@@ -25,7 +25,7 @@ export interface GlobalSettings {
 
 export class SampleSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
-	dataFilePath = path.join((window as any).app.vault.adapter.basePath,".obsidian","plugins","Task-Board","data.json");
+	dataFilePath = path.join((window as any).app.vault.adapter.basePath,".obsidian","plugins","Task-Board","plugindata.json");
 	globalSettings: GlobalSettings | null = null;
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -33,7 +33,7 @@ export class SampleSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	// Function to load the settings from data.json
+	// Function to load the settings from plugindata.json
 	async loadSettings(): Promise<void> {
 		try {
 			const data = fs.readFileSync(this.dataFilePath, "utf8");
@@ -44,7 +44,7 @@ export class SampleSettingTab extends PluginSettingTab {
 		}
 	}
 
-	// Function to save settings back to data.json
+	// Function to save settings back to plugindata.json
 	async saveSettings(): Promise<void> {
 		if (!this.globalSettings) return;
 

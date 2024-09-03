@@ -126,14 +126,16 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 	};
 
 
-
 	const handleEditTask = (task: Task) => {
 		const app = (window as any).app as App;
 		const editModal = new EditTaskModal(app, task, (updatedTask) => {
 			updatedTask.filePath = task.filePath;
-			// console.log("updatedTask i am received in Column.tsx file : ", updatedTask);
+			// Update the task in the file and JSON
 			updateTaskInFile(updatedTask);
 			updateTaskInJson(updatedTask);
+
+			// Refresh tasks state after update
+			setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
 		});
 		editModal.open();
 	};

@@ -47,7 +47,7 @@ const dataFilePath = path.join(
 	".obsidian",
 	"plugins",
 	"Task-Board",
-	"data.json"
+	"plugindata.json"
 );
 
 const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
@@ -175,9 +175,9 @@ export default KanbanBoard;
 // // File path to the JSON data
 
 // const basePath = (window as any).app.vault.adapter.basePath;
-// const dataFilePath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'data.json');
+// const dataFilePath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'plugindata.json');
 
-// // const dataFilePath = path.join('D:/Personal_Projects_Hub/IDE_Wise_Projects/Obsidian/TemplateToDevelopPlugin/.obsidian/plugins/Task-Board/', 'data.json');
+// // const dataFilePath = path.join('D:/Personal_Projects_Hub/IDE_Wise_Projects/Obsidian/TemplateToDevelopPlugin/.obsidian/plugins/Task-Board/', 'plugindata.json');
 
 // const KanbanBoard: React.FC = () => {
 // 	const [boards, setBoards] = useState<Board[]>([]);
