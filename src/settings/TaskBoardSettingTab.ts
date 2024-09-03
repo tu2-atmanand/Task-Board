@@ -1,4 +1,4 @@
-// src/settings/SampleSettingTab.ts
+// src/settings/TaskBoardSettingTab.ts
 import { App, PluginSettingTab, Setting } from "obsidian";
 import fs from "fs";
 import path from "path";
@@ -23,7 +23,7 @@ export interface GlobalSettings {
 	taskCompletionShowUtcOffset: boolean;
 }
 
-export class SampleSettingTab extends PluginSettingTab {
+export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
 	dataFilePath = path.join((window as any).app.vault.adapter.basePath,".obsidian","plugins","Task-Board","plugindata.json");
 	globalSettings: GlobalSettings | null = null;

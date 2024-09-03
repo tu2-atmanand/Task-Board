@@ -3,7 +3,7 @@
 import { App, Modal, Notice } from "obsidian";
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { GlobalSettings } from "../settings/SampleSettingTab"; // Assume this contains the settings UI
+import { GlobalSettings } from "../settings/TaskBoardSettingTab"; // Assume this contains the settings UI
 
 interface Board {
 	name: string;

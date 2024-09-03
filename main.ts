@@ -14,32 +14,12 @@ import {
 } from "obsidian";
 import { KanbanView } from "./src/views/KanbanView";
 import { VIEW_TYPE_KANBAN } from "./src/views/KanbanView";
-import { SampleSettingTab, GlobalSettings } from "./src/settings/SampleSettingTab"; // Import the settings
+import { TaskBoardSettingTab, GlobalSettings } from "./src/settings/TaskBoardSettingTab"; // Import the settings
 import ConfigModal from "src/components/BoardModal";
 
 // Import required modules
 import fs from "fs";
 import path from "path";
-
-// Remember to rename these classes and interfaces!
-
-interface TaskBoardSettings {
-	defaultColumnNames: {
-		today: string;
-		tomorrow: string;
-		future: string;
-		undated: string;
-		otherTags: string;
-		untagged: string;
-		completed: string;
-	};
-	filters: string[];
-	firstDayOfWeek: string;
-	ignoreFileNameDates: boolean;
-	taskCompletionFormat: string;
-	taskCompletionInLocalTime: boolean;
-	taskCompletionShowUtcOffset: boolean;
-}
 
 const DEFAULT_SETTINGS: TaskBoardSettings = {
 	defaultColumnNames: {
@@ -136,7 +116,7 @@ export default class TaskBoard extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		// const files = this.app.vault.getMarkdownFiles();
 		// console.log(files);
