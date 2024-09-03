@@ -1,49 +1,61 @@
 {
-  "Pending": {
-    "Daily_Notes/02-08-2024.md": [
-      {
-        "id": 1725276003305,
-        "body": "Complete the project proposal draft for review.",
-        "due": "2024-09-10",
-        "tag": "WorkProject"
-      },
-      {
-        "id": 1725276003306,
-        "body": "Prepare slides for the marketing meeting.",
-        "due": "2024-09-12",
-        "tag": "Marketing"
-      },
-      {
-        "id": 1725276003307,
-        "body": "Organize files and documents for archiving.",
-        "due": "2024-09-15",
-        "tag": "AdminTask"
-      }
-    ],
-    "Daily_Notes.md": [
-      {
-        "id": 1725276003308,
-        "body": "Call the client to discuss new requirements.",
-        "due": "2024-09-11",
-        "tag": "ClientMeeting"
-      }
-    ]
-  },
-  "Completed": {
-    "Daily_Notes/01-08-2024.md": [
-      {
-        "id": 1725276003309,
-        "body": "All the Documents submitted to TCS, Waiting for JL.",
-        "due": "2024-08-31",
-        "tag": "Finance",
-        "filePath": "Daily_Notes/01-08-2024.md"
-      },
-      {
-        "id": 1725276003310,
-        "body": "Submit the quarterly earnings report to the board.",
-        "due": "2024-09-10",
-        "tag": "Reports"
-      }
-    ]
-  }
+	"Pending": {
+		"Daily_Notes/02-08-2024.md": [
+			{
+				"id": 1725276003304,
+				"body": "Undated Task.",
+				"due": "",
+				"tag": "WorkProject"
+			},
+			{
+				"id": 1725276003305,
+				"body": "Complete the project proposal draft for review.",
+				"due": "2024-09-4",
+				"tag": "NOTE"
+			},
+			{
+				"id": 1725276003306,
+				"body": "OVERDUE TASK : Prepare slides for the marketing meeting.",
+				"due": "2024-09-2",
+				"tag": ""
+			},
+			{
+				"id": 1725276003307,
+				"body": "Organize files and documents for archiving.",
+				"due": "2024-09-15",
+				"tag": "AdminTask"
+			}
+		],
+		"Daily_Notes.md": [
+			{
+				"id": 1725276003308,
+				"body": "Call the client to discuss new requirements.",
+				"due": "2024-09-11",
+				"tag": ""
+			},
+			{
+				"id": 1725276003404,
+				"body": "TODAY : Call the client to discuss new requirements. Call the client to discuss new requirements. Call the client to discuss new requirements.",
+				"due": "2024-09-3",
+				"tag": "WhenMobileDataLeft"
+			}
+		]
+	},
+	"Completed": {
+		"Daily_Notes/01-08-2024.md": [
+			{
+				"id": 1725276003309,
+				"body": "All the Documents submitted to TCS, Waiting for JL.",
+				"due": "2024-08-31",
+				"tag": "Finance",
+				"filePath": "Daily_Notes/01-08-2024.md"
+			},
+			{
+				"id": 1725276003310,
+				"body": "Submit the quarterly earnings report to the board.",
+				"due": "2024-09-10",
+				"tag": "Reports"
+			}
+		]
+	}
 }

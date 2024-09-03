@@ -18,7 +18,10 @@
               "name": "Over Due",
               "range": {
                 "tag": "before",
-                "rangedata": 0
+                "rangedata": {
+                  "from": -1,
+                  "to": 0
+                }
               }
             }
           },
@@ -57,7 +60,10 @@
               "name": "Future",
               "range": {
                 "tag": "after",
-                "rangedata": 1
+                "rangedata": {
+                  "from": 2,
+                  "to": 0
+                }
               }
             }
           },
@@ -91,7 +97,7 @@
             "tag": "namedTag",
             "data": {
               "collapsed": false,
-              "name": "Finance",
+              "name": "",
               "coltag": "OfflineVideo"
             }
           },

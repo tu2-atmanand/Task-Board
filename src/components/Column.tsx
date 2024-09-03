@@ -63,8 +63,8 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 						tasks.forEach((task: any) => completedTasks.push({ ...task, filePath }));
 					}
 
-					console.log("Pending Tasks: ", pendingTasks);
-					console.log("Completed Tasks: ", completedTasks);
+					// console.log("Pending Tasks: ", pendingTasks);
+					// console.log("Completed Tasks: ", completedTasks);
 
 					// Combine both pending and completed tasks for filtering
 					const allTasksWithStatus = [...pendingTasks, ...completedTasks];
@@ -91,32 +91,37 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 
 		if (tag === "undated") {
 			tasksToDisplay = pendingTasks.filter(task => !task.due);
+			console.log("Tasks Under UnDated Columns : ", tasksToDisplay);
 		} else if (data.range) {
 			const { from, to } = data.range.rangedata;
 			tasksToDisplay = pendingTasks.filter(task => {
-				// console.log("The filepath Variable of each task: ", task.filePath);
 				if (!task.due) return false;
 				const dueDate = new Date(task.due);
-				const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+				const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) +1;
+				console.log("Today : ", today.getDate(), "Due Date : ", dueDate.getDate(), " | The Difference in Due an Today date : ", diffDays);
 
-				if (from < 0 && to < 0) {
+				if (from < 0 && to === 0) {
 					return diffDays < 0;
 				} else if (from === 0 && to === 0) {
 					return diffDays === 0;
 				} else if (from === 1 && to === 1) {
 					return diffDays === 1;
-				} else if (from === 1 && to === 2) {
-					return diffDays === 2;
+				} else if (from === 2 && to === 0) {
+					return diffDays > 2;
 				}
 
 				return false;
 			});
+			console.log("Tasks Under Dated Columns : ", tasksToDisplay);
 		} else if (tag === "untagged") {
 			tasksToDisplay = pendingTasks.filter(task => !task.tag);
-		} else if (tag === "nameTag") {
+			console.log("Tasks Under Untagged Columns : ", tasksToDisplay);
+		} else if (tag === "namedTag") {
 			tasksToDisplay = pendingTasks.filter(task => task.tag === data.coltag);
-		} else if (tag === "otherTag") {
+			console.log("Tasks Under Tagged Columns : ", tasksToDisplay);
+		} else if (tag === "otherTags") {
 			tasksToDisplay = pendingTasks.filter(task => task.tag && task.tag !== data.coltag);
+			console.log("Tasks Under OtherTag Columns : ", tasksToDisplay);
 		} else if (tag === "completed") {
 			// console.log("Completed Tasks : ", completedTasks);
 			tasksToDisplay = completedTasks;
