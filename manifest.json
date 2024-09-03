@@ -1,0 +1,11 @@
+{
+	"id": "Task-Board",
+	"name": "Task Board",
+	"version": "0.0.1",
+	"minAppVersion": "1.4.13",
+	"description": "An Obsidian plugin to see all your task in a much more efficient Kanban Board format. Easily manage your tasks throught the vault.",
+	"author": "Atmanand Gauns",
+	"authorUrl": "https://github.com/tu2-atmanand",
+	"fundingUrl": "https://buymeacoffee.com/tu2_atmanand",
+	"isDesktopOnly": false
+}
