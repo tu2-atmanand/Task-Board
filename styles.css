@@ -1,0 +1,133 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+
+
+/* src/styles/KanbanBoard.css */
+.kanbanBoard {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.kanbanHeader {
+	display: flex;
+	justify-content: space-between;
+	padding: 10px;
+	border-bottom: 1px solid #ddd;
+}
+
+.columnsContainer {
+	display: flex;
+	overflow-x: auto;
+	padding: 10px;
+	height: 100%;
+}
+
+.addColBtn {
+	cursor: pointer;
+	padding: 5px 10px;
+	border: none;
+	background-color: #007bff;
+	color: white;
+	border-radius: 5px;
+}
+
+
+/* src/styles/Column.css */
+.kanbanColumn {
+	background: transparent !important;
+	/* backdrop-filter: blur(10px) saturate(300%) contrast(80%) brightness(60%); */
+	border: var(--border-width) solid olive;
+	border-radius: 15px;
+	margin-right: 10px;
+	border-radius: 5px;
+	width: 300px;
+	min-width: 300px;
+	display: flex;
+	flex-direction: column;
+}
+
+.columnHeaderBar {
+	display: flex;
+	flex-direction: row;
+	padding: 10px;
+	background: var(--background-primary);
+}
+
+.columnTitle {
+	color: white;
+	text-align: center;
+}
+
+.tasksContainer {
+	padding: 10px;
+	flex: 1;
+	overflow-y: auto;
+	gap: 10px;
+	display: flex;
+	flex-direction: column;
+}
+
+
+/* /src/components/TaskItem.tsx */
+
+.taskItemTag {
+	background-color: var(--blockquote-background-dark);
+	border-radius: 8px;
+	padding-block: 2px;
+	padding-inline: 7px;
+	width: fit-content;
+	color: yellow;
+}
+
+.taskItem {
+	background: var(--background-secondary);
+	border: var(--border-width) solid olive;
+	padding: 8px;
+	border-radius: 5px;
+	padding-inline: 8px;
+}
+
+.taskItemBody {
+	padding: 0;
+}
+
+.taskItemDate {
+	color: orange;
+}
+
+
+/* /src/compoenents/BoardModal.tsx */
+
+.config-modal {
+	display: flex;
+	width: 100%;
+	height: 100%;
+}
+
+.config-modal-sidebar {
+	width: 200px;
+	background-color: #f0f0f0;
+	border-right: 1px solid #ddd;
+	padding: 10px;
+}
+
+.config-modal-sidebar div {
+	margin: 10px 0;
+	cursor: pointer;
+}
+
+.config-modal-sidebar div.active {
+	font-weight: bold;
+}
+
+.config-modal-content {
+	flex-grow: 1;
+	padding: 20px;
+}
