@@ -1,16 +1,7 @@
 // /src/components/TaskItem.tsx
 
 import React from 'react';
-
-interface TaskProps {
-	task: {
-		id: number;
-		body: string;
-		due: string;
-		tag: string;
-	};
-	onEdit: () => void;
-}
+import { TaskProps } from '../interfaces/TaskItem';
 
 const TaskItem: React.FC<TaskProps> = ({ task, onEdit }) => {
 	return (

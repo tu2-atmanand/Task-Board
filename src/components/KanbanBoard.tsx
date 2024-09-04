@@ -4,41 +4,9 @@ import React, { useEffect, useState } from "react";
 import Column from "./Column";
 import fs from "fs";
 import path from "path";
-import { App, Command } from "obsidian"; // Import App from Obsidian
+import { App } from "obsidian"; // Import App from Obsidian
 import ConfigModal from "./BoardModal";
-
-// Define the structure of Board, Column, and the Data read from JSON
-interface ColumnData {
-	tag: string;
-	data: {
-		collapsed: boolean;
-		name: string;
-		coltag?: string;
-		range?: {
-			tag: string;
-			rangedata: {
-				from: number;
-				to: number;
-			};
-		};
-		index?: number;
-		limit?: number;
-	};
-}
-
-interface Board {
-	name: string;
-	columns: ColumnData[];
-	filters?: any[];
-	filterPolarity?: string;
-	filterScope?: string;
-	showColumnTags?: boolean;
-	showFilteredTags?: boolean;
-}
-
-interface BoardConfig {
-	boardConfigs: Board[];
-}
+import { ColumnData, Board, BoardConfig } from "../interfaces/KanbanBoard";
 
 // File path to the JSON data
 const basePath = (window as any).app.vault.adapter.basePath;
@@ -92,10 +60,10 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 		new ConfigModal(app, boards, activeBoardIndex, handleSaveBoards).open();
 	};
 
-	// const openModal = () => {
-	// 	app.commands.executeCommandById("open-kanban-config-modal");
-	// };
-
+	// Function to refresh the Kanban board
+	const handleRefresh = () => {
+		loadDataFromFile(); // Reload data from the JSON file
+	};
 
 	return (
 		<div className="kanbanBoard">
@@ -115,6 +83,10 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				<button className="ConfigureBtn" onClick={openModal}>
 					Configure
 				</button>
+				{/* Add Refresh button here */}
+				<button className="RefreshBtn" onClick={handleRefresh}>
+					Refresh
+				</button>
 			</div>
 			<div className="columnsContainer">
 				{boards[activeBoardIndex]?.columns.map((column, index) => (
@@ -126,6 +98,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 };
 
 export default KanbanBoard;
+
 
 
 
