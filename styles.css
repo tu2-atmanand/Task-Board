@@ -140,6 +140,31 @@ If your plugin does not need CSS, delete this file.
 	gap: 0.5em;
 }
 
+.taskItemiconButton {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+	margin: 0 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.2em;
+	/* Adjust size as needed */
+	transition: transform 0.2s;
+	/* Animation for hover effect */
+}
+
+.taskItemiconButton:hover {
+	transform: scale(1.1);
+	/* Slightly enlarge on hover */
+}
+
+.taskItemiconButton:focus {
+	outline: none;
+	/* Remove default focus outline */
+}
+
 
 /* /src/compoenents/BoardModal.tsx */
 

@@ -1,6 +1,5 @@
-// /src/components/TaskItem.tsx
-
 import React from 'react';
+import { FaEdit, FaTrash } from 'react-icons/fa'; // Import the desired icons from react-icons
 import { TaskProps } from '../interfaces/TaskItem';
 
 const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete }) => {
@@ -19,8 +18,23 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete }) => {
 				<div className="taskItemFooter">
 					<div className='taskItemDate'>Due: {task.due}</div>
 					<div className="taskItemFooterBtns">
-						<button className="editButton" onClick={onEdit}>Edit</button>
-						<button className="editButton" onClick={onDelete}>Delete</button>
+						{/* Icon button for Edit with hover tooltip */}
+						<button
+							className="taskItemiconButton"
+							onClick={onEdit}
+							title="Edit Task"
+						>
+							<FaEdit />
+						</button>
+
+						{/* Icon button for Delete with hover tooltip */}
+						<button
+							className="taskItemiconButton"
+							onClick={onDelete}
+							title="Delete Task"
+						>
+							<FaTrash />
+						</button>
 					</div>
 				</div>
 			</div>
