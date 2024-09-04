@@ -16,12 +16,13 @@ import { KanbanView } from "./src/views/KanbanView";
 import { VIEW_TYPE_KANBAN } from "./src/views/KanbanView";
 import { TaskBoardSettingTab, GlobalSettings } from "./src/settings/TaskBoardSettingTab"; // Import the settings
 import ConfigModal from "src/components/BoardModal";
+import { AddTaskModal } from "src/components/AddTaskModal";
 
 // Import required modules
 import fs from "fs";
 import path from "path";
 
-const DEFAULT_SETTINGS: TaskBoardSettings = {
+const DEFAULT_SETTINGS: GlobalSettings = {
 	defaultColumnNames: {
 		today: "",
 		tomorrow: "",
@@ -94,23 +95,25 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
+		// Register a new command to open AddTaskModal
 		this.addCommand({
-			id: "open-sample-modal-complex",
-			name: "Open sample modal (complex)",
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
+			id: "open-add-task-modal",
+			name: "Add New Task in Current File",
+			callback: () => {
+				const app = this.app as App;
+				const activeFile = app.workspace.getActiveFile();
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
+				if (activeFile) {
+					new AddTaskModal(app, {
+						app,
+						filePath: activeFile.path,
+						onTaskAdded: () => {
+							// Refresh tasks or perform necessary actions after task is added
+							console.log("Task added successfully!");
+						},
+					}).open();
+				} else {
+					new Notice("No active file found to add a task.");
 				}
 			},
 		});

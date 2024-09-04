@@ -144,10 +144,11 @@
 		],
 		"globalSettings": {
 			"defaultColumnNames": {
+				"undated": "",
+				"overdue": "",
 				"today": "",
 				"tomorrow": "",
 				"future": "",
-				"undated": "",
 				"otherTags": "",
 				"untagged": "",
 				"completed": ""
