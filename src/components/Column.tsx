@@ -49,7 +49,7 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 				} else if (from === 1 && to === 1) {
 					return diffDays === 1;
 				} else if (from === 2 && to === 0) {
-					return diffDays > 2;
+					return diffDays >= 2;
 				}
 
 				return false;
