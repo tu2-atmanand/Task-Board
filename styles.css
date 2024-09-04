@@ -109,12 +109,35 @@ If your plugin does not need CSS, delete this file.
 	padding-inline: 8px;
 }
 
+.taskItemMainBody {
+	margin-block: 0.8em;
+}
+
 .taskItemBody {
 	padding: 0;
 }
 
 .taskItemDate {
 	color: orange;
+}
+
+.taskItemHeader {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.taskItemFooter {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+
+.taskItemFooterBtns {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
 }
 
 

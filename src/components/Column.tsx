@@ -7,7 +7,8 @@ import path from 'path';
 import { Modal, App } from 'obsidian';
 import { EditTaskModal } from './EditTaskModal';
 import { loadTasksFromJson } from 'src/utils/RefreshColumns';
-import {ColumnProps, Task} from '../interfaces/Column';
+import { ColumnProps, Task } from '../interfaces/Column';
+import { DeleteConfirmationModal } from '../utils/DeleteConfirmationModal'; // Import the Delete Modal
 
 const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
@@ -22,7 +23,6 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 
 		loadTasks();
 	}, [tag, data]);
-
 
 	// Function to filter tasks based on the column's tag and properties
 	const filterTasksByColumn = (allTasks: Task[], pendingTasks: Task[], completedTasks: Task[]) => {
@@ -39,7 +39,7 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 			tasksToDisplay = pendingTasks.filter(task => {
 				if (!task.due) return false;
 				const dueDate = new Date(task.due);
-				const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) +1;
+				const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 				console.log("Today : ", today.getDate(), "Due Date : ", dueDate.getDate(), " | The Difference in Due an Today date : ", diffDays);
 
 				if (from < 0 && to === 0) {
@@ -72,6 +72,61 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 		return tasksToDisplay;
 	};
 
+	const handleDeleteTask = (task: Task) => {
+		const app = (window as any).app as App;
+		const deleteModal = new DeleteConfirmationModal(app, {
+			onConfirm: () => {
+				deleteTaskFromFile(task);
+				deleteTaskFromJson(task);
+
+				// Remove the task from state after deletion
+				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
+			},
+			onCancel: () => {
+				console.log('Task deletion canceled');
+			}
+		});
+		deleteModal.open();
+	};
+
+	const deleteTaskFromFile = (task: Task) => {
+		const basePath = (window as any).app.vault.adapter.basePath;
+		const filePath = path.join(basePath, task.filePath);
+
+		try {
+			const fileContent = fs.readFileSync(filePath, 'utf8');
+			// Updated regex to match the task body ending with '|'
+			const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, 'gm');
+			const newContent = fileContent.replace(taskRegex, ''); // Remove the matched line from the file
+			fs.writeFileSync(filePath, newContent);
+		} catch (error) {
+			console.error("Error deleting task from file:", error);
+		}
+	};
+
+
+	const deleteTaskFromJson = (task: Task) => {
+		const basePath = (window as any).app.vault.adapter.basePath;
+		const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
+
+		try {
+			const tasksData = fs.readFileSync(tasksPath, 'utf8');
+			const allTasks = JSON.parse(tasksData);
+
+			// Remove task from Pending or Completed in tasks.json
+			if (allTasks.Pending[task.filePath]) {
+				allTasks.Pending[task.filePath] = allTasks.Pending[task.filePath].filter((t: any) => t.id !== task.id);
+			}
+			if (allTasks.Completed[task.filePath]) {
+				allTasks.Completed[task.filePath] = allTasks.Completed[task.filePath].filter((t: any) => t.id !== task.id);
+			}
+
+			// Write the updated data back to the JSON file
+			fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
+		} catch (error) {
+			console.error("Error deleting task from tasks.json:", error);
+		}
+	};
 
 	const handleEditTask = (task: Task) => {
 		const app = (window as any).app as App;
@@ -152,7 +207,12 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 			<div className="tasksContainer">
 				{tasks.length > 0 ? (
 					tasks.map((task, index) => (
-						<TaskItem key={index} task={task} onEdit={() => handleEditTask(task)} />
+						<TaskItem
+							key={index}
+							task={task}
+							onEdit={() => handleEditTask(task)}
+							onDelete={() => handleDeleteTask(task)}
+						/>
 					))
 				) : (
 					<p>No tasks available</p>
