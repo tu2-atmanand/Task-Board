@@ -6,33 +6,8 @@ import fs from 'fs';
 import path from 'path';
 import { Modal, App } from 'obsidian';
 import { EditTaskModal } from './EditTaskModal';
-
-interface ColumnProps {
-	tag: string;
-	data: {
-		collapsed: boolean;
-		name: string;
-		coltag: string;
-		range?: {
-			tag: string;
-			rangedata: {
-				from: number;
-				to: number;
-			};
-		};
-		index?: number;
-		limit?: number;
-	};
-}
-
-interface Task {
-	id: number;
-	body: string;
-	due: string;
-	tag: string;
-	filePath: string;
-	status: string;
-}
+import { loadTasksFromJson } from 'src/utils/RefreshColumns';
+import {ColumnProps, Task} from '../interfaces/Column';
 
 const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
@@ -40,42 +15,9 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 	// Load tasks from tasks.json file
 	useEffect(() => {
 		const loadTasks = async () => {
-			const basePath = (window as any).app.vault.adapter.basePath;
-			const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-			try {
-				if (fs.existsSync(tasksPath)) {
-					const tasksData = fs.readFileSync(tasksPath, 'utf8');
-					const allTasks = JSON.parse(tasksData);
-
-					const pendingTasks: Task[] = [];
-					const completedTasks: Task[] = [];
-
-					console.log("All Loaded Tasks: ", allTasks);
-
-					// Separate pending tasks
-					for (const [filePath, tasks] of Object.entries(allTasks.Pending || {})) {
-						tasks.forEach((task: any) => pendingTasks.push({ ...task, filePath }));
-					}
-
-					// Separate completed tasks
-					for (const [filePath, tasks] of Object.entries(allTasks.Completed || {})) {
-						tasks.forEach((task: any) => completedTasks.push({ ...task, filePath }));
-					}
-
-					// console.log("Pending Tasks: ", pendingTasks);
-					// console.log("Completed Tasks: ", completedTasks);
-
-					// Combine both pending and completed tasks for filtering
-					const allTasksWithStatus = [...pendingTasks, ...completedTasks];
-					const filteredTasks = filterTasksByColumn(allTasksWithStatus, pendingTasks, completedTasks);
-					setTasks(filteredTasks);
-				} else {
-					console.warn("tasks.json file not found.");
-				}
-			} catch (error) {
-				console.error("Error reading tasks.json:", error);
-			}
+			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+			const filteredTasks = filterTasksByColumn(allTasksWithStatus, pendingTasks, completedTasks);
+			setTasks(filteredTasks);
 		};
 
 		loadTasks();
