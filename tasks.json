@@ -5,25 +5,29 @@
         "id": 1725276003304,
         "body": "Undated Task.",
         "due": "",
-        "tag": "WorkProject"
+        "tag": "WorkProject",
+        "completed": false
       },
       {
         "id": 1725276003305,
         "body": "Complete the project proposal draft for review.",
         "due": "2024-09-4",
-        "tag": "NOTE"
+        "tag": "NOTE",
+        "completed": false
       },
       {
         "id": 1725276003306,
         "body": "OVERDUE TASK : Prepare slides for the marketing meeting.",
         "due": "2024-09-2",
-        "tag": ""
+        "tag": "",
+        "completed": false
       },
       {
         "id": 1725276003307,
         "body": "Organize files and documents for archiving.",
         "due": "2024-09-15",
-        "tag": "AdminTask"
+        "tag": "AdminTask",
+        "completed": false
       }
     ],
     "Daily_Notes.md": [
@@ -31,42 +35,54 @@
         "id": 1725276003308,
         "body": "Call the client to discuss new requirements.",
         "due": "2024-09-11",
-        "tag": ""
+        "tag": "",
+        "completed": false,
+        "filePath": "Daily_Notes.md"
       },
       {
         "id": 1725276003404,
         "body": "TODAY : Call the client to discuss new requirements. Call the client to discuss new requirements. Call the client to discuss new requirements.",
         "due": "2024-09-3",
-        "tag": "WhenMobileDataLeft"
+        "tag": "WhenMobileDataLeft",
+        "completed": false,
+        "filePath": "Daily_Notes.md"
       }
     ],
     "Daily_Notes/03-09-2024.md": [
       {
+        "id": 1725440316533,
+        "body": "This is a fifth task, UPDATED",
+        "due": "2024-09-05",
+        "tag": "Test",
+        "filePath": "Daily_Notes/03-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1725435049578,
+        "body": "This is a third task",
+        "due": "2024-09-06",
+        "tag": "",
+        "filePath": "Daily_Notes/03-09-2024.md",
+        "completed": false
+      },
+      {
         "id": 1725434303546,
         "body": "Finish all the Courses ASAP.",
         "due": "2024-09-04",
-        "tag": "Course"
+        "tag": "Course",
+        "completed": false,
+        "filePath": "Daily_Notes/03-09-2024.md"
       },
       {
         "id": 1725434909002,
         "body": "This is a second task in this file",
         "due": "2024-09-07",
-        "tag": ""
-      },
-      {
-        "id": 1725435049578,
-        "body": "This is a third task",
-        "due": "2024-09-04",
-        "tag": ""
-      },
-      {
-        "id": 1725440316533,
-        "body": "Thi is a fifth task, UPDATED",
-        "due": "2024-09-05",
-        "tag": "Test",
+        "tag": "",
+        "completed": false,
         "filePath": "Daily_Notes/03-09-2024.md"
       }
-    ]
+    ],
+    "Daily_Notes/01-08-2024.md": []
   },
   "Completed": {
     "Daily_Notes/01-08-2024.md": [
@@ -75,14 +91,19 @@
         "body": "All the Documents submitted to TCS, Waiting for JL.",
         "due": "2024-08-31",
         "tag": "Finance",
-        "filePath": "Daily_Notes/01-08-2024.md"
+        "filePath": "Daily_Notes/01-08-2024.md",
+        "completed": true
       },
       {
         "id": 1725276003310,
         "body": "Submit the quarterly earnings report to the board.",
         "due": "2024-09-10",
-        "tag": "Reports"
+        "tag": "Reports",
+        "completed": true,
+        "filePath": "Daily_Notes/01-08-2024.md"
       }
-    ]
+    ],
+    "Daily_Notes/03-09-2024.md": [],
+    "Daily_Notes.md": []
   }
 }

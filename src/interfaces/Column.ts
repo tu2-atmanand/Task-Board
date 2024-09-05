@@ -22,5 +22,5 @@ interface Task {
 	due: string;
 	tag: string;
 	filePath: string;
-	status: string;
+	completed: boolean;
 }
