@@ -73,11 +73,23 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: row;
 	padding: 10px;
 	background: var(--background-primary);
+	justify-content: space-between;
+	align-items: center;
 }
 
 .columnTitle {
-	color: white;
+	color: var(--foreground-primary);
 	text-align: center;
+	font-size: 1.2em;
+	font-weight: 700;
+}
+
+.columnDragIcon {
+	opacity: 0;
+}
+
+.columnDragIcon:hover {
+	opacity: 1;
 }
 
 .tasksContainer {
@@ -92,6 +104,52 @@ If your plugin does not need CSS, delete this file.
 
 /* /src/components/TaskItem.tsx */
 
+.taskItem {
+	background: var(--background-secondary);
+	border: var(--border-width) solid olive;
+	border-radius: 5px;
+	display: flex;
+	flex-direction: row;
+}
+
+.colorIndicator {
+	width: 0.3em;
+	height: 100%;
+	/* float: left; */
+	margin-right: 5px;
+	border-radius: 6px 0px 0px 6px;
+}
+
+.taskItemMainContent {
+	margin-block: 0.3em;
+	margin-inline-end: 0.3em;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.taskItemMainBody {
+	margin-block: 0.8em;
+	display: flex;
+	flex-direction: row;
+	gap: 0.4em;
+}
+
+.taskItemBody {
+	padding: 0;
+}
+
+.taskCheckbox {
+	transform: scale(1);
+	transition: transform 0.3s;
+}
+
+.taskCheckbox.checked {
+	transform: scale(1.5);
+	/* Slight animation effect */
+	transition: transform 0.3s;
+}
+
 .taskItemTag {
 	background-color: var(--blockquote-background-dark);
 	border-radius: 8px;
@@ -99,22 +157,6 @@ If your plugin does not need CSS, delete this file.
 	padding-inline: 7px;
 	width: fit-content;
 	color: yellow;
-}
-
-.taskItem {
-	background: var(--background-secondary);
-	border: var(--border-width) solid olive;
-	padding: 8px;
-	border-radius: 5px;
-	padding-inline: 8px;
-}
-
-.taskItemMainBody {
-	margin-block: 0.8em;
-}
-
-.taskItemBody {
-	padding: 0;
 }
 
 .taskItemDate {
@@ -125,6 +167,14 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+}
+
+.DragBtn {
+	opacity: 0;
+}
+
+.DragBtn:hover {
+	opacity: 1;
 }
 
 .taskItemFooter {
@@ -142,10 +192,11 @@ If your plugin does not need CSS, delete this file.
 
 .taskItemiconButton {
 	background: none;
+	background-color: transparent;
 	border: none;
 	cursor: pointer;
-	padding: 5px;
-	margin: 0 5px;
+	padding: 2px;
+	/* margin: 0 5px; */
 	display: flex;
 	align-items: center;
 	justify-content: center;
