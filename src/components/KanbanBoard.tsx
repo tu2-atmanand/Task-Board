@@ -1,68 +1,37 @@
 // src/components/KanbanBoard.tsx
 
+import { Board, BoardConfig, ColumnData } from "../interfaces/KanbanBoard";
 import React, { useEffect, useState } from "react";
+import { loadBoardsData, openConfigModal, saveBoardsData } from "../services/OpenColumnConfig";
+
+import { App } from "obsidian"; // Import App from Obsidian
 import Column from "./Column";
+import ConfigModal from "./BoardModal";
 import fs from "fs";
 import path from "path";
-import { App } from "obsidian"; // Import App from Obsidian
-import ConfigModal from "./BoardModal";
-import { ColumnData, Board, BoardConfig } from "../interfaces/KanbanBoard";
-
-// File path to the JSON data
-const basePath = (window as any).app.vault.adapter.basePath;
-const dataFilePath = path.join(
-	basePath,
-	".obsidian",
-	"plugins",
-	"Task-Board",
-	"plugindata.json"
-);
 
 const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 
-	// Load data from JSON when the component mounts
 	useEffect(() => {
-		loadDataFromFile();
+		loadBoards();
 	}, []);
 
-	// Function to load data from the JSON file
-	const loadDataFromFile = () => {
-		fs.readFile(dataFilePath, "utf8", (err, data) => {
-			if (err) {
-				console.error("Error reading data file:", err);
-				return;
-			}
-			const jsonData: BoardConfig = JSON.parse(data).data; // Adjust this to match the exact JSON structure
-			setBoards(jsonData.boardConfigs);
-		});
+	// Function to load boards data
+	const loadBoards = async () => {
+		try {
+			const data = await loadBoardsData();
+			setBoards(data);
+		} catch (err) {
+			console.error("Failed to load boards data:", err);
+		}
 	};
 
-	// Function to save data to the JSON file
-	const saveDataToFile = (updatedBoards: Board[]) => {
-		const newData = { version: "0.14.0", data: { boardConfigs: updatedBoards } }; // Keep other fields as needed
-		fs.writeFile(dataFilePath, JSON.stringify(newData, null, 2), (err) => {
-			if (err) {
-				console.error("Error writing to data file:", err);
-			}
-		});
-	};
-
-	// Function to handle saving boards from the modal
+	// Function to handle saving boards
 	const handleSaveBoards = (updatedBoards: Board[]) => {
 		setBoards(updatedBoards);
-		saveDataToFile(updatedBoards);
-	};
-
-	// Function to open the ConfigModal
-	const openModal = () => {
-		new ConfigModal(app, boards, activeBoardIndex, handleSaveBoards).open();
-	};
-
-	// Function to refresh the Kanban board
-	const handleRefresh = () => {
-		loadDataFromFile(); // Reload data from the JSON file
+		saveBoardsData(updatedBoards);
 	};
 
 	return (
@@ -80,11 +49,10 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 						</button>
 					))}
 				</div>
-				<button className="ConfigureBtn" onClick={openModal}>
+				<button className="ConfigureBtn" onClick={() => openConfigModal(app, boards, activeBoardIndex, handleSaveBoards)}>
 					Configure
 				</button>
-				{/* Add Refresh button here */}
-				<button className="RefreshBtn" onClick={handleRefresh}>
+				<button className="RefreshBtn" onClick={loadBoards}>
 					Refresh
 				</button>
 			</div>
