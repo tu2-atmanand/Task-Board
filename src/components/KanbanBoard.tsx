@@ -6,7 +6,7 @@ import { loadBoardsData, openConfigModal, saveBoardsData } from "../services/Ope
 
 import { App } from "obsidian"; // Import App from Obsidian
 import Column from "./Column";
-import ConfigModal from "./BoardModal";
+import ConfigModal from "../settings/BoardModal";
 import fs from "fs";
 import path from "path";
 

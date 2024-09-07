@@ -3,7 +3,7 @@
 import { App, Modal, Notice } from "obsidian";
 import React, { useEffect, useState } from "react";
 
-import { GlobalSettings } from "../settings/TaskBoardSettingTab"; // Assume this contains the settings UI
+import { GlobalSettings } from "src/interfaces/KanbanView";
 import ReactDOM from "react-dom/client";
 
 interface Board {

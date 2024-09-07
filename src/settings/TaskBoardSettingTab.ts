@@ -1,29 +1,10 @@
 // src/settings/TaskBoardSettingTab.ts
 import { App, PluginSettingTab, Setting } from "obsidian";
 
+import { GlobalSettings } from "src/interfaces/KanbanView";
 import TaskBoard from "../../main"; // Adjust the path based on your file structure
 import fs from "fs";
 import path from "path";
-
-// Define the interface for GlobalSettings based on your JSON structure
-export interface GlobalSettings {
-	defaultColumnNames: {
-		today: string;
-		tomorrow: string;
-		future: string;
-		undated: string;
-		otherTags: string;
-		untagged: string;
-		completed: string;
-	};
-	filters: string[];
-	firstDayOfWeek: string;
-	ignoreFileNameDates: boolean;
-	taskCompletionFormat: string;
-	taskCompletionInLocalTime: boolean;
-	taskCompletionShowUtcOffset: boolean;
-	autoAddDue: boolean;
-}
 
 export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
@@ -96,6 +77,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			taskCompletionInLocalTime,
 			taskCompletionShowUtcOffset,
 			autoAddDue,
+			ScanVaultAtStartup,
 		} = this.globalSettings;
 
 		containerEl.createEl("h3", { text: "Task Board Plugin" });
@@ -177,6 +159,22 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		// 			await this.saveSettings();
 		// 		})
 		// 	);
+
+		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
+		new Setting(containerEl)
+			.setName("Auto Scan the Vault on Obsidian Startup")
+			.setDesc(
+				TaskBoardSettingTab.createFragmentWithHTML(
+					"<p>The plugin will scan the whole vault to detect all the undetected tasks from whole vault everytime Obsidian starts.</p>" +
+						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(ScanVaultAtStartup).onChange(async (value) => {
+					this.globalSettings!.ScanVaultAtStartup = value;
+					await this.saveSettings();
+				})
+			);
 
 		// Setting for taskCompletionInLocalTime
 		new Setting(containerEl)

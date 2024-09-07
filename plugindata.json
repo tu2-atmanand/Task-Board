@@ -168,7 +168,8 @@
       "taskCompletionFormat": "",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
-      "autoAddDue": true
+      "autoAddDue": true,
+	  "ScanVaultAtStartup": false
     }
   }
 }
