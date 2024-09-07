@@ -1,31 +1,61 @@
 // /src/components/EditTaskModal.tsx
 
+import { App, Modal } from "obsidian";
 import React, { useState } from "react";
-import { Modal, App } from "obsidian";
+
 import ReactDOM from "react-dom/client";
 
 // Functional React component for the modal content
 const EditTaskContent: React.FC<{ task: any; onSave: (updatedTask: any) => void; onClose: () => void }> = ({ task, onSave, onClose }) => {
 	const [body, setBody] = useState(task.body);
 	const [due, setDue] = useState(task.due);
+	const [tag, setTag] = useState(task.tag);
 
 	const handleSave = () => {
 		const updatedTask = {
 			...task,
 			body,
 			due,
+			tag,
 		};
-		console.log("updatedTask i am sending from EditTaskModal.tsx to Column.tsx file : ", updatedTask);
+		// console.log("updatedTask i am sending from EditTaskModal.tsx to Column.tsx file : ", updatedTask);
 		onSave(updatedTask);
 		onClose();
 	};
 
 	return (
-		<div>
-			<h3>Edit Task</h3>
-			<textarea value={body} onChange={(e) => setBody(e.target.value)} />
-			<input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
-			<button onClick={handleSave}>Save</button>
+		<div className="EditTaskModalHome">
+			<div className="EditTaskModalHome-title">Edit Task</div>
+			<textarea className="EditTaskModalHome-taskBody" value={body} onChange={(e) => setBody(e.target.value)} />
+			<table>
+				<tr>
+					<td>
+						<div className="EditTaskModalHome-dueTitle">Task Due Date : </div>
+					</td>
+					<td className="EditTaskModalHome-tableValues">
+						<input className="EditTaskModalHome-dueValue" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+					</td>
+					<td>
+						📅{due}
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div className="EditTaskModalHome-tagTitle">Task Tag : </div>
+					</td>
+					<td className="EditTaskModalHome-tableValues">
+						<input className="EditTaskModalHome-tagValue" type="text" value={tag} onChange={(e) => setTag(e.target.value)} />
+					</td>
+					<td>
+						#{tag}
+					</td>
+				</tr>
+			</table>
+			<h6>Preview</h6>
+			<div className="previewBox">
+				- [ ] {body} | 📅{due} #{tag}
+			</div>
+			<button className="EditTaskModalHome-saveBtn" onClick={handleSave}>Save</button>
 		</div>
 	);
 };

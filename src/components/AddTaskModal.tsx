@@ -1,10 +1,11 @@
+// /src/components/AddTaskModal.tsx
 
-
+import { App, Modal, Notice } from 'obsidian';
 import React, { useState } from 'react';
-import { Modal, App, Notice } from 'obsidian';
+
 import fs from 'fs';
-import path from 'path';
 import { loadTasksFromJson } from 'src/utils/RefreshColumns';
+import path from 'path';
 
 interface AddTaskModalProps {
 	app: App;
@@ -32,15 +33,45 @@ export class AddTaskModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		const taskInput = contentEl.createEl('input', { type: 'text', placeholder: 'Enter task description' });
-		const dueInput = contentEl.createEl('input', { type: 'date' });
-		const tagInput = contentEl.createEl('input', { type: 'text', placeholder: 'Enter tag (optional)' });
+		// Create a wrapper div for styling
+		const wrapper = contentEl.createEl('div', { cls: 'modal-content-wrapper' });
+
+		// Add heading
+		const heading = wrapper.createEl('h2', { text: 'Add New Task' });
+		heading.style.marginBottom = '10px'; // Space below heading
+
+		// Add description paragraph
+		const description = wrapper.createEl('p', {
+			text: 'This will add a new task in the Currently Opened Markdown File at the Cursor Position.',
+		});
+		description.style.marginBottom = '20px'; // Space below paragraph
+
+		// Create inputs
+		const taskInputTittle = wrapper.createEl('h6', { text: 'Task Description : '});
+		const taskInput = wrapper.createEl('textarea', { type: 'text', placeholder: 'Enter task description' });
+		taskInput.style.marginBottom = '10px'; // Space below input
+		taskInput.style.minHeight = '100px';
+
+		const dueWrapper = wrapper.createEl('div', { cls: 'due-input-wrapper' }); // Wrapper for flex layout
+		// Create title and input
+		const dueInputTitle = dueWrapper.createEl('h6', { text: 'Task Due Date :' });
+		const dueInput = dueWrapper.createEl('input', { type: 'date' });
+		dueInputTitle.style.marginRight = '10px'; // Space between title and input
+		// dueInput.style.marginBottom = '10px'; // Space below input
+
+		const tagWrapper = wrapper.createEl('div', { cls: 'due-input-wrapper' });
+		const tagInputTittle = tagWrapper.createEl('h6', { text: 'Task Tag : '})
+		const tagInput = tagWrapper.createEl('input', { type: 'text', placeholder: 'Enter tag (optional)' });
+		dueInputTitle.style.marginRight = '10px'; // Space between title and input
+		// tagInput.style.marginBottom = '20px'; // Space below input
 
 		// Set default values if provided
 		if (this.defaultDue) dueInput.value = this.defaultDue;
 		if (this.defaultTag) tagInput.value = this.defaultTag;
 
-		const addButton = contentEl.createEl('button', { text: 'Add Task' });
+		// Create and style button
+		const addButton = wrapper.createEl('button', { text: 'Add Task' });
+		addButton.style.marginTop = '30px'; // Space above button
 
 		addButton.onclick = () => {
 			const taskBody = taskInput.value;
@@ -54,10 +85,11 @@ export class AddTaskModal extends Modal {
 
 			this.addTaskToFile(taskBody, dueDate, tag);
 			this.onTaskAdded(); // Callback to refresh tasks after addition
-			// TODO : Call the loadTasks from Columns, to refresh that component.
+			// TODO: Call the loadTasks from Columns, to refresh that component.
 			this.close();
 		};
 	}
+
 
 	addTaskToFile(taskBody: string, dueDate: string, tag: string) {
 		const basePath = (window as any).app.vault.adapter.basePath;

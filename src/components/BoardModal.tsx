@@ -1,9 +1,10 @@
 // /src/compoenents/BoardModal.tsx
 
 import { App, Modal, Notice } from "obsidian";
-import React, { useState, useEffect } from "react";
-import ReactDOM from "react-dom/client";
+import React, { useEffect, useState } from "react";
+
 import { GlobalSettings } from "../settings/TaskBoardSettingTab"; // Assume this contains the settings UI
+import ReactDOM from "react-dom/client";
 
 interface Board {
 	name: string;
@@ -28,7 +29,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	onClose,
 	onSave
 }) => {
-	const [localBoards, setLocalBoards] = useState<Board[]>(JSON.parse(JSON.stringify(boards))); // Deep clone
+	const [localBoards, setLocalBoards] = useState<Board[]>(() => {
+		try {
+			return boards ? JSON.parse(JSON.stringify(boards)) : []; // Use an empty array as a fallback
+		} catch (e) {
+			console.error("Failed to parse boards:", e);
+			return [];
+		}
+	});
+
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [settings, setSettings] = useState<GlobalSettings>({}); // Local state to store global settings
 
@@ -154,6 +163,3 @@ export default class ConfigModal extends Modal {
 		contentEl.empty();
 	}
 }
-
-// Usage example: You can use this modal in your plugin like this:
-

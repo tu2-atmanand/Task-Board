@@ -75,6 +75,13 @@
               "limit": 10,
               "name": "Completed"
             }
+          },
+          {
+            "tag": "custom",
+            "data": {
+              "collapsed": false,
+              "name": "Column 7"
+            }
           }
         ],
         "filters": [],
@@ -97,7 +104,7 @@
             "tag": "namedTag",
             "data": {
               "collapsed": false,
-              "name": "",
+              "name": "GPT",
               "coltag": "OfflineVideo"
             }
           },
@@ -161,7 +168,7 @@
       "taskCompletionFormat": "",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
-	  "autoAddDue": true
+      "autoAddDue": true
     }
   }
 }
