@@ -82,7 +82,16 @@
         "filePath": "Daily_Notes/03-09-2024.md"
       }
     ],
-    "Daily_Notes/01-08-2024.md": []
+    "Daily_Notes/01-08-2024.md": [],
+    "Spintly Details.md": [
+      {
+        "id": 1725545282005,
+        "body": "Just a new Task without tag or date",
+        "due": "2024-09-08",
+        "tag": "",
+        "filePath": "Spintly Details.md"
+      }
+    ]
   },
   "Completed": {
     "Daily_Notes/01-08-2024.md": [

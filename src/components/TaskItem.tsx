@@ -37,7 +37,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 			<div className="taskItemMainContent">
 				<div className="taskItemHeader">
 					<div className="taskItemTag">#{task.tag}</div>
-					<button className="DragBtn"><RxDragHandleDots2 /></button>
+					<div className="DragBtn"><RxDragHandleDots2 size={14} /></div>
 				</div>
 				<div className="taskItemMainBody">
 					<input
