@@ -1,7 +1,8 @@
 // /src/components/TaskItem.tsx
 
-import React, { useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa'; // Import the desired icons from react-icons
+import React, { useState } from 'react';
+
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { TaskProps } from '../interfaces/TaskItem';
 
@@ -52,10 +53,10 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 					<div className='taskItemDate'>Due: {task.due}</div>
 					<div className="taskItemFooterBtns">
 						<div className="taskItemiconButton" >
-							<FaEdit size={18} enableBackground={0} onClick={onEdit} title="Edit Task" />
+							<FaEdit size={18} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
 						</div>
 						<div className="taskItemiconButton">
-							<FaTrash size={15} enableBackground={0} onClick={onDelete} title="Delete Task" />
+							<FaTrash size={15} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
 						</div>
 					</div>
 				</div>

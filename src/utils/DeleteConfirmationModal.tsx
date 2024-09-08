@@ -1,7 +1,8 @@
 // src/utils/DeleteConfirmationModal.tsx
 
+import { App, Modal } from 'obsidian';
+
 import React from 'react';
-import { Modal, App } from 'obsidian';
 
 interface DeleteConfirmationModalProps {
 	app: App;
@@ -25,13 +26,22 @@ export class DeleteConfirmationModal extends Modal {
 		contentEl.createEl('p', { text: 'Are you sure you want to delete this task?' });
 
 		const buttonContainer = contentEl.createDiv('button-container');
+		buttonContainer.style.display = 'flex';
+		buttonContainer.style.gap = '1em';
+
 		const confirmButton = buttonContainer.createEl('button', { text: 'Yes' });
+		confirmButton.style.paddingBlock = '4px';
+		confirmButton.style.paddingInline = '25px';
+		confirmButton.classList.add('deleteTaskConfirmBtn');
 		confirmButton.addEventListener('click', () => {
 			this.onConfirm();
 			this.close();
 		});
 
 		const cancelButton = buttonContainer.createEl('button', { text: 'No' });
+		cancelButton.style.paddingBlock = '4px';
+		cancelButton.style.paddingInline = '25px';
+		cancelButton.classList.add('deleteTaskCancelmBtn');
 		cancelButton.addEventListener('click', () => {
 			this.onCancel();
 			this.close();

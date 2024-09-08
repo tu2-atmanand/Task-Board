@@ -424,3 +424,16 @@ td {
 .EditTaskModalHome button:hover {
 	background-color: #007bff;
 }
+
+
+/* DeleteTaskConfirmationModal */
+
+.deleteTaskConfirmBtn:hover {
+	background-color: red;
+	/* Change background to green on hover */
+}
+
+.deleteTaskCancelmBtn:hover {
+	background-color: green;
+	/* Change background to red on hover */
+}
