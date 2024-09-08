@@ -1,6 +1,7 @@
 // src/components/KanbanBoard.tsx
 
 import { Board, BoardConfig, ColumnData } from "../interfaces/KanbanBoard";
+import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { loadBoardsData, openConfigModal, saveBoardsData } from "../services/OpenColumnConfig";
 
@@ -32,6 +33,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 	const handleSaveBoards = (updatedBoards: Board[]) => {
 		setBoards(updatedBoards);
 		saveBoardsData(updatedBoards);
+		loadBoards();
 	};
 
 	return (
@@ -41,7 +43,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 					{boards.map((board, index) => (
 						<button
 							key={index}
-							className={`boardTitleButton ${index === activeBoardIndex ? "active" : ""
+							className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""
 								}`}
 							onClick={() => setActiveBoardIndex(index)}
 						>
@@ -49,12 +51,18 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 						</button>
 					))}
 				</div>
-				<button className="ConfigureBtn" onClick={() => openConfigModal(app, boards, activeBoardIndex, handleSaveBoards)}>
-					Configure
-				</button>
-				<button className="RefreshBtn" onClick={loadBoards}>
-					Refresh
-				</button>
+				<div className="kanbanHeaderBtns">
+					<Tally1 className="kanbanHeaderBtnsSeparator" />
+					<button className="addTaskBtn" style={{backgroundColor: "none"}} onClick={() => openConfigModal(app, boards, activeBoardIndex, handleSaveBoards)}>
+						<CirclePlus size={20} />
+					</button>
+					<button className="ConfigureBtn" onClick={() => openConfigModal(app, boards, activeBoardIndex, handleSaveBoards)}>
+						<Bolt size={20} />
+					</button>
+					<button className="RefreshBtn" onClick={loadBoards}>
+						<RefreshCcw size={20} />
+					</button>
+				</div>
 			</div>
 			<div className="columnsContainer">
 				{boards[activeBoardIndex]?.columns.map((column, index) => (

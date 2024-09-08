@@ -61,7 +61,7 @@
       {
         "id": 1725435049578,
         "body": "This is a third task",
-        "due": "2024-09-06",
+        "due": "",
         "tag": "",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": false
@@ -106,6 +106,14 @@
         "body": "Just adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.",
         "due": "2024-09-07",
         "tag": "GPT"
+      }
+    ],
+    "Daily_Notes/08-09-2024.md": [
+      {
+        "id": 1725785322765,
+        "body": "This is a task for tomorrow",
+        "due": "2024-09-09",
+        "tag": "Test"
       }
     ]
   },

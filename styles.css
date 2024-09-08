@@ -22,35 +22,59 @@ If your plugin does not need CSS, delete this file.
 	border-bottom: 1px solid #ddd;
 }
 
+.boardTitles {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+}
+
+.boardTitleButton {
+	box-shadow: var(--shadow-activated-tab-header-dark) !important;
+	background: transparent !important;
+	border-radius: var(--border-radius-activated-tab-header-dark);
+}
+
+.boardTitleButtonActive {
+	box-shadow: var(--shadow-activated-tab-header-dark) !important;
+	background: var(--background-activated-tab-header-dark) !important;
+	border-radius: var(--border-radius-activated-tab-header-dark);
+	border: var(--border-width) solid olive;
+}
+
+.kanbanHeaderBtns {
+	display: flex;
+	flex-direction: row;
+}
+
+.kanbanHeaderBtnsSeparator {
+	padding-inline: 0;
+}
+
+.addTaskBtn,
+.ConfigureBtn,
+.RefreshBtn {
+	background-color: transparent !important;
+	background: none;
+	padding: 7px;
+	margin-inline: 0.3em;
+	/* color: #fff; */
+	/* border: none; */
+	/* border-radius: 3px; */
+	cursor: pointer;
+	/* font-size: 14px; */
+}
+
+.addTaskBtn:hover,
+.ConfigureBtn:hover,
+.RefreshBtn:hover {
+	border: var(--border-width) solid olive;
+}
+
 .columnsContainer {
 	display: flex;
 	overflow-x: auto;
 	padding: 10px;
 	height: 100%;
-}
-
-.addColBtn {
-	cursor: pointer;
-	padding: 5px 10px;
-	border: none;
-	background-color: #007bff;
-	color: white;
-	border-radius: 5px;
-}
-
-.RefreshBtn {
-	margin-left: 10px;
-	padding: 5px 10px;
-	background-color: #007bff;
-	color: #fff;
-	border: none;
-	border-radius: 3px;
-	cursor: pointer;
-	font-size: 14px;
-}
-
-.RefreshBtn:hover {
-	background-color: #0056b3;
 }
 
 

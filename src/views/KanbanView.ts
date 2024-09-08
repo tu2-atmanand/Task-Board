@@ -36,7 +36,7 @@ export class KanbanView extends ItemView {
 	}
 
 	async onOpen() {
-		this.addAction("search", "Re-Scan Vault", () => {
+		this.addAction("lucide-scan-text", "Re-Scan Vault", () => {
 			openConfigModal(
 				this.app,
 				this.boards,
