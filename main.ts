@@ -55,7 +55,7 @@ export default class TaskBoard extends Plugin {
 
 		// Create a ribbon icon to open the Kanban board view
 		const ribbonIconEl = this.addRibbonIcon(
-			"dice",
+			"lucide-file-check",
 			"Open Kanban Board",
 			() => {
 				this.app.workspace
