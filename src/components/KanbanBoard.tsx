@@ -6,7 +6,7 @@ import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { loadBoardsData, openConfigModal, saveBoardsData } from "../services/OpenColumnConfig";
 
-import { AddTaskModal } from "./AddTaskModal";
+import { AddTaskModal } from "../modal/AddTaskModal";
 import Column from "./Column";
 import ConfigModal from "../settings/BoardModal";
 import fs from "fs";
@@ -31,7 +31,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 	};
 
 	// Function to handle saving boards
-	const handleSaveBoards = (updatedBoards: Board[]) => {
+	const handleUpdateBoards = (updatedBoards: Board[]) => {
 		setBoards(updatedBoards);
 		saveBoardsData(updatedBoards);
 		loadBoards();
@@ -75,7 +75,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 					<button className="addTaskBtn" style={{backgroundColor: "none"}} onClick={() => AddNewTaskIn() }>
 						<CirclePlus size={20} />
 					</button>
-					<button className="ConfigureBtn" onClick={() => openConfigModal(app, boards, activeBoardIndex, handleSaveBoards)}>
+					<button className="ConfigureBtn" onClick={() => openConfigModal(app, boards, activeBoardIndex, handleUpdateBoards)}>
 						<Bolt size={20} />
 					</button>
 					<button className="RefreshBtn" onClick={loadBoards}>

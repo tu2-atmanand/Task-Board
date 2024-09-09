@@ -1,15 +1,18 @@
 // /src/components/Column.tsx -------- V3
 
+import { App, Modal } from 'obsidian';
+import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
+import { deleteTaskFromFile, deleteTaskFromJson } from 'src/utils/FileUtils';
+import { markTaskCompleteInFile, moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/FileUtils';
+
+import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal'; // Import the Delete Modal
+import { EditTaskModal } from '../modal/EditTaskModal';
+import { RxDragHandleDots2 } from "react-icons/rx";
 import TaskItem from './TaskItem';
 import fs from 'fs';
-import path from 'path';
-import { Modal, App } from 'obsidian';
-import { EditTaskModal } from './EditTaskModal';
 import { loadTasksFromJson } from 'src/utils/RefreshColumns';
-import { RxDragHandleDots2 } from "react-icons/rx";
-import { ColumnProps, Task } from '../interfaces/Column';
-import { DeleteConfirmationModal } from '../utils/DeleteConfirmationModal'; // Import the Delete Modal
+import path from 'path';
 
 const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
@@ -79,6 +82,7 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 		return tasksToDisplay;
 	};
 
+
 	const handleCheckboxChange = (updatedTask: Task) => {
 		// Remove task from the current state
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
@@ -88,7 +92,6 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 
 		// Check if the task is completed
 		if (updatedTask.completed) {
-			console.log("New added function will get executed, but it wont since there is no task.completed....")
 			// Move from Completed to Pending
 			moveFromCompletedToPending(updatedTask);
 		} else {
@@ -103,87 +106,6 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 		// Refresh the tasks in the component
 		loadTasks();
 	};
-
-
-	const moveFromPendingToCompleted = (task: Task) => {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-		// Toggle the completed state
-		const updatedTask = { ...task, completed: !task.completed };
-
-		try {
-			const tasksData = fs.readFileSync(tasksPath, 'utf8');
-			const allTasks = JSON.parse(tasksData);
-
-			// Move task from Pending to Completed
-			if (allTasks.Pending[updatedTask.filePath]) {
-				allTasks.Pending[updatedTask.filePath] = allTasks.Pending[updatedTask.filePath].filter((task: any) => task.id !== updatedTask.id);
-				if (!allTasks.Completed[updatedTask.filePath]) {
-					allTasks.Completed[updatedTask.filePath] = [];
-				}
-				allTasks.Completed[updatedTask.filePath].push(updatedTask);
-			}
-
-			// Write the updated data back to the JSON file
-			fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
-		} catch (error) {
-			console.error("Error updating task in tasks.json:", error);
-		}
-	};
-
-	const moveFromCompletedToPending = (task: Task) => {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-		// Toggle the completed state
-		const updatedTask = { ...task, completed: !task.completed };
-
-		try {
-			const tasksData = fs.readFileSync(tasksPath, 'utf8');
-			const allTasks = JSON.parse(tasksData);
-
-			// Move task from Completed to Pending
-			if (allTasks.Completed[updatedTask.filePath]) {
-				allTasks.Completed[updatedTask.filePath] = allTasks.Completed[updatedTask.filePath].filter((task: any) => task.id !== updatedTask.id);
-				if (!allTasks.Pending[updatedTask.filePath]) {
-					allTasks.Pending[updatedTask.filePath] = [];
-				}
-				allTasks.Pending[updatedTask.filePath].push(updatedTask);
-			}
-
-			// Write the updated data back to the JSON file
-			fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
-		} catch (error) {
-			console.error("Error updating task in tasks.json:", error);
-		}
-	};
-
-
-	const markTaskCompleteInFile = (task: Task) => {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const filePath = path.join(basePath, task.filePath);
-
-		try {
-			const fileContent = fs.readFileSync(filePath, 'utf8');
-			let newContent = '';
-
-			if (task.completed) {
-				// Mark the task as incomplete
-				const completedTaskRegex = new RegExp(`^- \\[x\\] ${task.body} \\|.*`, 'gm');
-				newContent = fileContent.replace(completedTaskRegex, (match) => match.replace('[x]', '[ ]'));
-			} else {
-				// Mark the task as complete
-				const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, 'gm');
-				newContent = fileContent.replace(taskRegex, (match) => match.replace('[ ]', '[x]'));
-			}
-
-			fs.writeFileSync(filePath, newContent);
-		} catch (error) {
-			console.error("Error marking task in file:", error);
-		}
-	};
-
 
 
 	const handleDeleteTask = (task: Task) => {
@@ -203,51 +125,13 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 		deleteModal.open();
 	};
 
-	const deleteTaskFromFile = (task: Task) => {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const filePath = path.join(basePath, task.filePath);
-
-		try {
-			const fileContent = fs.readFileSync(filePath, 'utf8');
-			// Updated regex to match the task body ending with '|'
-			const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, 'gm');
-			const newContent = fileContent.replace(taskRegex, ''); // Remove the matched line from the file
-			fs.writeFileSync(filePath, newContent);
-		} catch (error) {
-			console.error("Error deleting task from file:", error);
-		}
-	};
-
-	const deleteTaskFromJson = (task: Task) => {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-		try {
-			const tasksData = fs.readFileSync(tasksPath, 'utf8');
-			const allTasks = JSON.parse(tasksData);
-
-			// Remove task from Pending or Completed in tasks.json
-			if (allTasks.Pending[task.filePath]) {
-				allTasks.Pending[task.filePath] = allTasks.Pending[task.filePath].filter((t: any) => t.id !== task.id);
-			}
-			if (allTasks.Completed[task.filePath]) {
-				allTasks.Completed[task.filePath] = allTasks.Completed[task.filePath].filter((t: any) => t.id !== task.id);
-			}
-
-			// Write the updated data back to the JSON file
-			fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
-		} catch (error) {
-			console.error("Error deleting task from tasks.json:", error);
-		}
-	};
-
 
 	const handleEditTask = (task: Task) => {
 		const app = (window as any).app as App;
 		const editModal = new EditTaskModal(app, task, (updatedTask) => {
 			updatedTask.filePath = task.filePath;
 			// Update the task in the file and JSON
-			updateTaskInFile(updatedTask);
+			updateTaskInFile(updatedTask, task);
 			updateTaskInJson(updatedTask);
 
 			// Refresh tasks state after update
@@ -256,65 +140,10 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 		editModal.open();
 	};
 
-	const updateTaskInFile = (updatedTask: Task) => {
-		console.log("updatedTask i am received in Column.tsx file -2 : ", updatedTask);
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const filePath = path.join(basePath, updatedTask.filePath);
-		// console.log("The File Path which needs to be updated : ", filePath);
-
-		try {
-			const fileContent = fs.readFileSync(filePath, 'utf8');
-			const taskRegex = new RegExp(`^- \\[ \\] .*?${updatedTask.tag}`, 'gm');
-			const newContent = fileContent.replace(taskRegex, `- [ ] ${updatedTask.body} | 📅 ${updatedTask.due} #${updatedTask.tag}`);
-			fs.writeFileSync(filePath, newContent);
-		} catch (error) {
-			console.error("Error updating task in file:", error);
-		}
-	};
-
-	const updateTaskInJson = (updatedTask: Task) => {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-		try {
-			const tasksData = fs.readFileSync(tasksPath, 'utf8');
-			const allTasks = JSON.parse(tasksData);
-			console.log("The file of Tasks.json which I am updating: ", allTasks);
-
-			// Function to update a task in a given task category (Pending or Completed)
-			const updateTasksInCategory = (taskCategory: any) => {
-				return Object.entries(taskCategory).reduce((acc: any, [filePath, tasks]: [string, any[]]) => {
-					acc[filePath] = tasks.map((task: any) =>
-						task.id === updatedTask.id ? updatedTask : task
-					);
-					return acc;
-				}, {});
-			};
-
-			// Update tasks in both Pending and Completed categories
-			const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
-			const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
-
-			console.log("All updated Pending Tasks to be written in Tasks.json: ", updatedPendingTasks);
-			console.log("All updated Completed Tasks to be written in Tasks.json: ", updatedCompletedTasks);
-
-			// Create the updated data object with both updated Pending and Completed tasks
-			const updatedData = {
-				Pending: updatedPendingTasks,
-				Completed: updatedCompletedTasks
-			};
-
-			// Write the updated data back to the JSON file
-			console.log("The new data to be updated in tasks.json: ", updatedData);
-			fs.writeFileSync(tasksPath, JSON.stringify(updatedData, null, 2));
-		} catch (error) {
-			console.error("Error updating task in tasks.json:", error);
-		}
-	};
 
 	return (
-		<div className="kanbanColumn">
-			<div className="columnHeaderBar">
+		<div className="TaskBoardColumnsSection">
+			<div className="taskBoardColumnSecHeader">
 				<div className="columnTitle">{data.name}</div>
 				<button className="columnDragIcon"><RxDragHandleDots2 /></button>
 			</div>
@@ -448,8 +277,8 @@ export default Column;
 // 	};
 
 // 	return (
-// 		<div className="kanbanColumn">
-// 			<div className="columnHeaderBar">
+// 		<div className="TaskBoardColumnsSection">
+// 			<div className="taskBoardColumnSecHeader">
 // 				<div className="columnTitle">{data.name}</div>
 // 				<div className="columnDragIcon"></div>
 // 			</div>
@@ -521,8 +350,8 @@ export default Column;
 // 	// console.log(data);
 
 // 	return (
-// 		<div className="kanbanColumn">
-// 			<div className="columnHeaderBar">
+// 		<div className="TaskBoardColumnsSection">
+// 			<div className="taskBoardColumnSecHeader">
 // 				<div className="columnTitle">{data.name}</div>
 // 				<div className="columnDragIcon"></div>
 // 			</div>

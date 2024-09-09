@@ -12,9 +12,10 @@
       {
         "id": 1725276003305,
         "body": "Complete the project proposal draft for review.",
-        "due": "2024-09-4",
+        "due": "2024-09-10",
         "tag": "NOTE",
-        "completed": false
+        "completed": false,
+        "filePath": "Daily_Notes/02-08-2024.md"
       },
       {
         "id": 1725276003306,
@@ -52,8 +53,8 @@
     "Daily_Notes/03-09-2024.md": [
       {
         "id": 1725440316533,
-        "body": "This is a fifth task, UPDATED",
-        "due": "2024-09-05",
+        "body": "Fifth task updating again, UPDATED",
+        "due": "2024-09-09",
         "tag": "OfflineVideo",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": false
@@ -75,11 +76,10 @@
         "filePath": "Daily_Notes/03-09-2024.md"
       },
       {
-        "id": 1725434909002,
-        "body": "This is a second task in this file",
-        "due": "2024-09-07",
-        "tag": "",
-        "completed": false,
+        "id": 1725898116389,
+        "body": "Completely Updating the content of this task",
+        "due": "2024-09-10",
+        "tag": "Test",
         "filePath": "Daily_Notes/03-09-2024.md"
       }
     ],
@@ -133,9 +133,10 @@
     "Daily_Notes/09-09-2024.md": [
       {
         "id": 1725889880632,
-        "body": "New Test task, now it should be added in the file, where i was last time and from where i just have pressed the Add button",
+        "body": "I trust Gemini, it should work",
         "due": "2024-09-10",
-        "tag": ""
+        "tag": "Test",
+        "filePath": "Daily_Notes/09-09-2024.md"
       }
     ]
   },

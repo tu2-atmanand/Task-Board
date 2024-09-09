@@ -13,7 +13,7 @@ import {
 	TFile,
 } from "obsidian";
 
-import { AddTaskModal } from "src/components/AddTaskModal";
+import { AddTaskModal } from "src/modal/AddTaskModal";
 import ConfigModal from "src/settings/BoardModal";
 import { GlobalSettings } from "src/interfaces/KanbanView";
 import { KanbanView } from "./src/views/KanbanView";

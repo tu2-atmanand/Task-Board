@@ -79,7 +79,7 @@ If your plugin does not need CSS, delete this file.
 
 
 /* src/styles/Column.css */
-.kanbanColumn {
+.TaskBoardColumnsSection {
 	background: transparent !important;
 	/* backdrop-filter: blur(10px) saturate(300%) contrast(80%) brightness(60%); */
 	border: var(--border-width) solid olive;
@@ -92,7 +92,7 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: column;
 }
 
-.columnHeaderBar {
+.taskBoardColumnSecHeader {
 	display: flex;
 	flex-direction: row;
 	padding: 10px;
