@@ -92,6 +92,12 @@
         "tag": "",
         "filePath": "Spintly Details.md",
         "completed": false
+      },
+      {
+        "id": 1725886490784,
+        "body": "New tasks testing",
+        "due": "2024-09-09",
+        "tag": "test"
       }
     ],
     "Daily_Notes/07-09-2024.md": [
@@ -114,6 +120,22 @@
         "body": "This is a task for tomorrow",
         "due": "2024-09-09",
         "tag": "Test"
+      }
+    ],
+    "3-Process After Offer Letter Received.md": [
+      {
+        "id": 1725889824849,
+        "body": "New Test task to be added from Add Task Button straight from the Plugin Window",
+        "due": "2024-09-09",
+        "tag": ""
+      }
+    ],
+    "Daily_Notes/09-09-2024.md": [
+      {
+        "id": 1725889880632,
+        "body": "New Test task, now it should be added in the file, where i was last time and from where i just have pressed the Add button",
+        "due": "2024-09-10",
+        "tag": ""
       }
     ]
   },

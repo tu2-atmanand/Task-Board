@@ -19,7 +19,6 @@ import { GlobalSettings } from "src/interfaces/KanbanView";
 import { KanbanView } from "./src/views/KanbanView";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_KANBAN } from "./src/views/KanbanView";
-// Import required modules
 import fs from "fs";
 import path from "path";
 

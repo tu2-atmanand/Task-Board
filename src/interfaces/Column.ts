@@ -1,4 +1,4 @@
-interface ColumnProps {
+export interface ColumnProps {
 	tag: string;
 	data: {
 		collapsed: boolean;
@@ -16,7 +16,7 @@ interface ColumnProps {
 	};
 }
 
-interface Task {
+export interface Task {
 	id: number;
 	body: string;
 	due: string;

@@ -53,10 +53,10 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 					<div className='taskItemDate'>Due: {task.due}</div>
 					<div className="taskItemFooterBtns">
 						<div className="taskItemiconButton" >
-							<FaEdit size={18} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
+							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
 						</div>
 						<div className="taskItemiconButton">
-							<FaTrash size={15} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
+							<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
 						</div>
 					</div>
 				</div>

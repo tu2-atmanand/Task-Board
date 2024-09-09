@@ -1,11 +1,12 @@
 // src/components/KanbanBoard.tsx
 
+import { App, Notice } from "obsidian"; // Import App from Obsidian
 import { Board, BoardConfig, ColumnData } from "../interfaces/KanbanBoard";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { loadBoardsData, openConfigModal, saveBoardsData } from "../services/OpenColumnConfig";
 
-import { App } from "obsidian"; // Import App from Obsidian
+import { AddTaskModal } from "./AddTaskModal";
 import Column from "./Column";
 import ConfigModal from "../settings/BoardModal";
 import fs from "fs";
@@ -36,6 +37,24 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 		loadBoards();
 	};
 
+	const AddNewTaskIn = () => {
+		// const app = app;
+		const activeFile = app.workspace.getActiveFile();
+
+		if (activeFile) {
+			new AddTaskModal(app, {
+				app,
+				filePath: activeFile.path,
+				onTaskAdded: () => {
+					// Refresh tasks or perform necessary actions after task is added
+					// console.log("Task added successfully!");
+				},
+			}).open();
+		} else {
+			new Notice("No active file found to add a task.");
+		}
+	}
+
 	return (
 		<div className="kanbanBoard">
 			<div className="kanbanHeader">
@@ -53,7 +72,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				</div>
 				<div className="kanbanHeaderBtns">
 					<Tally1 className="kanbanHeaderBtnsSeparator" />
-					<button className="addTaskBtn" style={{backgroundColor: "none"}} onClick={() => openConfigModal(app, boards, activeBoardIndex, handleSaveBoards)}>
+					<button className="addTaskBtn" style={{backgroundColor: "none"}} onClick={() => AddNewTaskIn() }>
 						<CirclePlus size={20} />
 					</button>
 					<button className="ConfigureBtn" onClick={() => openConfigModal(app, boards, activeBoardIndex, handleSaveBoards)}>
