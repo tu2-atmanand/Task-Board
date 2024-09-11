@@ -1,50 +1,64 @@
-// utils/RefreshColumns.ts
+// src/utils/RefreshColumns.ts
 
-import fs from "fs";
-import path from "path";
+import { Dispatch, SetStateAction } from "react";
 
-interface Task {
-	id: number;
-	body: string;
-	due: string;
-	tag: string;
-	filePath: string;
-	status: string;
-}
+import { Task } from "../interfaces/Column";
+import { loadTasksFromJson } from "./FileUtils";
 
-// utils/taskUtils.ts
+// Function to refresh tasks in any column by calling this utility function
+export const refreshTasks = (
+	setTasks: Dispatch<SetStateAction<Task[]>>,
+	tag: string,
+	data: any
+) => {
+	console.log("------ Inside the refreshTasks function -----");
+	// Load tasks from the JSON file
+	const { allTasksWithStatus, pendingTasks, completedTasks } =
+		loadTasksFromJson();
 
-export const loadTasksFromJson = (): { allTasksWithStatus: Task[], pendingTasks: Task[], completedTasks: Task[] } => {
-  const basePath = (window as any).app.vault.adapter.basePath;
-  const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
+	// Call the filter function based on the column's tag and properties
+	const today = new Date();
+	let tasksToDisplay: Task[] = [];
 
-  try {
-    if (fs.existsSync(tasksPath)) {
-      const tasksData = fs.readFileSync(tasksPath, 'utf8');
-      const allTasks = JSON.parse(tasksData);
+	if (tag === "undated") {
+		tasksToDisplay = pendingTasks.filter((task) => !task.due);
+	} else if (data.range) {
+		const { from, to } = data.range.rangedata;
+		tasksToDisplay = pendingTasks.filter((task) => {
+			if (!task.due) return false;
+			const dueDate = new Date(task.due);
+			const diffDays =
+				Math.floor(
+					(dueDate.getTime() - today.getTime()) /
+						(1000 * 60 * 60 * 24)
+				) + 1;
+				// console.log("The Difference in today and due : ", diffDays, "For the task : ", task.body);
 
-      const pendingTasks: Task[] = [];
-      const completedTasks: Task[] = [];
+			if (from < 0 && to === 0) {
+				return diffDays < 0;
+			} else if (from === 0 && to === 0) {
+				return diffDays === 0;
+			} else if (from === 1 && to === 1) {
+				return diffDays === 1;
+			} else if (from === 2 && to === 0) {
+				return diffDays >= 2;
+			}
 
-      // Separate pending tasks
-      for (const [filePath, tasks] of Object.entries(allTasks.Pending || {})) {
-        tasks.forEach((task: any) => pendingTasks.push({ ...task, filePath }));
-      }
+			return false;
+		});
+	} else if (tag === "untagged") {
+		tasksToDisplay = pendingTasks.filter((task) => !task.tag);
+	} else if (tag === "namedTag") {
+		tasksToDisplay = pendingTasks.filter(
+			(task) => task.tag === data.coltag
+		);
+	} else if (tag === "otherTags") {
+		tasksToDisplay = pendingTasks.filter(
+			(task) => task.tag && task.tag !== data.coltag
+		);
+	} else if (tag === "completed") {
+		tasksToDisplay = completedTasks;
+	}
 
-      // Separate completed tasks
-      for (const [filePath, tasks] of Object.entries(allTasks.Completed || {})) {
-        tasks.forEach((task: any) => completedTasks.push({ ...task, filePath }));
-      }
-
-      // Combine both pending and completed tasks
-      const allTasksWithStatus = [...pendingTasks, ...completedTasks];
-      return { allTasksWithStatus, pendingTasks, completedTasks };
-    } else {
-      console.warn("tasks.json file not found.");
-      return { allTasksWithStatus: [], pendingTasks: [], completedTasks: [] };
-    }
-  } catch (error) {
-    console.error("Error reading tasks.json:", error);
-    return { allTasksWithStatus: [], pendingTasks: [], completedTasks: [] };
-  }
+	setTasks(tasksToDisplay);
 };

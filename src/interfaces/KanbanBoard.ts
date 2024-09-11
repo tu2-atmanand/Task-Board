@@ -1,10 +1,10 @@
 // Define the structure of Board, Column, and the Data read from JSON
-interface ColumnData {
+export interface ColumnData {
 	tag: string;
 	data: {
 		collapsed: boolean;
 		name: string;
-		coltag?: string;
+		coltag: string;
 		range?: {
 			tag: string;
 			rangedata: {
@@ -17,7 +17,7 @@ interface ColumnData {
 	};
 }
 
-interface Board {
+export interface Board {
 	name: string;
 	columns: ColumnData[];
 	filters?: any[];
@@ -27,6 +27,6 @@ interface Board {
 	showFilteredTags?: boolean;
 }
 
-interface BoardConfig {
+export interface BoardConfig {
 	boardConfigs: Board[];
 }

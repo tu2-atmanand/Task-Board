@@ -125,7 +125,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 };
 
 // Define the modal class that integrates with Obsidian
-export default class ConfigModal extends Modal {
+export default class BoardConfigModal extends Modal {
 	boards: Board[];
 	activeBoardIndex: number;
 	onSave: (updatedBoards: Board[]) => void;

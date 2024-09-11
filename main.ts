@@ -14,7 +14,7 @@ import {
 } from "obsidian";
 
 import { AddTaskModal } from "src/modal/AddTaskModal";
-import ConfigModal from "src/settings/BoardModal";
+import BoardConfigModal from "src/settings/BoardModal";
 import { GlobalSettings } from "src/interfaces/KanbanView";
 import { KanbanView } from "./src/views/KanbanView";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
@@ -64,12 +64,12 @@ export default class TaskBoard extends Plugin {
 		);
 		ribbonIconEl.addClass("Task-Board-ribbon-class");
 
-		// Add a command to open the ConfigModal
+		// Add a command to open the BoardConfigModal
 		this.addCommand({
 			id: "open-kanban-config-modal",
 			name: "Open Kanban Configuration Modal",
 			callback: () => {
-				this.openConfigModal();
+				this.openBoardConfigModal();
 			},
 		});
 
@@ -155,9 +155,9 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
-	// Function to open the ConfigModal
-	openConfigModal() {
-		const modal = new ConfigModal(this.app); // Pass the app instance to the modal
+	// Function to open the BoardConfigModal
+	openBoardConfigModal() {
+		const modal = new BoardConfigModal(this.app); // Pass the app instance to the modal
 		modal.open();
 	}
 

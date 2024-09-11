@@ -3,7 +3,7 @@
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import {
 	loadBoardsData,
-	openConfigModal,
+	openBoardConfigModal,
 	saveBoardsData,
 } from "../services/OpenColumnConfig";
 
@@ -37,7 +37,7 @@ export class KanbanView extends ItemView {
 
 	async onOpen() {
 		this.addAction("lucide-scan-text", "Re-Scan Vault", () => {
-			openConfigModal(
+			openBoardConfigModal(
 				this.app,
 				this.boards,
 				this.activeBoardIndex,
@@ -80,7 +80,7 @@ export class KanbanView extends ItemView {
 
 // import { App, ItemView, Vault, Workspace, WorkspaceLeaf } from "obsidian";
 
-// import ConfigModal from "src/components/BoardModal";
+// import BoardConfigModal from "src/components/BoardModal";
 // import KanbanBoard from "../components/KanbanBoard";
 // import React from "react";
 // import ReactDOM from "react-dom/client"; // Ensure this import is correct for React 18+
@@ -110,7 +110,7 @@ export class KanbanView extends ItemView {
 // 	async onOpen() {
 // 		// Add icon button to the view header
 // 		this.addAction("gear", "Open Configure Window", () => {
-// 			this.openConfigModal();
+// 			this.openBoardConfigModal();
 // 		});
 
 // 		this.addAction("plus-circle", "Add New Task", () => {
@@ -136,9 +136,9 @@ export class KanbanView extends ItemView {
 // 		// ReactDOM.unmountComponentAtNode(this.contentEl);
 // 	}
 
-// 	// Function to open the ConfigModal
-// 	openConfigModal() {
-// 		const modal = new ConfigModal(this.app); // Pass the app instance to the modal
+// 	// Function to open the BoardConfigModal
+// 	openBoardConfigModal() {
+// 		const modal = new BoardConfigModal(this.app); // Pass the app instance to the modal
 // 		modal.open();
 // 	}
 // }

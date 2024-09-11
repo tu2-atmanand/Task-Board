@@ -52,14 +52,6 @@
     ],
     "Daily_Notes/03-09-2024.md": [
       {
-        "id": 1725440316533,
-        "body": "Fifth task updating again, UPDATED",
-        "due": "2024-09-09",
-        "tag": "OfflineVideo",
-        "filePath": "Daily_Notes/03-09-2024.md",
-        "completed": false
-      },
-      {
         "id": 1725435049578,
         "body": "This is a third task",
         "due": "",
@@ -78,9 +70,17 @@
       {
         "id": 1725898116389,
         "body": "Completely Updating the content of this task",
-        "due": "2024-09-10",
+        "due": "2024-09-14",
         "tag": "Test",
         "filePath": "Daily_Notes/03-09-2024.md"
+      },
+      {
+        "id": 1725440316533,
+        "body": "Fifth task updating again, UPDATED",
+        "due": "2024-09-12",
+        "tag": "OfflineVideo",
+        "filePath": "Daily_Notes/03-09-2024.md",
+        "completed": false
       }
     ],
     "Daily_Notes/01-08-2024.md": [],
@@ -110,18 +110,12 @@
       {
         "id": 1725697862884,
         "body": "Just adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.",
-        "due": "2024-09-07",
-        "tag": "GPT"
+        "due": "2024-09-12",
+        "tag": "GPT",
+        "filePath": "Daily_Notes/07-09-2024.md"
       }
     ],
-    "Daily_Notes/08-09-2024.md": [
-      {
-        "id": 1725785322765,
-        "body": "This is a task for tomorrow",
-        "due": "2024-09-09",
-        "tag": "Test"
-      }
-    ],
+    "Daily_Notes/08-09-2024.md": [],
     "3-Process After Offer Letter Received.md": [
       {
         "id": 1725889824849,
@@ -136,6 +130,13 @@
         "body": "I trust Gemini, it should work",
         "due": "2024-09-10",
         "tag": "Test",
+        "filePath": "Daily_Notes/09-09-2024.md"
+      },
+      {
+        "id": 1725901799902,
+        "body": "Temp Task updating",
+        "due": "2024-09-11",
+        "tag": "NOTE",
         "filePath": "Daily_Notes/09-09-2024.md"
       }
     ]
@@ -161,6 +162,16 @@
     ],
     "Daily_Notes/03-09-2024.md": [],
     "Daily_Notes.md": [],
-    "Spintly Details.md": []
+    "Spintly Details.md": [],
+    "Daily_Notes/08-09-2024.md": [
+      {
+        "id": 1725785322765,
+        "body": "This is a task for tomorrow, updating",
+        "due": "2024-09-09",
+        "tag": "Test",
+        "filePath": "Daily_Notes/08-09-2024.md",
+        "completed": true
+      }
+    ]
   }
 }
