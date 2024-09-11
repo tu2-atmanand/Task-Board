@@ -1,15 +1,15 @@
 // src/components/KanbanBoard.tsx
 
-import { App, Notice } from "obsidian"; // Import App from Obsidian
-import { Board, BoardConfig, ColumnData } from "../interfaces/KanbanBoard";
+import { App, Notice } from "obsidian";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
-import { loadBoardsData, openConfigModal, saveBoardsData } from "../services/OpenColumnConfig";
+import { handleUpdateBoards, refreshBoardData } from "../utils/refreshBoard"; // Import utility functions
 
 import { AddTaskModal } from "../modal/AddTaskModal";
+import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
-import ConfigModal from "../settings/BoardModal";
 import fs from "fs";
+import { openBoardConfigModal } from "../services/OpenColumnConfig";
 import path from "path";
 
 const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
@@ -17,28 +17,11 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 
 	useEffect(() => {
-		loadBoards();
+		refreshBoardData(setBoards); // Use utility function to load boards
 	}, []);
 
-	// Function to load boards data
-	const loadBoards = async () => {
-		try {
-			const data = await loadBoardsData();
-			setBoards(data);
-		} catch (err) {
-			console.error("Failed to load boards data:", err);
-		}
-	};
-
 	// Function to handle saving boards
-	const handleUpdateBoards = (updatedBoards: Board[]) => {
-		setBoards(updatedBoards);
-		saveBoardsData(updatedBoards);
-		loadBoards();
-	};
-
 	const AddNewTaskIn = () => {
-		// const app = app;
 		const activeFile = app.workspace.getActiveFile();
 
 		if (activeFile) {
@@ -46,14 +29,14 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				app,
 				filePath: activeFile.path,
 				onTaskAdded: () => {
-					// Refresh tasks or perform necessary actions after task is added
-					// console.log("Task added successfully!");
+					// Call refresh board data when a new task is added
+					refreshBoardData(setBoards);
 				},
 			}).open();
 		} else {
 			new Notice("No active file found to add a task.");
 		}
-	}
+	};
 
 	return (
 		<div className="kanbanBoard">
@@ -72,20 +55,30 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				</div>
 				<div className="kanbanHeaderBtns">
 					<Tally1 className="kanbanHeaderBtnsSeparator" />
-					<button className="addTaskBtn" style={{backgroundColor: "none"}} onClick={() => AddNewTaskIn() }>
+					<button className="addTaskBtn" style={{backgroundColor: "none"}} onClick={() => AddNewTaskIn }>
 						<CirclePlus size={20} />
 					</button>
-					<button className="ConfigureBtn" onClick={() => openConfigModal(app, boards, activeBoardIndex, handleUpdateBoards)}>
+					<button
+						className="ConfigureBtn"
+						onClick={() => openBoardConfigModal(app, boards, activeBoardIndex, (updatedBoards) =>
+							handleUpdateBoards(updatedBoards, setBoards)
+						)}
+					>
 						<Bolt size={20} />
 					</button>
-					<button className="RefreshBtn" onClick={loadBoards}>
+					<button className="RefreshBtn" onClick={() => refreshBoardData(setBoards)}>
 						<RefreshCcw size={20} />
 					</button>
 				</div>
 			</div>
 			<div className="columnsContainer">
 				{boards[activeBoardIndex]?.columns.map((column, index) => (
-					<Column key={index} tag={column.tag} data={column.data} />
+					<Column
+						key={index}
+						tag={column.tag}
+						data={column.data}
+						setBoards={setBoards} // Pass setBoards to the Column component
+					/>
 				))}
 			</div>
 		</div>

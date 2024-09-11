@@ -3,92 +3,35 @@
 import { App, Modal } from 'obsidian';
 import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
-import { deleteTaskFromFile, deleteTaskFromJson } from 'src/utils/FileUtils';
+import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/FileUtils';
 import { markTaskCompleteInFile, moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/FileUtils';
 
-import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal'; // Import the Delete Modal
+import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
 import { RxDragHandleDots2 } from "react-icons/rx";
 import TaskItem from './TaskItem';
 import fs from 'fs';
-import { loadTasksFromJson } from 'src/utils/RefreshColumns';
 import path from 'path';
+import { refreshBoardData } from 'src/utils/refreshBoard';
+import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
 
-const Column: React.FC<ColumnProps> = ({ tag, data }) => {
+interface ColumnPropsWithSetBoards extends ColumnProps {
+	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
+}
+
+const Column: React.FC<ColumnPropsWithSetBoards> = ({ tag, data, setBoards }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
 
 	// Load tasks from tasks.json file
 	useEffect(() => {
-		const loadTasks = async () => {
-			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
-			const filteredTasks = filterTasksByColumn(allTasksWithStatus, pendingTasks, completedTasks);
-			setTasks(filteredTasks);
-		};
-
-		loadTasks();
+		refreshTasks(setTasks, tag, data);
 	}, [tag, data]);
-
-	const loadTasks = () => {
-		const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
-		const filteredTasks = filterTasksByColumn(allTasksWithStatus, pendingTasks, completedTasks);
-		setTasks(filteredTasks);
-	};
-
-	// Function to filter tasks based on the column's tag and properties
-	const filterTasksByColumn = (allTasks: Task[], pendingTasks: Task[], completedTasks: Task[]) => {
-		const today = new Date();
-		let tasksToDisplay: Task[] = [];
-
-		// console.log("All Completed Tasks : ", completedTasks);
-
-		if (tag === "undated") {
-			tasksToDisplay = pendingTasks.filter(task => !task.due);
-			console.log("Tasks Under UnDated Columns : ", tasksToDisplay);
-		} else if (data.range) {
-			const { from, to } = data.range.rangedata;
-			tasksToDisplay = pendingTasks.filter(task => {
-				if (!task.due) return false;
-				const dueDate = new Date(task.due);
-				const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-				console.log("Today : ", today.getDate(), "Due Date : ", dueDate.getDate(), " | The Difference in Due an Today date : ", diffDays);
-
-				if (from < 0 && to === 0) {
-					return diffDays < 0;
-				} else if (from === 0 && to === 0) {
-					return diffDays === 0;
-				} else if (from === 1 && to === 1) {
-					return diffDays === 1;
-				} else if (from === 2 && to === 0) {
-					return diffDays >= 2;
-				}
-
-				return false;
-			});
-			console.log("Tasks Under Dated Columns : ", tasksToDisplay);
-		} else if (tag === "untagged") {
-			tasksToDisplay = pendingTasks.filter(task => !task.tag);
-			console.log("Tasks Under Untagged Columns : ", tasksToDisplay);
-		} else if (tag === "namedTag") {
-			tasksToDisplay = pendingTasks.filter(task => task.tag === data.coltag);
-			console.log("Tasks Under Tagged Columns : ", tasksToDisplay);
-		} else if (tag === "otherTags") {
-			tasksToDisplay = pendingTasks.filter(task => task.tag && task.tag !== data.coltag);
-			console.log("Tasks Under OtherTag Columns : ", tasksToDisplay);
-		} else if (tag === "completed") {
-			// console.log("Completed Tasks : ", completedTasks);
-			tasksToDisplay = completedTasks;
-		}
-
-		return tasksToDisplay;
-	};
 
 
 	const handleCheckboxChange = (updatedTask: Task) => {
 		// Remove task from the current state
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
-		console.log("These are the tasks which will be set by setTasks : ", updatedTasks);
 		setTasks(updatedTasks); // Update state to remove completed task
-		console.log("Checking if there is anything called task.completed : ", updatedTask.completed);
 
 		// Check if the task is completed
 		if (updatedTask.completed) {
@@ -101,10 +44,10 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 
 		// Mark task in file as complete or incomplete
 		markTaskCompleteInFile(updatedTask);
-		sleep(10);
 
 		// Refresh the tasks in the component
-		loadTasks();
+		// refreshTasks(setTasks, tag, data);
+		refreshBoardData(setBoards);
 	};
 
 
@@ -134,8 +77,12 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 			updateTaskInFile(updatedTask, task);
 			updateTaskInJson(updatedTask);
 
+			// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
 			// Refresh tasks state after update
-			setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+
+			// refreshTasks(setTasks, tag, data);
+			refreshBoardData(setBoards);
 		});
 		editModal.open();
 	};
