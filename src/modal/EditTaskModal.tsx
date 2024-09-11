@@ -55,7 +55,7 @@ const EditTaskContent: React.FC<{ task: any; onSave: (updatedTask: any) => void;
 			</table>
 			<h6>Preview</h6>
 			<div className="previewBox">
-				- [ ] {body} | 📅{due} #{tag}
+				- [ ] {body} | 📅{due} {tag}
 			</div>
 			<button className="EditTaskModalHome-saveBtn" onClick={handleSave}>Save</button>
 		</div>

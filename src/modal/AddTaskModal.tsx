@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import fs from 'fs';
 import { loadTasksFromJson } from 'src/utils/RefreshColumns';
 import path from 'path';
+import { refreshBoardData } from 'src/utils/refreshBoard';
 
 interface AddTaskModalProps {
 	app: App;
@@ -85,7 +86,7 @@ export class AddTaskModal extends Modal {
 
 			this.addTaskToFile(taskBody, dueDate, tag);
 			this.onTaskAdded(); // Callback to refresh tasks after addition
-			// TODO: Call the loadTasks from Columns, to refresh that component.
+			// TODO: Simply took trouble, i dont have to specifically refresh the board myself. Since when the md file will be updated. It will be detected by the code in main.ts and the board will be updated by that service.
 			this.close();
 		};
 	}
@@ -96,7 +97,7 @@ export class AddTaskModal extends Modal {
 		const fullPath = path.join(basePath, this.filePath);
 
 		try {
-			const newTaskLine = `- [ ] ${taskBody} | 📅 ${dueDate} ${tag ? `#${tag}` : ''}\n`;
+			const newTaskLine = `- [ ] ${taskBody} | 📅 ${dueDate} ${tag ? `${tag}` : ''}\n`;
 
 			// Append task to the file at the current cursor position or the end
 			fs.appendFileSync(fullPath, newTaskLine);

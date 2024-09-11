@@ -5,7 +5,7 @@
         "id": 1725276003304,
         "body": "Undated Task.",
         "due": "",
-        "tag": "Projects",
+        "tag": "#Projects",
         "completed": false,
         "filePath": "Daily_Notes/02-08-2024.md"
       },
@@ -13,7 +13,7 @@
         "id": 1725276003305,
         "body": "Complete the project proposal draft for review.",
         "due": "2024-09-10",
-        "tag": "NOTE",
+        "tag": "#NOTE",
         "completed": false,
         "filePath": "Daily_Notes/02-08-2024.md"
       },
@@ -28,7 +28,7 @@
         "id": 1725276003307,
         "body": "Organize files and documents for archiving.",
         "due": "2024-09-15",
-        "tag": "AdminTask",
+        "tag": "#AdminTask",
         "completed": false
       }
     ],
@@ -45,7 +45,7 @@
         "id": 1725276003404,
         "body": "TODAY : Call the client to discuss new requirements. Call the client to discuss new requirements. Call the client to discuss new requirements.",
         "due": "2024-09-3",
-        "tag": "WhenMobileDataLeft",
+        "tag": "#WhenMobileDataLeft",
         "completed": false,
         "filePath": "Daily_Notes.md"
       }
@@ -63,7 +63,7 @@
         "id": 1725434303546,
         "body": "Finish all the Courses ASAP.",
         "due": "2024-09-04",
-        "tag": "Course",
+        "tag": "#Course",
         "completed": false,
         "filePath": "Daily_Notes/03-09-2024.md"
       },
@@ -71,14 +71,14 @@
         "id": 1725898116389,
         "body": "Completely Updating the content of this task",
         "due": "2024-09-14",
-        "tag": "Test",
+        "tag": "#Test",
         "filePath": "Daily_Notes/03-09-2024.md"
       },
       {
         "id": 1725440316533,
         "body": "Fifth task updating again, UPDATED",
         "due": "2024-09-12",
-        "tag": "OfflineVideo",
+        "tag": "#OfflineVideo",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": false
       }
@@ -97,7 +97,7 @@
         "id": 1725886490784,
         "body": "New tasks testing",
         "due": "2024-09-09",
-        "tag": "test"
+        "tag": "#test"
       }
     ],
     "Daily_Notes/07-09-2024.md": [
@@ -105,13 +105,13 @@
         "id": 1725690615381,
         "body": "ChatGPT sometimes do things amazing",
         "due": "2024-09-08",
-        "tag": "GPT"
+        "tag": "#GPT"
       },
       {
         "id": 1725697862884,
         "body": "Just adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.",
         "due": "2024-09-12",
-        "tag": "GPT",
+        "tag": "#GPT",
         "filePath": "Daily_Notes/07-09-2024.md"
       }
     ],
@@ -129,15 +129,23 @@
         "id": 1725889880632,
         "body": "I trust Gemini, it should work",
         "due": "2024-09-10",
-        "tag": "Test",
+        "tag": "#Test",
         "filePath": "Daily_Notes/09-09-2024.md"
       },
       {
         "id": 1725901799902,
         "body": "Temp Task updating",
         "due": "2024-09-11",
-        "tag": "NOTE",
+        "tag": "#NOTE",
         "filePath": "Daily_Notes/09-09-2024.md"
+      }
+    ],
+    "Daily_Notes/11-09-2024.md": [
+      {
+        "id": 1726042171493,
+        "body": "New task adding to see if the task directly shows up in the board, after adding through the moda",
+        "due": "2024-09-11",
+        "tag": "Test"
       }
     ]
   },
@@ -147,7 +155,7 @@
         "id": 1725276003309,
         "body": "All the Documents submitted to TCS, Waiting for JL.",
         "due": "2024-08-31",
-        "tag": "Finance",
+        "tag": "#Finance",
         "filePath": "Daily_Notes/01-08-2024.md",
         "completed": true
       },
@@ -155,7 +163,7 @@
         "id": 1725276003310,
         "body": "Submit the quarterly earnings report to the board.",
         "due": "2024-09-10",
-        "tag": "Reports",
+        "tag": "#Reports",
         "completed": true,
         "filePath": "Daily_Notes/01-08-2024.md"
       }
@@ -168,7 +176,7 @@
         "id": 1725785322765,
         "body": "This is a task for tomorrow, updating",
         "due": "2024-09-09",
-        "tag": "Test",
+        "tag": "#Test",
         "filePath": "Daily_Notes/08-09-2024.md",
         "completed": true
       }

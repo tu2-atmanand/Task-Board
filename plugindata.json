@@ -105,7 +105,7 @@
             "data": {
               "collapsed": false,
               "name": "GPT",
-              "coltag": "OfflineVideo"
+              "coltag": "#OfflineVideo"
             }
           },
           {
@@ -113,7 +113,7 @@
             "data": {
               "collapsed": false,
               "name": "When Mobile Data Left at Night",
-              "coltag": "WhenMobileDataLeft"
+              "coltag": "#WhenMobileDataLeft"
             }
           },
           {
@@ -121,7 +121,7 @@
             "data": {
               "collapsed": false,
               "name": "Note Till Task is Done",
-              "coltag": "NOTE"
+              "coltag": "#NOTE"
             }
           },
           {

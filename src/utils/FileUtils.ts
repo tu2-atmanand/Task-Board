@@ -210,7 +210,7 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 		const taskRegex = new RegExp(`^- \\[ \\] .*?${oldTask.body}.*$`, "gm");
 		const newContent = fileContent.replace(
 			taskRegex,
-			`- [ ] ${updatedTask.body} | 📅 ${updatedTask.due} #${updatedTask.tag}`
+			`- [ ] ${updatedTask.body} | 📅 ${updatedTask.due} ${updatedTask.tag}`
 		);
 		fs.writeFileSync(filePath, newContent);
 	} catch (error) {
