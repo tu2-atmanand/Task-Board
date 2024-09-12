@@ -1,9 +1,10 @@
 // Define the structure of Board, Column, and the Data read from JSON
 export interface ColumnData {
-	tag: string;
+	colType: string;
 	data: {
-		collapsed: boolean;
+		collapsed?: boolean;
 		name: string;
+		index: number;
 		coltag: string;
 		range?: {
 			tag: string;
@@ -12,13 +13,13 @@ export interface ColumnData {
 				to: number;
 			};
 		};
-		index?: number;
 		limit?: number;
 	};
 }
 
 export interface Board {
 	name: string;
+	index: number;
 	columns: ColumnData[];
 	filters?: any[];
 	filterPolarity?: string;

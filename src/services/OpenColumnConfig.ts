@@ -2,7 +2,7 @@
 
 import { App } from "obsidian";
 import { Board } from "../interfaces/KanbanBoard";
-import BoardConfigModal from "../settings/BoardModal";
+import BoardConfigModal from "../settings/BoardConfigureModal";
 import fs from "fs";
 import path from "path";
 

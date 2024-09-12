@@ -14,7 +14,7 @@ import {
 } from "obsidian";
 
 import { AddTaskModal } from "src/modal/AddTaskModal";
-import BoardConfigModal from "src/settings/BoardModal";
+import BoardConfigModal from "src/settings/BoardConfigureModal";
 import { GlobalSettings } from "src/interfaces/KanbanView";
 import { KanbanView } from "./src/views/KanbanView";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";

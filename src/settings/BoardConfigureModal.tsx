@@ -3,16 +3,9 @@
 import { App, Modal, Notice } from "obsidian";
 import React, { useEffect, useState } from "react";
 
+import { Board } from "src/interfaces/KanbanBoard";
 import { GlobalSettings } from "src/interfaces/KanbanView";
 import ReactDOM from "react-dom/client";
-
-interface Board {
-	name: string;
-	columns: Array<{
-		tag: string;
-		data: { collapsed: boolean; name: string };
-	}>;
-}
 
 interface ConfigModalProps {
 	app: App;
@@ -52,7 +45,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const addColumnToBoard = (boardIndex: number) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
-			tag: "custom",
+			colType: "custom",
 			data: { collapsed: false, name: `Column ${updatedBoards[boardIndex].columns.length + 1}` }
 		});
 		setLocalBoards(updatedBoards);

@@ -8,7 +8,7 @@ import { loadTasksFromJson } from "./FileUtils";
 // Function to refresh tasks in any column by calling this utility function
 export const refreshTasks = (
 	setTasks: Dispatch<SetStateAction<Task[]>>,
-	tag: string,
+	colType: string,
 	data: any
 ) => {
 	console.log("------ Inside the refreshTasks function -----");
@@ -20,7 +20,7 @@ export const refreshTasks = (
 	const today = new Date();
 	let tasksToDisplay: Task[] = [];
 
-	if (tag === "undated") {
+	if (colType === "undated") {
 		tasksToDisplay = pendingTasks.filter((task) => !task.due);
 	} else if (data.range) {
 		const { from, to } = data.range.rangedata;
@@ -32,7 +32,7 @@ export const refreshTasks = (
 					(dueDate.getTime() - today.getTime()) /
 						(1000 * 60 * 60 * 24)
 				) + 1;
-				// console.log("The Difference in today and due : ", diffDays, "For the task : ", task.body);
+			// console.log("The Difference in today and due : ", diffDays, "For the task : ", task.body);
 
 			if (from < 0 && to === 0) {
 				return diffDays < 0;
@@ -46,17 +46,17 @@ export const refreshTasks = (
 
 			return false;
 		});
-	} else if (tag === "untagged") {
+	} else if (colType === "untagged") {
 		tasksToDisplay = pendingTasks.filter((task) => !task.tag);
-	} else if (tag === "namedTag") {
+	} else if (colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.tag === data.coltag
 		);
-	} else if (tag === "otherTags") {
+	} else if (colType === "otherTags") {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.tag && task.tag !== data.coltag
 		);
-	} else if (tag === "completed") {
+	} else if (colType === "completed") {
 		tasksToDisplay = completedTasks;
 	}
 

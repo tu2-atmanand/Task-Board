@@ -1,8 +1,9 @@
 export interface ColumnProps {
-	tag: string;
+	colType: string;
 	data: {
 		collapsed: boolean;
 		name: string;
+		index: number;
 		coltag: string;
 		range?: {
 			tag: string;
@@ -11,7 +12,6 @@ export interface ColumnProps {
 				to: number;
 			};
 		};
-		index?: number;
 		limit?: number;
 	};
 }

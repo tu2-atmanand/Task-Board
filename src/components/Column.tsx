@@ -19,13 +19,13 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
 }
 
-const Column: React.FC<ColumnPropsWithSetBoards> = ({ tag, data, setBoards }) => {
+const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
 
 	// Load tasks from tasks.json file
 	useEffect(() => {
-		refreshTasks(setTasks, tag, data);
-	}, [tag, data]);
+		refreshTasks(setTasks, colType, data);
+	}, [colType, data]);
 
 
 	const handleCheckboxChange = (updatedTask: Task) => {
@@ -46,7 +46,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ tag, data, setBoards }) =>
 		markTaskCompleteInFile(updatedTask);
 
 		// Refresh the tasks in the component
-		// refreshTasks(setTasks, tag, data);
+		// refreshTasks(setTasks, colType, data);
 		refreshBoardData(setBoards);
 	};
 
