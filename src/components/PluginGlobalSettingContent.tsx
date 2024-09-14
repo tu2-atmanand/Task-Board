@@ -3,11 +3,8 @@
 import React, { useEffect, useState } from "react";
 
 import { GlobalSettings } from "src/interfaces/KanbanView";
-import fs from "fs";
+import fs from "fs/promises"; // Changed to use promises-based API
 import path from "path";
-
-// Assuming GlobalSettings interface is imported from the appropriate file
-
 
 const dataFilePath = path.join(
 	(window as any).app.vault.adapter.basePath,
@@ -18,9 +15,7 @@ const dataFilePath = path.join(
 );
 
 const PluginGlobalSettingContent: React.FC = () => {
-	const [globalSettings, setGlobalSettings] = useState<GlobalSettings | null>(
-		null
-	);
+	const [globalSettings, setGlobalSettings] = useState<GlobalSettings | null>(null);
 
 	useEffect(() => {
 		loadSettings();
@@ -29,7 +24,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 	// Function to load settings from plugindata.json
 	const loadSettings = async (): Promise<void> => {
 		try {
-			const data = fs.readFileSync(dataFilePath, "utf8");
+			const data = await fs.readFile(dataFilePath, "utf8"); // Async file read
 			const jsonData = JSON.parse(data);
 			setGlobalSettings(jsonData.data.globalSettings);
 		} catch (err) {
@@ -38,40 +33,54 @@ const PluginGlobalSettingContent: React.FC = () => {
 	};
 
 	// Function to save settings back to plugindata.json
-	const saveSettings = async (): Promise<void> => {
-		if (!globalSettings) return;
-
+	const saveSettings = async (updatedSettings: GlobalSettings) => {
 		try {
-			const data = fs.readFileSync(dataFilePath, "utf8");
+			// Directly update the in-memory settings
+			const data = await fs.readFile(dataFilePath, "utf8");
 			const jsonData = JSON.parse(data);
-			jsonData.data.globalSettings = globalSettings;
+			jsonData.data.globalSettings = updatedSettings;
 
-			fs.writeFileSync(dataFilePath, JSON.stringify(jsonData, null, 2));
+			await fs.writeFile(dataFilePath, JSON.stringify(jsonData, null, 2)); // Async write
+			console.log("New data written to the global settings:", updatedSettings);
 		} catch (err) {
 			console.error("Error saving settings:", err);
 		}
 	};
 
 	if (!globalSettings) {
-		return <p style={{maxWidth: 'inherit'}}>Failed to load settings.</p>;
+		return <p style={{ maxWidth: 'inherit' }}>Failed to load Global settings.</p>;
 	}
 
 	const handleTextChange = (key: keyof GlobalSettings, value: string) => {
 		const updatedSettings = { ...globalSettings, [key]: value };
 		setGlobalSettings(updatedSettings);
-		saveSettings();
+		saveSettings(updatedSettings);
 	};
+
+	const handleColumnNameChange = (key: string, value: string) => {
+		// Create a new updated defaultColumnNames object
+		const updatedColumnNames = { ...globalSettings!.defaultColumnNames, [key]: value };
+
+		// Update the globalSettings with the new defaultColumnNames
+		const updatedSettings = { ...globalSettings, defaultColumnNames: updatedColumnNames };
+
+		// Set the updated settings in state and save them
+		setGlobalSettings(updatedSettings);
+		saveSettings(updatedSettings);
+	};
+
 
 	const handleToggleChange = (key: keyof GlobalSettings, value: boolean) => {
 		const updatedSettings = { ...globalSettings, [key]: value };
 		setGlobalSettings(updatedSettings);
-		saveSettings();
+		saveSettings(updatedSettings);
 	};
 
 	const handleDropdownChange = (value: string) => {
 		const updatedSettings = { ...globalSettings, firstDayOfWeek: value };
 		setGlobalSettings(updatedSettings);
-		saveSettings();
+		console.log("Changes happened in the dropdown:", updatedSettings);
+		saveSettings(updatedSettings);
 	};
 
 	return (
@@ -203,18 +212,17 @@ const PluginGlobalSettingContent: React.FC = () => {
 				<div className="globalSettingContentHomeElement" key={key}>
 					<div className="globalSettingContentHomeElementTag">
 						<h4>{key}</h4>
-						<p style={{maxWidth: 'inherit'}}>Enter the name for the {key} column</p>
+						<p style={{ maxWidth: 'inherit' }}>Enter the name for the {key} column</p>
 					</div>
 					<input
 						type="text"
 						value={value}
 						placeholder="Enter New Column Name"
-						onChange={(e) =>
-							handleTextChange(`defaultColumnNames.${key}`, e.target.value)
-						}
+						onChange={(e) => handleColumnNameChange(key, e.target.value)}
 					/>
 				</div>
 			))}
+
 		</div>
 	);
 };

@@ -215,8 +215,8 @@
     "globalSettings": {
       "defaultColumnNames": {
         "Undated": "",
-        "Overdue": "",
-        "Today": "Ajj",
+        "Overdue": "Kal",
+        "Today": "Todu",
         "Tomorrow": "",
         "Future": "",
         "Other Tags": "",
@@ -232,8 +232,7 @@
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
       "autoAddDue": true,
-      "ScanVaultAtStartup": false,
-      "defaultColumnNames.Today": "Aj"
+      "ScanVaultAtStartup": false
     }
   }
 }

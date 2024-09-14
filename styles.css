@@ -26,6 +26,7 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: row;
 	gap: 0.5em;
+	overflow: auto;
 }
 
 .boardTitleButton {
