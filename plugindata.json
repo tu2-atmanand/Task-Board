@@ -7,70 +7,71 @@
           {
             "colType": "undated",
             "data": {
-				"collapsed": false,
-				"name": "Undated",
-				"index": 1
-			}
+              "collapsed": false,
+              "name": "Undated",
+              "index": 1
+            }
           },
           {
             "colType": "dated",
             "data": {
-				"collapsed": false,
-				"name": "Over Due",
-				"index": 2,
-				"range": {
-					"tag": "before",
-					"rangedata": {
-						"from": -1,
-						"to": 0
-					}
-				}
-			}
+              "collapsed": false,
+              "name": "Over Due",
+              "index": 2,
+              "range": {
+                "tag": "before",
+                "rangedata": {
+                  "from": -1,
+                  "to": 0
+                }
+              }
+            }
           },
           {
             "colType": "dated",
             "data": {
-				"collapsed": false,
-				"name": "Today",
-				"index": 3,
-				"range": {
-					"tag": "between",
-					"rangedata": {
-						"from": 0,
-						"to": 0
-					}
-				}
-			}
+              "collapsed": false,
+              "name": "Today",
+              "index": 3,
+              "range": {
+                "tag": "between",
+                "rangedata": {
+                  "from": 0,
+                  "to": 0
+                }
+              }
+            }
           },
           {
             "colType": "dated",
             "data": {
-				"collapsed": false,
-				"name": "Tomorrow",
-				"index": 4,
-				"range": {
-					"tag": "between",
-					"rangedata": {
-						"from": 1,
-						"to": 1
-					}
-				}
-			}
+              "collapsed": false,
+              "name": "Tomorrow",
+              "index": 4,
+              "range": {
+                "tag": "between",
+                "rangedata": {
+                  "from": 1,
+                  "to": 1
+                }
+              }
+            }
           },
           {
             "colType": "dated",
             "data": {
-				"collapsed": false,
-				"name": "Future",
-				"index": 5,
-				"range": {
-					"tag": "after",
-					"rangedata": {
-						"from": 2,
-						"to": 0
-					}
-				}
-			}
+              "collapsed": false,
+              "name": "Future",
+              "index": 5,
+              "range": {
+                "tag": "after",
+                "rangedata": {
+                  "from": 2,
+                  "to": 0
+                }
+              },
+              "colType": "undated"
+            }
           },
           {
             "colType": "completed",
@@ -82,19 +83,31 @@
             }
           },
           {
-            "colType": "custom",
+            "colType": "untagged",
             "data": {
-				"collapsed": false,
-				"name": "Column 7",
-				"index": 7
-			}
+              "collapsed": false,
+              "name": "Untagged Tasks",
+              "index": 8
+            }
+          },
+          {
+            "colType": "namedTag",
+            "data": {
+              "collapsed": false,
+              "name": "Test Tagged Tasks",
+              "index": 8,
+              "coltag": "Test"
+            }
           }
         ],
-        "filters": [],
+        "filters": [
+          "Test",
+          "NOTE"
+        ],
         "filterPolarity": "Allow",
         "filterScope": "Both",
         "name": "Pending Tasks",
-		"index": 1,
+        "index": 1,
         "showColumnTags": true,
         "showFilteredTags": true
       },
@@ -103,64 +116,100 @@
           {
             "colType": "untagged",
             "data": {
-				"collapsed": false,
-				"name": "Untagged",
-				"index": 1
-			}
+              "collapsed": false,
+              "name": "Untagged",
+              "index": 1
+            }
           },
           {
             "colType": "namedTag",
             "data": {
-				"collapsed": false,
-				"name": "GPT",
-				"index": 2,
-				"coltag": "#OfflineVideo"
-			}
+              "collapsed": false,
+              "name": "GPT",
+              "index": 2,
+              "coltag": "#OfflineVideo"
+            }
           },
           {
             "colType": "namedTag",
             "data": {
-				"collapsed": false,
-				"name": "When Mobile Data Left at Night",
-				"index": 3,
-				"coltag": "#WhenMobileDataLeft"
-			}
+              "collapsed": false,
+              "name": "When Mobile Data Left at Night",
+              "index": 3,
+              "coltag": "#WhenMobileDataLeft"
+            }
           },
           {
             "colType": "namedTag",
             "data": {
-				"collapsed": false,
-				"name": "Note Till Task is Done",
-				"index": 4,
-				"coltag": "#NOTE"
-			}
+              "collapsed": false,
+              "name": "Note Till Task is Done",
+              "index": 4,
+              "coltag": "#NOTE"
+            }
           },
           {
             "colType": "otherTags",
             "data": {
-				"collapsed": false,
-				"name": "Other Tags",
-				"index": 5
-			}
+              "collapsed": false,
+              "name": "Other Tags",
+              "index": 5
+            }
           },
           {
             "colType": "completed",
             "data": {
-				"collapsed": false,
-				"index": 5,
-				"limit": 10,
-				"name": "Completed",
-				"index": 6
-			}
+              "collapsed": false,
+              "index": 6,
+              "limit": 10,
+              "name": "Completed"
+            }
           }
         ],
         "filters": [],
         "filterPolarity": "Allow",
         "filterScope": "Both",
         "name": "Tag Based Board",
-		"index": 2,
+        "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true
+      },
+      {
+        "name": "Test Board",
+        "index": 3,
+        "columns": [
+          {
+            "colType": "dated",
+            "data": {
+              "collapsed": false,
+              "name": "Test Dated Column",
+              "index": 1,
+              "range": {
+                "rangedata": {
+                  "from": -1,
+                  "to": 0
+                }
+              }
+            }
+          },
+          {
+            "colType": "namedTag",
+            "data": {
+              "collapsed": false,
+              "name": "Test Name Tag Column",
+              "index": 2,
+              "coltag": "Test"
+            }
+          },
+          {
+            "colType": "untagged",
+            "data": {
+              "collapsed": false,
+              "name": "Untagged Tasks",
+              "index": 3
+            }
+          }
+        ]
       }
     ],
     "globalSettings": {
@@ -183,7 +232,8 @@
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
       "autoAddDue": true,
-	  "ScanVaultAtStartup": false
+      "ScanVaultAtStartup": false,
+      "defaultColumnNames.Today": "Aj"
     }
   }
 }

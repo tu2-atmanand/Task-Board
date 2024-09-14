@@ -80,7 +80,7 @@ export class KanbanView extends ItemView {
 
 // import { App, ItemView, Vault, Workspace, WorkspaceLeaf } from "obsidian";
 
-// import BoardConfigModal from "src/components/BoardModal";
+// import BoardConfigModal from "src/components/BoardConfigureModal";
 // import KanbanBoard from "../components/KanbanBoard";
 // import React from "react";
 // import ReactDOM from "react-dom/client"; // Ensure this import is correct for React 18+

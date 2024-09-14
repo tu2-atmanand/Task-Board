@@ -2,7 +2,7 @@
 
 import { App } from "obsidian";
 import { Board } from "../interfaces/KanbanBoard";
-import BoardConfigModal from "../settings/BoardConfigureModal";
+import { BoardConfigureModal } from "src/settings/BoardConfigureModal";
 import fs from "fs";
 import path from "path";
 
@@ -67,5 +67,5 @@ export const openBoardConfigModal = (
 	activeBoardIndex: number,
 	onSave: (updatedBoards: Board[]) => void
 ) => {
-	new BoardConfigModal(app, boards, activeBoardIndex, onSave).open();
+	new BoardConfigureModal(app, boards, activeBoardIndex, onSave).open();
 };

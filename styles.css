@@ -262,7 +262,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 
-/* /src/compoenents/BoardModal.tsx */
+/* /src/compoenents/BoardConfigureModal.tsx */
 
 .config-modal {
 	display: flex;
@@ -379,7 +379,7 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 4px;
 }
 
-..EditTaskModalHome-taskBody:active {
+.EditTaskModalHome-taskBody:active {
 	border: 1px solid #fffb26;
 }
 
@@ -436,4 +436,205 @@ td {
 .deleteTaskCancelmBtn:hover {
 	background-color: green;
 	/* Change background to red on hover */
+}
+
+
+/* /src/compoenents/BoardConfigureModal.tsx - V2 */
+
+.modal {
+	min-width: fit-content;
+	min-height: 50vh;
+}
+
+.modal-content {
+	flex: 1 1 auto;
+	font-size: var(--font-ui-medium);
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+}
+
+.boardConfigModalHome {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	height: 100%;
+}
+
+.boardConfigModalSidebar {
+	background-color: var(--background-secondary);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	gap: 25em;
+	padding: 1em;
+	border-radius: 4px;
+	/* Ensure the sidebar takes the full height of the modal and doesn't scroll */
+	height: 100%;
+	position: sticky;
+	top: 0;
+	overflow: hidden;
+}
+
+.boardConfigModalSidebarBtnArea {
+	display: flex;
+	gap: 1em;
+	width: 100%;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.boardConfigModalSidebarBtnAreaGlobal {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.boardConfigModalSidebarBtnArea-btn {
+	border-radius: var(--border-radius-activated-tab-header-dark);
+	border: var(--border-width) solid olive;
+	padding: 8px;
+}
+
+.boardConfigModalSidebarBtnArea-btn-active {
+	box-shadow: var(--shadow-activated-tab-header-dark) !important;
+	background: var(--background-activated-tab-header-dark) !important;
+	border-radius: var(--border-radius-activated-tab-header-dark);
+	border: var(--border-width) solid olive;
+	padding: 8px;
+}
+
+.boardConfigModalMainContent {
+	flex: 1;
+	padding-left: 1em;
+	overflow-y: auto;
+	/* Allow scrolling for main content */
+}
+
+.boardConfigModalMainContent-Active {
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
+}
+
+.boardConfigModalMainContent-Active-Body {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.boardConfigModalMainContent-Active-Body h4 {
+	margin-block: 2px;
+}
+
+.boardConfigModalMainContent-Active-Body-InputItems {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.boardConfigModalMainContent-Active-Body-boardNameTag {
+	display: flex;
+	flex-direction: column;
+}
+
+.boardConfigModalMainContent-Active-BodyColumnSec {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.boardConfigModalMainContent-Active-BodyColumnsList {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.boardConfigModalColumnRow {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	gap: 0.5em;
+	margin-block: 0.5em;
+}
+
+.boardConfigModalColumnRowContent {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	gap: 0.5em;
+}
+
+.modal-container.mod-dim .modal {
+	min-width: fit-content;
+	min-height: 50vh;
+}
+
+.modal-close-button {
+	z-index: 10;
+}
+
+
+/* /src/modal/AddColumnModal.tsx */
+
+.addColumnModalOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.addColumnModalOverlayContent {
+	background: var(--background-secondary);
+	border: var(--border-width) solid olive;
+	border-radius: 5px;
+	padding: 20px;
+	width: 400px;
+	max-width: 90%;
+}
+
+.addColumnModalOverlayContentField {
+	margin-bottom: 15px;
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.addColumnModalOverlayContentActions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.addColumnModalOverlayContentActions button {
+	margin-left: 10px;
+}
+
+
+/* /src/settings/PluginGlobalSettingContent.tsx */
+
+.globalSettingContentHome {
+	display: flex;
+	flex-direction: column;
+}
+
+.globalSettingContentHomeElement {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.globalSettingContentHomeElementTag {
+	display: flex;
+	flex-direction: column;
+	text-wrap: balance;
+}
+
+.globalSettingContentHomeElementTag h4 {
+	margin-block: 1px;
 }

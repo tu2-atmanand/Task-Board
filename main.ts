@@ -14,7 +14,7 @@ import {
 } from "obsidian";
 
 import { AddTaskModal } from "src/modal/AddTaskModal";
-import BoardConfigModal from "src/settings/BoardConfigureModal";
+import { BoardConfigureModal } from "src/settings/BoardConfigureModal";
 import { GlobalSettings } from "src/interfaces/KanbanView";
 import { KanbanView } from "./src/views/KanbanView";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
@@ -157,7 +157,7 @@ export default class TaskBoard extends Plugin {
 
 	// Function to open the BoardConfigModal
 	openBoardConfigModal() {
-		const modal = new BoardConfigModal(this.app); // Pass the app instance to the modal
+		const modal = new BoardConfigureModal(this.app); // Pass the app instance to the modal
 		modal.open();
 	}
 

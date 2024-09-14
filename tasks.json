@@ -36,7 +36,7 @@
       {
         "id": 1725276003308,
         "body": "Call the client to discuss new requirements.",
-        "due": "2024-09-11",
+        "due": "2024-09-13",
         "tag": "",
         "completed": false,
         "filePath": "Daily_Notes.md"
@@ -44,7 +44,7 @@
       {
         "id": 1725276003404,
         "body": "TODAY : Call the client to discuss new requirements. Call the client to discuss new requirements. Call the client to discuss new requirements.",
-        "due": "2024-09-3",
+        "due": "2024-09-13",
         "tag": "#WhenMobileDataLeft",
         "completed": false,
         "filePath": "Daily_Notes.md"
@@ -88,7 +88,7 @@
       {
         "id": 1725545282005,
         "body": "Just a new Task without tag or date",
-        "due": "2024-09-08",
+        "due": "2024-09-14",
         "tag": "",
         "filePath": "Spintly Details.md",
         "completed": false
@@ -98,14 +98,14 @@
       {
         "id": 1725697862884,
         "body": "Just adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.\nJust adding a small task to get GPT tag.",
-        "due": "2024-09-12",
+        "due": "2024-09-20",
         "tag": "#GPT",
         "filePath": "Daily_Notes/07-09-2024.md"
       },
       {
         "id": 1725690615381,
         "body": "ChatGPT sometimes do things amazing",
-        "due": "2024-09-08",
+        "due": "2024-09-25",
         "tag": "#GPT",
         "filePath": "Daily_Notes/07-09-2024.md",
         "completed": false
@@ -116,15 +116,16 @@
       {
         "id": 1725889824849,
         "body": "New Test task to be added from Add Task Button straight from the Plugin Window",
-        "due": "2024-09-09",
-        "tag": ""
+        "due": "2024-09-27",
+        "tag": "",
+        "filePath": "3-Process After Offer Letter Received.md"
       }
     ],
     "Daily_Notes/09-09-2024.md": [
       {
         "id": 1725889880632,
         "body": "I trust Gemini, it should work",
-        "due": "2024-09-10",
+        "due": "2024-09-26",
         "tag": "#Test",
         "filePath": "Daily_Notes/09-09-2024.md"
       },
