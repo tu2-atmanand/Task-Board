@@ -1,5 +1,6 @@
 export interface ColumnProps {
 	colType: string;
+	active: boolean;
 	data: {
 		collapsed: boolean;
 		name: string;
@@ -23,4 +24,6 @@ export interface Task {
 	tag: string;
 	filePath: string;
 	completed: boolean;
+	time: string;
+	priority: number;
 }

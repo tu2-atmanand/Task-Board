@@ -38,6 +38,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 			<div className="taskItemMainContent">
 				<div className="taskItemHeader">
 					<div className="taskItemTag">{task.tag}</div>
+					<div className="taskItemPrio">{task.priority}</div>
 					<div className="DragBtn"><RxDragHandleDots2 size={14} /></div>
 				</div>
 				<div className="taskItemMainBody">
@@ -50,7 +51,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 					<div className="taskItemBody">{task.body}</div>
 				</div>
 				<div className="taskItemFooter">
-					<div className='taskItemDate'>Due: {task.due}</div>
+					<div className='taskItemDate'>Due: {task.time} {task.due}</div>
 					<div className="taskItemFooterBtns">
 						<div className="taskItemiconButton" >
 							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
