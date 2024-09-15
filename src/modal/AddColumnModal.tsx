@@ -5,7 +5,7 @@ import React, { useState } from "react";
 interface AddColumnModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSubmit: (columnData: { colType: string; name: string }) => void;
+	onSubmit: (columnData: { colType: string; name: string, active: boolean }) => void;
 }
 
 const AddColumnModal: React.FC<AddColumnModalProps> = ({ isOpen, onClose, onSubmit }) => {
@@ -21,7 +21,8 @@ const AddColumnModal: React.FC<AddColumnModalProps> = ({ isOpen, onClose, onSubm
 	};
 
 	const handleSubmit = () => {
-		onSubmit({ colType, name });
+		const active = true;
+		onSubmit({ colType, name, active });
 		onClose();
 	};
 

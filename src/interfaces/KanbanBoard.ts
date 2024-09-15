@@ -1,6 +1,7 @@
 // Define the structure of Board, Column, and the Data read from JSON
 export interface ColumnData {
 	colType: string;
+	active: boolean;
 	data: {
 		collapsed?: boolean;
 		name: string;

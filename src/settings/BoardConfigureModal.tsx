@@ -2,6 +2,7 @@
 
 import { App, Modal, Notice } from "obsidian";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useState } from "react";
 
@@ -105,10 +106,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsAddColumnModalOpen(false);
 	};
 
-	const handleAddColumn = (boardIndex: number, columnData: { colType: string; name: string }) => {
+	const handleAddColumn = (boardIndex: number, columnData: { colType: string; name: string, active: boolean }) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
 			colType: columnData.colType,
+			active: columnData.active,
 			data: {
 				collapsed: false,
 				name: columnData.name,
@@ -187,6 +189,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			<PluginGlobalSettingContent />
 		</div>
 	);
+
+	const toggleActiveState = (boardIndex: number, columnIndex: number) => {
+		const updatedBoards = [...localBoards];
+		const column = updatedBoards[boardIndex].columns[columnIndex];
+		column.active = !column.active; // Toggle the active state
+		setLocalBoards(updatedBoards); // Update the state
+		onSave(updatedBoards); // Save the updated state
+	};
 
 	// Function to render board settings
 	const renderBoardSettings = (boardIndex: number) => {
@@ -280,6 +290,17 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												>
 													<div className="boardConfigModalColumnRow">
 														<RxDragHandleDots2 size={15} enableBackground={0} />
+														{column.active ? (
+															<EyeIcon
+																onClick={() => toggleActiveState(boardIndex, columnIndex)}
+																style={{ cursor: 'pointer' }}
+															/>
+														) : (
+															<EyeOffIcon
+																onClick={() => toggleActiveState(boardIndex, columnIndex)}
+																style={{ cursor: 'pointer' }}
+															/>
+														)}
 														<div className="boardConfigModalColumnRowContent">
 															<button style={{ width: '100%', minWidth: '8em' }}>{column.colType}</button>
 															<input
