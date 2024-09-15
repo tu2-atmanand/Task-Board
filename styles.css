@@ -339,6 +339,7 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	gap: 1.5em;
 	/* Align items vertically centered */
 	/* margin-bottom: 10px; */
 	/* Space below the entire row */
@@ -346,13 +347,29 @@ If your plugin does not need CSS, delete this file.
 
 .due-input-wrapper h6 {
 	margin: 0;
-	margin-right: 10px;
 }
 
 .due-input-wrapper input {
 	padding: 5px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
+}
+
+.start-time-input-wrapper,
+.end-time-input-wrapper,
+.priority-input-wrapper,
+.tag-input-wrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 1.5em;
+}
+
+.time-input-wrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 1.5em;
+	justify-content: space-between;
 }
 
 

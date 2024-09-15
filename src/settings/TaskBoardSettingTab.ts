@@ -78,6 +78,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			taskCompletionShowUtcOffset,
 			autoAddDue,
 			ScanVaultAtStartup,
+			dayPlannerPlugin,
 		} = this.globalSettings;
 
 		containerEl.createEl("h3", { text: "Task Board Plugin" });
@@ -214,6 +215,19 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddDue).onChange(async (value) => {
 					this.globalSettings!.autoAddDue = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(containerEl)
+			.setName("Day Planner Plugin Compatibility")
+			.setDesc(
+				"If you have installed Day Planner Plugin, this plugin enters the time at the start of the task body, instead in the metadata. After enabling this feature, the time will be shown according to the Day Planner plugin inside Markdown files, but in the Task Board, the time will be shown in the Task Footer."
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(dayPlannerPlugin).onChange(async (value) => {
+					this.globalSettings!.dayPlannerPlugin = value;
 					await this.saveSettings();
 				})
 			);

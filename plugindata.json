@@ -5,23 +5,33 @@
       {
         "columns": [
           {
-            "colType": "untagged",
+            "colType": "dated",
+            "active": true,
             "data": {
               "collapsed": false,
-              "name": "Untagged Tasks",
-              "index": 1
+              "name": "Today",
+              "index": 1,
+              "range": {
+                "tag": "between",
+                "rangedata": {
+                  "from": 0,
+                  "to": 0
+                }
+              }
             }
           },
           {
-            "colType": "undated",
+            "colType": "untagged",
+            "active": true,
             "data": {
               "collapsed": false,
-              "name": "Undated",
+              "name": "Untagged Tasks",
               "index": 2
             }
           },
           {
             "colType": "dated",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Over Due",
@@ -36,22 +46,17 @@
             }
           },
           {
-            "colType": "dated",
+            "colType": "undated",
+            "active": true,
             "data": {
               "collapsed": false,
-              "name": "Today",
-              "index": 4,
-              "range": {
-                "tag": "between",
-                "rangedata": {
-                  "from": 0,
-                  "to": 0
-                }
-              }
+              "name": "Undated",
+              "index": 4
             }
           },
           {
             "colType": "namedTag",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Test Tagged Tasks",
@@ -61,10 +66,27 @@
           },
           {
             "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Future",
+              "index": 6,
+              "range": {
+                "tag": "after",
+                "rangedata": {
+                  "from": 2,
+                  "to": 0
+                }
+              }
+            }
+          },
+          {
+            "colType": "dated",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Tomorrow",
-              "index": 6,
+              "index": 7,
               "range": {
                 "tag": "between",
                 "rangedata": {
@@ -75,28 +97,22 @@
             }
           },
           {
-            "colType": "dated",
-            "data": {
-              "collapsed": false,
-              "name": "Future",
-              "index": 7,
-              "range": {
-                "tag": "after",
-                "rangedata": {
-                  "from": 2,
-                  "to": 0
-                }
-              },
-              "colType": "undated"
-            }
-          },
-          {
             "colType": "completed",
+            "active": true,
             "data": {
               "collapsed": false,
               "limit": 10,
               "name": "Completed",
               "index": 8
+            }
+          },
+          {
+            "colType": "otherTags",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Other Tags",
+              "index": 9
             }
           }
         ],
@@ -115,6 +131,7 @@
         "columns": [
           {
             "colType": "untagged",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Untagged",
@@ -123,6 +140,7 @@
           },
           {
             "colType": "namedTag",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "GPT",
@@ -132,6 +150,7 @@
           },
           {
             "colType": "namedTag",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "When Mobile Data Left at Night",
@@ -141,6 +160,7 @@
           },
           {
             "colType": "namedTag",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Note Till Task is Done",
@@ -150,6 +170,7 @@
           },
           {
             "colType": "otherTags",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Other Tags",
@@ -158,11 +179,22 @@
           },
           {
             "colType": "completed",
+            "active": true,
             "data": {
               "collapsed": false,
               "index": 6,
               "limit": 10,
               "name": "Completed"
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Test Tasks",
+              "index": 7,
+              "coltag": "#Test"
             }
           }
         ],
@@ -180,9 +212,10 @@
         "columns": [
           {
             "colType": "dated",
+            "active": true,
             "data": {
               "collapsed": false,
-              "name": "Test Dated Column",
+              "name": "Past Tasks",
               "index": 1,
               "range": {
                 "rangedata": {
@@ -194,6 +227,7 @@
           },
           {
             "colType": "namedTag",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Test Name Tag Column",
@@ -203,13 +237,25 @@
           },
           {
             "colType": "untagged",
+            "active": true,
             "data": {
               "collapsed": false,
               "name": "Untagged Tasks",
               "index": 3
             }
+          },
+          {
+            "colType": "otherTags",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Other Tags Tasks",
+              "index": 4
+            }
           }
-        ]
+        ],
+        "showColumnTags": true,
+        "showFilteredTags": true
       }
     ],
     "globalSettings": {
@@ -231,8 +277,9 @@
       "taskCompletionFormat": "",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
-      "autoAddDue": true,
-      "ScanVaultAtStartup": false
+      "autoAddDue": false,
+      "ScanVaultAtStartup": false,
+      "dayPlannerPlugin": true
     }
   }
 }

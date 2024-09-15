@@ -62,7 +62,7 @@
       {
         "id": 1725434303546,
         "body": "Finish all the Courses ASAP.",
-        "due": "2024-09-04",
+        "due": "2024-10-01",
         "tag": "#Course",
         "completed": false,
         "filePath": "Daily_Notes/03-09-2024.md"
@@ -70,14 +70,14 @@
       {
         "id": 1725898116389,
         "body": "Completely Updating the content of this task",
-        "due": "2024-09-14",
+        "due": "2024-10-03",
         "tag": "#Test",
         "filePath": "Daily_Notes/03-09-2024.md"
       },
       {
         "id": 1725440316533,
         "body": "Fifth task updating again, UPDATED",
-        "due": "2024-09-12",
+        "due": "2024-09-16",
         "tag": "#OfflineVideo",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": false
@@ -88,10 +88,12 @@
       {
         "id": 1725545282005,
         "body": "Just a new Task without tag or date",
-        "due": "2024-09-14",
+        "due": "2024-09-15",
         "tag": "",
         "filePath": "Spintly Details.md",
-        "completed": false
+        "completed": false,
+        "time": "10:30-11:30",
+        "priority": 1
       }
     ],
     "Daily_Notes/07-09-2024.md": [
@@ -143,6 +145,129 @@
         "body": "New task adding to see if the task directly shows up in the board, after adding through the moda",
         "due": "2024-09-11",
         "tag": "Test"
+      },
+      {
+        "id": 1726387036387,
+        "body": "A temp task to see completed field comes or not",
+        "due": "2024-09-16",
+        "tag": "Test",
+        "filePath": "Daily_Notes/11-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Miscellaneous Points.md": [],
+    "Daily_Notes/15-09-2024.md": [
+      {
+        "id": 1726410692540,
+        "body": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
+        "time": "21:01 - 22:01",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "priority": 0,
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726413344787,
+        "body": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
+        "time": "21:45 - 22:45",
+        "due": "",
+        "tag": "#Test",
+        "priority": 1,
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726414204563,
+        "body": "Not time, no tag, no due, no priority",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": 0,
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726414301580,
+        "body": "Time and Tag and Priority",
+        "time": "22:01 - 23:01",
+        "due": "",
+        "tag": "#Test",
+        "priority": 3,
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726415020308,
+        "body": "solving the problem of emoji not coming for priority, SOLVED",
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "priority": 0,
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/14-09-2024.md": [
+      {
+        "id": 1726415932606,
+        "body": "Adding all fields when the DayPlanner Plugin is enabled",
+        "time": "22:28 - 23:28",
+        "due": "",
+        "tag": "#Test",
+        "priority": 1,
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726416328550,
+        "body": "adding due temp task",
+        "time": " - ",
+        "due": "2024-09-16",
+        "tag": "#Test",
+        "priority": 2,
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726416869345,
+        "body": "Now the auto add due option is disabled, so if i dont give anything, there shouldnt be anything",
+        "time": "23:44 - 00:44",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "priority": 2,
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726416920407,
+        "body": "Now, if i give date, it should come even though, autoAddDue option is disabled",
+        "time": "22:45 - 23:45",
+        "due": "2024-09-16",
+        "tag": "#Test",
+        "priority": 1,
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726419078744,
+        "body": "Final testing if all fields come correctly",
+        "time": "13:21 - 14:21",
+        "due": "2024-09-17",
+        "tag": "#Test",
+        "priority": 4,
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726419124312,
+        "body": "Let me see if due comes of today, it shouldnt come",
+        "time": "",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "priority": 1,
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
       }
     ]
   },
@@ -187,6 +312,7 @@
         "completed": true
       }
     ],
-    "Daily_Notes/07-09-2024.md": []
+    "Daily_Notes/07-09-2024.md": [],
+    "Daily_Notes/11-09-2024.md": []
   }
 }

@@ -17,4 +17,5 @@ export interface GlobalSettings {
 	taskCompletionShowUtcOffset: boolean;
 	autoAddDue: boolean;
 	ScanVaultAtStartup: boolean;
+	dayPlannerPlugin: boolean;
 }
