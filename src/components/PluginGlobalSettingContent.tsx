@@ -48,7 +48,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 	};
 
 	if (!globalSettings) {
-		return <p style={{ maxWidth: 'inherit' }}>Failed to load Global settings.</p>;
+		return <p style={{ maxWidth: '33vw' }}>Failed to load Global settings.</p>;
 	}
 
 	const handleTextChange = (key: keyof GlobalSettings, value: string) => {
@@ -89,7 +89,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 			<div className="globalSettingContentHomeElement">
 				<div className="globalSettingContentHomeElementTag">
 					<h4>Files and Paths to ignore</h4>
-					<p style={{maxWidth: 'inherit'}}>
+					<p style={{maxWidth: '33vw'}}>
 						Enter the file names and Paths separated by comma. All tasks under
 						these files will be ignored.
 					</p>
@@ -113,7 +113,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 			<div className="globalSettingContentHomeElement">
 				<div className="globalSettingContentHomeElementTag">
 					<h4>First Day of the Week</h4>
-					<p style={{maxWidth: 'inherit'}}>Set the first day of the week</p>
+					<p style={{maxWidth: '33vw'}}>Set the first day of the week</p>
 				</div>
 				<select
 					value={globalSettings.firstDayOfWeek}
@@ -135,7 +135,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 			<div className="globalSettingContentHomeElement">
 				<div className="globalSettingContentHomeElementTag">
 					<h4>Auto Scan the Vault on Obsidian Startup</h4>
-					<p style={{maxWidth: 'inherit'}}>
+					<p style={{maxWidth: '33vw'}}>
 						The plugin will scan the whole vault to detect all the undetected
 						tasks from the whole vault every time Obsidian starts.
 					</p>
@@ -158,7 +158,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 			<div className="globalSettingContentHomeElement">
 				<div className="globalSettingContentHomeElementTag">
 					<h4>Task Completion in Local Time</h4>
-					<p style={{maxWidth: 'inherit'}}>Whether task completion times are shown in local time</p>
+					<p style={{maxWidth: '33vw'}}>Whether task completion times are shown in local time</p>
 				</div>
 				<input
 					type="checkbox"
@@ -175,7 +175,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 			<div className="globalSettingContentHomeElement">
 				<div className="globalSettingContentHomeElementTag">
 					<h4>Show UTC Offset for Task Completion</h4>
-					<p style={{maxWidth: 'inherit'}}>Whether to display the UTC offset for task completion times</p>
+					<p style={{maxWidth: '33vw'}}>Whether to display the UTC offset for task completion times</p>
 				</div>
 				<input
 					type="checkbox"
@@ -192,7 +192,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 			<div className="globalSettingContentHomeElement">
 				<div className="globalSettingContentHomeElementTag">
 					<h4>Auto Add Due Date to Tasks</h4>
-					<p style={{maxWidth: 'inherit'}}>
+					<p style={{maxWidth: '33vw'}}>
 						Whether to auto add Due Date as Today's date when the tasks are
 						created from the Add New task shortcut.
 					</p>
@@ -206,13 +206,30 @@ const PluginGlobalSettingContent: React.FC = () => {
 
 			<hr width="100%" size="1" color="olive" style={{ "margin": '2px', "marginBottom": '1em' }} noshade="true"></hr>
 
+			{/* Setting for Auto Adding Due Date */}
+			<div className="globalSettingContentHomeElement">
+				<div className="globalSettingContentHomeElementTag">
+					<h4>Day Planner Plugin Compatibility</h4>
+					<p style={{ maxWidth: '33vw' }}>
+						If you have installed Day Planner Plugin, this plugin enters the time at the start of the task body, instead in the metadata. After enabling this feature, the time will be shown according to the Day Planner plugin inside Markdown files, but in the Task Board, the time will be shown in the Task Footer.
+					</p>
+				</div>
+				<input
+					type="checkbox"
+					checked={globalSettings.dayPlannerPlugin}
+					onChange={(e) => handleToggleChange("dayPlannerPlugin", e.target.checked)}
+				/>
+			</div>
+
+			<hr width="100%" size="1" color="olive" style={{ "margin": '2px', "marginBottom": '1em' }} noshade="true"></hr>
+
 			{/* Settings for Default Column Names */}
 			<h3>Default Column Names</h3>
 			{Object.entries(globalSettings.defaultColumnNames).map(([key, value]) => (
 				<div className="globalSettingContentHomeElement" key={key}>
 					<div className="globalSettingContentHomeElementTag">
 						<h4>{key}</h4>
-						<p style={{ maxWidth: 'inherit' }}>Enter the name for the {key} column</p>
+						<p style={{ maxWidth: '33vw' }}>Enter the name for the {key} column</p>
 					</div>
 					<input
 						type="text"
