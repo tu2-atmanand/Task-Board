@@ -10,6 +10,7 @@ import { Board } from "src/interfaces/KanbanBoard";
 import { GlobalSettings } from "src/interfaces/KanbanView";
 import PluginGlobalSettingContent from "src/components/PluginGlobalSettingContent";
 import ReactDOM from "react-dom/client";
+import { RxDragHandleDots2 } from "react-icons/rx";
 
 interface ConfigModalProps {
 	app: App;
@@ -278,8 +279,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													{...provided.dragHandleProps}
 												>
 													<div className="boardConfigModalColumnRow">
+														<RxDragHandleDots2 size={15} enableBackground={0} />
 														<div className="boardConfigModalColumnRowContent">
-															<button style={{width:'100%', minWidth:'8em'}}>{column.colType}</button>
+															<button style={{ width: '100%', minWidth: '8em' }}>{column.colType}</button>
 															<input
 																type="text"
 																value={column.data.name}
@@ -379,7 +381,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<button onClick={handleOpenAddColumnModal}>Add Column</button>
 				</div>
 				<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-				<button style={{backgroundColor:"darkred"}} onClick={deleteCurrentBoard}>Delete This Board</button>
+				<button style={{ backgroundColor: "darkred" }} onClick={deleteCurrentBoard}>Delete This Board</button>
 			</div>
 		);
 	};
@@ -387,43 +389,43 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	return (
 		<>
 			{renderAddColumnModal()}
-			<DragDropContext onDragEnd={onDragEnd}>
-				<div className="boardConfigModalHome">
-					<div className="boardConfigModalSidebar">
-						<div className="boardConfigModalSidebarBtnArea" >
-							<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>Global Settings</div>
-							<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-							<h6>Boards</h6>
-							{localBoards.map((board, index) => (
-								<div
-									key={index}
-									onClick={() => setSelectedBoardIndex(index)}
-									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-								>
-									{board.name}
-								</div>
-							))}
-						</div>
-						<div className="boardConfigModalSidebarBtnArea">
-							<button style={{ width: '100%' }} onClick={() => {
-								const newBoard: Board = {
-									name: `Board ${localBoards.length + 1}`,
-									index: localBoards.length + 1,
-									columns: [],
-								};
-								setLocalBoards([...localBoards, newBoard]);
-							}}>+ Add Board</button>
-							<hr width="100%" size="2" color="olive" noshade="true"></hr>
-							<button style={{ width: '100%', backgroundColor:"darkgreen" }} onClick={handleSave}>Save</button>
-						</div>
+			<div className="boardConfigModalHome">
+				<div className="boardConfigModalSidebar">
+					<div className="boardConfigModalSidebarBtnArea" >
+						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>Global Settings</div>
+						<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
+						<h6>Boards</h6>
+						{localBoards.map((board, index) => (
+							<div
+								key={index}
+								onClick={() => setSelectedBoardIndex(index)}
+								className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
+							>
+								{board.name}
+							</div>
+						))}
 					</div>
+					<div className="boardConfigModalSidebarBtnArea">
+						<button style={{ width: '100%' }} onClick={() => {
+							const newBoard: Board = {
+								name: `Board ${localBoards.length + 1}`,
+								index: localBoards.length + 1,
+								columns: [],
+							};
+							setLocalBoards([...localBoards, newBoard]);
+						}}>+ Add Board</button>
+						<hr width="100%" size="2" color="olive" noshade="true"></hr>
+						<button style={{ width: '100%', backgroundColor: "darkgreen" }} onClick={handleSave}>Save</button>
+					</div>
+				</div>
+				<DragDropContext onDragEnd={onDragEnd}>
 					<div className="boardConfigModalMainContent">
 						{selectedBoardIndex === -1
 							? renderGlobalSettings()
 							: renderBoardSettings(selectedBoardIndex)}
 					</div>
-				</div>
-			</DragDropContext>
+				</DragDropContext>
+			</div>
 		</>
 	);
 };

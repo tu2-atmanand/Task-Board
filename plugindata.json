@@ -5,11 +5,19 @@
       {
         "columns": [
           {
+            "colType": "untagged",
+            "data": {
+              "collapsed": false,
+              "name": "Untagged Tasks",
+              "index": 1
+            }
+          },
+          {
             "colType": "undated",
             "data": {
               "collapsed": false,
               "name": "Undated",
-              "index": 1
+              "index": 2
             }
           },
           {
@@ -17,7 +25,7 @@
             "data": {
               "collapsed": false,
               "name": "Over Due",
-              "index": 2,
+              "index": 3,
               "range": {
                 "tag": "before",
                 "rangedata": {
@@ -32,7 +40,7 @@
             "data": {
               "collapsed": false,
               "name": "Today",
-              "index": 3,
+              "index": 4,
               "range": {
                 "tag": "between",
                 "rangedata": {
@@ -43,11 +51,20 @@
             }
           },
           {
+            "colType": "namedTag",
+            "data": {
+              "collapsed": false,
+              "name": "Test Tagged Tasks",
+              "index": 5,
+              "coltag": "Test"
+            }
+          },
+          {
             "colType": "dated",
             "data": {
               "collapsed": false,
               "name": "Tomorrow",
-              "index": 4,
+              "index": 6,
               "range": {
                 "tag": "between",
                 "rangedata": {
@@ -62,7 +79,7 @@
             "data": {
               "collapsed": false,
               "name": "Future",
-              "index": 5,
+              "index": 7,
               "range": {
                 "tag": "after",
                 "rangedata": {
@@ -79,24 +96,7 @@
               "collapsed": false,
               "limit": 10,
               "name": "Completed",
-              "index": 6
-            }
-          },
-          {
-            "colType": "untagged",
-            "data": {
-              "collapsed": false,
-              "name": "Untagged Tasks",
               "index": 8
-            }
-          },
-          {
-            "colType": "namedTag",
-            "data": {
-              "collapsed": false,
-              "name": "Test Tagged Tasks",
-              "index": 8,
-              "coltag": "Test"
             }
           }
         ],
