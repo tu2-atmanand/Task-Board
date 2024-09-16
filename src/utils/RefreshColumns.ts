@@ -17,7 +17,6 @@ export const refreshTasks = (
 		loadTasksFromJson();
 
 	// Call the filter function based on the column's tag and properties
-	const today = new Date();
 	let tasksToDisplay: Task[] = [];
 
 	if (colType === "undated") {
@@ -26,12 +25,15 @@ export const refreshTasks = (
 		const { from, to } = data.range.rangedata;
 		tasksToDisplay = pendingTasks.filter((task) => {
 			if (!task.due) return false;
+			const today = new Date();
 			const dueDate = new Date(task.due);
-			const diffDays =
-				Math.floor(
-					(dueDate.getTime() - today.getTime()) /
-						(1000 * 60 * 60 * 24)
-				) + 1;
+			// const diffDays =
+			// 	Math.floor(
+			// 		(dueDate.getTime() - today.getTime()) /
+			// 			(1000 * 60 * 60 * 24)
+			// 	) + 1;
+			const diffDays = dueDate.getDate() - today.getDate();
+			console.log("The value of the difference between the two dates : ", diffDays);
 			// console.log("The Difference in today and due : ", diffDays, "For the task : ", task.body);
 
 			if (from < 0 && to === 0) {
