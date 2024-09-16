@@ -190,6 +190,7 @@ If your plugin does not need CSS, delete this file.
 
 .taskItemDate {
 	color: rgb(185, 125, 13);
+	font-size: small;
 }
 
 .taskItemHeader {
@@ -502,16 +503,16 @@ If your plugin does not need CSS, delete this file.
 
 .modal {
 	min-width: fit-content;
-	min-height: 50vh;
+	min-height: fit-content;
 }
 
-.modal-content {
+/* .modal-content {
 	flex: 1 1 auto;
 	font-size: var(--font-ui-medium);
 	display: flex;
 	flex-direction: row;
 	height: 100%;
-}
+} */
 
 .boardConfigModalHome {
 	display: flex;
@@ -625,9 +626,9 @@ If your plugin does not need CSS, delete this file.
 	gap: 0.5em;
 }
 
-.modal-container.mod-dim .modal {
+.modal-container.mod-dim {
 	min-width: fit-content;
-	min-height: 50vh;
+	min-height: fit-content;
 }
 
 .modal-close-button {

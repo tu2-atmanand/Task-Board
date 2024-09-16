@@ -15,6 +15,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 	const getColorIndicator = () => {
 		const today = new Date();
 		const taskDueDate = new Date(task.due);
+		// console.log("Today : ", today.toDateString(), " Due : ", taskDueDate.toDateString(), " TASK : ", task.body);
 
 		if (taskDueDate.toDateString() === today.toDateString()) {
 			return 'yellow'; // Due today
@@ -54,7 +55,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 					<div className="taskItemBody">{task.body}</div>
 				</div>
 				<div className="taskItemFooter">
-					<div className='taskItemDate'>Due: {task.time} {task.due}</div>
+					<div className='taskItemDate'>{task.time ? `⏰${task.time}` : ''}  {task.due ? `📅${task.due}` : ''}</div>
 					<div className="taskItemFooterBtns">
 						<div className="taskItemiconButton" >
 							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />

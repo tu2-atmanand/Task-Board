@@ -10,15 +10,6 @@
         "filePath": "Daily_Notes/02-08-2024.md"
       },
       {
-        "id": 1725276003306,
-        "body": "OVERDUE TASK : Prepare slides for the marketing meeting.",
-        "due": "2024-09-2",
-        "tag": "#OldTest",
-        "completed": false,
-        "filePath": "Daily_Notes/02-08-2024.md",
-        "time": " - "
-      },
-      {
         "id": 1725276003307,
         "body": "Organize files and documents for archiving.",
         "due": "2024-09-15",
@@ -26,28 +17,7 @@
         "completed": false
       }
     ],
-    "Daily_Notes.md": [
-      {
-        "id": 1725276003308,
-        "body": "Call the client to discuss new requirements.",
-        "due": "2024-09-13",
-        "tag": "",
-        "completed": false,
-        "filePath": "Daily_Notes.md",
-        "time": " - ",
-        "priority": "1"
-      },
-      {
-        "id": 1725276003404,
-        "body": "TODAY : Call the client to discuss new requirements. Call the client to discuss new requirements. Call the client to discuss new requirements.",
-        "due": "2024-09-13",
-        "tag": "#WhenMobileDataLeft",
-        "completed": false,
-        "filePath": "Daily_Notes.md",
-        "time": " - ",
-        "priority": "3"
-      }
-    ],
+    "Daily_Notes.md": [],
     "Daily_Notes/03-09-2024.md": [
       {
         "id": 1725434303546,
@@ -71,7 +41,7 @@
         "id": 1725545282005,
         "body": "Just a new Task without tag or date",
         "due": "2024-09-15",
-        "tag": "#Testing",
+        "tag": "",
         "filePath": "Spintly Details.md",
         "completed": false,
         "time": "10:30 - 11:30",
@@ -93,30 +63,13 @@
         "tag": "#GPT",
         "filePath": "Daily_Notes/07-09-2024.md",
         "completed": false,
-        "time": " - ",
+        "time": "14:11 - 15:11",
         "priority": "1"
       }
     ],
     "Daily_Notes/08-09-2024.md": [],
-    "3-Process After Offer Letter Received.md": [
-      {
-        "id": 1725889824849,
-        "body": "New Test task to be added from Add Task Button straight from the Plugin Window",
-        "due": "2024-09-27",
-        "tag": "",
-        "filePath": "3-Process After Offer Letter Received.md",
-        "time": " - ",
-        "priority": "1"
-      }
-    ],
+    "3-Process After Offer Letter Received.md": [],
     "Daily_Notes/09-09-2024.md": [
-      {
-        "id": 1725889880632,
-        "body": "I trust Gemini, it should work",
-        "due": "2024-09-26",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/09-09-2024.md"
-      },
       {
         "id": 1725901799902,
         "body": "Temp Task updating",
@@ -130,23 +83,13 @@
         "body": "Adding testing task, time will come first, thats it",
         "time": "23:18 - 00:18",
         "due": "2024-09-16",
-        "tag": "",
+        "tag": "NOTE",
         "priority": "4",
         "filePath": "Daily_Notes/09-09-2024.md",
         "completed": false
       }
     ],
-    "Daily_Notes/11-09-2024.md": [
-      {
-        "id": 1726387036387,
-        "body": "A temp task to see completed field comes or not",
-        "due": "2024-09-16",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/11-09-2024.md",
-        "completed": false,
-        "time": " - "
-      }
-    ],
+    "Daily_Notes/11-09-2024.md": [],
     "Miscellaneous Points.md": [],
     "Daily_Notes/15-09-2024.md": [
       {
@@ -155,7 +98,7 @@
         "time": "21:01 - 22:01",
         "due": "2024-09-15",
         "tag": "#Test",
-        "priority": 0,
+        "priority": "2",
         "filePath": "Daily_Notes/15-09-2024.md",
         "completed": false
       },
@@ -168,29 +111,9 @@
         "priority": 1,
         "filePath": "Daily_Notes/15-09-2024.md",
         "completed": false
-      },
-      {
-        "id": 1726415020308,
-        "body": "solving the problem of emoji not coming for priority, SOLVED",
-        "time": " - ",
-        "due": "",
-        "tag": "#Test",
-        "priority": "2",
-        "filePath": "Daily_Notes/15-09-2024.md",
-        "completed": false
       }
     ],
     "Daily_Notes/14-09-2024.md": [
-      {
-        "id": 1726416328550,
-        "body": "adding due temp task",
-        "time": " - ",
-        "due": "2024-09-16",
-        "tag": "#Test",
-        "priority": 2,
-        "filePath": "Daily_Notes/14-09-2024.md",
-        "completed": false
-      },
       {
         "id": 1726416869345,
         "body": "Now the auto add due option is disabled, so if i dont give anything, there shouldnt be anything",
@@ -203,9 +126,9 @@
       },
       {
         "id": 1726416920407,
-        "body": "Now, if i give date, it should come even though, `autoAddDue` option is disabled",
+        "body": "Now, if i give date, it should come even though, `autoAddDue` option is disabled, Rescheduling",
         "time": "22:45 - 23:45",
-        "due": "2024-09-16",
+        "due": "2024-09-18",
         "tag": "#Test",
         "priority": 1,
         "filePath": "Daily_Notes/14-09-2024.md",
@@ -228,6 +151,16 @@
         "due": "2024-09-15",
         "tag": "#Test",
         "priority": 1,
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726508858330,
+        "body": "Now adding task to see if 0 comes if no priority given",
+        "time": "",
+        "due": "2024-09-16",
+        "tag": "#Testing",
+        "priority": 0,
         "filePath": "Daily_Notes/14-09-2024.md",
         "completed": false
       }
@@ -286,16 +219,6 @@
     "Daily_Notes/07-09-2024.md": [],
     "Daily_Notes/11-09-2024.md": [],
     "Daily_Notes/15-09-2024.md": [
-      {
-        "id": 1726414204563,
-        "body": "Not time, no tag, no due, no priority, ITS WORKING",
-        "time": " - ",
-        "due": "",
-        "tag": "#Test",
-        "priority": "1",
-        "filePath": "Daily_Notes/15-09-2024.md",
-        "completed": true
-      },
       {
         "id": 1726414301580,
         "body": "Time and Tag and Priority",

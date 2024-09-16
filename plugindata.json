@@ -21,12 +21,28 @@
             }
           },
           {
+            "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Tomorrow",
+              "index": 2,
+              "range": {
+                "tag": "between",
+                "rangedata": {
+                  "from": 1,
+                  "to": 1
+                }
+              }
+            }
+          },
+          {
             "colType": "untagged",
             "active": true,
             "data": {
               "collapsed": false,
               "name": "Untagged Tasks",
-              "index": 2
+              "index": 3
             }
           },
           {
@@ -35,7 +51,7 @@
             "data": {
               "collapsed": false,
               "name": "Over Due",
-              "index": 3,
+              "index": 4,
               "range": {
                 "tag": "before",
                 "rangedata": {
@@ -51,7 +67,7 @@
             "data": {
               "collapsed": false,
               "name": "Undated",
-              "index": 4
+              "index": 5
             }
           },
           {
@@ -60,7 +76,7 @@
             "data": {
               "collapsed": false,
               "name": "Test Tagged Tasks",
-              "index": 5,
+              "index": 6,
               "coltag": "Test"
             }
           },
@@ -70,28 +86,12 @@
             "data": {
               "collapsed": false,
               "name": "Future",
-              "index": 6,
+              "index": 7,
               "range": {
                 "tag": "after",
                 "rangedata": {
                   "from": 2,
                   "to": 0
-                }
-              }
-            }
-          },
-          {
-            "colType": "dated",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Tomorrow",
-              "index": 7,
-              "range": {
-                "tag": "between",
-                "rangedata": {
-                  "from": 1,
-                  "to": 1
                 }
               }
             }
@@ -143,9 +143,19 @@
             "active": true,
             "data": {
               "collapsed": false,
-              "name": "GPT",
+              "name": "Testing Tasks",
               "index": 2,
-              "coltag": "#OfflineVideo"
+              "coltag": "Testing"
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "GPT",
+              "index": 3,
+              "coltag": "GPT"
             }
           },
           {
@@ -154,8 +164,8 @@
             "data": {
               "collapsed": false,
               "name": "When Mobile Data Left at Night",
-              "index": 3,
-              "coltag": "#WhenMobileDataLeft"
+              "index": 4,
+              "coltag": "WhenMobileDataLeft"
             }
           },
           {
@@ -164,8 +174,8 @@
             "data": {
               "collapsed": false,
               "name": "Note Till Task is Done",
-              "index": 4,
-              "coltag": "#NOTE"
+              "index": 5,
+              "coltag": "NOTE"
             }
           },
           {
@@ -174,7 +184,7 @@
             "data": {
               "collapsed": false,
               "name": "Other Tags",
-              "index": 5
+              "index": 6
             }
           },
           {
@@ -182,7 +192,7 @@
             "active": true,
             "data": {
               "collapsed": false,
-              "index": 6,
+              "index": 7,
               "limit": 10,
               "name": "Completed"
             }
@@ -193,8 +203,8 @@
             "data": {
               "collapsed": false,
               "name": "Test Tasks",
-              "index": 7,
-              "coltag": "#Test"
+              "index": 8,
+              "coltag": "Test"
             }
           }
         ],
