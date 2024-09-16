@@ -50,7 +50,7 @@ export const refreshTasks = (
 		tasksToDisplay = pendingTasks.filter((task) => !task.tag);
 	} else if (colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter(
-			(task) => task.tag === data.coltag
+			(task) => task.tag === `#${data.coltag}`
 		);
 	} else if (colType === "otherTags") {
 		tasksToDisplay = pendingTasks.filter(

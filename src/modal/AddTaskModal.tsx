@@ -146,7 +146,7 @@ export class AddTaskModal extends Modal {
 
 		// const dueDateWithEmo = autoAddDueOption ? `📅 ${dueDate}` : '';
 
-		const Emopriority = priorityEmojis[Number(priority)]; // or any other default value
+		const Emopriority = Number(priority) > 0 ? priorityEmojis[Number(priority)] : ''; // or any other default value
 
 
 		try {
