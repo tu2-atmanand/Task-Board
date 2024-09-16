@@ -14,6 +14,7 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 	const [tag, setTag] = useState(task.tag); // Prepend # to tag
 	const [startTime, setStartTime] = useState(task.time ? task.time.split(' - ')[0] : '');
 	const [endTime, setEndTime] = useState(task.time ? task.time.split(' - ')[1] || '' : '');
+	const [newTime, setNewTime] = useState(task.time);
 	const [priority, setPriority] = useState(task.priority);
 	const fileContentRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +24,8 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 			const [hours, minutes] = startTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
+			const newTime = `${startTime} - ${endTime}`;
+			setNewTime(newTime);
 		}
 	}, [startTime, endTime]);
 
@@ -33,7 +36,7 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 			body,
 			due,
 			tag,
-			time: `${startTime} - ${endTime}`,
+			time: newTime,
 			priority,
 		};
 		onSave(updatedTask);
@@ -50,6 +53,7 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 	// 	}
 	// }, [fileContentRef]);
 
+	// Unnecessary below memory and CPU wastage, just for the Live Preview thing, you can remove this and create the actual display of the file content, or else, you can keep this as it also, no issues : 
 	let newTaskContent = ''
 	if (dayPlannerPlugin) {
 		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${body} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${ tag } `;
