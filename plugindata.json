@@ -279,7 +279,7 @@
       "taskCompletionShowUtcOffset": false,
       "autoAddDue": false,
       "ScanVaultAtStartup": false,
-      "dayPlannerPlugin": true
+      "dayPlannerPlugin": false
     }
   }
 }

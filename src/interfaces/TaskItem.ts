@@ -20,3 +20,13 @@ export const priorityEmojis = {
 	4: "🔽",
 	5: "⏬",
 };
+
+// Priority Options
+export const priorityOptions = [
+	{ value: '0', text: 'NONE' },
+	{ value: '1', text: 'Highest : 🔺' },
+	{ value: '2', text: 'High : ⏫' },
+	{ value: '3', text: 'Medium : 🔼' },
+	{ value: '4', text: 'Low : 🔽' },
+	{ value: '5', text: 'Lowest : ⏬' }
+];

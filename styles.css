@@ -177,13 +177,15 @@ If your plugin does not need CSS, delete this file.
 }
 
 .taskItemTag {
-	background-color: var(--blockquote-background-dark);
-	border-radius: 10px;
-	padding-block: 2px;
-	padding-inline: 7px;
-	width: fit-content;
-	color: rgb(206, 206, 10);
-	font-size: 0.9em;
+	background-color: var(--tag-background);
+	border: var(--tag-border-width) solid var(--tag-border-color);
+	border-radius: var(--tag-radius);
+	color: var(--tag-color);
+	font-size: var(--tag-size);
+	font-weight: var(--tag-weight);
+	text-decoration: var(--tag-decoration);
+	padding: var(--tag-padding-y) var(--tag-padding-x);
+	line-height: 1;
 }
 
 .taskItemDate {
@@ -195,6 +197,12 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: center;
+}
+
+.taskItemHeaderLeft {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
 }
 
 .DragBtn {
@@ -378,69 +386,102 @@ If your plugin does not need CSS, delete this file.
 .EditTaskModalHome {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-start;
-	gap: 10px;
+	width: 100%;
+	padding: 20px;
+	box-sizing: border-box;
 }
 
 .EditTaskModalHome-title {
-	font-size: 20px;
-	font-weight: 600;
-	margin-block-end: 20px;
-	align-self: center;
+	font-size: 1.5rem;
+	font-weight: bold;
+	margin-bottom: 15px;
+	text-align: center;
 }
 
 .EditTaskModalHome-taskBody {
 	width: 100%;
-	min-height: 40px;
-	padding: 8px;
-	border: 1px solid #ddd;
+	height: 100px;
+	margin-bottom: 15px;
+	padding: 10px;
+	font-size: 1rem;
+	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
-.EditTaskModalHome-taskBody:active {
-	border: 1px solid #fffb26;
-}
-
-.EditTaskModalHome-tag,
-.EditTaskModalHome-due {
+.EditTaskModalHomeField {
 	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 10px;
+	justify-content: space-between;
+	margin-bottom: 15px;
 }
 
-.EditTaskModalHome-tagValue .EditTaskModalHome-dueValue {
-	/* margin-bottom: 10px; */
-	padding: 8px;
-	border: 1px solid #ddd;
+.EditTaskModalHomeTimeInput,
+.EditTaskModalHomeDueInput {
+	width: 48%;
+	padding: 5px;
+	font-size: 1rem;
+	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
-td {
-	padding: 5px;
-	padding-inline: 8px;
+.EditTaskModalHomeFieldTitle {
+	font-weight: bold;
+	margin-bottom: 5px;
 }
 
-.previewBox {
-	background-color: rgb(26, 21, 11);
-	border-radius: 5px;
-	padding-inline: 8px;
-	padding-block: 15px;
+.EditTaskModalHomePreview {
+	max-width: 30vw;
 }
 
-.EditTaskModalHome button {
-	padding: 10px 15px;
+.fileContentContainer {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow-y: auto;
+	border-radius: 4px;
+	margin-bottom: 15px;
+	background-color: var(--background-primary-alt);
+	position: relative;
+}
+
+.fileContentContainer h6 {
+	font-size: 1rem;
+	/* margin-bottom: 10px; */
+	font-weight: bold;
+	margin: 0;
+	background: black;
+	padding: 0.5em;
+}
+
+.fileContent {
+	white-space: pre-wrap;
+	min-height: 10vh;
+	overflow-wrap: break-word;
+	padding: 4px;
+	padding-block: 1em;
+	font-family: monospace;
+}
+
+.EditTaskModalHomeOpenFileBtn {
+	position: sticky;
+	bottom: 10px;
+	right: 10px;
+	padding: 8px 12px;
+	align-self: end;
+	font-size: 0.9rem;
+	color: white;
 	border: none;
 	border-radius: 4px;
-	color: white;
-	background-color: #0056b3;
 	cursor: pointer;
-	margin-top: 40px;
-	width: 100%;
+	width: fit-content;
+	z-index: 10;
 }
 
-.EditTaskModalHome button:hover {
-	background-color: #007bff;
+.EditTaskModalHomeOpenFileBtn:hover {
+	background-color: #0056b3;
+}
+
+.EditTaskModalHomeSaveBtn:hover {
+	background-color: green;
 }
 
 

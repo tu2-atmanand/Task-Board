@@ -4,6 +4,7 @@ import { App, Modal, Notice } from 'obsidian';
 import React, { useState } from 'react';
 
 import fs from 'fs';
+import { loadGlobalSettings } from 'src/utils/FileUtils';
 import { loadTasksFromJson } from 'src/utils/RefreshColumns';
 import path from 'path';
 import { priorityEmojis } from 'src/interfaces/TaskItem';
@@ -132,7 +133,7 @@ export class AddTaskModal extends Modal {
 	addTaskToFile(taskBody: string, time: string, dueDate: string, tag: string, priority: string) {
 		const basePath = (window as any).app.vault.adapter.basePath;
 		const fullPath = path.join(basePath, this.filePath);
-		let globalSettings = this.loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
+		let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
 		globalSettings = globalSettings.data.globalSettings;
 		console.log("The global setting loaded in Add New Task Modal : ", globalSettings);
 		const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
@@ -145,7 +146,7 @@ export class AddTaskModal extends Modal {
 
 		// const dueDateWithEmo = autoAddDueOption ? `📅 ${dueDate}` : '';
 
-		let Emopriority = priorityEmojis[Number(priority)]; // or any other default value
+		const Emopriority = priorityEmojis[Number(priority)]; // or any other default value
 
 
 		try {
@@ -201,20 +202,6 @@ export class AddTaskModal extends Modal {
 			fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
 		} catch (error) {
 			console.error("Error updating tasks.json:", error);
-		}
-	}
-
-	// Load globalSettings to check for dayPlannerPlugin value
-	loadGlobalSettings() {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const settingsPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'plugindata.json');
-
-		try {
-			const settingsData = fs.readFileSync(settingsPath, 'utf8');
-			return JSON.parse(settingsData);
-		} catch (error) {
-			console.error("Error loading globalSettings:", error);
-			return {};
 		}
 	}
 }

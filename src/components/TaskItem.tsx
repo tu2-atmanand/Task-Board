@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { TaskProps } from '../interfaces/TaskItem';
+import { priorityEmojis } from '../interfaces/TaskItem';
 
 const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChange }) => {
 	// State to handle the checkbox animation
@@ -37,8 +38,10 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				<div className="taskItemHeader">
-					<div className="taskItemTag">{task.tag}</div>
-					<div className="taskItemPrio">{task.priority}</div>
+					<div className="taskItemHeaderLeft">
+						<div className="taskItemPrio">{task.priority>0 ? priorityEmojis[task.priority] : ''}</div>
+						<div className="taskItemTag">{task.tag}</div>
+					</div>
 					<div className="DragBtn"><RxDragHandleDots2 size={14} /></div>
 				</div>
 				<div className="taskItemMainBody">
