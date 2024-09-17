@@ -284,11 +284,11 @@
       ],
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "",
+      "taskCompletionFormat": "Obsidian",
       "taskCompletionInLocalTime": true,
-      "taskCompletionShowUtcOffset": false,
+      "taskCompletionShowUtcOffset": true,
       "autoAddDue": false,
-      "ScanVaultAtStartup": false,
+      "scanVaultAtStartup": true,
       "dayPlannerPlugin": false
     }
   }

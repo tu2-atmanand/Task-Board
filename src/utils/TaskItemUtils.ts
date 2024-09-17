@@ -1,9 +1,10 @@
 import { Task } from "src/interfaces/Column";
 import fs from "fs";
+import { loadGlobalSettings } from "./SettingsOperations";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
 
-// utils/taskUtils.ts
+// utils/TaskItemUtils.ts
 
 export const loadTasksFromJson = (): {
 	allTasksWithStatus: Task[];
@@ -337,25 +338,5 @@ export const updateTaskInJson = (updatedTask: Task) => {
 		fs.writeFileSync(tasksPath, JSON.stringify(updatedData, null, 2));
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
-	}
-};
-
-// Load globalSettings to check for dayPlannerPlugin value
-export const loadGlobalSettings = () => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const settingsPath = path.join(
-		basePath,
-		".obsidian",
-		"plugins",
-		"Task-Board",
-		"plugindata.json"
-	);
-
-	try {
-		const settingsData = fs.readFileSync(settingsPath, "utf8");
-		return JSON.parse(settingsData);
-	} catch (error) {
-		console.error("Error loading globalSettings:", error);
-		return {};
 	}
 };

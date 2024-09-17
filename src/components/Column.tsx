@@ -3,8 +3,8 @@
 import { App, Modal } from 'obsidian';
 import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
-import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/FileUtils';
-import { markTaskCompleteInFile, moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/FileUtils';
+import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
+import { markTaskCompleteInFile, moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
 
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';

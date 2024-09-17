@@ -2,38 +2,39 @@
 
 import React, { useEffect, useState } from "react";
 
-import { GlobalSettings } from "src/interfaces/KanbanView";
+import { globalSettingsData } from "src/interfaces/KanbanView";
 import fs from "fs/promises"; // Changed to use promises-based API
 import path from "path";
+import { loadGlobalSettings } from "src/utils/SettingsOperations";
 
 const dataFilePath = path.join(
 	(window as any).app.vault.adapter.basePath,
 	".obsidian",
 	"plugins",
 	"Task-Board",
-	"plugindata.json"
+	"data.json"
 );
 
 const PluginGlobalSettingContent: React.FC = () => {
-	const [globalSettings, setGlobalSettings] = useState<GlobalSettings | null>(null);
+	const [globalSettings, setGlobalSettings] = useState<globalSettingsData | null>(null);
 
 	useEffect(() => {
 		loadSettings();
 	}, []);
 
-	// Function to load settings from plugindata.json
+	// Function to load settings from data.json
 	const loadSettings = async (): Promise<void> => {
 		try {
-			const data = await fs.readFile(dataFilePath, "utf8"); // Async file read
-			const jsonData = JSON.parse(data);
+			// const data = await fs.readFile(dataFilePath, "utf8"); // Async file read
+			const jsonData = loadGlobalSettings();
 			setGlobalSettings(jsonData.data.globalSettings);
 		} catch (err) {
 			console.error("Error loading settings:", err);
 		}
 	};
 
-	// Function to save settings back to plugindata.json
-	const saveSettings = async (updatedSettings: GlobalSettings) => {
+	// Function to save settings back to data.json
+	const saveSettings = async (updatedSettings: globalSettingsData) => {
 		try {
 			// Directly update the in-memory settings
 			const data = await fs.readFile(dataFilePath, "utf8");
@@ -51,7 +52,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 		return <p style={{ maxWidth: '33vw' }}>Failed to load Global settings.</p>;
 	}
 
-	const handleTextChange = (key: keyof GlobalSettings, value: string) => {
+	const handleTextChange = (key: keyof globalSettingsData, value: string) => {
 		const updatedSettings = { ...globalSettings, [key]: value };
 		setGlobalSettings(updatedSettings);
 		saveSettings(updatedSettings);
@@ -70,7 +71,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 	};
 
 
-	const handleToggleChange = (key: keyof GlobalSettings, value: boolean) => {
+	const handleToggleChange = (key: keyof globalSettingsData, value: boolean) => {
 		const updatedSettings = { ...globalSettings, [key]: value };
 		setGlobalSettings(updatedSettings);
 		saveSettings(updatedSettings);
@@ -131,7 +132,7 @@ const PluginGlobalSettingContent: React.FC = () => {
 
 			<hr width="100%" size="1" color="olive" style={{ "margin": '2px', "marginBottom": '1em' }} noshade="true"></hr>
 
-			{/* Setting for ScanVaultAtStartup */}
+			{/* Setting for scanVaultAtStartup */}
 			<div className="globalSettingContentHomeElement">
 				<div className="globalSettingContentHomeElementTag">
 					<h4>Auto Scan the Vault on Obsidian Startup</h4>
@@ -145,9 +146,9 @@ const PluginGlobalSettingContent: React.FC = () => {
 				</div>
 				<input
 					type="checkbox"
-					checked={globalSettings.ScanVaultAtStartup}
+					checked={globalSettings.scanVaultAtStartup}
 					onChange={(e) =>
-						handleToggleChange("ScanVaultAtStartup", e.target.checked)
+						handleToggleChange("scanVaultAtStartup", e.target.checked)
 					}
 				/>
 			</div>

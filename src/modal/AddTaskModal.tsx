@@ -4,7 +4,7 @@ import { App, Modal, Notice } from 'obsidian';
 import React, { useState } from 'react';
 
 import fs from 'fs';
-import { loadGlobalSettings } from 'src/utils/FileUtils';
+import { loadGlobalSettings } from 'src/utils/SettingsOperations';
 import { loadTasksFromJson } from 'src/utils/RefreshColumns';
 import path from 'path';
 import { priorityEmojis } from 'src/interfaces/TaskItem';

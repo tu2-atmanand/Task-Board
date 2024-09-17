@@ -1,9 +1,10 @@
 // src/settings/TaskBoardSettingTab.ts
 import { App, PluginSettingTab, Setting } from "obsidian";
 
-import { GlobalSettings } from "src/interfaces/KanbanView";
 import TaskBoard from "../../main"; // Adjust the path based on your file structure
 import fs from "fs";
+import { globalSettingsData } from "src/interfaces/KanbanView";
+import { loadGlobalSettings } from "src/utils/SettingsOperations";
 import path from "path";
 
 export class TaskBoardSettingTab extends PluginSettingTab {
@@ -13,9 +14,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		".obsidian",
 		"plugins",
 		"Task-Board",
-		"plugindata.json"
+		"data.json"
 	);
-	globalSettings: GlobalSettings | null = null;
+	globalSettings: globalSettingsData | null = null;
 
 	constructor(app: App, plugin: TaskBoard) {
 		super(app, plugin);
@@ -28,18 +29,18 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				(documentFragment.createDiv().innerHTML = html)
 		);
 
-	// Function to load the settings from plugindata.json
+	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
 		try {
-			const data = fs.readFileSync(this.dataFilePath, "utf8");
-			const jsonData = JSON.parse(data);
+			const jsonData = loadGlobalSettings();
+			console.log("The global setting i have loaded : ", jsonData);
 			this.globalSettings = jsonData.data.globalSettings;
 		} catch (err) {
 			console.error("Error loading settings:", err);
 		}
 	}
 
-	// Function to save settings back to plugindata.json
+	// Function to save settings back to data.json
 	async saveSettings(): Promise<void> {
 		if (!this.globalSettings) return;
 
@@ -77,7 +78,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			taskCompletionInLocalTime,
 			taskCompletionShowUtcOffset,
 			autoAddDue,
-			ScanVaultAtStartup,
+			scanVaultAtStartup,
 			dayPlannerPlugin,
 		} = this.globalSettings;
 
@@ -171,8 +172,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				)
 			)
 			.addToggle((toggle) =>
-				toggle.setValue(ScanVaultAtStartup).onChange(async (value) => {
-					this.globalSettings!.ScanVaultAtStartup = value;
+				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
+					this.globalSettings!.scanVaultAtStartup = value;
 					await this.saveSettings();
 				})
 			);

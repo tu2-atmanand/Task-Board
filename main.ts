@@ -20,41 +20,19 @@ import {
 
 import { AddTaskModal } from "src/modal/AddTaskModal";
 import { BoardConfigureModal } from "src/settings/BoardConfigureModal";
-import { GlobalSettings } from "src/interfaces/KanbanView";
 import { KanbanView } from "./src/views/KanbanView";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import fs from "fs";
+import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 import path from "path";
-
-// Import the settings
-
-const DEFAULT_SETTINGS: GlobalSettings = {
-	defaultColumnNames: {
-		today: "",
-		tomorrow: "",
-		future: "",
-		undated: "",
-		otherTags: "",
-		untagged: "",
-		completed: "",
-	},
-	filters: [],
-	firstDayOfWeek: "Mon",
-	ignoreFileNameDates: false,
-	taskCompletionFormat: "ObsidianTasks",
-	taskCompletionInLocalTime: true,
-	taskCompletionShowUtcOffset: true,
-};
-
-export const TaskBoardIcon = "lucide-trello";
 
 export default class TaskBoard extends Plugin {
 	settings: GlobalSettings; // Use the GlobalSettings type here
 
 	async onload() {
-		console.log("TaskBoard: loading plugin");
+		console.log("TaskBoard: loading plugin ...");
 
-		await this.loadSettings();
+		this.scanningVault = new ScanningVault(this.app);
 
 		// Create a ribbon icon to open the Kanban board view
 		const ribbonIconEl = this.addRibbonIcon(
@@ -173,9 +151,9 @@ export default class TaskBoard extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
-			DEFAULT_SETTINGS,
 			await this.loadData()
 		);
+		console.log("The setting loaded in Main.ts using the Object.assign method : ", this.settings);
 	}
 
 	async saveSettings() {

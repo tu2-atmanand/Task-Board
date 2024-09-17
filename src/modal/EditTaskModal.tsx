@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { priorityEmojis, priorityOptions } from "src/interfaces/TaskItem";
 
 import ReactDOM from "react-dom/client";
-import { loadGlobalSettings } from "src/utils/FileUtils";
+import { loadGlobalSettings } from "src/utils/SettingsOperations";
 
 // Functional React component for the modal content
 const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean; onSave: (updatedTask: any) => void; onClose: () => void }> = ({ task, onSave, onClose, dayPlannerPlugin }) => {

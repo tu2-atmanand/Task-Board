@@ -3,7 +3,7 @@
 import { Dispatch, SetStateAction } from "react";
 
 import { Task } from "../interfaces/Column";
-import { loadTasksFromJson } from "./FileUtils";
+import { loadTasksFromJson } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
 export const refreshTasks = (
@@ -33,7 +33,7 @@ export const refreshTasks = (
 			// 			(1000 * 60 * 60 * 24)
 			// 	) + 1;
 			const diffDays = dueDate.getDate() - today.getDate();
-			console.log("The value of the difference between the two dates : ", diffDays);
+			// console.log("The value of the difference between the two dates : ", diffDays);
 			// console.log("The Difference in today and due : ", diffDays, "For the task : ", task.body);
 
 			if (from < 0 && to === 0) {

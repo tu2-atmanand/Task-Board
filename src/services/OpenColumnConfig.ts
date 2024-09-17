@@ -1,6 +1,7 @@
 // src/services/OpenColumnConfig.ts
 
-import { App } from "obsidian";
+import { App, Plugin } from "obsidian";
+
 import { Board } from "../interfaces/KanbanBoard";
 import { BoardConfigureModal } from "src/settings/BoardConfigureModal";
 import fs from "fs";
@@ -13,7 +14,7 @@ const dataFilePath = path.join(
 	".obsidian",
 	"plugins",
 	"Task-Board",
-	"plugindata.json"
+	"data.json"
 );
 
 // Function to load boards data from the JSON file
