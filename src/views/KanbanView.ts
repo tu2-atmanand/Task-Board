@@ -1,18 +1,18 @@
 // src/views/KanbanView.ts
 
-import { App, ItemView, WorkspaceLeaf } from "obsidian";
+import { App, ItemView, Vault, WorkspaceLeaf } from "obsidian";
 import {
 	loadBoardsData,
 	openBoardConfigModal,
 	saveBoardsData,
 } from "../services/OpenColumnConfig";
 
+import { Board } from "src/interfaces/KanbanBoard";
 import KanbanBoard from "../components/KanbanBoard";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "../../main";
-
-export const VIEW_TYPE_KANBAN = "kanban-view";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/TaskBoardGlobalValues";
 
 export class KanbanView extends ItemView {
 	private vault: Vault;
@@ -28,11 +28,15 @@ export class KanbanView extends ItemView {
 	}
 
 	getViewType() {
-		return VIEW_TYPE_KANBAN;
+		return VIEW_TYPE_TASKBOARD;
 	}
 
 	getDisplayText() {
 		return "Kanban Board";
+	}
+
+	getSettings() {
+		return this.plugin.settings;
 	}
 
 	async onOpen() {
@@ -44,6 +48,8 @@ export class KanbanView extends ItemView {
 				this.handleSaveBoards
 			);
 		});
+
+		console.log("The Settings which i have loaded using Obsidian : ", this.getSettings());
 
 		const root = ReactDOM.createRoot(this.contentEl);
 		root.render(<KanbanBoard app={this.plugin.app} />);
@@ -86,7 +92,7 @@ export class KanbanView extends ItemView {
 // import ReactDOM from "react-dom/client"; // Ensure this import is correct for React 18+
 // import TaskBoard from "../../main";
 
-// export const VIEW_TYPE_KANBAN = "kanban-view";
+// export const VIEW_TYPE_TASKBOARD = "kanban-view";
 
 // export class KanbanView extends ItemView {
 // 	private vault: Vault;
@@ -100,7 +106,7 @@ export class KanbanView extends ItemView {
 // 	}
 
 // 	getViewType() {
-// 		return VIEW_TYPE_KANBAN;
+// 		return VIEW_TYPE_TASKBOARD;
 // 	}
 
 // 	getDisplayText() {

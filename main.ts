@@ -12,13 +12,17 @@ import {
 	Setting,
 	TFile,
 } from "obsidian";
+import { DEFAULT_SETTINGS, GlobalSettings } from "src/interfaces/KanbanView";
+import {
+	TaskBoardIcon,
+	VIEW_TYPE_TASKBOARD,
+} from "src/interfaces/TaskBoardGlobalValues";
 
 import { AddTaskModal } from "src/modal/AddTaskModal";
 import { BoardConfigureModal } from "src/settings/BoardConfigureModal";
 import { GlobalSettings } from "src/interfaces/KanbanView";
 import { KanbanView } from "./src/views/KanbanView";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import { VIEW_TYPE_KANBAN } from "./src/views/KanbanView";
 import fs from "fs";
 import path from "path";
 
@@ -54,12 +58,12 @@ export default class TaskBoard extends Plugin {
 
 		// Create a ribbon icon to open the Kanban board view
 		const ribbonIconEl = this.addRibbonIcon(
-			"lucide-file-check",
-			"Open Kanban Board",
+			TaskBoardIcon,
+			"Open Task Board",
 			() => {
 				this.app.workspace
 					.getLeaf(true)
-					.setViewState({ type: "kanban-view", active: true });
+					.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
 			}
 		);
 		ribbonIconEl.addClass("Task-Board-ribbon-class");
@@ -118,7 +122,7 @@ export default class TaskBoard extends Plugin {
 
 		// Register the Kanban view
 		this.registerView(
-			VIEW_TYPE_KANBAN,
+			VIEW_TYPE_TASKBOARD,
 			(leaf) => new KanbanView(this, leaf)
 		);
 
@@ -163,7 +167,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("unloading TaskBoard plugin");
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_KANBAN);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
 	async loadSettings() {
