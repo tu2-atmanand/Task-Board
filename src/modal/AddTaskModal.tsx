@@ -37,6 +37,10 @@ export class AddTaskModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
+		let globalSettings = loadGlobalSettings();
+		globalSettings = globalSettings.data.globalSettings;
+		const autoAddDueOption = globalSettings?.autoAddDue;
+
 		// Create a wrapper div for styling
 		const wrapper = contentEl.createEl('div', { cls: 'modal-content-wrapper' });
 
@@ -114,7 +118,8 @@ export class AddTaskModal extends Modal {
 
 		addButton.onclick = () => {
 			const taskBody = taskInput.value;
-			const dueDate = dueInput.value || new Date().toISOString().split('T')[0]; // Default to today
+			const defaultDue = autoAddDueOption ? new Date().toISOString().split('T')[0] : '';
+			const dueDate = dueInput.value || defaultDue; // Default to today
 			const tag = tagInput.value.trim();
 			const time = `${startTimeInput.value} - ${endTimeInput.value}`; // Time format for the task
 			const priority = priorityInput.value;
@@ -138,12 +143,12 @@ export class AddTaskModal extends Modal {
 		globalSettings = globalSettings.data.globalSettings;
 		console.log("The global setting loaded in Add New Task Modal : ", globalSettings);
 		const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
-		const autoAddDueOption = globalSettings?.autoAddDue;
-		console.log("Global Settings Values : dayPlannerPluginCompatibility : ", dayPlannerPlugin, " | autoAddDueOption : ", autoAddDueOption);
+		// const autoAddDueOption = globalSettings?.autoAddDue;
+		// console.log("Global Settings Values : dayPlannerPluginCompatibility : ", dayPlannerPlugin, " | autoAddDueOption : ", autoAddDueOption);
 
-		const today = new Date().toISOString().split('T')[0]; // get today's date in YYYY-MM-DD format
+		// const today = new Date().toISOString().split('T')[0]; // get today's date in YYYY-MM-DD format
 
-		const dueDateWithEmo = dueDate === today && !autoAddDueOption ? '' : dueDate ? `📅 ${dueDate}` : '';
+		const dueDateWithEmo = dueDate ? `📅 ${dueDate}` : '';
 
 		// const dueDateWithEmo = autoAddDueOption ? `📅 ${dueDate}` : '';
 
