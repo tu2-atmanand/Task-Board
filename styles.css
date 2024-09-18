@@ -502,7 +502,7 @@ If your plugin does not need CSS, delete this file.
 /* /src/compoenents/BoardConfigureModal.tsx - V2 */
 
 .modal {
-	min-width: fit-content;
+	width: auto;
 	min-height: fit-content;
 }
 
@@ -697,4 +697,11 @@ If your plugin does not need CSS, delete this file.
 
 .globalSettingContentHomeElementTag h4 {
 	margin-block: 1px;
+}
+
+
+/* // src/settings/TaskBoardSettingTab.ts */
+
+.TaskBoardSettingTab {
+	/* max-width: fit-content; */
 }
