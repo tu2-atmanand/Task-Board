@@ -9,6 +9,7 @@ import { loadTasksFromJson } from 'src/utils/RefreshColumns';
 import path from 'path';
 import { priorityEmojis } from 'src/interfaces/TaskItem';
 import { refreshBoardData } from 'src/utils/refreshBoard';
+import { tasksPath } from 'src/interfaces/TaskBoardGlobalValues';
 
 interface AddTaskModalProps {
 	app: App;
@@ -175,8 +176,6 @@ export class AddTaskModal extends Modal {
 	}
 
 	updateTasksJson(taskBody: string, time: string, dueDate: string, tag: string, priority: number, filePath: string) {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
 
 		try {
 			const tasksData = fs.readFileSync(tasksPath, 'utf8');

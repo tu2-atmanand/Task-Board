@@ -3,6 +3,7 @@ import fs from "fs";
 import { loadGlobalSettings } from "./SettingsOperations";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
+import { tasksPath } from "src/interfaces/TaskBoardGlobalValues";
 
 // utils/TaskItemUtils.ts
 
@@ -11,15 +12,6 @@ export const loadTasksFromJson = (): {
 	pendingTasks: Task[];
 	completedTasks: Task[];
 } => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const tasksPath = path.join(
-		basePath,
-		".obsidian",
-		"plugins",
-		"Task-Board",
-		"tasks.json"
-	);
-
 	try {
 		if (fs.existsSync(tasksPath)) {
 			const tasksData = fs.readFileSync(tasksPath, "utf8");
@@ -66,14 +58,6 @@ export const loadTasksFromJson = (): {
 // For handleCheckboxChange
 
 export const moveFromPendingToCompleted = (task: Task) => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const tasksPath = path.join(
-		basePath,
-		".obsidian",
-		"plugins",
-		"Task-Board",
-		"tasks.json"
-	);
 
 	// Toggle the completed state
 	const updatedTask = { ...task, completed: !task.completed };
@@ -101,14 +85,6 @@ export const moveFromPendingToCompleted = (task: Task) => {
 };
 
 export const moveFromCompletedToPending = (task: Task) => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const tasksPath = path.join(
-		basePath,
-		".obsidian",
-		"plugins",
-		"Task-Board",
-		"tasks.json"
-	);
 
 	// Toggle the completed state
 	const updatedTask = { ...task, completed: !task.completed };
@@ -184,14 +160,6 @@ export const deleteTaskFromFile = (task: Task) => {
 };
 
 export const deleteTaskFromJson = (task: Task) => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const tasksPath = path.join(
-		basePath,
-		".obsidian",
-		"plugins",
-		"Task-Board",
-		"tasks.json"
-	);
 
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
@@ -287,14 +255,6 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 };
 
 export const updateTaskInJson = (updatedTask: Task) => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const tasksPath = path.join(
-		basePath,
-		".obsidian",
-		"plugins",
-		"Task-Board",
-		"tasks.json"
-	);
 
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
