@@ -32,7 +32,7 @@ export class KanbanView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Kanban Board";
+		return "Task Board";
 	}
 
 	getSettings() {
@@ -92,7 +92,7 @@ export class KanbanView extends ItemView {
 // import ReactDOM from "react-dom/client"; // Ensure this import is correct for React 18+
 // import TaskBoard from "../../main";
 
-// export const VIEW_TYPE_TASKBOARD = "kanban-view";
+// export const VIEW_TYPE_TASKBOARD = "task-board-view";
 
 // export class KanbanView extends ItemView {
 // 	private vault: Vault;
