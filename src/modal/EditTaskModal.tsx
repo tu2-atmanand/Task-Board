@@ -25,6 +25,7 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
 			const newTime = `${startTime} - ${endTime}`;
+			console.log("EditTaskModa : New time freshly added : ", newTime);
 			setNewTime(newTime);
 		}
 	}, [startTime, endTime]);
@@ -58,7 +59,7 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 	if (dayPlannerPlugin) {
 		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${body} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${ tag } `;
 	} else {
-		newTaskContent = `- [] ${body} | ${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''} ${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${ tag } `;
+		newTaskContent = `- [] ${body} |${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''}${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${ tag } `;
 	}
 
 	return (

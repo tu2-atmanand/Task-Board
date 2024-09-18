@@ -6,6 +6,7 @@ export interface TaskProps {
 		tag: string;
 		time: string;
 		priority: number;
+		completed: boolean;
 	};
 	onEdit: () => void;
 	onDelete: () => void;
