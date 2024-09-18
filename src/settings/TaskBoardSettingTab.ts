@@ -62,6 +62,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	async display(): Promise<void> {
 		const { containerEl } = this;
 		containerEl.empty();
+		containerEl.addClass('TaskBoardSettingTab');
 
 		await this.loadSettings();
 
@@ -80,6 +81,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			autoAddDue,
 			scanVaultAtStartup,
 			dayPlannerPlugin,
+			realTimeScanning,
 		} = this.globalSettings;
 
 		containerEl.createEl("h3", { text: "Task Board Plugin" });
@@ -114,6 +116,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				});
 			});
 
+		containerEl.createEl("h4", { text: "Time related settings" });
 		// Setting for firstDayOfWeek
 		new Setting(containerEl)
 			.setName("First Day of the Week")
@@ -139,44 +142,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					await this.saveSettings();
 				});
 			});
-
-		// // Setting for ignoreFileNameDates
-		// new Setting(containerEl)
-		// 	.setName("Ignore File Name Dates")
-		// 	.setDesc("Whether to ignore dates in file names")
-		// 	.addToggle((toggle) =>
-		// 		toggle.setValue(ignoreFileNameDates).onChange(async (value) => {
-		// 			this.globalSettings!.ignoreFileNameDates = value;
-		// 			await this.saveSettings();
-		// 		})
-		// 	);
-
-		// // Setting for taskCompletionFormat
-		// new Setting(containerEl)
-		// 	.setName("Task Completion Format")
-		// 	.setDesc("Set the task completion format")
-		// 	.addText((text) =>
-		// 		text.setValue(taskCompletionFormat).onChange(async (value) => {
-		// 			this.globalSettings!.taskCompletionFormat = value;
-		// 			await this.saveSettings();
-		// 		})
-		// 	);
-
-		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
-		new Setting(containerEl)
-			.setName("Auto Scan the Vault on Obsidian Startup")
-			.setDesc(
-				TaskBoardSettingTab.createFragmentWithHTML(
-					"<p>The plugin will scan the whole vault to detect all the undetected tasks from whole vault everytime Obsidian starts.</p>" +
-						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
-				)
-			)
-			.addToggle((toggle) =>
-				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
-					this.globalSettings!.scanVaultAtStartup = value;
-					await this.saveSettings();
-				})
-			);
 
 		// Setting for taskCompletionInLocalTime
 		new Setting(containerEl)
@@ -207,6 +172,58 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					})
 			);
 
+		// // Setting for ignoreFileNameDates
+		// new Setting(containerEl)
+		// 	.setName("Ignore File Name Dates")
+		// 	.setDesc("Whether to ignore dates in file names")
+		// 	.addToggle((toggle) =>
+		// 		toggle.setValue(ignoreFileNameDates).onChange(async (value) => {
+		// 			this.globalSettings!.ignoreFileNameDates = value;
+		// 			await this.saveSettings();
+		// 		})
+		// 	);
+
+		// // Setting for taskCompletionFormat
+		// new Setting(containerEl)
+		// 	.setName("Task Completion Format")
+		// 	.setDesc("Set the task completion format")
+		// 	.addText((text) =>
+		// 		text.setValue(taskCompletionFormat).onChange(async (value) => {
+		// 			this.globalSettings!.taskCompletionFormat = value;
+		// 			await this.saveSettings();
+		// 		})
+		// 	);
+
+		containerEl.createEl("h4", { text: "Automation Settings" });
+		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
+		new Setting(containerEl)
+			.setName("Auto Scan the Vault on Obsidian Startup")
+			.setDesc(
+				TaskBoardSettingTab.createFragmentWithHTML(
+					"<p>The plugin will scan the whole vault to detect all the undetected tasks from whole vault everytime Obsidian starts.</p>" +
+						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
+					this.globalSettings!.scanVaultAtStartup = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to scan the modified file in realtime
+		new Setting(containerEl)
+			.setName("Real-Time Scanning")
+			.setDesc(
+				"This setting will scan the modified file every time some changes is made to any markdown file. This wont slow down the performance, but if it does, disbale this setting.\nDisabling this setting will scan the newly added task within 5 minutes and will render on the board."
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(realTimeScanning).onChange(async (value) => {
+					this.globalSettings!.realTimeScanning = value;
+					await this.saveSettings();
+				})
+			);
+
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(containerEl)
 			.setName("Auto Add Due Date to Tasks")
@@ -220,6 +237,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				})
 			);
 
+		containerEl.createEl("h4", { text: "Compatibility Settings" });
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(containerEl)
 			.setName("Day Planner Plugin Compatibility")
@@ -233,7 +251,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				})
 			);
 
-		containerEl.createEl("h3", { text: "Default Column Names" });
+		containerEl.createEl("h4", { text: "Default Column Names" });
 
 		// Create settings for each default column name
 		for (const [key, value] of Object.entries(defaultColumnNames)) {

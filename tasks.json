@@ -1,198 +1,126 @@
 {
   "Pending": {
-    "Daily_Notes/02-08-2024.md": [
+    "Daily_Notes/18-09-2024.md": [
       {
-        "id": 1725276003304,
-        "body": "Undated Task.",
-        "due": "",
-        "tag": "#Projects",
-        "completed": false,
-        "filePath": "Daily_Notes/02-08-2024.md"
-      }
-    ],
-    "Daily_Notes.md": [],
-    "Daily_Notes/03-09-2024.md": [
+        "id": 1726660426152,
+        "body": "Adding a new task, i think now everything is working. Adding all the fields now.",
+        "time": "12:09 - 13:09",
+        "due": "2024-09-19",
+        "tag": "#Complete",
+        "priority": "0",
+        "filePath": "Daily_Notes/18-09-2024.md",
+        "completed": false
+      },
       {
-        "id": 1725434303546,
-        "body": "Finish all the Courses ASAP.",
-        "due": "2024-10-01",
-        "tag": "#Course",
-        "completed": false,
-        "filePath": "Daily_Notes/03-09-2024.md"
-      }
-    ],
-    "Daily_Notes/01-08-2024.md": [],
-    "Spintly Details.md": [
-      {
-        "id": 1725545282005,
-        "body": "Just a new Task without tag or date",
+        "id": 1726660426152,
+        "body": "ading simple task to see if the time afterwards will come or not",
+        "time": "",
         "due": "2024-09-18",
-        "tag": "",
-        "filePath": "Spintly Details.md",
-        "completed": false,
-        "time": "10:30 - 11:30",
-        "priority": "3"
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/18-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726660426152,
+        "body": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
+        "time": "18:21 - 19:21",
+        "due": "2024-09-19",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/18-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/17-09-2024.md": [
+      {
+        "id": 1726660230781,
+        "body": "This task will be updated in the json file after 10 seconds",
+        "time": "",
+        "due": "",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726660230781,
+        "body": "Adding new task, this will update in the file after 5 minutes",
+        "time": "12:45 - 13:45",
+        "due": "",
+        "tag": "#Testing",
+        "priority": "2",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726660230781,
+        "body": "autoAddDue is ON, now today date should come automatically",
+        "time": "12:12 - 13:12",
+        "due": "2024-09-17",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726660230781,
+        "body": "Adding tomorrow date, it should come even autoAddDue is ON",
+        "time": "",
+        "due": "2024-09-18",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
       }
     ],
     "Daily_Notes/07-09-2024.md": [
       {
-        "id": 1725690615381,
+        "id": 1726660192309,
         "body": "ChatGPT sometimes do things amazing",
+        "time": "14:11 - 15:11",
         "due": "2024-09-25",
         "tag": "#GPT",
-        "filePath": "Daily_Notes/07-09-2024.md",
-        "completed": false,
-        "time": "14:11 - 15:11",
-        "priority": "1"
-      }
-    ],
-    "Daily_Notes/08-09-2024.md": [],
-    "3-Process After Offer Letter Received.md": [],
-    "Daily_Notes/09-09-2024.md": [
-      {
-        "id": 1726501741663,
-        "body": "Adding testing task, time will come first, thats it",
-        "time": "23:18 - 00:18",
-        "due": "2024-09-17",
-        "tag": "NOTE",
-        "priority": "4",
-        "filePath": "Daily_Notes/09-09-2024.md",
-        "completed": false
-      }
-    ],
-    "Daily_Notes/11-09-2024.md": [],
-    "Miscellaneous Points.md": [],
-    "Daily_Notes/15-09-2024.md": [
-      {
-        "id": 1726410692540,
-        "body": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
-        "time": "21:01 - 22:01",
-        "due": "2024-09-15",
-        "tag": "#Test",
-        "priority": "2",
-        "filePath": "Daily_Notes/15-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726413344787,
-        "body": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
-        "time": "21:45 - 22:45",
-        "due": "",
-        "tag": "#Test",
-        "priority": 1,
-        "filePath": "Daily_Notes/15-09-2024.md",
-        "completed": false
-      }
-    ],
-    "Daily_Notes/14-09-2024.md": [
-      {
-        "id": 1726416869345,
-        "body": "Now the auto add due option is disabled, so if i dont give anything, there shouldnt be anything",
-        "time": "23:44 - 00:44",
-        "due": "2024-09-16",
-        "tag": "#Test",
         "priority": "0",
-        "filePath": "Daily_Notes/14-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726416920407,
-        "body": "Now, if i give date, it should come even though, `autoAddDue` option is disabled, Rescheduling",
-        "time": "22:45 - 23:45",
-        "due": "2024-09-18",
-        "tag": "#Test",
-        "priority": 1,
-        "filePath": "Daily_Notes/14-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726419078744,
-        "body": "Final testing if all fields come correctly, now the time will come front instead of back.",
-        "time": "13:21 - 14:21",
-        "due": "2024-09-17",
-        "tag": "#Testing ",
-        "priority": 4,
-        "filePath": "Daily_Notes/14-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726419124312,
-        "body": "Let me see if due comes of today, it shouldnt come",
-        "time": "",
-        "due": "2024-09-17",
-        "tag": "#Test",
-        "priority": 1,
-        "filePath": "Daily_Notes/14-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726508858330,
-        "body": "Now adding task to see if 0 comes if no priority given",
-        "time": "",
-        "due": "2024-09-16",
-        "tag": "#Testing",
-        "priority": 0,
-        "filePath": "Daily_Notes/14-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726516023375,
-        "body": "Since there are very less tasks for future so just adding a task, and then changing its due to more future to see what happens",
-        "time": "",
-        "due": "2024-09-22",
-        "tag": "#Project",
-        "priority": 2,
-        "filePath": "Daily_Notes/14-09-2024.md",
+        "filePath": "Daily_Notes/07-09-2024.md",
         "completed": false
       }
     ]
   },
   "Completed": {
-    "Daily_Notes/01-08-2024.md": [
+    "Daily_Notes/18-09-2024.md": [],
+    "Daily_Notes/17-09-2024.md": [
       {
-        "id": 1725276003309,
-        "body": "All the Documents submitted to TCS, Waiting for JL.",
-        "due": "2024-08-31",
-        "tag": "#Finance",
-        "filePath": "Daily_Notes/01-08-2024.md",
+        "id": 1726660230781,
+        "body": "Now auto add due option is false, so the due date shouldnt be added",
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
         "completed": true
       },
       {
-        "id": 1725276003310,
-        "body": "Submit the quarterly earnings report to the board.",
-        "due": "2024-09-10",
-        "tag": "#Reports",
-        "completed": true,
-        "filePath": "Daily_Notes/01-08-2024.md"
-      }
-    ],
-    "Daily_Notes/03-09-2024.md": [],
-    "Daily_Notes.md": [],
-    "Spintly Details.md": [
-      {
-        "id": 1725886490784,
-        "body": "New tasks testing",
-        "due": "2024-09-09",
-        "tag": "#test",
-        "filePath": "Spintly Details.md",
-        "completed": true
-      }
-    ],
-    "Daily_Notes/08-09-2024.md": [],
-    "Daily_Notes/07-09-2024.md": [],
-    "Daily_Notes/11-09-2024.md": [],
-    "Daily_Notes/15-09-2024.md": [
-      {
-        "id": 1726414301580,
-        "body": "Time and Tag and Priority",
-        "time": "22:01 - 23:01",
-        "due": "",
+        "id": 1726660230781,
+        "body": "Auto add due option is false, but if i add todays date it should work",
+        "time": "12:10 - 13:10",
+        "due": "2024-09-17",
         "tag": "#Test",
-        "priority": 3,
-        "filePath": "Daily_Notes/15-09-2024.md",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726660230781,
+        "body": "If i add any other due it should work, autoAddDue is off",
+        "time": "",
+        "due": "2024-09-18",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
         "completed": true
       }
     ],
-    "Daily_Notes/09-09-2024.md": []
+    "Daily_Notes/07-09-2024.md": []
   }
 }

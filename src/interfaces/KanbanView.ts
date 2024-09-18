@@ -1,26 +1,26 @@
 import { BoardConfig } from "./KanbanBoard";
 
 export interface globalSettingsData {
-			defaultColumnNames: {
-				today: string;
-				tomorrow: string;
-				future: string;
-				undated: string;
-				otherTags: string;
-				untagged: string;
-				completed: string;
-			};
-			filters: string[];
-			firstDayOfWeek?: string;
-			ignoreFileNameDates: boolean;
-			taskCompletionFormat: string;
-			taskCompletionInLocalTime: boolean;
-			taskCompletionShowUtcOffset: boolean;
-			autoAddDue: boolean;
-			scanVaultAtStartup: boolean;
-			dayPlannerPlugin: boolean;
+	defaultColumnNames: {
+		today: string;
+		tomorrow: string;
+		future: string;
+		undated: string;
+		otherTags: string;
+		untagged: string;
+		completed: string;
+	};
+	filters: string[];
+	firstDayOfWeek?: string;
+	ignoreFileNameDates: boolean;
+	taskCompletionFormat: string;
+	taskCompletionInLocalTime: boolean;
+	taskCompletionShowUtcOffset: boolean;
+	autoAddDue: boolean;
+	scanVaultAtStartup: boolean;
+	dayPlannerPlugin: boolean;
+	realTimeScanning: boolean;
 }
-
 // Define the interface for GlobalSettings based on your JSON structure
 export interface GlobalSettings {
 	version: string;
@@ -33,7 +33,7 @@ export interface GlobalSettings {
 export const DEFAULT_SETTINGS: GlobalSettings = {
 	version: "",
 	data: {
-		boardConfigs:[],
+		boardConfigs: [],
 		globalSettings: {
 			defaultColumnNames: {
 				today: "",
@@ -53,6 +53,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 			autoAddDue: true,
 			scanVaultAtStartup: false,
 			dayPlannerPlugin: false,
+			realTimeScanning: false,
 		},
 	},
 };

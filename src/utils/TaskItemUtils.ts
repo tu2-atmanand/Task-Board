@@ -68,9 +68,17 @@ export const moveFromPendingToCompleted = (task: Task) => {
 
 		// Move task from Pending to Completed
 		if (allTasks.Pending[updatedTask.filePath]) {
+			console.log(
+				"moveFromPendingToCompleted : All tasks inside allTasks.Pending[updatedTask.filePath] : ",
+				allTasks.Pending[updatedTask.filePath]
+			);
 			allTasks.Pending[updatedTask.filePath] = allTasks.Pending[
 				updatedTask.filePath
 			].filter((task: any) => task.id !== updatedTask.id);
+			console.log(
+				"Lets see what is going in allTasks.Pending[updatedTask.filePath] = ",
+				allTasks.Pending[updatedTask.filePath]
+			);
 			if (!allTasks.Completed[updatedTask.filePath]) {
 				allTasks.Completed[updatedTask.filePath] = [];
 			}
@@ -98,6 +106,10 @@ export const moveFromCompletedToPending = (task: Task) => {
 			allTasks.Completed[updatedTask.filePath] = allTasks.Completed[
 				updatedTask.filePath
 			].filter((task: any) => task.id !== updatedTask.id);
+			console.log(
+				"Lets see what is going in allTasks.Completed[updatedTask.filePath] = ",
+				allTasks.Completed[updatedTask.filePath]
+			);
 			if (!allTasks.Pending[updatedTask.filePath]) {
 				allTasks.Pending[updatedTask.filePath] = [];
 			}

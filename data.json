@@ -9,8 +9,24 @@
             "active": true,
             "data": {
               "collapsed": false,
-              "name": "Today",
+              "name": "Over Due",
               "index": 1,
+              "range": {
+                "tag": "before",
+                "rangedata": {
+                  "from": -1,
+                  "to": 0
+                }
+              }
+            }
+          },
+          {
+            "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Today",
+              "index": 2,
               "range": {
                 "tag": "between",
                 "rangedata": {
@@ -26,7 +42,7 @@
             "data": {
               "collapsed": false,
               "name": "Tomorrow",
-              "index": 2,
+              "index": 3,
               "range": {
                 "tag": "between",
                 "rangedata": {
@@ -37,47 +53,12 @@
             }
           },
           {
-            "colType": "untagged",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Untagged Tasks",
-              "index": 3
-            }
-          },
-          {
-            "colType": "dated",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Over Due",
-              "index": 4,
-              "range": {
-                "tag": "before",
-                "rangedata": {
-                  "from": -1,
-                  "to": 0
-                }
-              }
-            }
-          },
-          {
             "colType": "undated",
             "active": true,
             "data": {
               "collapsed": false,
               "name": "Undated",
-              "index": 5
-            }
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Test Tagged Tasks",
-              "index": 6,
-              "coltag": "Test"
+              "index": 4
             }
           },
           {
@@ -86,7 +67,7 @@
             "data": {
               "collapsed": false,
               "name": "Future",
-              "index": 7,
+              "index": 5,
               "range": {
                 "tag": "after",
                 "rangedata": {
@@ -103,16 +84,7 @@
               "collapsed": false,
               "limit": 10,
               "name": "Completed",
-              "index": 8
-            }
-          },
-          {
-            "colType": "otherTags",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Other Tags",
-              "index": 9
+              "index": 6
             }
           }
         ],
@@ -122,7 +94,7 @@
         ],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "Pending Tasks",
+        "name": "For Testing, This board contains only date related tasks",
         "index": 1,
         "showColumnTags": true,
         "showFilteredTags": true
@@ -217,7 +189,7 @@
         "showFilteredTags": true
       },
       {
-        "name": "Test Board",
+        "name": "All types of Columns",
         "index": 3,
         "columns": [
           {
@@ -287,9 +259,10 @@
       "taskCompletionFormat": "Obsidian",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": true,
-      "autoAddDue": false,
-      "scanVaultAtStartup": true,
-      "dayPlannerPlugin": false
+      "autoAddDue": true,
+      "scanVaultAtStartup": false,
+      "dayPlannerPlugin": false,
+      "realTimeScanning": true
     }
   }
 }
