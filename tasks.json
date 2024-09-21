@@ -48,7 +48,7 @@
     "Miscellaneous Points.md": [],
     "Pending Document Work.md": [
       {
-        "id": 1726939806872,
+        "id": 1726943852624,
         "body": "Create Medical Certificate : [[Format-MedicalCertificate.pdf",
         "time": "",
         "due": "",
@@ -58,20 +58,20 @@
         "completed": false
       },
       {
-        "id": 1726939806872,
+        "id": 1726943852624,
         "body": "New Event want to register please",
         "time": "",
         "due": "",
         "tag": "",
-        "priority": "0",
+        "priority": "2",
         "filePath": "Pending Document Work.md",
         "completed": false
       },
       {
-        "id": 1726939806873,
+        "id": 1726943852625,
         "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
@@ -94,10 +94,10 @@
     "Daily_Notes/DailyTemplate.md": [],
     "Daily_Notes/27-08-2024.md": [
       {
-        "id": 1726939806924,
+        "id": 1726944087413,
         "body": "Put Hair Oil",
         "time": "18:00 - 18:20",
-        "due": "",
+        "due": "2024-09-22",
         "tag": "",
         "priority": "0",
         "filePath": "Daily_Notes/27-08-2024.md",
@@ -106,10 +106,10 @@
     ],
     "Daily_Notes/25-08-2024.md": [
       {
-        "id": 1726939806926,
+        "id": 1726943879540,
         "body": "Tata Crucible Quiz",
         "time": "17:30 - 17:30",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Daily_Notes/25-08-2024.md",
@@ -119,28 +119,7 @@
     "Daily_Notes/24-08-2024.md": [],
     "Daily_Notes/30-08-2024.md": [],
     "Daily_Notes/29-08-2024.md": [],
-    "Daily_Notes/28-08-2024.md": [
-      {
-        "id": 1726939806929,
-        "body": "New item",
-        "time": "09:10 - 09:10",
-        "due": "",
-        "tag": "",
-        "priority": "0",
-        "filePath": "Daily_Notes/28-08-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726939806929,
-        "body": "New item",
-        "time": "09:00 - 09:00",
-        "due": "",
-        "tag": "",
-        "priority": "0",
-        "filePath": "Daily_Notes/28-08-2024.md",
-        "completed": false
-      }
-    ],
+    "Daily_Notes/28-08-2024.md": [],
     "Daily_Notes/22-08-2024.md": [],
     "Daily_Notes/23-08-2024.md": [],
     "Daily_Notes/21-08-2024.md": [
@@ -157,7 +136,7 @@
     ],
     "Daily_Notes/18-09-2024.md": [
       {
-        "id": 1726939806932,
+        "id": 1726944030386,
         "body": "Adding a new task, i think now everything is working. Adding all the fields now.",
         "time": "12:09 - 13:09",
         "due": "2024-09-19",
@@ -167,20 +146,20 @@
         "completed": false
       },
       {
-        "id": 1726939806932,
+        "id": 1726944030386,
         "body": "ading simple task to see if the time afterwards will come or not",
         "time": "",
-        "due": "2024-09-18",
+        "due": "2024-09-23",
         "tag": "#Testing",
         "priority": "0",
         "filePath": "Daily_Notes/18-09-2024.md",
         "completed": false
       },
       {
-        "id": 1726939806932,
+        "id": 1726944030386,
         "body": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
         "time": "18:21 - 19:21",
-        "due": "2024-09-19",
+        "due": "2024-09-23",
         "tag": "#Testing",
         "priority": "0",
         "filePath": "Daily_Notes/18-09-2024.md",
@@ -190,17 +169,7 @@
     "Daily_Notes/01-09-2024.md": [],
     "Daily_Notes/17-09-2024.md": [
       {
-        "id": 1726939806938,
-        "body": "This task will be updated in the json file after 10 seconds",
-        "time": "",
-        "due": "",
-        "tag": "#Testing",
-        "priority": "0",
-        "filePath": "Daily_Notes/17-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1726939806938,
+        "id": 1726944157639,
         "body": "Adding new task, this will update in the file after 5 minutes",
         "time": "12:45 - 13:45",
         "due": "",
@@ -210,7 +179,7 @@
         "completed": false
       },
       {
-        "id": 1726939806938,
+        "id": 1726944157639,
         "body": "autoAddDue is ON, now today date should come automatically",
         "time": "12:12 - 13:12",
         "due": "2024-09-21",
@@ -220,7 +189,7 @@
         "completed": false
       },
       {
-        "id": 1726939806938,
+        "id": 1726944157639,
         "body": "Adding tomorrow date, it should come even autoAddDue is ON",
         "time": "",
         "due": "2024-09-22",
@@ -419,7 +388,7 @@
     "Miscellaneous Points.md": [],
     "Pending Document Work.md": [
       {
-        "id": 1726939806872,
+        "id": 1726943852624,
         "body": "Photo with Yellow Background : [[MyPassportPhoto.jpg]]",
         "time": "",
         "due": "",
@@ -429,7 +398,7 @@
         "completed": true
       },
       {
-        "id": 1726939806872,
+        "id": 1726943852624,
         "body": "Aadhar Card : [[AdharCard.pdf]]",
         "time": "",
         "due": "",
@@ -439,284 +408,284 @@
         "completed": true
       },
       {
-        "id": 1726939806872,
-        "body": "X Grade Mark Sheet : [[10_Marksheet.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "X Grade Certificate : [[X_Grade_Certificate.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "XII Grade Marksheet : [[12_Marksheet.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "XII Grade Certificate : [[XII_Grade_Certificate.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "Graduate All Semester Marksheets :",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "Graduation Degree Provisional Certificate : [[GraduationProvisionalDegreeCertificate-16-Aug-2024.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "Bonafied Letter : [[CollegeBonafideCertificate.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "Graduation Certificate : [[CollegeDegreeCertificate.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "Non-Criminal Affidavit : [[NCA_TCS.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "Birth Certificate : [[BirthCertificate.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "PAN Card : [[PanCard.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "Passport : [[Passport.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806872,
-        "body": "NSR eCard : [[NSR_eCard.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Address Proof : Aadhar Card",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Copy of Person of India Origin (PIO) card : Passport",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Election/Voter ID Card : [[e-EPIC_IIT0440180.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "ID Proof : Voter ID",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Spintly Experience Letter : [[Atmanand Gauns - Internship Experience Certificate.pdf]]",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Apply for new **Birth Certificate** hardcopy",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Create the Non-Criminal Affidavit : [[Format-Non_Criminal_Affidavit.pdf",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Only one Recording Course is remaining of Java, you can finish this off Today",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "2024-08-25",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Only one Recording Course is remaining of Java, you can finish this off Today",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "2024-08-24",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Get 8th Semester Provisional Marksheet and Apply for :",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "In my BGC form there is a problem of Wrong Institution name for SSC an HSSC. Also the Board of Education for BE should be Goa University. **I got the following pdf, while submitting the BGC form or updating and submitting form : ** [[14472195BGC.pdf]]  ===== I will only able to change this after joining.",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "**See what you have filled for ECNR option, change it to Yes, it will be in the NSR Portal.**",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       },
       {
-        "id": 1726939806873,
-        "body": "Add Passport details in NSR portal and BGC after getting Passport.",
+        "id": 1726943852625,
+        "body": "Create new **Income Certificate** of father before joining.",
         "time": "",
-        "due": "",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
         "filePath": "Pending Document Work.md",
-        "completed": true
+        "completed": false
       }
     ],
     "Excalidraw/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
@@ -725,7 +694,7 @@
     "Daily_Notes/27-08-2024.md": [],
     "Daily_Notes/25-08-2024.md": [
       {
-        "id": 1726939806926,
+        "id": 1726943879540,
         "body": "Cut Nails ✅ 2024-08-25",
         "time": "10:00 - 10:15",
         "due": "",
@@ -738,13 +707,13 @@
     "Daily_Notes/24-08-2024.md": [
       {
         "id": 1726939806926,
-        "body": "Completed Three Hand-on Courses ✅ 2024-08-25",
-        "time": "11:00 - 13:30",
-        "due": "",
+        "body": "Tata Crucible Quiz",
+        "time": "17:30 - 17:30",
+        "due": "2024-09-23",
         "tag": "",
         "priority": "0",
-        "filePath": "Daily_Notes/24-08-2024.md",
-        "completed": true
+        "filePath": "Daily_Notes/25-08-2024.md",
+        "completed": false
       },
       {
         "id": 1726939806927,
@@ -762,7 +731,7 @@
     "Daily_Notes/28-08-2024.md": [],
     "Daily_Notes/22-08-2024.md": [
       {
-        "id": 1726939806929,
+        "id": 1726944144977,
         "body": "Give a shot to Java Hackathon ⏫ ➕ 2024-08-22 📅 2024-08-22 ✅ 2024-08-23",
         "time": "17:00 - 18:30",
         "due": "2024-08-22",
@@ -829,7 +798,17 @@
     "Daily_Notes/01-09-2024.md": [],
     "Daily_Notes/17-09-2024.md": [
       {
-        "id": 1726939806938,
+        "id": 1726944157639,
+        "body": "This task will be updated in the json file after 10 seconds",
+        "time": "",
+        "due": "",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726944157639,
         "body": "Now auto add due option is false, so the due date shouldnt be added",
         "time": "",
         "due": "",
@@ -839,7 +818,7 @@
         "completed": true
       },
       {
-        "id": 1726939806938,
+        "id": 1726944157639,
         "body": "Auto add due option is false, but if i add todays date it should work",
         "time": "12:10 - 13:10",
         "due": "2024-09-17",
@@ -849,7 +828,7 @@
         "completed": true
       },
       {
-        "id": 1726939806938,
+        "id": 1726944157639,
         "body": "If i add any other due it should work, autoAddDue is off",
         "time": "",
         "due": "2024-09-18",
