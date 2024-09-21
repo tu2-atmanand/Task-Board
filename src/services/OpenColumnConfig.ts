@@ -4,6 +4,7 @@ import { App, Plugin } from "obsidian";
 
 import { Board } from "../interfaces/KanbanBoard";
 import { BoardConfigureModal } from "src/settings/BoardConfigureModal";
+import { ReScanVaultModal } from "src/modal/ReScanVaultModal";
 import fs from "fs";
 import path from "path";
 
@@ -69,4 +70,12 @@ export const openBoardConfigModal = (
 	onSave: (updatedBoards: Board[]) => void
 ) => {
 	new BoardConfigureModal(app, boards, activeBoardIndex, onSave).open();
+};
+
+
+// Function to open the BoardConfigModal
+export const openReScanVaultModal = (
+	app: App
+) => {
+	new ReScanVaultModal(app).open();
 };
