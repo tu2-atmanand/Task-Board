@@ -57,9 +57,9 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 	// Unnecessary below memory and CPU wastage, just for the Live Preview thing, you can remove this and create the actual display of the file content, or else, you can keep this as it also, no issues : 
 	let newTaskContent = ''
 	if (dayPlannerPlugin) {
-		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${body} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${ tag } `;
+		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${body} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${tag} `;
 	} else {
-		newTaskContent = `- [] ${body} |${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''}${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${ tag } `;
+		newTaskContent = `- [] ${body} |${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''}${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority] : ''} ${tag} `;
 	}
 
 	return (

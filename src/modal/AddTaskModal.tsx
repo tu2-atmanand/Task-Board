@@ -136,6 +136,10 @@ export class AddTaskModal extends Modal {
 		};
 	}
 
+	onClose(): void {
+		this.contentEl.empty();
+	}
+
 	addTaskToFile(taskBody: string, time: string, dueDate: string, tag: string, priority: string) {
 		const basePath = (window as any).app.vault.adapter.basePath;
 		const fullPath = path.join(basePath, this.filePath);
