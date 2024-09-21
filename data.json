@@ -1,0 +1,268 @@
+{
+  "version": "0.15.0",
+  "data": {
+    "boardConfigs": [
+      {
+        "columns": [
+          {
+            "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Over Due",
+              "index": 1,
+              "range": {
+                "tag": "before",
+                "rangedata": {
+                  "from": -1,
+                  "to": 0
+                }
+              }
+            }
+          },
+          {
+            "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Today",
+              "index": 2,
+              "range": {
+                "tag": "between",
+                "rangedata": {
+                  "from": 0,
+                  "to": 0
+                }
+              }
+            }
+          },
+          {
+            "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Tomorrow",
+              "index": 3,
+              "range": {
+                "tag": "between",
+                "rangedata": {
+                  "from": 1,
+                  "to": 1
+                }
+              }
+            }
+          },
+          {
+            "colType": "undated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Undated",
+              "index": 4
+            }
+          },
+          {
+            "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Future",
+              "index": 5,
+              "range": {
+                "tag": "after",
+                "rangedata": {
+                  "from": 2,
+                  "to": 0
+                }
+              }
+            }
+          },
+          {
+            "colType": "completed",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "limit": 10,
+              "name": "Completed",
+              "index": 6
+            }
+          }
+        ],
+        "filters": [
+          "Test",
+          "NOTE"
+        ],
+        "filterPolarity": "Allow",
+        "filterScope": "Both",
+        "name": "For Testing, This board contains only date related tasks",
+        "index": 1,
+        "showColumnTags": true,
+        "showFilteredTags": true
+      },
+      {
+        "columns": [
+          {
+            "colType": "untagged",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Untagged",
+              "index": 1
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Testing Tasks",
+              "index": 2,
+              "coltag": "Testing"
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "GPT",
+              "index": 3,
+              "coltag": "GPT"
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "When Mobile Data Left at Night",
+              "index": 4,
+              "coltag": "WhenMobileDataLeft"
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Note Till Task is Done",
+              "index": 5,
+              "coltag": "NOTE"
+            }
+          },
+          {
+            "colType": "otherTags",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Other Tags",
+              "index": 6
+            }
+          },
+          {
+            "colType": "completed",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "index": 7,
+              "limit": 10,
+              "name": "Completed"
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Test Tasks",
+              "index": 8,
+              "coltag": "Test"
+            }
+          }
+        ],
+        "filters": [],
+        "filterPolarity": "Allow",
+        "filterScope": "Both",
+        "name": "Tag Based Board",
+        "index": 2,
+        "showColumnTags": true,
+        "showFilteredTags": true
+      },
+      {
+        "name": "All types of Columns",
+        "index": 3,
+        "columns": [
+          {
+            "colType": "dated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Past Tasks",
+              "index": 1,
+              "range": {
+                "rangedata": {
+                  "from": -1,
+                  "to": 0
+                }
+              }
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Test Name Tag Column",
+              "index": 2,
+              "coltag": "Test"
+            }
+          },
+          {
+            "colType": "untagged",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Untagged Tasks",
+              "index": 3
+            }
+          },
+          {
+            "colType": "otherTags",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Other Tags Tasks",
+              "index": 4
+            }
+          }
+        ],
+        "showColumnTags": true,
+        "showFilteredTags": true
+      }
+    ],
+    "globalSettings": {
+      "defaultColumnNames": {
+        "Undated": "",
+        "Overdue": "Kal",
+        "Today": "Todu",
+        "Tomorrow": "",
+        "Future": "",
+        "Other Tags": "",
+        "Untagged": "",
+        "Completed": ""
+      },
+      "filters": [
+        "MyReadme.md, Daily/, New.md"
+      ],
+      "firstDayOfWeek": "2",
+      "ignoreFileNameDates": false,
+      "taskCompletionFormat": "Obsidian",
+      "taskCompletionInLocalTime": true,
+      "taskCompletionShowUtcOffset": true,
+      "autoAddDue": true,
+      "scanVaultAtStartup": false,
+      "dayPlannerPlugin": false,
+      "realTimeScanning": true
+    }
+  }
+}

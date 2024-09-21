@@ -22,6 +22,55 @@ If your plugin does not need CSS, delete this file.
 	border-bottom: 1px solid #ddd;
 }
 
+.boardTitles {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+	overflow: auto;
+}
+
+.boardTitleButton {
+	box-shadow: var(--shadow-activated-tab-header-dark) !important;
+	background: transparent !important;
+	border-radius: var(--border-radius-activated-tab-header-dark);
+}
+
+.boardTitleButtonActive {
+	box-shadow: var(--shadow-activated-tab-header-dark) !important;
+	background: var(--background-activated-tab-header-dark) !important;
+	border-radius: var(--border-radius-activated-tab-header-dark);
+	border: var(--border-width) solid olive;
+}
+
+.kanbanHeaderBtns {
+	display: flex;
+	flex-direction: row;
+}
+
+.kanbanHeaderBtnsSeparator {
+	padding-inline: 0;
+}
+
+.addTaskBtn,
+.ConfigureBtn,
+.RefreshBtn {
+	background-color: transparent !important;
+	background: none;
+	padding: 7px;
+	margin-inline: 0.3em;
+	/* color: #fff; */
+	/* border: none; */
+	/* border-radius: 3px; */
+	cursor: pointer;
+	/* font-size: 14px; */
+}
+
+.addTaskBtn:hover,
+.ConfigureBtn:hover,
+.RefreshBtn:hover {
+	border: var(--border-width) solid olive;
+}
+
 .columnsContainer {
 	display: flex;
 	overflow-x: auto;
@@ -29,18 +78,9 @@ If your plugin does not need CSS, delete this file.
 	height: 100%;
 }
 
-.addColBtn {
-	cursor: pointer;
-	padding: 5px 10px;
-	border: none;
-	background-color: #007bff;
-	color: white;
-	border-radius: 5px;
-}
-
 
 /* src/styles/Column.css */
-.kanbanColumn {
+.TaskBoardColumnsSection {
 	background: transparent !important;
 	/* backdrop-filter: blur(10px) saturate(300%) contrast(80%) brightness(60%); */
 	border: var(--border-width) solid olive;
@@ -53,16 +93,28 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: column;
 }
 
-.columnHeaderBar {
+.taskBoardColumnSecHeader {
 	display: flex;
 	flex-direction: row;
 	padding: 10px;
 	background: var(--background-primary);
+	justify-content: space-between;
+	align-items: center;
 }
 
 .columnTitle {
-	color: white;
+	color: var(--foreground-primary);
 	text-align: center;
+	font-size: 1.2em;
+	font-weight: 700;
+}
+
+.columnDragIcon {
+	opacity: 0;
+}
+
+.columnDragIcon:hover {
+	opacity: 1;
 }
 
 .tasksContainer {
@@ -77,33 +129,150 @@ If your plugin does not need CSS, delete this file.
 
 /* /src/components/TaskItem.tsx */
 
-.taskItemTag {
-	background-color: var(--blockquote-background-dark);
-	border-radius: 8px;
-	padding-block: 2px;
-	padding-inline: 7px;
-	width: fit-content;
-	color: yellow;
-}
-
 .taskItem {
 	background: var(--background-secondary);
 	border: var(--border-width) solid olive;
-	padding: 8px;
 	border-radius: 5px;
-	padding-inline: 8px;
+	display: flex;
+	flex-direction: row;
+}
+
+.colorIndicator {
+	width: 0.3em;
+	height: 100%;
+	/* float: left; */
+	margin-right: 5px;
+	border-radius: 6px 0px 0px 6px;
+}
+
+.taskItemMainContent {
+	margin-block: 0.3em;
+	margin-inline-end: 0.3em;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.taskItemMainBody {
+	margin-block: 0.6em;
+	display: flex;
+	flex-direction: row;
+	gap: 0.4em;
 }
 
 .taskItemBody {
 	padding: 0;
+	font-weight: 500;
+}
+
+.taskCheckbox {
+	transform: scale(1);
+	transition: transform 0.3s;
+}
+
+.taskCheckbox.checked {
+	transform: scale(1.5);
+	/* Slight animation effect */
+	transition: transform 0.3s;
+}
+
+.taskItemTag {
+	background-color: var(--tag-background);
+	border: var(--tag-border-width) solid var(--tag-border-color);
+	border-radius: var(--tag-radius);
+	color: var(--tag-color);
+	font-size: var(--tag-size);
+	font-weight: var(--tag-weight);
+	text-decoration: var(--tag-decoration);
+	padding: var(--tag-padding-y) var(--tag-padding-x);
+	line-height: 1;
 }
 
 .taskItemDate {
-	color: orange;
+	color: rgb(185, 125, 13);
+	font-size: small;
+}
+
+.taskItemHeader {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.taskItemHeaderLeft {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+}
+
+.DragBtn {
+	opacity: 0;
+	background-color: var(--background-primary-alt);
+	border: none;
+	cursor: pointer;
+	padding-block: 2px;
+	padding-inline: 4px;
+	border-radius: 5px;
+	/* margin: 0 5px; */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.2em;
+	/* Adjust size as needed */
+	transition: transform 0.2s;
+	/* Animation for hover effect */
+}
+
+.DragBtn:hover {
+	transform: scale(1.1);
+}
+
+.DragBtn:hover {
+	opacity: 1;
+}
+
+.taskItemFooter {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+
+.taskItemFooterBtns {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+}
+
+.taskItemiconButton {
+	background: none;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 2px;
+	/* margin: 0 5px; */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.2em;
+	/* Adjust size as needed */
+	transition: transform 0.2s;
+	/* Animation for hover effect */
+}
+
+.taskItemiconButton:hover {
+	transform: scale(1.1);
+	/* Slightly enlarge on hover */
+}
+
+.taskItemiconButton:focus {
+	outline: none;
+	/* Remove default focus outline */
 }
 
 
-/* /src/compoenents/BoardModal.tsx */
+/* /src/compoenents/BoardConfigureModal.tsx */
 
 .config-modal {
 	display: flex;
@@ -130,4 +299,462 @@ If your plugin does not need CSS, delete this file.
 .config-modal-content {
 	flex-grow: 1;
 	padding: 20px;
+}
+
+
+/* /src/components/AddTaskModal.tsx */
+
+.modal-content-wrapper {
+	display: flex;
+	flex-direction: column;
+	padding: 20px;
+}
+
+.modal-content-wrapper h2 {
+	font-size: 20px;
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.modal-content-wrapper p {
+	margin-bottom: 20px;
+	font-size: 14px;
+	color: #bebbb7;
+	text-align: center;
+}
+
+.modal-content-wrapper input {
+	/* margin-bottom: 10px; */
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.modal-content-wrapper button {
+	padding: 10px 15px;
+	border: none;
+	border-radius: 4px;
+	background-color: #007bff;
+	color: white;
+	cursor: pointer;
+	margin-top: 40px;
+}
+
+.modal-content-wrapper button:hover {
+	background-color: #0056b3;
+}
+
+.due-input-wrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 1.5em;
+	/* Align items vertically centered */
+	/* margin-bottom: 10px; */
+	/* Space below the entire row */
+}
+
+.due-input-wrapper h6 {
+	margin: 0;
+}
+
+.due-input-wrapper input {
+	padding: 5px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.start-time-input-wrapper,
+.end-time-input-wrapper,
+.priority-input-wrapper,
+.tag-input-wrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 1.5em;
+}
+
+.time-input-wrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 1.5em;
+	justify-content: space-between;
+}
+
+
+/* /src/components/EditTaskModal.tsx */
+
+.EditTaskModalHome {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.EditTaskModalHome-title {
+	font-size: 1.5rem;
+	font-weight: bold;
+	margin-bottom: 15px;
+	text-align: center;
+}
+
+.EditTaskModalHome-taskBody {
+	width: 100%;
+	height: 100px;
+	margin-bottom: 15px;
+	padding: 10px;
+	font-size: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.EditTaskModalHomeField {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 15px;
+}
+
+.EditTaskModalHomeTimeInput,
+.EditTaskModalHomeDueInput {
+	width: 48%;
+	padding: 5px;
+	font-size: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.EditTaskModalHomeFieldTitle {
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+.EditTaskModalHomePreview {
+	max-width: 30vw;
+}
+
+.fileContentContainer {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow-y: auto;
+	border-radius: 4px;
+	margin-bottom: 15px;
+	background-color: var(--background-primary-alt);
+	position: relative;
+}
+
+.fileContentContainer h6 {
+	font-size: 1rem;
+	/* margin-bottom: 10px; */
+	font-weight: bold;
+	margin: 0;
+	background: black;
+	padding: 0.5em;
+}
+
+.fileContent {
+	white-space: pre-wrap;
+	min-height: 10vh;
+	overflow-wrap: break-word;
+	padding: 4px;
+	padding-block: 1em;
+	font-family: monospace;
+}
+
+.EditTaskModalHomeOpenFileBtn {
+	position: sticky;
+	bottom: 10px;
+	right: 10px;
+	padding: 8px 12px;
+	align-self: end;
+	font-size: 0.9rem;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	width: fit-content;
+	z-index: 10;
+}
+
+.EditTaskModalHomeOpenFileBtn:hover {
+	background-color: #0056b3;
+}
+
+.EditTaskModalHomeSaveBtn:hover {
+	background-color: green;
+}
+
+
+/* DeleteTaskConfirmationModal */
+
+.deleteTaskConfirmBtn:hover {
+	background-color: red;
+	/* Change background to green on hover */
+}
+
+.deleteTaskCancelmBtn:hover {
+	background-color: green;
+	/* Change background to red on hover */
+}
+
+
+/* /src/compoenents/BoardConfigureModal.tsx - V2 */
+
+.modal {
+	width: auto;
+	min-height: fit-content;
+}
+
+/* .modal-content {
+	flex: 1 1 auto;
+	font-size: var(--font-ui-medium);
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+} */
+
+.boardConfigModalHome {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	height: 100%;
+}
+
+.boardConfigModalSidebar {
+	background-color: var(--background-secondary);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	gap: 25em;
+	padding: 1em;
+	border-radius: 4px;
+	/* Ensure the sidebar takes the full height of the modal and doesn't scroll */
+	height: 100%;
+	position: sticky;
+	top: 0;
+	overflow: hidden;
+}
+
+.boardConfigModalSidebarBtnArea {
+	display: flex;
+	gap: 1em;
+	width: 100%;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.boardConfigModalSidebarBtnAreaGlobal {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.boardConfigModalSidebarBtnArea-btn {
+	border-radius: var(--border-radius-activated-tab-header-dark);
+	border: var(--border-width) solid olive;
+	padding: 8px;
+}
+
+.boardConfigModalSidebarBtnArea-btn-active {
+	box-shadow: var(--shadow-activated-tab-header-dark) !important;
+	background: var(--background-activated-tab-header-dark) !important;
+	border-radius: var(--border-radius-activated-tab-header-dark);
+	border: var(--border-width) solid olive;
+	padding: 8px;
+}
+
+.boardConfigModalMainContent {
+	flex: 1;
+	padding-left: 1em;
+	overflow-y: auto;
+	/* Allow scrolling for main content */
+}
+
+.boardConfigModalMainContent-Active {
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
+}
+
+.boardConfigModalMainContent-Active-Body {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.boardConfigModalMainContent-Active-Body h4 {
+	margin-block: 2px;
+}
+
+.boardConfigModalMainContent-Active-Body-InputItems {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.boardConfigModalMainContent-Active-Body-boardNameTag {
+	display: flex;
+	flex-direction: column;
+}
+
+.boardConfigModalMainContent-Active-BodyColumnSec {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.boardConfigModalMainContent-Active-BodyColumnsList {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.boardConfigModalColumnRow {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	gap: 0.5em;
+	margin-block: 0.5em;
+}
+
+.boardConfigModalColumnRowContent {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	gap: 0.5em;
+}
+
+.modal-container.mod-dim {
+	min-width: fit-content;
+	min-height: fit-content;
+}
+
+.modal-close-button {
+	z-index: 10;
+}
+
+
+/* /src/modal/AddColumnModal.tsx */
+
+.addColumnModalOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.addColumnModalOverlayContent {
+	background: var(--background-secondary);
+	border: var(--border-width) solid olive;
+	border-radius: 5px;
+	padding: 20px;
+	width: 400px;
+	max-width: 90%;
+}
+
+.addColumnModalOverlayContentField {
+	margin-bottom: 15px;
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.addColumnModalOverlayContentActions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.addColumnModalOverlayContentActions button {
+	margin-left: 10px;
+}
+
+
+/* /src/settings/PluginGlobalSettingContent.tsx */
+
+.globalSettingContentHome {
+	display: flex;
+	flex-direction: column;
+}
+
+.globalSettingContentHomeElement {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.globalSettingContentHomeElementTag {
+	display: flex;
+	flex-direction: column;
+	text-wrap: balance;
+}
+
+.globalSettingContentHomeElementTag h4 {
+	margin-block: 1px;
+}
+
+
+/* // src/settings/TaskBoardSettingTab.ts */
+
+.TaskBoardSettingTab {
+	/* max-width: fit-content; */
+}
+
+
+/* /src/components/ReScanVaultModal.tsx */
+
+.reScanVaultModalHome {
+	min-width: 40vw;
+	min-height: 40vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.reScanVaultModalHomeSecondSection {
+	display: flex;
+	align-items: center;
+	margin-top: 20px;
+	gap: 1em;
+}
+
+.reScanVaultModalHomeSecondSectionButton {
+	padding: 10px 15px;
+	border: none;
+	border-radius: 4px;
+	font-size: 1.5em;
+	color: white;
+	cursor: pointer;
+}
+
+.reScanVaultModalHomeSecondSectionButton:hover {
+	background-color: #007bff;
+}
+
+.reScanVaultModalHomeTerminal {
+	height: 100%;
+	width: 100%;
+	background-color: rgb(30, 30, 30);
+	color: rgb(255, 255, 255);
+	padding: 10px;
+	overflow-y: scroll;
+	margin-top: 20px;
+	min-height: inherit;
+	max-height: 65vh;
+}
+
+.reScanVaultModalHomeTasksCollected {
+	margin-top: 20px;
+	width: 100%;
+	overflow-y: scroll;
+	height: 60%;
+	background-color: transparent;
+	padding-left: 1em;
+	border: var(--border-width) solid olive;
 }

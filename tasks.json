@@ -1,61 +1,1002 @@
 {
-	"Pending": {
-		"Daily_Notes/02-08-2024.md": [
-			{
-				"id": 1725276003304,
-				"body": "Undated Task.",
-				"due": "",
-				"tag": "WorkProject"
-			},
-			{
-				"id": 1725276003305,
-				"body": "Complete the project proposal draft for review.",
-				"due": "2024-09-4",
-				"tag": "NOTE"
-			},
-			{
-				"id": 1725276003306,
-				"body": "OVERDUE TASK : Prepare slides for the marketing meeting.",
-				"due": "2024-09-2",
-				"tag": ""
-			},
-			{
-				"id": 1725276003307,
-				"body": "Organize files and documents for archiving.",
-				"due": "2024-09-15",
-				"tag": "AdminTask"
-			}
-		],
-		"Daily_Notes.md": [
-			{
-				"id": 1725276003308,
-				"body": "Call the client to discuss new requirements.",
-				"due": "2024-09-11",
-				"tag": ""
-			},
-			{
-				"id": 1725276003404,
-				"body": "TODAY : Call the client to discuss new requirements. Call the client to discuss new requirements. Call the client to discuss new requirements.",
-				"due": "2024-09-3",
-				"tag": "WhenMobileDataLeft"
-			}
-		]
-	},
-	"Completed": {
-		"Daily_Notes/01-08-2024.md": [
-			{
-				"id": 1725276003309,
-				"body": "All the Documents submitted to TCS, Waiting for JL.",
-				"due": "2024-08-31",
-				"tag": "Finance",
-				"filePath": "Daily_Notes/01-08-2024.md"
-			},
-			{
-				"id": 1725276003310,
-				"body": "Submit the quarterly earnings report to the board.",
-				"due": "2024-09-10",
-				"tag": "Reports"
-			}
-		]
-	}
+  "Pending": {
+    "Spintly Details.md": [
+      {
+        "id": 1726940128944,
+        "body": "need to complete all the Documents work  and submit to TCS",
+        "time": "",
+        "due": "2024-09-09",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Spintly Details.md",
+        "completed": false
+      },
+      {
+        "id": 1726940128944,
+        "body": "Just a new Task without tag or date",
+        "time": "10:30 - 11:30",
+        "due": "2024-09-18",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Spintly Details.md",
+        "completed": false
+      },
+      {
+        "id": 1726940128944,
+        "body": "New tasks testing",
+        "time": "",
+        "due": "2024-09-21",
+        "tag": "#test",
+        "priority": "0",
+        "filePath": "Spintly Details.md",
+        "completed": false
+      }
+    ],
+    "TODO.md": [
+      {
+        "id": 1726939806809,
+        "body": "New temp task, lets see if this comes after 5 minutes",
+        "time": "",
+        "due": "",
+        "tag": "#Testing",
+        "priority": "1",
+        "filePath": "TODO.md",
+        "completed": false
+      }
+    ],
+    "XploreProgram/How to Access Xplore Courses.md": [],
+    "Miscellaneous Points.md": [],
+    "Pending Document Work.md": [
+      {
+        "id": 1726939806872,
+        "body": "Create Medical Certificate : [[Format-MedicalCertificate.pdf",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806872,
+        "body": "New Event want to register please",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806873,
+        "body": "Create new **Income Certificate** of father before joining.",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": false
+      }
+    ],
+    "Excalidraw/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
+    "Daily_Notes/21-09-2024.md": [
+      {
+        "id": 1726939806923,
+        "body": "Adding random task for today to see how the board updates.",
+        "time": "12:02 - 13:02",
+        "due": "2024-09-22",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/21-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/DailyTemplate.md": [],
+    "Daily_Notes/27-08-2024.md": [
+      {
+        "id": 1726939806924,
+        "body": "Put Hair Oil",
+        "time": "18:00 - 18:20",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/27-08-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/25-08-2024.md": [
+      {
+        "id": 1726939806926,
+        "body": "Tata Crucible Quiz",
+        "time": "17:30 - 17:30",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/25-08-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/24-08-2024.md": [],
+    "Daily_Notes/30-08-2024.md": [],
+    "Daily_Notes/29-08-2024.md": [],
+    "Daily_Notes/28-08-2024.md": [
+      {
+        "id": 1726939806929,
+        "body": "New item",
+        "time": "09:10 - 09:10",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/28-08-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806929,
+        "body": "New item",
+        "time": "09:00 - 09:00",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/28-08-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/22-08-2024.md": [],
+    "Daily_Notes/23-08-2024.md": [],
+    "Daily_Notes/21-08-2024.md": [
+      {
+        "id": 1726939806931,
+        "body": "I missed lot of Slides before this, get them from the Recording Video afterwards @completed(2024-08-23T14:21:05+05:30)",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/21-08-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/18-09-2024.md": [
+      {
+        "id": 1726939806932,
+        "body": "Adding a new task, i think now everything is working. Adding all the fields now.",
+        "time": "12:09 - 13:09",
+        "due": "2024-09-19",
+        "tag": "#Complete",
+        "priority": "0",
+        "filePath": "Daily_Notes/18-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806932,
+        "body": "ading simple task to see if the time afterwards will come or not",
+        "time": "",
+        "due": "2024-09-18",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/18-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806932,
+        "body": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
+        "time": "18:21 - 19:21",
+        "due": "2024-09-19",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/18-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/01-09-2024.md": [],
+    "Daily_Notes/17-09-2024.md": [
+      {
+        "id": 1726939806938,
+        "body": "This task will be updated in the json file after 10 seconds",
+        "time": "",
+        "due": "",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806938,
+        "body": "Adding new task, this will update in the file after 5 minutes",
+        "time": "12:45 - 13:45",
+        "due": "",
+        "tag": "#Testing",
+        "priority": "2",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806938,
+        "body": "autoAddDue is ON, now today date should come automatically",
+        "time": "12:12 - 13:12",
+        "due": "2024-09-21",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939806938,
+        "body": "Adding tomorrow date, it should come even autoAddDue is ON",
+        "time": "",
+        "due": "2024-09-22",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/16-09-2024.md": [],
+    "Daily_Notes/15-09-2024.md": [
+      {
+        "id": 1726939807002,
+        "body": "New task adding to see if the task directly shows up in the board, after adding through the modal",
+        "time": "15:50 - 16:20",
+        "due": "2024-09-11",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939807002,
+        "body": "A temp task to see completed field comes or not",
+        "time": "",
+        "due": "2024-09-15",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939807002,
+        "body": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
+        "time": "21:01 - 22:01",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939807002,
+        "body": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
+        "time": "21:45 - 22:45",
+        "due": "",
+        "tag": "#Test",
+        "priority": "1",
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/14-09-2024.md": [
+      {
+        "id": 1726939807022,
+        "body": "Now the auto add due option is disabled, so if i dont give anything, there shouldnt be anything",
+        "time": "23:44 - 00:44",
+        "due": "2024-09-16",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939807022,
+        "body": "Now, if i give date, it should come even though, `autoAddDue` option is disabled, Rescheduling",
+        "time": "22:45 - 23:45",
+        "due": "2024-09-18",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939807022,
+        "body": "Now adding task to see if 0 comes if no priority given",
+        "time": "",
+        "due": "",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939807022,
+        "body": "Since there are very less tasks for future so just adding a task, and then changing its due to more future to see what happens",
+        "time": "",
+        "due": "2024-09-22",
+        "tag": "#Project",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/13-09-2024.md": [],
+    "Daily_Notes/12-09-2024.md": [],
+    "Daily_Notes/07-08-2024.md": [
+      {
+        "id": 1726939807035,
+        "body": "Watch the following Javascript Course. #OfflineVideo ✅ 2024-08-24",
+        "time": "",
+        "due": "",
+        "tag": "#OfflineVideo",
+        "priority": "0",
+        "filePath": "Daily_Notes/07-08-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/11-09-2024.md": [],
+    "Daily_Notes/09-09-2024.md": [
+      {
+        "id": 1726939807097,
+        "body": "New logic added to edit the task and replace in line",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/09-09-2024.md",
+        "completed": false
+      },
+      {
+        "id": 1726939807097,
+        "body": "Adding testing task, time will come first, thats it",
+        "time": "23:18 - 00:18",
+        "due": "2024-09-17",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/09-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/08-09-2024.md": [],
+    "Daily_Notes/07-09-2024.md": [
+      {
+        "id": 1726939807101,
+        "body": "ChatGPT sometimes do things amazing",
+        "time": "14:11 - 15:11",
+        "due": "2024-09-25",
+        "tag": "#GPT",
+        "priority": "0",
+        "filePath": "Daily_Notes/07-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/06-09-2024.md": [],
+    "Daily_Notes/05-09-2024.md": [],
+    "Daily_Notes/04-09-2024.md": [],
+    "Daily_Notes/03-09-2024.md": [
+      {
+        "id": 1726939807167,
+        "body": "This  is a third task",
+        "time": "",
+        "due": "2024-09-04",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/03-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/02-09-2024.md": [
+      {
+        "id": 1726939807172,
+        "body": "adding a task",
+        "time": "",
+        "due": "2024-09-18",
+        "tag": "#testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/02-09-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes/02-08-2024.md": [],
+    "Daily_Notes/01-08-2024.md": [
+      {
+        "id": 1726939807179,
+        "body": "Watch the following Unix Sessions, Pending🔼 🏁 🔁 every day when done 🛫 2024-01-08 #OfflineVideo",
+        "time": "",
+        "due": "",
+        "tag": "#OfflineVideo",
+        "priority": "0",
+        "filePath": "Daily_Notes/01-08-2024.md",
+        "completed": false
+      }
+    ],
+    "Daily_Notes.md": [],
+    "2-Preparation_For_TCS_Interview.md": [],
+    "4-Process After Joining.md": [],
+    "3-Process After Offer Letter Received.md": [],
+    "1-Registering For TCS.md": [],
+    "0-ImportantData.md": []
+  },
+  "Completed": {
+    "Spintly Details.md": [],
+    "TODO.md": [],
+    "XploreProgram/How to Access Xplore Courses.md": [],
+    "Miscellaneous Points.md": [],
+    "Pending Document Work.md": [
+      {
+        "id": 1726939806872,
+        "body": "Photo with Yellow Background : [[MyPassportPhoto.jpg]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Aadhar Card : [[AdharCard.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "X Grade Mark Sheet : [[10_Marksheet.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "X Grade Certificate : [[X_Grade_Certificate.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "XII Grade Marksheet : [[12_Marksheet.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "XII Grade Certificate : [[XII_Grade_Certificate.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Graduate All Semester Marksheets :",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Graduation Degree Provisional Certificate : [[GraduationProvisionalDegreeCertificate-16-Aug-2024.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Bonafied Letter : [[CollegeBonafideCertificate.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Graduation Certificate : [[CollegeDegreeCertificate.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Non-Criminal Affidavit : [[NCA_TCS.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Birth Certificate : [[BirthCertificate.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "PAN Card : [[PanCard.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "Passport : [[Passport.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806872,
+        "body": "NSR eCard : [[NSR_eCard.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Address Proof : Aadhar Card",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Copy of Person of India Origin (PIO) card : Passport",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Election/Voter ID Card : [[e-EPIC_IIT0440180.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "ID Proof : Voter ID",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Spintly Experience Letter : [[Atmanand Gauns - Internship Experience Certificate.pdf]]",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Apply for new **Birth Certificate** hardcopy",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Create the Non-Criminal Affidavit : [[Format-Non_Criminal_Affidavit.pdf",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Only one Recording Course is remaining of Java, you can finish this off Today",
+        "time": "",
+        "due": "2024-08-25",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Only one Recording Course is remaining of Java, you can finish this off Today",
+        "time": "",
+        "due": "2024-08-24",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Get 8th Semester Provisional Marksheet and Apply for :",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "In my BGC form there is a problem of Wrong Institution name for SSC an HSSC. Also the Board of Education for BE should be Goa University. **I got the following pdf, while submitting the BGC form or updating and submitting form : ** [[14472195BGC.pdf]]  ===== I will only able to change this after joining.",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "**See what you have filled for ECNR option, change it to Yes, it will be in the NSR Portal.**",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806873,
+        "body": "Add Passport details in NSR portal and BGC after getting Passport.",
+        "time": "",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Pending Document Work.md",
+        "completed": true
+      }
+    ],
+    "Excalidraw/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
+    "Daily_Notes/21-09-2024.md": [],
+    "Daily_Notes/DailyTemplate.md": [],
+    "Daily_Notes/27-08-2024.md": [],
+    "Daily_Notes/25-08-2024.md": [
+      {
+        "id": 1726939806926,
+        "body": "Cut Nails ✅ 2024-08-25",
+        "time": "10:00 - 10:15",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/25-08-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/24-08-2024.md": [
+      {
+        "id": 1726939806926,
+        "body": "Completed Three Hand-on Courses ✅ 2024-08-25",
+        "time": "11:00 - 13:30",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/24-08-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806927,
+        "body": "Fantastic Four 2 watched ✅ 2024-08-24",
+        "time": "16:00 - 18:00",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/24-08-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/30-08-2024.md": [],
+    "Daily_Notes/29-08-2024.md": [],
+    "Daily_Notes/28-08-2024.md": [],
+    "Daily_Notes/22-08-2024.md": [
+      {
+        "id": 1726939806929,
+        "body": "Give a shot to Java Hackathon ⏫ ➕ 2024-08-22 📅 2024-08-22 ✅ 2024-08-23",
+        "time": "17:00 - 18:30",
+        "due": "2024-08-22",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/22-08-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/23-08-2024.md": [
+      {
+        "id": 1726939806930,
+        "body": "Give a shot to Java Hackathon ⏫ ➕ 2024-08-24 ⏳ 2024-08-24 📅 2024-08-24 ✅ 2024-08-24",
+        "time": "11:30 - 13:00",
+        "due": "2024-08-24",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/23-08-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806930,
+        "body": "Watched Fantastic 4 movie ✅ 2024-08-23",
+        "time": "15:30 - 17:30",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/23-08-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806930,
+        "body": "Did same thing of updating the Obsidian Theme, found some good  extension also, created a whole new TCS theme ✅ 2024-08-23",
+        "time": "10:00 - 11:00",
+        "due": "",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/23-08-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806930,
+        "body": "Dinner📅 2024-08-23  ✅ 2024-08-23",
+        "time": "21:30 - 22:00",
+        "due": "2024-08-23",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/23-08-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806930,
+        "body": "Learn the questions that will come for tomorrows Hackathon ⏳ 2024-08-24 📅 2024-08-24  ✅ 2024-08-24",
+        "time": "11:00 - 11:30",
+        "due": "2024-08-24",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/23-08-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/21-08-2024.md": [],
+    "Daily_Notes/18-09-2024.md": [],
+    "Daily_Notes/01-09-2024.md": [],
+    "Daily_Notes/17-09-2024.md": [
+      {
+        "id": 1726939806938,
+        "body": "Now auto add due option is false, so the due date shouldnt be added",
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806938,
+        "body": "Auto add due option is false, but if i add todays date it should work",
+        "time": "12:10 - 13:10",
+        "due": "2024-09-17",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939806938,
+        "body": "If i add any other due it should work, autoAddDue is off",
+        "time": "",
+        "due": "2024-09-18",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/16-09-2024.md": [],
+    "Daily_Notes/15-09-2024.md": [
+      {
+        "id": 1726939807002,
+        "body": "Not time, no tag, no due, no priority, ITS WORKING",
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939807002,
+        "body": "Time and Tag and Priority",
+        "time": "22:01 - 23:01",
+        "due": "",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/15-09-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/14-09-2024.md": [
+      {
+        "id": 1726939807022,
+        "body": "Final testing if all fields come correctly, now the time will come front instead of back.",
+        "time": "13:21 - 14:21",
+        "due": "2024-09-17",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939807022,
+        "body": "Let me see if due comes of today, it shouldnt come",
+        "time": "",
+        "due": "2024-09-17",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939807022,
+        "body": "Creating an Untagged future task",
+        "time": "18:42 - 19:42",
+        "due": "2024-09-21",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/13-09-2024.md": [],
+    "Daily_Notes/12-09-2024.md": [],
+    "Daily_Notes/07-08-2024.md": [],
+    "Daily_Notes/11-09-2024.md": [],
+    "Daily_Notes/09-09-2024.md": [],
+    "Daily_Notes/08-09-2024.md": [
+      {
+        "id": 1726939807099,
+        "body": "This is a task for tomorrow, updating",
+        "time": "",
+        "due": "2024-09-09",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/08-09-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/07-09-2024.md": [],
+    "Daily_Notes/06-09-2024.md": [],
+    "Daily_Notes/05-09-2024.md": [],
+    "Daily_Notes/04-09-2024.md": [],
+    "Daily_Notes/03-09-2024.md": [
+      {
+        "id": 1726939807167,
+        "body": "Finish all the Courses ASAP.",
+        "time": "",
+        "due": "2024-10-01",
+        "tag": "#Course",
+        "priority": "0",
+        "filePath": "Daily_Notes/03-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939807167,
+        "body": "Completely Updating the content of this task",
+        "time": "",
+        "due": "2024-10-03",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/03-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1726939807167,
+        "body": "Fifth task updating again, UPDATED",
+        "time": "",
+        "due": "2024-09-16",
+        "tag": "#OfflineVideo",
+        "priority": "0",
+        "filePath": "Daily_Notes/03-09-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes/02-09-2024.md": [],
+    "Daily_Notes/02-08-2024.md": [],
+    "Daily_Notes/01-08-2024.md": [
+      {
+        "id": 1726939807179,
+        "body": "All the Documents submitted to TCS, Waiting for JL.",
+        "time": "",
+        "due": "2024-08-31",
+        "tag": "#Finance",
+        "priority": "0",
+        "filePath": "Daily_Notes/01-08-2024.md",
+        "completed": true
+      }
+    ],
+    "Daily_Notes.md": [],
+    "2-Preparation_For_TCS_Interview.md": [],
+    "4-Process After Joining.md": [],
+    "3-Process After Offer Letter Received.md": [
+      {
+        "id": 1726939807235,
+        "body": "New Test task to be added from Add Task Button straight from the Plugin Window",
+        "time": "",
+        "due": "2024-09-27",
+        "tag": "",
+        "priority": "0",
+        "filePath": "3-Process After Offer Letter Received.md",
+        "completed": true
+      }
+    ],
+    "1-Registering For TCS.md": [],
+    "0-ImportantData.md": []
+  }
 }

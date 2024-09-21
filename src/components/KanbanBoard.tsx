@@ -1,101 +1,42 @@
-// src/components/KanbanBoard.tsx
+// src/components/KanbanBoard.tsx --------- V3
 
+import { App, Notice } from "obsidian";
+import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
+import { handleUpdateBoards, refreshBoardData } from "../utils/refreshBoard"; // Import utility functions
+
+import { AddTaskModal } from "../modal/AddTaskModal";
+import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
 import fs from "fs";
+import { openBoardConfigModal } from "../services/OpenColumnConfig";
 import path from "path";
-import { App, Command } from "obsidian"; // Import App from Obsidian
-import ConfigModal from "./BoardModal";
-
-// Define the structure of Board, Column, and the Data read from JSON
-interface ColumnData {
-	tag: string;
-	data: {
-		collapsed: boolean;
-		name: string;
-		coltag?: string;
-		range?: {
-			tag: string;
-			rangedata: {
-				from: number;
-				to: number;
-			};
-		};
-		index?: number;
-		limit?: number;
-	};
-}
-
-interface Board {
-	name: string;
-	columns: ColumnData[];
-	filters?: any[];
-	filterPolarity?: string;
-	filterScope?: string;
-	showColumnTags?: boolean;
-	showFilteredTags?: boolean;
-}
-
-interface BoardConfig {
-	boardConfigs: Board[];
-}
-
-// File path to the JSON data
-const basePath = (window as any).app.vault.adapter.basePath;
-const dataFilePath = path.join(
-	basePath,
-	".obsidian",
-	"plugins",
-	"Task-Board",
-	"plugindata.json"
-);
 
 const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 
-	// Load data from JSON when the component mounts
 	useEffect(() => {
-		loadDataFromFile();
+		refreshBoardData(setBoards); // Use utility function to load boards
 	}, []);
 
-	// Function to load data from the JSON file
-	const loadDataFromFile = () => {
-		fs.readFile(dataFilePath, "utf8", (err, data) => {
-			if (err) {
-				console.error("Error reading data file:", err);
-				return;
-			}
-			const jsonData: BoardConfig = JSON.parse(data).data; // Adjust this to match the exact JSON structure
-			setBoards(jsonData.boardConfigs);
-		});
+	// Function to handle saving boards
+	const AddNewTaskIn = () => {
+		const activeFile = app.workspace.getActiveFile();
+
+		if (activeFile) {
+			new AddTaskModal(app, {
+				app,
+				filePath: activeFile.path,
+				onTaskAdded: () => {
+					// Call refresh board data when a new task is added
+					refreshBoardData(setBoards);
+				},
+			}).open();
+		} else {
+			new Notice("No active file found to add a task.");
+		}
 	};
-
-	// Function to save data to the JSON file
-	const saveDataToFile = (updatedBoards: Board[]) => {
-		const newData = { version: "0.14.0", data: { boardConfigs: updatedBoards } }; // Keep other fields as needed
-		fs.writeFile(dataFilePath, JSON.stringify(newData, null, 2), (err) => {
-			if (err) {
-				console.error("Error writing to data file:", err);
-			}
-		});
-	};
-
-	// Function to handle saving boards from the modal
-	const handleSaveBoards = (updatedBoards: Board[]) => {
-		setBoards(updatedBoards);
-		saveDataToFile(updatedBoards);
-	};
-
-	// Function to open the ConfigModal
-	const openModal = () => {
-		new ConfigModal(app, boards, activeBoardIndex, handleSaveBoards).open();
-	};
-
-	// const openModal = () => {
-	// 	app.commands.executeCommandById("open-kanban-config-modal");
-	// };
-
 
 	return (
 		<div className="kanbanBoard">
@@ -104,28 +45,152 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 					{boards.map((board, index) => (
 						<button
 							key={index}
-							className={`boardTitleButton ${index === activeBoardIndex ? "active" : ""
-								}`}
+							className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
 							onClick={() => setActiveBoardIndex(index)}
 						>
 							{board.name}
 						</button>
 					))}
 				</div>
-				<button className="ConfigureBtn" onClick={openModal}>
-					Configure
-				</button>
+				<div className="kanbanHeaderBtns">
+					<Tally1 className="kanbanHeaderBtnsSeparator" />
+					<button className="addTaskBtn" style={{ backgroundColor: "none" }} onClick={AddNewTaskIn}>
+						<CirclePlus size={20} />
+					</button>
+					<button
+						className="ConfigureBtn"
+						onClick={() => openBoardConfigModal(app, boards, activeBoardIndex, (updatedBoards) =>
+							handleUpdateBoards(updatedBoards, setBoards)
+						)}
+					>
+						<Bolt size={20} />
+					</button>
+					<button className="RefreshBtn" onClick={() => refreshBoardData(setBoards)}>
+						<RefreshCcw size={20} />
+					</button>
+				</div>
 			</div>
 			<div className="columnsContainer">
-				{boards[activeBoardIndex]?.columns.map((column, index) => (
-					<Column key={index} tag={column.tag} data={column.data} />
-				))}
+				{/* Filter and only render columns with active: true */}
+				{boards[activeBoardIndex]?.columns
+					.filter((column) => column.active) // Show only active columns
+					.map((column, index) => (
+						<Column
+							key={index}
+							colType={column.colType}
+							data={column.data}
+							setBoards={setBoards} // Pass setBoards to the Column component
+						/>
+					))}
 			</div>
 		</div>
 	);
 };
 
 export default KanbanBoard;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // src/components/KanbanBoard.tsx ---------- V3 - Working
+
+// import { App, Notice } from "obsidian";
+// import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
+// import React, { useEffect, useState } from "react";
+// import { handleUpdateBoards, refreshBoardData } from "../utils/refreshBoard"; // Import utility functions
+
+// import { AddTaskModal } from "../modal/AddTaskModal";
+// import { Board } from "../interfaces/KanbanBoard";
+// import Column from "./Column";
+// import fs from "fs";
+// import { openBoardConfigModal } from "../services/OpenColumnConfig";
+// import path from "path";
+
+// const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
+// 	const [boards, setBoards] = useState<Board[]>([]);
+// 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
+
+// 	useEffect(() => {
+// 		refreshBoardData(setBoards); // Use utility function to load boards
+// 	}, []);
+
+// 	// Function to handle saving boards
+// 	const AddNewTaskIn = () => {
+// 		const activeFile = app.workspace.getActiveFile();
+
+// 		if (activeFile) {
+// 			new AddTaskModal(app, {
+// 				app,
+// 				filePath: activeFile.path,
+// 				onTaskAdded: () => {
+// 					// Call refresh board data when a new task is added
+// 					refreshBoardData(setBoards);
+// 				},
+// 			}).open();
+// 		} else {
+// 			new Notice("No active file found to add a task.");
+// 		}
+// 	};
+
+// 	return (
+// 		<div className="kanbanBoard">
+// 			<div className="kanbanHeader">
+// 				<div className="boardTitles">
+// 					{boards.map((board, index) => (
+// 						<button
+// 							key={index}
+// 							className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""
+// 								}`}
+// 							onClick={() => setActiveBoardIndex(index)}
+// 						>
+// 							{board.name}
+// 						</button>
+// 					))}
+// 				</div>
+// 				<div className="kanbanHeaderBtns">
+// 					<Tally1 className="kanbanHeaderBtnsSeparator" />
+// 					<button className="addTaskBtn" style={{backgroundColor: "none"}} onClick={() => AddNewTaskIn }>
+// 						<CirclePlus size={20} />
+// 					</button>
+// 					<button
+// 						className="ConfigureBtn"
+// 						onClick={() => openBoardConfigModal(app, boards, activeBoardIndex, (updatedBoards) =>
+// 							handleUpdateBoards(updatedBoards, setBoards)
+// 						)}
+// 					>
+// 						<Bolt size={20} />
+// 					</button>
+// 					<button className="RefreshBtn" onClick={() => refreshBoardData(setBoards)}>
+// 						<RefreshCcw size={20} />
+// 					</button>
+// 				</div>
+// 			</div>
+// 			<div className="columnsContainer">
+// 				{boards[activeBoardIndex]?.columns.map((column, index) => (
+// 					<Column
+// 						key={index}
+// 						colType={column.colType}
+// 						data={column.data}
+// 						setBoards={setBoards} // Pass setBoards to the Column component
+// 					/>
+// 				))}
+// 			</div>
+// 		</div>
+// 	);
+// };
+
+// export default KanbanBoard;
+
 
 
 
@@ -175,9 +240,9 @@ export default KanbanBoard;
 // // File path to the JSON data
 
 // const basePath = (window as any).app.vault.adapter.basePath;
-// const dataFilePath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'plugindata.json');
+// const dataFilePath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'data.json');
 
-// // const dataFilePath = path.join('D:/Personal_Projects_Hub/IDE_Wise_Projects/Obsidian/TemplateToDevelopPlugin/.obsidian/plugins/Task-Board/', 'plugindata.json');
+// // const dataFilePath = path.join('D:/Personal_Projects_Hub/IDE_Wise_Projects/Obsidian/TemplateToDevelopPlugin/.obsidian/plugins/Task-Board/', 'data.json');
 
 // const KanbanBoard: React.FC = () => {
 // 	const [boards, setBoards] = useState<Board[]>([]);

@@ -1,133 +1,73 @@
 // /src/components/Column.tsx -------- V3
 
+import { App, Modal } from 'obsidian';
+import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
+import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
+import { markTaskCompleteInFile, moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+
+import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
+import { EditTaskModal } from '../modal/EditTaskModal';
+import { RxDragHandleDots2 } from "react-icons/rx";
 import TaskItem from './TaskItem';
 import fs from 'fs';
 import path from 'path';
-import { Modal, App } from 'obsidian';
-import { EditTaskModal } from './EditTaskModal';
+import { refreshBoardData } from 'src/utils/refreshBoard';
+import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
 
-interface ColumnProps {
-	tag: string;
-	data: {
-		collapsed: boolean;
-		name: string;
-		coltag: string;
-		range?: {
-			tag: string;
-			rangedata: {
-				from: number;
-				to: number;
-			};
-		};
-		index?: number;
-		limit?: number;
-	};
+interface ColumnPropsWithSetBoards extends ColumnProps {
+	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
 }
 
-interface Task {
-	id: number;
-	body: string;
-	due: string;
-	tag: string;
-	filePath: string;
-	status: string;
-}
-
-const Column: React.FC<ColumnProps> = ({ tag, data }) => {
+const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
 
 	// Load tasks from tasks.json file
 	useEffect(() => {
-		const loadTasks = async () => {
-			const basePath = (window as any).app.vault.adapter.basePath;
-			const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-			try {
-				if (fs.existsSync(tasksPath)) {
-					const tasksData = fs.readFileSync(tasksPath, 'utf8');
-					const allTasks = JSON.parse(tasksData);
-
-					const pendingTasks: Task[] = [];
-					const completedTasks: Task[] = [];
-
-					console.log("All Loaded Tasks: ", allTasks);
-
-					// Separate pending tasks
-					for (const [filePath, tasks] of Object.entries(allTasks.Pending || {})) {
-						tasks.forEach((task: any) => pendingTasks.push({ ...task, filePath }));
-					}
-
-					// Separate completed tasks
-					for (const [filePath, tasks] of Object.entries(allTasks.Completed || {})) {
-						tasks.forEach((task: any) => completedTasks.push({ ...task, filePath }));
-					}
-
-					// console.log("Pending Tasks: ", pendingTasks);
-					// console.log("Completed Tasks: ", completedTasks);
-
-					// Combine both pending and completed tasks for filtering
-					const allTasksWithStatus = [...pendingTasks, ...completedTasks];
-					const filteredTasks = filterTasksByColumn(allTasksWithStatus, pendingTasks, completedTasks);
-					setTasks(filteredTasks);
-				} else {
-					console.warn("tasks.json file not found.");
-				}
-			} catch (error) {
-				console.error("Error reading tasks.json:", error);
-			}
-		};
-
-		loadTasks();
-	}, [tag, data]);
+		refreshTasks(setTasks, colType, data);
+	}, [colType, data]);
 
 
-	// Function to filter tasks based on the column's tag and properties
-	const filterTasksByColumn = (allTasks: Task[], pendingTasks: Task[], completedTasks: Task[]) => {
-		const today = new Date();
-		let tasksToDisplay: Task[] = [];
+	const handleCheckboxChange = (updatedTask: Task) => {
+		// Remove task from the current state
+		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
+		console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
+		console.log("The tasks which has been filtered : ", updatedTasks);
+		setTasks(updatedTasks); // Update state to remove completed task
 
-		// console.log("All Completed Tasks : ", completedTasks);
-
-		if (tag === "undated") {
-			tasksToDisplay = pendingTasks.filter(task => !task.due);
-			console.log("Tasks Under UnDated Columns : ", tasksToDisplay);
-		} else if (data.range) {
-			const { from, to } = data.range.rangedata;
-			tasksToDisplay = pendingTasks.filter(task => {
-				if (!task.due) return false;
-				const dueDate = new Date(task.due);
-				const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) +1;
-				console.log("Today : ", today.getDate(), "Due Date : ", dueDate.getDate(), " | The Difference in Due an Today date : ", diffDays);
-
-				if (from < 0 && to === 0) {
-					return diffDays < 0;
-				} else if (from === 0 && to === 0) {
-					return diffDays === 0;
-				} else if (from === 1 && to === 1) {
-					return diffDays === 1;
-				} else if (from === 2 && to === 0) {
-					return diffDays > 2;
-				}
-
-				return false;
-			});
-			console.log("Tasks Under Dated Columns : ", tasksToDisplay);
-		} else if (tag === "untagged") {
-			tasksToDisplay = pendingTasks.filter(task => !task.tag);
-			console.log("Tasks Under Untagged Columns : ", tasksToDisplay);
-		} else if (tag === "namedTag") {
-			tasksToDisplay = pendingTasks.filter(task => task.tag === data.coltag);
-			console.log("Tasks Under Tagged Columns : ", tasksToDisplay);
-		} else if (tag === "otherTags") {
-			tasksToDisplay = pendingTasks.filter(task => task.tag && task.tag !== data.coltag);
-			console.log("Tasks Under OtherTag Columns : ", tasksToDisplay);
-		} else if (tag === "completed") {
-			// console.log("Completed Tasks : ", completedTasks);
-			tasksToDisplay = completedTasks;
+		// Check if the task is completed
+		if (updatedTask.completed) {
+			// Move from Completed to Pending
+			moveFromCompletedToPending(updatedTask);
+		} else {
+			// Move from Pending to Completed
+			moveFromPendingToCompleted(updatedTask);
 		}
 
-		return tasksToDisplay;
+		// Mark task in file as complete or incomplete
+		markTaskCompleteInFile(updatedTask);
+
+		// Refresh the tasks in the component
+		// refreshTasks(setTasks, colType, data);
+		refreshBoardData(setBoards);
+	};
+
+
+	const handleDeleteTask = (task: Task) => {
+		const app = (window as any).app as App;
+		const deleteModal = new DeleteConfirmationModal(app, {
+			onConfirm: () => {
+				deleteTaskFromFile(task);
+				deleteTaskFromJson(task);
+
+				// Remove the task from state after deletion
+				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
+			},
+			onCancel: () => {
+				console.log('Task deletion canceled');
+			}
+		});
+		deleteModal.open();
 	};
 
 
@@ -136,81 +76,36 @@ const Column: React.FC<ColumnProps> = ({ tag, data }) => {
 		const editModal = new EditTaskModal(app, task, (updatedTask) => {
 			updatedTask.filePath = task.filePath;
 			// Update the task in the file and JSON
-			updateTaskInFile(updatedTask);
+			updateTaskInFile(updatedTask, task);
 			updateTaskInJson(updatedTask);
 
+			// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
 			// Refresh tasks state after update
-			setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+
+			// refreshTasks(setTasks, tag, data);
+			refreshBoardData(setBoards);
 		});
 		editModal.open();
 	};
 
-	const updateTaskInFile = (updatedTask: Task) => {
-		console.log("updatedTask i am received in Column.tsx file -2 : ", updatedTask);
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const filePath = path.join(basePath, updatedTask.filePath);
-		// console.log("The File Path which needs to be updated : ", filePath);
-
-		try {
-			const fileContent = fs.readFileSync(filePath, 'utf8');
-			const taskRegex = new RegExp(`^- \\[ \\] .*?${updatedTask.tag}`, 'gm');
-			const newContent = fileContent.replace(taskRegex, `- [ ] ${updatedTask.body} | 📅 ${updatedTask.due} #${updatedTask.tag}`);
-			fs.writeFileSync(filePath, newContent);
-		} catch (error) {
-			console.error("Error updating task in file:", error);
-		}
-	};
-
-	const updateTaskInJson = (updatedTask: Task) => {
-		const basePath = (window as any).app.vault.adapter.basePath;
-		const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-		try {
-			const tasksData = fs.readFileSync(tasksPath, 'utf8');
-			const allTasks = JSON.parse(tasksData);
-			console.log("The file of Tasks.json which I am updating: ", allTasks);
-
-			// Function to update a task in a given task category (Pending or Completed)
-			const updateTasksInCategory = (taskCategory: any) => {
-				return Object.entries(taskCategory).reduce((acc: any, [filePath, tasks]: [string, any[]]) => {
-					acc[filePath] = tasks.map((task: any) =>
-						task.id === updatedTask.id ? updatedTask : task
-					);
-					return acc;
-				}, {});
-			};
-
-			// Update tasks in both Pending and Completed categories
-			const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
-			const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
-
-			console.log("All updated Pending Tasks to be written in Tasks.json: ", updatedPendingTasks);
-			console.log("All updated Completed Tasks to be written in Tasks.json: ", updatedCompletedTasks);
-
-			// Create the updated data object with both updated Pending and Completed tasks
-			const updatedData = {
-				Pending: updatedPendingTasks,
-				Completed: updatedCompletedTasks
-			};
-
-			// Write the updated data back to the JSON file
-			console.log("The new data to be updated in tasks.json: ", updatedData);
-			fs.writeFileSync(tasksPath, JSON.stringify(updatedData, null, 2));
-		} catch (error) {
-			console.error("Error updating task in tasks.json:", error);
-		}
-	};
 
 	return (
-		<div className="kanbanColumn">
-			<div className="columnHeaderBar">
+		<div className="TaskBoardColumnsSection">
+			<div className="taskBoardColumnSecHeader">
 				<div className="columnTitle">{data.name}</div>
-				<div className="columnDragIcon"></div>
+				<button className="columnDragIcon"><RxDragHandleDots2 /></button>
 			</div>
 			<div className="tasksContainer">
 				{tasks.length > 0 ? (
 					tasks.map((task, index) => (
-						<TaskItem key={index} task={task} onEdit={() => handleEditTask(task)} />
+						<TaskItem
+							key={index}
+							task={task}
+							onEdit={() => handleEditTask(task)}
+							onDelete={() => handleDeleteTask(task)}
+							onCheckboxChange={handleCheckboxChange}
+						/>
 					))
 				) : (
 					<p>No tasks available</p>
@@ -331,8 +226,8 @@ export default Column;
 // 	};
 
 // 	return (
-// 		<div className="kanbanColumn">
-// 			<div className="columnHeaderBar">
+// 		<div className="TaskBoardColumnsSection">
+// 			<div className="taskBoardColumnSecHeader">
 // 				<div className="columnTitle">{data.name}</div>
 // 				<div className="columnDragIcon"></div>
 // 			</div>
@@ -404,8 +299,8 @@ export default Column;
 // 	// console.log(data);
 
 // 	return (
-// 		<div className="kanbanColumn">
-// 			<div className="columnHeaderBar">
+// 		<div className="TaskBoardColumnsSection">
+// 			<div className="taskBoardColumnSecHeader">
 // 				<div className="columnTitle">{data.name}</div>
 // 				<div className="columnDragIcon"></div>
 // 			</div>
