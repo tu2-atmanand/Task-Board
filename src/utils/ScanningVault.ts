@@ -16,13 +16,21 @@ export class ScanningVault {
 	}
 
 	// Scan all markdown files for tasks
-	async scanVaultForTasks() {
+	// Modify scanVaultForTasks to accept a callback function for terminal updates
+
+	async scanVaultForTasks(onFileScanned: (fileName: string) => void) {
+		console.log(
+			"Scanning The Whole Vault, either on Startup or using Modal..."
+		);
 		const files = this.app.vault.getMarkdownFiles();
 		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
 
 		for (const file of files) {
+			onFileScanned(file.path); // Pass file name to callback for live updates
 			await this.extractTasksFromFile(file, this.tasks);
 		}
+		
+		console.log("Following tasks has been collected after Vault Scan : ", this.tasks);
 
 		this.saveTasksToFile();
 	}

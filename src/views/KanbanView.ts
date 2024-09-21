@@ -4,11 +4,13 @@ import { App, ItemView, Vault, WorkspaceLeaf } from "obsidian";
 import {
 	loadBoardsData,
 	openBoardConfigModal,
+	openReScanVaultModal,
 	saveBoardsData,
 } from "../services/OpenColumnConfig";
 
 import { Board } from "src/interfaces/KanbanBoard";
 import KanbanBoard from "../components/KanbanBoard";
+import { ReScanVaultModal } from "src/modal/ReScanVaultModal";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "../../main";
@@ -41,12 +43,13 @@ export class KanbanView extends ItemView {
 
 	async onOpen() {
 		this.addAction("lucide-scan-text", "Re-Scan Vault", () => {
-			openBoardConfigModal(
-				this.app,
-				this.boards,
-				this.activeBoardIndex,
-				this.handleSaveBoards
-			);
+			// openBoardConfigModal(
+			// 	this.app,
+			// 	this.boards,
+			// 	this.activeBoardIndex,
+			// 	this.handleSaveBoards
+			// );
+			openReScanVaultModal(this.app);
 		});
 
 		console.log("The Settings which i have loaded using Obsidian : ", this.getSettings());

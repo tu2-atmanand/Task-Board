@@ -7,10 +7,35 @@ export interface TaskProps {
 		time: string;
 		priority: number;
 		completed: boolean;
+		filePath: string;
 	};
 	onEdit: () => void;
 	onDelete: () => void;
 	onCheckboxChange: () => void;
+}
+
+export interface taskItem {
+	id: number;
+	body: string;
+	due: string;
+	tag: string;
+	time: string;
+	priority: number;
+	completed: boolean;
+	filePath: string; // Include filePath since it's in the tasks
+}
+
+export interface tasksInFile {
+	taskItem: taskItem;
+}
+
+export interface tasksJson {
+	Pending: {
+		[filePath: string]: taskItem[]; // Maps file paths to arrays of pending tasks
+	};
+	Completed: {
+		[filePath: string]: taskItem[]; // Maps file paths to arrays of completed tasks
+	};
 }
 
 export const priorityEmojis = {
