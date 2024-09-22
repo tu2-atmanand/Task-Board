@@ -95,7 +95,7 @@ export const moveFromPendingToCompleted = (task: Task) => {
 
 export const moveFromCompletedToPending = (task: Task) => {
 	// Toggle the completed state
-	const updatedTask = { ...task, completed: !task.completed };
+	const updatedTask = { ...task, completed: "" };
 
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
