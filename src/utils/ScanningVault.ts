@@ -29,8 +29,11 @@ export class ScanningVault {
 			onFileScanned(file.path); // Pass file name to callback for live updates
 			await this.extractTasksFromFile(file, this.tasks);
 		}
-		
-		console.log("Following tasks has been collected after Vault Scan : ", this.tasks);
+
+		console.log(
+			"Following tasks has been collected after Vault Scan : ",
+			this.tasks
+		);
 
 		this.saveTasksToFile();
 	}
@@ -44,17 +47,20 @@ export class ScanningVault {
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
 
-		for (const line of lines) {
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
 				const isCompleted = line.startsWith("- [x]");
-				const body = this.extractBody(line);
+				const title = this.extractTitle(line);
 				const time = this.extractTime(line);
 				const due = this.extractDate(line);
 				const priority = this.extractPriority(line);
 				const tag = this.extractTag(line);
+				const body = this.extractBody(lines, i + 1);
 
 				const task = {
 					id: this.generateTaskId(),
+					title,
 					body,
 					time,
 					due,
@@ -105,17 +111,20 @@ export class ScanningVault {
 			const newPendingTasks: any[] = [];
 			const newCompletedTasks: any[] = [];
 
-			for (const line of lines) {
+			for (let i = 0; i < lines.length; i++) {
+				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
 					const isCompleted = line.startsWith("- [x]");
-					const body = this.extractBody(line);
+					const title = this.extractTitle(line);
 					const time = this.extractTime(line);
 					const due = this.extractDate(line);
 					const priority = this.extractPriority(line);
 					const tag = this.extractTag(line);
+					const body = this.extractBody(lines, i + 1);
 
 					const task = {
 						id: this.generateTaskId(),
+						title,
 						body,
 						time,
 						due,
@@ -164,20 +173,42 @@ export class ScanningVault {
 		new Notice("Tasks saved to tasks.json");
 	}
 
-	// Extract body from task line
-	extractBody(text: string): string {
+	// New function to extract task body
+	extractBody(lines: string[], startLineIndex: number): string[] {
+		const bodyLines = [];
+		for (let i = startLineIndex; i < lines.length; i++) {
+			const line = lines[i];
+
+			if (line.trim() === "") {
+				// Empty line indicates the end of the task body
+				break;
+			}
+
+			if (line.startsWith("\t") || line.startsWith("    ")) {
+				// If the line has one level of indentation, consider it part of the body
+				bodyLines.push(line.trim());
+			} else {
+				// If no indentation is detected, stop reading the body
+				break;
+			}
+		}
+		return bodyLines;
+	}
+
+	// Extract title from task line
+	extractTitle(text: string): string {
 		const timeAtStartMatch = text.match(
 			/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
 		);
 
 		if (timeAtStartMatch) {
-			// If time is at the start, extract body after the time and till the pipe symbol
+			// If time is at the start, extract title after the time and till the pipe symbol
 			return text
 				.replace(/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
 				.split("|")[0]
 				.trim();
 		} else {
-			// Default case: no time at start, extract body till the pipe symbol
+			// Default case: no time at start, extract title till the pipe symbol
 			return text.includes("|")
 				? text
 						.split("|")[0]
@@ -200,19 +231,19 @@ export class ScanningVault {
 		}
 
 		// Otherwise, look for time elsewhere in the line
-		const timeInBodyMatch = text.match(
+		const timeIntitleMatch = text.match(
 			/⏰\s*\[(\d{2}:\d{2} - \d{2}:\d{2})\]/
 		);
-		return timeInBodyMatch ? timeInBodyMatch[1] : "";
+		return timeIntitleMatch ? timeIntitleMatch[1] : "";
 	}
 
-	// Extract date from task body
+	// Extract date from task title
 	extractDate(text: string): string {
 		const match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
 		return match ? match[1] : "";
 	}
 
-	// Extract priority from task body
+	// Extract priority from task title
 	extractPriority(text: string): string {
 		const priorityMatch = Object.entries(priorityEmojis).find(
 			([key, emoji]) => text.includes(emoji)
@@ -227,7 +258,7 @@ export class ScanningVault {
 		return priorityMatch?.[0] || "0";
 	}
 
-	// Extract tag from task body
+	// Extract tag from task title
 	extractTag(text: string): string {
 		const match = text.match(/#(\w+)/);
 		return match ? `#${match[1]}` : "";
