@@ -261,7 +261,7 @@
       "taskCompletionShowUtcOffset": true,
       "autoAddDue": true,
       "scanVaultAtStartup": false,
-      "dayPlannerPlugin": false,
+      "dayPlannerPlugin": true,
       "realTimeScanning": true
     }
   }

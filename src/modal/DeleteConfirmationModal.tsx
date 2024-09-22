@@ -16,6 +16,7 @@ export class DeleteConfirmationModal extends Modal {
 
 	constructor(app: App, { onConfirm, onCancel }: DeleteConfirmationModalProps) {
 		super(app);
+		this.app = app;
 		this.onConfirm = onConfirm;
 		this.onCancel = onCancel;
 	}

@@ -59,7 +59,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 			onConfirm: () => {
 				deleteTaskFromFile(task);
 				deleteTaskFromJson(task);
-
 				// Remove the task from state after deletion
 				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
 			},

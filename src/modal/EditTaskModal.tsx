@@ -20,11 +20,11 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
-		if (startTime && !endTime) {
+		if (startTime) {
 			const [hours, minutes] = startTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
-			const newTime = `${startTime} - ${endTime}`;
+			const newTime = `${startTime} - ${newEndTime}`;
 			console.log("EditTaskModa : New time freshly added : ", newTime);
 			setNewTime(newTime);
 		}
@@ -96,8 +96,8 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 			{/* Task Tag */}
 			<div className="EditTaskModalHomeField">
 				<label className="EditTaskModalHomeFieldTitle">Task Tag:</label>
-				{/* <input className="EditTaskModalHome-tagValue" type="text" value={tag} onChange={(e) => setTag(`#${ e.target.value.replace('#', '').trim() }`)} /> */}
-				<input className="EditTaskModalHome-tagValue" type="text" value={tag} onChange={(e) => setTag(e.target.value)} />
+				<input className="EditTaskModalHome-tagValue" type="text" value={tag} onChange={(e) => setTag(`#${ e.target.value.replace('#', '').trim() }`)} />
+				{/* <input className="EditTaskModalHome-tagValue" type="text" value={tag} onChange={(e) => setTag(e.target.value)} /> */}
 			</div>
 
 			{/* Live File Preview */}

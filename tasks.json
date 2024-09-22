@@ -94,11 +94,11 @@
     "Daily_Notes/DailyTemplate.md": [],
     "Daily_Notes/27-08-2024.md": [
       {
-        "id": 1726944087413,
+        "id": 1726993374895,
         "body": "Put Hair Oil",
-        "time": "18:00 - 18:20",
+        "time": "18:00 - 19:00",
         "due": "2024-09-22",
-        "tag": "",
+        "tag": "#Personal",
         "priority": "0",
         "filePath": "Daily_Notes/27-08-2024.md",
         "completed": false
@@ -379,7 +379,19 @@
     "4-Process After Joining.md": [],
     "3-Process After Offer Letter Received.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "Daily_Notes/22-09-2024.md": [
+      {
+        "id": 1726993295440,
+        "body": "A tempararory new task",
+        "time": "20:45 - 21:45",
+        "due": "2024-09-22",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/22-09-2024.md",
+        "completed": false
+      }
+    ]
   },
   "Completed": {
     "Spintly Details.md": [],
@@ -706,17 +718,17 @@
     ],
     "Daily_Notes/24-08-2024.md": [
       {
-        "id": 1726939806926,
-        "body": "Tata Crucible Quiz",
-        "time": "17:30 - 17:30",
-        "due": "2024-09-23",
+        "id": 1726944592950,
+        "body": "Completed Three Hand-on Courses ✅ 2024-08-25",
+        "time": "11:00 - 13:30",
+        "due": "",
         "tag": "",
         "priority": "0",
-        "filePath": "Daily_Notes/25-08-2024.md",
-        "completed": false
+        "filePath": "Daily_Notes/24-08-2024.md",
+        "completed": true
       },
       {
-        "id": 1726939806927,
+        "id": 1726944592950,
         "body": "Fantastic Four 2 watched ✅ 2024-08-24",
         "time": "16:00 - 18:00",
         "due": "",
@@ -976,6 +988,7 @@
       }
     ],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "Daily_Notes/22-09-2024.md": []
   }
 }
