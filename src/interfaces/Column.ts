@@ -1,8 +1,8 @@
 export interface ColumnProps {
 	colType: string;
-	active: boolean;
+	active?: boolean;
 	data: {
-		collapsed: boolean;
+		collapsed?: boolean;
 		name: string;
 		index: number;
 		coltag: string;
@@ -19,11 +19,12 @@ export interface ColumnProps {
 
 export interface Task {
 	id: number;
-	body: string;
+	title: string;
+	body: string[];
 	due: string;
 	tag: string;
 	filePath: string;
-	completed: boolean;
+	completed: string;
 	time: string;
 	priority: number;
 }

@@ -1,27 +1,29 @@
 export interface TaskProps {
 	task: {
 		id: number;
-		body: string;
+		title: string;
+		body: string[];
 		due: string;
 		tag: string;
 		time: string;
 		priority: number;
-		completed: boolean;
+		completed: string;
 		filePath: string;
 	};
 	onEdit: () => void;
 	onDelete: () => void;
-	onCheckboxChange: () => void;
+	onCheckboxChange: (task: taskItem) => void;
 }
 
 export interface taskItem {
 	id: number;
-	body: string;
+	title: string;
+	body: string[];
 	due: string;
 	tag: string;
 	time: string;
 	priority: number;
-	completed: boolean;
+	completed: string;
 	filePath: string; // Include filePath since it's in the tasks
 }
 
@@ -38,7 +40,7 @@ export interface tasksJson {
 	};
 }
 
-export const priorityEmojis = {
+export const priorityEmojis: { [key: number]: string } = {
 	0: "0",
 	1: "🔺",
 	2: "⏫",
@@ -49,10 +51,10 @@ export const priorityEmojis = {
 
 // Priority Options
 export const priorityOptions = [
-	{ value: '0', text: 'NONE' },
-	{ value: '1', text: 'Highest : 🔺' },
-	{ value: '2', text: 'High : ⏫' },
-	{ value: '3', text: 'Medium : 🔼' },
-	{ value: '4', text: 'Low : 🔽' },
-	{ value: '5', text: 'Lowest : ⏬' }
+	{ value: "0", text: "NONE" },
+	{ value: "1", text: "Highest : 🔺" },
+	{ value: "2", text: "High : ⏫" },
+	{ value: "3", text: "Medium : 🔼" },
+	{ value: "4", text: "Low : 🔽" },
+	{ value: "5", text: "Lowest : ⏬" },
 ];
