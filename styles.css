@@ -160,7 +160,7 @@ If your plugin does not need CSS, delete this file.
 	gap: 0.4em;
 }
 
-.taskItemBody {
+.taskItemTitle {
 	padding: 0;
 	font-weight: 500;
 }

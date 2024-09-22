@@ -135,9 +135,9 @@
             "active": true,
             "data": {
               "collapsed": false,
-              "name": "When Mobile Data Left at Night",
+              "name": "Test Task",
               "index": 4,
-              "coltag": "WhenMobileDataLeft"
+              "coltag": "Test"
             }
           },
           {
@@ -262,7 +262,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": true
+      "realTimeScanning": false
     }
   }
 }
