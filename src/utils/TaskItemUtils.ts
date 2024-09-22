@@ -58,9 +58,10 @@ export const loadTasksFromJson = (): {
 // For handleCheckboxChange
 
 export const moveFromPendingToCompleted = (task: Task) => {
-
-	// Toggle the completed state
-	const updatedTask = { ...task, completed: !task.completed };
+	const updatedTask = {
+		...task,
+		completed: new Date().toISOString().slice(0, 16),
+	}; // e.g., '2024-09-21T12:20'
 
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
@@ -93,7 +94,6 @@ export const moveFromPendingToCompleted = (task: Task) => {
 };
 
 export const moveFromCompletedToPending = (task: Task) => {
-
 	// Toggle the completed state
 	const updatedTask = { ...task, completed: !task.completed };
 
@@ -172,7 +172,6 @@ export const deleteTaskFromFile = (task: Task) => {
 };
 
 export const deleteTaskFromJson = (task: Task) => {
-
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
 		const allTasks = JSON.parse(tasksData);
@@ -229,7 +228,7 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 					updatedTask.body
 				} |${dueDateWithEmo} ${
 					updatedTask.priority > 0
-						? priorityEmojis[updatedTask.priority]
+						? priorityEmojis[updatedTask.priority as number]
 						: ""
 				} ${updatedTask.tag}`
 			);
@@ -239,14 +238,14 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 			);
 			console.log(
 				"What the fuck wrong in this, this line should print emoji : ",
-				priorityEmojis[updatedTask.priority]
+				priorityEmojis[updatedTask.priority as number]
 			);
 		} else {
 			newContent = fileContent.replace(
 				taskRegex,
 				`- [ ] ${updatedTask.body} |${timeWithEmo}${dueDateWithEmo} ${
 					updatedTask.priority > 0
-						? priorityEmojis[updatedTask.priority]
+						? priorityEmojis[updatedTask.priority as number]
 						: ""
 				} ${updatedTask.tag}`
 			);
@@ -256,7 +255,7 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 			);
 			console.log(
 				"What the fuck wrong in this, this line should print emoji : ",
-				priorityEmojis[updatedTask.priority]
+				priorityEmojis[updatedTask.priority as number]
 			);
 		}
 
@@ -267,7 +266,6 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 };
 
 export const updateTaskInJson = (updatedTask: Task) => {
-
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
 		const allTasks = JSON.parse(tasksData);

@@ -71,15 +71,14 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				</div>
 			</div>
 			<div className="columnsContainer">
-				{/* Filter and only render columns with active: true */}
 				{boards[activeBoardIndex]?.columns
-					.filter((column) => column.active) // Show only active columns
+					.filter((column) => column.active)
 					.map((column, index) => (
 						<Column
 							key={index}
 							colType={column.colType}
 							data={column.data}
-							setBoards={setBoards} // Pass setBoards to the Column component
+							setBoards={setBoards}
 						/>
 					))}
 			</div>

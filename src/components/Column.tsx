@@ -54,8 +54,9 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 
 
 	const handleDeleteTask = (task: Task) => {
-		const app = (window as any).app as App;
+		const app = (window as any).app as App; // Fetch the Obsidian app instance
 		const deleteModal = new DeleteConfirmationModal(app, {
+			app, // Add app here
 			onConfirm: () => {
 				deleteTaskFromFile(task);
 				deleteTaskFromJson(task);
@@ -68,6 +69,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 		});
 		deleteModal.open();
 	};
+
 
 
 	const handleEditTask = (task: Task) => {
@@ -103,7 +105,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 							task={task}
 							onEdit={() => handleEditTask(task)}
 							onDelete={() => handleDeleteTask(task)}
-							onCheckboxChange={handleCheckboxChange}
+							onCheckboxChange={() => handleCheckboxChange(task)}
 						/>
 					))
 				) : (

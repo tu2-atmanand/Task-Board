@@ -16,7 +16,7 @@ interface AddTaskModalProps {
 	filePath: string;
 	defaultDue?: string;
 	defaultTag?: string;
-	onTaskAdded: () => void; // Callback function to refresh tasks after addition
+	onTaskAdded: () => void;
 }
 
 export class AddTaskModal extends Modal {
