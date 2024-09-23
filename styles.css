@@ -389,8 +389,19 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	padding: 20px;
 	box-sizing: border-box;
+}
+
+.EditTaskModalHomeBody {
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.EditTaskModalHomeLeftSec {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
 }
 
 .EditTaskModalHome-title {
@@ -400,27 +411,50 @@ If your plugin does not need CSS, delete this file.
 	text-align: center;
 }
 
-.EditTaskModalHome-taskBody {
-	width: 100%;
+.EditTaskModalBodyDescription {
+	width: 40vw;
 	height: 100px;
-	margin-bottom: 15px;
 	padding: 10px;
 	font-size: 1rem;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
+.EditTaskModalsubTasksContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.EditTaskModalsubTaskItem {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.EditTaskModalsubTaskItemInput {
+	width: 100%;
+}
+
+.EditTaskModalHomeRightSec {
+	display: flex;
+	flex-direction: column;
+	border: var(--border-width) solid olive;
+	border-radius: 5px;
+	padding: 0.5em;
+}
+
 .EditTaskModalHomeField {
 	display: flex;
+	flex-direction: column;
 	justify-content: space-between;
 	margin-bottom: 15px;
 }
 
 .EditTaskModalHomeTimeInput,
 .EditTaskModalHomeDueInput {
-	width: 48%;
-	padding: 5px;
-	font-size: 1rem;
+	padding: 4px;
+	font-size: 0.8rem;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 }
@@ -431,7 +465,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .EditTaskModalHomePreview {
-	max-width: 30vw;
+	max-width: 40vw;
 }
 
 .fileContentContainer {
@@ -440,7 +474,6 @@ If your plugin does not need CSS, delete this file.
 	flex-grow: 1;
 	overflow-y: auto;
 	border-radius: 4px;
-	margin-bottom: 15px;
 	background-color: var(--background-primary-alt);
 	position: relative;
 }
@@ -480,6 +513,10 @@ If your plugin does not need CSS, delete this file.
 
 .EditTaskModalHomeOpenFileBtn:hover {
 	background-color: #0056b3;
+}
+
+.EditTaskModalHomeSaveBtn {
+	margin-top: 15px;
 }
 
 .EditTaskModalHomeSaveBtn:hover {
