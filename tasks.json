@@ -156,17 +156,6 @@
     ],
     "Daily_Notes/22-09-2024.md": [
       {
-        "id": 1727024050269,
-        "title": "A tempararory new task",
-        "body": [],
-        "time": "20:45 - 21:45",
-        "due": "2024-09-23",
-        "tag": "#Test",
-        "priority": "0",
-        "filePath": "Daily_Notes/22-09-2024.md",
-        "completed": false
-      },
-      {
         "id": 1727024050270,
         "title": "Adding task from command to see if the taskboard refreshes now",
         "body": [],
@@ -208,6 +197,17 @@
         "priority": "0",
         "filePath": "Daily_Notes/22-09-2024.md",
         "completed": false
+      },
+      {
+        "id": 1727024050269,
+        "title": "A tempararory new task",
+        "body": [],
+        "time": "20:45 - 21:45",
+        "due": "2024-09-23",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/22-09-2024.md",
+        "completed": ""
       }
     ],
     "Daily_Notes/22-08-2024.md": [
@@ -379,56 +379,45 @@
     ],
     "Daily_Notes/14-09-2024.md": [
       {
-        "id": 1727016883255,
-        "title": "Now the auto add due option is disabled, so if i dont give anything, there shouldnt be anything",
-        "body": [],
-        "time": "23:44 - 24:44",
-        "due": "2024-10-04",
-        "tag": "#Test",
-        "priority": "0",
-        "filePath": "Daily_Notes/14-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1727016883255,
-        "title": "Now, if i give date, it should come even though, `autoAddDue` option is disabled, Rescheduling",
+        "id": 1727030489253,
+        "title": "",
         "body": [],
         "time": "22:45 - 23:45",
-        "due": "2024-10-04",
+        "due": "2024-09-25",
         "tag": "#Test",
         "priority": "0",
         "filePath": "Daily_Notes/14-09-2024.md",
         "completed": false
       },
       {
-        "id": 1727016883255,
-        "title": "Now adding task to see if 0 comes if no priority given",
+        "id": 1727030489254,
+        "title": "",
         "body": [],
-        "time": "",
-        "due": "",
-        "tag": "#Testing",
+        "time": "22:45 - 23:45",
+        "due": "2024-09-25",
+        "tag": "#Test",
         "priority": "0",
         "filePath": "Daily_Notes/14-09-2024.md",
         "completed": false
       },
       {
-        "id": 1727016883255,
-        "title": "Since there are very less tasks for future so just adding a task, and then changing its due to more future to see what happens",
+        "id": 1727030489254,
+        "title": "",
         "body": [],
-        "time": "",
-        "due": "2024-09-22",
-        "tag": "#Project",
+        "time": "22:45 - 23:45",
+        "due": "2024-09-25",
+        "tag": "#Test",
         "priority": "0",
         "filePath": "Daily_Notes/14-09-2024.md",
         "completed": false
       },
       {
-        "id": 1727016883255,
-        "title": "Final testing if all fields come correctly, now the time will come front instead of back.",
+        "id": 1727030489254,
+        "title": "",
         "body": [],
-        "time": "13:21 - 14:21",
-        "due": "2024-09-17",
-        "tag": "#Testing",
+        "time": "22:45 - 23:45",
+        "due": "2024-09-25",
+        "tag": "#Test",
         "priority": "0",
         "filePath": "Daily_Notes/14-09-2024.md",
         "completed": false
@@ -461,19 +450,7 @@
         "completed": false
       }
     ],
-    "Daily_Notes/08-09-2024.md": [
-      {
-        "id": 1727016190542,
-        "title": "This is a task for tomorrow, updating",
-        "body": [],
-        "time": "",
-        "due": "2024-09-09",
-        "tag": "#Test",
-        "priority": "0",
-        "filePath": "Daily_Notes/08-09-2024.md",
-        "completed": false
-      }
-    ],
+    "Daily_Notes/08-09-2024.md": [],
     "Daily_Notes/07-09-2024.md": [
       {
         "id": 1727016190549,
@@ -573,12 +550,58 @@
     "Daily_Notes/17-09-2024.md": [],
     "Daily_Notes/16-09-2024.md": [],
     "Daily_Notes/15-09-2024.md": [],
-    "Daily_Notes/14-09-2024.md": [],
+    "Daily_Notes/14-09-2024.md": [
+      {
+        "id": 1727030489254,
+        "title": "Final testing if all fields come correctly, now the time will come front instead of back.",
+        "body": [],
+        "time": "13:21 - 14:21",
+        "due": "2024-09-17",
+        "tag": "#Testing",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1727030489254,
+        "title": "Let me see if due comes of today, it shouldnt come",
+        "body": [],
+        "time": "",
+        "due": "2024-09-17",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": true
+      },
+      {
+        "id": 1727030489254,
+        "title": "Creating an Untagged future task",
+        "body": [],
+        "time": "18:42 - 19:42",
+        "due": "2024-09-21",
+        "tag": "",
+        "priority": "0",
+        "filePath": "Daily_Notes/14-09-2024.md",
+        "completed": true
+      }
+    ],
     "Daily_Notes/13-09-2024.md": [],
     "Daily_Notes/12-09-2024.md": [],
     "Daily_Notes/11-09-2024.md": [],
     "Daily_Notes/09-09-2024.md": [],
-    "Daily_Notes/08-09-2024.md": [],
+    "Daily_Notes/08-09-2024.md": [
+      {
+        "id": 1727030308470,
+        "title": "This is a task for tomorrow, updating",
+        "body": [],
+        "time": "",
+        "due": "2024-09-09",
+        "tag": "#Test",
+        "priority": "0",
+        "filePath": "Daily_Notes/08-09-2024.md",
+        "completed": true
+      }
+    ],
     "Daily_Notes/07-09-2024.md": [],
     "Daily_Notes/07-08-2024.md": [],
     "Daily_Notes/06-09-2024.md": [],

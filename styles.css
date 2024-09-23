@@ -163,6 +163,7 @@ If your plugin does not need CSS, delete this file.
 .taskItemTitle {
 	padding: 0;
 	font-weight: 500;
+	overflow-wrap: anywhere;
 }
 
 .taskCheckbox {

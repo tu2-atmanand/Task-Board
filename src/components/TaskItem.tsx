@@ -20,8 +20,10 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 			return 'yellow'; // Due today
 		} else if (taskDueDate > today) {
 			return 'green'; // Due in the future
-		} else {
+		} else if (taskDueDate < today) {
 			return 'red'; // Past due
+		} else {
+			return 'grey';
 		}
 	};
 
