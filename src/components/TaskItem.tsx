@@ -127,7 +127,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 						<div className='taskItemDateCompleted'>✅ {task.completed}</div>
 					) : (
 						<div className='taskItemDate'>
-							{task.time ? `⏰${task.time}` : ''}
+							{task.time ? `⏰${task.time} | ` : ''}
 							{task.due ? `📅${task.due}` : ''}
 						</div>
 					)}
