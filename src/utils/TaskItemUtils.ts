@@ -199,71 +199,70 @@ export const deleteTaskFromJson = (task: Task) => {
 
 export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 	console.log(
-		"updatedTask i am received in Column.tsx file -2 : ",
+		"updatedTask i am receiving in Column.tsx file : ",
 		updatedTask
 	);
-	console.log("oldTask i am received in Column.tsx file -2 : ", oldTask);
+	console.log("oldTask i am receiving in Column.tsx file -2 : ", oldTask);
+
 	const basePath = (window as any).app.vault.adapter.basePath;
 	const filePath = path.join(basePath, updatedTask.filePath);
-	// console.log("The File Path which needs to be updated : ", filePath);
 	let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
 	globalSettings = globalSettings.data.globalSettings;
 	const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
+
 	const dueDateWithEmo = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
 	const timeWithEmo = updatedTask.time ? ` ⏰ [${updatedTask.time}]` : "";
 
+	// Combine priority emoji if it exists
+	const priorityWithEmo =
+		updatedTask.priority > 0
+			? priorityEmojis[updatedTask.priority as number]
+			: "";
+
+	// Build the formatted string for the main task
+	let formattedTask = `- [ ] ${
+		updatedTask.time ? `${updatedTask.time} ` : ""
+	}${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${
+		updatedTask.tag
+	}`;
+
+	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+	const bodyLines = updatedTask.body
+		.filter(
+			(line: string) =>
+				!line.startsWith("- [ ]") && !line.startsWith("- [x]")
+		)
+		.map((line: string) => `\t${line}`)
+		.join("\n");
+
+	// Add the sub-tasks without additional indentation
+	const subTasks = updatedTask.body
+		.filter(
+			(line: string) =>
+				line.startsWith("- [ ]") || line.startsWith("- [x]")
+		)
+		.join("\n");
+
+	// Combine all parts: main task, body, and sub-tasks
+	const completeTask = `${formattedTask}\n${bodyLines}\n${subTasks}`;
+
 	try {
+		// Read the file content
 		const fileContent = fs.readFileSync(filePath, "utf8");
-		const taskRegex = new RegExp(`^- \\[ \\] .*?${oldTask.body}.*$`, "gm");
-		console.log(
-			"The line which i am going to replace, found from file : ",
-			taskRegex
-		);
 
-		let newContent = " ";
-		if (dayPlannerPlugin) {
-			newContent = fileContent.replace(
-				taskRegex,
-				`- [ ] ${updatedTask.time ? `${updatedTask.time} ` : ""}${
-					updatedTask.body
-				} |${dueDateWithEmo} ${
-					updatedTask.priority > 0
-						? priorityEmojis[updatedTask.priority as number]
-						: ""
-				} ${updatedTask.tag}`
-			);
-			console.log(
-				"New content i am writing in the file after Edit Task Modal : ",
-				newContent
-			);
-			console.log(
-				"What the fuck wrong in this, this line should print emoji : ",
-				priorityEmojis[updatedTask.priority as number]
-			);
-		} else {
-			newContent = fileContent.replace(
-				taskRegex,
-				`- [ ] ${updatedTask.body} |${timeWithEmo}${dueDateWithEmo} ${
-					updatedTask.priority > 0
-						? priorityEmojis[updatedTask.priority as number]
-						: ""
-				} ${updatedTask.tag}`
-			);
-			console.log(
-				"New content i am writing in the file after Edit Task Modal : ",
-				newContent
-			);
-			console.log(
-				"What the fuck wrong in this, this line should print emoji : ",
-				priorityEmojis[updatedTask.priority as number]
-			);
-		}
+		// Create a regex to match the old task by its body content for replacement
+		const taskRegex = new RegExp(`^- \\[ \\] .*?${oldTask.title}.*$`, "gm");
 
+		// Replace the old task with the updated formatted task in the file
+		const newContent = fileContent.replace(taskRegex, completeTask);
+
+		// Write the updated content back to the file
 		fs.writeFileSync(filePath, newContent);
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}
 };
+
 
 export const updateTaskInJson = (updatedTask: Task) => {
 	try {
