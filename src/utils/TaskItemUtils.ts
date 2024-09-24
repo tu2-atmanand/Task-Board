@@ -200,11 +200,11 @@ export const deleteTaskFromJson = (task: Task) => {
 // For handleEditTask
 
 export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
+	console.log("oldTask i am receiving in Column.tsx file -2 : ", oldTask);
 	console.log(
 		"updatedTask i am receiving in Column.tsx file : ",
 		updatedTask
 	);
-	console.log("oldTask i am receiving in Column.tsx file -2 : ", oldTask);
 
 	const basePath = (window as any).app.vault.adapter.basePath;
 	const filePath = path.join(basePath, updatedTask.filePath);
@@ -212,8 +212,8 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 	globalSettings = globalSettings.data.globalSettings;
 	const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
 
-	const dueDateWithEmo = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
-	const timeWithEmo = updatedTask.time ? ` ⏰ [${updatedTask.time}]` : "";
+	const dueDateWithEmo = updatedTask.due ? ` 📅${updatedTask.due}` : "";
+	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
 
 	// Combine priority emoji if it exists
 	const priorityWithEmo =
@@ -225,10 +225,10 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 	let formattedTask = "";
 	if (dayPlannerPlugin) {
 		formattedTask = `- [ ] ${
-		updatedTask.time ? `${updatedTask.time} ` : ""
+			updatedTask.time ? `${updatedTask.time} ` : ""
 		}${updatedTask.title} |${dueDateWithEmo} ${priorityWithEmo} ${
-		updatedTask.tag
-	}`;
+			updatedTask.tag
+		}`;
 	} else {
 		formattedTask = `- [ ] ${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}`;
 	}
@@ -243,11 +243,12 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 		.join("\n");
 
 	// Add the sub-tasks without additional indentation
-	const subTasks = updatedTask.body
+	const subTasksWithTab = updatedTask.body
 		.filter(
 			(line: string) =>
 				line.startsWith("- [ ]") || line.startsWith("- [x]")
 		)
+		.map((Line: string) => `\t${Line}`)
 		.join("\n");
 
 	// Combine all parts: main task, body, and sub-tasks
@@ -259,9 +260,39 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 	try {
 		// Read the file content
 		const fileContent = fs.readFileSync(filePath, "utf8");
-
+		let taskRegex = "";
 		// Create a regex to match the old task by its body content for replacement
-		const taskRegex = new RegExp(`^- \\[ \\] .*?${oldTask.title}.*$`, "gm");
+		// const taskRegex = new RegExp(
+		// 	`^- \\[ \\] .*?${oldTask.title}.*$(?:[\s\S]*?\n\n)`,
+		// 	"gm"
+		// );
+
+		// A more reliable approach would be to use a regex to find the starting line, and then iterate through the lines until an empty line is detected:
+		// const taskRegex = new RegExp(^- \\[ \\] .*?${oldTask.title}.*$, "gm");
+
+		const startRegex = new RegExp(
+			`^- \\[ \\] .*?${oldTask.title}.*$`,
+			"gm"
+		);
+		const startIndex = fileContent.search(startRegex);
+
+		if (startIndex !== -1) {
+			const lines = fileContent.substring(startIndex).split("\n");
+			const taskContent = [];
+
+			for (const line of lines) {
+				if (line.trim() === "") {
+					break;
+				}
+				taskContent.push(line);
+			}
+
+			taskRegex = taskContent.join("\n");
+		}
+		console.log(
+			"----- THE content i will be replacing with the new one : ",
+			taskRegex
+		);
 
 		// Replace the old task with the updated formatted task in the file
 		const newContent = fileContent.replace(taskRegex, completeTask);
@@ -272,7 +303,6 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 		console.error("Error updating task in file:", error);
 	}
 };
-
 
 export const updateTaskInJson = (updatedTask: Task) => {
 	try {
