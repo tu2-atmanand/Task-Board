@@ -156,29 +156,53 @@ export class AddTaskModal extends Modal {
 
 		// const today = new Date().toISOString().split('T')[0]; // get today's date in YYYY-MM-DD format
 
-		const dueDateWithEmo = dueDate ? `📅 ${dueDate}` : '';
+		const dueDateWithEmo = dueDate ? ` 📅${dueDate}` : "";
+		const timeWithEmo = time ? ` ⏰[${time}]` : "";
 
-		// const dueDateWithEmo = autoAddDueOption ? `📅 ${dueDate}` : '';
-
-		const Emopriority = Number(priority) > 0 ? priorityEmojis[Number(priority)] : ''; // or any other default value
+		// Combine priority emoji if it exists
+		const priorityWithEmo =
+			priority > 0
+				? priorityEmojis[priority as number]
+				: "";
 
 
 		try {
-			let newTaskLine = '';
+			let formattedTask = "";
 			if (dayPlannerPlugin) {
-				const timeWithEmo = (time === " - ") ? '' : `${time} `;
-				// If dayPlannerPlugin is true, place time before the task body
-				newTaskLine = `- [ ] ${timeWithEmo}${title} | ${dueDateWithEmo} ${Emopriority} ${tag}\n\t${body[0]}\n\t------- I need a danger logic here to show the content properly-------\n\t${subTasks[0]}\n\t------- I need a danger logic here to show the content properly-------\n`;
+				formattedTask = `- [ ] ${time ? `${time} ` : ""
+					}${title
+					} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${tag
+					}`;
 			} else {
-				console.log("Time value before processing it : ", (time === " - "))
-				const timeWithEmo = (time === " - ") ? '' : `⏰ [${time}]`;
-				console.log("Time added : ", time);
-				// If dayPlannerPlugin is false, place time after the task body
-				newTaskLine = `- [ ] ${title} | ${timeWithEmo} ${dueDateWithEmo} ${Emopriority} ${tag}\n\t${body[0]}\n\t------- I need a danger logic here to show the content properly-------\n\t${subTasks[0]}\n\t------- I need a danger logic here to show the content properly-------\n`;
+				formattedTask = `- [ ] ${title
+					} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${tag
+					}`;
 			}
 
+			// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+			const bodyLines = body
+				.filter(
+					(line: string) =>
+						!line.startsWith("- [ ]") && !line.startsWith("- [x]")
+				)
+				.map((line: string) => `\t${line}`)
+				.join("\n");
+
+			// console.log("The subtasks array before i append backslah t into it : ", subTasks);
+
+			// Add the sub-tasks without additional indentation
+			const subTasksWithTab = subTasks
+				.map((Line: string) => `\t${Line}`)
+				.join("\n");
+
+			// console.log("If i dont add anything in body, then what is the value of bodyLines between the colons :", bodyLines,":");
+			// Combine all parts: main task, body, and sub-tasks
+			// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}\n`;
+			const completeTask = `${formattedTask}${bodyLines.trim() ? `\n${bodyLines}` : ''}\n${subTasksWithTab}\n`;
+
+
 			// Append task to the file at the current cursor position or the end
-			fs.appendFileSync(fullPath, newTaskLine);
+			fs.appendFileSync(fullPath, completeTask);
 
 			// Update tasks.json
 			time = (time === " - ") ? '' : time;
