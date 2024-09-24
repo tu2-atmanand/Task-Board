@@ -165,7 +165,31 @@ export const deleteTaskFromFile = (task: Task) => {
 	try {
 		const fileContent = fs.readFileSync(filePath, "utf8");
 		// Updated regex to match the task body ending with '|'
-		const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, "gm");
+		// const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, "gm");
+		let taskRegex = "";
+		const startRegex = new RegExp(
+			`^- \\[ \\] .*?${task.title}.*$`,
+			"gm"
+		);
+		const startIndex = fileContent.search(startRegex);
+
+		if (startIndex !== -1) {
+			const lines = fileContent.substring(startIndex).split("\n");
+			const taskContent = [];
+
+			for (const line of lines) {
+				if (line.trim() === "") {
+					break;
+				}
+				taskContent.push(line);
+			}
+
+			taskRegex = taskContent.join("\n");
+		}
+		console.log(
+			"----- THE content i will be deleting from the file : ",
+			taskRegex
+		);
 		const newContent = fileContent.replace(taskRegex, ""); // Remove the matched line from the file
 		fs.writeFileSync(filePath, newContent);
 	} catch (error) {

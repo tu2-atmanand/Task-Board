@@ -411,7 +411,7 @@
     "0-ImportantData.md": [],
     "Daily_Notes/24-09-2024.md": [
       {
-        "id": 1727189799298,
+        "id": 1727194008411,
         "title": "This is a simple task with random note, but this doesnt have either a body nor subtasks. But the problem is this has a tab on the immediate next line.",
         "body": [],
         "time": "17:08 - 18:08",
@@ -422,7 +422,7 @@
         "completed": false
       },
       {
-        "id": 1727189799299,
+        "id": 1727194008412,
         "title": "Adding a Task to see if this task dont have body and only have the subtasks, then there shouldnt be any empty line between Main task and SubTasks.",
         "body": [],
         "time": "17:51 - 18:51",
@@ -433,30 +433,19 @@
         "completed": false
       },
       {
-        "id": 1727189799299,
-        "title": "Adding task without body lets see now what happens",
-        "body": [],
-        "time": "22:24 - 23:24",
-        "due": "2024-09-24",
-        "tag": "",
-        "priority": "0",
-        "filePath": "Daily_Notes/24-09-2024.md",
-        "completed": false
-      },
-      {
-        "id": 1727190325386,
+        "id": 1727194008412,
         "title": "Now please dont come empty line between title and subtasks, removing body",
         "body": [
-          "",
+          "First adding a body so i can delete this complete task to test delete functionality",
           "- [ ] First sub task",
           "- [ ] Second tasks"
         ],
         "time": "22:35 - 23:35",
         "due": "2024-09-25",
-        "tag": "#Testing",
-        "priority": 3,
+        "tag": "#Working",
+        "priority": "0",
         "filePath": "Daily_Notes/24-09-2024.md",
-        "completed": ""
+        "completed": false
       }
     ],
     "Daily_Notes/23-09-2024.md": [
