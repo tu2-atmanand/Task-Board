@@ -104,15 +104,17 @@ export default class TaskBoard extends Plugin {
 		);
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
-				console.log(
-					"NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that."
-				);
+				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
+
+				// console.log(
+				// 	"NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that."
+				// );
 			})
 		);
 		this.registerEvent(
 			this.app.vault.on("rename", (file) => {
 				console.log(
-					"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file."
+					"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
 				);
 			})
 		);
@@ -204,7 +206,7 @@ export default class TaskBoard extends Plugin {
 			// Save to localStorage
 			localStorage.setItem("fileStack", JSON.stringify(this.fileStack));
 			console.log(
-				"Inside saveStack(), the data inside localStorage after setItem : ",
+				"saveStack() : The data inside localStorage after setItem : ",
 				localStorage.getItem("fileStack")
 			);
 			console.log("After updating the data is : ", this.fileStack);
@@ -267,7 +269,7 @@ export default class TaskBoard extends Plugin {
 	async onFileChange(file: TFile) {
 		if (file.extension === "md") {
 			console.log(`File modified: ${file.path}`);
-			console.log("The value of realTimeScanning : ", this.settings.data.globalSettings.realTimeScanning);
+			// console.log("The value of realTimeScanning : ", this.settings.data.globalSettings.realTimeScanning);
 			// console.log(
 			// 	"The data inside LocalStorage Before adding the new modified file : ",
 			// 	this.fileStack
@@ -275,7 +277,7 @@ export default class TaskBoard extends Plugin {
 			// If real-time scanning is enabled, scan the file immediately
 			if (this.settings.data.globalSettings.realTimeScanning) {
 				console.log(
-					"Will call the updateTasksFromFile function to scan this file : ",
+					"Reat-Time Scanning is ON. Scanning following file : ",
 					file
 				);
 				this.scanningVault.updateTasksFromFiles([file]);
@@ -285,11 +287,8 @@ export default class TaskBoard extends Plugin {
 				// 	!this.fileStack.includes(file.path)
 				// );
 				// If the file is already in the stack, ignore it
-				console.log("The value of localStorage : ", this.fileStack);
-				console.log(
-					"Just checking what is the value of this.fileStack.pop() : ",
-					this.fileStack.at(0) === undefined
-				);
+				console.log("The value of localStorage before adding updated file : ", this.fileStack);
+				
 				if (this.fileStack.at(0) === undefined) {
 					this.fileStack.push(file.path); // Add the file to the stack
 				} else if (!this.fileStack.includes(file.path)) {
