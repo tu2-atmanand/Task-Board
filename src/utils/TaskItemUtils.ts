@@ -131,19 +131,21 @@ export const markTaskCompleteInFile = (task: Task) => {
 		const fileContent = fs.readFileSync(filePath, "utf8");
 		let newContent = "";
 
+		// Create a regex to match the task line based on the task title
+		const taskRegex = new RegExp(
+			`^- \\[([ x])\\] .*?${task.title}.*$`,
+			"m"
+		);
+
+		// Replace the checkbox based on the task.completed status
 		if (task.completed) {
 			// Mark the task as incomplete
-			const completedTaskRegex = new RegExp(
-				`^- \\[x\\] ${task.body} \\|.*`,
-				"gm"
-			);
-			newContent = fileContent.replace(completedTaskRegex, (match) =>
+			newContent = fileContent.replace(taskRegex, (match, checkbox) =>
 				match.replace("[x]", "[ ]")
 			);
 		} else {
 			// Mark the task as complete
-			const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, "gm");
-			newContent = fileContent.replace(taskRegex, (match) =>
+			newContent = fileContent.replace(taskRegex, (match, checkbox) =>
 				match.replace("[ ]", "[x]")
 			);
 		}
