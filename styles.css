@@ -185,7 +185,7 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: row;
 	background: var(--background-modifier-box-shadow);
 	align-items: center;
-	margin: 2px;
+	margin: 4px;
 	border-radius: 14px;
 	padding: 2px
 }

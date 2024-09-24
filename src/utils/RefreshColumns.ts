@@ -26,12 +26,23 @@ export const refreshTasks = (
 		tasksToDisplay = pendingTasks.filter((task) => {
 			if (!task.due) return false;
 			const today = new Date();
+			today.setHours(0, 0, 0, 0); // Set time to 00:00
 			const dueDate = new Date(task.due);
+			dueDate.setHours(0, 0, 0, 0); // Set time to 00:00
 
 			const diffDays = Math.round(
 				(dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
 			);
-			// console.log("Dudate : ", dueDate.getTime(), "Today : ", today.getTime(),"The Difference is : ", diffDays, "For the task : ", task.title);
+			// console.log(
+			// 	"Dudate : ",
+			// 	dueDate.getTime(),
+			// 	"Today : ",
+			// 	today.getTime(),
+			// 	"The Difference is : ",
+			// 	diffDays,
+			// 	"For the task : ",
+			// 	task.title
+			// );
 
 			if (from < 0 && to === 0) {
 				return diffDays < 0;
