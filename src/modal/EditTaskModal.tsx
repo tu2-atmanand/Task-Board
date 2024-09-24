@@ -74,10 +74,19 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 
 	// Unnecessary below memory and CPU wastage, just for the Live Preview thing, you can remove this and create the actual display of the file content, or else, you can keep this as it also, no issues : 
 	let newTaskContent = ''
+	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+	// const bodyLines = bodyContent
+	// 	.map((line: string) => `\t${line}`)
+	// 	.split('\n');
+
+	// Add the sub-tasks without additional indentation
+	const subTasksWithTab = subTasks
+		.map((Line: string) => `\n\t${Line}`)
+
 	if (dayPlannerPlugin) {
-		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${title} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}\n\t${subTasks}`;
+		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${title} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}\n${subTasksWithTab}`;
 	} else {
-		newTaskContent = `- [] ${title} |${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''}${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}\n\t${subTasks}`;
+		newTaskContent = `- [] ${title} |${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''}${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}${subTasksWithTab}`;
 	}
 
 	return (
@@ -113,13 +122,13 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 								/>
 							</div>
 						))}
-						<button onClick={addNewSubTask}>Add new Sub-Task</button>
+						<button style={{width: 'fit-content', alignSelf: 'end'}} onClick={addNewSubTask}>Add new Sub-Task</button>
 					</div>
 					{/* Live File Preview */}
 					<div className="EditTaskModalHomePreview">
 						<h3 style={{ margin: 0 }}>File Preview</h3>
 						<div className="fileContentContainer" ref={fileContentRef}>
-							<h6>File Modified : {task.filePath}</h6>
+							<h6>Parent File Location : {task.filePath}</h6>
 							<div className="fileContent">
 								{newTaskContent}
 							</div>
