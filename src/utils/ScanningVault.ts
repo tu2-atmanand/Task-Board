@@ -181,6 +181,7 @@ export class ScanningVault {
 
 			if (line.trim() === "") {
 				// Empty line indicates the end of the task body
+				console.log("The current line detected should be empty :", line,": There shouldnt be any space between the two colons");
 				break;
 			}
 

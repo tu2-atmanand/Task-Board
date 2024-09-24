@@ -31,8 +31,7 @@ export const refreshTasks = (
 			const diffDays = Math.round(
 				(dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
 			);
-			// console.log("The value of the difference between the two dates : ", diffDays);
-			// console.log("The Difference in today and due : ", diffDays, "For the task : ", task.body);
+			// console.log("Dudate : ", dueDate.getTime(), "Today : ", today.getTime(),"The Difference is : ", diffDays, "For the task : ", task.title);
 
 			if (from < 0 && to === 0) {
 				return diffDays < 0;
