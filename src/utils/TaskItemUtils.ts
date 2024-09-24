@@ -249,7 +249,10 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 		.join("\n");
 
 	// Combine all parts: main task, body, and sub-tasks
-	const completeTask = `${formattedTask}\n${bodyLines}\n${subTasks}`;
+	// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}`;
+	const completeTask = `${formattedTask}${
+		bodyLines.trim() ? `\n${bodyLines}` : ""
+	}\n${subTasksWithTab}\n`;
 
 	try {
 		// Read the file content
