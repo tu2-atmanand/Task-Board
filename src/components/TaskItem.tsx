@@ -66,7 +66,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 							const isCompleted = line.startsWith('- [x]');
 							const subtaskText = line.replace(/- \[.\] /, ''); // Remove the '- [ ]' or '- [x]' prefix
 							return (
-								<div key={index}>
+								<div className="taskItemBodySubtaskItem" key={index}>
 									<input
 										type="checkbox"
 										checked={isCompleted}
@@ -78,7 +78,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 						})}
 		
 						{/* Add an empty line between sub-tasks and the rest of the body */}
-						{subTasks.length > 0 && otherBody.length > 0 && <br />}
+						{subTasks.length > 0 && otherBody.length > 0 && <div style={{opacity: '50%', marginBlockStart: '0.5em'}}>Description</div>}
 		
 						{/* Render remaining body content */}
 						{otherBody.map((line, index) => (
@@ -111,7 +111,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 					<input
 						type="checkbox"
 						checked={task.completed ? true : false}
-						className={`taskCheckbox ${isChecked ? 'checked' : ''}`}
+						className={`taskItemCheckbox${isChecked ? '-Checked' : ''}`}
 						onChange={handleCheckboxChange}
 					/>
 					<div className="taskItemBodyContent">

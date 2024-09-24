@@ -157,24 +157,37 @@ If your plugin does not need CSS, delete this file.
 	margin-block: 0.6em;
 	display: flex;
 	flex-direction: row;
-	gap: 0.4em;
 }
 
 .taskItemTitle {
 	padding: 0;
+	padding-inline-start: 0.4em;
 	font-weight: 500;
 	overflow-wrap: anywhere;
 }
 
-.taskCheckbox {
+.taskItemCheckbox {
 	transform: scale(1);
 	transition: transform 0.3s;
+	height: 20px !important;
+	width: 20px !important;
+	margin-inline-end: 0 !important;
 }
 
-.taskCheckbox.checked {
+.taskItemCheckbox-Checked {
 	transform: scale(1.5);
 	/* Slight animation effect */
 	transition: transform 0.3s;
+}
+
+.taskItemBodySubtaskItem {
+	display: flex;
+	flex-direction: row;
+	background: var(--background-modifier-box-shadow);
+	align-items: center;
+	margin: 2px;
+	border-radius: 14px;
+	padding: 2px
 }
 
 .taskItemTag {
@@ -472,7 +485,6 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
-	overflow-y: auto;
 	border-radius: 4px;
 	background-color: var(--background-primary-alt);
 	position: relative;
@@ -490,10 +502,12 @@ If your plugin does not need CSS, delete this file.
 .fileContent {
 	white-space: pre-wrap;
 	min-height: 10vh;
+	max-height: 25vh;
 	overflow-wrap: break-word;
 	padding: 4px;
 	padding-block: 1em;
 	font-family: monospace;
+	overflow-y: auto;
 }
 
 .EditTaskModalHomeOpenFileBtn {
