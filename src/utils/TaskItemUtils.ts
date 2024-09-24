@@ -220,11 +220,16 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 			: "";
 
 	// Build the formatted string for the main task
-	let formattedTask = `- [ ] ${
+	let formattedTask = "";
+	if (dayPlannerPlugin) {
+		formattedTask = `- [ ] ${
 		updatedTask.time ? `${updatedTask.time} ` : ""
-	}${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${
+		}${updatedTask.title} |${dueDateWithEmo} ${priorityWithEmo} ${
 		updatedTask.tag
 	}`;
+	} else {
+		formattedTask = `- [ ] ${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}`;
+	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
