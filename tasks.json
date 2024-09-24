@@ -58,26 +58,16 @@
     "Daily_Notes/30-08-2024.md": [],
     "Daily_Notes/29-08-2024.md": [],
     "Daily_Notes/28-08-2024.md": [],
-    "Daily_Notes/27-08-2024.md": [
-      {
-        "id": 1727016190196,
-        "title": "Put Hair Oil",
-        "body": [],
-        "time": "18:00 - 19:00",
-        "due": "2024-09-23",
-        "tag": "#Personal",
-        "priority": "0",
-        "filePath": "Daily_Notes/27-08-2024.md",
-        "completed": false
-      }
-    ],
+    "Daily_Notes/27-08-2024.md": [],
     "Daily_Notes/25-08-2024.md": [
       {
         "id": 1727016190203,
-        "title": "Tata Crucible Quiz",
-        "body": [],
-        "time": "17:30 - 17:30",
-        "due": "2024-09-23",
+        "title": "Cut Nails | ✅ 2024-08-25",
+        "body": [
+          ""
+        ],
+        "time": "10:00 - 11:00",
+        "due": "",
         "tag": "",
         "priority": "0",
         "filePath": "Daily_Notes/25-08-2024.md",
@@ -85,9 +75,11 @@
       },
       {
         "id": 1727016190203,
-        "title": "Cut Nails ✅ 2024-08-25",
-        "body": [],
-        "time": "10:00 - 10:15",
+        "title": "Cut Nails | ✅ 2024-08-25",
+        "body": [
+          ""
+        ],
+        "time": "10:00 - 11:00",
         "due": "",
         "tag": "",
         "priority": "0",
@@ -99,10 +91,10 @@
     "Daily_Notes/23-08-2024.md": [],
     "Daily_Notes/22-09-2024.md": [
       {
-        "id": 1727177691928,
+        "id": 1727197996008,
         "title": "A tempararory new task",
         "body": [
-          "I am adding a body to the task which only had subtasks"
+          "I am adding a body to the task which only have body now"
         ],
         "time": "20:45 - 21:45",
         "due": "2024-09-23",
@@ -112,7 +104,7 @@
         "completed": false
       },
       {
-        "id": 1727177691928,
+        "id": 1727197996009,
         "title": "Adding task from command to see if the taskboard refreshes now",
         "body": [],
         "time": "16:17 - 17:17",
@@ -123,7 +115,7 @@
         "completed": false
       },
       {
-        "id": 1727177691928,
+        "id": 1727197996009,
         "title": "New task title",
         "body": [
           "Putting something nice instead of just the body body. This is good, i think now it is working.",
@@ -139,7 +131,7 @@
         "completed": false
       },
       {
-        "id": 1727177691928,
+        "id": 1727197996009,
         "title": "This is a main Task, updating, Updating more",
         "body": [
           "This is a body i am going to replace all the three bullete lines with this one sentence, because i think usually people will going to simply add a one sentence for the body or maybe bullete points also.",
@@ -161,17 +153,15 @@
     "Daily_Notes/22-08-2024.md": [],
     "Daily_Notes/21-09-2024.md": [
       {
-        "id": 1727016635249,
+        "id": 1727197513340,
         "title": "Adding random task for today to see how the board updates.",
-        "body": [
-          ""
-        ],
+        "body": [],
         "time": "12:02 - 13:02",
         "due": "2024-09-24",
         "tag": "#Testing",
         "priority": "0",
         "filePath": "Daily_Notes/21-09-2024.md",
-        "completed": false
+        "completed": ""
       }
     ],
     "Daily_Notes/21-08-2024.md": [
@@ -755,7 +745,19 @@
     "Daily_Notes/30-08-2024.md": [],
     "Daily_Notes/29-08-2024.md": [],
     "Daily_Notes/28-08-2024.md": [],
-    "Daily_Notes/27-08-2024.md": [],
+    "Daily_Notes/27-08-2024.md": [
+      {
+        "id": 1727197015427,
+        "title": "Put Hair Oil",
+        "body": [],
+        "time": "18:00 - 19:00",
+        "due": "2024-09-23",
+        "tag": "#Personal",
+        "priority": "0",
+        "filePath": "Daily_Notes/27-08-2024.md",
+        "completed": "2024-09-24T17:02"
+      }
+    ],
     "Daily_Notes/25-08-2024.md": [],
     "Daily_Notes/24-08-2024.md": [
       {

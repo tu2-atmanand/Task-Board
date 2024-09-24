@@ -110,8 +110,8 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 				<div className="taskItemMainBody">
 					<input
 						type="checkbox"
-						checked={task.completed ? true : false}
-						className={`taskItemCheckbox${isChecked ? '-Checked' : ''}`}
+						checked={(task.completed || isChecked) ? true : false}
+						className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
 						onChange={handleCheckboxChange}
 					/>
 					<div className="taskItemBodyContent">
