@@ -53,21 +53,12 @@
             }
           },
           {
-            "colType": "undated",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Undated",
-              "index": 4
-            }
-          },
-          {
             "colType": "dated",
             "active": true,
             "data": {
               "collapsed": false,
               "name": "Future",
-              "index": 5,
+              "index": 4,
               "range": {
                 "tag": "after",
                 "rangedata": {
@@ -75,6 +66,15 @@
                   "to": 0
                 }
               }
+            }
+          },
+          {
+            "colType": "undated",
+            "active": true,
+            "data": {
+              "collapsed": false,
+              "name": "Undated",
+              "index": 5
             }
           },
           {

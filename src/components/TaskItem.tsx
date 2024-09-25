@@ -11,6 +11,8 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 	// State to handle the checkbox animation
 	const [isChecked, setIsChecked] = useState(false);
 	const [taskBody, setTaskBody] = useState<string[]>(task.body);
+	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
+
 
 	// Determine color for the task indicator
 	const getColorIndicator = () => {
@@ -52,19 +54,24 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 		setTaskBody(updatedBody);
 	};
 
+	// Toggle function to expand/collapse the description
+	const toggleDescription = () => {
+		setIsDescriptionExpanded(!isDescriptionExpanded);
+	};
+
 	// Render sub-tasks and remaining body separately
 	const renderTaskBody = () => {
 		try {
-			if(taskBody.length > 0) {
+			if (taskBody.length > 0) {
 				const subTasks = taskBody.filter(line => line.startsWith('- [ ]') || line.startsWith('- [x]'));
 				const otherBody = taskBody.filter(line => !line.startsWith('- [ ]') && !line.startsWith('- [x]'));
-		
+
 				return (
 					<>
 						{/* Render sub-tasks first */}
 						{subTasks.map((line, index) => {
 							const isCompleted = line.startsWith('- [x]');
-							const subtaskText = line.replace(/- \[.\] /, ''); // Remove the '- [ ]' or '- [x]' prefix
+							const subtaskText = line.replace(/- \[.\] /, '');
 							return (
 								<div className="taskItemBodySubtaskItem" key={index}>
 									<input
@@ -76,16 +83,31 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 								</div>
 							);
 						})}
-		
-						{/* Add an empty line between sub-tasks and the rest of the body */}
-						{subTasks.length > 0 && otherBody.length > 0 && <div style={{opacity: '50%', marginBlockStart: '0.5em'}}>Description</div>}
-		
-						{/* Render remaining body content */}
-						{otherBody.map((line, index) => (
-							<div key={subTasks.length + index}>
-								<span>{line}</span>
+
+						{/* Touchable Description element */}
+						{otherBody.length > 0 && (
+							<div
+								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer' }}
+								onClick={toggleDescription}
+							>
+								{isDescriptionExpanded ? 'Hide Description' : 'Show Description'}
 							</div>
-						))}
+						)}
+						
+						{/* Render remaining body content with expand/collapse animation */}
+						<div
+							style={{
+								maxHeight: isDescriptionExpanded ? '100%' : '0',
+								overflow: 'hidden',
+								transition: 'max-height 0.3s ease-in',
+							}}
+						>
+							{otherBody.map((line, index) => (
+								<div key={subTasks.length + index}>
+									<span>{line}</span>
+								</div>
+							))}
+						</div>
 					</>
 				);
 			} else {
