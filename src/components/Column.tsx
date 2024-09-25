@@ -37,15 +37,18 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 
 		// Check if the task is completed
 		if (updatedTask.completed) {
+			const taskWithCompleted = { ...updatedTask, completed: ""};
 			// Move from Completed to Pending
 			moveFromCompletedToPending(updatedTask);
+			updateTaskInFile(taskWithCompleted, taskWithCompleted);
 		} else {
+			const taskWithCompleted = { ...updatedTask, completed: new Date().toISOString().slice(0, 16), };
 			// Move from Pending to Completed
 			moveFromPendingToCompleted(updatedTask);
+			updateTaskInFile(taskWithCompleted, taskWithCompleted);
 		}
 
 		// Mark task in file as complete or incomplete
-		markTaskCompleteInFile(updatedTask);
 
 		// Refresh the tasks in the component
 		// refreshTasks(setTasks, colType, data);

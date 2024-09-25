@@ -123,6 +123,7 @@ export const moveFromCompletedToPending = (task: Task) => {
 	}
 };
 
+/*
 export const markTaskCompleteInFile = (task: Task) => {
 	const basePath = (window as any).app.vault.adapter.basePath;
 	const filePath = path.join(basePath, task.filePath);
@@ -155,6 +156,7 @@ export const markTaskCompleteInFile = (task: Task) => {
 		console.error("Error marking task in file:", error);
 	}
 };
+*/
 
 // For handleDeleteTask
 
@@ -238,6 +240,8 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 
 	const dueDateWithEmo = updatedTask.due ? ` 📅${updatedTask.due}` : "";
 	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
+	const completedWithEmo = updatedTask.completed ? ` ✅${updatedTask.completed}` : "";
+	const checkBoxStat = updatedTask.completed ? '- [x]' : '- [ ]';
 
 	// Combine priority emoji if it exists
 	const priorityWithEmo =
@@ -248,13 +252,11 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 	// Build the formatted string for the main task
 	let formattedTask = "";
 	if (dayPlannerPlugin) {
-		formattedTask = `- [ ] ${
+		formattedTask = `${checkBoxStat} ${
 			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${updatedTask.title} |${dueDateWithEmo} ${priorityWithEmo} ${
-			updatedTask.tag
-		}`;
+		}${updatedTask.title} |${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}${completedWithEmo}`;
 	} else {
-		formattedTask = `- [ ] ${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}`;
+		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}${completedWithEmo}`;
 	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
@@ -295,7 +297,7 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 		// const taskRegex = new RegExp(^- \\[ \\] .*?${oldTask.title}.*$, "gm");
 
 		const startRegex = new RegExp(
-			`^- \\[ \\] .*?${oldTask.title}.*$`,
+			`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
 			"gm"
 		);
 		const startIndex = fileContent.search(startRegex);
