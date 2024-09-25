@@ -81,7 +81,10 @@ export class ScanningVault {
 
 	// Generate a unique ID for each task
 	generateTaskId(): number {
-		return Date.now();
+		const array = new Uint32Array(1);
+		crypto.getRandomValues(array);
+		console.log("The random value generated : ", array[0]);
+		return array[0];
 	}
 
 	// Helper function to load the existing tasks from the tasks.json file
@@ -181,7 +184,11 @@ export class ScanningVault {
 
 			if (line.trim() === "") {
 				// Empty line indicates the end of the task body
-				console.log("The current line detected should be empty :", line,": There shouldnt be any space between the two colons");
+				console.log(
+					"The current line detected should be empty :",
+					line,
+					": There shouldnt be any space between the two colons"
+				);
 				break;
 			}
 
