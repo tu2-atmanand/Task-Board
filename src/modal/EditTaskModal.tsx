@@ -4,6 +4,7 @@ import { App, Modal } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
 import { priorityEmojis, priorityOptions } from "src/interfaces/TaskItem";
 
+import { FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { loadGlobalSettings } from "src/utils/SettingsOperations";
 
@@ -39,6 +40,11 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 		updatedSubTasks[index] = updatedSubTasks[index].startsWith('- [x]')
 			? updatedSubTasks[index].replace('- [x]', '- [ ]')
 			: updatedSubTasks[index].replace('- [ ]', '- [x]');
+		setSubTasks(updatedSubTasks);
+	};
+
+	const removeSubTask = (index: number) => {
+		const updatedSubTasks = subTasks.filter((_, idx) => idx !== index);
 		setSubTasks(updatedSubTasks);
 	};
 
@@ -120,9 +126,18 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 									value={subTask.replace(/- \[.\] /, '')}
 									onChange={(e) => updateSubTaskContent(index, e.target.value)}
 								/>
+								<FaTrash
+									size={15}
+									enableBackground={0}
+									opacity={0.7}
+									style={{marginInlineStart: '0.8em'}}
+									title="Delete Sub-Task"
+									onClick={() => removeSubTask(index)}
+									cursor={'pointer'}
+								/>
 							</div>
 						))}
-						<button style={{width: 'fit-content', alignSelf: 'end'}} onClick={addNewSubTask}>Add new Sub-Task</button>
+						<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>Add new Sub-Task</button>
 					</div>
 					{/* Live File Preview */}
 					<div className="EditTaskModalHomePreview">
