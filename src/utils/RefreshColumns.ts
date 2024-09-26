@@ -3,11 +3,13 @@
 import { Dispatch, SetStateAction } from "react";
 
 import { Task } from "../interfaces/Column";
+import { loadGlobalSettings } from "./SettingsOperations";
 import { loadTasksFromJson } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
 export const refreshTasks = (
 	setTasks: Dispatch<SetStateAction<Task[]>>,
+	activeBoard: number,
 	colType: string,
 	data: any
 ) => {
@@ -67,7 +69,27 @@ export const refreshTasks = (
 			(task) => task.tag && task.tag !== data.coltag
 		);
 	} else if (colType === "completed") {
-		tasksToDisplay = completedTasks;
+		const globalSettings = loadGlobalSettings();
+		const completedColumnIndex = globalSettings.data.boardConfigs[
+			activeBoard
+		].columns.findIndex((column) => column.colType === "completed");
+		const tasksLimit =
+			globalSettings.data.boardConfigs[activeBoard].columns[
+				completedColumnIndex
+			].data.limit;
+
+		const sortedCompletedTasks = completedTasks.sort((a, b) => {
+			const dateA = new Date(a.completed);
+			const dateB = new Date(b.completed);
+			return dateB.getTime() - dateA.getTime(); // Sort in descending order (newest first)
+		});
+
+		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);
+		// tasksToDisplay = sortedCompletedTasks;
+
+		// console.log("The value of Limit for Completed Column : ", tasksLimit);
+		// console.log("All Completed taks i have : ", completedTasks);
+		// console.log("Tasks to Display : ", tasksToDisplay);
 	}
 
 	setTasks(tasksToDisplay);
