@@ -111,8 +111,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		updatedBoards[boardIndex].columns.push({
 			colType: columnData.colType,
 			active: columnData.active,
+			collapsed: false,
 			data: {
-				collapsed: false,
 				name: columnData.name,
 				index: updatedBoards[boardIndex].columns.length + 1,
 			},

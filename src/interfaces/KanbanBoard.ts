@@ -2,11 +2,11 @@
 export interface ColumnData {
 	colType: string;
 	active: boolean;
+	collapsed?: boolean;
 	data: {
-		collapsed?: boolean;
 		name: string;
 		index: number;
-		coltag: string;
+		coltag?: string;
 		range?: {
 			tag: string;
 			rangedata: {
@@ -15,6 +15,10 @@ export interface ColumnData {
 			};
 		};
 		limit?: number;
+	};
+	sort?: {
+		criteria: string;
+		order: boolean; // Ascending = 0 AND Descending = 1
 	};
 }
 
