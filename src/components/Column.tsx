@@ -3,12 +3,12 @@
 import { App, Modal } from 'obsidian';
 import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
+import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
-import { markTaskCompleteInFile, moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
 
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
-import { RxDragHandleDots2 } from "react-icons/rx";
 import TaskItem from './TaskItem';
 import fs from 'fs';
 import path from 'path';
@@ -19,12 +19,12 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
 }
 
-const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }) => {
+const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data, setBoards }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
 
 	// Load tasks from tasks.json file
 	useEffect(() => {
-		refreshTasks(setTasks, colType, data);
+		refreshTasks(setTasks, activeBoard, colType, data);
 	}, [colType, data]);
 
 
@@ -37,7 +37,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 
 		// Check if the task is completed
 		if (updatedTask.completed) {
-			const taskWithCompleted = { ...updatedTask, completed: ""};
+			const taskWithCompleted = { ...updatedTask, completed: "" };
 			// Move from Completed to Pending
 			moveFromCompletedToPending(updatedTask);
 			updateTaskInFile(taskWithCompleted, taskWithCompleted);
@@ -97,8 +97,11 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 	return (
 		<div className="TaskBoardColumnsSection">
 			<div className="taskBoardColumnSecHeader">
-				<div className="columnTitle">{data.name}</div>
-				<button className="columnDragIcon"><RxDragHandleDots2 /></button>
+				<div className="taskBoardColumnSecHeaderTitleSec">
+					{/* <button className="columnDragIcon"><RxDragHandleDots2 /></button> */}
+					<div className="columnTitle">{data.name}</div>
+				</div>
+				<RxDotsVertical />
 			</div>
 			<div className="tasksContainer">
 				{tasks.length > 0 ? (

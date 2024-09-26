@@ -1,4 +1,5 @@
 export interface ColumnProps {
+	activeBoard: number;
 	colType: string;
 	active?: boolean;
 	data: {

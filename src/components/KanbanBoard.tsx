@@ -76,6 +76,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 					.map((column, index) => (
 						<Column
 							key={index}
+							activeBoard={activeBoardIndex}
 							colType={column.colType}
 							data={column.data}
 							setBoards={setBoards}

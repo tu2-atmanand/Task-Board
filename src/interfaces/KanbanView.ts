@@ -21,6 +21,7 @@ export interface globalSettingsData {
 	dayPlannerPlugin: boolean;
 	realTimeScanning: boolean;
 }
+
 // Define the interface for GlobalSettings based on your JSON structure
 export interface GlobalSettings {
 	version: string;
