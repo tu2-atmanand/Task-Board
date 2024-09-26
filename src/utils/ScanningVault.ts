@@ -56,6 +56,7 @@ export class ScanningVault {
 				const due = this.extractDate(line);
 				const priority = this.extractPriority(line);
 				const tag = this.extractTag(line);
+				const completionDate = this.extractCompletionDate(line);
 				const body = this.extractBody(lines, i + 1);
 
 				const task = {
@@ -67,7 +68,7 @@ export class ScanningVault {
 					tag,
 					priority,
 					filePath: fileNameWithPath,
-					completed: isCompleted,
+					completed: completionDate,
 				};
 
 				if (isCompleted) {
@@ -123,6 +124,7 @@ export class ScanningVault {
 					const due = this.extractDate(line);
 					const priority = this.extractPriority(line);
 					const tag = this.extractTag(line);
+					const completionDate = this.extractCompletionDate(line);
 					const body = this.extractBody(lines, i + 1);
 
 					const task = {
@@ -134,7 +136,7 @@ export class ScanningVault {
 						tag,
 						priority,
 						filePath: fileNameWithPath,
-						completed: isCompleted,
+						completed: completionDate,
 					};
 
 					if (isCompleted) {
@@ -271,4 +273,12 @@ export class ScanningVault {
 		const match = text.match(/#(\w+)/);
 		return match ? `#${match[1]}` : "";
 	}
+
+	extractCompletionDate(text: string): string {
+		const match =
+			text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/) ||
+			text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+		return match ? match[1] : "";
+	}
+
 }

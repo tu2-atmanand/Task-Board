@@ -102,6 +102,12 @@ If your plugin does not need CSS, delete this file.
 	align-items: center;
 }
 
+.taskBoardColumnSecHeaderTitleSec {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+}
+
 .columnTitle {
 	color: var(--foreground-primary);
 	text-align: center;
