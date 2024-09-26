@@ -275,10 +275,14 @@ export class ScanningVault {
 	}
 
 	extractCompletionDate(text: string): string {
-		const match =
-			text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/) ||
-			text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+		// const match =
+		// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/) ||
+		// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+		let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+		// if (!match) {
+		// 	match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+		// }
+		
 		return match ? match[1] : "";
 	}
-
 }
