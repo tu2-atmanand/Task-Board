@@ -24,11 +24,11 @@ import { KanbanView } from "./src/views/KanbanView";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import fs from "fs";
-import { loadGlobalSettings } from "src/utils/TaskItemUtils";
+// import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 import path from "path";
 
 export default class TaskBoard extends Plugin {
-	settings: globalSettingsData; // Use the GlobalSettings type here
+	settings: globalSettingsData;
 	scanningVault: ScanningVault;
 	fileStack: string[] = [];
 	stackFilePath = path.join(
@@ -80,14 +80,14 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 
-		// Add a command to Re-Scan the whole Vault
-		this.addCommand({
-			id: "rescan-vault-for-tasks",
-			name: "Re-Scan Vault",
-			callback: () => {
-				this.scanningVault.scanVaultForTasks();
-			},
-		});
+		// // Add a command to Re-Scan the whole Vault
+		// this.addCommand({
+		// 	id: "rescan-vault-for-tasks",
+		// 	name: "Re-Scan Vault",
+		// 	callback: () => {
+		// 		this.scanningVault.scanVaultForTasks();
+		// 	},
+		// });
 
 		await this.loadSettings();
 		// This adds a settings tab so the user can configure various aspects of the plugin
