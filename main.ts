@@ -98,7 +98,7 @@ export default class TaskBoard extends Plugin {
 		console.log("Creating localStorage ...");
 		// Calling a function based on any file change in the valut.
 		this.registerEvent(
-			this.app.vault.on("modify", (file: TFile) =>
+			this.app.vault.on('modify', (file: TFile) =>
 				this.onFileChange(file)
 			)
 		);
@@ -228,7 +228,7 @@ export default class TaskBoard extends Plugin {
 		);
 		this.scanTimer = window.setInterval(() => {
 			this.processStack();
-		}, 3 * 60 * 1000); // TODO : Change the following value to : 5 * 60 * 1000
+		}, 10 * 60 * 1000); // TODO : Change the following value to : 5 * 60 * 1000
 	}
 
 	// Process all files from the stack at once
