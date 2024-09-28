@@ -54,7 +54,7 @@ export class ScanningVault {
 				const title = this.extractTitle(line);
 				const time = this.extractTime(line);
 				const due = this.extractDate(line);
-				const priority = this.extractPriority(line);
+				// const priority = this.extractPriority(line);
 				const tag = this.extractTag(line);
 				const completionDate = this.extractCompletionDate(line);
 				const body = this.extractBody(lines, i + 1);
@@ -66,7 +66,7 @@ export class ScanningVault {
 					time,
 					due,
 					tag,
-					priority,
+					// priority,
 					filePath: fileNameWithPath,
 					completed: completionDate,
 				};
@@ -122,7 +122,7 @@ export class ScanningVault {
 					const title = this.extractTitle(line);
 					const time = this.extractTime(line);
 					const due = this.extractDate(line);
-					const priority = this.extractPriority(line);
+					// const priority = this.extractPriority(line);
 					const tag = this.extractTag(line);
 					const completionDate = this.extractCompletionDate(line);
 					const body = this.extractBody(lines, i + 1);
@@ -134,7 +134,7 @@ export class ScanningVault {
 						time,
 						due,
 						tag,
-						priority,
+						// priority,
 						filePath: fileNameWithPath,
 						completed: completionDate,
 					};
@@ -249,7 +249,14 @@ export class ScanningVault {
 
 	// Extract date from task title
 	extractDate(text: string): string {
-		const match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+		let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+
+		if (!match) {
+			match = text.match(
+				/\[due::\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)\]/
+			);
+		}
+
 		return match ? match[1] : "";
 	}
 
@@ -274,15 +281,36 @@ export class ScanningVault {
 		return match ? `#${match[1]}` : "";
 	}
 
+	// extractCompletionDate(text: string): string {
+	// 	// const match =
+	// 	// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/) ||
+	// 	// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+	// 	let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+	// 	// if (!match) {
+	// 	// 	match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+	// 	// }
+
+	// 	return match ? match[1] : "";
+	// }
+
 	extractCompletionDate(text: string): string {
-		// const match =
-		// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/) ||
-		// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
-		let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
-		// if (!match) {
-		// 	match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
-		// }
-		
+		// Match cases like ✅2024-09-26T11:30 or ✅ 2024-09-28
+		let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)/);
+
+		// If not found, try to match the completion:: 2024-09-28 format
+		if (!match) {
+			match = text.match(
+				/\[completion::\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)\]/
+			);
+		}
+
+		if (!match) {
+			match = text.match(
+				/\@completed\(\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?)\)/
+			);
+		}
+
+		// Return the matched date or date-time, or an empty string if no match
 		return match ? match[1] : "";
 	}
 }
