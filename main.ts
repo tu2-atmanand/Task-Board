@@ -12,7 +12,10 @@ import {
 	Setting,
 	TFile,
 } from "obsidian";
-import { DEFAULT_SETTINGS, globalSettingsData } from "src/interfaces/KanbanView";
+import {
+	DEFAULT_SETTINGS,
+	globalSettingsData,
+} from "src/interfaces/KanbanView";
 import {
 	TaskBoardIcon,
 	VIEW_TYPE_TASKBOARD,
@@ -80,6 +83,27 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "open-task-board",
+			name: "Open Task Board",
+			callback: () => {
+				this.app.workspace
+					.getLeaf(true)
+					.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+			},
+		});
+
+		this.addCommand({
+			id: "open-task-board-new-window",
+			name: "Open Task Board in New Window",
+			callback: () => {
+				this.app.workspace.getLeaf("window").setViewState({
+					type: VIEW_TYPE_TASKBOARD,
+					active: true,
+				});
+			},
+		});
+
 		// // Add a command to Re-Scan the whole Vault
 		// this.addCommand({
 		// 	id: "rescan-vault-for-tasks",
@@ -98,14 +122,13 @@ export default class TaskBoard extends Plugin {
 		console.log("Creating localStorage ...");
 		// Calling a function based on any file change in the valut.
 		this.registerEvent(
-			this.app.vault.on('modify', (file: TFile) =>
+			this.app.vault.on("modify", (file: TFile) =>
 				this.onFileChange(file)
 			)
 		);
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
 				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-
 				// console.log(
 				// 	"NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that."
 				// );
@@ -287,8 +310,11 @@ export default class TaskBoard extends Plugin {
 				// 	!this.fileStack.includes(file.path)
 				// );
 				// If the file is already in the stack, ignore it
-				console.log("The value of localStorage before adding updated file : ", this.fileStack);
-				
+				console.log(
+					"The value of localStorage before adding updated file : ",
+					this.fileStack
+				);
+
 				if (this.fileStack.at(0) === undefined) {
 					this.fileStack.push(file.path); // Add the file to the stack
 				} else if (!this.fileStack.includes(file.path)) {
