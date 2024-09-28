@@ -292,7 +292,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 
-/* /src/compoenents/BoardConfigureModal.tsx */
+/* /src/modal/BoardConfigureModal.tsx */
 
 .config-modal {
 	display: flex;
@@ -421,6 +421,7 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
+	max-width: 40vw
 }
 
 .EditTaskModalHome-title {
@@ -461,6 +462,7 @@ If your plugin does not need CSS, delete this file.
 	border: var(--border-width) solid olive;
 	border-radius: 5px;
 	padding: 0.5em;
+	min-width: 12vw;
 }
 
 .EditTaskModalHomeField {
@@ -557,7 +559,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 
-/* /src/compoenents/BoardConfigureModal.tsx - V2 */
+/* /src/modal/BoardConfigureModal.tsx - V2 */
 
 .modal {
 	width: auto;
@@ -593,6 +595,8 @@ If your plugin does not need CSS, delete this file.
 	position: sticky;
 	top: 0;
 	overflow: hidden;
+	max-width: 15vw;
+	width: 15vw;
 }
 
 .boardConfigModalSidebarBtnArea {
@@ -758,7 +762,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 
-/* // src/settings/TaskBoardSettingTab.ts */
+/* // src/views/TaskBoardSettingTab.ts */
 
 .TaskBoardSettingTab {
 	/* max-width: fit-content; */

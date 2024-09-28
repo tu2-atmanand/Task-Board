@@ -31,8 +31,8 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 	const handleCheckboxChange = (updatedTask: Task) => {
 		// Remove task from the current state
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
-		console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
-		console.log("The tasks which has been filtered : ", updatedTasks);
+		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
+		// console.log("The tasks which has been filtered : ", updatedTasks);
 		setTasks(updatedTasks); // Update state to remove completed task
 
 		// Check if the task is completed

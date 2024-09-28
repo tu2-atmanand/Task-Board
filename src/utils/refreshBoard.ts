@@ -1,4 +1,4 @@
-import { loadBoardsData, saveBoardsData } from "../services/OpenColumnConfig";
+import { loadBoardsData, saveBoardsData } from "./SettingsOperations";
 
 import { Board } from "../interfaces/KanbanBoard";
 

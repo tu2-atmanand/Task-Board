@@ -9,7 +9,7 @@ import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
 import fs from "fs";
-import { openBoardConfigModal } from "../services/OpenColumnConfig";
+import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
 
 const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {

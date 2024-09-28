@@ -5,7 +5,7 @@ import { App, Notice, TFile } from "obsidian";
 import fs from "fs";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
-import { tasksPath } from "src/interfaces/TaskBoardGlobalValues";
+import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {
 	app: App;

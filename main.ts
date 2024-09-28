@@ -19,13 +19,13 @@ import {
 import {
 	TaskBoardIcon,
 	VIEW_TYPE_TASKBOARD,
-} from "src/interfaces/TaskBoardGlobalValues";
+} from "src/interfaces/GlobalVariables";
 
 import { AddTaskModal } from "src/modal/AddTaskModal";
-import { BoardConfigureModal } from "src/settings/BoardConfigureModal";
+import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { KanbanView } from "./src/views/KanbanView";
 import { ScanningVault } from "src/utils/ScanningVault";
-import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
+import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import fs from "fs";
 // import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 import path from "path";
