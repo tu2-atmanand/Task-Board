@@ -1,3 +1,6 @@
+# In this branch i will test the features i have implemented first before merging the new content into main branch.
+> Merge all the code from your development branch to this branch first for testing, once all things and functionalities have been tested, merge this branch with the main branch.
+
 # Task Board - Obsidian Plugin
 
 ![License](https://img.shields.io/github/license/tu2-atmanand/Task-Board)
