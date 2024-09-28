@@ -53,7 +53,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 		refreshBoardData(setBoards);
 	};
 
-
 	const handleDeleteTask = (task: Task) => {
 		const app = (window as any).app as App; // Fetch the Obsidian app instance
 		const deleteModal = new DeleteConfirmationModal(app, {
@@ -70,8 +69,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 		});
 		deleteModal.open();
 	};
-
-
 
 	const handleEditTask = (task: Task) => {
 		const app = (window as any).app as App;
