@@ -175,7 +175,7 @@ export class ScanningVault {
 			"The following data saved in the tasks.json : ",
 			this.tasks
 		);
-		new Notice("Tasks saved to tasks.json");
+		new Notice("Tasks scanned from the modified files.");
 	}
 
 	// New function to extract task body

@@ -13,6 +13,8 @@ import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
 
 const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
+	app: app;
+	
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 

@@ -44,7 +44,7 @@ export default class TaskBoard extends Plugin {
 	scanTimer: number;
 
 	async onload() {
-		console.log("TaskBoard: loading plugin ...");
+		console.log("TaskBoard : loading plugin ...");
 
 		this.scanningVault = new ScanningVault(this.app);
 
@@ -153,6 +153,7 @@ export default class TaskBoard extends Plugin {
 		console.log("MAIN.ts : Loading the setting values : ", this.settings);
 
 		// Run scanVaultForTasks if scanVaultAtStartup is true
+		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
 		this.settings.scanVaultAtStartup
 			? this.scanningVault.scanVaultForTasks()
 			: "";
@@ -331,7 +332,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	onunload() {
-		console.log("unloading TaskBoard plugin");
+		console.log("TaskBoard : unloading plugin...");
 		window.clearInterval(this.scanTimer);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}

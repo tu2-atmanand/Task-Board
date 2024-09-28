@@ -10,8 +10,6 @@ import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/util
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
-import fs from 'fs';
-import path from 'path';
 import { refreshBoardData } from 'src/utils/refreshBoard';
 import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
 

@@ -259,7 +259,7 @@
       "taskCompletionFormat": "Obsidian",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": true,
-      "autoAddDue": false,
+      "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
       "realTimeScanning": false
