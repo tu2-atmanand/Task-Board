@@ -19,7 +19,10 @@ const ReScanVaultModalContent: React.FC<{ app: App; scanningVault: ScanningVault
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
 	const [progress, setProgress] = useState(0);
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
-	const [collectedTasks, setCollectedTasks] = useState<tasksJson[]>([]);
+	const [collectedTasks, setCollectedTasks] = useState<tasksJson>({
+		Pending: {},
+		Completed: {},
+	});
 
 	const runScan = async () => {
 		setIsRunning(true);
