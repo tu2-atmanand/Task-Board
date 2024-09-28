@@ -1,4 +1,6 @@
-import { loadBoardsData, saveBoardsData } from "../services/OpenColumnConfig";
+// /src/utils/refreshBoards.ts
+
+import { loadBoardsData, saveBoardsData } from "./SettingsOperations";
 
 import { Board } from "../interfaces/KanbanBoard";
 

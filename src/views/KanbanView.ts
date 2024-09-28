@@ -1,20 +1,14 @@
 // src/views/KanbanView.ts
 
-import { App, ItemView, Vault, WorkspaceLeaf } from "obsidian";
-import {
-	loadBoardsData,
-	openBoardConfigModal,
-	openReScanVaultModal,
-	saveBoardsData,
-} from "../services/OpenColumnConfig";
+import { ItemView, Vault, WorkspaceLeaf } from "obsidian";
 
 import { Board } from "src/interfaces/KanbanBoard";
-import KanbanBoard from "../components/KanbanBoard";
-import { ReScanVaultModal } from "src/modal/ReScanVaultModal";
-import React from "react";
+import KanbanBoard from "src/components/KanbanBoard";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "../../main";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/TaskBoardGlobalValues";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
+import { loadBoardsData } from "src/utils/SettingsOperations";
+import { openReScanVaultModal } from "../services/OpenModals";
 
 export class KanbanView extends ItemView {
 	private vault: Vault;
@@ -52,10 +46,14 @@ export class KanbanView extends ItemView {
 			openReScanVaultModal(this.app);
 		});
 
-		console.log("The Settings which i have loaded using Obsidian : ", this.getSettings());
+		console.log(
+			"KanbanView : The Settings which i have loaded using Obsidian : ",
+			this.getSettings()
+		);
 
 		const root = ReactDOM.createRoot(this.contentEl); // Correct element reference
-		root.render(<KanbanBoard app={this.app} />); // Use 'this.app' here
+		root.render(<KanbanBoard app={this.app} />);
+		// root.render(<KanbanBoard />);
 		await this.loadBoards();
 	}
 
@@ -67,23 +65,10 @@ export class KanbanView extends ItemView {
 		}
 	}
 
-	private handleSaveBoards = (updatedBoards: Board[]) => {
-		this.boards = updatedBoards;
-		saveBoardsData(updatedBoards);
-	};
-
 	async onClose() {
 		// Clean up when view is closed
 	}
 }
-
-
-
-
-
-
-
-
 
 // // src/views/KanbanView.ts   ----- Wokring - V2
 

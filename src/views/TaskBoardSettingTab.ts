@@ -1,4 +1,4 @@
-// src/settings/TaskBoardSettingTab.ts
+// src/views/TaskBoardSettingTab.ts
 import { App, PluginSettingTab, Setting } from "obsidian";
 
 import TaskBoard from "../../main"; // Adjust the path based on your file structure

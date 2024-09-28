@@ -5,7 +5,7 @@ import { App, Notice, TFile } from "obsidian";
 import fs from "fs";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
-import { tasksPath } from "src/interfaces/TaskBoardGlobalValues";
+import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {
 	app: App;
@@ -175,7 +175,7 @@ export class ScanningVault {
 			"The following data saved in the tasks.json : ",
 			this.tasks
 		);
-		new Notice("Tasks saved to tasks.json");
+		new Notice("Tasks scanned from the modified files.");
 	}
 
 	// New function to extract task body

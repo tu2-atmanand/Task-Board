@@ -9,6 +9,6 @@ export const tasksPath = path.join(
 	basePath,
 	".obsidian",
 	"plugins",
-	"Task-Board",
+	"task-board",
 	"tasks.json"
 );

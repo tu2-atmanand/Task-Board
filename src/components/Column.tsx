@@ -10,8 +10,6 @@ import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/util
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
-import fs from 'fs';
-import path from 'path';
 import { refreshBoardData } from 'src/utils/refreshBoard';
 import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
 
@@ -31,8 +29,8 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 	const handleCheckboxChange = (updatedTask: Task) => {
 		// Remove task from the current state
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
-		console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
-		console.log("The tasks which has been filtered : ", updatedTasks);
+		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
+		// console.log("The tasks which has been filtered : ", updatedTasks);
 		setTasks(updatedTasks); // Update state to remove completed task
 
 		// Check if the task is completed
@@ -55,7 +53,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 		refreshBoardData(setBoards);
 	};
 
-
 	const handleDeleteTask = (task: Task) => {
 		const app = (window as any).app as App; // Fetch the Obsidian app instance
 		const deleteModal = new DeleteConfirmationModal(app, {
@@ -72,8 +69,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 		});
 		deleteModal.open();
 	};
-
-
 
 	const handleEditTask = (task: Task) => {
 		const app = (window as any).app as App;

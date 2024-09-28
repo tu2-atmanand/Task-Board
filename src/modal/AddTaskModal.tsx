@@ -8,7 +8,7 @@ import { loadGlobalSettings } from 'src/utils/SettingsOperations';
 import path from 'path';
 import { priorityEmojis } from 'src/interfaces/TaskItem';
 import { refreshBoardData } from 'src/utils/refreshBoard';
-import { tasksPath } from 'src/interfaces/TaskBoardGlobalValues';
+import { tasksPath } from 'src/interfaces/GlobalVariables';
 
 interface AddTaskModalProps {
 	app: App;

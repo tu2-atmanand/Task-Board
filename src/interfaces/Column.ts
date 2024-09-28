@@ -6,7 +6,7 @@ export interface ColumnProps {
 	data: {
 		name: string;
 		index: number;
-		coltag: string;
+		coltag?: string;
 		range?: {
 			tag: string;
 			rangedata: {

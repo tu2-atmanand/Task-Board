@@ -3,7 +3,7 @@ import fs from "fs";
 import { loadGlobalSettings } from "./SettingsOperations";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
-import { tasksPath } from "src/interfaces/TaskBoardGlobalValues";
+import { tasksPath } from "src/interfaces/GlobalVariables";
 
 // utils/TaskItemUtils.ts
 
