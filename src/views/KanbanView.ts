@@ -54,8 +54,8 @@ export class KanbanView extends ItemView {
 
 		console.log("The Settings which i have loaded using Obsidian : ", this.getSettings());
 
-		const root = ReactDOM.createRoot(this.contentEl);
-		root.render(<KanbanBoard app={this.plugin.app} />);
+		const root = ReactDOM.createRoot(this.contentEl); // Correct element reference
+		root.render(<KanbanBoard app={this.app} />); // Use 'this.app' here
 		await this.loadBoards();
 	}
 

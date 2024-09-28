@@ -7,8 +7,8 @@
           {
             "colType": "dated",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Over Due",
               "index": 1,
               "range": {
@@ -23,8 +23,8 @@
           {
             "colType": "dated",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Today",
               "index": 2,
               "range": {
@@ -39,8 +39,8 @@
           {
             "colType": "dated",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Tomorrow",
               "index": 3,
               "range": {
@@ -55,8 +55,8 @@
           {
             "colType": "dated",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Future",
               "index": 4,
               "range": {
@@ -71,8 +71,8 @@
           {
             "colType": "undated",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Undated",
               "index": 5
             }
@@ -80,8 +80,8 @@
           {
             "colType": "completed",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "limit": 10,
               "name": "Completed",
               "index": 6
@@ -104,8 +104,8 @@
           {
             "colType": "untagged",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Untagged",
               "index": 1
             }
@@ -113,8 +113,8 @@
           {
             "colType": "namedTag",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Testing Tasks",
               "index": 2,
               "coltag": "Testing"
@@ -123,8 +123,8 @@
           {
             "colType": "namedTag",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "GPT",
               "index": 3,
               "coltag": "GPT"
@@ -133,8 +133,8 @@
           {
             "colType": "namedTag",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Test Task",
               "index": 4,
               "coltag": "Test"
@@ -143,8 +143,8 @@
           {
             "colType": "namedTag",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Note Till Task is Done",
               "index": 5,
               "coltag": "NOTE"
@@ -153,8 +153,8 @@
           {
             "colType": "otherTags",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Other Tags",
               "index": 6
             }
@@ -162,8 +162,8 @@
           {
             "colType": "completed",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "index": 7,
               "limit": 10,
               "name": "Completed"
@@ -172,8 +172,8 @@
           {
             "colType": "namedTag",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Test Tasks",
               "index": 8,
               "coltag": "Test"
@@ -195,8 +195,8 @@
           {
             "colType": "dated",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Past Tasks",
               "index": 1,
               "range": {
@@ -210,8 +210,8 @@
           {
             "colType": "namedTag",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Test Name Tag Column",
               "index": 2,
               "coltag": "Test"
@@ -220,8 +220,8 @@
           {
             "colType": "untagged",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Untagged Tasks",
               "index": 3
             }
@@ -229,8 +229,8 @@
           {
             "colType": "otherTags",
             "active": true,
+			"collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Other Tags Tasks",
               "index": 4
             }

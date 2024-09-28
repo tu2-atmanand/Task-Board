@@ -2,8 +2,8 @@ export interface ColumnProps {
 	activeBoard: number;
 	colType: string;
 	active?: boolean;
+	collapsed?: boolean;
 	data: {
-		collapsed?: boolean;
 		name: string;
 		index: number;
 		coltag: string;
