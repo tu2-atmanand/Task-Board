@@ -8,6 +8,7 @@ import {
 	Notice,
 	Platform,
 	Plugin,
+	PluginManifest,
 	PluginSettingTab,
 	Setting,
 	TFile,
@@ -29,6 +30,7 @@ import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import fs from "fs";
 // import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 import path from "path";
+import { refreshKanbanBoard } from "src/services/RefreshServices";
 
 export default class TaskBoard extends Plugin {
 	settings: globalSettingsData;
@@ -42,11 +44,20 @@ export default class TaskBoard extends Plugin {
 		"file-stack.json"
 	);
 	scanTimer: number;
+	app: App;
+	plugin: TaskBoard;
+
+	constructor(app: App, menifest: PluginManifest) {
+		super(app, menifest);
+		this.app = app;
+		this.plugin = this;
+		this.scanTimer = 0;
+		this.scanningVault = new ScanningVault(this.app, this.plugin);
+	}
 
 	async onload() {
 		console.log("TaskBoard : loading plugin ...");
 
-		this.scanningVault = new ScanningVault(this.app);
 
 		// Create a ribbon icon to open the Kanban board view
 		const ribbonIconEl = this.addRibbonIcon(

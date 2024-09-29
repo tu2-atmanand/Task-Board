@@ -12,6 +12,7 @@ import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
 import { refreshBoardData } from 'src/utils/refreshBoard';
 import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
+import { updateTasksAndRefreshBoard } from 'src/services/RefreshServices';
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -91,9 +92,20 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
 
 			// refreshTasks(setTasks, tag, data);
-			refreshBoardData(setBoards, () => {
-				refreshTasks(setTasks, activeBoard, colType, data);
-			});
+
+			// --- MY METHOD ---------
+			// const emptyTheTasks: Task[] = [];
+			// setTasks(emptyTheTasks);
+			// sleep(10);
+
+			// setTasks([]);
+
+			// refreshBoardData(setBoards, () => {
+			// 	console.log("Task updated, running the Dispatch method of updating the board...");
+			// 	refreshTasks(setTasks, activeBoard, colType, data);
+			// });
+
+			updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
 		});
 		editModal.open();
 	};

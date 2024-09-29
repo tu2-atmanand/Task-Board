@@ -28,3 +28,22 @@ export function refreshKanbanBoard(app: App) {
 		console.info(err);
 	}
 }
+
+
+// Create a function that clears tasks and refreshes the board
+export const updateTasksAndRefreshBoard = (
+    setTasks: Dispatch<SetStateAction<Task[]>>,
+    setBoards: React.Dispatch<React.SetStateAction<any[]>>,
+    activeBoard: number,
+    colType: string,
+    data: any
+) => {
+    // Clear the tasks array
+    setTasks([]);
+	sleep(10);
+    // Refresh board and tasks
+    refreshBoardData(setBoards, () => {
+        console.log("updateTasksAndRefreshBoard : Tasks and board refreshed...");
+        refreshTasks(setTasks, activeBoard, colType, data);
+    });
+};
