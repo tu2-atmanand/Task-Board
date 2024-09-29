@@ -17,8 +17,14 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
 }
 
-const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data, setBoards }) => {
-	const [tasks, setTasks] = useState<Task[]>([]);
+const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data, setBoards, tasks: externalTasks }) => {
+	// Local tasks state, initially set from external tasks
+	const [tasks, setTasks] = useState<Task[]>(externalTasks);
+
+	// Sync local tasks state with external tasks when they change
+	useEffect(() => {
+		setTasks(externalTasks);
+	}, [externalTasks]);
 
 	// Load tasks from tasks.json file
 	useEffect(() => {
@@ -50,7 +56,9 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 
 		// Refresh the tasks in the component
 		// refreshTasks(setTasks, colType, data);
-		refreshBoardData(setBoards);
+		refreshBoardData(setBoards, () => {
+			refreshTasks(setTasks, activeBoard, colType, data);
+		});
 	};
 
 	const handleDeleteTask = (task: Task) => {
@@ -83,7 +91,9 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
 
 			// refreshTasks(setTasks, tag, data);
-			refreshBoardData(setBoards);
+			refreshBoardData(setBoards, () => {
+				refreshTasks(setTasks, activeBoard, colType, data);
+			});
 		});
 		editModal.open();
 	};

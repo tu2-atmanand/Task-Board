@@ -8,19 +8,33 @@ import { handleUpdateBoards, refreshBoardData } from "../utils/refreshBoard"; //
 import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
+import { Task } from "src/interfaces/Column";
 import fs from "fs";
 import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
+import { refreshTasks } from "src/utils/RefreshColumns"; // Adjust the path accordingly
 
 const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 	app: app;
-	
+
+	const [tasks, setTasks] = useState<Task[]>([]);
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 
 	useEffect(() => {
-		refreshBoardData(setBoards); // Use utility function to load boards
+		refreshBoardData(setBoards, () => {
+			RefreshTasksInsideColumns();
+		}); // Adding empty callback function
 	}, []);
+
+	const RefreshTasksInsideColumns = () => {
+		// Trigger refreshTasks after the boards are refreshed
+		boards.forEach((board, index) => {
+			board.columns.forEach((column) => {
+				refreshTasks(setTasks, index, column.colType, column.data);
+			});
+		});
+	};
 
 	// Function to handle saving boards
 	const AddNewTaskIn = () => {
@@ -32,7 +46,9 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				filePath: activeFile.path,
 				onTaskAdded: () => {
 					// Call refresh board data when a new task is added
-					refreshBoardData(setBoards);
+					refreshBoardData(setBoards, () => {
+						RefreshTasksInsideColumns();
+					});
 				},
 			}).open();
 		} else {
@@ -67,7 +83,9 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 					>
 						<Bolt size={20} />
 					</button>
-					<button className="RefreshBtn" onClick={() => refreshBoardData(setBoards)}>
+					<button className="RefreshBtn" onClick={() => refreshBoardData(setBoards, () => {
+						RefreshTasksInsideColumns();
+					})}>
 						<RefreshCcw size={20} />
 					</button>
 				</div>
@@ -82,6 +100,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 							colType={column.colType}
 							data={column.data}
 							setBoards={setBoards}
+							tasks={tasks} // Pass tasks as a prop to the Column component
 						/>
 					))}
 			</div>

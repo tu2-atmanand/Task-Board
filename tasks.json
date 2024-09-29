@@ -16,24 +16,25 @@
     ],
     "Spintly Details.md": [
       {
-        "id": 3346914159,
+        "id": 3853269087,
         "title": "need to complete all the Documents work  and submit to TCS",
-        "body": [],
+        "body": [
+          "Just adding a normal line for this task as a body.",
+          "- [x] Adding a first subtask, with checked state true"
+        ],
         "time": "",
         "due": "2024-09-09",
         "tag": "",
-        "priority": "0",
         "filePath": "Spintly Details.md",
         "completed": ""
       },
       {
-        "id": 2499769124,
+        "id": 1065084769,
         "title": "Just a new Task without tag or date",
         "body": [],
         "time": "10:30 - 11:30",
         "due": "2024-10-01",
         "tag": "",
-        "priority": "0",
         "filePath": "Spintly Details.md",
         "completed": ""
       }

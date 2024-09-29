@@ -1,4 +1,4 @@
-// main.ts  ---------  Before adding logic - WORKING
+// main.ts - WORKING
 
 import {
 	App,
