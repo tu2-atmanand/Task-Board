@@ -67,6 +67,7 @@ export class KanbanView extends ItemView {
 	}
 
 	private renderBoard() {
+		// this.root.unmount();
 		this.root.render(<KanbanBoard app={this.app} plugin={this.plugin} />);  // Pass the plugin as a prop
 	}
 

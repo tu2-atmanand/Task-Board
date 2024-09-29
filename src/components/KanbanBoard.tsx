@@ -47,7 +47,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 				onTaskAdded: () => {
 					// Call refresh board data when a new task is added
 					refreshBoardData(setBoards, () => {
-						console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...")
+						console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...");
 						RefreshTasksInsideColumns();
 					});
 				},

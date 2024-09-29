@@ -14,7 +14,7 @@ export function refreshKanbanBoard(app: App) {
 	app: App;
 
 	console.log(
-		"RefreshKanbanBoard from Main.ts : Running the function to refresh the whole KanbanBoard.tsx component..."
+		"refreshKanbanBoard : From Main.ts : Running the function to refresh the whole KanbanBoard.tsx component..."
 	);
 	try {
 		const leaf = app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];

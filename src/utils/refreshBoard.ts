@@ -25,6 +25,6 @@ export const handleUpdateBoards = async (
 	setBoards: React.Dispatch<React.SetStateAction<Board[]>>
 ) => {
 	setBoards(updatedBoards);
-	await saveBoardsData(updatedBoards);
-	await refreshBoardData(setBoards, () => {}); 
+	saveBoardsData(updatedBoards);
+	await refreshBoardData(setBoards, () => {});
 };

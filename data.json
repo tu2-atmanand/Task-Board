@@ -168,16 +168,6 @@
               "limit": 10,
               "name": "Completed"
             }
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Test Tasks",
-              "index": 8,
-              "coltag": "Test"
-            }
           }
         ],
         "filters": [],
