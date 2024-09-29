@@ -2,17 +2,21 @@
 
 import { App, Notice, TFile } from "obsidian";
 
+import TaskBoard from "main";
 import fs from "fs";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
+import { refreshKanbanBoard } from "src/services/RefreshServices";
 import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {
 	app: App;
+	plugin: TaskBoard;
 	tasks: any = { Pending: {}, Completed: {} };
 
-	constructor(app: App) {
+	constructor(app: App, plugin:TaskBoard) {
 		this.app = app;
+		this.plugin = plugin;
 	}
 
 	// Scan all markdown files for tasks
@@ -36,6 +40,10 @@ export class ScanningVault {
 		);
 
 		this.saveTasksToFile();
+		console.log(
+			"ScanningVault : Running the function from Main.ts to re-Render..."
+		);
+		// refreshKanbanBoard(this.app);
 	}
 
 	// Extract tasks from a specific file
@@ -166,6 +174,10 @@ export class ScanningVault {
 
 		// Save the updated tasks back to tasks.json after processing all files
 		this.saveTasksToFile();
+		console.log(
+			"ScanningVault : Running the function from Main.ts to re-Render..."
+		);
+		// refreshKanbanBoard(this.app);
 	}
 
 	// Save tasks to JSON file

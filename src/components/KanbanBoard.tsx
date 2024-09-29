@@ -9,14 +9,14 @@ import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
 import { Task } from "src/interfaces/Column";
+import TaskBoard from "main";
 import fs from "fs";
 import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
+import { refreshKanbanBoard } from "src/services/RefreshServices";
 import { refreshTasks } from "src/utils/RefreshColumns"; // Adjust the path accordingly
 
-const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
-	app: app;
-
+const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
@@ -47,6 +47,7 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				onTaskAdded: () => {
 					// Call refresh board data when a new task is added
 					refreshBoardData(setBoards, () => {
+						console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...")
 						RefreshTasksInsideColumns();
 					});
 				},
@@ -55,6 +56,10 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 			new Notice("No active file found to add a task.");
 		}
 	};
+
+	const refreshBoard = () => {
+		refreshKanbanBoard(app);
+	}
 
 	return (
 		<div className="kanbanBoard">
@@ -83,9 +88,12 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 					>
 						<Bolt size={20} />
 					</button>
-					<button className="RefreshBtn" onClick={() => refreshBoardData(setBoards, () => {
+					{/* <button className="RefreshBtn" onClick={() => refreshBoardData(setBoards, () => {
 						RefreshTasksInsideColumns();
 					})}>
+						<RefreshCcw size={20} />
+					</button> */}
+					<button className="RefreshBtn" onClick={refreshBoard}>
 						<RefreshCcw size={20} />
 					</button>
 				</div>
