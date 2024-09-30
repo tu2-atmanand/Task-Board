@@ -6,13 +6,14 @@ import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+import { updateTasksAndRefreshBoard, updateTasksAndRefreshColumn } from 'src/services/RefreshServices';
 
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
-import { refreshBoardData } from 'src/utils/refreshBoard';
-import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
-import { updateTasksAndRefreshBoard } from 'src/services/RefreshServices';
+import { eventEmitter } from 'src/services/EventEmitter';
+import { refreshBoardData } from 'src/utils/BoardOperations';
+import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -29,8 +30,30 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 
 	// Load tasks from tasks.json file
 	useEffect(() => {
-		refreshTasks(setTasks, activeBoard, colType, data);
+		renderColumns(setTasks, activeBoard, colType, data);
 	}, [colType, data]);
+
+	// Pub Sub method similar to Kafka to read events/messages.
+	useEffect(() => {
+		const refreshBoardListener = () => {
+			updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
+		};
+
+		// const refreshColumnListener = () => {
+		// 	updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
+		// };
+
+		eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
+		// eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
+		// eventEmitter.on('REFRESH_TASK', refreshListener);
+
+		// Clean up the listener when component unmounts
+		return () => {
+			eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
+			// eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
+		};
+	}, [setTasks, setBoards, activeBoard, colType, data]);
+
 
 
 	const handleCheckboxChange = (updatedTask: Task) => {
@@ -56,10 +79,15 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 		// Mark task in file as complete or incomplete
 
 		// Refresh the tasks in the component
-		// refreshTasks(setTasks, colType, data);
+		// renderColumns(setTasks, colType, data);
+
+		// PLEASE NOTE : Keep the following lines as it is, when i check the box, without updating the whole board, the TaskItem Card moves from the Todays column into Completed column and vice-versa very smoothly.
 		refreshBoardData(setBoards, () => {
-			refreshTasks(setTasks, activeBoard, colType, data);
+			renderColumns(setTasks, activeBoard, colType, data);
 		});
+		
+		
+		// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
 	};
 
 	const handleDeleteTask = (task: Task) => {
@@ -91,7 +119,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 			// Refresh tasks state after update
 			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
 
-			// refreshTasks(setTasks, tag, data);
+			// renderColumns(setTasks, tag, data);
 
 			// --- MY METHOD ---------
 			// const emptyTheTasks: Task[] = [];
@@ -100,12 +128,15 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 
 			// setTasks([]);
 
+			// THIS METHOD IS NOTE WORKING
 			// refreshBoardData(setBoards, () => {
 			// 	console.log("Task updated, running the Dispatch method of updating the board...");
-			// 	refreshTasks(setTasks, activeBoard, colType, data);
+			// 	renderColumns(setTasks, activeBoard, colType, data);
 			// });
 
+			// ONLY THIS BELOW METHOD IS WORKING, AND IT ONLY REFRESHES THE WHOLE COLUMN, YOU CAN SEE ALL THE TASKITEM FROM THIS COLUMN GETTING REFRESHED, REST COLUMNS REMAINS SILENT, BUT YOU KNOW OBVIOULSY THEY ARE ALSO GETTING ADDED FROM NEW TASKS.JSON DATA.
 			updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
+			// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
 		});
 		editModal.open();
 	};
