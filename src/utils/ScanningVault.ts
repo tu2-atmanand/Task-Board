@@ -40,10 +40,8 @@ export class ScanningVault {
 		);
 
 		this.saveTasksToFile();
-		console.log(
-			"ScanningVault : Running the function from Main.ts to re-Render..."
-		);
-		// refreshKanbanBoard(this.app);
+		// Emit the event
+		eventEmitter.emit("REFRESH_BOARD");
 	}
 
 	// Extract tasks from a specific file
@@ -58,6 +56,7 @@ export class ScanningVault {
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+				this.TaskDetected = true;
 				const isCompleted = line.startsWith("- [x]");
 				const title = this.extractTitle(line);
 				const time = this.extractTime(line);
@@ -126,6 +125,7 @@ export class ScanningVault {
 			for (let i = 0; i < lines.length; i++) {
 				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+					// this.TaskDetected = true;
 					const isCompleted = line.startsWith("- [x]");
 					const title = this.extractTitle(line);
 					const time = this.extractTime(line);
@@ -187,7 +187,15 @@ export class ScanningVault {
 			"The following data saved in the tasks.json : ",
 			this.tasks
 		);
+
+		// Refresh the board only if any task has be extracted from the updated file.
+		if (this.TaskDetected) {
 		new Notice("Tasks scanned from the modified files.");
+			// Emit the event
+			eventEmitter.emit("REFRESH_BOARD");
+			// eventEmitter.emit("REFRESH_COLUMN");
+			this.TaskDetected = false;
+		}
 	}
 
 	// New function to extract task body

@@ -3,18 +3,20 @@
 import { App, Notice } from "obsidian";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
-import { handleUpdateBoards, refreshBoardData } from "../utils/refreshBoard"; // Import utility functions
+import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations"; // Import utility functions
+import { loadBoardConfigs, loadBoardsData, loadGlobalSettings } from "src/utils/SettingsOperations";
 
 import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
 import { Task } from "src/interfaces/Column";
 import TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
 import { refreshKanbanBoard } from "src/services/RefreshServices";
-import { refreshTasks } from "src/utils/RefreshColumns"; // Adjust the path accordingly
+import { renderColumns } from "src/utils/RenderColumns"; // Adjust the path accordingly
 
 const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin }) => {
 	const [tasks, setTasks] = useState<Task[]>([]);
@@ -27,14 +29,44 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		}); // Adding empty callback function
 	}, []);
 
+	// Pub Sub method similar to Kafka to read events/messages.
+	// useEffect(() => {
+	// 	// const refreshBoardListener = () => {
+	// 	// 	updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
+	// 	// };
+
+	// 	const refreshColumnListener = () => {
+	// 		console.log("Received the message to update only columns...\n	Currently i have the following boards : ", boards);
+	// 		boards.forEach((board, index) => {
+	// 			board.columns.forEach((column) => {
+	// 				renderColumns(setTasks, index, column.colType, column.data);
+	// 			});
+	// 		});
+	// 	};
+
+	// 	// eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
+	// 	eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
+	// 	// eventEmitter.on('REFRESH_TASK', refreshListener);
+
+	// 	// Clean up the listener when component unmounts
+	// 	return () => {
+	// 		// eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
+	// 		eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
+	// 	};
+	// }, [setTasks, setBoards]);
+
 	const RefreshTasksInsideColumns = () => {
-		// Trigger refreshTasks after the boards are refreshed
+		// Trigger renderColumns after the boards are refreshed
 		boards.forEach((board, index) => {
 			board.columns.forEach((column) => {
-				refreshTasks(setTasks, index, column.colType, column.data);
+				renderColumns(setTasks, index, column.colType, column.data);
 			});
 		});
 	};
+
+	// const RefreshAllColumnOfActiveBoard = () => {
+	// 	board
+	// }
 
 	// Function to handle saving boards
 	const AddNewTaskIn = () => {
@@ -58,7 +90,19 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	};
 
 	const refreshBoard = () => {
-		refreshKanbanBoard(app);
+		// refreshKanbanBoard(app);
+
+		// If the user complaints that the pressing the refreshing button does bullshit and jump the Task Board from one place to another, then simply, disable the above line and enable below line.
+
+		eventEmitter.emit("REFRESH_BOARD");
+		// eventEmitter.emit("REFRESH_COLUMN");
+		// const boardsData = loadBoardConfigs();
+		// // Trigger renderColumns after the boards are refreshed
+		// boardsData.forEach((board: Board, index: number) => {
+		// 	board.columns.forEach((column) => {
+		// 		renderColumns(setTasks, index, column.colType, column.data);
+		// 	});
+		// });
 	}
 
 	return (

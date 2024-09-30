@@ -7,8 +7,8 @@ import { KanbanView } from "src/views/KanbanView";
 import { Task } from "../interfaces/Column";
 import TaskBoard from "main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
-import { refreshBoardData } from "src/utils/refreshBoard";
-import { refreshTasks } from "src/utils/RefreshColumns";
+import { refreshBoardData } from "src/utils/BoardOperations";
+import { renderColumns } from "src/utils/RenderColumns";
 
 export function refreshKanbanBoard(app: App) {
 	app: App;
@@ -29,21 +29,37 @@ export function refreshKanbanBoard(app: App) {
 	}
 }
 
-
 // Create a function that clears tasks and refreshes the board
 export const updateTasksAndRefreshBoard = (
-    setTasks: Dispatch<SetStateAction<Task[]>>,
-    setBoards: React.Dispatch<React.SetStateAction<any[]>>,
-    activeBoard: number,
-    colType: string,
-    data: any
+	setTasks: Dispatch<SetStateAction<Task[]>>,
+	setBoards: React.Dispatch<React.SetStateAction<any[]>>,
+	activeBoard: number,
+	colType: string,
+	data: any
 ) => {
-    // Clear the tasks array
-    setTasks([]);
+	// Clear the tasks array
+	setTasks([]);
 	sleep(10);
-    // Refresh board and tasks
-    refreshBoardData(setBoards, () => {
-        console.log("updateTasksAndRefreshBoard : Tasks and board refreshed...");
-        refreshTasks(setTasks, activeBoard, colType, data);
-    });
+	// Refresh board and tasks
+	refreshBoardData(setBoards, () => {
+		console.log(
+			"updateTasksAndRefreshBoard : Tasks and board refreshed..."
+		);
+		renderColumns(setTasks, activeBoard, colType, data);
+	});
+};
+
+// Create a function that clears tasks and refreshes the board
+export const updateTasksAndRefreshColumn = (
+	setTasks: Dispatch<SetStateAction<Task[]>>,
+	activeBoard: number,
+	colType: string,
+	data: any
+) => {
+	// Clear the tasks array
+	setTasks([]);
+	sleep(10);
+	// Refresh board and tasks
+	console.log("updateTasksAndRefreshColumn : Tasks and board refreshed...");
+	renderColumns(setTasks, activeBoard, colType, data);
 };
