@@ -82,7 +82,7 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "limit": 10,
+              "limit": 20,
               "name": "Completed",
               "index": 6
             }
@@ -252,7 +252,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": false
+      "realTimeScanning": true
     }
   }
 }

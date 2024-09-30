@@ -3,6 +3,7 @@
 import { App, Notice, TFile } from "obsidian";
 
 import TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
@@ -13,10 +14,12 @@ export class ScanningVault {
 	app: App;
 	plugin: TaskBoard;
 	tasks: any = { Pending: {}, Completed: {} };
+	TaskDetected: boolean;
 
-	constructor(app: App, plugin:TaskBoard) {
+	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
+		this.TaskDetected = false;
 	}
 
 	// Scan all markdown files for tasks
@@ -190,7 +193,7 @@ export class ScanningVault {
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (this.TaskDetected) {
-		new Notice("Tasks scanned from the modified files.");
+			new Notice("Tasks scanned from the modified files.");
 			// Emit the event
 			eventEmitter.emit("REFRESH_BOARD");
 			// eventEmitter.emit("REFRESH_COLUMN");

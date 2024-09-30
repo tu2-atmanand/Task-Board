@@ -26,6 +26,17 @@ export const loadGlobalSettings = () => {
 	}
 };
 
+// Load globalSettings to check for dayPlannerPlugin value
+export const loadBoardConfigs = () => {
+	try {
+		const settingsData = fs.readFileSync(dataFilePath, "utf8");
+		return JSON.parse(settingsData).data.boardConfigs;
+	} catch (error) {
+		console.error("Error loading globalSettings:", error);
+		return {};
+	}
+};
+
 
 // Function to load boards data from the JSON file
 export const loadBoardsData = (): Promise<Board[]> => {

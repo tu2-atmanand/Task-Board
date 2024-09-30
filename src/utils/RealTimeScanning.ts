@@ -86,7 +86,7 @@ export class RealTimeScanning {
 
 		this.scanTimer = window.setInterval(() => {
 			this.processStack();
-		}, 10 * 60 * 1000); // Set to 5 minutes
+		}, 1 * 60 * 1000); // Set to 10 minutes
 	}
 
 	async processStack() {

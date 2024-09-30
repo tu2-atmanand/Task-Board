@@ -3,33 +3,37 @@
     "XploreProgram/How to Access Xplore Courses.md": [],
     "TODO.md": [
       {
-        "id": 1726568233,
+        "id": 4028316712,
         "title": "New temp task, lets see if this comes after 5 minutes",
-        "body": [],
+        "body": [
+          "Updating the body line.",
+          "- [x] Also adding this new Subtask, first",
+          "- [ ] And adding second subtask."
+        ],
         "time": "",
         "due": "",
         "tag": "#Testing",
-        "priority": "1",
         "filePath": "TODO.md",
-        "completed": ""
+        "completed": "",
+        "priority": "3"
       }
     ],
     "Spintly Details.md": [
       {
-        "id": 3853269087,
+        "id": 3292475584,
         "title": "need to complete all the Documents work  and submit to TCS",
         "body": [
           "Just adding a normal line for this task as a body.",
           "- [x] Adding a first subtask, with checked state true"
         ],
         "time": "",
-        "due": "2024-09-09",
+        "due": "2024-10-01",
         "tag": "",
         "filePath": "Spintly Details.md",
         "completed": ""
       },
       {
-        "id": 1065084769,
+        "id": 3585694137,
         "title": "Just a new Task without tag or date",
         "body": [],
         "time": "10:30 - 11:30",
@@ -41,7 +45,7 @@
     ],
     "Pending Document Work.md": [
       {
-        "id": 3489094392,
+        "id": 2465335064,
         "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
         "body": [],
         "time": "",
@@ -51,7 +55,7 @@
         "completed": ""
       },
       {
-        "id": 3460248684,
+        "id": 1018285162,
         "title": "Spintly Experience Letter : [[Atmanand Gauns - Internship Experience Certificate.pdf]]",
         "body": [],
         "time": "",
@@ -61,7 +65,7 @@
         "completed": ""
       },
       {
-        "id": 3544787756,
+        "id": 3600513340,
         "title": "ID Proof : Voter ID",
         "body": [],
         "time": "",
@@ -71,7 +75,7 @@
         "completed": ""
       },
       {
-        "id": 1790317748,
+        "id": 425200196,
         "title": "Copy of Person of India Origin (PIO) card : Passport",
         "body": [],
         "time": "",
@@ -81,17 +85,7 @@
         "completed": ""
       },
       {
-        "id": 1894834934,
-        "title": "Address Proof : Aadhar Card",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      },
-      {
-        "id": 831179417,
+        "id": 1534961142,
         "title": "NSR eCard : [[NSR_eCard.pdf]]",
         "body": [],
         "time": "",
@@ -101,7 +95,7 @@
         "completed": ""
       },
       {
-        "id": 1824197849,
+        "id": 1208758869,
         "title": "Passport : [[Passport.pdf]]",
         "body": [],
         "time": "",
@@ -111,7 +105,7 @@
         "completed": ""
       },
       {
-        "id": 1597557813,
+        "id": 3617146085,
         "title": "PAN Card : [[PanCard.pdf]]",
         "body": [],
         "time": "",
@@ -121,7 +115,7 @@
         "completed": ""
       },
       {
-        "id": 2215412585,
+        "id": 845705791,
         "title": "Birth Certificate : [[BirthCertificate.pdf]]",
         "body": [],
         "time": "",
@@ -131,7 +125,7 @@
         "completed": ""
       },
       {
-        "id": 1915234750,
+        "id": 1310344170,
         "title": "Non-Criminal Affidavit : [[NCA_TCS.pdf]]",
         "body": [],
         "time": "",
@@ -141,7 +135,7 @@
         "completed": ""
       },
       {
-        "id": 2967615940,
+        "id": 4136392115,
         "title": "Graduation Certificate : [[CollegeDegreeCertificate.pdf]]",
         "body": [],
         "time": "",
@@ -151,7 +145,7 @@
         "completed": ""
       },
       {
-        "id": 2117289331,
+        "id": 3952115799,
         "title": "Bonafied Letter : [[CollegeBonafideCertificate.pdf]]",
         "body": [],
         "time": "",
@@ -161,7 +155,7 @@
         "completed": ""
       },
       {
-        "id": 139363140,
+        "id": 2394705161,
         "title": "XII Grade Certificate : [[XII_Grade_Certificate.pdf]]",
         "body": [],
         "time": "",
@@ -171,7 +165,7 @@
         "completed": ""
       },
       {
-        "id": 1836272878,
+        "id": 3048157091,
         "title": "XII Grade Marksheet : [[12_Marksheet.pdf]]",
         "body": [],
         "time": "",
@@ -181,7 +175,7 @@
         "completed": ""
       },
       {
-        "id": 481279720,
+        "id": 540787717,
         "title": "X Grade Certificate : [[X_Grade_Certificate.pdf]]",
         "body": [],
         "time": "",
@@ -191,7 +185,7 @@
         "completed": ""
       },
       {
-        "id": 942182360,
+        "id": 3548816893,
         "title": "X Grade Mark Sheet : [[10_Marksheet.pdf]]",
         "body": [],
         "time": "",
@@ -201,7 +195,7 @@
         "completed": ""
       },
       {
-        "id": 4269944841,
+        "id": 521272623,
         "title": "Photo with Yellow Background : [[MyPassportPhoto.jpg]]",
         "body": [],
         "time": "",
@@ -211,7 +205,7 @@
         "completed": ""
       },
       {
-        "id": 1562475579,
+        "id": 3618544690,
         "title": "Graduate All Semester Marksheets :",
         "body": [
           "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -230,7 +224,7 @@
         "completed": ""
       },
       {
-        "id": 1980130027,
+        "id": 4023621421,
         "title": "Create new **Income Certificate** of father before joining.",
         "body": [],
         "time": "",
@@ -240,7 +234,7 @@
         "completed": ""
       },
       {
-        "id": 3513338639,
+        "id": 3962754297,
         "title": "Only one Recording Course is remaining of JavaOk",
         "body": [
           "Now i am removing all the points from the body and changing them into a one line sentence.",
@@ -248,16 +242,6 @@
         ],
         "time": "",
         "due": "2024-08-24",
-        "tag": "",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      },
-      {
-        "id": 189041503,
-        "title": "-  Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
-        "body": [],
-        "time": "",
-        "due": "2024-09-30",
         "tag": "",
         "filePath": "Pending Document Work.md",
         "completed": ""
@@ -315,7 +299,9 @@
         "id": 1949443457,
         "title": "Adding random task for today to see how the board updates.",
         "body": [
-          "Adding body to this task from file itself not using any Modal. So, now when this file will be scanned, it will first get detected as well as, the whole board should re-render. updating more..."
+          "Adding body to this task from file itself not using any Modal. So, now when this file will be scanned, it will first get detected as well as, the whole board should re-render. updating more...",
+          "- [ ] Changing the complete content of the subTask, updating",
+          "- [ ] Adding another subTask, Second"
         ],
         "time": "12:02 - 13:02",
         "due": "2024-09-29",
@@ -326,38 +312,35 @@
     ],
     "Daily_Notes/18-09-2024.md": [
       {
-        "id": 1676798118,
+        "id": 2536979090,
         "title": "Adding a new task, i think now everything is working. Adding all the fields now.",
         "body": [],
         "time": "12:09 - 13:09",
         "due": "2024-11-08",
         "tag": "#Complete",
-        "priority": "0",
         "filePath": "Daily_Notes/18-09-2024.md",
         "completed": ""
       },
       {
-        "id": 3923675528,
+        "id": 2212206084,
         "title": "ading simple task to see if the time afterwards will come or not",
         "body": [
           "This function dont have any body, hence adding one line.",
           "- [x] One subtask also, for fun"
         ],
         "time": "",
-        "due": "2024-09-29",
+        "due": "2024-10-02",
         "tag": "#Testing",
-        "priority": "0",
         "filePath": "Daily_Notes/18-09-2024.md",
         "completed": ""
       },
       {
-        "id": 3918723116,
+        "id": 84709291,
         "title": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
         "body": [],
         "time": "18:21 - 19:21",
         "due": "2024-09-28",
         "tag": "#Testing",
-        "priority": "0",
         "filePath": "Daily_Notes/18-09-2024.md",
         "completed": ""
       }
@@ -971,7 +954,33 @@
     ],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "Daily_Notes/30-09-2024.md": [
+      {
+        "id": 4021288275,
+        "title": "This is a task, and this is very bad way since the board is getting refreshed but it is refreshing the whole shit.",
+        "body": [],
+        "time": "",
+        "due": "2024-09-30",
+        "tag": "#RealTime",
+        "filePath": "Daily_Notes/30-09-2024.md",
+        "completed": ""
+      },
+      {
+        "id": 130811684,
+        "title": "Now after this board is updated only the file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version.",
+        "body": [
+          "Adding a body line, updating. more updating.",
+          "And for those who dont want their cpu to keep running at 20% all the time when i am doing the simplest thing that is typing then they can directly disable this feature, the best way .",
+          "- [ ] Alright now the refreshing should look faster, since removed the sleep, but no, still seeing equal amount of delay."
+        ],
+        "time": "",
+        "due": "2024-09-30",
+        "tag": "",
+        "filePath": "Daily_Notes/30-09-2024.md",
+        "completed": ""
+      }
+    ]
   },
   "Completed": {
     "XploreProgram/How to Access Xplore Courses.md": [],
@@ -979,7 +988,7 @@
     "Spintly Details.md": [],
     "Pending Document Work.md": [
       {
-        "id": 3525745657,
+        "id": 3963436946,
         "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
         "body": [],
         "time": "",
@@ -989,7 +998,7 @@
         "completed": "2024-09-26T16:50"
       },
       {
-        "id": 106121764,
+        "id": 1508353277,
         "title": "Add Passport details in NSR portal and BGC after getting Passport.",
         "body": [
           "Editing this task to see if this content gets properly detected and old content gets replaced with this new one."
@@ -1001,7 +1010,17 @@
         "completed": "2024-09-26T11:30"
       },
       {
-        "id": 298056642,
+        "id": 3622061523,
+        "title": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "",
+        "filePath": "Pending Document Work.md",
+        "completed": "2024-09-29T16:21"
+      },
+      {
+        "id": 1457024781,
         "title": "Get 8th Semester Provisional Marksheet and Apply for :",
         "body": [
           "All the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
@@ -1017,7 +1036,7 @@
         "completed": "2024-09-28T15:30"
       },
       {
-        "id": 2205691740,
+        "id": 2901385163,
         "title": "Apply for new **Birth Certificate** hardcopy ✅ 2024-09-28",
         "body": [],
         "time": "",
@@ -1027,7 +1046,7 @@
         "completed": "2024-09-28"
       },
       {
-        "id": 3257685593,
+        "id": 4264886485,
         "title": "Create the Non-Criminal Affidavit : [[Format-Non_Criminal_Affidavit.pdf",
         "body": [],
         "time": "",
@@ -1037,7 +1056,7 @@
         "completed": "2024-09-28"
       },
       {
-        "id": 1052826389,
+        "id": 4054075986,
         "title": "This is a normal task to add a task and then to mark it, to get a different completion date format",
         "body": [],
         "time": "",
@@ -1047,14 +1066,14 @@
         "completed": "2024-09-28T08:43"
       },
       {
-        "id": 3484568090,
-        "title": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
+        "id": 3244730329,
+        "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
         "body": [],
         "time": "",
-        "due": "",
+        "due": "2024-09-30",
         "tag": "",
         "filePath": "Pending Document Work.md",
-        "completed": "2024-09-29T21:51"
+        "completed": "2024-09-30T14:47"
       }
     ],
     "Miscellaneous Points.md": [],
@@ -1276,6 +1295,7 @@
     "3-Process After Offer Letter Received.md": [],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "Daily_Notes/30-09-2024.md": []
   }
 }
