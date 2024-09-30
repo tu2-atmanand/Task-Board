@@ -15,6 +15,7 @@ import {
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
+	GlobalSettings,
 	globalSettingsData,
 } from "src/interfaces/KanbanView";
 import {
@@ -25,6 +26,7 @@ import {
 import { AddTaskModal } from "src/modal/AddTaskModal";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { KanbanView } from "./src/views/KanbanView";
+import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import fs from "fs";
@@ -33,8 +35,9 @@ import path from "path";
 import { refreshKanbanBoard } from "src/services/RefreshServices";
 
 export default class TaskBoard extends Plugin {
-	settings: globalSettingsData;
+	settings: GlobalSettings;
 	scanningVault: ScanningVault;
+	realTimeScanning: RealTimeScanning;
 	fileStack: string[] = [];
 	stackFilePath = path.join(
 		(window as any).app.vault.adapter.basePath,
@@ -51,13 +54,14 @@ export default class TaskBoard extends Plugin {
 		super(app, menifest);
 		this.app = app;
 		this.plugin = this;
+		this.settings = DEFAULT_SETTINGS;
 		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
+		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 	}
 
 	async onload() {
 		console.log("TaskBoard : loading plugin ...");
-
 
 		// Create a ribbon icon to open the Kanban board view
 		const ribbonIconEl = this.addRibbonIcon(
@@ -93,7 +97,6 @@ export default class TaskBoard extends Plugin {
 				}
 			},
 		});
-
 		this.addCommand({
 			id: "open-task-board",
 			name: "Open Task Board",
@@ -103,7 +106,6 @@ export default class TaskBoard extends Plugin {
 					.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
 			},
 		});
-
 		this.addCommand({
 			id: "open-task-board-new-window",
 			name: "Open Task Board in New Window",
@@ -114,7 +116,6 @@ export default class TaskBoard extends Plugin {
 				});
 			},
 		});
-
 		// // Add a command to Re-Scan the whole Vault
 		// this.addCommand({
 		// 	id: "rescan-vault-for-tasks",
@@ -128,13 +129,18 @@ export default class TaskBoard extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
-		// Creating Few Events
-		this.initializeStack();
+		// Following line will create a localStorage if the realTimeScanning value is TRUE.
+		this.realTimeScanning.initializeStack(
+			this.settings.data.globalSettings.realTimeScanning
+		);
 		console.log("Creating localStorage ...");
-		// Calling a function based on any file change in the valut.
+		// Creating Few Events
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TFile) =>
-				this.onFileChange(file)
+				this.realTimeScanning.onFileChange(
+					file,
+					this.settings.data.globalSettings.realTimeScanning
+				)
 			)
 		);
 		this.registerEvent(
@@ -165,7 +171,7 @@ export default class TaskBoard extends Plugin {
 
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
-		this.settings.scanVaultAtStartup
+		this.settings.data.globalSettings.scanVaultAtStartup
 			? this.scanningVault.scanVaultForTasks()
 			: "";
 
@@ -201,150 +207,10 @@ export default class TaskBoard extends Plugin {
 		// });
 	}
 
-	// Initialize stack from localStorage or file
-	async initializeStack() {
-		if (this.settings.realTimeScanning) return;
-
-		try {
-			// Try loading stack from localStorage
-			console.log(
-				"The data inside the localstorage at startup : ",
-				localStorage.getItem("fileStack")
-			);
-			const storedStack = localStorage.getItem("fileStack");
-			if (storedStack) {
-				this.fileStack = JSON.parse(storedStack);
-				console.log(
-					"I think the local storage have been created, value of fileStack : ",
-					this.fileStack
-				);
-			} else {
-				// Fallback to loading from file if localStorage isn't available
-				if (fs.existsSync(this.stackFilePath)) {
-					const data = fs.readFileSync(this.stackFilePath, "utf8");
-					this.fileStack = JSON.parse(data) || [];
-					console.log(
-						"The data i stored inside the file-stack.json, which i have put inside the localStorage : ",
-						this.fileStack
-					);
-				}
-			}
-			this.startScanTimer();
-		} catch (error) {
-			console.error("Error loading file stack:", error);
-		}
-	}
-
-	// Save stack to localStorage and file
-	async saveStack() {
-		try {
-			// Save to localStorage
-			localStorage.setItem("fileStack", JSON.stringify(this.fileStack));
-			console.log(
-				"saveStack() : The data inside localStorage after setItem : ",
-				localStorage.getItem("fileStack")
-			);
-			console.log("After updating the data is : ", this.fileStack);
-			// Save to file as fallback
-			fs.writeFileSync(
-				this.stackFilePath,
-				JSON.stringify(this.fileStack, null, 2)
-			);
-		} catch (error) {
-			console.error("Error saving file stack:", error);
-		}
-	}
-
-	// Timer function to scan files every 5 minutes
-	async startScanTimer() {
-		console.log(
-			"Creating LocalStorage, starting 10 Seconds timer : ",
-			this.fileStack
-		);
-		this.scanTimer = window.setInterval(() => {
-			this.processStack();
-		}, 10 * 60 * 1000); // TODO : Change the following value to : 5 * 60 * 1000
-	}
-
-	// Process all files from the stack at once
-	async processStack() {
-		console.log(
-			"TIME UP : 1 minute has passed, scanning the following files: ",
-			this.fileStack
-		);
-
-		// Copy the current stack to a new array and clear the stack
-		const filesToProcess = this.fileStack.slice();
-		this.fileStack = [];
-
-		// Retrieve TFile objects for each file path in the stack
-		const files = filesToProcess
-			.map((filePath) => this.getFileFromPath(filePath))
-			.filter((file) => !!file);
-
-		if (files.length > 0) {
-			// Send all files for scanning and updating tasks
-			await this.scanningVault.updateTasksFromFiles(files);
-		}
-
-		// Save updated stack (which should now be empty)
-		await this.saveStack();
-	}
-
-	// Fetch the file object from the path (mock function)
-	getFileFromPath(filePath: string): TFile {
-		// This function should retrieve the file by its path in the vault
-		// Assuming this is implemented in your plugin
-		return (window as any).app.vault.getAbstractFileByPath(
-			filePath
-		) as TFile;
-	}
-
-	// File change handler
-	async onFileChange(file: TFile) {
-		if (file.extension === "md") {
-			console.log(`File modified: ${file.path}`);
-			// console.log("The value of realTimeScanning : ", this.settings.data.globalSettings.realTimeScanning);
-			// console.log(
-			// 	"The data inside LocalStorage Before adding the new modified file : ",
-			// 	this.fileStack
-			// );
-			// If real-time scanning is enabled, scan the file immediately
-			if (this.settings.data.globalSettings.realTimeScanning) {
-				console.log(
-					"Reat-Time Scanning is ON. Scanning following file : ",
-					file
-				);
-				this.scanningVault.updateTasksFromFiles([file]);
-			} else {
-				// console.log(
-				// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.fileStack.includes(file.path) : ",
-				// 	!this.fileStack.includes(file.path)
-				// );
-				// If the file is already in the stack, ignore it
-				console.log(
-					"The value of localStorage before adding updated file : ",
-					this.fileStack
-				);
-
-				if (this.fileStack.at(0) === undefined) {
-					this.fileStack.push(file.path); // Add the file to the stack
-				} else if (!this.fileStack.includes(file.path)) {
-					this.fileStack.push(file.path);
-					await this.saveStack(); // Save the updated stack
-				} else {
-					console.log(
-						"The file alrady exists in fileStack : ",
-						file.path
-					);
-				}
-			}
-		}
-	}
-
 	onunload() {
 		console.log("TaskBoard : unloading plugin...");
 		window.clearInterval(this.scanTimer);
+		this.realTimeScanning.clearScanTimer();
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
