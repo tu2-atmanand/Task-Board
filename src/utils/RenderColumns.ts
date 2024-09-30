@@ -1,4 +1,4 @@
-// src/utils/RefreshColumns.ts
+// src/utils/RenderColumns.ts
 
 import { Dispatch, SetStateAction } from "react";
 
@@ -7,13 +7,13 @@ import { loadGlobalSettings } from "./SettingsOperations";
 import { loadTasksFromJson } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
-export const refreshTasks = (
+export const renderColumns = (
 	setTasks: Dispatch<SetStateAction<Task[]>>,
 	activeBoard: number,
 	colType: string,
 	data: any
 ) => {
-	console.log("------ Inside the refreshTasks function -----");
+	console.log("------ Inside the renderColumns function : Only Reading tasks.json -----");
 	// Load tasks from the JSON file
 	const { allTasksWithStatus, pendingTasks, completedTasks } =
 		loadTasksFromJson();

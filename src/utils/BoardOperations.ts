@@ -1,4 +1,4 @@
-// /src/utils/refreshBoards.ts
+// /src/utils/BoardOperations.ts
 
 import { loadBoardsData, saveBoardsData } from "./SettingsOperations";
 
@@ -9,7 +9,7 @@ export const refreshBoardData = async (
 	setBoards: React.Dispatch<React.SetStateAction<Board[]>>,
 	callback: () => void // Add this callback
 ) => {
-	console.log("------ Inside the refreshBoardData function -----");
+	console.log("------ Inside the refreshBoardData function : Reading data.json -----");
 	try {
 		const data = await loadBoardsData(); // Fetch updated board data
 		setBoards(data); // Update the state with the new data
