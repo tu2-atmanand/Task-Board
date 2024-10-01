@@ -20,23 +20,26 @@
     ],
     "Spintly Details.md": [
       {
-        "id": 3292475584,
+        "id": 1883059365,
+        "title": "Just a new Task without tag or date",
+        "body": [
+          ""
+        ],
+        "time": "10:30 - 11:30",
+        "due": "2024-10-01",
+        "tag": "",
+        "filePath": "Spintly Details.md",
+        "completed": "",
+        "priority": "2"
+      },
+      {
+        "id": 1592005913,
         "title": "need to complete all the Documents work  and submit to TCS",
         "body": [
           "Just adding a normal line for this task as a body.",
           "- [x] Adding a first subtask, with checked state true"
         ],
         "time": "",
-        "due": "2024-10-01",
-        "tag": "",
-        "filePath": "Spintly Details.md",
-        "completed": ""
-      },
-      {
-        "id": 3585694137,
-        "title": "Just a new Task without tag or date",
-        "body": [],
-        "time": "10:30 - 11:30",
         "due": "2024-10-01",
         "tag": "",
         "filePath": "Spintly Details.md",
@@ -244,21 +247,25 @@
         "due": "2024-08-24",
         "tag": "",
         "filePath": "Pending Document Work.md",
-        "completed": ""
+        "completed": "",
+        "priority": "5"
       }
     ],
     "Miscellaneous Points.md": [],
     "Daily_Notes.md": [],
     "Daily_Notes/28-09-2024.md": [
       {
-        "id": 285853632,
-        "title": "This is a new task with due date with the format of dataview",
-        "body": [],
+        "id": 2143406379,
+        "title": "This is a new task with due date with the format of dataview. Updating",
+        "body": [
+          ""
+        ],
         "time": "",
         "due": "2024-09-28",
-        "tag": "",
+        "tag": "#Test",
         "filePath": "Daily_Notes/28-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "4"
       }
     ],
     "Daily_Notes/29-08-2024.md": [],
@@ -307,7 +314,8 @@
         "due": "2024-09-29",
         "tag": "#Testing",
         "filePath": "Daily_Notes/21-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "2"
       }
     ],
     "Daily_Notes/18-09-2024.md": [
@@ -332,22 +340,26 @@
         "due": "2024-10-02",
         "tag": "#Testing",
         "filePath": "Daily_Notes/18-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "1"
       },
       {
         "id": 84709291,
         "title": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
-        "body": [],
+        "body": [
+          ""
+        ],
         "time": "18:21 - 19:21",
         "due": "2024-09-28",
         "tag": "#Testing",
         "filePath": "Daily_Notes/18-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "2"
       }
     ],
     "Daily_Notes/24-09-2024.md": [
       {
-        "id": 3995028431,
+        "id": 1800052821,
         "title": "This is a simple task with random note, but this doesnt have either a body nor subtasks. But the problem is this has a tab on the immediate next line.",
         "body": [
           "No tab doesnt come on the next line now anymore."
@@ -355,23 +367,21 @@
         "time": "17:08 - 18:08",
         "due": "2024-09-30",
         "tag": "#Testing",
-        "priority": "1",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
       },
       {
-        "id": 590444140,
+        "id": 986906668,
         "title": "Adding a Task to see if this task dont have body and only have the subtasks, then there shouldnt be any empty line between Main task and SubTasks.",
         "body": [],
         "time": "17:51 - 18:51",
         "due": "2024-10-02",
         "tag": "#Error",
-        "priority": "0",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
       },
       {
-        "id": 2574704192,
+        "id": 193589233,
         "title": "Now please dont come empty line between title and subtasks, removing body",
         "body": [
           "First adding a body so i can delete this complete task to test delete functionality",
@@ -381,7 +391,6 @@
         "time": "22:35 - 23:35",
         "due": "2024-10-03",
         "tag": "#Working",
-        "priority": "0",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
       }
@@ -436,7 +445,8 @@
         "due": "2024-09-29",
         "tag": "#Test",
         "filePath": "Daily_Notes/22-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "3"
       },
       {
         "id": 7237785,
@@ -707,24 +717,24 @@
     ],
     "Daily_Notes/03-09-2024.md": [
       {
-        "id": 2696711375,
-        "title": "Finish all the Courses ASAP.",
-        "body": [],
+        "id": 2232864046,
+        "title": "Finish all the Courses ASAP. updating",
+        "body": [
+          "- [ ] Adding subTask"
+        ],
         "time": "",
         "due": "2024-10-01",
         "tag": "#Course",
-        "priority": "0",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": ""
       },
       {
-        "id": 173516963,
+        "id": 3670575068,
         "title": "Completely Updating the content of this task",
         "body": [],
         "time": "",
         "due": "2024-10-03",
         "tag": "#Test",
-        "priority": "0",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": ""
       }
@@ -980,6 +990,59 @@
         "filePath": "Daily_Notes/30-09-2024.md",
         "completed": ""
       }
+    ],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
+    "Daily_Notes/01-10-2024.md": [
+      {
+        "id": 3676792983,
+        "title": "Lets see after 2 min if this is getting updated on the board. UPDATE THIS IN THE BOARD",
+        "body": [
+          ""
+        ],
+        "time": "",
+        "due": "2024-10-02",
+        "tag": "#Testing",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": "",
+        "priority": "3"
+      },
+      {
+        "id": 209426169,
+        "title": "Now you will see something, updating more, even more, will it update, so say a user is updating a task, he will be able to see it live now, issue resolved, but the problem is, my cpu is running at more than 30%, when a user will be typing very fast.",
+        "body": [
+          ""
+        ],
+        "time": "",
+        "due": "2024-10-01",
+        "tag": "",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": "",
+        "priority": "3"
+      },
+      {
+        "id": 3045023103,
+        "title": "New task has been added, lets see REFRESH_BOARD, mssg works. Also updating this.",
+        "body": [],
+        "time": "",
+        "due": "2024-10-01",
+        "tag": "",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": ""
+      },
+      {
+        "id": 2849185987,
+        "title": "Task for tomorrow, will be updated on the board auto after 2 min",
+        "body": [
+          ""
+        ],
+        "time": "",
+        "due": "2024-10-02",
+        "tag": "",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": "",
+        "priority": "4"
+      }
     ]
   },
   "Completed": {
@@ -1228,13 +1291,12 @@
     "Daily_Notes/02-09-2024.md": [],
     "Daily_Notes/03-09-2024.md": [
       {
-        "id": 1609876184,
+        "id": 2328158313,
         "title": "This  is a third task",
         "body": [],
         "time": "",
         "due": "2024-09-26",
         "tag": "",
-        "priority": "0",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": "2024-09-26T11:15"
       }
@@ -1296,6 +1358,9 @@
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
     "0-ImportantData.md": [],
-    "Daily_Notes/30-09-2024.md": []
+    "Daily_Notes/30-09-2024.md": [],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
+    "Daily_Notes/01-10-2024.md": []
   }
 }

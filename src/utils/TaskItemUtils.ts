@@ -324,7 +324,7 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 			taskRegex = taskContent.join("\n");
 		}
 		console.log(
-			"----- THE content i will be replacing with the new one : ",
+			"Following is the Old Content, That i am going to update :\n",
 			taskRegex
 		);
 

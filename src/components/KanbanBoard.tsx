@@ -3,8 +3,7 @@
 import { App, Notice } from "obsidian";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
-import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations"; // Import utility functions
-import { loadBoardConfigs, loadBoardsData, loadGlobalSettings } from "src/utils/SettingsOperations";
+import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
 
 import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
@@ -25,31 +24,26 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 	const [pendingTasks, setPendingTasks] = useState<Task[]>([]);
 	const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
-
-	// useEffect(() => {
-	// 	refreshBoardData(setBoards, () => {
-	// 		console.log("----------- LETS SEE IF THE CALLBACK FUNTION IS EVEN RUNNING AFTER THE DATA.JSON HAS BEEN LOADED AND SET TO THE setBoards");
-	// 		// RefreshTasksInsideColumns();
-	// 	}); // Adding empty callback function
-	// }, []);
+	const [refreshCount, setRefreshCount] = useState(0); // Use a counter to track refreshes
 
 	// Load tasks only once when the board is refreshed
 	useEffect(() => {
+		console.log("KanbanBoard.tsx: Refreshing board and tasks...");
 		refreshBoardData(setBoards, () => {
 			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
 			setPendingTasks(pendingTasks);
 			setCompletedTasks(completedTasks);
 		});
-	}, []); // Empty dependency array ensures this runs only once on component mount
+	}, [refreshCount]); // Empty dependency array ensures this runs only once on component mount
 
 	// Pub Sub method similar to Kafka to read events/messages.
 	useEffect(() => {
 		const refreshBoardListener = () => {
 			console.log("KanbanBoard.tsx : REFRESH_BOARD mssgs received...");
 			// Clear the tasks array
-			setTasks([]);
-			sleep(10);
-			refreshBoardData(setBoards, () => { });
+			// setTasks([]);
+			// sleep(30);
+			setRefreshCount((prev) => prev + 1);
 		};
 
 		const refreshColumnListener = () => {
@@ -60,29 +54,25 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		};
 
 		// For some reason, the things i am doing inside `refreshBoardListener` is not working.
-		// eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
+		eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
 		eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
 
 		// Clean up the listener when component unmounts
 		return () => {
-			// eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
+			eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
 			eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
 		};
 	}, []);
 
-	const RefreshTasksInsideColumns = () => {
-		const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
-		// Trigger renderColumns after the boards are refreshed
-		boards.forEach((board, index) => {
-			board.columns.forEach((column) => {
-				renderColumns(setTasks, index, column.colType, column.data, pendingTasks, completedTasks);
-			});
-		});
-	};
-
-	// const RefreshAllColumnOfActiveBoard = () => {
-	// 	board
-	// }
+	// const RefreshTasksInsideColumns = () => {
+	// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+	// 	// Trigger renderColumns after the boards are refreshed
+	// 	boards.forEach((board, index) => {
+	// 		board.columns.forEach((column) => {
+	// 			renderColumns(setTasks, index, column.colType, column.data, pendingTasks, completedTasks);
+	// 		});
+	// 	});
+	// };
 
 	// Function to handle saving boards
 	const AddNewTaskIn = () => {
@@ -94,10 +84,12 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 				filePath: activeFile.path,
 				onTaskAdded: () => {
 					// Call refresh board data when a new task is added
-					refreshBoardData(setBoards, () => {
-						console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...");
-						// // RefreshTasksInsideColumns();
-					});
+					// refreshBoardData(setBoards, () => {
+					// 	console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...");
+					// 	// // RefreshTasksInsideColumns();
+					// });
+
+					eventEmitter.emit("REFRESH_COLUMN");
 				},
 			}).open();
 		} else {
@@ -105,7 +97,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		}
 	};
 
-	const refreshBoard = () => {
+	const refreshBoardButton = () => {
 		// refreshKanbanBoard(app);
 
 		// If the user complaints that the pressing the refreshing button does bullshit and jump the Task Board from one place to another, then simply, disable the above line and enable below line.
@@ -153,7 +145,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					})}>
 						<RefreshCcw size={20} />
 					</button> */}
-					<button className="RefreshBtn" onClick={refreshBoard}>
+					<button className="RefreshBtn" onClick={refreshBoardButton}>
 						<RefreshCcw size={20} />
 					</button>
 				</div>

@@ -49,7 +49,8 @@ export const loadBoardsData = (): Promise<Board[]> => {
 				reject(err);
 				return;
 			}
-			const jsonData = JSON.parse(data).data; // Adjust this to match the exact JSON structure
+			const jsonData = JSON.parse(data).data; // Adjusting to match the exact json structure
+			console.log("loadBoardsData : Loading data.json for boardConfigs, I hope this is running only once...");
 			resolve(jsonData.boardConfigs);
 		});
 	});

@@ -68,24 +68,17 @@ export class KanbanView extends ItemView {
 
 	private renderBoard() {
 		// this.root.unmount();
-		this.root.render(<KanbanBoard app={this.app} plugin={this.plugin} />);  // Pass the plugin as a prop
+		this.root.render(<KanbanBoard app={this.app} plugin={this.plugin} />); // Pass the plugin as a prop
 	}
 
-	public refreshBoard() {
-		this.renderBoard(); // Re-render the KanbanBoard
-	}
+	// public refreshBoard() {
+	// 	this.renderBoard(); // Re-render the KanbanBoard
+	// }
 
 	async onClose() {
 		// Clean up when view is closed
 	}
 }
-
-
-
-
-
-
-
 
 // // src/views/KanbanView.ts   ----- Wokring - V2
 

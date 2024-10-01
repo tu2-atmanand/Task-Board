@@ -73,7 +73,7 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Undated",
+              "name": "Undated Tasks",
               "index": 5
             }
           },
@@ -94,7 +94,7 @@
         ],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "For Testing, This board contains only date related tasks",
+        "name": "Only Keep  Data based Col for Testing",
         "index": 1,
         "showColumnTags": true,
         "showFilteredTags": true
@@ -173,7 +173,7 @@
         "filters": [],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "Tag Based Board",
+        "name": "Tag Based Board, updating",
         "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true
@@ -252,7 +252,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": true
+      "realTimeScanning": false
     }
   }
 }
