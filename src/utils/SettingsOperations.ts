@@ -1,3 +1,5 @@
+// /src/utils/SettingsOperations.ts
+
 import { App, Plugin } from "obsidian";
 
 import { Board } from "../interfaces/KanbanBoard";
