@@ -57,6 +57,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 
 
 	const handleCheckboxChange = (updatedTask: Task) => {
+		const moment = require("moment");
 		// Remove task from the current state
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
 		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
@@ -70,7 +71,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 			moveFromCompletedToPending(updatedTask);
 			updateTaskInFile(taskWithCompleted, taskWithCompleted);
 		} else {
-			const taskWithCompleted = { ...updatedTask, completed: new Date().toISOString().slice(0, 16), };
+			const taskWithCompleted = { ...updatedTask, completed: moment().format("YYYY-MM-DDTHH:mm"), };
 			// Move from Pending to Completed
 			moveFromPendingToCompleted(updatedTask);
 			updateTaskInFile(taskWithCompleted, taskWithCompleted);
