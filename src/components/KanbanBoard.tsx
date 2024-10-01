@@ -43,36 +43,39 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	}, []); // Empty dependency array ensures this runs only once on component mount
 
 	// Pub Sub method similar to Kafka to read events/messages.
-	// useEffect(() => {
-	// 	// const refreshBoardListener = () => {
-	// 	// 	updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
-	// 	// };
+	useEffect(() => {
+		const refreshBoardListener = () => {
+			console.log("KanbanBoard.tsx : REFRESH_BOARD mssgs received...");
+			// Clear the tasks array
+			setTasks([]);
+			sleep(10);
+			refreshBoardData(setBoards, () => { });
+		};
 
-	// 	const refreshColumnListener = () => {
-	// 		console.log("Received the message to update only columns...\n	Currently i have the following boards : ", boards);
-	// 		boards.forEach((board, index) => {
-	// 			board.columns.forEach((column) => {
-	// 				renderColumns(setTasks, index, column.colType, column.data);
-	// 			});
-	// 		});
-	// 	};
+		const refreshColumnListener = () => {
+			console.log("KanbanBoard.tsx : REFRESH_COLUMN mssgs received...");
+			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+			setPendingTasks(pendingTasks);
+			setCompletedTasks(completedTasks);
+		};
 
-	// 	// eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
-	// 	eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
-	// 	// eventEmitter.on('REFRESH_TASK', refreshListener);
+		// For some reason, the things i am doing inside `refreshBoardListener` is not working.
+		// eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
+		eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
 
-	// 	// Clean up the listener when component unmounts
-	// 	return () => {
-	// 		// eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
-	// 		eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
-	// 	};
-	// }, [setTasks, setBoards]);
+		// Clean up the listener when component unmounts
+		return () => {
+			// eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
+			eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
+		};
+	}, []);
 
 	const RefreshTasksInsideColumns = () => {
+		const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
 		// Trigger renderColumns after the boards are refreshed
 		boards.forEach((board, index) => {
 			board.columns.forEach((column) => {
-				renderColumns(setTasks, index, column.colType, column.data);
+				renderColumns(setTasks, index, column.colType, column.data, pendingTasks, completedTasks);
 			});
 		});
 	};
@@ -93,7 +96,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					// Call refresh board data when a new task is added
 					refreshBoardData(setBoards, () => {
 						console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...");
-						RefreshTasksInsideColumns();
+						// // RefreshTasksInsideColumns();
 					});
 				},
 			}).open();
@@ -166,6 +169,8 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 							data={column.data}
 							setBoards={setBoards}
 							tasks={tasks} // Pass tasks as a prop to the Column component
+							pendingTasks={pendingTasks} // Pass the pending tasks
+							completedTasks={completedTasks} // Pass the completed tasks
 						/>
 					))}
 			</div>
