@@ -11,12 +11,16 @@ export const renderColumns = (
 	setTasks: Dispatch<SetStateAction<Task[]>>,
 	activeBoard: number,
 	colType: string,
-	data: any
+	data: any,
+	pendingTasks: Task[],
+	completedTasks: Task[]
 ) => {
-	console.log("------ Inside the renderColumns function : Only Reading tasks.json -----");
+	console.log(
+		"renderColumns function : This will run as many times as there are columns in the current board -----------"
+	);
 	// Load tasks from the JSON file
-	const { allTasksWithStatus, pendingTasks, completedTasks } =
-		loadTasksFromJson();
+	// const { allTasksWithStatus, pendingTasks, completedTasks } =
+	// 	loadTasksFromJson();
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: Task[] = [];

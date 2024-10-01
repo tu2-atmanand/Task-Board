@@ -13,6 +13,7 @@ import { Task } from "src/interfaces/Column";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
+import { loadTasksFromJson } from "src/utils/TaskItemUtils";
 import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
 import { refreshKanbanBoard } from "src/services/RefreshServices";
@@ -22,12 +23,24 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
+	const [pendingTasks, setPendingTasks] = useState<Task[]>([]);
+	const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
 
+	// useEffect(() => {
+	// 	refreshBoardData(setBoards, () => {
+	// 		console.log("----------- LETS SEE IF THE CALLBACK FUNTION IS EVEN RUNNING AFTER THE DATA.JSON HAS BEEN LOADED AND SET TO THE setBoards");
+	// 		// RefreshTasksInsideColumns();
+	// 	}); // Adding empty callback function
+	// }, []);
+
+	// Load tasks only once when the board is refreshed
 	useEffect(() => {
 		refreshBoardData(setBoards, () => {
-			RefreshTasksInsideColumns();
-		}); // Adding empty callback function
-	}, []);
+			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+			setPendingTasks(pendingTasks);
+			setCompletedTasks(completedTasks);
+		});
+	}, []); // Empty dependency array ensures this runs only once on component mount
 
 	// Pub Sub method similar to Kafka to read events/messages.
 	// useEffect(() => {

@@ -12,6 +12,7 @@ export const loadTasksFromJson = (): {
 	pendingTasks: Task[];
 	completedTasks: Task[];
 } => {
+	console.log("loadTasksFromJson : I hope this is getting loaded only at once -----------------  ");
 	try {
 		if (fs.existsSync(tasksPath)) {
 			const tasksData = fs.readFileSync(tasksPath, "utf8");

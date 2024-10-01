@@ -4,7 +4,7 @@ import { App, Modal } from 'obsidian';
 import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
-import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
+import { deleteTaskFromFile, deleteTaskFromJson, loadTasksFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
 import { updateTasksAndRefreshBoard, updateTasksAndRefreshColumn } from 'src/services/RefreshServices';
 
@@ -19,7 +19,15 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
 }
 
-const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data, setBoards, tasks: externalTasks }) => {
+const Column: React.FC<ColumnPropsWithSetBoards> = ({
+	activeBoard,
+	colType,
+	data,
+	setBoards,
+	tasks: externalTasks,
+	pendingTasks,  // New props for pending tasks
+	completedTasks // New props for completed tasks
+}) => {
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<Task[]>(externalTasks);
 
@@ -28,10 +36,10 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 		setTasks(externalTasks);
 	}, [externalTasks]);
 
-	// Load tasks from tasks.json file
+	// Render tasks using the tasks passed from KanbanBoard
 	useEffect(() => {
-		renderColumns(setTasks, activeBoard, colType, data);
-	}, [colType, data]);
+		renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
+	}, [colType, data, pendingTasks, completedTasks]);
 
 	// Pub Sub method similar to Kafka to read events/messages.
 	useEffect(() => {
