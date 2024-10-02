@@ -2,15 +2,18 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa'; // Import the desired icons from react-icons
 import React, { useState } from 'react';
+import { TaskProps, taskItem } from '../interfaces/TaskItem';
 
 import { RxDragHandleDots2 } from "react-icons/rx";
-import { TaskProps } from '../interfaces/TaskItem';
 import { priorityEmojis } from '../interfaces/TaskItem';
 
-const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChange }) => {
+const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation
+	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
-	const [taskBody, setTaskBody] = useState<string[]>(task.body);
+	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.startsWith('- [ ]') && !line.startsWith('- [x]'))));
+	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.startsWith('- [ ]') || line.startsWith('- [x]'))));
+	const [taskBody, setTaskBody] = useState<string[]>(task.body)
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
 
@@ -38,20 +41,47 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 	};
 
 	// Function to handle the checkbox toggle inside the task body
+	// const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
+	// 	const updatedSubTasks = subTasks.map((line, idx) => {
+	// 		if (line.startsWith('- [ ]') || line.startsWith('- [x]')) {
+	// 			if (idx === index) {
+	// 				console.log("Following SubTask Line status has been changed : ", line);
+	// 				if (isCompleted) {
+	// 					console.log("Marking the SubTask as Incomplete...");
+	// 					// Mark as incomplete (change from '- [x]' to '- [ ]')
+	// 					return line.replace('- [x]', '- [ ]');
+	// 				} else {
+	// 					console.log("Marking the SubTask as Complete...");
+	// 					// Mark as complete (change from '- [ ]' to '- [x]')
+	// 					return line.replace('- [ ]', '- [x]');
+	// 				}
+	// 			}
+	// 			console.log("After updating the line of the subTasks : ", line);
+	// 		}
+	// 		return line;
+	// 	});
+	// 	setSubTasks(updatedSubTasks);
+	// 	// console.log("After Updating the state on the TaskItem Card using setTaskBody, Now following content will be stored in the json and in the md file : ", updatedSubTasks);
+		
+	// 	const updatedTask: taskItem = { ...task, body: [...taskDesc, ...updatedSubTasks] };
+	// 	// console.log("After all the subTasks has been updated, now, the whole task shoule change. FOllowing is the updated, before i send it to the handleSubTasks function : ", updatedTask);
+	// 	// setTask(updatedTask);
+	// 	onSubTasksChange(updatedTask);
+	// };
+
+	// Optimized code for above function :
 	const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
-		const updatedBody = taskBody.map((line, idx) => {
+		const updatedSubTasks = subTasks.map((line, idx) => {
 			if (idx === index) {
-				if (isCompleted) {
-					// Mark as incomplete (change from '- [x]' to '- [ ]')
-					return line.replace('- [x]', '- [ ]');
-				} else {
-					// Mark as complete (change from '- [ ]' to '- [x]')
-					return line.replace('- [ ]', '- [x]');
-				}
+				return isCompleted ? line.replace('- [x]', '- [ ]') : line.replace('- [ ]', '- [x]');
 			}
 			return line;
 		});
-		setTaskBody(updatedBody);
+		setSubTasks(updatedSubTasks);
+
+		// Update the task with new body content
+		const updatedTask: taskItem = { ...task, body: [...taskDesc, ...updatedSubTasks] };
+		onSubTasksChange(updatedTask);
 	};
 
 	// Toggle function to expand/collapse the description
@@ -63,8 +93,8 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 	const renderTaskBody = () => {
 		try {
 			if (taskBody.length > 0) {
-				const subTasks = taskBody.filter(line => line.startsWith('- [ ]') || line.startsWith('- [x]'));
-				const otherBody = taskBody.filter(line => !line.startsWith('- [ ]') && !line.startsWith('- [x]'));
+				// const subTasks = taskBody.filter(line => line.startsWith('- [ ]') || line.startsWith('- [x]'));
+				// const otherBody = taskBody.filter(line => !line.startsWith('- [ ]') && !line.startsWith('- [x]'));
 
 				return (
 					<>
@@ -85,7 +115,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 						})}
 
 						{/* Touchable Description element */}
-						{otherBody.length > 0 && (
+						{taskDesc.length > 0 && (
 							<div
 								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer' }}
 								onClick={toggleDescription}
@@ -93,7 +123,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 								{isDescriptionExpanded ? 'Hide Description' : 'Show Description'}
 							</div>
 						)}
-						
+
 						{/* Render remaining body content with expand/collapse animation */}
 						<div
 							style={{
@@ -102,7 +132,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 								transition: 'max-height 0.3s ease-in',
 							}}
 						>
-							{otherBody.map((line, index) => (
+							{taskDesc.map((line, index) => (
 								<div key={subTasks.length + index}>
 									<span>{line}</span>
 								</div>
@@ -111,10 +141,11 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 					</>
 				);
 			} else {
-				return "";
+				return null
 			}
 		} catch (error) {
 			console.log("Getting error while trying to print the body : ", error);
+			return null;
 		}
 	};
 

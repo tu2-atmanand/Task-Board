@@ -1,19 +1,20 @@
 // /src/components/Column.tsx -------- V3
 
 import { App, Modal } from 'obsidian';
-import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
 import { deleteTaskFromFile, deleteTaskFromJson, loadTasksFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
 import { updateTasksAndRefreshBoard, updateTasksAndRefreshColumn } from 'src/services/RefreshServices';
 
+import { ColumnProps } from '../interfaces/Column';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { refreshBoardData } from 'src/utils/BoardOperations';
 import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
+import { taskItem } from 'src/interfaces/TaskItem';
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -29,7 +30,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	completedTasks // New props for completed tasks
 }) => {
 	// Local tasks state, initially set from external tasks
-	const [tasks, setTasks] = useState<Task[]>(externalTasks);
+	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
 
 	// Sync local tasks state with external tasks when they change
 	useEffect(() => {
@@ -62,9 +63,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	// 	};
 	// }, [setTasks, activeBoard, colType, data]);
 
-
-
-	const handleCheckboxChange = (updatedTask: Task) => {
+	const handleCheckboxChange = (updatedTask: taskItem) => {
 		const moment = require("moment");
 		// Remove task from the current state
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
@@ -109,7 +108,19 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		eventEmitter.emit("REFRESH_COLUMN");
 	};
 
-	const handleDeleteTask = (task: Task) => {
+	const handleSubTasksChange = (updatedTask: taskItem) => {
+		// const moment = require("moment");
+		// Remove task from the current state
+		// const updatedTasks = tasks;
+		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
+		// console.log("The tasks which has been filtered : ", updatedTasks);
+		// setTasks(updatedTasks); // Update state to remove completed task
+		// console.log("The new task which i have received and which i am going to put in the taks.json : ", updatedTask);
+		updateTaskInJson(updatedTask);
+		updateTaskInFile(updatedTask, updatedTask);
+	};
+
+	const handleDeleteTask = (task: taskItem) => {
 		const app = (window as any).app as App; // Fetch the Obsidian app instance
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app, // Add app here
@@ -126,7 +137,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		deleteModal.open();
 	};
 
-	const handleEditTask = (task: Task) => {
+	const handleEditTask = (task: taskItem) => {
 		const app = (window as any).app as App;
 		const editModal = new EditTaskModal(app, task, (updatedTask) => {
 			updatedTask.filePath = task.filePath;
@@ -184,6 +195,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 							onEdit={() => handleEditTask(task)}
 							onDelete={() => handleDeleteTask(task)}
 							onCheckboxChange={() => handleCheckboxChange(task)}
+							onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
 						/>
 					))
 				) : (
