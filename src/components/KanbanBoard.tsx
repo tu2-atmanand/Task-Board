@@ -41,7 +41,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		const refreshBoardListener = () => {
 			console.log("KanbanBoard.tsx : REFRESH_BOARD mssgs received...");
 			// Clear the tasks array
-			// setTasks([]);
+			setTasks([]);
 			// sleep(30);
 			setRefreshCount((prev) => prev + 1);
 		};

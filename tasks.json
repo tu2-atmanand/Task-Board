@@ -1345,7 +1345,7 @@
     "Daily_Notes/01-10-2024.md": [],
     "Daily_Notes/02-10-2024.md": [
       {
-        "id": 2858203187,
+        "id": 233492131,
         "title": "New task title",
         "body": [
           "Putting something nice instead of just the body body. This is good, i think now it is working.",
@@ -1357,7 +1357,7 @@
         "due": "2024-10-03",
         "tag": "#Working",
         "filePath": "Daily_Notes/02-10-2024.md",
-        "completed": "2024-10-02T19:02"
+        "completed": "2024-10-02T19:10"
       }
     ]
   }
