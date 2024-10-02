@@ -176,12 +176,13 @@ If your plugin does not need CSS, delete this file.
 	/* height: 20px !important;
 	width: 20px !important; */
 	margin-inline-end: 0 !important;
-	transform: scale(1.2) !important;
+	transform: scale(1.1) !important;
+	border-radius: 2px !important;
 	transition: transform 0.3s;
 }
 
 .taskItemCheckbox-checked {
-	transform: scale(1.5);
+	transform: scale(1.4);
 	/* Slight animation effect */
 	transition: transform 0.3s;
 }
@@ -189,11 +190,23 @@ If your plugin does not need CSS, delete this file.
 .taskItemBodySubtaskItem {
 	display: flex;
 	flex-direction: row;
-	background: var(--background-modifier-box-shadow);
+	/* background: var(--background-modifier-box-shadow); */
 	align-items: center;
-	margin: 4px;
-	border-radius: 14px;
-	padding: 2px
+	margin-block: 4px;
+	/* border-radius: 14px; */
+	/* padding: 2px */
+}
+
+.taskItemBodyDescription {
+	max-height: 0;
+	overflow: hidden;
+}
+
+.taskItemBodyDescription-expanded {
+	padding: 2px;
+	border-radius: 4px;
+	max-height: 100%;
+	background: var(--background-modifier-box-shadow);
 }
 
 .taskItemTag {
@@ -226,11 +239,11 @@ If your plugin does not need CSS, delete this file.
 	gap: 0.5em;
 }
 
-.DragBtn {
+.taskItemDragBtn {
 	opacity: 0;
 	background-color: var(--background-primary-alt);
 	border: none;
-	cursor: pointer;
+	cursor: grab;
 	padding-block: 2px;
 	padding-inline: 4px;
 	border-radius: 5px;
@@ -244,12 +257,9 @@ If your plugin does not need CSS, delete this file.
 	/* Animation for hover effect */
 }
 
-.DragBtn:hover {
-	transform: scale(1.1);
-}
-
-.DragBtn:hover {
+.taskItemDragBtn:hover {
 	opacity: 1;
+	transform: scale(1.1);
 }
 
 .taskItemFooter {

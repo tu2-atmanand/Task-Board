@@ -62,7 +62,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 	// 	});
 	// 	setSubTasks(updatedSubTasks);
 	// 	// console.log("After Updating the state on the TaskItem Card using setTaskBody, Now following content will be stored in the json and in the md file : ", updatedSubTasks);
-		
+
 	// 	const updatedTask: taskItem = { ...task, body: [...taskDesc, ...updatedSubTasks] };
 	// 	// console.log("After all the subTasks has been updated, now, the whole task shoule change. FOllowing is the updated, before i send it to the handleSubTasks function : ", updatedTask);
 	// 	// setTask(updatedTask);
@@ -125,12 +125,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 						)}
 
 						{/* Render remaining body content with expand/collapse animation */}
-						<div
-							style={{
-								maxHeight: isDescriptionExpanded ? '100%' : '0',
-								overflow: 'hidden',
-								transition: 'max-height 0.3s ease-in',
-							}}
+						<div className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
 						>
 							{taskDesc.map((line, index) => (
 								<div key={subTasks.length + index}>
@@ -158,7 +153,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 						<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
 						<div className="taskItemTag">{task.tag}</div>
 					</div>
-					<div className="DragBtn"><RxDragHandleDots2 size={14} /></div>
+					<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
 				</div>
 				<div className="taskItemMainBody">
 					<input

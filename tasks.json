@@ -1035,7 +1035,23 @@
         "priority": "4"
       }
     ],
-    "Daily_Notes/02-10-2024.md": []
+    "Daily_Notes/02-10-2024.md": [
+      {
+        "id": 2570104219,
+        "title": "New task title",
+        "body": [
+          "Putting something nice instead of just the body body. This is good, i think now it is working.",
+          "- [ ] New sub task only one.",
+          "- [x] Another second sub task.",
+          "- [x] Adding a third task."
+        ],
+        "time": "16:45 - 17:45",
+        "due": "2024-10-03",
+        "tag": "#Working",
+        "filePath": "Daily_Notes/02-10-2024.md",
+        "completed": ""
+      }
+    ]
   },
   "Completed": {
     "XploreProgram/How to Access Xplore Courses.md": [],
@@ -1180,7 +1196,7 @@
     ],
     "Daily_Notes/26-09-2024.md": [
       {
-        "id": 1148377954,
+        "id": 1891242999,
         "title": "Just creating an undated task but will have time.",
         "body": [
           "- [ ] This is a first sub task."
@@ -1188,9 +1204,8 @@
         "time": "18:24 - 19:24",
         "due": "2024-09-26",
         "tag": "",
-        "priority": "0",
         "filePath": "Daily_Notes/26-09-2024.md",
-        "completed": ""
+        "completed": "2024-10-02T21:41"
       }
     ],
     "Daily_Notes/21-09-2024.md": [],
@@ -1354,22 +1369,6 @@
     "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
     "DocsForPlugin/PluginCodeBase/main.md": [],
     "Daily_Notes/01-10-2024.md": [],
-    "Daily_Notes/02-10-2024.md": [
-      {
-        "id": 1235411494,
-        "title": "New task title",
-        "body": [
-          "Putting something nice instead of just the body body. This is good, i think now it is working.",
-          "- [x] New sub task only one.",
-          "- [x] Another second sub task.",
-          "- [x] Adding a third task."
-        ],
-        "time": "16:45 - 17:45",
-        "due": "2024-10-03",
-        "tag": "#Working",
-        "filePath": "Daily_Notes/02-10-2024.md",
-        "completed": "2024-10-02T19:10"
-      }
-    ]
+    "Daily_Notes/02-10-2024.md": []
   }
 }
