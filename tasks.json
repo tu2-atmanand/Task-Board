@@ -3,54 +3,52 @@
     "XploreProgram/How to Access Xplore Courses.md": [],
     "TODO.md": [
       {
-        "id": 1726568233,
+        "id": 4028316712,
         "title": "New temp task, lets see if this comes after 5 minutes",
-        "body": [],
+        "body": [
+          "Updating the body line.",
+          "- [x] Also adding this new Subtask, first",
+          "- [ ] And adding second subtask."
+        ],
         "time": "",
         "due": "",
         "tag": "#Testing",
-        "priority": "1",
         "filePath": "TODO.md",
-        "completed": ""
+        "completed": "",
+        "priority": "3"
       }
     ],
     "Spintly Details.md": [
       {
-        "id": 3346914159,
-        "title": "need to complete all the Documents work  and submit to TCS",
-        "body": [],
-        "time": "",
-        "due": "2024-09-09",
-        "tag": "",
-        "priority": "0",
-        "filePath": "Spintly Details.md",
-        "completed": ""
-      },
-      {
-        "id": 2499769124,
+        "id": 1883059365,
         "title": "Just a new Task without tag or date",
-        "body": [],
+        "body": [
+          ""
+        ],
         "time": "10:30 - 11:30",
         "due": "2024-10-01",
         "tag": "",
-        "priority": "0",
+        "filePath": "Spintly Details.md",
+        "completed": "",
+        "priority": "2"
+      },
+      {
+        "id": 1592005913,
+        "title": "need to complete all the Documents work  and submit to TCS",
+        "body": [
+          "Just adding a normal line for this task as a body.",
+          "- [x] Adding a first subtask, with checked state true"
+        ],
+        "time": "",
+        "due": "2024-10-01",
+        "tag": "",
         "filePath": "Spintly Details.md",
         "completed": ""
       }
     ],
     "Pending Document Work.md": [
       {
-        "id": 3742787438,
-        "title": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      },
-      {
-        "id": 800632053,
+        "id": 2465335064,
         "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
         "body": [],
         "time": "",
@@ -60,7 +58,7 @@
         "completed": ""
       },
       {
-        "id": 2116648877,
+        "id": 1018285162,
         "title": "Spintly Experience Letter : [[Atmanand Gauns - Internship Experience Certificate.pdf]]",
         "body": [],
         "time": "",
@@ -70,7 +68,7 @@
         "completed": ""
       },
       {
-        "id": 1699500471,
+        "id": 3600513340,
         "title": "ID Proof : Voter ID",
         "body": [],
         "time": "",
@@ -80,7 +78,7 @@
         "completed": ""
       },
       {
-        "id": 2756393376,
+        "id": 425200196,
         "title": "Copy of Person of India Origin (PIO) card : Passport",
         "body": [],
         "time": "",
@@ -90,17 +88,7 @@
         "completed": ""
       },
       {
-        "id": 1176844846,
-        "title": "Address Proof : Aadhar Card",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      },
-      {
-        "id": 1188670976,
+        "id": 1534961142,
         "title": "NSR eCard : [[NSR_eCard.pdf]]",
         "body": [],
         "time": "",
@@ -110,7 +98,7 @@
         "completed": ""
       },
       {
-        "id": 3200683098,
+        "id": 1208758869,
         "title": "Passport : [[Passport.pdf]]",
         "body": [],
         "time": "",
@@ -120,7 +108,7 @@
         "completed": ""
       },
       {
-        "id": 510791253,
+        "id": 3617146085,
         "title": "PAN Card : [[PanCard.pdf]]",
         "body": [],
         "time": "",
@@ -130,7 +118,7 @@
         "completed": ""
       },
       {
-        "id": 3344578708,
+        "id": 845705791,
         "title": "Birth Certificate : [[BirthCertificate.pdf]]",
         "body": [],
         "time": "",
@@ -140,7 +128,7 @@
         "completed": ""
       },
       {
-        "id": 2515204697,
+        "id": 1310344170,
         "title": "Non-Criminal Affidavit : [[NCA_TCS.pdf]]",
         "body": [],
         "time": "",
@@ -150,7 +138,7 @@
         "completed": ""
       },
       {
-        "id": 3218067942,
+        "id": 4136392115,
         "title": "Graduation Certificate : [[CollegeDegreeCertificate.pdf]]",
         "body": [],
         "time": "",
@@ -160,7 +148,7 @@
         "completed": ""
       },
       {
-        "id": 3498974075,
+        "id": 3952115799,
         "title": "Bonafied Letter : [[CollegeBonafideCertificate.pdf]]",
         "body": [],
         "time": "",
@@ -170,7 +158,7 @@
         "completed": ""
       },
       {
-        "id": 3805446084,
+        "id": 2394705161,
         "title": "XII Grade Certificate : [[XII_Grade_Certificate.pdf]]",
         "body": [],
         "time": "",
@@ -180,7 +168,7 @@
         "completed": ""
       },
       {
-        "id": 3709614649,
+        "id": 3048157091,
         "title": "XII Grade Marksheet : [[12_Marksheet.pdf]]",
         "body": [],
         "time": "",
@@ -190,7 +178,7 @@
         "completed": ""
       },
       {
-        "id": 599428289,
+        "id": 540787717,
         "title": "X Grade Certificate : [[X_Grade_Certificate.pdf]]",
         "body": [],
         "time": "",
@@ -200,7 +188,7 @@
         "completed": ""
       },
       {
-        "id": 2657412169,
+        "id": 3548816893,
         "title": "X Grade Mark Sheet : [[10_Marksheet.pdf]]",
         "body": [],
         "time": "",
@@ -210,7 +198,7 @@
         "completed": ""
       },
       {
-        "id": 3909622594,
+        "id": 521272623,
         "title": "Photo with Yellow Background : [[MyPassportPhoto.jpg]]",
         "body": [],
         "time": "",
@@ -220,7 +208,7 @@
         "completed": ""
       },
       {
-        "id": 4133060858,
+        "id": 3618544690,
         "title": "Graduate All Semester Marksheets :",
         "body": [
           "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -239,7 +227,7 @@
         "completed": ""
       },
       {
-        "id": 3896779956,
+        "id": 4023621421,
         "title": "Create new **Income Certificate** of father before joining.",
         "body": [],
         "time": "",
@@ -249,33 +237,35 @@
         "completed": ""
       },
       {
-        "id": 1302261452,
-        "title": "Only one Recording Course is remaining of Java",
+        "id": 3962754297,
+        "title": "Only one Recording Course is remaining of JavaOk",
         "body": [
-          "- NOTE : you can finish this off Today"
+          "Now i am removing all the points from the body and changing them into a one line sentence.",
+          "- [ ] Now i am adding this subtask, this should be updated inside the json file. Updating"
         ],
         "time": "",
         "due": "2024-08-24",
         "tag": "",
         "filePath": "Pending Document Work.md",
-        "completed": ""
+        "completed": "",
+        "priority": "5"
       }
     ],
     "Miscellaneous Points.md": [],
     "Daily_Notes.md": [],
     "Daily_Notes/28-09-2024.md": [
       {
-        "id": 4079114418,
-        "title": "This is a new task with due date with the format of dataview [due:: 2024-09-28]",
+        "id": 2143406379,
+        "title": "This is a new task with due date with the format of dataview. Updating",
         "body": [
           ""
         ],
         "time": "",
         "due": "2024-09-28",
-        "tag": "",
-        "priority": "4",
+        "tag": "#Test",
         "filePath": "Daily_Notes/28-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "4"
       }
     ],
     "Daily_Notes/29-08-2024.md": [],
@@ -313,81 +303,85 @@
     "Daily_Notes/26-09-2024.md": [],
     "Daily_Notes/21-09-2024.md": [
       {
-        "id": 88541806,
+        "id": 1949443457,
         "title": "Adding random task for today to see how the board updates.",
         "body": [
-          ""
+          "Adding body to this task from file itself not using any Modal. So, now when this file will be scanned, it will first get detected as well as, the whole board should re-render. updating more...",
+          "- [ ] Changing the complete content of the subTask, updating",
+          "- [ ] Adding another subTask, Second"
         ],
         "time": "12:02 - 13:02",
-        "due": "2024-09-26",
+        "due": "2024-09-29",
         "tag": "#Testing",
-        "priority": "1",
         "filePath": "Daily_Notes/21-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "2"
       }
     ],
     "Daily_Notes/18-09-2024.md": [
       {
-        "id": 1676798118,
+        "id": 2536979090,
         "title": "Adding a new task, i think now everything is working. Adding all the fields now.",
         "body": [],
         "time": "12:09 - 13:09",
         "due": "2024-11-08",
         "tag": "#Complete",
-        "priority": "0",
         "filePath": "Daily_Notes/18-09-2024.md",
         "completed": ""
       },
       {
-        "id": 3923675528,
+        "id": 2212206084,
         "title": "ading simple task to see if the time afterwards will come or not",
+        "body": [
+          "This function dont have any body, hence adding one line.",
+          "- [x] One subtask also, for fun"
+        ],
+        "time": "",
+        "due": "2024-10-02",
+        "tag": "#Testing",
+        "filePath": "Daily_Notes/18-09-2024.md",
+        "completed": "",
+        "priority": "1"
+      },
+      {
+        "id": 84709291,
+        "title": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
         "body": [
           ""
         ],
-        "time": "",
-        "due": "2024-09-29",
-        "tag": "#Testing",
-        "priority": "0",
-        "filePath": "Daily_Notes/18-09-2024.md",
-        "completed": ""
-      },
-      {
-        "id": 3918723116,
-        "title": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
-        "body": [],
         "time": "18:21 - 19:21",
         "due": "2024-09-28",
         "tag": "#Testing",
-        "priority": "0",
         "filePath": "Daily_Notes/18-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "2"
       }
     ],
     "Daily_Notes/24-09-2024.md": [
       {
-        "id": 3995028431,
+        "id": 1800052821,
         "title": "This is a simple task with random note, but this doesnt have either a body nor subtasks. But the problem is this has a tab on the immediate next line.",
-        "body": [],
+        "body": [
+          "No tab doesnt come on the next line now anymore."
+        ],
         "time": "17:08 - 18:08",
         "due": "2024-09-30",
         "tag": "#Testing",
-        "priority": "0",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
       },
       {
-        "id": 590444140,
+        "id": 986906668,
         "title": "Adding a Task to see if this task dont have body and only have the subtasks, then there shouldnt be any empty line between Main task and SubTasks.",
         "body": [],
         "time": "17:51 - 18:51",
         "due": "2024-10-02",
         "tag": "#Error",
-        "priority": "0",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
       },
       {
-        "id": 2574704192,
+        "id": 193589233,
         "title": "Now please dont come empty line between title and subtasks, removing body",
         "body": [
           "First adding a body so i can delete this complete task to test delete functionality",
@@ -397,7 +391,6 @@
         "time": "22:35 - 23:35",
         "due": "2024-10-03",
         "tag": "#Working",
-        "priority": "0",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
       }
@@ -431,31 +424,32 @@
     ],
     "Daily_Notes/22-09-2024.md": [
       {
-        "id": 1680252826,
+        "id": 1406581948,
         "title": "Adding task from command to see if the taskboard refreshes now",
         "body": [],
         "time": "16:17 - 17:17",
         "due": "2024-09-22",
         "tag": "#Testing",
-        "priority": "0",
         "filePath": "Daily_Notes/22-09-2024.md",
         "completed": ""
       },
       {
-        "id": 3993287289,
+        "id": 3164441723,
         "title": "A tempararory new task",
         "body": [
-          "I am adding a body to the task which only have body now"
+          "Just updating the body.",
+          "- Adding one bullete line in body.",
+          "- [ ] Just adding a simple new subTask to see if first all the boards are getting empty."
         ],
         "time": "20:45 - 21:45",
         "due": "2024-09-29",
         "tag": "#Test",
-        "priority": "0",
         "filePath": "Daily_Notes/22-09-2024.md",
-        "completed": ""
+        "completed": "",
+        "priority": "3"
       },
       {
-        "id": 2648501358,
+        "id": 7237785,
         "title": "New task title",
         "body": [
           "Putting something nice instead of just the body body. This is good, i think now it is working.",
@@ -466,12 +460,11 @@
         "time": "16:45 - 17:45",
         "due": "2024-10-03",
         "tag": "#Working",
-        "priority": "0",
         "filePath": "Daily_Notes/22-09-2024.md",
         "completed": ""
       },
       {
-        "id": 1429084991,
+        "id": 1956076093,
         "title": "This is a main Task, updating, Updating more",
         "body": [
           "This is a body i am going to replace all the three bullete lines with this one sentence, because i think usually people will going to simply add a one sentence for the body or maybe bullete points also.",
@@ -482,57 +475,60 @@
           "- [ ] Fifth task"
         ],
         "time": "20:00 - 21:00",
-        "due": "2024-09-25",
+        "due": "2024-09-30",
         "tag": "#Tested",
-        "priority": "0",
         "filePath": "Daily_Notes/22-09-2024.md",
         "completed": ""
       }
     ],
     "Daily_Notes/17-09-2024.md": [
       {
-        "id": 3362318496,
+        "id": 1174054468,
         "title": "If i add any other due it should work, autoAddDue is off",
-        "body": [
-          ""
-        ],
+        "body": [],
         "time": "",
         "due": "2024-09-28",
         "tag": "#Testing",
-        "priority": "3",
         "filePath": "Daily_Notes/17-09-2024.md",
         "completed": ""
       },
       {
-        "id": 1306576471,
+        "id": 1047122242,
+        "title": "This task will be updated in the json file after 10 seconds",
+        "body": [],
+        "time": "",
+        "due": "2024-09-27",
+        "tag": "#Testing",
+        "filePath": "Daily_Notes/17-09-2024.md",
+        "completed": ""
+      },
+      {
+        "id": 2510226260,
         "title": "Adding new task, this will update in the file after 5 minutes",
         "body": [],
         "time": "12:45 - 13:45",
         "due": "",
         "tag": "#Testing",
-        "priority": "2",
         "filePath": "Daily_Notes/17-09-2024.md",
         "completed": ""
       },
       {
-        "id": 1056900983,
+        "id": 3209103240,
         "title": "Now auto add due option is false, so the due date shouldnt be added",
         "body": [],
         "time": "",
         "due": "",
         "tag": "#Test",
-        "priority": "0",
         "filePath": "Daily_Notes/17-09-2024.md",
         "completed": ""
       },
       {
-        "id": 1337102158,
+        "id": 1627697856,
         "title": "Adding tomorrow date, it should come even autoAddDue is ON",
         "body": [],
         "time": "",
         "due": "2024-09-27",
         "tag": "#Testing",
-        "priority": "0",
         "filePath": "Daily_Notes/17-09-2024.md",
         "completed": ""
       }
@@ -690,11 +686,13 @@
       {
         "id": 1521783691,
         "title": "Adding testing task, time will come first, thats it",
-        "body": [],
+        "body": [
+          ""
+        ],
         "time": "23:18 - 24:18",
         "due": "2024-09-29",
-        "tag": "",
-        "priority": "0",
+        "tag": "#Testing",
+        "priority": "2",
         "filePath": "Daily_Notes/09-09-2024.md",
         "completed": ""
       }
@@ -719,24 +717,24 @@
     ],
     "Daily_Notes/03-09-2024.md": [
       {
-        "id": 2696711375,
-        "title": "Finish all the Courses ASAP.",
-        "body": [],
+        "id": 2232864046,
+        "title": "Finish all the Courses ASAP. updating",
+        "body": [
+          "- [ ] Adding subTask"
+        ],
         "time": "",
         "due": "2024-10-01",
         "tag": "#Course",
-        "priority": "0",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": ""
       },
       {
-        "id": 173516963,
+        "id": 3670575068,
         "title": "Completely Updating the content of this task",
         "body": [],
         "time": "",
         "due": "2024-10-03",
         "tag": "#Test",
-        "priority": "0",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": ""
       }
@@ -966,7 +964,86 @@
     ],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "Daily_Notes/30-09-2024.md": [
+      {
+        "id": 4021288275,
+        "title": "This is a task, and this is very bad way since the board is getting refreshed but it is refreshing the whole shit.",
+        "body": [],
+        "time": "",
+        "due": "2024-09-30",
+        "tag": "#RealTime",
+        "filePath": "Daily_Notes/30-09-2024.md",
+        "completed": ""
+      },
+      {
+        "id": 130811684,
+        "title": "Now after this board is updated only the file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version.",
+        "body": [
+          "Adding a body line, updating. more updating.",
+          "And for those who dont want their cpu to keep running at 20% all the time when i am doing the simplest thing that is typing then they can directly disable this feature, the best way .",
+          "- [ ] Alright now the refreshing should look faster, since removed the sleep, but no, still seeing equal amount of delay."
+        ],
+        "time": "",
+        "due": "2024-09-30",
+        "tag": "",
+        "filePath": "Daily_Notes/30-09-2024.md",
+        "completed": ""
+      }
+    ],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
+    "Daily_Notes/01-10-2024.md": [
+      {
+        "id": 3676792983,
+        "title": "Lets see after 2 min if this is getting updated on the board. UPDATE THIS IN THE BOARD",
+        "body": [
+          ""
+        ],
+        "time": "",
+        "due": "2024-10-02",
+        "tag": "#Testing",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": "",
+        "priority": "3"
+      },
+      {
+        "id": 209426169,
+        "title": "Now you will see something, updating more, even more, will it update, so say a user is updating a task, he will be able to see it live now, issue resolved, but the problem is, my cpu is running at more than 30%, when a user will be typing very fast.",
+        "body": [
+          ""
+        ],
+        "time": "",
+        "due": "2024-10-01",
+        "tag": "",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": "",
+        "priority": "3"
+      },
+      {
+        "id": 3045023103,
+        "title": "New task has been added, lets see REFRESH_BOARD, mssg works. Also updating this.",
+        "body": [],
+        "time": "",
+        "due": "2024-10-01",
+        "tag": "",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": ""
+      },
+      {
+        "id": 2849185987,
+        "title": "Task for tomorrow, will be updated on the board auto after 2 min",
+        "body": [
+          ""
+        ],
+        "time": "",
+        "due": "2024-10-02",
+        "tag": "",
+        "filePath": "Daily_Notes/01-10-2024.md",
+        "completed": "",
+        "priority": "4"
+      }
+    ]
   },
   "Completed": {
     "XploreProgram/How to Access Xplore Courses.md": [],
@@ -974,7 +1051,7 @@
     "Spintly Details.md": [],
     "Pending Document Work.md": [
       {
-        "id": 1708117243,
+        "id": 3963436946,
         "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
         "body": [],
         "time": "",
@@ -984,7 +1061,7 @@
         "completed": "2024-09-26T16:50"
       },
       {
-        "id": 1595387129,
+        "id": 1508353277,
         "title": "Add Passport details in NSR portal and BGC after getting Passport.",
         "body": [
           "Editing this task to see if this content gets properly detected and old content gets replaced with this new one."
@@ -996,7 +1073,17 @@
         "completed": "2024-09-26T11:30"
       },
       {
-        "id": 223190241,
+        "id": 3622061523,
+        "title": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "",
+        "filePath": "Pending Document Work.md",
+        "completed": "2024-09-29T16:21"
+      },
+      {
+        "id": 1457024781,
         "title": "Get 8th Semester Provisional Marksheet and Apply for :",
         "body": [
           "All the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
@@ -1012,7 +1099,7 @@
         "completed": "2024-09-28T15:30"
       },
       {
-        "id": 2315766350,
+        "id": 2901385163,
         "title": "Apply for new **Birth Certificate** hardcopy ✅ 2024-09-28",
         "body": [],
         "time": "",
@@ -1022,7 +1109,7 @@
         "completed": "2024-09-28"
       },
       {
-        "id": 3164396664,
+        "id": 4264886485,
         "title": "Create the Non-Criminal Affidavit : [[Format-Non_Criminal_Affidavit.pdf",
         "body": [],
         "time": "",
@@ -1032,7 +1119,7 @@
         "completed": "2024-09-28"
       },
       {
-        "id": 3677036371,
+        "id": 4054075986,
         "title": "This is a normal task to add a task and then to mark it, to get a different completion date format",
         "body": [],
         "time": "",
@@ -1040,6 +1127,16 @@
         "tag": "#Testing",
         "filePath": "Pending Document Work.md",
         "completed": "2024-09-28T08:43"
+      },
+      {
+        "id": 3244730329,
+        "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
+        "body": [],
+        "time": "",
+        "due": "2024-09-30",
+        "tag": "",
+        "filePath": "Pending Document Work.md",
+        "completed": "2024-09-30T14:47"
       }
     ],
     "Miscellaneous Points.md": [],
@@ -1194,13 +1291,12 @@
     "Daily_Notes/02-09-2024.md": [],
     "Daily_Notes/03-09-2024.md": [
       {
-        "id": 1609876184,
+        "id": 2328158313,
         "title": "This  is a third task",
         "body": [],
         "time": "",
         "due": "2024-09-26",
         "tag": "",
-        "priority": "0",
         "filePath": "Daily_Notes/03-09-2024.md",
         "completed": "2024-09-26T11:15"
       }
@@ -1261,6 +1357,10 @@
     "3-Process After Offer Letter Received.md": [],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "Daily_Notes/30-09-2024.md": [],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
+    "Daily_Notes/01-10-2024.md": []
   }
 }

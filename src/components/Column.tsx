@@ -4,29 +4,68 @@ import { App, Modal } from 'obsidian';
 import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
-import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
+import { deleteTaskFromFile, deleteTaskFromJson, loadTasksFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+import { updateTasksAndRefreshBoard, updateTasksAndRefreshColumn } from 'src/services/RefreshServices';
 
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
-import { refreshBoardData } from 'src/utils/refreshBoard';
-import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
+import { eventEmitter } from 'src/services/EventEmitter';
+import { refreshBoardData } from 'src/utils/BoardOperations';
+import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
 }
 
-const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data, setBoards }) => {
-	const [tasks, setTasks] = useState<Task[]>([]);
+const Column: React.FC<ColumnPropsWithSetBoards> = ({
+	activeBoard,
+	colType,
+	data,
+	setBoards,
+	tasks: externalTasks,
+	pendingTasks,  // New props for pending tasks
+	completedTasks // New props for completed tasks
+}) => {
+	// Local tasks state, initially set from external tasks
+	const [tasks, setTasks] = useState<Task[]>(externalTasks);
 
-	// Load tasks from tasks.json file
+	// Sync local tasks state with external tasks when they change
 	useEffect(() => {
-		refreshTasks(setTasks, activeBoard, colType, data);
-	}, [colType, data]);
+		setTasks(externalTasks);
+	}, [externalTasks]);
+
+	// Render tasks using the tasks passed from KanbanBoard
+	useEffect(() => {
+		renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
+	}, [colType, data, pendingTasks, completedTasks]);
+
+	// // Pub Sub method similar to Kafka to read events/messages.
+	// useEffect(() => {
+	// 	const refreshBoardListener = () => {
+	// 		updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
+	// 	};
+
+	// 	const refreshColumnListener = () => {
+	// 		updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
+	// 	};
+
+	// 	eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
+	// 	// eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
+	// 	// eventEmitter.on('REFRESH_TASK', refreshListener);
+
+	// 	// Clean up the listener when component unmounts
+	// 	return () => {
+	// 		eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
+	// 		// eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
+	// 	};
+	// }, [setTasks, activeBoard, colType, data]);
+
 
 
 	const handleCheckboxChange = (updatedTask: Task) => {
+		const moment = require("moment");
 		// Remove task from the current state
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
 		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
@@ -40,17 +79,34 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 			moveFromCompletedToPending(updatedTask);
 			updateTaskInFile(taskWithCompleted, taskWithCompleted);
 		} else {
-			const taskWithCompleted = { ...updatedTask, completed: new Date().toISOString().slice(0, 16), };
+			const taskWithCompleted = { ...updatedTask, completed: moment().format("YYYY-MM-DDTHH:mm"), };
 			// Move from Pending to Completed
 			moveFromPendingToCompleted(updatedTask);
 			updateTaskInFile(taskWithCompleted, taskWithCompleted);
 		}
 
-		// Mark task in file as complete or incomplete
 
-		// Refresh the tasks in the component
-		// refreshTasks(setTasks, colType, data);
-		refreshBoardData(setBoards);
+		// Following are multiple method used for refresing only the columns and not the whole board : 
+
+		// renderColumns(setTasks, colType, data);
+
+		// // PLEASE NOTE : Keep the following lines as it is, when i check the box, without updating the whole board, the TaskItem Card moves from the Todays column into Completed column and vice-versa very smoothly.
+		// refreshBoardData(setBoards, () => {
+		// 	// renderColumns(setTasks, activeBoard, colType, data);
+		// 	console.log("The below line is loading the tasks from tasks.json, hopefully this line will be running only once...");
+		// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+
+		// 	// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
+		// });
+
+		// const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+		// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
+
+
+		// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
+
+		// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
+		eventEmitter.emit("REFRESH_COLUMN");
 	};
 
 	const handleDeleteTask = (task: Task) => {
@@ -82,8 +138,29 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ activeBoard, colType, data
 			// Refresh tasks state after update
 			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
 
-			// refreshTasks(setTasks, tag, data);
-			refreshBoardData(setBoards);
+			// Following are multiple method used for refresing only the columns and not the whole board : 
+
+			// renderColumns(setTasks, tag, data);
+
+			// --- MY METHOD ---------
+			// const emptyTheTasks: Task[] = [];
+			// setTasks(emptyTheTasks);
+			// sleep(10);
+
+			// setTasks([]);
+
+			// THIS METHOD IS NOTE WORKING
+			// refreshBoardData(setBoards, () => {
+			// 	console.log("Task updated, running the Dispatch method of updating the board...");
+			// 	renderColumns(setTasks, activeBoard, colType, data);
+			// });
+
+			// ONLY THIS BELOW METHOD IS WORKING, AND IT ONLY REFRESHES THE WHOLE COLUMN, YOU CAN SEE ALL THE TASKITEM FROM THIS COLUMN GETTING REFRESHED, REST COLUMNS REMAINS SILENT, BUT YOU KNOW OBVIOULSY THEY ARE ALSO GETTING ADDED FROM NEW TASKS.JSON DATA.
+			// updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
+			// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
+
+			// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
+			eventEmitter.emit("REFRESH_COLUMN");
 		});
 		editModal.open();
 	};

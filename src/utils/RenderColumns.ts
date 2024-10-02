@@ -1,4 +1,4 @@
-// src/utils/RefreshColumns.ts
+// src/utils/RenderColumns.ts
 
 import { Dispatch, SetStateAction } from "react";
 
@@ -7,19 +7,24 @@ import { loadGlobalSettings } from "./SettingsOperations";
 import { loadTasksFromJson } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
-export const refreshTasks = (
+export const renderColumns = (
 	setTasks: Dispatch<SetStateAction<Task[]>>,
 	activeBoard: number,
 	colType: string,
-	data: any
+	data: any,
+	pendingTasks: Task[],
+	completedTasks: Task[]
 ) => {
-	console.log("------ Inside the refreshTasks function -----");
+	console.log(
+		"renderColumns function : This will run as many times as there are columns in the current board -----------"
+	);
 	// Load tasks from the JSON file
-	const { allTasksWithStatus, pendingTasks, completedTasks } =
-		loadTasksFromJson();
+	// const { allTasksWithStatus, pendingTasks, completedTasks } =
+	// 	loadTasksFromJson();
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: Task[] = [];
+	// setTasks(tasksToDisplay);
 
 	if (colType === "undated") {
 		tasksToDisplay = pendingTasks.filter((task) => !task.due);

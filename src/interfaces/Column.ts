@@ -16,6 +16,9 @@ export interface ColumnProps {
 		};
 		limit?: number;
 	};
+	tasks: Task[];
+	pendingTasks: Task[];
+	completedTasks: Task[];
 }
 
 export interface Task {

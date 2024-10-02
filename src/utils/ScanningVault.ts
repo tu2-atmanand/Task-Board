@@ -2,17 +2,24 @@
 
 import { App, Notice, TFile } from "obsidian";
 
+import TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
+import { refreshKanbanBoard } from "src/services/RefreshServices";
 import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {
 	app: App;
+	plugin: TaskBoard;
 	tasks: any = { Pending: {}, Completed: {} };
+	TaskDetected: boolean;
 
-	constructor(app: App) {
+	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
+		this.plugin = plugin;
+		this.TaskDetected = false;
 	}
 
 	// Scan all markdown files for tasks
@@ -36,6 +43,8 @@ export class ScanningVault {
 		);
 
 		this.saveTasksToFile();
+		// Emit the event
+		eventEmitter.emit("REFRESH_BOARD");
 	}
 
 	// Extract tasks from a specific file
@@ -50,6 +59,7 @@ export class ScanningVault {
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+				this.TaskDetected = true;
 				const isCompleted = line.startsWith("- [x]");
 				const title = this.extractTitle(line);
 				const time = this.extractTime(line);
@@ -118,6 +128,7 @@ export class ScanningVault {
 			for (let i = 0; i < lines.length; i++) {
 				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+					this.TaskDetected = true;
 					const isCompleted = line.startsWith("- [x]");
 					const title = this.extractTitle(line);
 					const time = this.extractTime(line);
@@ -165,17 +176,38 @@ export class ScanningVault {
 		}
 
 		// Save the updated tasks back to tasks.json after processing all files
+		// console.log(
+		// 	"Value of this.plugin.settings.data.globalSettings.realTimeScanning : ",
+		// 	this.plugin.settings.data.globalSettings.realTimeScanning
+		// );
+
+		// TODO : At this present commit and the prsent state of the codeBase, the feature that when a user writes at a high speed, the task will be getting refreshed in real-Time is happening perfectly. For that you will have to disable the below line. Also just to mention, you will have to do an optimization, since, if the user is typing at a double speed then mine, then the my CPU was running at 40%.
+		this.TaskDetected = !(this.plugin.settings.data.globalSettings.realTimeScanning) ? true : false;
+		console.log("After Tasks are extracted and when realTimeScanning is OFF, value of this.TaskDetected : ", this.TaskDetected);
 		this.saveTasksToFile();
+
+		// console.log(
+		// 	"ScanningVault : Running the function from Main.ts to re-Render..."
+		// );
+		// refreshKanbanBoard(this.app);
 	}
 
 	// Save tasks to JSON file
 	saveTasksToFile() {
 		fs.writeFileSync(tasksPath, JSON.stringify(this.tasks, null, 2));
-		console.log(
-			"The following data saved in the tasks.json : ",
-			this.tasks
-		);
-		new Notice("Tasks scanned from the modified files.");
+		// console.log(
+		// 	"The following data saved in the tasks.json : ",
+		// 	this.tasks
+		// );
+
+		// Refresh the board only if any task has be extracted from the updated file.
+		if (this.TaskDetected) {
+			// new Notice("Tasks scanned from the modified files.");
+			// Emit the event
+			eventEmitter.emit("REFRESH_COLUMN");
+			// eventEmitter.emit("REFRESH_COLUMN");
+			this.TaskDetected = false;
+		}
 	}
 
 	// New function to extract task body
@@ -186,11 +218,11 @@ export class ScanningVault {
 
 			if (line.trim() === "") {
 				// Empty line indicates the end of the task body
-				console.log(
-					"The current line detected should be empty :",
-					line,
-					": There shouldnt be any space between the two colons"
-				);
+				// console.log(
+				// 	"The current line detected should be empty :",
+				// 	line,
+				// 	": There shouldnt be any space between the two colons"
+				// );
 				break;
 			}
 

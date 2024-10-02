@@ -15,12 +15,14 @@ export class KanbanView extends ItemView {
 	private plugin: TaskBoard;
 	private boards: Board[] = [];
 	private activeBoardIndex: number = 0;
+	private root: ReactDOM.Root;
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
 		this.app = plugin.app;
 		this.plugin = plugin;
 		this.vault = plugin.app.vault;
+		// this.root = ReactDOM.createRoot(this.contentEl);
 	}
 
 	getViewType() {
@@ -43,7 +45,7 @@ export class KanbanView extends ItemView {
 			// 	this.activeBoardIndex,
 			// 	this.handleSaveBoards
 			// );
-			openReScanVaultModal(this.app);
+			openReScanVaultModal(this.app, this.plugin);
 		});
 
 		console.log(
@@ -51,9 +53,8 @@ export class KanbanView extends ItemView {
 			this.getSettings()
 		);
 
-		const root = ReactDOM.createRoot(this.contentEl); // Correct element reference
-		root.render(<KanbanBoard app={this.app} />);
-		// root.render(<KanbanBoard />);
+		this.root = ReactDOM.createRoot(this.contentEl); // Store root reference
+		this.renderBoard();
 		await this.loadBoards();
 	}
 
@@ -64,6 +65,15 @@ export class KanbanView extends ItemView {
 			console.error("Failed to load boards data:", err);
 		}
 	}
+
+	private renderBoard() {
+		// this.root.unmount();
+		this.root.render(<KanbanBoard app={this.app} plugin={this.plugin} />); // Pass the plugin as a prop
+	}
+
+	// public refreshBoard() {
+	// 	this.renderBoard(); // Re-render the KanbanBoard
+	// }
 
 	async onClose() {
 		// Clean up when view is closed

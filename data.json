@@ -73,7 +73,7 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Undated",
+              "name": "Undated Tasks",
               "index": 5
             }
           },
@@ -82,7 +82,7 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "limit": 10,
+              "limit": 20,
               "name": "Completed",
               "index": 6
             }
@@ -94,7 +94,7 @@
         ],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "For Testing, This board contains only date related tasks",
+        "name": "Only Keep  Data based Col for Testing",
         "index": 1,
         "showColumnTags": true,
         "showFilteredTags": true
@@ -168,22 +168,12 @@
               "limit": 10,
               "name": "Completed"
             }
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Test Tasks",
-              "index": 8,
-              "coltag": "Test"
-            }
           }
         ],
         "filters": [],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "Tag Based Board",
+        "name": "Tag Based Board, updating",
         "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true

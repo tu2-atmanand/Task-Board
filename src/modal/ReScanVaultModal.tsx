@@ -1,10 +1,11 @@
 // /src/components/ReScanVaultModal.tsx
 
-import { App, Modal, Notice } from "obsidian";
+import { App, Modal, Notice, Plugin } from "obsidian";
 import React, { useEffect, useState } from "react";
 
 import ReactDOM from "react-dom/client";
 import { ScanningVault } from "src/utils/ScanningVault";
+import TaskBoard from "main";
 import { tasksJson } from "src/interfaces/TaskItem";
 
 interface ReScanVaultModalProps {
@@ -97,10 +98,12 @@ const ReScanVaultModalContent: React.FC<{ app: App; scanningVault: ScanningVault
 
 export class ReScanVaultModal extends Modal {
 	scanningVault: ScanningVault;
+	plugin: TaskBoard;
 
-	constructor(app: App) {
+	constructor(app: App, plugin: TaskBoard) {
 		super(app);
-		this.scanningVault = new ScanningVault(app);
+		this.plugin = plugin;
+		this.scanningVault = new ScanningVault(app, plugin);
 	}
 
 	onOpen() {

@@ -1,3 +1,5 @@
+// /src/utils/SettingsOperations.ts
+
 import { App, Plugin } from "obsidian";
 
 import { Board } from "../interfaces/KanbanBoard";
@@ -26,6 +28,17 @@ export const loadGlobalSettings = () => {
 	}
 };
 
+// Load globalSettings to check for dayPlannerPlugin value
+export const loadBoardConfigs = () => {
+	try {
+		const settingsData = fs.readFileSync(dataFilePath, "utf8");
+		return JSON.parse(settingsData).data.boardConfigs;
+	} catch (error) {
+		console.error("Error loading globalSettings:", error);
+		return {};
+	}
+};
+
 
 // Function to load boards data from the JSON file
 export const loadBoardsData = (): Promise<Board[]> => {
@@ -36,7 +49,8 @@ export const loadBoardsData = (): Promise<Board[]> => {
 				reject(err);
 				return;
 			}
-			const jsonData = JSON.parse(data).data; // Adjust this to match the exact JSON structure
+			const jsonData = JSON.parse(data).data; // Adjusting to match the exact json structure
+			console.log("loadBoardsData : Loading data.json for boardConfigs, I hope this is running only once...");
 			resolve(jsonData.boardConfigs);
 		});
 	});
