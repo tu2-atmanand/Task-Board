@@ -7,8 +7,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Over Due",
               "index": 1,
               "range": {
@@ -23,8 +23,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Today",
               "index": 2,
               "range": {
@@ -39,8 +39,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Tomorrow",
               "index": 3,
               "range": {
@@ -53,21 +53,12 @@
             }
           },
           {
-            "colType": "undated",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Undated",
-              "index": 4
-            }
-          },
-          {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Future",
-              "index": 5,
+              "index": 4,
               "range": {
                 "tag": "after",
                 "rangedata": {
@@ -78,11 +69,20 @@
             }
           },
           {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "data": {
+              "name": "Undated Tasks",
+              "index": 5
+            }
+          },
+          {
             "colType": "completed",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
-              "limit": 10,
+              "limit": 20,
               "name": "Completed",
               "index": 6
             }
@@ -94,7 +94,7 @@
         ],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "For Testing, This board contains only date related tasks",
+        "name": "Only Keep  Data based Col for Testing",
         "index": 1,
         "showColumnTags": true,
         "showFilteredTags": true
@@ -104,8 +104,8 @@
           {
             "colType": "untagged",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Untagged",
               "index": 1
             }
@@ -113,8 +113,8 @@
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Testing Tasks",
               "index": 2,
               "coltag": "Testing"
@@ -123,8 +123,8 @@
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "GPT",
               "index": 3,
               "coltag": "GPT"
@@ -133,18 +133,18 @@
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
-              "name": "When Mobile Data Left at Night",
+              "name": "Test Task",
               "index": 4,
-              "coltag": "WhenMobileDataLeft"
+              "coltag": "Test"
             }
           },
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Note Till Task is Done",
               "index": 5,
               "coltag": "NOTE"
@@ -153,8 +153,8 @@
           {
             "colType": "otherTags",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Other Tags",
               "index": 6
             }
@@ -162,28 +162,18 @@
           {
             "colType": "completed",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "index": 7,
               "limit": 10,
               "name": "Completed"
-            }
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Test Tasks",
-              "index": 8,
-              "coltag": "Test"
             }
           }
         ],
         "filters": [],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "Tag Based Board",
+        "name": "Tag Based Board, updating",
         "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true
@@ -195,8 +185,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Past Tasks",
               "index": 1,
               "range": {
@@ -210,8 +200,8 @@
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Test Name Tag Column",
               "index": 2,
               "coltag": "Test"
@@ -220,8 +210,8 @@
           {
             "colType": "untagged",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Untagged Tasks",
               "index": 3
             }
@@ -229,8 +219,8 @@
           {
             "colType": "otherTags",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Other Tags Tasks",
               "index": 4
             }
@@ -254,7 +244,7 @@
       "filters": [
         "MyReadme.md, Daily/, New.md"
       ],
-      "firstDayOfWeek": "2",
+      "firstDayOfWeek": "1",
       "ignoreFileNameDates": false,
       "taskCompletionFormat": "Obsidian",
       "taskCompletionInLocalTime": true,
@@ -262,7 +252,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": true
+      "realTimeScanning": false
     }
   }
 }

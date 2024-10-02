@@ -1,11 +1,14 @@
+import { taskItem } from "./TaskItem";
+
 export interface ColumnProps {
+	activeBoard: number;
 	colType: string;
-	active: boolean;
+	active?: boolean;
+	collapsed?: boolean;
 	data: {
-		collapsed: boolean;
 		name: string;
 		index: number;
-		coltag: string;
+		coltag?: string;
 		range?: {
 			tag: string;
 			rangedata: {
@@ -15,15 +18,7 @@ export interface ColumnProps {
 		};
 		limit?: number;
 	};
-}
-
-export interface Task {
-	id: number;
-	body: string;
-	due: string;
-	tag: string;
-	filePath: string;
-	completed: boolean;
-	time: string;
-	priority: number;
+	tasks: taskItem[];
+	pendingTasks: taskItem[];
+	completedTasks: taskItem[];
 }

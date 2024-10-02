@@ -1,32 +1,28 @@
 // src/views/KanbanView.ts
 
-import { App, ItemView, Vault, WorkspaceLeaf } from "obsidian";
-import {
-	loadBoardsData,
-	openBoardConfigModal,
-	openReScanVaultModal,
-	saveBoardsData,
-} from "../services/OpenColumnConfig";
+import { ItemView, Vault, WorkspaceLeaf } from "obsidian";
 
 import { Board } from "src/interfaces/KanbanBoard";
-import KanbanBoard from "../components/KanbanBoard";
-import { ReScanVaultModal } from "src/modal/ReScanVaultModal";
-import React from "react";
+import KanbanBoard from "src/components/KanbanBoard";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "../../main";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/TaskBoardGlobalValues";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
+import { loadBoardsData } from "src/utils/SettingsOperations";
+import { openReScanVaultModal } from "../services/OpenModals";
 
 export class KanbanView extends ItemView {
 	private vault: Vault;
 	private plugin: TaskBoard;
 	private boards: Board[] = [];
 	private activeBoardIndex: number = 0;
+	private root: ReactDOM.Root;
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
 		this.app = plugin.app;
 		this.plugin = plugin;
 		this.vault = plugin.app.vault;
+		// this.root = ReactDOM.createRoot(this.contentEl);
 	}
 
 	getViewType() {
@@ -49,13 +45,16 @@ export class KanbanView extends ItemView {
 			// 	this.activeBoardIndex,
 			// 	this.handleSaveBoards
 			// );
-			openReScanVaultModal(this.app);
+			openReScanVaultModal(this.app, this.plugin);
 		});
 
-		console.log("The Settings which i have loaded using Obsidian : ", this.getSettings());
+		console.log(
+			"KanbanView : The Settings which i have loaded using Obsidian : ",
+			this.getSettings()
+		);
 
-		const root = ReactDOM.createRoot(this.contentEl);
-		root.render(<KanbanBoard app={this.plugin.app} />);
+		this.root = ReactDOM.createRoot(this.contentEl); // Store root reference
+		this.renderBoard();
 		await this.loadBoards();
 	}
 
@@ -67,23 +66,19 @@ export class KanbanView extends ItemView {
 		}
 	}
 
-	private handleSaveBoards = (updatedBoards: Board[]) => {
-		this.boards = updatedBoards;
-		saveBoardsData(updatedBoards);
-	};
+	private renderBoard() {
+		// this.root.unmount();
+		this.root.render(<KanbanBoard app={this.app} plugin={this.plugin} />); // Pass the plugin as a prop
+	}
+
+	// public refreshBoard() {
+	// 	this.renderBoard(); // Re-render the KanbanBoard
+	// }
 
 	async onClose() {
 		// Clean up when view is closed
 	}
 }
-
-
-
-
-
-
-
-
 
 // // src/views/KanbanView.ts   ----- Wokring - V2
 

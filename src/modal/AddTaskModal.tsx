@@ -1,22 +1,21 @@
-// /src/components/AddTaskModal.tsx
+// /src/modal/AddTaskModal.tsx
 
 import { App, Modal, Notice } from 'obsidian';
 import React, { useState } from 'react';
 
 import fs from 'fs';
 import { loadGlobalSettings } from 'src/utils/SettingsOperations';
-import { loadTasksFromJson } from 'src/utils/RefreshColumns';
 import path from 'path';
 import { priorityEmojis } from 'src/interfaces/TaskItem';
-import { refreshBoardData } from 'src/utils/refreshBoard';
-import { tasksPath } from 'src/interfaces/TaskBoardGlobalValues';
+import { refreshBoardData } from 'src/utils/BoardOperations';
+import { tasksPath } from 'src/interfaces/GlobalVariables';
 
 interface AddTaskModalProps {
 	app: App;
 	filePath: string;
 	defaultDue?: string;
 	defaultTag?: string;
-	onTaskAdded: () => void; // Callback function to refresh tasks after addition
+	onTaskAdded: () => void;
 }
 
 export class AddTaskModal extends Modal {
@@ -41,37 +40,47 @@ export class AddTaskModal extends Modal {
 		globalSettings = globalSettings.data.globalSettings;
 		const autoAddDueOption = globalSettings?.autoAddDue;
 
-		// Create a wrapper div for styling
 		const wrapper = contentEl.createEl('div', { cls: 'modal-content-wrapper' });
 
-		// Add heading
-		const heading = wrapper.createEl('h2', { text: 'Add New Task' });
-		heading.style.marginBottom = '10px'; // Space below heading
+		// Title Input for Task
+		const taskTitleLabel = wrapper.createEl('h6', { text: 'Task Title : ' });
+		const taskTitleInput = wrapper.createEl('input', { type: 'text', placeholder: 'Enter task title' });
+		taskTitleInput.style.marginBottom = '10px';
 
-		// Add description paragraph
-		const description = wrapper.createEl('p', {
-			text: 'This will add a new task in the Currently Opened Markdown File at the Cursor Position.',
-		});
-		description.style.marginBottom = '20px'; // Space below paragraph
+		// Body Text Area (supports multiline body)
+		const taskBodyLabel = wrapper.createEl('h6', { text: 'Task Body :' });
+		const taskBodyTextArea = wrapper.createEl('textarea', { placeholder: 'Enter task body content here...' });
+		taskBodyTextArea.style.minHeight = '100px';
+		taskBodyTextArea.style.marginBottom = '10px';
 
-		// Create inputs
-		const taskInputTittle = wrapper.createEl('h6', { text: 'Task Description : ' });
-		const taskInput = wrapper.createEl('textarea', { type: 'text', placeholder: 'Enter task description' });
-		taskInput.style.marginBottom = '10px'; // Space below input
-		taskInput.style.minHeight = '100px';
+		// Sub-task Input (dynamic)
+		const subTaskLabel = wrapper.createEl('h6', { text: 'Sub-Tasks :' });
+		const subTaskWrapper = wrapper.createEl('div', { cls: 'sub-task-wrapper' });
+		const subTasks: string[] = [];
+
+		const addSubTaskInput = () => {
+			const subTaskInput = subTaskWrapper.createEl('input', { type: 'text', placeholder: 'Enter sub-task and press Enter' });
+			subTaskInput.addEventListener('keypress', (e) => {
+				if (e.key === 'Enter' && subTaskInput.value.trim()) {
+					subTasks.push(`- [ ] ${subTaskInput.value.trim()}`);
+					subTaskInput.value = ''; // Clear the field after adding
+					addSubTaskInput(); // Add a new input field
+				}
+			});
+		};
+		addSubTaskInput();
 
 		// Time input fields
-		const timeWrapper = wrapper.createEl('div', { cls: 'time-input-wrapper' }); // Wrapper for flex layout
-		
+		const timeWrapper = wrapper.createEl('div', { cls: 'time-input-wrapper' });
+
 		const startTimeWrapper = timeWrapper.createEl('div', { cls: 'start-time-input-wrapper' });
 		const startTimeInputTitle = startTimeWrapper.createEl('h6', { text: 'Task Start Time :' });
 		const startTimeInput = startTimeWrapper.createEl('input', { type: 'time' });
-		
+
 		const endTimeWrapper = timeWrapper.createEl('div', { cls: 'end-time-input-wrapper' });
 		const endTimeInputTitle = endTimeWrapper.createEl('h6', { text: 'Task End Time :' });
 		const endTimeInput = endTimeWrapper.createEl('input', { type: 'time' });
 
-		// Automatically set end time if only start time is provided
 		startTimeInput.addEventListener('change', () => {
 			if (startTimeInput.value && !endTimeInput.value) {
 				const [hours, minutes] = startTimeInput.value.split(':').map(Number);
@@ -80,12 +89,12 @@ export class AddTaskModal extends Modal {
 			}
 		});
 
-		// Due date input field
+		// Due date input
 		const dueWrapper = wrapper.createEl('div', { cls: 'due-input-wrapper' });
 		const dueInputTitle = dueWrapper.createEl('h6', { text: 'Task Due Date :' });
 		const dueInput = dueWrapper.createEl('input', { type: 'date' });
 
-		// Tag input field
+		// Tag input
 		const tagWrapper = wrapper.createEl('div', { cls: 'tag-input-wrapper' });
 		const tagInputTittle = tagWrapper.createEl('h6', { text: 'Task Tag : ' });
 		const tagInput = tagWrapper.createEl('input', { type: 'text', placeholder: 'Enter tag (optional)' });
@@ -102,36 +111,31 @@ export class AddTaskModal extends Modal {
 			{ value: '4', text: 'Low : 🔽' },
 			{ value: '5', text: 'Lowest : ⏬' }
 		];
-
 		priorityOptions.forEach(opt => {
 			const optionEl = priorityInput.createEl('option', { value: opt.value, text: opt.text });
 			priorityInput.appendChild(optionEl);
 		});
 
-		// Set default values if provided
-		if (this.defaultDue) dueInput.value = this.defaultDue;
-		if (this.defaultTag) tagInput.value = this.defaultTag;
-
-		// Create and style button
+		// Add Task Button
 		const addButton = wrapper.createEl('button', { text: 'Add Task' });
-		addButton.style.marginTop = '30px'; // Space above button
+		addButton.style.marginTop = '30px';
 
 		addButton.onclick = () => {
-			const taskBody = taskInput.value;
-			const defaultDue = autoAddDueOption ? new Date().toISOString().split('T')[0] : '';
-			const dueDate = dueInput.value || defaultDue; // Default to today
+			const taskTitle = taskTitleInput.value.trim();
+			const taskBody = taskBodyTextArea.value.split('\n').map(line => line.trim()).filter(line => line !== ''); // Convert body to array
+			const dueDate = dueInput.value || (autoAddDueOption ? new Date().toISOString().split('T')[0] : '');
 			const tag = tagInput.value.trim();
-			const time = `${startTimeInput.value} - ${endTimeInput.value}`; // Time format for the task
+			const time = `${startTimeInput.value} - ${endTimeInput.value}`;
 			const priority = priorityInput.value;
 
-			if (!taskBody) {
-				new Notice("Task body cannot be empty.");
+			if (!taskTitle) {
+				new Notice("Task title cannot be empty.");
 				return;
 			}
 
-			this.addTaskToFile(taskBody, time ? time : '', dueDate ? dueDate : '', tag ? `#${tag}` : '', (Number(priority) === 0) ? '' : priority);
-			this.onTaskAdded(); // Callback to refresh tasks after addition
-			// TODO: Simply took trouble, i dont have to specifically refresh the board myself. Since when the md file will be updated. It will be detected by the code in main.ts and the board will be updated by that service.
+			// Add task to the file
+			this.addTaskToFile(taskTitle, taskBody, subTasks, time, dueDate, tag, Number(priority) || 0);
+			this.onTaskAdded();
 			this.close();
 		};
 	}
@@ -140,7 +144,7 @@ export class AddTaskModal extends Modal {
 		this.contentEl.empty();
 	}
 
-	addTaskToFile(taskBody: string, time: string, dueDate: string, tag: string, priority: string) {
+	addTaskToFile(title: string, body: string[], subTasks: string[], time: string, dueDate: string, tag: string, priority: number) {
 		const basePath = (window as any).app.vault.adapter.basePath;
 		const fullPath = path.join(basePath, this.filePath);
 		let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
@@ -152,64 +156,86 @@ export class AddTaskModal extends Modal {
 
 		// const today = new Date().toISOString().split('T')[0]; // get today's date in YYYY-MM-DD format
 
-		const dueDateWithEmo = dueDate ? `📅 ${dueDate}` : '';
+		const dueDateWithEmo = dueDate ? ` 📅${dueDate}` : "";
+		const timeWithEmo = time ? ` ⏰[${time}]` : "";
 
-		// const dueDateWithEmo = autoAddDueOption ? `📅 ${dueDate}` : '';
-
-		const Emopriority = Number(priority) > 0 ? priorityEmojis[Number(priority)] : ''; // or any other default value
+		// Combine priority emoji if it exists
+		const priorityWithEmo =
+			priority > 0
+				? priorityEmojis[priority as number]
+				: "";
 
 
 		try {
-			let newTaskLine = '';
+			let formattedTask = "";
 			if (dayPlannerPlugin) {
-				const timeWithEmo = (time === " - ") ? '' : `${time} `;
-				// If dayPlannerPlugin is true, place time before the task body
-				newTaskLine = `- [ ] ${timeWithEmo}${taskBody} | ${dueDateWithEmo} ${Emopriority} ${tag}\n`;
+				formattedTask = `- [ ] ${time ? `${time} ` : ""
+					}${title
+					} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${tag
+					}`;
 			} else {
-				console.log("Time value before processing it : ", (time===" - "))
-				const timeWithEmo = (time === " - ") ? '' : `⏰ [${time}]`;
-				console.log("Time added : ", time);
-				// If dayPlannerPlugin is false, place time after the task body
-				newTaskLine = `- [ ] ${taskBody} | ${timeWithEmo} ${dueDateWithEmo} ${Emopriority} ${tag}\n`;
+				formattedTask = `- [ ] ${title
+					} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${tag
+					}`;
 			}
 
+			// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+			const bodyLines = body
+				.filter(
+					(line: string) =>
+						!line.startsWith("- [ ]") && !line.startsWith("- [x]")
+				)
+				.map((line: string) => `\t${line}`)
+				.join("\n");
+
+			// console.log("The subtasks array before i append backslah t into it : ", subTasks);
+
+			// Add the sub-tasks without additional indentation
+			const subTasksWithTab = subTasks
+				.map((Line: string) => `\t${Line}`)
+				.join("\n");
+
+			// console.log("If i dont add anything in body, then what is the value of bodyLines between the colons :", bodyLines,":");
+			// Combine all parts: main task, body, and sub-tasks
+			// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}\n`;
+			const completeTask = `${formattedTask}${bodyLines.trim() ? `\n${bodyLines}` : ''}\n${subTasksWithTab}\n`;
+
+
 			// Append task to the file at the current cursor position or the end
-			fs.appendFileSync(fullPath, newTaskLine);
+			fs.appendFileSync(fullPath, completeTask);
 
 			// Update tasks.json
 			time = (time === " - ") ? '' : time;
-			this.updateTasksJson(taskBody, time, dueDate, tag, Number(priority) ? Number(priority) : 0, this.filePath);
+
+			// Update tasks.json
+			this.updateTasksJson(title, body, subTasks, time, dueDate, tag, priority, this.filePath);
 		} catch (error) {
 			console.error("Error adding task to file:", error);
 		}
 	}
 
-	updateTasksJson(taskBody: string, time: string, dueDate: string, tag: string, priority: number, filePath: string) {
+	updateTasksJson(title: string, body: string[], subTasks: string[], time: string, dueDate: string, tag: string, priority: number, filePath: string) {
+		const tasksData = fs.readFileSync(tasksPath, 'utf8');
+		const allTasks = JSON.parse(tasksData);
 
-		try {
-			const tasksData = fs.readFileSync(tasksPath, 'utf8');
-			const allTasks = JSON.parse(tasksData);
+		const newTask = {
+			id: Date.now(),
+			title: title,
+			body: [...body, ...subTasks],  // Body now includes main body and sub-tasks
+			time: time || '',
+			due: dueDate || '',
+			tag: tag || '',
+			priority: priority,
+			filePath: filePath,
+			completed: ''  // This will be updated when task is marked as complete
+		};
 
-			const newTask = {
-				id: Date.now(),
-				body: taskBody,
-				time: time,
-				due: dueDate,
-				tag: tag,
-				priority: priority,
-				filePath: filePath,
-				completed: false,
-			};
-
-			// Add task to the correct file path in the "Pending" category
-			if (!allTasks.Pending[filePath]) {
-				allTasks.Pending[filePath] = [];
-			}
-			allTasks.Pending[filePath].push(newTask);
-
-			fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
-		} catch (error) {
-			console.error("Error updating tasks.json:", error);
+		// Update the task list (assuming it's a file-based task structure)
+		if (!allTasks.Pending[filePath]) {
+			allTasks.Pending[filePath] = [];
 		}
+		allTasks.Pending[filePath].push(newTask);
+
+		fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
 	}
 }

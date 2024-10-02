@@ -21,6 +21,7 @@ export interface globalSettingsData {
 	dayPlannerPlugin: boolean;
 	realTimeScanning: boolean;
 }
+
 // Define the interface for GlobalSettings based on your JSON structure
 export interface GlobalSettings {
 	version: string;
@@ -49,8 +50,8 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 			ignoreFileNameDates: false,
 			taskCompletionFormat: "ObsidianTasks",
 			taskCompletionInLocalTime: true,
-			taskCompletionShowUtcOffset: true,
-			autoAddDue: true,
+			taskCompletionShowUtcOffset: false,
+			autoAddDue: false,
 			scanVaultAtStartup: false,
 			dayPlannerPlugin: false,
 			realTimeScanning: false,

@@ -2,23 +2,30 @@
 
 import { App, Notice, TFile } from "obsidian";
 
+import TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
-import { tasksPath } from "src/interfaces/TaskBoardGlobalValues";
+import { refreshKanbanBoard } from "src/services/RefreshServices";
+import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {
 	app: App;
+	plugin: TaskBoard;
 	tasks: any = { Pending: {}, Completed: {} };
+	TaskDetected: boolean;
 
-	constructor(app: App) {
+	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
+		this.plugin = plugin;
+		this.TaskDetected = false;
 	}
 
 	// Scan all markdown files for tasks
 	// Modify scanVaultForTasks to accept a callback function for terminal updates
 
-	async scanVaultForTasks(onFileScanned: (fileName: string) => void) {
+	async scanVaultForTasks() {
 		console.log(
 			"Scanning The Whole Vault, either on Startup or using Modal..."
 		);
@@ -26,13 +33,18 @@ export class ScanningVault {
 		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
 
 		for (const file of files) {
-			onFileScanned(file.path); // Pass file name to callback for live updates
+			// onFileScanned(file.path); // Pass file name to callback for live updates
 			await this.extractTasksFromFile(file, this.tasks);
 		}
-		
-		console.log("Following tasks has been collected after Vault Scan : ", this.tasks);
+
+		console.log(
+			"Following tasks has been collected after Vault Scan : ",
+			this.tasks
+		);
 
 		this.saveTasksToFile();
+		// Emit the event
+		eventEmitter.emit("REFRESH_BOARD");
 	}
 
 	// Extract tasks from a specific file
@@ -44,24 +56,29 @@ export class ScanningVault {
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
 
-		for (const line of lines) {
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+				this.TaskDetected = true;
 				const isCompleted = line.startsWith("- [x]");
-				const body = this.extractBody(line);
+				const title = this.extractTitle(line);
 				const time = this.extractTime(line);
 				const due = this.extractDate(line);
-				const priority = this.extractPriority(line);
+				// const priority = this.extractPriority(line);
 				const tag = this.extractTag(line);
+				const completionDate = this.extractCompletionDate(line);
+				const body = this.extractBody(lines, i + 1);
 
 				const task = {
 					id: this.generateTaskId(),
+					title,
 					body,
 					time,
 					due,
 					tag,
-					priority,
+					// priority,
 					filePath: fileNameWithPath,
-					completed: isCompleted,
+					completed: completionDate,
 				};
 
 				if (isCompleted) {
@@ -75,7 +92,10 @@ export class ScanningVault {
 
 	// Generate a unique ID for each task
 	generateTaskId(): number {
-		return Date.now();
+		const array = new Uint32Array(1);
+		crypto.getRandomValues(array);
+		console.log("The random value generated : ", array[0]);
+		return array[0];
 	}
 
 	// Helper function to load the existing tasks from the tasks.json file
@@ -105,24 +125,29 @@ export class ScanningVault {
 			const newPendingTasks: any[] = [];
 			const newCompletedTasks: any[] = [];
 
-			for (const line of lines) {
+			for (let i = 0; i < lines.length; i++) {
+				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+					this.TaskDetected = true;
 					const isCompleted = line.startsWith("- [x]");
-					const body = this.extractBody(line);
+					const title = this.extractTitle(line);
 					const time = this.extractTime(line);
 					const due = this.extractDate(line);
-					const priority = this.extractPriority(line);
+					// const priority = this.extractPriority(line);
 					const tag = this.extractTag(line);
+					const completionDate = this.extractCompletionDate(line);
+					const body = this.extractBody(lines, i + 1);
 
 					const task = {
 						id: this.generateTaskId(),
+						title,
 						body,
 						time,
 						due,
 						tag,
-						priority,
+						// priority,
 						filePath: fileNameWithPath,
-						completed: isCompleted,
+						completed: completionDate,
 					};
 
 					if (isCompleted) {
@@ -151,33 +176,81 @@ export class ScanningVault {
 		}
 
 		// Save the updated tasks back to tasks.json after processing all files
+		// console.log(
+		// 	"Value of this.plugin.settings.data.globalSettings.realTimeScanning : ",
+		// 	this.plugin.settings.data.globalSettings.realTimeScanning
+		// );
+
+		// TODO : At this present commit and the prsent state of the codeBase, the feature that when a user writes at a high speed, the task will be getting refreshed in real-Time is happening perfectly. For that you will have to disable the below line. Also just to mention, you will have to do an optimization, since, if the user is typing at a double speed then mine, then the my CPU was running at 40%.
+		this.TaskDetected = !(this.plugin.settings.data.globalSettings.realTimeScanning) ? true : false;
+		console.log("After Tasks are extracted and when realTimeScanning is OFF, value of this.TaskDetected : ", this.TaskDetected);
 		this.saveTasksToFile();
+
+		// console.log(
+		// 	"ScanningVault : Running the function from Main.ts to re-Render..."
+		// );
+		// refreshKanbanBoard(this.app);
 	}
 
 	// Save tasks to JSON file
 	saveTasksToFile() {
 		fs.writeFileSync(tasksPath, JSON.stringify(this.tasks, null, 2));
-		console.log(
-			"The following data saved in the tasks.json : ",
-			this.tasks
-		);
-		new Notice("Tasks saved to tasks.json");
+		// console.log(
+		// 	"The following data saved in the tasks.json : ",
+		// 	this.tasks
+		// );
+
+		// Refresh the board only if any task has be extracted from the updated file.
+		if (this.TaskDetected) {
+			// new Notice("Tasks scanned from the modified files.");
+			// Emit the event
+			eventEmitter.emit("REFRESH_COLUMN");
+			// eventEmitter.emit("REFRESH_COLUMN");
+			this.TaskDetected = false;
+		}
 	}
 
-	// Extract body from task line
-	extractBody(text: string): string {
+	// New function to extract task body
+	extractBody(lines: string[], startLineIndex: number): string[] {
+		const bodyLines = [];
+		for (let i = startLineIndex; i < lines.length; i++) {
+			const line = lines[i];
+
+			if (line.trim() === "") {
+				// Empty line indicates the end of the task body
+				// console.log(
+				// 	"The current line detected should be empty :",
+				// 	line,
+				// 	": There shouldnt be any space between the two colons"
+				// );
+				break;
+			}
+
+			if (line.startsWith("\t") || line.startsWith("    ")) {
+				// If the line has one level of indentation, consider it part of the body
+				bodyLines.push(line.trim());
+			} else {
+				// If no indentation is detected, stop reading the body
+				break;
+			}
+		}
+		return bodyLines;
+	}
+
+	// Extract title from task line
+	extractTitle(text: string): string {
 		const timeAtStartMatch = text.match(
 			/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
 		);
 
 		if (timeAtStartMatch) {
-			// If time is at the start, extract body after the time and till the pipe symbol
+			// If time is at the start, extract title after the time and till the pipe symbol
 			return text
 				.replace(/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
 				.split("|")[0]
 				.trim();
 		} else {
-			// Default case: no time at start, extract body till the pipe symbol
+			// Default case: no time at start, extract title till the pipe symbol
 			return text.includes("|")
 				? text
 						.split("|")[0]
@@ -200,19 +273,26 @@ export class ScanningVault {
 		}
 
 		// Otherwise, look for time elsewhere in the line
-		const timeInBodyMatch = text.match(
+		const timeIntitleMatch = text.match(
 			/⏰\s*\[(\d{2}:\d{2} - \d{2}:\d{2})\]/
 		);
-		return timeInBodyMatch ? timeInBodyMatch[1] : "";
+		return timeIntitleMatch ? timeIntitleMatch[1] : "";
 	}
 
-	// Extract date from task body
+	// Extract date from task title
 	extractDate(text: string): string {
-		const match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+		let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+
+		if (!match) {
+			match = text.match(
+				/\[due::\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)\]/
+			);
+		}
+
 		return match ? match[1] : "";
 	}
 
-	// Extract priority from task body
+	// Extract priority from task title
 	extractPriority(text: string): string {
 		const priorityMatch = Object.entries(priorityEmojis).find(
 			([key, emoji]) => text.includes(emoji)
@@ -227,9 +307,42 @@ export class ScanningVault {
 		return priorityMatch?.[0] || "0";
 	}
 
-	// Extract tag from task body
+	// Extract tag from task title
 	extractTag(text: string): string {
 		const match = text.match(/#(\w+)/);
 		return match ? `#${match[1]}` : "";
+	}
+
+	// extractCompletionDate(text: string): string {
+	// 	// const match =
+	// 	// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/) ||
+	// 	// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+	// 	let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+	// 	// if (!match) {
+	// 	// 	match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
+	// 	// }
+
+	// 	return match ? match[1] : "";
+	// }
+
+	extractCompletionDate(text: string): string {
+		// Match cases like ✅2024-09-26T11:30 or ✅ 2024-09-28
+		let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)/);
+
+		// If not found, try to match the completion:: 2024-09-28 format
+		if (!match) {
+			match = text.match(
+				/\[completion::\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)\]/
+			);
+		}
+
+		if (!match) {
+			match = text.match(
+				/\@completed\(\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?)\)/
+			);
+		}
+
+		// Return the matched date or date-time, or an empty string if no match
+		return match ? match[1] : "";
 	}
 }

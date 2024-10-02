@@ -1,4 +1,4 @@
-// /src/compoenents/BoardConfigureModal.tsx - V2
+// /src/modal/BoardConfigModal.tsx - V2
 
 import { App, Modal, Notice } from "obsidian";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
@@ -111,8 +111,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		updatedBoards[boardIndex].columns.push({
 			colType: columnData.colType,
 			active: columnData.active,
+			collapsed: false,
 			data: {
-				collapsed: false,
 				name: columnData.name,
 				index: updatedBoards[boardIndex].columns.length + 1,
 			},

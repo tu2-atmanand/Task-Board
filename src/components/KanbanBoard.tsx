@@ -3,22 +3,76 @@
 import { App, Notice } from "obsidian";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
-import { handleUpdateBoards, refreshBoardData } from "../utils/refreshBoard"; // Import utility functions
+import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
 
 import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
+import TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
-import { openBoardConfigModal } from "../services/OpenColumnConfig";
+import { loadTasksFromJson } from "src/utils/TaskItemUtils";
+import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
+import { refreshKanbanBoard } from "src/services/RefreshServices";
+import { renderColumns } from "src/utils/RenderColumns"; // Adjust the path accordingly
+import { taskItem } from "src/interfaces/TaskItem";
 
-const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
+const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin }) => {
+	const [tasks, setTasks] = useState<taskItem[]>([]);
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
+	const [pendingTasks, setPendingTasks] = useState<taskItem[]>([]);
+	const [completedTasks, setCompletedTasks] = useState<taskItem[]>([]);
+	const [refreshCount, setRefreshCount] = useState(0); // Use a counter to track refreshes
 
+	// Load tasks only once when the board is refreshed
 	useEffect(() => {
-		refreshBoardData(setBoards); // Use utility function to load boards
+		console.log("KanbanBoard.tsx: Refreshing board and tasks...");
+		refreshBoardData(setBoards, () => {
+			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+			setPendingTasks(pendingTasks);
+			setCompletedTasks(completedTasks);
+		});
+	}, [refreshCount]); // Empty dependency array ensures this runs only once on component mount
+
+	// Pub Sub method similar to Kafka to read events/messages.
+	useEffect(() => {
+		const refreshBoardListener = () => {
+			console.log("KanbanBoard.tsx : REFRESH_BOARD mssgs received...");
+			// Clear the tasks array
+			setTasks([]);
+			// sleep(30);
+			setRefreshCount((prev) => prev + 1);
+		};
+
+		const refreshColumnListener = () => {
+			console.log("KanbanBoard.tsx : REFRESH_COLUMN mssgs received...");
+			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+			setPendingTasks(pendingTasks);
+			setCompletedTasks(completedTasks);
+		};
+
+		// For some reason, the things i am doing inside `refreshBoardListener` is not working.
+		eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
+		eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
+
+		// Clean up the listener when component unmounts
+		return () => {
+			eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
+			eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
+		};
 	}, []);
+
+	// const RefreshTasksInsideColumns = () => {
+	// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+	// 	// Trigger renderColumns after the boards are refreshed
+	// 	boards.forEach((board, index) => {
+	// 		board.columns.forEach((column) => {
+	// 			renderColumns(setTasks, index, column.colType, column.data, pendingTasks, completedTasks);
+	// 		});
+	// 	});
+	// };
 
 	// Function to handle saving boards
 	const AddNewTaskIn = () => {
@@ -30,13 +84,34 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 				filePath: activeFile.path,
 				onTaskAdded: () => {
 					// Call refresh board data when a new task is added
-					refreshBoardData(setBoards);
+					// refreshBoardData(setBoards, () => {
+					// 	console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...");
+					// 	// // RefreshTasksInsideColumns();
+					// });
+
+					eventEmitter.emit("REFRESH_COLUMN");
 				},
 			}).open();
 		} else {
 			new Notice("No active file found to add a task.");
 		}
 	};
+
+	const refreshBoardButton = () => {
+		// refreshKanbanBoard(app);
+
+		// If the user complaints that the pressing the refreshing button does bullshit and jump the Task Board from one place to another, then simply, disable the above line and enable below line.
+
+		eventEmitter.emit("REFRESH_BOARD");
+		// eventEmitter.emit("REFRESH_COLUMN");
+		// const boardsData = loadBoardConfigs();
+		// // Trigger renderColumns after the boards are refreshed
+		// boardsData.forEach((board: Board, index: number) => {
+		// 	board.columns.forEach((column) => {
+		// 		renderColumns(setTasks, index, column.colType, column.data);
+		// 	});
+		// });
+	}
 
 	return (
 		<div className="kanbanBoard">
@@ -65,21 +140,29 @@ const KanbanBoard: React.FC<{ app: App }> = ({ app }) => {
 					>
 						<Bolt size={20} />
 					</button>
-					<button className="RefreshBtn" onClick={() => refreshBoardData(setBoards)}>
+					{/* <button className="RefreshBtn" onClick={() => refreshBoardData(setBoards, () => {
+						RefreshTasksInsideColumns();
+					})}>
+						<RefreshCcw size={20} />
+					</button> */}
+					<button className="RefreshBtn" onClick={refreshBoardButton}>
 						<RefreshCcw size={20} />
 					</button>
 				</div>
 			</div>
 			<div className="columnsContainer">
-				{/* Filter and only render columns with active: true */}
 				{boards[activeBoardIndex]?.columns
-					.filter((column) => column.active) // Show only active columns
+					.filter((column) => column.active)
 					.map((column, index) => (
 						<Column
 							key={index}
+							activeBoard={activeBoardIndex}
 							colType={column.colType}
 							data={column.data}
-							setBoards={setBoards} // Pass setBoards to the Column component
+							setBoards={setBoards}
+							tasks={tasks} // Pass tasks as a prop to the Column component
+							pendingTasks={pendingTasks} // Pass the pending tasks
+							completedTasks={completedTasks} // Pass the completed tasks
 						/>
 					))}
 			</div>
