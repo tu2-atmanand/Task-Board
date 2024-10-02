@@ -235,9 +235,9 @@ export const deleteTaskFromJson = (task: taskItem) => {
 // For handleEditTask
 
 export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
-	console.log("oldTask i am receiving in Column.tsx file -2 : ", oldTask);
+	console.log("oldTask i have received for updating in md file : ", oldTask);
 	console.log(
-		"updatedTask i am receiving in Column.tsx file : ",
+		"updatedTask i have received : ",
 		updatedTask
 	);
 
@@ -250,7 +250,7 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 	const dueDateWithEmo = updatedTask.due ? ` 📅${updatedTask.due}` : "";
 	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
 	const completedWithEmo = updatedTask.completed
-		? ` ✅${updatedTask.completed}`
+		? ` ✅${updatedTask.completed} `
 		: "";
 	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
 
@@ -290,11 +290,11 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 		.map((Line: string) => `\t${Line}`)
 		.join("\n");
 
+	// console.log("If i there is not subTask to the file and there was no line in the Description, then here there shouldnt be anything if i have added a fresh bullete point in the Desc : ", subTasksWithTab);
+
 	// Combine all parts: main task, body, and sub-tasks
 	// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}`;
-	const completeTask = `${formattedTask}${
-		bodyLines.trim() ? `\n${bodyLines}` : ""
-	}\n${subTasksWithTab}\n`;
+	const completeTask = `${formattedTask}${bodyLines.trim() ? `\n${bodyLines}` : ""}\n${subTasksWithTab}`;
 
 	try {
 		// Read the file content
@@ -357,8 +357,8 @@ export const updateTaskInJson = (updatedTask: taskItem) => {
 		// Function to update a task in a given task category (Pending or Completed)
 		const updateTasksInCategory = (taskCategory: any) => {
 			return Object.entries(taskCategory).reduce(
-				(acc: any, [filePath, tasks]: [string, any[]]) => {
-					acc[filePath] = tasks.map((task: any) =>
+				(acc: any, [filePath, tasks]: [string, taskItem[]]) => {
+					acc[filePath] = tasks.map((task: taskItem) =>
 						task.id === updatedTask.id ? updatedTask : task
 					);
 					return acc;

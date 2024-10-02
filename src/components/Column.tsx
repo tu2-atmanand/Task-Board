@@ -42,27 +42,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
 	}, [colType, data, pendingTasks, completedTasks]);
 
-	// // Pub Sub method similar to Kafka to read events/messages.
-	// useEffect(() => {
-	// 	const refreshBoardListener = () => {
-	// 		updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
-	// 	};
-
-	// 	const refreshColumnListener = () => {
-	// 		updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
-	// 	};
-
-	// 	eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
-	// 	// eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
-	// 	// eventEmitter.on('REFRESH_TASK', refreshListener);
-
-	// 	// Clean up the listener when component unmounts
-	// 	return () => {
-	// 		eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
-	// 		// eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
-	// 	};
-	// }, [setTasks, activeBoard, colType, data]);
-
 	const handleCheckboxChange = (updatedTask: taskItem) => {
 		const moment = require("moment");
 		// Remove task from the current state
