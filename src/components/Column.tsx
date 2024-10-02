@@ -39,6 +39,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 
 	// Render tasks using the tasks passed from KanbanBoard
 	useEffect(() => {
+		setTasks([]);
 		renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
 	}, [colType, data, pendingTasks, completedTasks]);
 

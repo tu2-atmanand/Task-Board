@@ -24,7 +24,7 @@ export const renderColumns = (
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
-	// setTasks(tasksToDisplay);
+	setTasks(tasksToDisplay);
 
 	if (colType === "undated") {
 		tasksToDisplay = pendingTasks.filter((task) => !task.due);
