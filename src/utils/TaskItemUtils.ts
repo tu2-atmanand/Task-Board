@@ -1,25 +1,29 @@
-import { Task } from "src/interfaces/Column";
+// /src/utils/TaskItemUtils.ts
+
+import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
+
 import fs from "fs";
 import { loadGlobalSettings } from "./SettingsOperations";
 import path from "path";
-import { priorityEmojis } from "src/interfaces/TaskItem";
 import { tasksPath } from "src/interfaces/GlobalVariables";
 
 // utils/TaskItemUtils.ts
 
 export const loadTasksFromJson = (): {
-	allTasksWithStatus: Task[];
-	pendingTasks: Task[];
-	completedTasks: Task[];
+	allTasksWithStatus: taskItem[];
+	pendingTasks: taskItem[];
+	completedTasks: taskItem[];
 } => {
-	console.log("loadTasksFromJson : I hope this is getting loaded only at once -----------------  ");
+	console.log(
+		"loadTasksFromJson : I hope this is getting loaded only at once -----------------  "
+	);
 	try {
 		if (fs.existsSync(tasksPath)) {
 			const tasksData = fs.readFileSync(tasksPath, "utf8");
 			const allTasks = JSON.parse(tasksData);
 
-			const pendingTasks: Task[] = [];
-			const completedTasks: Task[] = [];
+			const pendingTasks: taskItem[] = [];
+			const completedTasks: taskItem[] = [];
 
 			// Separate pending tasks
 			for (const [filePath, tasks] of Object.entries(
@@ -58,7 +62,7 @@ export const loadTasksFromJson = (): {
 
 // For handleCheckboxChange
 
-export const moveFromPendingToCompleted = (task: Task) => {
+export const moveFromPendingToCompleted = (task: taskItem) => {
 	const moment = require("moment");
 	// const completed = moment().format("YYYY-MM-DDTHH:mm");
 	// console.log(
@@ -101,7 +105,7 @@ export const moveFromPendingToCompleted = (task: Task) => {
 	}
 };
 
-export const moveFromCompletedToPending = (task: Task) => {
+export const moveFromCompletedToPending = (task: taskItem) => {
 	// Toggle the completed state
 	const updatedTask = { ...task, completed: "" };
 
@@ -132,7 +136,7 @@ export const moveFromCompletedToPending = (task: Task) => {
 };
 
 /*
-export const markTaskCompleteInFile = (task: Task) => {
+export const markTaskCompleteInFile = (task: taskItem) => {
 	const basePath = (window as any).app.vault.adapter.basePath;
 	const filePath = path.join(basePath, task.filePath);
 
@@ -168,7 +172,7 @@ export const markTaskCompleteInFile = (task: Task) => {
 
 // For handleDeleteTask
 
-export const deleteTaskFromFile = (task: Task) => {
+export const deleteTaskFromFile = (task: taskItem) => {
 	const basePath = (window as any).app.vault.adapter.basePath;
 	const filePath = path.join(basePath, task.filePath);
 
@@ -177,10 +181,7 @@ export const deleteTaskFromFile = (task: Task) => {
 		// Updated regex to match the task body ending with '|'
 		// const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, "gm");
 		let taskRegex = "";
-		const startRegex = new RegExp(
-			`^- \\[ \\] .*?${task.title}.*$`,
-			"gm"
-		);
+		const startRegex = new RegExp(`^- \\[ \\] .*?${task.title}.*$`, "gm");
 		const startIndex = fileContent.search(startRegex);
 
 		if (startIndex !== -1) {
@@ -207,7 +208,7 @@ export const deleteTaskFromFile = (task: Task) => {
 	}
 };
 
-export const deleteTaskFromJson = (task: Task) => {
+export const deleteTaskFromJson = (task: taskItem) => {
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
 		const allTasks = JSON.parse(tasksData);
@@ -233,7 +234,7 @@ export const deleteTaskFromJson = (task: Task) => {
 
 // For handleEditTask
 
-export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
+export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 	console.log("oldTask i am receiving in Column.tsx file -2 : ", oldTask);
 	console.log(
 		"updatedTask i am receiving in Column.tsx file : ",
@@ -248,8 +249,10 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 
 	const dueDateWithEmo = updatedTask.due ? ` 📅${updatedTask.due}` : "";
 	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
-	const completedWithEmo = updatedTask.completed ? ` ✅${updatedTask.completed}` : "";
-	const checkBoxStat = updatedTask.completed ? '- [x]' : '- [ ]';
+	const completedWithEmo = updatedTask.completed
+		? ` ✅${updatedTask.completed}`
+		: "";
+	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
 
 	// Combine priority emoji if it exists
 	const priorityWithEmo =
@@ -262,7 +265,9 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 	if (dayPlannerPlugin) {
 		formattedTask = `${checkBoxStat} ${
 			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${updatedTask.title} |${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}${completedWithEmo}`;
+		}${updatedTask.title} |${dueDateWithEmo} ${priorityWithEmo} ${
+			updatedTask.tag
+		}${completedWithEmo}`;
 	} else {
 		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}${completedWithEmo}`;
 	}
@@ -330,6 +335,10 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 
 		// Replace the old task with the updated formatted task in the file
 		const newContent = fileContent.replace(taskRegex, completeTask);
+		console.log(
+			"Following is the New Content, which you will see after update :\n",
+			completeTask
+		);
 
 		// Write the updated content back to the file
 		fs.writeFileSync(filePath, newContent);
@@ -338,11 +347,12 @@ export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
 	}
 };
 
-export const updateTaskInJson = (updatedTask: Task) => {
+export const updateTaskInJson = (updatedTask: taskItem) => {
+	console.log("The new task which i have received and which i am going to put in the taks.json : ", updatedTask);
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
 		const allTasks = JSON.parse(tasksData);
-		console.log("The file of Tasks.json which I am updating: ", allTasks);
+		// console.log("The file of Tasks.json which I am updating: ", allTasks);
 
 		// Function to update a task in a given task category (Pending or Completed)
 		const updateTasksInCategory = (taskCategory: any) => {
@@ -361,14 +371,14 @@ export const updateTaskInJson = (updatedTask: Task) => {
 		const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
 		const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
 
-		console.log(
-			"All updated Pending Tasks to be written in Tasks.json: ",
-			updatedPendingTasks
-		);
-		console.log(
-			"All updated Completed Tasks to be written in Tasks.json: ",
-			updatedCompletedTasks
-		);
+		// console.log(
+		// 	"All updated Pending Tasks to be written in Tasks.json: ",
+		// 	updatedPendingTasks
+		// );
+		// console.log(
+		// 	"All updated Completed Tasks to be written in Tasks.json: ",
+		// 	updatedCompletedTasks
+		// );
 
 		// Create the updated data object with both updated Pending and Completed tasks
 		const updatedData = {

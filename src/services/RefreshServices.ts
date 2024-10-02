@@ -4,12 +4,12 @@ import { Dispatch, SetStateAction } from "react";
 
 import { App } from "obsidian";
 import { KanbanView } from "src/views/KanbanView";
-import { Task } from "../interfaces/Column";
 import TaskBoard from "main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
 import { loadTasksFromJson } from "src/utils/TaskItemUtils";
 import { refreshBoardData } from "src/utils/BoardOperations";
 import { renderColumns } from "src/utils/RenderColumns";
+import { taskItem } from "src/interfaces/TaskItem";
 
 export function refreshKanbanBoard(app: App) {
 	app: App;
@@ -32,7 +32,7 @@ export function refreshKanbanBoard(app: App) {
 
 // Create a function that clears tasks and refreshes the board
 export const updateTasksAndRefreshBoard = (
-	setTasks: Dispatch<SetStateAction<Task[]>>,
+	setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>,
 	activeBoard: number,
 	colType: string,
@@ -46,11 +46,12 @@ export const updateTasksAndRefreshBoard = (
 	sleep(10);
 	// const { allTasksWithStatus, pendingTasks, completedTasks } =
 	// 	loadTasksFromJson();
-	
+
 	// Refresh board and tasks
 	refreshBoardData(setBoards, () => {
 		console.log(
-			"updateTasksAndRefreshBoard : Inside the emtpy callBack function ...");
+			"updateTasksAndRefreshBoard : Inside the emtpy callBack function ..."
+		);
 		// renderColumns(
 		// 	setTasks,
 		// 	activeBoard,
@@ -68,8 +69,8 @@ export const updateTasksAndRefreshBoard = (
 
 // Create a function that clears tasks and refreshes the board
 export const loadDataTosetBoards = (
-	setTasks: Dispatch<SetStateAction<Task[]>>,
-	setBoards: React.Dispatch<React.SetStateAction<any[]>>,
+	setTasks: Dispatch<SetStateAction<taskItem[]>>,
+	setBoards: React.Dispatch<React.SetStateAction<any[]>>
 ) => {
 	console.log(
 		"updateTasksAndRefreshBoard : I hope this is running only once"
@@ -79,11 +80,12 @@ export const loadDataTosetBoards = (
 	sleep(10);
 	// const { allTasksWithStatus, pendingTasks, completedTasks } =
 	// 	loadTasksFromJson();
-	
+
 	// Refresh board and tasks
 	refreshBoardData(setBoards, () => {
 		console.log(
-			"updateTasksAndRefreshBoard : Inside the emtpy callBack function ...");
+			"updateTasksAndRefreshBoard : Inside the emtpy callBack function ..."
+		);
 		// renderColumns(
 		// 	setTasks,
 		// 	activeBoard,
@@ -100,7 +102,7 @@ export const loadDataTosetBoards = (
 
 // This will clear out the tasks and will refreshes the tasks under the column, whose tasks has been updated just now, from the board.
 export const updateTasksAndRefreshColumn = (
-	setTasks: Dispatch<SetStateAction<Task[]>>,
+	setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
 	colType: string,
 	data: any
@@ -112,5 +114,12 @@ export const updateTasksAndRefreshColumn = (
 	const { allTasksWithStatus, pendingTasks, completedTasks } =
 		loadTasksFromJson();
 	console.log("updateTasksAndRefreshColumn : Tasks and board refreshed...");
-	renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
+	renderColumns(
+		setTasks,
+		activeBoard,
+		colType,
+		data,
+		pendingTasks,
+		completedTasks
+	);
 };

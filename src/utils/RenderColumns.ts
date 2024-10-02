@@ -2,18 +2,18 @@
 
 import { Dispatch, SetStateAction } from "react";
 
-import { Task } from "../interfaces/Column";
 import { loadGlobalSettings } from "./SettingsOperations";
 import { loadTasksFromJson } from "./TaskItemUtils";
+import { taskItem } from "src/interfaces/TaskItem";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
-	setTasks: Dispatch<SetStateAction<Task[]>>,
+	setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
 	colType: string,
 	data: any,
-	pendingTasks: Task[],
-	completedTasks: Task[]
+	pendingTasks: taskItem[],
+	completedTasks: taskItem[]
 ) => {
 	console.log(
 		"renderColumns function : This will run as many times as there are columns in the current board -----------"
@@ -23,7 +23,7 @@ export const renderColumns = (
 	// 	loadTasksFromJson();
 
 	// Call the filter function based on the column's tag and properties
-	let tasksToDisplay: Task[] = [];
+	let tasksToDisplay: taskItem[] = [];
 	// setTasks(tasksToDisplay);
 
 	if (colType === "undated") {

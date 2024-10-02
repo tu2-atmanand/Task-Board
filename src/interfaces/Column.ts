@@ -1,3 +1,5 @@
+import { taskItem } from "./TaskItem";
+
 export interface ColumnProps {
 	activeBoard: number;
 	colType: string;
@@ -16,19 +18,7 @@ export interface ColumnProps {
 		};
 		limit?: number;
 	};
-	tasks: Task[];
-	pendingTasks: Task[];
-	completedTasks: Task[];
-}
-
-export interface Task {
-	id: number;
-	title: string;
-	body: string[];
-	due: string;
-	tag: string;
-	filePath: string;
-	completed: string;
-	time: string;
-	priority: number;
+	tasks: taskItem[];
+	pendingTasks: taskItem[];
+	completedTasks: taskItem[];
 }

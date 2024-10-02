@@ -1,18 +1,9 @@
 export interface TaskProps {
-	task: {
-		id: number;
-		title: string;
-		body: string[];
-		due: string;
-		tag: string;
-		time: string;
-		priority: number;
-		completed: string;
-		filePath: string;
-	};
+	task: taskItem;
 	onEdit: () => void;
 	onDelete: () => void;
 	onCheckboxChange: (task: taskItem) => void;
+	onSubTasksChange: (task: taskItem) => void;
 }
 
 export interface taskItem {

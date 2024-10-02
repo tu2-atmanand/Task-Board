@@ -8,7 +8,6 @@ import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
 import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
-import { Task } from "src/interfaces/Column";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
@@ -17,13 +16,14 @@ import { openBoardConfigModal } from "../services/OpenModals";
 import path from "path";
 import { refreshKanbanBoard } from "src/services/RefreshServices";
 import { renderColumns } from "src/utils/RenderColumns"; // Adjust the path accordingly
+import { taskItem } from "src/interfaces/TaskItem";
 
 const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin }) => {
-	const [tasks, setTasks] = useState<Task[]>([]);
+	const [tasks, setTasks] = useState<taskItem[]>([]);
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
-	const [pendingTasks, setPendingTasks] = useState<Task[]>([]);
-	const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
+	const [pendingTasks, setPendingTasks] = useState<taskItem[]>([]);
+	const [completedTasks, setCompletedTasks] = useState<taskItem[]>([]);
 	const [refreshCount, setRefreshCount] = useState(0); // Use a counter to track refreshes
 
 	// Load tasks only once when the board is refreshed
