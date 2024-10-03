@@ -231,12 +231,32 @@
       }
     ],
     "globalSettings": {
-      "filters": [
-        "MyReadme.md, Daily/, New.md"
-      ],
-      "firstDayOfWeek": "1",
+      "scanFilters": {
+        "files": {
+          "polarity": 2,
+          "values": [
+            "MyReadme.md"
+          ]
+        },
+        "folders": {
+          "polarity": 3,
+          "values": [
+            "Notes/",
+            "Personal_Data/"
+          ]
+        },
+        "tags": {
+          "polarity": 3,
+          "values": [
+            "#test",
+            "#important"
+          ]
+        }
+      },
+      "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "Obsidian",
+      "taskCompletionFormat": "1",
+      "taskCompletionDateTimePattern": "yyyy-MM-dd/HH:mm",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": true,
       "autoAddDue": true,

@@ -3,15 +3,15 @@ import { BoardConfig } from "./KanbanBoard";
 export interface globalSettingsData {
 	scanFilters: {
 		files: {
-			polarity: string;
+			polarity: number;
 			values: string[];
 		};
 		folders: {
-			polarity: string;
+			polarity: number;
 			values: string[];
 		};
 		tags: {
-			polarity: string;
+			polarity: number;
 			values: string[];
 		};
 	};
@@ -43,16 +43,16 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 		globalSettings: {
 			scanFilters: {
 				files: {
-					polarity: "",
-					values: "",
+					polarity: 0,
+					values: [],
 				},
 				folders: {
-					polarity: "",
-					values: "",
+					polarity: 0,
+					values: [],
 				},
 				tags: {
-					polarity: "",
-					values: "",
+					polarity: 0,
+					values: [],
 				},
 			},
 			firstDayOfWeek: "Mon",
