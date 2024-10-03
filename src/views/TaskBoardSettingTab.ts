@@ -62,7 +62,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	async display(): Promise<void> {
 		const { containerEl } = this;
 		containerEl.empty();
-		containerEl.addClass('TaskBoardSettingTab');
+		containerEl.addClass("TaskBoardSettingTab");
 
 		await this.loadSettings();
 
@@ -72,7 +72,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		}
 
 		const {
-			defaultColumnNames,
 			firstDayOfWeek,
 			filters,
 			taskCompletionFormat,
@@ -87,12 +86,13 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		containerEl.createEl("h3", { text: "Task Board Plugin" });
 
 		// Setting for taskCompletionFormat
+		containerEl.createEl("h4", { text: "Filters for Scanning" });
 		new Setting(containerEl)
 			.setName("Files and Paths to ignore")
 			// .setDesc("Enter the file names and Paths separated by comman. All tasks under this files will be ignored.")
 			.setDesc(
 				TaskBoardSettingTab.createFragmentWithHTML(
-					"<p>Enter the file names and Paths separated by comman. All tasks under this files will be ignored.</p>" +
+					"<p>Enter the file names, Paths and tags in the respective text inputs separated by comma.</p>" +
 						"<p>NOTE : <b>You will need to Rescan the Vault by pressing the rescan button from the Title bar of the plugin window.</b></p>"
 				)
 			)
@@ -116,61 +116,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				});
 			});
 
-		containerEl.createEl("h4", { text: "Time related settings" });
-		// Setting for firstDayOfWeek
-		new Setting(containerEl)
-			.setName("First Day of the Week")
-			.setDesc("Set the first day of the week")
-			// .addText((text) =>
-			// 	text.setValue(firstDayOfWeek).onChange(async (value) => {
-			// 		this.globalSettings!.firstDayOfWeek = value;
-			// 		await this.saveSettings();
-			// 	})
-			// );
-			.addDropdown((dropdown) => {
-				dropdown.addOption("1", "Sunday");
-				dropdown.addOption("2", "Monday");
-				dropdown.addOption("3", "Tuesday");
-				dropdown.addOption("4", "Wednesday");
-				dropdown.addOption("5", "Thursday");
-				dropdown.addOption("6", "Friday");
-				dropdown.addOption("7", "Satday");
-
-				dropdown.setValue(firstDayOfWeek as string);
-				dropdown.onChange(async (value) => {
-					this.globalSettings!.firstDayOfWeek = value;
-					await this.saveSettings();
-				});
-			});
-
-		// Setting for taskCompletionInLocalTime
-		new Setting(containerEl)
-			.setName("Task Completion in Local Time")
-			.setDesc("Whether task completion times are shown in local time")
-			.addToggle((toggle) =>
-				toggle
-					.setValue(taskCompletionInLocalTime)
-					.onChange(async (value) => {
-						this.globalSettings!.taskCompletionInLocalTime = value;
-						await this.saveSettings();
-					})
-			);
-
-		// Setting for taskCompletionShowUtcOffset
-		new Setting(containerEl)
-			.setName("Show UTC Offset for Task Completion")
-			.setDesc(
-				"Whether to display the UTC offset for task completion times"
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(taskCompletionShowUtcOffset)
-					.onChange(async (value) => {
-						this.globalSettings!.taskCompletionShowUtcOffset =
-							value;
-						await this.saveSettings();
-					})
-			);
+		// containerEl.createEl("h4", { text: "Time related settings" });
 
 		// // Setting for ignoreFileNameDates
 		// new Setting(containerEl)
@@ -228,7 +174,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Auto Add Due Date to Tasks")
 			.setDesc(
-				"Whether to auto add Due Date as Today's date when the tasks are created from the Add New task shortcut."
+				"When enabled, if you add a task using the Add New Task pop-up window, then today date will be added as Due date, if not Due date is entered."
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddDue).onChange(async (value) => {
@@ -251,32 +197,111 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				})
 			);
 
-		containerEl.createEl("h4", { text: "Default Column Names" });
+		// Seeting to take the format of Due and Completion values. And to take the date-Time format for the completion value.
+		containerEl.createEl("h4", { text: "Due and Completion Formats" });
 
-		// Create settings for each default column name
-		for (const [key, value] of Object.entries(defaultColumnNames)) {
-			new Setting(containerEl)
-				.setName(`${key}`)
-				.setDesc(`Enter the name for the ${key} column`)
-				.addText((text) => {
-					const oldValue =
-						this.globalSettings!.defaultColumnNames[
-							key as keyof typeof defaultColumnNames
-						];
-					// console.log("Old Values of Columns names : ", oldValue);
-					// text.inputEl.setAttr("type", "string");
-					text.setPlaceholder(
-						`${oldValue ? oldValue : "Enter New Column Name"}`
-					);
-					// text.inputEl.value = value ? value.toString() : "";
+		// Show the Live format for both the tags, when the user will change the value of below dropDown.
 
-					text.setValue(value).onChange(async (newValue) => {
-						this.globalSettings!.defaultColumnNames[
-							key as keyof typeof defaultColumnNames
-						] = newValue;
-						await this.saveSettings();
-					});
+		new Setting(containerEl)
+			.setName("Compatible Plugin")
+			.setDesc(
+				"Different plugins have different format to give the Due and Completion tags in the task. Please select one and see the above format, if its compatible with your current setup."
+			)
+			.addDropdown((dropdown) => {
+				dropdown.addOption("1", "Default");
+				dropdown.addOption("2", "Tasks Plugin");
+				dropdown.addOption("3", "Dataview Plugine");
+				dropdown.addOption("4", "Obsidian Native");
+
+				dropdown.setValue(taskCompletionFormat as string);
+				dropdown.onChange(async (value) => {
+					this.globalSettings!.taskCompletionFormat = value;
+					await this.saveSettings();
 				});
-		}
+			});
+
+		// Setting for firstDayOfWeek
+		new Setting(containerEl)
+			.setName("First Day of the Week")
+			.setDesc("Set the first day of the week")
+			// .addText((text) =>
+			// 	text.setValue(firstDayOfWeek).onChange(async (value) => {
+			// 		this.globalSettings!.firstDayOfWeek = value;
+			// 		await this.saveSettings();
+			// 	})
+			// );
+			.addDropdown((dropdown) => {
+				dropdown.addOption("1", "Sunday");
+				dropdown.addOption("2", "Monday");
+				dropdown.addOption("3", "Tuesday");
+				dropdown.addOption("4", "Wednesday");
+				dropdown.addOption("5", "Thursday");
+				dropdown.addOption("6", "Friday");
+				dropdown.addOption("7", "Satday");
+
+				dropdown.setValue(firstDayOfWeek as string);
+				dropdown.onChange(async (value) => {
+					this.globalSettings!.firstDayOfWeek = value;
+					await this.saveSettings();
+				});
+			});
+
+		// Setting for taskCompletionInLocalTime
+		new Setting(containerEl)
+			.setName("Task Completion in Local Time")
+			.setDesc("Whether task completion times are shown in local time")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(taskCompletionInLocalTime)
+					.onChange(async (value) => {
+						this.globalSettings!.taskCompletionInLocalTime = value;
+						await this.saveSettings();
+					})
+			);
+
+		// Setting for taskCompletionShowUtcOffset
+		new Setting(containerEl)
+			.setName("Show UTC Offset for Task Completion")
+			.setDesc(
+				"Whether to display the UTC offset for task completion times"
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(taskCompletionShowUtcOffset)
+					.onChange(async (value) => {
+						this.globalSettings!.taskCompletionShowUtcOffset =
+							value;
+						await this.saveSettings();
+					})
+			);
+
+		// It doesnt make sense to me why the user will want to give names to the default columns. Anyways, the user can delete the default columns and also can add new columns and give the names required.
+		// containerEl.createEl("h4", { text: "Default Column Names" });
+
+		// // Create settings for each default column name
+		// for (const [key, value] of Object.entries(defaultColumnNames)) {
+		// 	new Setting(containerEl)
+		// 		.setName(`${key}`)
+		// 		.setDesc(`Enter the name for the ${key} column`)
+		// 		.addText((text) => {
+		// 			const oldValue =
+		// 				this.globalSettings!.defaultColumnNames[
+		// 					key as keyof typeof defaultColumnNames
+		// 				];
+		// 			// console.log("Old Values of Columns names : ", oldValue);
+		// 			// text.inputEl.setAttr("type", "string");
+		// 			text.setPlaceholder(
+		// 				`${oldValue ? oldValue : "Enter New Column Name"}`
+		// 			);
+		// 			// text.inputEl.value = value ? value.toString() : "";
+
+		// 			text.setValue(value).onChange(async (newValue) => {
+		// 				this.globalSettings!.defaultColumnNames[
+		// 					key as keyof typeof defaultColumnNames
+		// 				] = newValue;
+		// 				await this.saveSettings();
+		// 			});
+		// 		});
+		// }
 	}
 }

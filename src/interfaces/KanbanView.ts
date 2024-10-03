@@ -1,16 +1,20 @@
 import { BoardConfig } from "./KanbanBoard";
 
 export interface globalSettingsData {
-	defaultColumnNames: {
-		today: string;
-		tomorrow: string;
-		future: string;
-		undated: string;
-		otherTags: string;
-		untagged: string;
-		completed: string;
+	scanFilters: {
+		files: {
+			polarity: string;
+			values: string[];
+		};
+		folders: {
+			polarity: string;
+			values: string[];
+		};
+		tags: {
+			polarity: string;
+			values: string[];
+		};
 	};
-	filters: string[];
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskCompletionFormat: string;
@@ -36,16 +40,20 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 	data: {
 		boardConfigs: [],
 		globalSettings: {
-			defaultColumnNames: {
-				today: "",
-				tomorrow: "",
-				future: "",
-				undated: "",
-				otherTags: "",
-				untagged: "",
-				completed: "",
+			scanFilters: {
+				files: {
+					polarity: "",
+					values: "",
+				},
+				folders: {
+					polarity: "",
+					values: "",
+				},
+				tags: {
+					polarity: "",
+					values: "",
+				},
 			},
-			filters: [],
 			firstDayOfWeek: "Mon",
 			ignoreFileNameDates: false,
 			taskCompletionFormat: "ObsidianTasks",

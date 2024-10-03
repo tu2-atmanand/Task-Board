@@ -231,16 +231,6 @@
       }
     ],
     "globalSettings": {
-      "defaultColumnNames": {
-        "Undated": "",
-        "Overdue": "Kal",
-        "Today": "Todu",
-        "Tomorrow": "",
-        "Future": "",
-        "Other Tags": "",
-        "Untagged": "",
-        "Completed": ""
-      },
       "filters": [
         "MyReadme.md, Daily/, New.md"
       ],
