@@ -357,7 +357,7 @@
           ""
         ],
         "time": "18:21 - 19:21",
-        "due": "2024-09-28",
+        "due": "2024-10-04",
         "tag": "#Testing",
         "filePath": "Daily_Notes/18-09-2024.md",
         "completed": "",
@@ -372,7 +372,7 @@
           "No tab doesnt come on the next line now anymore."
         ],
         "time": "17:08 - 18:08",
-        "due": "2024-09-30",
+        "due": "2024-10-04",
         "tag": "#Testing",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
@@ -380,9 +380,11 @@
       {
         "id": 986906668,
         "title": "Adding a Task to see if this task dont have body and only have the subtasks, then there shouldnt be any empty line between Main task and SubTasks.",
-        "body": [],
+        "body": [
+          ""
+        ],
         "time": "17:51 - 18:51",
-        "due": "2024-10-02",
+        "due": "2024-11-06",
         "tag": "#Error",
         "filePath": "Daily_Notes/24-09-2024.md",
         "completed": ""
@@ -421,9 +423,11 @@
       {
         "id": 718774190,
         "title": "Learn the questions that will come for tomorrows Hackathon ⏳ 2024-08-24",
-        "body": [],
-        "time": "11:00 - 11:30",
-        "due": "2024-08-28",
+        "body": [
+          ""
+        ],
+        "time": "11:00 - 12:00",
+        "due": "2024-10-31",
         "tag": "",
         "filePath": "Daily_Notes/23-08-2024.md",
         "completed": ""
@@ -433,9 +437,11 @@
       {
         "id": 1150825594,
         "title": "Adding task from command to see if the taskboard refreshes now",
-        "body": [],
+        "body": [
+          ""
+        ],
         "time": "16:17 - 17:17",
-        "due": "2024-09-22",
+        "due": "2024-10-24",
         "tag": "#Testing",
         "filePath": "Daily_Notes/22-09-2024.md",
         "completed": ""
@@ -449,7 +455,7 @@
           "- [ ] Just adding a simple new subTask to see if first all the boards are getting empty."
         ],
         "time": "20:45 - 21:45",
-        "due": "2024-09-29",
+        "due": "2024-10-18",
         "tag": "#Test",
         "filePath": "Daily_Notes/22-09-2024.md",
         "completed": ""
@@ -466,7 +472,7 @@
           "- [ ] Fifth task"
         ],
         "time": "20:00 - 21:00",
-        "due": "2024-09-30",
+        "due": "2024-10-18",
         "tag": "#Tested",
         "filePath": "Daily_Notes/22-09-2024.md",
         "completed": ""
@@ -526,17 +532,14 @@
     ],
     "Daily_Notes/22-08-2024.md": [
       {
-        "id": 2772978640,
-        "title": "Give a shot to Java Hackathon ➕ 2024-08-22 📅 2024-08-22 ✅ 2024-08-23",
-        "body": [
-          ""
-        ],
+        "id": 1917143067,
+        "title": "Give a shot to Java Hackathon ➕ 2024-08-22",
+        "body": [],
         "time": "17:00 - 18:00",
-        "due": "2024-08-22",
+        "due": "2024-10-17",
         "tag": "",
-        "priority": "2",
         "filePath": "Daily_Notes/22-08-2024.md",
-        "completed": "2024-08-23"
+        "completed": ""
       }
     ],
     "Daily_Notes/15-09-2024.md": [
@@ -601,9 +604,11 @@
       {
         "id": 1753287875,
         "title": "Let me see if due comes of today, it shouldnt come",
-        "body": [],
+        "body": [
+          ""
+        ],
         "time": "",
-        "due": "2024-09-17",
+        "due": "2024-10-05",
         "tag": "#Test",
         "priority": "0",
         "filePath": "Daily_Notes/14-09-2024.md",
@@ -976,7 +981,7 @@
           "- [ ] Alright now the refreshing should look faster, since removed the sleep, but no, still seeing equal amount of delay."
         ],
         "time": "",
-        "due": "2024-09-30",
+        "due": "2024-10-11",
         "tag": "",
         "filePath": "Daily_Notes/30-09-2024.md",
         "completed": ""
@@ -986,34 +991,28 @@
     "DocsForPlugin/PluginCodeBase/main.md": [],
     "Daily_Notes/01-10-2024.md": [
       {
-        "id": 3676792983,
+        "id": 1564788212,
         "title": "Lets see after 2 min if this is getting updated on the board. UPDATE THIS IN THE BOARD",
-        "body": [
-          ""
-        ],
+        "body": [],
         "time": "",
         "due": "2024-10-02",
         "tag": "#Testing",
         "filePath": "Daily_Notes/01-10-2024.md",
-        "completed": "",
-        "priority": "3"
+        "completed": ""
       },
       {
-        "id": 209426169,
+        "id": 3725992409,
         "title": "Now you will see something, updating more, even more, will it update, so say a user is updating a task, he will be able to see it live now, issue resolved, but the problem is, my cpu is running at more than 30%, when a user will be typing very fast.",
-        "body": [
-          ""
-        ],
+        "body": [],
         "time": "",
-        "due": "2024-10-01",
+        "due": "2024-10-25",
         "tag": "",
         "filePath": "Daily_Notes/01-10-2024.md",
-        "completed": "",
-        "priority": "3"
+        "completed": ""
       },
       {
-        "id": 3045023103,
-        "title": "New task has been added, lets see REFRESH_BOARD, mssg works. Also updating this.",
+        "id": 4117282954,
+        "title": "UPdating,  this will refresh New task has been added, lets see REFRESH_BOARD, mssg works. Also updating this.",
         "body": [],
         "time": "",
         "due": "2024-10-01",
@@ -1022,17 +1021,14 @@
         "completed": ""
       },
       {
-        "id": 2849185987,
+        "id": 1061461466,
         "title": "Task for tomorrow, will be updated on the board auto after 2 min",
-        "body": [
-          ""
-        ],
+        "body": [],
         "time": "",
         "due": "2024-10-02",
         "tag": "",
         "filePath": "Daily_Notes/01-10-2024.md",
-        "completed": "",
-        "priority": "4"
+        "completed": ""
       }
     ],
     "Daily_Notes/02-10-2024.md": [
@@ -1051,7 +1047,8 @@
         "filePath": "Daily_Notes/02-10-2024.md",
         "completed": ""
       }
-    ]
+    ],
+    "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": []
   },
   "Completed": {
     "XploreProgram/How to Access Xplore Courses.md": [],
@@ -1369,6 +1366,7 @@
     "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
     "DocsForPlugin/PluginCodeBase/main.md": [],
     "Daily_Notes/01-10-2024.md": [],
-    "Daily_Notes/02-10-2024.md": []
+    "Daily_Notes/02-10-2024.md": [],
+    "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": []
   }
 }
