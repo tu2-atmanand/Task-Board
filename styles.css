@@ -778,6 +778,24 @@ If your plugin does not need CSS, delete this file.
 	/* max-width: fit-content; */
 }
 
+.mainPluginTitle {
+	text-align: center;
+}
+
+.settingTabFooterSection {
+	margin-top: 2em;
+	align-items: center;
+	text-align: center;
+}
+
+.settingTabFooterDonationsSec {
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+	margin-top: 1em;
+	align-items: center;
+	justify-content: center;
+}
 
 /* /src/components/ReScanVaultModal.tsx */
 

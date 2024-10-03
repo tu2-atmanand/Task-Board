@@ -73,8 +73,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 		const {
 			firstDayOfWeek,
-			filters,
+			scanFilters,
 			taskCompletionFormat,
+			taskCompletionDateTimePattern,
 			taskCompletionInLocalTime,
 			taskCompletionShowUtcOffset,
 			autoAddDue,
@@ -83,38 +84,106 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			realTimeScanning,
 		} = this.globalSettings;
 
-		containerEl.createEl("h3", { text: "Task Board Plugin" });
+		containerEl.createEl("h1", {
+			text: "Task Board",
+			cls: "mainPluginTitle",
+		});
 
 		// Setting for taskCompletionFormat
 		containerEl.createEl("h4", { text: "Filters for Scanning" });
-		new Setting(containerEl)
-			.setName("Files and Paths to ignore")
-			// .setDesc("Enter the file names and Paths separated by comman. All tasks under this files will be ignored.")
-			.setDesc(
-				TaskBoardSettingTab.createFragmentWithHTML(
-					"<p>Enter the file names, Paths and tags in the respective text inputs separated by comma.</p>" +
-						"<p>NOTE : <b>You will need to Rescan the Vault by pressing the rescan button from the Title bar of the plugin window.</b></p>"
-				)
-			)
-			.setTooltip(
-				"You will need to Rescan the Vault by pressing the rescan button from the Title bar of the plugin window."
-			)
-			.addText((text) => {
-				const oldValue = this.globalSettings!.filters;
-				text.setPlaceholder(
-					`${
-						oldValue
-							? oldValue
-							: "Enter File and Folder names, separated with comma"
-					}`
-				);
-				text.setValue(oldValue ? oldValue.toString() : "");
-				text.setValue(filters).onChange(async (string) => {
-					this.globalSettings!.filters.pop();
-					this.globalSettings!.filters.push(string);
+
+		// CSS for proper layout
+		const cssStyles = `
+		.scan-filter-row {
+			display: flex;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+		.filter-label {
+			width: 80px;
+			font-weight: bold;
+			color: #e74c3c;
+		}
+		.filter-input {
+			flex-grow: 1;
+			margin-right: 10px;
+		}
+		.filter-dropdown {
+			width: 120px;
+			text-align: center;
+		}
+	`;
+		containerEl.createEl("style", { text: cssStyles });
+
+		// Helper to add filter rows
+		const addFilterRow = (
+			label: string,
+			filterType: keyof typeof scanFilters,
+			polarity: number,
+			values: string[]
+		) => {
+			const row = containerEl.createDiv({ cls: "scan-filter-row" });
+
+			// Label
+			row.createEl("span", { text: label, cls: "filter-label" });
+
+			// Input for values
+			const input = row.createEl("input", {
+				type: "text",
+				cls: "filter-input",
+			});
+			input.value = values.join(", ");
+			input.addEventListener("change", async () => {
+				this.globalSettings!.scanFilters[filterType].values =
+					input.value.split(",").map((v) => v.trim());
 					await this.saveSettings();
 				});
+
+			// Dropdown for polarity
+			const dropdown = row.createEl("select", { cls: "filter-dropdown" });
+			["Only Scan this", "Dont Scan this", "Disable"].forEach(
+				(optionText, idx) => {
+					const option = dropdown.createEl("option", {
+						text: optionText,
+					});
+					option.value = (idx + 1).toString();
+					if (idx + 1 === polarity) option.selected = true;
+				}
+			);
+			dropdown.addEventListener("change", async () => {
+				this.globalSettings!.scanFilters[filterType].polarity =
+					parseInt(dropdown.value, 10);
+				await this.saveSettings();
 			});
+		};
+
+		// Files Row
+		addFilterRow(
+			"Files",
+			"files",
+			scanFilters.files.polarity,
+			scanFilters.files.values
+		);
+
+		// Folders Row
+		addFilterRow(
+			"Folders",
+			"folders",
+			scanFilters.folders.polarity,
+			scanFilters.folders.values
+		);
+
+		// Tags Row
+		addFilterRow(
+			"Tags",
+			"tags",
+			scanFilters.tags.polarity,
+			scanFilters.tags.values
+		);
+
+		containerEl.createEl("hr");
+		// Save settings and reflect changes
+		// await this.saveSettings();
 
 		// containerEl.createEl("h4", { text: "Time related settings" });
 
@@ -125,17 +194,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		// 	.addToggle((toggle) =>
 		// 		toggle.setValue(ignoreFileNameDates).onChange(async (value) => {
 		// 			this.globalSettings!.ignoreFileNameDates = value;
-		// 			await this.saveSettings();
-		// 		})
-		// 	);
-
-		// // Setting for taskCompletionFormat
-		// new Setting(containerEl)
-		// 	.setName("Task Completion Format")
-		// 	.setDesc("Set the task completion format")
-		// 	.addText((text) =>
-		// 		text.setValue(taskCompletionFormat).onChange(async (value) => {
-		// 			this.globalSettings!.taskCompletionFormat = value;
 		// 			await this.saveSettings();
 		// 		})
 		// 	);

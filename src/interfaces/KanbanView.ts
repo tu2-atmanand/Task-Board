@@ -18,6 +18,7 @@ export interface globalSettingsData {
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskCompletionFormat: string;
+	taskCompletionDateTimePattern: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
 	autoAddDue: boolean;
@@ -56,7 +57,8 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 			},
 			firstDayOfWeek: "Mon",
 			ignoreFileNameDates: false,
-			taskCompletionFormat: "ObsidianTasks",
+			taskCompletionFormat: "",
+			taskCompletionDateTimePattern: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
 			autoAddDue: false,
