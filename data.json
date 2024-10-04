@@ -239,16 +239,18 @@
           ]
         },
         "folders": {
-          "polarity": 3,
+          "polarity": 2,
           "values": [
             "Notes/",
-            "Personal_Data/"
+            "Personal_Data/",
+            "Daily_Notes/",
+            "DocsForPlugin/"
           ]
         },
         "tags": {
-          "polarity": 3,
+          "polarity": 2,
           "values": [
-            "#test",
+            "#Test",
             "#important"
           ]
         }

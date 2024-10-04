@@ -139,7 +139,8 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("modify", (file: TFile) =>
 				this.realTimeScanning.onFileChange(
 					file,
-					this.settings.data.globalSettings.realTimeScanning
+					this.settings.data.globalSettings.realTimeScanning,
+					this.settings.data.globalSettings.scanFilters
 				)
 			)
 		);

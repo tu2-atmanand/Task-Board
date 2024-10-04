@@ -1,6 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, Notice, TFile } from "obsidian";
+import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
 
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -33,8 +34,12 @@ export class ScanningVault {
 		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
 
 		for (const file of files) {
+			const scanFilters =
+				this.plugin.settings.data.globalSettings.scanFilters;
 			// onFileScanned(file.path); // Pass file name to callback for live updates
-			await this.extractTasksFromFile(file, this.tasks);
+			if (scanFilterForFilesNFolders(file, scanFilters)) {
+				await this.extractTasksFromFile(file, this.tasks, scanFilters);
+			}
 		}
 
 		console.log(
@@ -48,7 +53,7 @@ export class ScanningVault {
 	}
 
 	// Extract tasks from a specific file
-	async extractTasksFromFile(file: TFile, tasks: any) {
+	async extractTasksFromFile(file: TFile, tasks: any, scanFilters: any) {
 		const fileContent = await this.app.vault.read(file);
 		const lines = fileContent.split("\n");
 		const fileNameWithPath = file.path;
@@ -59,32 +64,41 @@ export class ScanningVault {
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
-				this.TaskDetected = true;
-				const isCompleted = line.startsWith("- [x]");
-				const title = this.extractTitle(line);
-				const time = this.extractTime(line);
-				const due = this.extractDate(line);
-				// const priority = this.extractPriority(line);
 				const tag = this.extractTag(line);
-				const completionDate = this.extractCompletionDate(line);
-				const body = this.extractBody(lines, i + 1);
 
-				const task = {
-					id: this.generateTaskId(),
-					title,
-					body,
-					time,
-					due,
-					tag,
-					// priority,
-					filePath: fileNameWithPath,
-					completed: completionDate,
-				};
+				if (scanFilterForTags(tag, scanFilters)) {
+					this.TaskDetected = true;
+					const isCompleted = line.startsWith("- [x]");
+					const title = this.extractTitle(line);
+					const time = this.extractTime(line);
+					const due = this.extractDate(line);
+					// const priority = this.extractPriority(line);
+					const completionDate = this.extractCompletionDate(line);
+					const body = this.extractBody(lines, i + 1);
 
-				if (isCompleted) {
-					tasks.Completed[fileNameWithPath].push(task);
+					const task = {
+						id: this.generateTaskId(),
+						title,
+						body,
+						time,
+						due,
+						tag,
+						// priority,
+						filePath: fileNameWithPath,
+						completed: completionDate,
+					};
+
+					console.log(
+						"extractTasksFromFile : Scanned the following task, because it allowed in setting : ",
+						task
+					);
+					if (isCompleted) {
+						tasks.Completed[fileNameWithPath].push(task);
+					} else {
+						tasks.Pending[fileNameWithPath].push(task);
+					}
 				} else {
-					tasks.Pending[fileNameWithPath].push(task);
+					console.log("The tasks is not allowed...");
 				}
 			}
 		}
@@ -117,6 +131,7 @@ export class ScanningVault {
 			"Following Old data has been loaded from tasks.json: ",
 			oldTasks
 		);
+		const scanFilters = this.plugin.settings.data.globalSettings.scanFilters;
 
 		for (const file of files) {
 			const fileNameWithPath = file.path;
@@ -128,32 +143,37 @@ export class ScanningVault {
 			for (let i = 0; i < lines.length; i++) {
 				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
-					this.TaskDetected = true;
-					const isCompleted = line.startsWith("- [x]");
-					const title = this.extractTitle(line);
-					const time = this.extractTime(line);
-					const due = this.extractDate(line);
-					// const priority = this.extractPriority(line);
 					const tag = this.extractTag(line);
-					const completionDate = this.extractCompletionDate(line);
-					const body = this.extractBody(lines, i + 1);
 
-					const task = {
-						id: this.generateTaskId(),
-						title,
-						body,
-						time,
-						due,
-						tag,
-						// priority,
-						filePath: fileNameWithPath,
-						completed: completionDate,
-					};
+					if (scanFilterForTags(tag, scanFilters)) {
+						this.TaskDetected = true;
+						const isCompleted = line.startsWith("- [x]");
+						const title = this.extractTitle(line);
+						const time = this.extractTime(line);
+						const due = this.extractDate(line);
+						// const priority = this.extractPriority(line);
+						const completionDate = this.extractCompletionDate(line);
+						const body = this.extractBody(lines, i + 1);
 
-					if (isCompleted) {
-						newCompletedTasks.push(task);
+						const task = {
+							id: this.generateTaskId(),
+							title,
+							body,
+							time,
+							due,
+							tag,
+							// priority,
+							filePath: fileNameWithPath,
+							completed: completionDate,
+						};
+
+						if (isCompleted) {
+							newCompletedTasks.push(task);
+						} else {
+							newPendingTasks.push(task);
+						}
 					} else {
-						newPendingTasks.push(task);
+						console.log("The tasks is not allowed...");
 					}
 				}
 			}
@@ -182,8 +202,14 @@ export class ScanningVault {
 		// );
 
 		// TODO : At this present commit and the prsent state of the codeBase, the feature that when a user writes at a high speed, the task will be getting refreshed in real-Time is happening perfectly. For that you will have to disable the below line. Also just to mention, you will have to do an optimization, since, if the user is typing at a double speed then mine, then the my CPU was running at 40%.
-		this.TaskDetected = !(this.plugin.settings.data.globalSettings.realTimeScanning) ? true : false;
-		console.log("After Tasks are extracted and when realTimeScanning is OFF, value of this.TaskDetected : ", this.TaskDetected);
+		this.TaskDetected = !this.plugin.settings.data.globalSettings
+			.realTimeScanning
+			? true
+			: false;
+		console.log(
+			"After Tasks are extracted and when realTimeScanning is OFF, value of this.TaskDetected : ",
+			this.TaskDetected
+		);
 		this.saveTasksToFile();
 
 		// console.log(
