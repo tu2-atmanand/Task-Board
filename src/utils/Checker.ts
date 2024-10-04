@@ -12,30 +12,42 @@ export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 	// Check folder filters
 	const folderInFilters = scanFilters.folders.values.includes(parentFolder);
 	const folderCheckPass =
-		(folderInFilters && scanFilters.folders.polarity !== 2) ||
-		!folderInFilters;
+		(folderInFilters && scanFilters.folders.polarity === 1) ||
+		(!folderInFilters && scanFilters.folders.polarity === 2) ||
+		scanFilters.folders.polarity === 3;
 
-	// Check file filters
-	const fileInFilters = scanFilters.files.values.includes(fileName);
-	const fileCheckPass =
-		(fileInFilters && scanFilters.files.polarity !== 2) || !fileInFilters;
+	if (folderCheckPass) {
+		// Check file filters
+		const fileInFilters = scanFilters.files.values.includes(fileName);
+		const fileCheckPass =
+			(fileInFilters && scanFilters.files.polarity === 1) ||
+			(!fileInFilters && scanFilters.files.polarity === 2) ||
+			scanFilters.files.polarity === 3;
 
-	// If both checks pass, proceed with the scanning logic
-	if (folderCheckPass && fileCheckPass) {
-		return true;
+		if (fileCheckPass) {
+			return true;
+		} else {
+			return false;
+		}
 	} else {
 		return false;
 	}
 }
 
-
 export function scanFilterForTags(tag: string, scanFilters: any) {
-	console.log("The value of tag i am checking using .includes :", tag, ": There shouldnt be any thing in between.")
+	console.log(
+		"The value of tag i am checking using .includes :",
+		tag,
+		": There shouldnt be any thing in between."
+	);
 	const tagInFilters = scanFilters.tags.values.includes(tag);
 	const tagPolarity = scanFilters.tags.polarity;
 
-	const tagCheck = (tagPolarity === 1 && tagInFilters) || (tagPolarity === 2 && !tagInFilters) || tagPolarity === 3;
-	if(tagCheck) {
+	const tagCheck =
+		(tagPolarity === 1 && tagInFilters) ||
+		(tagPolarity === 2 && !tagInFilters) ||
+		tagPolarity === 3;
+	if (tagCheck) {
 		return true;
 	} else {
 		return false;
