@@ -78,6 +78,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			taskCompletionDateTimePattern,
 			taskCompletionInLocalTime,
 			taskCompletionShowUtcOffset,
+			dailyNotesPluginComp,
+			dueDateFormat,
 			autoAddDue,
 			scanVaultAtStartup,
 			dayPlannerPlugin,
@@ -88,6 +90,15 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			text: "Task Board",
 			cls: "mainPluginTitle",
 		});
+
+		containerEl
+			.createEl("p", {
+				text: "Please read the Documentation to make an efficient use of the plugin : ",
+			})
+			.createEl("a", {
+				text: "TaskBoard Docs",
+				href: "https://github.com/",
+			});
 
 		// Setting for taskCompletionFormat
 		containerEl.createEl("h4", { text: "Filters for Scanning" });
@@ -252,6 +263,35 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				toggle.setValue(dayPlannerPlugin).onChange(async (value) => {
 					this.globalSettings!.dayPlannerPlugin = value;
 					await this.saveSettings();
+				})
+			);
+
+		// Setting for Auto Adding Due Date from the Daily Notes file name.
+		new Setting(containerEl)
+			.setName("Daily Notes Plugin Compatibility")
+			.setDesc(
+				"When enabled, if you add a task in a Daily Note file, which has a file name like 'yyyy-MM-DD'. Then this date will be considered as the Due Date for the task."
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(dailyNotesPluginComp)
+					.onChange(async (value) => {
+						this.globalSettings!.dailyNotesPluginComp = value;
+						await this.saveSettings();
+					})
+			);
+
+		// Text input for the dueDateFormat
+		new Setting(containerEl)
+			.setName("Due Date Format")
+			.setDesc(
+				"Enter the format of the Date which you are using to name your Daily Notes files. Please use the either 'yyyy-MM-DD' or 'DD-MM-yyyy'"
+			)
+			.addText((text) =>
+				text.setValue(dueDateFormat).onChange(async (value) => {
+					this.globalSettings!.dueDateFormat = value;
+					await this.saveSettings();
+					updatePreview(); // Update the preview when the text pattern changes
 				})
 			);
 
@@ -420,7 +460,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 		const footerText = createEl("p");
 		footerText.appendText(
-			"If you like this Plugin, do consider supporting my work by making a small donation for contineued better improvement of the idea!"
+			"If you like this Plugin, do consider supporting my work by making a small donation for continued better improvement of the idea!"
 		);
 
 		footerSection.appendChild(footerText);
