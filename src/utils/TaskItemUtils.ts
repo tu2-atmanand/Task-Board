@@ -280,7 +280,7 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 			updatedTask.tag
 		}${completedWitFormat}`;
 	} else {
-		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWithEmo}`;
+		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWitFormat}`;
 	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting

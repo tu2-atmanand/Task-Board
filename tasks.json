@@ -63,7 +63,7 @@
     "Daily_Notes/16-09-2024.md": [],
     "Daily_Notes/15-09-2024.md": [
       {
-        "id": 1334282705,
+        "id": 297712308,
         "title": "Time and Tag and Priority",
         "body": [],
         "time": "22:01 - 23:01",
@@ -73,7 +73,7 @@
         "completed": ""
       },
       {
-        "id": 3150221324,
+        "id": 4168730085,
         "title": "New task adding to see if the task directly shows up in the board, after adding through the modal",
         "body": [],
         "time": "15:50 - 16:50",
@@ -83,7 +83,7 @@
         "completed": ""
       },
       {
-        "id": 2429112845,
+        "id": 3507877303,
         "title": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
         "body": [],
         "time": "21:01 - 22:01",
@@ -93,7 +93,7 @@
         "completed": ""
       },
       {
-        "id": 2277004510,
+        "id": 533277058,
         "title": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
         "body": [],
         "time": "21:45 - 22:45",
@@ -155,7 +155,132 @@
     "Daily_Notes/02-08-2024.md": [],
     "Daily_Notes/01-10-2024.md": [],
     "Daily_Notes/01-09-2024.md": [],
-    "Daily_Notes/01-08-2024.md": []
+    "Daily_Notes/01-08-2024.md": [],
+    "Daily_Notes/2024-09-15.md": [
+      {
+        "id": 2386289368,
+        "title": "Time and Tag and Priority",
+        "body": [],
+        "time": "22:01 - 23:01",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "filePath": "Daily_Notes/2024-09-15.md",
+        "completed": ""
+      },
+      {
+        "id": 3435290986,
+        "title": "New task adding to see if the task directly shows up in the board, after adding through the modal",
+        "body": [],
+        "time": "15:50 - 16:50",
+        "due": "2024-10-10",
+        "tag": "#Test",
+        "filePath": "Daily_Notes/2024-09-15.md",
+        "completed": ""
+      },
+      {
+        "id": 1019235019,
+        "title": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
+        "body": [],
+        "time": "21:01 - 22:01",
+        "due": "2024-10-04",
+        "tag": "#Test",
+        "filePath": "Daily_Notes/2024-09-15.md",
+        "completed": ""
+      },
+      {
+        "id": 1014187758,
+        "title": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
+        "body": [],
+        "time": "21:45 - 22:45",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "filePath": "Daily_Notes/2024-09-15.md",
+        "completed": ""
+      },
+      {
+        "id": 1563459170,
+        "title": "file this new task. #Test",
+        "body": [],
+        "time": "",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "filePath": "Daily_Notes/2024-09-15.md",
+        "completed": ""
+      }
+    ],
+    "Parent/Child/TempNote.md": [],
+    "DailyNotes.md": [
+      {
+        "id": 3592318021,
+        "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "filePath": "DailyNotes.md",
+        "completed": ""
+      }
+    ],
+    "Parent/Child/12-01-2002.md": [
+      {
+        "id": 288966499,
+        "title": "I was born",
+        "body": [],
+        "time": "",
+        "due": "12-01-2002",
+        "tag": "#Test",
+        "filePath": "Parent/Child/12-01-2002.md",
+        "completed": ""
+      }
+    ],
+    "Parent/Child/12-JAN-2002.md": [
+      {
+        "id": 2473373574,
+        "title": "Adding temp task",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "filePath": "Parent/Child/12-JAN-2002.md",
+        "completed": ""
+      }
+    ],
+    "Parent/Child/2002-01-Sa.md": [
+      {
+        "id": 2818044865,
+        "title": "I was born on saturday",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "filePath": "Parent/Child/2002-01-Sa.md",
+        "completed": ""
+      }
+    ],
+    "Parent/Child/2002-01-Fr.md": [
+      {
+        "id": 369376156,
+        "title": "I was born on Saturday , just editing to detect",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "filePath": "Parent/Child/2002-01-Fr.md",
+        "completed": ""
+      }
+    ],
+    "Parent/Child/2002-01-12.md": [
+      {
+        "id": 2985895181,
+        "title": "I was born on Saturday",
+        "body": [],
+        "time": "",
+        "due": "2002-01-12",
+        "tag": "#Test",
+        "filePath": "Parent/Child/2002-01-12.md",
+        "completed": ""
+      }
+    ]
   },
   "Completed": {
     "Daily_Notes/Readme of CardBoard.md": [],
@@ -184,7 +309,7 @@
     "Daily_Notes/16-09-2024.md": [],
     "Daily_Notes/15-09-2024.md": [
       {
-        "id": 789373509,
+        "id": 219772732,
         "title": "Not time, no tag, no due, no priority, ITS WORKING",
         "body": [],
         "time": "",
@@ -213,6 +338,25 @@
     "Daily_Notes/02-08-2024.md": [],
     "Daily_Notes/01-10-2024.md": [],
     "Daily_Notes/01-09-2024.md": [],
-    "Daily_Notes/01-08-2024.md": []
+    "Daily_Notes/01-08-2024.md": [],
+    "Daily_Notes/2024-09-15.md": [
+      {
+        "id": 1413912022,
+        "title": "Not time, no tag, no due, no priority, ITS WORKING",
+        "body": [],
+        "time": "",
+        "due": "2024-09-15",
+        "tag": "#Test",
+        "filePath": "Daily_Notes/2024-09-15.md",
+        "completed": "2024-10-04/18:44"
+      }
+    ],
+    "Parent/Child/TempNote.md": [],
+    "DailyNotes.md": [],
+    "Parent/Child/12-01-2002.md": [],
+    "Parent/Child/12-JAN-2002.md": [],
+    "Parent/Child/2002-01-Sa.md": [],
+    "Parent/Child/2002-01-Fr.md": [],
+    "Parent/Child/2002-01-12.md": []
   }
 }

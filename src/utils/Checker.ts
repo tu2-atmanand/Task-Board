@@ -2,9 +2,10 @@ import { TFile } from "obsidian";
 
 export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 	// Separate the parent folder and file name from the file path
-	const filePathParts = file.path.split("/");
-	const fileName = filePathParts.pop(); // Extract file name
-	const parentFolder = filePathParts.join("/") + "/"; // Rebuild the parent folder path
+	// const filePathParts = file.path.split("/");
+	const fileName = file.basename; // Extract file name
+	// const parentFolder = filePathParts.join("/").trim() + "/"; // Rebuild the parent folder path
+	const parentFolder = file.parent?.path;
 
 	console.log("The fileName is : ", fileName);
 	console.log("The parentFolder is : ", parentFolder);
