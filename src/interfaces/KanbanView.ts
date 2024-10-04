@@ -60,7 +60,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 			firstDayOfWeek: "Mon",
 			ignoreFileNameDates: false,
 			taskCompletionFormat: "",
-			taskCompletionDateTimePattern: "",
+			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
 			dailyNotesPluginComp: false,
 			dueDateFormat: "",
 			taskCompletionInLocalTime: true,

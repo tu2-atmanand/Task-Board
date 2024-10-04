@@ -35,7 +35,7 @@ import path from "path";
 import { refreshKanbanBoard } from "src/services/RefreshServices";
 
 export default class TaskBoard extends Plugin {
-	settings: GlobalSettings;
+	settings: GlobalSettings = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	fileStack: string[] = [];
