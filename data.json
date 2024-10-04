@@ -239,16 +239,13 @@
           ]
         },
         "folders": {
-          "polarity": 2,
+          "polarity": 1,
           "values": [
-            "Notes/",
-            "Personal_Data/",
-            "Daily_Notes/",
-            "DocsForPlugin/"
+            "Daily_Notes/"
           ]
         },
         "tags": {
-          "polarity": 2,
+          "polarity": 1,
           "values": [
             "#Test",
             "#important"
@@ -257,14 +254,14 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "1",
-      "taskCompletionDateTimePattern": "yyyy-MM-dd/HH:mm",
+      "taskCompletionFormat": "4",
+      "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": true,
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": false
+      "realTimeScanning": true
     }
   }
 }

@@ -271,7 +271,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			let preview = `- [ ] ${taskTitle} | `;
 			switch (this.globalSettings!.taskCompletionFormat) {
 				case "1": // Default
-					preview += `📅 ${dueDate} ✅ ${completionDate}`;
+					preview += `📅${dueDate} ✅${completionDate}`;
 					break;
 				case "2": // Tasks Plugin
 					preview += `📅 ${dueDate} ✅ ${
@@ -282,7 +282,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					preview += `[due:: ${dueDate}] [completion:: ${completionDate}]`;
 					break;
 				case "4": // Obsidian Native
-					preview += `@Due(${dueDate}) @completion(${completionDate})`;
+					preview += `@due(${dueDate}) @completion(${completionDate})`;
 					break;
 			}
 			previewEl.setText(preview);
