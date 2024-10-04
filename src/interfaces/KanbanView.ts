@@ -19,6 +19,8 @@ export interface globalSettingsData {
 	ignoreFileNameDates: boolean;
 	taskCompletionFormat: string;
 	taskCompletionDateTimePattern: string;
+	dailyNotesPluginComp: boolean;
+	dueDateFormat: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
 	autoAddDue: boolean;
@@ -59,6 +61,8 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 			ignoreFileNameDates: false,
 			taskCompletionFormat: "",
 			taskCompletionDateTimePattern: "",
+			dailyNotesPluginComp: false,
+			dueDateFormat: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
 			autoAddDue: false,

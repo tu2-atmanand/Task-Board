@@ -123,6 +123,7 @@ export class ScanningVault {
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: TFile[]) {
+		const moment = require("moment");
 		console.log("Following files have been received for scanning: ", files);
 
 		// Load the existing tasks from tasks.json once
@@ -151,10 +152,43 @@ export class ScanningVault {
 						const isCompleted = line.startsWith("- [x]");
 						const title = this.extractTitle(line);
 						const time = this.extractTime(line);
-						const due = this.extractDueDate(line);
 						// const priority = this.extractPriority(line);
 						const completionDate = this.extractCompletionDate(line);
 						const body = this.extractBody(lines, i + 1);
+
+						let due = this.extractDueDate(line);
+						// if (!due) {
+						// 	const moment = require("moment");
+						// 	console.log(
+						// 		"Following thing  has been written by the moment library. Let see what it return if the file name is : ",
+						// 		file.basename,
+						// 		" | OUTPUT : ",
+						// 		moment().format(file.basename)
+						// 	);
+						// 	if (moment().format(file.basename)) {
+						// 		due = moment().format(file.basename);
+						// 	}
+						// }
+
+						if (!due && this.plugin.settings.data.globalSettings.dailyNotesPluginComp) {
+							const dueFormat =
+								this.plugin.settings.data.globalSettings
+									.dueDateFormat;
+							const basename = file.basename;
+
+								console.log(
+									"Following thing  has been written by the moment library. Let see what it return if the file name is : ",
+									file.basename,
+									" | OUTPUT : ",
+									moment().format(file.basename)
+								);
+							// Check if the basename matches the dueFormat using moment
+							if (moment(basename, dueFormat, true).isValid()) {
+								due = basename; // If the basename matches the dueFormat, assign it to due
+							} else {
+								due = ""; // If not, assign an empty string
+							}
+						}
 
 						const task = {
 							id: this.generateTaskId(),
