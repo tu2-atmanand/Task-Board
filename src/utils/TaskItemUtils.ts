@@ -70,32 +70,32 @@ export const moveFromPendingToCompleted = (task: taskItem) => {
 	// 	moment().format("YYYY-MM-DDTHH:mm")
 	// );
 
-	const updatedTask = {
-		...task,
-		completed: moment().format("YYYY-MM-DDTHH:mm"),
-	}; // e.g., '2024-09-21T12:20'
+	// const updatedTask = {
+	// 	...task,
+	// 	completed: moment().format("YYYY-MM-DDTHH:mm"),
+	// }; // e.g., '2024-09-21T12:20'
 
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
 		const allTasks = JSON.parse(tasksData);
 
 		// Move task from Pending to Completed
-		if (allTasks.Pending[updatedTask.filePath]) {
+		if (allTasks.Pending[task.filePath]) {
 			console.log(
 				"moveFromPendingToCompleted : All tasks inside allTasks.Pending[updatedTask.filePath] : ",
-				allTasks.Pending[updatedTask.filePath]
+				allTasks.Pending[task.filePath]
 			);
-			allTasks.Pending[updatedTask.filePath] = allTasks.Pending[
-				updatedTask.filePath
-			].filter((task: any) => task.id !== updatedTask.id);
+			allTasks.Pending[task.filePath] = allTasks.Pending[
+				task.filePath
+			].filter((t: taskItem) => t.id !== task.id);
 			// console.log(
 			// 	"Lets see what is going in allTasks.Pending[updatedTask.filePath] = ",
 			// 	allTasks.Pending[updatedTask.filePath]
 			// );
-			if (!allTasks.Completed[updatedTask.filePath]) {
-				allTasks.Completed[updatedTask.filePath] = [];
+			if (!allTasks.Completed[task.filePath]) {
+				allTasks.Completed[task.filePath] = [];
 			}
-			allTasks.Completed[updatedTask.filePath].push(updatedTask);
+			allTasks.Completed[task.filePath].push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -107,25 +107,25 @@ export const moveFromPendingToCompleted = (task: taskItem) => {
 
 export const moveFromCompletedToPending = (task: taskItem) => {
 	// Toggle the completed state
-	const updatedTask = { ...task, completed: "" };
+	// const updatedTask = { ...task, completed: "" };
 
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
 		const allTasks = JSON.parse(tasksData);
 
 		// Move task from Completed to Pending
-		if (allTasks.Completed[updatedTask.filePath]) {
-			allTasks.Completed[updatedTask.filePath] = allTasks.Completed[
-				updatedTask.filePath
-			].filter((task: any) => task.id !== updatedTask.id);
+		if (allTasks.Completed[task.filePath]) {
+			allTasks.Completed[task.filePath] = allTasks.Completed[
+				task.filePath
+			].filter((t: taskItem) => t.id !== task.id);
 			// console.log(
 			// 	"Lets see what is going in allTasks.Completed[updatedTask.filePath] = ",
 			// 	allTasks.Completed[updatedTask.filePath]
 			// );
-			if (!allTasks.Pending[updatedTask.filePath]) {
-				allTasks.Pending[updatedTask.filePath] = [];
+			if (!allTasks.Pending[task.filePath]) {
+				allTasks.Pending[task.filePath] = [];
 			}
-			allTasks.Pending[updatedTask.filePath].push(updatedTask);
+			allTasks.Pending[task.filePath].push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -236,10 +236,7 @@ export const deleteTaskFromJson = (task: taskItem) => {
 
 export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 	console.log("oldTask i have received for updating in md file : ", oldTask);
-	console.log(
-		"updatedTask i have received : ",
-		updatedTask
-	);
+	console.log("updatedTask i have received : ", updatedTask);
 
 	const basePath = (window as any).app.vault.adapter.basePath;
 	const filePath = path.join(basePath, updatedTask.filePath);
@@ -247,11 +244,25 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 	globalSettings = globalSettings.data.globalSettings;
 	const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
 
-	const dueDateWithEmo = updatedTask.due ? ` 📅${updatedTask.due}` : "";
+	let dueDateWithFormat = "";
+	let completedWitFormat = "";
+	if (updatedTask.due || updatedTask.completed) {
+		if (globalSettings?.taskCompletionFormat === "1") {
+			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
+			completedWitFormat = updatedTask.completed ? ` ✅${updatedTask.completed} `: "";
+		} else if (globalSettings?.taskCompletionFormat === "2") {
+			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
+			completedWitFormat = updatedTask.completed ? ` ✅ ${updatedTask.completed} ` : "";
+		} else if (globalSettings?.taskCompletionFormat === "3") {
+			dueDateWithFormat = updatedTask.due ? ` [due:: ${updatedTask.due}]` : "";
+			completedWitFormat = updatedTask.completed ? ` [completion:: ${updatedTask.completed}] ` : "";
+		} else {
+			dueDateWithFormat = updatedTask.due ? ` @due(${updatedTask.due})` : "";
+			completedWitFormat = updatedTask.completed ? ` @completion(${updatedTask.completed}) ` : "";
+		}
+	}
+
 	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
-	const completedWithEmo = updatedTask.completed
-		? ` ✅${updatedTask.completed} `
-		: "";
 	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
 
 	// Combine priority emoji if it exists
@@ -265,11 +276,11 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 	if (dayPlannerPlugin) {
 		formattedTask = `${checkBoxStat} ${
 			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${updatedTask.title} |${dueDateWithEmo} ${priorityWithEmo} ${
+		}${updatedTask.title} |${dueDateWithFormat} ${priorityWithEmo} ${
 			updatedTask.tag
-		}${completedWithEmo}`;
+		}${completedWitFormat}`;
 	} else {
-		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithEmo} ${priorityWithEmo} ${updatedTask.tag}${completedWithEmo}`;
+		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWithEmo}`;
 	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
@@ -294,7 +305,9 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 
 	// Combine all parts: main task, body, and sub-tasks
 	// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}`;
-	const completeTask = `${formattedTask}${bodyLines.trim() ? `\n${bodyLines}` : ""}\n${subTasksWithTab}`;
+	const completeTask = `${formattedTask}${
+		bodyLines.trim() ? `\n${bodyLines}` : ""
+	}\n${subTasksWithTab}`;
 
 	try {
 		// Read the file content
@@ -348,7 +361,10 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 };
 
 export const updateTaskInJson = (updatedTask: taskItem) => {
-	console.log("The new task which i have received and which i am going to put in the taks.json : ", updatedTask);
+	console.log(
+		"The new task which i have received and which i am going to put in the taks.json : ",
+		updatedTask
+	);
 	try {
 		const tasksData = fs.readFileSync(tasksPath, "utf8");
 		const allTasks = JSON.parse(tasksData);

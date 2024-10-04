@@ -71,7 +71,7 @@ export class ScanningVault {
 					const isCompleted = line.startsWith("- [x]");
 					const title = this.extractTitle(line);
 					const time = this.extractTime(line);
-					const due = this.extractDate(line);
+					const due = this.extractDueDate(line);
 					// const priority = this.extractPriority(line);
 					const completionDate = this.extractCompletionDate(line);
 					const body = this.extractBody(lines, i + 1);
@@ -131,7 +131,8 @@ export class ScanningVault {
 			"Following Old data has been loaded from tasks.json: ",
 			oldTasks
 		);
-		const scanFilters = this.plugin.settings.data.globalSettings.scanFilters;
+		const scanFilters =
+			this.plugin.settings.data.globalSettings.scanFilters;
 
 		for (const file of files) {
 			const fileNameWithPath = file.path;
@@ -150,7 +151,7 @@ export class ScanningVault {
 						const isCompleted = line.startsWith("- [x]");
 						const title = this.extractTitle(line);
 						const time = this.extractTime(line);
-						const due = this.extractDate(line);
+						const due = this.extractDueDate(line);
 						// const priority = this.extractPriority(line);
 						const completionDate = this.extractCompletionDate(line);
 						const body = this.extractBody(lines, i + 1);
@@ -306,13 +307,15 @@ export class ScanningVault {
 	}
 
 	// Extract date from task title
-	extractDate(text: string): string {
+	extractDueDate(text: string): string {
 		let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
 
 		if (!match) {
-			match = text.match(
-				/\[due::\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)\]/
-			);
+			match = text.match(/\[due::\s*(\d{4}-\d{2}-\d{2})\]/);
+		}
+
+		if (!match) {
+			match = text.match(/\@due\(\s*(\d{4}-\d{2}-\d{2})\)/);
 		}
 
 		return match ? match[1] : "";
@@ -353,22 +356,47 @@ export class ScanningVault {
 
 	extractCompletionDate(text: string): string {
 		// Match cases like ✅2024-09-26T11:30 or ✅ 2024-09-28
-		let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)/);
+		// let match = text.match(
+		// 	/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)(\d{2}:\d{2})?/
+		// );
+
+		let match = text.match(
+			/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?/
+		);
 
 		// If not found, try to match the completion:: 2024-09-28 format
 		if (!match) {
 			match = text.match(
-				/\[completion::\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?)\]/
+				/\[completion::\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\]/
 			);
+
+			if (match) {
+				return match
+					? match[0]
+							.replace("[completion::", "")
+							.replace("]", "")
+							.trim()
+					: "";
+			}
 		}
 
 		if (!match) {
 			match = text.match(
-				/\@completed\(\s*(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?)\)/
+				/\@completion\(\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\)/
 			);
+
+			if (match) {
+				return match
+					? match[0]
+							.replace("@completion(", "")
+							.replace(")", "")
+							.trim()
+					: "";
+			}
 		}
 
+		console.log("Following thing detected for completion date : ", match);
 		// Return the matched date or date-time, or an empty string if no match
-		return match ? match[1] : "";
+		return match ? match[0].replace("✅", "").trim() : "";
 	}
 }
