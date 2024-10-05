@@ -155,6 +155,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					.filter((column) => column.active)
 					.map((column, index) => (
 						<Column
+							app={app}
 							key={index}
 							activeBoard={activeBoardIndex}
 							colType={column.colType}

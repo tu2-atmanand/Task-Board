@@ -7,7 +7,7 @@ import { TaskProps, taskItem } from '../interfaces/TaskItem';
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItem';
 
-const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
+const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation
 	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
@@ -87,6 +87,20 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 	// Toggle function to expand/collapse the description
 	const toggleDescription = () => {
 		setIsDescriptionExpanded(!isDescriptionExpanded);
+	};
+
+	const handleMouseEnter = (event: React.MouseEvent) => {
+		const element = document.getElementById('taskItemEditIconBtn');
+		if (element) {
+			app.workspace.trigger('hover-link', {
+				event,                    // The original mouse event
+				source: "task-board",      // Source of the hover
+				hoverParent: element,      // The element that triggered the hover
+				targetEl: element,         // The element to be hovered (same as parent in this case)
+				linktext: task.filePath,   // The file path to preview
+				sourcePath: task.filePath  // The source path (same as file path here)
+			});
+		}
 	};
 
 	// Render sub-tasks and remaining body separately
@@ -179,7 +193,7 @@ const TaskItem: React.FC<TaskProps> = ({ task, onEdit, onDelete, onCheckboxChang
 							{task.due ? `📅${task.due}` : ''}
 						</div>
 					)}
-					<div className="taskItemFooterBtns">
+					<div id="taskItemEditIconBtn" className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 						<div className="taskItemiconButton">
 							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
 						</div>

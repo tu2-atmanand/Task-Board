@@ -1,241 +1,119 @@
 {
   "Pending": {
-    "Daily_Notes/Readme of CardBoard.md": [],
-    "Daily_Notes/DailyTemplate.md": [],
-    "Daily_Notes/30-09-2024.md": [],
-    "Daily_Notes/30-08-2024.md": [],
-    "Daily_Notes/29-09-2024.md": [],
-    "Daily_Notes/29-08-2024.md": [],
-    "Daily_Notes/28-09-2024.md": [
+    "Untitled.md": [],
+    "XploreProgram/How to Access Xplore Courses.md": [],
+    "TODO.md": [
       {
-        "id": 1195996269,
-        "title": "This is a new task with due date with the format of dataview. Updating",
-        "body": [],
-        "time": "",
-        "due": "2024-09-28",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/28-09-2024.md",
-        "completed": ""
-      }
-    ],
-    "Daily_Notes/28-08-2024.md": [],
-    "Daily_Notes/27-09-2024.md": [],
-    "Daily_Notes/27-08-2024.md": [],
-    "Daily_Notes/26-09-2024.md": [],
-    "Daily_Notes/25-09-2024.md": [],
-    "Daily_Notes/25-08-2024.md": [],
-    "Daily_Notes/24-09-2024.md": [],
-    "Daily_Notes/24-08-2024.md": [],
-    "Daily_Notes/23-09-2024.md": [],
-    "Daily_Notes/23-08-2024.md": [],
-    "Daily_Notes/22-09-2024.md": [
-      {
-        "id": 1668171398,
-        "title": "A tempararory new task",
+        "id": 14282070,
+        "title": "New temp task, lets see if this comes after 5 minutes",
         "body": [
-          "Just updating the body.",
-          "- Adding one bullete line in body.",
-          "- [ ] Just adding a simple new subTask to see if first all the boards are getting empty."
+          "Updating the body line.",
+          "- Adding a bullete point in the desc.",
+          "- [x] Also adding this new Subtask, first",
+          "- [ ] And adding second subtask."
         ],
-        "time": "20:45 - 21:45",
-        "due": "2024-10-18",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/22-09-2024.md",
-        "completed": ""
-      }
-    ],
-    "Daily_Notes/22-08-2024.md": [],
-    "Daily_Notes/21-09-2024.md": [],
-    "Daily_Notes/21-08-2024.md": [],
-    "Daily_Notes/18-09-2024.md": [],
-    "Daily_Notes/17-09-2024.md": [
-      {
-        "id": 1294824174,
-        "title": "Now auto add due option is false, so the due date shouldnt be added",
-        "body": [],
         "time": "",
         "due": "",
         "tag": "#Test",
-        "filePath": "Daily_Notes/17-09-2024.md",
+        "filePath": "TODO.md",
         "completed": ""
       }
     ],
-    "Daily_Notes/16-09-2024.md": [],
-    "Daily_Notes/15-09-2024.md": [
+    "Spintly Details.md": [
       {
-        "id": 297712308,
-        "title": "Time and Tag and Priority",
-        "body": [],
-        "time": "22:01 - 23:01",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/15-09-2024.md",
-        "completed": ""
-      },
-      {
-        "id": 4168730085,
-        "title": "New task adding to see if the task directly shows up in the board, after adding through the modal",
-        "body": [],
-        "time": "15:50 - 16:50",
-        "due": "2024-10-10",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/15-09-2024.md",
-        "completed": ""
-      },
-      {
-        "id": 3507877303,
-        "title": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
-        "body": [],
-        "time": "21:01 - 22:01",
+        "id": 391363236,
+        "title": "need to complete all the Documents work  and submit to TCS",
+        "body": [
+          "Just adding a normal line for this task as a body.",
+          "Adding a new line in the body/Desc",
+          "- [ ] Adding a first subtask, with checked state true"
+        ],
+        "time": "",
         "due": "2024-10-04",
         "tag": "#Test",
-        "filePath": "Daily_Notes/15-09-2024.md",
+        "filePath": "Spintly Details.md",
         "completed": ""
       },
       {
-        "id": 533277058,
-        "title": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
-        "body": [],
-        "time": "21:45 - 22:45",
+        "id": 993322022,
+        "title": "Just a new Task without tag or date",
+        "body": [
+          "First normal line for body is added.",
+          "- Adding a bullete point in the body.",
+          "Adding one more line in Desc",
+          "- Adding another bullete point in the description",
+          "- [ ] Adding one subTask",
+          "- [ ] Adding another subTask, second one"
+        ],
+        "time": "10:30 - 11:30",
+        "due": "2024-10-01",
+        "tag": "#Test",
+        "filePath": "Spintly Details.md",
+        "completed": ""
+      }
+    ],
+    "Pending Document Work.md": [
+      {
+        "id": 3343916719,
+        "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
+        "body": [
+          "This is a line in the Desc",
+          "- There  is no subTask for this task, and adding a new line in the Desc with bullete point."
+        ],
+        "time": "",
         "due": "",
         "tag": "#Test",
-        "filePath": "Daily_Notes/15-09-2024.md",
+        "filePath": "Pending Document Work.md",
         "completed": ""
-      }
-    ],
-    "Daily_Notes/14-09-2024.md": [
+      },
       {
-        "id": 302329281,
-        "title": "Let me see if due comes of today, it shouldnt come",
-        "body": [],
+        "id": 1370395444,
+        "title": "Graduate All Semester Marksheets :",
+        "body": [
+          "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
+          "- [x] Semester 2 : [[Semester_2_Marksheet.pdf]]",
+          "- [x] Semester 3 : [[Semester_3_Marksheet.pdf]]",
+          "- [x] Semester 4 : [[Semester_4_Marksheet.pdf]]",
+          "- [x] Semester 5 : [[Semester_5_Marksheet.pdf]]",
+          "- [x] Semester 6 : [[Semester_6_Marksheet.pdf]]",
+          "- [x] Semester 7 : [[Semester_7_Marksheet.pdf]]",
+          "- [x] Semester 8 : [[Semester_8_Marksheet.pdf]]"
+        ],
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "filePath": "Pending Document Work.md",
+        "completed": ""
+      },
+      {
+        "id": 457342651,
+        "title": "Only one Recording Course is remaining of JavaOk",
+        "body": [
+          "Now i am removing all the points from the body and changing them into a one line sentence.",
+          "- [ ] Now i am adding this subtask, this should be updated inside the json file. Updating"
+        ],
         "time": "",
         "due": "2024-10-05",
         "tag": "#Test",
-        "filePath": "Daily_Notes/14-09-2024.md",
+        "filePath": "Pending Document Work.md",
         "completed": ""
-      }
-    ],
-    "Daily_Notes/13-09-2024.md": [],
-    "Daily_Notes/12-09-2024.md": [],
-    "Daily_Notes/11-09-2024.md": [],
-    "Daily_Notes/09-09-2024.md": [],
-    "Daily_Notes/08-09-2024.md": [
+      },
       {
-        "id": 774464426,
-        "title": "This is a task for tomorrow, updating",
-        "body": [],
-        "time": "",
-        "due": "2024-10-05",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/08-09-2024.md",
-        "completed": ""
-      }
-    ],
-    "Daily_Notes/07-09-2024.md": [],
-    "Daily_Notes/07-08-2024.md": [],
-    "Daily_Notes/06-09-2024.md": [],
-    "Daily_Notes/05-09-2024.md": [],
-    "Daily_Notes/04-10-2024.md": [],
-    "Daily_Notes/04-09-2024.md": [],
-    "Daily_Notes/03-10-2024.md": [],
-    "Daily_Notes/03-09-2024.md": [
-      {
-        "id": 1807970776,
-        "title": "Completely Updating the content of this task",
+        "id": 2137945973,
+        "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
         "body": [],
         "time": "",
         "due": "2024-10-03",
         "tag": "#Test",
-        "filePath": "Daily_Notes/03-09-2024.md",
+        "filePath": "Pending Document Work.md",
         "completed": ""
       }
     ],
-    "Daily_Notes/02-10-2024.md": [],
-    "Daily_Notes/02-09-2024.md": [],
-    "Daily_Notes/02-08-2024.md": [],
-    "Daily_Notes/01-10-2024.md": [],
-    "Daily_Notes/01-09-2024.md": [],
-    "Daily_Notes/01-08-2024.md": [],
-    "Daily_Notes/2024-09-15.md": [
-      {
-        "id": 2386289368,
-        "title": "Time and Tag and Priority",
-        "body": [],
-        "time": "22:01 - 23:01",
-        "due": "2024-09-15",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/2024-09-15.md",
-        "completed": ""
-      },
-      {
-        "id": 3435290986,
-        "title": "New task adding to see if the task directly shows up in the board, after adding through the modal",
-        "body": [],
-        "time": "15:50 - 16:50",
-        "due": "2024-10-10",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/2024-09-15.md",
-        "completed": ""
-      },
-      {
-        "id": 1019235019,
-        "title": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
-        "body": [],
-        "time": "21:01 - 22:01",
-        "due": "2024-10-04",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/2024-09-15.md",
-        "completed": ""
-      },
-      {
-        "id": 1014187758,
-        "title": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
-        "body": [],
-        "time": "21:45 - 22:45",
-        "due": "2024-09-15",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/2024-09-15.md",
-        "completed": ""
-      },
-      {
-        "id": 1563459170,
-        "title": "file this new task. #Test",
-        "body": [],
-        "time": "",
-        "due": "2024-09-15",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/2024-09-15.md",
-        "completed": ""
-      }
-    ],
+    "Parent/Child/2002-01-12.md": [],
     "Parent/Child/TempNote.md": [],
-    "DailyNotes.md": [
-      {
-        "id": 3592318021,
-        "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "DailyNotes.md",
-        "completed": ""
-      }
-    ],
-    "Parent/Child/12-01-2002.md": [
-      {
-        "id": 288966499,
-        "title": "I was born",
-        "body": [],
-        "time": "",
-        "due": "12-01-2002",
-        "tag": "#Test",
-        "filePath": "Parent/Child/12-01-2002.md",
-        "completed": ""
-      }
-    ],
     "Parent/Child/12-JAN-2002.md": [
       {
-        "id": 2473373574,
+        "id": 742230975,
         "title": "Adding temp task",
         "body": [],
         "time": "",
@@ -245,111 +123,64 @@
         "completed": ""
       }
     ],
-    "Parent/Child/2002-01-Sa.md": [
+    "Parent/Child/12-01-2002.md": [
       {
-        "id": 2818044865,
-        "title": "I was born on saturday",
+        "id": 3889052897,
+        "title": "I was born",
         "body": [],
         "time": "",
         "due": "",
         "tag": "#Test",
-        "filePath": "Parent/Child/2002-01-Sa.md",
+        "filePath": "Parent/Child/12-01-2002.md",
         "completed": ""
       }
     ],
-    "Parent/Child/2002-01-Fr.md": [
+    "Miscellaneous Points.md": [],
+    "DocsForPlugin/Question On Accessing Settings.md": [],
+    "DocsForPlugin/Readme of CardBoard.md": [],
+    "DocsForPlugin/Readme of CardBoard-HTML.md": [],
+    "DocsForPlugin/Readme for Task Board.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
+    "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DailyNotes.md": [
       {
-        "id": 369376156,
-        "title": "I was born on Saturday , just editing to detect",
+        "id": 3234122191,
+        "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
         "body": [],
         "time": "",
         "due": "",
         "tag": "#Test",
-        "filePath": "Parent/Child/2002-01-Fr.md",
+        "filePath": "DailyNotes.md",
         "completed": ""
       }
     ],
-    "Parent/Child/2002-01-12.md": [],
-    "DocsForPlugin/Question On Accessing Settings.md": []
+    "4-Process After Joining.md": [],
+    "3-Process After Offer Letter Received.md": [],
+    "2-Preparation_For_TCS_Interview.md": [],
+    "1-Registering For TCS.md": [],
+    "0-ImportantData.md": []
   },
   "Completed": {
-    "Daily_Notes/Readme of CardBoard.md": [],
-    "Daily_Notes/DailyTemplate.md": [],
-    "Daily_Notes/30-09-2024.md": [],
-    "Daily_Notes/30-08-2024.md": [],
-    "Daily_Notes/29-09-2024.md": [],
-    "Daily_Notes/29-08-2024.md": [],
-    "Daily_Notes/28-09-2024.md": [],
-    "Daily_Notes/28-08-2024.md": [],
-    "Daily_Notes/27-09-2024.md": [],
-    "Daily_Notes/27-08-2024.md": [],
-    "Daily_Notes/26-09-2024.md": [],
-    "Daily_Notes/25-09-2024.md": [],
-    "Daily_Notes/25-08-2024.md": [],
-    "Daily_Notes/24-09-2024.md": [],
-    "Daily_Notes/24-08-2024.md": [],
-    "Daily_Notes/23-09-2024.md": [],
-    "Daily_Notes/23-08-2024.md": [],
-    "Daily_Notes/22-09-2024.md": [],
-    "Daily_Notes/22-08-2024.md": [],
-    "Daily_Notes/21-09-2024.md": [],
-    "Daily_Notes/21-08-2024.md": [],
-    "Daily_Notes/18-09-2024.md": [],
-    "Daily_Notes/17-09-2024.md": [],
-    "Daily_Notes/16-09-2024.md": [],
-    "Daily_Notes/15-09-2024.md": [
+    "Untitled.md": [],
+    "XploreProgram/How to Access Xplore Courses.md": [],
+    "TODO.md": [],
+    "Spintly Details.md": [],
+    "Pending Document Work.md": [
       {
-        "id": 219772732,
-        "title": "Not time, no tag, no due, no priority, ITS WORKING",
+        "id": 2220173576,
+        "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
         "body": [],
         "time": "",
         "due": "",
         "tag": "#Test",
-        "filePath": "Daily_Notes/15-09-2024.md",
-        "completed": "2024-10-04/18:44"
+        "filePath": "Pending Document Work.md",
+        "completed": "2024-09-26T16"
       }
     ],
-    "Daily_Notes/14-09-2024.md": [],
-    "Daily_Notes/13-09-2024.md": [],
-    "Daily_Notes/12-09-2024.md": [],
-    "Daily_Notes/11-09-2024.md": [],
-    "Daily_Notes/09-09-2024.md": [],
-    "Daily_Notes/08-09-2024.md": [],
-    "Daily_Notes/07-09-2024.md": [],
-    "Daily_Notes/07-08-2024.md": [],
-    "Daily_Notes/06-09-2024.md": [],
-    "Daily_Notes/05-09-2024.md": [],
-    "Daily_Notes/04-10-2024.md": [],
-    "Daily_Notes/04-09-2024.md": [],
-    "Daily_Notes/03-10-2024.md": [],
-    "Daily_Notes/03-09-2024.md": [],
-    "Daily_Notes/02-10-2024.md": [],
-    "Daily_Notes/02-09-2024.md": [],
-    "Daily_Notes/02-08-2024.md": [],
-    "Daily_Notes/01-10-2024.md": [],
-    "Daily_Notes/01-09-2024.md": [],
-    "Daily_Notes/01-08-2024.md": [],
-    "Daily_Notes/2024-09-15.md": [
-      {
-        "id": 1413912022,
-        "title": "Not time, no tag, no due, no priority, ITS WORKING",
-        "body": [],
-        "time": "",
-        "due": "2024-09-15",
-        "tag": "#Test",
-        "filePath": "Daily_Notes/2024-09-15.md",
-        "completed": "2024-10-04/18:44"
-      }
-    ],
-    "Parent/Child/TempNote.md": [],
-    "DailyNotes.md": [],
-    "Parent/Child/12-01-2002.md": [],
-    "Parent/Child/12-JAN-2002.md": [],
-    "Parent/Child/2002-01-Sa.md": [],
-    "Parent/Child/2002-01-Fr.md": [],
     "Parent/Child/2002-01-12.md": [
       {
-        "id": 1902244309,
+        "id": 865540652,
         "title": "I was born on Saturday",
         "body": [],
         "time": "",
@@ -359,6 +190,22 @@
         "completed": "2024-10-04/22:08"
       }
     ],
-    "DocsForPlugin/Question On Accessing Settings.md": []
+    "Parent/Child/TempNote.md": [],
+    "Parent/Child/12-JAN-2002.md": [],
+    "Parent/Child/12-01-2002.md": [],
+    "Miscellaneous Points.md": [],
+    "DocsForPlugin/Question On Accessing Settings.md": [],
+    "DocsForPlugin/Readme of CardBoard.md": [],
+    "DocsForPlugin/Readme of CardBoard-HTML.md": [],
+    "DocsForPlugin/Readme for Task Board.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
+    "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DailyNotes.md": [],
+    "4-Process After Joining.md": [],
+    "3-Process After Offer Letter Received.md": [],
+    "2-Preparation_For_TCS_Interview.md": [],
+    "1-Registering For TCS.md": [],
+    "0-ImportantData.md": []
   }
 }

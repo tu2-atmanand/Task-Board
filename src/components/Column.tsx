@@ -22,6 +22,7 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 }
 
 const Column: React.FC<ColumnPropsWithSetBoards> = ({
+	app,
 	activeBoard,
 	colType,
 	data,
@@ -174,6 +175,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 				{tasks.length > 0 ? (
 					tasks.map((task, index) => (
 						<TaskItem
+							app={app}
 							key={index}
 							task={task}
 							onEdit={() => handleEditTask(task)}
