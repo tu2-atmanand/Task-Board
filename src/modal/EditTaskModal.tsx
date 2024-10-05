@@ -180,20 +180,20 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 	// 	}
 	// };
 
-	// TODO : This feature is not working, since the popup is not coming on the top of the 
-	const handleMouseEnter = async (event: React.MouseEvent) => {
-		const element = document.getElementById('EditTaskModalHomeOpenFileBtn');
-		if (element) {
-			app.workspace.trigger('hover-link', {
-				event,                    // The original mouse event
-				source: "EditTaskModalHome",      // Source of the hover
-				hoverParent: element,      // The element that triggered the hover
-				targetEl: element,         // The element to be hovered (same as parent in this case)
-				linktext: task.filePath,   // The file path to preview
-				sourcePath: task.filePath  // The source path (same as file path here)
-			});
-		}
-	};
+	// // TODO : This feature is not working, since the popup is not coming on the top of the 
+	// const handleMouseEnter = async (event: React.MouseEvent) => {
+	// 	const element = document.getElementById('EditTaskModalHomeOpenFileBtn');
+	// 	if (element) {
+	// 		app.workspace.trigger('hover-link', {
+	// 			event,                    // The original mouse event
+	// 			source: "EditTaskModalHome",      // Source of the hover
+	// 			hoverParent: element,      // The element that triggered the hover
+	// 			targetEl: element,         // The element to be hovered (same as parent in this case)
+	// 			linktext: task.filePath,   // The file path to preview
+	// 			sourcePath: task.filePath  // The source path (same as file path here)
+	// 		});
+	// 	}
+	// };
 
 
 	// const handleMouseLeave = () => {
@@ -262,7 +262,7 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 							
 							<button className="EditTaskModalHomeOpenFileBtn"
 								id="EditTaskModalHomeOpenFileBtn"
-								onMouseEnter={handleMouseEnter}
+								// onMouseEnter={handleMouseEnter}
 								// onMouseOver={handleMouseEnter}
 								onClick={() => app.workspace.openLinkText(task.filePath, "")}
 							>Open File</button>
