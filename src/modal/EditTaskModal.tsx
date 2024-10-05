@@ -118,30 +118,30 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 	// console.log("The content of file : ", data);
 
 
-	// // FOR THE FILE PREVIEW FUNCTIONALITY
-	// const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
+	// FOR THE FILE PREVIEW FUNCTIONALITY
+	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
 	// const [isPreviewVisible, setIsPreviewVisible] = useState(false);  // Track popup visibility
-	// // Key press listeners for CTRL/CMD
-	// useEffect(() => {
-	// 	const handleKeyDown = (e: KeyboardEvent) => {
-	// 		if (e.ctrlKey || e.metaKey) {
-	// 			setIsCtrlPressed(true);
-	// 		}
-	// 	};
+	// Key press listeners for CTRL/CMD
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey || e.metaKey) {
+				setIsCtrlPressed(true);
+			}
+		};
 
-	// 	const handleKeyUp = () => {
-	// 		setIsCtrlPressed(false);
-	// 	};
+		const handleKeyUp = () => {
+			setIsCtrlPressed(false);
+		};
 
-	// 	window.addEventListener('keydown', handleKeyDown);
-	// 	window.addEventListener('keyup', handleKeyUp);
+		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keyup', handleKeyUp);
 
-	// 	return () => {
-	// 		window.removeEventListener('keydown', handleKeyDown);
-	// 		window.removeEventListener('keyup', handleKeyUp);
-	// 	};
-	// }, []);
-	
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('keyup', handleKeyUp);
+		};
+	}, []);
+
 	// Reference to the HTML element where the hover preview will be rendered
 	// const hoverPopoverRef = useRef<HTMLDivElement>(null);
 
@@ -259,12 +259,13 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 							<div className="EditTaskModalHomePreview" ref={previewContainerRef}>
 								{/* The markdown content will be rendered here */}
 							</div>
-							
+
 							<button className="EditTaskModalHomeOpenFileBtn"
 								id="EditTaskModalHomeOpenFileBtn"
 								// onMouseEnter={handleMouseEnter}
 								// onMouseOver={handleMouseEnter}
-								onClick={() => app.workspace.openLinkText(task.filePath, "")}
+								// onClick={() => app.workspace.openLinkText(task.filePath, "")}
+								onClick={() => isCtrlPressed ? app.workspace.openLinkText('', task.filePath, 'window') : app.workspace.openLinkText('', task.filePath, false)}
 							>Open File</button>
 						</div>
 					</div>
