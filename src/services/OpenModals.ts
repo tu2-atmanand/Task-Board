@@ -5,7 +5,7 @@ import { App, Plugin } from "obsidian";
 import { Board } from "../interfaces/KanbanBoard";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { ReScanVaultModal } from "src/modal/ReScanVaultModal";
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import fs from "fs";
 import path from "path";
 

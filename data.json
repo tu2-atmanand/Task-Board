@@ -231,32 +231,39 @@
       }
     ],
     "globalSettings": {
-		"scanFilters": {
-			"files": {
-				"polarity": 2,
-				"values": ["MyReadme"]
-			},
-			"folders": {
-				"polarity": 2,
-				"values": ["Daily_Notes"]
-			},
-			"tags": {
-				"polarity": 1,
-				"values": ["#Test", "#important"]
-			}
-		},
-		"firstDayOfWeek": "2",
-		"ignoreFileNameDates": false,
-		"taskCompletionFormat": "4",
-		"taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
-		"dailyNotesPluginComp": false,
-		"dueDateFormat": "yyyy-MM-DD",
-		"taskCompletionInLocalTime": true,
-		"taskCompletionShowUtcOffset": true,
-		"autoAddDue": true,
-		"scanVaultAtStartup": false,
-		"dayPlannerPlugin": true,
-		"realTimeScanning": true
-	}
+      "scanFilters": {
+        "files": {
+          "polarity": 2,
+          "values": [
+            "MyReadme"
+          ]
+        },
+        "folders": {
+          "polarity": 2,
+          "values": [
+            "Daily_Notes"
+          ]
+        },
+        "tags": {
+          "polarity": 1,
+          "values": [
+            "#Test",
+            "#important"
+          ]
+        }
+      },
+      "firstDayOfWeek": "2",
+      "ignoreFileNameDates": false,
+      "taskCompletionFormat": "4",
+      "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
+      "dailyNotesPluginComp": false,
+      "dueDateFormat": "yyyy-MM-DD",
+      "taskCompletionInLocalTime": true,
+      "taskCompletionShowUtcOffset": true,
+      "autoAddDue": true,
+      "scanVaultAtStartup": false,
+      "dayPlannerPlugin": true,
+      "realTimeScanning": false
+    }
   }
 }

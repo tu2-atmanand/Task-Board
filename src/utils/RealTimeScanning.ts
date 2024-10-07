@@ -3,7 +3,7 @@
 import { App, TFile } from "obsidian";
 
 import { ScanningVault } from "src/utils/ScanningVault";
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import fs from "fs";
 import path from "path";
 import { scanFilterForFilesNFolders } from "./Checker";

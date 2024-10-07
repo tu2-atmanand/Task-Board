@@ -4,16 +4,16 @@
     "XploreProgram/How to Access Xplore Courses.md": [],
     "TODO.md": [
       {
-        "id": 14282070,
+        "id": 148426921,
         "title": "New temp task, lets see if this comes after 5 minutes",
         "body": [
-          "Updating the body line.",
-          "- Adding a bullete point in the desc.",
+          "Updating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
+          "Another thing i will put is link to a markdwon file from my Valut : [[0-ImportantData]]",
           "- [x] Also adding this new Subtask, first",
           "- [ ] And adding second subtask."
         ],
-        "time": "",
-        "due": "",
+        "time": "13:49 - 14:49",
+        "due": "2024-10-23",
         "tag": "#Test",
         "filePath": "TODO.md",
         "completed": ""
@@ -21,12 +21,13 @@
     ],
     "Spintly Details.md": [
       {
-        "id": 391363236,
-        "title": "need to complete all the Documents work  and submit to TCS",
+        "id": 2557480714,
+        "title": "Need to complete all the Documents work  and submit to TCS",
         "body": [
           "Just adding a normal line for this task as a body.",
-          "Adding a new line in the body/Desc",
-          "- [ ] Adding a first subtask, with checked state true"
+          "This is an image in the body : ![[1721576562712.jpg]]",
+          "- [ ] Adding a first subtask, with **checked** state true.",
+          "- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
         ],
         "time": "",
         "due": "2024-10-04",
@@ -35,18 +36,18 @@
         "completed": ""
       },
       {
-        "id": 993322022,
+        "id": 3570836813,
         "title": "Just a new Task without tag or date",
         "body": [
           "First normal line for body is added.",
           "- Adding a bullete point in the body.",
           "Adding one more line in Desc",
           "- Adding another bullete point in the description",
-          "- [ ] Adding one subTask",
+          "- [ ] Adding one subTask with an image : ![[UANnumber-Spintly.png]]",
           "- [ ] Adding another subTask, second one"
         ],
         "time": "10:30 - 11:30",
-        "due": "2024-10-01",
+        "due": "2024-10-08",
         "tag": "#Test",
         "filePath": "Spintly Details.md",
         "completed": ""
@@ -54,7 +55,7 @@
     ],
     "Pending Document Work.md": [
       {
-        "id": 3343916719,
+        "id": 4186280784,
         "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
         "body": [
           "This is a line in the Desc",
@@ -67,7 +68,7 @@
         "completed": ""
       },
       {
-        "id": 1370395444,
+        "id": 2916009592,
         "title": "Graduate All Semester Marksheets :",
         "body": [
           "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -86,20 +87,20 @@
         "completed": ""
       },
       {
-        "id": 457342651,
+        "id": 2223631268,
         "title": "Only one Recording Course is remaining of JavaOk",
         "body": [
           "Now i am removing all the points from the body and changing them into a one line sentence.",
           "- [ ] Now i am adding this subtask, this should be updated inside the json file. Updating"
         ],
         "time": "",
-        "due": "2024-10-05",
+        "due": "2024-10-07",
         "tag": "#Test",
         "filePath": "Pending Document Work.md",
         "completed": ""
       },
       {
-        "id": 2137945973,
+        "id": 2962147371,
         "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
         "body": [],
         "time": "",
@@ -123,18 +124,7 @@
         "completed": ""
       }
     ],
-    "Parent/Child/12-01-2002.md": [
-      {
-        "id": 3889052897,
-        "title": "I was born",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Parent/Child/12-01-2002.md",
-        "completed": ""
-      }
-    ],
+    "Parent/Child/12-01-2002.md": [],
     "Miscellaneous Points.md": [],
     "DocsForPlugin/Question On Accessing Settings.md": [],
     "DocsForPlugin/Readme of CardBoard.md": [],
@@ -147,9 +137,11 @@
       {
         "id": 3234122191,
         "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
-        "body": [],
+        "body": [
+          ""
+        ],
         "time": "",
-        "due": "",
+        "due": "2024-10-16",
         "tag": "#Test",
         "filePath": "DailyNotes.md",
         "completed": ""
@@ -168,7 +160,7 @@
     "Spintly Details.md": [],
     "Pending Document Work.md": [
       {
-        "id": 2220173576,
+        "id": 3364473018,
         "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
         "body": [],
         "time": "",
@@ -180,7 +172,7 @@
     ],
     "Parent/Child/2002-01-12.md": [
       {
-        "id": 865540652,
+        "id": 475864272,
         "title": "I was born on Saturday",
         "body": [],
         "time": "",
@@ -192,7 +184,18 @@
     ],
     "Parent/Child/TempNote.md": [],
     "Parent/Child/12-JAN-2002.md": [],
-    "Parent/Child/12-01-2002.md": [],
+    "Parent/Child/12-01-2002.md": [
+      {
+        "id": 3838052229,
+        "title": "I was born",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "filePath": "Parent/Child/12-01-2002.md",
+        "completed": "2024-10-07"
+      }
+    ],
     "Miscellaneous Points.md": [],
     "DocsForPlugin/Question On Accessing Settings.md": [],
     "DocsForPlugin/Readme of CardBoard.md": [],

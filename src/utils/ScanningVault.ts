@@ -3,7 +3,7 @@
 import { App, Notice, TFile } from "obsidian";
 import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
 
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import path from "path";

@@ -8,7 +8,7 @@ import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
 import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import { loadTasksFromJson } from "src/utils/TaskItemUtils";

@@ -1,7 +1,8 @@
 // src/views/TaskBoardSettingTab.ts
+
 import { App, PluginSettingTab, Setting } from "obsidian";
 
-import TaskBoard from "../../main"; // Adjust the path based on your file structure
+import type TaskBoard from "../../main"; // Adjust the path based on your file structure
 import fs from "fs";
 import { globalSettingsData } from "src/interfaces/KanbanView";
 import { loadGlobalSettings } from "src/utils/SettingsOperations";
