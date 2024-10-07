@@ -191,15 +191,36 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: row;
 	/* background: var(--background-modifier-box-shadow); */
-	align-items: center;
+	align-items: flex-start;
 	margin-block: 4px;
 	/* border-radius: 14px; */
 	/* padding: 2px */
 }
 
+.taskItemBodySubtaskItemCheckbox {
+	margin-top: 4px !important;
+}
+
+.subtaskTextRenderer p {
+	margin-block: 0 !important;;
+}
+
 .taskItemBodyDescription {
 	max-height: 0;
 	overflow: hidden;
+}
+
+.taskItemBodyDescriptionRenderer {
+	margin: 0 !important;
+}
+
+.taskItemBodyDescriptionRenderer p {
+	margin: 4px !important;
+}
+
+.taskItemBodyDescriptionRenderer ul {
+	margin-block: 4px !important;
+	padding-inline-start: 25px !important;
 }
 
 .taskItemBodyDescription-expanded {
