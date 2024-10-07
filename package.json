@@ -1,6 +1,6 @@
 {
 	"name": "task-board",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"description": "An Obsidian plugin to see all your task in a much more efficient Kanban Board format. Easily manage your tasks throught your vault.",
 	"main": "main.js",
 	"scripts": {
