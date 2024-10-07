@@ -1,6 +1,6 @@
 // /src/modal/EditTaskModal.tsx
 
-import { App, Modal } from "obsidian";
+import { App, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
 import { priorityEmojis, priorityOptions } from "src/interfaces/TaskItem";
 
@@ -9,7 +9,7 @@ import ReactDOM from "react-dom/client";
 import { loadGlobalSettings } from "src/utils/SettingsOperations";
 
 // Functional React component for the modal content
-const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean; onSave: (updatedTask: any) => void; onClose: () => void }> = ({ task, onSave, onClose, dayPlannerPlugin }) => {
+const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlannerPlugin: boolean; onSave: (updatedTask: any) => void; onClose: () => void }> = ({ container, app, task, onSave, onClose, dayPlannerPlugin }) => {
 	const [title, setTitle] = useState(task.title);
 	const [due, setDue] = useState(task.due);
 	const [tag, setTag] = useState(task.tag); // Prepend # to tag
@@ -89,11 +89,123 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 	const subTasksWithTab = subTasks
 		.map((Line: string) => `\n\t${Line}`)
 
+	// Code to render the content of the Task in a Obsidian Markdown view.
 	if (dayPlannerPlugin) {
 		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${title} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}\n${subTasksWithTab}`;
 	} else {
 		newTaskContent = `- [] ${title} |${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''}${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}${subTasksWithTab}`;
 	}
+	// Reference to the HTML element where markdown will be rendered
+	const previewContainerRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (previewContainerRef.current) {
+			// Clear previous content before rendering new markdown
+			previewContainerRef.current.innerHTML = '';
+
+			// Use the MarkdownRenderer.render() method
+			MarkdownRenderer.render(
+				app,                   // The app object
+				newTaskContent,         // The markdown content
+				previewContainerRef.current, // The element to append to
+				task.filePath,                     // Source path (leave empty if not needed)
+				container                    // The parent component (this modal instance)
+			);
+		}
+	}, [newTaskContent]); // Re-render when newTaskContent changes
+
+	// console.log("The difference between, task.filePath : ", task.filePath, " | And app.vault.getAbstractFileByPath(task.filePath) : ", app.vault.getAbstractFileByPath(task.filePath));
+	// const data = app.vault.getFileByPath(task.filePath);
+	// console.log("The content of file : ", data);
+
+
+	// FOR THE FILE PREVIEW FUNCTIONALITY
+	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
+	// const [isPreviewVisible, setIsPreviewVisible] = useState(false);  // Track popup visibility
+	// Key press listeners for CTRL/CMD
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey || e.metaKey) {
+				setIsCtrlPressed(true);
+			}
+		};
+
+		const handleKeyUp = () => {
+			setIsCtrlPressed(false);
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keyup', handleKeyUp);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('keyup', handleKeyUp);
+		};
+	}, []);
+
+	// Reference to the HTML element where the hover preview will be rendered
+	// const hoverPopoverRef = useRef<HTMLDivElement>(null);
+
+	// const handleMouseEnter = async () => {
+	// 	if (!isCtrlPressed) return;  // Only open popup if CTRL/CMD is pressed
+	// 	const file = app.vault.getAbstractFileByPath(task.filePath);
+
+	// 	console.log("Mouse entered on the Open File Button...");
+
+	// 	if (file instanceof TFile) {
+	// 		try {
+	// 			// Read the content of the file
+	// 			const fileContent = await app.vault.read(file);
+
+	// 			// Clear the previous content if necessary (optional)
+	// 			if (hoverPopoverRef.current) {
+	// 				hoverPopoverRef.current.innerHTML = ''; // Optional: clear previous content
+	// 			}
+
+	// 			// const markdownPreviewHover = new MarkdownPreviewView(container);
+	// 			const parent: HoverParent = HTMLElement;
+	// 			const markdownPreviewHover = new HoverPopover(parent, hoverPopoverRef, 1);
+	// 			// hoverPopoverRef.hoverPopover = markdownPreviewHover.hoverPopover;
+
+	// 			// Render the file content as a markdown preview
+	// 			MarkdownPreviewView.render(
+	// 				app,
+	// 				fileContent,              // File content as markdown
+	// 				hoverPopoverRef.current,   // HTML element to render preview
+	// 				task.filePath,             // File path for reference
+	// 				container                  // Modal/container element
+	// 			);
+	// 		} catch (error) {
+	// 			console.error("Error reading file content:", error);
+	// 		}
+	// 	}
+	// };
+
+	// // TODO : This feature is not working, since the popup is not coming on the top of the 
+	// const handleMouseEnter = async (event: React.MouseEvent) => {
+	// 	const element = document.getElementById('EditTaskModalHomeOpenFileBtn');
+	// 	if (element) {
+	// 		app.workspace.trigger('hover-link', {
+	// 			event,                    // The original mouse event
+	// 			source: "EditTaskModalHome",      // Source of the hover
+	// 			hoverParent: element,      // The element that triggered the hover
+	// 			targetEl: element,         // The element to be hovered (same as parent in this case)
+	// 			linktext: task.filePath,   // The file path to preview
+	// 			sourcePath: task.filePath  // The source path (same as file path here)
+	// 		});
+	// 	}
+	// };
+
+
+	// const handleMouseLeave = () => {
+	// 	if (hoverPopoverRef.current) {
+	// 		console.log("Mouse entered on the Open File Button...");
+	// 		hoverPopoverRef.current.hide();
+	// 	}
+	// };
+
+	// const handleMouseLeave = () => {
+	// 	setIsPreviewVisible(false);  // Hide the popup when mouse leaves
+	// };
 
 	return (
 		<div className="EditTaskModalHome">
@@ -130,7 +242,7 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 									size={15}
 									enableBackground={0}
 									opacity={0.7}
-									style={{marginInlineStart: '0.8em'}}
+									style={{ marginInlineStart: '0.8em' }}
 									title="Delete Sub-Task"
 									onClick={() => removeSubTask(index)}
 									cursor={'pointer'}
@@ -144,10 +256,17 @@ const EditTaskContent: React.FC<{ app: App, task: any, dayPlannerPlugin: boolean
 						<h3 style={{ margin: 0 }}>File Preview</h3>
 						<div className="fileContentContainer" ref={fileContentRef}>
 							<h6>Parent File Location : {task.filePath}</h6>
-							<div className="fileContent">
-								{newTaskContent}
+							<div className="EditTaskModalHomePreview" ref={previewContainerRef}>
+								{/* The markdown content will be rendered here */}
 							</div>
-							<button className="EditTaskModalHomeOpenFileBtn" onClick={() => app.workspace.openLinkText(task.filePath, "")}>Open File</button>
+
+							<button className="EditTaskModalHomeOpenFileBtn"
+								id="EditTaskModalHomeOpenFileBtn"
+								// onMouseEnter={handleMouseEnter}
+								// onMouseOver={handleMouseEnter}
+								// onClick={() => app.workspace.openLinkText(task.filePath, "")}
+								onClick={() => isCtrlPressed ? app.workspace.openLinkText('', task.filePath, 'window') : app.workspace.openLinkText('', task.filePath, false)}
+							>Open File</button>
 						</div>
 					</div>
 				</div>
@@ -217,6 +336,7 @@ export class EditTaskModal extends Modal {
 		const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
 
 		root.render(<EditTaskContent
+			container={container}
 			app={this.app}
 			task={this.task}
 			dayPlannerPlugin={dayPlannerPlugin}

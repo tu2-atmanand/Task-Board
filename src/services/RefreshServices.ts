@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import { App } from "obsidian";
 import { KanbanView } from "src/views/KanbanView";
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
 import { loadTasksFromJson } from "src/utils/TaskItemUtils";
 import { refreshBoardData } from "src/utils/BoardOperations";

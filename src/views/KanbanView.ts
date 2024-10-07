@@ -5,7 +5,7 @@ import { ItemView, Vault, WorkspaceLeaf } from "obsidian";
 import { Board } from "src/interfaces/KanbanBoard";
 import KanbanBoard from "src/components/KanbanBoard";
 import ReactDOM from "react-dom/client";
-import TaskBoard from "../../main";
+import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
 import { loadBoardsData } from "src/utils/SettingsOperations";
 import { openReScanVaultModal } from "../services/OpenModals";
@@ -88,7 +88,7 @@ export class KanbanView extends ItemView {
 // import KanbanBoard from "../components/KanbanBoard";
 // import React from "react";
 // import ReactDOM from "react-dom/client"; // Ensure this import is correct for React 18+
-// import TaskBoard from "../../main";
+// import type TaskBoard from "../../main";
 
 // export const VIEW_TYPE_TASKBOARD = "task-board-view";
 

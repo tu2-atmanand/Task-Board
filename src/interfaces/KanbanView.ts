@@ -1,19 +1,26 @@
 import { BoardConfig } from "./KanbanBoard";
 
 export interface globalSettingsData {
-	defaultColumnNames: {
-		today: string;
-		tomorrow: string;
-		future: string;
-		undated: string;
-		otherTags: string;
-		untagged: string;
-		completed: string;
+	scanFilters: {
+		files: {
+			polarity: number;
+			values: string[];
+		};
+		folders: {
+			polarity: number;
+			values: string[];
+		};
+		tags: {
+			polarity: number;
+			values: string[];
+		};
 	};
-	filters: string[];
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskCompletionFormat: string;
+	taskCompletionDateTimePattern: string;
+	dailyNotesPluginComp: boolean;
+	dueDateFormat: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
 	autoAddDue: boolean;
@@ -36,19 +43,26 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 	data: {
 		boardConfigs: [],
 		globalSettings: {
-			defaultColumnNames: {
-				today: "",
-				tomorrow: "",
-				future: "",
-				undated: "",
-				otherTags: "",
-				untagged: "",
-				completed: "",
+			scanFilters: {
+				files: {
+					polarity: 0,
+					values: [],
+				},
+				folders: {
+					polarity: 0,
+					values: [],
+				},
+				tags: {
+					polarity: 0,
+					values: [],
+				},
 			},
-			filters: [],
 			firstDayOfWeek: "Mon",
 			ignoreFileNameDates: false,
-			taskCompletionFormat: "ObsidianTasks",
+			taskCompletionFormat: "",
+			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
+			dailyNotesPluginComp: false,
+			dueDateFormat: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
 			autoAddDue: false,

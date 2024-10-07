@@ -1,4 +1,7 @@
+import { App } from "obsidian";
+
 export interface TaskProps {
+	app: App;
 	task: taskItem;
 	onEdit: () => void;
 	onDelete: () => void;

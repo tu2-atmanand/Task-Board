@@ -12,6 +12,7 @@ import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { loadGlobalSettings } from 'src/utils/SettingsOperations';
 import { refreshBoardData } from 'src/utils/BoardOperations';
 import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -21,6 +22,7 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 }
 
 const Column: React.FC<ColumnPropsWithSetBoards> = ({
+	app,
 	activeBoard,
 	colType,
 	data,
@@ -31,6 +33,8 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 }) => {
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
+	let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
+	globalSettings = globalSettings.data.globalSettings;
 
 	// Sync local tasks state with external tasks when they change
 	useEffect(() => {
@@ -55,12 +59,13 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		if (updatedTask.completed) {
 			const taskWithCompleted = { ...updatedTask, completed: "" };
 			// Move from Completed to Pending
-			moveFromCompletedToPending(updatedTask);
+			moveFromCompletedToPending(taskWithCompleted);
 			updateTaskInFile(taskWithCompleted, taskWithCompleted);
 		} else {
-			const taskWithCompleted = { ...updatedTask, completed: moment().format("YYYY-MM-DDTHH:mm"), };
+			console.log("The format give by user for completion date : ", globalSettings?.taskCompletionDateTimePattern, " | The date-time i have got from the moment library : ", moment().format(globalSettings?.taskCompletionDateTimePattern));
+			const taskWithCompleted = { ...updatedTask, completed: moment().format(globalSettings?.taskCompletionDateTimePattern), };
 			// Move from Pending to Completed
-			moveFromPendingToCompleted(updatedTask);
+			moveFromPendingToCompleted(taskWithCompleted);
 			updateTaskInFile(taskWithCompleted, taskWithCompleted);
 		}
 
@@ -170,6 +175,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 				{tasks.length > 0 ? (
 					tasks.map((task, index) => (
 						<TaskItem
+							app={app}
 							key={index}
 							task={task}
 							onEdit={() => handleEditTask(task)}
