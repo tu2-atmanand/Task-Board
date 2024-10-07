@@ -1,9 +1,11 @@
 // /src/components/TaskItem.tsx
 
 import { FaEdit, FaTrash } from 'react-icons/fa'; // Import the desired icons from react-icons
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TaskProps, taskItem } from '../interfaces/TaskItem';
 
+import { Component } from 'obsidian';
+import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItem';
 
@@ -89,6 +91,75 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 		setIsDescriptionExpanded(!isDescriptionExpanded);
 	};
 
+	const taskItemBodyDescriptionRenderer = useRef<HTMLDivElement>(null);
+	const subtaskTextRefs = useRef<(HTMLDivElement | null)[]>([]);  // Store refs for each subtask text element
+	const componentRef = useRef<Component | null>(null);
+	useEffect(() => {
+		// Initialize Obsidian Component on mount
+		componentRef.current = new Component();
+		componentRef.current.load();
+
+		return () => {
+			// Cleanup the component on unmount
+			componentRef.current?.unload();
+		};
+	}, []);
+
+	useEffect(() => {
+		// Render subtasks after componentRef is initialized
+		subTasks.forEach((subtaskText, index) => {
+			const element = subtaskTextRefs.current[index];
+			if (element && componentRef.current) {
+				element.innerHTML = '';
+
+				subtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+
+				MarkdownUIRenderer.renderSubtaskText(
+					app,
+					subtaskText, // Pass individual subtask text here
+					element,
+					task.filePath,
+					componentRef.current
+				);
+			}
+		});
+	}, [subTasks, task.filePath, app]);
+
+	useEffect(() => {
+		if (taskItemBodyDescriptionRenderer.current && componentRef.current) {
+			taskItemBodyDescriptionRenderer.current.innerHTML = ''; // Clear existing content
+
+			// Call the MarkdownUIRenderer to render the description
+			MarkdownUIRenderer.renderTaskDisc(
+				app,
+				taskDesc.join('\n'),
+				taskItemBodyDescriptionRenderer.current, // Use HTMLDivElement reference
+				task.filePath,
+				componentRef.current // Pass the Component instance
+			);
+		}
+	}, [taskDesc, task.filePath, app]);
+
+
+	// // Reference to the HTML element where markdown will be rendered
+	// const previewContainerRef = useRef<HTMLDivElement>(null);
+	// const container = document.createElement("div");
+	// useEffect(() => {
+	// 	if (previewContainerRef.current) {
+	// 		// Clear previous content before rendering new markdown
+	// 		previewContainerRef.current.innerHTML = '';
+
+	// 		// Use the MarkdownRenderer.render() method
+	// 		MarkdownRenderer.render(
+	// 			app,                   // The app object
+	// 			taskDescriptionContent,         // The markdown content
+	// 			previewContainerRef.current, // The element to append to
+	// 			task.filePath,                     // Source path (leave empty if not needed)
+	// 			container                    // The parent component (this modal instance)
+	// 		);
+	// 	}
+	// }, [isDescriptionExpanded]); // Re-render when newTaskContent changes
+
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemEditIconBtn');
 		if (element) {
@@ -120,16 +191,21 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 								<div className="taskItemBodySubtaskItem" key={index}>
 									<input
 										type="checkbox"
+										className="taskItemBodySubtaskItemCheckbox"
 										checked={isCompleted}
 										onChange={() => handleSubtaskCheckboxChange(index, isCompleted)}
 									/>
-									<span>{subtaskText}</span>
+									{/* Render each subtask separately */}
+									<div
+										className="subtaskTextRenderer"
+										ref={(el) => (subtaskTextRefs.current[index] = el)}  // Assign each subtask its own ref
+									/>
 								</div>
 							);
 						})}
 
 						{/* Touchable Description element */}
-						{taskDesc.length > 0 && (
+						{taskDesc.length > 0 && taskDesc.at(0) !== "" && (
 							<div
 								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer' }}
 								onClick={toggleDescription}
@@ -141,11 +217,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 						{/* Render remaining body content with expand/collapse animation */}
 						<div className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
 						>
-							{taskDesc.map((line, index) => (
-								<div key={subTasks.length + index}>
-									<span>{line}</span>
-								</div>
-							))}
+							<div className="taskItemBodyDescriptionRenderer" ref={taskItemBodyDescriptionRenderer} />
 						</div>
 					</>
 				);
@@ -193,7 +265,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 							{task.due ? `📅${task.due}` : ''}
 						</div>
 					)}
-					<div id="taskItemEditIconBtn" className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+					<div id="taskItemEditIconBtn" className="taskItemFooterBtns" onMouseEnter={handleMouseEnter}>
 						<div className="taskItemiconButton">
 							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
 						</div>
