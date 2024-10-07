@@ -231,22 +231,33 @@
       }
     ],
     "globalSettings": {
-      "defaultColumnNames": {
-        "Undated": "",
-        "Overdue": "Kal",
-        "Today": "Todu",
-        "Tomorrow": "",
-        "Future": "",
-        "Other Tags": "",
-        "Untagged": "",
-        "Completed": ""
+      "scanFilters": {
+        "files": {
+          "polarity": 2,
+          "values": [
+            "MyReadme"
+          ]
+        },
+        "folders": {
+          "polarity": 2,
+          "values": [
+            "Daily_Notes"
+          ]
+        },
+        "tags": {
+          "polarity": 1,
+          "values": [
+            "#Test",
+            "#important"
+          ]
+        }
       },
-      "filters": [
-        "MyReadme.md, Daily/, New.md"
-      ],
-      "firstDayOfWeek": "1",
+      "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "Obsidian",
+      "taskCompletionFormat": "4",
+      "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
+      "dailyNotesPluginComp": false,
+      "dueDateFormat": "yyyy-MM-DD",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": true,
       "autoAddDue": true,

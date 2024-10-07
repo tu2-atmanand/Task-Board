@@ -3,9 +3,10 @@
 import { App, TFile } from "obsidian";
 
 import { ScanningVault } from "src/utils/ScanningVault";
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import fs from "fs";
 import path from "path";
+import { scanFilterForFilesNFolders } from "./Checker";
 
 export class RealTimeScanning {
 	app: App;
@@ -114,44 +115,73 @@ export class RealTimeScanning {
 		) as TFile;
 	}
 
-	async onFileChange(file: TFile, realTimeScanning: boolean) {
+	async onFileChange(
+		file: TFile,
+		realTimeScanning: boolean,
+		scanFilters: any
+	) {
 		if (file.extension === "md") {
 			console.log(`File modified: ${file.path}`);
-			// console.log("The value of realTimeScanning : ", this.settings.data.globalSettings.realTimeScanning);
-			// console.log(
-			// 	"The data inside LocalStorage Before adding the new modified file : ",
-			// 	this.fileStack
-			// );
 
-			// If real-time scanning is enabled, scan the file immediately
-			if (realTimeScanning) {
-				console.log(
-					"Reat-Time Scanning is ON. Scanning following file : ",
-					file
-				);
-				this.scanningVault.updateTasksFromFiles([file]);
-			} else {
-				// console.log(
-				// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.fileStack.includes(file.path) : ",
-				// 	!this.fileStack.includes(file.path)
-				// );
-				// If the file is already in the stack, ignore it
-				console.log(
-					"The value of localStorage before adding updated file : ",
-					this.fileStack
-				);
+			// // Separate the parent folder and file name from the file path
+			// const filePathParts = file.path.split("/");
+			// const fileName = filePathParts.pop(); // Extract file name
+			// const parentFolder = filePathParts.join("/") + "/"; // Rebuild the parent folder path
 
-				if (this.fileStack.at(0) === undefined) {
-					this.fileStack.push(file.path); // Add the file to the stack
-				} else if (!this.fileStack.includes(file.path)) {
-					this.fileStack.push(file.path);
-					await this.saveStack(); // Save the updated stack
-				} else {
+			// console.log("The fileName is : ", fileName);
+			// console.log("The parentFolder is : ", parentFolder);
+			
+			// // Check folder filters
+			// const folderInFilters =
+			// 	scanFilters.folders.values.includes(parentFolder);
+			// const folderCheckPass =
+			// 	(folderInFilters && scanFilters.folders.polarity !== 2) ||
+			// 	!folderInFilters;
+
+			// // Check file filters
+			// const fileInFilters = scanFilters.files.values.includes(fileName);
+			// const fileCheckPass =
+			// 	(fileInFilters && scanFilters.files.polarity !== 2) ||
+			// 	!fileInFilters;
+
+			// If both checks pass, proceed with the scanning logic
+			if (scanFilterForFilesNFolders(file, scanFilters)) {
+				// If real-time scanning is enabled, scan the file immediately
+				if (realTimeScanning) {
 					console.log(
-						"The file alrady exists in fileStack : ",
-						file.path
+						"Real-Time Scanning is ON. Scanning following file:",
+						file
 					);
+					this.scanningVault.updateTasksFromFiles([file]);
+				} else {
+					// console.log(
+					// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.fileStack.includes(file.path) : ",
+					// 	!this.fileStack.includes(file.path)
+					// );
+					
+					// If the file is already in the stack, ignore it
+					console.log(
+						"The value of fileStack before adding updated file:",
+						this.fileStack
+					);
+
+					if (this.fileStack.at(0) === undefined) {
+						this.fileStack.push(file.path); // Add the file to the stack
+					} else if (!this.fileStack.includes(file.path)) {
+						this.fileStack.push(file.path);
+						await this.saveStack(); // Save the updated stack
+					} else {
+						console.log(
+							"The file already exists in fileStack:",
+							file.path
+						);
+					}
 				}
+			} else {
+				console.log(
+					"The file is not allowed for Scanning : ",
+					file.path
+				);
 			}
 		}
 	}

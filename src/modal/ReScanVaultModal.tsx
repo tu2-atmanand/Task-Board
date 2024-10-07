@@ -5,16 +5,18 @@ import React, { useEffect, useState } from "react";
 
 import ReactDOM from "react-dom/client";
 import { ScanningVault } from "src/utils/ScanningVault";
-import TaskBoard from "main";
+import type TaskBoard from "main";
+import { scanFilterForFilesNFolders } from "src/utils/Checker";
 import { tasksJson } from "src/interfaces/TaskItem";
 
 interface ReScanVaultModalProps {
 	app: App;
 }
 
-const ReScanVaultModalContent: React.FC<{ app: App; scanningVault: ScanningVault }> = ({ app, scanningVault }) => {
+const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
 	// collectedTasks: any = { Pending: {}, Completed: {} };
 	scanningVault: ScanningVault;
+	plugin: TaskBoard;
 
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
@@ -32,9 +34,14 @@ const ReScanVaultModalContent: React.FC<{ app: App; scanningVault: ScanningVault
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
-			setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
-
-			await scanningVault.extractTasksFromFile(file, scanningVault.tasks);
+			
+			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
+			console.log("ReScanVaultModalContent: The value of scanFilters from plugin.setting : ", scanFilters);
+			
+			if (scanFilterForFilesNFolders(file, scanFilters)) {
+				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
+				await scanningVault.extractTasksFromFile(file, scanningVault.tasks, scanFilters);
+			}
 
 			setProgress(((i + 1) / files.length) * 100); // Update progress
 		}
@@ -110,6 +117,7 @@ export class ReScanVaultModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		console.log("ReScanVaultModal : Opening the Modal...");
+		console.log("The settings loaded using plugin.setting method : ", this.plugin.settings);
 
 		const container = document.createElement("div");
 		contentEl.appendChild(container);
@@ -118,6 +126,7 @@ export class ReScanVaultModal extends Modal {
 
 		root.render(<ReScanVaultModalContent
 			app={this.app}
+			plugin={this.plugin}
 			scanningVault={this.scanningVault}
 		/>);
 

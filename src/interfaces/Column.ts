@@ -1,6 +1,8 @@
+import { App } from "obsidian";
 import { taskItem } from "./TaskItem";
 
 export interface ColumnProps {
+	app: App;
 	activeBoard: number;
 	colType: string;
 	active?: boolean;
