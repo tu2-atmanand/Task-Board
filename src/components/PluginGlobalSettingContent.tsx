@@ -2,16 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 
-import { globalSettingsData } from "src/interfaces/KanbanView";
 import fs from "fs/promises"; // Changed to use promises-based API
-import path from "path";
+import { globalSettingsData } from "src/interfaces/KanbanView";
 import { loadGlobalSettings } from "src/utils/SettingsOperations";
+import path from "path";
 
 const dataFilePath = path.join(
 	(window as any).app.vault.adapter.basePath,
 	".obsidian",
 	"plugins",
-	"Task-Board",
+	"task-board",
 	"data.json"
 );
 

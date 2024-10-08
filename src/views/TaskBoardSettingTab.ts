@@ -14,7 +14,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		(window as any).app.vault.adapter.basePath,
 		".obsidian",
 		"plugins",
-		"Task-Board",
+		"task-board",
 		"data.json"
 	);
 	globalSettings: globalSettingsData | null = null;

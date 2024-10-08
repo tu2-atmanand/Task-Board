@@ -30,9 +30,12 @@ import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import fs from "fs";
-// import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 import path from "path";
 import { refreshKanbanBoard } from "src/services/RefreshServices";
+
+// import { loadGlobalSettings } from "src/utils/TaskItemUtils";
+
+
 
 export default class TaskBoard extends Plugin {
 	settings: GlobalSettings = DEFAULT_SETTINGS;
@@ -43,7 +46,7 @@ export default class TaskBoard extends Plugin {
 		(window as any).app.vault.adapter.basePath,
 		".obsidian",
 		"plugins",
-		"Task-Board",
+		"task-board",
 		"file-stack.json"
 	);
 	scanTimer: number;
@@ -73,7 +76,7 @@ export default class TaskBoard extends Plugin {
 					.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
 			}
 		);
-		ribbonIconEl.addClass("Task-Board-ribbon-class");
+		ribbonIconEl.addClass("task-board-ribbon-class");
 
 		// Register a new command to open AddTaskModal
 		this.addCommand({

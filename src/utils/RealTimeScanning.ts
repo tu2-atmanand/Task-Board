@@ -23,7 +23,7 @@ export class RealTimeScanning {
 			(window as any).app.vault.adapter.basePath,
 			".obsidian",
 			"plugins",
-			"Task-Board",
+			"task-board",
 			"file-stack.json"
 		);
 		this.scanTimer = 0;
