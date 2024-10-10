@@ -1,13 +1,13 @@
 // /src/utils/TaskItemUtils.ts
 
-import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
+import { priorityEmojis, taskItem, tasksJson } from "src/interfaces/TaskItem";
 
+import { App } from "obsidian";
+import TaskBoard from "main";
 import fs from "fs";
 import { loadGlobalSettings } from "./SettingsOperations";
 import path from "path";
 import { tasksPath } from "src/interfaces/GlobalVariables";
-
-// utils/TaskItemUtils.ts
 
 export const loadTasksFromJson = (): {
 	allTasksWithStatus: taskItem[];
@@ -58,6 +58,119 @@ export const loadTasksFromJson = (): {
 		console.error("Error reading tasks.json:", error);
 		return { allTasksWithStatus: [], pendingTasks: [], completedTasks: [] };
 	}
+};
+
+// export const loadTasksUsingObsidianMethod = async (
+// 	plugin: TaskBoard
+// ): Promise<{ allTasks: tasksJson }> => {
+// 	const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+// 	try {
+// 		const data: string = await plugin.app.vault.adapter.read(path); // Await the promise
+// 		const parsedData: tasksJson = JSON.parse(data);
+// 		return { allTasks: parsedData };
+// 	} catch (error) {
+// 		console.error("Failed to load tasks from tasks.json:", error);
+// 		throw error;
+// 	}
+// };
+
+// export const loadJustTheData = (plugin: TaskBoard) : (
+// 	allTasks: tasksJson
+// ) => {
+// 	loadTasksUsingObsidianMethod(plugin)
+// 		.then(({ allTasks }) => {
+// 			// console.log(allTasks); // Access the data here
+// 			return allTasks;
+// 		})
+// 		.catch((error) => {
+// 			console.error("Error while loading tasks:", error);
+// 			return {};
+// 		});
+// };
+
+export const taskElementsFormatter = (updatedTask: taskItem) => {
+	let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
+	globalSettings = globalSettings.data.globalSettings;
+	const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
+
+	let dueDateWithFormat = "";
+	let completedWitFormat = "";
+	if (updatedTask.due || updatedTask.completed) {
+		if (globalSettings?.taskCompletionFormat === "1") {
+			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
+			completedWitFormat = updatedTask.completed
+				? ` ✅${updatedTask.completed} `
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "2") {
+			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
+			completedWitFormat = updatedTask.completed
+				? ` ✅ ${updatedTask.completed} `
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "3") {
+			dueDateWithFormat = updatedTask.due
+				? ` [due:: ${updatedTask.due}]`
+				: "";
+			completedWitFormat = updatedTask.completed
+				? ` [completion:: ${updatedTask.completed}] `
+				: "";
+		} else {
+			dueDateWithFormat = updatedTask.due
+				? ` @due(${updatedTask.due})`
+				: "";
+			completedWitFormat = updatedTask.completed
+				? ` @completion(${updatedTask.completed}) `
+				: "";
+		}
+	}
+
+	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
+	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
+
+	// Combine priority emoji if it exists
+	const priorityWithEmo =
+		updatedTask.priority > 0
+			? priorityEmojis[updatedTask.priority as number]
+			: "";
+
+	// Build the formatted string for the main task
+	let formattedTask = "";
+	if (dayPlannerPlugin) {
+		formattedTask = `${checkBoxStat} ${
+			updatedTask.time ? `${updatedTask.time} ` : ""
+		}${updatedTask.title} |${dueDateWithFormat} ${priorityWithEmo} ${
+			updatedTask.tag
+		}${completedWitFormat}`;
+	} else {
+		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWitFormat}`;
+	}
+
+	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+	const bodyLines = updatedTask.body
+		.filter(
+			(line: string) =>
+				!line.startsWith("- [ ]") && !line.startsWith("- [x]")
+		)
+		.map((line: string) => `\t${line}`)
+		.join("\n");
+
+	// Add the sub-tasks without additional indentation
+	const subTasksWithTab = updatedTask.body
+		.filter(
+			(line: string) =>
+				line.startsWith("- [ ]") || line.startsWith("- [x]")
+		)
+		.map((Line: string) => `\t${Line}`)
+		.join("\n");
+
+	// console.log("If i there is not subTask to the file and there was no line in the Description, then here there shouldnt be anything if i have added a fresh bullete point in the Desc : ", subTasksWithTab);
+
+	// Combine all parts: main task, body, and sub-tasks
+	// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}`;
+	const completeTask = `${formattedTask}${
+		bodyLines.trim() ? `\n${bodyLines}` : ""
+	}\n${subTasksWithTab}`;
+
+	return completeTask;
 };
 
 // For handleCheckboxChange
@@ -135,41 +248,6 @@ export const moveFromCompletedToPending = (task: taskItem) => {
 	}
 };
 
-/*
-export const markTaskCompleteInFile = (task: taskItem) => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const filePath = path.join(basePath, task.filePath);
-
-	try {
-		const fileContent = fs.readFileSync(filePath, "utf8");
-		let newContent = "";
-
-		// Create a regex to match the task line based on the task title
-		const taskRegex = new RegExp(
-			`^- \\[([ x])\\] .*?${task.title}.*$`,
-			"m"
-		);
-
-		// Replace the checkbox based on the task.completed status
-		if (task.completed) {
-			// Mark the task as incomplete
-			newContent = fileContent.replace(taskRegex, (match, checkbox) =>
-				match.replace("[x]", "[ ]")
-			);
-		} else {
-			// Mark the task as complete
-			newContent = fileContent.replace(taskRegex, (match, checkbox) =>
-				match.replace("[ ]", "[x]")
-			);
-		}
-
-		fs.writeFileSync(filePath, newContent);
-	} catch (error) {
-		console.error("Error marking task in file:", error);
-	}
-};
-*/
-
 // For handleDeleteTask
 
 export const deleteTaskFromFile = (task: taskItem) => {
@@ -232,7 +310,7 @@ export const deleteTaskFromJson = (task: taskItem) => {
 	}
 };
 
-// For handleEditTask
+// For handleAddOrEditTask
 
 export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 	console.log("oldTask i have received for updating in md file : ", oldTask);
@@ -240,76 +318,9 @@ export const updateTaskInFile = (updatedTask: taskItem, oldTask: taskItem) => {
 
 	const basePath = (window as any).app.vault.adapter.basePath;
 	const filePath = path.join(basePath, updatedTask.filePath);
-	let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
-	globalSettings = globalSettings.data.globalSettings;
-	const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
-
-	let dueDateWithFormat = "";
-	let completedWitFormat = "";
-	if (updatedTask.due || updatedTask.completed) {
-		if (globalSettings?.taskCompletionFormat === "1") {
-			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completed ? ` ✅${updatedTask.completed} `: "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
-			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completed ? ` ✅ ${updatedTask.completed} ` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
-			dueDateWithFormat = updatedTask.due ? ` [due:: ${updatedTask.due}]` : "";
-			completedWitFormat = updatedTask.completed ? ` [completion:: ${updatedTask.completed}] ` : "";
-		} else {
-			dueDateWithFormat = updatedTask.due ? ` @due(${updatedTask.due})` : "";
-			completedWitFormat = updatedTask.completed ? ` @completion(${updatedTask.completed}) ` : "";
-		}
-	}
-
-	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
-	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
-
-	// Combine priority emoji if it exists
-	const priorityWithEmo =
-		updatedTask.priority > 0
-			? priorityEmojis[updatedTask.priority as number]
-			: "";
-
-	// Build the formatted string for the main task
-	let formattedTask = "";
-	if (dayPlannerPlugin) {
-		formattedTask = `${checkBoxStat} ${
-			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${updatedTask.title} |${dueDateWithFormat} ${priorityWithEmo} ${
-			updatedTask.tag
-		}${completedWitFormat}`;
-	} else {
-		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWitFormat}`;
-	}
-
-	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = updatedTask.body
-		.filter(
-			(line: string) =>
-				!line.startsWith("- [ ]") && !line.startsWith("- [x]")
-		)
-		.map((line: string) => `\t${line}`)
-		.join("\n");
-
-	// Add the sub-tasks without additional indentation
-	const subTasksWithTab = updatedTask.body
-		.filter(
-			(line: string) =>
-				line.startsWith("- [ ]") || line.startsWith("- [x]")
-		)
-		.map((Line: string) => `\t${Line}`)
-		.join("\n");
-
-	// console.log("If i there is not subTask to the file and there was no line in the Description, then here there shouldnt be anything if i have added a fresh bullete point in the Desc : ", subTasksWithTab);
-
-	// Combine all parts: main task, body, and sub-tasks
-	// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}`;
-	const completeTask = `${formattedTask}${
-		bodyLines.trim() ? `\n${bodyLines}` : ""
-	}\n${subTasksWithTab}`;
 
 	try {
+		const completeTask = taskElementsFormatter(updatedTask);
 		// Read the file content
 		const fileContent = fs.readFileSync(filePath, "utf8");
 		let taskRegex = "";
@@ -407,5 +418,74 @@ export const updateTaskInJson = (updatedTask: taskItem) => {
 		fs.writeFileSync(tasksPath, JSON.stringify(updatedData, null, 2));
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
+	}
+};
+
+// Generate a unique ID for each task
+export const generateTaskId = (): number => {
+	const array = new Uint32Array(1);
+	crypto.getRandomValues(array);
+	console.log("The random value generated : ", array[0]);
+	return array[0];
+};
+
+export const addTaskInJson = (newTask: taskItem) => {
+	const tasksData = fs.readFileSync(tasksPath, "utf8");
+	const allTasks = JSON.parse(tasksData);
+
+	const newTaskWithId = {
+		...newTask,
+		id: generateTaskId(),
+		filePath: newTask.filePath,
+		completed: "", // This will be updated when task is marked as complete
+	};
+
+	// Update the task list (assuming it's a file-based task structure)
+	if (!allTasks.Pending[newTask.filePath]) {
+		allTasks.Pending[newTask.filePath] = [];
+	}
+	console.log("New task which i will going to add : ", newTaskWithId);
+
+	allTasks.Pending[newTask.filePath].push(newTaskWithId);
+	fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
+};
+
+export const addTaskInFile = (app: App, newTask: taskItem) => {
+	console.log("New Task i have received: ", newTask);
+
+	const basePath = (window as any).app.vault.adapter.basePath;
+	const filePath = path.join(basePath, newTask.filePath);
+
+	try {
+		const completeTask = taskElementsFormatter(newTask);
+
+		// Get the active editor and the current cursor position
+		const activeEditor = app.workspace.activeEditor?.editor;
+		if (!activeEditor) {
+			throw new Error("No active editor found.");
+		}
+		const cursorPosition = activeEditor.getCursor();
+
+		// Read the file content
+		const fileContent = fs.readFileSync(filePath, "utf8");
+
+		// Split file content into an array of lines
+		const fileLines = fileContent.split("\n");
+
+		// Insert the new task at the cursor line position
+		fileLines.splice(cursorPosition.line, 0, completeTask);
+
+		// Join the lines back into a single string
+		const newContent = fileLines.join("\n");
+
+		console.log(
+			"Following is the New Content, which you will see after update:\n",
+			completeTask
+		);
+
+		// Write the updated content back to the file
+		fs.writeFileSync(filePath, newContent);
+	} catch (error) {
+		console.error("Error updating task in file:", error);
 	}
 };
