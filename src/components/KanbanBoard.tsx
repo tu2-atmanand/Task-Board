@@ -12,7 +12,6 @@ import Column from "./Column";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
-import { refreshKanbanBoard } from "src/services/RefreshServices";
 import { renderColumns } from "src/utils/RenderColumns"; // Adjust the path accordingly
 import { taskItem } from "src/interfaces/TaskItem";
 

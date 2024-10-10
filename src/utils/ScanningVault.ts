@@ -8,7 +8,6 @@ import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItem";
-import { refreshKanbanBoard } from "src/services/RefreshServices";
 import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {

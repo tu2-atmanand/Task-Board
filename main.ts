@@ -34,7 +34,6 @@ import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import path from "path";
-import { refreshKanbanBoard } from "src/services/RefreshServices";
 
 // import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 
