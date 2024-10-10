@@ -2,19 +2,21 @@
 
 import { App, Modal, Notice } from "obsidian";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
+import { DraggableProvided, DropResult } from 'react-beautiful-dnd';
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import AddColumnModal from "src/modal/AddColumnModal";
 import { Board } from "src/interfaces/KanbanBoard";
-import { GlobalSettings } from "src/interfaces/KanbanView";
-import PluginGlobalSettingContent from "src/components/PluginGlobalSettingContent";
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
+import { SettingsManager } from "src/services/TaskBoardSettingConstructUI";
+import TaskBoard from "main";
 
 interface ConfigModalProps {
 	app: App;
+	settingManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
 	onClose: () => void;
@@ -22,6 +24,8 @@ interface ConfigModalProps {
 }
 
 const ConfigModalContent: React.FC<ConfigModalProps> = ({
+	app,
+	settingManager,
 	boards,
 	activeBoardIndex,
 	onClose,
@@ -39,7 +43,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(
 		activeBoardIndex
 	);
-	const [settings, setSettings] = useState<GlobalSettings>({});
+	// const [settings, setSettings] = useState<GlobalSettings>();
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
@@ -56,7 +60,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		value: any
 	) => {
 		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex].columns[columnIndex].data[field] = value;
+		if (field in updatedBoards[boardIndex].columns[columnIndex].data) {
+			(updatedBoards[boardIndex].columns[columnIndex].data as any)[field] = value;
+		}
 		setLocalBoards(updatedBoards);
 	};
 
@@ -75,10 +81,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const handleToggleChange = (boardIndex: number, field: keyof Board, value: boolean) => {
 		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex][field] = value;
+		if (updatedBoards[boardIndex]) {
+			updatedBoards[boardIndex][field] = value;
+		}
 		setLocalBoards(updatedBoards);
 	};
-
 
 	// Function to add a new column to the selected board
 
@@ -182,13 +189,43 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Function to render global settings
-	const renderGlobalSettings = () => (
-		<div>
-			<h3>Task Board Plugin - Global Settings</h3>
-			<hr width="50%" size="2" color="olive" noshade="true"></hr>
-			<PluginGlobalSettingContent />
-		</div>
-	);
+	// useEffect(() => {
+	// 	console.log("Inside the useEffect to render Global Settings ...............");
+	// 	// <div>
+	// 	// 	<h3>Task Board Plugin - Global Settings</h3>
+	// 	// 	<hr width="50%" size="2" color="olive" noshade="true"></hr>
+	// 	// 	<PluginGlobalSettingContent />
+	// 	// </div>
+	// 	if (globalSettingsHTMLSection.current) {
+	// 		settingManager.constructUI(globalSettingsHTMLSection.current, "Plugin Global Settings");
+	// 	}
+	// }, [selectedBoardIndex === -1]);
+
+	// useEffect(() => {
+	// 	console.log("Outside the useEffect to render Global Settings ...............");
+
+	// 	if (globalSettingsHTMLSection.current) {
+	// 		globalSettingsHTMLSection.current.innerHTML = '';
+	// 	}
+	// }, [selectedBoardIndex !== -1]);
+
+	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (globalSettingsHTMLSection.current) {
+			if (selectedBoardIndex === -1) {
+				// Render global settings
+				settingManager.constructUI(globalSettingsHTMLSection.current, "Plugin Global Settings");
+			} else {
+				// Cleanup global settings UI
+				settingManager.cleanUp();
+				// globalSettingsHTMLSection.current.innerHTML = ''; // Clear the content
+				// globalSettingsHTMLSection.current.detach();
+				globalSettingsHTMLSection.current.remove();
+				// globalSettingsHTMLSection.current.removeClass("pluginGlobalSettingsTab");
+			}
+		}
+	}, [selectedBoardIndex]);
+
 
 	const toggleActiveState = (boardIndex: number, columnIndex: number) => {
 		const updatedBoards = [...localBoards];
@@ -442,7 +479,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<DragDropContext onDragEnd={onDragEnd}>
 					<div className="boardConfigModalMainContent">
 						{selectedBoardIndex === -1
-							? renderGlobalSettings()
+							? <div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
 							: renderBoardSettings(selectedBoardIndex)}
 					</div>
 				</DragDropContext>
@@ -453,12 +490,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 // BoardConfigureModal class for modal behavior
 export class BoardConfigureModal extends Modal {
+	root: ReactDOM.Root;
+	settingsManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
 	onSave: (updatedBoards: Board[]) => void;
+	// root: ReactDOM.Root;
 
 	constructor(
 		app: App,
+		plugin: TaskBoard,
 		boards: Board[],
 		activeBoardIndex: number,
 		onSave: (updatedBoards: Board[]) => void
@@ -467,15 +508,19 @@ export class BoardConfigureModal extends Modal {
 		this.boards = boards;
 		this.activeBoardIndex = activeBoardIndex;
 		this.onSave = onSave;
+		this.settingsManager = new SettingsManager(app, plugin);
+		const { contentEl } = this;
+		// this.root = null;
+		this.root = ReactDOM.createRoot(contentEl);
 	}
 
 	onOpen() {
-		const { contentEl } = this;
-		contentEl.empty();
-		const root = ReactDOM.createRoot(contentEl);
-		root.render(
+		// contentEl.empty();
+		// modalEl.addClass('global-settings-modal');
+		this.root.render(
 			<ConfigModalContent
 				app={this.app}
+				settingManager={this.settingsManager}
 				boards={this.boards}
 				activeBoardIndex={this.activeBoardIndex}
 				onClose={() => this.close()}
@@ -485,183 +530,22 @@ export class BoardConfigureModal extends Modal {
 	}
 
 	onClose() {
+		// Clean up React rendering
+		if (this.root) {
+			this.root.unmount();
+		}
+
+		// Clean up settings manager if needed
+		if (this.settingsManager) {
+			this.settingsManager.cleanUp();
+		}
+
+		// Clear the content element
 		const { contentEl } = this;
 		contentEl.empty();
+
+		// Call the super method to correctly close the modal
+		super.onClose();
 	}
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // /src/compoenents/BoardConfigureModal.tsx -------- Working - V1
-
-// import { App, Modal, Notice } from "obsidian";
-// import React, { useEffect, useState } from "react";
-
-// import { Board } from "src/interfaces/KanbanBoard";
-// import { GlobalSettings } from "src/interfaces/KanbanView";
-// import ReactDOM from "react-dom/client";
-
-// interface ConfigModalProps {
-// 	app: App;
-// 	boards: Board[];
-// 	activeBoardIndex: number;
-// 	onClose: () => void;
-// 	onSave: (updatedBoards: Board[]) => void;
-// }
-
-// // Define a React component for the modal content
-// const ConfigModalContent: React.FC<ConfigModalProps> = ({
-// 	boards,
-// 	activeBoardIndex,
-// 	onClose,
-// 	onSave
-// }) => {
-// 	const [localBoards, setLocalBoards] = useState<Board[]>(() => {
-// 		try {
-// 			return boards ? JSON.parse(JSON.stringify(boards)) : []; // Use an empty array as a fallback
-// 		} catch (e) {
-// 			console.error("Failed to parse boards:", e);
-// 			return [];
-// 		}
-// 	});
-
-// 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
-// 	const [settings, setSettings] = useState<GlobalSettings>({}); // Local state to store global settings
-
-// 	// Function to handle board name change
-// 	const handleBoardNameChange = (index: number, newName: string) => {
-// 		const updatedBoards = [...localBoards];
-// 		updatedBoards[index].name = newName;
-// 		setLocalBoards(updatedBoards);
-// 	};
-
-// 	// Function to add a new column to the selected board
-// 	const addColumnToBoard = (boardIndex: number) => {
-// 		const updatedBoards = [...localBoards];
-// 		updatedBoards[boardIndex].columns.push({
-// 			colType: "custom",
-// 			data: { collapsed: false, name: `Column ${updatedBoards[boardIndex].columns.length + 1}` }
-// 		});
-// 		setLocalBoards(updatedBoards);
-// 	};
-
-// 	// Function to save changes
-// 	const handleSave = () => {
-// 		onSave(localBoards);
-// 		onClose();
-// 	};
-
-// 	// Function to render global settings
-// 	const renderGlobalSettings = () => {
-// 		return (
-// 			<div>
-// 				<h3>Global Settings</h3>
-// 				{/* Here, render the global settings component */}
-// 				{/* Example: <GlobalSettingsComponent settings={settings} onSettingsChange={setSettings} /> */}
-// 			</div>
-// 		);
-// 	};
-
-// 	// Function to render board settings
-// 	const renderBoardSettings = (boardIndex: number) => {
-// 		const board = localBoards[boardIndex];
-// 		return (
-// 			<div>
-// 				<h3>{board.name} Settings</h3>
-// 				{/* Board configuration inputs */}
-// 				<input
-// 					type="text"
-// 					value={board.name}
-// 					onChange={(e) => handleBoardNameChange(boardIndex, e.target.value)}
-// 				/>
-// 				{board.columns.map((column, columnIndex) => (
-// 					<div key={columnIndex}>
-// 						<input
-// 							type="text"
-// 							value={column.data.name}
-// 							onChange={(e) => {
-// 								const updatedBoards = [...localBoards];
-// 								updatedBoards[boardIndex].columns[columnIndex].data.name = e.target.value;
-// 								setLocalBoards(updatedBoards);
-// 							}}
-// 						/>
-// 					</div>
-// 				))}
-// 				<button onClick={() => addColumnToBoard(boardIndex)}>+ Add Column</button>
-// 			</div>
-// 		);
-// 	};
-
-// 	return (
-// 		<div className="config-modal">
-// 			<div className="config-modal-sidebar">
-// 				<div onClick={() => setSelectedBoardIndex(-1)}>Global Settings</div>
-// 				{localBoards.map((board, index) => (
-// 					<div key={index} onClick={() => setSelectedBoardIndex(index)} className={index === selectedBoardIndex ? "active" : ""}>
-// 						{board.name}
-// 					</div>
-// 				))}
-// 			</div>
-// 			<div className="config-modal-content">
-// 				{selectedBoardIndex === -1 ? renderGlobalSettings() : renderBoardSettings(selectedBoardIndex)}
-// 				<button onClick={handleSave}>Save</button>
-// 				<button onClick={onClose}>Close</button>
-// 			</div>
-// 		</div>
-// 	);
-// };
-
-// // Define the modal class that integrates with Obsidian
-// export default class BoardConfigModal extends Modal {
-// 	boards: Board[];
-// 	activeBoardIndex: number;
-// 	onSave: (updatedBoards: Board[]) => void;
-
-// 	constructor(app: App, boards: Board[], activeBoardIndex: number, onSave: (updatedBoards: Board[]) => void) {
-// 		super(app);
-// 		this.boards = boards;
-// 		this.activeBoardIndex = activeBoardIndex;
-// 		this.onSave = onSave;
-// 	}
-
-// 	onOpen() {
-// 		const { contentEl } = this;
-// 		contentEl.empty();
-
-// 		// Create a container for React content
-// 		const container = document.createElement("div");
-// 		contentEl.appendChild(container);
-
-// 		const root = ReactDOM.createRoot(this.contentEl);
-
-// 		root.render(
-// 			<ConfigModalContent
-// 				app={this.app}
-// 				boards={this.boards}
-// 				activeBoardIndex={this.activeBoardIndex}
-// 				onClose={() => this.close()}
-// 				onSave={this.onSave}
-// 			/>
-// 		);
-// 	}
-
-// 	onClose() {
-// 		const { contentEl } = this;
-// 		contentEl.empty();
-// 	}
-// }
