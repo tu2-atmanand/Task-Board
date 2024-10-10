@@ -21,12 +21,12 @@
     ],
     "Spintly Details.md": [
       {
-        "id": 2557480714,
+        "id": 3898692235,
         "title": "Need to complete all the Documents work  and submit to TCS",
         "body": [
           "Just adding a normal line for this task as a body.",
           "This is an image in the body : ![[1721576562712.jpg]]",
-          "- [ ] Adding a first subtask, with **checked** state true.",
+          "- [x] Adding a first subtask, with **checked** state true.",
           "- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
         ],
         "time": "",
@@ -36,7 +36,7 @@
         "completed": ""
       },
       {
-        "id": 3570836813,
+        "id": 3544624575,
         "title": "Just a new Task without tag or date",
         "body": [
           "First normal line for body is added.",
@@ -47,7 +47,7 @@
           "- [ ] Adding another subTask, second one"
         ],
         "time": "10:30 - 11:30",
-        "due": "2024-10-08",
+        "due": "2024-10-11",
         "tag": "#Test",
         "filePath": "Spintly Details.md",
         "completed": ""
@@ -55,7 +55,7 @@
     ],
     "Pending Document Work.md": [
       {
-        "id": 4186280784,
+        "id": 3090355261,
         "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
         "body": [
           "This is a line in the Desc",
@@ -68,7 +68,7 @@
         "completed": ""
       },
       {
-        "id": 2916009592,
+        "id": 281500388,
         "title": "Graduate All Semester Marksheets :",
         "body": [
           "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -87,24 +87,25 @@
         "completed": ""
       },
       {
-        "id": 2223631268,
+        "id": 3645625555,
         "title": "Only one Recording Course is remaining of JavaOk",
         "body": [
           "Now i am removing all the points from the body and changing them into a one line sentence.",
-          "- [ ] Now i am adding this subtask, this should be updated inside the json file. Updating"
+          "- [ ] Now i am adding this subtask, this should be updated inside the json file. Updating",
+          "- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
         ],
-        "time": "",
-        "due": "2024-10-07",
+        "time": "21:10 - 22:10",
+        "due": "2024-10-10",
         "tag": "#Test",
         "filePath": "Pending Document Work.md",
         "completed": ""
       },
       {
-        "id": 2962147371,
+        "id": 3942327242,
         "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
         "body": [],
         "time": "",
-        "due": "2024-10-03",
+        "due": "2024-10-09",
         "tag": "#Test",
         "filePath": "Pending Document Work.md",
         "completed": ""
@@ -151,7 +152,95 @@
     "3-Process After Offer Letter Received.md": [],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "DocsForPlugin/Summarization by GPT.md": [],
+    "Daily_Notes/2024-10-10.md": [
+      {
+        "title": "This is a new Task I am adding from the Combined Modal.",
+        "body": [
+          "I will be adding all the fields.",
+          "- This is a bullete point in the Description.",
+          "- [ ] Just first SubTask",
+          "- [ ] Another SubTask, second One"
+        ],
+        "due": "2024-10-11",
+        "tag": "#Test",
+        "time": "20:10 - 21:10",
+        "priority": "3",
+        "filePath": "Daily_Notes/2024-10-10.md",
+        "id": 944988031,
+        "completed": ""
+      },
+      {
+        "title": "A simple new Task",
+        "body": [
+          "Just simple Body",
+          "- [ ] Only one SubTask"
+        ],
+        "due": "2024-10-10",
+        "tag": "#Test",
+        "time": "12:27 - 13:27",
+        "priority": "2",
+        "filePath": "Daily_Notes/2024-10-10.md",
+        "id": 1444396765,
+        "completed": ""
+      },
+      {
+        "title": "Adding a Simple Task using Modal through Shortcut",
+        "body": [
+          "Just a line",
+          "- [ ] One SubTask"
+        ],
+        "due": "2024-10-10",
+        "tag": "#Test",
+        "time": "21:31 - 22:31",
+        "priority": "1",
+        "filePath": "Daily_Notes/2024-10-10.md",
+        "id": 1016529206,
+        "completed": ""
+      },
+      {
+        "title": "Adding new task",
+        "body": [
+          ""
+        ],
+        "due": "",
+        "tag": "",
+        "time": "",
+        "priority": 0,
+        "filePath": "Daily_Notes/2024-10-10.md",
+        "id": 1519590961,
+        "completed": ""
+      },
+      {
+        "title": "Adding a new task, to see if everything works fine",
+        "body": [
+          "Just a simple line in body",
+          "- [ ] Adding a simple SubTask"
+        ],
+        "due": "2024-10-11",
+        "tag": "#Test",
+        "time": "22:28 - 23:28",
+        "priority": "4",
+        "filePath": "Daily_Notes/2024-10-10.md",
+        "id": 3019060318,
+        "completed": ""
+      },
+      {
+        "title": "Adding a simple Task, to see if everything works correctly",
+        "body": [
+          "Adding a simple line",
+          "- [ ] SubTask"
+        ],
+        "due": "2024-10-10",
+        "tag": "#Test",
+        "time": "22:29 - 23:29",
+        "priority": "2",
+        "filePath": "Daily_Notes/2024-10-10.md",
+        "id": 2478658714,
+        "completed": ""
+      }
+    ]
   },
   "Completed": {
     "Untitled.md": [],
@@ -160,7 +249,7 @@
     "Spintly Details.md": [],
     "Pending Document Work.md": [
       {
-        "id": 3364473018,
+        "id": 1062799639,
         "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
         "body": [],
         "time": "",
@@ -209,6 +298,7 @@
     "3-Process After Offer Letter Received.md": [],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
+    "0-ImportantData.md": [],
+    "DocsForPlugin/Summarization by GPT.md": []
   }
 }
