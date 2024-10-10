@@ -55,6 +55,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		const refreshColumnListener = () => {
 			console.log("KanbanBoard.tsx : REFRESH_COLUMN mssgs received...");
 			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+			// TODO : i think i dont need to do the following three lines of code, after i implement saving and loading tasks from sessionStorage/localStorage.
+			// setPendingTasks([]);
+			// setCompletedTasks([]);
+			// sleep(30);
 			setPendingTasks(pendingTasks);
 			setCompletedTasks(completedTasks);
 		};
@@ -85,31 +89,6 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		const activeFile = app.workspace.getActiveFile();
 
 		if (activeFile) {
-			// new AddTaskModal(app, {
-			// 	app,
-			// 	filePath: activeFile.path,
-			// 	onTaskAdded: () => {
-			// 		// Call refresh board data when a new task is added
-			// 		// refreshBoardData(setBoards, () => {
-			// 		// 	console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...");
-			// 		// 	// // RefreshTasksInsideColumns();
-			// 		// });
-
-			// 		eventEmitter.emit("REFRESH_COLUMN");
-			// 	},
-			// }).open();
-
-			// const AddTaskModal = new AddOrEditTaskModal(
-			// 	app,
-			// 	(newTask: taskItem) => {
-			// 		addTaskInFile(app, newTask);
-			// 		addTaskInJson(newTask);
-
-			// 		eventEmitter.emit("REFRESH_COLUMN");
-			// 	},
-			// 	activeFile.path,
-			// );
-			// AddTaskModal.open();
 
 			openAddNewTaskModal(app, plugin, activeFile);
 		} else {

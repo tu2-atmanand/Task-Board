@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
 import { deleteTaskFromFile, deleteTaskFromJson, loadTasksFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
-import { updateTasksAndRefreshBoard, updateTasksAndRefreshColumn } from 'src/services/RefreshServices';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { ColumnProps } from '../interfaces/Column';
