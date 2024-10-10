@@ -3,6 +3,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa'; // Import the desired icons from react-icons
 import React, { useEffect, useRef, useState } from 'react';
 import { TaskProps, taskItem } from '../interfaces/TaskItem';
+import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
@@ -43,35 +44,6 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 	};
 
 	// Function to handle the checkbox toggle inside the task body
-	// const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
-	// 	const updatedSubTasks = subTasks.map((line, idx) => {
-	// 		if (line.startsWith('- [ ]') || line.startsWith('- [x]')) {
-	// 			if (idx === index) {
-	// 				console.log("Following SubTask Line status has been changed : ", line);
-	// 				if (isCompleted) {
-	// 					console.log("Marking the SubTask as Incomplete...");
-	// 					// Mark as incomplete (change from '- [x]' to '- [ ]')
-	// 					return line.replace('- [x]', '- [ ]');
-	// 				} else {
-	// 					console.log("Marking the SubTask as Complete...");
-	// 					// Mark as complete (change from '- [ ]' to '- [x]')
-	// 					return line.replace('- [ ]', '- [x]');
-	// 				}
-	// 			}
-	// 			console.log("After updating the line of the subTasks : ", line);
-	// 		}
-	// 		return line;
-	// 	});
-	// 	setSubTasks(updatedSubTasks);
-	// 	// console.log("After Updating the state on the TaskItem Card using setTaskBody, Now following content will be stored in the json and in the md file : ", updatedSubTasks);
-
-	// 	const updatedTask: taskItem = { ...task, body: [...taskDesc, ...updatedSubTasks] };
-	// 	// console.log("After all the subTasks has been updated, now, the whole task shoule change. FOllowing is the updated, before i send it to the handleSubTasks function : ", updatedTask);
-	// 	// setTask(updatedTask);
-	// 	onSubTasksChange(updatedTask);
-	// };
-
-	// Optimized code for above function :
 	const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
 		const updatedSubTasks = subTasks.map((line, idx) => {
 			if (idx === index) {
@@ -121,6 +93,8 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 					task.filePath,
 					componentRef.current
 				);
+
+				hookMarkdownLinkMouseEventHandlers(app, element, task.filePath, task.filePath);
 			}
 		});
 	}, [subTasks, task.filePath, app]);
@@ -137,40 +111,25 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 				task.filePath,
 				componentRef.current // Pass the Component instance
 			);
+
+			hookMarkdownLinkMouseEventHandlers(app, taskItemBodyDescriptionRenderer.current, task.filePath, task.filePath);
 		}
 	}, [taskDesc, task.filePath, app]);
 
 
-	// // Reference to the HTML element where markdown will be rendered
-	// const previewContainerRef = useRef<HTMLDivElement>(null);
-	// const container = document.createElement("div");
-	// useEffect(() => {
-	// 	if (previewContainerRef.current) {
-	// 		// Clear previous content before rendering new markdown
-	// 		previewContainerRef.current.innerHTML = '';
-
-	// 		// Use the MarkdownRenderer.render() method
-	// 		MarkdownRenderer.render(
-	// 			app,                   // The app object
-	// 			taskDescriptionContent,         // The markdown content
-	// 			previewContainerRef.current, // The element to append to
-	// 			task.filePath,                     // Source path (leave empty if not needed)
-	// 			container                    // The parent component (this modal instance)
-	// 		);
-	// 	}
-	// }, [isDescriptionExpanded]); // Re-render when newTaskContent changes
-
 	const handleMouseEnter = (event: React.MouseEvent) => {
-		const element = document.getElementById('taskItemEditIconBtn');
+		const element = document.getElementById('taskItemFooterBtns');
 		if (element) {
-			app.workspace.trigger('hover-link', {
-				event,                    // The original mouse event
-				source: "task-board",      // Source of the hover
-				hoverParent: element,      // The element that triggered the hover
-				targetEl: element,         // The element to be hovered (same as parent in this case)
-				linktext: task.filePath,   // The file path to preview
-				sourcePath: task.filePath  // The source path (same as file path here)
-			});
+			markdownButtonHoverPreviewEvent(app, event, element, task.filePath);
+
+			// app.workspace.trigger('hover-link', {
+			// 	event,                    // The original mouse event
+			// 	source: "task-board",      // Source of the hover
+			// 	hoverParent: element,      // The element that triggered the hover
+			// 	targetEl: element,         // The element to be hovered (same as parent in this case)
+			// 	linktext: task.filePath,   // The file path to preview
+			// 	sourcePath: task.filePath  // The source path (same as file path here)
+			// });
 		}
 	};
 
@@ -265,8 +224,8 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 							{task.due ? `📅${task.due}` : ''}
 						</div>
 					)}
-					<div id="taskItemEditIconBtn" className="taskItemFooterBtns" onMouseEnter={handleMouseEnter}>
-						<div className="taskItemiconButton">
+					<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+						<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
 							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
 						</div>
 						<div className="taskItemiconButton">
