@@ -1,25 +1,29 @@
-// /src/modal/EditTaskModal.tsx
+// /src/modal/AddOrEditTaskModal.tsx
 
-import { App, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
+import { App, Component, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
-import { priorityEmojis, priorityOptions } from "src/interfaces/TaskItem";
+import ReactDOM, { Root } from "react-dom/client";
+import { priorityEmojis, priorityOptions, taskItem } from "src/interfaces/TaskItem";
 
+import CodeMirrorEditor from "src/components/MarkdownEditor";
 import { FaTrash } from 'react-icons/fa';
-import ReactDOM from "react-dom/client";
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { loadGlobalSettings } from "src/utils/SettingsOperations";
+import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 // Functional React component for the modal content
-const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlannerPlugin: boolean; onSave: (updatedTask: any) => void; onClose: () => void }> = ({ container, app, task, onSave, onClose, dayPlannerPlugin }) => {
-	const [title, setTitle] = useState(task.title);
-	const [due, setDue] = useState(task.due);
-	const [tag, setTag] = useState(task.tag); // Prepend # to tag
+const EditTaskContent: React.FC<{ app: App, root: HTMLElement, task?: taskItem, taskExists?: boolean, filePath: string; onSave: (updatedTask: taskItem) => void; onClose: () => void }> = ({ app, root, task = {}, taskExists, filePath, onSave, onClose }) => {
+	const [title, setTitle] = useState(task.title || '');
+	const [due, setDue] = useState(task.due || '');
+	const [tag, setTag] = useState(task.tag || '');
 	const [startTime, setStartTime] = useState(task.time ? task.time.split(' - ')[0] : '');
 	const [endTime, setEndTime] = useState(task.time ? task.time.split(' - ')[1] || '' : '');
-	const [newTime, setNewTime] = useState(task.time);
-	const [priority, setPriority] = useState(task.priority);
-	const [bodyContent, setBodyContent] = useState(task.body.filter((line: string) => !line.startsWith('- [ ]') && !line.startsWith('- [x]')).join('\n'));
+	const [newTime, setNewTime] = useState(task.time || '');
+	const [priority, setPriority] = useState(task.priority || 0);
+	const [bodyContent, setBodyContent] = useState(task.body ? task.body.filter(line => !line.startsWith('- [ ]') && !line.startsWith('- [x]')).join('\n') : '');
 	const [subTasks, setSubTasks] = useState(
-		task.body.filter((line: string) => line.startsWith('- [ ]') || line.startsWith('- [x]'))
+		task.body ? task.body.filter(line => line.startsWith('- [ ]') || line.startsWith('- [x]')) : []
 	);
 	const fileContentRef = useRef<HTMLDivElement>(null);
 
@@ -73,54 +77,63 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 			tag,
 			time: newTime,
 			priority,
+			filePath: filePath,
 		};
 		onSave(updatedTask);
 		onClose();
 	};
 
-	// Unnecessary below memory and CPU wastage, just for the Live Preview thing, you can remove this and create the actual display of the file content, or else, you can keep this as it also, no issues : 
-	let newTaskContent = ''
-	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	// const bodyLines = bodyContent
-	// 	.map((line: string) => `\t${line}`)
-	// 	.split('\n');
 
-	// Add the sub-tasks without additional indentation
-	const subTasksWithTab = subTasks
-		.map((Line: string) => `\n\t${Line}`)
-
-	// Code to render the content of the Task in a Obsidian Markdown view.
-	if (dayPlannerPlugin) {
-		newTaskContent = `- [ ] ${startTime ? `${startTime} - ${endTime} ` : ''}${title} |${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}\n${subTasksWithTab}`;
-	} else {
-		newTaskContent = `- [] ${title} |${startTime ? ` ⏰[${startTime} - ${endTime}]` : ''}${due ? ` 📅${due}` : ''} ${priority > 0 ? priorityEmojis[priority as number] : ''} ${tag}\n\t${bodyContent}${subTasksWithTab}`;
-	}
+	let formatedContent = '';
+	const newTaskContent: taskItem = {
+		...task,
+		title: title,
+		body: [
+			...bodyContent.split('\n'),
+			...subTasks,
+		],
+		due: due,
+		tag: tag,
+		time: newTime,
+		priority: priority,
+		filePath: '',
+	};
 	// Reference to the HTML element where markdown will be rendered
+
+	const componentRef = useRef<Component | null>(null);
+	useEffect(() => {
+		// Initialize Obsidian Component on mount
+		componentRef.current = new Component();
+		componentRef.current.load();
+
+		return () => {
+			// Cleanup the component on unmount
+			componentRef.current?.unload();
+		};
+	}, []);
+
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
+		formatedContent = taskElementsFormatter(newTaskContent);
+		console.log("Content received from the formatter function :\n", formatedContent);
 		if (previewContainerRef.current) {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.innerHTML = '';
 
-			// Use the MarkdownRenderer.render() method
-			MarkdownRenderer.render(
-				app,                   // The app object
-				newTaskContent,         // The markdown content
-				previewContainerRef.current, // The element to append to
-				task.filePath,                     // Source path (leave empty if not needed)
-				container                    // The parent component (this modal instance)
+			MarkdownUIRenderer.renderTaskDisc(
+				app,
+				formatedContent,
+				previewContainerRef.current,
+				filePath,
+				componentRef.current
 			);
+
+			hookMarkdownLinkMouseEventHandlers(app, previewContainerRef.current, filePath, filePath);
 		}
 	}, [newTaskContent]); // Re-render when newTaskContent changes
 
-	// console.log("The difference between, task.filePath : ", task.filePath, " | And app.vault.getAbstractFileByPath(task.filePath) : ", app.vault.getAbstractFileByPath(task.filePath));
-	// const data = app.vault.getFileByPath(task.filePath);
-	// console.log("The content of file : ", data);
 
-
-	// FOR THE FILE PREVIEW FUNCTIONALITY
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
-	// const [isPreviewVisible, setIsPreviewVisible] = useState(false);  // Track popup visibility
 	// Key press listeners for CTRL/CMD
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -133,83 +146,20 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 			setIsCtrlPressed(false);
 		};
 
-		window.addEventListener('keydown', handleKeyDown);
-		window.addEventListener('keyup', handleKeyUp);
+		root.addEventListener('keydown', handleKeyDown);
+		root.addEventListener('keyup', handleKeyUp);
 
 		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
-			window.removeEventListener('keyup', handleKeyUp);
+			root.removeEventListener('keydown', handleKeyDown);
+			root.removeEventListener('keyup', handleKeyUp);
 		};
 	}, []);
 
-	// Reference to the HTML element where the hover preview will be rendered
-	// const hoverPopoverRef = useRef<HTMLDivElement>(null);
-
-	// const handleMouseEnter = async () => {
-	// 	if (!isCtrlPressed) return;  // Only open popup if CTRL/CMD is pressed
-	// 	const file = app.vault.getAbstractFileByPath(task.filePath);
-
-	// 	console.log("Mouse entered on the Open File Button...");
-
-	// 	if (file instanceof TFile) {
-	// 		try {
-	// 			// Read the content of the file
-	// 			const fileContent = await app.vault.read(file);
-
-	// 			// Clear the previous content if necessary (optional)
-	// 			if (hoverPopoverRef.current) {
-	// 				hoverPopoverRef.current.innerHTML = ''; // Optional: clear previous content
-	// 			}
-
-	// 			// const markdownPreviewHover = new MarkdownPreviewView(container);
-	// 			const parent: HoverParent = HTMLElement;
-	// 			const markdownPreviewHover = new HoverPopover(parent, hoverPopoverRef, 1);
-	// 			// hoverPopoverRef.hoverPopover = markdownPreviewHover.hoverPopover;
-
-	// 			// Render the file content as a markdown preview
-	// 			MarkdownPreviewView.render(
-	// 				app,
-	// 				fileContent,              // File content as markdown
-	// 				hoverPopoverRef.current,   // HTML element to render preview
-	// 				task.filePath,             // File path for reference
-	// 				container                  // Modal/container element
-	// 			);
-	// 		} catch (error) {
-	// 			console.error("Error reading file content:", error);
-	// 		}
-	// 	}
-	// };
-
-	// // TODO : This feature is not working, since the popup is not coming on the top of the 
-	// const handleMouseEnter = async (event: React.MouseEvent) => {
-	// 	const element = document.getElementById('EditTaskModalHomeOpenFileBtn');
-	// 	if (element) {
-	// 		app.workspace.trigger('hover-link', {
-	// 			event,                    // The original mouse event
-	// 			source: "EditTaskModalHome",      // Source of the hover
-	// 			hoverParent: element,      // The element that triggered the hover
-	// 			targetEl: element,         // The element to be hovered (same as parent in this case)
-	// 			linktext: task.filePath,   // The file path to preview
-	// 			sourcePath: task.filePath  // The source path (same as file path here)
-	// 		});
-	// 	}
-	// };
-
-
-	// const handleMouseLeave = () => {
-	// 	if (hoverPopoverRef.current) {
-	// 		console.log("Mouse entered on the Open File Button...");
-	// 		hoverPopoverRef.current.hide();
-	// 	}
-	// };
-
-	// const handleMouseLeave = () => {
-	// 	setIsPreviewVisible(false);  // Hide the popup when mouse leaves
-	// };
-
 	return (
 		<div className="EditTaskModalHome">
-			<div className="EditTaskModalHome-title">Edit Task</div>
+			{taskExists ?
+				<div className="EditTaskModalHome-title">Edit Task</div> : <div className="EditTaskModalHome-title">Add New Task</div>
+			}
 			<div className="EditTaskModalHomeBody">
 				<div className="EditTaskModalHomeLeftSec">
 					<label className="EditTaskModalHomeFieldTitle">Task Title</label>
@@ -225,7 +175,7 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 					{/* Subtasks */}
 					<label className="EditTaskModalHomeFieldTitle">Sub Tasks</label>
 					<div className="EditTaskModalsubTasksContainer">
-						{subTasks.map((subTask, index) => (
+						{subTasks.map((subTask: string, index: number) => (
 							<div key={index} className="EditTaskModalsubTaskItem">
 								<input
 									type="checkbox"
@@ -254,19 +204,20 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 					{/* Live File Preview */}
 					<div className="EditTaskModalHomePreview">
 						<h3 style={{ margin: 0 }}>File Preview</h3>
-						<div className="fileContentContainer" ref={fileContentRef}>
-							<h6>Parent File Location : {task.filePath}</h6>
-							<div className="EditTaskModalHomePreview" ref={previewContainerRef}>
+						<div className="EditTaskModalHomePreviewContainer" ref={fileContentRef}>
+							<div className="EditTaskModalHomePreviewHeader">
+								<h6>Parent File Location : {filePath}</h6>
+								<button className="EditTaskModalHomeOpenFileBtn"
+									id="EditTaskModalHomeOpenFileBtn"
+									// onMouseEnter={handleMouseEnter}
+									// onMouseOver={handleMouseEnter}
+									// onClick={() => app.workspace.openLinkText(task.filePath, "")}
+									onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+								>Open File</button>
+							</div>
+							<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
 								{/* The markdown content will be rendered here */}
 							</div>
-
-							<button className="EditTaskModalHomeOpenFileBtn"
-								id="EditTaskModalHomeOpenFileBtn"
-								// onMouseEnter={handleMouseEnter}
-								// onMouseOver={handleMouseEnter}
-								// onClick={() => app.workspace.openLinkText(task.filePath, "")}
-								onClick={() => isCtrlPressed ? app.workspace.openLinkText('', task.filePath, 'window') : app.workspace.openLinkText('', task.filePath, false)}
-							>Open File</button>
 						</div>
 					</div>
 				</div>
@@ -310,15 +261,22 @@ const EditTaskContent: React.FC<{ container: any, app: App, task: any, dayPlanne
 };
 
 // Class component extending Modal for Obsidian
-export class EditTaskModal extends Modal {
-	task: any;
-	onSave: (updatedTask: any) => void;
+export class AddOrEditTaskModal extends Modal {
+	app: App;
+	task: taskItem;
+	filePath: string;
+	taskExist: boolean = false;
+	onSave: (updatedTask: taskItem) => void;
 
-	constructor(app: App, task: any, onSave: (updatedTask: any) => void) {
+	constructor(app: App, onSave: (updatedTask: taskItem) => void, filePath: string, task?: taskItem) {
 		super(app);
 		this.app = app;
-		this.task = task;
+		this.filePath = filePath;
 		this.onSave = onSave;
+		if (task) {
+			this.task = task;
+			this.taskExist = true;
+		}
 	}
 
 	onOpen() {
@@ -332,14 +290,15 @@ export class EditTaskModal extends Modal {
 
 		let globalSettings = loadGlobalSettings();
 		globalSettings = globalSettings.data.globalSettings;
-		console.log("The global setting i have loaded : ", globalSettings);
+		// console.log("The global setting i have loaded : ", globalSettings);
 		const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
 
 		root.render(<EditTaskContent
-			container={container}
 			app={this.app}
+			root={contentEl}
 			task={this.task}
-			dayPlannerPlugin={dayPlannerPlugin}
+			taskExists={this.taskExist}
+			filePath={this.filePath}
 			onSave={this.onSave}
 			onClose={() => this.close()}
 		/>);
