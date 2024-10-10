@@ -1,8 +1,10 @@
 import { App } from "obsidian";
+import TaskBoard from "main";
 import { taskItem } from "./TaskItem";
 
 export interface ColumnProps {
 	app: App;
+	plugin: TaskBoard;
 	activeBoard: number;
 	colType: string;
 	active?: boolean;
