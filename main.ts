@@ -22,20 +22,21 @@ import {
 	TaskBoardIcon,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/GlobalVariables";
+import { addTaskInFile, addTaskInJson, updateTaskInFile } from "src/utils/TaskItemUtils";
 
-import { AddTaskModal } from "src/modal/AddTaskModal";
+import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
+import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
+import { openAddNewTaskModal } from "src/services/OpenModals";
 import path from "path";
 import { refreshKanbanBoard } from "src/services/RefreshServices";
 
 // import { loadGlobalSettings } from "src/utils/TaskItemUtils";
-
-
 
 export default class TaskBoard extends Plugin {
 	settings: GlobalSettings = DEFAULT_SETTINGS;
@@ -85,16 +86,8 @@ export default class TaskBoard extends Plugin {
 			callback: () => {
 				const app = this.app as App;
 				const activeFile = app.workspace.getActiveFile();
-
 				if (activeFile) {
-					new AddTaskModal(app, {
-						app,
-						filePath: activeFile.path,
-						onTaskAdded: () => {
-							// Refresh tasks or perform necessary actions after task is added
-							// console.log("Task added successfully!");
-						},
-					}).open();
+					openAddNewTaskModal(app, this.plugin, activeFile)
 				} else {
 					new Notice("No active file found to add a task.");
 				}
