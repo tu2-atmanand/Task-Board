@@ -25,6 +25,11 @@ export interface tasksInFile {
 	taskItem: taskItem;
 }
 
+export interface taskJsonMerged {
+	Pending: taskItem[];
+	Completed: taskItem[];
+}
+
 export interface tasksJson {
 	Pending: {
 		[filePath: string]: taskItem[]; // Maps file paths to arrays of pending tasks

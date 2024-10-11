@@ -3,18 +3,16 @@
 import { App, Modal } from 'obsidian';
 import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
-import { deleteTaskFromFile, deleteTaskFromJson, loadTasksFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
+import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItem';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { ColumnProps } from '../interfaces/Column';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { loadGlobalSettings } from 'src/utils/SettingsOperations';
-import { refreshBoardData } from 'src/utils/BoardOperations';
 import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
-import { taskItem } from 'src/interfaces/TaskItem';
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -26,13 +24,14 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	activeBoard,
 	colType,
 	data,
-	setBoards,
 	tasks: externalTasks,
-	pendingTasks,  // New props for pending tasks
-	completedTasks // New props for completed tasks
+	allTasks: allTasksExternal
+	// pendingTasks,  // New props for pending tasks
+	// completedTasks // New props for completed tasks
 }) => {
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
+	const [allTasks, setAllTasks] = useState<taskJsonMerged>(allTasksExternal);
 	// let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
 	// globalSettings = globalSettings.data.globalSettings;
 	const globalSettings = plugin.settings.data.globalSettings;
@@ -45,9 +44,12 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 
 	// Render tasks using the tasks passed from KanbanBoard
 	useEffect(() => {
-		setTasks([]);
-		renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
-	}, [colType, data, pendingTasks, completedTasks]);
+		// setTasks([]);
+		// console.log("FROM COLUMN.TSX : Data i will be sending to renderColumns function : ", allTasksExternal);
+		if(allTasksExternal.Pending.length>0 || allTasksExternal.Completed.length>0) {
+			renderColumns(setTasks, activeBoard, colType, data, allTasksExternal);
+		}
+	}, [colType, data, allTasksExternal]);
 
 	const handleCheckboxChange = (updatedTask: taskItem) => {
 		const moment = require("moment");
