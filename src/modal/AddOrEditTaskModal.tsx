@@ -9,7 +9,7 @@ import CodeMirrorEditor from "src/components/MarkdownEditor";
 import { FaTrash } from 'react-icons/fa';
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
-import { loadGlobalSettings } from "src/utils/SettingsOperations";
+import { loadGlobalSettings } from "src/utils/JsonFileOperations";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 // Functional React component for the modal content
@@ -289,7 +289,6 @@ export class AddOrEditTaskModal extends Modal {
 		const root = ReactDOM.createRoot(this.contentEl);
 
 		let globalSettings = loadGlobalSettings();
-		globalSettings = globalSettings.data.globalSettings;
 		// console.log("The global setting i have loaded : ", globalSettings);
 		const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
 

@@ -5,92 +5,12 @@ import { priorityEmojis, taskItem, tasksJson } from "src/interfaces/TaskItem";
 import { App } from "obsidian";
 import TaskBoard from "main";
 import fs from "fs";
-import { loadGlobalSettings } from "./SettingsOperations";
+import { loadGlobalSettings } from "./JsonFileOperations";
 import path from "path";
 import { tasksPath } from "src/interfaces/GlobalVariables";
 
-export const loadTasksFromJson = (): {
-	allTasksWithStatus: taskItem[];
-	pendingTasks: taskItem[];
-	completedTasks: taskItem[];
-} => {
-	console.log(
-		"loadTasksFromJson : I hope this is getting loaded only at once -----------------  "
-	);
-	try {
-		if (fs.existsSync(tasksPath)) {
-			const tasksData = fs.readFileSync(tasksPath, "utf8");
-			const allTasks = JSON.parse(tasksData);
-
-			const pendingTasks: taskItem[] = [];
-			const completedTasks: taskItem[] = [];
-
-			// Separate pending tasks
-			for (const [filePath, tasks] of Object.entries(
-				allTasks.Pending || {}
-			)) {
-				tasks.forEach((task: any) =>
-					pendingTasks.push({ ...task, filePath })
-				);
-			}
-
-			// Separate completed tasks
-			for (const [filePath, tasks] of Object.entries(
-				allTasks.Completed || {}
-			)) {
-				tasks.forEach((task: any) =>
-					completedTasks.push({ ...task, filePath })
-				);
-			}
-
-			// Combine both pending and completed tasks
-			const allTasksWithStatus = [...pendingTasks, ...completedTasks];
-			return { allTasksWithStatus, pendingTasks, completedTasks };
-		} else {
-			console.warn("tasks.json file not found.");
-			return {
-				allTasksWithStatus: [],
-				pendingTasks: [],
-				completedTasks: [],
-			};
-		}
-	} catch (error) {
-		console.error("Error reading tasks.json:", error);
-		return { allTasksWithStatus: [], pendingTasks: [], completedTasks: [] };
-	}
-};
-
-// export const loadTasksUsingObsidianMethod = async (
-// 	plugin: TaskBoard
-// ): Promise<{ allTasks: tasksJson }> => {
-// 	const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-// 	try {
-// 		const data: string = await plugin.app.vault.adapter.read(path); // Await the promise
-// 		const parsedData: tasksJson = JSON.parse(data);
-// 		return { allTasks: parsedData };
-// 	} catch (error) {
-// 		console.error("Failed to load tasks from tasks.json:", error);
-// 		throw error;
-// 	}
-// };
-
-// export const loadJustTheData = (plugin: TaskBoard) : (
-// 	allTasks: tasksJson
-// ) => {
-// 	loadTasksUsingObsidianMethod(plugin)
-// 		.then(({ allTasks }) => {
-// 			// console.log(allTasks); // Access the data here
-// 			return allTasks;
-// 		})
-// 		.catch((error) => {
-// 			console.error("Error while loading tasks:", error);
-// 			return {};
-// 		});
-// };
-
 export const taskElementsFormatter = (updatedTask: taskItem) => {
-	let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
-	globalSettings = globalSettings.data.globalSettings;
+	let globalSettings = loadGlobalSettings();
 	const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
 
 	let dueDateWithFormat = "";

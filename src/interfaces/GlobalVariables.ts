@@ -12,3 +12,11 @@ export const tasksPath = path.join(
 	"task-board",
 	"tasks.json"
 );
+
+export const dataFilePath = path.join(
+	basePath,
+	".obsidian",
+	"plugins",
+	"task-board",
+	"data.json"
+);
