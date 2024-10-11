@@ -7,7 +7,7 @@ import KanbanBoard from "src/components/KanbanBoard";
 import ReactDOM from "react-dom/client";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
-import { loadBoardsData } from "src/utils/SettingsOperations";
+import { loadBoardsData } from "src/utils/JsonFileOperations";
 import { openReScanVaultModal } from "../services/OpenModals";
 
 export class KanbanView extends ItemView {

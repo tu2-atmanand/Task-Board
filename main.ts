@@ -212,10 +212,6 @@ export default class TaskBoard extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, await this.loadData());
-		console.log(
-			"The setting loaded in Main.ts using the Object.assign method : ",
-			this.settings
-		);
 	}
 
 	async saveSettings() {
