@@ -26,7 +26,7 @@ export interface Board {
 	name: string;
 	index: number;
 	columns: ColumnData[];
-	filters?: any[];
+	filters?: string[];
 	filterPolarity?: string;
 	filterScope?: string;
 	showColumnTags?: boolean;

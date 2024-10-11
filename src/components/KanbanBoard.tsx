@@ -3,18 +3,15 @@
 import { App, Notice } from "obsidian";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
+import { addTaskInFile, addTaskInJson, loadJustTheData, loadTasksFromJson, loadTasksUsingObsidianMethod, updateTaskInFile, updateTaskInJson } from "src/utils/TaskItemUtils";
 import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
+import { openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
 
-import { AddTaskModal } from "../modal/AddTaskModal";
 import { Board } from "../interfaces/KanbanBoard";
 import Column from "./Column";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
-import { loadTasksFromJson } from "src/utils/TaskItemUtils";
-import { openBoardConfigModal } from "../services/OpenModals";
-import path from "path";
-import { refreshKanbanBoard } from "src/services/RefreshServices";
 import { renderColumns } from "src/utils/RenderColumns"; // Adjust the path accordingly
 import { taskItem } from "src/interfaces/TaskItem";
 
@@ -29,6 +26,14 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	// Load tasks only once when the board is refreshed
 	useEffect(() => {
 		console.log("KanbanBoard.tsx: Refreshing board and tasks...");
+		// const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+		// let data = plugin.app.vault.adapter.read(path);
+		// const tempData = loadTasksUsingObsidianMethod(plugin);
+
+		// const tasksData = loadJustTheData(plugin);
+
+		// console.log("What is the value of this.app.vault.adapter.read(yourFolderPath) : ", tasksData);
+
 		refreshBoardData(setBoards, () => {
 			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
 			setPendingTasks(pendingTasks);
@@ -49,6 +54,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		const refreshColumnListener = () => {
 			console.log("KanbanBoard.tsx : REFRESH_COLUMN mssgs received...");
 			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+			// TODO : i think i dont need to do the following three lines of code, after i implement saving and loading tasks from sessionStorage/localStorage.
+			// setPendingTasks([]);
+			// setCompletedTasks([]);
+			// sleep(30);
 			setPendingTasks(pendingTasks);
 			setCompletedTasks(completedTasks);
 		};
@@ -79,19 +88,8 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		const activeFile = app.workspace.getActiveFile();
 
 		if (activeFile) {
-			new AddTaskModal(app, {
-				app,
-				filePath: activeFile.path,
-				onTaskAdded: () => {
-					// Call refresh board data when a new task is added
-					// refreshBoardData(setBoards, () => {
-					// 	console.log("AddTaskModal : New task has been added, now will first remove all the taks and then will load it from the json file...");
-					// 	// // RefreshTasksInsideColumns();
-					// });
 
-					eventEmitter.emit("REFRESH_COLUMN");
-				},
-			}).open();
+			openAddNewTaskModal(app, plugin, activeFile);
 		} else {
 			new Notice("No active file found to add a task.");
 		}
@@ -134,7 +132,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					</button>
 					<button
 						className="ConfigureBtn"
-						onClick={() => openBoardConfigModal(app, boards, activeBoardIndex, (updatedBoards) =>
+						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
 							handleUpdateBoards(updatedBoards, setBoards)
 						)}
 					>
@@ -156,6 +154,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					.map((column, index) => (
 						<Column
 							app={app}
+							plugin={plugin}
 							key={index}
 							activeBoard={activeBoardIndex}
 							colType={column.colType}

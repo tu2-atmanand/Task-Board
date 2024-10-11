@@ -5,11 +5,10 @@ import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
 import { deleteTaskFromFile, deleteTaskFromJson, loadTasksFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
-import { updateTasksAndRefreshBoard, updateTasksAndRefreshColumn } from 'src/services/RefreshServices';
 
+import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { ColumnProps } from '../interfaces/Column';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
-import { EditTaskModal } from '../modal/EditTaskModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { loadGlobalSettings } from 'src/utils/SettingsOperations';
@@ -23,6 +22,7 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 
 const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	app,
+	plugin,
 	activeBoard,
 	colType,
 	data,
@@ -33,8 +33,10 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 }) => {
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
-	let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
-	globalSettings = globalSettings.data.globalSettings;
+	// let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
+	// globalSettings = globalSettings.data.globalSettings;
+	const globalSettings = plugin.settings.data.globalSettings;
+	// console.log("Now even after user makes any changes from the Setting Tab, it should reflect in the following setting data i am reading using plugin.settings : ", globalSettings);
 
 	// Sync local tasks state with external tasks when they change
 	useEffect(() => {
@@ -124,40 +126,44 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 
 	const handleEditTask = (task: taskItem) => {
 		const app = (window as any).app as App;
-		const editModal = new EditTaskModal(app, task, (updatedTask) => {
-			updatedTask.filePath = task.filePath;
-			// Update the task in the file and JSON
-			updateTaskInFile(updatedTask, task);
-			updateTaskInJson(updatedTask);
+		const editModal = new AddOrEditTaskModal(
+			app,
+			(updatedTask) => {
+				updatedTask.filePath = task.filePath;
+				// Update the task in the file and JSON
+				updateTaskInFile(updatedTask, task);
+				updateTaskInJson(updatedTask);
 
-			// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
-			// Refresh tasks state after update
-			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+				// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
+				// Refresh tasks state after update
+				// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
 
-			// Following are multiple method used for refresing only the columns and not the whole board : 
+				// Following are multiple method used for refresing only the columns and not the whole board : 
 
-			// renderColumns(setTasks, tag, data);
+				// renderColumns(setTasks, tag, data);
 
-			// --- MY METHOD ---------
-			// const emptyTheTasks: Task[] = [];
-			// setTasks(emptyTheTasks);
-			// sleep(10);
+				// --- MY METHOD ---------
+				// const emptyTheTasks: Task[] = [];
+				// setTasks(emptyTheTasks);
+				// sleep(10);
 
-			// setTasks([]);
+				// setTasks([]);
 
-			// THIS METHOD IS NOTE WORKING
-			// refreshBoardData(setBoards, () => {
-			// 	console.log("Task updated, running the Dispatch method of updating the board...");
-			// 	renderColumns(setTasks, activeBoard, colType, data);
-			// });
+				// THIS METHOD IS NOTE WORKING
+				// refreshBoardData(setBoards, () => {
+				// 	console.log("Task updated, running the Dispatch method of updating the board...");
+				// 	renderColumns(setTasks, activeBoard, colType, data);
+				// });
 
-			// ONLY THIS BELOW METHOD IS WORKING, AND IT ONLY REFRESHES THE WHOLE COLUMN, YOU CAN SEE ALL THE TASKITEM FROM THIS COLUMN GETTING REFRESHED, REST COLUMNS REMAINS SILENT, BUT YOU KNOW OBVIOULSY THEY ARE ALSO GETTING ADDED FROM NEW TASKS.JSON DATA.
-			// updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
-			// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
+				// ONLY THIS BELOW METHOD IS WORKING, AND IT ONLY REFRESHES THE WHOLE COLUMN, YOU CAN SEE ALL THE TASKITEM FROM THIS COLUMN GETTING REFRESHED, REST COLUMNS REMAINS SILENT, BUT YOU KNOW OBVIOULSY THEY ARE ALSO GETTING ADDED FROM NEW TASKS.JSON DATA.
+				// updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
+				// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
 
-			// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
-			eventEmitter.emit("REFRESH_COLUMN");
-		});
+				// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
+				eventEmitter.emit("REFRESH_COLUMN");
+			},
+			task.filePath,
+			task);
 		editModal.open();
 	};
 

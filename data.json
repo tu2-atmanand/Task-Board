@@ -92,12 +92,12 @@
           "Test",
           "NOTE"
         ],
-        "filterPolarity": "Allow",
+        "filterPolarity": "Deny",
         "filterScope": "Both",
         "name": "Only Keep  Data based Col for Testing",
         "index": 1,
         "showColumnTags": true,
-        "showFilteredTags": true
+        "showFilteredTags": false
       },
       {
         "columns": [
@@ -263,7 +263,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": false
+      "realTimeScanning": true
     }
   }
 }

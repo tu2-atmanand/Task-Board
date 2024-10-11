@@ -10,14 +10,14 @@ export interface TaskProps {
 }
 
 export interface taskItem {
-	id: number;
+	id?: number;
 	title: string;
 	body: string[];
 	due: string;
 	tag: string;
 	time: string;
 	priority: number;
-	completed: string;
+	completed?: string;
 	filePath: string; // Include filePath since it's in the tasks
 }
 
@@ -45,10 +45,10 @@ export const priorityEmojis: { [key: number]: string } = {
 
 // Priority Options
 export const priorityOptions = [
-	{ value: "0", text: "NONE" },
-	{ value: "1", text: "Highest : 🔺" },
-	{ value: "2", text: "High : ⏫" },
-	{ value: "3", text: "Medium : 🔼" },
-	{ value: "4", text: "Low : 🔽" },
-	{ value: "5", text: "Lowest : ⏬" },
+	{ value: 0, text: "NONE" },
+	{ value: 1, text: "Highest : 🔺" },
+	{ value: 2, text: "High : ⏫" },
+	{ value: 3, text: "Medium : 🔼" },
+	{ value: 4, text: "Low : 🔽" },
+	{ value: 5, text: "Lowest : ⏬" },
 ];

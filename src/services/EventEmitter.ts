@@ -1,5 +1,7 @@
 // /src/services/ EventEmitter.ts
 
+// import EventEmitter from "eventemitter3";
+
 class EventEmitter {
 	private events: { [key: string]: Function[] } = {};
 
