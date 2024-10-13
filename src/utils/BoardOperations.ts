@@ -17,10 +17,11 @@ export const refreshBoardData = async (
 
 // Function to handle saving boards
 export const handleUpdateBoards = async (
+	plugin: TaskBoard,
 	updatedBoards: Board[],
 	setBoards: React.Dispatch<React.SetStateAction<Board[]>>
 ) => {
 	setBoards(updatedBoards);
-	saveBoardsData(updatedBoards);
+	saveBoardsData(plugin, updatedBoards);
 	await refreshBoardData(setBoards, () => {});
 };

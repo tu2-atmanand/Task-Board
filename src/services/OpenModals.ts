@@ -44,13 +44,14 @@ export const openAddNewTaskModal = (
 	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
+		plugin,
 		(newTask) => {
-			addTaskInFile(app, newTask);
+			addTaskInFile(app, plugin, newTask);
 			if (
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
 				scanFilterForTags(newTask.tag, scanFilters)
 			) {
-				addTaskInJson(newTask);
+				addTaskInJson(plugin, newTask);
 			}
 
 			eventEmitter.emit("REFRESH_COLUMN");

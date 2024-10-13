@@ -19,13 +19,7 @@ export class RealTimeScanning {
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
-		this.stackFilePath = path.join(
-			(window as any).app.vault.adapter.basePath,
-			".obsidian",
-			"plugins",
-			"task-board",
-			"file-stack.json"
-		);
+		this.stackFilePath = `${plugin.app.vault.configDir}/plugins/task-board/file-stack.json`;
 		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(app, plugin);
 	}
@@ -110,9 +104,7 @@ export class RealTimeScanning {
 	}
 
 	getFileFromPath(filePath: string): TFile {
-		return (window as any).app.vault.getAbstractFileByPath(
-			filePath
-		) as TFile;
+		return this.plugin.app.vault.getAbstractFileByPath(filePath) as TFile;
 	}
 
 	async onFileChange(
@@ -130,7 +122,7 @@ export class RealTimeScanning {
 
 			// console.log("The fileName is : ", fileName);
 			// console.log("The parentFolder is : ", parentFolder);
-			
+
 			// // Check folder filters
 			// const folderInFilters =
 			// 	scanFilters.folders.values.includes(parentFolder);
@@ -158,7 +150,7 @@ export class RealTimeScanning {
 					// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.fileStack.includes(file.path) : ",
 					// 	!this.fileStack.includes(file.path)
 					// );
-					
+
 					// If the file is already in the stack, ignore it
 					console.log(
 						"The value of fileStack before adding updated file:",

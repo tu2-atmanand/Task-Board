@@ -60,7 +60,7 @@ export class KanbanView extends ItemView {
 
 	private async loadBoards() {
 		try {
-			this.boards = await loadBoardsData();
+			this.boards = await loadBoardsData(this.plugin);
 		} catch (err) {
 			console.error("Failed to load boards data:", err);
 		}

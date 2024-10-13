@@ -7,10 +7,12 @@ import {
 	tasksJson,
 } from "src/interfaces/TaskItemProps";
 
-import { loadBoardConfigs } from "./JsonFileOperations";
+import TaskBoard from "main";
+import moment from "moment";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
+	plugin: TaskBoard,
 	setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
 	colType: string,
@@ -22,7 +24,7 @@ export const renderColumns = (
 	);
 	// Load tasks from the JSON file
 	// const { allTasksWithStatus, pendingTasks, completedTasks } =
-	// 	loadTasksFromJson();
+	// 	loadTasksProcessed();
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
@@ -78,18 +80,22 @@ export const renderColumns = (
 			(task) => task.tag && task.tag !== data.coltag
 		);
 	} else if (colType === "completed") {
-		const boardConfigs = loadBoardConfigs(); // NOTE : I think i will have to use this function only to get the boardConfigs, although, i know its possible to get this from `plugin.settings`. 
+		const boardConfigs = plugin.settings.data.boardConfigs; // NOTE : I think i will have to use this function only to get the boardConfigs, although, i know its possible to get this from `plugin.settings`.
 		const completedColumnIndex = boardConfigs[
 			activeBoard
-		].columns.findIndex((column) => column.colType === "completed");
-		const tasksLimit = boardConfigs[activeBoard].columns[
-				completedColumnIndex
-			].data.limit;
+		]?.columns.findIndex((column) => column.colType === "completed");
+		const tasksLimit =
+			boardConfigs[activeBoard]?.columns[completedColumnIndex].data.limit;
 
 		const sortedCompletedTasks = completedTasks.sort((a, b) => {
-			const dateA = new Date(a.completed);
-			const dateB = new Date(b.completed);
-			return dateB.getTime() - dateA.getTime(); // Sort in descending order (newest first)
+			// const dateA = new Date(a.completed);
+			// const dateB = new Date(b.completed);
+
+			if (a.completed && b.completed) {
+				const dateA = new Date(a.completed).getTime();
+				const dateB = new Date(b.completed).getTime();
+				return dateB - dateA;
+			}
 		});
 
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);

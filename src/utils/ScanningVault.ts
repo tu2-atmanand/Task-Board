@@ -1,6 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, Notice, TFile } from "obsidian";
+import { loadTasksRaw, writeTasksJson } from "./JsonFileOperations";
 import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
 
 import type TaskBoard from "main";
@@ -54,9 +55,12 @@ export class ScanningVault {
 
 	// Extract tasks from a specific file
 	async extractTasksFromFile(file: TFile, tasks: any, scanFilters: any) {
-		const fileContent = await this.app.vault.read(file);
-		const lines = fileContent.split("\n");
 		const fileNameWithPath = file.path;
+		const fileContent = await readDataOfVaultFiles(
+			this.plugin,
+			fileNameWithPath
+		);
+		const lines = fileContent.split("\n");
 
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
@@ -112,14 +116,14 @@ export class ScanningVault {
 		return array[0];
 	}
 
-	// Helper function to load the existing tasks from the tasks.json file
-	async loadTasksFromFile() {
-		if (fs.existsSync(tasksPath)) {
-			const data = fs.readFileSync(tasksPath, "utf8");
-			return JSON.parse(data);
-		}
-		return { Pending: {}, Completed: {} }; // Return an empty object if no file exists
-	}
+	// // Helper function to load the existing tasks from the tasks.json file
+	// async loadTasksFromFile() {
+	// 	if (fs.existsSync(tasksPath)) {
+	// 		const data = fs.readFileSync(tasksPath, "utf8");
+	// 		return JSON.parse(data);
+	// 	}
+	// 	return { Pending: {}, Completed: {} }; // Return an empty object if no file exists
+	// }
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: TFile[]) {
@@ -127,7 +131,7 @@ export class ScanningVault {
 		console.log("Following files have been received for scanning: ", files);
 
 		// Load the existing tasks from tasks.json once
-		const oldTasks = await this.loadTasksFromFile();
+		const oldTasks = await loadTasksRaw(this.plugin);
 		console.log(
 			"Following Old data has been loaded from tasks.json: ",
 			oldTasks
@@ -170,18 +174,22 @@ export class ScanningVault {
 						// 	}
 						// }
 
-						if (!due && this.plugin.settings.data.globalSettings.dailyNotesPluginComp) {
+						if (
+							!due &&
+							this.plugin.settings.data.globalSettings
+								.dailyNotesPluginComp
+						) {
 							const dueFormat =
 								this.plugin.settings.data.globalSettings
 									.dueDateFormat;
 							const basename = file.basename;
 
-								console.log(
-									"Following thing  has been written by the moment library. Let see what it return if the file name is : ",
-									file.basename,
-									" | OUTPUT : ",
-									moment().format(file.basename)
-								);
+							console.log(
+								"Following thing  has been written by the moment library. Let see what it return if the file name is : ",
+								file.basename,
+								" | OUTPUT : ",
+								moment().format(file.basename)
+							);
 							// Check if the basename matches the dueFormat using moment
 							if (moment(basename, dueFormat, true).isValid()) {
 								due = basename; // If the basename matches the dueFormat, assign it to due
@@ -254,8 +262,9 @@ export class ScanningVault {
 	}
 
 	// Save tasks to JSON file
-	saveTasksToFile() {
+	async saveTasksToFile() {
 		fs.writeFileSync(tasksPath, JSON.stringify(this.tasks, null, 2));
+		await writeTasksJson(this.plugin, this.tasks);
 		// console.log(
 		// 	"The following data saved in the tasks.json : ",
 		// 	this.tasks

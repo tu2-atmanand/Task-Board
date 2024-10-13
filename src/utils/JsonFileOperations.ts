@@ -1,93 +1,86 @@
 // /src/utils/JsonFileOperations.ts
 
-import { App, Plugin } from "obsidian";
 import { dataFilePath, tasksPath } from "src/interfaces/GlobalVariables";
 import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItemProps";
 
-import { Board } from "../interfaces/KanbanBoard";
-import { BoardConfigureModal } from "src/modal/BoardConfigModal";
+import { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
 import fs from "fs";
-import path from "path";
 
 // Operations with data.json
 
 // Load only the globalSettings part from the data.json
-export const loadGlobalSettings = () => {
+export const loadGlobalSettings = async (plugin: TaskBoard) => {
 	try {
-		const settingsData = fs.readFileSync(dataFilePath, "utf8");
-		return JSON.parse(settingsData).data.globalSettings;
+		await plugin.loadSettings();
+		const globalSettings = plugin.settings.data.globalSettings || {};
+		return globalSettings;
 	} catch (error) {
 		console.error("Error loading globalSettings:", error);
 		return {};
 	}
 };
 
-// Load only the boardConfigs part from the data.json
-export const loadBoardConfigs = () => {
+// NOTE : This is very inefficient method, remove it before release
+export const loadBoardConfigsUsinFS = async () => {
 	try {
 		const settingsData = fs.readFileSync(dataFilePath, "utf8");
 		return JSON.parse(settingsData).data.boardConfigs;
 	} catch (error) {
 		console.error("Error loading boardConfigs:", error);
-		return {};
+		throw error;
 	}
 };
 
 // Function to load boards data from the JSON file
-export const loadBoardsData = (): Promise<Board[]> => {
-	return new Promise((resolve, reject) => {
-		fs.readFile(dataFilePath, "utf8", (err, data) => {
-			if (err) {
-				console.error("Error reading data file:", err);
-				reject(err);
-				return;
-			}
-			const jsonData = JSON.parse(data).data; // Adjusting to match the exact json structure
-			console.log(
-				"loadBoardsData : Loading data.json for boardConfigs, I hope this is running only once..."
-			);
-			resolve(jsonData.boardConfigs);
-		});
-	});
+export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
+	try {
+		console.log(
+			"loadBoardsData: Loading board configurations. I hope this is running only once......"
+		);
+
+		// Fetch settings via Obsidian's loadData method
+		await plugin.loadSettings();
+
+		const boardConfigs = plugin.settings.data.boardConfigs || [];
+
+		return boardConfigs;
+	} catch (error) {
+		console.error("Error loading board configurations:", error);
+		throw error;
+	}
 };
+
 
 // Function to save boards data to the JSON file
-export const saveBoardsData = (updatedBoards: Board[]) => {
-	// First, read the current content of the file
-	fs.readFile(dataFilePath, "utf8", (readErr, data) => {
-		if (readErr) {
-			console.error("Error reading data file:", readErr);
-			return;
-		}
+export const saveBoardsData = async (
+	plugin: TaskBoard,
+	updatedBoards: Board[]
+) => {
+	try {
+		console.log("saveBoardsData: Saving board configurations...");
 
-		try {
-			// Parse the current JSON content
-			const currentData = JSON.parse(data);
+		// Fetch current settings
+		await plugin.loadSettings();
 
-			// Update the boardConfigs part while keeping the other settings intact
-			currentData.data.boardConfigs = updatedBoards;
+		// Update the boardConfigs in settings
+		plugin.settings.data.boardConfigs = updatedBoards;
 
-			// Write the updated content back to the file
-			fs.writeFile(
-				dataFilePath,
-				JSON.stringify(currentData, null, 2),
-				(writeErr) => {
-					if (writeErr) {
-						console.error("Error writing to data file:", writeErr);
-					}
-				}
-			);
-		} catch (parseErr) {
-			console.error("Error parsing JSON data:", parseErr);
-		}
-	});
+		// Save updated settings
+		await plugin.saveSettings();
+
+		console.log("Board configurations saved successfully.");
+	} catch (error) {
+		console.error("Error saving board configurations:", error);
+		throw error;
+	}
 };
+
+
 
 // Operations with tasks.json
 
-
-export const loadTasksUsingObsidianMethod = async (
+export const loadTasksAndMerge = async (
 	plugin: TaskBoard
 ): Promise<{ allTasksMerged: taskJsonMerged }> => {
 	const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
@@ -133,11 +126,11 @@ export const loadTasksUsingObsidianMethod = async (
 	}
 };
 
-export async function loadTasksFromJson(plugin: TaskBoard) {
+export async function loadTasksProcessed(plugin: TaskBoard) {
 	console.log(
-		"loadTasksFromJson : Let me see how many times this is running..."
+		"loadTasksProcessed : Let me see how many times this is running..."
 	);
-	return loadTasksUsingObsidianMethod(plugin)
+	return loadTasksAndMerge(plugin)
 		.then(({ allTasksMerged }) => {
 			return allTasksMerged; // Ensure it returns the merged tasks
 		})
@@ -147,3 +140,37 @@ export async function loadTasksFromJson(plugin: TaskBoard) {
 			return { Pending: [], Completed: [] };
 		});
 }
+
+export const loadTasksRaw = async (plugin: TaskBoard): Promise<tasksJson> => {
+	try {
+		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+		const data: string = await plugin.app.vault.adapter.read(path);
+		const allTasks: tasksJson = JSON.parse(data);
+		return allTasks;
+	} catch (error) {
+		console.error("Error reading tasks.json:", error);
+		throw error;
+	}
+};
+
+export const writeTasksJson = async (
+	plugin: TaskBoard,
+	updatedData: tasksJson
+): Promise<void> => {
+	try {
+		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+		await plugin.app.vault.adapter.write(
+			path,
+			JSON.stringify(updatedData, null, 2)
+		);
+		console.log("Successfully updated tasks.json.");
+	} catch (error) {
+		console.error("Error writing to tasks.json:", error);
+		throw error;
+	}
+};
+
+
+
+// Operations with fileStack.json
+
