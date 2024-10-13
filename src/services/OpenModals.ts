@@ -8,7 +8,7 @@ import {
 } from "src/utils/Checker";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { Board } from "../interfaces/KanbanBoard";
+import { Board } from "../interfaces/BoardConfigs";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { ReScanVaultModal } from "src/modal/ReScanVaultModal";
 import type TaskBoard from "main";

@@ -17,7 +17,7 @@ import {
 	DEFAULT_SETTINGS,
 	GlobalSettings,
 	globalSettingsData,
-} from "src/interfaces/KanbanView";
+} from "src/interfaces/GlobalSettings";
 import {
 	TaskBoardIcon,
 	VIEW_TYPE_TASKBOARD,

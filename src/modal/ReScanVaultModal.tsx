@@ -7,7 +7,7 @@ import ReactDOM from "react-dom/client";
 import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/Checker";
-import { tasksJson } from "src/interfaces/TaskItem";
+import { tasksJson } from "src/interfaces/TaskItemProps";
 
 interface ReScanVaultModalProps {
 	app: App;

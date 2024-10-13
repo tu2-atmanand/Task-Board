@@ -1,7 +1,11 @@
 // src/utils/RenderColumns.ts
 
 import { Dispatch, SetStateAction } from "react";
-import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItem";
+import {
+	taskItem,
+	taskJsonMerged,
+	tasksJson,
+} from "src/interfaces/TaskItemProps";
 
 import { loadBoardConfigs } from "./JsonFileOperations";
 

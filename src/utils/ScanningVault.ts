@@ -7,7 +7,8 @@ import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import path from "path";
-import { priorityEmojis } from "src/interfaces/TaskItem";
+import { priorityEmojis } from "src/interfaces/TaskItemProps";
+import { readDataOfVaultFiles } from "./MarkdownFileOperations";
 import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {

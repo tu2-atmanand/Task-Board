@@ -1,8 +1,8 @@
 // /src/utils/BoardOperations.ts
 
-import { loadBoardsData, saveBoardsData } from "./JsonFileOperations";
-
-import { Board } from "../interfaces/KanbanBoard";
+import { Board } from "../interfaces/BoardConfigs";
+import TaskBoard from "main";
+import { saveBoardsData } from "./JsonFileOperations";
 
 // Function to refresh the board data
 export const refreshBoardData = async (

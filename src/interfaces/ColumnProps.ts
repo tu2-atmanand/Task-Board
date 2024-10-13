@@ -1,4 +1,4 @@
-import { taskItem, taskJsonMerged, tasksJson } from "./TaskItem";
+import { taskItem, taskJsonMerged } from "./TaskItemProps";
 
 import { App } from "obsidian";
 import TaskBoard from "main";

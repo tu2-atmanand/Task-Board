@@ -5,7 +5,7 @@ import { App, Setting } from "obsidian";
 import TaskBoard from "main";
 import { TaskBoardSettingTab } from "../views/TaskBoardSettingTab";
 import fs from "fs";
-import { globalSettingsData } from "src/interfaces/KanbanView";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import path from "path";
 
 export class SettingsManager {

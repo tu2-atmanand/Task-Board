@@ -1,5 +1,5 @@
 // Define the structure of Board, Column, and the Data read from JSON
-export interface ColumnData {
+export type ColumnData = {
 	colType: string;
 	active: boolean;
 	collapsed?: boolean;
@@ -22,7 +22,7 @@ export interface ColumnData {
 	};
 }
 
-export interface Board {
+export type Board = {
 	name: string;
 	index: number;
 	columns: ColumnData[];
@@ -33,6 +33,5 @@ export interface Board {
 	showFilteredTags?: boolean;
 }
 
-export interface BoardConfig {
-	boardConfigs: Board[];
-}
+export type BoardConfigs = Board[];
+

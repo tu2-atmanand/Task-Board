@@ -2,7 +2,7 @@
 
 import { App, Plugin } from "obsidian";
 import { dataFilePath, tasksPath } from "src/interfaces/GlobalVariables";
-import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItem";
+import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItemProps";
 
 import { Board } from "../interfaces/KanbanBoard";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";

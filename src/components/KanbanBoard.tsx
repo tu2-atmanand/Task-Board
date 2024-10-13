@@ -6,9 +6,9 @@ import React, { useEffect, useState } from "react";
 import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
 import { loadBoardsData, loadTasksFromJson } from "src/utils/JsonFileOperations";
 import { openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
-import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItem";
+import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItemProps";
 
-import { Board } from "../interfaces/KanbanBoard";
+import { Board } from "../interfaces/BoardConfigs";
 import Column from "./Column";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";

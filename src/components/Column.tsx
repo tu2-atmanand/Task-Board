@@ -8,7 +8,7 @@ import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/util
 import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItem';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { ColumnProps } from '../interfaces/Column';
+import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';

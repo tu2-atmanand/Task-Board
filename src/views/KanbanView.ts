@@ -2,7 +2,7 @@
 
 import { ItemView, Vault, WorkspaceLeaf } from "obsidian";
 
-import { Board } from "src/interfaces/KanbanBoard";
+import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
 import ReactDOM from "react-dom/client";
 import type TaskBoard from "../../main";

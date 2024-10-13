@@ -3,7 +3,7 @@
 import { App, Component, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM, { Root } from "react-dom/client";
-import { priorityEmojis, priorityOptions, taskItem } from "src/interfaces/TaskItem";
+import { priorityEmojis, priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 
 import CodeMirrorEditor from "src/components/MarkdownEditor";
 import { FaTrash } from 'react-icons/fa';
