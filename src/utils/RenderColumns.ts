@@ -87,15 +87,13 @@ export const renderColumns = (
 		const tasksLimit =
 			boardConfigs[activeBoard]?.columns[completedColumnIndex].data.limit;
 
-		const sortedCompletedTasks = completedTasks.sort((a, b) => {
-			// const dateA = new Date(a.completed);
-			// const dateB = new Date(b.completed);
-
+		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
 			if (a.completed && b.completed) {
 				const dateA = new Date(a.completed).getTime();
 				const dateB = new Date(b.completed).getTime();
 				return dateB - dateA;
 			}
+			return 0;
 		});
 
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);

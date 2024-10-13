@@ -3,14 +3,12 @@
 import { App, Component, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM, { Root } from "react-dom/client";
-import { priorityEmojis, priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
+import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 
-import CodeMirrorEditor from "src/components/MarkdownEditor";
 import { FaTrash } from 'react-icons/fa';
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import TaskBoard from "main";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
-import { loadGlobalSettings } from "src/utils/JsonFileOperations";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 // Functional React component for the modal content
@@ -49,7 +47,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 	};
 
 	const removeSubTask = (index: number) => {
-		const updatedSubTasks = subTasks.filter((_, idx) => idx !== index);
+		const updatedSubTasks = subTasks.filter((_:string, idx:number) => idx !== index);
 		setSubTasks(updatedSubTasks);
 	};
 
@@ -116,7 +114,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		formatedContent = taskElementsFormatter(plugin, newTaskContent);
-		console.log("Content received from the formatter function :\n", formatedContent);
+		// console.log("Content received from the formatter function :\n", formatedContent);
 		if (previewContainerRef.current) {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.innerHTML = '';

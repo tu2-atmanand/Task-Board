@@ -16,30 +16,33 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
-	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 import {
 	TaskBoardIcon,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/GlobalVariables";
+import {
+	loadTasksRawDisk,
+	onUnloadSave,
+	startPeriodicSave,
+} from "src/utils/tasksCache";
 
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { openAddNewTaskModal } from "src/services/OpenModals";
-import path from "path";
 
 // import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 
 export default class TaskBoard extends Plugin {
+	app: App;
 	plugin: TaskBoard;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	fileStack: string[] = [];
 	scanTimer: number;
-	app: App;
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -66,7 +69,9 @@ export default class TaskBoard extends Plugin {
 		);
 		ribbonIconEl.addClass("task-board-ribbon-class");
 
-		// Register a new command to open AddTaskModal
+
+
+		// Register few commands
 		this.addCommand({
 			id: "open-add-task-modal",
 			name: "Add New Task in Current File",
@@ -108,15 +113,25 @@ export default class TaskBoard extends Plugin {
 		// 	},
 		// });
 
+
+
+		// Loading settings and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
+		console.log("MAIN.ts : Loading the setting values : ", this.settings);
 
-		// Following line will create a localStorage if the realTimeScanning value is TRUE.
+
+
+		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
+		console.log("Creating localStorage ...");
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
-		console.log("Creating localStorage ...");
+		this.realTimeScanning.processStack();
+
+
+
 		// Creating Few Events
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TFile) =>
@@ -150,20 +165,26 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
-		// this.settings = loadGlobalSettings().data.globalSettings;
-		console.log("MAIN.ts : Loading the setting values : ", this.settings);
-
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
 		this.settings.data.globalSettings.scanVaultAtStartup
 			? this.scanningVault.scanVaultForTasks()
 			: "";
 
+
+		// Load all the tasks from the tasks.json into sessionStorage
+		const _ = loadTasksRawDisk(this.plugin);
+		startPeriodicSave(this.plugin);
+
+
+
 		// Register the Kanban view
 		this.registerView(
 			VIEW_TYPE_TASKBOARD,
-			(leaf) => new KanbanView(this, leaf)
+			(leaf) => new KanbanView(this.app, this, leaf)
 		);
+
+
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
@@ -193,6 +214,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : unloading plugin...");
+		onUnloadSave(this.plugin);
 		window.clearInterval(this.scanTimer);
 		this.realTimeScanning.clearScanTimer();
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);

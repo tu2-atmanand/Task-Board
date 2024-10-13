@@ -1,217 +1,236 @@
 {
-  "Pending": {
-    "Untitled.md": [],
-    "XploreProgram/How to Access Xplore Courses.md": [],
-    "TODO.md": [
-      {
-        "id": 173970467,
-        "title": "New temp task, lets see if this comes after 5 minutes",
-        "body": [
-          "Updating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
-          "Another thing i will put is link to a markdwon file from my Valut : [[0-ImportantData]]",
-          "- [x] Also adding this new Subtask, first",
-          "- [ ] And adding second subtask. Now editing will make any difference."
+    "Pending": {
+        "XploreProgram/How to Access Xplore Courses.md": [],
+        "Untitled.md": [],
+        "TODO.md": [
+            {
+                "id": 2965917073,
+                "title": "New temp task, lets see if this comes after 5 minutes",
+                "body": [
+                    "Updating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
+                    "Another thing i will put is link to a markdwon file from my Valut : [[0-ImportantData]]",
+                    "- [x] Also adding this new Subtask, first",
+                    "- [ ] And adding second subtask. Now editing will make any difference."
+                ],
+                "time": "13:49 - 14:49",
+                "due": "2024-10-23",
+                "tag": "#Test",
+                "filePath": "TODO.md",
+                "completed": ""
+            }
         ],
-        "time": "13:49 - 14:49",
-        "due": "2024-10-23",
-        "tag": "#Test",
-        "filePath": "TODO.md",
-        "completed": ""
-      }
-    ],
-    "Parent/Child/TempNote.md": [],
-    "Parent/Child/2002-01-12.md": [],
-    "Parent/Child/12-JAN-2002.md": [
-      {
-        "id": 4138716375,
-        "title": "Adding temp task",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Parent/Child/12-JAN-2002.md",
-        "completed": ""
-      }
-    ],
-    "Parent/Child/12-01-2002.md": [],
-    "Parent/MarkdownPreviewView Docs.md": [],
-    "Pending Document Work.md": [
-      {
-        "id": 3910440856,
-        "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
-        "body": [
-          "This is a line in the Desc",
-          "- There  is no subTask for this task, and adding a new line in the Desc with bullete point."
+        "Spintly Details.md": [
+            {
+                "id": 3494128309,
+                "title": "Need to complete all the Documents work  and submit to TCS",
+                "body": [
+                    "Just adding a normal line for this task as a body.",
+                    "This is an image in the body : ![[1721576562712.jpg]]",
+                    "- [x] Adding a first subtask, with **checked** state true.",
+                    "- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
+                ],
+                "time": "",
+                "due": "2024-10-13",
+                "tag": "#Test",
+                "filePath": "Spintly Details.md",
+                "completed": ""
+            },
+            {
+                "id": 3483640190,
+                "title": "Just a new Task without tag or date",
+                "body": [
+                    "First normal line for body is added.",
+                    "- Adding a bullete point in the body.",
+                    "Adding one more line in Desc",
+                    "- Adding another bullete point in the description",
+                    "- [ ] Adding one subTask with an image : ![[UANnumber-Spintly.png]]",
+                    "- [ ] Adding another subTask, second one"
+                ],
+                "time": "10:30 - 11:30",
+                "due": "2024-10-14",
+                "tag": "#Test",
+                "filePath": "Spintly Details.md",
+                "completed": ""
+            }
         ],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      },
-      {
-        "id": 1115697425,
-        "title": "Graduate All Semester Marksheets :",
-        "body": [
-          "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
-          "- [x] Semester 2 : [[Semester_2_Marksheet.pdf]]",
-          "- [x] Semester 3 : [[Semester_3_Marksheet.pdf]]",
-          "- [x] Semester 4 : [[Semester_4_Marksheet.pdf]]",
-          "- [x] Semester 5 : [[Semester_5_Marksheet.pdf]]",
-          "- [x] Semester 6 : [[Semester_6_Marksheet.pdf]]",
-          "- [x] Semester 7 : [[Semester_7_Marksheet.pdf]]",
-          "- [x] Semester 8 : [[Semester_8_Marksheet.pdf]]"
+        "Pending Document Work.md": [
+            {
+                "id": 3754856656,
+                "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
+                "body": [
+                    "This is a line in the Desc",
+                    "- There  is no subTask for this task, and adding a new line in the Desc with bullete point."
+                ],
+                "time": "",
+                "due": "",
+                "tag": "#Test",
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1835022124,
+                "title": "Graduate All Semester Marksheets :",
+                "body": [
+                    "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
+                    "- [x] Semester 2 : [[Semester_2_Marksheet.pdf]]",
+                    "- [x] Semester 3 : [[Semester_3_Marksheet.pdf]]",
+                    "- [x] Semester 4 : [[Semester_4_Marksheet.pdf]]",
+                    "- [x] Semester 5 : [[Semester_5_Marksheet.pdf]]",
+                    "- [x] Semester 6 : [[Semester_6_Marksheet.pdf]]",
+                    "- [x] Semester 7 : [[Semester_7_Marksheet.pdf]]",
+                    "- [x] Semester 8 : [[Semester_8_Marksheet.pdf]]"
+                ],
+                "time": "",
+                "due": "",
+                "tag": "#Test",
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 3517167294,
+                "title": "Only one Recording Course is remaining of JavaOk",
+                "body": [
+                    "Now i am removing all the points from the body and changing them into a one line sentence.",
+                    "- [ ] Now i am adding this subtask, this should be updated inside the json file. Updating",
+                    "- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
+                ],
+                "time": "21:10 - 22:10",
+                "due": "2024-10-12",
+                "tag": "#Test",
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 519893000,
+                "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
+                "body": [],
+                "time": "",
+                "due": "2024-10-13",
+                "tag": "#Test",
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            }
         ],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      },
-      {
-        "id": 115794778,
-        "title": "Only one Recording Course is remaining of JavaOk",
-        "body": [
-          "Now i am removing all the points from the body and changing them into a one line sentence.",
-          "- [ ] Now i am adding this subtask, this should be updated inside the json file. Updating",
-          "- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
+        "Parent/MarkdownPreviewView Docs.md": [],
+        "Parent/Child/TempNote.md": [],
+        "Parent/Child/2002-01-12.md": [],
+        "Parent/Child/12-JAN-2002.md": [
+            {
+                "id": 3919307966,
+                "title": "Adding temp task",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tag": "#Test",
+                "filePath": "Parent/Child/12-JAN-2002.md",
+                "completed": ""
+            }
         ],
-        "time": "21:10 - 22:10",
-        "due": "2024-10-12",
-        "tag": "#Test",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      },
-      {
-        "id": 1812436880,
-        "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
-        "body": [],
-        "time": "",
-        "due": "2024-10-13",
-        "tag": "#Test",
-        "filePath": "Pending Document Work.md",
-        "completed": ""
-      }
-    ],
-    "Spintly Details.md": [
-      {
-        "id": 1192634133,
-        "title": "Need to complete all the Documents work  and submit to TCS",
-        "body": [
-          "Just adding a normal line for this task as a body.",
-          "This is an image in the body : ![[1721576562712.jpg]]",
-          "- [x] Adding a first subtask, with **checked** state true.",
-          "- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
+        "Parent/Child/12-01-2002.md": [],
+        "Miscellaneous Points.md": [],
+        "DocsForPlugin/Summarization by GPT.md": [],
+        "DocsForPlugin/Readme of CardBoard.md": [],
+        "DocsForPlugin/Readme of CardBoard-HTML.md": [],
+        "DocsForPlugin/Readme for Task Board.md": [],
+        "DocsForPlugin/Question On Accessing Settings.md": [],
+        "DocsForPlugin/PluginCodeBase/main.md": [],
+        "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
+        "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+        "DailyNotes.md": [
+            {
+                "id": 755447619,
+                "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
+                "body": [],
+                "time": "",
+                "due": "2024-10-16",
+                "tag": "#Test",
+                "filePath": "DailyNotes.md",
+                "completed": ""
+            }
         ],
-        "time": "",
-        "due": "2024-10-13",
-        "tag": "#Test",
-        "filePath": "Spintly Details.md",
-        "completed": ""
-      },
-      {
-        "id": 2181242902,
-        "title": "Just a new Task without tag or date",
-        "body": [
-          "First normal line for body is added.",
-          "- Adding a bullete point in the body.",
-          "Adding one more line in Desc",
-          "- Adding another bullete point in the description",
-          "- [ ] Adding one subTask with an image : ![[UANnumber-Spintly.png]]",
-          "- [ ] Adding another subTask, second one"
+        "4-Process After Joining.md": [],
+        "3-Process After Offer Letter Received.md": [],
+        "2-Preparation_For_TCS_Interview.md": [],
+        "1-Registering For TCS.md": [],
+        "0-ImportantData.md": [],
+        "Testing 2.md": [
+            {
+                "id": 2803563704,
+                "title": "So This is to add a simple Task for testing. UPdated",
+                "body": [
+                    "Basically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. Updated",
+                    "> One probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
+                    "- [x] Trace how you code is running for the REFRESH_COLUMN  command. Updated",
+                    "- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated"
+                ],
+                "time": "19:34 - 20:34",
+                "due": "2024-10-12",
+                "tag": "#Test",
+                "filePath": "Testing 2.md",
+                "completed": "",
+                "priority": "1"
+            }
+        ]
+    },
+    "Completed": {
+        "XploreProgram/How to Access Xplore Courses.md": [],
+        "Untitled.md": [],
+        "TODO.md": [],
+        "Spintly Details.md": [],
+        "Pending Document Work.md": [
+            {
+                "id": 4266205964,
+                "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tag": "#Test",
+                "filePath": "Pending Document Work.md",
+                "completed": "2024-09-26T16"
+            }
         ],
-        "time": "10:30 - 11:30",
-        "due": "2024-10-14",
-        "tag": "#Test",
-        "filePath": "Spintly Details.md",
-        "completed": ""
-      }
-    ],
-    "Miscellaneous Points.md": [],
-    "DocsForPlugin/PluginCodeBase/main.md": [],
-    "DocsForPlugin/Question On Accessing Settings.md": [],
-    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
-    "DocsForPlugin/Summarization by GPT.md": [],
-    "DocsForPlugin/Readme of CardBoard.md": [],
-    "DocsForPlugin/Readme of CardBoard-HTML.md": [],
-    "DocsForPlugin/Readme for Task Board.md": [],
-    "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
-    "DailyNotes.md": [
-      {
-        "id": 3572741659,
-        "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
-        "body": [],
-        "time": "",
-        "due": "2024-10-16",
-        "tag": "#Test",
-        "filePath": "DailyNotes.md",
-        "completed": ""
-      }
-    ],
-    "4-Process After Joining.md": [],
-    "3-Process After Offer Letter Received.md": [],
-    "2-Preparation_For_TCS_Interview.md": [],
-    "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
-  },
-  "Completed": {
-    "Untitled.md": [],
-    "XploreProgram/How to Access Xplore Courses.md": [],
-    "TODO.md": [],
-    "Parent/Child/TempNote.md": [],
-    "Parent/Child/2002-01-12.md": [
-      {
-        "id": 3407388999,
-        "title": "I was born on Saturday",
-        "body": [],
-        "time": "",
-        "due": "2002-01-12",
-        "tag": "#Test",
-        "filePath": "Parent/Child/2002-01-12.md",
-        "completed": "2024-10-04/22:08"
-      }
-    ],
-    "Parent/Child/12-JAN-2002.md": [],
-    "Parent/Child/12-01-2002.md": [
-      {
-        "id": 147248929,
-        "title": "I was born",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Parent/Child/12-01-2002.md",
-        "completed": "2024-10-07"
-      }
-    ],
-    "Parent/MarkdownPreviewView Docs.md": [],
-    "Pending Document Work.md": [
-      {
-        "id": 1140685561,
-        "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Pending Document Work.md",
-        "completed": "2024-09-26T16"
-      }
-    ],
-    "Spintly Details.md": [],
-    "Miscellaneous Points.md": [],
-    "DocsForPlugin/PluginCodeBase/main.md": [],
-    "DocsForPlugin/Question On Accessing Settings.md": [],
-    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
-    "DocsForPlugin/Summarization by GPT.md": [],
-    "DocsForPlugin/Readme of CardBoard.md": [],
-    "DocsForPlugin/Readme of CardBoard-HTML.md": [],
-    "DocsForPlugin/Readme for Task Board.md": [],
-    "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
-    "DailyNotes.md": [],
-    "4-Process After Joining.md": [],
-    "3-Process After Offer Letter Received.md": [],
-    "2-Preparation_For_TCS_Interview.md": [],
-    "1-Registering For TCS.md": [],
-    "0-ImportantData.md": []
-  }
+        "Parent/MarkdownPreviewView Docs.md": [],
+        "Parent/Child/TempNote.md": [],
+        "Parent/Child/2002-01-12.md": [
+            {
+                "id": 2270985670,
+                "title": "I was born on Saturday",
+                "body": [],
+                "time": "",
+                "due": "2002-01-12",
+                "tag": "#Test",
+                "filePath": "Parent/Child/2002-01-12.md",
+                "completed": "2024-10-04/22:08"
+            }
+        ],
+        "Parent/Child/12-JAN-2002.md": [],
+        "Parent/Child/12-01-2002.md": [
+            {
+                "id": 3388967613,
+                "title": "I was born",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tag": "#Test",
+                "filePath": "Parent/Child/12-01-2002.md",
+                "completed": "2024-10-07"
+            }
+        ],
+        "Miscellaneous Points.md": [],
+        "DocsForPlugin/Summarization by GPT.md": [],
+        "DocsForPlugin/Readme of CardBoard.md": [],
+        "DocsForPlugin/Readme of CardBoard-HTML.md": [],
+        "DocsForPlugin/Readme for Task Board.md": [],
+        "DocsForPlugin/Question On Accessing Settings.md": [],
+        "DocsForPlugin/PluginCodeBase/main.md": [],
+        "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
+        "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+        "DailyNotes.md": [],
+        "4-Process After Joining.md": [],
+        "3-Process After Offer Letter Received.md": [],
+        "2-Preparation_For_TCS_Interview.md": [],
+        "1-Registering For TCS.md": [],
+        "0-ImportantData.md": [],
+        "Testing 2.md": []
+    }
 }

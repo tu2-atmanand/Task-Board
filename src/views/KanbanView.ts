@@ -1,6 +1,6 @@
 // src/views/KanbanView.ts
 
-import { ItemView, Vault, WorkspaceLeaf } from "obsidian";
+import { App, ItemView, Vault, WorkspaceLeaf } from "obsidian";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
@@ -17,12 +17,12 @@ export class KanbanView extends ItemView {
 	private activeBoardIndex: number = 0;
 	private root: ReactDOM.Root;
 
-	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
+	constructor(app: App, plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
-		this.app = plugin.app;
+		this.app = app;
 		this.plugin = plugin;
 		this.vault = plugin.app.vault;
-		// this.root = ReactDOM.createRoot(this.contentEl);
+		this.root = ReactDOM.createRoot(this.contentEl);
 	}
 
 	getViewType() {
@@ -53,7 +53,7 @@ export class KanbanView extends ItemView {
 			this.getSettings()
 		);
 
-		this.root = ReactDOM.createRoot(this.contentEl); // Store root reference
+		// this.root = ReactDOM.createRoot(this.contentEl); // Store root reference
 		this.renderBoard();
 		await this.loadBoards();
 	}
@@ -77,6 +77,7 @@ export class KanbanView extends ItemView {
 
 	async onClose() {
 		// Clean up when view is closed
+		this.root.unmount();
 	}
 }
 
