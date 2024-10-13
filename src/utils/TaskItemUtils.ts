@@ -1,10 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
-import {
-	loadGlobalSettings,
-	loadTasksRaw,
-	writeTasksJson,
-} from "./JsonFileOperations";
+import { loadTasksRaw, writeTasksJson } from "./tasksCache";
 import path, { join } from "path";
 import {
 	priorityEmojis,
@@ -18,6 +14,7 @@ import {
 
 import { App } from "obsidian";
 import TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
 import { tasksPath } from "src/interfaces/GlobalVariables";
 
@@ -245,8 +242,14 @@ export const updateTaskInFile = async (
 	updatedTask: taskItem,
 	oldTask: taskItem
 ) => {
-	console.log("oldTask i have received for updating in md file : ", oldTask);
-	console.log("updatedTask i have received : ", updatedTask);
+	console.log(
+		"updateTaskInFile : oldTask to be replaced in MD file : ",
+		oldTask
+	);
+	console.log(
+		"updateTaskInFile : NewTask to be replaced in MD file : ",
+		updatedTask
+	);
 
 	const filePath = updatedTask.filePath;
 	// const data = plugin.app.vault.read(plugin.app.vault.getFileByPath(updatedTask.filePath));
@@ -309,7 +312,7 @@ export const updateTaskInJson = async (
 	updatedTask: taskItem
 ) => {
 	console.log(
-		"The new task which i have received and which i am going to put in the taks.json : ",
+		"updateTaskInJson : NewTask to be replaced/updated in data.json/sessionStorage : ",
 		updatedTask
 	);
 	try {
@@ -333,25 +336,23 @@ export const updateTaskInJson = async (
 		const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
 		const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
 
-		// console.log(
-		// 	"All updated Pending Tasks to be written in Tasks.json: ",
-		// 	updatedPendingTasks
-		// );
-		// console.log(
-		// 	"All updated Completed Tasks to be written in Tasks.json: ",
-		// 	updatedCompletedTasks
-		// );
-
 		// Create the updated data object with both updated Pending and Completed tasks
-		const updatedData = {
+		const updatedData: tasksJson = {
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
 		};
+
+		console.log(
+			"updateTaskInJson : Data before sending to the tasksCache file function to write to sessionStorage : ",
+			updatedData
+		);
 
 		// Write the updated data back to the JSON file
 		console.log("The new data to be updated in tasks.json: ", updatedData);
 		// Write the updated data back to the JSON file using the new function
 		await writeTasksJson(plugin, updatedData);
+		
+		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
 		console.error(
 			"updateTaskInJson : Error updating task in tasks.json:",

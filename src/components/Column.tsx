@@ -53,10 +53,9 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 
 	const handleCheckboxChange = (updatedTask: taskItem) => {
 		const moment = require("moment");
-		// Remove task from the current state
+
+		// NOTE : The following two lines removes the task which has been marked as completed or vice-versa, but only the TaskTitle disappers, if that task has a body, then what you see on the board is, the body of this updated task gets appeded to the task either above or below. This most probably will be due to worst way of rendering. I am not sure about this or if in future Svelte going to solve it or not.
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
-		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
-		// console.log("The tasks which has been filtered : ", updatedTasks);
 		setTasks(updatedTasks); // Update state to remove completed task
 
 		// Check if the task is completed
@@ -72,29 +71,8 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			moveFromPendingToCompleted(plugin, taskWithCompleted);
 			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		}
+		// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 
-
-		// Following are multiple method used for refresing only the columns and not the whole board : 
-
-		// renderColumns(setTasks, colType, data);
-
-		// // PLEASE NOTE : Keep the following lines as it is, when i check the box, without updating the whole board, the TaskItem Card moves from the Todays column into Completed column and vice-versa very smoothly.
-		// refreshBoardData(setBoards, () => {
-		// 	// renderColumns(setTasks, activeBoard, colType, data);
-		// 	console.log("The below line is loading the tasks from tasks.json, hopefully this line will be running only once...");
-		// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksProcessed();
-
-		// 	// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
-		// });
-
-		// const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksProcessed();
-		// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
-
-
-		// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
-
-		// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
-		eventEmitter.emit("REFRESH_COLUMN");
 	};
 
 	const handleSubTasksChange = (updatedTask: taskItem) => {
@@ -134,34 +112,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 				// Update the task in the file and JSON
 				updateTaskInFile(plugin, updatedTask, task);
 				updateTaskInJson(plugin, updatedTask);
-
-				// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
-				// Refresh tasks state after update
-				// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
-
-				// Following are multiple method used for refresing only the columns and not the whole board : 
-
-				// renderColumns(setTasks, tag, data);
-
-				// --- MY METHOD ---------
-				// const emptyTheTasks: Task[] = [];
-				// setTasks(emptyTheTasks);
-				// sleep(10);
-
-				// setTasks([]);
-
-				// THIS METHOD IS NOTE WORKING
-				// refreshBoardData(setBoards, () => {
-				// 	console.log("Task updated, running the Dispatch method of updating the board...");
-				// 	renderColumns(setTasks, activeBoard, colType, data);
-				// });
-
-				// ONLY THIS BELOW METHOD IS WORKING, AND IT ONLY REFRESHES THE WHOLE COLUMN, YOU CAN SEE ALL THE TASKITEM FROM THIS COLUMN GETTING REFRESHED, REST COLUMNS REMAINS SILENT, BUT YOU KNOW OBVIOULSY THEY ARE ALSO GETTING ADDED FROM NEW TASKS.JSON DATA.
-				// updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
-				// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
-
-				// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
-				eventEmitter.emit("REFRESH_COLUMN");
+				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 			},
 			task.filePath,
 			task);
