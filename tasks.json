@@ -4,7 +4,7 @@
     "XploreProgram/How to Access Xplore Courses.md": [],
     "TODO.md": [
       {
-        "id": 1432539618,
+        "id": 173970467,
         "title": "New temp task, lets see if this comes after 5 minutes",
         "body": [
           "Updating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
@@ -19,43 +19,25 @@
         "completed": ""
       }
     ],
-    "Spintly Details.md": [
+    "Parent/Child/TempNote.md": [],
+    "Parent/Child/2002-01-12.md": [],
+    "Parent/Child/12-JAN-2002.md": [
       {
-        "id": 620403379,
-        "title": "Need to complete all the Documents work  and submit to TCS",
-        "body": [
-          "Just adding a normal line for this task as a body.",
-          "This is an image in the body : ![[1721576562712.jpg]]",
-          "- [x] Adding a first subtask, with **checked** state true.",
-          "- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
-        ],
+        "id": 4138716375,
+        "title": "Adding temp task",
+        "body": [],
         "time": "",
-        "due": "2024-10-09",
+        "due": "",
         "tag": "#Test",
-        "filePath": "Spintly Details.md",
-        "completed": ""
-      },
-      {
-        "id": 1998236555,
-        "title": "Just a new Task without tag or date",
-        "body": [
-          "First normal line for body is added.",
-          "- Adding a bullete point in the body.",
-          "Adding one more line in Desc",
-          "- Adding another bullete point in the description",
-          "- [ ] Adding one subTask with an image : ![[UANnumber-Spintly.png]]",
-          "- [ ] Adding another subTask, second one"
-        ],
-        "time": "10:30 - 11:30",
-        "due": "2024-10-11",
-        "tag": "#Test",
-        "filePath": "Spintly Details.md",
+        "filePath": "Parent/Child/12-JAN-2002.md",
         "completed": ""
       }
     ],
+    "Parent/Child/12-01-2002.md": [],
+    "Parent/MarkdownPreviewView Docs.md": [],
     "Pending Document Work.md": [
       {
-        "id": 849195941,
+        "id": 3910440856,
         "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
         "body": [
           "This is a line in the Desc",
@@ -68,7 +50,7 @@
         "completed": ""
       },
       {
-        "id": 290988823,
+        "id": 1115697425,
         "title": "Graduate All Semester Marksheets :",
         "body": [
           "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -87,7 +69,7 @@
         "completed": ""
       },
       {
-        "id": 3218149293,
+        "id": 115794778,
         "title": "Only one Recording Course is remaining of JavaOk",
         "body": [
           "Now i am removing all the points from the body and changing them into a one line sentence.",
@@ -101,46 +83,64 @@
         "completed": ""
       },
       {
-        "id": 2744296386,
+        "id": 1812436880,
         "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
         "body": [],
         "time": "",
-        "due": "2024-10-09",
+        "due": "2024-10-13",
         "tag": "#Test",
         "filePath": "Pending Document Work.md",
         "completed": ""
       }
     ],
-    "Parent/Child/2002-01-12.md": [],
-    "Parent/Child/TempNote.md": [],
-    "Parent/Child/12-JAN-2002.md": [
+    "Spintly Details.md": [
       {
-        "id": 742230975,
-        "title": "Adding temp task",
-        "body": [],
+        "id": 1192634133,
+        "title": "Need to complete all the Documents work  and submit to TCS",
+        "body": [
+          "Just adding a normal line for this task as a body.",
+          "This is an image in the body : ![[1721576562712.jpg]]",
+          "- [x] Adding a first subtask, with **checked** state true.",
+          "- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
+        ],
         "time": "",
-        "due": "",
+        "due": "2024-10-13",
         "tag": "#Test",
-        "filePath": "Parent/Child/12-JAN-2002.md",
+        "filePath": "Spintly Details.md",
+        "completed": ""
+      },
+      {
+        "id": 2181242902,
+        "title": "Just a new Task without tag or date",
+        "body": [
+          "First normal line for body is added.",
+          "- Adding a bullete point in the body.",
+          "Adding one more line in Desc",
+          "- Adding another bullete point in the description",
+          "- [ ] Adding one subTask with an image : ![[UANnumber-Spintly.png]]",
+          "- [ ] Adding another subTask, second one"
+        ],
+        "time": "10:30 - 11:30",
+        "due": "2024-10-14",
+        "tag": "#Test",
+        "filePath": "Spintly Details.md",
         "completed": ""
       }
     ],
-    "Parent/Child/12-01-2002.md": [],
     "Miscellaneous Points.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
     "DocsForPlugin/Question On Accessing Settings.md": [],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DocsForPlugin/Summarization by GPT.md": [],
     "DocsForPlugin/Readme of CardBoard.md": [],
     "DocsForPlugin/Readme of CardBoard-HTML.md": [],
     "DocsForPlugin/Readme for Task Board.md": [],
-    "DocsForPlugin/PluginCodeBase/main.md": [],
     "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
-    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
     "DailyNotes.md": [
       {
-        "id": 3234122191,
+        "id": 3572741659,
         "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
-        "body": [
-          ""
-        ],
+        "body": [],
         "time": "",
         "due": "2024-10-16",
         "tag": "#Test",
@@ -152,116 +152,16 @@
     "3-Process After Offer Letter Received.md": [],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": [],
-    "DocsForPlugin/Summarization by GPT.md": [],
-    "Daily_Notes/2024-10-10.md": [
-      {
-        "title": "This is a new Task I am adding from the Combined Modal.",
-        "body": [
-          "I will be adding all the fields.",
-          "- This is a bullete point in the Description.",
-          "- [ ] Just first SubTask",
-          "- [ ] Another SubTask, second One"
-        ],
-        "due": "2024-10-11",
-        "tag": "#Test",
-        "time": "20:10 - 21:10",
-        "priority": "3",
-        "filePath": "Daily_Notes/2024-10-10.md",
-        "id": 944988031,
-        "completed": ""
-      },
-      {
-        "title": "A simple new Task",
-        "body": [
-          "Just simple Body",
-          "- [ ] Only one SubTask"
-        ],
-        "due": "2024-10-12",
-        "tag": "#Test",
-        "time": "12:27 - 13:27",
-        "priority": "2",
-        "filePath": "Daily_Notes/2024-10-10.md",
-        "id": 1444396765,
-        "completed": ""
-      },
-      {
-        "title": "Adding a Simple Task using Modal through Shortcut",
-        "body": [
-          "Just a line",
-          "- [ ] One SubTask"
-        ],
-        "due": "2024-10-12",
-        "tag": "#Test",
-        "time": "21:31 - 22:31",
-        "priority": "1",
-        "filePath": "Daily_Notes/2024-10-10.md",
-        "id": 1016529206,
-        "completed": ""
-      },
-      {
-        "title": "Adding new task",
-        "body": [
-          ""
-        ],
-        "due": "",
-        "tag": "",
-        "time": "",
-        "priority": 0,
-        "filePath": "Daily_Notes/2024-10-10.md",
-        "id": 1519590961,
-        "completed": ""
-      },
-      {
-        "title": "Adding a new task, to see if everything works fine",
-        "body": [
-          "Just a simple line in body",
-          "- [ ] Adding a simple SubTask"
-        ],
-        "due": "2024-10-11",
-        "tag": "#Test",
-        "time": "22:28 - 23:28",
-        "priority": "4",
-        "filePath": "Daily_Notes/2024-10-10.md",
-        "id": 3019060318,
-        "completed": ""
-      },
-      {
-        "title": "Adding a simple Task, to see if everything works correctly",
-        "body": [
-          "Adding a simple line",
-          "- [ ] SubTask"
-        ],
-        "due": "2024-10-10",
-        "tag": "#Test",
-        "time": "22:29 - 23:29",
-        "priority": "2",
-        "filePath": "Daily_Notes/2024-10-10.md",
-        "id": 2478658714,
-        "completed": ""
-      }
-    ]
+    "0-ImportantData.md": []
   },
   "Completed": {
     "Untitled.md": [],
     "XploreProgram/How to Access Xplore Courses.md": [],
     "TODO.md": [],
-    "Spintly Details.md": [],
-    "Pending Document Work.md": [
-      {
-        "id": 2221487215,
-        "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
-        "body": [],
-        "time": "",
-        "due": "",
-        "tag": "#Test",
-        "filePath": "Pending Document Work.md",
-        "completed": "2024-09-26T16"
-      }
-    ],
+    "Parent/Child/TempNote.md": [],
     "Parent/Child/2002-01-12.md": [
       {
-        "id": 475864272,
+        "id": 3407388999,
         "title": "I was born on Saturday",
         "body": [],
         "time": "",
@@ -271,11 +171,10 @@
         "completed": "2024-10-04/22:08"
       }
     ],
-    "Parent/Child/TempNote.md": [],
     "Parent/Child/12-JAN-2002.md": [],
     "Parent/Child/12-01-2002.md": [
       {
-        "id": 3838052229,
+        "id": 147248929,
         "title": "I was born",
         "body": [],
         "time": "",
@@ -285,20 +184,34 @@
         "completed": "2024-10-07"
       }
     ],
+    "Parent/MarkdownPreviewView Docs.md": [],
+    "Pending Document Work.md": [
+      {
+        "id": 1140685561,
+        "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
+        "body": [],
+        "time": "",
+        "due": "",
+        "tag": "#Test",
+        "filePath": "Pending Document Work.md",
+        "completed": "2024-09-26T16"
+      }
+    ],
+    "Spintly Details.md": [],
     "Miscellaneous Points.md": [],
+    "DocsForPlugin/PluginCodeBase/main.md": [],
     "DocsForPlugin/Question On Accessing Settings.md": [],
+    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
+    "DocsForPlugin/Summarization by GPT.md": [],
     "DocsForPlugin/Readme of CardBoard.md": [],
     "DocsForPlugin/Readme of CardBoard-HTML.md": [],
     "DocsForPlugin/Readme for Task Board.md": [],
-    "DocsForPlugin/PluginCodeBase/main.md": [],
     "DocsForPlugin/ModalDesignsForTheTaskBoardPlugin.excalidraw.md": [],
-    "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
     "DailyNotes.md": [],
     "4-Process After Joining.md": [],
     "3-Process After Offer Letter Received.md": [],
     "2-Preparation_For_TCS_Interview.md": [],
     "1-Registering For TCS.md": [],
-    "0-ImportantData.md": [],
-    "DocsForPlugin/Summarization by GPT.md": []
+    "0-ImportantData.md": []
   }
 }

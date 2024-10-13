@@ -15,43 +15,31 @@ import {
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
-	GlobalSettings,
+	PluginDataJson,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 import {
 	TaskBoardIcon,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/GlobalVariables";
-import { addTaskInFile, addTaskInJson, updateTaskInFile } from "src/utils/TaskItemUtils";
 
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
-import { eventEmitter } from "src/services/EventEmitter";
-import fs from "fs";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import path from "path";
 
 // import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 
 export default class TaskBoard extends Plugin {
-	settings: GlobalSettings = DEFAULT_SETTINGS;
+	plugin: TaskBoard;
+	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	fileStack: string[] = [];
-	stackFilePath = path.join(
-		(window as any).app.vault.adapter.basePath,
-		".obsidian",
-		"plugins",
-		"task-board",
-		"file-stack.json"
-	);
 	scanTimer: number;
 	app: App;
-	plugin: TaskBoard;
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -86,7 +74,7 @@ export default class TaskBoard extends Plugin {
 				const app = this.app as App;
 				const activeFile = app.workspace.getActiveFile();
 				if (activeFile) {
-					openAddNewTaskModal(app, this.plugin, activeFile)
+					openAddNewTaskModal(app, this.plugin, activeFile);
 				} else {
 					new Notice("No active file found to add a task.");
 				}

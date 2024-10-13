@@ -263,7 +263,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": true
+      "realTimeScanning": false
     }
   }
 }
