@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
-import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItem';
+import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItemProps';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { ColumnProps } from '../interfaces/ColumnProps';
@@ -46,8 +46,8 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	useEffect(() => {
 		// setTasks([]);
 		// console.log("FROM COLUMN.TSX : Data i will be sending to renderColumns function : ", allTasksExternal);
-		if(allTasksExternal.Pending.length>0 || allTasksExternal.Completed.length>0) {
-			renderColumns(setTasks, activeBoard, colType, data, allTasksExternal);
+		if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
+			renderColumns(plugin, setTasks, activeBoard, colType, data, allTasksExternal);
 		}
 	}, [colType, data, allTasksExternal]);
 
@@ -63,14 +63,14 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		if (updatedTask.completed) {
 			const taskWithCompleted = { ...updatedTask, completed: "" };
 			// Move from Completed to Pending
-			moveFromCompletedToPending(taskWithCompleted);
-			updateTaskInFile(taskWithCompleted, taskWithCompleted);
+			moveFromCompletedToPending(plugin, taskWithCompleted);
+			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		} else {
 			console.log("The format give by user for completion date : ", globalSettings?.taskCompletionDateTimePattern, " | The date-time i have got from the moment library : ", moment().format(globalSettings?.taskCompletionDateTimePattern));
 			const taskWithCompleted = { ...updatedTask, completed: moment().format(globalSettings?.taskCompletionDateTimePattern), };
 			// Move from Pending to Completed
-			moveFromPendingToCompleted(taskWithCompleted);
-			updateTaskInFile(taskWithCompleted, taskWithCompleted);
+			moveFromPendingToCompleted(plugin, taskWithCompleted);
+			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		}
 
 
@@ -82,12 +82,12 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		// refreshBoardData(setBoards, () => {
 		// 	// renderColumns(setTasks, activeBoard, colType, data);
 		// 	console.log("The below line is loading the tasks from tasks.json, hopefully this line will be running only once...");
-		// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+		// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksProcessed();
 
 		// 	// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
 		// });
 
-		// const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+		// const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksProcessed();
 		// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
 
 
@@ -105,17 +105,16 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		// console.log("The tasks which has been filtered : ", updatedTasks);
 		// setTasks(updatedTasks); // Update state to remove completed task
 		// console.log("The new task which i have received and which i am going to put in the taks.json : ", updatedTask);
-		updateTaskInJson(updatedTask);
-		updateTaskInFile(updatedTask, updatedTask);
+		updateTaskInJson(plugin, updatedTask);
+		updateTaskInFile(plugin, updatedTask, updatedTask);
 	};
 
-	const handleDeleteTask = (task: taskItem) => {
-		const app = (window as any).app as App; // Fetch the Obsidian app instance
+	const handleDeleteTask = (app: App, task: taskItem) => {
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app, // Add app here
 			onConfirm: () => {
-				deleteTaskFromFile(task);
-				deleteTaskFromJson(task);
+				deleteTaskFromFile(plugin, task);
+				deleteTaskFromJson(plugin, task);
 				// Remove the task from state after deletion
 				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
 			},
@@ -127,14 +126,14 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	};
 
 	const handleEditTask = (task: taskItem) => {
-		const app = (window as any).app as App;
 		const editModal = new AddOrEditTaskModal(
 			app,
+			plugin,
 			(updatedTask) => {
 				updatedTask.filePath = task.filePath;
 				// Update the task in the file and JSON
-				updateTaskInFile(updatedTask, task);
-				updateTaskInJson(updatedTask);
+				updateTaskInFile(plugin, updatedTask, task);
+				updateTaskInJson(plugin, updatedTask);
 
 				// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
 				// Refresh tasks state after update
@@ -187,7 +186,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 							key={index}
 							task={task}
 							onEdit={() => handleEditTask(task)}
-							onDelete={() => handleDeleteTask(task)}
+							onDelete={() => handleDeleteTask(app, task)}
 							onCheckboxChange={() => handleCheckboxChange(task)}
 							onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
 						/>

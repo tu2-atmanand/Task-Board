@@ -4,7 +4,7 @@ import { App, Notice } from "obsidian";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
-import { loadBoardsData, loadTasksFromJson } from "src/utils/JsonFileOperations";
+import { loadBoardsData, loadTasksProcessed } from "src/utils/JsonFileOperations";
 import { openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
 import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItemProps";
 
@@ -36,16 +36,14 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 
 		refreshBoardData(setBoards, async () => {
 			try {
-				const data = await loadBoardsData(); // Fetch updated board data
+				const data = await loadBoardsData(plugin); // Fetch updated board data
 				setBoards(data); // Update the state with the new data
-				// Since loadTasksFromJson is async, await its result
-				const allTasks = await loadTasksFromJson(plugin);
+				// Since loadTasksProcessed is async, await its result
+				const allTasks = await loadTasksProcessed(plugin);
 				// console.log("THE DATA I HAVE RECEIVED : ", allTasks);
 				if (allTasks) {
 					setAllTasks(allTasks);  // Set the tasks if not undefined
 				}
-				// setPendingTasks(pendingTasks);
-				// setCompletedTasks(completedTasks);
 			} catch (error) {
 				console.error("Error loading tasks:", error);
 			}
@@ -65,16 +63,8 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		const refreshColumnListener = async () => {
 			console.log("KanbanBoard.tsx : REFRESH_COLUMN mssgs received...");
 			try {
-				const allTasks = await loadTasksFromJson(plugin);
+				const allTasks = await loadTasksProcessed(plugin);
 				setAllTasks(allTasks);
-
-				// const { pendingTasks, completedTasks } = await loadTasksFromJson(plugin);
-				// TODO : i think i dont need to do the following three lines of code, after i implement saving and loading tasks from sessionStorage/localStorage.
-				// setPendingTasks([]);
-				// setCompletedTasks([]);
-				// sleep(30);
-				setPendingTasks(pendingTasks);
-				setCompletedTasks(completedTasks);
 			} catch (error) {
 				console.error("Error loading tasks:", error);
 			}
@@ -92,7 +82,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	}, []);
 
 	// const RefreshTasksInsideColumns = () => {
-	// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+	// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksProcessed();
 	// 	// Trigger renderColumns after the boards are refreshed
 	// 	boards.forEach((board, index) => {
 	// 		board.columns.forEach((column) => {
@@ -151,16 +141,11 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					<button
 						className="ConfigureBtn"
 						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
-							handleUpdateBoards(updatedBoards, setBoards)
+							handleUpdateBoards(plugin, updatedBoards, setBoards)
 						)}
 					>
 						<Bolt size={20} />
 					</button>
-					{/* <button className="RefreshBtn" onClick={() => refreshBoardData(setBoards, () => {
-						RefreshTasksInsideColumns();
-					})}>
-						<RefreshCcw size={20} />
-					</button> */}
 					<button className="RefreshBtn" onClick={refreshBoardButton}>
 						<RefreshCcw size={20} />
 					</button>
