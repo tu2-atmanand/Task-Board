@@ -1,7 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, Notice, TFile } from "obsidian";
-import { loadTasksRaw, writeTasksJson } from "./JsonFileOperations";
+import { loadTasksRaw, writeTasksJson } from "./tasksCache";
 import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
 
 import type TaskBoard from "main";
