@@ -263,19 +263,14 @@ export class ScanningVault {
 
 	// Save tasks to JSON file
 	async saveTasksToFile() {
-		fs.writeFileSync(tasksPath, JSON.stringify(this.tasks, null, 2));
 		await writeTasksJson(this.plugin, this.tasks);
-		// console.log(
-		// 	"The following data saved in the tasks.json : ",
-		// 	this.tasks
-		// );
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (this.TaskDetected) {
 			// new Notice("Tasks scanned from the modified files.");
+			
 			// Emit the event
 			eventEmitter.emit("REFRESH_COLUMN");
-			// eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
 	}
