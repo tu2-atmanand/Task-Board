@@ -103,11 +103,15 @@ export const writeTasksFromSessionStorageToDisk = async (
 	plugin: TaskBoard
 ): Promise<void> => {
 	try {
-		// Trigger write operation to save sessionStorage data to disk
-		await writeTasksJsonDisk(plugin);
 		console.log(
-			"SESSIONSTORAGE : Time UP : Periodically saved tasks data to disk."
+			"SESSIONSTORAGE : Time UP : Running the Periodically Saving of data from sessionStorage to Disk."
 		);
+		if (localStorage.getItem("fileStack")?.at(0) === undefined) {
+			console.log("No files has been changed, no need to write the data from sessionStorage to Disk....");
+		} else {
+			// Trigger write operation to save sessionStorage data to disk
+			await writeTasksJsonDisk(plugin);
+		}
 	} catch (error) {
 		console.warn("Error writing tasks from sessionStorage to disk:", error);
 	}
