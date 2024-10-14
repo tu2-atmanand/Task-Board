@@ -69,8 +69,6 @@ export default class TaskBoard extends Plugin {
 		);
 		ribbonIconEl.addClass("task-board-ribbon-class");
 
-
-
 		// Register few commands
 		this.addCommand({
 			id: "open-add-task-modal",
@@ -113,15 +111,11 @@ export default class TaskBoard extends Plugin {
 		// 	},
 		// });
 
-
-
 		// Loading settings and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 		console.log("MAIN.ts : Loading the setting values : ", this.settings);
-
-
 
 		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
 		console.log("Creating localStorage ...");
@@ -130,18 +124,58 @@ export default class TaskBoard extends Plugin {
 		);
 		this.realTimeScanning.processStack();
 
-
-
 		// Creating Few Events
+
+		// this.registerEvent(
+		// 	this.app.vault.on("modify", (file: TFile) =>
+		// 		this.realTimeScanning.onFileChange(
+		// 			file,
+		// 			this.settings.data.globalSettings.realTimeScanning,
+		// 			this.settings.data.globalSettings.scanFilters
+		// 		)
+		// 	)
+		// );
+		// Register an event for the 'editor-blur' event
+		// Track if the editor has been modified
+		let editorModified = false;
+		// Listen for editor-change event using workspace.trigger
 		this.registerEvent(
-			this.app.vault.on("modify", (file: TFile) =>
-				this.realTimeScanning.onFileChange(
-					file,
-					this.settings.data.globalSettings.realTimeScanning,
-					this.settings.data.globalSettings.scanFilters
-				)
+			this.app.workspace.on(
+				"editor-change",
+				(editor: CodeMirror.Editor) => {
+					console.log("EVENT : editor-change event working...");
+					// Set editorModified to true when any change occurs
+					editorModified = true;
+				}
 			)
 		);
+		// Listen for editor-blur event and trigger scanning if the editor was modified
+		this.registerEvent(
+			this.app.workspace.on(
+				"active-leaf-change",
+				(editor: CodeMirror.Editor) => {
+					// onblur= (this, event: "blur") => {};
+					// const activeEditor = this.app.workspace.activeEditor?.editor;
+					// console.log(
+					// 	"EVENT : editor-blur event working... | Value of blur : ",
+					// 	activeEditor?.focus()
+					// );
+					const file = this.app.workspace.getActiveFile();
+					if (editorModified && file) {
+						console.log("EVENT : activeEditor.focus() ...");
+						this.realTimeScanning.onFileChange(
+							file,
+							this.settings.data.globalSettings.realTimeScanning,
+							this.settings.data.globalSettings.scanFilters
+						);
+
+						// Reset the editorModified flag after the scan
+						editorModified = false;
+					}
+				}
+			)
+		);
+
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
 				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
@@ -171,20 +205,15 @@ export default class TaskBoard extends Plugin {
 			? this.scanningVault.scanVaultForTasks()
 			: "";
 
-
 		// Load all the tasks from the tasks.json into sessionStorage
 		const _ = loadTasksRawDisk(this.plugin);
 		startPeriodicSave(this.plugin);
-
-
 
 		// Register the Kanban view
 		this.registerView(
 			VIEW_TYPE_TASKBOARD,
 			(leaf) => new KanbanView(this.app, this, leaf)
 		);
-
-
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
