@@ -102,6 +102,17 @@ export default class TaskBoard extends Plugin {
 				});
 			},
 		});
+		// TODO : Remove this command before publishing
+		this.addCommand({
+			id: "save-session-to-disk",
+			name: "DEV : Save Data from sessionStorage to Disk.",
+			callback: () => {
+				this.app.workspace.getLeaf("window").setViewState({
+					type: VIEW_TYPE_TASKBOARD,
+					active: true,
+				});
+			},
+		});
 		// // Add a command to Re-Scan the whole Vault
 		// this.addCommand({
 		// 	id: "rescan-vault-for-tasks",
