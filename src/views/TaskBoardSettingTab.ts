@@ -5,25 +5,20 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import { SettingsManager } from "../services/TaskBoardSettingConstructUI";
 import type TaskBoard from "../../main"; // Adjust the path based on your file structure
 import fs from "fs";
-import { globalSettingsData } from "src/interfaces/KanbanView";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import path from "path";
 
 export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
 	settingsManager: SettingsManager;
-	dataFilePath = path.join(
-		(window as any).app.vault.adapter.basePath,
-		".obsidian",
-		"plugins",
-		"task-board",
-		"data.json"
-	);
 	globalSettings: globalSettingsData | null = null;
+	dataFilePath: string;
 
 	constructor(app: App, plugin: TaskBoard) {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.settingsManager = new SettingsManager(app, plugin);
+		this.dataFilePath = `${this.plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
 	}
 
 	// Display the settings in the settings tab
@@ -33,6 +28,5 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		containerEl.addClass("TaskBoardSettingTab");
 
 		this.settingsManager.constructUI(containerEl, "Task Board");
-
 	}
 }

@@ -3,18 +3,16 @@
 import { App, Modal } from 'obsidian';
 import React, { useEffect, useState } from 'react';
 import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
-import { deleteTaskFromFile, deleteTaskFromJson, loadTasksFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
+import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItemProps';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { ColumnProps } from '../interfaces/Column';
+import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { loadGlobalSettings } from 'src/utils/SettingsOperations';
-import { refreshBoardData } from 'src/utils/BoardOperations';
 import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
-import { taskItem } from 'src/interfaces/TaskItem';
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -26,13 +24,14 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	activeBoard,
 	colType,
 	data,
-	setBoards,
 	tasks: externalTasks,
-	pendingTasks,  // New props for pending tasks
-	completedTasks // New props for completed tasks
+	allTasks: allTasksExternal
+	// pendingTasks,  // New props for pending tasks
+	// completedTasks // New props for completed tasks
 }) => {
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
+	const [allTasks, setAllTasks] = useState<taskJsonMerged>(allTasksExternal);
 	// let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
 	// globalSettings = globalSettings.data.globalSettings;
 	const globalSettings = plugin.settings.data.globalSettings;
@@ -45,54 +44,35 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 
 	// Render tasks using the tasks passed from KanbanBoard
 	useEffect(() => {
-		setTasks([]);
-		renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
-	}, [colType, data, pendingTasks, completedTasks]);
+		// setTasks([]);
+		// console.log("FROM COLUMN.TSX : Data i will be sending to renderColumns function : ", allTasksExternal);
+		if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
+			renderColumns(plugin, setTasks, activeBoard, colType, data, allTasksExternal);
+		}
+	}, [colType, data, allTasksExternal]);
 
 	const handleCheckboxChange = (updatedTask: taskItem) => {
 		const moment = require("moment");
-		// Remove task from the current state
+
+		// NOTE : The following two lines removes the task which has been marked as completed or vice-versa, but only the TaskTitle disappers, if that task has a body, then what you see on the board is, the body of this updated task gets appeded to the task either above or below. This most probably will be due to worst way of rendering. I am not sure about this or if in future Svelte going to solve it or not.
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
-		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
-		// console.log("The tasks which has been filtered : ", updatedTasks);
 		setTasks(updatedTasks); // Update state to remove completed task
 
 		// Check if the task is completed
 		if (updatedTask.completed) {
 			const taskWithCompleted = { ...updatedTask, completed: "" };
 			// Move from Completed to Pending
-			moveFromCompletedToPending(taskWithCompleted);
-			updateTaskInFile(taskWithCompleted, taskWithCompleted);
+			moveFromCompletedToPending(plugin, taskWithCompleted);
+			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		} else {
 			console.log("The format give by user for completion date : ", globalSettings?.taskCompletionDateTimePattern, " | The date-time i have got from the moment library : ", moment().format(globalSettings?.taskCompletionDateTimePattern));
 			const taskWithCompleted = { ...updatedTask, completed: moment().format(globalSettings?.taskCompletionDateTimePattern), };
 			// Move from Pending to Completed
-			moveFromPendingToCompleted(taskWithCompleted);
-			updateTaskInFile(taskWithCompleted, taskWithCompleted);
+			moveFromPendingToCompleted(plugin, taskWithCompleted);
+			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		}
+		// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 
-
-		// Following are multiple method used for refresing only the columns and not the whole board : 
-
-		// renderColumns(setTasks, colType, data);
-
-		// // PLEASE NOTE : Keep the following lines as it is, when i check the box, without updating the whole board, the TaskItem Card moves from the Todays column into Completed column and vice-versa very smoothly.
-		// refreshBoardData(setBoards, () => {
-		// 	// renderColumns(setTasks, activeBoard, colType, data);
-		// 	console.log("The below line is loading the tasks from tasks.json, hopefully this line will be running only once...");
-		// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
-
-		// 	// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
-		// });
-
-		// const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
-		// renderColumns(setTasks, activeBoard, colType, data, pendingTasks, completedTasks);
-
-
-		// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
-
-		// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
-		eventEmitter.emit("REFRESH_COLUMN");
 	};
 
 	const handleSubTasksChange = (updatedTask: taskItem) => {
@@ -103,17 +83,16 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		// console.log("The tasks which has been filtered : ", updatedTasks);
 		// setTasks(updatedTasks); // Update state to remove completed task
 		// console.log("The new task which i have received and which i am going to put in the taks.json : ", updatedTask);
-		updateTaskInJson(updatedTask);
-		updateTaskInFile(updatedTask, updatedTask);
+		updateTaskInJson(plugin, updatedTask);
+		updateTaskInFile(plugin, updatedTask, updatedTask);
 	};
 
-	const handleDeleteTask = (task: taskItem) => {
-		const app = (window as any).app as App; // Fetch the Obsidian app instance
+	const handleDeleteTask = (app: App, task: taskItem) => {
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app, // Add app here
 			onConfirm: () => {
-				deleteTaskFromFile(task);
-				deleteTaskFromJson(task);
+				deleteTaskFromFile(plugin, task);
+				deleteTaskFromJson(plugin, task);
 				// Remove the task from state after deletion
 				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
 			},
@@ -125,42 +104,15 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	};
 
 	const handleEditTask = (task: taskItem) => {
-		const app = (window as any).app as App;
 		const editModal = new AddOrEditTaskModal(
 			app,
+			plugin,
 			(updatedTask) => {
 				updatedTask.filePath = task.filePath;
 				// Update the task in the file and JSON
-				updateTaskInFile(updatedTask, task);
-				updateTaskInJson(updatedTask);
-
-				// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
-				// Refresh tasks state after update
-				// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
-
-				// Following are multiple method used for refresing only the columns and not the whole board : 
-
-				// renderColumns(setTasks, tag, data);
-
-				// --- MY METHOD ---------
-				// const emptyTheTasks: Task[] = [];
-				// setTasks(emptyTheTasks);
-				// sleep(10);
-
-				// setTasks([]);
-
-				// THIS METHOD IS NOTE WORKING
-				// refreshBoardData(setBoards, () => {
-				// 	console.log("Task updated, running the Dispatch method of updating the board...");
-				// 	renderColumns(setTasks, activeBoard, colType, data);
-				// });
-
-				// ONLY THIS BELOW METHOD IS WORKING, AND IT ONLY REFRESHES THE WHOLE COLUMN, YOU CAN SEE ALL THE TASKITEM FROM THIS COLUMN GETTING REFRESHED, REST COLUMNS REMAINS SILENT, BUT YOU KNOW OBVIOULSY THEY ARE ALSO GETTING ADDED FROM NEW TASKS.JSON DATA.
-				// updateTasksAndRefreshBoard(setTasks, setBoards, activeBoard, colType, data);
-				// updateTasksAndRefreshColumn(setTasks, activeBoard, colType, data);
-
-				// Since now i have change lot of things, the above methods wont work for Loading New tasks from tasks.json and refreshing all the columns.
-				eventEmitter.emit("REFRESH_COLUMN");
+				updateTaskInFile(plugin, updatedTask, task);
+				updateTaskInJson(plugin, updatedTask);
+				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 			},
 			task.filePath,
 			task);
@@ -185,7 +137,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 							key={index}
 							task={task}
 							onEdit={() => handleEditTask(task)}
-							onDelete={() => handleDeleteTask(task)}
+							onDelete={() => handleDeleteTask(app, task)}
 							onCheckboxChange={() => handleCheckboxChange(task)}
 							onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
 						/>

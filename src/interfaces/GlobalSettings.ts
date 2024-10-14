@@ -1,4 +1,4 @@
-import { BoardConfig } from "./KanbanBoard";
+import { BoardConfigs } from "./BoardConfigs";
 
 export interface globalSettingsData {
 	scanFilters: {
@@ -30,15 +30,15 @@ export interface globalSettingsData {
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
-export interface GlobalSettings {
+export interface PluginDataJson {
 	version: string;
 	data: {
-		boardConfigs: BoardConfig[];
+		boardConfigs: BoardConfigs;
 		globalSettings: globalSettingsData;
 	};
 }
 
-export const DEFAULT_SETTINGS: GlobalSettings = {
+export const DEFAULT_SETTINGS: PluginDataJson = {
 	version: "",
 	data: {
 		boardConfigs: [],

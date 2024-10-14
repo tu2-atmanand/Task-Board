@@ -3,20 +3,20 @@
 import { App, Notice } from "obsidian";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { useEffect, useState } from "react";
-import { addTaskInFile, addTaskInJson, loadJustTheData, loadTasksFromJson, loadTasksUsingObsidianMethod, updateTaskInFile, updateTaskInJson } from "src/utils/TaskItemUtils";
 import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
+import { loadBoardsData, loadTasksProcessed } from "src/utils/JsonFileOperations";
 import { openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
+import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItemProps";
 
-import { Board } from "../interfaces/KanbanBoard";
+import { Board } from "../interfaces/BoardConfigs";
 import Column from "./Column";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
-import { renderColumns } from "src/utils/RenderColumns"; // Adjust the path accordingly
-import { taskItem } from "src/interfaces/TaskItem";
 
 const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin }) => {
 	const [tasks, setTasks] = useState<taskItem[]>([]);
+	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 	const [pendingTasks, setPendingTasks] = useState<taskItem[]>([]);
@@ -34,12 +34,21 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 
 		// console.log("What is the value of this.app.vault.adapter.read(yourFolderPath) : ", tasksData);
 
-		refreshBoardData(setBoards, () => {
-			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
-			setPendingTasks(pendingTasks);
-			setCompletedTasks(completedTasks);
+		refreshBoardData(setBoards, async () => {
+			try {
+				const data = await loadBoardsData(plugin); // Fetch updated board data
+				setBoards(data); // Update the state with the new data
+				// Since loadTasksProcessed is async, await its result
+				const allTasks = await loadTasksProcessed(plugin);
+				// console.log("THE DATA I HAVE RECEIVED : ", allTasks);
+				if (allTasks) {
+					setAllTasks(allTasks);  // Set the tasks if not undefined
+				}
+			} catch (error) {
+				console.error("Error loading tasks:", error);
+			}
 		});
-	}, [refreshCount]); // Empty dependency array ensures this runs only once on component mount
+	}, [refreshCount]);
 
 	// Pub Sub method similar to Kafka to read events/messages.
 	useEffect(() => {
@@ -51,15 +60,14 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 			setRefreshCount((prev) => prev + 1);
 		};
 
-		const refreshColumnListener = () => {
+		const refreshColumnListener = async () => {
 			console.log("KanbanBoard.tsx : REFRESH_COLUMN mssgs received...");
-			const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
-			// TODO : i think i dont need to do the following three lines of code, after i implement saving and loading tasks from sessionStorage/localStorage.
-			// setPendingTasks([]);
-			// setCompletedTasks([]);
-			// sleep(30);
-			setPendingTasks(pendingTasks);
-			setCompletedTasks(completedTasks);
+			try {
+				const allTasks = await loadTasksProcessed(plugin);
+				setAllTasks(allTasks);
+			} catch (error) {
+				console.error("Error loading tasks:", error);
+			}
 		};
 
 		// For some reason, the things i am doing inside `refreshBoardListener` is not working.
@@ -74,7 +82,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	}, []);
 
 	// const RefreshTasksInsideColumns = () => {
-	// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksFromJson();
+	// 	const { allTasksWithStatus, pendingTasks, completedTasks } = loadTasksProcessed();
 	// 	// Trigger renderColumns after the boards are refreshed
 	// 	boards.forEach((board, index) => {
 	// 		board.columns.forEach((column) => {
@@ -133,16 +141,11 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					<button
 						className="ConfigureBtn"
 						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
-							handleUpdateBoards(updatedBoards, setBoards)
+							handleUpdateBoards(plugin, updatedBoards, setBoards)
 						)}
 					>
 						<Bolt size={20} />
 					</button>
-					{/* <button className="RefreshBtn" onClick={() => refreshBoardData(setBoards, () => {
-						RefreshTasksInsideColumns();
-					})}>
-						<RefreshCcw size={20} />
-					</button> */}
 					<button className="RefreshBtn" onClick={refreshBoardButton}>
 						<RefreshCcw size={20} />
 					</button>
@@ -159,12 +162,12 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 							activeBoard={activeBoardIndex}
 							colType={column.colType}
 							data={column.data}
+							tasks={tasks}
+							allTasks={allTasks || { Pending: [], Completed: [] }}
 							setBoards={setBoards}
-							tasks={tasks} // Pass tasks as a prop to the Column component
-							pendingTasks={pendingTasks} // Pass the pending tasks
-							completedTasks={completedTasks} // Pass the completed tasks
 						/>
 					))}
+
 			</div>
 		</div>
 	);

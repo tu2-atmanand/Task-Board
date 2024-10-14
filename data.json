@@ -254,7 +254,7 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "4",
+      "taskCompletionFormat": "3",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "dailyNotesPluginComp": false,
       "dueDateFormat": "yyyy-MM-DD",
@@ -263,7 +263,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": true
+      "realTimeScanning": false
     }
   }
 }

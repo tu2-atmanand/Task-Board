@@ -1,6 +1,7 @@
+import { taskItem, taskJsonMerged } from "./TaskItemProps";
+
 import { App } from "obsidian";
 import TaskBoard from "main";
-import { taskItem } from "./TaskItem";
 
 export interface ColumnProps {
 	app: App;
@@ -23,6 +24,5 @@ export interface ColumnProps {
 		limit?: number;
 	};
 	tasks: taskItem[];
-	pendingTasks: taskItem[];
-	completedTasks: taskItem[];
+	allTasks: taskJsonMerged;
 }

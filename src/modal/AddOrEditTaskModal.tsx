@@ -3,17 +3,16 @@
 import { App, Component, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM, { Root } from "react-dom/client";
-import { priorityEmojis, priorityOptions, taskItem } from "src/interfaces/TaskItem";
+import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 
-import CodeMirrorEditor from "src/components/MarkdownEditor";
 import { FaTrash } from 'react-icons/fa';
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import TaskBoard from "main";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
-import { loadGlobalSettings } from "src/utils/SettingsOperations";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 // Functional React component for the modal content
-const EditTaskContent: React.FC<{ app: App, root: HTMLElement, task?: taskItem, taskExists?: boolean, filePath: string; onSave: (updatedTask: taskItem) => void; onClose: () => void }> = ({ app, root, task = {}, taskExists, filePath, onSave, onClose }) => {
+const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement, task?: taskItem, taskExists?: boolean, filePath: string; onSave: (updatedTask: taskItem) => void; onClose: () => void }> = ({ app, plugin, root, task = {}, taskExists, filePath, onSave, onClose }) => {
 	const [title, setTitle] = useState(task.title || '');
 	const [due, setDue] = useState(task.due || '');
 	const [tag, setTag] = useState(task.tag || '');
@@ -48,7 +47,7 @@ const EditTaskContent: React.FC<{ app: App, root: HTMLElement, task?: taskItem, 
 	};
 
 	const removeSubTask = (index: number) => {
-		const updatedSubTasks = subTasks.filter((_, idx) => idx !== index);
+		const updatedSubTasks = subTasks.filter((_:string, idx:number) => idx !== index);
 		setSubTasks(updatedSubTasks);
 	};
 
@@ -114,8 +113,8 @@ const EditTaskContent: React.FC<{ app: App, root: HTMLElement, task?: taskItem, 
 
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		formatedContent = taskElementsFormatter(newTaskContent);
-		console.log("Content received from the formatter function :\n", formatedContent);
+		formatedContent = taskElementsFormatter(plugin, newTaskContent);
+		// console.log("Content received from the formatter function :\n", formatedContent);
 		if (previewContainerRef.current) {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.innerHTML = '';
@@ -263,14 +262,16 @@ const EditTaskContent: React.FC<{ app: App, root: HTMLElement, task?: taskItem, 
 // Class component extending Modal for Obsidian
 export class AddOrEditTaskModal extends Modal {
 	app: App;
+	plugin: TaskBoard;
 	task: taskItem;
 	filePath: string;
 	taskExist: boolean = false;
 	onSave: (updatedTask: taskItem) => void;
 
-	constructor(app: App, onSave: (updatedTask: taskItem) => void, filePath: string, task?: taskItem) {
+	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, task?: taskItem) {
 		super(app);
 		this.app = app;
+		this.plugin = plugin;
 		this.filePath = filePath;
 		this.onSave = onSave;
 		if (task) {
@@ -288,13 +289,9 @@ export class AddOrEditTaskModal extends Modal {
 
 		const root = ReactDOM.createRoot(this.contentEl);
 
-		let globalSettings = loadGlobalSettings();
-		globalSettings = globalSettings.data.globalSettings;
-		// console.log("The global setting i have loaded : ", globalSettings);
-		const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
-
 		root.render(<EditTaskContent
 			app={this.app}
+			plugin={this.plugin}
 			root={contentEl}
 			task={this.task}
 			taskExists={this.taskExist}

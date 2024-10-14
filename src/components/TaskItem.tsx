@@ -2,13 +2,13 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa'; // Import the desired icons from react-icons
 import React, { useEffect, useRef, useState } from 'react';
-import { TaskProps, taskItem } from '../interfaces/TaskItem';
+import { TaskProps, taskItem } from '../interfaces/TaskItemProps';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { RxDragHandleDots2 } from "react-icons/rx";
-import { priorityEmojis } from '../interfaces/TaskItem';
+import { priorityEmojis } from '../interfaces/TaskItemProps';
 
 const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation

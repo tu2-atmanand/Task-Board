@@ -8,7 +8,7 @@ import {
 } from "src/utils/Checker";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { Board } from "../interfaces/KanbanBoard";
+import { Board } from "../interfaces/BoardConfigs";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { ReScanVaultModal } from "src/modal/ReScanVaultModal";
 import type TaskBoard from "main";
@@ -44,13 +44,14 @@ export const openAddNewTaskModal = (
 	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
+		plugin,
 		(newTask) => {
-			addTaskInFile(app, newTask);
+			addTaskInFile(app, plugin, newTask);
 			if (
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
 				scanFilterForTags(newTask.tag, scanFilters)
 			) {
-				addTaskInJson(newTask);
+				addTaskInJson(plugin, newTask);
 			}
 
 			eventEmitter.emit("REFRESH_COLUMN");

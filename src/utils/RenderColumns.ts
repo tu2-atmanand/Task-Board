@@ -1,30 +1,36 @@
 // src/utils/RenderColumns.ts
 
 import { Dispatch, SetStateAction } from "react";
+import {
+	taskItem,
+	taskJsonMerged,
+	tasksJson,
+} from "src/interfaces/TaskItemProps";
 
-import { loadGlobalSettings } from "./SettingsOperations";
-import { loadTasksFromJson } from "./TaskItemUtils";
-import { taskItem } from "src/interfaces/TaskItem";
+import TaskBoard from "main";
+import moment from "moment";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
+	plugin: TaskBoard,
 	setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
 	colType: string,
 	data: any,
-	pendingTasks: taskItem[],
-	completedTasks: taskItem[]
+	allTasks: taskJsonMerged
 ) => {
 	console.log(
 		"renderColumns function : This will run as many times as there are columns in the current board -----------"
 	);
 	// Load tasks from the JSON file
 	// const { allTasksWithStatus, pendingTasks, completedTasks } =
-	// 	loadTasksFromJson();
+	// 	loadTasksProcessed();
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
-	setTasks(tasksToDisplay);
+	const pendingTasks = allTasks.Pending;
+	const completedTasks = allTasks.Completed;
+	// setTasks(tasksToDisplay);
 
 	if (colType === "undated") {
 		tasksToDisplay = pendingTasks.filter((task) => !task.due);
@@ -74,19 +80,20 @@ export const renderColumns = (
 			(task) => task.tag && task.tag !== data.coltag
 		);
 	} else if (colType === "completed") {
-		const globalSettings = loadGlobalSettings();
-		const completedColumnIndex = globalSettings.data.boardConfigs[
+		const boardConfigs = plugin.settings.data.boardConfigs; // NOTE : I think i will have to use this function only to get the boardConfigs, although, i know its possible to get this from `plugin.settings`.
+		const completedColumnIndex = boardConfigs[
 			activeBoard
-		].columns.findIndex((column) => column.colType === "completed");
+		]?.columns.findIndex((column) => column.colType === "completed");
 		const tasksLimit =
-			globalSettings.data.boardConfigs[activeBoard].columns[
-				completedColumnIndex
-			].data.limit;
+			boardConfigs[activeBoard]?.columns[completedColumnIndex].data.limit;
 
-		const sortedCompletedTasks = completedTasks.sort((a, b) => {
-			const dateA = new Date(a.completed);
-			const dateB = new Date(b.completed);
-			return dateB.getTime() - dateA.getTime(); // Sort in descending order (newest first)
+		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
+			if (a.completed && b.completed) {
+				const dateA = new Date(a.completed).getTime();
+				const dateB = new Date(b.completed).getTime();
+				return dateB - dateA;
+			}
+			return 0;
 		});
 
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);

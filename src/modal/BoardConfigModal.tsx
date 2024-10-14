@@ -8,7 +8,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 
 import AddColumnModal from "src/modal/AddColumnModal";
-import { Board } from "src/interfaces/KanbanBoard";
+import { Board } from "src/interfaces/BoardConfigs";
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/services/TaskBoardSettingConstructUI";

@@ -12,46 +12,57 @@ export class RealTimeScanning {
 	app: App;
 	plugin: TaskBoard;
 	fileStack: string[] = [];
-	stackFilePath: string;
 	scanTimer: number;
 	scanningVault: ScanningVault;
 
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
-		this.stackFilePath = path.join(
-			(window as any).app.vault.adapter.basePath,
-			".obsidian",
-			"plugins",
-			"task-board",
-			"file-stack.json"
-		);
 		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(app, plugin);
 	}
+
+	// NOTE : VERIFIED THROUGH EXPERIMENT : This was the earlier version, which use to create a file file-stack.json and keep the data of the localStorage to ensure, the data is not got lost when the obsidian closes or crashes. But i have performed the experiment and has found that, the localStorage is indeed stored on disk(Database) and is loaded when the plugin loads. So i dont have to keep the file-stack.json file.
+	// async initializeStack(realTimeScanning: boolean) {
+	// 	if (realTimeScanning) return;
+	// 	try {
+	// 		console.log(
+	// 			"The data inside the localstorage at startup : ",
+	// 			localStorage.getItem("fileStack")
+	// 		);
+	// 		const storedStack = localStorage.getItem("fileStack");
+	// 		if (storedStack) {
+	// 			this.fileStack = JSON.parse(storedStack);
+	// 			console.log(
+	// 				"I think the local storage have been created, value of fileStack : ",
+	// 				this.fileStack
+	// 			);
+	// 		} else if (fs.existsSync(this.stackFilePath)) {
+	// 			// Fallback to loading from file if localStorage isn't available
+	// 			const data = fs.readFileSync(this.stackFilePath, "utf8");
+	// 			this.fileStack = JSON.parse(data) || [];
+	// 			console.log(
+	// 				"The data i stored inside the file-stack.json, which i have put inside the localStorage : ",
+	// 				this.fileStack
+	// 			);
+	// 		}
+	// 		this.startScanTimer();
+	// 	} catch (error) {
+	// 		console.error("Error loading file stack:", error);
+	// 	}
+	// }
 
 	async initializeStack(realTimeScanning: boolean) {
 		if (realTimeScanning) return;
 		try {
 			console.log(
-				"The data inside the localstorage at startup : ",
+				"LocalStorage : initializeStack : The data inside the localstorage at startup : ",
 				localStorage.getItem("fileStack")
 			);
 			const storedStack = localStorage.getItem("fileStack");
 			if (storedStack) {
 				this.fileStack = JSON.parse(storedStack);
-				console.log(
-					"I think the local storage have been created, value of fileStack : ",
-					this.fileStack
-				);
-			} else if (fs.existsSync(this.stackFilePath)) {
-				// Fallback to loading from file if localStorage isn't available
-				const data = fs.readFileSync(this.stackFilePath, "utf8");
-				this.fileStack = JSON.parse(data) || [];
-				console.log(
-					"The data i stored inside the file-stack.json, which i have put inside the localStorage : ",
-					this.fileStack
-				);
+			} else {
 			}
 			this.startScanTimer();
 		} catch (error) {
@@ -64,16 +75,15 @@ export class RealTimeScanning {
 			localStorage.setItem("fileStack", JSON.stringify(this.fileStack));
 
 			console.log(
-				"saveStack() : The data inside localStorage after setItem : ",
+				"saveStack : The data inside localStorage after setItem : ",
 				localStorage.getItem("fileStack")
 			);
-			console.log("After updating the data is : ", this.fileStack);
 
-			// Save to file as fallback
-			fs.writeFileSync(
-				this.stackFilePath,
-				JSON.stringify(this.fileStack, null, 2)
-			);
+			// NOTE : Below is the part of the commented code for the VERIFIED THROUGH EXPERIMENT above.
+			// fs.writeFileSync(
+			// 	this.stackFilePath,
+			// 	JSON.stringify(this.fileStack, null, 2)
+			// );
 		} catch (error) {
 			console.error("Error saving file stack:", error);
 		}
@@ -87,12 +97,12 @@ export class RealTimeScanning {
 
 		this.scanTimer = window.setInterval(() => {
 			this.processStack();
-		}, 2 * 60 * 1000); // Set to 10 minutes
+		}, 1 * 60 * 1000); // Set to 10 minutes
 	}
 
 	async processStack() {
 		console.log(
-			"TIME UP : 1 minute has passed, scanning the following files: ",
+			"TIME UP : 1 minute has passed or at startup. Scanning the following files: ",
 			this.fileStack
 		);
 		const filesToProcess = this.fileStack.slice();
@@ -110,9 +120,7 @@ export class RealTimeScanning {
 	}
 
 	getFileFromPath(filePath: string): TFile {
-		return (window as any).app.vault.getAbstractFileByPath(
-			filePath
-		) as TFile;
+		return this.plugin.app.vault.getAbstractFileByPath(filePath) as TFile;
 	}
 
 	async onFileChange(
@@ -122,27 +130,6 @@ export class RealTimeScanning {
 	) {
 		if (file.extension === "md") {
 			console.log(`File modified: ${file.path}`);
-
-			// // Separate the parent folder and file name from the file path
-			// const filePathParts = file.path.split("/");
-			// const fileName = filePathParts.pop(); // Extract file name
-			// const parentFolder = filePathParts.join("/") + "/"; // Rebuild the parent folder path
-
-			// console.log("The fileName is : ", fileName);
-			// console.log("The parentFolder is : ", parentFolder);
-			
-			// // Check folder filters
-			// const folderInFilters =
-			// 	scanFilters.folders.values.includes(parentFolder);
-			// const folderCheckPass =
-			// 	(folderInFilters && scanFilters.folders.polarity !== 2) ||
-			// 	!folderInFilters;
-
-			// // Check file filters
-			// const fileInFilters = scanFilters.files.values.includes(fileName);
-			// const fileCheckPass =
-			// 	(fileInFilters && scanFilters.files.polarity !== 2) ||
-			// 	!fileInFilters;
 
 			// If both checks pass, proceed with the scanning logic
 			if (scanFilterForFilesNFolders(file, scanFilters)) {
@@ -158,15 +145,11 @@ export class RealTimeScanning {
 					// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.fileStack.includes(file.path) : ",
 					// 	!this.fileStack.includes(file.path)
 					// );
-					
-					// If the file is already in the stack, ignore it
-					console.log(
-						"The value of fileStack before adding updated file:",
-						this.fileStack
-					);
 
+					// If the file is already in the stack, ignore it
 					if (this.fileStack.at(0) === undefined) {
 						this.fileStack.push(file.path); // Add the file to the stack
+						await this.saveStack(); // Save the updated stack
 					} else if (!this.fileStack.includes(file.path)) {
 						this.fileStack.push(file.path);
 						await this.saveStack(); // Save the updated stack

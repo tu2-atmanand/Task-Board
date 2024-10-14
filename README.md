@@ -1,4 +1,4 @@
-# In this branch i will test the features i have implemented first before merging the new content into main branch.
+# In this branch the main goal is to optimize how i am loading the settings from data.json and tasks from tasks.json. And hopefully use sessionStorage to reduce disk Read/Write drastically.
 > Merge all the code from your development branch to this branch first for testing, once all things and functionalities have been tested, merge this branch with the main branch.
 
 # Task Board - Obsidian Plugin

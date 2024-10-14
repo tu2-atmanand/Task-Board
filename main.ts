@@ -15,43 +15,34 @@ import {
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
-	GlobalSettings,
-	globalSettingsData,
-} from "src/interfaces/KanbanView";
+	PluginDataJson,
+} from "src/interfaces/GlobalSettings";
 import {
 	TaskBoardIcon,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/GlobalVariables";
-import { addTaskInFile, addTaskInJson, updateTaskInFile } from "src/utils/TaskItemUtils";
+import {
+	loadTasksRawDisk,
+	onUnloadSave,
+	startPeriodicSave,
+} from "src/utils/tasksCache";
 
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
-import { eventEmitter } from "src/services/EventEmitter";
-import fs from "fs";
 import { openAddNewTaskModal } from "src/services/OpenModals";
-import path from "path";
 
 // import { loadGlobalSettings } from "src/utils/TaskItemUtils";
 
 export default class TaskBoard extends Plugin {
-	settings: GlobalSettings = DEFAULT_SETTINGS;
+	app: App;
+	plugin: TaskBoard;
+	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	fileStack: string[] = [];
-	stackFilePath = path.join(
-		(window as any).app.vault.adapter.basePath,
-		".obsidian",
-		"plugins",
-		"task-board",
-		"file-stack.json"
-	);
 	scanTimer: number;
-	app: App;
-	plugin: TaskBoard;
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -78,7 +69,7 @@ export default class TaskBoard extends Plugin {
 		);
 		ribbonIconEl.addClass("task-board-ribbon-class");
 
-		// Register a new command to open AddTaskModal
+		// Register few commands
 		this.addCommand({
 			id: "open-add-task-modal",
 			name: "Add New Task in Current File",
@@ -86,7 +77,7 @@ export default class TaskBoard extends Plugin {
 				const app = this.app as App;
 				const activeFile = app.workspace.getActiveFile();
 				if (activeFile) {
-					openAddNewTaskModal(app, this.plugin, activeFile)
+					openAddNewTaskModal(app, this.plugin, activeFile);
 				} else {
 					new Notice("No active file found to add a task.");
 				}
@@ -120,25 +111,71 @@ export default class TaskBoard extends Plugin {
 		// 	},
 		// });
 
+		// Loading settings and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
+		console.log("MAIN.ts : Loading the setting values : ", this.settings);
 
-		// Following line will create a localStorage if the realTimeScanning value is TRUE.
+		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
+		console.log("Creating localStorage ...");
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
-		console.log("Creating localStorage ...");
+		this.realTimeScanning.processStack();
+
 		// Creating Few Events
+
+		// this.registerEvent(
+		// 	this.app.vault.on("modify", (file: TFile) =>
+		// 		this.realTimeScanning.onFileChange(
+		// 			file,
+		// 			this.settings.data.globalSettings.realTimeScanning,
+		// 			this.settings.data.globalSettings.scanFilters
+		// 		)
+		// 	)
+		// );
+		// Register an event for the 'editor-blur' event
+		// Track if the editor has been modified
+		let editorModified = false;
+		// Listen for editor-change event using workspace.trigger
 		this.registerEvent(
-			this.app.vault.on("modify", (file: TFile) =>
-				this.realTimeScanning.onFileChange(
-					file,
-					this.settings.data.globalSettings.realTimeScanning,
-					this.settings.data.globalSettings.scanFilters
-				)
+			this.app.workspace.on(
+				"editor-change",
+				(editor: CodeMirror.Editor) => {
+					console.log("EVENT : editor-change event working...");
+					// Set editorModified to true when any change occurs
+					editorModified = true;
+				}
 			)
 		);
+		// Listen for editor-blur event and trigger scanning if the editor was modified
+		this.registerEvent(
+			this.app.workspace.on(
+				"active-leaf-change",
+				(editor: CodeMirror.Editor) => {
+					// onblur= (this, event: "blur") => {};
+					// const activeEditor = this.app.workspace.activeEditor?.editor;
+					// console.log(
+					// 	"EVENT : editor-blur event working... | Value of blur : ",
+					// 	activeEditor?.focus()
+					// );
+					const file = this.app.workspace.getActiveFile();
+					if (editorModified && file) {
+						console.log("EVENT : activeEditor.focus() ...");
+						this.realTimeScanning.onFileChange(
+							file,
+							this.settings.data.globalSettings.realTimeScanning,
+							this.settings.data.globalSettings.scanFilters
+						);
+
+						// Reset the editorModified flag after the scan
+						editorModified = false;
+					}
+				}
+			)
+		);
+
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
 				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
@@ -162,19 +199,20 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
-		// this.settings = loadGlobalSettings().data.globalSettings;
-		console.log("MAIN.ts : Loading the setting values : ", this.settings);
-
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
 		this.settings.data.globalSettings.scanVaultAtStartup
 			? this.scanningVault.scanVaultForTasks()
 			: "";
 
+		// Load all the tasks from the tasks.json into sessionStorage
+		const _ = loadTasksRawDisk(this.plugin);
+		startPeriodicSave(this.plugin);
+
 		// Register the Kanban view
 		this.registerView(
 			VIEW_TYPE_TASKBOARD,
-			(leaf) => new KanbanView(this, leaf)
+			(leaf) => new KanbanView(this.app, this, leaf)
 		);
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
@@ -205,6 +243,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : unloading plugin...");
+		onUnloadSave(this.plugin);
 		window.clearInterval(this.scanTimer);
 		this.realTimeScanning.clearScanTimer();
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
@@ -212,10 +251,6 @@ export default class TaskBoard extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, await this.loadData());
-		console.log(
-			"The setting loaded in Main.ts using the Object.assign method : ",
-			this.settings
-		);
 	}
 
 	async saveSettings() {
