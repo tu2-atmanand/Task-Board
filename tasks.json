@@ -30,10 +30,11 @@
                     "- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
                 ],
                 "time": "",
-                "due": "2024-10-13",
+                "due": "2024-10-16",
                 "tag": "#Test",
                 "filePath": "Spintly Details.md",
-                "completed": ""
+                "completed": "",
+                "priority": 0
             },
             {
                 "id": 690817134,
@@ -95,20 +96,24 @@
                     "- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-10-12",
+                "due": "2024-10-14",
                 "tag": "#Test",
                 "filePath": "Pending Document Work.md",
-                "completed": ""
+                "completed": "",
+                "priority": 0
             },
             {
                 "id": 519893000,
                 "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
-                "body": [],
+                "body": [
+                    ""
+                ],
                 "time": "",
-                "due": "2024-10-13",
+                "due": "2024-10-15",
                 "tag": "#Test",
                 "filePath": "Pending Document Work.md",
-                "completed": ""
+                "completed": "",
+                "priority": 0
             }
         ],
         "Parent/MarkdownPreviewView Docs.md": [],
@@ -125,7 +130,7 @@
                     "- [ ] Adding a subTask, to see if shows up instantly in the board. > No, I didnt saw any SubTask inside the taskItem Card"
                 ],
                 "time": "21:15 - 22:15",
-                "due": "2024-10-14",
+                "due": "2024-10-15",
                 "tag": "#Test",
                 "filePath": "Parent/Child/12-JAN-2002.md",
                 "completed": "",
@@ -182,13 +187,15 @@
                 "id": 743721281,
                 "title": "This is a normal task, I am adding in the file, Updating",
                 "body": [
+                    "",
                     "- [ ] Adding a Subtask in file manually."
                 ],
                 "time": "",
-                "due": "2024-10-14",
+                "due": "2024-10-15",
                 "tag": "#Test",
                 "filePath": "Testing 1.md",
-                "completed": ""
+                "completed": "",
+                "priority": 0
             }
         ]
     },
