@@ -12,20 +12,12 @@ export class RealTimeScanning {
 	app: App;
 	plugin: TaskBoard;
 	fileStack: string[] = [];
-	stackFilePath: string;
 	scanTimer: number;
 	scanningVault: ScanningVault;
 
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
-		this.stackFilePath = path.join(
-			(window as any).app.vault.adapter.basePath,
-			".obsidian",
-			"plugins",
-			"Task-Board",
-			"file-stack.json"
-		);
 		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(app, plugin);
 	}
@@ -71,7 +63,6 @@ export class RealTimeScanning {
 			if (storedStack) {
 				this.fileStack = JSON.parse(storedStack);
 			} else {
-
 			}
 			this.startScanTimer();
 		} catch (error) {
@@ -106,12 +97,12 @@ export class RealTimeScanning {
 
 		this.scanTimer = window.setInterval(() => {
 			this.processStack();
-		}, 100 * 60 * 1000); // Set to 10 minutes
+		}, 1 * 60 * 1000); // Set to 10 minutes
 	}
 
 	async processStack() {
 		console.log(
-			"TIME UP : 100 minute has passed or at startup. Scanning the following files: ",
+			"TIME UP : 1 minute has passed or at startup. Scanning the following files: ",
 			this.fileStack
 		);
 		const filesToProcess = this.fileStack.slice();
@@ -158,6 +149,7 @@ export class RealTimeScanning {
 					// If the file is already in the stack, ignore it
 					if (this.fileStack.at(0) === undefined) {
 						this.fileStack.push(file.path); // Add the file to the stack
+						await this.saveStack(); // Save the updated stack
 					} else if (!this.fileStack.includes(file.path)) {
 						this.fileStack.push(file.path);
 						await this.saveStack(); // Save the updated stack
