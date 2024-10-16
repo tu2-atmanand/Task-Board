@@ -43,6 +43,7 @@ export default class TaskBoard extends Plugin {
 	realTimeScanning: RealTimeScanning;
 	fileStack: string[] = [];
 	scanTimer: number;
+	currentModifiedFile: TFile | null;
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -52,6 +53,7 @@ export default class TaskBoard extends Plugin {
 		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
+		this.currentModifiedFile = null;
 	}
 
 	async onload() {
@@ -154,9 +156,10 @@ export default class TaskBoard extends Plugin {
 			this.app.workspace.on(
 				"editor-change",
 				(editor: CodeMirror.Editor) => {
-					console.log("EVENT : editor-change event working...");
+					// console.log("EVENT : editor-change event working...");
 					// Set editorModified to true when any change occurs
 					editorModified = true;
+					this.currentModifiedFile = this.app.workspace.getActiveFile();
 				}
 			)
 		);
@@ -171,11 +174,10 @@ export default class TaskBoard extends Plugin {
 					// 	"EVENT : editor-blur event working... | Value of blur : ",
 					// 	activeEditor?.focus()
 					// );
-					const file = this.app.workspace.getActiveFile();
-					if (editorModified && file) {
+					if (editorModified && this.currentModifiedFile) {
 						console.log("EVENT : activeEditor.focus() ...");
 						this.realTimeScanning.onFileChange(
-							file,
+							this.currentModifiedFile,
 							this.settings.data.globalSettings.realTimeScanning,
 							this.settings.data.globalSettings.scanFilters
 						);
