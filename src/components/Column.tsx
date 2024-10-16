@@ -119,9 +119,10 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		editModal.open();
 	};
 
+	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
 
 	return (
-		<div className="TaskBoardColumnsSection">
+		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth }} >
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
 					{/* <button className="columnDragIcon"><RxDragHandleDots2 /></button> */}
@@ -134,6 +135,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 					tasks.map((task, index) => (
 						<TaskItem
 							app={app}
+							plugin={plugin}
 							key={index}
 							task={task}
 							onEdit={() => handleEditTask(task)}
