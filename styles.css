@@ -8,7 +8,15 @@ If your plugin does not need CSS, delete this file.
 */
 
 
-/* src/styles/KanbanBoard.css */
+/* Obsidian Components */
+
+.workspace-tabs .workspace-leaf .view-content {
+	height: 100%;
+	padding: 0 !important;
+	padding-inline: 8px !important;
+}
+
+/* src/styles/KanbanBoard.tsx */
 .kanbanBoard {
 	display: flex;
 	flex-direction: column;
@@ -18,7 +26,8 @@ If your plugin does not need CSS, delete this file.
 .kanbanHeader {
 	display: flex;
 	justify-content: space-between;
-	padding: 10px;
+	padding: 4px;
+	padding-block-end: 8px;
 	border-bottom: 1px solid #ddd;
 }
 
@@ -74,23 +83,23 @@ If your plugin does not need CSS, delete this file.
 .columnsContainer {
 	display: flex;
 	overflow-x: auto;
-	padding: 10px;
+	padding-block: 10px;
 	height: 100%;
 }
 
 
-/* src/styles/Column.css */
+/* src/styles/Column.tsx */
 .TaskBoardColumnsSection {
 	background: transparent !important;
 	/* backdrop-filter: blur(10px) saturate(300%) contrast(80%) brightness(60%); */
 	border: var(--border-width) solid olive;
 	border-radius: 15px;
-	margin-right: 10px;
+	margin-right: 8px;
 	border-radius: 5px;
-	width: 300px;
-	min-width: 300px;
 	display: flex;
 	flex-direction: column;
+	min-width: var(--column-width) !important;
+	width: var(--column-width) !important;
 }
 
 .taskBoardColumnSecHeader {
@@ -124,10 +133,10 @@ If your plugin does not need CSS, delete this file.
 }
 
 .tasksContainer {
-	padding: 10px;
+	padding: 7px;
 	flex: 1;
 	overflow-y: auto;
-	gap: 10px;
+	gap: 7px;
 	display: flex;
 	flex-direction: column;
 }
@@ -161,6 +170,11 @@ If your plugin does not need CSS, delete this file.
 
 .taskItemMainBody {
 	margin-block: 0.6em;
+	display: flex;
+	flex-direction: column;
+}
+
+.taskItemMainBodyTitleNsubTasks {
 	display: flex;
 	flex-direction: row;
 }
@@ -205,6 +219,10 @@ If your plugin does not need CSS, delete this file.
 	margin-block: 0 !important;
 }
 
+.taskItemMainBodyDescription {
+	width: 100%;
+}
+
 .taskItemBodyDescription {
 	max-height: 0;
 	overflow: hidden;
@@ -221,6 +239,13 @@ If your plugin does not need CSS, delete this file.
 .taskItemBodyDescriptionRenderer ul {
 	margin-block: 4px !important;
 	padding-inline-start: 25px !important;
+}
+
+.taskItemBodyDescriptionRenderer blockquote {
+	display: block;
+	margin-block-start: 0.5em;
+	margin-block-end: 0.5em;
+	margin-inline-start: 15px;
 }
 
 .taskItemBodyDescription-expanded {
@@ -320,116 +345,6 @@ If your plugin does not need CSS, delete this file.
 .taskItemiconButton:focus {
 	outline: none;
 	/* Remove default focus outline */
-}
-
-
-/* /src/modal/BoardConfigureModal.tsx */
-
-.config-modal {
-	display: flex;
-	width: 100%;
-	height: 100%;
-}
-
-.config-modal-sidebar {
-	width: 200px;
-	background-color: #f0f0f0;
-	border-right: 1px solid #ddd;
-	padding: 10px;
-}
-
-.config-modal-sidebar div {
-	margin: 10px 0;
-	cursor: pointer;
-}
-
-.config-modal-sidebar div.active {
-	font-weight: bold;
-}
-
-.config-modal-content {
-	flex-grow: 1;
-	padding: 20px;
-}
-
-
-/* /src/components/AddTaskModal.tsx */
-
-.modal-content-wrapper {
-	display: flex;
-	flex-direction: column;
-	padding: 20px;
-}
-
-.modal-content-wrapper h2 {
-	font-size: 20px;
-	margin-bottom: 10px;
-	text-align: center;
-}
-
-.modal-content-wrapper p {
-	margin-bottom: 20px;
-	font-size: 14px;
-	color: #bebbb7;
-	text-align: center;
-}
-
-.modal-content-wrapper input {
-	/* margin-bottom: 10px; */
-	padding: 8px;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-}
-
-.modal-content-wrapper button {
-	padding: 10px 15px;
-	border: none;
-	border-radius: 4px;
-	background-color: #007bff;
-	color: white;
-	cursor: pointer;
-	margin-top: 40px;
-}
-
-.modal-content-wrapper button:hover {
-	background-color: #0056b3;
-}
-
-.due-input-wrapper {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 1.5em;
-	/* Align items vertically centered */
-	/* margin-bottom: 10px; */
-	/* Space below the entire row */
-}
-
-.due-input-wrapper h6 {
-	margin: 0;
-}
-
-.due-input-wrapper input {
-	padding: 5px;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-}
-
-.start-time-input-wrapper,
-.end-time-input-wrapper,
-.priority-input-wrapper,
-.tag-input-wrapper {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 1.5em;
-}
-
-.time-input-wrapper {
-	display: flex;
-	flex-direction: row;
-	gap: 1.5em;
-	justify-content: space-between;
 }
 
 
@@ -597,7 +512,34 @@ If your plugin does not need CSS, delete this file.
 }
 
 
-/* /src/modal/BoardConfigureModal.tsx - V2 */
+/* /src/modal/BoardConfigureModal.tsx */
+
+.config-modal {
+	display: flex;
+	width: 100%;
+	height: 100%;
+}
+
+.config-modal-sidebar {
+	width: 200px;
+	background-color: #f0f0f0;
+	border-right: 1px solid #ddd;
+	padding: 10px;
+}
+
+.config-modal-sidebar div {
+	margin: 10px 0;
+	cursor: pointer;
+}
+
+.config-modal-sidebar div.active {
+	font-weight: bold;
+}
+
+.config-modal-content {
+	flex-grow: 1;
+	padding: 20px;
+}
 
 .modal {
 	width: auto;
@@ -776,34 +718,14 @@ If your plugin does not need CSS, delete this file.
 }
 
 
-/* /src/settings/PluginGlobalSettingContent.tsx */
-
-.globalSettingContentHome {
-	display: flex;
-	flex-direction: column;
-}
-
-.globalSettingContentHomeElement {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-}
-
-.globalSettingContentHomeElementTag {
-	display: flex;
-	flex-direction: column;
-	text-wrap: balance;
-}
-
-.globalSettingContentHomeElementTag h4 {
-	margin-block: 1px;
-}
-
-
 /* // src/views/TaskBoardSettingTab.ts */
 
 .TaskBoardSettingTab {
 	/* max-width: fit-content; */
+}
+
+.TaskBoardSettingConstructUI {
+	margin-bottom: 5px;
 }
 
 .mainPluginTitle {
@@ -824,6 +746,7 @@ If your plugin does not need CSS, delete this file.
 	align-items: center;
 	justify-content: center;
 }
+
 
 /* /src/components/ReScanVaultModal.tsx */
 

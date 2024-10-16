@@ -259,11 +259,14 @@
       "dailyNotesPluginComp": false,
       "dueDateFormat": "yyyy-MM-DD",
       "taskCompletionInLocalTime": true,
-      "taskCompletionShowUtcOffset": true,
+      "taskCompletionShowUtcOffset": false,
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": false
+      "realTimeScanning": false,
+      "columnWidth": "300px",
+      "showHeader": true,
+      "showFooter": true
     }
   }
 }

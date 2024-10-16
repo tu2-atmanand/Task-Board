@@ -97,12 +97,12 @@ export class RealTimeScanning {
 
 		this.scanTimer = window.setInterval(() => {
 			this.processStack();
-		}, 1 * 60 * 1000); // Set to 10 minutes
+		}, 25 * 60 * 1000); // Set to 10 minutes
 	}
 
 	async processStack() {
 		console.log(
-			"TIME UP : 1 minute has passed or at startup. Scanning the following files: ",
+			"TIME UP : 25 minute has passed or at startup. Scanning the following files: ",
 			this.fileStack
 		);
 		const filesToProcess = this.fileStack.slice();

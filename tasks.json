@@ -1,10 +1,9 @@
 {
     "Pending": {
         "XploreProgram/How to Access Xplore Courses.md": [],
-        "Untitled.md": [],
         "TODO.md": [
             {
-                "id": 2965917073,
+                "id": 1322033304,
                 "title": "New temp task, lets see if this comes after 5 minutes",
                 "body": [
                     "Updating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
@@ -19,9 +18,76 @@
                 "completed": ""
             }
         ],
+        "Testing 2.md": [
+            {
+                "id": 790110170,
+                "title": "So This is to add a simple Task for testing. UPdated",
+                "body": [
+                    "Basically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly.",
+                    "One probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
+                    "- [x] Trace how you code is running for the REFRESH_COLUMN  command. Updated",
+                    "- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
+                    "- [ ] A sub-sub Task for the first time."
+                ],
+                "time": "19:34 - 20:34",
+                "due": "2024-10-12",
+                "tag": "#Test",
+                "filePath": "Testing 2.md",
+                "completed": ""
+            }
+        ],
+        "Testing 1.md": [
+            {
+                "id": 1136095397,
+                "title": "This is a normal task, I am adding in the file, Updating",
+                "body": [
+                    "- [ ] Adding a Subtask in file manually.",
+                    "- [ ] Adding a Second SubTask Manually in the file, to see if it will show up in the board automatically. No, its wont show up automatically REFRESH_COLUMN not working."
+                ],
+                "time": "",
+                "due": "2024-10-17",
+                "tag": "#Test",
+                "filePath": "Testing 1.md",
+                "completed": ""
+            },
+            {
+                "id": 2012914457,
+                "title": "Adding a new task to encounter a different issue",
+                "body": [
+                    "- [ ] This is a first level Sub-Task so this will going to get detected very well, without any problem.",
+                    "This is the body/Description of this task.",
+                    "- [ ] This is a Third level of SubTask I dont know anything about this.",
+                    "- [ ] This is a fourth level Sub-Task, lets see what will happen with this.",
+                    "This is another line in the description , with one level of indentation and this line is followed by multiple bullete points :",
+                    "- This is a bullete point in the Desc, with two levels of indentation.",
+                    "- This is another line in the body with third level of indentation.",
+                    "- This the a fourth level of indentation.",
+                    "This is a normal line in the Desc with two levels of indentation.",
+                    "This is a normal line in Desc with three levels of Indentation.",
+                    "This is a normal line in Desc with four levels of indentation."
+                ],
+                "time": "",
+                "due": "2024-10-14",
+                "tag": "#Test",
+                "filePath": "Testing 1.md",
+                "completed": ""
+            },
+            {
+                "id": 3469731956,
+                "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
+                "body": [
+                    "![[Pasted image 20241014211429.png]]"
+                ],
+                "time": "",
+                "due": "2024-10-15",
+                "tag": "#Test",
+                "filePath": "Testing 1.md",
+                "completed": ""
+            }
+        ],
         "Spintly Details.md": [
             {
-                "id": 3053204116,
+                "id": 674051504,
                 "title": "Need to complete all the Documents work  and submit to TCS",
                 "body": [
                     "Just adding a normal line for this task as a body.",
@@ -33,18 +99,17 @@
                 "due": "2024-10-16",
                 "tag": "#Test",
                 "filePath": "Spintly Details.md",
-                "completed": "",
-                "priority": 0
+                "completed": ""
             },
             {
-                "id": 690817134,
+                "id": 962528312,
                 "title": "Just a new Task without tag or date",
                 "body": [
                     "First normal line for body is added.",
                     "- Adding a bullete point in the body.",
                     "Adding one more line in Desc",
                     "- Adding another bullete point in the description",
-                    "- [ ] Adding one subTask with an image : ![[UANnumber-Spintly.png]]",
+                    "- [ ] Adding one subTask with image: ![[UANnumber-Spintly.png]]",
                     "- [ ] Adding another subTask, second one"
                 ],
                 "time": "10:30 - 11:30",
@@ -56,7 +121,35 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 3754856656,
+                "id": 365709874,
+                "title": "Add Passport details in NSR portal and BGC after getting Passport.",
+                "body": [
+                    "Editing this task to see if this content gets properly detected and old content gets replaced with this new one."
+                ],
+                "time": "18:59 - 19:59",
+                "due": "2024-09-26",
+                "tag": "#Test",
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1663442919,
+                "title": "Get 8th Semester Provisional Marksheet and Apply for :",
+                "body": [
+                    "All the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
+                    "- [x]  **Provisional Degree Certificate**",
+                    "- [x] **Bonafide Letter (with percentage and aggregate marks)**",
+                    "- [x] **Consolidated Marksheet**",
+                    "- [x] **Leaving Certificate**"
+                ],
+                "time": "",
+                "due": "2024-11-01",
+                "tag": "#Test",
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 2781118870,
                 "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
                 "body": [
                     "This is a line in the Desc",
@@ -69,7 +162,7 @@
                 "completed": ""
             },
             {
-                "id": 1835022124,
+                "id": 3962531954,
                 "title": "Graduate All Semester Marksheets :",
                 "body": [
                     "- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -88,7 +181,7 @@
                 "completed": ""
             },
             {
-                "id": 3517167294,
+                "id": 1719659427,
                 "title": "Only one Recording Course is remaining of JavaOk",
                 "body": [
                     "Now i am removing all the points from the body and changing them into a one line sentence.",
@@ -96,24 +189,20 @@
                     "- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-10-14",
+                "due": "2024-10-17",
                 "tag": "#Test",
                 "filePath": "Pending Document Work.md",
-                "completed": "",
-                "priority": 0
+                "completed": ""
             },
             {
-                "id": 519893000,
+                "id": 603202348,
                 "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
-                "body": [
-                    ""
-                ],
+                "body": [],
                 "time": "",
-                "due": "2024-10-15",
+                "due": "2024-10-17",
                 "tag": "#Test",
                 "filePath": "Pending Document Work.md",
-                "completed": "",
-                "priority": 0
+                "completed": ""
             }
         ],
         "Parent/MarkdownPreviewView Docs.md": [],
@@ -121,7 +210,7 @@
         "Parent/Child/2002-01-12.md": [],
         "Parent/Child/12-JAN-2002.md": [
             {
-                "id": 3919307966,
+                "id": 2992984023,
                 "title": "Adding temp task",
                 "body": [
                     "Adding a line in body to see if it instantly updates in the board.",
@@ -130,11 +219,10 @@
                     "- [ ] Adding a subTask, to see if shows up instantly in the board. > No, I didnt saw any SubTask inside the taskItem Card"
                 ],
                 "time": "21:15 - 22:15",
-                "due": "2024-10-15",
+                "due": "2024-10-17",
                 "tag": "#Test",
                 "filePath": "Parent/Child/12-JAN-2002.md",
-                "completed": "",
-                "priority": "1"
+                "completed": ""
             }
         ],
         "Parent/Child/12-01-2002.md": [],
@@ -149,7 +237,7 @@
         "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
         "DailyNotes.md": [
             {
-                "id": 755447619,
+                "id": 1955455678,
                 "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
                 "body": [],
                 "time": "",
@@ -163,50 +251,17 @@
         "3-Process After Offer Letter Received.md": [],
         "2-Preparation_For_TCS_Interview.md": [],
         "1-Registering For TCS.md": [],
-        "0-ImportantData.md": [],
-        "Testing 2.md": [
-            {
-                "id": 2803563704,
-                "title": "So This is to add a simple Task for testing. UPdated",
-                "body": [
-                    "Basically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. Updated",
-                    "> One probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
-                    "- [x] Trace how you code is running for the REFRESH_COLUMN  command. Updated",
-                    "- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated"
-                ],
-                "time": "19:34 - 20:34",
-                "due": "2024-10-12",
-                "tag": "#Test",
-                "filePath": "Testing 2.md",
-                "completed": "",
-                "priority": "1"
-            }
-        ],
-        "Testing 1.md": [
-            {
-                "id": 743721281,
-                "title": "This is a normal task, I am adding in the file, Updating",
-                "body": [
-                    "",
-                    "- [ ] Adding a Subtask in file manually."
-                ],
-                "time": "",
-                "due": "2024-10-15",
-                "tag": "#Test",
-                "filePath": "Testing 1.md",
-                "completed": "",
-                "priority": 0
-            }
-        ]
+        "0-ImportantData.md": []
     },
     "Completed": {
         "XploreProgram/How to Access Xplore Courses.md": [],
-        "Untitled.md": [],
         "TODO.md": [],
+        "Testing 2.md": [],
+        "Testing 1.md": [],
         "Spintly Details.md": [],
         "Pending Document Work.md": [
             {
-                "id": 4266205964,
+                "id": 877259332,
                 "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
                 "body": [],
                 "time": "",
@@ -220,7 +275,7 @@
         "Parent/Child/TempNote.md": [],
         "Parent/Child/2002-01-12.md": [
             {
-                "id": 2270985670,
+                "id": 1847444916,
                 "title": "I was born on Saturday",
                 "body": [],
                 "time": "",
@@ -233,7 +288,7 @@
         "Parent/Child/12-JAN-2002.md": [],
         "Parent/Child/12-01-2002.md": [
             {
-                "id": 3388967613,
+                "id": 81324546,
                 "title": "I was born",
                 "body": [],
                 "time": "",
@@ -257,8 +312,6 @@
         "3-Process After Offer Letter Received.md": [],
         "2-Preparation_For_TCS_Interview.md": [],
         "1-Registering For TCS.md": [],
-        "0-ImportantData.md": [],
-        "Testing 2.md": [],
-        "Testing 1.md": []
+        "0-ImportantData.md": []
     }
 }

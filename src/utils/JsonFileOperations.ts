@@ -94,10 +94,10 @@ export const loadTasksAndMerge = async (
 		// const allTasks: tasksJson = JSON.parse(data);
 
 		const allTasks: tasksJson = await loadTasksRaw(plugin);
-		console.log(
-			"REFRESH_COLUMN : loadTasksAndMerge : Data recived from the sessionStorage function : ",
-			allTasks
-		);
+		// console.log(
+		// 	"REFRESH_COLUMN : loadTasksAndMerge : Data recived from the sessionStorage function : ",
+		// 	allTasks
+		// );
 
 		const pendingTasks: taskItem[] = [];
 		const completedTasks: taskItem[] = [];
@@ -125,10 +125,10 @@ export const loadTasksAndMerge = async (
 			Completed: completedTasks,
 		};
 
-		console.log(
-			"I am going to return the following data : ",
-			allTasksMerged
-		);
+		// console.log(
+		// 	"I am going to return the following data : ",
+		// 	allTasksMerged
+		// );
 
 		return { allTasksMerged };
 	} catch (error) {
