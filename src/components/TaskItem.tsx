@@ -10,7 +10,7 @@ import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 
-const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
+const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation
 	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
@@ -121,28 +121,75 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 		const element = document.getElementById('taskItemFooterBtns');
 		if (element) {
 			markdownButtonHoverPreviewEvent(app, event, element, task.filePath);
+		}
+	};
 
-			// app.workspace.trigger('hover-link', {
-			// 	event,                    // The original mouse event
-			// 	source: "task-board",      // Source of the hover
-			// 	hoverParent: element,      // The element that triggered the hover
-			// 	targetEl: element,         // The element to be hovered (same as parent in this case)
-			// 	linktext: task.filePath,   // The file path to preview
-			// 	sourcePath: task.filePath  // The source path (same as file path here)
-			// });
+	// Render Header based on the settings
+	const renderHeader = () => {
+		try {
+			if (plugin.settings.data.globalSettings.showHeader) {
+				return (
+					<>
+						<div className="taskItemHeader">
+							<div className="taskItemHeaderLeft">
+								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
+								<div className="taskItemTag">{task.tag}</div>
+							</div>
+							<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
+						</div>
+					</>
+				);
+			} else {
+				return null
+			}
+		} catch (error) {
+			console.log("Getting error while trying to render Header : ", error);
+			return null;
+		}
+	};
+
+	// Render Footer based on the settings
+	const renderFooter = () => {
+		try {
+			if (plugin.settings.data.globalSettings.showFooter) {
+				return (
+					<>
+						<div className="taskItemFooter">
+							{/* Conditionally render task.completed or the date/time */}
+							{task.completed ? (
+								<div className='taskItemDateCompleted'>✅ {task.completed}</div>
+							) : (
+								<div className='taskItemDate'>
+									{task.time ? `⏰${task.time} | ` : ''}
+									{task.due ? `📅${task.due}` : ''}
+								</div>
+							)}
+							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
+									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
+								</div>
+								<div className="taskItemiconButton">
+									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
+								</div>
+							</div>
+						</div>
+					</>
+				);
+			} else {
+				return null
+			}
+		} catch (error) {
+			console.log("Getting error while trying to render Footer : ", error);
+			return null;
 		}
 	};
 
 	// Render sub-tasks and remaining body separately
-	const renderTaskBody = () => {
+	const renderSubTasks = () => {
 		try {
 			if (taskBody.length > 0) {
-				// const subTasks = taskBody.filter(line => line.startsWith('- [ ]') || line.startsWith('- [x]'));
-				// const otherBody = taskBody.filter(line => !line.startsWith('- [ ]') && !line.startsWith('- [x]'));
-
 				return (
 					<>
-						{/* Render sub-tasks first */}
 						{subTasks.map((line, index) => {
 							const isCompleted = line.startsWith('- [x]');
 							const subtaskText = line.replace(/- \[.\] /, '');
@@ -162,11 +209,27 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 								</div>
 							);
 						})}
+					</>
+				);
+			} else {
+				return null
+			}
+		} catch (error) {
+			console.log("Getting error while trying to print the SubTasks : ", error);
+			return null;
+		}
+	};
 
-						{/* Touchable Description element */}
+
+	// Render Task Description
+	const renderTaskDescriptoin = () => {
+		try {
+			if (taskBody.length > 0) {
+				return (
+					<>
 						{taskDesc.length > 0 && taskDesc.at(0) !== "" && (
 							<div
-								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer' }}
+								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer', marginInlineStart: '5px' }}
 								onClick={toggleDescription}
 							>
 								{isDescriptionExpanded ? 'Hide Description' : 'Show Description'}
@@ -184,7 +247,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 				return null
 			}
 		} catch (error) {
-			console.log("Getting error while trying to print the body : ", error);
+			console.log("Getting error while trying to print the Description : ", error);
 			return null;
 		}
 	};
@@ -193,46 +256,27 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 		<div className="taskItem">
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
-				<div className="taskItemHeader">
-					<div className="taskItemHeaderLeft">
-						<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
-						<div className="taskItemTag">{task.tag}</div>
-					</div>
-					<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
-				</div>
+				{renderHeader()}
 				<div className="taskItemMainBody">
-					<input
-						type="checkbox"
-						checked={(task.completed || isChecked) ? true : false}
-						className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
-						onChange={handleCheckboxChange}
-					/>
-					<div className="taskItemBodyContent">
-						<div className="taskItemTitle">{task.title}</div>
-						<div className="taskItemBody">
-							{renderTaskBody()}
+					<div className="taskItemMainBodyTitleNsubTasks">
+						<input
+							type="checkbox"
+							checked={(task.completed || isChecked) ? true : false}
+							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
+							onChange={handleCheckboxChange}
+						/>
+						<div className="taskItemBodyContent">
+							<div className="taskItemTitle">{task.title}</div>
+							<div className="taskItemBody">
+								{renderSubTasks()}
+							</div>
 						</div>
 					</div>
-				</div>
-				<div className="taskItemFooter">
-					{/* Conditionally render task.completed or the date/time */}
-					{task.completed ? (
-						<div className='taskItemDateCompleted'>✅ {task.completed}</div>
-					) : (
-						<div className='taskItemDate'>
-							{task.time ? `⏰${task.time} | ` : ''}
-							{task.due ? `📅${task.due}` : ''}
-						</div>
-					)}
-					<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-						<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
-							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
-						</div>
-						<div className="taskItemiconButton">
-							<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
-						</div>
+					<div className="taskItemMainBodyDescription">
+						{renderTaskDescriptoin()}
 					</div>
 				</div>
+				{renderFooter()}
 			</div>
 		</div>
 	);
