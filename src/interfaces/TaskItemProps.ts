@@ -1,7 +1,9 @@
 import { App } from "obsidian";
+import TaskBoard from "main";
 
 export interface TaskProps {
 	app: App;
+	plugin: TaskBoard;
 	task: taskItem;
 	onEdit: () => void;
 	onDelete: () => void;

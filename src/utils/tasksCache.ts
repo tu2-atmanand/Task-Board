@@ -106,7 +106,7 @@ export const writeTasksFromSessionStorageToDisk = async (
 		console.log(
 			"SESSIONSTORAGE : Time UP : Running the Periodically Saving of data from sessionStorage to Disk."
 		);
-		if (localStorage.getItem("fileStack")?.at(0) === undefined) {
+		if (localStorage.getItem("fileStack") === '[]') {
 			console.log("No files has been changed, no need to write the data from sessionStorage to Disk....");
 		} else {
 			// Trigger write operation to save sessionStorage data to disk
@@ -121,11 +121,11 @@ export const writeTasksFromSessionStorageToDisk = async (
 export const startPeriodicSave = (plugin: TaskBoard) => {
 	setInterval(async () => {
 		await writeTasksFromSessionStorageToDisk(plugin);
-	}, 10 * 60 * 1000); // 5 minutes in milliseconds
+	}, 30 * 60 * 1000); // 5 minutes in milliseconds
 };
 
 // Call this function when the plugin is unloading
 export const onUnloadSave = async (plugin: TaskBoard) => {
-	await writeTasksFromSessionStorageToDisk(plugin);
+	await writeTasksJsonDisk(plugin);
 	console.log("Tasks saved to disk before plugin unload.");
 };

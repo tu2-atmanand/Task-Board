@@ -27,6 +27,9 @@ export interface globalSettingsData {
 	scanVaultAtStartup: boolean;
 	dayPlannerPlugin: boolean;
 	realTimeScanning: boolean;
+	columnWidth: string;
+	showHeader: boolean;
+	showFooter:boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -69,6 +72,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			scanVaultAtStartup: false,
 			dayPlannerPlugin: false,
 			realTimeScanning: false,
+			columnWidth: "300px",
+			showHeader: true,
+			showFooter: true,
 		},
 	},
 };

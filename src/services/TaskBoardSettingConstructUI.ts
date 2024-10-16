@@ -75,6 +75,9 @@ export class SettingsManager {
 			scanVaultAtStartup,
 			dayPlannerPlugin,
 			realTimeScanning,
+			columnWidth,
+			showHeader,
+			showFooter,
 		} = this.globalSettings;
 
 		contentEl.createEl("h1", {
@@ -188,21 +191,46 @@ export class SettingsManager {
 		);
 
 		contentEl.createEl("hr");
-		// Save settings and reflect changes
-		// await this.saveSettings();
 
-		// contentEl.createEl("h4", { text: "Time related settings" });
+		contentEl.createEl("h4", { text: "Board UI Settings" });
+		// Setting to show/Hide the Header of the Task Item Card
+		new Setting(contentEl)
+			.setName("Show Header of the Task Item Card")
+			.setDesc("Enable this to see the Header in the Task Item Card")
+			.addToggle((toggle) =>
+				toggle.setValue(showHeader).onChange(async (value) => {
+					this.globalSettings!.showHeader = value;
+					await this.saveSettings();
+				})
+			);
 
-		// // Setting for ignoreFileNameDates
-		// new Setting(contentEl)
-		// 	.setName("Ignore File Name Dates")
-		// 	.setDesc("Whether to ignore dates in file names")
-		// 	.addToggle((toggle) =>
-		// 		toggle.setValue(ignoreFileNameDates).onChange(async (value) => {
-		// 			this.globalSettings!.ignoreFileNameDates = value;
-		// 			await this.saveSettings();
-		// 		})
-		// 	);
+		// Setting to show/Hide the Footer of the Task Item Card
+		new Setting(contentEl)
+			.setName("Show Footer of the Task Item Card")
+			.setDesc("Enable this to see the Footer in the Task Item Card")
+			.addToggle((toggle) =>
+				toggle.setValue(showFooter).onChange(async (value) => {
+					this.globalSettings!.showFooter = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to take the width of each Column in px.
+		new Setting(contentEl)
+			.setName("Width of each Column")
+			.setDesc(
+				"Enter the value of width for each column. The default value is 273px"
+			)
+			.addText((text) =>
+				text
+					.setValue(columnWidth)
+					.onChange(async (value) => {
+						this.globalSettings!.columnWidth = value;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the text pattern changes
+					})
+					.setPlaceholder("273px")
+			);
 
 		contentEl.createEl("h4", { text: "Automation Settings" });
 		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
@@ -283,29 +311,32 @@ export class SettingsManager {
 				"Enter the format of the Date which you are using to name your Daily Notes files. Please use the either 'yyyy-MM-DD' or 'DD-MM-yyyy'"
 			)
 			.addText((text) =>
-				text.setValue(dueDateFormat).onChange(async (value) => {
-					this.globalSettings!.dueDateFormat = value;
-					await this.saveSettings();
-					updatePreview(); // Update the preview when the text pattern changes
-				})
+				text
+					.setValue(dueDateFormat)
+					.onChange(async (value) => {
+						this.globalSettings!.dueDateFormat = value;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the text pattern changes
+					})
+					.setPlaceholder("yyyy-MM-DD")
 			);
 
 		// Seeting to take the format of Due and Completion values. And to take the date-Time format for the completion value.
 		contentEl.createEl("h4", {
-			text: "Due and Completion Formats",
+			text: "Due and Completion date formats",
 		});
 
 		// Create the live preview element
 		const previewEl = contentEl.createEl("div", {
 			text: "Preview will appear here",
-			cls: "live-preview",
+			cls: "globa-setting-tab-live-preview",
 		});
 		const updatePreview = () => {
 			let dueDate = "2024-09-21";
 			let completionDate = "2024-09-21T12:20:33";
 			let taskTitle = "<Task Title>";
 
-			let preview = `- [ ] ${taskTitle} | `;
+			let preview = `PREVIEW : - [ ] ${taskTitle} | `;
 			switch (this.globalSettings!.taskCompletionFormat) {
 				case "1": // Default
 					preview += `📅${dueDate} ✅${completionDate}`;
@@ -360,6 +391,7 @@ export class SettingsManager {
 						await this.saveSettings();
 						updatePreview(); // Update the preview when the text pattern changes
 					})
+					.setPlaceholder("yyyy-MM-DD/HH:mm")
 			);
 
 		// Initialize the preview on page load
@@ -495,7 +527,6 @@ export class SettingsManager {
 		// Optionally, perform any additional cleanup of settings-related data or state
 	}
 }
-
 
 const buyMeACoffeeButton = (link: string): HTMLElement => {
 	const a = createEl("a");

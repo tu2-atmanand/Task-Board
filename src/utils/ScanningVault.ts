@@ -264,6 +264,7 @@ export class ScanningVault {
 	// Save tasks to JSON file
 	async saveTasksToFile() {
 		await writeTasksJson(this.plugin, this.tasks);
+		await writeTasksJsonDisk(this.plugin);
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (this.TaskDetected) {
