@@ -30,6 +30,7 @@ export interface globalSettingsData {
 	columnWidth: string;
 	showHeader: boolean;
 	showFooter:boolean;
+	showVerticalScroll:boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure

@@ -130,7 +130,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 				</div>
 				<RxDotsVertical />
 			</div>
-			<div className="tasksContainer">
+			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
 					tasks.map((task, index) => (
 						<TaskItem

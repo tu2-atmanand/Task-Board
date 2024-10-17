@@ -78,6 +78,7 @@ export class SettingsManager {
 			columnWidth,
 			showHeader,
 			showFooter,
+			showVerticalScroll,
 		} = this.globalSettings;
 
 		contentEl.createEl("h1", {
@@ -230,6 +231,19 @@ export class SettingsManager {
 						updatePreview(); // Update the preview when the text pattern changes
 					})
 					.setPlaceholder("273px")
+			);
+
+		// Setting to show/Hide the Vertical ScrollBar of each Column
+		new Setting(contentEl)
+			.setName("Show Column Scroll Bar")
+			.setDesc(
+				"Enable to see a scrollbar for each column. This will reduce the width of Task Cards."
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(showVerticalScroll).onChange(async (value) => {
+					this.globalSettings!.showVerticalScroll = value;
+					await this.saveSettings();
+				})
 			);
 
 		contentEl.createEl("h4", { text: "Automation Settings" });
