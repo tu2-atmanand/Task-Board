@@ -88,6 +88,7 @@ export const writeTasksJsonToSS = async (
 	try {
 		// Store the updated tasks data in sessionStorage
 		sessionStorage.setItem("tasksData", JSON.stringify(updatedData));
+		plugin.IsTasksJsonChanged = true;
 		console.log(
 			"SESSIONSTORAGE : Tasks updated in sessionStorage : ",
 			JSON.parse(sessionStorage.getItem("tasksData"))
@@ -106,11 +107,12 @@ export const writeTasksFromSessionStorageToDisk = async (
 		console.log(
 			"SESSIONSTORAGE : Time UP : Running the Periodically Saving of data from sessionStorage to Disk."
 		);
-		if (localStorage.getItem("fileStack") === '[]') {
-			console.log("No files has been changed, no need to write the data from sessionStorage to Disk....");
+		if (!plugin.IsTasksJsonChanged) {
+			console.log("The data in SessionStorage has not been changed. No need to write the data from sessionStorage to Disk....");
 		} else {
 			// Trigger write operation to save sessionStorage data to disk
-			await writeTasksJsonDisk(plugin);
+			plugin.IsTasksJsonChanged = false;
+			await writeTasksJsonToDisk(plugin);
 		}
 	} catch (error) {
 		console.warn("Error writing tasks from sessionStorage to disk:", error);
@@ -120,6 +122,7 @@ export const writeTasksFromSessionStorageToDisk = async (
 // Start a timer to write tasks from sessionStorage to disk every 5 minutes
 export const startPeriodicSave = (plugin: TaskBoard) => {
 	setInterval(async () => {
+		console.log("This function runs after every 1 min, let me see what is the value of the plugin.IsTasksJsonChanged = ", plugin.IsTasksJsonChanged);
 		await writeTasksFromSessionStorageToDisk(plugin);
 	}, 1 * 60 * 1000); // 5 minutes in milliseconds
 };

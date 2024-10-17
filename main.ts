@@ -44,6 +44,7 @@ export default class TaskBoard extends Plugin {
 	fileStack: string[] = [];
 	scanTimer: number;
 	currentModifiedFile: TFile | null;
+	IsTasksJsonChanged: boolean;
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -54,6 +55,7 @@ export default class TaskBoard extends Plugin {
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.currentModifiedFile = null;
+		this.IsTasksJsonChanged = false;
 	}
 
 	async onload() {
@@ -131,7 +133,6 @@ export default class TaskBoard extends Plugin {
 		console.log("MAIN.ts : Loading the setting values : ", this.settings);
 
 		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
-		console.log("Creating localStorage ...");
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
