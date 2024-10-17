@@ -1,6 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
-import { loadTasksRaw, writeTasksJson } from "./tasksCache";
+import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
 import path, { join } from "path";
 import {
 	priorityEmojis,
@@ -113,7 +113,7 @@ export const moveFromPendingToCompleted = async (
 	task: taskItem
 ) => {
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Move task from Pending to Completed
 		if (allTasks.Pending[task.filePath]) {
@@ -135,7 +135,7 @@ export const moveFromPendingToCompleted = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeTasksJson(plugin, allTasks);
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
@@ -149,7 +149,7 @@ export const moveFromCompletedToPending = async (
 	// const updatedTask = { ...task, completed: "" };
 
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Move task from Completed to Pending
 		if (allTasks.Completed[task.filePath]) {
@@ -167,7 +167,7 @@ export const moveFromCompletedToPending = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeTasksJson(plugin, allTasks);
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
@@ -213,7 +213,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 
 export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Remove task from Pending or Completed in tasks.json
 		if (allTasks.Pending[task.filePath]) {
@@ -229,7 +229,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 
 		// Write the updated data back to the JSON file
 		// fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
-		await writeTasksJson(plugin, allTasks);
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error deleting task from tasks.json:", error);
 	}
@@ -316,7 +316,7 @@ export const updateTaskInJson = async (
 		updatedTask
 	);
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 		// console.log("The file of Tasks.json which I am updating: ", allTasks);
 
 		// Function to update a task in a given task category (Pending or Completed)
@@ -350,7 +350,7 @@ export const updateTaskInJson = async (
 		// Write the updated data back to the JSON file
 		console.log("The new data to be updated in tasks.json: ", updatedData);
 		// Write the updated data back to the JSON file using the new function
-		await writeTasksJson(plugin, updatedData);
+		await writeTasksJsonToSS(plugin, updatedData);
 		
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
@@ -372,7 +372,7 @@ export const generateTaskId = (): number => {
 };
 
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
-	const allTasks = await loadTasksRaw(plugin);
+	const allTasks = await loadTasksJsonFromSS(plugin);
 
 	const newTaskWithId = {
 		...newTask,
@@ -389,7 +389,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	allTasks.Pending[newTask.filePath].push(newTaskWithId);
 
-	await writeTasksJson(plugin, allTasks);
+	await writeTasksJsonToSS(plugin, allTasks);
 };
 
 export const addTaskInFile = async (

@@ -22,7 +22,7 @@ import {
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/GlobalVariables";
 import {
-	loadTasksRawDisk,
+	loadTasksJsonFromDiskToSS,
 	onUnloadSave,
 	startPeriodicSave,
 } from "src/utils/tasksCache";
@@ -219,7 +219,7 @@ export default class TaskBoard extends Plugin {
 			: "";
 
 		// Load all the tasks from the tasks.json into sessionStorage
-		const _ = loadTasksRawDisk(this.plugin);
+		const _ = loadTasksJsonFromDiskToSS(this.plugin);
 		startPeriodicSave(this.plugin);
 
 		// Register the Kanban view

@@ -1,7 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, Notice, TFile } from "obsidian";
-import { loadTasksRaw, writeTasksFromSessionStorageToDisk, writeTasksJson, writeTasksJsonDisk } from "./tasksCache";
+import { loadTasksJsonFromSS, writeTasksFromSessionStorageToDisk, writeTasksJsonToDisk, writeTasksJsonToSS } from "./tasksCache";
 import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
 
 import type TaskBoard from "main";
@@ -131,7 +131,7 @@ export class ScanningVault {
 		console.log("Following files have been received for scanning: ", files);
 
 		// Load the existing tasks from tasks.json once
-		const oldTasks = await loadTasksRaw(this.plugin);
+		const oldTasks = await loadTasksJsonFromSS(this.plugin);
 		console.log(
 			"Following Old data has been loaded from tasks.json: ",
 			oldTasks
@@ -263,8 +263,8 @@ export class ScanningVault {
 
 	// Save tasks to JSON file
 	async saveTasksToFile() {
-		await writeTasksJson(this.plugin, this.tasks);
-		await writeTasksJsonDisk(this.plugin);
+		await writeTasksJsonToSS(this.plugin, this.tasks);
+		await writeTasksJsonToDisk(this.plugin);
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (this.TaskDetected) {
@@ -294,7 +294,7 @@ export class ScanningVault {
 
 			if (line.startsWith("\t") || line.startsWith("    ")) { //TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
 				// If the line has one level of indentation, consider it part of the body
-				bodyLines.push(line.trim());
+				bodyLines.push(line);
 			} else {
 				// If no indentation is detected, stop reading the body
 				break;
