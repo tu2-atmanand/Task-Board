@@ -14,9 +14,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 	// State to handle the checkbox animation
 	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
-	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.startsWith('- [ ]') && !line.startsWith('- [x]'))));
-	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.startsWith('- [ ]') || line.startsWith('- [x]'))));
-	const [taskBody, setTaskBody] = useState<string[]>(task.body)
+	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
+	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]'))));
+	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
 
@@ -45,17 +45,21 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 
 	// Function to handle the checkbox toggle inside the task body
 	const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
-		const updatedSubTasks = subTasks.map((line, idx) => {
+		const updatedBody = taskBody.map((line, idx) => {
 			if (idx === index) {
-				return isCompleted ? line.replace('- [x]', '- [ ]') : line.replace('- [ ]', '- [x]');
+				// Toggle the checkbox status only for the specific line
+				return isCompleted
+					? line.replace('- [x]', '- [ ]')
+					: line.replace('- [ ]', '- [x]');
 			}
 			return line;
 		});
-		setSubTasks(updatedSubTasks);
 
-		// Update the task with new body content
-		const updatedTask: taskItem = { ...task, body: [...taskDesc, ...updatedSubTasks] };
-		onSubTasksChange(updatedTask);
+		setTaskBody(updatedBody);
+
+		// Update the task with the modified body content
+		const updatedTask: taskItem = { ...task, body: updatedBody };
+		onSubTasksChange(updatedTask); // Notify parent of the change
 	};
 
 	// Toggle function to expand/collapse the description
@@ -63,8 +67,6 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 		setIsDescriptionExpanded(!isDescriptionExpanded);
 	};
 
-	const taskItemBodyDescriptionRenderer = useRef<HTMLDivElement>(null);
-	const subtaskTextRefs = useRef<(HTMLDivElement | null)[]>([]);  // Store refs for each subtask text element
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
 		// Initialize Obsidian Component on mount
@@ -77,18 +79,21 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 		};
 	}, []);
 
+	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
 		// Render subtasks after componentRef is initialized
-		subTasks.forEach((subtaskText, index) => {
-			const element = subtaskTextRefs.current[index];
-			if (element && componentRef.current) {
-				element.innerHTML = '';
+		task.body.forEach((subtaskText, index) => {
+			const uniqueKey = `${task.id}-${index}`;
+			const element = subtaskTextRefs.current[uniqueKey];
 
-				subtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+			if (element) {
+				element.innerHTML = ''; // Clear previous content
+
+				const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
 				MarkdownUIRenderer.renderSubtaskText(
 					app,
-					subtaskText, // Pass individual subtask text here
+					strippedSubtaskText,
 					element,
 					task.filePath,
 					componentRef.current
@@ -97,22 +102,28 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 				hookMarkdownLinkMouseEventHandlers(app, element, task.filePath, task.filePath);
 			}
 		});
-	}, [subTasks, task.filePath, app]);
+	}, [task.body, task.filePath, app]);
 
+
+	const taskItemBodyDescriptionRenderer = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
 		if (taskItemBodyDescriptionRenderer.current && componentRef.current) {
-			taskItemBodyDescriptionRenderer.current.innerHTML = ''; // Clear existing content
+			const uniqueKey = `${task.id}-desc`;
+			const descElement = taskItemBodyDescriptionRenderer.current[uniqueKey]; // Clear existing content
 
-			// Call the MarkdownUIRenderer to render the description
-			MarkdownUIRenderer.renderTaskDisc(
-				app,
-				taskDesc.join('\n'),
-				taskItemBodyDescriptionRenderer.current, // Use HTMLDivElement reference
-				task.filePath,
-				componentRef.current // Pass the Component instance
-			);
+			if (descElement) {
+				descElement.innerHTML = '';
+				// Call the MarkdownUIRenderer to render the description
+				MarkdownUIRenderer.renderTaskDisc(
+					app,
+					taskDesc.join('\n').trim(),
+					descElement, // Use HTMLDivElement reference
+					task.filePath,
+					componentRef.current // Pass the Component instance
+				);
 
-			hookMarkdownLinkMouseEventHandlers(app, taskItemBodyDescriptionRenderer.current, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, descElement, task.filePath, task.filePath);
+			}
 		}
 	}, [taskDesc, task.filePath, app]);
 
@@ -187,14 +198,28 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 	// Render sub-tasks and remaining body separately
 	const renderSubTasks = () => {
 		try {
-			if (taskBody.length > 0) {
+			if (task.body.length > 0) {
 				return (
 					<>
-						{subTasks.map((line, index) => {
-							const isCompleted = line.startsWith('- [x]');
-							const subtaskText = line.replace(/- \[.\] /, '');
-							return (
-								<div className="taskItemBodySubtaskItem" key={index}>
+						{task.body.map((line, index) => {
+							const isCompleted = line.trim().startsWith('- [x]');
+							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
+							const subtaskText = line.replace(/- \[.\] /, '').trim();
+
+							// Calculate padding based on the number of tabs
+							const numTabs = line.match(/^\t+/)?.[0].length || 0;
+							const paddingLeft = numTabs > 1 ? `${(numTabs - 1) * 15}px` : '0px';
+
+							// Create a unique key for this subtask based on task.id and index
+							const uniqueKey = `${task.id}-${index}`;
+
+							return isSubTask ? (
+								<div
+									className="taskItemBodySubtaskItem"
+									key={uniqueKey}
+									style={{ paddingLeft }}
+									id={uniqueKey} // Assign a unique ID for each subtask element
+								>
 									<input
 										type="checkbox"
 										className="taskItemBodySubtaskItemCheckbox"
@@ -204,18 +229,18 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 									{/* Render each subtask separately */}
 									<div
 										className="subtaskTextRenderer"
-										ref={(el) => (subtaskTextRefs.current[index] = el)}  // Assign each subtask its own ref
+										ref={(el) => (subtaskTextRefs.current[uniqueKey] = el)} // Assign unique ref to each subtask
 									/>
 								</div>
-							);
+							) : null;
 						})}
 					</>
 				);
 			} else {
-				return null
+				return null;
 			}
 		} catch (error) {
-			console.log("Getting error while trying to print the SubTasks : ", error);
+			console.log('Getting error while trying to render the SubTasks: ', error);
 			return null;
 		}
 	};
@@ -225,6 +250,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 	const renderTaskDescriptoin = () => {
 		try {
 			if (taskBody.length > 0) {
+				const uniqueKey = `${task.id}-desc`;
 				return (
 					<>
 						{taskDesc.length > 0 && taskDesc.at(0) !== "" && (
@@ -237,9 +263,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 						)}
 
 						{/* Render remaining body content with expand/collapse animation */}
-						<div className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
+						<div className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`} key={uniqueKey} id={uniqueKey}
 						>
-							<div className="taskItemBodyDescriptionRenderer" ref={taskItemBodyDescriptionRenderer} />
+							<div className="taskItemBodyDescriptionRenderer" ref={(descEl) => taskItemBodyDescriptionRenderer.current[uniqueKey] = descEl} />
 						</div>
 					</>
 				);
