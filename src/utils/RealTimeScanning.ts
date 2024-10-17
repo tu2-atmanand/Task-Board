@@ -55,6 +55,7 @@ export class RealTimeScanning {
 	async initializeStack(realTimeScanning: boolean) {
 		if (realTimeScanning) return;
 		try {
+			console.log("Creating localStorage ...");
 			console.log(
 				"LocalStorage : initializeStack : The data inside the localstorage at startup : ",
 				localStorage.getItem("fileStack")

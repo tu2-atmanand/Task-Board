@@ -10,11 +10,11 @@ If your plugin does not need CSS, delete this file.
 
 /* Obsidian Components */
 
-.workspace-tabs .workspace-leaf .view-content {
+/* .workspace-tabs .workspace-leaf .view-content {
 	height: 100%;
 	padding: 0 !important;
 	padding-inline: 8px !important;
-}
+} */
 
 /* src/styles/KanbanBoard.tsx */
 .kanbanBoard {
@@ -139,6 +139,22 @@ If your plugin does not need CSS, delete this file.
 	gap: 7px;
 	display: flex;
 	flex-direction: column;
+}
+
+.tasksContainer-SH {
+	padding: 7px;
+	flex: 1;
+	overflow-y: auto;
+	gap: 7px;
+	display: flex;
+	flex-direction: column;
+
+	/* Firefox */
+	scrollbar-width: none;
+	&::-webkit-scrollbar {
+		/* Chrome, Safari, Opera */
+		display: none;
+	}
 }
 
 
