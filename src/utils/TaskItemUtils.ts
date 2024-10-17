@@ -79,21 +79,18 @@ export const taskElementsFormatter = (
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
-		.filter(
-			(line: string) =>
-				!line.startsWith("- [ ]") && !line.startsWith("- [x]")
-		)
-		.map((line: string) => `\t${line}`)
+		.map((line: string) => `${line}`)
 		.join("\n");
 
-	// Add the sub-tasks without additional indentation
-	const subTasksWithTab = updatedTask.body
-		.filter(
-			(line: string) =>
-				line.startsWith("- [ ]") || line.startsWith("- [x]")
-		)
-		.map((Line: string) => `\t${Line}`)
-		.join("\n");
+	// // Add the sub-tasks without additional indentation
+	// const subTasksWithTab = updatedTask.body
+	// 	.filter(
+	// 		(line: string) =>
+	// 			line.startsWith("- [ ]") || line.startsWith("- [x]")
+	// 	)
+	// 	.map((Line: string) => `\t${Line}`)
+	// 	.join("\n")
+	// 	.trim();
 
 	// console.log("If i there is not subTask to the file and there was no line in the Description, then here there shouldnt be anything if i have added a fresh bullete point in the Desc : ", subTasksWithTab);
 
@@ -101,7 +98,9 @@ export const taskElementsFormatter = (
 	// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}`;
 	const completeTask = `${formattedTask}${
 		bodyLines.trim() ? `\n${bodyLines}` : ""
-	}\n${subTasksWithTab}`;
+	}`;
+
+	console.log("taskElementsFormatter : To render in the HTML :\n",completeTask);
 
 	return completeTask;
 };
@@ -351,7 +350,7 @@ export const updateTaskInJson = async (
 		console.log("The new data to be updated in tasks.json: ", updatedData);
 		// Write the updated data back to the JSON file using the new function
 		await writeTasksJsonToSS(plugin, updatedData);
-		
+
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
 		console.error(
