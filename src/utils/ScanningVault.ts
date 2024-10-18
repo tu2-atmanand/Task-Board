@@ -1,16 +1,13 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, Notice, TFile } from "obsidian";
-import { loadTasksJsonFromSS, writeTasksFromSessionStorageToDisk, writeTasksJsonToDisk, writeTasksJsonToSS } from "./tasksCache";
+import { loadTasksJsonFromSS, writeTasksJsonToDisk, writeTasksJsonToSS } from "./tasksCache";
 import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import fs from "fs";
-import path from "path";
 import { priorityEmojis } from "src/interfaces/TaskItemProps";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
-import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export class ScanningVault {
 	app: App;
@@ -76,7 +73,7 @@ export class ScanningVault {
 					const title = this.extractTitle(line);
 					const time = this.extractTime(line);
 					const due = this.extractDueDate(line);
-					// const priority = this.extractPriority(line);
+					const priority = this.extractPriority(line);
 					const completionDate = this.extractCompletionDate(line);
 					const body = this.extractBody(lines, i + 1);
 
@@ -87,7 +84,7 @@ export class ScanningVault {
 						time,
 						due,
 						tag,
-						// priority,
+						priority,
 						filePath: fileNameWithPath,
 						completed: completionDate,
 					};
@@ -156,7 +153,7 @@ export class ScanningVault {
 						const isCompleted = line.startsWith("- [x]");
 						const title = this.extractTitle(line);
 						const time = this.extractTime(line);
-						// const priority = this.extractPriority(line);
+						const priority = this.extractPriority(line);
 						const completionDate = this.extractCompletionDate(line);
 						const body = this.extractBody(lines, i + 1);
 
@@ -205,7 +202,7 @@ export class ScanningVault {
 							time,
 							due,
 							tag,
-							// priority,
+							priority,
 							filePath: fileNameWithPath,
 							completed: completionDate,
 						};
@@ -264,13 +261,11 @@ export class ScanningVault {
 	// Save tasks to JSON file
 	async saveTasksToFile() {
 		await writeTasksJsonToSS(this.plugin, this.tasks);
-		await writeTasksJsonToDisk(this.plugin);
+		await writeTasksJsonToDisk(this.plugin); // Since this updateTasksFromFiles will be run only after 5 min, so its fine to write the data to disk.
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (this.TaskDetected) {
 			// new Notice("Tasks scanned from the modified files.");
-
-			// Emit the event
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
@@ -370,15 +365,21 @@ export class ScanningVault {
 
 		// Execute the regex to find the emoji in the text
 		const match = text.match(emojiPattern);
-		console.log("Following is the match i found for the Priority : ", match);
-
+		
 		// If a match is found, map it back to the corresponding priority number
 		if (match) {
-			const emojiFound = match[0].trim();
+			const emojiFound = match[0].trim().replace('|', '').trim();
+			console.log(
+				"Following is the match I found for the Priority :",
+				emojiFound
+			);
+
 			const priorityMatch = Object.entries(priorityEmojis).find(
 				([, emoji]) => emoji === emojiFound
 			);
-			return priorityMatch?.[0] || "0"; // Return the key if found, otherwise default to '0'
+
+			console.log("The match i found for this emoji from the mapping :", priorityMatch);
+			return priorityMatch?.[0] || "0";
 		}
 
 		// Default priority if no emoji is found

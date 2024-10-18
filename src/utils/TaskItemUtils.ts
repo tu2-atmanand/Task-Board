@@ -1,7 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
 import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
-import path, { join } from "path";
 import {
 	priorityEmojis,
 	taskItem,
@@ -15,8 +14,6 @@ import {
 import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import fs from "fs";
-import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export const taskElementsFormatter = (
 	plugin: TaskBoard,
@@ -74,7 +71,7 @@ export const taskElementsFormatter = (
 			updatedTask.tag
 		}${completedWitFormat}`;
 	} else {
-		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWitFormat}`;
+		formattedTask = `${checkBoxStat} ${updatedTask.title} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWitFormat}`;
 	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
