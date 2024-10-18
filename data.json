@@ -173,7 +173,7 @@
         "filters": [],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "Tag Based Board, updating",
+        "name": "Tag Based Board",
         "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true
