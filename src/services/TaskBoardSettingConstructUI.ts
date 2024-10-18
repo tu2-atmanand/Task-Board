@@ -247,27 +247,11 @@ export class SettingsManager {
 			);
 
 		contentEl.createEl("h4", { text: "Automation Settings" });
-		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
-		new Setting(contentEl)
-			.setName("Auto Scan the Vault on Obsidian Startup")
-			.setDesc(
-				SettingsManager.createFragmentWithHTML(
-					"<p>The plugin will scan the whole vault to detect all the undetected tasks from whole vault everytime Obsidian starts.</p>" +
-						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
-				)
-			)
-			.addToggle((toggle) =>
-				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
-					this.globalSettings!.scanVaultAtStartup = value;
-					await this.saveSettings();
-				})
-			);
-
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
 			.setName("Real-Time Scanning")
 			.setDesc(
-				"This setting will scan the modified file every time some changes is made to any markdown file. This wont slow down the performance, but if it does, disbale this setting.\nDisabling this setting will scan the newly added task within 5 minutes and will render on the board."
+				"After you loose focus from the file you have edited, the task will be immediately refreshed on the Task Boad.\nDisabling this setting will scan the modified files after some time."
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(realTimeScanning).onChange(async (value) => {
@@ -280,11 +264,27 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName("Auto Add Due Date to Tasks")
 			.setDesc(
-				"When enabled, if you add a task using the Add New Task pop-up window, then today date will be added as Due date, if not Due date is entered."
+				"When enabled, if you add a task using the Add New Task pop-up window, then today's date will be added as Due date, if the value is not entered."
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddDue).onChange(async (value) => {
 					this.globalSettings!.autoAddDue = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
+		new Setting(contentEl)
+			.setName("Auto Scan the Vault on Obsidian Startup")
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					"<p>Only use this feature if your Vault is small and have small files. You dont have to user this feature, as your tasks will be auto scanned..</p>" +
+						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
+					this.globalSettings!.scanVaultAtStartup = value;
 					await this.saveSettings();
 				})
 			);
