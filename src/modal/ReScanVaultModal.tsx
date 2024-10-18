@@ -1,17 +1,15 @@
 // /src/components/ReScanVaultModal.tsx
 
-import { App, Modal, Notice, Plugin } from "obsidian";
-import React, { useEffect, useState } from "react";
+import { App, Component, Modal, Notice } from "obsidian";
+import React, { useEffect, useRef, useState } from "react";
+import { taskItem, tasksJson } from "src/interfaces/TaskItemProps";
 
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/Checker";
-import { tasksJson } from "src/interfaces/TaskItemProps";
-
-interface ReScanVaultModalProps {
-	app: App;
-}
+import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
 	// collectedTasks: any = { Pending: {}, Completed: {} };
@@ -34,10 +32,10 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
-			
+
 			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 			console.log("ReScanVaultModalContent: The value of scanFilters from plugin.setting : ", scanFilters);
-			
+
 			if (scanFilterForFilesNFolders(file, scanFilters)) {
 				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 				await scanningVault.extractTasksFromFile(file, scanningVault.tasks, scanFilters);
@@ -58,47 +56,103 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 		setShowCollectedTasks(!showCollectedTasks);
 	};
 
+	const componentRef = useRef<Component | null>(null);
+	useEffect(() => {
+		// Initialize Obsidian Component on mount
+		componentRef.current = new Component();
+		componentRef.current.load();
+
+		return () => {
+			// Cleanup the component on unmount
+			componentRef.current?.unload();
+		};
+	}, []);
+
+	const taskRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+	useEffect(() => {
+		// Render tasks in collectedTasks when the view is toggled to show
+		if (showCollectedTasks) {
+			Object.keys(collectedTasks.Pending).forEach(filePath => {
+				const tasks = collectedTasks.Pending[filePath];
+				tasks.forEach((task, taskIndex) => {
+					const newTaskContent: taskItem = {
+						...task,
+						title: task.title,
+						body: task.body,
+						due: task.due,
+						tag: task.tag,
+						time: task.time,
+						priority: task.priority,
+					};
+
+					const formatedContent = taskElementsFormatter(plugin, newTaskContent);
+					
+					const uniqueKey = `${filePath}-task-${taskIndex}`;
+					const descElement = taskRendererRef.current[uniqueKey];
+
+					if (descElement) {
+						descElement.innerHTML = '';
+						// Render task description using MarkdownUIRenderer
+						MarkdownUIRenderer.renderTaskDisc(
+							app,
+							formatedContent,
+							descElement,
+							task.filePath,
+							componentRef.current
+						);
+					}
+				});
+			});
+		}
+	}, [showCollectedTasks, collectedTasks]);
+
 	return (
 		<div className="reScanVaultModalHome">
 			<h2 style={{ textAlign: "center" }}>Scan Tasks from the Vault</h2>
-			<p>You dont have to run this often. The plugin has a real-time detection mechanism, which detects the newly added task automatically. The tasks will be updated in the board within 5 minutes. If you want to use the real-time feature, see the respective option in the plugin setting.
-				This is only for the first time after the plugin has been installed. There is also an option in setting if you want to run this functionality on the Obsidian startup, if it slows down the startup time, then you can disable the option.</p>
+			<p>Run this feature only if your tasks has not been properly detected/scanned or the board is acting weired.</p>
+			<p>You dont have to run this feature often, the plugin will auto detect newly added/edited tasks.</p>
+			<p>NOTE : Please check your File Scanning Filters from the plugin settings first, if you are running this function to scan undetected tasks.</p>
 
 			<div className="reScanVaultModalHomeSecondSection" >
 				<div style={{ flexGrow: 1, width: "80%" }}>
-					<progress max="100" value={progress} style={{ width: "100%" }}></progress>
+					<progress max="100" value={progress} style={{ width: "100%", height: '35px' }}></progress>
 				</div>
 				<button className="reScanVaultModalHomeSecondSectionButton" onClick={runScan} disabled={isRunning}>
 					{isRunning ? progress.toFixed(0) : "Run"}
 				</button>
 			</div>
 
-			<div className="reScanVaultModalHomeTerminal"
-			>
-				{terminalOutput.map((line, index) => (
-					<div key={index}>{line}</div>
-				))}
+			<div className="reScanVaultModalHomeThirdSection">
+				<div className={`reScanVaultModalHomeTerminal ${showCollectedTasks ? 'reScanVaultModalHomeTerminalSlideOut' : 'reScanVaultModalHomeTerminalSlideIn'}`}>
+					{terminalOutput.map((line, index) => (
+						<div key={index}>{line}</div>
+					))}
+				</div>
+				<div className={`reScanVaultModalHomeTasksCollected ${showCollectedTasks ? 'slideIn' : 'slideOut'}`}>
+					{Object.keys(collectedTasks.Pending).map((filePath, index) => (
+						<div key={index}>
+							<h3>{filePath}</h3>
+							<div>
+								{collectedTasks.Pending[filePath].map((task: any, taskIndex: number) => {
+									const uniqueKey = `${filePath}-task-${taskIndex}`;
+									return (
+										<div key={taskIndex}>
+											<div
+												ref={(descEl) => (taskRendererRef.current[uniqueKey] = descEl)}
+												id={uniqueKey}
+											/>
+										</div>
+									);
+								})}
+							</div>
+						</div>
+					))}
+				</div>
 			</div>
 
 			<button onClick={toggleView} style={{ marginTop: "20px" }}>
 				{showCollectedTasks ? "Hide Tasks Collected" : "Show Tasks Collected"}
 			</button>
-
-			{showCollectedTasks && (
-				<div className="reScanVaultModalHomeTasksCollected"
-				>
-					{Object.keys(collectedTasks.Pending).map((filePath, index) => (
-						<div key={index}>
-							<h4>{filePath}</h4>
-							<ul>
-								{collectedTasks.Pending[filePath].map((task: any, taskIndex: number) => (
-									<li key={taskIndex}>{task.body}</li>
-								))}
-							</ul>
-						</div>
-					))}
-				</div>
-			)}
 		</div>
 	);
 }
