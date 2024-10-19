@@ -279,11 +279,17 @@ If your plugin does not need CSS, delete this file.
 	background: var(--background-modifier-box-shadow);
 }
 
+.taskItemTags {
+	display: flex;
+	gap: 2px;
+	flex-wrap: wrap;
+}
+
 .taskItemTag {
-	background-color: var(--tag-background);
-	border: var(--tag-border-width) solid var(--tag-border-color);
+	/* background-color: var(--tag-background); */
+	/* border: var(--tag-border-width) solid var(--tag-border-color); */
 	border-radius: var(--tag-radius);
-	color: var(--tag-color);
+	/* color: var(--tag-color); */
 	font-size: var(--tag-size);
 	font-weight: var(--tag-weight);
 	text-decoration: var(--tag-decoration);
