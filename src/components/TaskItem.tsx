@@ -135,7 +135,26 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 		}
 	};
 
-	// Render Header based on the settings
+	// Helper function to convert a hex color to an RGBA string with the specified opacity
+	const hexToRgba = (hex: string, opacity: number): string => {
+		let r = 0, g = 0, b = 0;
+
+		if (hex.length === 4) {
+			r = parseInt(hex[1] + hex[1], 16);
+			g = parseInt(hex[2] + hex[2], 16);
+			b = parseInt(hex[3] + hex[3], 16);
+		} else if (hex.length === 7 || hex.length === 9) {
+			r = parseInt(hex[1] + hex[2], 16);
+			g = parseInt(hex[3] + hex[4], 16);
+			b = parseInt(hex[5] + hex[6], 16);
+		}
+
+		return `rgba(${r},${g},${b},${opacity})`;
+	};
+
+	// Default color when tag isn't found in the settings
+	const defaultTagColor = 'var(--tag-color)';
+
 	const renderHeader = () => {
 		try {
 			if (plugin.settings.data.globalSettings.showHeader) {
@@ -144,17 +163,47 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 						<div className="taskItemHeader">
 							<div className="taskItemHeaderLeft">
 								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
-								<div className="taskItemTag">{task.tag}</div>
+
+								{/* Render tags individually */}
+								<div className="taskItemTags">
+									{task.tags.map((tag: string) => {
+										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
+										const tagColor = customTagColor || defaultTagColor;
+										console.log("The color of the tag ", tag, " is :",tagColor);
+										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
+										console.log("The background color received :", backgroundColor);
+										return (
+											<div
+												key={tag}
+												className="taskItemTag"
+												style={{
+													color: tagColor,             // Font color
+													border: `1px solid ${tagColor}`, // Border color
+													backgroundColor: backgroundColor,             // Background color
+													borderRadius: '1em',
+													padding: '2px 8px',
+													marginRight: '2px',          // Space between tags
+													display: 'inline-block',     // Ensure inline display for wrapping
+													whiteSpace: 'nowrap'         // Prevent text overflow
+												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+								</div>
 							</div>
+
+							{/* Drag Handle */}
 							<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
 						</div>
 					</>
 				);
 			} else {
-				return null
+				return null;
 			}
 		} catch (error) {
-			console.log("Getting error while trying to render Header : ", error);
+			console.log("Getting error while trying to render Header: ", error);
 			return null;
 		}
 	};
