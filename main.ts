@@ -213,6 +213,22 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
+		const closeButton = document.querySelector(
+			".titlebar-button.mod-close"
+		);
+		if (closeButton) {
+			closeButton.addEventListener("mouseenter", () => {
+				console.log(
+					"User hovered over the close button. Storing SessionStorage data to Disk."
+				);
+				onUnloadSave(this.plugin);
+			});
+			// closeButton.addEventListener("mouseleave", () => {
+			// 	console.log("User stopped hovering over the close button.");
+			// 	// Your custom code for leaving the hover event
+			// });
+		}
+
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
 		this.settings.data.globalSettings.scanVaultAtStartup
