@@ -49,7 +49,7 @@ export const openAddNewTaskModal = (
 			addTaskInFile(app, plugin, newTask);
 			if (
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
-				scanFilterForTags(newTask.tag, scanFilters)
+				scanFilterForTags(newTask.tags, scanFilters)
 			) {
 				addTaskInJson(plugin, newTask);
 			}

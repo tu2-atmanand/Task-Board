@@ -80,7 +80,7 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 						title: task.title,
 						body: task.body,
 						due: task.due,
-						tag: task.tag,
+						tags: task.tags,
 						time: task.time,
 						priority: task.priority,
 					};

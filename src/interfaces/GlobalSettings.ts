@@ -29,8 +29,9 @@ export interface globalSettingsData {
 	realTimeScanning: boolean;
 	columnWidth: string;
 	showHeader: boolean;
-	showFooter:boolean;
-	showVerticalScroll:boolean;
+	showFooter: boolean;
+	showVerticalScroll: boolean;
+	tagColors: { [tagName: string]: string };
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -76,6 +77,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			columnWidth: "300px",
 			showHeader: true,
 			showFooter: true,
+			showVerticalScroll: false,
+			tagColors: {},
 		},
 	},
 };

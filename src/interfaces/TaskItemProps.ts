@@ -16,7 +16,7 @@ export interface taskItem {
 	title: string;
 	body: string[];
 	due: string;
-	tag: string;
+	tags: string[];
 	time: string;
 	priority: number;
 	completed?: string;

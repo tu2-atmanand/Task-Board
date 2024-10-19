@@ -15,7 +15,7 @@ import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement, task?: taskItem, taskExists?: boolean, filePath: string; onSave: (updatedTask: taskItem) => void; onClose: () => void }> = ({ app, plugin, root, task = {}, taskExists, filePath, onSave, onClose }) => {
 	const [title, setTitle] = useState(task.title || '');
 	const [due, setDue] = useState(task.due || '');
-	const [tag, setTag] = useState(task.tag || '');
+	const [tags, setTag] = useState<string[]>(task.tags || []);
 	const [startTime, setStartTime] = useState(task.time ? task.time.split(' - ')[0] : '');
 	const [endTime, setEndTime] = useState(task.time ? task.time.split(' - ')[1] || '' : '');
 	const [newTime, setNewTime] = useState(task.time || '');
@@ -36,6 +36,14 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 			setNewTime(newTime);
 		}
 	}, [startTime, endTime]);
+
+
+	// Function to handle tag input and split by space or comma
+	const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const input = e.target.value;
+		const parsedTags = input.split(/[\s,]+/).filter(tag => tag.startsWith("#")); // Split by space or comma, only keep valid tags
+		setTag(parsedTags);
+	};
 
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
@@ -73,7 +81,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 				...subTasks,
 			],
 			due,
-			tag,
+			tags,
 			time: newTime,
 			priority,
 			filePath: filePath,
@@ -92,7 +100,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 			...subTasks,
 		],
 		due: due,
-		tag: tag,
+		tags: tags,
 		time: newTime,
 		priority: priority,
 		filePath: '',
@@ -250,7 +258,12 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 					{/* Task Tag */}
 					<div className="EditTaskModalHomeField">
 						<label className="EditTaskModalHomeFieldTitle">Task Tag</label>
-						<input className="EditTaskModalHome-tagValue" type="text" value={tag} onChange={(e) => setTag(`#${e.target.value.replace('#', '').trim()}`)} />
+						<input
+							className="EditTaskModalHome-tagValue"
+							type="text"
+							value={tags.join(" ")}  // Show the tags as space-separated in the input
+							onChange={handleTagInput}  // Call handleTagInput on change
+						/>
 					</div>
 				</div>
 			</div>
@@ -306,134 +319,3 @@ export class AddOrEditTaskModal extends Modal {
 		contentEl.empty();
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // /src/components/EditTaskModal.tsx  --- V1 - WOrking
-
-// import { App, Modal } from "obsidian";
-// import React, { useState } from "react";
-
-// import ReactDOM from "react-dom/client";
-
-// // Functional React component for the modal content
-// const EditTaskContent: React.FC<{ task: any; onSave: (updatedTask: any) => void; onClose: () => void }> = ({ task, onSave, onClose }) => {
-// 	const [body, setBody] = useState(task.body);
-// 	const [due, setDue] = useState(task.due);
-// 	const [tag, setTag] = useState(task.tag);
-// 	const [time, setTime] = useState(task.time);
-// 	const [priority, setPriority] = useState(task.priority);
-
-// 	const handleSave = () => {
-// 		const updatedTask = {
-// 			...task,
-// 			body,
-// 			due,
-// 			tag,
-// 			time,
-// 			priority,
-// 		};
-// 		onSave(updatedTask);
-// 		onClose();
-// 	};
-
-// 	return (
-// 		<div className="EditTaskModalHome">
-// 			<div className="EditTaskModalHome-title">Edit Task</div>
-// 			<textarea className="EditTaskModalHome-taskBody" value={body} onChange={(e) => setBody(e.target.value)} />
-// 			<div className="EditTaskModalHomeTime">
-// 				<h3>Task Due Time : </h3> <div>⏰ [{time}]</div>
-// 				<div>Start Time : <input className="EditTaskModalHomeTimeInput" type="time" value={time} onChange={(e) => setTime(e.target.value)} /></div>
-// 				<div>End Time : <input className="EditTaskModalHomeTimeInput" type="time" value={time} onChange={(e) => setTime(e.target.value)} /></div>
-// 			</div>
-// 			<table>
-// 				<tbody>
-// 					<tr>
-// 						<td>
-// 							<div className="EditTaskModalHomeFieldTitle">Task Due Date : </div>
-// 						</td>
-// 						<td className="EditTaskModalHome-tableValues">
-// 							<input className="EditTaskModalHome-dueValue" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
-// 						</td>
-// 						<td>
-// 							📅{due}
-// 						</td>
-// 					</tr>
-// 					<tr>
-// 						<td>
-// 							<div className="EditTaskModalHomeFieldTitle">Task Priority : </div>
-// 						</td>
-// 						<td className="EditTaskModalHome-tableValues">
-// 							<input className="EditTaskModalHome-priorityValue" type="dropdown" value={tag} onChange={(e) => setTag(e.target.value)} />
-// 						</td>
-// 						<td>
-// 							{tag}
-// 						</td>
-// 					</tr>
-// 					<tr>
-// 						<td>
-// 							<div className="EditTaskModalHomeFieldTitle">Task Tag : </div>
-// 						</td>
-// 						<td className="EditTaskModalHome-tableValues">
-// 							<input className="EditTaskModalHome-tagValue" type="text" value={tag} onChange={(e) => setTag(e.target.value)} />
-// 						</td>
-// 						<td>
-// 							{tag}
-// 						</td>
-// 					</tr>
-// 				</tbody>
-// 			</table>
-// 			<h6>Preview</h6>
-// 			<div className="previewBox">
-// 				- [ ] {body} | 📅{due} {tag}
-// 			</div>
-// 			<button className="EditTaskModalHome-saveBtn" onClick={handleSave}>Save</button>
-// 		</div>
-// 	);
-// };
-
-// // Class component extending Modal for Obsidian
-// export class EditTaskModal extends Modal {
-// 	task: any;
-// 	onSave: (updatedTask: any) => void;
-
-// 	constructor(app: App, task: any, onSave: (updatedTask: any) => void) {
-// 		super(app);
-// 		this.task = task;
-// 		this.onSave = onSave;
-// 	}
-
-// 	onOpen() {
-// 		const { contentEl } = this;
-// 		contentEl.empty();
-
-// 		const container = document.createElement("div");
-// 		contentEl.appendChild(container);
-
-// 		const root = ReactDOM.createRoot(this.contentEl);
-
-// 		root.render(<EditTaskContent
-// 			task={this.task}
-// 			onSave={this.onSave}
-// 			onClose={() => this.close()}
-// 		/>)
-// 	}
-
-// 	onClose() {
-// 		const { contentEl } = this;
-// 		contentEl.empty();
-// 	}
-// }

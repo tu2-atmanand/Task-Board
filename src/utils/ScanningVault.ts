@@ -65,9 +65,13 @@ export class ScanningVault {
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
-				const tag = this.extractTag(line);
+				const tags = this.extractTags(line);
+				console.log(
+					"extractTasksFromFile : Following thing received for tags :",
+					tags
+				);
 
-				if (scanFilterForTags(tag, scanFilters)) {
+				if (scanFilterForTags(tags, scanFilters)) {
 					this.TaskDetected = true;
 					const isCompleted = line.startsWith("- [x]");
 					const title = this.extractTitle(line);
@@ -83,7 +87,7 @@ export class ScanningVault {
 						body,
 						time,
 						due,
-						tag,
+						tags,
 						priority,
 						filePath: fileNameWithPath,
 						completed: completionDate,
@@ -146,9 +150,13 @@ export class ScanningVault {
 			for (let i = 0; i < lines.length; i++) {
 				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
-					const tag = this.extractTag(line);
+					const tags = this.extractTags(line);
+					console.log(
+						"updateTasksFromFiles : Following thing received for tags :",
+						tags
+					);
 
-					if (scanFilterForTags(tag, scanFilters)) {
+					if (scanFilterForTags(tags, scanFilters)) {
 						this.TaskDetected = true;
 						const isCompleted = line.startsWith("- [x]");
 						const title = this.extractTitle(line);
@@ -201,7 +209,7 @@ export class ScanningVault {
 							body,
 							time,
 							due,
-							tag,
+							tags,
 							priority,
 							filePath: fileNameWithPath,
 							completed: completionDate,
@@ -261,11 +269,11 @@ export class ScanningVault {
 	// Save tasks to JSON file
 	async saveTasksToFile() {
 		await writeTasksJsonToSS(this.plugin, this.tasks);
-		await writeTasksJsonToDisk(this.plugin); // Since this updateTasksFromFiles will be run only after 5 min, so its fine to write the data to disk.
-
+		
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (this.TaskDetected) {
 			// new Notice("Tasks scanned from the modified files.");
+			await writeTasksJsonToDisk(this.plugin); // DEV : Remove this, as for RealTimeScanning, this is too many write operations to disk.
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
@@ -287,7 +295,8 @@ export class ScanningVault {
 				break;
 			}
 
-			if (line.startsWith("\t") || line.startsWith("    ")) { //TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
+			if (line.startsWith("\t") || line.startsWith("    ")) {
+				//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
 				// If the line has one level of indentation, consider it part of the body
 				bodyLines.push(line);
 			} else {
@@ -365,20 +374,23 @@ export class ScanningVault {
 
 		// Execute the regex to find the emoji in the text
 		const match = text.match(emojiPattern);
-		
+
 		// If a match is found, map it back to the corresponding priority number
 		if (match) {
-			const emojiFound = match[0].trim().replace('|', '').trim();
-			console.log(
-				"Following is the match I found for the Priority :",
-				emojiFound
-			);
+			const emojiFound = match[0].trim().replace("|", "").trim();
+			// console.log(
+			// 	"Following is the match I found for the Priority :",
+			// 	emojiFound
+			// );
 
 			const priorityMatch = Object.entries(priorityEmojis).find(
 				([, emoji]) => emoji === emojiFound
 			);
 
-			console.log("The match i found for this emoji from the mapping :", priorityMatch);
+			// console.log(
+			// 	"The match i found for this emoji from the mapping :",
+			// 	priorityMatch
+			// );
 			return priorityMatch?.[0] || "0";
 		}
 
@@ -402,9 +414,10 @@ export class ScanningVault {
 	// }
 
 	// Extract tag from task title
-	extractTag(text: string): string {
-		const match = text.match(/#(\w+)/);
-		return match ? `#${match[1]}` : "";
+	extractTags(text: string): string[] {
+		const matches = text.match(/\s+#\S+/g);
+		console.log("extractTags : Following tags extracted :", matches);
+		return matches ? matches.map((tag) => tag.trim()) : [];
 	}
 
 	// extractCompletionDate(text: string): string {

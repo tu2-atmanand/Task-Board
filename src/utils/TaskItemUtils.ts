@@ -67,11 +67,13 @@ export const taskElementsFormatter = (
 	if (dayPlannerPlugin) {
 		formattedTask = `${checkBoxStat} ${
 			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${updatedTask.title} |${dueDateWithFormat} ${priorityWithEmo} ${
-			updatedTask.tag
-		}${completedWitFormat}`;
+		}${
+			updatedTask.title
+		} |${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(" ")}${completedWitFormat}`;
 	} else {
-		formattedTask = `${checkBoxStat} ${updatedTask.title} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWitFormat}`;
+		formattedTask = `${checkBoxStat} ${
+			updatedTask.title
+		} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(" ")}${completedWitFormat}`;
 	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
@@ -97,7 +99,10 @@ export const taskElementsFormatter = (
 		bodyLines.trim() ? `\n${bodyLines}` : ""
 	}`;
 
-	console.log("taskElementsFormatter : To render in the HTML :\n",completeTask);
+	console.log(
+		"taskElementsFormatter : To render in the HTML :\n",
+		completeTask
+	);
 
 	return completeTask;
 };
@@ -224,7 +229,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 		}
 
 		// Write the updated data back to the JSON file
-		// fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
+		// fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 4));
 		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error deleting task from tasks.json:", error);
