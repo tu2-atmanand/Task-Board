@@ -149,9 +149,12 @@ export default class TaskBoard extends Plugin {
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				this.editorModified = true;
-				if(file instanceof TFile) {
+				if (file instanceof TFile) {
 					this.currentModifiedFile = file;
-					console.log("Modified file is : ", this.currentModifiedFile);
+					console.log(
+						"Modified file is : ",
+						this.currentModifiedFile
+					);
 				}
 			})
 		);
@@ -176,12 +179,10 @@ export default class TaskBoard extends Plugin {
 				}
 			)
 		);
-		window.addEventListener("blur", () => {
-			console.log(
-				"User switched away from Obsidian or Obsidian lost focus."
-			);
+		this.registerDomEvent(window, "blur", () => {
 			this.onFileModifiedAndLostFocus();
 		});
+
 		// window.addEventListener("focus", () => {
 		// 	console.log(
 		// 		"User switched back to Obsidian or Obsidian gained focus."
@@ -216,16 +217,12 @@ export default class TaskBoard extends Plugin {
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
-			closeButton.addEventListener("mouseenter", () => {
+			this.registerDomEvent(window, "mouseenter", (closeButton) => {
 				console.log(
 					"User hovered over the close button. Storing SessionStorage data to Disk."
 				);
 				onUnloadSave(this.plugin);
 			});
-			// closeButton.addEventListener("mouseleave", () => {
-			// 	console.log("User stopped hovering over the close button.");
-			// 	// Your custom code for leaving the hover event
-			// });
 		}
 
 		// Run scanVaultForTasks if scanVaultAtStartup is true
