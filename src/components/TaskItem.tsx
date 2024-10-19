@@ -169,9 +169,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 									{task.tags.map((tag: string) => {
 										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
 										const tagColor = customTagColor || defaultTagColor;
-										console.log("The color of the tag ", tag, " is :",tagColor);
+										// console.log("The color of the tag ", tag, " is :",tagColor);
 										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
-										console.log("The background color received :", backgroundColor);
+										// console.log("The background color received :", backgroundColor);
 										return (
 											<div
 												key={tag}

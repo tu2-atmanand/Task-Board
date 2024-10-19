@@ -69,7 +69,9 @@ export const taskElementsFormatter = (
 			updatedTask.time ? `${updatedTask.time} ` : ""
 		}${
 			updatedTask.title
-		} |${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(" ")}${completedWitFormat}`;
+		} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
+			" "
+		)}${completedWitFormat}`;
 	} else {
 		formattedTask = `${checkBoxStat} ${
 			updatedTask.title
