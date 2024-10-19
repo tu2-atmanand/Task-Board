@@ -387,6 +387,12 @@ If your plugin does not need CSS, delete this file.
 	box-sizing: border-box;
 }
 
+.EditTaskModalHomeModalTitle {
+	font-size: 1.5em;
+	font-weight: bold;
+	text-align: center;
+}
+
 .EditTaskModalHomeBody {
 	display: flex;
 	flex-direction: row;
@@ -396,24 +402,23 @@ If your plugin does not need CSS, delete this file.
 .EditTaskModalHomeLeftSec {
 	display: flex;
 	flex-direction: column;
-	gap: 1em;
-	max-width: 50vw
+	width: 40vw;
+	max-width: 40vw
 }
 
-.EditTaskModalHome-title {
-	font-size: 1.5rem;
-	font-weight: bold;
+
+.EditTaskModalHomeFieldTitle {
+	font-size: 1em;
+	/* text-align: center; */
+	font-weight: 700;
+	margin-bottom: 5px;
+}
+
+.EditTaskModalHomeFieldTitleInput {
 	margin-bottom: 15px;
-	text-align: center;
 }
 
-.EditTaskModalBodyDescription {
-	height: 100px;
-	padding: 10px;
-	font-size: 1rem;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-}
+.EditTaskModalHomeFieldTitleInput {}
 
 .EditTaskModalsubTasksContainer {
 	display: flex;
@@ -431,40 +436,48 @@ If your plugin does not need CSS, delete this file.
 	width: 100%;
 }
 
-.EditTaskModalHomeRightSec {
+.EditTaskModalTabHeader {
 	display: flex;
-	flex-direction: column;
-	border: var(--border-width) solid olive;
-	border-radius: 5px;
-	padding: 0.5em;
-	min-width: 12vw;
+	gap: 5px;
+	width: fit-content;
+	flex-direction: row;
+	/* background: var(--background-modifier-message); */
 }
 
-.EditTaskModalHomeField {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	margin-bottom: 15px;
+.EditTaskModalTabHeaderBtn {
+	padding-block: 5px;
+	padding-inline: 15px;
 }
 
-.EditTaskModalHomeTimeInput,
-.EditTaskModalHomeDueInput {
-	padding: 4px;
-	font-size: 0.8rem;
-	border: 1px solid #ccc;
-	border-radius: 4px;
+.EditTaskModalTabHeaderBtn-active {
+	padding-block: 5px;
+	padding-inline: 15px;
+	font-weight: 500;
+	border-radius: 10px 10px 0 0;
+	background: var(--background-modifier-message);
 }
 
-.EditTaskModalHomeFieldTitle {
-	font-weight: bold;
-	margin-bottom: 5px;
+.EditTaskModalTabContent {
+	transition: opacity 0.3s ease-in-out;
+}
+
+
+.EditTaskModalTabContent.show {
+	opacity: 1;
+}
+
+.EditTaskModalTabContent.hide {
+	opacity: 0;
 }
 
 .EditTaskModalHomePreviewHeader {
 	display: flex;
+	padding: 5px;
 	flex-direction: row;
+	/* border-radius: 10px 0 5px 0; */
 	justify-content: space-between;
-	background: black;
+	background: var(--background-modifier-message);
+	align-items: center;
 }
 
 .EditTaskModalHomePreview ul {
@@ -518,6 +531,46 @@ If your plugin does not need CSS, delete this file.
 
 .EditTaskModalHomeOpenFileBtn:hover {
 	background-color: #0056b3;
+}
+
+.EditTaskModalBodyDescription {
+	height: 250px;
+	padding: 10px;
+	font-size: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.EditTaskModalHomeRightSec {
+	display: flex;
+	flex-direction: column;
+	border: var(--border-width) solid olive;
+	border-radius: 5px;
+	padding: 0.5em;
+	min-width: 8vw;
+	max-width: 12vw;
+}
+
+.EditTaskModalHomeField {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	margin-bottom: 15px;
+}
+
+.EditTaskModalHomeTimeInput,
+.EditTaskModalHomeDueInput {
+	padding: 4px;
+	font-size: 0.8rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.EditTaskModalHome-taskItemTagsPreview {
+	display: flex;
+	gap: 2px;
+	margin-block: 5px;
+	flex-wrap: wrap;
 }
 
 .EditTaskModalHomeSaveBtn {

@@ -1,30 +1,52 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
 import { App, Component, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
+import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM, { Root } from "react-dom/client";
+import { extractBody, extractCompletionDate, extractDueDate, extractPriority, extractTags, extractTime, extractTitle } from "src/utils/ScanningVault";
 import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 
-import { FaTrash } from 'react-icons/fa';
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import TaskBoard from "main";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
+const taskItemEmpty = {
+	id: 0,
+	title: "",
+	body: [],
+	due: "",
+	tags: [],
+	time: "",
+	priority: 0,
+	completed: "",
+	filePath: "", // Include filePath since it's in the tasks
+};
+
 // Functional React component for the modal content
-const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement, task?: taskItem, taskExists?: boolean, filePath: string; onSave: (updatedTask: taskItem) => void; onClose: () => void }> = ({ app, plugin, root, task = {}, taskExists, filePath, onSave, onClose }) => {
+const EditTaskContent: React.FC<{
+	app: App,
+	plugin: TaskBoard,
+	root: HTMLElement,
+	task?: taskItem,
+	taskExists?: boolean,
+	filePath: string;
+	onSave: (updatedTask: taskItem) => void;
+	onClose: () => void;
+}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose }) => {
 	const [title, setTitle] = useState(task.title || '');
 	const [due, setDue] = useState(task.due || '');
-	const [tags, setTag] = useState<string[]>(task.tags || []);
-	const [startTime, setStartTime] = useState(task.time ? task.time.split(' - ')[0] : '');
-	const [endTime, setEndTime] = useState(task.time ? task.time.split(' - ')[1] || '' : '');
+	const [tags, setTags] = useState<string[]>(task.tags || []);
+	const [startTime, setStartTime] = useState(task.time?.split(' - ')[0] || '');
+	const [endTime, setEndTime] = useState(task.time?.split(' - ')[1] || '');
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
-	const [bodyContent, setBodyContent] = useState(task.body ? task.body.filter(line => !line.startsWith('- [ ]') && !line.startsWith('- [x]')).join('\n') : '');
+	const [bodyContent, setBodyContent] = useState(task.body?.filter(line => !line.trim().startsWith('- [ ]')).join('\n') || '');
 	const [subTasks, setSubTasks] = useState(
-		task.body ? task.body.filter(line => line.startsWith('- [ ]') || line.startsWith('- [x]')) : []
+		task.body?.filter(line => line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]')) || []
 	);
-	const fileContentRef = useRef<HTMLDivElement>(null);
+	const [taskContent, setTaskContent] = useState<string>('');
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
@@ -39,11 +61,11 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 
 
 	// Function to handle tag input and split by space or comma
-	const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const input = e.target.value;
-		const parsedTags = input.split(/[\s,]+/).filter(tag => tag.startsWith("#")); // Split by space or comma, only keep valid tags
-		setTag(parsedTags);
-	};
+	// const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const input = e.target.value;
+	// 	const parsedTags = input.split(/[\s,]+/).filter(tag => tag.startsWith("#")); // Split by space or comma, only keep valid tags
+	// 	setTags(parsedTags);
+	// };
 
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
@@ -54,21 +76,38 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 		setSubTasks(updatedSubTasks);
 	};
 
+	// Function to remove a subtask
 	const removeSubTask = (index: number) => {
-		const updatedSubTasks = subTasks.filter((_:string, idx:number) => idx !== index);
+		const updatedSubTasks = subTasks.filter((_, idx) => idx !== index);
 		setSubTasks(updatedSubTasks);
 	};
 
-	// Function to add a new subtask
+	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
-		setSubTasks([...subTasks, '- [ ] ']);
+		setSubTasks([...subTasks, '']);
 	};
 
-	// Function to update subtask content
+	// Update subtask content
 	const updateSubTaskContent = (index: number, value: string) => {
 		const updatedSubTasks = [...subTasks];
-		updatedSubTasks[index] = updatedSubTasks[index].replace(/- \[.\] .*/, `- [ ] ${value}`);
+		updatedSubTasks[index] = `- [ ] ${value}`;
 		setSubTasks(updatedSubTasks);
+	};
+
+	// Tags input
+	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter') {
+			const input = e.currentTarget.value.trim();
+			if (!tags.includes(input)) {
+				setTags(prevTags => [...prevTags, input.startsWith("#") ? input : `#${input}`]);
+				e.currentTarget.value = '';
+			}
+		}
+	};
+
+	// Function to remove a tag
+	const removeTag = (tagToRemove: string) => {
+		setTags(prevTags => prevTags.filter(tag => tag !== tagToRemove));
 	};
 
 	// Function to handle saving the updated task
@@ -91,8 +130,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 	};
 
 
-	let formatedContent = '';
-	const newTaskContent: taskItem = {
+	const modifiedTask: taskItem = {
 		...task,
 		title: title,
 		body: [
@@ -103,7 +141,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 		tags: tags,
 		time: newTime,
 		priority: priority,
-		filePath: '',
+		filePath: filePath,
 	};
 	// Reference to the HTML element where markdown will be rendered
 
@@ -121,7 +159,9 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		formatedContent = taskElementsFormatter(plugin, newTaskContent);
+		// setUpdatedTask(modifiedTask);
+		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
+		setTaskContent(formatedContent);
 		// console.log("Content received from the formatter function :\n", formatedContent);
 		if (previewContainerRef.current) {
 			// Clear previous content before rendering new markdown
@@ -137,7 +177,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 
 			hookMarkdownLinkMouseEventHandlers(app, previewContainerRef.current, filePath, filePath);
 		}
-	}, [newTaskContent]); // Re-render when newTaskContent changes
+	}, [modifiedTask]); // Re-render when modifiedTask changes
 
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
@@ -162,23 +202,64 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 		};
 	}, []);
 
+	// Tab Switching
+	const [activeTab, setActiveTab] = useState<'preview' | 'editor'>('preview');
+	const handleTabSwitch = (tab: 'preview' | 'editor') => setActiveTab(tab);
+
+	// Helper function to convert a hex color to an RGBA string with the specified opacity
+	const hexToRgba = (hex: string, opacity: number): string => {
+		let r = 0, g = 0, b = 0;
+
+		if (hex.length === 4) {
+			r = parseInt(hex[1] + hex[1], 16);
+			g = parseInt(hex[2] + hex[2], 16);
+			b = parseInt(hex[3] + hex[3], 16);
+		} else if (hex.length === 7 || hex.length === 9) {
+			r = parseInt(hex[1] + hex[2], 16);
+			g = parseInt(hex[3] + hex[4], 16);
+			b = parseInt(hex[5] + hex[6], 16);
+		}
+
+		return `rgba(${r},${g},${b},${opacity})`;
+	};
+	const defaultTagColor = 'var(--tag-color)';
+
+	// Function to parse the textarea content back to task properties
+	const parseTaskContent = (content: string) => {
+		// Simulate extracting task properties like due, priority, etc.
+		const updatedTask = {
+			...task,
+			title: extractTitle(content),
+			body: extractBody(content.split("\n"), 1),
+			due: extractDueDate(content),
+			tags: extractTags(content),
+			time: extractTime(content),
+			priority: extractPriority(content),
+			completed: extractCompletionDate(content),
+			filePath: task.filePath,
+		};
+		return updatedTask;
+	};
+
+	// Function to handle textarea changes
+	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setBodyContent(e.target.value);
+		// const updatedContent = e.target.value;
+		// setTaskContent(updatedContent);
+		// const extractedTaskFromTextBox = parseTaskContent(updatedContent);
+		// setUpdatedTask(extractedTaskFromTextBox);
+	};
+
 	return (
 		<div className="EditTaskModalHome">
-			{taskExists ?
-				<div className="EditTaskModalHome-title">Edit Task</div> : <div className="EditTaskModalHome-title">Add New Task</div>
-			}
+			<div className="EditTaskModalHomeTitle">
+				{taskExists ? 'Edit Task' : 'Add New Task'}
+			</div>
 			<div className="EditTaskModalHomeBody">
 				<div className="EditTaskModalHomeLeftSec">
 					<label className="EditTaskModalHomeFieldTitle">Task Title</label>
-					<input type="text" className="EditTaskModalHome-taskBody" value={title} onChange={(e) => setTitle(e.target.value)} />
-					{/* Body Content */}
-					<label className="EditTaskModalHomeFieldTitle">Task Description</label>
-					<textarea
-						className="EditTaskModalBodyDescription"
-						value={bodyContent}
-						onChange={(e) => setBodyContent(e.target.value)}
-						placeholder="Body content"
-					/>
+					<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
+
 					{/* Subtasks */}
 					<label className="EditTaskModalHomeFieldTitle">Sub Tasks</label>
 					<div className="EditTaskModalsubTasksContainer">
@@ -192,7 +273,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 								<input
 									className="EditTaskModalsubTaskItemInput"
 									type="text"
-									value={subTask.replace(/- \[.\] /, '')}
+									value={subTask.trim().replace(/- \[.\] /, '')}
 									onChange={(e) => updateSubTaskContent(index, e.target.value)}
 								/>
 								<FaTrash
@@ -208,25 +289,45 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 						))}
 						<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>Add new Sub-Task</button>
 					</div>
-					{/* Live File Preview */}
-					<div className="EditTaskModalHomePreview">
-						<h3 style={{ margin: 0 }}>File Preview</h3>
-						<div className="EditTaskModalHomePreviewContainer" ref={fileContentRef}>
-							<div className="EditTaskModalHomePreviewHeader">
-								<h6>Parent File Location : {filePath}</h6>
-								<button className="EditTaskModalHomeOpenFileBtn"
-									id="EditTaskModalHomeOpenFileBtn"
-									// onMouseEnter={handleMouseEnter}
-									// onMouseOver={handleMouseEnter}
-									// onClick={() => app.workspace.openLinkText(task.filePath, "")}
-									onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
-								>Open File</button>
-							</div>
-							<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
-								{/* The markdown content will be rendered here */}
+
+					<div className="EditTaskModalTabHeader">
+						<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>Preview</div>
+						<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>Editor</div>
+					</div>
+
+					{/* Conditional rendering based on active tab */}
+					<div className={`EditTaskModalTabContent ${activeTab === 'preview' ? 'show' : 'hide'}`}>
+						{/* Preview Section */}
+						<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
+							<div className="EditTaskModalHomePreviewContainer">
+								<div className="EditTaskModalHomePreviewHeader">
+									<div style={{ fontWeight: '400' }}>{filePath}</div>
+									<button className="EditTaskModalHomeOpenFileBtn"
+										id="EditTaskModalHomeOpenFileBtn"
+										// onMouseEnter={handleMouseEnter}
+										// onMouseOver={handleMouseEnter}
+										// onClick={() => app.workspace.openLinkText(task.filePath, "")}
+										onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+									>Open File</button>
+								</div>
+								<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
+									{/* The markdown content will be rendered here */}
+								</div>
 							</div>
 						</div>
 					</div>
+					<div className={`EditTaskModalTabContent ${activeTab === 'editor' ? 'show' : 'hide'}`}>
+						<div className="EditTaskModalHomePreviewHeader">Directly Edit any value or add more sub tasks and description for this task.</div>
+						{/* Editor Section */}
+						<textarea
+							className="EditTaskModalBodyDescription"
+							value={bodyContent}
+							onChange={handleTextareaChange}
+							placeholder="Body content"
+							style={{ display: activeTab === 'editor' ? 'block' : 'none', width: '100%' }}
+						/>
+					</div>
+
 				</div>
 				<div className="EditTaskModalHomeRightSec">
 					{/* Task Time Input */}
@@ -248,7 +349,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 					{/* Task Priority */}
 					<div className="EditTaskModalHomeField">
 						<label className="EditTaskModalHomeFieldTitle">Task Priority</label>
-						<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => setPriority(e.target.value)}>
+						<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => setPriority(parseInt(e.target.value))}>
 							{priorityOptions.map((option) => (
 								<option key={option.value} value={option.value}>{option.text}</option>
 							))}
@@ -261,9 +362,39 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 						<input
 							className="EditTaskModalHome-tagValue"
 							type="text"
-							value={tags.join(" ")}  // Show the tags as space-separated in the input
-							onChange={handleTagInput}  // Call handleTagInput on change
+							onKeyDown={handleTagInput}  // Call handleTagInput on change
 						/>
+						{/* Render tags with cross icon */}
+						<div className="EditTaskModalHome-taskItemTags">
+							{tags.map((tag: string) => {
+								const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
+								const tagColor = customTagColor || defaultTagColor;
+								const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`;
+								return (
+									<div
+										key={tag}
+										className="EditTaskModalHome-taskItemTagsPreview"
+										style={{
+											color: tagColor,
+											border: `1px solid ${tagColor}`,
+											backgroundColor: backgroundColor,
+											borderRadius: '1em',
+											padding: '2px 8px',
+											marginRight: '2px',
+											display: 'inline-block',
+											whiteSpace: 'nowrap',
+											fontSize: 'small'
+										}}
+									>
+										{tag}
+										<FaTimes
+											style={{ marginLeft: '8px', cursor: 'pointer' }}
+											onClick={() => removeTag(tag)}
+										/>
+									</div>
+								);
+							})}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -276,7 +407,7 @@ const EditTaskContent: React.FC<{ app: App, plugin: TaskBoard, root: HTMLElement
 export class AddOrEditTaskModal extends Modal {
 	app: App;
 	plugin: TaskBoard;
-	task: taskItem;
+	task: taskItem = taskItemEmpty;
 	filePath: string;
 	taskExist: boolean = false;
 	onSave: (updatedTask: taskItem) => void;
