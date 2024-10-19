@@ -3,6 +3,7 @@
 import {
 	App,
 	Editor,
+	MarkdownFileInfo,
 	MarkdownView,
 	Modal,
 	Notice,
@@ -11,7 +12,9 @@ import {
 	PluginManifest,
 	PluginSettingTab,
 	Setting,
+	TAbstractFile,
 	TFile,
+	WorkspaceLeaf,
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
@@ -43,6 +46,7 @@ export default class TaskBoard extends Plugin {
 	realTimeScanning: RealTimeScanning;
 	fileStack: string[] = [];
 	scanTimer: number;
+	editorModified: boolean;
 	currentModifiedFile: TFile | null;
 	IsTasksJsonChanged: boolean;
 
@@ -54,6 +58,7 @@ export default class TaskBoard extends Plugin {
 		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
+		this.editorModified = false;
 		this.currentModifiedFile = null;
 		this.IsTasksJsonChanged = false;
 	}
@@ -140,55 +145,49 @@ export default class TaskBoard extends Plugin {
 
 		// Creating Few Events
 
+		// TODO : Find out which of the below two methods are optized one. I think the first method is the best one.
+		this.registerEvent(
+			this.app.vault.on("modify", (file: TAbstractFile) => {
+				this.editorModified = true;
+				if(file instanceof TFile) {
+					this.currentModifiedFile = file;
+					console.log("Modified file is : ", this.currentModifiedFile);
+				}
+			})
+		);
 		// this.registerEvent(
-		// 	this.app.vault.on("modify", (file: TFile) =>
-		// 		this.realTimeScanning.onFileChange(
-		// 			file,
-		// 			this.settings.data.globalSettings.realTimeScanning,
-		// 			this.settings.data.globalSettings.scanFilters
-		// 		)
+		// 	this.app.workspace.on(
+		// 		"editor-change",
+		// 		(editor: Editor, info: MarkdownView | MarkdownFileInfo) => {
+		// 			// console.log("EVENT : editor-change event working...");
+		// 			// Set editorModified to true when any change occurs
+		// 			this.editorModified = true;
+		// 			this.currentModifiedFile =
+		// 				this.app.workspace.getActiveFile();
+		// 		}
 		// 	)
 		// );
-		// Register an event for the 'editor-blur' event
-		// Track if the editor has been modified
-		let editorModified = false;
-		// Listen for editor-change event using workspace.trigger
-		this.registerEvent(
-			this.app.workspace.on(
-				"editor-change",
-				(editor: CodeMirror.Editor) => {
-					// console.log("EVENT : editor-change event working...");
-					// Set editorModified to true when any change occurs
-					editorModified = true;
-					this.currentModifiedFile = this.app.workspace.getActiveFile();
-				}
-			)
-		);
 		// Listen for editor-blur event and trigger scanning if the editor was modified
 		this.registerEvent(
 			this.app.workspace.on(
 				"active-leaf-change",
-				(editor: CodeMirror.Editor) => {
-					// onblur= (this, event: "blur") => {};
-					// const activeEditor = this.app.workspace.activeEditor?.editor;
-					// console.log(
-					// 	"EVENT : editor-blur event working... | Value of blur : ",
-					// 	activeEditor?.focus()
-					// );
-					if (editorModified && this.currentModifiedFile) {
-						console.log("EVENT : activeEditor.focus() ...");
-						this.realTimeScanning.onFileChange(
-							this.currentModifiedFile,
-							this.settings.data.globalSettings.realTimeScanning,
-							this.settings.data.globalSettings.scanFilters
-						);
-
-						// Reset the editorModified flag after the scan
-						editorModified = false;
-					}
+				(leaf: WorkspaceLeaf | null) => {
+					this.onFileModifiedAndLostFocus();
 				}
 			)
 		);
+		window.addEventListener("blur", () => {
+			console.log(
+				"User switched away from Obsidian or Obsidian lost focus."
+			);
+			this.onFileModifiedAndLostFocus();
+		});
+		// window.addEventListener("focus", () => {
+		// 	console.log(
+		// 		"User switched back to Obsidian or Obsidian gained focus."
+		// 	);
+		// 	// Trigger your custom code when the app gains focus
+		// });
 
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
@@ -237,7 +236,7 @@ export default class TaskBoard extends Plugin {
 
 		// Load all the tasks from the tasks.json into sessionStorage
 		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		startPeriodicSave(this.plugin);
+		// startPeriodicSave(this.plugin);
 
 		// Register the Kanban view
 		this.registerView(
@@ -269,6 +268,20 @@ export default class TaskBoard extends Plugin {
 		// this.registerDomEvent(document, "click", (evt: MouseEvent) => {
 		// 	console.log("click", evt);
 		// });
+	}
+
+	onFileModifiedAndLostFocus() {
+		if (this.editorModified && this.currentModifiedFile) {
+			console.log("EVENT : activeEditor.focus() ...");
+			this.realTimeScanning.onFileChange(
+				this.currentModifiedFile,
+				this.settings.data.globalSettings.realTimeScanning,
+				this.settings.data.globalSettings.scanFilters
+			);
+
+			// Reset the editorModified flag after the scan
+			this.editorModified = false;
+		}
 	}
 
 	onunload() {
