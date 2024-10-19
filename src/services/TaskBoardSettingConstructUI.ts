@@ -79,6 +79,7 @@ export class SettingsManager {
 			showHeader,
 			showFooter,
 			showVerticalScroll,
+			tagColors,
 		} = this.globalSettings;
 
 		contentEl.createEl("h1", {
@@ -246,6 +247,112 @@ export class SettingsManager {
 				})
 			);
 
+		// Tag Colors settings
+		contentEl.createEl("h4", { text: "Tag Colors" });
+
+		// If there are existing tag colors, show them
+		const tagColorsContainer = contentEl.createDiv({
+			cls: "tag-colors-container",
+		});
+
+		Object.entries(tagColors).forEach(([tagName, color]) => {
+			// Create the preview element after adding inputs and buttons
+			const previewElement = document.createElement("span");
+			previewElement.className = "tag-color-preview";
+			previewElement.textContent = tagName; // Show the tag name as text
+			previewElement.style.color = color; // Set text color to 'newColor'
+			previewElement.style.border = `1px solid ${color}`; // Set border with 'newColor'
+			previewElement.style.borderRadius = "20px"; // Set border-radius
+			previewElement.style.padding = "1px 10px"; // Add padding inside the border
+
+			// Convert the color to 20% opacity for the background
+			let rgbaColor = colorTo20PercentOpacity(color);
+			previewElement.style.backgroundColor = rgbaColor; // Apply 20% opacity background color
+
+			const tagSetting = new Setting(tagColorsContainer)
+				.setName("")
+				.setDesc("") // Setting an empty description to allow space for the custom preview
+				.addText((text) => text.setValue(tagName).setDisabled(true)) // Tag name input
+				.addText((text) =>
+					text.setValue(color).onChange(async (newColor) => {
+						this.globalSettings!.tagColors[tagName] = newColor;
+
+						// Update the preview color dynamically
+						const previewElement =
+							tagSetting.settingEl.querySelector(
+								".tag-color-preview"
+							) as HTMLElement;
+						if (previewElement) {
+							previewElement.style.color = newColor;
+							previewElement.style.border = `1px solid ${newColor}`;
+							previewElement.style.backgroundColor =
+								colorTo20PercentOpacity(newColor);
+						}
+
+						await this.saveSettings();
+					})
+				)
+				.addButton((btn) =>
+					btn.setButtonText("Delete").onClick(async () => {
+						delete this.globalSettings!.tagColors[tagName];
+						tagSetting.settingEl.remove();
+						await this.saveSettings();
+					})
+				);
+
+			// Append the preview element to the tag setting container
+			tagSetting.settingEl.prepend(previewElement);
+		});
+
+		const addTagColorButton = new Setting(contentEl).addButton((btn) =>
+			btn.setButtonText("Add Tag Color").onClick(() => {
+				const newTagSetting = new Setting(tagColorsContainer)
+					.addText((text) =>
+						text
+							.setPlaceholder("Tag Name")
+							.onChange(async (newTag) => {
+								// if (!this.globalSettings!.tagColors[newTag]) {
+								// 	this.globalSettings!.tagColors[newTag] = ""; // Set empty color initially
+								// }
+							})
+					)
+					.addColorPicker((picker) =>
+						picker.onChange(async (hexColor) => {
+							const tagName =
+								newTagSetting.settingEl.querySelector(
+									"input"
+								)?.value;
+							if (tagName) {
+								this.globalSettings!.tagColors[tagName] =
+									hexColor; // Save as hex initially
+								await this.saveSettings();
+							}
+						})
+					)
+					.addText((alphaText) =>
+						alphaText
+							.setPlaceholder("Alpha (0-1)")
+							.onChange(async (alpha) => {
+								const tagName =
+									newTagSetting.settingEl.querySelector(
+										"input"
+									)?.value;
+								if (tagName) {
+									const hexColor =
+										this.globalSettings!.tagColors[tagName];
+									const rgbaColor = hexToHexAlpha(
+										hexColor,
+										parseFloat(alpha)
+									); // Convert hex to RGBA with alpha
+									this.globalSettings!.tagColors[tagName] =
+										rgbaColor;
+									await this.saveSettings();
+								}
+							})
+					);
+			})
+		);
+
 		contentEl.createEl("h4", { text: "Automation Settings" });
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
@@ -278,7 +385,7 @@ export class SettingsManager {
 			.setName("Auto Scan the Vault on Obsidian Startup")
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
-					"<p>Only use this feature if your Vault is small and have small files. You dont have to user this feature, as your tasks will be auto scanned..</p>" +
+					"<p>Only use this feature if your tasks are not getting detected. Usually all your newly added/edited tasks will be detected directly.</p>" +
 						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
 				)
 			)
@@ -572,3 +679,46 @@ const kofiButton = (link: string): HTMLElement => {
 	a.innerHTML = `<img src="https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/assets/kofi_color.svg" height="40">`;
 	return a;
 };
+
+// Utility to convert hex to RGBA with specific opacity
+function hexToRgba(hex: string, opacity: number): string {
+	let r = 0,
+		g = 0,
+		b = 0;
+
+	if (hex.length === 4) {
+		r = parseInt(hex[1] + hex[1], 16);
+		g = parseInt(hex[2] + hex[2], 16);
+		b = parseInt(hex[3] + hex[3], 16);
+	} else if (hex.length === 7 || hex.length === 9) {
+		r = parseInt(hex[1] + hex[2], 16);
+		g = parseInt(hex[3] + hex[4], 16);
+		b = parseInt(hex[5] + hex[6], 16);
+	}
+	// console.log(
+	// 	"hexToRgba : Following is the converted data : ",
+	// 	`rgba(${r},${g},${b},${opacity})`
+	// );
+
+	return `rgba(${r},${g},${b},${opacity})`;
+}
+
+// Convert hex color to hex with Alpha
+function hexToHexAlpha(hex: string, alpha: number = 1): string {
+	hex = hex.slice(0, 7);
+	// console.log("hexToHexAlpha : Value of hex =", hex);
+	const alphaHex = Math.floor(alpha * 255)
+		.toString(16)
+		.padStart(2, "0");
+	// console.log("hexToHexAlpha : Value of alpha after changing =", alphaHex);
+	return `${hex}${alphaHex}`;
+}
+
+// Function to convert RGBA/Hex color to 20% opacity background color
+// Function to convert RGBA/Hex color to 20% opacity background color
+function colorTo20PercentOpacity(color: string): string {
+	if (color.startsWith("#")) {
+		return hexToRgba(color, 0.1);
+	}
+	return color; // If it's already RGBA, return the same color
+}
