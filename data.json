@@ -267,7 +267,13 @@
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,
-      "showVerticalScroll": false
+      "showVerticalScroll": false,
+      "tagColors": {
+        "Test": "#22ee1fef",
+        "Bug": "#ef1120dd",
+        "bug/solver": "#22f7de99",
+        "feat": "#b50df2f2"
+      }
     }
   }
 }

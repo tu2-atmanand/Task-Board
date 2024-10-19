@@ -172,7 +172,7 @@ export async function loadTasksProcessed(plugin: TaskBoard) {
 // 		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
 // 		await plugin.app.vault.adapter.write(
 // 			path,
-// 			JSON.stringify(updatedData, null, 2)
+// 			JSON.stringify(updatedData, null, 4)
 // 		);
 // 		console.log("Successfully updated tasks.json.");
 // 	} catch (error) {
