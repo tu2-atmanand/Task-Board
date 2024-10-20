@@ -42,10 +42,13 @@ const EditTaskContent: React.FC<{
 	const [endTime, setEndTime] = useState(task.time?.split(' - ')[1] || '');
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
-	const [bodyContent, setBodyContent] = useState(task.body?.filter(line => !line.trim().startsWith('- [ ]')).join('\n') || '');
+	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [subTasks, setSubTasks] = useState(
-		task.body?.filter(line => line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]')) || []
-	);
+		bodyContent.split('\n').filter(line =>
+			line.startsWith('\t- [ ]') ||
+			line.startsWith('\t- [x]')) ||
+		[]
+	); // New way to store only one level of SubTasks
 	const [taskContent, setTaskContent] = useState<string>('');
 
 	// Automatically update end time if only start time is provided
@@ -69,30 +72,52 @@ const EditTaskContent: React.FC<{
 
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
-		const updatedSubTasks = [...subTasks];
-		updatedSubTasks[index] = updatedSubTasks[index].startsWith('- [x]')
-			? updatedSubTasks[index].replace('- [x]', '- [ ]')
-			: updatedSubTasks[index].replace('- [ ]', '- [x]');
-		setSubTasks(updatedSubTasks);
+		const updatedBodyContent = bodyContent.split('\n');
+		updatedBodyContent[index] = updatedBodyContent[index].startsWith('- [x]')
+			? updatedBodyContent[index].replace('- [x]', '- [ ]')
+			: updatedBodyContent[index].replace('- [ ]', '- [x]');
+		setBodyContent(updatedBodyContent.join('\n'));
 	};
 
 	// Function to remove a subtask
 	const removeSubTask = (index: number) => {
-		const updatedSubTasks = subTasks.filter((_, idx) => idx !== index);
-		setSubTasks(updatedSubTasks);
+		const updatedSubTasks = bodyContent.split('\n').filter((_, idx) => idx !== index);
+		setBodyContent(updatedSubTasks.join('\n'));
 	};
 
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
-		setSubTasks([...subTasks, '']);
+		const updatedBodyContent = bodyContent.split('\n');
+		setBodyContent(['', ...updatedBodyContent].join('\n'));
 	};
 
-	// Update subtask content
 	const updateSubTaskContent = (index: number, value: string) => {
-		const updatedSubTasks = [...subTasks];
-		updatedSubTasks[index] = `- [ ] ${value}`;
-		setSubTasks(updatedSubTasks);
+		const updatedBodyContent = bodyContent.split('\n');
+		updatedBodyContent[index] = `\t- [ ] ${value}`; // Change task state to incomplete upon editing
+		setBodyContent(updatedBodyContent.join('\n'));
 	};
+
+
+	// // Update subtask content
+	// const updateSubTaskContent = (index: number, value: string) => {
+	// 	const updatedSubTasks = [...subTasks];
+	// 	updatedSubTasks[index] = `- [ ] ${value}`; // This is a feature not a bug, whenever user will edit any subTask, its state will be changed to not completed, so the user can change it back to completed if he wants from the Modal itself.
+	// 	setSubTasks(updatedSubTasks);
+	// };
+
+	// useEffect(() => {
+	// 	const updatedBodyContent = bodyContent.split('\n').map((line) => {
+	// 		// Check if the line corresponds to a subtask
+	// 		const matchingSubTask = subTasks.find((subTask) => subTask === line);
+
+	// 		// If there's a matching subtask, use the updated version from subTasks
+	// 		return matchingSubTask ? matchingSubTask : line;
+	// 	});
+
+	// 	// Update bodyContent with the new lines (while preserving the original order)
+	// 	setBodyContent(updatedBodyContent.join('\n'));
+	// }, [subTasks]); // Run this effect whenever subTasks changes
+
 
 	// Tags input
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -117,7 +142,6 @@ const EditTaskContent: React.FC<{
 			title,
 			body: [
 				...bodyContent.split('\n'),
-				...subTasks,
 			],
 			due,
 			tags,
@@ -135,7 +159,6 @@ const EditTaskContent: React.FC<{
 		title: title,
 		body: [
 			...bodyContent.split('\n'),
-			...subTasks,
 		],
 		due: due,
 		tags: tags,
@@ -251,155 +274,164 @@ const EditTaskContent: React.FC<{
 	};
 
 	return (
-		<div className="EditTaskModalHome">
-			<div className="EditTaskModalHomeTitle">
-				{taskExists ? 'Edit Task' : 'Add New Task'}
-			</div>
-			<div className="EditTaskModalHomeBody">
-				<div className="EditTaskModalHomeLeftSec">
-					<label className="EditTaskModalHomeFieldTitle">Task Title</label>
-					<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
-
-					{/* Subtasks */}
-					<label className="EditTaskModalHomeFieldTitle">Sub Tasks</label>
-					<div className="EditTaskModalsubTasksContainer">
-						{subTasks.map((subTask: string, index: number) => (
-							<div key={index} className="EditTaskModalsubTaskItem">
-								<input
-									type="checkbox"
-									checked={subTask.startsWith('- [x]')}
-									onChange={() => toggleSubTaskCompletion(index)}
-								/>
-								<input
-									className="EditTaskModalsubTaskItemInput"
-									type="text"
-									value={subTask.trim().replace(/- \[.\] /, '')}
-									onChange={(e) => updateSubTaskContent(index, e.target.value)}
-								/>
-								<FaTrash
-									size={15}
-									enableBackground={0}
-									opacity={0.7}
-									style={{ marginInlineStart: '0.8em' }}
-									title="Delete Sub-Task"
-									onClick={() => removeSubTask(index)}
-									cursor={'pointer'}
-								/>
-							</div>
-						))}
-						<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>Add new Sub-Task</button>
-					</div>
-
-					<div className="EditTaskModalTabHeader">
-						<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>Preview</div>
-						<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>Editor</div>
-					</div>
-
-					{/* Conditional rendering based on active tab */}
-					<div className={`EditTaskModalTabContent ${activeTab === 'preview' ? 'show' : 'hide'}`}>
-						{/* Preview Section */}
-						<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
-							<div className="EditTaskModalHomePreviewContainer">
-								<div className="EditTaskModalHomePreviewHeader">
-									<div style={{ fontWeight: '400' }}>{filePath}</div>
-									<button className="EditTaskModalHomeOpenFileBtn"
-										id="EditTaskModalHomeOpenFileBtn"
-										// onMouseEnter={handleMouseEnter}
-										// onMouseOver={handleMouseEnter}
-										// onClick={() => app.workspace.openLinkText(task.filePath, "")}
-										onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
-									>Open File</button>
-								</div>
-								<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
-									{/* The markdown content will be rendered here */}
-								</div>
-							</div>
-						</div>
-					</div>
-					<div className={`EditTaskModalTabContent ${activeTab === 'editor' ? 'show' : 'hide'}`}>
-						<div className="EditTaskModalHomePreviewHeader">Directly Edit any value or add more sub tasks and description for this task.</div>
-						{/* Editor Section */}
-						<textarea
-							className="EditTaskModalBodyDescription"
-							value={bodyContent}
-							onChange={handleTextareaChange}
-							placeholder="Body content"
-							style={{ display: activeTab === 'editor' ? 'block' : 'none', width: '100%' }}
-						/>
-					</div>
-
+		<>
+			<div className="EditTaskModalHome">
+				<div className="EditTaskModalHomeTitle">
+					{taskExists ? 'Edit Task' : 'Add New Task'}
 				</div>
-				<div className="EditTaskModalHomeRightSec">
-					{/* Task Time Input */}
-					<div className="EditTaskModalHomeField">
-						<label className="EditTaskModalHomeFieldTitle">Task Start Time</label>
-						<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-					</div>
-					<div className="EditTaskModalHomeField">
-						<label className="EditTaskModalHomeFieldTitle">Task End Time</label>
-						<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-					</div>
+				<div className="EditTaskModalHomeBody">
+					<div className="EditTaskModalHomeLeftSec">
+						<label className="EditTaskModalHomeFieldTitle">Task Title</label>
+						<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-					{/* Task Due Date */}
-					<div className="EditTaskModalHomeField">
-						<label className="EditTaskModalHomeFieldTitle">Task Due Date</label>
-						<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
-					</div>
-
-					{/* Task Priority */}
-					<div className="EditTaskModalHomeField">
-						<label className="EditTaskModalHomeFieldTitle">Task Priority</label>
-						<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => setPriority(parseInt(e.target.value))}>
-							{priorityOptions.map((option) => (
-								<option key={option.value} value={option.value}>{option.text}</option>
-							))}
-						</select>
-					</div>
-
-					{/* Task Tag */}
-					<div className="EditTaskModalHomeField">
-						<label className="EditTaskModalHomeFieldTitle">Task Tag</label>
-						<input
-							className="EditTaskModalHome-tagValue"
-							type="text"
-							onKeyDown={handleTagInput}  // Call handleTagInput on change
-						/>
-						{/* Render tags with cross icon */}
-						<div className="EditTaskModalHome-taskItemTags">
-							{tags.map((tag: string) => {
-								const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
-								const tagColor = customTagColor || defaultTagColor;
-								const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`;
-								return (
-									<div
-										key={tag}
-										className="EditTaskModalHome-taskItemTagsPreview"
-										style={{
-											color: tagColor,
-											border: `1px solid ${tagColor}`,
-											backgroundColor: backgroundColor,
-											borderRadius: '1em',
-											padding: '2px 8px',
-											marginRight: '2px',
-											display: 'inline-block',
-											whiteSpace: 'nowrap',
-											fontSize: 'small'
-										}}
-									>
-										{tag}
-										<FaTimes
-											style={{ marginLeft: '8px', cursor: 'pointer' }}
-											onClick={() => removeTag(tag)}
-										/>
-									</div>
-								);
+						{/* Subtasks */}
+						<label className="EditTaskModalHomeFieldTitle">Sub Tasks</label>
+						<div className="EditTaskModalsubTasksContainer">
+							{bodyContent.split('\n').map((bodyLine: string, bodyLineIndex: number) => {
+								// Filter only the lines that start with the task patterns
+								if (bodyLine.startsWith('\t- [ ]') || bodyLine.startsWith('\t- [x]')) {
+									return (
+										<div key={bodyLineIndex} className="EditTaskModalsubTaskItem">
+											<input
+												type="checkbox"
+												checked={bodyLine.trim().startsWith('- [x]')}
+												onChange={() => toggleSubTaskCompletion(bodyLineIndex)}
+											/>
+											<input
+												className="EditTaskModalsubTaskItemInput"
+												type="text"
+												value={bodyLine.trim().replace(/- \[.\] /, '')}
+												onChange={(e) => updateSubTaskContent(bodyLineIndex, e.target.value)}
+											/>
+											<FaTrash
+												size={15}
+												enableBackground={0}
+												opacity={0.7}
+												style={{ marginInlineStart: '0.8em' }}
+												title="Delete Sub-Task"
+												onClick={() => removeSubTask(bodyLineIndex)}
+												cursor={'pointer'}
+											/>
+										</div>
+									);
+								}
+								// Return null if the line doesn't match the subtask pattern
+								return null;
 							})}
+							<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>Add new Sub-Task</button>
+						</div>
+
+						<div className="EditTaskModalTabHeader">
+							<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>Preview</div>
+							<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>Editor</div>
+						</div>
+
+						{/* Conditional rendering based on active tab */}
+						<div className={`EditTaskModalTabContent ${activeTab === 'preview' ? 'show' : 'hide'}`}>
+							{/* Preview Section */}
+							<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
+								<div className="EditTaskModalHomePreviewContainer">
+									<div className="EditTaskModalHomePreviewHeader">
+										<div style={{ fontWeight: '400' }}>{filePath}</div>
+										<button className="EditTaskModalHomeOpenFileBtn"
+											id="EditTaskModalHomeOpenFileBtn"
+											// onMouseEnter={handleMouseEnter}
+											// onMouseOver={handleMouseEnter}
+											// onClick={() => app.workspace.openLinkText(task.filePath, "")}
+											onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+										>Open File</button>
+									</div>
+									<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
+										{/* The markdown content will be rendered here */}
+									</div>
+								</div>
+							</div>
+						</div>
+						<div className={`EditTaskModalTabContent ${activeTab === 'editor' ? 'show' : 'hide'}`}>
+							<div className="EditTaskModalHomePreviewHeader">Edit or add Description for the Task or add more subTasks.</div>
+							{/* Editor Section */}
+							<textarea
+								className="EditTaskModalBodyDescription"
+								value={bodyContent}
+								onChange={handleTextareaChange}
+								placeholder="Body content"
+								style={{ display: activeTab === 'editor' ? 'block' : 'none', width: '100%' }}
+							/>
+						</div>
+
+					</div>
+					<div className="EditTaskModalHomeRightSec">
+						{/* Task Time Input */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">Task Start Time</label>
+							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+						</div>
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">Task End Time</label>
+							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+						</div>
+
+						{/* Task Due Date */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">Task Due Date</label>
+							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+						</div>
+
+						{/* Task Priority */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">Task Priority</label>
+							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => setPriority(parseInt(e.target.value))}>
+								{priorityOptions.map((option) => (
+									<option key={option.value} value={option.value}>{option.text}</option>
+								))}
+							</select>
+						</div>
+
+						{/* Task Tag */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">Task Tag</label>
+							<input
+								className="EditTaskModalHome-tagValue"
+								type="text"
+								onKeyDown={handleTagInput}  // Call handleTagInput on change
+							/>
+							{/* Render tags with cross icon */}
+							<div className="EditTaskModalHome-taskItemTags">
+								{tags.map((tag: string) => {
+									const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
+									const tagColor = customTagColor || defaultTagColor;
+									const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`;
+									return (
+										<div
+											key={tag}
+											className="EditTaskModalHome-taskItemTagsPreview"
+											style={{
+												color: tagColor,
+												border: `1px solid ${tagColor}`,
+												backgroundColor: backgroundColor,
+												borderRadius: '1em',
+												padding: '2px 8px',
+												marginRight: '2px',
+												display: 'inline-block',
+												whiteSpace: 'nowrap',
+												fontSize: 'small'
+											}}
+										>
+											{tag}
+											<FaTimes
+												style={{ marginLeft: '8px', cursor: 'pointer' }}
+												onClick={() => removeTag(tag)}
+											/>
+										</div>
+									);
+								})}
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>Save</button>
-		</div>
+				<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>Save</button>
+			</div >
+		</>
 	);
 };
 
