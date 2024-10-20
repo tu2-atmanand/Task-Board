@@ -1,7 +1,9 @@
 import { App } from "obsidian";
+import TaskBoard from "main";
 
 export interface TaskProps {
 	app: App;
+	plugin: TaskBoard;
 	task: taskItem;
 	onEdit: () => void;
 	onDelete: () => void;
@@ -14,7 +16,7 @@ export interface taskItem {
 	title: string;
 	body: string[];
 	due: string;
-	tag: string;
+	tags: string[];
 	time: string;
 	priority: number;
 	completed?: string;

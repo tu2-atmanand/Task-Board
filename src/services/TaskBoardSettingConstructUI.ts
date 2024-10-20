@@ -75,6 +75,11 @@ export class SettingsManager {
 			scanVaultAtStartup,
 			dayPlannerPlugin,
 			realTimeScanning,
+			columnWidth,
+			showHeader,
+			showFooter,
+			showVerticalScroll,
+			tagColors,
 		} = this.globalSettings;
 
 		contentEl.createEl("h1", {
@@ -188,44 +193,172 @@ export class SettingsManager {
 		);
 
 		contentEl.createEl("hr");
-		// Save settings and reflect changes
-		// await this.saveSettings();
 
-		// contentEl.createEl("h4", { text: "Time related settings" });
-
-		// // Setting for ignoreFileNameDates
-		// new Setting(contentEl)
-		// 	.setName("Ignore File Name Dates")
-		// 	.setDesc("Whether to ignore dates in file names")
-		// 	.addToggle((toggle) =>
-		// 		toggle.setValue(ignoreFileNameDates).onChange(async (value) => {
-		// 			this.globalSettings!.ignoreFileNameDates = value;
-		// 			await this.saveSettings();
-		// 		})
-		// 	);
-
-		contentEl.createEl("h4", { text: "Automation Settings" });
-		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
+		contentEl.createEl("h4", { text: "Board UI Settings" });
+		// Setting to show/Hide the Header of the Task Item Card
 		new Setting(contentEl)
-			.setName("Auto Scan the Vault on Obsidian Startup")
-			.setDesc(
-				SettingsManager.createFragmentWithHTML(
-					"<p>The plugin will scan the whole vault to detect all the undetected tasks from whole vault everytime Obsidian starts.</p>" +
-						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
-				)
-			)
+			.setName("Show Header of the Task Item Card")
+			.setDesc("Enable this to see the Header in the Task Item Card")
 			.addToggle((toggle) =>
-				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
-					this.globalSettings!.scanVaultAtStartup = value;
+				toggle.setValue(showHeader).onChange(async (value) => {
+					this.globalSettings!.showHeader = value;
 					await this.saveSettings();
 				})
 			);
 
+		// Setting to show/Hide the Footer of the Task Item Card
+		new Setting(contentEl)
+			.setName("Show Footer of the Task Item Card")
+			.setDesc("Enable this to see the Footer in the Task Item Card")
+			.addToggle((toggle) =>
+				toggle.setValue(showFooter).onChange(async (value) => {
+					this.globalSettings!.showFooter = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to take the width of each Column in px.
+		new Setting(contentEl)
+			.setName("Width of each Column")
+			.setDesc(
+				"Enter the value of width for each column. The default value is 273px"
+			)
+			.addText((text) =>
+				text
+					.setValue(columnWidth)
+					.onChange(async (value) => {
+						this.globalSettings!.columnWidth = value;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the text pattern changes
+					})
+					.setPlaceholder("273px")
+			);
+
+		// Setting to show/Hide the Vertical ScrollBar of each Column
+		new Setting(contentEl)
+			.setName("Show Column Scroll Bar")
+			.setDesc(
+				"Enable to see a scrollbar for each column. This will reduce the width of Task Cards."
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(showVerticalScroll).onChange(async (value) => {
+					this.globalSettings!.showVerticalScroll = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Tag Colors settings
+		contentEl.createEl("h4", { text: "Tag Colors" });
+
+		// If there are existing tag colors, show them
+		const tagColorsContainer = contentEl.createDiv({
+			cls: "tag-colors-container",
+		});
+
+		Object.entries(tagColors).forEach(([tagName, color]) => {
+			// Create the preview element after adding inputs and buttons
+			const previewElement = document.createElement("span");
+			previewElement.className = "tag-color-preview";
+			previewElement.textContent = tagName; // Show the tag name as text
+			previewElement.style.color = color; // Set text color to 'newColor'
+			previewElement.style.border = `1px solid ${color}`; // Set border with 'newColor'
+			previewElement.style.borderRadius = "20px"; // Set border-radius
+			previewElement.style.padding = "1px 10px"; // Add padding inside the border
+
+			// Convert the color to 20% opacity for the background
+			let rgbaColor = colorTo20PercentOpacity(color);
+			previewElement.style.backgroundColor = rgbaColor; // Apply 20% opacity background color
+
+			const tagSetting = new Setting(tagColorsContainer)
+				.setName("")
+				.setDesc("") // Setting an empty description to allow space for the custom preview
+				.addText((text) => text.setValue(tagName).setDisabled(true)) // Tag name input
+				.addText((text) =>
+					text.setValue(color).onChange(async (newColor) => {
+						this.globalSettings!.tagColors[tagName] = newColor;
+
+						// Update the preview color dynamically
+						const previewElement =
+							tagSetting.settingEl.querySelector(
+								".tag-color-preview"
+							) as HTMLElement;
+						if (previewElement) {
+							previewElement.style.color = newColor;
+							previewElement.style.border = `1px solid ${newColor}`;
+							previewElement.style.backgroundColor =
+								colorTo20PercentOpacity(newColor);
+						}
+
+						await this.saveSettings();
+					})
+				)
+				.addButton((btn) =>
+					btn.setButtonText("Delete").onClick(async () => {
+						delete this.globalSettings!.tagColors[tagName];
+						tagSetting.settingEl.remove();
+						await this.saveSettings();
+					})
+				);
+
+			// Append the preview element to the tag setting container
+			tagSetting.settingEl.prepend(previewElement);
+		});
+
+		const addTagColorButton = new Setting(contentEl).addButton((btn) =>
+			btn.setButtonText("Add Tag Color").onClick(() => {
+				const newTagSetting = new Setting(tagColorsContainer)
+					.addText((text) =>
+						text
+							.setPlaceholder("Tag Name")
+							.onChange(async (newTag) => {
+								// if (!this.globalSettings!.tagColors[newTag]) {
+								// 	this.globalSettings!.tagColors[newTag] = ""; // Set empty color initially
+								// }
+							})
+					)
+					.addColorPicker((picker) =>
+						picker.onChange(async (hexColor) => {
+							const tagName =
+								newTagSetting.settingEl.querySelector(
+									"input"
+								)?.value;
+							if (tagName) {
+								this.globalSettings!.tagColors[tagName] =
+									hexColor; // Save as hex initially
+								await this.saveSettings();
+							}
+						})
+					)
+					.addText((alphaText) =>
+						alphaText
+							.setPlaceholder("Alpha (0-1)")
+							.onChange(async (alpha) => {
+								const tagName =
+									newTagSetting.settingEl.querySelector(
+										"input"
+									)?.value;
+								if (tagName) {
+									const hexColor =
+										this.globalSettings!.tagColors[tagName];
+									const rgbaColor = hexToHexAlpha(
+										hexColor,
+										parseFloat(alpha)
+									); // Convert hex to RGBA with alpha
+									this.globalSettings!.tagColors[tagName] =
+										rgbaColor;
+									await this.saveSettings();
+								}
+							})
+					);
+			})
+		);
+
+		contentEl.createEl("h4", { text: "Automation Settings" });
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
 			.setName("Real-Time Scanning")
 			.setDesc(
-				"This setting will scan the modified file every time some changes is made to any markdown file. This wont slow down the performance, but if it does, disbale this setting.\nDisabling this setting will scan the newly added task within 5 minutes and will render on the board."
+				"After you loose focus from the file you have edited, the task will be immediately refreshed on the Task Boad.\nDisabling this setting will scan the modified files after some time."
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(realTimeScanning).onChange(async (value) => {
@@ -238,11 +371,27 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName("Auto Add Due Date to Tasks")
 			.setDesc(
-				"When enabled, if you add a task using the Add New Task pop-up window, then today date will be added as Due date, if not Due date is entered."
+				"When enabled, if you add a task using the Add New Task pop-up window, then today's date will be added as Due date, if the value is not entered."
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddDue).onChange(async (value) => {
 					this.globalSettings!.autoAddDue = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
+		new Setting(contentEl)
+			.setName("Auto Scan the Vault on Obsidian Startup")
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					"<p>Only use this feature if your tasks are not getting detected. Usually all your newly added/edited tasks will be detected directly.</p>" +
+						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
+					this.globalSettings!.scanVaultAtStartup = value;
 					await this.saveSettings();
 				})
 			);
@@ -283,29 +432,32 @@ export class SettingsManager {
 				"Enter the format of the Date which you are using to name your Daily Notes files. Please use the either 'yyyy-MM-DD' or 'DD-MM-yyyy'"
 			)
 			.addText((text) =>
-				text.setValue(dueDateFormat).onChange(async (value) => {
-					this.globalSettings!.dueDateFormat = value;
-					await this.saveSettings();
-					updatePreview(); // Update the preview when the text pattern changes
-				})
+				text
+					.setValue(dueDateFormat)
+					.onChange(async (value) => {
+						this.globalSettings!.dueDateFormat = value;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the text pattern changes
+					})
+					.setPlaceholder("yyyy-MM-DD")
 			);
 
 		// Seeting to take the format of Due and Completion values. And to take the date-Time format for the completion value.
 		contentEl.createEl("h4", {
-			text: "Due and Completion Formats",
+			text: "Due and Completion date formats",
 		});
 
 		// Create the live preview element
 		const previewEl = contentEl.createEl("div", {
 			text: "Preview will appear here",
-			cls: "live-preview",
+			cls: "globa-setting-tab-live-preview",
 		});
 		const updatePreview = () => {
 			let dueDate = "2024-09-21";
 			let completionDate = "2024-09-21T12:20:33";
 			let taskTitle = "<Task Title>";
 
-			let preview = `- [ ] ${taskTitle} | `;
+			let preview = `PREVIEW : - [ ] ${taskTitle} | `;
 			switch (this.globalSettings!.taskCompletionFormat) {
 				case "1": // Default
 					preview += `📅${dueDate} ✅${completionDate}`;
@@ -360,6 +512,7 @@ export class SettingsManager {
 						await this.saveSettings();
 						updatePreview(); // Update the preview when the text pattern changes
 					})
+					.setPlaceholder("yyyy-MM-DD/HH:mm")
 			);
 
 		// Initialize the preview on page load
@@ -496,7 +649,6 @@ export class SettingsManager {
 	}
 }
 
-
 const buyMeACoffeeButton = (link: string): HTMLElement => {
 	const a = createEl("a");
 	a.setAttribute("href", link);
@@ -527,3 +679,46 @@ const kofiButton = (link: string): HTMLElement => {
 	a.innerHTML = `<img src="https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/assets/kofi_color.svg" height="40">`;
 	return a;
 };
+
+// Utility to convert hex to RGBA with specific opacity
+function hexToRgba(hex: string, opacity: number): string {
+	let r = 0,
+		g = 0,
+		b = 0;
+
+	if (hex.length === 4) {
+		r = parseInt(hex[1] + hex[1], 16);
+		g = parseInt(hex[2] + hex[2], 16);
+		b = parseInt(hex[3] + hex[3], 16);
+	} else if (hex.length === 7 || hex.length === 9) {
+		r = parseInt(hex[1] + hex[2], 16);
+		g = parseInt(hex[3] + hex[4], 16);
+		b = parseInt(hex[5] + hex[6], 16);
+	}
+	// console.log(
+	// 	"hexToRgba : Following is the converted data : ",
+	// 	`rgba(${r},${g},${b},${opacity})`
+	// );
+
+	return `rgba(${r},${g},${b},${opacity})`;
+}
+
+// Convert hex color to hex with Alpha
+function hexToHexAlpha(hex: string, alpha: number = 1): string {
+	hex = hex.slice(0, 7);
+	// console.log("hexToHexAlpha : Value of hex =", hex);
+	const alphaHex = Math.floor(alpha * 255)
+		.toString(16)
+		.padStart(2, "0");
+	// console.log("hexToHexAlpha : Value of alpha after changing =", alphaHex);
+	return `${hex}${alphaHex}`;
+}
+
+// Function to convert RGBA/Hex color to 20% opacity background color
+// Function to convert RGBA/Hex color to 20% opacity background color
+function colorTo20PercentOpacity(color: string): string {
+	if (color.startsWith("#")) {
+		return hexToRgba(color, 0.1);
+	}
+	return color; // If it's already RGBA, return the same color
+}

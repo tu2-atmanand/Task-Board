@@ -35,13 +35,17 @@ export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 	}
 }
 
-export function scanFilterForTags(tag: string, scanFilters: any) {
+export function scanFilterForTags(tags: string[], scanFilters: any) {
 	// console.log(
 	// 	"The value of tag i am checking using .includes :",
 	// 	tag,
 	// 	": There shouldnt be any thing in between."
 	// );
-	const tagInFilters = scanFilters.tags.values.includes(tag);
+	console.log("scanFilterForTags : The value of scanFilters :", scanFilters, "| Value of task.tags :", tags);
+	const tagInFilters = tags.some((tag) =>
+		scanFilters.tags.values.includes(tag)
+	);
+
 	const tagPolarity = scanFilters.tags.polarity;
 
 	const tagCheck =

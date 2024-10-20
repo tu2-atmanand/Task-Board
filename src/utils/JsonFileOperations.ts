@@ -10,7 +10,7 @@ import {
 import { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
 import fs from "fs";
-import { loadTasksRaw } from "./tasksCache";
+import { loadTasksJsonFromSS } from "./tasksCache";
 
 // Operations with data.json
 
@@ -93,11 +93,11 @@ export const loadTasksAndMerge = async (
 		// const data: string = await plugin.app.vault.adapter.read(path);
 		// const allTasks: tasksJson = JSON.parse(data);
 
-		const allTasks: tasksJson = await loadTasksRaw(plugin);
-		console.log(
-			"REFRESH_COLUMN : loadTasksAndMerge : Data recived from the sessionStorage function : ",
-			allTasks
-		);
+		const allTasks: tasksJson = await loadTasksJsonFromSS(plugin);
+		// console.log(
+		// 	"REFRESH_COLUMN : loadTasksAndMerge : Data recived from the sessionStorage function : ",
+		// 	allTasks
+		// );
 
 		const pendingTasks: taskItem[] = [];
 		const completedTasks: taskItem[] = [];
@@ -125,10 +125,10 @@ export const loadTasksAndMerge = async (
 			Completed: completedTasks,
 		};
 
-		console.log(
-			"I am going to return the following data : ",
-			allTasksMerged
-		);
+		// console.log(
+		// 	"I am going to return the following data : ",
+		// 	allTasksMerged
+		// );
 
 		return { allTasksMerged };
 	} catch (error) {
@@ -152,7 +152,7 @@ export async function loadTasksProcessed(plugin: TaskBoard) {
 		});
 }
 
-// export const loadTasksRaw = async (plugin: TaskBoard): Promise<tasksJson> => {
+// export const loadTasksJsonFromSS = async (plugin: TaskBoard): Promise<tasksJson> => {
 // 	try {
 // 		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
 // 		const data: string = await plugin.app.vault.adapter.read(path);
@@ -164,7 +164,7 @@ export async function loadTasksProcessed(plugin: TaskBoard) {
 // 	}
 // };
 
-// export const writeTasksJson = async (
+// export const writeTasksJsonToSS = async (
 // 	plugin: TaskBoard,
 // 	updatedData: tasksJson
 // ): Promise<void> => {
@@ -172,7 +172,7 @@ export async function loadTasksProcessed(plugin: TaskBoard) {
 // 		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
 // 		await plugin.app.vault.adapter.write(
 // 			path,
-// 			JSON.stringify(updatedData, null, 2)
+// 			JSON.stringify(updatedData, null, 4)
 // 		);
 // 		console.log("Successfully updated tasks.json.");
 // 	} catch (error) {

@@ -1,7 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
-import { loadTasksRaw, writeTasksJson } from "./tasksCache";
-import path, { join } from "path";
+import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
 import {
 	priorityEmojis,
 	taskItem,
@@ -15,8 +14,6 @@ import {
 import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import fs from "fs";
-import { tasksPath } from "src/interfaces/GlobalVariables";
 
 export const taskElementsFormatter = (
 	plugin: TaskBoard,
@@ -70,30 +67,31 @@ export const taskElementsFormatter = (
 	if (dayPlannerPlugin) {
 		formattedTask = `${checkBoxStat} ${
 			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${updatedTask.title} |${dueDateWithFormat} ${priorityWithEmo} ${
-			updatedTask.tag
-		}${completedWitFormat}`;
+		}${
+			updatedTask.title
+		} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
+			" "
+		)}${completedWitFormat}`;
 	} else {
-		formattedTask = `${checkBoxStat} ${updatedTask.title} |${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tag}${completedWitFormat}`;
+		formattedTask = `${checkBoxStat} ${
+			updatedTask.title
+		} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(" ")}${completedWitFormat}`;
 	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
-		.filter(
-			(line: string) =>
-				!line.startsWith("- [ ]") && !line.startsWith("- [x]")
-		)
-		.map((line: string) => `\t${line}`)
+		.map((line: string) => `${line}`)
 		.join("\n");
 
-	// Add the sub-tasks without additional indentation
-	const subTasksWithTab = updatedTask.body
-		.filter(
-			(line: string) =>
-				line.startsWith("- [ ]") || line.startsWith("- [x]")
-		)
-		.map((Line: string) => `\t${Line}`)
-		.join("\n");
+	// // Add the sub-tasks without additional indentation
+	// const subTasksWithTab = updatedTask.body
+	// 	.filter(
+	// 		(line: string) =>
+	// 			line.startsWith("- [ ]") || line.startsWith("- [x]")
+	// 	)
+	// 	.map((Line: string) => `\t${Line}`)
+	// 	.join("\n")
+	// 	.trim();
 
 	// console.log("If i there is not subTask to the file and there was no line in the Description, then here there shouldnt be anything if i have added a fresh bullete point in the Desc : ", subTasksWithTab);
 
@@ -101,7 +99,12 @@ export const taskElementsFormatter = (
 	// const completeTask = `${formattedTask}\n${bodyLines}\n${subTasksWithTab}`;
 	const completeTask = `${formattedTask}${
 		bodyLines.trim() ? `\n${bodyLines}` : ""
-	}\n${subTasksWithTab}`;
+	}`;
+
+	console.log(
+		"taskElementsFormatter : To render in the HTML :\n",
+		completeTask
+	);
 
 	return completeTask;
 };
@@ -113,7 +116,7 @@ export const moveFromPendingToCompleted = async (
 	task: taskItem
 ) => {
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Move task from Pending to Completed
 		if (allTasks.Pending[task.filePath]) {
@@ -135,7 +138,7 @@ export const moveFromPendingToCompleted = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeTasksJson(plugin, allTasks);
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
@@ -149,7 +152,7 @@ export const moveFromCompletedToPending = async (
 	// const updatedTask = { ...task, completed: "" };
 
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Move task from Completed to Pending
 		if (allTasks.Completed[task.filePath]) {
@@ -167,7 +170,7 @@ export const moveFromCompletedToPending = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeTasksJson(plugin, allTasks);
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
@@ -213,7 +216,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 
 export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Remove task from Pending or Completed in tasks.json
 		if (allTasks.Pending[task.filePath]) {
@@ -228,8 +231,8 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 		}
 
 		// Write the updated data back to the JSON file
-		// fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
-		await writeTasksJson(plugin, allTasks);
+		// fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 4));
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error deleting task from tasks.json:", error);
 	}
@@ -316,7 +319,7 @@ export const updateTaskInJson = async (
 		updatedTask
 	);
 	try {
-		const allTasks = await loadTasksRaw(plugin);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 		// console.log("The file of Tasks.json which I am updating: ", allTasks);
 
 		// Function to update a task in a given task category (Pending or Completed)
@@ -350,8 +353,8 @@ export const updateTaskInJson = async (
 		// Write the updated data back to the JSON file
 		console.log("The new data to be updated in tasks.json: ", updatedData);
 		// Write the updated data back to the JSON file using the new function
-		await writeTasksJson(plugin, updatedData);
-		
+		await writeTasksJsonToSS(plugin, updatedData);
+
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
 		console.error(
@@ -372,7 +375,7 @@ export const generateTaskId = (): number => {
 };
 
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
-	const allTasks = await loadTasksRaw(plugin);
+	const allTasks = await loadTasksJsonFromSS(plugin);
 
 	const newTaskWithId = {
 		...newTask,
@@ -389,7 +392,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	allTasks.Pending[newTask.filePath].push(newTaskWithId);
 
-	await writeTasksJson(plugin, allTasks);
+	await writeTasksJsonToSS(plugin, allTasks);
 };
 
 export const addTaskInFile = async (

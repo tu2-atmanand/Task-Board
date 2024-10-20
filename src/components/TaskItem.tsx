@@ -10,13 +10,13 @@ import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 
-const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
+const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation
 	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
-	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.startsWith('- [ ]') && !line.startsWith('- [x]'))));
-	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.startsWith('- [ ]') || line.startsWith('- [x]'))));
-	const [taskBody, setTaskBody] = useState<string[]>(task.body)
+	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
+	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]'))));
+	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
 
@@ -45,17 +45,21 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 
 	// Function to handle the checkbox toggle inside the task body
 	const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
-		const updatedSubTasks = subTasks.map((line, idx) => {
+		const updatedBody = taskBody.map((line, idx) => {
 			if (idx === index) {
-				return isCompleted ? line.replace('- [x]', '- [ ]') : line.replace('- [ ]', '- [x]');
+				// Toggle the checkbox status only for the specific line
+				return isCompleted
+					? line.replace('- [x]', '- [ ]')
+					: line.replace('- [ ]', '- [x]');
 			}
 			return line;
 		});
-		setSubTasks(updatedSubTasks);
 
-		// Update the task with new body content
-		const updatedTask: taskItem = { ...task, body: [...taskDesc, ...updatedSubTasks] };
-		onSubTasksChange(updatedTask);
+		setTaskBody(updatedBody);
+
+		// Update the task with the modified body content
+		const updatedTask: taskItem = { ...task, body: updatedBody };
+		onSubTasksChange(updatedTask); // Notify parent of the change
 	};
 
 	// Toggle function to expand/collapse the description
@@ -63,8 +67,6 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 		setIsDescriptionExpanded(!isDescriptionExpanded);
 	};
 
-	const taskItemBodyDescriptionRenderer = useRef<HTMLDivElement>(null);
-	const subtaskTextRefs = useRef<(HTMLDivElement | null)[]>([]);  // Store refs for each subtask text element
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
 		// Initialize Obsidian Component on mount
@@ -77,18 +79,21 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 		};
 	}, []);
 
+	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
 		// Render subtasks after componentRef is initialized
-		subTasks.forEach((subtaskText, index) => {
-			const element = subtaskTextRefs.current[index];
-			if (element && componentRef.current) {
-				element.innerHTML = '';
+		task.body.forEach((subtaskText, index) => {
+			const uniqueKey = `${task.id}-${index}`;
+			const element = subtaskTextRefs.current[uniqueKey];
 
-				subtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+			if (element) {
+				element.innerHTML = ''; // Clear previous content
+
+				const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
 				MarkdownUIRenderer.renderSubtaskText(
 					app,
-					subtaskText, // Pass individual subtask text here
+					strippedSubtaskText,
 					element,
 					task.filePath,
 					componentRef.current
@@ -97,22 +102,28 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 				hookMarkdownLinkMouseEventHandlers(app, element, task.filePath, task.filePath);
 			}
 		});
-	}, [subTasks, task.filePath, app]);
+	}, [task.body, task.filePath, app]);
 
+
+	const taskItemBodyDescriptionRenderer = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
 		if (taskItemBodyDescriptionRenderer.current && componentRef.current) {
-			taskItemBodyDescriptionRenderer.current.innerHTML = ''; // Clear existing content
+			const uniqueKey = `${task.id}-desc`;
+			const descElement = taskItemBodyDescriptionRenderer.current[uniqueKey]; // Clear existing content
 
-			// Call the MarkdownUIRenderer to render the description
-			MarkdownUIRenderer.renderTaskDisc(
-				app,
-				taskDesc.join('\n'),
-				taskItemBodyDescriptionRenderer.current, // Use HTMLDivElement reference
-				task.filePath,
-				componentRef.current // Pass the Component instance
-			);
+			if (descElement) {
+				descElement.innerHTML = '';
+				// Call the MarkdownUIRenderer to render the description
+				MarkdownUIRenderer.renderTaskDisc(
+					app,
+					taskDesc.join('\n').trim(),
+					descElement, // Use HTMLDivElement reference
+					task.filePath,
+					componentRef.current // Pass the Component instance
+				);
 
-			hookMarkdownLinkMouseEventHandlers(app, taskItemBodyDescriptionRenderer.current, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, descElement, task.filePath, task.filePath);
+			}
 		}
 	}, [taskDesc, task.filePath, app]);
 
@@ -121,33 +132,143 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 		const element = document.getElementById('taskItemFooterBtns');
 		if (element) {
 			markdownButtonHoverPreviewEvent(app, event, element, task.filePath);
+		}
+	};
 
-			// app.workspace.trigger('hover-link', {
-			// 	event,                    // The original mouse event
-			// 	source: "task-board",      // Source of the hover
-			// 	hoverParent: element,      // The element that triggered the hover
-			// 	targetEl: element,         // The element to be hovered (same as parent in this case)
-			// 	linktext: task.filePath,   // The file path to preview
-			// 	sourcePath: task.filePath  // The source path (same as file path here)
-			// });
+	// Helper function to convert a hex color to an RGBA string with the specified opacity
+	const hexToRgba = (hex: string, opacity: number): string => {
+		let r = 0, g = 0, b = 0;
+
+		if (hex.length === 4) {
+			r = parseInt(hex[1] + hex[1], 16);
+			g = parseInt(hex[2] + hex[2], 16);
+			b = parseInt(hex[3] + hex[3], 16);
+		} else if (hex.length === 7 || hex.length === 9) {
+			r = parseInt(hex[1] + hex[2], 16);
+			g = parseInt(hex[3] + hex[4], 16);
+			b = parseInt(hex[5] + hex[6], 16);
+		}
+
+		return `rgba(${r},${g},${b},${opacity})`;
+	};
+
+	// Default color when tag isn't found in the settings
+	const defaultTagColor = 'var(--tag-color)';
+
+	const renderHeader = () => {
+		try {
+			if (plugin.settings.data.globalSettings.showHeader) {
+				return (
+					<>
+						<div className="taskItemHeader">
+							<div className="taskItemHeaderLeft">
+								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
+
+								{/* Render tags individually */}
+								<div className="taskItemTags">
+									{task.tags.map((tag: string) => {
+										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
+										const tagColor = customTagColor || defaultTagColor;
+										// console.log("The color of the tag ", tag, " is :",tagColor);
+										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
+										// console.log("The background color received :", backgroundColor);
+										return (
+											<div
+												key={tag}
+												className="taskItemTag"
+												style={{
+													color: tagColor,             // Font color
+													border: `1px solid ${tagColor}`, // Border color
+													backgroundColor: backgroundColor,             // Background color
+													borderRadius: '1em',
+													padding: '2px 8px',
+													marginRight: '2px',          // Space between tags
+													display: 'inline-block',     // Ensure inline display for wrapping
+													whiteSpace: 'nowrap'         // Prevent text overflow
+												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+								</div>
+							</div>
+
+							{/* Drag Handle */}
+							<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
+						</div>
+					</>
+				);
+			} else {
+				return null;
+			}
+		} catch (error) {
+			console.log("Getting error while trying to render Header: ", error);
+			return null;
+		}
+	};
+
+	// Render Footer based on the settings
+	const renderFooter = () => {
+		try {
+			if (plugin.settings.data.globalSettings.showFooter) {
+				return (
+					<>
+						<div className="taskItemFooter">
+							{/* Conditionally render task.completed or the date/time */}
+							{task.completed ? (
+								<div className='taskItemDateCompleted'>✅ {task.completed}</div>
+							) : (
+								<div className='taskItemDate'>
+									{task.time ? `⏰${task.time} | ` : ''}
+									{task.due ? `📅${task.due}` : ''}
+								</div>
+							)}
+							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
+									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
+								</div>
+								<div className="taskItemiconButton">
+									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
+								</div>
+							</div>
+						</div>
+					</>
+				);
+			} else {
+				return null
+			}
+		} catch (error) {
+			console.log("Getting error while trying to render Footer : ", error);
+			return null;
 		}
 	};
 
 	// Render sub-tasks and remaining body separately
-	const renderTaskBody = () => {
+	const renderSubTasks = () => {
 		try {
-			if (taskBody.length > 0) {
-				// const subTasks = taskBody.filter(line => line.startsWith('- [ ]') || line.startsWith('- [x]'));
-				// const otherBody = taskBody.filter(line => !line.startsWith('- [ ]') && !line.startsWith('- [x]'));
-
+			if (task.body.length > 0) {
 				return (
 					<>
-						{/* Render sub-tasks first */}
-						{subTasks.map((line, index) => {
-							const isCompleted = line.startsWith('- [x]');
-							const subtaskText = line.replace(/- \[.\] /, '');
-							return (
-								<div className="taskItemBodySubtaskItem" key={index}>
+						{task.body.map((line, index) => {
+							const isCompleted = line.trim().startsWith('- [x]');
+							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
+							const subtaskText = line.replace(/- \[.\] /, '').trim();
+
+							// Calculate padding based on the number of tabs
+							const numTabs = line.match(/^\t+/)?.[0].length || 0;
+							const paddingLeft = numTabs > 1 ? `${(numTabs - 1) * 15}px` : '0px';
+
+							// Create a unique key for this subtask based on task.id and index
+							const uniqueKey = `${task.id}-${index}`;
+
+							return isSubTask ? (
+								<div
+									className="taskItemBodySubtaskItem"
+									key={uniqueKey}
+									style={{ paddingLeft }}
+									id={uniqueKey} // Assign a unique ID for each subtask element
+								>
 									<input
 										type="checkbox"
 										className="taskItemBodySubtaskItemCheckbox"
@@ -157,16 +278,33 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 									{/* Render each subtask separately */}
 									<div
 										className="subtaskTextRenderer"
-										ref={(el) => (subtaskTextRefs.current[index] = el)}  // Assign each subtask its own ref
+										ref={(el) => (subtaskTextRefs.current[uniqueKey] = el)} // Assign unique ref to each subtask
 									/>
 								</div>
-							);
+							) : null;
 						})}
+					</>
+				);
+			} else {
+				return null;
+			}
+		} catch (error) {
+			console.log('Getting error while trying to render the SubTasks: ', error);
+			return null;
+		}
+	};
 
-						{/* Touchable Description element */}
+
+	// Render Task Description
+	const renderTaskDescriptoin = () => {
+		try {
+			if (taskBody.length > 0) {
+				const uniqueKey = `${task.id}-desc`;
+				return (
+					<>
 						{taskDesc.length > 0 && taskDesc.at(0) !== "" && (
 							<div
-								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer' }}
+								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer', marginInlineStart: '5px' }}
 								onClick={toggleDescription}
 							>
 								{isDescriptionExpanded ? 'Hide Description' : 'Show Description'}
@@ -174,9 +312,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 						)}
 
 						{/* Render remaining body content with expand/collapse animation */}
-						<div className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
+						<div className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`} key={uniqueKey} id={uniqueKey}
 						>
-							<div className="taskItemBodyDescriptionRenderer" ref={taskItemBodyDescriptionRenderer} />
+							<div className="taskItemBodyDescriptionRenderer" ref={(descEl) => taskItemBodyDescriptionRenderer.current[uniqueKey] = descEl} />
 						</div>
 					</>
 				);
@@ -184,7 +322,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 				return null
 			}
 		} catch (error) {
-			console.log("Getting error while trying to print the body : ", error);
+			console.log("Getting error while trying to print the Description : ", error);
 			return null;
 		}
 	};
@@ -193,46 +331,27 @@ const TaskItem: React.FC<TaskProps> = ({ app, task, onEdit, onDelete, onCheckbox
 		<div className="taskItem">
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
-				<div className="taskItemHeader">
-					<div className="taskItemHeaderLeft">
-						<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
-						<div className="taskItemTag">{task.tag}</div>
-					</div>
-					<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
-				</div>
+				{renderHeader()}
 				<div className="taskItemMainBody">
-					<input
-						type="checkbox"
-						checked={(task.completed || isChecked) ? true : false}
-						className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
-						onChange={handleCheckboxChange}
-					/>
-					<div className="taskItemBodyContent">
-						<div className="taskItemTitle">{task.title}</div>
-						<div className="taskItemBody">
-							{renderTaskBody()}
+					<div className="taskItemMainBodyTitleNsubTasks">
+						<input
+							type="checkbox"
+							checked={(task.completed || isChecked) ? true : false}
+							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
+							onChange={handleCheckboxChange}
+						/>
+						<div className="taskItemBodyContent">
+							<div className="taskItemTitle">{task.title}</div>
+							<div className="taskItemBody">
+								{renderSubTasks()}
+							</div>
 						</div>
 					</div>
-				</div>
-				<div className="taskItemFooter">
-					{/* Conditionally render task.completed or the date/time */}
-					{task.completed ? (
-						<div className='taskItemDateCompleted'>✅ {task.completed}</div>
-					) : (
-						<div className='taskItemDate'>
-							{task.time ? `⏰${task.time} | ` : ''}
-							{task.due ? `📅${task.due}` : ''}
-						</div>
-					)}
-					<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-						<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
-							<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
-						</div>
-						<div className="taskItemiconButton">
-							<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
-						</div>
+					<div className="taskItemMainBodyDescription">
+						{renderTaskDescriptoin()}
 					</div>
 				</div>
+				{renderFooter()}
 			</div>
 		</div>
 	);

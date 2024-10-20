@@ -70,14 +70,14 @@ export const renderColumns = (
 			return false;
 		});
 	} else if (colType === "untagged") {
-		tasksToDisplay = pendingTasks.filter((task) => !task.tag);
+		tasksToDisplay = pendingTasks.filter((task) => !(task.tags.length > 0));
 	} else if (colType === "namedTag") {
-		tasksToDisplay = pendingTasks.filter(
-			(task) => task.tag === `#${data.coltag}`
+		tasksToDisplay = pendingTasks.filter((task) =>
+			task.tags.some((tag) => tag === `#${data.coltag}`)
 		);
 	} else if (colType === "otherTags") {
 		tasksToDisplay = pendingTasks.filter(
-			(task) => task.tag && task.tag !== data.coltag
+			(task) => task.tags && task.tags.some((tag) => tag !== data.coltag)
 		);
 	} else if (colType === "completed") {
 		const boardConfigs = plugin.settings.data.boardConfigs; // NOTE : I think i will have to use this function only to get the boardConfigs, although, i know its possible to get this from `plugin.settings`.

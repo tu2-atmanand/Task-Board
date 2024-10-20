@@ -173,7 +173,7 @@
         "filters": [],
         "filterPolarity": "Allow",
         "filterScope": "Both",
-        "name": "Tag Based Board, updating",
+        "name": "Tag Based Board",
         "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true
@@ -259,11 +259,21 @@
       "dailyNotesPluginComp": false,
       "dueDateFormat": "yyyy-MM-DD",
       "taskCompletionInLocalTime": true,
-      "taskCompletionShowUtcOffset": true,
+      "taskCompletionShowUtcOffset": false,
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": false
+      "realTimeScanning": true,
+      "columnWidth": "300px",
+      "showHeader": true,
+      "showFooter": true,
+      "showVerticalScroll": false,
+      "tagColors": {
+        "Test": "#22ee1fef",
+        "Bug": "#ef1120dd",
+        "bug/solver": "#22f7de99",
+        "feat": "#b50df2f2"
+      }
     }
   }
 }
