@@ -46,7 +46,7 @@
         ],
         "Testing 3.md": [
             {
-                "id": 1357415990,
+                "id": 3096905609,
                 "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks",
                 "body": [
                     "\t- [ ] This is the first Sub Task, updating",
@@ -54,6 +54,7 @@
                     "\t\t\t- [ ] This is first sub-sub-sub task",
                     "\t\t\t- [ ] Adding New three level Indentation subTask",
                     "\t\t- [ ] This is second sub-sub Task",
+                    "\tAdding a line here, the below tasks has been achieved. This line was added from the Modal using textArea box.",
                     "\t- [x] This is the Second Sub Task",
                     "\t\t- [x] This is the first sub-sub Task",
                     "\t\t- [x] This is second sub-sub Task, Updated"
@@ -72,7 +73,7 @@
         ],
         "Testing 1.md": [
             {
-                "id": 2339996745,
+                "id": 1014853974,
                 "title": "This is a normal task, I am adding in the file, Updating",
                 "body": [
                     "\t- [ ] Adding a Subtask in file manually.",
@@ -84,12 +85,12 @@
                     "#Test",
                     "#secondTag😀/fun"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Testing 1.md",
                 "completed": ""
             },
             {
-                "id": 3677017633,
+                "id": 2849394505,
                 "title": "Adding a new task to encounter a different issue",
                 "body": [
                     "\t- [ ] This is a first level Sub-Task so this will going to get detected very well, without any problem.",
@@ -106,32 +107,32 @@
                     "\t\t\t\tThis is a normal line in Desc with four levels of indentation. Updating"
                 ],
                 "time": "",
-                "due": "2024-10-19",
+                "due": "2024-10-22",
                 "tags": [
                     "#Test",
                     "#Bug"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Testing 1.md",
                 "completed": ""
             },
             {
-                "id": 2395876619,
+                "id": 2429635315,
                 "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
                 "body": [
                     "\t![[Pasted image 20241014211429.png]]"
                 ],
                 "time": "",
-                "due": "2024-10-18",
+                "due": "2024-10-23",
                 "tags": [
                     "#Test"
                 ],
-                "priority": "4",
+                "priority": 4,
                 "filePath": "Testing 1.md",
                 "completed": ""
             },
             {
-                "id": 4174061902,
+                "id": 1275322136,
                 "title": "A simple task with the priority emoji",
                 "body": [],
                 "time": "",
@@ -139,12 +140,12 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "4",
+                "priority": 4,
                 "filePath": "Testing 1.md",
                 "completed": ""
             },
             {
-                "id": 2667189897,
+                "id": 1476935919,
                 "title": "Another simple task with priority emoji away from the pipe symbol",
                 "body": [],
                 "time": "",
@@ -152,14 +153,14 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "1",
+                "priority": 1,
                 "filePath": "Testing 1.md",
                 "completed": ""
             }
         ],
         "Spintly Details.md": [
             {
-                "id": 3782717572,
+                "id": 1254298175,
                 "title": "Need to complete all the Documents work  and submit to TCS",
                 "body": [
                     "\tJust adding a normal line for this task as a body.",
@@ -168,17 +169,17 @@
                     "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
                 ],
                 "time": "",
-                "due": "2024-10-16",
+                "due": "2024-10-21",
                 "tags": [
                     "#Test",
                     "#feat"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Spintly Details.md",
                 "completed": ""
             },
             {
-                "id": 3351774859,
+                "id": 1878460082,
                 "title": "Just a new Task without tag or date",
                 "body": [
                     "\tFirst normal line for body is added.",
@@ -193,14 +194,14 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Spintly Details.md",
                 "completed": ""
             }
         ],
         "Pending Document Work.md": [
             {
-                "id": 2988984348,
+                "id": 1946578727,
                 "title": "Add Passport details in NSR portal and BGC after getting Passport.",
                 "body": [
                     "\tEditing this task to see if this content gets properly detected and old content gets replaced with this new one."
@@ -211,12 +212,12 @@
                     "#Test",
                     "#working"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Pending Document Work.md",
                 "completed": ""
             },
             {
-                "id": 1037170575,
+                "id": 2696363354,
                 "title": "Get 8th Semester Provisional Marksheet and Apply for :",
                 "body": [
                     "\tAll the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
@@ -230,12 +231,12 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Pending Document Work.md",
                 "completed": ""
             },
             {
-                "id": 3124127374,
+                "id": 4131142012,
                 "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
                 "body": [
                     "\tThis is a line in the Desc",
@@ -246,12 +247,12 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Pending Document Work.md",
                 "completed": ""
             },
             {
-                "id": 499200572,
+                "id": 4294395661,
                 "title": "Graduate All Semester Marksheets :",
                 "body": [
                     "\t- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -268,12 +269,12 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "1",
+                "priority": 1,
                 "filePath": "Pending Document Work.md",
                 "completed": ""
             },
             {
-                "id": 1210178448,
+                "id": 503565421,
                 "title": "Only one Recording Course is remaining of JavaOk",
                 "body": [
                     "\tNow i am removing all the points from the body and changing them into a one line sentence.",
@@ -281,16 +282,16 @@
                     "\t- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-10-19",
+                "due": "2024-10-21",
                 "tags": [
                     "#Test"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Pending Document Work.md",
                 "completed": ""
             },
             {
-                "id": 978020075,
+                "id": 3284473024,
                 "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
                 "body": [],
                 "time": "",
@@ -298,7 +299,7 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "Pending Document Work.md",
                 "completed": ""
             }
@@ -340,15 +341,15 @@
         "DocsForPlugin/CodeBase Structure.excalidraw.md": [],
         "DailyNotes.md": [
             {
-                "id": 4137463717,
+                "id": 1011337028,
                 "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
                 "body": [],
                 "time": "",
-                "due": "2024-10-16",
+                "due": "2024-10-23",
                 "tags": [
                     "#Test"
                 ],
-                "priority": "0",
+                "priority": 0,
                 "filePath": "DailyNotes.md",
                 "completed": ""
             }
@@ -368,7 +369,7 @@
         "Spintly Details.md": [],
         "Pending Document Work.md": [
             {
-                "id": 567010257,
+                "id": 914193809,
                 "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
                 "body": [],
                 "time": "",
@@ -376,7 +377,7 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": "3",
+                "priority": 3,
                 "filePath": "Pending Document Work.md",
                 "completed": "2024-09-26T16"
             }
