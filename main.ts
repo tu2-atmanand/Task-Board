@@ -15,6 +15,7 @@ import {
 	TAbstractFile,
 	TFile,
 	WorkspaceLeaf,
+	requireApiVersion,
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
@@ -180,6 +181,9 @@ export default class TaskBoard extends Plugin {
 			)
 		);
 		this.registerDomEvent(window, "blur", () => {
+			console.log(
+				"User switched away from Obsidian or Obsidian lost focus."
+			);
 			this.onFileModifiedAndLostFocus();
 		});
 
@@ -213,17 +217,37 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
+		// requireApiVersion("0.15.0")
+		// 	? (activeDocument = activeWindow.document)
+		// 	: (activeDocument = window.document);
 		const closeButton = document.querySelector(
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
-			this.registerDomEvent(window, "mouseenter", (closeButton) => {
-				console.log(
-					"User hovered over the close button. Storing SessionStorage data to Disk."
-				);
-				onUnloadSave(this.plugin);
-			});
+			this.registerDomEvent(
+				window,
+				"mouseenter",
+				() => {
+					console.log(
+						"User hovered over the close button. Storing SessionStorage data to Disk."
+					);
+					// onUnloadSave(this.plugin);
+				}
+			);
 		}
+
+		// Old method :
+		// const closeButton = document.querySelector(
+		// 	".titlebar-button.mod-close"
+		// );
+		// if (closeButton) {
+		// 	closeButton.addEventListener("mouseenter", () => {
+		// 		console.log(
+		// 			"User hovered over the close button. Storing SessionStorage data to Disk."
+		// 		);
+		// 		onUnloadSave(this.plugin);
+		// 	});
+		// }
 
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
