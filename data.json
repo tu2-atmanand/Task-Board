@@ -90,13 +90,13 @@
         ],
         "filters": [
           "Test",
-          "NOTE"
+          "Bug"
         ],
         "filterPolarity": "Deny",
         "filterScope": "Both",
-        "name": "Only Keep  Data based Col for Testing",
+        "name": "Testing This Board",
         "index": 1,
-        "showColumnTags": true,
+        "showColumnTags": false,
         "showFilteredTags": false
       },
       {

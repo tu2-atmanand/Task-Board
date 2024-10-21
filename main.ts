@@ -257,7 +257,7 @@ export default class TaskBoard extends Plugin {
 
 		// Load all the tasks from the tasks.json into sessionStorage
 		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		// startPeriodicSave(this.plugin);
+		startPeriodicSave(this.plugin);
 
 		// Register the Kanban view
 		this.registerView(
