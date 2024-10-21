@@ -302,6 +302,11 @@ If your plugin does not need CSS, delete this file.
 	font-size: small;
 }
 
+.taskItemDateCompleted {
+	color: #ccc;
+	font-size: small;
+}
+
 .taskItemHeader {
 	display: flex;
 	flex-direction: row;
@@ -658,8 +663,8 @@ If your plugin does not need CSS, delete this file.
 	position: sticky;
 	top: 0;
 	overflow: hidden;
-	max-width: 15vw;
-	width: 15vw;
+	min-width: 180px;
+	max-width: 250px;
 }
 
 .boardConfigModalSidebarBtnArea {
@@ -668,6 +673,10 @@ If your plugin does not need CSS, delete this file.
 	width: 100%;
 	flex-direction: column;
 	align-items: flex-start;
+}
+
+.boardConfigModalSidebarBtnArea hr {
+	margin: 0 !important;
 }
 
 .boardConfigModalSidebarBtnAreaGlobal {
@@ -694,7 +703,13 @@ If your plugin does not need CSS, delete this file.
 	flex: 1;
 	padding-left: 1em;
 	overflow-y: auto;
+	max-width: 50vw;
 	/* Allow scrolling for main content */
+}
+
+.boardConfigModalMainContentBoardSettingTab,
+.pluginGlobalSettingsTab {
+	max-width: 50vw;
 }
 
 .boardConfigModalMainContent-Active {
@@ -749,6 +764,16 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: row;
 	justify-content: flex-start;
 	gap: 0.5em;
+}
+
+.boardConfigModalColumnRowContentColName {
+	min-width: 133px;
+	max-width: 200px;
+}
+
+.boardConfigModalColumnRowContentColDatedVal {
+	min-width: 70px;
+	max-width: 75px;
 }
 
 .modal-container.mod-dim {

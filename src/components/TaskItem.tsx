@@ -220,7 +220,8 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 								<div className='taskItemDateCompleted'>✅ {task.completed}</div>
 							) : (
 								<div className='taskItemDate'>
-									{task.time ? `⏰${task.time} | ` : ''}
+									{task.time ? `⏰${task.time}` : ''}
+									{task.time && task.due ? ' | ' : ''}
 									{task.due ? `📅${task.due}` : ''}
 								</div>
 							)}
