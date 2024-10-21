@@ -209,20 +209,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// 	}
 	// }, [selectedBoardIndex !== -1]);
 
-	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		if (globalSettingsHTMLSection.current) {
-			if (selectedBoardIndex === -1) {
-				// Render global settings
-				settingManager.constructUI(globalSettingsHTMLSection.current, "Plugin Global Settings");
-			} else {
-				// Cleanup global settings UI
-				settingManager.cleanUp();
-				// globalSettingsHTMLSection.current.innerHTML = ''; // Clear the content
-				// globalSettingsHTMLSection.current.detach();
-				globalSettingsHTMLSection.current.remove();
-				// globalSettingsHTMLSection.current.removeClass("pluginGlobalSettingsTab");
-			}
+
+			// Render global settings
+			settingManager.constructUI(globalSettingsHTMLSection.current, "Plugin Global Settings");
 		}
 	}, [selectedBoardIndex]);
 
@@ -237,6 +229,17 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Function to render board settings
 	const renderBoardSettings = (boardIndex: number) => {
+		if (globalSettingsHTMLSection.current) {
+			// Cleanup global settings UI
+			settingManager.cleanUp();
+			globalSettingsHTMLSection.current.innerHTML = '';
+			// globalSettingsHTMLSection.current.detach();
+			// globalSettingsHTMLSection.current.remove();
+			// globalSettingsHTMLSection.current.empty();
+			// globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+			// globalSettingsHTMLSection.current.removeClass("pluginGlobalSettingsTab");
+		}
+
 		const board = localBoards[boardIndex];
 		return (
 			<div className="boardConfigModalMainContent-Active">
@@ -339,7 +342,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															/>
 														)}
 														<div className="boardConfigModalColumnRowContent">
-															<button style={{ width: '100%', minWidth: '8em' }}>{column.colType}</button>
+															<button style={{ width: '100%', minWidth: '5em', maxWidth: '8em' }}>{column.colType}</button>
 															<input
 																type="text"
 																value={column.data.name}
@@ -351,6 +354,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																		e.target.value
 																	)
 																}
+																className="boardConfigModalColumnRowContentColName"
 															/>
 															{column.colType === "namedTag" && (
 																<input
@@ -365,6 +369,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																			e.target.value
 																		)
 																	}
+																	className="boardConfigModalColumnRowContentColName"
 																/>
 															)}
 															{column.colType === "completed" && (
@@ -402,6 +407,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																				}
 																			)
 																		}
+																		className="boardConfigModalColumnRowContentColDatedVal"
 																	/>
 																	<input
 																		type="number"
@@ -421,6 +427,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																				}
 																			)
 																		}
+																		className="boardConfigModalColumnRowContentColDatedVal"
 																	/>
 																</>
 															)}
@@ -444,6 +451,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 	};
 
+	const renderGlobalSettingsTab = (boardIndex: number) => {
+		return (
+			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
+		);
+	}
+
 	return (
 		<>
 			{renderAddColumnModal()}
@@ -452,7 +465,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<div className="boardConfigModalSidebarBtnArea" >
 						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>Global Settings</div>
 						<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-						<h6>Boards</h6>
+						<h6>All Boards</h6>
 						{localBoards.map((board, index) => (
 							<div
 								key={index}
@@ -479,8 +492,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<DragDropContext onDragEnd={onDragEnd}>
 					<div className="boardConfigModalMainContent">
 						{selectedBoardIndex === -1
-							? <div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
-							: renderBoardSettings(selectedBoardIndex)}
+							? <div>{renderGlobalSettingsTab(selectedBoardIndex)}</div>
+							: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
+						}
 					</div>
 				</DragDropContext>
 			</div>
