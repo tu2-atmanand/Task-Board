@@ -281,84 +281,87 @@ const EditTaskContent: React.FC<{
 				</div>
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
-						<label className="EditTaskModalHomeFieldTitle">Task Title</label>
-						<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
+						<div className="EditTaskModalHomeLeftSecScrollable">
+							<label className="EditTaskModalHomeFieldTitle">Task Title</label>
+							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-						{/* Subtasks */}
-						<label className="EditTaskModalHomeFieldTitle">Sub Tasks</label>
-						<div className="EditTaskModalsubTasksContainer">
-							{bodyContent.split('\n').map((bodyLine: string, bodyLineIndex: number) => {
-								// Filter only the lines that start with the task patterns
-								if (bodyLine.startsWith('\t- [ ]') || bodyLine.startsWith('\t- [x]')) {
-									return (
-										<div key={bodyLineIndex} className="EditTaskModalsubTaskItem">
-											<input
-												type="checkbox"
-												checked={bodyLine.trim().startsWith('- [x]')}
-												onChange={() => toggleSubTaskCompletion(bodyLineIndex)}
-											/>
-											<input
-												className="EditTaskModalsubTaskItemInput"
-												type="text"
+							{/* Subtasks */}
+							<label className="EditTaskModalHomeFieldTitle">Sub Tasks</label>
+							<div className="EditTaskModalsubTasksContainer">
+								{bodyContent.split('\n').map((bodyLine: string, bodyLineIndex: number) => {
+									// Filter only the lines that start with the task patterns
+									if (bodyLine.startsWith('\t- [ ]') || bodyLine.startsWith('\t- [x]')) {
+										return (
+											<div key={bodyLineIndex} className="EditTaskModalsubTaskItem">
+												<input
+													type="checkbox"
+													checked={bodyLine.trim().startsWith('- [x]')}
+													onChange={() => toggleSubTaskCompletion(bodyLineIndex)}
+												/>
+												<input
+													className="EditTaskModalsubTaskItemInput"
+													type="text"
 													value={bodyLine.replace(/\t- \[(.)\] /, '')}
-												onChange={(e) => updateSubTaskContent(bodyLineIndex, e.target.value)}
-											/>
-											<FaTrash
-												size={15}
-												enableBackground={0}
-												opacity={0.7}
-												style={{ marginInlineStart: '0.8em' }}
-												title="Delete Sub-Task"
-												onClick={() => removeSubTask(bodyLineIndex)}
-												cursor={'pointer'}
-											/>
+													onChange={(e) => updateSubTaskContent(bodyLineIndex, e.target.value)}
+												/>
+												<FaTrash
+													size={15}
+													enableBackground={0}
+													opacity={0.7}
+													style={{ marginInlineStart: '0.8em' }}
+													title="Delete Sub-Task"
+													onClick={() => removeSubTask(bodyLineIndex)}
+													cursor={'pointer'}
+												/>
+											</div>
+										);
+									}
+									// Return null if the line doesn't match the subtask pattern
+									return null;
+								})}
+								<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>Add new Sub-Task</button>
+							</div>
+
+							<div className="EditTaskModalTabHeader">
+								<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>Preview</div>
+								<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>Editor</div>
+							</div>
+
+							{/* Conditional rendering based on active tab */}
+							<div className={`EditTaskModalTabContent ${activeTab === 'preview' ? 'show' : 'hide'}`}>
+								{/* Preview Section */}
+								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
+									<div className="EditTaskModalHomePreviewContainer">
+										<div className="EditTaskModalHomePreviewHeader">
+											<div style={{ fontWeight: '400' }}>{filePath}</div>
+											<button className="EditTaskModalHomeOpenFileBtn"
+												id="EditTaskModalHomeOpenFileBtn"
+												// onMouseEnter={handleMouseEnter}
+												// onMouseOver={handleMouseEnter}
+												// onClick={() => app.workspace.openLinkText(task.filePath, "")}
+												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+											>Open File</button>
 										</div>
-									);
-								}
-								// Return null if the line doesn't match the subtask pattern
-								return null;
-							})}
-							<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>Add new Sub-Task</button>
-						</div>
-
-						<div className="EditTaskModalTabHeader">
-							<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>Preview</div>
-							<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>Editor</div>
-						</div>
-
-						{/* Conditional rendering based on active tab */}
-						<div className={`EditTaskModalTabContent ${activeTab === 'preview' ? 'show' : 'hide'}`}>
-							{/* Preview Section */}
-							<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
-								<div className="EditTaskModalHomePreviewContainer">
-									<div className="EditTaskModalHomePreviewHeader">
-										<div style={{ fontWeight: '400' }}>{filePath}</div>
-										<button className="EditTaskModalHomeOpenFileBtn"
-											id="EditTaskModalHomeOpenFileBtn"
-											// onMouseEnter={handleMouseEnter}
-											// onMouseOver={handleMouseEnter}
-											// onClick={() => app.workspace.openLinkText(task.filePath, "")}
-											onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
-										>Open File</button>
-									</div>
-									<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
-										{/* The markdown content will be rendered here */}
+										<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
+											{/* The markdown content will be rendered here */}
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<div className={`EditTaskModalTabContent ${activeTab === 'editor' ? 'show' : 'hide'}`}>
-							<div className="EditTaskModalHomePreviewHeader">Edit or add Description for the Task or add more subTasks.</div>
-							{/* Editor Section */}
-							<textarea
-								className="EditTaskModalBodyDescription"
-								value={bodyContent}
-								onChange={handleTextareaChange}
-								placeholder="Body content"
-								style={{ display: activeTab === 'editor' ? 'block' : 'none', width: '100%' }}
-							/>
+							<div className={`EditTaskModalTabContent ${activeTab === 'editor' ? 'show' : 'hide'}`}>
+								<div className="EditTaskModalHomePreviewHeader">Edit or add Description for the Task or add more subTasks.</div>
+								{/* Editor Section */}
+								<textarea
+									className="EditTaskModalBodyDescription"
+									value={bodyContent}
+									onChange={handleTextareaChange}
+									placeholder="Body content"
+									style={{ display: activeTab === 'editor' ? 'block' : 'none', width: '100%' }}
+								/>
+							</div>
 						</div>
 
+						<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>Save</button>
 					</div>
 					<div className="EditTaskModalHomeRightSec">
 						{/* Task Time Input */}
@@ -429,7 +432,6 @@ const EditTaskContent: React.FC<{
 						</div>
 					</div>
 				</div>
-				<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>Save</button>
 			</div >
 		</>
 	);

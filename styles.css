@@ -116,6 +116,7 @@ If your plugin does not need CSS, delete this file.
 	justify-content: space-between;
 	align-items: center;
 	padding-inline: 10px;
+	border-radius: 5px;
 }
 
 .taskBoardColumnSecHeaderTitleSec {
@@ -248,8 +249,17 @@ If your plugin does not need CSS, delete this file.
 }
 
 .taskItemBodyDescription {
-	max-height: 0;
 	overflow: hidden;
+	transition: max-height 0.4s cubic-bezier(0.71, -0.04, 0.06, 1.01);
+	max-height: 0;
+}
+
+.taskItemBodyDescription-expanded {
+	padding: 2px;
+	border-radius: 4px;
+	background: var(--background-modifier-box-shadow);
+	transition: max-height 0.4s cubic-bezier(0.71, -0.04, 0.06, 1.01);
+	max-height: 100%;
 }
 
 .taskItemBodyDescriptionRenderer {
@@ -272,12 +282,6 @@ If your plugin does not need CSS, delete this file.
 	margin-inline-start: 15px;
 }
 
-.taskItemBodyDescription-expanded {
-	padding: 2px;
-	border-radius: 4px;
-	max-height: 100%;
-	background: var(--background-modifier-box-shadow);
-}
 
 .taskItemTags {
 	display: flex;
@@ -389,7 +393,15 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	max-height: calc(var(--dialog-max-height) - 4vh);
 	box-sizing: border-box;
+	position: relative;
+}
+
+.EditTaskModalHomeTitle {
+	font-size: x-large;
+	font-weight: 600;
+	align-self: center;
 }
 
 .EditTaskModalHomeModalTitle {
@@ -401,14 +413,29 @@ If your plugin does not need CSS, delete this file.
 .EditTaskModalHomeBody {
 	display: flex;
 	flex-direction: row;
-	gap: 1em;
+	flex-grow: 1;
+	/* Allow it to take available space between the title and Save button */
+	overflow: hidden;
+	/* Prevent the body from scrolling */
+	height: 100%;
+	/* Ensure it takes the full height */
 }
 
 .EditTaskModalHomeLeftSec {
 	display: flex;
 	flex-direction: column;
 	width: 40vw;
-	max-width: 40vw
+	max-width: 40vw;
+	flex-grow: 1;
+	max-height: 100%;
+}
+
+.EditTaskModalHomeLeftSecScrollable {
+	display: flex;
+	flex-direction: column;
+	max-height: 100%;
+	overflow-y: auto;
+	padding-inline-end: 8px;
 }
 
 
@@ -520,18 +547,10 @@ If your plugin does not need CSS, delete this file.
 }
 
 .EditTaskModalHomeOpenFileBtn {
-	/* position: sticky; */
-	/* bottom: 10px; */
-	/* right: 10px; */
-	padding: 8px 12px;
-	/* align-self: end; */
-	font-size: 0.9rem;
-	color: white;
+	padding: 4px 8px !important;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
-	width: fit-content;
-	margin-inline-end: 1em;
 }
 
 .EditTaskModalHomeOpenFileBtn:hover {
@@ -553,7 +572,8 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 5px;
 	padding: 0.5em;
 	min-width: 8vw;
-	max-width: 12vw;
+	max-width: 11vw;
+	box-sizing: border-box;
 }
 
 .EditTaskModalHomeField {
@@ -579,7 +599,15 @@ If your plugin does not need CSS, delete this file.
 }
 
 .EditTaskModalHomeSaveBtn {
-	margin-top: 15px;
+	position: sticky;
+	bottom: 0;
+	background-color: green;
+	/* width: 100%; */
+	padding: 10px;
+	border: none;
+	cursor: pointer;
+	margin-inline: 1em;
+	margin-block-start: 1em;
 }
 
 .EditTaskModalHomeSaveBtn:hover {
@@ -658,8 +686,7 @@ If your plugin does not need CSS, delete this file.
 	gap: 25em;
 	padding: 1em;
 	border-radius: 4px;
-	/* Ensure the sidebar takes the full height of the modal and doesn't scroll */
-	height: 100%;
+	max-height: calc(var(--dialog-max-height) - 4vh);
 	position: sticky;
 	top: 0;
 	overflow: hidden;
@@ -683,20 +710,24 @@ If your plugin does not need CSS, delete this file.
 	padding: 8px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
+	align-self: center;
+	cursor: pointer;
 }
 
 .boardConfigModalSidebarBtnArea-btn {
-	border-radius: var(--border-radius-activated-tab-header-dark);
+	border-radius: var(--button-radius);
 	border: var(--border-width) solid olive;
 	padding: 8px;
+	cursor: pointer;
 }
 
 .boardConfigModalSidebarBtnArea-btn-active {
-	box-shadow: var(--shadow-activated-tab-header-dark) !important;
-	background: var(--background-activated-tab-header-dark) !important;
-	border-radius: var(--border-radius-activated-tab-header-dark);
+	box-shadow: var(--button-shadow) !important;
+	background: var(--background-primary-alt) !important;
+	border-radius: var(--button-radius);
 	border: var(--border-width) solid olive;
 	padding: 8px;
+	cursor: pointer;
 }
 
 .boardConfigModalMainContent {
