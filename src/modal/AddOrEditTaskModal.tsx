@@ -88,7 +88,7 @@ const EditTaskContent: React.FC<{
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
-		setBodyContent(['', ...updatedBodyContent].join('\n'));
+		setBodyContent(['\t- [ ] New Sub Task', ...updatedBodyContent].join('\n'));
 	};
 
 	const updateSubTaskContent = (index: number, value: string) => {
@@ -300,7 +300,7 @@ const EditTaskContent: React.FC<{
 											<input
 												className="EditTaskModalsubTaskItemInput"
 												type="text"
-												value={bodyLine.trim().replace(/- \[.\] /, '')}
+													value={bodyLine.replace(/\t- \[(.)\] /, '')}
 												onChange={(e) => updateSubTaskContent(bodyLineIndex, e.target.value)}
 											/>
 											<FaTrash
