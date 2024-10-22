@@ -160,26 +160,27 @@
         ],
         "Spintly Details.md": [
             {
-                "id": 1254298175,
+                "id": 1152415198,
                 "title": "Need to complete all the Documents work  and submit to TCS",
                 "body": [
+                    "\t- [ ] Adding a simple New SubTask",
                     "\tJust adding a normal line for this task as a body.",
                     "\tThis is an image in the body : ![[1721576562712.jpg]]",
                     "\t- [x] Adding a first subtask, with **checked** state true.",
                     "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
                 ],
                 "time": "",
-                "due": "2024-10-21",
+                "due": "2024-10-22",
                 "tags": [
                     "#Test",
                     "#feat"
                 ],
-                "priority": 0,
+                "priority": 2,
                 "filePath": "Spintly Details.md",
                 "completed": ""
             },
             {
-                "id": 1878460082,
+                "id": 257943902,
                 "title": "Just a new Task without tag or date",
                 "body": [
                     "\tFirst normal line for body is added.",
@@ -190,7 +191,7 @@
                     "\t- [ ] Adding another subTask, second one"
                 ],
                 "time": "10:30 - 11:30",
-                "due": "2024-10-20",
+                "due": "2024-10-22",
                 "tags": [
                     "#Test"
                 ],

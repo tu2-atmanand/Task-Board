@@ -89,15 +89,15 @@
           }
         ],
         "filters": [
-          "Test",
-          "Bug"
+          "#Bug",
+          "#bug/solver"
         ],
-        "filterPolarity": "Deny",
+        "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Testing This Board",
         "index": 1,
         "showColumnTags": false,
-        "showFilteredTags": false
+        "showFilteredTags": true
       },
       {
         "columns": [
@@ -171,11 +171,11 @@
           }
         ],
         "filters": [],
-        "filterPolarity": "Allow",
+        "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Tag Based Board",
         "index": 2,
-        "showColumnTags": true,
+        "showColumnTags": false,
         "showFilteredTags": true
       },
       {
@@ -227,7 +227,8 @@
           }
         ],
         "showColumnTags": true,
-        "showFilteredTags": true
+        "showFilteredTags": true,
+        "filterPolarity": "0"
       }
     ],
     "globalSettings": {
