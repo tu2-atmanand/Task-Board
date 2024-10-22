@@ -31,6 +31,8 @@ An Obsidian plugin to view and manage all your task in a much more efficient Kan
 
 **Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and create your own boards from the Configure Board Settings. Enjoy !
 
+---
+
 ## Basic Information
 > The detailed Documentation on how to use the Task Board efficiently can be found here : [Task Board Documentation]()
 
@@ -55,6 +57,10 @@ Edit task directly from the Edit Task Window. You can add different properties t
 ### Deleting a Task
 Directly delete unwanted task from the board using the delete Icon. The task will aslo be deleted from the parent markdown file.
 
+### Applying Filters
+Apply Board filters to filter out and see the urgent tasks on the board with ease. Filters for Columns coming soon.
+
+---
 
 ## Upcoming Features
 
@@ -65,6 +71,8 @@ Directly delete unwanted task from the board using the delete Icon. The task wil
 - **Temporary Task :** User will be able to add a temporary task which is not required to be saved in any file.
 - **New Board Type :** A new type of Board knows as `Markdown` will be added, which will work with a single markdown file, similar to the Kanban Plugin.
 - **Comments and Activity :** From the Task Popup window, you can add comments to the task, which will help you to document everything you were doing while working on this task, similar to Github Projects Kanban boards.
+
+---
 
 ## Motivation for the Project
 
