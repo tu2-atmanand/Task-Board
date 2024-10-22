@@ -3,7 +3,7 @@
 import { App, Modal, Notice } from "obsidian";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
 import { DraggableProvided, DropResult } from 'react-beautiful-dnd';
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, Italic } from "lucide-react";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 
@@ -259,8 +259,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>Show Column Tags</h4>
-							<div>Whether to show tags on the columns.</div>
+							<h4>Show Tags for <i>namedTag</i> type columns</h4>
+							<div>Only works for <i>namedTag</i> type columns. If you dont want to see the tag on the card for the type of column.</div>
 						</div>
 						<input
 							type="checkbox"
@@ -275,7 +275,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 							<h4>Filter Tags</h4>
-							<div>Enter the tags, separated with comman, you want to see in this board. Only tasks with these tags will be shown.</div>
+							<div>Enter the tags, separated with comma, you want to see in this board. Only tasks with these tags will be shown.</div>
 
 						</div>
 						<input
@@ -287,20 +287,20 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 							<h4>Filter Polarity</h4>
-							<div>Enable or disable the above filter tags inside the boards.</div>
+							<div>Activate or Deactivate the above filter tags inside the boards.</div>
 						</div>
 						<select
 							value={board.filterPolarity}
 							onChange={(e) => handleFilterPolarityChange(boardIndex, e.target.value)}
 						>
-							<option value="Allow">Allow</option>
-							<option value="Deny">Deny</option>
+							<option value="1">Activate</option>
+							<option value="0">Deactivate</option>
 						</select>
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 							<h4>Show Filtered Tags</h4>
-							<div>Whether to show the filtered tags on the columns.</div>
+							<div>Whether to show the above mention filtered tags on the Task Item Card.</div>
 						</div>
 						<input
 							type="checkbox"
