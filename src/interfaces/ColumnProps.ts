@@ -6,7 +6,8 @@ import TaskBoard from "main";
 export interface ColumnProps {
 	app: App;
 	plugin: TaskBoard;
-	activeBoard: number;
+	columnIndex: number;
+	activeBoardIndex: number;
 	colType: string;
 	active?: boolean;
 	collapsed?: boolean;

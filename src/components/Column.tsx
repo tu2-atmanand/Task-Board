@@ -21,7 +21,8 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	app,
 	plugin,
-	activeBoard,
+	columnIndex,
+	activeBoardIndex,
 	colType,
 	data,
 	tasks: externalTasks,
@@ -47,7 +48,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		// setTasks([]);
 		// console.log("FROM COLUMN.TSX : Data i will be sending to renderColumns function : ", allTasksExternal);
 		if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
-			renderColumns(plugin, setTasks, activeBoard, colType, data, allTasksExternal);
+			renderColumns(plugin, setTasks, activeBoardIndex, colType, data, allTasksExternal);
 		}
 	}, [colType, data, allTasksExternal]);
 
@@ -120,9 +121,10 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	};
 
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
+	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	return (
-		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth }} >
+		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth }}>
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
 					{/* <button className="columnDragIcon"><RxDragHandleDots2 /></button> */}
@@ -130,26 +132,39 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 				</div>
 				<RxDotsVertical />
 			</div>
-			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll? '' : '-SH'}`}>
+			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
-					tasks.map((task, index) => (
-						<TaskItem
-							app={app}
-							plugin={plugin}
-							key={index}
-							task={task}
-							onEdit={() => handleEditTask(task)}
-							onDelete={() => handleDeleteTask(app, task)}
-							onCheckboxChange={() => handleCheckboxChange(task)}
-							onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
-						/>
-					))
+					tasks.map((task, index) => {
+						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
+							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
+
+						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
+							return ( // Ensure that TaskItem is returned
+								<TaskItem
+									key={index} // Make sure to add a key prop
+									app={app}
+									plugin={plugin}
+									taskItemIndex={index}
+									task={task}
+									columnIndex={columnIndex}
+									activeBoardSettings={activeBoardSettings}
+									onEdit={() => handleEditTask(task)}
+									onDelete={() => handleDeleteTask(app, task)}
+									onCheckboxChange={() => handleCheckboxChange(task)}
+									onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
+								/>
+							);
+						}
+
+						return null; // Return null if the condition is false, to avoid undefined behavior.
+					})
 				) : (
 					<p>No tasks available</p>
 				)}
 			</div>
 		</div>
 	);
+
 };
 
 export default Column;

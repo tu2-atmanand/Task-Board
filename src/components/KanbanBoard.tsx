@@ -158,8 +158,8 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 						<Column
 							app={app}
 							plugin={plugin}
-							key={index}
-							activeBoard={activeBoardIndex}
+							columnIndex={index}
+							activeBoardIndex={activeBoardIndex}
 							colType={column.colType}
 							data={column.data}
 							tasks={tasks}
