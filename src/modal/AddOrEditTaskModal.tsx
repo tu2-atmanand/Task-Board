@@ -10,6 +10,7 @@ import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import TaskBoard from "main";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
+import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 const taskItemEmpty = {
@@ -289,7 +290,7 @@ const EditTaskContent: React.FC<{
 									// Return null if the line doesn't match the subtask pattern
 									return null;
 								})}
-								<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>Add new Sub-Task</button>
+								<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>{t(4)}</button>
 							</div>
 
 							<div className="EditTaskModalTabHeader">
