@@ -208,10 +208,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, columnIndex, activeB
 									})}
 								</div>
 
-
-								{/* Drag Handle */}
-								<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
 							</div>
+							{/* Drag Handle */}
+							<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
 						</div>
 					</>);
 			} else {
