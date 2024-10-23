@@ -8,7 +8,7 @@ aliases:
 ## Topics
 - [01 - Installation](01-Installation.md)
 - [02 - Getting Started](02-GettingStarted.md)
-- [03 - Features](03-Features.md)
+- [03 - Features](Features/README.md)
 - [04 - Examples](Examples/README.md)
 - [05 - How to do Anything](<How To/README.md>)
 - [06 - FAQs](FAQs/README.md)
@@ -33,6 +33,6 @@ aliases:
 
 **STEP 3 :** Go through various examples : [Examples](Examples/README.md)
 
-**STEP 4 :** Understand all the features to user the plugin efficiently : [Getting Started](02-GettingStarted.md)
+**STEP 4 :** Understand all the features to user the plugin efficiently : [Features](Features/README.md)
 
 > For any queries try to find your answer here : [Frequently Asked Questions](FAQs/README.md)
