@@ -130,7 +130,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 					{/* <button className="columnDragIcon"><RxDragHandleDots2 /></button> */}
 					<div className="columnTitle">{data.name}</div>
 				</div>
-				<RxDotsVertical />
+				{/* <RxDotsVertical /> */}
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (

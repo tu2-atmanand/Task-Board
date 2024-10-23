@@ -62,14 +62,6 @@ const EditTaskContent: React.FC<{
 		}
 	}, [startTime, endTime]);
 
-
-	// Function to handle tag input and split by space or comma
-	// const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-	// 	const input = e.target.value;
-	// 	const parsedTags = input.split(/[\s,]+/).filter(tag => tag.startsWith("#")); // Split by space or comma, only keep valid tags
-	// 	setTags(parsedTags);
-	// };
-
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
 		const updatedBodyContent = bodyContent.split('\n');
@@ -96,28 +88,6 @@ const EditTaskContent: React.FC<{
 		updatedBodyContent[index] = `\t- [ ] ${value}`; // Change task state to incomplete upon editing
 		setBodyContent(updatedBodyContent.join('\n'));
 	};
-
-
-	// // Update subtask content
-	// const updateSubTaskContent = (index: number, value: string) => {
-	// 	const updatedSubTasks = [...subTasks];
-	// 	updatedSubTasks[index] = `- [ ] ${value}`; // This is a feature not a bug, whenever user will edit any subTask, its state will be changed to not completed, so the user can change it back to completed if he wants from the Modal itself.
-	// 	setSubTasks(updatedSubTasks);
-	// };
-
-	// useEffect(() => {
-	// 	const updatedBodyContent = bodyContent.split('\n').map((line) => {
-	// 		// Check if the line corresponds to a subtask
-	// 		const matchingSubTask = subTasks.find((subTask) => subTask === line);
-
-	// 		// If there's a matching subtask, use the updated version from subTasks
-	// 		return matchingSubTask ? matchingSubTask : line;
-	// 	});
-
-	// 	// Update bodyContent with the new lines (while preserving the original order)
-	// 	setBodyContent(updatedBodyContent.join('\n'));
-	// }, [subTasks]); // Run this effect whenever subTasks changes
-
 
 	// Tags input
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
