@@ -1,4 +1,4 @@
-const en = {
+const ptBR = {
 	1: "Save",
 	2: "Close",
 	3: "Archive",
@@ -125,9 +125,5 @@ const en = {
 	124: "Show UTC Offset for Task Completion",
 	125: "Whether to display the UTC offset for task completion times",
 	126: "If you like this Plugin, do consider supporting my work by making a small donation for continued better improvement of the idea!",
-	127: "Plugin Language",
-	128: "Select the language of the Plugin UI. To contribute on improve the current language or to add your own Native language, please refer the docs."
 };
-
-export default en;
-export type Lang = typeof en;
+export default ptBR;

@@ -2,7 +2,7 @@
 import en, { Lang } from "./locale/en";
 
 import ar from "./locale/ar";
-import cz from "./locale/cz";
+import cs from "./locale/cs";
 import da from "./locale/da";
 import de from "./locale/de";
 import es from "./locale/es";
@@ -16,19 +16,19 @@ import nl from "./locale/nl";
 import no from "./locale/no";
 import pl from "./locale/pl";
 import pt from "./locale/pt";
-import ptBR from "./locale/pt-br";
+import ptBR from "./locale/ptBR";
 import ro from "./locale/ro";
 import ru from "./locale/ru";
 import sq from "./locale/sq";
 import tr from "./locale/tr";
 import uk from "./locale/uk";
-import zhCN from "./locale/zh-cn";
-import zhTW from "./locale/zh-tw";
+import zhCN from "./locale/zhCN";
+import zhTW from "./locale/zhTW";
 
 // Create a map of the locales
 const localeMap: { [k: string]: Partial<Lang> } = {
 	ar,
-	cz,
+	cs,
 	da,
 	de,
 	en,
@@ -56,11 +56,11 @@ const localeMap: { [k: string]: Partial<Lang> } = {
 // Function to get the current language from the system/localStorage
 const getLanguage = (): string => {
 	// Get the language from localStorage or default to English
-	return window.localStorage.getItem("language") || "en"; // TODO : use better method to get this value from RAM instead of localStorage thousands of times.
+	return window.localStorage.getItem("taskBoardLang") || "en"; // TODO : use better method to get this value from RAM instead of localStorage thousands of times.
 };
 
 // Function to fetch the locale based on the current language
-const getLocale = (): Partial<Lang> => {
+const getLocale = (): string => {
 	const lang = getLanguage();
 	const locale = localeMap[lang] || localeMap["en"]; // Fallback to 'en' if the language is not found
 	if (!locale) {
@@ -72,7 +72,5 @@ const getLocale = (): Partial<Lang> => {
 // Main translation function
 export function t(strIndex: number): string {
 	const locale = getLocale();
-	return (
-		locale[strIndex] || en[strIndex]
-	);
+	return locale[strIndex] || en[strIndex];
 }
