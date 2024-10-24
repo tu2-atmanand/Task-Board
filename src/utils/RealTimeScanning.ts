@@ -11,7 +11,7 @@ import { scanFilterForFilesNFolders } from "./Checker";
 export class RealTimeScanning {
 	app: App;
 	plugin: TaskBoard;
-	fileStack: string[] = [];
+	taskBoardFileStack: string[] = [];
 	scanTimer: number;
 	scanningVault: ScanningVault;
 
@@ -28,22 +28,22 @@ export class RealTimeScanning {
 	// 	try {
 	// 		console.log(
 	// 			"The data inside the localstorage at startup : ",
-	// 			localStorage.getItem("fileStack")
+	// 			localStorage.getItem("taskBoardFileStack")
 	// 		);
-	// 		const storedStack = localStorage.getItem("fileStack");
+	// 		const storedStack = localStorage.getItem("taskBoardFileStack");
 	// 		if (storedStack) {
-	// 			this.fileStack = JSON.parse(storedStack);
+	// 			this.taskBoardFileStack = JSON.parse(storedStack);
 	// 			console.log(
-	// 				"I think the local storage have been created, value of fileStack : ",
-	// 				this.fileStack
+	// 				"I think the local storage have been created, value of taskBoardFileStack : ",
+	// 				this.taskBoardFileStack
 	// 			);
 	// 		} else if (fs.existsSync(this.stackFilePath)) {
 	// 			// Fallback to loading from file if localStorage isn't available
 	// 			const data = fs.readFileSync(this.stackFilePath, "utf8");
-	// 			this.fileStack = JSON.parse(data) || [];
+	// 			this.taskBoardFileStack = JSON.parse(data) || [];
 	// 			console.log(
 	// 				"The data i stored inside the file-stack.json, which i have put inside the localStorage : ",
-	// 				this.fileStack
+	// 				this.taskBoardFileStack
 	// 			);
 	// 		}
 	// 		this.startScanTimer();
@@ -58,11 +58,11 @@ export class RealTimeScanning {
 			console.log("Creating localStorage ...");
 			console.log(
 				"LocalStorage : initializeStack : The data inside the localstorage at startup : ",
-				localStorage.getItem("fileStack")
+				localStorage.getItem("taskBoardFileStack")
 			);
-			const storedStack = localStorage.getItem("fileStack");
+			const storedStack = localStorage.getItem("taskBoardFileStack");
 			if (storedStack) {
-				this.fileStack = JSON.parse(storedStack);
+				this.taskBoardFileStack = JSON.parse(storedStack);
 			} else {
 			}
 			this.startScanTimer();
@@ -73,17 +73,17 @@ export class RealTimeScanning {
 
 	async saveStack() {
 		try {
-			localStorage.setItem("fileStack", JSON.stringify(this.fileStack));
+			localStorage.setItem("taskBoardFileStack", JSON.stringify(this.taskBoardFileStack));
 
 			console.log(
 				"saveStack : The data inside localStorage after setItem : ",
-				localStorage.getItem("fileStack")
+				localStorage.getItem("taskBoardFileStack")
 			);
 
 			// NOTE : Below is the part of the commented code for the VERIFIED THROUGH EXPERIMENT above.
 			// fs.writeFileSync(
 			// 	this.stackFilePath,
-			// 	JSON.stringify(this.fileStack, null, 2)
+			// 	JSON.stringify(this.taskBoardFileStack, null, 2)
 			// );
 		} catch (error) {
 			console.error("Error saving file stack:", error);
@@ -93,7 +93,7 @@ export class RealTimeScanning {
 	async startScanTimer() {
 		// 	console.log(
 		// 		"Creating LocalStorage, starting 10 min timer which will run forever : ",
-		// 		this.fileStack
+		// 		this.taskBoardFileStack
 		// 	);
 
 		this.scanTimer = window.setInterval(() => {
@@ -104,10 +104,10 @@ export class RealTimeScanning {
 	async processStack() {
 		console.log(
 			"TIME UP : 25 minute has passed or at startup. Scanning the following files: ",
-			this.fileStack
+			this.taskBoardFileStack
 		);
-		const filesToProcess = this.fileStack.slice();
-		this.fileStack = [];
+		const filesToProcess = this.taskBoardFileStack.slice();
+		this.taskBoardFileStack = [];
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
 			.filter((file) => !!file);
@@ -143,20 +143,20 @@ export class RealTimeScanning {
 					this.scanningVault.updateTasksFromFiles([file]);
 				} else {
 					// console.log(
-					// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.fileStack.includes(file.path) : ",
-					// 	!this.fileStack.includes(file.path)
+					// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.taskBoardFileStack.includes(file.path) : ",
+					// 	!this.taskBoardFileStack.includes(file.path)
 					// );
 
 					// If the file is already in the stack, ignore it
-					if (this.fileStack.at(0) === undefined) {
-						this.fileStack.push(file.path); // Add the file to the stack
+					if (this.taskBoardFileStack.at(0) === undefined) {
+						this.taskBoardFileStack.push(file.path); // Add the file to the stack
 						await this.saveStack(); // Save the updated stack
-					} else if (!this.fileStack.includes(file.path)) {
-						this.fileStack.push(file.path);
+					} else if (!this.taskBoardFileStack.includes(file.path)) {
+						this.taskBoardFileStack.push(file.path);
 						await this.saveStack(); // Save the updated stack
 					} else {
 						console.log(
-							"The file already exists in fileStack:",
+							"The file already exists in taskBoardFileStack:",
 							file.path
 						);
 					}
