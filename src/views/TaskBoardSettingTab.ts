@@ -3,10 +3,8 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 
 import { SettingsManager } from "../services/TaskBoardSettingConstructUI";
-import type TaskBoard from "../../main"; // Adjust the path based on your file structure
-import fs from "fs";
+import type TaskBoard from "../../main";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
-import path from "path";
 
 export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
