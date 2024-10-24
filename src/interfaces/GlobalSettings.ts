@@ -1,6 +1,7 @@
 import { BoardConfigs } from "./BoardConfigs";
 
 export interface globalSettingsData {
+	lang: string;
 	scanFilters: {
 		files: {
 			polarity: number;
@@ -48,6 +49,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 	data: {
 		boardConfigs: [],
 		globalSettings: {
+			lang: "en",
 			scanFilters: {
 				files: {
 					polarity: 0,
@@ -81,4 +83,31 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			tagColors: {},
 		},
 	},
+};
+
+export const langCodes: { [key: string]: string } = {
+	en: "English",
+	ar: "العربية",
+	cs: "čeština",
+	da: "Dansk",
+	de: "Deutsch",
+	es: "Español",
+	fr: "français",
+	hi: "हिन्दी",
+	id: "Bahasa Indonesia",
+	it: "Italiano",
+	ja: "日本語",
+	ko: "한국어",
+	nl: "Nederlands",
+	no: "Norsk",
+	pl: "język polski",
+	pt: "Português",
+	ro: "Română",
+	ru: "Русский",
+	sq: "Shqip",
+	tr: "Türkçe",
+	uk: "Українська",
+	"pt-BR": "Portugues do Brasil",
+	"zh-CN": "简体中文",
+	"zh-TW": "繁體中文",
 };
