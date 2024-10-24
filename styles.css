@@ -808,10 +808,10 @@ If your plugin does not need CSS, delete this file.
 	max-width: 75px;
 }
 
-.modal-container.mod-dim {
+/* .modal-container.mod-dim {
 	min-width: fit-content;
 	min-height: fit-content;
-}
+} */
 
 .modal-close-button {
 	z-index: 10;
