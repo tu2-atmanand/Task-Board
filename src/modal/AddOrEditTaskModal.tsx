@@ -248,16 +248,16 @@ const EditTaskContent: React.FC<{
 		<>
 			<div className="EditTaskModalHome">
 				<div className="EditTaskModalHomeTitle">
-					{taskExists ? 'Edit Task' : 'Add New Task'}
+					{taskExists ? t(21) : t(22)}
 				</div>
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
-							<label className="EditTaskModalHomeFieldTitle">Task Title</label>
+							<label className="EditTaskModalHomeFieldTitle">{t(23)}</label>
 							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
 
 							{/* Subtasks */}
-							<label className="EditTaskModalHomeFieldTitle">Sub Tasks</label>
+							<label className="EditTaskModalHomeFieldTitle">{t(24)}</label>
 							<div className="EditTaskModalsubTasksContainer">
 								{bodyContent.split('\n').map((bodyLine: string, bodyLineIndex: number) => {
 									// Filter only the lines that start with the task patterns
@@ -294,8 +294,8 @@ const EditTaskContent: React.FC<{
 							</div>
 
 							<div className="EditTaskModalTabHeader">
-								<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>Preview</div>
-								<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>Editor</div>
+								<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>{t(25)}</div>
+								<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>{t(26)}</div>
 							</div>
 
 							{/* Conditional rendering based on active tab */}
@@ -311,7 +311,7 @@ const EditTaskContent: React.FC<{
 												// onMouseOver={handleMouseEnter}
 												// onClick={() => app.workspace.openLinkText(task.filePath, "")}
 												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
-											>Open File</button>
+											>{t(27)}</button>
 										</div>
 										<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
 											{/* The markdown content will be rendered here */}
@@ -320,40 +320,40 @@ const EditTaskContent: React.FC<{
 								</div>
 							</div>
 							<div className={`EditTaskModalTabContent ${activeTab === 'editor' ? 'show' : 'hide'}`}>
-								<div className="EditTaskModalHomePreviewHeader">Edit or add Description for the Task or add more subTasks.</div>
+								<div className="EditTaskModalHomePreviewHeader">{t(28)}</div>
 								{/* Editor Section */}
 								<textarea
 									className="EditTaskModalBodyDescription"
 									value={bodyContent}
 									onChange={handleTextareaChange}
-									placeholder="Body content"
+									placeholder={t(29)}
 									style={{ display: activeTab === 'editor' ? 'block' : 'none', width: '100%' }}
 								/>
 							</div>
 						</div>
 
-						<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>Save</button>
+						<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t(1)}</button>
 					</div>
 					<div className="EditTaskModalHomeRightSec">
 						{/* Task Time Input */}
 						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">Task Start Time</label>
+							<label className="EditTaskModalHomeFieldTitle">{t(30)}</label>
 							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
 						</div>
 						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">Task End Time</label>
+							<label className="EditTaskModalHomeFieldTitle">{t(31)}</label>
 							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
 						</div>
 
 						{/* Task Due Date */}
 						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">Task Due Date</label>
+							<label className="EditTaskModalHomeFieldTitle">{t(32)}</label>
 							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
 						</div>
 
 						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">Task Priority</label>
+							<label className="EditTaskModalHomeFieldTitle">{t(33)}</label>
 							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => setPriority(parseInt(e.target.value))}>
 								{priorityOptions.map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
@@ -363,7 +363,7 @@ const EditTaskContent: React.FC<{
 
 						{/* Task Tag */}
 						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">Task Tag</label>
+							<label className="EditTaskModalHomeFieldTitle">{t(34)}</label>
 							<input
 								className="EditTaskModalHome-tagValue"
 								type="text"

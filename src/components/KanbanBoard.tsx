@@ -13,6 +13,7 @@ import Column from "./Column";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
+import { t } from "src/utils/lang/helper";
 
 const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin }) => {
 	const [tasks, setTasks] = useState<taskItem[]>([]);
@@ -99,7 +100,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 
 			openAddNewTaskModal(app, plugin, activeFile);
 		} else {
-			new Notice("No active file found to add a task.");
+			new Notice(t(6));
 		}
 	};
 

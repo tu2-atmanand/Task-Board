@@ -9,6 +9,7 @@ import ReactDOM from "react-dom/client";
 import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/Checker";
+import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
@@ -46,7 +47,7 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 
 		setCollectedTasks(scanningVault.tasks);
 		// setIsRunning(false);
-		new Notice("Vault scanning complete.");
+		new Notice(t(64));
 		console.log("Vault scanning complete.");
 		scanningVault.saveTasksToFile();
 
@@ -108,17 +109,17 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 
 	return (
 		<div className="reScanVaultModalHome">
-			<h2 style={{ textAlign: "center" }}>Scan Tasks from the Vault</h2>
-			<p>Run this feature only if your tasks has not been properly detected/scanned or the board is acting weired.</p>
-			<p>You dont have to run this feature often, the plugin will auto detect newly added/edited tasks.</p>
-			<p>NOTE : Please check your File Scanning Filters from the plugin settings first, if you are running this function to scan undetected tasks.</p>
+			<h2 style={{ textAlign: "center" }}>{t(65)}</h2>
+			<p>{t(66)}</p>
+			<p>{t(67)}</p>
+			<p>{t(68)}</p>
 
 			<div className="reScanVaultModalHomeSecondSection" >
 				<div style={{ flexGrow: 1, width: "80%" }}>
 					<progress max="100" value={progress} style={{ width: "100%", height: '35px' }}></progress>
 				</div>
 				<button className="reScanVaultModalHomeSecondSectionButton" onClick={runScan} disabled={isRunning}>
-					{isRunning ? progress.toFixed(0) : "Run"}
+					{isRunning ? progress.toFixed(0) : t(69)}
 				</button>
 			</div>
 
@@ -151,7 +152,7 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 			</div>
 
 			<button onClick={toggleView} style={{ marginTop: "20px" }}>
-				{showCollectedTasks ? "Hide Tasks Collected" : "Show Tasks Collected"}
+				{showCollectedTasks ? t(70) : t(71)}
 			</button>
 		</div>
 	);

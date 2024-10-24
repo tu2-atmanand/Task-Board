@@ -9,6 +9,7 @@ import { Component } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItemProps';
+import { t } from 'src/utils/lang/helper';
 
 const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, columnIndex, activeBoardSettings, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation
@@ -241,10 +242,10 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, columnIndex, activeB
 							)}
 							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
+									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title={t(8)} />
 								</div>
 								<div className="taskItemiconButton">
-									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
+									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title={t(9)} />
 								</div>
 							</div>
 						</div>

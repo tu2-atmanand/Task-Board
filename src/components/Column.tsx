@@ -13,6 +13,7 @@ import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
+import { t } from 'src/utils/lang/helper';
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -159,7 +160,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 						return null; // Return null if the condition is false, to avoid undefined behavior.
 					})
 				) : (
-					<p>No tasks available</p>
+					<p>{t(7)}</p>
 				)}
 			</div>
 		</div>

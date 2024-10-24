@@ -3,6 +3,7 @@
 import { App, Modal } from 'obsidian';
 
 import React from 'react';
+import { t } from 'src/utils/lang/helper';
 
 interface DeleteConfirmationModalProps {
 	app: App;
@@ -23,14 +24,14 @@ export class DeleteConfirmationModal extends Modal {
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: 'Confirm Delete' });
-		contentEl.createEl('p', { text: 'Are you sure you want to delete this task?' });
+		contentEl.createEl('h2', { text: t(60) });
+		contentEl.createEl('p', { text: t(61) });
 
 		const buttonContainer = contentEl.createDiv('button-container');
 		buttonContainer.style.display = 'flex';
 		buttonContainer.style.gap = '1em';
 
-		const confirmButton = buttonContainer.createEl('button', { text: 'Yes' });
+		const confirmButton = buttonContainer.createEl('button', { text: t(62) });
 		confirmButton.style.paddingBlock = '4px';
 		confirmButton.style.paddingInline = '25px';
 		confirmButton.classList.add('deleteTaskConfirmBtn');
@@ -39,7 +40,7 @@ export class DeleteConfirmationModal extends Modal {
 			this.close();
 		});
 
-		const cancelButton = buttonContainer.createEl('button', { text: 'No' });
+		const cancelButton = buttonContainer.createEl('button', { text: t(63) });
 		cancelButton.style.paddingBlock = '4px';
 		cancelButton.style.paddingInline = '25px';
 		cancelButton.classList.add('deleteTaskCancelmBtn');

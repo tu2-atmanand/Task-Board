@@ -13,6 +13,7 @@ import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/services/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
+import { t } from "src/utils/lang/helper";
 
 interface ConfigModalProps {
 	app: App;
@@ -155,7 +156,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			setLocalBoards(updatedBoards);
 			setSelectedBoardIndex(-1); // Reset to global settings or no board selected
 		} else {
-			new Notice("No board selected to delete.");
+			new Notice(t(35));
 		}
 	};
 
@@ -214,7 +215,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (globalSettingsHTMLSection.current) {
 
 			// Render global settings
-			settingManager.constructUI(globalSettingsHTMLSection.current, "Plugin Global Settings");
+			settingManager.constructUI(globalSettingsHTMLSection.current, t(36));
 		}
 	}, [selectedBoardIndex]);
 
@@ -243,13 +244,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const board = localBoards[boardIndex];
 		return (
 			<div className="boardConfigModalMainContent-Active">
-				<h2 className="boardConfigModalMainContent-Active-Heading">{board.name} Settings</h2>
+				<h2 className="boardConfigModalMainContent-Active-Heading">{board.name} {t(37)}</h2>
 				<hr width="50%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
 				<div className="boardConfigModalMainContent-Active-Body">
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>Board Name</h4>
-							<div>Name of the Board which will appear as a tab in the tab header inside the plugin.</div>
+							<h4>{t(38)}</h4>
+							<div>{t(39)}</div>
 						</div>
 						<input
 							type="text"
@@ -259,8 +260,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>Show Tags for <i>namedTag</i> type columns</h4>
-							<div>Only works for <i>namedTag</i> type columns. If you dont want to see the tag on the card for the type of column.</div>
+							<h4>{t(40)}</h4>
+							<div>{t(41)}</div>
 						</div>
 						<input
 							type="checkbox"
@@ -274,8 +275,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<h3>Board Filters</h3>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>Filter Tags</h4>
-							<div>Enter the tags, separated with comma, you want to see in this board. Only tasks with these tags will be shown.</div>
+							<h4>{t(42)}</h4>
+							<div>{t(43)}</div>
 
 						</div>
 						<input
@@ -286,21 +287,21 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>Filter Polarity</h4>
-							<div>Activate or Deactivate the above filter tags inside the boards.</div>
+							<h4>{t(44)}</h4>
+							<div>{t(45)}</div>
 						</div>
 						<select
 							value={board.filterPolarity}
 							onChange={(e) => handleFilterPolarityChange(boardIndex, e.target.value)}
 						>
-							<option value="1">Activate</option>
-							<option value="0">Deactivate</option>
+							<option value="1">{t(46)}</option>
+							<option value="0">{t(47)}</option>
 						</select>
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>Show Filtered Tags</h4>
-							<div>Whether to show the above mention filtered tags on the Task Item Card.</div>
+							<h4>{t(48)}</h4>
+							<div>{t(49)}</div>
 						</div>
 						<input
 							type="checkbox"
@@ -312,7 +313,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
 
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
-						<h3>Columns</h3>
+						<h3>{t(50)}</h3>
 						<Droppable droppableId="columns" className="boardConfigModalMainContent-Active-BodyColumnsList">
 							{(provided) => (
 								<div ref={provided.innerRef} {...provided.droppableProps}>
@@ -359,7 +360,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															{column.colType === "namedTag" && (
 																<input
 																	type="text"
-																	placeholder="Enter tag"
+																	placeholder={t(51)}
 																	value={column.data.coltag || ""}
 																	onChange={(e) =>
 																		handleColumnChange(
@@ -375,7 +376,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															{column.colType === "completed" && (
 																<input
 																	type="number"
-																	placeholder="Max items"
+																	placeholder={t(52)}
 																	value={column.data.limit || ""}
 																	onChange={(e) =>
 																		handleColumnChange(
@@ -391,7 +392,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																<>
 																	<input
 																		type="number"
-																		placeholder="From"
+																		placeholder={t(53)}
 																		value={column.data.range?.rangedata.from || ""}
 																		onChange={(e) =>
 																			handleColumnChange(
@@ -411,7 +412,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																	/>
 																	<input
 																		type="number"
-																		placeholder="To"
+																		placeholder={t(54)}
 																		value={column.data.range?.rangedata.to || ""}
 																		onChange={(e) =>
 																			handleColumnChange(
@@ -432,7 +433,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																</>
 															)}
 														</div>
-														<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title="Delete Column" />
+														<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t(55)} />
 													</div>
 												</div>
 											)}
@@ -443,10 +444,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							)}
 						</Droppable>
 					</div>
-					<button onClick={handleOpenAddColumnModal}>Add Column</button>
+					<button onClick={handleOpenAddColumnModal}>{t(56)}</button>
 				</div>
 				<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-				<button style={{ backgroundColor: "darkred" }} onClick={deleteCurrentBoard}>Delete This Board</button>
+				<button style={{ backgroundColor: "darkred" }} onClick={deleteCurrentBoard}>{t(57)}</button>
 			</div>
 		);
 	};
@@ -463,7 +464,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			<div className="boardConfigModalHome">
 				<div className="boardConfigModalSidebar">
 					<div className="boardConfigModalSidebarBtnArea" >
-						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>Global Settings</div>
+						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>{t(58)}</div>
 						<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
 						<h6>All Boards</h6>
 						{localBoards.map((board, index) => (
@@ -484,9 +485,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								columns: [],
 							};
 							setLocalBoards([...localBoards, newBoard]);
-						}}>+ Add Board</button>
+						}}>{t(59)}</button>
 						<hr width="100%" size="2" color="olive" noshade="true"></hr>
-						<button style={{ width: '100%', backgroundColor: "darkgreen" }} onClick={handleSave}>Save</button>
+						<button style={{ width: '100%', backgroundColor: "darkgreen" }} onClick={handleSave}>{t(1)}</button>
 					</div>
 				</div>
 				<DragDropContext onDragEnd={onDragEnd}>
