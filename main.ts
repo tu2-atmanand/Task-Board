@@ -21,6 +21,7 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
+	langCodes,
 } from "src/interfaces/GlobalSettings";
 import { RefreshIcon, TaskBoardIcon } from "src/types/Icons";
 import {
@@ -37,8 +38,7 @@ import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
 import { eventEmitter } from "src/services/EventEmitter";
 import { openAddNewTaskModal } from "src/services/OpenModals";
-
-// import { loadGlobalSettings } from "src/utils/TaskItemUtils";
+import { t } from "src/utils/lang/helper";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -46,7 +46,7 @@ export default class TaskBoard extends Plugin {
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
-	fileStack: string[] = [];
+	taskBoardFileStack: string[] = [];
 	scanTimer: number;
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
@@ -68,79 +68,44 @@ export default class TaskBoard extends Plugin {
 	async onload() {
 		console.log("TaskBoard : loading plugin ...");
 
-		// Create a ribbon icon to open the Kanban board view
-		const ribbonIconEl = this.addRibbonIcon(
-			TaskBoardIcon,
-			"Open Task Board",
-			() => {
-				this.app.workspace
-					.getLeaf(true)
-					.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
-			}
-		);
-		ribbonIconEl.addClass("task-board-ribbon-class");
+		//Creates a Icon on Ribbon Bar
+		this.getRibbonIcon();
 
 		// Register few commands
 		this.registerCommands();
 
-		// Loading settings and creating the Settings Tab in main Setting
+		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
-		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 		console.log("MAIN.ts : Loading the setting values : ", this.settings);
 
-		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
-		this.realTimeScanning.initializeStack(
-			this.settings.data.globalSettings.realTimeScanning
-		);
-		this.realTimeScanning.processStack();
+		this.getLanguage();
 
 		// Creating Few Events
 		this.registerEvents();
 
-		// Run scanVaultForTasks if scanVaultAtStartup is true
-		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
-		this.settings.data.globalSettings.scanVaultAtStartup
-			? this.scanningVault.scanVaultForTasks()
-			: "";
+		this.createLocalStorageAndScanModifiedFiles();
 
-		// Load all the tasks from the tasks.json into sessionStorage
-		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		startPeriodicSave(this.plugin);
+		// Run scanVaultForTasks if scanVaultAtStartup is true
+		this.scanVaultAtStartup();
+
+		// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
+		this.loadTasksDataToSS();
 
 		// Register the Kanban view
-		this.registerView(
-			VIEW_TYPE_TASKBOARD,
-			(leaf) => new KanbanView(this.app, this, leaf)
-		);
+		this.registerTaskBoardView();
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText("Total # Tasks Pending");
+		this.registerTaskBoardStatusBar();
+	}
 
-		const lang = window.localStorage.getItem("language");
-		console.log("The language of the Obsidian Application : ", lang);
-
-		// // This adds an editor command that can perform some operation on the current editor instance
-		// this.addCommand({
-		// 	id: "sample-editor-command",
-		// 	name: "Sample editor command",
-		// 	editorCallback: (editor: Editor, view: MarkdownView) => {
-		// 		console.log(editor.getSelection());
-		// 		editor.replaceSelection("Sample Editor Command");
-		// 	},
-		// });
-
-		// // When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		// this.registerInterval(
-		// 	window.setInterval(() => console.log("setInterval"), 5 * 60 * 1000)
-		// );
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		// this.registerDomEvent(document, "click", (evt: MouseEvent) => {
-		// 	console.log("click", evt);
-		// });
+	getRibbonIcon() {
+		// Create a ribbon icon to open the Kanban board view
+		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(4), () => {
+			this.app.workspace
+				.getLeaf(true)
+				.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+		});
+		ribbonIconEl.addClass("task-board-ribbon-class");
 	}
 
 	onFileModifiedAndLostFocus() {
@@ -171,6 +136,55 @@ export default class TaskBoard extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	getLanguage() {
+		const obsidianLang = window.localStorage.getItem("language");
+
+		if (obsidianLang && obsidianLang in langCodes) {
+			localStorage.setItem("taskBoardLang", obsidianLang);
+			this.settings.data.globalSettings.lang = obsidianLang;
+			this.saveSettings();
+		} else {
+			localStorage.setItem(
+				"taskBoardLang",
+				this.settings.data.globalSettings.lang
+			);
+		}
+
+	}
+
+	createLocalStorageAndScanModifiedFiles() {
+		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
+		this.realTimeScanning.initializeStack(
+			this.settings.data.globalSettings.realTimeScanning
+		);
+		this.realTimeScanning.processStack();
+	}
+
+	scanVaultAtStartup() {
+		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
+		this.settings.data.globalSettings.scanVaultAtStartup
+			? this.scanningVault.scanVaultForTasks()
+			: "";
+	}
+
+	loadTasksDataToSS() {
+		const _ = loadTasksJsonFromDiskToSS(this.plugin);
+		startPeriodicSave(this.plugin);
+	}
+
+	registerTaskBoardView() {
+		this.registerView(
+			VIEW_TYPE_TASKBOARD,
+			(leaf) => new KanbanView(this.app, this, leaf)
+		);
+	}
+
+	registerTaskBoardStatusBar() {
+		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
+		// const statusBarItemEl = this.addStatusBarItem();
+		// statusBarItemEl.setText("Total # Tasks Pending");
 	}
 
 	registerCommands() {
@@ -223,6 +237,16 @@ export default class TaskBoard extends Plugin {
 		// 	name: "Re-Scan Vault",
 		// 	callback: () => {
 		// 		this.scanningVault.scanVaultForTasks();
+		// 	},
+		// });
+
+		// // This adds an editor command that can perform some operation on the current editor instance
+		// this.addCommand({
+		// 	id: "sample-editor-command",
+		// 	name: "Sample editor command",
+		// 	editorCallback: (editor: Editor, view: MarkdownView) => {
+		// 		console.log(editor.getSelection());
+		// 		editor.replaceSelection("Sample Editor Command");
 		// 	},
 		// });
 	}
