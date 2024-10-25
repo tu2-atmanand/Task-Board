@@ -20,8 +20,6 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [boards, setBoards] = useState<Board[]>([]);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
-	const [pendingTasks, setPendingTasks] = useState<taskItem[]>([]);
-	const [completedTasks, setCompletedTasks] = useState<taskItem[]>([]);
 	const [refreshCount, setRefreshCount] = useState(0); // Use a counter to track refreshes
 
 	// Load tasks only once when the board is refreshed

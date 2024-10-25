@@ -50,10 +50,10 @@ export class KanbanView extends ItemView {
 			openReScanVaultModal(this.app, this.plugin);
 		});
 
-		console.log(
-			"KanbanView : The Settings which i have loaded using Obsidian : ",
-			this.getSettings()
-		);
+		// console.log(
+		// 	"KanbanView : The Settings which i have loaded using Obsidian : ",
+		// 	this.getSettings()
+		// );
 
 		// this.root = ReactDOM.createRoot(this.contentEl); // Store root reference
 		this.renderBoard();
@@ -82,70 +82,3 @@ export class KanbanView extends ItemView {
 		this.root.unmount();
 	}
 }
-
-// // src/views/KanbanView.ts   ----- Wokring - V2
-
-// import { App, ItemView, Vault, Workspace, WorkspaceLeaf } from "obsidian";
-
-// import BoardConfigModal from "src/components/BoardConfigureModal";
-// import KanbanBoard from "../components/KanbanBoard";
-// import React from "react";
-// import ReactDOM from "react-dom/client"; // Ensure this import is correct for React 18+
-// import type TaskBoard from "../../main";
-
-// export const VIEW_TYPE_TASKBOARD = "task-board-view";
-
-// export class KanbanView extends ItemView {
-// 	private vault: Vault;
-// 	private plugin: TaskBoard;
-
-// 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
-// 		super(leaf);
-// 		this.app = plugin.app;
-// 		this.plugin = plugin;
-// 		this.vault = plugin.app.vault;
-// 	}
-
-// 	getViewType() {
-// 		return VIEW_TYPE_TASKBOARD;
-// 	}
-
-// 	getDisplayText() {
-// 		return "Kanban Board";
-// 	}
-
-// 	async onOpen() {
-// 		// Add icon button to the view header
-// 		this.addAction("gear", "Open Configure Window", () => {
-// 			this.openBoardConfigModal();
-// 		});
-
-// 		this.addAction("plus-circle", "Add New Task", () => {
-// 			// main.ts
-// 			// const MY_COMMAND_ID = "task-board:open-add-task-modal";
-// 			// this.app.commands.executeCommandById(MY_COMMAND_ID);
-// 		});
-
-// 		const root = ReactDOM.createRoot(this.contentEl);
-// 		// Pass the app instance to the KanbanBoard component
-// 		root.render(<KanbanBoard app={this.plugin.app} />);
-
-// 		// Optional: You can remove the task loading logic here if it's meant to be triggered by a button
-// 	}
-
-// 	async loadTasks() {
-// 		// Scan markdown files and populate Kanban board with tasks
-// 		console.log("Executing script to read all Todo Tasks Checkboxes");
-// 	}
-
-// 	async onClose() {
-// 		// Cleanup if needed when the view is closed
-// 		// ReactDOM.unmountComponentAtNode(this.contentEl);
-// 	}
-
-// 	// Function to open the BoardConfigModal
-// 	openBoardConfigModal() {
-// 		const modal = new BoardConfigModal(this.app); // Pass the app instance to the modal
-// 		modal.open();
-// 	}
-// }
