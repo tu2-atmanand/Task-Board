@@ -11,7 +11,7 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
 
-const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, columnIndex, activeBoardSettings, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
+const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex, activeBoardSettings, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation
 	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
@@ -344,7 +344,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, columnIndex, activeB
 	};
 
 	return (
-		<div className="taskItem">
+		<div className="taskItem" key={taskKey}>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				{renderHeader()}

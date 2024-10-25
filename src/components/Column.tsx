@@ -28,8 +28,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	data,
 	tasks: externalTasks,
 	allTasks: allTasksExternal
-	// pendingTasks,  // New props for pending tasks
-	// completedTasks // New props for completed tasks
 }) => {
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
@@ -135,17 +133,16 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
-					tasks.map((task, index) => {
+					tasks.map((task, index=task.id) => {
 						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
 							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
 
 						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
 							return ( // Ensure that TaskItem is returned
 								<TaskItem
-									key={index} // Make sure to add a key prop
 									app={app}
 									plugin={plugin}
-									taskItemIndex={index}
+									taskKey={index}
 									task={task}
 									columnIndex={columnIndex}
 									activeBoardSettings={activeBoardSettings}
