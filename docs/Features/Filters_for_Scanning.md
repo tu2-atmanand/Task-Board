@@ -34,18 +34,17 @@ In the seccond row you will enter the folder names which you will be going to us
 
 ### Folder Names
 
-Enter the folder names separated with commas. Also ensure that the folder name has a backslash at the end of it. 
-
+Enter the folder names separated with commas.
 For Example, if you want to enter two folder names, say 'New Folder 1' amd 'New Folder 2', then enter the values as : 
 ```
-New Folder 1/, New Folder 2/
+New Folder 1, New Folder 2
 ```
 
 If you are giving a folder name which is inside another folder, then, enter the path of the folder from your Vault location. 
 
-For exaple, if you want to enter the specific folder name, say 'New folder' and this folder is inside another folder say 'Parent Folder'. Then enter the full path of this folder and also add a backslash at the end as : 
+For exaple, if you want to enter the specific folder name, say 'New folder' and this folder is inside another folder say 'Parent Folder'. Then enter the full path of this folder :
 ```
-Parent Folder/new folder/
+Parent Folder/new folder
 ```
 
 ### Filter Status
@@ -54,7 +53,7 @@ The status filter again works similar to the one in the above section in Filters
 
 - **Only Scan This :** The plugin will only scan the files inside the folders whose names has been entered by you in the text field.
 
-- **Dont Scan This :** The plugin will not scan any files under the folders whole names has been entered in the text field. It will scan all the files in all the other folder and in the parent directory of the vault, unless you have given the names of the files from the parent directory.
+- **Dont Scan This :** The plugin will not scan any files under the folders whole names has been entered in the text field and also the sub-folders inside them. It will scan all the files in all the other folder and in the parent directory of the vault, unless you have given the names of the files from the parent directory.
 
 - **Disable :** The Filters for Folder wont be applied and the plugin will scan all the files from all the folder.
 
