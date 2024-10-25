@@ -5,7 +5,7 @@ import TaskBoard from "main";
 export interface TaskProps {
 	app: App;
 	plugin: TaskBoard;
-	taskItemIndex: number;
+	taskKey: number;
 	task: taskItem;
 	columnIndex: number;
 	activeBoardSettings: Board;
@@ -16,7 +16,7 @@ export interface TaskProps {
 }
 
 export interface taskItem {
-	id?: number;
+	id: number;
 	title: string;
 	body: string[];
 	due: string;
