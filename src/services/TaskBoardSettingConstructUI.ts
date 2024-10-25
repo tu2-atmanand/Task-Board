@@ -129,7 +129,8 @@ export class SettingsManager {
 			label: string,
 			filterType: keyof typeof scanFilters,
 			polarity: number,
-			values: string[]
+			values: string[],
+			placeholder: string
 		) => {
 			const row = contentEl.createDiv({
 				cls: "scan-filter-row",
@@ -149,6 +150,7 @@ export class SettingsManager {
 					input.value.split(",").map((v) => v.trim());
 				await this.saveSettings();
 			});
+			input.placeholder = placeholder;
 
 			// Dropdown for polarity
 			const dropdown = row.createEl("select", {
@@ -173,7 +175,8 @@ export class SettingsManager {
 			"Files",
 			"files",
 			scanFilters.files.polarity,
-			scanFilters.files.values
+			scanFilters.files.values,
+			"Personal Tasks.md, New folder/New file.md"
 		);
 
 		// Folders Row
@@ -181,7 +184,8 @@ export class SettingsManager {
 			"Folders",
 			"folders",
 			scanFilters.folders.polarity,
-			scanFilters.folders.values
+			scanFilters.folders.values,
+			"New Folder 1, New Folder 2, Parent Folder/child folder/New folder"
 		);
 
 		// Tags Row
@@ -189,7 +193,8 @@ export class SettingsManager {
 			"Tags",
 			"tags",
 			scanFilters.tags.polarity,
-			scanFilters.tags.values
+			scanFilters.tags.values,
+			"#Bug, #docs/🔥bug, #feature"
 		);
 
 		contentEl.createEl("hr");
