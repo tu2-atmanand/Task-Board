@@ -1,9 +1,10 @@
 import { TFile } from "obsidian";
 
 export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
+	console.log("The currently edited file :", file);
 	// Separate the parent folder and file name from the file path
 	// const filePathParts = file.path.split("/");
-	const fileName = file.basename; // Extract file name
+	const fileName = file.path; // Extract file name
 	// const parentFolder = filePathParts.join("/").trim() + "/"; // Rebuild the parent folder path
 	const parentFolder = file.parent?.path;
 
@@ -11,7 +12,16 @@ export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 	console.log("The parentFolder is : ", parentFolder);
 
 	// Check folder filters
-	const folderInFilters = scanFilters.folders.values.includes(parentFolder);
+	const folderFilters = scanFilters.folders.values;
+	let folderInFilters = folderFilters.includes(parentFolder);
+
+	if (!folderInFilters && parentFolder) {
+		console.log("--------------------------------");
+		folderInFilters = folderFilters.some((filter: string) =>
+			parentFolder.includes(filter)
+		);
+	} 
+
 	const folderCheckPass =
 		(folderInFilters && scanFilters.folders.polarity === 1) ||
 		(!folderInFilters && scanFilters.folders.polarity === 2) ||
