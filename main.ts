@@ -225,10 +225,7 @@ export default class TaskBoard extends Plugin {
 			id: "save-session-to-disk",
 			name: "DEV : Save Data from sessionStorage to Disk.",
 			callback: () => {
-				this.app.workspace.getLeaf("window").setViewState({
-					type: VIEW_TYPE_TASKBOARD,
-					active: true,
-				});
+				writeTasksJsonToDisk(this.plugin);
 			},
 		});
 		// // Add a command to Re-Scan the whole Vault
