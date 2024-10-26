@@ -142,6 +142,8 @@ export const moveFromPendingToCompleted = async (
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
+
+	eventEmitter.emit("REFRESH_COLUMN");
 };
 
 export const moveFromCompletedToPending = async (
@@ -174,6 +176,8 @@ export const moveFromCompletedToPending = async (
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
+
+	eventEmitter.emit("REFRESH_COLUMN");
 };
 
 // For handleDeleteTask
@@ -393,6 +397,8 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	allTasks.Pending[newTask.filePath].push(newTaskWithId);
 
 	await writeTasksJsonToSS(plugin, allTasks);
+
+	eventEmitter.emit("REFRESH_COLUMN");
 };
 
 export const addTaskInFile = async (
