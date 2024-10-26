@@ -29,16 +29,38 @@ export const loadTasksJsonFromDiskToSS = async (
 	}
 };
 
+export const dataCleanup = (oldTaskData: tasksJson): tasksJson => {
+	// Function to remove keys with empty arrays from a specified section
+	const removeEmptyKeys = (section: any) => {
+		Object.keys(section).forEach((key) => {
+			if (Array.isArray(section[key]) && section[key].length === 0) {
+				delete section[key];
+			}
+		});
+	};
+
+	// Remove empty arrays from "Pending" and "Completed" sections
+	removeEmptyKeys(oldTaskData.Pending);
+	removeEmptyKeys(oldTaskData.Completed);
+
+	return oldTaskData;
+};
+
+
+
 // Function to write tasks data to disk (called after 5-minute intervals or before unload)
 export const writeTasksJsonToDisk = async (plugin: TaskBoard): Promise<void> => {
 	try {
 		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
 		const ssData = sessionStorage.getItem("tasksData");
-		const tasksData: tasksJson = JSON.parse(ssData ? ssData : "");
+		let tasksData: tasksJson = JSON.parse(ssData ? ssData : "");
 		console.log(
 			"SESSIONSTORAGE : writeTasksJsonToDisk : The data i am going to write to the Disk : ",
 			tasksData
 		);
+
+		// Clean up data to remove empty arrays/objects before writing
+		tasksData = dataCleanup(tasksData);
 
 		if (tasksData) {
 			console.log(
