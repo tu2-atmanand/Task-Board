@@ -3,6 +3,7 @@ import { Board } from "./BoardConfigs";
 import TaskBoard from "main";
 
 export interface TaskProps {
+	key: number
 	app: App;
 	plugin: TaskBoard;
 	taskKey: number;

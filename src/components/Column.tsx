@@ -77,7 +77,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		}
 		// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
-
 	};
 
 	const handleSubTasksChange = (updatedTask: taskItem) => {
@@ -145,6 +144,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
 							return ( // Ensure that TaskItem is returned
 								<TaskItem
+									key={index}
 									app={app}
 									plugin={plugin}
 									taskKey={index}
