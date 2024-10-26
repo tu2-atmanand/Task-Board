@@ -8,14 +8,14 @@ import { ReScanVaultIcon } from "src/types/Icons";
 import ReactDOM from "react-dom/client";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
+import { eventEmitter } from "src/services/EventEmitter";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
 import { openReScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
 export class KanbanView extends ItemView {
-	private vault: Vault;
-	private plugin: TaskBoard;
-	private boards: Board[] = [];
+	plugin: TaskBoard;
+	private boards: Board[];
 	private activeBoardIndex: number = 0;
 	private root: ReactDOM.Root;
 
@@ -23,8 +23,8 @@ export class KanbanView extends ItemView {
 		super(leaf);
 		this.app = app;
 		this.plugin = plugin;
-		this.vault = plugin.app.vault;
 		this.root = ReactDOM.createRoot(this.contentEl);
+		this.boards = [];
 	}
 
 	getViewType() {
@@ -56,8 +56,10 @@ export class KanbanView extends ItemView {
 		// );
 
 		// this.root = ReactDOM.createRoot(this.contentEl); // Store root reference
-		this.renderBoard();
 		await this.loadBoards();
+		this.renderBoard();
+
+		// eventEmitter.on("REFRESH_COLUMN", this.renderBoard);
 	}
 
 	private async loadBoards() {
@@ -70,7 +72,13 @@ export class KanbanView extends ItemView {
 
 	private renderBoard() {
 		// this.root.unmount();
-		this.root.render(<KanbanBoard app={this.app} plugin={this.plugin} />); // Pass the plugin as a prop
+		this.root.render(
+			<KanbanBoard
+				app={this.app}
+				plugin={this.plugin}
+				boardConfigs={this.boards}
+			/>
+		);
 	}
 
 	// public refreshBoard() {
@@ -80,5 +88,6 @@ export class KanbanView extends ItemView {
 	async onClose() {
 		// Clean up when view is closed
 		this.root.unmount();
+		// eventEmitter.off("REFRESH_COLUMN", this.loadBoards);
 	}
 }
