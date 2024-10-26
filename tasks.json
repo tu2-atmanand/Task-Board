@@ -278,12 +278,10 @@
                 "filePath": "DailyNotes.md",
                 "completed": ""
             }
-        ]
-    },
-    "Completed": {
+        ],
         "Testing 3.md": [
             {
-                "id": 4063503087,
+                "id": 1805150001,
                 "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks",
                 "body": [
                     "\t- [ ] This is the first Sub Task, updating",
@@ -306,9 +304,11 @@
                 ],
                 "priority": 2,
                 "filePath": "Testing 3.md",
-                "completed": "2024-10-26/15:46"
+                "completed": ""
             }
-        ],
+        ]
+    },
+    "Completed": {
         "Testing 1.md": [
             {
                 "id": 3513449458,

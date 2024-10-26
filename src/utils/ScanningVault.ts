@@ -254,8 +254,7 @@ export class ScanningVault {
 		// );
 
 		// TODO : At this present commit and the prsent state of the codeBase, the feature that when a user writes at a high speed, the task will be getting refreshed in real-Time is happening perfectly. For that you will have to disable the below line. Also just to mention, you will have to do an optimization, since, if the user is typing at a double speed then mine, then the my CPU was running at 40%.
-		this.TaskDetected = !this.plugin.settings.data.globalSettings
-			.realTimeScanning
+		this.TaskDetected = !this.plugin.settings.data.globalSettings.realTimeScanning
 			? true
 			: false;
 		console.log(
@@ -278,9 +277,9 @@ export class ScanningVault {
 		if (this.TaskDetected) {
 			// new Notice("Tasks scanned from the modified files.");
 			await writeTasksJsonToDisk(this.plugin); // DEV : Remove this, as for RealTimeScanning, this is too many write operations to disk.
-			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
+		eventEmitter.emit("REFRESH_COLUMN");
 	}
 }
 

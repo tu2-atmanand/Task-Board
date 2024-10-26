@@ -101,10 +101,10 @@ export const taskElementsFormatter = (
 		bodyLines.trim() ? `\n${bodyLines}` : ""
 	}`;
 
-	console.log(
-		"taskElementsFormatter : To render in the HTML :\n",
-		completeTask
-	);
+	// console.log(
+	// 	"taskElementsFormatter : To render in the HTML :\n",
+	// 	completeTask
+	// );
 
 	return completeTask;
 };
