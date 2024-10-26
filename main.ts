@@ -151,7 +151,6 @@ export default class TaskBoard extends Plugin {
 				this.settings.data.globalSettings.lang
 			);
 		}
-
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
@@ -189,7 +188,7 @@ export default class TaskBoard extends Plugin {
 
 	registerCommands() {
 		this.addCommand({
-			id: "open-add-task-modal",
+			id: "task-board-1",
 			name: "Add New Task in Current File",
 			callback: () => {
 				const app = this.app as App;
@@ -202,7 +201,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "open-task-board",
+			id: "task-board-2",
 			name: "Open Task Board",
 			callback: () => {
 				this.app.workspace
@@ -211,7 +210,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "open-task-board-new-window",
+			id: "task-board-3",
 			name: "Open Task Board in New Window",
 			callback: () => {
 				this.app.workspace.getLeaf("window").setViewState({
@@ -222,10 +221,17 @@ export default class TaskBoard extends Plugin {
 		});
 		// TODO : Remove this command before publishing
 		this.addCommand({
-			id: "save-session-to-disk",
+			id: "task-board-4",
 			name: "DEV : Save Data from sessionStorage to Disk.",
 			callback: () => {
 				writeTasksJsonToDisk(this.plugin);
+			},
+		});
+		this.addCommand({
+			id: "task-board-5",
+			name: "DEV : REFRESH_COLUMN.",
+			callback: () => {
+				eventEmitter.emit("REFRESH_COLUMN");
 			},
 		});
 		// // Add a command to Re-Scan the whole Vault
