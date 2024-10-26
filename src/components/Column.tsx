@@ -8,12 +8,17 @@ import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/util
 import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItemProps';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
+import { CSSProperties } from 'react';
 import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
 import { t } from 'src/utils/lang/helper';
+
+type CustomCSSProperties = CSSProperties & {
+	'--column-width': string;
+};
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -123,7 +128,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	return (
-		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth }}>
+		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties}>
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
 					{/* <button className="columnDragIcon"><RxDragHandleDots2 /></button> */}
@@ -133,7 +138,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
-					tasks.map((task, index=task.id) => {
+					tasks.map((task, index = task.id) => {
 						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
 							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
 
