@@ -304,9 +304,10 @@ const EditTaskContent: React.FC<{
 								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
 									<div className="EditTaskModalHomePreviewContainer">
 										<div className="EditTaskModalHomePreviewHeader">
-											<div style={{ fontWeight: '400' }}>{filePath}</div>
+											<div style={{ fontWeight: '400', display: 'flex', flexDirection: 'row' }}>File : <div style={{ fontWeight: '500', paddingInline: '10px' }}>{filePath}</div></div>
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
+												aria-label="Hold CTRL button to open in new Window"
 												// onMouseEnter={handleMouseEnter}
 												// onMouseOver={handleMouseEnter}
 												// onClick={() => app.workspace.openLinkText(task.filePath, "")}
@@ -367,6 +368,7 @@ const EditTaskContent: React.FC<{
 							<input
 								className="EditTaskModalHome-tagValue"
 								type="text"
+								placeholder="Hit Enter after typing"
 								onKeyDown={handleTagInput}  // Call handleTagInput on change
 							/>
 							{/* Render tags with cross icon */}
@@ -375,13 +377,14 @@ const EditTaskContent: React.FC<{
 									const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
 									const tagColor = customTagColor || defaultTagColor;
 									const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`;
+									const borderColor = hexToRgba(tagColor, 0.5) || tagColor;
 									return (
 										<div
 											key={tag}
 											className="EditTaskModalHome-taskItemTagsPreview"
 											style={{
 												color: tagColor,
-												border: `1px solid ${tagColor}`,
+												border: `1px solid ${borderColor}`,
 												backgroundColor: backgroundColor,
 												borderRadius: '1em',
 												padding: '2px 8px',
@@ -393,7 +396,7 @@ const EditTaskContent: React.FC<{
 										>
 											{tag}
 											<FaTimes
-												style={{ marginLeft: '8px', cursor: 'pointer' }}
+												style={{ marginLeft: '8px', cursor: 'pointer', verticalAlign: 'text-bottom' }}
 												onClick={() => removeTag(tag)}
 											/>
 										</div>

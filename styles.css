@@ -393,13 +393,13 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	max-height: calc(var(--dialog-max-height) - 4vh);
+	max-height: calc(var(--dialog-max-height) - 5vh);
 	box-sizing: border-box;
 	position: relative;
 }
 
 .EditTaskModalHomeTitle {
-	font-size: x-large;
+	font-size: large;
 	font-weight: 600;
 	align-self: center;
 }
@@ -687,7 +687,7 @@ If your plugin does not need CSS, delete this file.
 	gap: 25em;
 	padding: 1em;
 	border-radius: 4px;
-	max-height: calc(var(--dialog-max-height) - 4vh);
+	max-height: calc(var(--dialog-max-height) - 5vh);
 	position: sticky;
 	top: 0;
 	overflow: hidden;
@@ -896,6 +896,11 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+}
+
+.reScanVaultModalHome h2 {
+	margin-top: 0 !important;
+	margin-bottom: 1em;
 }
 
 .reScanVaultModalHome p {

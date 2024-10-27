@@ -172,6 +172,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
 										const tagColor = customTagColor || defaultTagColor;
 										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
+										const borderColor = hexToRgba(tagColor, 0.5) || tagColor;
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
 										const column = activeBoardSettings.columns[columnIndex];
@@ -194,7 +195,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 												className="taskItemTag"
 												style={{
 													color: tagColor,
-													border: `1px solid ${tagColor}`,
+													border: `1px solid ${borderColor}`,
 													backgroundColor: backgroundColor,
 													borderRadius: '1em',
 													padding: '2px 8px',
@@ -211,7 +212,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 
 							</div>
 							{/* Drag Handle */}
-							<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
+							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} /></div> */}
 						</div>
 					</>);
 			} else {
