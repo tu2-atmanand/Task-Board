@@ -356,7 +356,9 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
-				console.log("CHecking if this file-menu is registered or not");
+				console.log(
+					"MENU : Checking if this file-menu is registered or not"
+				);
 				if (source === "link-context-menu") return;
 
 				const fileIsFile = file instanceof TFile;
@@ -364,7 +366,8 @@ export default class TaskBoard extends Plugin {
 				const leafIsMarkdown = leaf?.view instanceof MarkdownView;
 				const leafIsKanban = leaf?.view instanceof KanbanView;
 
-				if (["pane-more-options", "tab-header"].includes(source)) {
+				if (["pane-more-options"].includes(source)) {
+					console.log("MENU : If the fileIsFile ");
 					menu.addItem((item) => {
 						item.setTitle("Refresh Board")
 							.setIcon(RefreshIcon)
@@ -375,7 +378,119 @@ export default class TaskBoard extends Plugin {
 					});
 				}
 
-				if (leafIsKanban) {
+				if (fileIsFile) {
+					menu.addItem((item) => {
+						item.setTitle("Update tasks from this file")
+							.setIcon(TaskBoardIcon)
+							.setSection("action")
+							.onClick(() => {
+								this.scanningVault.updateTasksFromFiles([file]);
+								this.scanningVault.saveTasksToFile();
+							});
+					});
+					if (
+						this.settings.data.globalSettings.scanFilters.files
+							.polarity === 2
+					) {
+						menu.addItem((item) => {
+							item.setTitle(
+								"Add file in `Dont Scan this file` Filter"
+							)
+								.setIcon(TaskBoardIcon)
+								.setSection("action")
+								.onClick(() => {
+									this.settings.data.globalSettings.scanFilters.files.values.push(
+										file.path
+									);
+									this.saveSettings();
+								});
+						});
+					}
+					if (
+						this.settings.data.globalSettings.scanFilters.files
+							.polarity === 1
+					) {
+						menu.addItem((item) => {
+							item.setTitle(
+								"Add file in `Only Scan this file` Filter"
+							)
+								.setIcon(TaskBoardIcon)
+								.setSection("action")
+								.onClick(() => {
+									this.settings.data.globalSettings.scanFilters.files.values.push(
+										file.path
+									);
+									this.saveSettings();
+								});
+						});
+					}
+
+					menu.addItem((item) => {
+						item.setTitle("DEV : Save Changes") // Cant keep this option in the meny, only for dev
+							.setIcon(TaskBoardIcon)
+							.setSection("action")
+							.onClick(() => {
+								onUnloadSave(this.plugin);
+							});
+					});
+				}
+
+				if (fileIsFolder) {
+					console.log("WHat is the folder object :", file);
+					
+					// menu.addItem((item) => {
+					// 	item.setTitle("Update tasks from this folder")
+					// 		.setIcon(TaskBoardIcon)
+					// 		.setSection("action")
+					// 		.onClick(() => {
+					// 		});
+					// });
+
+					if (
+						this.settings.data.globalSettings.scanFilters.folders
+							.polarity === 2
+					) {
+						menu.addItem((item) => {
+							item.setTitle(
+								"Add folder in `Dont Scan this folder` Filter"
+							)
+								.setIcon(TaskBoardIcon)
+								.setSection("action")
+								.onClick(() => {
+									this.settings.data.globalSettings.scanFilters.folders.values.push(
+										file.path
+									);
+									this.saveSettings();
+								});
+						});
+					}
+					if (
+						this.settings.data.globalSettings.scanFilters.folders
+							.polarity === 1
+					) {
+						menu.addItem((item) => {
+							item.setTitle(
+								"Add folder in `Only Scan this folder` Filter"
+							)
+								.setIcon(TaskBoardIcon)
+								.setSection("action")
+								.onClick(() => {
+									this.settings.data.globalSettings.scanFilters.folders.values.push(
+										file.path
+									);
+									this.saveSettings();
+								});
+						});
+					}
+				}
+
+				if (
+					!Platform.isMobile &&
+					leafIsKanban &&
+					leaf &&
+					source === "sidebar-context-menu"
+				) {
+					console.log("MENU : If the 'sidebar-context-menu'");
 					menu.addItem((item) => {
 						item.setTitle("Refresh Board")
 							.setIcon(RefreshIcon)
