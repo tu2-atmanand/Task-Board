@@ -1,5 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
+import { App, Notice, TFile } from "obsidian";
 import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
 import {
 	priorityEmojis,
@@ -11,7 +12,6 @@ import {
 	writeDataToVaultFiles,
 } from "./MarkdownFileOperations";
 
-import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 
@@ -401,7 +401,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	eventEmitter.emit("REFRESH_COLUMN");
 };
 
-export const addTaskInFile = async (
+export const addTaskInActiveEditor = async (
 	app: App,
 	plugin: TaskBoard,
 	newTask: taskItem
@@ -416,8 +416,10 @@ export const addTaskInFile = async (
 		// Get the active editor and the current cursor position
 		const activeEditor = app.workspace.activeEditor?.editor;
 		if (!activeEditor) {
-			throw new Error("No active editor found.");
+			throw new Error("No active editor found. Please place your cursor in markdown file");
+			new Notice("No active editor found. Please place your cursor in markdown file");
 		}
+
 		const cursorPosition = activeEditor.getCursor();
 
 		// Read the file content
@@ -433,7 +435,7 @@ export const addTaskInFile = async (
 		const newContent = fileLines.join("\n");
 
 		console.log(
-			"Following is the New Content, which you will see after update:\n",
+			"addTaskInActiveEditor : Following is the New Content, which you will see after update:\n",
 			completeTask
 		);
 
