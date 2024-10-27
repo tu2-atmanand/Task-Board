@@ -130,7 +130,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties}>
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
-					{/* <button className="columnDragIcon"><RxDragHandleDots2 /></button> */}
+					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 					<div className="columnTitle">{data.name}</div>
 				</div>
 				{/* <RxDotsVertical /> */}

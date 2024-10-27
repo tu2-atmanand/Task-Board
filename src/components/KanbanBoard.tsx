@@ -92,16 +92,15 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	// };
 
 	// Function to handle saving boards
-	const AddNewTaskIn = () => {
-		const activeFile = app.workspace.getActiveFile();
+	// const AddNewTaskIn = () => {
+	// 	const activeFile = app.workspace.getActiveFile();
 
-		if (activeFile) {
-
-			openAddNewTaskModal(app, plugin, activeFile);
-		} else {
-			new Notice(t(6));
-		}
-	};
+	// 	if (activeFile) {
+	// 		openAddNewTaskModal(app, plugin, activeFile);
+	// 	} else {
+	// 		new Notice(t(6));
+	// 	}
+	// };
 
 	const refreshBoardButton = () => {
 		// refreshKanbanBoard(app);
@@ -135,9 +134,9 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 				</div>
 				<div className="kanbanHeaderBtns">
 					<Tally1 className="kanbanHeaderBtnsSeparator" />
-					<button className="addTaskBtn" style={{ backgroundColor: "none" }} onClick={AddNewTaskIn}>
+					{/* <button className="addTaskBtn" style={{ backgroundColor: "none" }} onClick={AddNewTaskIn}>
 						<CirclePlus size={20} />
-					</button>
+					</button> */}
 					<button
 						className="ConfigureBtn"
 						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
