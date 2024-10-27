@@ -8,11 +8,17 @@ import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/util
 import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItemProps';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
+import { CSSProperties } from 'react';
 import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import TaskItem from './TaskItem';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
+import { t } from 'src/utils/lang/helper';
+
+type CustomCSSProperties = CSSProperties & {
+	'--column-width': string;
+};
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
 	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
@@ -21,13 +27,12 @@ interface ColumnPropsWithSetBoards extends ColumnProps {
 const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	app,
 	plugin,
-	activeBoard,
+	columnIndex,
+	activeBoardIndex,
 	colType,
 	data,
 	tasks: externalTasks,
 	allTasks: allTasksExternal
-	// pendingTasks,  // New props for pending tasks
-	// completedTasks // New props for completed tasks
 }) => {
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
@@ -47,7 +52,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 		// setTasks([]);
 		// console.log("FROM COLUMN.TSX : Data i will be sending to renderColumns function : ", allTasksExternal);
 		if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
-			renderColumns(plugin, setTasks, activeBoard, colType, data, allTasksExternal);
+			renderColumns(plugin, setTasks, activeBoardIndex, colType, data, allTasksExternal);
 		}
 	}, [colType, data, allTasksExternal]);
 
@@ -72,7 +77,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		}
 		// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
-
 	};
 
 	const handleSubTasksChange = (updatedTask: taskItem) => {
@@ -120,36 +124,50 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	};
 
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
+	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	return (
-		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth }} >
+		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties}>
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
-					{/* <button className="columnDragIcon"><RxDragHandleDots2 /></button> */}
+					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 					<div className="columnTitle">{data.name}</div>
 				</div>
-				<RxDotsVertical />
+				{/* <RxDotsVertical /> */}
 			</div>
-			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll? '' : '-SH'}`}>
+			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
-					tasks.map((task, index) => (
-						<TaskItem
-							app={app}
-							plugin={plugin}
-							key={index}
-							task={task}
-							onEdit={() => handleEditTask(task)}
-							onDelete={() => handleDeleteTask(app, task)}
-							onCheckboxChange={() => handleCheckboxChange(task)}
-							onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
-						/>
-					))
+					tasks.map((task, index = task.id) => {
+						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
+							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
+
+						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
+							return ( // Ensure that TaskItem is returned
+								<TaskItem
+									key={index}
+									app={app}
+									plugin={plugin}
+									taskKey={index}
+									task={task}
+									columnIndex={columnIndex}
+									activeBoardSettings={activeBoardSettings}
+									onEdit={() => handleEditTask(task)}
+									onDelete={() => handleDeleteTask(app, task)}
+									onCheckboxChange={() => handleCheckboxChange(task)}
+									onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
+								/>
+							);
+						}
+
+						return null; // Return null if the condition is false, to avoid undefined behavior.
+					})
 				) : (
-					<p>No tasks available</p>
+					<p>{t(7)}</p>
 				)}
 			</div>
 		</div>
 	);
+
 };
 
 export default Column;

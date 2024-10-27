@@ -13,14 +13,13 @@ import Column from "./Column";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import fs from "fs";
+import { t } from "src/utils/lang/helper";
 
-const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin }) => {
+const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [tasks, setTasks] = useState<taskItem[]>([]);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
-	const [boards, setBoards] = useState<Board[]>([]);
+	const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
-	const [pendingTasks, setPendingTasks] = useState<taskItem[]>([]);
-	const [completedTasks, setCompletedTasks] = useState<taskItem[]>([]);
 	const [refreshCount, setRefreshCount] = useState(0); // Use a counter to track refreshes
 
 	// Load tasks only once when the board is refreshed
@@ -53,7 +52,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	// Pub Sub method similar to Kafka to read events/messages.
 	useEffect(() => {
 		const refreshBoardListener = () => {
-			console.log("KanbanBoard.tsx : REFRESH_BOARD mssgs received...");
+			console.log("KanbanBoard : REFRESH_BOARD mssgs received...");
 			// Clear the tasks array
 			setTasks([]);
 			// sleep(30);
@@ -61,9 +60,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 		};
 
 		const refreshColumnListener = async () => {
-			console.log("KanbanBoard.tsx : REFRESH_COLUMN mssgs received...");
+			console.log("KanbanBoard : REFRESH_COLUMN mssgs received...");
 			try {
 				const allTasks = await loadTasksProcessed(plugin);
+				setTasks([]);
 				setAllTasks(allTasks);
 			} catch (error) {
 				console.error("Error loading tasks:", error);
@@ -92,16 +92,15 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 	// };
 
 	// Function to handle saving boards
-	const AddNewTaskIn = () => {
-		const activeFile = app.workspace.getActiveFile();
+	// const AddNewTaskIn = () => {
+	// 	const activeFile = app.workspace.getActiveFile();
 
-		if (activeFile) {
-
-			openAddNewTaskModal(app, plugin, activeFile);
-		} else {
-			new Notice("No active file found to add a task.");
-		}
-	};
+	// 	if (activeFile) {
+	// 		openAddNewTaskModal(app, plugin, activeFile);
+	// 	} else {
+	// 		new Notice(t(6));
+	// 	}
+	// };
 
 	const refreshBoardButton = () => {
 		// refreshKanbanBoard(app);
@@ -135,9 +134,9 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 				</div>
 				<div className="kanbanHeaderBtns">
 					<Tally1 className="kanbanHeaderBtnsSeparator" />
-					<button className="addTaskBtn" style={{ backgroundColor: "none" }} onClick={AddNewTaskIn}>
+					{/* <button className="addTaskBtn" style={{ backgroundColor: "none" }} onClick={AddNewTaskIn}>
 						<CirclePlus size={20} />
-					</button>
+					</button> */}
 					<button
 						className="ConfigureBtn"
 						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
@@ -156,10 +155,11 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard }> = ({ app, plugin })
 					.filter((column) => column.active)
 					.map((column, index) => (
 						<Column
+							key={index}
 							app={app}
 							plugin={plugin}
-							key={index}
-							activeBoard={activeBoardIndex}
+							columnIndex={index}
+							activeBoardIndex={activeBoardIndex}
 							colType={column.colType}
 							data={column.data}
 							tasks={tasks}

@@ -1,10 +1,15 @@
 import { App } from "obsidian";
+import { Board } from "./BoardConfigs";
 import TaskBoard from "main";
 
 export interface TaskProps {
+	key: number
 	app: App;
 	plugin: TaskBoard;
+	taskKey: number;
 	task: taskItem;
+	columnIndex: number;
+	activeBoardSettings: Board;
 	onEdit: () => void;
 	onDelete: () => void;
 	onCheckboxChange: (task: taskItem) => void;
@@ -12,7 +17,7 @@ export interface TaskProps {
 }
 
 export interface taskItem {
-	id?: number;
+	id: number;
 	title: string;
 	body: string[];
 	due: string;

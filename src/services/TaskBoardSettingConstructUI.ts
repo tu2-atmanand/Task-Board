@@ -1,12 +1,13 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
 import { App, Setting } from "obsidian";
+import { globalSettingsData, langCodes } from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
 import { TaskBoardSettingTab } from "../views/TaskBoardSettingTab";
 import fs from "fs";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import path from "path";
+import { t } from "src/utils/lang/helper";
 
 export class SettingsManager {
 	win: Window;
@@ -57,12 +58,13 @@ export class SettingsManager {
 
 		if (!this.globalSettings) {
 			contentEl.createEl("p", {
-				text: "Failed to load settings.",
+				text: t(72),
 			});
 			return;
 		}
 
 		const {
+			lang,
 			firstDayOfWeek,
 			scanFilters,
 			taskCompletionFormat,
@@ -89,15 +91,15 @@ export class SettingsManager {
 
 		contentEl
 			.createEl("p", {
-				text: "Please read the Documentation to make an efficient use of the plugin : ",
+				text: t(73),
 			})
 			.createEl("a", {
-				text: "TaskBoard Docs",
+				text: t(74),
 				href: "https://github.com/",
 			});
 
 		// Setting for taskCompletionFormat
-		contentEl.createEl("h4", { text: "Filters for Scanning" });
+		contentEl.createEl("h4", { text: t(75) });
 
 		// CSS for proper layout
 		const cssStyles = `
@@ -127,7 +129,8 @@ export class SettingsManager {
 			label: string,
 			filterType: keyof typeof scanFilters,
 			polarity: number,
-			values: string[]
+			values: string[],
+			placeholder: string
 		) => {
 			const row = contentEl.createDiv({
 				cls: "scan-filter-row",
@@ -147,20 +150,19 @@ export class SettingsManager {
 					input.value.split(",").map((v) => v.trim());
 				await this.saveSettings();
 			});
+			input.placeholder = placeholder;
 
 			// Dropdown for polarity
 			const dropdown = row.createEl("select", {
 				cls: "filter-dropdown",
 			});
-			["Only Scan this", "Dont Scan this", "Disable"].forEach(
-				(optionText, idx) => {
-					const option = dropdown.createEl("option", {
-						text: optionText,
-					});
-					option.value = (idx + 1).toString();
-					if (idx + 1 === polarity) option.selected = true;
-				}
-			);
+			[t(76), t(77), t(78)].forEach((optionText, idx) => {
+				const option = dropdown.createEl("option", {
+					text: optionText,
+				});
+				option.value = (idx + 1).toString();
+				if (idx + 1 === polarity) option.selected = true;
+			});
 			dropdown.addEventListener("change", async () => {
 				this.globalSettings!.scanFilters[filterType].polarity =
 					parseInt(dropdown.value, 10);
@@ -173,7 +175,8 @@ export class SettingsManager {
 			"Files",
 			"files",
 			scanFilters.files.polarity,
-			scanFilters.files.values
+			scanFilters.files.values,
+			"Personal Tasks.md, New folder/New file.md"
 		);
 
 		// Folders Row
@@ -181,7 +184,8 @@ export class SettingsManager {
 			"Folders",
 			"folders",
 			scanFilters.folders.polarity,
-			scanFilters.folders.values
+			scanFilters.folders.values,
+			"New Folder 1, New Folder 2, Parent Folder/child folder/New folder"
 		);
 
 		// Tags Row
@@ -189,16 +193,38 @@ export class SettingsManager {
 			"Tags",
 			"tags",
 			scanFilters.tags.polarity,
-			scanFilters.tags.values
+			scanFilters.tags.values,
+			"#Bug, #docs/🔥bug, #feature"
 		);
 
 		contentEl.createEl("hr");
 
-		contentEl.createEl("h4", { text: "Board UI Settings" });
+		contentEl.createEl("h4", { text: t(79) });
+		// Setting for Plugin Language
+
+		new Setting(contentEl)
+			.setName(t(127))
+			.setDesc(t(128))
+			.addDropdown((dropdown) => {
+				// Dynamically add options from langCodes
+				Object.keys(langCodes).forEach((key) => {
+					dropdown.addOption(key, langCodes[key]); // key as value, langCodes[key] as label
+				});
+
+				// Set the initial value (assuming lang is the current selected language)
+				dropdown.setValue(lang as string);
+
+				// On dropdown value change, update the global settings
+				dropdown.onChange(async (value) => {
+					this.globalSettings!.lang = value;
+					await this.saveSettings();
+				});
+			});
+
 		// Setting to show/Hide the Header of the Task Item Card
 		new Setting(contentEl)
-			.setName("Show Header of the Task Item Card")
-			.setDesc("Enable this to see the Header in the Task Item Card")
+			.setName(t(80))
+			.setDesc(t(81))
 			.addToggle((toggle) =>
 				toggle.setValue(showHeader).onChange(async (value) => {
 					this.globalSettings!.showHeader = value;
@@ -208,8 +234,8 @@ export class SettingsManager {
 
 		// Setting to show/Hide the Footer of the Task Item Card
 		new Setting(contentEl)
-			.setName("Show Footer of the Task Item Card")
-			.setDesc("Enable this to see the Footer in the Task Item Card")
+			.setName(t(82))
+			.setDesc(t(83))
 			.addToggle((toggle) =>
 				toggle.setValue(showFooter).onChange(async (value) => {
 					this.globalSettings!.showFooter = value;
@@ -219,10 +245,8 @@ export class SettingsManager {
 
 		// Setting to take the width of each Column in px.
 		new Setting(contentEl)
-			.setName("Width of each Column")
-			.setDesc(
-				"Enter the value of width for each column. The default value is 273px"
-			)
+			.setName(t(84))
+			.setDesc(t(85))
 			.addText((text) =>
 				text
 					.setValue(columnWidth)
@@ -236,10 +260,8 @@ export class SettingsManager {
 
 		// Setting to show/Hide the Vertical ScrollBar of each Column
 		new Setting(contentEl)
-			.setName("Show Column Scroll Bar")
-			.setDesc(
-				"Enable to see a scrollbar for each column. This will reduce the width of Task Cards."
-			)
+			.setName(t(86))
+			.setDesc(t(87))
 			.addToggle((toggle) =>
 				toggle.setValue(showVerticalScroll).onChange(async (value) => {
 					this.globalSettings!.showVerticalScroll = value;
@@ -248,7 +270,7 @@ export class SettingsManager {
 			);
 
 		// Tag Colors settings
-		contentEl.createEl("h4", { text: "Tag Colors" });
+		contentEl.createEl("h4", { text: t(88) });
 
 		// If there are existing tag colors, show them
 		const tagColorsContainer = contentEl.createDiv({
@@ -293,7 +315,7 @@ export class SettingsManager {
 					})
 				)
 				.addButton((btn) =>
-					btn.setButtonText("Delete").onClick(async () => {
+					btn.setButtonText(t(89)).onClick(async () => {
 						delete this.globalSettings!.tagColors[tagName];
 						tagSetting.settingEl.remove();
 						await this.saveSettings();
@@ -305,16 +327,14 @@ export class SettingsManager {
 		});
 
 		const addTagColorButton = new Setting(contentEl).addButton((btn) =>
-			btn.setButtonText("Add Tag Color").onClick(() => {
+			btn.setButtonText(t(90)).onClick(() => {
 				const newTagSetting = new Setting(tagColorsContainer)
 					.addText((text) =>
-						text
-							.setPlaceholder("Tag Name")
-							.onChange(async (newTag) => {
-								// if (!this.globalSettings!.tagColors[newTag]) {
-								// 	this.globalSettings!.tagColors[newTag] = ""; // Set empty color initially
-								// }
-							})
+						text.setPlaceholder(t(91)).onChange(async (newTag) => {
+							// if (!this.globalSettings!.tagColors[newTag]) {
+							// 	this.globalSettings!.tagColors[newTag] = ""; // Set empty color initially
+							// }
+						})
 					)
 					.addColorPicker((picker) =>
 						picker.onChange(async (hexColor) => {
@@ -353,13 +373,11 @@ export class SettingsManager {
 			})
 		);
 
-		contentEl.createEl("h4", { text: "Automation Settings" });
+		contentEl.createEl("h4", { text: t(92) });
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
-			.setName("Real-Time Scanning")
-			.setDesc(
-				"After you loose focus from the file you have edited, the task will be immediately refreshed on the Task Boad.\nDisabling this setting will scan the modified files after some time."
-			)
+			.setName(t(93))
+			.setDesc(t(94))
 			.addToggle((toggle) =>
 				toggle.setValue(realTimeScanning).onChange(async (value) => {
 					this.globalSettings!.realTimeScanning = value;
@@ -369,10 +387,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName("Auto Add Due Date to Tasks")
-			.setDesc(
-				"When enabled, if you add a task using the Add New Task pop-up window, then today's date will be added as Due date, if the value is not entered."
-			)
+			.setName(t(95))
+			.setDesc(t(96))
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddDue).onChange(async (value) => {
 					this.globalSettings!.autoAddDue = value;
@@ -382,11 +398,15 @@ export class SettingsManager {
 
 		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
 		new Setting(contentEl)
-			.setName("Auto Scan the Vault on Obsidian Startup")
+			.setName(t(97))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
-					"<p>Only use this feature if your tasks are not getting detected. Usually all your newly added/edited tasks will be detected directly.</p>" +
-						"<p>NOTE : <b>If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.</b></p>"
+					"<p>" +
+						t(98) +
+						"</p>" +
+						"<p>NOTE : <b>" +
+						t(99) +
+						"</b></p>"
 				)
 			)
 			.addToggle((toggle) =>
@@ -396,13 +416,11 @@ export class SettingsManager {
 				})
 			);
 
-		contentEl.createEl("h4", { text: "Compatibility Settings" });
+		contentEl.createEl("h4", { text: t(100) });
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName("Day Planner Plugin Compatibility")
-			.setDesc(
-				"If you have installed Day Planner Plugin, this plugin enters the time at the start of the task body, instead in the metadata. After enabling this feature, the time will be shown according to the Day Planner plugin inside Markdown files, but in the Task Board, the time will be shown in the Task Footer."
-			)
+			.setName("Day Planner Plugin" + t(101))
+			.setDesc(t(102))
 			.addToggle((toggle) =>
 				toggle.setValue(dayPlannerPlugin).onChange(async (value) => {
 					this.globalSettings!.dayPlannerPlugin = value;
@@ -412,10 +430,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date from the Daily Notes file name.
 		new Setting(contentEl)
-			.setName("Daily Notes Plugin Compatibility")
-			.setDesc(
-				"When enabled, if you add a task in a Daily Note file, which has a file name like 'yyyy-MM-DD'. Then this date will be considered as the Due Date for the task."
-			)
+			.setName("Daily Notes Plugin" + t(101))
+			.setDesc(t(103))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(dailyNotesPluginComp)
@@ -427,10 +443,8 @@ export class SettingsManager {
 
 		// Text input for the dueDateFormat
 		new Setting(contentEl)
-			.setName("Due Date Format")
-			.setDesc(
-				"Enter the format of the Date which you are using to name your Daily Notes files. Please use the either 'yyyy-MM-DD' or 'DD-MM-yyyy'"
-			)
+			.setName(t(104))
+			.setDesc(t(105))
 			.addText((text) =>
 				text
 					.setValue(dueDateFormat)
@@ -444,12 +458,12 @@ export class SettingsManager {
 
 		// Seeting to take the format of Due and Completion values. And to take the date-Time format for the completion value.
 		contentEl.createEl("h4", {
-			text: "Due and Completion date formats",
+			text: t(106),
 		});
 
 		// Create the live preview element
 		const previewEl = contentEl.createEl("div", {
-			text: "Preview will appear here",
+			text: t(107),
 			cls: "globa-setting-tab-live-preview",
 		});
 		const updatePreview = () => {
@@ -479,12 +493,10 @@ export class SettingsManager {
 
 		// Setting for Due and Completion Date-Time pattern format
 		new Setting(contentEl)
-			.setName("Compatible Plugin")
-			.setDesc(
-				"Different plugins have different format to give the Due and Completion tags in the task. Please select one and see the above format, if its compatible with your current setup."
-			)
+			.setName(t(108))
+			.setDesc(t(109))
 			.addDropdown((dropdown) => {
-				dropdown.addOption("1", "Default");
+				dropdown.addOption("1", t(110));
 				dropdown.addOption("2", "Tasks Plugin");
 				dropdown.addOption("3", "Dataview Plugine");
 				dropdown.addOption("4", "Obsidian Native");
@@ -499,10 +511,8 @@ export class SettingsManager {
 
 		// Text input for the taskCompletionDateTimePattern
 		new Setting(contentEl)
-			.setName("Task Completion Date-Time Pattern")
-			.setDesc(
-				"Enter the pattern of the Date-Time which you would like to see for the Completion value. Eg. yyyy-MM-ddTHH:mm:ss"
-			)
+			.setName(t(111))
+			.setDesc(t(112))
 			.addText((text) =>
 				text
 					.setValue(taskCompletionDateTimePattern)
@@ -520,8 +530,8 @@ export class SettingsManager {
 
 		// Setting for firstDayOfWeek
 		new Setting(contentEl)
-			.setName("First Day of the Week")
-			.setDesc("Set the first day of the week")
+			.setName(t(113))
+			.setDesc(t(114))
 			// .addText((text) =>
 			// 	text.setValue(firstDayOfWeek).onChange(async (value) => {
 			// 		this.globalSettings!.firstDayOfWeek = value;
@@ -529,13 +539,13 @@ export class SettingsManager {
 			// 	})
 			// );
 			.addDropdown((dropdown) => {
-				dropdown.addOption("1", "Sunday");
-				dropdown.addOption("2", "Monday");
-				dropdown.addOption("3", "Tuesday");
-				dropdown.addOption("4", "Wednesday");
-				dropdown.addOption("5", "Thursday");
-				dropdown.addOption("6", "Friday");
-				dropdown.addOption("7", "Satday");
+				dropdown.addOption("1", t(115));
+				dropdown.addOption("2", t(116));
+				dropdown.addOption("3", t(117));
+				dropdown.addOption("4", t(118));
+				dropdown.addOption("5", t(119));
+				dropdown.addOption("6", t(120));
+				dropdown.addOption("7", t(121));
 
 				dropdown.setValue(firstDayOfWeek as string);
 				dropdown.onChange(async (value) => {
@@ -546,8 +556,8 @@ export class SettingsManager {
 
 		// Setting for taskCompletionInLocalTime
 		new Setting(contentEl)
-			.setName("Task Completion in Local Time")
-			.setDesc("Whether task completion times are shown in local time")
+			.setName(t(122))
+			.setDesc(t(123))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(taskCompletionInLocalTime)
@@ -559,10 +569,8 @@ export class SettingsManager {
 
 		// Setting for taskCompletionShowUtcOffset
 		new Setting(contentEl)
-			.setName("Show UTC Offset for Task Completion")
-			.setDesc(
-				"Whether to display the UTC offset for task completion times"
-			)
+			.setName(t(124))
+			.setDesc(t(125))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(taskCompletionShowUtcOffset)
@@ -609,9 +617,7 @@ export class SettingsManager {
 		});
 
 		const footerText = createEl("p");
-		footerText.appendText(
-			"If you like this Plugin, do consider supporting my work by making a small donation for continued better improvement of the idea!"
-		);
+		footerText.appendText(t(126));
 
 		footerSection.appendChild(footerText);
 

@@ -4,9 +4,11 @@ import { App } from "obsidian";
 import TaskBoard from "main";
 
 export interface ColumnProps {
+	key: number;
 	app: App;
 	plugin: TaskBoard;
-	activeBoard: number;
+	columnIndex: number;
+	activeBoardIndex: number;
 	colType: string;
 	active?: boolean;
 	collapsed?: boolean;

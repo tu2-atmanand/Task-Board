@@ -9,8 +9,9 @@ import { Component } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItemProps';
+import { t } from 'src/utils/lang/helper';
 
-const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
+const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex, activeBoardSettings, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	// State to handle the checkbox animation
 	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
@@ -154,6 +155,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 
 	// Default color when tag isn't found in the settings
 	const defaultTagColor = 'var(--tag-color)';
+	// console.log("The Current Board Settings Data : ", activeBoardSettings);
 
 	const renderHeader = () => {
 		try {
@@ -169,22 +171,37 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 									{task.tags.map((tag: string) => {
 										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
 										const tagColor = customTagColor || defaultTagColor;
-										// console.log("The color of the tag ", tag, " is :",tagColor);
 										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
-										// console.log("The background color received :", backgroundColor);
+										const borderColor = hexToRgba(tagColor, 0.5) || tagColor;
+
+										// If showColumnTags is false and column type is namedTag, skip the column's tag
+										const column = activeBoardSettings.columns[columnIndex];
+										// console.log("Current Column Index :", columnIndex, "| Current Column data :", column);
+										if (!activeBoardSettings.showColumnTags && activeBoardSettings.columns[columnIndex].colType === "namedTag" && tag === column.data.coltag) {
+											// console.log("This is a namedTag, the tag of this column's coltag wont be shown |  Name of Column :", column.data.name);
+											return null;
+										}
+
+										// If showFilteredTags is false, skip tags in the filters array
+										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters?.at(0) != null && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
+											// console.log("The following tags wont be shown since showFilteredTags is OFF :", activeBoardSettings.filters);
+											return null;
+										}
+
+										// Render the remaining tags
 										return (
 											<div
 												key={tag}
 												className="taskItemTag"
 												style={{
-													color: tagColor,             // Font color
-													border: `1px solid ${tagColor}`, // Border color
-													backgroundColor: backgroundColor,             // Background color
+													color: tagColor,
+													border: `1px solid ${borderColor}`,
+													backgroundColor: backgroundColor,
 													borderRadius: '1em',
 													padding: '2px 8px',
-													marginRight: '2px',          // Space between tags
-													display: 'inline-block',     // Ensure inline display for wrapping
-													whiteSpace: 'nowrap'         // Prevent text overflow
+													marginRight: '2px',
+													display: 'inline-block',
+													whiteSpace: 'nowrap'
 												}}
 											>
 												{tag}
@@ -192,13 +209,12 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 										);
 									})}
 								</div>
-							</div>
 
+							</div>
 							{/* Drag Handle */}
-							<div className="taskItemDragBtn"><RxDragHandleDots2 size={14} /></div>
+							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} /></div> */}
 						</div>
-					</>
-				);
+					</>);
 			} else {
 				return null;
 			}
@@ -220,16 +236,17 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 								<div className='taskItemDateCompleted'>✅ {task.completed}</div>
 							) : (
 								<div className='taskItemDate'>
-									{task.time ? `⏰${task.time} | ` : ''}
+									{task.time ? `⏰${task.time}` : ''}
+									{task.time && task.due ? ' | ' : ''}
 									{task.due ? `📅${task.due}` : ''}
 								</div>
 							)}
 							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title="Edit Task" />
+									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title={t(8)} />
 								</div>
 								<div className="taskItemiconButton">
-									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title="Delete Task" />
+									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title={t(9)} />
 								</div>
 							</div>
 						</div>
@@ -328,7 +345,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, task, onEdit, onDelete, on
 	};
 
 	return (
-		<div className="taskItem">
+		<div className="taskItem" key={taskKey}>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				{renderHeader()}

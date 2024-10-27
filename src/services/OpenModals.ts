@@ -1,7 +1,7 @@
 // src/services/OpenModals.ts
 
 import { App, Plugin, TFile } from "obsidian";
-import { addTaskInFile, addTaskInJson } from "src/utils/TaskItemUtils";
+import { addTaskInActiveEditor, addTaskInJson } from "src/utils/TaskItemUtils";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -46,7 +46,7 @@ export const openAddNewTaskModal = (
 		app,
 		plugin,
 		(newTask) => {
-			addTaskInFile(app, plugin, newTask);
+			addTaskInActiveEditor(app, plugin, newTask);
 			if (
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
 				scanFilterForTags(newTask.tags, scanFilters)
