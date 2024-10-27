@@ -234,7 +234,7 @@
     "globalSettings": {
       "scanFilters": {
         "files": {
-          "polarity": 2,
+          "polarity": 1,
           "values": [
             "MyReadme.md"
           ]
@@ -242,8 +242,7 @@
         "folders": {
           "polarity": 2,
           "values": [
-            "Daily_Notes",
-            "Parent"
+            "Daily_Notes"
           ]
         },
         "tags": {
