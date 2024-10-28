@@ -73,7 +73,10 @@ export class RealTimeScanning {
 
 	async saveStack() {
 		try {
-			localStorage.setItem("taskBoardFileStack", JSON.stringify(this.taskBoardFileStack));
+			localStorage.setItem(
+				"taskBoardFileStack",
+				JSON.stringify(this.taskBoardFileStack)
+			);
 
 			console.log(
 				"saveStack : The data inside localStorage after setItem : ",
@@ -103,7 +106,7 @@ export class RealTimeScanning {
 
 	async processStack() {
 		console.log(
-			"TIME UP : 25 minute has passed or at startup. Scanning the following files: ",
+			"processStack : processing all modified files from localStorage either at startup or when Refresh Button is pressed.",
 			this.taskBoardFileStack
 		);
 		const filesToProcess = this.taskBoardFileStack.slice();
@@ -142,10 +145,10 @@ export class RealTimeScanning {
 					);
 					this.scanningVault.updateTasksFromFiles([file]);
 				} else {
-					// console.log(
-					// 	"So the tasks will be updated after 10 seconds. This will only run in the following is true : !this.taskBoardFileStack.includes(file.path) : ",
-					// 	!this.taskBoardFileStack.includes(file.path)
-					// );
+					console.log(
+						"Real-Time Scanning is OFF, storing file in LocalStorage... :",
+						file
+					);
 
 					// If the file is already in the stack, ignore it
 					if (this.taskBoardFileStack.at(0) === undefined) {

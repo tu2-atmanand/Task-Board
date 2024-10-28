@@ -154,7 +154,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
+		// Following line will create a localStorage if the realTimeScanning value is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
@@ -170,7 +170,7 @@ export default class TaskBoard extends Plugin {
 
 	loadTasksDataToSS() {
 		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		startPeriodicSave(this.plugin);
+		// startPeriodicSave(this.plugin); // TODO : Enable this before release, disabled to during development.
 	}
 
 	registerTaskBoardView() {
@@ -261,10 +261,7 @@ export default class TaskBoard extends Plugin {
 				this.editorModified = true;
 				if (file instanceof TFile) {
 					this.currentModifiedFile = file;
-					console.log(
-						"Modified file is : ",
-						this.currentModifiedFile
-					);
+					console.log("Modified file is : ", this.currentModifiedFile	);
 				}
 			})
 		);
