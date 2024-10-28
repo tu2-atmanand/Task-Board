@@ -65,7 +65,7 @@ export class RealTimeScanning {
 				this.taskBoardFileStack = JSON.parse(storedStack);
 			} else {
 			}
-			this.startScanTimer();
+			// this.startScanTimer();
 		} catch (error) {
 			console.error("Error loading file stack:", error);
 		}
