@@ -234,7 +234,7 @@
     "globalSettings": {
       "scanFilters": {
         "files": {
-          "polarity": 1,
+          "polarity": 2,
           "values": [
             "MyReadme.md"
           ]
@@ -264,7 +264,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": true,
-      "realTimeScanning": true,
+      "realTimeScanning": false,
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,

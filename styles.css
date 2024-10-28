@@ -209,6 +209,7 @@ If your plugin does not need CSS, delete this file.
 	padding-inline-start: 0.4em;
 	font-weight: 500;
 	overflow-wrap: anywhere;
+	color: var(--accent-strong);
 }
 
 .taskItemCheckbox {
@@ -242,6 +243,10 @@ If your plugin does not need CSS, delete this file.
 
 .subtaskTextRenderer p {
 	margin-block: 0 !important;
+}
+
+.subtaskTextRenderer strong {
+	color: var(--text-normal);
 }
 
 .taskItemMainBodyDescription {
