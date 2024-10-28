@@ -1,4 +1,4 @@
-const pt-BR = {
+const ptBR = {
   1: "Save",
   2: "Close",
   3: "Archive",
@@ -147,4 +147,4 @@ const pt-BR = {
   146: "Refresh Board Button",
   147: "No active Editor is open. Please place your cursor inside Editor and run this command.",
 };
-export default pt-BR;
+export default ptBR;

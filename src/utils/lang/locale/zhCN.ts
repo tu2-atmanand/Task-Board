@@ -1,4 +1,4 @@
-const zh-CN = {
+const zhCN = {
   1: "节省",
   2: "关闭",
   3: "档案",
@@ -147,4 +147,4 @@ const zh-CN = {
   146: "刷新板按钮",
   147: "没有打开活动编辑器。请将光标放在编辑器内并运行此命令。",
 };
-export default zh-CN;
+export default zhCN;

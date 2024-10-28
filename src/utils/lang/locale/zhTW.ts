@@ -1,4 +1,4 @@
-const zh-TW = {
+const zhTW = {
   1: "節省",
   2: "關閉",
   3: "檔案",
@@ -147,4 +147,4 @@ const zh-TW = {
   146: "刷新面板按鈕",
   147: "沒有開啟活動編輯器。請將遊標置於編輯器中並執行此命令。",
 };
-export default zh-TW;
+export default zhTW;
