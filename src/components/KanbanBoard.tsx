@@ -145,13 +145,14 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 					</button> */}
 					<button
 						className="ConfigureBtn"
+						aria-label={t(145)}
 						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
 							handleUpdateBoards(plugin, updatedBoards, setBoards)
 						)}
 					>
 						<Bolt size={20} />
 					</button>
-					<button className="RefreshBtn" onClick={refreshBoardButton}>
+					<button className="RefreshBtn" aria-label={t(146)} onClick={refreshBoardButton}>
 						<RefreshCcw size={20} />
 					</button>
 				</div>
