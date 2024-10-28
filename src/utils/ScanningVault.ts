@@ -76,7 +76,8 @@ export class ScanningVault {
 				);
 
 				if (scanFilterForTags(tags, scanFilters)) {
-					this.TaskDetected = true;
+					this.TaskDetected =
+						line.startsWith("- [x]") || line.startsWith("- [ ]");
 					const isCompleted = line.startsWith("- [x]");
 					const title = extractTitle(line);
 					const time = extractTime(line);
@@ -161,7 +162,9 @@ export class ScanningVault {
 					);
 
 					if (scanFilterForTags(tags, scanFilters)) {
-						this.TaskDetected = true;
+						this.TaskDetected =
+							line.startsWith("- [x]") ||
+							line.startsWith("- [ ]");
 						const isCompleted = line.startsWith("- [x]");
 						const title = extractTitle(line);
 						const time = extractTime(line);
@@ -253,14 +256,6 @@ export class ScanningVault {
 		// 	this.plugin.settings.data.globalSettings.realTimeScanning
 		// );
 
-		// TODO : At this present commit and the prsent state of the codeBase, the feature that when a user writes at a high speed, the task will be getting refreshed in real-Time is happening perfectly. For that you will have to disable the below line. Also just to mention, you will have to do an optimization, since, if the user is typing at a double speed then mine, then the my CPU was running at 40%.
-		this.TaskDetected = !this.plugin.settings.data.globalSettings.realTimeScanning
-			? true
-			: false;
-		console.log(
-			"After Tasks are extracted and when realTimeScanning is OFF, value of this.TaskDetected : ",
-			this.TaskDetected
-		);
 		this.saveTasksToFile();
 
 		// console.log(
@@ -274,12 +269,15 @@ export class ScanningVault {
 		await writeTasksJsonToSS(this.plugin, this.tasks);
 
 		// Refresh the board only if any task has be extracted from the updated file.
-		if (this.TaskDetected) {
+		if (
+			this.TaskDetected &&
+			this.plugin.settings.data.globalSettings.realTimeScanning
+		) {
 			// new Notice("Tasks scanned from the modified files.");
-			await writeTasksJsonToDisk(this.plugin); // DEV : Remove this, as for RealTimeScanning, this is too many write operations to disk.
+			// await writeTasksJsonToDisk(this.plugin); // DEV : Remove this, as for RealTimeScanning, this is too many write operations to disk.
+			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
-		eventEmitter.emit("REFRESH_COLUMN");
 	}
 }
 

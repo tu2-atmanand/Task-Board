@@ -5,6 +5,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import { SettingsManager } from "../services/TaskBoardSettingConstructUI";
 import type TaskBoard from "../../main";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
+import { t } from "src/utils/lang/helper";
 
 export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
@@ -25,6 +26,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		containerEl.empty();
 		containerEl.addClass("TaskBoardSettingTab");
 
-		this.settingsManager.constructUI(containerEl, "Task Board");
+		this.settingsManager.constructUI(containerEl, t(130));
 	}
 }

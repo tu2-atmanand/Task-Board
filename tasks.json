@@ -2,12 +2,12 @@
     "Pending": {
         "Testing 2.md": [
             {
-                "id": 2895628899,
+                "id": 2697012779,
                 "title": "So This is to add a simple Task for testing. UPdated",
                 "body": [
                     "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
                     "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
-                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command. Updated",
+                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
                     "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
                     "\t\t- [ ] A sub-sub Task for the first time."
                 ],
@@ -98,7 +98,7 @@
         ],
         "Spintly Details.md": [
             {
-                "id": 776811270,
+                "id": 111592345,
                 "title": "Need to complete all the Documents work  and submit to TCS",
                 "body": [
                     "\t- [ ] Adding a simple New SubTask",
@@ -118,7 +118,7 @@
                 "completed": ""
             },
             {
-                "id": 3762050571,
+                "id": 468348907,
                 "title": "Just a new Task without tag or date",
                 "body": [
                     "\t- [ ] Adding a new Sub Task",
@@ -222,7 +222,7 @@
                     "\t- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-10-27",
+                "due": "2024-10-29",
                 "tags": [
                     "#Test"
                 ],

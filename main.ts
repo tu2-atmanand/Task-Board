@@ -154,7 +154,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning value is TRUE. And then it will scan the previous files which got left scanning, becaues the Obsidian was closed before that or crashed.
+		// Following line will create a localStorage if the realTimeScanning value is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
@@ -170,7 +170,7 @@ export default class TaskBoard extends Plugin {
 
 	loadTasksDataToSS() {
 		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		startPeriodicSave(this.plugin);
+		// startPeriodicSave(this.plugin); // TODO : Enable this before release, disabled to during development.
 	}
 
 	registerTaskBoardView() {
@@ -189,20 +189,21 @@ export default class TaskBoard extends Plugin {
 	registerCommands() {
 		this.addCommand({
 			id: "task-board-1",
-			name: "Add New Task in Current File",
+			name: t(131),
 			callback: () => {
 				const app = this.app as App;
+				const activeEditor = app.workspace.activeEditor?.editor;
 				const activeFile = app.workspace.getActiveFile();
-				if (activeFile) {
+				if (activeEditor && activeFile) {
 					openAddNewTaskModal(app, this.plugin, activeFile);
 				} else {
-					new Notice("No active file found to add a task.");
+					new Notice(t(147));
 				}
 			},
 		});
 		this.addCommand({
 			id: "task-board-2",
-			name: "Open Task Board",
+			name: t(132),
 			callback: () => {
 				this.app.workspace
 					.getLeaf(true)
@@ -211,7 +212,7 @@ export default class TaskBoard extends Plugin {
 		});
 		this.addCommand({
 			id: "task-board-3",
-			name: "Open Task Board in New Window",
+			name: t(133),
 			callback: () => {
 				this.app.workspace.getLeaf("window").setViewState({
 					type: VIEW_TYPE_TASKBOARD,
@@ -337,7 +338,7 @@ export default class TaskBoard extends Plugin {
 				console.log(
 					"User hovered over the close button. Storing SessionStorage data to Disk."
 				);
-				// onUnloadSave(this.plugin);
+				onUnloadSave(this.plugin);
 			});
 		}
 
@@ -366,7 +367,7 @@ export default class TaskBoard extends Plugin {
 				const leafIsMarkdown = leaf?.view instanceof MarkdownView;
 				const leafIsKanban = leaf?.view instanceof KanbanView;
 
-				if (["pane-more-options"].includes(source)) {
+				if (source === "pane-more-options") {
 					console.log("MENU : If the fileIsFile ");
 					menu.addItem((item) => {
 						item.setTitle("Refresh Board")
@@ -380,7 +381,7 @@ export default class TaskBoard extends Plugin {
 
 				if (fileIsFile) {
 					menu.addItem((item) => {
-						item.setTitle("Update tasks from this file")
+						item.setTitle(t(134))
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
@@ -393,9 +394,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 2
 					) {
 						menu.addItem((item) => {
-							item.setTitle(
-								"Add file in `Dont Scan this file` Filter"
-							)
+							item.setTitle(t(135))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -411,9 +410,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 1
 					) {
 						menu.addItem((item) => {
-							item.setTitle(
-								"Add file in `Only Scan this file` Filter"
-							)
+							item.setTitle(t(136))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -425,14 +422,14 @@ export default class TaskBoard extends Plugin {
 						});
 					}
 
-					menu.addItem((item) => {
-						item.setTitle("DEV : Save Changes") // Cant keep this option in the meny, only for dev
-							.setIcon(TaskBoardIcon)
-							.setSection("action")
-							.onClick(() => {
-								onUnloadSave(this.plugin);
-							});
-					});
+					// menu.addItem((item) => {
+					// 	item.setTitle("DEV : Save Changes") // Cant keep this option in the meny, only for dev
+					// 		.setIcon(TaskBoardIcon)
+					// 		.setSection("action")
+					// 		.onClick(() => {
+					// 			onUnloadSave(this.plugin);
+					// 		});
+					// });
 				}
 
 				if (fileIsFolder) {
@@ -451,9 +448,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 2
 					) {
 						menu.addItem((item) => {
-							item.setTitle(
-								"Add folder in `Dont Scan this folder` Filter"
-							)
+							item.setTitle(t(137))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -469,9 +464,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 1
 					) {
 						menu.addItem((item) => {
-							item.setTitle(
-								"Add folder in `Only Scan this folder` Filter"
-							)
+							item.setTitle(t(138))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -484,38 +477,38 @@ export default class TaskBoard extends Plugin {
 					}
 				}
 
-				if (
-					!Platform.isMobile &&
-					leafIsKanban &&
-					leaf &&
-					source === "sidebar-context-menu"
-				) {
-					console.log("MENU : If the 'sidebar-context-menu'");
-					menu.addItem((item) => {
-						item.setTitle("Refresh Board")
-							.setIcon(RefreshIcon)
-							.setSection("pane")
-							.onClick(() => {
-								eventEmitter.emit("REFRESH_BOARD");
-							});
-					})
-						.addItem((item) => {
-							item.setTitle("DEV : Save Changes") // Cant keep this option in the meny, only for dev
-								.setIcon(RefreshIcon)
-								.setSection("pane")
-								.onClick(() => {
-									onUnloadSave(this.plugin);
-								});
-						})
-						.addItem((item) => {
-							item.setTitle("Open Board Settings")
-								.setIcon(RefreshIcon)
-								.setSection("pane")
-								.onClick(() => {
-									// Need to find a way to open the Board Config Modal and then also to
-								});
-						});
-				}
+				// if (
+				// 	!Platform.isMobile &&
+				// 	leafIsKanban &&
+				// 	leaf &&
+				// 	source === "sidebar-context-menu"
+				// ) {
+				// 	console.log("MENU : If the 'sidebar-context-menu'");
+				// 	menu.addItem((item) => {
+				// 		item.setTitle("Refresh Board")
+				// 			.setIcon(RefreshIcon)
+				// 			.setSection("action")
+				// 			.onClick(() => {
+				// 				eventEmitter.emit("REFRESH_BOARD");
+				// 			});
+				// 	})
+				// 		.addItem((item) => {
+				// 			item.setTitle("Open Board Settings")
+				// 				.setIcon(RefreshIcon)
+				// 				.setSection("action")
+				// 				.onClick(() => {
+				// 					// Need to find a way to open the Board Config Modal and then also to
+				// 				});
+				// 		})
+				// 		.addItem((item) => {
+				// 			item.setTitle("DEV : Save Changes") // Delete this item before release, only for dev
+				// 				.setIcon(RefreshIcon)
+				// 				.setSection("action")
+				// 				.onClick(() => {
+				// 					onUnloadSave(this.plugin);
+				// 				});
+				// 		});
+				// }
 			})
 		);
 	}

@@ -7,27 +7,32 @@ import { t } from 'src/utils/lang/helper';
 
 interface DeleteConfirmationModalProps {
 	app: App;
+	mssg: string;
 	onConfirm: () => void;
 	onCancel: () => void;
 }
 
 export class DeleteConfirmationModal extends Modal {
+	mssg: string;
 	onConfirm: () => void;
 	onCancel: () => void;
 
-	constructor(app: App, { onConfirm, onCancel }: DeleteConfirmationModalProps) {
+	constructor(app: App, { mssg, onConfirm, onCancel }: DeleteConfirmationModalProps) {
 		super(app);
 		this.app = app;
+		this.mssg = mssg;
 		this.onConfirm = onConfirm;
 		this.onCancel = onCancel;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: t(60) });
-		contentEl.createEl('p', { text: t(61) });
 
-		const buttonContainer = contentEl.createDiv('button-container');
+		const homeComponenet = contentEl.createEl("span", { cls: "deleteConfirmationModalHome" });
+		homeComponenet.createEl('h2', { text: t(60) });
+		homeComponenet.createEl('p', { text: this.mssg });
+
+		const buttonContainer = homeComponenet.createDiv('button-container');
 		buttonContainer.style.display = 'flex';
 		buttonContainer.style.gap = '1em';
 

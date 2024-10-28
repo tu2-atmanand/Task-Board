@@ -209,6 +209,11 @@ If your plugin does not need CSS, delete this file.
 	padding-inline-start: 0.4em;
 	font-weight: 500;
 	overflow-wrap: anywhere;
+	color: var(--accent-strong);
+}
+
+.taskItemTitle p {
+	margin-block: 0 !important;
 }
 
 .taskItemCheckbox {
@@ -242,6 +247,12 @@ If your plugin does not need CSS, delete this file.
 
 .subtaskTextRenderer p {
 	margin-block: 0 !important;
+}
+
+.subtaskTextRenderer strong {
+	color: var(--text-normal) !important;
+	font-size: unset !important;
+	font-weight: 600 !important;
 }
 
 .taskItemMainBodyDescription {
@@ -618,13 +629,20 @@ If your plugin does not need CSS, delete this file.
 
 /* DeleteTaskConfirmationModal */
 
+.deleteConfirmationModalHome {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
 .deleteTaskConfirmBtn:hover {
-	background-color: red;
+	background-color: red !important;
 	/* Change background to green on hover */
 }
 
 .deleteTaskCancelmBtn:hover {
-	background-color: green;
+	background-color: green !important;
 	/* Change background to red on hover */
 }
 

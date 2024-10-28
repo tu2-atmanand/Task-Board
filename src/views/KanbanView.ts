@@ -1,10 +1,10 @@
 // src/views/KanbanView.ts
 
 import { App, ItemView, Vault, WorkspaceLeaf } from "obsidian";
+import { ReScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
-import { ReScanVaultIcon } from "src/types/Icons";
 import ReactDOM from "react-dom/client";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
@@ -25,6 +25,7 @@ export class KanbanView extends ItemView {
 		this.plugin = plugin;
 		this.root = ReactDOM.createRoot(this.contentEl);
 		this.boards = [];
+		this.icon = TaskBoardIcon;
 	}
 
 	getViewType() {
@@ -32,7 +33,7 @@ export class KanbanView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Task Board";
+		return t(130);
 	}
 
 	getSettings() {

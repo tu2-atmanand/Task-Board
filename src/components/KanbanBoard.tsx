@@ -106,8 +106,14 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 		// refreshKanbanBoard(app);
 
 		// If the user complaints that the pressing the refreshing button does bullshit and jump the Task Board from one place to another, then simply, disable the above line and enable below line.
-
-		eventEmitter.emit("REFRESH_BOARD");
+		if(plugin.settings.data.globalSettings.realTimeScanning) {
+			eventEmitter.emit("REFRESH_BOARD");
+		} else {
+			if(localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined) {
+				plugin.realTimeScanning.processStack();
+			}
+			eventEmitter.emit("REFRESH_BOARD");
+		}
 		// eventEmitter.emit("REFRESH_COLUMN");
 		// const boardsData = loadBoardConfigs();
 		// // Trigger renderColumns after the boards are refreshed
@@ -139,13 +145,14 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 					</button> */}
 					<button
 						className="ConfigureBtn"
+						aria-label={t(145)}
 						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
 							handleUpdateBoards(plugin, updatedBoards, setBoards)
 						)}
 					>
 						<Bolt size={20} />
 					</button>
-					<button className="RefreshBtn" onClick={refreshBoardButton}>
+					<button className="RefreshBtn" aria-label={t(146)} onClick={refreshBoardButton}>
 						<RefreshCcw size={20} />
 					</button>
 				</div>

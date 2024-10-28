@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import AddColumnModal from "src/modal/AddColumnModal";
 import { Board } from "src/interfaces/BoardConfigs";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/services/TaskBoardSettingConstructUI";
@@ -150,14 +151,25 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	const deleteCurrentBoard = () => {
-		if (selectedBoardIndex !== -1) {
-			const updatedBoards = [...localBoards];
-			updatedBoards.splice(selectedBoardIndex, 1);
-			setLocalBoards(updatedBoards);
-			setSelectedBoardIndex(-1); // Reset to global settings or no board selected
-		} else {
-			new Notice(t(35));
-		}
+		const mssg = t(129)
+		const deleteModal = new DeleteConfirmationModal(app, {
+			app,
+			mssg,
+			onConfirm: () => {
+				if (selectedBoardIndex !== -1) {
+					const updatedBoards = [...localBoards];
+					updatedBoards.splice(selectedBoardIndex, 1);
+					setLocalBoards(updatedBoards);
+					setSelectedBoardIndex(-1); // Reset to global settings or no board selected
+				} else {
+					new Notice(t(35));
+				}
+			},
+			onCancel: () => {
+				console.log("Board Deletion Operation Cancelled.");
+			},
+		});
+		deleteModal.open();
 	};
 
 	// Function to handle column drag-and-drop
@@ -272,7 +284,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 					<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
 
-					<h3>Board Filters</h3>
+					<h3>{t(139)}</h3>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 							<h4>{t(42)}</h4>
