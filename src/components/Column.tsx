@@ -92,8 +92,10 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	};
 
 	const handleDeleteTask = (app: App, task: taskItem) => {
+		const mssg = t(61);
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app, // Add app here
+			mssg,
 			onConfirm: () => {
 				deleteTaskFromFile(plugin, task);
 				deleteTaskFromJson(plugin, task);

@@ -172,7 +172,7 @@ export class SettingsManager {
 
 		// Files Row
 		addFilterRow(
-			"Files",
+			t(140),
 			"files",
 			scanFilters.files.polarity,
 			scanFilters.files.values,
@@ -181,7 +181,7 @@ export class SettingsManager {
 
 		// Folders Row
 		addFilterRow(
-			"Folders",
+			t(141),
 			"folders",
 			scanFilters.folders.polarity,
 			scanFilters.folders.values,
@@ -190,7 +190,7 @@ export class SettingsManager {
 
 		// Tags Row
 		addFilterRow(
-			"Tags",
+			t(142),
 			"tags",
 			scanFilters.tags.polarity,
 			scanFilters.tags.values,
@@ -419,7 +419,7 @@ export class SettingsManager {
 		contentEl.createEl("h4", { text: t(100) });
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName("Day Planner Plugin" + t(101))
+			.setName("Day Planner " + t(101))
 			.setDesc(t(102))
 			.addToggle((toggle) =>
 				toggle.setValue(dayPlannerPlugin).onChange(async (value) => {
@@ -430,7 +430,7 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date from the Daily Notes file name.
 		new Setting(contentEl)
-			.setName("Daily Notes Plugin" + t(101))
+			.setName("Daily Notes " + t(101))
 			.setDesc(t(103))
 			.addToggle((toggle) =>
 				toggle
@@ -497,9 +497,9 @@ export class SettingsManager {
 			.setDesc(t(109))
 			.addDropdown((dropdown) => {
 				dropdown.addOption("1", t(110));
-				dropdown.addOption("2", "Tasks Plugin");
-				dropdown.addOption("3", "Dataview Plugine");
-				dropdown.addOption("4", "Obsidian Native");
+				dropdown.addOption("2", "Tasks " + t(143));
+				dropdown.addOption("3", "Dataview " + t(143));
+				dropdown.addOption("4", "Obsidian " + t(144));
 
 				dropdown.setValue(taskCompletionFormat as string);
 				dropdown.onChange(async (value) => {
