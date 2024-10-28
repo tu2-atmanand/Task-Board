@@ -196,7 +196,7 @@ export default class TaskBoard extends Plugin {
 				if (activeFile) {
 					openAddNewTaskModal(app, this.plugin, activeFile);
 				} else {
-					new Notice("No active file found to add a task.");
+					new Notice("No active file found to add a task. Please place your curosr inside Editor and run this command");
 				}
 			},
 		});
