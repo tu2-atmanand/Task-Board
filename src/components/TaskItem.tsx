@@ -128,6 +128,28 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		}
 	}, [taskDesc, task.filePath, app]);
 
+	const taskIdKey = `${task.id}`; // for rendering unique title
+	const taskTitleRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+	useEffect(() => {
+		if (taskTitleRendererRef.current && componentRef.current) {
+			const titleElement = taskTitleRendererRef.current[taskIdKey];
+
+			if (titleElement) {
+				titleElement.innerHTML = '';
+				// Call the MarkdownUIRenderer to render the description
+				MarkdownUIRenderer.renderTaskDisc(
+					app,
+					task.title,
+					titleElement, // Use HTMLDivElement reference
+					task.filePath,
+					componentRef.current // Pass the Component instance
+				);
+
+				hookMarkdownLinkMouseEventHandlers(app, titleElement, task.filePath, task.filePath);
+			}
+		}
+	}, [task.title, task.filePath, app]);
+
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemFooterBtns');
@@ -358,7 +380,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 							onChange={handleCheckboxChange}
 						/>
 						<div className="taskItemBodyContent">
-							<div className="taskItemTitle">{task.title}</div>
+							<div className="taskItemTitle" ref={(titleEL) => taskTitleRendererRef.current[taskIdKey] = titleEL} />
 							<div className="taskItemBody">
 								{renderSubTasks()}
 							</div>
