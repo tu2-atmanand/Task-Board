@@ -58,7 +58,7 @@
                     "\t\t\t\tThis is a normal line in Desc with four levels of indentation. Updating"
                 ],
                 "time": "",
-                "due": "2024-10-26",
+                "due": "2024-10-29",
                 "tags": [
                     "#Test",
                     "#Bug"
@@ -83,9 +83,11 @@
             {
                 "id": 1097838755,
                 "title": "Another simple task with priority emoji away from the pipe symbol",
-                "body": [],
+                "body": [
+                    ""
+                ],
                 "time": "",
-                "due": "2024-10-20",
+                "due": "2024-10-28",
                 "tags": [
                     "#Test"
                 ],
@@ -128,7 +130,7 @@
                     "\t- [ ] Adding another subTask, second one, updaing"
                 ],
                 "time": "10:30 - 11:30",
-                "due": "2024-10-28",
+                "due": "2024-10-29",
                 "tags": [
                     "#Test"
                 ],
