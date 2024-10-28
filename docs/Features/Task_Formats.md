@@ -1,14 +1,26 @@
 # Task Formats
 
-This feature will allow you to create tasks which you want the plugin to be get scanned and tasks which you want the plugin to ignore.
+This plugin only works for a specific type of tasks, which are in a particular format.
 
-This plugin will only detect and work with the checkbox items/tasks which are in the following format :
-```
-- [ ]
-```
+## The Checkbox Patter
 
-If you dont want this plugin to detect your tasks, you are free to use the below format to define your tasks/checkbox items :
-```
+Obsidian supports three types of pattern to create a checkbox or in other words a task item as shown below  :
+```md
+- [ ] 
++ [ ] 
 * [ ] 
-+ [ ]
 ```
+
+But this plugin only works for the first kind of checkbox or detects any line as task, if it starts with the following patter :
+```md
+- [ ] 
+```
+
+So, if you want the plugin to not detect any of your task and consider the task as normal text, then you can use the other types of formats. This even works for sub-task. Any sub-tasks with the patter other than supported by this plugin, will be considered as a description content for the task and will be shown under the Description section and not as a sub-task.
+
+## Sub Tasks
+
+
+## Task Description
+
+

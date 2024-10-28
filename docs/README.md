@@ -19,9 +19,11 @@ aliases:
 
 < need to add two images here with dark and light theme>
 
+Understand the complete UI of Task Board from here : [Task Board Pane](./Features/Task_Board_Pane.md)
+
 ## **How Does it work ?**
 
-- It scans tasks from all the Markdown file from your whole vault and show them on a Kanban type Board.
+- This plugin scans tasks from all or the filtered Markdown file from your whole vault and show them on a Kanban type Board.
 - You can edit the task directly from the Task Board, without opening the Markdown file.
 - Add task to currently opened files using a pop-up window.
 
@@ -29,10 +31,10 @@ aliases:
 
 **STEP 1 :** First install the plugin : [Installation](01-Installation.md)
 
-**STEP 2 :** Learn ho to start using the plugin, initial setup : [Getting Started](02-GettingStarted.md)
+**STEP 2 :** Learn how to start using the plugin, initial setup : [Getting Started](02-GettingStarted.md)
 
 **STEP 3 :** Go through various examples : [Examples](Examples/README.md)
 
-**STEP 4 :** Understand all the features to user the plugin efficiently : [Features](Features/README.md)
+**STEP 4 :** Understand all the features to use the plugin efficiently : [Features](Features/README.md)
 
 > For any queries try to find your answer here : [Frequently Asked Questions](FAQs/README.md)

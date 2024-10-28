@@ -8,11 +8,11 @@ Checkout in Details here : [Task Formats](Task_Formats.md)
 
 ### Marking as Complete
 
-![Marking Task as Complete](MarkTaskComplete.gif)
+![Marking Task as Complete](../assets/MarkTaskComplete.gif)
 
 Marking a Task as complete from the board is real-time, as soon as you will mark or unmark the task, the changes will be instantly made in the parent markdown file.
 
-Checkout detailed information here : [Marking a task complete](MarkdingTaskComplete.md)
+Checkout detailed information here : [Marking a task complete](MarkingTaskComplete.md)
 
 ### Editing a Task
 
