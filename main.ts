@@ -333,7 +333,7 @@ export default class TaskBoard extends Plugin {
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
-			this.registerDomEvent(window, "mouseenter", () => {
+			this.registerDomEvent(closeButton, 'mouseenter', () => {
 				console.log(
 					"User hovered over the close button. Storing SessionStorage data to Disk."
 				);
@@ -437,7 +437,7 @@ export default class TaskBoard extends Plugin {
 
 				if (fileIsFolder) {
 					console.log("WHat is the folder object :", file);
-					
+
 					// menu.addItem((item) => {
 					// 	item.setTitle("Update tasks from this folder")
 					// 		.setIcon(TaskBoardIcon)
