@@ -24,10 +24,12 @@ export class DeleteConfirmationModal extends Modal {
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: t(60) });
-		contentEl.createEl('p', { text: t(61) });
 
-		const buttonContainer = contentEl.createDiv('button-container');
+		const homeComponenet = contentEl.createEl("span", { cls: "deleteConfirmationModalHome" });
+		homeComponenet.createEl('h2', { text: t(60) });
+		homeComponenet.createEl('p', { text: t(61) });
+
+		const buttonContainer = homeComponenet.createDiv('button-container');
 		buttonContainer.style.display = 'flex';
 		buttonContainer.style.gap = '1em';
 
