@@ -91,7 +91,7 @@ export class SettingsManager {
 			})
 			.createEl("a", {
 				text: t(74),
-				href: "https://github.com/",
+				href: "https://tu2-atmanand.github.io/task-board-docs/index.html",
 			});
 
 		// Setting for taskCompletionFormat
