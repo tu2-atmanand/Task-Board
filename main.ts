@@ -1,22 +1,15 @@
-// main.ts - WORKING
+// main.ts
 
 import {
 	App,
-	Editor,
-	MarkdownFileInfo,
 	MarkdownView,
-	Modal,
 	Notice,
-	Platform,
 	Plugin,
 	PluginManifest,
-	PluginSettingTab,
-	Setting,
 	TAbstractFile,
 	TFile,
 	TFolder,
 	WorkspaceLeaf,
-	requireApiVersion,
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
@@ -27,8 +20,6 @@ import { RefreshIcon, TaskBoardIcon } from "src/types/Icons";
 import {
 	loadTasksJsonFromDiskToSS,
 	onUnloadSave,
-	startPeriodicSave,
-	writeTasksJsonToDisk,
 } from "src/utils/tasksCache";
 
 import { KanbanView } from "./src/views/KanbanView";
@@ -110,7 +101,6 @@ export default class TaskBoard extends Plugin {
 
 	onFileModifiedAndLostFocus() {
 		if (this.editorModified && this.currentModifiedFile) {
-			console.log("EVENT : activeEditor.focus() ...");
 			this.realTimeScanning.onFileChange(
 				this.currentModifiedFile,
 				this.settings.data.globalSettings.realTimeScanning,
@@ -163,9 +153,9 @@ export default class TaskBoard extends Plugin {
 
 	scanVaultAtStartup() {
 		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
-		this.settings.data.globalSettings.scanVaultAtStartup
-			? this.scanningVault.scanVaultForTasks()
-			: "";
+		if (this.settings.data.globalSettings.scanVaultAtStartup) {
+			this.scanningVault.scanVaultForTasks();
+		}
 	}
 
 	loadTasksDataToSS() {
@@ -220,43 +210,33 @@ export default class TaskBoard extends Plugin {
 				});
 			},
 		});
-		// TODO : Remove this command before publishing
-		this.addCommand({
-			id: "task-board-4",
-			name: "DEV : Save Data from sessionStorage to Disk.",
-			callback: () => {
-				writeTasksJsonToDisk(this.plugin);
-			},
-		});
-		this.addCommand({
-			id: "task-board-5",
-			name: "DEV : REFRESH_COLUMN.",
-			callback: () => {
-				eventEmitter.emit("REFRESH_COLUMN");
-			},
-		});
 		// // Add a command to Re-Scan the whole Vault
 		// this.addCommand({
-		// 	id: "rescan-vault-for-tasks",
+		// 	id: "task-board-6",
 		// 	name: "Re-Scan Vault",
 		// 	callback: () => {
 		// 		this.scanningVault.scanVaultForTasks();
 		// 	},
 		// });
 
-		// // This adds an editor command that can perform some operation on the current editor instance
+		// // TODO : Remove this command before publishing, DEV commands
 		// this.addCommand({
-		// 	id: "sample-editor-command",
-		// 	name: "Sample editor command",
-		// 	editorCallback: (editor: Editor, view: MarkdownView) => {
-		// 		console.log(editor.getSelection());
-		// 		editor.replaceSelection("Sample Editor Command");
+		// 	id: "task-board-4",
+		// 	name: "DEV : Save Data from sessionStorage to Disk",
+		// 	callback: () => {
+		// 		writeTasksJsonToDisk(this.plugin);
+		// 	},
+		// });
+		// this.addCommand({
+		// 	id: "task-board-5",
+		// 	name: "DEV : REFRESH_COLUMN",
+		// 	callback: () => {
+		// 		eventEmitter.emit("REFRESH_COLUMN");
 		// 	},
 		// });
 	}
 
 	registerEvents() {
-		// TODO : Find out which of the below two methods are optized one. I think the first method is the best one.
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				this.editorModified = true;
@@ -269,18 +249,6 @@ export default class TaskBoard extends Plugin {
 				}
 			})
 		);
-		// this.registerEvent(
-		// 	this.app.workspace.on(
-		// 		"editor-change",
-		// 		(editor: Editor, info: MarkdownView | MarkdownFileInfo) => {
-		// 			// console.log("EVENT : editor-change event working...");
-		// 			// Set editorModified to true when any change occurs
-		// 			this.editorModified = true;
-		// 			this.currentModifiedFile =
-		// 				this.app.workspace.getActiveFile();
-		// 		}
-		// 	)
-		// );
 		// Listen for editor-blur event and trigger scanning if the editor was modified
 		this.registerEvent(
 			this.app.workspace.on(
@@ -297,63 +265,37 @@ export default class TaskBoard extends Plugin {
 			this.onFileModifiedAndLostFocus();
 		});
 
-		// window.addEventListener("focus", () => {
-		// 	console.log(
-		// 		"User switched back to Obsidian or Obsidian gained focus."
-		// 	);
-		// 	// Trigger your custom code when the app gains focus
-		// });
+		// this.registerEvent(
+		// 	this.app.vault.on("create", (file) => {
+		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("rename", (file) => {
+		// 		// console.log(
+		// 		// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
+		// 		// );
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("delete", (file) => {
+		// 		console.log(
+		// 			"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
+		// 		);
+		// 	})
+		// );
 
-		this.registerEvent(
-			this.app.vault.on("create", (file) => {
-				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-				// console.log(
-				// 	"NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that."
-				// );
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("rename", (file) => {
-				console.log(
-					"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
-				);
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("delete", (file) => {
-				console.log(
-					"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-				);
-			})
-		);
-
-		// requireApiVersion("0.15.0")
-		// 	? (activeDocument = activeWindow.document)
-		// 	: (activeDocument = window.document);
 		const closeButton = document.querySelector(
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
-			this.registerDomEvent(closeButton, 'mouseenter', () => {
+			this.registerDomEvent(closeButton, "mouseenter", () => {
 				console.log(
 					"User hovered over the close button. Storing SessionStorage data to Disk."
 				);
 				onUnloadSave(this.plugin);
 			});
 		}
-
-		// Old method :
-		// const closeButton = document.querySelector(
-		// 	".titlebar-button.mod-close"
-		// );
-		// if (closeButton) {
-		// 	closeButton.addEventListener("mouseenter", () => {
-		// 		console.log(
-		// 			"User hovered over the close button. Storing SessionStorage data to Disk."
-		// 		);
-		// 		onUnloadSave(this.plugin);
-		// 	});
-		// }
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
@@ -433,8 +375,7 @@ export default class TaskBoard extends Plugin {
 				}
 
 				if (fileIsFolder) {
-					console.log("WHat is the folder object :", file);
-
+					// TODO : Implement this in future releases
 					// menu.addItem((item) => {
 					// 	item.setTitle("Update tasks from this folder")
 					// 		.setIcon(TaskBoardIcon)
