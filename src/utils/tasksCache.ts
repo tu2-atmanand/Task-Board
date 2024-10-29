@@ -7,20 +7,10 @@ export const loadTasksJsonFromDiskToSS = async (
 ): Promise<tasksJson> => {
 	try {
 		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		console.log(
-			"---------- The only Disk Read Operation to Load tasks.json (loadTasksJsonFromDiskToSS) -------------"
-		);
 		const data: string = await plugin.app.vault.adapter.read(path);
 		const allTasks: tasksJson = JSON.parse(data);
-		console.log("Following tasks has been loaded from Disk : ", allTasks);
-
 		// Store the tasks data in sessionStorage for future use
 		sessionStorage.setItem("tasksData", JSON.stringify(allTasks));
-		console.log(
-			"Following tasks has been written to sessionStorage : ",
-			JSON.parse(sessionStorage.getItem("tasksData"))
-		);
-
 		// Return the tasks data
 		return allTasks;
 	} catch (error) {
@@ -46,33 +36,23 @@ export const dataCleanup = (oldTaskData: tasksJson): tasksJson => {
 	return oldTaskData;
 };
 
-
-
 // Function to write tasks data to disk (called after 5-minute intervals or before unload)
-export const writeTasksJsonToDisk = async (plugin: TaskBoard): Promise<void> => {
+export const writeTasksJsonToDisk = async (
+	plugin: TaskBoard
+): Promise<void> => {
 	try {
 		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
 		const ssData = sessionStorage.getItem("tasksData");
 		let tasksData: tasksJson = JSON.parse(ssData ? ssData : "");
-		console.log(
-			"SESSIONSTORAGE : writeTasksJsonToDisk : The data i am going to write to the Disk : ",
-			tasksData
-		);
 
 		// Clean up data to remove empty arrays/objects before writing
 		tasksData = dataCleanup(tasksData);
 
 		if (tasksData) {
-			console.log(
-				"---------- The only Disk Write Operation to Write tasks.json (writeTasksJsonToDisk) -------------"
-			);
 			await plugin.app.vault.adapter.write(
 				path,
 				JSON.stringify(tasksData, null, 4)
 			);
-
-			// plugin.app.vault.adapter.writeBinary
-			console.log("Successfully updated tasks.json from sessionStorage.");
 		} else {
 			console.warn(
 				"No tasks data found in sessionStorage to write to disk."
@@ -85,13 +65,11 @@ export const writeTasksJsonToDisk = async (plugin: TaskBoard): Promise<void> => 
 };
 
 // Function to load tasks from sessionStorage (faster than reading from disk)
-export const loadTasksJsonFromSS = async (plugin: TaskBoard): Promise<tasksJson> => {
+export const loadTasksJsonFromSS = async (
+	plugin: TaskBoard
+): Promise<tasksJson> => {
 	try {
 		const tasksData = sessionStorage.getItem("tasksData");
-		console.log(
-			"loadTasksJsonFromSS : Following is the data which will be sent for column rendering : ",
-			JSON.parse(tasksData)
-		);
 		if (tasksData) {
 			return JSON.parse(tasksData);
 		}
@@ -111,10 +89,6 @@ export const writeTasksJsonToSS = async (
 		// Store the updated tasks data in sessionStorage
 		sessionStorage.setItem("tasksData", JSON.stringify(updatedData));
 		plugin.IsTasksJsonChanged = true;
-		console.log(
-			"SESSIONSTORAGE : Tasks updated in sessionStorage : ",
-			JSON.parse(sessionStorage.getItem("tasksData"))
-		);
 	} catch (error) {
 		console.warn("Error updating tasks in sessionStorage:", error);
 		throw error;
@@ -126,12 +100,7 @@ export const writeTasksFromSessionStorageToDisk = async (
 	plugin: TaskBoard
 ): Promise<void> => {
 	try {
-		console.log(
-			"SESSIONSTORAGE : Time UP : Running the Periodically Saving of data from sessionStorage to Disk."
-		);
-		if (!plugin.IsTasksJsonChanged) {
-			console.log("The data in SessionStorage has not been changed. No need to write the data from sessionStorage to Disk....");
-		} else {
+		if (plugin.IsTasksJsonChanged) {
 			// Trigger write operation to save sessionStorage data to disk
 			plugin.IsTasksJsonChanged = false;
 			await writeTasksJsonToDisk(plugin);
@@ -144,7 +113,6 @@ export const writeTasksFromSessionStorageToDisk = async (
 // Start a timer to write tasks from sessionStorage to disk every 5 minutes
 export const startPeriodicSave = (plugin: TaskBoard) => {
 	setInterval(async () => {
-		// console.log("This function runs after every 1 min, let me see what is the value of the plugin.IsTasksJsonChanged = ", plugin.IsTasksJsonChanged);
 		await writeTasksFromSessionStorageToDisk(plugin);
 	}, 10 * 60 * 1000); // 5 minutes in milliseconds
 };
@@ -152,5 +120,4 @@ export const startPeriodicSave = (plugin: TaskBoard) => {
 // Call this function when the plugin is unloading
 export const onUnloadSave = async (plugin: TaskBoard) => {
 	await writeTasksJsonToDisk(plugin);
-	console.log("Tasks saved to disk before plugin unload.");
 };

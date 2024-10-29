@@ -4,9 +4,6 @@ import { App, Setting } from "obsidian";
 import { globalSettingsData, langCodes } from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
-import { TaskBoardSettingTab } from "../views/TaskBoardSettingTab";
-import fs from "fs";
-import path from "path";
 import { t } from "src/utils/lang/helper";
 
 export class SettingsManager {
@@ -32,7 +29,6 @@ export class SettingsManager {
 	async loadSettings(): Promise<void> {
 		try {
 			const settingsData = this.plugin.settings.data.globalSettings;
-			console.log("The global setting i have loaded : ", settingsData);
 			this.globalSettings = settingsData;
 		} catch (err) {
 			console.error("Error loading settings:", err);
@@ -581,35 +577,6 @@ export class SettingsManager {
 					})
 			);
 
-		// It doesnt make sense to me why the user will want to give names to the default columns. Anyways, the user can delete the default columns and also can add new columns and give the names required.
-		// contentEl.createEl("h4", { text: "Default Column Names" });
-
-		// // Create settings for each default column name
-		// for (const [key, value] of Object.entries(defaultColumnNames)) {
-		// 	new Setting(contentEl)
-		// 		.setName(`${key}`)
-		// 		.setDesc(`Enter the name for the ${key} column`)
-		// 		.addText((text) => {
-		// 			const oldValue =
-		// 				this.globalSettings!.defaultColumnNames[
-		// 					key as keyof typeof defaultColumnNames
-		// 				];
-		// 			// console.log("Old Values of Columns names : ", oldValue);
-		// 			// text.inputEl.setAttr("type", "string");
-		// 			text.setPlaceholder(
-		// 				`${oldValue ? oldValue : "Enter New Column Name"}`
-		// 			);
-		// 			// text.inputEl.value = value ? value.toString() : "";
-
-		// 			text.setValue(value).onChange(async (newValue) => {
-		// 				this.globalSettings!.defaultColumnNames[
-		// 					key as keyof typeof defaultColumnNames
-		// 				] = newValue;
-		// 				await this.saveSettings();
-		// 			});
-		// 		});
-		// }
-
 		contentEl.createEl("hr");
 
 		const footerSection = contentEl.createEl("div", {
@@ -645,13 +612,6 @@ export class SettingsManager {
 
 		// Reset global settings if necessary
 		this.globalSettings = null;
-
-		// If any event listeners were added during constructUI, remove them here
-		// Example: assuming some event listener was added like contentEl.addEventListener(...)
-		// You would need to remove the listeners like this:
-		// this.contentEl.removeEventListener('eventName', eventHandler);
-
-		// Optionally, perform any additional cleanup of settings-related data or state
 	}
 }
 
@@ -701,10 +661,6 @@ function hexToRgba(hex: string, opacity: number): string {
 		g = parseInt(hex[3] + hex[4], 16);
 		b = parseInt(hex[5] + hex[6], 16);
 	}
-	// console.log(
-	// 	"hexToRgba : Following is the converted data : ",
-	// 	`rgba(${r},${g},${b},${opacity})`
-	// );
 
 	return `rgba(${r},${g},${b},${opacity})`;
 }
@@ -712,15 +668,12 @@ function hexToRgba(hex: string, opacity: number): string {
 // Convert hex color to hex with Alpha
 function hexToHexAlpha(hex: string, alpha: number = 1): string {
 	hex = hex.slice(0, 7);
-	// console.log("hexToHexAlpha : Value of hex =", hex);
 	const alphaHex = Math.floor(alpha * 255)
 		.toString(16)
 		.padStart(2, "0");
-	// console.log("hexToHexAlpha : Value of alpha after changing =", alphaHex);
 	return `${hex}${alphaHex}`;
 }
 
-// Function to convert RGBA/Hex color to 20% opacity background color
 // Function to convert RGBA/Hex color to 20% opacity background color
 function colorTo20PercentOpacity(color: string): string {
 	if (color.startsWith("#")) {

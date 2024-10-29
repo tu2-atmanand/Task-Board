@@ -1,22 +1,14 @@
 import { TFile } from "obsidian";
 
 export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
-	console.log("The currently edited file :", file);
-	// Separate the parent folder and file name from the file path
-	// const filePathParts = file.path.split("/");
-	const fileName = file.path; // Extract file name
-	// const parentFolder = filePathParts.join("/").trim() + "/"; // Rebuild the parent folder path
+	const fileName = file.path; // Extract file name along with the path
 	const parentFolder = file.parent?.path;
-
-	console.log("The fileName is : ", fileName);
-	console.log("The parentFolder is : ", parentFolder);
 
 	// Check folder filters
 	const folderFilters = scanFilters.folders.values;
 	let folderInFilters = folderFilters.includes(parentFolder);
 
 	if (!folderInFilters && parentFolder) {
-		console.log("--------------------------------");
 		folderInFilters = folderFilters.some((filter: string) =>
 			parentFolder.includes(filter)
 		);
@@ -46,12 +38,6 @@ export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 }
 
 export function scanFilterForTags(tags: string[], scanFilters: any) {
-	// console.log(
-	// 	"The value of tag i am checking using .includes :",
-	// 	tag,
-	// 	": There shouldnt be any thing in between."
-	// );
-	console.log("scanFilterForTags : The value of scanFilters :", scanFilters, "| Value of task.tags :", tags);
 	const tagInFilters = tags.some((tag) =>
 		scanFilters.tags.values.includes(tag)
 	);

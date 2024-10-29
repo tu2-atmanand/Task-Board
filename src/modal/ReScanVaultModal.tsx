@@ -13,9 +13,6 @@ import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
 const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
-	// collectedTasks: any = { Pending: {}, Completed: {} };
-	scanningVault: ScanningVault;
-	plugin: TaskBoard;
 
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
@@ -35,8 +32,6 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 			const file = files[i];
 
 			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
-			console.log("ReScanVaultModalContent: The value of scanFilters from plugin.setting : ", scanFilters);
-
 			if (scanFilterForFilesNFolders(file, scanFilters)) {
 				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 				await scanningVault.extractTasksFromFile(file, scanningVault.tasks, scanFilters);
@@ -48,9 +43,7 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 		setCollectedTasks(scanningVault.tasks);
 		// setIsRunning(false);
 		new Notice(t(64));
-		console.log("Vault scanning complete.");
 		scanningVault.saveTasksToFile();
-
 	};
 
 	const toggleView = () => {
@@ -171,9 +164,6 @@ export class ReScanVaultModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		console.log("ReScanVaultModal : Opening the Modal...");
-		console.log("The settings loaded using plugin.setting method : ", this.plugin.settings);
-
 		const container = document.createElement("div");
 		contentEl.appendChild(container);
 

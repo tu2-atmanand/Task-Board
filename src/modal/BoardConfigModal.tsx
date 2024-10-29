@@ -2,14 +2,13 @@
 
 import { App, Modal, Notice } from "obsidian";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
-import { DraggableProvided, DropResult } from 'react-beautiful-dnd';
-import { EyeIcon, EyeOffIcon, Italic } from "lucide-react";
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import AddColumnModal from "src/modal/AddColumnModal";
 import { Board } from "src/interfaces/BoardConfigs";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
+import { FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/services/TaskBoardSettingConstructUI";
@@ -45,7 +44,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(
 		activeBoardIndex
 	);
-	// const [settings, setSettings] = useState<GlobalSettings>();
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
@@ -90,20 +88,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Function to add a new column to the selected board
-
-	// const addColumnToBoard = (boardIndex: number) => {
-	// 	const updatedBoards = [...localBoards];
-	// 	updatedBoards[boardIndex].columns.push({
-	// 		colType: "undated",
-	// 		data: {
-	// 			collapsed: false,
-	// 			name: `Column ${updatedBoards[boardIndex].columns.length + 1}`,
-	// 			index: updatedBoards[boardIndex].columns.length + 1,
-	// 		},
-	// 	});
-	// 	setLocalBoards(updatedBoards);
-	// };
-
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
 
 	const handleOpenAddColumnModal = () => {
@@ -132,8 +116,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Function to render the Add Column Modal
 	const renderAddColumnModal = () => {
-		if (!isAddColumnModalOpen) return null; // Return null if the modal is not open
-		console.log("Inside the renderAddColumnModal");
+		if (!isAddColumnModalOpen) return null;
 		return (
 			<AddColumnModal
 				isOpen={isAddColumnModalOpen}
@@ -201,27 +184,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		onClose();
 	};
 
-	// Function to render global settings
-	// useEffect(() => {
-	// 	console.log("Inside the useEffect to render Global Settings ...............");
-	// 	// <div>
-	// 	// 	<h3>Task Board Plugin - Global Settings</h3>
-	// 	// 	<hr width="50%" size="2" color="olive" noshade="true"></hr>
-	// 	// 	<PluginGlobalSettingContent />
-	// 	// </div>
-	// 	if (globalSettingsHTMLSection.current) {
-	// 		settingManager.constructUI(globalSettingsHTMLSection.current, "Plugin Global Settings");
-	// 	}
-	// }, [selectedBoardIndex === -1]);
-
-	// useEffect(() => {
-	// 	console.log("Outside the useEffect to render Global Settings ...............");
-
-	// 	if (globalSettingsHTMLSection.current) {
-	// 		globalSettingsHTMLSection.current.innerHTML = '';
-	// 	}
-	// }, [selectedBoardIndex !== -1]);
-
 	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		if (globalSettingsHTMLSection.current) {
@@ -246,11 +208,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			// Cleanup global settings UI
 			settingManager.cleanUp();
 			globalSettingsHTMLSection.current.innerHTML = '';
-			// globalSettingsHTMLSection.current.detach();
-			// globalSettingsHTMLSection.current.remove();
-			// globalSettingsHTMLSection.current.empty();
-			// globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
-			// globalSettingsHTMLSection.current.removeClass("pluginGlobalSettingsTab");
 		}
 
 		const board = localBoards[boardIndex];
@@ -522,7 +479,6 @@ export class BoardConfigureModal extends Modal {
 	boards: Board[];
 	activeBoardIndex: number;
 	onSave: (updatedBoards: Board[]) => void;
-	// root: ReactDOM.Root;
 
 	constructor(
 		app: App,
@@ -537,13 +493,10 @@ export class BoardConfigureModal extends Modal {
 		this.onSave = onSave;
 		this.settingsManager = new SettingsManager(app, plugin);
 		const { contentEl } = this;
-		// this.root = null;
 		this.root = ReactDOM.createRoot(contentEl);
 	}
 
 	onOpen() {
-		// contentEl.empty();
-		// modalEl.addClass('global-settings-modal');
 		this.root.render(
 			<ConfigModalContent
 				app={this.app}

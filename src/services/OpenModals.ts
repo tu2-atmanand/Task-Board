@@ -1,6 +1,6 @@
 // src/services/OpenModals.ts
 
-import { App, Plugin, TFile } from "obsidian";
+import { App, TFile } from "obsidian";
 import { addTaskInActiveEditor, addTaskInJson } from "src/utils/TaskItemUtils";
 import {
 	scanFilterForFilesNFolders,

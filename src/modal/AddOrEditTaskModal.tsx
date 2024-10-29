@@ -22,7 +22,7 @@ const taskItemEmpty = {
 	time: "",
 	priority: 0,
 	completed: "",
-	filePath: "", // Include filePath since it's in the tasks
+	filePath: "",
 };
 
 // Functional React component for the modal content
@@ -44,13 +44,6 @@ const EditTaskContent: React.FC<{
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
-	const [subTasks, setSubTasks] = useState(
-		bodyContent.split('\n').filter(line =>
-			line.startsWith('\t- [ ]') ||
-			line.startsWith('\t- [x]')) ||
-		[]
-	); // New way to store only one level of SubTasks
-	const [taskContent, setTaskContent] = useState<string>('');
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
@@ -81,7 +74,7 @@ const EditTaskContent: React.FC<{
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
-		setBodyContent(['\t- [ ] New Sub Task', ...updatedBodyContent].join('\n'));
+		setBodyContent(['\t- [ ] Add you text here...', ...updatedBodyContent].join('\n'));
 	};
 
 	const updateSubTaskContent = (index: number, value: string) => {
@@ -153,10 +146,7 @@ const EditTaskContent: React.FC<{
 
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		// setUpdatedTask(modifiedTask);
 		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
-		setTaskContent(formatedContent);
-		// console.log("Content received from the formatter function :\n", formatedContent);
 		if (previewContainerRef.current) {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.innerHTML = '';
@@ -175,7 +165,6 @@ const EditTaskContent: React.FC<{
 
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
-	// Key press listeners for CTRL/CMD
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.ctrlKey || e.metaKey) {
@@ -238,10 +227,6 @@ const EditTaskContent: React.FC<{
 	// Function to handle textarea changes
 	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setBodyContent(e.target.value);
-		// const updatedContent = e.target.value;
-		// setTaskContent(updatedContent);
-		// const extractedTaskFromTextBox = parseTaskContent(updatedContent);
-		// setUpdatedTask(extractedTaskFromTextBox);
 	};
 
 	return (
@@ -308,9 +293,6 @@ const EditTaskContent: React.FC<{
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
 												aria-label="Hold CTRL button to open in new Window"
-												// onMouseEnter={handleMouseEnter}
-												// onMouseOver={handleMouseEnter}
-												// onClick={() => app.workspace.openLinkText(task.filePath, "")}
 												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
 											>{t(27)}</button>
 										</div>

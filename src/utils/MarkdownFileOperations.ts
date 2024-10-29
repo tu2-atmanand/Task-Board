@@ -1,5 +1,5 @@
-import TaskBoard from "main";
 import { TFile } from "obsidian";
+import TaskBoard from "main";
 
 export const readDataOfVaultFiles = async (
 	plugin: TaskBoard,
@@ -29,8 +29,7 @@ export const writeDataToVaultFiles = async (
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
-			await plugin.app.vault.modify(file, content); // Write updated content to the file
-			console.log(`Successfully updated file at path: ${filePath}`);
+			await plugin.app.vault.modify(file, content);
 		} else {
 			throw new Error(`File not found at path: ${filePath}`);
 		}

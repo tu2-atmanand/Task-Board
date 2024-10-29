@@ -255,7 +255,7 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "3",
+      "taskCompletionFormat": "2",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "dailyNotesPluginComp": false,
       "dueDateFormat": "yyyy-MM-DD",
@@ -275,7 +275,7 @@
         "bug/solver": "#22f7de99",
         "feat": "#b50df2f2"
       },
-      "lang": "ko"
+      "lang": "en"
     }
   }
 }

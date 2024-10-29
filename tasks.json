@@ -24,9 +24,10 @@
         ],
         "Testing 1.md": [
             {
-                "id": 396465473,
+                "id": 1595316364,
                 "title": "This is a normal task, I am adding in the file, Updating",
                 "body": [
+                    "\tThis a line as a description for the Task Description.",
                     "\t- [ ] Adding a Subtask in file manually.",
                     "\t- [ ] Adding a Second SubTask Manually in the file, to see if it will show up in the board automatically. No, its wont show up automatically REFRESH_COLUMN not working."
                 ],
@@ -41,7 +42,7 @@
                 "completed": ""
             },
             {
-                "id": 3745684060,
+                "id": 3455556089,
                 "title": "Adding a new task to encounter a different issue",
                 "body": [
                     "\t- [ ] This is a first level Sub-Task so this will going to get detected very well, without any problem.",
@@ -68,9 +69,11 @@
                 "completed": ""
             },
             {
-                "id": 801735712,
+                "id": 1031561983,
                 "title": "A simple task with the priority emoji",
-                "body": [],
+                "body": [
+                    "\t- [ ] Another simple task with priority emoji away from the pipe symbol | 🔺 [due:: 2024-10-28] #Test"
+                ],
                 "time": "",
                 "due": "",
                 "tags": [
@@ -81,11 +84,9 @@
                 "completed": ""
             },
             {
-                "id": 1097838755,
+                "id": 3424616817,
                 "title": "Another simple task with priority emoji away from the pipe symbol",
-                "body": [
-                    ""
-                ],
+                "body": [],
                 "time": "",
                 "due": "2024-10-28",
                 "tags": [
@@ -222,7 +223,7 @@
                     "\t- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-10-29",
+                "due": "2024-10-30",
                 "tags": [
                     "#Test"
                 ],
@@ -248,9 +249,11 @@
             {
                 "id": 957710739,
                 "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
-                "body": [],
+                "body": [
+                    ""
+                ],
                 "time": "",
-                "due": "2024-10-23",
+                "due": "2024-10-30",
                 "tags": [
                     "#Test"
                 ],
@@ -276,7 +279,7 @@
                     "\t\t- [x] This is second sub-sub Task, Updated"
                 ],
                 "time": "",
-                "due": "2024-10-28",
+                "due": "2024-10-30",
                 "tags": [
                     "#Test",
                     "#SubTasks/🔥bugs",
@@ -291,7 +294,7 @@
     "Completed": {
         "Testing 1.md": [
             {
-                "id": 3513449458,
+                "id": 415199143,
                 "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
                 "body": [
                     "\t![[Pasted image 20241014211429.png]]"
