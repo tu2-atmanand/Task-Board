@@ -20,6 +20,7 @@ import { RefreshIcon, TaskBoardIcon } from "src/types/Icons";
 import {
 	loadTasksJsonFromDiskToSS,
 	onUnloadSave,
+	startPeriodicSave,
 } from "src/utils/tasksCache";
 
 import { KanbanView } from "./src/views/KanbanView";
@@ -151,7 +152,6 @@ export default class TaskBoard extends Plugin {
 	}
 
 	scanVaultAtStartup() {
-		// TODO : This feature havent been tested. Also the way you are reading the variable scanVaultAtStartup is not correct.
 		if (this.settings.data.globalSettings.scanVaultAtStartup) {
 			this.scanningVault.scanVaultForTasks();
 		}
@@ -159,7 +159,7 @@ export default class TaskBoard extends Plugin {
 
 	loadTasksDataToSS() {
 		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		// startPeriodicSave(this.plugin); // TODO : Enable this before release, disabled to during development.
+		startPeriodicSave(this.plugin); // TODO : Enable this before release, disabled to during development.
 	}
 
 	registerTaskBoardView() {
