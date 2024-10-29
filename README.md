@@ -6,11 +6,13 @@
 
 > Inspired from [CardBoard Plugin](https://github.com/roovo/obsidian-card-board) by [roovo](https://github.com/roovo).
 
-**"Document your work while completing your tasks."**
+**"Document your progress while completing your tasks."**
 
 An Obsidian plugin to view and manage all your task in a much more efficient Kanban Board format. Easily manage your tasks throught your vault.
 
 < need to add two images here with dark and light theme>
+
+The main idea behind this plugin is to able to document all your work from start to end on how you completed the specific task, what all possible solution and resources you collected along with recording the timestamp while you were working on the task.
 
 #### **How Does it work ?**
 
@@ -34,9 +36,11 @@ An Obsidian plugin to view and manage all your task in a much more efficient Kan
 ---
 
 ## Basic Information
+
 > The detailed Documentation on how to use the Task Board efficiently can be found here : [Task Board Documentation]()
 
 ### Task Formats
+
 This plugin will only detect and work with the checkbox items/tasks which are in the following format : 
 ```
 - [ ]
@@ -48,16 +52,20 @@ If you dont want this plugin to detect your tasks, you are free to use the below
 ```
 
 ### Marking as Complete
+
 Marking a Task as complete from the board is real-time, as soon as you will mark or unmark the task, the changes will be instantly made in the parent markdown file.
 ![Realt Time changes for marking task complete](assets/MarkTaskComplete.gif)
 
 ### Editing a Task
+
 Edit task directly from the Edit Task Window. You can add different properties to the task, add more subTask, add or edit description to the task. And the changes will be return to the parent markdown file exactly the way you see it in the preview.
 
 ### Deleting a Task
+
 Directly delete unwanted task from the board using the delete Icon. The task will aslo be deleted from the parent markdown file.
 
 ### Applying Filters
+
 Apply Board filters to filter out and see the urgent tasks on the board with ease. Filters for Columns coming soon.
 
 ---
@@ -74,9 +82,23 @@ Apply Board filters to filter out and see the urgent tasks on the board with eas
 
 ---
 
+# How to Contribute
+
+You can contribute to this project by :
+
+**1. Requesting a new feature or suggesting a change :** [How to create a new request]().
+
+**2. Improving the old translated languages or add a new language :** [How to Contribute for Language Translation]().
+
+**3. Contribute to the Development of the plugin Code :** : [How to join the plugin developme]().
+
+---
+
 ## Motivation for the Project
 
-From the start, I always used the [Kanban Plugin]() to manage my tasks. And it use to work nice for me with all the amzing features. But as soon as I came across the [CardBoard Plugin]() eveything changed. The idea of adding tasks anywhere in your vault and managing them from a single board amazed me. While using kanban plugin the issue was, i wasnt able to add tasks directly and then see them on the board, i was required to use the Kanabn Board only to add/edit my tasks, and it use to keep all this tasks in a single markdown file. I immediately switched to the CardBoard plugin after I came across it. But after using it for few days, i realized there are few important features this plugin is lacking and hence I went to first contribute to the main project, but I wasnt familiar with the elm files, hence decided to start my own plugin. While development I took inspirations from CardBoard and Kanban plugin as well as many feature ideas from [GitHub Project KanBan board](). I hope I was able to give the best of all this three plugins into one, and will be improving this further.
+From the start, I always used the [Kanban Plugin]() to manage my tasks. And it use to work nice for me with all the amazing features. But as soon as I came across the [CardBoard Plugin]() eveything changed. The idea of adding tasks anywhere in your vault and managing them from a single board amazed me. While using kanban plugin the issue was, i wasnt able to add tasks directly to any markdown file, i was required to use the Kanabn Board only to add/edit my tasks, and it use to keep all this tasks in a single markdown file. I immediately switched to the CardBoard plugin after I came across it. But after using it for few days, i realized there are few important features this plugin is lacking and hence I went to first contribute to the main project, but I wasnt familiar with the elm files, hence decided to start my own plugin. 
+
+While development I took inspirations from CardBoard and Kanban plugin as well as many feature ideas from [GitHub Project KanBan board](). I hope I am able to give the best of all this three plugins into one, and will be improving this further.
 
 
 > Note for me :  Dont make this readme so big, so the user will keep scrolling also difficult to load. Only put basic things to get user going, rest everything put in docs/ folder.
