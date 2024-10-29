@@ -68,7 +68,6 @@ export default class TaskBoard extends Plugin {
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
-		console.log("MAIN.ts : Loading the setting values : ", this.settings);
 
 		this.getLanguage();
 
@@ -107,7 +106,7 @@ export default class TaskBoard extends Plugin {
 				this.settings.data.globalSettings.scanFilters
 			);
 
-			// Reset the editorModified flag after the scan
+			// Reset the editorModified flag after the scan.
 			this.editorModified = false;
 		}
 	}
@@ -242,10 +241,6 @@ export default class TaskBoard extends Plugin {
 				this.editorModified = true;
 				if (file instanceof TFile) {
 					this.currentModifiedFile = file;
-					console.log(
-						"Modified file is : ",
-						this.currentModifiedFile
-					);
 				}
 			})
 		);
@@ -259,9 +254,6 @@ export default class TaskBoard extends Plugin {
 			)
 		);
 		this.registerDomEvent(window, "blur", () => {
-			console.log(
-				"User switched away from Obsidian or Obsidian lost focus."
-			);
 			this.onFileModifiedAndLostFocus();
 		});
 
@@ -290,18 +282,12 @@ export default class TaskBoard extends Plugin {
 		);
 		if (closeButton) {
 			this.registerDomEvent(closeButton, "mouseenter", () => {
-				console.log(
-					"User hovered over the close button. Storing SessionStorage data to Disk."
-				);
 				onUnloadSave(this.plugin);
 			});
 		}
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
-				console.log(
-					"MENU : Checking if this file-menu is registered or not"
-				);
 				if (source === "link-context-menu") return;
 
 				const fileIsFile = file instanceof TFile;

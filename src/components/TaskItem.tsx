@@ -1,22 +1,18 @@
 // /src/components/TaskItem.tsx
 
-import { FaEdit, FaTrash } from 'react-icons/fa'; // Import the desired icons from react-icons
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from 'react';
 import { TaskProps, taskItem } from '../interfaces/TaskItemProps';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { RxDragHandleDots2 } from "react-icons/rx";
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
 
 const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex, activeBoardSettings, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
-	// State to handle the checkbox animation
-	const [updatedTask, setTask] = useState<taskItem>(task);
 	const [isChecked, setIsChecked] = useState(false);
 	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
-	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]'))));
 	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
@@ -32,7 +28,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		} else if (taskDueDate < today) {
 			return 'red'; // Past due
 		} else {
-			return 'grey';
+			return 'grey'; // No Due
 		}
 	};
 
@@ -110,7 +106,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 	useEffect(() => {
 		if (taskItemBodyDescriptionRenderer.current && componentRef.current) {
 			const uniqueKey = `${task.id}-desc`;
-			const descElement = taskItemBodyDescriptionRenderer.current[uniqueKey]; // Clear existing content
+			const descElement = taskItemBodyDescriptionRenderer.current[uniqueKey];
 
 			if (descElement) {
 				descElement.innerHTML = '';
@@ -118,9 +114,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				MarkdownUIRenderer.renderTaskDisc(
 					app,
 					taskDesc.join('\n').trim(),
-					descElement, // Use HTMLDivElement reference
+					descElement,
 					task.filePath,
-					componentRef.current // Pass the Component instance
+					componentRef.current
 				);
 
 				hookMarkdownLinkMouseEventHandlers(app, descElement, task.filePath, task.filePath);
@@ -140,9 +136,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				MarkdownUIRenderer.renderTaskDisc(
 					app,
 					task.title,
-					titleElement, // Use HTMLDivElement reference
+					titleElement,
 					task.filePath,
-					componentRef.current // Pass the Component instance
+					componentRef.current
 				);
 
 				hookMarkdownLinkMouseEventHandlers(app, titleElement, task.filePath, task.filePath);
@@ -198,15 +194,12 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
 										const column = activeBoardSettings.columns[columnIndex];
-										// console.log("Current Column Index :", columnIndex, "| Current Column data :", column);
 										if (!activeBoardSettings.showColumnTags && activeBoardSettings.columns[columnIndex].colType === "namedTag" && tag === column.data.coltag) {
-											// console.log("This is a namedTag, the tag of this column's coltag wont be shown |  Name of Column :", column.data.name);
 											return null;
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
 										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters?.at(0) != null && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
-											// console.log("The following tags wont be shown since showFilteredTags is OFF :", activeBoardSettings.filters);
 											return null;
 										}
 

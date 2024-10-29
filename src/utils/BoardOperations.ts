@@ -9,9 +9,6 @@ export const refreshBoardData = async (
 	setBoards: React.Dispatch<React.SetStateAction<Board[]>>,
 	callback: () => void // Add this callback
 ) => {
-	console.log(
-		"refreshBoardData : Loading the boarConfigData and setting it to setBoards"
-	);
 	callback();
 };
 

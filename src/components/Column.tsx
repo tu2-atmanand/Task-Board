@@ -1,19 +1,17 @@
-// /src/components/Column.tsx -------- V3
+// /src/components/Column.tsx
 
-import { App, Modal } from 'obsidian';
 import React, { useEffect, useState } from 'react';
-import { RxDotsVertical, RxDragHandleDots2 } from "react-icons/rx";
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
-import { taskItem, taskJsonMerged, tasksJson } from 'src/interfaces/TaskItemProps';
+import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItemProps';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
+import { App } from 'obsidian';
 import { CSSProperties } from 'react';
 import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import TaskItem from './TaskItem';
-import { eventEmitter } from 'src/services/EventEmitter';
-import { renderColumns } from 'src/utils/RenderColumns'; // Import the renderColumns function
+import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from 'src/utils/lang/helper';
 
 type CustomCSSProperties = CSSProperties & {
@@ -21,7 +19,7 @@ type CustomCSSProperties = CSSProperties & {
 };
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
-	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
+	setBoards: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 const Column: React.FC<ColumnPropsWithSetBoards> = ({
@@ -37,10 +35,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	// Local tasks state, initially set from external tasks
 	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>(allTasksExternal);
-	// let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
-	// globalSettings = globalSettings.data.globalSettings;
 	const globalSettings = plugin.settings.data.globalSettings;
-	// console.log("Now even after user makes any changes from the Setting Tab, it should reflect in the following setting data i am reading using plugin.settings : ", globalSettings);
 
 	// Sync local tasks state with external tasks when they change
 	useEffect(() => {
@@ -49,8 +44,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 
 	// Render tasks using the tasks passed from KanbanBoard
 	useEffect(() => {
-		// setTasks([]);
-		// console.log("FROM COLUMN.TSX : Data i will be sending to renderColumns function : ", allTasksExternal);
 		if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
 			renderColumns(plugin, setTasks, activeBoardIndex, colType, data, allTasksExternal);
 		}
@@ -59,7 +52,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	const handleCheckboxChange = (updatedTask: taskItem) => {
 		const moment = require("moment");
 
-		// NOTE : The following two lines removes the task which has been marked as completed or vice-versa, but only the TaskTitle disappers, if that task has a body, then what you see on the board is, the body of this updated task gets appeded to the task either above or below. This most probably will be due to worst way of rendering. I am not sure about this or if in future Svelte going to solve it or not.
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
 		setTasks(updatedTasks); // Update state to remove completed task
 
@@ -70,7 +62,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			moveFromCompletedToPending(plugin, taskWithCompleted);
 			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		} else {
-			console.log("The format give by user for completion date : ", globalSettings?.taskCompletionDateTimePattern, " | The date-time i have got from the moment library : ", moment().format(globalSettings?.taskCompletionDateTimePattern));
 			const taskWithCompleted = { ...updatedTask, completed: moment().format(globalSettings?.taskCompletionDateTimePattern), };
 			// Move from Pending to Completed
 			moveFromPendingToCompleted(plugin, taskWithCompleted);
@@ -80,13 +71,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	};
 
 	const handleSubTasksChange = (updatedTask: taskItem) => {
-		// const moment = require("moment");
-		// Remove task from the current state
-		// const updatedTasks = tasks;
-		// console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
-		// console.log("The tasks which has been filtered : ", updatedTasks);
-		// setTasks(updatedTasks); // Update state to remove completed task
-		// console.log("The new task which i have received and which i am going to put in the taks.json : ", updatedTask);
 		updateTaskInJson(plugin, updatedTask);
 		updateTaskInFile(plugin, updatedTask, updatedTask);
 	};
@@ -94,7 +78,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	const handleDeleteTask = (app: App, task: taskItem) => {
 		const mssg = t(61);
 		const deleteModal = new DeleteConfirmationModal(app, {
-			app, // Add app here
+			app,
 			mssg,
 			onConfirm: () => {
 				deleteTaskFromFile(plugin, task);
@@ -144,7 +128,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
 
 						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
-							return ( // Ensure that TaskItem is returned
+							return (
 								<TaskItem
 									key={index}
 									app={app}
@@ -161,7 +145,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 							);
 						}
 
-						return null; // Return null if the condition is false, to avoid undefined behavior.
+						return null;
 					})
 				) : (
 					<p>{t(7)}</p>

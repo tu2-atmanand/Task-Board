@@ -1,9 +1,8 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, Notice, TFile } from "obsidian";
+import { App, TFile } from "obsidian";
 import {
 	loadTasksJsonFromSS,
-	writeTasksJsonToDisk,
 	writeTasksJsonToSS,
 } from "./tasksCache";
 import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
@@ -25,29 +24,17 @@ export class ScanningVault {
 		this.TaskDetected = false;
 	}
 
-	// Scan all markdown files for tasks
-	// Modify scanVaultForTasks to accept a callback function for terminal updates
-
 	async scanVaultForTasks() {
-		console.log(
-			"Scanning The Whole Vault, either on Startup or using Modal..."
-		);
 		const files = this.app.vault.getMarkdownFiles();
 		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
 
 		for (const file of files) {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
-			// onFileScanned(file.path); // Pass file name to callback for live updates
 			if (scanFilterForFilesNFolders(file, scanFilters)) {
 				await this.extractTasksFromFile(file, this.tasks, scanFilters);
 			}
 		}
-
-		console.log(
-			"Following tasks has been collected after Vault Scan : ",
-			this.tasks
-		);
 
 		this.saveTasksToFile();
 		// Emit the event
@@ -70,11 +57,6 @@ export class ScanningVault {
 			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
 				const tags = extractTags(line);
-				console.log(
-					"extractTasksFromFile : Following thing received for tags :",
-					tags
-				);
-
 				if (scanFilterForTags(tags, scanFilters)) {
 					this.TaskDetected =
 						line.startsWith("- [x]") || line.startsWith("- [ ]");
@@ -98,17 +80,13 @@ export class ScanningVault {
 						completed: completionDate,
 					};
 
-					console.log(
-						"extractTasksFromFile : Scanned the following task, because it allowed in setting : ",
-						task
-					);
 					if (isCompleted) {
 						tasks.Completed[fileNameWithPath].push(task);
 					} else {
 						tasks.Pending[fileNameWithPath].push(task);
 					}
 				} else {
-					console.log("The tasks is not allowed...");
+					// console.log("The tasks is not allowed...");
 				}
 			}
 		}
@@ -118,30 +96,15 @@ export class ScanningVault {
 	generateTaskId(): number {
 		const array = new Uint32Array(1);
 		crypto.getRandomValues(array);
-		console.log("The random value generated : ", array[0]);
 		return array[0];
 	}
-
-	// // Helper function to load the existing tasks from the tasks.json file
-	// async loadTasksFromFile() {
-	// 	if (fs.existsSync(tasksPath)) {
-	// 		const data = fs.readFileSync(tasksPath, "utf8");
-	// 		return JSON.parse(data);
-	// 	}
-	// 	return { Pending: {}, Completed: {} }; // Return an empty object if no file exists
-	// }
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: TFile[]) {
 		const moment = require("moment");
-		console.log("Following files have been received for scanning: ", files);
 
 		// Load the existing tasks from tasks.json once
 		const oldTasks = await loadTasksJsonFromSS(this.plugin);
-		console.log(
-			"Following Old data has been loaded from tasks.json: ",
-			oldTasks
-		);
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
 
@@ -156,11 +119,6 @@ export class ScanningVault {
 				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
 					const tags = extractTags(line);
-					console.log(
-						"updateTasksFromFiles : Following thing received for tags :",
-						tags
-					);
-
 					if (scanFilterForTags(tags, scanFilters)) {
 						this.TaskDetected =
 							line.startsWith("- [x]") ||
@@ -171,21 +129,7 @@ export class ScanningVault {
 						const priority = extractPriority(line);
 						const completionDate = extractCompletionDate(line);
 						const body = extractBody(lines, i + 1);
-
 						let due = extractDueDate(line);
-						// if (!due) {
-						// 	const moment = require("moment");
-						// 	console.log(
-						// 		"Following thing  has been written by the moment library. Let see what it return if the file name is : ",
-						// 		file.basename,
-						// 		" | OUTPUT : ",
-						// 		moment().format(file.basename)
-						// 	);
-						// 	if (moment().format(file.basename)) {
-						// 		due = moment().format(file.basename);
-						// 	}
-						// }
-
 						if (
 							!due &&
 							this.plugin.settings.data.globalSettings
@@ -196,12 +140,6 @@ export class ScanningVault {
 									.dueDateFormat;
 							const basename = file.basename;
 
-							console.log(
-								"Following thing  has been written by the moment library. Let see what it return if the file name is : ",
-								file.basename,
-								" | OUTPUT : ",
-								moment().format(file.basename)
-							);
 							// Check if the basename matches the dueFormat using moment
 							if (moment(basename, dueFormat, true).isValid()) {
 								due = basename; // If the basename matches the dueFormat, assign it to due
@@ -228,15 +166,10 @@ export class ScanningVault {
 							newPendingTasks.push(task);
 						}
 					} else {
-						console.log("The tasks is not allowed...");
+						// console.log("The tasks is not allowed...");
 					}
 				}
 			}
-
-			console.log("Tasks extracted from the file: ", {
-				newPendingTasks,
-				newCompletedTasks,
-			});
 
 			// Only replace the tasks for the specific file
 			this.tasks.Pending = {
@@ -250,18 +183,7 @@ export class ScanningVault {
 			};
 		}
 
-		// Save the updated tasks back to tasks.json after processing all files
-		// console.log(
-		// 	"Value of this.plugin.settings.data.globalSettings.realTimeScanning : ",
-		// 	this.plugin.settings.data.globalSettings.realTimeScanning
-		// );
-
 		this.saveTasksToFile();
-
-		// console.log(
-		// 	"ScanningVault : Running the function from Main.ts to re-Render..."
-		// );
-		// refreshKanbanBoard(this.app);
 	}
 
 	// Save tasks to JSON file
@@ -273,8 +195,6 @@ export class ScanningVault {
 			this.TaskDetected &&
 			this.plugin.settings.data.globalSettings.realTimeScanning
 		) {
-			// new Notice("Tasks scanned from the modified files.");
-			// await writeTasksJsonToDisk(this.plugin); // DEV : Remove this, as for RealTimeScanning, this is too many write operations to disk.
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
@@ -288,22 +208,17 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 		const line = lines[i];
 
 		if (line.trim() === "") {
-			// Empty line indicates the end of the task body
-			// console.log(
-			// 	"The current line detected should be empty :",
-			// 	line,
-			// 	": There shouldnt be any space between the two colons"
-			// );
 			break;
 		}
 
+		// If the line has one level of indentation, consider it part of the body
 		if (line.startsWith("\t") || line.startsWith("    ")) {
 			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
-			// If the line has one level of indentation, consider it part of the body
 			bodyLines.push(line);
 		} else {
-			// If no indentation is detected, stop reading the body
-			break;
+			// TODO : If no indentation has been detected, still consider it as the part of the task body, and add one indentation to the line.
+			bodyLines.push(`\t${line}`);
+			// break;
 		}
 	}
 	return bodyLines;
@@ -398,46 +313,14 @@ export function extractPriority(text: string): number {
 	return 0;
 }
 
-// // Extract priority from task title
-// extractPriority(text: string): string {
-// 	const priorityMatch = Object.entries(priorityEmojis).find(
-// 		([key, emoji]) => text.includes(emoji)
-// 	);
-// 	// console.log(
-// 	// 	"This is what has been extracted as emoji : ",
-// 	// 	priorityMatch,
-// 	// 	" Of the task : ",
-// 	// 	text
-// 	// );
-// 	// console.log([...text].map((char) => char.codePointAt(0).toString(16)));
-// 	return priorityMatch?.[0] || "0";
-// }
-
-// Extract tag from task title
+// Extract tags from task title
 export function extractTags(text: string): string[] {
 	const matches = text.match(/\s+#\S+/g);
-	console.log("extractTags : Following tags extracted :", matches);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
 
-// extractCompletionDate(text: string): string {
-// 	// const match =
-// 	// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/) ||
-// 	// 	text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
-// 	let match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
-// 	// if (!match) {
-// 	// 	match = text.match(/✅\s*(\d{4}-\d{2}-\d{2}/);
-// 	// }
-
-// 	return match ? match[1] : "";
-// }
-
+// Extract completion date-time value
 export function extractCompletionDate(text: string): string {
-	// Match cases like ✅2024-09-26T11:30 or ✅ 2024-09-28
-	// let match = text.match(
-	// 	/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)(\d{2}:\d{2})?/
-	// );
-
 	let match = text.match(
 		/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?/
 	);
@@ -466,8 +349,6 @@ export function extractCompletionDate(text: string): string {
 				: "";
 		}
 	}
-
-	console.log("Following thing detected for completion date : ", match);
 	// Return the matched date or date-time, or an empty string if no match
 	return match ? match[0].replace("✅", "").trim() : "";
 }

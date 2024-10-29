@@ -4,11 +4,9 @@ import { Dispatch, SetStateAction } from "react";
 import {
 	taskItem,
 	taskJsonMerged,
-	tasksJson,
 } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
-import moment from "moment";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
@@ -19,18 +17,10 @@ export const renderColumns = (
 	data: any,
 	allTasks: taskJsonMerged
 ) => {
-	console.log(
-		"renderColumns function : This will run as many times as there are columns in the current board -----------"
-	);
-	// Load tasks from the JSON file
-	// const { allTasksWithStatus, pendingTasks, completedTasks } =
-	// 	loadTasksProcessed();
-
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
 	const pendingTasks = allTasks.Pending;
 	const completedTasks = allTasks.Completed;
-	// setTasks(tasksToDisplay);
 
 	if (colType === "undated") {
 		tasksToDisplay = pendingTasks.filter((task) => !task.due);
@@ -46,16 +36,6 @@ export const renderColumns = (
 			const diffDays = Math.round(
 				(dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
 			);
-			// console.log(
-			// 	"Dudate : ",
-			// 	dueDate.getTime(),
-			// 	"Today : ",
-			// 	today.getTime(),
-			// 	"The Difference is : ",
-			// 	diffDays,
-			// 	"For the task : ",
-			// 	task.title
-			// );
 
 			if (from < 0 && to === 0) {
 				return diffDays < 0;
@@ -80,7 +60,7 @@ export const renderColumns = (
 			(task) => task.tags && task.tags.some((tag) => tag !== data.coltag)
 		);
 	} else if (colType === "completed") {
-		const boardConfigs = plugin.settings.data.boardConfigs; // NOTE : I think i will have to use this function only to get the boardConfigs, although, i know its possible to get this from `plugin.settings`.
+		const boardConfigs = plugin.settings.data.boardConfigs;
 		const completedColumnIndex = boardConfigs[
 			activeBoard
 		]?.columns.findIndex((column) => column.colType === "completed");
@@ -97,11 +77,6 @@ export const renderColumns = (
 		});
 
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);
-		// tasksToDisplay = sortedCompletedTasks;
-
-		// console.log("The value of Limit for Completed Column : ", tasksLimit);
-		// console.log("All Completed taks i have : ", completedTasks);
-		// console.log("Tasks to Display : ", tasksToDisplay);
 	}
 
 	setTasks(tasksToDisplay);
