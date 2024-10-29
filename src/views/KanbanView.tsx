@@ -1,4 +1,4 @@
-// src/views/KanbanView.ts
+// src/views/KanbanView.tsx
 
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { ReScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
@@ -24,8 +24,6 @@ export class KanbanView extends ItemView {
 		const { contentEl } = this;
 		this.contentEl = contentEl;
 		this.contentEl.empty();
-		const container = document.createElement("div");
-		this.contentEl.appendChild(container);
 		this.root = ReactDOM.createRoot(this.contentEl);
 		this.boards = [];
 		this.icon = TaskBoardIcon;
