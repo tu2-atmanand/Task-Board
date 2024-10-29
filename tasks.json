@@ -109,7 +109,7 @@
                     "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
                 ],
                 "time": "",
-                "due": "2024-10-29",
+                "due": "2024-10-31",
                 "tags": [
                     "#Test",
                     "#feat"
@@ -131,7 +131,7 @@
                     "\t- [ ] Adding another subTask, second one, updaing"
                 ],
                 "time": "10:30 - 11:30",
-                "due": "2024-10-29",
+                "due": "2024-10-31",
                 "tags": [
                     "#Test"
                 ],
