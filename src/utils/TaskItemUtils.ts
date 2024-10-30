@@ -75,14 +75,15 @@ export const taskElementsFormatter = (
 	} else {
 		formattedTask = `${checkBoxStat} ${
 			updatedTask.title
-		} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(" ")}${completedWitFormat}`;
+		} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(
+			" "
+		)}${completedWitFormat}`;
 	}
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
 		.map((line: string) => `${line}`)
 		.join("\n");
-
 
 	const completeTask = `${formattedTask}${
 		bodyLines.trim() ? `\n${bodyLines}` : ""
@@ -210,7 +211,6 @@ export const updateTaskInFile = async (
 	updatedTask: taskItem,
 	oldTask: taskItem
 ) => {
-
 	const filePath = updatedTask.filePath;
 
 	try {
@@ -258,15 +258,20 @@ export const updateTaskInJson = async (
 		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Function to update a task in a given task category (Pending or Completed)
-		const updateTasksInCategory = (taskCategory: any) => {
+		const updateTasksInCategory = (taskCategory: {
+			[filePath: string]: taskItem[];
+		}) => {
 			return Object.entries(taskCategory).reduce(
-				(acc: any, [filePath, tasks]: [string, taskItem[]]) => {
+				(
+					acc: { [filePath: string]: taskItem[] },
+					[filePath, tasks]: [string, taskItem[]]
+				) => {
 					acc[filePath] = tasks.map((task: taskItem) =>
 						task.id === updatedTask.id ? updatedTask : task
 					);
 					return acc;
 				},
-				{}
+				{} as { [filePath: string]: taskItem[] } // Set the initial accumulator type
 			);
 		};
 
@@ -279,7 +284,6 @@ export const updateTaskInJson = async (
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
 		};
-;
 		// Write the updated data back to the JSON file using the new function
 		await writeTasksJsonToSS(plugin, updatedData);
 
@@ -336,7 +340,9 @@ export const addTaskInActiveEditor = async (
 		// Get the active editor and the current cursor position
 		const activeEditor = app.workspace.activeEditor?.editor;
 		if (!activeEditor) {
-			throw new Error("No active editor found. Please place your cursor in markdown file");
+			throw new Error(
+				"No active editor found. Please place your cursor in markdown file"
+			);
 		}
 
 		const cursorPosition = activeEditor.getCursor();
