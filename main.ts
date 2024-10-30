@@ -283,12 +283,13 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
-		const closeButton = document.querySelector(
+		const closeButton = document.querySelector<HTMLElement>(
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
 			this.registerDomEvent(closeButton, "mouseenter", () => {
-				onUnloadSave(this.plugin);
+				console.log("Hover over close button...");
+				// onUnloadSave(this.plugin);
 			});
 		}
 
