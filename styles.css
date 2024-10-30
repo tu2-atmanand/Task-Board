@@ -10,11 +10,15 @@
 	padding-block-start: 0 !important;
 }
 
+.workspace-leaf-content .view-content {
+	overflow: unset;
+}
+
 /* src/styles/KanbanBoard.tsx */
 .kanbanBoard {
 	display: flex;
 	flex-direction: column;
-	height: 100%;
+	height: 99%;
 }
 
 .kanbanHeader {
@@ -22,7 +26,7 @@
 	justify-content: space-between;
 	padding: 4px;
 	padding-block-end: 8px;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid var(--text-normal);
 }
 
 .boardTitles {
@@ -33,18 +37,17 @@
 }
 
 .boardTitleButton {
-	box-shadow: var(--shadow-activated-tab-header-dark) !important;
 	background: transparent !important;
 	border-radius: var(--radius-s);
 	cursor: pointer;
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid var(--tab-outline-color);
 }
 
 .boardTitleButtonActive {
-	box-shadow: var(--shadow-activated-tab-header-dark) !important;
+	box-shadow: var(--embed-block-shadow-hover) !important;
 	background: var(--background-secondary-alt) !important;
 	border-radius: var(--radius-s);
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid var(--interactive-accent);
 }
 
 .kanbanHeaderBtns {
@@ -88,7 +91,7 @@
 .TaskBoardColumnsSection {
 	background: transparent !important;
 	/* backdrop-filter: blur(10px) saturate(300%) contrast(80%) brightness(60%); */
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
 	border-radius: 15px;
 	margin-right: 8px;
 	border-radius: 5px;
@@ -106,7 +109,7 @@
 	justify-content: space-between;
 	align-items: center;
 	padding-inline: 10px;
-	border-radius: 5px;
+	border-radius: 5px 5px 0 0;
 }
 
 .taskBoardColumnSecHeaderTitleSec {
@@ -160,8 +163,8 @@
 /* /src/components/TaskItem.tsx */
 
 .taskItem {
-	background: var(--background-secondary);
-	border: var(--border-width) solid olive;
+	background: var(--background-primary-alt);
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 1.1));
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
@@ -251,7 +254,7 @@
 
 .taskItemBodyDescription {
 	overflow: hidden;
-	transition: max-height 0.4s cubic-bezier(0.71, -0.04, 0.06, 1.01);
+	transition: max-height 0.4s ease-in;
 	max-height: 0;
 }
 
@@ -259,7 +262,7 @@
 	padding: 2px;
 	border-radius: 4px;
 	background: var(--background-modifier-box-shadow);
-	transition: max-height 0.4s cubic-bezier(0.71, -0.04, 0.06, 1.01);
+	transition: max-height 0.4s ease-out;
 	max-height: 100%;
 }
 
@@ -308,7 +311,7 @@
 }
 
 .taskItemDateCompleted {
-	color: #ccc;
+	color: var(--text-success);
 	font-size: small;
 }
 
@@ -452,8 +455,6 @@
 	margin-bottom: 15px;
 }
 
-.EditTaskModalHomeFieldTitleInput {}
-
 .EditTaskModalsubTasksContainer {
 	display: flex;
 	flex-direction: column;
@@ -488,7 +489,7 @@
 	padding-inline: 15px;
 	font-weight: 500;
 	border-radius: 10px 10px 0 0;
-	background: var(--background-modifier-message);
+	background: var(--table-header-border-color);
 }
 
 .EditTaskModalTabContent {
@@ -498,10 +499,12 @@
 
 .EditTaskModalTabContent.show {
 	opacity: 1;
+	height: 100%;
 }
 
 .EditTaskModalTabContent.hide {
 	opacity: 0;
+	height: 0;
 }
 
 .EditTaskModalHomePreviewHeader {
@@ -510,7 +513,7 @@
 	flex-direction: row;
 	/* border-radius: 10px 0 5px 0; */
 	justify-content: space-between;
-	background: var(--background-modifier-message);
+	background: var(--table-header-border-color);
 	align-items: center;
 }
 
@@ -559,18 +562,22 @@
 	background-color: #0056b3;
 }
 
+.EditTaskModalHomePreviewBody {
+	height: 25vh;
+	overflow: auto;
+}
+
 .EditTaskModalBodyDescription {
 	height: 250px;
 	padding: 10px;
 	font-size: 1rem;
-	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
 .EditTaskModalHomeRightSec {
 	display: flex;
 	flex-direction: column;
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
 	border-radius: 5px;
 	padding: 0.5em;
 	min-width: 8vw;
@@ -608,7 +615,7 @@
 	padding: 10px;
 	border: none;
 	cursor: pointer;
-	margin-inline: 1em;
+	margin-inline: 1em 2.5em;
 	margin-block-start: 1em;
 }
 
@@ -725,7 +732,7 @@
 
 .boardConfigModalSidebarBtnArea-btn {
 	border-radius: var(--button-radius);
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid var(--tab-outline-color);
 	padding: 8px;
 	cursor: pointer;
 }
@@ -737,6 +744,11 @@
 	border: var(--border-width) solid olive;
 	padding: 8px;
 	cursor: pointer;
+}
+
+.boardConfigModalSidebarSaveBtn {
+	width: 100%;
+	background-color: green !important;
 }
 
 .boardConfigModalMainContent {
@@ -816,6 +828,11 @@
 	max-width: 75px;
 }
 
+.boardConfigModalDeleteBoardBtn:hover {
+	background-color: darkred;
+	color: white;
+}
+
 /* .modal-container.mod-dim {
 	min-width: fit-content;
 	min-height: fit-content;
@@ -880,6 +897,11 @@
 	text-align: center;
 }
 
+.global-setting-tab-live-preview {
+	padding: 5px;
+	background-color: var(--background-primary-alt);
+}
+
 .settingTabFooterSection {
 	margin-top: 2em;
 	align-items: center;
@@ -941,11 +963,11 @@
 	height: 50vh;
 	width: 100%;
 	margin-block: 20px;
+	justify-content: space-between;
 }
 
 .reScanVaultModalHomeTerminal {
 	height: 100%;
-	max-width: 50vw;
 	background-color: rgb(12 10 10);
 	color: rgb(255, 255, 255);
 	padding: 10px;
@@ -955,11 +977,12 @@
 }
 
 .reScanVaultModalHomeTerminalSlideIn {
-	transition: width 0.4s ease-in;
+	transition: width 0.3s ease-in;
 	width: 100%;
 }
 
 .reScanVaultModalHomeTerminalSlideOut {
+	transition: width 0.3s ease-out;
 	width: 0;
 }
 
@@ -967,7 +990,6 @@
 	overflow-y: scroll;
 	position: sticky;
 	height: 100%;
-	max-width: 45vw;
 	background-color: transparent;
 	padding-left: 1em;
 	z-index: 10;
@@ -975,11 +997,11 @@
 }
 
 .slideIn {
-	transition: width 0.4s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+	transition: width 0.3s ease-in;
 	width: 100%;
 }
 
 .slideOut {
-	transition: width 0.4s ease-in-out;
+	transition: width 0.3s ease-out;
 	width: 0;
 }
