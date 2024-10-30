@@ -289,7 +289,7 @@ export default class TaskBoard extends Plugin {
 		if (closeButton) {
 			this.registerDomEvent(closeButton, "mouseenter", () => {
 				console.log("Hover over close button...");
-				// onUnloadSave(this.plugin);
+				onUnloadSave(this.plugin);
 			});
 		}
 
