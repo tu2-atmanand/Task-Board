@@ -460,7 +460,7 @@ export class SettingsManager {
 		// Create the live preview element
 		const previewEl = contentEl.createEl("div", {
 			text: t(107),
-			cls: "globa-setting-tab-live-preview",
+			cls: "global-setting-tab-live-preview",
 		});
 		const updatePreview = () => {
 			let dueDate = "2024-09-21";

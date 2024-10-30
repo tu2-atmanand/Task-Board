@@ -270,10 +270,10 @@
       "showFooter": true,
       "showVerticalScroll": false,
       "tagColors": {
-        "Test": "#22ee1fef",
-        "Bug": "#ef1120dd",
-        "bug/solver": "#22f7de99",
-        "feat": "#b50df2f2"
+        "Test": "#10da0cEE",
+        "Bug": "#E6090EEE",
+        "bug/solver": "#22f7eeff",
+        "feat": "#d50df2ff"
       },
       "lang": "en"
     }
