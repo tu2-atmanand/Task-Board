@@ -4,7 +4,7 @@ import { App, TFile } from "obsidian";
 
 import { ScanningVault } from "src/utils/ScanningVault";
 import type TaskBoard from "main";
-import { scanFilterForFilesNFolders } from "./Checker";
+import { scanFilterForFilesNFolders } from "./FiltersVerifier";
 
 export class RealTimeScanning {
 	app: App;

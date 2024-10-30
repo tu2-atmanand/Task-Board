@@ -5,7 +5,7 @@ import {
 	loadTasksJsonFromSS,
 	writeTasksJsonToSS,
 } from "./tasksCache";
-import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
+import { scanFilterForFilesNFolders, scanFilterForTags } from "./FiltersVerifier";
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
