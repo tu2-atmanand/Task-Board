@@ -159,7 +159,7 @@ const EditTaskContent: React.FC<{
 				componentRef.current
 			);
 
-			hookMarkdownLinkMouseEventHandlers(app, previewContainerRef.current, filePath, filePath);
+			hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
 		}
 	}, [modifiedTask]); // Re-render when modifiedTask changes
 

@@ -96,7 +96,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, element, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, plugin, element, task.filePath, task.filePath);
 			}
 		});
 	}, [task.body, task.filePath, app]);
@@ -119,7 +119,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, descElement, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, plugin, descElement, task.filePath, task.filePath);
 			}
 		}
 	}, [taskDesc, task.filePath, app]);
@@ -141,7 +141,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, titleElement, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, plugin, titleElement, task.filePath, task.filePath);
 			}
 		}
 	}, [task.title, task.filePath, app]);
