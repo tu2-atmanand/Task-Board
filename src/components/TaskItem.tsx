@@ -190,7 +190,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
 										const tagColor = customTagColor || defaultTagColor;
 										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
-										const borderColor = hexToRgba(tagColor, 0.5) || tagColor;
+										const borderColor = customTagColor ? hexToRgba(tagColor, 0.5) : `var(--tag-color-hover)`;
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
 										const column = activeBoardSettings.columns[columnIndex];
