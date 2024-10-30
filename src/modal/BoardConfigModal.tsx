@@ -279,7 +279,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
-					<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
+					<hr width="100%" size="2" color="olive" style={{ "margin": 0, "marginBottom": '1em' }} noshade="true"></hr>
 
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t(50)}</h3>
@@ -416,7 +416,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<button onClick={handleOpenAddColumnModal}>{t(56)}</button>
 				</div>
 				<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-				<button style={{ backgroundColor: "darkred" }} onClick={deleteCurrentBoard}>{t(57)}</button>
+				<button className="boardConfigModalDeleteBoardBtn" onClick={deleteCurrentBoard}>{t(57)}</button>
 			</div>
 		);
 	};
@@ -456,7 +456,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							setLocalBoards([...localBoards, newBoard]);
 						}}>{t(59)}</button>
 						<hr width="100%" size="2" color="olive" noshade="true"></hr>
-						<button style={{ width: '100%', backgroundColor: "darkgreen" }} onClick={handleSave}>{t(1)}</button>
+						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t(1)}</button>
 					</div>
 				</div>
 				<DragDropContext onDragEnd={onDragEnd}>
