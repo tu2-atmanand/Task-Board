@@ -22,11 +22,11 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		const today = new Date();
 		const taskDueDate = new Date(task.due);
 		if (taskDueDate.toDateString() === today.toDateString()) {
-			return 'yellow'; // Due today
+			return 'var(--color-yellow)'; // Due today
 		} else if (taskDueDate > today) {
-			return 'green'; // Due in the future
+			return 'var(--color-green)'; // Due in the future
 		} else if (taskDueDate < today) {
-			return 'red'; // Past due
+			return 'var(--color-red)'; // Past due
 		} else {
 			return 'grey'; // No Due
 		}
@@ -258,10 +258,10 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 							)}
 							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title={t(8)} />
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEdit} title={t(8)} />
 								</div>
 								<div className="taskItemiconButton">
-									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title={t(9)} />
+									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
 								</div>
 							</div>
 						</div>
