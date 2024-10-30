@@ -110,13 +110,6 @@ export const writeTasksFromSessionStorageToDisk = async (
 	}
 };
 
-// Start a timer to write tasks from sessionStorage to disk every 5 minutes
-export const startPeriodicSave = (plugin: TaskBoard) => {
-	setInterval(async () => {
-		await writeTasksFromSessionStorageToDisk(plugin);
-	}, 10 * 60 * 1000); // 5 minutes in milliseconds
-};
-
 // Call this function when the plugin is unloading
 export const onUnloadSave = async (plugin: TaskBoard) => {
 	await writeTasksJsonToDisk(plugin);
