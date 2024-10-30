@@ -244,7 +244,9 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				this.editorModified = true;
 				if (file instanceof TFile) {
-					this.currentModifiedFile = file;
+					if (!file.path.endsWith(".excalidraw.md")) {
+						this.currentModifiedFile = file;
+					}
 				}
 			})
 		);
