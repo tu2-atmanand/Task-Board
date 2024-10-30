@@ -20,7 +20,7 @@ import { RefreshIcon, TaskBoardIcon } from "src/types/Icons";
 import {
 	loadTasksJsonFromDiskToSS,
 	onUnloadSave,
-	startPeriodicSave,
+	writeTasksFromSessionStorageToDisk,
 } from "src/utils/tasksCache";
 
 import { KanbanView } from "./src/views/KanbanView";
@@ -39,7 +39,6 @@ export default class TaskBoard extends Plugin {
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
-	scanTimer: number;
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
 	IsTasksJsonChanged: boolean;
@@ -49,7 +48,6 @@ export default class TaskBoard extends Plugin {
 		this.app = app;
 		this.plugin = this;
 		this.settings = DEFAULT_SETTINGS;
-		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.editorModified = false;
@@ -118,8 +116,6 @@ export default class TaskBoard extends Plugin {
 	onunload() {
 		console.log("TaskBoard : unloading plugin...");
 		onUnloadSave(this.plugin);
-		window.clearInterval(this.scanTimer);
-		this.realTimeScanning.clearScanTimer();
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
@@ -162,7 +158,7 @@ export default class TaskBoard extends Plugin {
 
 	loadTasksDataToSS() {
 		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		startPeriodicSave(this.plugin); // TODO : Enable this before release, disabled to during development.
+		// And a setInteval is registered to start periodic saving.
 	}
 
 	registerTaskBoardView() {
@@ -239,6 +235,13 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerEvents() {
+		// Start a timer to write tasks from sessionStorage to disk every 5 minutes
+		this.registerInterval(
+			window.setInterval(async () => {
+				await writeTasksFromSessionStorageToDisk(this.plugin);
+			}, 10 * 60 * 1000)
+		);
+
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				this.editorModified = true;
@@ -280,7 +283,7 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
-		const closeButton = document.querySelector (
+		const closeButton = document.querySelector(
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
