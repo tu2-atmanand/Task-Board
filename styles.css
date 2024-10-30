@@ -619,7 +619,8 @@
 	position: sticky;
 	bottom: 0;
 	background-color: green !important;
-	color: var(--background-primary) !important;
+	color: white !important;
+	font-weight: 600;
 	/* width: 100%; */
 	padding: 10px;
 	border: none;
@@ -660,6 +661,10 @@
 	flex-direction: row;
 	width: 100%;
 	height: 100%;
+}
+
+.boardConfigModalHome hr {
+	border-color: hsl(calc(var(--accent-h) - 3), calc(var(--accent-s) * 0.9), calc(var(--accent-l) * 1.5));
 }
 
 .boardConfigModalSidebar {
@@ -736,7 +741,6 @@
 .boardConfigModalMainContent-Active {
 	display: flex;
 	flex-direction: column;
-	gap: 2em;
 }
 
 .boardConfigModalMainContent-Active-Body {

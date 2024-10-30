@@ -2,7 +2,6 @@
 
 import {
 	App,
-	MarkdownView,
 	Notice,
 	Plugin,
 	PluginManifest,
@@ -16,7 +15,6 @@ import {
 	PluginDataJson,
 	langCodes,
 } from "src/interfaces/GlobalSettings";
-import { RefreshIcon, TaskBoardIcon } from "src/types/Icons";
 import {
 	loadTasksJsonFromDiskToSS,
 	onUnloadSave,
@@ -26,9 +24,9 @@ import {
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
+import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
-import { eventEmitter } from "src/services/EventEmitter";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
