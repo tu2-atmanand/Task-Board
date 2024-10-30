@@ -14,6 +14,11 @@
 	overflow: unset;
 }
 
+.modal {
+	width: auto;
+	min-height: fit-content;
+}
+
 /* src/styles/KanbanBoard.tsx */
 .kanbanBoard {
 	display: flex;
@@ -164,7 +169,7 @@
 
 .taskItem {
 	background: var(--background-primary-alt);
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 1.1));
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 3), calc(var(--accent-s) * 0.9), calc(var(--accent-l) * 1.5));
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
@@ -482,6 +487,7 @@
 .EditTaskModalTabHeaderBtn {
 	padding-block: 5px;
 	padding-inline: 15px;
+	cursor: pointer;
 }
 
 .EditTaskModalTabHeaderBtn-active {
@@ -565,6 +571,8 @@
 .EditTaskModalHomePreviewBody {
 	height: 25vh;
 	overflow: auto;
+	border: var(--border-width) solid var(--table-header-border-color);
+	;
 }
 
 .EditTaskModalBodyDescription {
@@ -577,7 +585,7 @@
 .EditTaskModalHomeRightSec {
 	display: flex;
 	flex-direction: column;
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 3), calc(var(--accent-s) * 0.9), calc(var(--accent-l) * 1.5));
 	border-radius: 5px;
 	padding: 0.5em;
 	min-width: 8vw;
@@ -596,8 +604,8 @@
 .EditTaskModalHomeDueInput {
 	padding: 4px;
 	font-size: 0.8rem;
-	border: 1px solid #ccc;
 	border-radius: 4px;
+	border: 1px solid var(--table-border-color);
 }
 
 .EditTaskModalHome-taskItemTagsPreview {
@@ -610,7 +618,8 @@
 .EditTaskModalHomeSaveBtn {
 	position: sticky;
 	bottom: 0;
-	background-color: green;
+	background-color: green !important;
+	color: var(--background-primary) !important;
 	/* width: 100%; */
 	padding: 10px;
 	border: none;
@@ -645,46 +654,6 @@
 
 
 /* /src/modal/BoardConfigureModal.tsx */
-
-.config-modal {
-	display: flex;
-	width: 100%;
-	height: 100%;
-}
-
-.config-modal-sidebar {
-	width: 200px;
-	background-color: #f0f0f0;
-	border-right: 1px solid #ddd;
-	padding: 10px;
-}
-
-.config-modal-sidebar div {
-	margin: 10px 0;
-	cursor: pointer;
-}
-
-.config-modal-sidebar div.active {
-	font-weight: bold;
-}
-
-.config-modal-content {
-	flex-grow: 1;
-	padding: 20px;
-}
-
-.modal {
-	width: auto;
-	min-height: fit-content;
-}
-
-/* .modal-content {
-	flex: 1 1 auto;
-	font-size: var(--font-ui-medium);
-	display: flex;
-	flex-direction: row;
-	height: 100%;
-} */
 
 .boardConfigModalHome {
 	display: flex;
@@ -732,7 +701,7 @@
 
 .boardConfigModalSidebarBtnArea-btn {
 	border-radius: var(--button-radius);
-	border: var(--border-width) solid var(--tab-outline-color);
+	border: var(--border-width) solid var(--table-header-border-color);
 	padding: 8px;
 	cursor: pointer;
 }
@@ -741,7 +710,7 @@
 	box-shadow: var(--button-shadow) !important;
 	background: var(--background-primary-alt) !important;
 	border-radius: var(--button-radius);
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid var(--interactive-accent);
 	padding: 8px;
 	cursor: pointer;
 }
@@ -859,7 +828,8 @@
 
 .addColumnModalOverlayContent {
 	background: var(--background-secondary);
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid var(--border-width) solid var(--interactive-accent);
+	;
 	border-radius: 5px;
 	padding: 20px;
 	width: 400px;
@@ -883,7 +853,7 @@
 }
 
 
-/* // src/views/TaskBoardSettingTab.ts */
+/* src/views/TaskBoardSettingTab.ts */
 
 .TaskBoardSettingTab {
 	/* max-width: fit-content; */
@@ -899,6 +869,8 @@
 
 .global-setting-tab-live-preview {
 	padding: 5px;
+	padding-block: 1em;
+	border-radius: var(--radius-m);
 	background-color: var(--background-primary-alt);
 }
 
@@ -949,7 +921,7 @@
 	border: none;
 	border-radius: 4px;
 	font-size: 1.5em;
-	color: white;
+	color: var(--foreground-primary);
 	cursor: pointer;
 }
 
@@ -969,7 +941,7 @@
 .reScanVaultModalHomeTerminal {
 	height: 100%;
 	background-color: rgb(12 10 10);
-	color: rgb(255, 255, 255);
+	color: rgb(109, 253, 140);
 	padding: 10px;
 	overflow-y: scroll;
 	min-height: inherit;
@@ -993,7 +965,7 @@
 	background-color: transparent;
 	padding-left: 1em;
 	z-index: 10;
-	border: var(--border-width) solid olive;
+	border: var(--border-width) solid var(--border-width) solid var(--interactive-accent);
 }
 
 .slideIn {
