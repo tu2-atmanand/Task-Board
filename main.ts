@@ -63,17 +63,20 @@ export default class TaskBoard extends Plugin {
 		//Creates a Icon on Ribbon Bar
 		this.getRibbonIcon();
 
-		// Register few commands
-		this.registerCommands();
-
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		this.getLanguage();
 
-		// Creating Few Events
-		this.registerEvents();
+		// Register events and commands only on Layout is ready
+		this.app.workspace.onLayoutReady(() => {
+			// Creating Few Events
+			this.registerEvents();
+
+			// Register few commands
+			this.registerCommands();
+		});
 
 		this.createLocalStorageAndScanModifiedFiles();
 
@@ -257,27 +260,27 @@ export default class TaskBoard extends Plugin {
 			this.onFileModifiedAndLostFocus();
 		});
 
-		// this.registerEvent(
-		// 	this.app.vault.on("create", (file) => {
-		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-		// 	})
-		// );
-		// this.registerEvent(
-		// 	this.app.vault.on("rename", (file) => {
-		// 		// console.log(
-		// 		// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
-		// 		// );
-		// 	})
-		// );
-		// this.registerEvent(
-		// 	this.app.vault.on("delete", (file) => {
-		// 		console.log(
-		// 			"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-		// 		);
-		// 	})
-		// );
+		this.registerEvent(
+			this.app.vault.on("create", (file) => {
+				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
+			})
+		);
+		this.registerEvent(
+			this.app.vault.on("rename", (file) => {
+				// console.log(
+				// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
+				// );
+			})
+		);
+		this.registerEvent(
+			this.app.vault.on("delete", (file) => {
+				console.log(
+					"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
+				);
+			})
+		);
 
-		const closeButton = document.querySelector(
+		const closeButton = document.querySelector (
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
@@ -292,20 +295,20 @@ export default class TaskBoard extends Plugin {
 
 				const fileIsFile = file instanceof TFile;
 				const fileIsFolder = file instanceof TFolder;
-				const leafIsMarkdown = leaf?.view instanceof MarkdownView;
-				const leafIsKanban = leaf?.view instanceof KanbanView;
+				// const leafIsMarkdown = leaf?.view instanceof MarkdownView;
+				// const leafIsKanban = leaf?.view instanceof KanbanView;
 
-				if (source === "pane-more-options") {
-					console.log("MENU : If the fileIsFile ");
-					menu.addItem((item) => {
-						item.setTitle("Refresh Board")
-							.setIcon(RefreshIcon)
-							.setSection("pane")
-							.onClick(() => {
-								eventEmitter.emit("REFRESH_BOARD");
-							});
-					});
-				}
+				// if (leafIsKanban || source === "pane-more-options") {
+				// 	console.log("MENU : If the fileIsFile ");
+				// 	menu.addItem((item) => {
+				// 		item.setTitle("Refresh Board")
+				// 			.setIcon(RefreshIcon)
+				// 			.setSection("pane")
+				// 			.onClick(() => {
+				// 				eventEmitter.emit("REFRESH_BOARD");
+				// 			});
+				// 	});
+				// }
 
 				if (fileIsFile) {
 					menu.addItem((item) => {
@@ -438,5 +441,24 @@ export default class TaskBoard extends Plugin {
 				// }
 			})
 		);
+
+		// this.registerEvent(
+		// 	this.app.workspace.on("editor-menu", (menu, editor, view) => {
+		// 		const leafIsMarkdown = view instanceof MarkdownView;
+		// 		const leafIsKanban = view instanceof KanbanView;
+
+		// 		if (leafIsKanban) {
+		// 			console.log("MENU : If the fileIsFile ");
+		// 			menu.addItem((item) => {
+		// 				item.setTitle("Refresh Board")
+		// 					.setIcon(RefreshIcon)
+		// 					.setSection("pane")
+		// 					.onClick(() => {
+		// 						eventEmitter.emit("REFRESH_BOARD");
+		// 					});
+		// 			});
+		// 		}
+		// 	})
+		// );
 	}
 }
