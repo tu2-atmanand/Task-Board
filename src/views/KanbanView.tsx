@@ -2,10 +2,11 @@
 
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { ReScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
+import { Root, createRoot } from "react-dom/client";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
-import ReactDOM from "react-dom/client";
+import { StrictMode } from "react";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
@@ -15,16 +16,12 @@ import { t } from "src/utils/lang/helper";
 export class KanbanView extends ItemView {
 	plugin: TaskBoard;
 	private boards: Board[];
-	private root: ReactDOM.Root;
+	root: Root | null = null;
 
 	constructor(app: App, plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
 		this.app = app;
 		this.plugin = plugin;
-		const { contentEl } = this;
-		this.contentEl = contentEl;
-		this.contentEl.empty();
-		this.root = ReactDOM.createRoot(this.contentEl);
 		this.boards = [];
 		this.icon = TaskBoardIcon;
 	}
@@ -59,17 +56,20 @@ export class KanbanView extends ItemView {
 	}
 
 	private renderBoard() {
+		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
-			<KanbanBoard
-				app={this.app}
-				plugin={this.plugin}
-				boardConfigs={this.boards}
-			/>
+			<StrictMode>
+				<KanbanBoard
+					app={this.app}
+					plugin={this.plugin}
+					boardConfigs={this.boards}
+				/>,
+			</StrictMode>,
 		);
 	}
 
 	async onClose() {
 		// Clean up when view is closed
-		this.root.unmount();
+		this.root?.unmount();
 	}
 }

@@ -159,7 +159,7 @@ const EditTaskContent: React.FC<{
 				componentRef.current
 			);
 
-			hookMarkdownLinkMouseEventHandlers(app, previewContainerRef.current, filePath, filePath);
+			hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
 		}
 	}, [modifiedTask]); // Re-render when modifiedTask changes
 
@@ -359,7 +359,7 @@ const EditTaskContent: React.FC<{
 									const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
 									const tagColor = customTagColor || defaultTagColor;
 									const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`;
-									const borderColor = hexToRgba(tagColor, 0.5) || tagColor;
+									const borderColor = customTagColor ? hexToRgba(tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
 											key={tag}

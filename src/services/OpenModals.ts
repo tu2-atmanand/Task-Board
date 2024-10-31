@@ -5,7 +5,7 @@ import { addTaskInActiveEditor, addTaskInJson } from "src/utils/TaskItemUtils";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
-} from "src/utils/Checker";
+} from "src/utils/FiltersVerifier";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { Board } from "../interfaces/BoardConfigs";

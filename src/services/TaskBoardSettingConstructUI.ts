@@ -1,6 +1,6 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Setting } from "obsidian";
+import { App, Setting, normalizePath } from "obsidian";
 import { globalSettingsData, langCodes } from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
@@ -143,7 +143,7 @@ export class SettingsManager {
 			input.value = values.join(", ");
 			input.addEventListener("change", async () => {
 				this.globalSettings!.scanFilters[filterType].values =
-					input.value.split(",").map((v) => v.trim());
+					input.value.split(",").map((v) => normalizePath(v.trim()));
 				await this.saveSettings();
 			});
 			input.placeholder = placeholder;
@@ -460,7 +460,7 @@ export class SettingsManager {
 		// Create the live preview element
 		const previewEl = contentEl.createEl("div", {
 			text: t(107),
-			cls: "globa-setting-tab-live-preview",
+			cls: "global-setting-tab-live-preview",
 		});
 		const updatePreview = () => {
 			let dueDate = "2024-09-21";

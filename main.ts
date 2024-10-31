@@ -2,7 +2,6 @@
 
 import {
 	App,
-	MarkdownView,
 	Notice,
 	Plugin,
 	PluginManifest,
@@ -16,19 +15,18 @@ import {
 	PluginDataJson,
 	langCodes,
 } from "src/interfaces/GlobalSettings";
-import { RefreshIcon, TaskBoardIcon } from "src/types/Icons";
 import {
 	loadTasksJsonFromDiskToSS,
 	onUnloadSave,
-	startPeriodicSave,
+	writeTasksFromSessionStorageToDisk,
 } from "src/utils/tasksCache";
 
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
+import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
-import { eventEmitter } from "src/services/EventEmitter";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
@@ -39,17 +37,15 @@ export default class TaskBoard extends Plugin {
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
-	scanTimer: number;
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
 	IsTasksJsonChanged: boolean;
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
-		this.app = app;
 		this.plugin = this;
+		this.app = this.plugin.app;
 		this.settings = DEFAULT_SETTINGS;
-		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.editorModified = false;
@@ -63,17 +59,20 @@ export default class TaskBoard extends Plugin {
 		//Creates a Icon on Ribbon Bar
 		this.getRibbonIcon();
 
-		// Register few commands
-		this.registerCommands();
-
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		this.getLanguage();
 
-		// Creating Few Events
-		this.registerEvents();
+		// Register events and commands only on Layout is ready
+		this.app.workspace.onLayoutReady(() => {
+			// Creating Few Events
+			this.registerEvents();
+
+			// Register few commands
+			this.registerCommands();
+		});
 
 		this.createLocalStorageAndScanModifiedFiles();
 
@@ -115,8 +114,6 @@ export default class TaskBoard extends Plugin {
 	onunload() {
 		console.log("TaskBoard : unloading plugin...");
 		onUnloadSave(this.plugin);
-		window.clearInterval(this.scanTimer);
-		this.realTimeScanning.clearScanTimer();
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
@@ -159,7 +156,7 @@ export default class TaskBoard extends Plugin {
 
 	loadTasksDataToSS() {
 		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		startPeriodicSave(this.plugin); // TODO : Enable this before release, disabled to during development.
+		// And a setInteval is registered to start periodic saving.
 	}
 
 	registerTaskBoardView() {
@@ -177,21 +174,20 @@ export default class TaskBoard extends Plugin {
 
 	registerCommands() {
 		this.addCommand({
-			id: "task-board-1",
+			id: "command-1",
 			name: t(131),
 			callback: () => {
-				const app = this.app as App;
-				const activeEditor = app.workspace.activeEditor?.editor;
-				const activeFile = app.workspace.getActiveFile();
+				const activeEditor = this.app.workspace.activeEditor?.editor;
+				const activeFile = this.app.workspace.getActiveFile();
 				if (activeEditor && activeFile) {
-					openAddNewTaskModal(app, this.plugin, activeFile);
+					openAddNewTaskModal(this.app, this.plugin, activeFile);
 				} else {
 					new Notice(t(147));
 				}
 			},
 		});
 		this.addCommand({
-			id: "task-board-2",
+			id: "command-2",
 			name: t(132),
 			callback: () => {
 				this.app.workspace
@@ -200,7 +196,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "task-board-3",
+			id: "command-3",
 			name: t(133),
 			callback: () => {
 				this.app.workspace.getLeaf("window").setViewState({
@@ -211,7 +207,7 @@ export default class TaskBoard extends Plugin {
 		});
 		// // Add a command to Re-Scan the whole Vault
 		// this.addCommand({
-		// 	id: "task-board-6",
+		// 	id: "command-6",
 		// 	name: "Re-Scan Vault",
 		// 	callback: () => {
 		// 		this.scanningVault.scanVaultForTasks();
@@ -220,14 +216,14 @@ export default class TaskBoard extends Plugin {
 
 		// // TODO : Remove this command before publishing, DEV commands
 		// this.addCommand({
-		// 	id: "task-board-4",
+		// 	id: "command-4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
 		// 		writeTasksJsonToDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
-		// 	id: "task-board-5",
+		// 	id: "command-5",
 		// 	name: "DEV : REFRESH_COLUMN",
 		// 	callback: () => {
 		// 		eventEmitter.emit("REFRESH_COLUMN");
@@ -236,11 +232,20 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerEvents() {
+		// Start a timer to write tasks from sessionStorage to disk every 5 minutes
+		this.registerInterval(
+			window.setInterval(async () => {
+				await writeTasksFromSessionStorageToDisk(this.plugin);
+			}, 10 * 60 * 1000)
+		);
+
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				this.editorModified = true;
 				if (file instanceof TFile) {
-					this.currentModifiedFile = file;
+					if (!file.path.endsWith(".excalidraw.md")) {
+						this.currentModifiedFile = file;
+					}
 				}
 			})
 		);
@@ -257,31 +262,32 @@ export default class TaskBoard extends Plugin {
 			this.onFileModifiedAndLostFocus();
 		});
 
-		// this.registerEvent(
-		// 	this.app.vault.on("create", (file) => {
-		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-		// 	})
-		// );
-		// this.registerEvent(
-		// 	this.app.vault.on("rename", (file) => {
-		// 		// console.log(
-		// 		// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
-		// 		// );
-		// 	})
-		// );
-		// this.registerEvent(
-		// 	this.app.vault.on("delete", (file) => {
-		// 		console.log(
-		// 			"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-		// 		);
-		// 	})
-		// );
+		this.registerEvent(
+			this.app.vault.on("create", (file) => {
+				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
+			})
+		);
+		this.registerEvent(
+			this.app.vault.on("rename", (file) => {
+				// console.log(
+				// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
+				// );
+			})
+		);
+		this.registerEvent(
+			this.app.vault.on("delete", (file) => {
+				console.log(
+					"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
+				);
+			})
+		);
 
-		const closeButton = document.querySelector(
+		const closeButton = document.querySelector<HTMLElement>(
 			".titlebar-button.mod-close"
 		);
 		if (closeButton) {
 			this.registerDomEvent(closeButton, "mouseenter", () => {
+				console.log("Hover over close button...");
 				onUnloadSave(this.plugin);
 			});
 		}
@@ -292,20 +298,20 @@ export default class TaskBoard extends Plugin {
 
 				const fileIsFile = file instanceof TFile;
 				const fileIsFolder = file instanceof TFolder;
-				const leafIsMarkdown = leaf?.view instanceof MarkdownView;
-				const leafIsKanban = leaf?.view instanceof KanbanView;
+				// const leafIsMarkdown = leaf?.view instanceof MarkdownView;
+				// const leafIsKanban = leaf?.view instanceof KanbanView;
 
-				if (source === "pane-more-options") {
-					console.log("MENU : If the fileIsFile ");
-					menu.addItem((item) => {
-						item.setTitle("Refresh Board")
-							.setIcon(RefreshIcon)
-							.setSection("pane")
-							.onClick(() => {
-								eventEmitter.emit("REFRESH_BOARD");
-							});
-					});
-				}
+				// if (leafIsKanban || source === "pane-more-options") {
+				// 	console.log("MENU : If the fileIsFile ");
+				// 	menu.addItem((item) => {
+				// 		item.setTitle("Refresh Board")
+				// 			.setIcon(RefreshIcon)
+				// 			.setSection("pane")
+				// 			.onClick(() => {
+				// 				eventEmitter.emit("REFRESH_BOARD");
+				// 			});
+				// 	});
+				// }
 
 				if (fileIsFile) {
 					menu.addItem((item) => {
@@ -438,5 +444,24 @@ export default class TaskBoard extends Plugin {
 				// }
 			})
 		);
+
+		// this.registerEvent(
+		// 	this.app.workspace.on("editor-menu", (menu, editor, view) => {
+		// 		const leafIsMarkdown = view instanceof MarkdownView;
+		// 		const leafIsKanban = view instanceof KanbanView;
+
+		// 		if (leafIsKanban) {
+		// 			console.log("MENU : If the fileIsFile ");
+		// 			menu.addItem((item) => {
+		// 				item.setTitle("Refresh Board")
+		// 					.setIcon(RefreshIcon)
+		// 					.setSection("pane")
+		// 					.onClick(() => {
+		// 						eventEmitter.emit("REFRESH_BOARD");
+		// 					});
+		// 			});
+		// 		}
+		// 	})
+		// );
 	}
 }

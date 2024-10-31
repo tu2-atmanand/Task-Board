@@ -5,7 +5,7 @@ import {
 	loadTasksJsonFromSS,
 	writeTasksJsonToSS,
 } from "./tasksCache";
-import { scanFilterForFilesNFolders, scanFilterForTags } from "./Checker";
+import { scanFilterForFilesNFolders, scanFilterForTags } from "./FiltersVerifier";
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -216,9 +216,9 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
 			bodyLines.push(line);
 		} else {
-			// TODO : If no indentation has been detected, still consider it as the part of the task body, and add one indentation to the line.
-			bodyLines.push(`\t${line}`);
-			// break;
+			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
+			// bodyLines.push(`\t${line}`);
+			break;
 		}
 	}
 	return bodyLines;

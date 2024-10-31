@@ -8,7 +8,7 @@ import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
-import { scanFilterForFilesNFolders } from "src/utils/Checker";
+import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 

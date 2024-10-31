@@ -1,15 +1,18 @@
 import { App, Keymap } from "obsidian";
 
 import React from "react";
+import TaskBoard from "main";
 
 export function hookMarkdownLinkMouseEventHandlers(
 	app: App,
+	plugin: TaskBoard,
 	containerEl: HTMLElement,
 	sourcePath: string,
 	filePath: string
 ) {
-	containerEl.querySelectorAll("a.internal-link").forEach((el) => {
-		el.addEventListener("click", (evt: MouseEvent) => {
+	containerEl.querySelectorAll<HTMLElement>("a.internal-link").forEach((el) => {
+		// Register the click event
+		plugin.registerDomEvent(el, "click", (evt: MouseEvent) => {
 			evt.preventDefault();
 			const linktext = el.getAttribute("href");
 			if (linktext) {
@@ -21,7 +24,8 @@ export function hookMarkdownLinkMouseEventHandlers(
 			}
 		});
 
-		el.addEventListener("mouseover", (event: MouseEvent) => {
+		// Register the mouseover event
+		plugin.registerDomEvent(el, "mouseover", (event: MouseEvent) => {
 			event.preventDefault();
 			const linktext = el.getAttribute("href");
 			if (linktext) {
@@ -37,6 +41,7 @@ export function hookMarkdownLinkMouseEventHandlers(
 		});
 	});
 }
+
 
 export function markdownButtonHoverPreviewEvent(
 	app: App,

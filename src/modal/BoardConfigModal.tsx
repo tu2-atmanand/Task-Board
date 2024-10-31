@@ -3,7 +3,7 @@
 import { App, Modal, Notice } from "obsidian";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { ComponentPropsWithRef, useEffect, useRef, useState } from "react";
 
 import AddColumnModal from "src/modal/AddColumnModal";
 import { Board } from "src/interfaces/BoardConfigs";
@@ -79,10 +79,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setLocalBoards(updatedBoards);
 	};
 
-	const handleToggleChange = (boardIndex: number, field: keyof Board, value: boolean) => {
+	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags';
+	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
 		const updatedBoards = [...localBoards];
 		if (updatedBoards[boardIndex]) {
-			updatedBoards[boardIndex][field] = value;
+			updatedBoards[boardIndex][field] = value as boolean;
 		}
 		setLocalBoards(updatedBoards);
 	};
@@ -156,7 +157,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Function to handle column drag-and-drop
-	const onDragEnd = (result) => {
+	const onDragEnd = (result: any) => {
 		if (!result.destination) return;
 
 		const updatedBoards = [...localBoards];
@@ -214,7 +215,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		return (
 			<div className="boardConfigModalMainContent-Active">
 				<h2 className="boardConfigModalMainContent-Active-Heading">{board.name} {t(37)}</h2>
-				<hr width="50%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
+				<hr
+					style={{
+						width: '50%',
+						height: '2px',
+						margin: 0,
+						marginBottom: '2em',
+					}}
+				/>
 				<div className="boardConfigModalMainContent-Active-Body">
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
@@ -238,9 +246,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							onChange={(e) => handleToggleChange(boardIndex, "showColumnTags", e.target.checked)}
 						/>
 					</div>
-
-					<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-
+					<hr
+						style={{
+							width: '100%',
+							height: '2px',
+							margin: 0,
+						}}
+					/>
 					<h3>{t(139)}</h3>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
@@ -278,13 +290,17 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							onChange={(e) => handleToggleChange(boardIndex, "showFilteredTags", e.target.checked)}
 						/>
 					</div>
-
-					<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-
+					<hr
+						style={{
+							width: '100%',
+							height: '2px',
+							margin: 0,
+						}}
+					/>
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t(50)}</h3>
 						<Droppable droppableId="columns" className="boardConfigModalMainContent-Active-BodyColumnsList">
-							{(provided) => (
+							{(provided: any) => (
 								<div ref={provided.innerRef} {...provided.droppableProps}>
 									{board.columns.map((column, columnIndex) => (
 										<Draggable
@@ -292,7 +308,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											draggableId={columnIndex.toString()}
 											index={columnIndex}
 										>
-											{(provided) => (
+											{(provided: any) => (
 												<div
 													ref={provided.innerRef}
 													{...provided.draggableProps}
@@ -413,10 +429,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							)}
 						</Droppable>
 					</div>
-					<button onClick={handleOpenAddColumnModal}>{t(56)}</button>
+					<button style={{ width: '50%'}} onClick={handleOpenAddColumnModal}>{t(56)}</button>
 				</div>
-				<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
-				<button style={{ backgroundColor: "darkred" }} onClick={deleteCurrentBoard}>{t(57)}</button>
+				<hr
+					style={{
+						width: '100%',
+						height: '2px',
+						marginBlock: '2em',
+					}}
+				/>
+				<button className="boardConfigModalDeleteBoardBtn" onClick={deleteCurrentBoard}>{t(57)}</button>
 			</div>
 		);
 	};
@@ -434,7 +456,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<div className="boardConfigModalSidebar">
 					<div className="boardConfigModalSidebarBtnArea" >
 						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>{t(58)}</div>
-						<hr width="100%" size="2" color="olive" style={{ "margin": 0 }} noshade="true"></hr>
+						<hr
+							style={{
+								width: '100%',
+								height: '2px',
+								margin: 0,
+							}}
+						/>
 						<h6>All Boards</h6>
 						{localBoards.map((board, index) => (
 							<div
@@ -455,8 +483,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							};
 							setLocalBoards([...localBoards, newBoard]);
 						}}>{t(59)}</button>
-						<hr width="100%" size="2" color="olive" noshade="true"></hr>
-						<button style={{ width: '100%', backgroundColor: "darkgreen" }} onClick={handleSave}>{t(1)}</button>
+						<hr
+							style={{
+								width: '100%',
+								height: '2px',
+								marginBlock: '2em',
+							}}
+						/>
+						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t(1)}</button>
 					</div>
 				</div>
 				<DragDropContext onDragEnd={onDragEnd}>

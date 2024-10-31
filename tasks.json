@@ -24,7 +24,7 @@
         ],
         "Testing 1.md": [
             {
-                "id": 1595316364,
+                "id": 3543296231,
                 "title": "This is a normal task, I am adding in the file, Updating",
                 "body": [
                     "\tThis a line as a description for the Task Description.",
@@ -42,7 +42,7 @@
                 "completed": ""
             },
             {
-                "id": 3455556089,
+                "id": 3464255991,
                 "title": "Adding a new task to encounter a different issue",
                 "body": [
                     "\t- [ ] This is a first level Sub-Task so this will going to get detected very well, without any problem.",
@@ -69,11 +69,9 @@
                 "completed": ""
             },
             {
-                "id": 1031561983,
+                "id": 1635994298,
                 "title": "A simple task with the priority emoji",
-                "body": [
-                    "\t- [ ] Another simple task with priority emoji away from the pipe symbol | 🔺 [due:: 2024-10-28] #Test"
-                ],
+                "body": [],
                 "time": "",
                 "due": "",
                 "tags": [
@@ -84,13 +82,14 @@
                 "completed": ""
             },
             {
-                "id": 3424616817,
+                "id": 272701313,
                 "title": "Another simple task with priority emoji away from the pipe symbol",
                 "body": [],
                 "time": "",
                 "due": "2024-10-28",
                 "tags": [
-                    "#Test"
+                    "#Test",
+                    "#feat"
                 ],
                 "priority": 1,
                 "filePath": "Testing 1.md",
@@ -99,8 +98,8 @@
         ],
         "Spintly Details.md": [
             {
-                "id": 111592345,
-                "title": "Need to complete all the Documents work  and submit to TCS",
+                "id": 2575285121,
+                "title": "Need to complete all the Documents work  and submit to company",
                 "body": [
                     "\t- [ ] Adding a simple New SubTask",
                     "\tJust adding a normal line for this task as a body.",
@@ -119,7 +118,7 @@
                 "completed": ""
             },
             {
-                "id": 468348907,
+                "id": 1317617967,
                 "title": "Just a new Task without tag or date",
                 "body": [
                     "\t- [ ] Adding a new Sub Task",
@@ -131,7 +130,7 @@
                     "\t- [ ] Adding another subTask, second one, updaing"
                 ],
                 "time": "10:30 - 11:30",
-                "due": "2024-10-31",
+                "due": "2024-11-02",
                 "tags": [
                     "#Test"
                 ],
@@ -142,9 +141,10 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 1616211074,
+                "id": 2799894035,
                 "title": "Add Passport details in NSR portal and BGC after getting Passport.",
                 "body": [
+                    "\t- [ ] Adding a simple SubTask to see if it updates instantly in board.",
                     "\tEditing this task to see if this content gets properly detected and old content gets replaced with this new one."
                 ],
                 "time": "18:59 - 19:59",
@@ -158,11 +158,11 @@
                 "completed": ""
             },
             {
-                "id": 2300799053,
+                "id": 1987359423,
                 "title": "Get 8th Semester Provisional Marksheet and Apply for :",
                 "body": [
                     "\tAll the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
-                    "\t- [x] **Provisional Degree Certificate**",
+                    "\t- [x]  **Provisional Degree Certificate**",
                     "\t- [x] **Bonafide Letter (with percentage and aggregate marks)**",
                     "\t- [x] **Consolidated Marksheet**",
                     "\t- [x] **Leaving Certificate**"
@@ -177,7 +177,7 @@
                 "completed": ""
             },
             {
-                "id": 1537781669,
+                "id": 3035757174,
                 "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
                 "body": [
                     "\tThis is a line in the Desc",
@@ -193,7 +193,7 @@
                 "completed": ""
             },
             {
-                "id": 2152716698,
+                "id": 3448930959,
                 "title": "Graduate All Semester Marksheets :",
                 "body": [
                     "\t- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -215,24 +215,25 @@
                 "completed": ""
             },
             {
-                "id": 2020511293,
+                "id": 564854710,
                 "title": "Only one Recording Course is remaining of JavaOk",
                 "body": [
                     "\tNow i am removing all the points from the body and changing them into a one line sentence.",
                     "\t- [ ] Now i am adding this subtask, this should be updated inside the json file.",
-                    "\t- [ ] Adding a second Subtask to see how the preview looks : ![[Pasted image 20241008192305.png]]"
+                    "\t- [ ] Adding a second Subtask with image to see the preview : ![[Pasted image 20241008192305.png]]"
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-10-30",
+                "due": "2024-10-31",
                 "tags": [
-                    "#Test"
+                    "#Test",
+                    "#New"
                 ],
                 "priority": 0,
                 "filePath": "Pending Document Work.md",
                 "completed": ""
             },
             {
-                "id": 3880137727,
+                "id": 1923516425,
                 "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
                 "body": [],
                 "time": "",
@@ -247,17 +248,15 @@
         ],
         "DailyNotes.md": [
             {
-                "id": 957710739,
+                "id": 3071223449,
                 "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
-                "body": [
-                    ""
-                ],
+                "body": [],
                 "time": "",
                 "due": "2024-10-30",
                 "tags": [
                     "#Test"
                 ],
-                "priority": 0,
+                "priority": 2,
                 "filePath": "DailyNotes.md",
                 "completed": ""
             }
@@ -279,7 +278,7 @@
                     "\t\t- [x] This is second sub-sub Task, Updated"
                 ],
                 "time": "",
-                "due": "2024-10-30",
+                "due": "2024-11-01",
                 "tags": [
                     "#Test",
                     "#SubTasks/🔥bugs",
@@ -289,12 +288,34 @@
                 "filePath": "Testing 3.md",
                 "completed": ""
             }
+        ],
+        "Testing4.md": [
+            {
+                "id": 701144249,
+                "title": "Need to finish the following pending tasks before next Task Board release.",
+                "body": [
+                    "\tThese features will help the plugin to achieve its intended functionality.",
+                    "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
+                    "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
+                    "\t- [x] Sorting feature for each individual Column.",
+                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
+                ],
+                "time": "21:10 - 23:10",
+                "due": "2024-10-31",
+                "tags": [
+                    "#Test",
+                    "#feat"
+                ],
+                "priority": 2,
+                "filePath": "Testing4.md",
+                "completed": ""
+            }
         ]
     },
     "Completed": {
         "Testing 1.md": [
             {
-                "id": 415199143,
+                "id": 2329598593,
                 "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
                 "body": [
                     "\t![[Pasted image 20241014211429.png]]"
@@ -311,12 +332,13 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 553268015,
-                "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
+                "id": 4143925143,
+                "title": "Created new Adhar card, upload it on all important places : [[AdharCard.pdf]]",
                 "body": [],
                 "time": "",
                 "due": "",
                 "tags": [
+                    "#Test",
                     "#Test"
                 ],
                 "priority": 3,

@@ -22,11 +22,11 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		const today = new Date();
 		const taskDueDate = new Date(task.due);
 		if (taskDueDate.toDateString() === today.toDateString()) {
-			return 'yellow'; // Due today
+			return 'var(--color-yellow)'; // Due today
 		} else if (taskDueDate > today) {
-			return 'green'; // Due in the future
+			return 'var(--color-green)'; // Due in the future
 		} else if (taskDueDate < today) {
-			return 'red'; // Past due
+			return 'var(--color-red)'; // Past due
 		} else {
 			return 'grey'; // No Due
 		}
@@ -96,7 +96,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, element, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, plugin, element, task.filePath, task.filePath);
 			}
 		});
 	}, [task.body, task.filePath, app]);
@@ -119,7 +119,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, descElement, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, plugin, descElement, task.filePath, task.filePath);
 			}
 		}
 	}, [taskDesc, task.filePath, app]);
@@ -141,7 +141,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, titleElement, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(app, plugin, titleElement, task.filePath, task.filePath);
 			}
 		}
 	}, [task.title, task.filePath, app]);
@@ -190,7 +190,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
 										const tagColor = customTagColor || defaultTagColor;
 										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
-										const borderColor = hexToRgba(tagColor, 0.5) || tagColor;
+										const borderColor = customTagColor ? hexToRgba(tagColor, 0.5) : `var(--tag-color-hover)`;
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
 										const column = activeBoardSettings.columns[columnIndex];
@@ -258,10 +258,10 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 							)}
 							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.7} onClick={onEdit} title={t(8)} />
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEdit} title={t(8)} />
 								</div>
 								<div className="taskItemiconButton">
-									<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={onDelete} title={t(9)} />
+									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
 								</div>
 							</div>
 						</div>

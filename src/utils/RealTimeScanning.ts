@@ -4,19 +4,17 @@ import { App, TFile } from "obsidian";
 
 import { ScanningVault } from "src/utils/ScanningVault";
 import type TaskBoard from "main";
-import { scanFilterForFilesNFolders } from "./Checker";
+import { scanFilterForFilesNFolders } from "./FiltersVerifier";
 
 export class RealTimeScanning {
 	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
-	scanTimer: number;
 	scanningVault: ScanningVault;
 
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
-		this.scanTimer = 0;
 		this.scanningVault = new ScanningVault(app, plugin);
 	}
 
@@ -43,12 +41,6 @@ export class RealTimeScanning {
 		} catch (error) {
 			console.error("Error saving file stack:", error);
 		}
-	}
-
-	async startScanTimer() {
-		this.scanTimer = window.setInterval(() => {
-			this.processStack();
-		}, 25 * 60 * 1000); // Set to 5 minutes
 	}
 
 	async processStack() {
@@ -103,9 +95,5 @@ export class RealTimeScanning {
 				// );
 			}
 		}
-	}
-
-	clearScanTimer() {
-		window.clearInterval(this.scanTimer);
 	}
 }
