@@ -115,9 +115,9 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Testing Tasks",
+              "name": "Bugs in Project",
               "index": 2,
-              "coltag": "Testing"
+              "coltag": "Bug"
             }
           },
           {
@@ -125,9 +125,9 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "GPT",
+              "name": "Features Pending",
               "index": 3,
-              "coltag": "GPT"
+              "coltag": "feat"
             }
           },
           {
@@ -147,7 +147,7 @@
             "data": {
               "name": "Note Till Task is Done",
               "index": 5,
-              "coltag": "NOTE"
+              "coltag": "Note"
             }
           },
           {
