@@ -257,24 +257,7 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 3869128746,
-                "title": "Add Passport details in NSR portal and BGC after getting Passport.",
-                "body": [
-                    "\t- [ ] Adding a simple SubTask to see if it updates instantly in board.",
-                    "\tEditing this task to see if this content gets properly detected and old content gets replaced with this new one."
-                ],
-                "time": "18:59 - 19:59",
-                "due": "2024-09-26",
-                "tags": [
-                    "#Test",
-                    "#working"
-                ],
-                "priority": 0,
-                "filePath": "Pending Document Work.md",
-                "completed": ""
-            },
-            {
-                "id": 3436821265,
+                "id": 468020783,
                 "title": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
                 "body": [],
                 "time": "",
@@ -287,7 +270,7 @@
                 "completed": ""
             },
             {
-                "id": 3470097587,
+                "id": 3936780094,
                 "title": "Get 8th Semester Provisional Marksheet and Apply for :",
                 "body": [
                     "\tAll the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
@@ -306,7 +289,7 @@
                 "completed": ""
             },
             {
-                "id": 773353763,
+                "id": 2792384892,
                 "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
                 "body": [
                     "\tThis is a line in the Desc",
@@ -322,7 +305,7 @@
                 "completed": ""
             },
             {
-                "id": 300386021,
+                "id": 170796684,
                 "title": "Spintly Experience Letter : [[Atmanand Gauns - Internship Experience Certificate.pdf]]",
                 "body": [],
                 "time": "",
@@ -333,7 +316,7 @@
                 "completed": ""
             },
             {
-                "id": 3593501016,
+                "id": 1377899774,
                 "title": "ID Proof : Voter ID",
                 "body": [],
                 "time": "",
@@ -344,7 +327,7 @@
                 "completed": ""
             },
             {
-                "id": 2474071952,
+                "id": 2831171056,
                 "title": "Copy of Person of India Origin (PIO) card : Passport",
                 "body": [],
                 "time": "",
@@ -355,7 +338,7 @@
                 "completed": ""
             },
             {
-                "id": 1011310444,
+                "id": 3883432226,
                 "title": "NSR eCard : [[NSR_eCard.pdf]]",
                 "body": [],
                 "time": "",
@@ -366,7 +349,7 @@
                 "completed": ""
             },
             {
-                "id": 3399156896,
+                "id": 3954858175,
                 "title": "Passport : [[Passport.pdf]]",
                 "body": [],
                 "time": "",
@@ -377,7 +360,7 @@
                 "completed": ""
             },
             {
-                "id": 3442369881,
+                "id": 4030011242,
                 "title": "PAN Card : [[PanCard.pdf]]",
                 "body": [],
                 "time": "",
@@ -388,7 +371,7 @@
                 "completed": ""
             },
             {
-                "id": 3095577649,
+                "id": 3502621183,
                 "title": "Birth Certificate : [[BirthCertificate.pdf]]",
                 "body": [],
                 "time": "",
@@ -399,7 +382,7 @@
                 "completed": ""
             },
             {
-                "id": 4169096404,
+                "id": 3074916900,
                 "title": "Non-Criminal Affidavit : [[NCA_TCS.pdf]]",
                 "body": [],
                 "time": "",
@@ -410,7 +393,7 @@
                 "completed": ""
             },
             {
-                "id": 4204399126,
+                "id": 1425183489,
                 "title": "Graduation Certificate : [[CollegeDegreeCertificate.pdf]]",
                 "body": [],
                 "time": "",
@@ -421,7 +404,7 @@
                 "completed": ""
             },
             {
-                "id": 3365298372,
+                "id": 525515315,
                 "title": "Bonafied Letter : [[CollegeBonafideCertificate.pdf]]",
                 "body": [],
                 "time": "",
@@ -432,7 +415,7 @@
                 "completed": ""
             },
             {
-                "id": 3136355231,
+                "id": 3805612582,
                 "title": "XII Grade Certificate : [[XII_Grade_Certificate.pdf]]",
                 "body": [],
                 "time": "",
@@ -443,7 +426,7 @@
                 "completed": ""
             },
             {
-                "id": 263561395,
+                "id": 3660660104,
                 "title": "XII Grade Marksheet : [[12_Marksheet.pdf]]",
                 "body": [],
                 "time": "",
@@ -454,7 +437,7 @@
                 "completed": ""
             },
             {
-                "id": 4002673332,
+                "id": 2068540291,
                 "title": "X Grade Certificate : [[X_Grade_Certificate.pdf]]",
                 "body": [],
                 "time": "",
@@ -465,7 +448,7 @@
                 "completed": ""
             },
             {
-                "id": 2713413138,
+                "id": 1932725514,
                 "title": "X Grade Mark Sheet : [[10_Marksheet.pdf]]",
                 "body": [],
                 "time": "",
@@ -476,7 +459,7 @@
                 "completed": ""
             },
             {
-                "id": 2862295501,
+                "id": 2764984679,
                 "title": "Photo with Yellow Background : [[MyPassportPhoto.jpg]]",
                 "body": [],
                 "time": "",
@@ -487,7 +470,7 @@
                 "completed": ""
             },
             {
-                "id": 2448603935,
+                "id": 1130748477,
                 "title": "Graduate All Semester Marksheets :",
                 "body": [
                     "\t- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -509,7 +492,7 @@
                 "completed": ""
             },
             {
-                "id": 4231210181,
+                "id": 139420108,
                 "title": "Create new `Income Certificate` of father before joining.",
                 "body": [],
                 "time": "",
@@ -522,7 +505,7 @@
                 "completed": ""
             },
             {
-                "id": 211111078,
+                "id": 3347046367,
                 "title": "Only one Recording Course is remaining of JavaOk",
                 "body": [
                     "\tNow i am removing all the points from the body and changing them into a one line sentence.",
@@ -540,7 +523,7 @@
                 "completed": ""
             },
             {
-                "id": 3664832499,
+                "id": 976194574,
                 "title": "This is a normal task to add a task and then to mark it, to get a different completion date format",
                 "body": [],
                 "time": "",
@@ -553,7 +536,7 @@
                 "completed": ""
             },
             {
-                "id": 1658465865,
+                "id": 2848326739,
                 "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
                 "body": [],
                 "time": "",
@@ -624,7 +607,7 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 1268026554,
+                "id": 922576191,
                 "title": "Created new Adhar card, upload it on all important places : [[AdharCard.pdf]]",
                 "body": [],
                 "time": "",
@@ -637,7 +620,7 @@
                 "completed": "2024-09-26T16"
             },
             {
-                "id": 4215058678,
+                "id": 1759183527,
                 "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
                 "body": [],
                 "time": "",
@@ -650,7 +633,24 @@
                 "completed": "2024-09-26T16"
             },
             {
-                "id": 652565889,
+                "id": 501432948,
+                "title": "Add Passport details in NSR portal and BGC after getting Passport.",
+                "body": [
+                    "\t- [ ] Adding a simple SubTask to see if it updates instantly in board.",
+                    "\tEditing this task to see if this content gets properly detected and old content gets replaced with this new one."
+                ],
+                "time": "18:59 - 19:59",
+                "due": "2024-09-26",
+                "tags": [
+                    "#Test",
+                    "#working"
+                ],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": "2024-10-31/20:20"
+            },
+            {
+                "id": 1730321731,
                 "title": "Apply for new **Birth Certificate** hardcopy ✅ 2024-09-28",
                 "body": [],
                 "time": "",
@@ -661,7 +661,7 @@
                 "completed": "2024-09-28"
             },
             {
-                "id": 1587698526,
+                "id": 1106299641,
                 "title": "Create the Non-Criminal Affidavit : [[Format-Non_Criminal_Affidavit.pdf",
                 "body": [],
                 "time": "",
