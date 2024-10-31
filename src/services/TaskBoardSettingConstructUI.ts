@@ -10,7 +10,6 @@ export class SettingsManager {
 	win: Window;
 	app: App;
 	plugin: TaskBoard;
-	contentEl: HTMLElement;
 	globalSettings: globalSettingsData | null = null;
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -48,7 +47,6 @@ export class SettingsManager {
 	}
 
 	async constructUI(contentEl: HTMLElement, heading: string) {
-		this.contentEl = contentEl;
 
 		await this.loadSettings();
 
@@ -606,9 +604,9 @@ export class SettingsManager {
 
 	cleanUp() {
 		// Clear the content of contentEl (if set)
-		if (this.contentEl) {
-			this.contentEl.empty(); // Empty the contentEl to remove all child elements
-		}
+		// if (this.contentEl) {
+		// 	this.contentEl.empty(); // Empty the contentEl to remove all child elements
+		// }
 
 		// Reset global settings if necessary
 		this.globalSettings = null;
