@@ -149,4 +149,7 @@ const en: Lang = {
 };
 
 export default en;
-export type Lang = typeof en;
+export type Lang = {
+	[key: number]: string;
+};
+

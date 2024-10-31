@@ -1,4 +1,4 @@
-# Task Board - Obsidian Plugin
+# Task Board
 
 ![License](https://img.shields.io/github/license/tu2-atmanand/Task-Board)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=flat-square)
@@ -6,19 +6,19 @@
 
 > Inspired from [CardBoard Plugin](https://github.com/roovo/obsidian-card-board) by [roovo](https://github.com/roovo).
 
-**"Document your progress while completing your tasks."**
+**"Document your progress while completing your tasks"**
 
-An Obsidian plugin to view and manage all your task in a much more efficient Kanban Board format. Easily manage your tasks throught your vault.
+An Obsidian plugin to view and manage all your tasks, throughout the vault in a much more efficient Kanban Board format.
 
-< need to add two images here with dark and light theme>
+![Task Board Thumbnail](./assets/TaskBoardThumbnail.png)
 
-The main idea behind this plugin is to able to document all your work from start to end on how you completed the specific task, what all possible solution and resources you collected along with recording the timestamp while you were working on the task.
+The main idea behind this plugin is to be able to document all your work from start to end while you are completing the specific task. You will be easily open the specific task without opening the markdown file and add the solution, points, resources you have found about the task and add sub-tasks in it. This feature has been inspired from the [GitHub Projects Board Layout](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). The plan is to replicate whole GitHub Projects feature into Obsidian, to maintain your private personal projects or even create a private collaborative workspace.
 
 #### **How Does it work ?**
 
-- It scans tasks from all the Markdown file from your whole vault and show them on a Kanban type Board.
+- It scans tasks from all the Markdown files from your whole vault and show them on a Kanban type Board.
 - Edit the task directly from the Task Board, without opening the Markdown file.
-- See Real TIme changes in the parent markdown file.
+- See Real-TIme changes in the parent markdown file.
 - Add task to currently opened files using a pop-up window.
 
 #### **How to start ?**
@@ -26,30 +26,39 @@ The main idea behind this plugin is to able to document all your work from start
 **Step 1 :** Install and Enable the plugin.
 
 **Step 2 :** Open Task Board using the Icon from the right side Ribbon Icon Bar. Or there is a command in the Command Pallet.
-< Add a Image here to show which ribbon button to click >
 
-**Step 3 :** Click on the Re-Scan Vault button. This will open the Scanning Pop-up window to scan tasks from your file. (This is required to run only for fresh install or in special cases.)
-< Add a Image here, where on left show the button to press and on right of this image, show the Scan Modal >
+![RibbonIcon](./assets/RibbonIcon.png)
 
-**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and create your own boards from the Configure Board Settings. Enjoy !
+**Step 3 :** Click on the Re-Scan Vault button from the top-right in the Task Board view header as shown in below image. Then click on the run button and it will scan all your files to look for tasks. (read the docs to learn more about it and apply filters to scan only specific files)
+
+![ReScanVaultModalOpen](./assets/ReScanVaultModalOpen.png)
+
+**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the Configure Board Settings. Enjoy !
 
 ---
 
 ## Basic Information
 
-> The detailed Documentation on how to use the Task Board efficiently can be found here : [Task Board Documentation]()
+> This is a basic information, Ill highly recommend to go through the docs to understand the plugin better and to use the Task Board efficiently : [Task Board Documentation](https://tu2-atmanand.github.io/task-board-docs/)
 
 ### Task Formats
 
-This plugin will only detect and work with the checkbox items/tasks which are in the following format : 
-```
+This plugin will only detect and work with the checkbox items/tasks which are in the following format :
+
+```md
 - [ ]
 ```
-If you dont want this plugin to detect your tasks, you are free to use the below format to define your tasks/checkbox items : 
-```
+
+If you dont want this plugin to detect your tasks, you are free to use the below format to define your tasks/checkbox items :
+
+```md
 * [ ] 
 + [ ] 
 ```
+
+The task can have metadata like due date, time duration, tags, priority, etc separated by pipe symbol. Additionally, you can add multi-level sub-tasks and body description with images and files with the accepted format as explained in the docs. Following is an example of a task :
+
+![An Complete task example](./assets/TaskExample.png)
 
 ### Marking as Complete
 
@@ -59,6 +68,8 @@ Marking a Task as complete from the board is real-time, as soon as you will mark
 ### Editing a Task
 
 Edit task directly from the Edit Task Window. You can add different properties to the task, add more subTask, add or edit description to the task. And the changes will be return to the parent markdown file exactly the way you see it in the preview.
+
+![Editing a Task Item](./assets/EditTaskWindow.gif)
 
 ### Deleting a Task
 
@@ -82,23 +93,28 @@ Apply Board filters to filter out and see the urgent tasks on the board with eas
 
 ---
 
-# How to Contribute
+## How to Contribute
 
 You can contribute to this project by :
 
-**1. Requesting a new feature or suggesting a change :** [How to create a new request]().
+**1. Requesting a new feature or suggesting a change :** [How to create a new request](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToCreateRequest.html).
 
-**2. Improving the old translated languages or add a new language :** [How to Contribute for Language Translation]().
+**2. Improving the old translated languages or add a new language :** [How to Contribute for Language Translation](https://tu2-atmanand.github.io/task-board-docs/Advanced/Contribution_For_Languages.html).
 
-**3. Contribute to the Development of the plugin Code :** : [How to join the plugin developme]().
+**3. Contribute to the Development of the plugin Code :** : [How to join the plugin developme](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToJoinDevelopment.html).
 
 ---
 
 ## Motivation for the Project
 
-From the start, I always used the [Kanban Plugin]() to manage my tasks. And it use to work nice for me with all the amazing features. But as soon as I came across the [CardBoard Plugin]() eveything changed. The idea of adding tasks anywhere in your vault and managing them from a single board amazed me. While using kanban plugin the issue was, i wasnt able to add tasks directly to any markdown file, i was required to use the Kanabn Board only to add/edit my tasks, and it use to keep all this tasks in a single markdown file. I immediately switched to the CardBoard plugin after I came across it. But after using it for few days, i realized there are few important features this plugin is lacking and hence I went to first contribute to the main project, but I wasnt familiar with the elm files, hence decided to start my own plugin. 
+I always used the [Kanban Plugin](https://github.com/mgmeyers/obsidian-kanban) to manage my tasks. And it use to work nice for me with all the amazing features. But as soon as I came across the CardBoard Plugin eveything changed. The idea of adding tasks anywhere in your vault and managing them from a single board amazed me. While using kanban plugin the issue was, i wasnt able to add tasks directly to any markdown file, i was required to use the Kanabn Board only to add/edit my tasks, and it use to keep all this tasks in a single markdown file. I immediately switched to the CardBoard plugin after I came across it. But after using it for few days, i realized there are few important features this plugin is lacking and hence I went to first contribute to the main project, but I wasnt familiar with the elm files, hence decided to start my own plugin.
 
-While development I took inspirations from CardBoard and Kanban plugin as well as many feature ideas from [GitHub Project KanBan board](). I hope I am able to give the best of all this three plugins into one, and will be improving this further.
+While development I took inspirations from CardBoard and Kanban plugin as well as many feature ideas from [GitHub Project KanBan board](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). I hope I am able to give the best of all this three plugins into one, and will be improving this further.
 
+## Pricing
 
-> Note for me :  Dont make this readme so big, so the user will keep scrolling also difficult to load. Only put basic things to get user going, rest everything put in docs/ folder.
+A great effort of work was put into this idea to make it happen. I created the plugin for personal use, but I believe it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider donating for further improvement of this idea.
+
+## License
+
+Task Board is licensed under GNU GPL V2. Refer to [LICENSE](https://github.com/tu2-atmanand/Task-Board/blob/main/LICENSE) for more information.
