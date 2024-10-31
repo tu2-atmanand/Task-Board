@@ -276,9 +276,9 @@ export default class TaskBoard extends Plugin {
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
-				console.log(
-					"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-				);
+				// console.log(
+				// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
+				// );
 			})
 		);
 
@@ -287,7 +287,6 @@ export default class TaskBoard extends Plugin {
 		);
 		if (closeButton) {
 			this.registerDomEvent(closeButton, "mouseenter", () => {
-				console.log("Hover over close button...");
 				onUnloadSave(this.plugin);
 			});
 		}

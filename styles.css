@@ -169,7 +169,7 @@
 
 .taskItem {
 	background: var(--background-primary-alt);
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 3), calc(var(--accent-s) * 0.9), calc(var(--accent-l) * 1.5));
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 2), calc(var(--accent-s) * 1.5), calc(var(--accent-l) * 0.9));
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
@@ -937,6 +937,8 @@
 	display: flex;
 	flex-direction: row;
 	height: 50vh;
+	max-width: 50vw;
+	width: 50vw;
 	width: 100%;
 	margin-block: 20px;
 	justify-content: space-between;
