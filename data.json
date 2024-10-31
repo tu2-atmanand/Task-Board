@@ -242,11 +242,12 @@
         "folders": {
           "polarity": 2,
           "values": [
-            "Daily_Notes"
+            "Daily_Notes",
+            "DocsForPlugin"
           ]
         },
         "tags": {
-          "polarity": 1,
+          "polarity": 3,
           "values": [
             "#Test",
             "#important"

@@ -1,30 +1,123 @@
 {
     "Pending": {
-        "Testing 2.md": [
+        "Testing4.md": [
             {
-                "id": 2697012779,
-                "title": "So This is to add a simple Task for testing. UPdated",
+                "id": 973180363,
+                "title": "Need to finish the following pending tasks before next Task Board release.",
                 "body": [
-                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
-                    "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
-                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
-                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
-                    "\t\t- [ ] A sub-sub Task for the first time."
+                    "\tThese features will help the plugin to achieve its intended functionality.",
+                    "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
+                    "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
+                    "\t- [x] Sorting feature for each individual Column.",
+                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
                 ],
-                "time": "19:34 - 20:34",
-                "due": "2024-11-07",
+                "time": "21:10 - 23:10",
+                "due": "2024-10-31",
                 "tags": [
                     "#Test",
-                    "#bug/solver"
+                    "#feat"
+                ],
+                "priority": 2,
+                "filePath": "Testing4.md",
+                "completed": ""
+            }
+        ],
+        "Testing 3.md": [
+            {
+                "id": 964418941,
+                "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks",
+                "body": [
+                    "\t- [ ] This is the first Sub Task, updating",
+                    "\t\t- [ ] This is the first sub-sub Task",
+                    "\t\t\t- [ ] This is first sub-sub-sub task",
+                    "\t\t\t- [ ] Adding New three level Indentation subTask.",
+                    "\t\t- [ ] This is second sub-sub Task",
+                    "\t This is an H1 heading",
+                    "\tAdding a line here, the below tasks has been achieved. This line was added from the Modal using textArea box.",
+                    "\t- [x] This is the Second Sub Task",
+                    "\t\t- [x] This is the first sub-sub Task",
+                    "\t\t- [x] This is second sub-sub Task, Updated"
+                ],
+                "time": "",
+                "due": "2024-11-01",
+                "tags": [
+                    "#Test",
+                    "#SubTasks/🔥bugs",
+                    "#Bug"
+                ],
+                "priority": 2,
+                "filePath": "Testing 3.md",
+                "completed": ""
+            }
+        ],
+        "TODO.md": [
+            {
+                "id": 2009959928,
+                "title": "New temp task, lets see if this comes after 5 minutes",
+                "body": [
+                    "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
+                    "\tAnother thing i will put is link to a markdwon file from my Valut : [[0-ImportantData]]",
+                    "\tSimply adding another line in the description.",
+                    "\t- [x] Also adding this new Subtask, first",
+                    "\t- [ ] And adding second subtask. Now editing will make any difference."
+                ],
+                "time": "13:49 - 14:49",
+                "due": "2024-10-23",
+                "tags": [
+                    "#Test",
+                    "#New"
+                ],
+                "priority": 2,
+                "filePath": "TODO.md",
+                "completed": ""
+            }
+        ],
+        "Spintly Details.md": [
+            {
+                "id": 275425527,
+                "title": "Need to complete all the Documents work  and submit to company",
+                "body": [
+                    "\t- [ ] Adding a simple New SubTask",
+                    "\tJust adding a normal line for this task as a body.",
+                    "\tThis is an image in the body : ![[1721576562712.jpg]]",
+                    "\t- [x] Adding a first subtask, with **checked** state true.",
+                    "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
+                ],
+                "time": "",
+                "due": "2024-10-31",
+                "tags": [
+                    "#Test",
+                    "#feat"
+                ],
+                "priority": 2,
+                "filePath": "Spintly Details.md",
+                "completed": ""
+            },
+            {
+                "id": 71035730,
+                "title": "Just a new Task without tag or date",
+                "body": [
+                    "\t- [ ] Adding a new Sub Task",
+                    "\tFirst normal line for body is added.",
+                    "\t- Adding a bullete point in the body.",
+                    "\tAdding one more line in Desc.",
+                    "\t- Adding another bullete point in the description",
+                    "\t- [ ] Adding one subTask with image: ![[UANnumber-Spintly.png]]",
+                    "\t- [ ] Adding another subTask, second one, updaing"
+                ],
+                "time": "10:30 - 11:30",
+                "due": "2024-11-02",
+                "tags": [
+                    "#Test"
                 ],
                 "priority": 0,
-                "filePath": "Testing 2.md",
+                "filePath": "Spintly Details.md",
                 "completed": ""
             }
         ],
         "Testing 1.md": [
             {
-                "id": 3543296231,
+                "id": 699683782,
                 "title": "This is a normal task, I am adding in the file, Updating",
                 "body": [
                     "\tThis a line as a description for the Task Description.",
@@ -42,7 +135,7 @@
                 "completed": ""
             },
             {
-                "id": 3464255991,
+                "id": 3022820048,
                 "title": "Adding a new task to encounter a different issue",
                 "body": [
                     "\t- [ ] This is a first level Sub-Task so this will going to get detected very well, without any problem.",
@@ -69,7 +162,7 @@
                 "completed": ""
             },
             {
-                "id": 1635994298,
+                "id": 1458721075,
                 "title": "A simple task with the priority emoji",
                 "body": [],
                 "time": "",
@@ -82,7 +175,7 @@
                 "completed": ""
             },
             {
-                "id": 272701313,
+                "id": 557415156,
                 "title": "Another simple task with priority emoji away from the pipe symbol",
                 "body": [],
                 "time": "",
@@ -94,54 +187,77 @@
                 "priority": 1,
                 "filePath": "Testing 1.md",
                 "completed": ""
-            }
-        ],
-        "Spintly Details.md": [
+            },
             {
-                "id": 2575285121,
-                "title": "Need to complete all the Documents work  and submit to company",
-                "body": [
-                    "\t- [ ] Adding a simple New SubTask",
-                    "\tJust adding a normal line for this task as a body.",
-                    "\tThis is an image in the body : ![[1721576562712.jpg]]",
-                    "\t- [x] Adding a first subtask, with **checked** state true.",
-                    "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
-                ],
+                "id": 1029639355,
+                "title": "Adding Many tasks right after one another.",
+                "body": [],
                 "time": "",
-                "due": "2024-10-31",
-                "tags": [
-                    "#Test",
-                    "#feat"
-                ],
-                "priority": 2,
-                "filePath": "Spintly Details.md",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
                 "completed": ""
             },
             {
-                "id": 1317617967,
-                "title": "Just a new Task without tag or date",
+                "id": 2261054569,
+                "title": "Do not do this.",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completed": ""
+            },
+            {
+                "id": 3980915635,
+                "title": "If all this tasks are suppose to be for similar work.",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completed": ""
+            },
+            {
+                "id": 3226444966,
+                "title": "Considering making them as sub-tasks and giving a main title.",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completed": ""
+            }
+        ],
+        "Testing 2.md": [
+            {
+                "id": 1976038004,
+                "title": "So This is to add a simple Task for testing. UPdated",
                 "body": [
-                    "\t- [ ] Adding a new Sub Task",
-                    "\tFirst normal line for body is added.",
-                    "\t- Adding a bullete point in the body.",
-                    "\tAdding one more line in Desc.",
-                    "\t- Adding another bullete point in the description",
-                    "\t- [ ] Adding one subTask with image: ![[UANnumber-Spintly.png]]",
-                    "\t- [ ] Adding another subTask, second one, updaing"
+                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
+                    "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
+                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
+                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
+                    "\t\t- [ ] A sub-sub Task for the first time."
                 ],
-                "time": "10:30 - 11:30",
-                "due": "2024-11-02",
+                "time": "19:34 - 20:34",
+                "due": "2024-11-07",
                 "tags": [
-                    "#Test"
+                    "#Test",
+                    "#bug/solver"
                 ],
                 "priority": 0,
-                "filePath": "Spintly Details.md",
+                "filePath": "Testing 2.md",
                 "completed": ""
             }
         ],
         "Pending Document Work.md": [
             {
-                "id": 2799894035,
+                "id": 1956321843,
                 "title": "Add Passport details in NSR portal and BGC after getting Passport.",
                 "body": [
                     "\t- [ ] Adding a simple SubTask to see if it updates instantly in board.",
@@ -158,7 +274,20 @@
                 "completed": ""
             },
             {
-                "id": 1987359423,
+                "id": 3291252667,
+                "title": "As soon as you finish everything with Spintly and got both the letter, click the Submit button for BGC docs, even if you havent received provisional degree, as it is not mandatory, but its important that you upload the Bonafide, which you will hopefully get soon.",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [
+                    "#Test1"
+                ],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1817391625,
                 "title": "Get 8th Semester Provisional Marksheet and Apply for :",
                 "body": [
                     "\tAll the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
@@ -177,7 +306,7 @@
                 "completed": ""
             },
             {
-                "id": 3035757174,
+                "id": 2507407480,
                 "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
                 "body": [
                     "\tThis is a line in the Desc",
@@ -193,7 +322,172 @@
                 "completed": ""
             },
             {
-                "id": 3448930959,
+                "id": 689021774,
+                "title": "Spintly Experience Letter : [[Atmanand Gauns - Internship Experience Certificate.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 2825372827,
+                "title": "ID Proof : Voter ID",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 2703209766,
+                "title": "Copy of Person of India Origin (PIO) card : Passport",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 3403840493,
+                "title": "NSR eCard : [[NSR_eCard.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 2935635090,
+                "title": "Passport : [[Passport.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1757189556,
+                "title": "PAN Card : [[PanCard.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1173735534,
+                "title": "Birth Certificate : [[BirthCertificate.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1866681241,
+                "title": "Non-Criminal Affidavit : [[NCA_TCS.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1736723342,
+                "title": "Graduation Certificate : [[CollegeDegreeCertificate.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1535175839,
+                "title": "Bonafied Letter : [[CollegeBonafideCertificate.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 3432913401,
+                "title": "XII Grade Certificate : [[XII_Grade_Certificate.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 3180747746,
+                "title": "XII Grade Marksheet : [[12_Marksheet.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1587572630,
+                "title": "X Grade Certificate : [[X_Grade_Certificate.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1127048505,
+                "title": "X Grade Mark Sheet : [[10_Marksheet.pdf]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 2998615679,
+                "title": "Photo with Yellow Background : [[MyPassportPhoto.jpg]]",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 105160404,
                 "title": "Graduate All Semester Marksheets :",
                 "body": [
                     "\t- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -215,7 +509,18 @@
                 "completed": ""
             },
             {
-                "id": 564854710,
+                "id": 1831580213,
+                "title": "Create new **Income Certificate** of father before joining.",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1607910666,
                 "title": "Only one Recording Course is remaining of JavaOk",
                 "body": [
                     "\tNow i am removing all the points from the body and changing them into a one line sentence.",
@@ -233,7 +538,20 @@
                 "completed": ""
             },
             {
-                "id": 1923516425,
+                "id": 2910395625,
+                "title": "This is a normal task to add a task and then to mark it, to get a different completion date format",
+                "body": [],
+                "time": "",
+                "due": "2024-09-28",
+                "tags": [
+                    "#Testing"
+                ],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": ""
+            },
+            {
+                "id": 1604032069,
                 "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
                 "body": [],
                 "time": "",
@@ -246,9 +564,31 @@
                 "completed": ""
             }
         ],
+        "Parent/Child/12-JAN-2002.md": [
+            {
+                "id": 689713224,
+                "title": "Adding temp task",
+                "body": [
+                    "\tAdding a line in body to see if it instantly updates in the board. That Bro.",
+                    "\t> No, just found that after you add a fresh line and click save button, the taskItem is not refreshed, so i was not able to see the `Show Description` button.",
+                    "\t> Also, when i updated this body, it didnt updated later.",
+                    "\t> Adding another in the Description using the Modal.",
+                    "\t- [ ] Adding a subTask, to see if shows up instantly in the board. > No, I didnt saw any SubTask inside the taskItem Card"
+                ],
+                "time": "21:15 - 22:15",
+                "due": "2024-10-26",
+                "tags": [
+                    "#Test",
+                    "#feat"
+                ],
+                "priority": 0,
+                "filePath": "Parent/Child/12-JAN-2002.md",
+                "completed": ""
+            }
+        ],
         "DailyNotes.md": [
             {
-                "id": 3071223449,
+                "id": 1357826841,
                 "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
                 "body": [],
                 "time": "",
@@ -260,62 +600,12 @@
                 "filePath": "DailyNotes.md",
                 "completed": ""
             }
-        ],
-        "Testing 3.md": [
-            {
-                "id": 151110206,
-                "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks",
-                "body": [
-                    "\t- [ ] This is the first Sub Task, updating",
-                    "\t\t- [ ] This is the first sub-sub Task",
-                    "\t\t\t- [ ] This is first sub-sub-sub task",
-                    "\t\t\t- [ ] Adding New three level Indentation subTask.",
-                    "\t\t- [ ] This is second sub-sub Task",
-                    "\t This is an H1 heading",
-                    "\tAdding a line here, the below tasks has been achieved. This line was added from the Modal using textArea box.",
-                    "\t- [x] This is the Second Sub Task",
-                    "\t\t- [x] This is the first sub-sub Task",
-                    "\t\t- [x] This is second sub-sub Task, Updated"
-                ],
-                "time": "",
-                "due": "2024-11-01",
-                "tags": [
-                    "#Test",
-                    "#SubTasks/🔥bugs",
-                    "#Bug"
-                ],
-                "priority": 2,
-                "filePath": "Testing 3.md",
-                "completed": ""
-            }
-        ],
-        "Testing4.md": [
-            {
-                "id": 701144249,
-                "title": "Need to finish the following pending tasks before next Task Board release.",
-                "body": [
-                    "\tThese features will help the plugin to achieve its intended functionality.",
-                    "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
-                    "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
-                    "\t- [x] Sorting feature for each individual Column.",
-                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
-                ],
-                "time": "21:10 - 23:10",
-                "due": "2024-10-31",
-                "tags": [
-                    "#Test",
-                    "#feat"
-                ],
-                "priority": 2,
-                "filePath": "Testing4.md",
-                "completed": ""
-            }
         ]
     },
     "Completed": {
         "Testing 1.md": [
             {
-                "id": 2329598593,
+                "id": 4136629522,
                 "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
                 "body": [
                     "\t![[Pasted image 20241014211429.png]]"
@@ -332,7 +622,7 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 4143925143,
+                "id": 3525580071,
                 "title": "Created new Adhar card, upload it on all important places : [[AdharCard.pdf]]",
                 "body": [],
                 "time": "",
@@ -344,28 +634,73 @@
                 "priority": 3,
                 "filePath": "Pending Document Work.md",
                 "completed": "2024-09-26T16"
+            },
+            {
+                "id": 1555709506,
+                "title": "Apply for new **Birth Certificate** hardcopy ✅ 2024-09-28",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": "2024-09-28"
+            },
+            {
+                "id": 3748139754,
+                "title": "Create the Non-Criminal Affidavit : [[Format-Non_Criminal_Affidavit.pdf",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Pending Document Work.md",
+                "completed": "2024-09-28"
             }
         ],
-        "TODO.md": [
+        "Parent/Child/2002-01-12.md": [
             {
-                "id": 3554069327,
-                "title": "New temp task, lets see if this comes after 5 minutes",
-                "body": [
-                    "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
-                    "\tAnother thing i will put is link to a markdwon file from my Valut : [[0-ImportantData]]",
-                    "\tSimply adding another line in the description.",
-                    "\t- [x] Also adding this new Subtask, first",
-                    "\t- [ ] And adding second subtask. Now editing will make any difference."
-                ],
-                "time": "13:49 - 14:49",
-                "due": "2024-10-24",
+                "id": 1975749762,
+                "title": "I was born on Saturday",
+                "body": [],
+                "time": "",
+                "due": "2002-01-12",
                 "tags": [
-                    "#Test",
-                    "#New"
+                    "#Test"
                 ],
-                "priority": 2,
-                "filePath": "TODO.md",
-                "completed": "2024-10-27/01:03"
+                "priority": 0,
+                "filePath": "Parent/Child/2002-01-12.md",
+                "completed": "2024-10-04/22:08"
+            }
+        ],
+        "Parent/Child/12-01-2002.md": [
+            {
+                "id": 766567492,
+                "title": "I was born",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 0,
+                "filePath": "Parent/Child/12-01-2002.md",
+                "completed": "2024-10-17/21:22"
+            }
+        ],
+        "3-Process After Offer Letter Received.md": [
+            {
+                "id": 1866023561,
+                "title": "New Test task to be added from Add Task Button straight from the Plugin Window",
+                "body": [],
+                "time": "",
+                "due": "2024-10-05",
+                "tags": [
+                    "#Test1"
+                ],
+                "priority": 0,
+                "filePath": "3-Process After Offer Letter Received.md",
+                "completed": "2024-10-Fr/14:15"
             }
         ]
     }
