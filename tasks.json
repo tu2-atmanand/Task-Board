@@ -99,7 +99,7 @@
         "Spintly Details.md": [
             {
                 "id": 2575285121,
-                "title": "Need to complete all the Documents work  and submit to TCS",
+                "title": "Need to complete all the Documents work  and submit to company",
                 "body": [
                     "\t- [ ] Adding a simple New SubTask",
                     "\tJust adding a normal line for this task as a body.",
@@ -141,7 +141,7 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 1808746611,
+                "id": 2799894035,
                 "title": "Add Passport details in NSR portal and BGC after getting Passport.",
                 "body": [
                     "\t- [ ] Adding a simple SubTask to see if it updates instantly in board.",
@@ -158,7 +158,7 @@
                 "completed": ""
             },
             {
-                "id": 4084634664,
+                "id": 1987359423,
                 "title": "Get 8th Semester Provisional Marksheet and Apply for :",
                 "body": [
                     "\tAll the this documents have been submitted properly, now truly believe that my joining will come very very soon.",
@@ -177,7 +177,7 @@
                 "completed": ""
             },
             {
-                "id": 3209903442,
+                "id": 3035757174,
                 "title": "Relieving Letter : Relieving Letter cannot be given for Internship Employees.",
                 "body": [
                     "\tThis is a line in the Desc",
@@ -193,7 +193,7 @@
                 "completed": ""
             },
             {
-                "id": 110515799,
+                "id": 3448930959,
                 "title": "Graduate All Semester Marksheets :",
                 "body": [
                     "\t- [x] Semester 1 : [[Semester_1_Marksheet.pdf]]",
@@ -215,7 +215,7 @@
                 "completed": ""
             },
             {
-                "id": 784443738,
+                "id": 564854710,
                 "title": "Only one Recording Course is remaining of JavaOk",
                 "body": [
                     "\tNow i am removing all the points from the body and changing them into a one line sentence.",
@@ -223,7 +223,7 @@
                     "\t- [ ] Adding a second Subtask with image to see the preview : ![[Pasted image 20241008192305.png]]"
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-10-30",
+                "due": "2024-10-31",
                 "tags": [
                     "#Test",
                     "#New"
@@ -233,7 +233,7 @@
                 "completed": ""
             },
             {
-                "id": 1540769229,
+                "id": 1923516425,
                 "title": "Adding a simple task to see if now the board refreshes with the new task added, since now i will add a new task inside task.json",
                 "body": [],
                 "time": "",
@@ -278,7 +278,7 @@
                     "\t\t- [x] This is second sub-sub Task, Updated"
                 ],
                 "time": "",
-                "due": "2024-10-30",
+                "due": "2024-11-01",
                 "tags": [
                     "#Test",
                     "#SubTasks/🔥bugs",
@@ -286,6 +286,28 @@
                 ],
                 "priority": 2,
                 "filePath": "Testing 3.md",
+                "completed": ""
+            }
+        ],
+        "Testing4.md": [
+            {
+                "id": 701144249,
+                "title": "Need to finish the following pending tasks before next Task Board release.",
+                "body": [
+                    "\tThese features will help the plugin to achieve its intended functionality.",
+                    "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
+                    "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
+                    "\t- [x] Sorting feature for each individual Column.",
+                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
+                ],
+                "time": "21:10 - 23:10",
+                "due": "2024-10-31",
+                "tags": [
+                    "#Test",
+                    "#feat"
+                ],
+                "priority": 2,
+                "filePath": "Testing4.md",
                 "completed": ""
             }
         ]
@@ -310,12 +332,13 @@
         ],
         "Pending Document Work.md": [
             {
-                "id": 914628928,
-                "title": "Aadhar Card : [[AdharCard.pdf]] , Just adding some content to see if the Editing functionality is working",
+                "id": 4143925143,
+                "title": "Created new Adhar card, upload it on all important places : [[AdharCard.pdf]]",
                 "body": [],
                 "time": "",
                 "due": "",
                 "tags": [
+                    "#Test",
                     "#Test"
                 ],
                 "priority": 3,

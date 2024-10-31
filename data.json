@@ -263,7 +263,7 @@
       "taskCompletionShowUtcOffset": false,
       "autoAddDue": true,
       "scanVaultAtStartup": false,
-      "dayPlannerPlugin": true,
+      "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
       "showHeader": true,
