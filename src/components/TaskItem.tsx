@@ -203,10 +203,11 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 											return null;
 										}
 
+										const tagKey = `${task.id}-${tag}`;
 										// Render the remaining tags
 										return (
 											<div
-												key={tag}
+												key={tagKey}
 												className="taskItemTag"
 												style={{
 													color: tagColor,
