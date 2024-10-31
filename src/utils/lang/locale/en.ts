@@ -1,4 +1,4 @@
-const en = {
+const en: Lang = {
 	1: "Save",
 	2: "Close",
 	3: "Archive",

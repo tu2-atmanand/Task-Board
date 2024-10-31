@@ -1,4 +1,5 @@
 // Import all the language files
+
 import en, { Lang } from "./locale/en";
 
 import ar from "./locale/ar";
@@ -60,7 +61,7 @@ const getLanguage = (): string => {
 };
 
 // Function to fetch the locale based on the current language
-const getLocale = (): string => {
+const getLocale = (): Partial<Lang> => {
 	const lang = getLanguage();
 	const locale = localeMap[lang] || localeMap["en"]; // Fallback to 'en' if the language is not found
 	if (!locale) {
