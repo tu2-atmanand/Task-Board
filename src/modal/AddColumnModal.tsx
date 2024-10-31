@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 
+import { t } from "src/utils/lang/helper";
+
 interface AddColumnModalProps {
 	isOpen: boolean;
 	onClose: () => void;
@@ -33,29 +35,29 @@ const AddColumnModal: React.FC<AddColumnModalProps> = ({ isOpen, onClose, onSubm
 			<div className="addColumnModalOverlayContent">
 				<h2>Add Column</h2>
 				<div className="addColumnModalOverlayContentField">
-					<label htmlFor="colType">Column Type</label>
+					<label htmlFor="colType">{t(10)}</label>
 					<select id="colType" value={colType} onChange={handleColTypeChange}>
-						<option value="undated">Undated</option>
-						<option value="dated">Dated</option>
-						<option value="namedTag">Tagged</option>
-						<option value="untagged">Untagged</option>
-						<option value="completed">Completed</option>
-						<option value="otherTags">Other Tags</option>
+						<option value="undated">{t(11)}</option>
+						<option value="dated">{t(12)}</option>
+						<option value="namedTag">{t(13)}</option>
+						<option value="untagged">{t(14)}</option>
+						<option value="completed">{t(15)}</option>
+						<option value="otherTags">{t(16)}</option>
 					</select>
 				</div>
 				<div className="addColumnModalOverlayContentField">
-					<label htmlFor="name">Column Name</label>
+					<label htmlFor="name">{t(17)}</label>
 					<input
 						type="text"
 						id="name"
 						value={name}
 						onChange={handleNameChange}
-						placeholder="Enter column name"
+						placeholder={t(20)}
 					/>
 				</div>
 				<div className="addColumnModalOverlayContentActions">
-					<button onClick={handleSubmit}>Submit</button>
-					<button onClick={onClose}>Cancel</button>
+					<button onClick={handleSubmit}>{t(18)}</button>
+					<button onClick={onClose}>{t(19)}</button>
 				</div>
 			</div>
 		</div>

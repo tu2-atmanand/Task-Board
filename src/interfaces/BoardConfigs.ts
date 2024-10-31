@@ -1,12 +1,12 @@
 // Define the structure of Board, Column, and the Data read from JSON
-export interface ColumnData {
+export type ColumnData = {
 	colType: string;
 	active: boolean;
+	collapsed?: boolean;
 	data: {
-		collapsed?: boolean;
 		name: string;
 		index: number;
-		coltag: string;
+		coltag?: string;
 		range?: {
 			tag: string;
 			rangedata: {
@@ -16,19 +16,22 @@ export interface ColumnData {
 		};
 		limit?: number;
 	};
+	sort?: {
+		criteria: string;
+		order: boolean; // Ascending = 0 AND Descending = 1
+	};
 }
 
-export interface Board {
+export type Board = {
 	name: string;
 	index: number;
 	columns: ColumnData[];
-	filters?: any[];
+	filters?: string[];
 	filterPolarity?: string;
 	filterScope?: string;
 	showColumnTags?: boolean;
 	showFilteredTags?: boolean;
 }
 
-export interface BoardConfig {
-	boardConfigs: Board[];
-}
+export type BoardConfigs = Board[];
+

@@ -7,8 +7,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Over Due",
               "index": 1,
               "range": {
@@ -23,8 +23,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Today",
               "index": 2,
               "range": {
@@ -39,8 +39,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Tomorrow",
               "index": 3,
               "range": {
@@ -53,21 +53,12 @@
             }
           },
           {
-            "colType": "undated",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Undated",
-              "index": 4
-            }
-          },
-          {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Future",
-              "index": 5,
+              "index": 4,
               "range": {
                 "tag": "after",
                 "rangedata": {
@@ -78,25 +69,34 @@
             }
           },
           {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "data": {
+              "name": "Undated Tasks",
+              "index": 5
+            }
+          },
+          {
             "colType": "completed",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
-              "limit": 10,
+              "limit": 20,
               "name": "Completed",
               "index": 6
             }
           }
         ],
         "filters": [
-          "Test",
-          "NOTE"
+          "#Bug",
+          "#bug/solver"
         ],
-        "filterPolarity": "Allow",
+        "filterPolarity": "0",
         "filterScope": "Both",
-        "name": "For Testing, This board contains only date related tasks",
+        "name": "Testing This Board",
         "index": 1,
-        "showColumnTags": true,
+        "showColumnTags": false,
         "showFilteredTags": true
       },
       {
@@ -104,8 +104,8 @@
           {
             "colType": "untagged",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Untagged",
               "index": 1
             }
@@ -113,48 +113,48 @@
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
-              "name": "Testing Tasks",
+              "name": "Bugs in Project",
               "index": 2,
-              "coltag": "Testing"
+              "coltag": "Bug"
             }
           },
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
-              "name": "GPT",
+              "name": "Features Pending",
               "index": 3,
-              "coltag": "GPT"
+              "coltag": "feat"
             }
           },
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
-              "name": "When Mobile Data Left at Night",
+              "name": "Test Task",
               "index": 4,
-              "coltag": "WhenMobileDataLeft"
+              "coltag": "Test"
             }
           },
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Note Till Task is Done",
               "index": 5,
-              "coltag": "NOTE"
+              "coltag": "Note"
             }
           },
           {
             "colType": "otherTags",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Other Tags",
               "index": 6
             }
@@ -162,30 +162,20 @@
           {
             "colType": "completed",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "index": 7,
               "limit": 10,
               "name": "Completed"
             }
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "data": {
-              "collapsed": false,
-              "name": "Test Tasks",
-              "index": 8,
-              "coltag": "Test"
-            }
           }
         ],
         "filters": [],
-        "filterPolarity": "Allow",
+        "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Tag Based Board",
         "index": 2,
-        "showColumnTags": true,
+        "showColumnTags": false,
         "showFilteredTags": true
       },
       {
@@ -195,8 +185,8 @@
           {
             "colType": "dated",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Past Tasks",
               "index": 1,
               "range": {
@@ -210,8 +200,8 @@
           {
             "colType": "namedTag",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Test Name Tag Column",
               "index": 2,
               "coltag": "Test"
@@ -220,8 +210,8 @@
           {
             "colType": "untagged",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Untagged Tasks",
               "index": 3
             }
@@ -229,40 +219,64 @@
           {
             "colType": "otherTags",
             "active": true,
+            "collapsed": false,
             "data": {
-              "collapsed": false,
               "name": "Other Tags Tasks",
               "index": 4
             }
           }
         ],
         "showColumnTags": true,
-        "showFilteredTags": true
+        "showFilteredTags": true,
+        "filterPolarity": "0"
       }
     ],
     "globalSettings": {
-      "defaultColumnNames": {
-        "Undated": "",
-        "Overdue": "Kal",
-        "Today": "Todu",
-        "Tomorrow": "",
-        "Future": "",
-        "Other Tags": "",
-        "Untagged": "",
-        "Completed": ""
+      "scanFilters": {
+        "files": {
+          "polarity": 2,
+          "values": [
+            "MyReadme.md"
+          ]
+        },
+        "folders": {
+          "polarity": 2,
+          "values": [
+            "Daily_Notes",
+            "DocsForPlugin"
+          ]
+        },
+        "tags": {
+          "polarity": 3,
+          "values": [
+            "#Test",
+            "#important"
+          ]
+        }
       },
-      "filters": [
-        "MyReadme.md, Daily/, New.md"
-      ],
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "Obsidian",
+      "taskCompletionFormat": "2",
+      "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
+      "dailyNotesPluginComp": false,
+      "dueDateFormat": "yyyy-MM-DD",
       "taskCompletionInLocalTime": true,
-      "taskCompletionShowUtcOffset": true,
+      "taskCompletionShowUtcOffset": false,
       "autoAddDue": true,
       "scanVaultAtStartup": false,
-      "dayPlannerPlugin": true,
-      "realTimeScanning": true
+      "dayPlannerPlugin": false,
+      "realTimeScanning": true,
+      "columnWidth": "300px",
+      "showHeader": true,
+      "showFooter": true,
+      "showVerticalScroll": false,
+      "tagColors": {
+        "Test": "#10da0cEE",
+        "Bug": "#E6090EEE",
+        "bug/solver": "#22f7eeff",
+        "feat": "#d50df2ff"
+      },
+      "lang": "en"
     }
   }
 }

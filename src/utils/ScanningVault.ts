@@ -1,73 +1,92 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, Notice, TFile } from "obsidian";
+import { App, TFile } from "obsidian";
+import {
+	loadTasksJsonFromSS,
+	writeTasksJsonToSS,
+} from "./tasksCache";
+import { scanFilterForFilesNFolders, scanFilterForTags } from "./FiltersVerifier";
 
-import fs from "fs";
-import path from "path";
-import { priorityEmojis } from "src/interfaces/TaskItem";
-import { tasksPath } from "src/interfaces/TaskBoardGlobalValues";
+import type TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
+import { priorityEmojis } from "src/interfaces/TaskItemProps";
+import { readDataOfVaultFiles } from "./MarkdownFileOperations";
 
 export class ScanningVault {
 	app: App;
+	plugin: TaskBoard;
 	tasks: any = { Pending: {}, Completed: {} };
+	TaskDetected: boolean;
 
-	constructor(app: App) {
+	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
+		this.plugin = plugin;
+		this.TaskDetected = false;
 	}
 
-	// Scan all markdown files for tasks
-	// Modify scanVaultForTasks to accept a callback function for terminal updates
-
-	async scanVaultForTasks(onFileScanned: (fileName: string) => void) {
-		console.log(
-			"Scanning The Whole Vault, either on Startup or using Modal..."
-		);
+	async scanVaultForTasks() {
 		const files = this.app.vault.getMarkdownFiles();
 		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
 
 		for (const file of files) {
-			onFileScanned(file.path); // Pass file name to callback for live updates
-			await this.extractTasksFromFile(file, this.tasks);
+			const scanFilters =
+				this.plugin.settings.data.globalSettings.scanFilters;
+			if (scanFilterForFilesNFolders(file, scanFilters)) {
+				await this.extractTasksFromFile(file, this.tasks, scanFilters);
+			}
 		}
-		
-		console.log("Following tasks has been collected after Vault Scan : ", this.tasks);
 
 		this.saveTasksToFile();
+		// Emit the event
+		eventEmitter.emit("REFRESH_BOARD");
 	}
 
 	// Extract tasks from a specific file
-	async extractTasksFromFile(file: TFile, tasks: any) {
-		const fileContent = await this.app.vault.read(file);
-		const lines = fileContent.split("\n");
+	async extractTasksFromFile(file: TFile, tasks: any, scanFilters: any) {
 		const fileNameWithPath = file.path;
+		const fileContent = await readDataOfVaultFiles(
+			this.plugin,
+			fileNameWithPath
+		);
+		const lines = fileContent.split("\n");
 
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
 
-		for (const line of lines) {
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
 			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
-				const isCompleted = line.startsWith("- [x]");
-				const body = this.extractBody(line);
-				const time = this.extractTime(line);
-				const due = this.extractDate(line);
-				const priority = this.extractPriority(line);
-				const tag = this.extractTag(line);
+				const tags = extractTags(line);
+				if (scanFilterForTags(tags, scanFilters)) {
+					this.TaskDetected =
+						line.startsWith("- [x]") || line.startsWith("- [ ]");
+					const isCompleted = line.startsWith("- [x]");
+					const title = extractTitle(line);
+					const time = extractTime(line);
+					const due = extractDueDate(line);
+					const priority = extractPriority(line);
+					const completionDate = extractCompletionDate(line);
+					const body = extractBody(lines, i + 1);
 
-				const task = {
-					id: this.generateTaskId(),
-					body,
-					time,
-					due,
-					tag,
-					priority,
-					filePath: fileNameWithPath,
-					completed: isCompleted,
-				};
+					const task = {
+						id: this.generateTaskId(),
+						title,
+						body,
+						time,
+						due,
+						tags,
+						priority,
+						filePath: fileNameWithPath,
+						completed: completionDate,
+					};
 
-				if (isCompleted) {
-					tasks.Completed[fileNameWithPath].push(task);
+					if (isCompleted) {
+						tasks.Completed[fileNameWithPath].push(task);
+					} else {
+						tasks.Pending[fileNameWithPath].push(task);
+					}
 				} else {
-					tasks.Pending[fileNameWithPath].push(task);
+					// console.log("The tasks is not allowed...");
 				}
 			}
 		}
@@ -75,28 +94,19 @@ export class ScanningVault {
 
 	// Generate a unique ID for each task
 	generateTaskId(): number {
-		return Date.now();
-	}
-
-	// Helper function to load the existing tasks from the tasks.json file
-	async loadTasksFromFile() {
-		if (fs.existsSync(tasksPath)) {
-			const data = fs.readFileSync(tasksPath, "utf8");
-			return JSON.parse(data);
-		}
-		return { Pending: {}, Completed: {} }; // Return an empty object if no file exists
+		const array = new Uint32Array(1);
+		crypto.getRandomValues(array);
+		return array[0];
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: TFile[]) {
-		console.log("Following files have been received for scanning: ", files);
+		const moment = require("moment");
 
 		// Load the existing tasks from tasks.json once
-		const oldTasks = await this.loadTasksFromFile();
-		console.log(
-			"Following Old data has been loaded from tasks.json: ",
-			oldTasks
-		);
+		const oldTasks = await loadTasksJsonFromSS(this.plugin);
+		const scanFilters =
+			this.plugin.settings.data.globalSettings.scanFilters;
 
 		for (const file of files) {
 			const fileNameWithPath = file.path;
@@ -105,38 +115,61 @@ export class ScanningVault {
 			const newPendingTasks: any[] = [];
 			const newCompletedTasks: any[] = [];
 
-			for (const line of lines) {
+			for (let i = 0; i < lines.length; i++) {
+				const line = lines[i];
 				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
-					const isCompleted = line.startsWith("- [x]");
-					const body = this.extractBody(line);
-					const time = this.extractTime(line);
-					const due = this.extractDate(line);
-					const priority = this.extractPriority(line);
-					const tag = this.extractTag(line);
+					const tags = extractTags(line);
+					if (scanFilterForTags(tags, scanFilters)) {
+						this.TaskDetected =
+							line.startsWith("- [x]") ||
+							line.startsWith("- [ ]");
+						const isCompleted = line.startsWith("- [x]");
+						const title = extractTitle(line);
+						const time = extractTime(line);
+						const priority = extractPriority(line);
+						const completionDate = extractCompletionDate(line);
+						const body = extractBody(lines, i + 1);
+						let due = extractDueDate(line);
+						if (
+							!due &&
+							this.plugin.settings.data.globalSettings
+								.dailyNotesPluginComp
+						) {
+							const dueFormat =
+								this.plugin.settings.data.globalSettings
+									.dueDateFormat;
+							const basename = file.basename;
 
-					const task = {
-						id: this.generateTaskId(),
-						body,
-						time,
-						due,
-						tag,
-						priority,
-						filePath: fileNameWithPath,
-						completed: isCompleted,
-					};
+							// Check if the basename matches the dueFormat using moment
+							if (moment(basename, dueFormat, true).isValid()) {
+								due = basename; // If the basename matches the dueFormat, assign it to due
+							} else {
+								due = ""; // If not, assign an empty string
+							}
+						}
 
-					if (isCompleted) {
-						newCompletedTasks.push(task);
+						const task = {
+							id: this.generateTaskId(),
+							title,
+							body,
+							time,
+							due,
+							tags,
+							priority,
+							filePath: fileNameWithPath,
+							completed: completionDate,
+						};
+
+						if (isCompleted) {
+							newCompletedTasks.push(task);
+						} else {
+							newPendingTasks.push(task);
+						}
 					} else {
-						newPendingTasks.push(task);
+						// console.log("The tasks is not allowed...");
 					}
 				}
 			}
-
-			console.log("Tasks extracted from the file: ", {
-				newPendingTasks,
-				newCompletedTasks,
-			});
 
 			// Only replace the tasks for the specific file
 			this.tasks.Pending = {
@@ -150,86 +183,172 @@ export class ScanningVault {
 			};
 		}
 
-		// Save the updated tasks back to tasks.json after processing all files
 		this.saveTasksToFile();
 	}
 
 	// Save tasks to JSON file
-	saveTasksToFile() {
-		fs.writeFileSync(tasksPath, JSON.stringify(this.tasks, null, 2));
-		console.log(
-			"The following data saved in the tasks.json : ",
-			this.tasks
-		);
-		new Notice("Tasks saved to tasks.json");
+	async saveTasksToFile() {
+		await writeTasksJsonToSS(this.plugin, this.tasks);
+
+		// Refresh the board only if any task has be extracted from the updated file.
+		if (
+			this.TaskDetected &&
+			this.plugin.settings.data.globalSettings.realTimeScanning
+		) {
+			eventEmitter.emit("REFRESH_COLUMN");
+			this.TaskDetected = false;
+		}
 	}
+}
 
-	// Extract body from task line
-	extractBody(text: string): string {
-		const timeAtStartMatch = text.match(
-			/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
-		);
+// New function to extract task body
+export function extractBody(lines: string[], startLineIndex: number): string[] {
+	const bodyLines = [];
+	for (let i = startLineIndex; i < lines.length; i++) {
+		const line = lines[i];
 
-		if (timeAtStartMatch) {
-			// If time is at the start, extract body after the time and till the pipe symbol
-			return text
-				.replace(/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
-				.split("|")[0]
-				.trim();
+		if (line.trim() === "") {
+			break;
+		}
+
+		// If the line has one level of indentation, consider it part of the body
+		if (line.startsWith("\t") || line.startsWith("    ")) {
+			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
+			bodyLines.push(line);
 		} else {
-			// Default case: no time at start, extract body till the pipe symbol
-			return text.includes("|")
-				? text
-						.split("|")[0]
-						.replace(/^- \[[x ]\]\s*/, "")
-						.trim()
-				: text.replace(/^- \[[x ]\]\s*/, "").trim();
+			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
+			// bodyLines.push(`\t${line}`);
+			break;
 		}
 	}
+	return bodyLines;
+}
 
-	// Extract time from task line
-	extractTime(text: string): string {
-		// Check if time is at the start of the task
-		const timeAtStartMatch = text.match(
-			/^- \[[x ]\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
-		);
+// Extract title from task line
+export function extractTitle(text: string): string {
+	const timeAtStartMatch = text.match(
+		/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
+	);
 
-		if (timeAtStartMatch) {
-			// If time is at the start, extract it
-			return timeAtStartMatch[1];
-		}
+	if (timeAtStartMatch) {
+		// If time is at the start, extract title after the time and till the pipe symbol
+		return text
+			.replace(/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
+			.split("|")[0]
+			.trim();
+	} else {
+		// Default case: no time at start, extract title till the pipe symbol
+		return text.includes("|")
+			? text
+					.split("|")[0]
+					.replace(/^- \[[x ]\]\s*/, "")
+					.trim()
+			: text.replace(/^- \[[x ]\]\s*/, "").trim();
+	}
+}
 
-		// Otherwise, look for time elsewhere in the line
-		const timeInBodyMatch = text.match(
-			/⏰\s*\[(\d{2}:\d{2} - \d{2}:\d{2})\]/
-		);
-		return timeInBodyMatch ? timeInBodyMatch[1] : "";
+// Extract time from task line
+export function extractTime(text: string): string {
+	// Check if time is at the start of the task
+	const timeAtStartMatch = text.match(
+		/^- \[[x ]\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
+	);
+
+	if (timeAtStartMatch) {
+		// If time is at the start, extract it
+		return timeAtStartMatch[1];
 	}
 
-	// Extract date from task body
-	extractDate(text: string): string {
-		const match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
-		return match ? match[1] : "";
+	// Otherwise, look for time elsewhere in the line
+	const timeIntitleMatch = text.match(/⏰\s*\[(\d{2}:\d{2} - \d{2}:\d{2})\]/);
+	return timeIntitleMatch ? timeIntitleMatch[1] : "";
+}
+
+// Extract date from task title
+export function extractDueDate(text: string): string {
+	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+
+	if (!match) {
+		match = text.match(/\[due::\s*(\d{4}-\d{2}-\d{2})\]/);
 	}
 
-	// Extract priority from task body
-	extractPriority(text: string): string {
-		const priorityMatch = Object.entries(priorityEmojis).find(
-			([key, emoji]) => text.includes(emoji)
-		);
+	if (!match) {
+		match = text.match(/\@due\(\s*(\d{4}-\d{2}-\d{2})\)/);
+	}
+
+	return match ? match[1] : "";
+}
+
+// Extract priority from task title using RegEx
+export function extractPriority(text: string): number {
+	// Create a regex pattern to match any priority emoji
+	const emojiPattern = new RegExp(
+		`\\|?\\s*(${Object.values(priorityEmojis).join("|")})\\s*`,
+		"g"
+	);
+
+	// Execute the regex to find the emoji in the text
+	const match = text.match(emojiPattern);
+
+	// If a match is found, map it back to the corresponding priority number
+	if (match) {
+		const emojiFound = match[0].trim().replace("|", "").trim();
 		// console.log(
-		// 	"This is what has been extracted as emoji : ",
-		// 	priorityMatch,
-		// 	" Of the task : ",
-		// 	text
+		// 	"Following is the match I found for the Priority :",
+		// 	emojiFound
 		// );
-		// console.log([...text].map((char) => char.codePointAt(0).toString(16)));
-		return priorityMatch?.[0] || "0";
+
+		const priorityMatch = Object.entries(priorityEmojis).find(
+			([, emoji]) => emoji === emojiFound
+		);
+
+		// console.log(
+		// 	"The match i found for this emoji from the mapping :",
+		// 	priorityMatch
+		// );
+		return parseInt(priorityMatch?.[0] || "0") || 0;
 	}
 
-	// Extract tag from task body
-	extractTag(text: string): string {
-		const match = text.match(/#(\w+)/);
-		return match ? `#${match[1]}` : "";
+	// Default priority if no emoji is found
+	return 0;
+}
+
+// Extract tags from task title
+export function extractTags(text: string): string[] {
+	const matches = text.match(/\s+#\S+/g);
+	return matches ? matches.map((tag) => tag.trim()) : [];
+}
+
+// Extract completion date-time value
+export function extractCompletionDate(text: string): string {
+	let match = text.match(
+		/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?/
+	);
+
+	// If not found, try to match the completion:: 2024-09-28 format
+	if (!match) {
+		match = text.match(
+			/\[completion::\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\]/
+		);
+
+		if (match) {
+			return match
+				? match[0].replace("[completion::", "").replace("]", "").trim()
+				: "";
+		}
 	}
+
+	if (!match) {
+		match = text.match(
+			/\@completion\(\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\)/
+		);
+
+		if (match) {
+			return match
+				? match[0].replace("@completion(", "").replace(")", "").trim()
+				: "";
+		}
+	}
+	// Return the matched date or date-time, or an empty string if no match
+	return match ? match[0].replace("✅", "").trim() : "";
 }

@@ -3,34 +3,40 @@
 import { App, Modal } from 'obsidian';
 
 import React from 'react';
+import { t } from 'src/utils/lang/helper';
 
 interface DeleteConfirmationModalProps {
 	app: App;
+	mssg: string;
 	onConfirm: () => void;
 	onCancel: () => void;
 }
 
 export class DeleteConfirmationModal extends Modal {
+	mssg: string;
 	onConfirm: () => void;
 	onCancel: () => void;
 
-	constructor(app: App, { onConfirm, onCancel }: DeleteConfirmationModalProps) {
+	constructor(app: App, { mssg, onConfirm, onCancel }: DeleteConfirmationModalProps) {
 		super(app);
 		this.app = app;
+		this.mssg = mssg;
 		this.onConfirm = onConfirm;
 		this.onCancel = onCancel;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: 'Confirm Delete' });
-		contentEl.createEl('p', { text: 'Are you sure you want to delete this task?' });
 
-		const buttonContainer = contentEl.createDiv('button-container');
+		const homeComponenet = contentEl.createEl("span", { cls: "deleteConfirmationModalHome" });
+		homeComponenet.createEl('h2', { text: t(60) });
+		homeComponenet.createEl('p', { text: this.mssg });
+
+		const buttonContainer = homeComponenet.createDiv('button-container');
 		buttonContainer.style.display = 'flex';
 		buttonContainer.style.gap = '1em';
 
-		const confirmButton = buttonContainer.createEl('button', { text: 'Yes' });
+		const confirmButton = buttonContainer.createEl('button', { text: t(62) });
 		confirmButton.style.paddingBlock = '4px';
 		confirmButton.style.paddingInline = '25px';
 		confirmButton.classList.add('deleteTaskConfirmBtn');
@@ -39,7 +45,7 @@ export class DeleteConfirmationModal extends Modal {
 			this.close();
 		});
 
-		const cancelButton = buttonContainer.createEl('button', { text: 'No' });
+		const cancelButton = buttonContainer.createEl('button', { text: t(63) });
 		cancelButton.style.paddingBlock = '4px';
 		cancelButton.style.paddingInline = '25px';
 		cancelButton.classList.add('deleteTaskCancelmBtn');

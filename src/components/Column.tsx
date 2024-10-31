@@ -1,64 +1,88 @@
-// /src/components/Column.tsx -------- V3
+// /src/components/Column.tsx
 
-import { App, Modal } from 'obsidian';
-import { ColumnProps, Task } from '../interfaces/Column';
 import React, { useEffect, useState } from 'react';
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
-import { markTaskCompleteInFile, moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
+import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItemProps';
 
+import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
+import { App } from 'obsidian';
+import { CSSProperties } from 'react';
+import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
-import { EditTaskModal } from '../modal/EditTaskModal';
-import { RxDragHandleDots2 } from "react-icons/rx";
 import TaskItem from './TaskItem';
-import fs from 'fs';
-import path from 'path';
-import { refreshBoardData } from 'src/utils/refreshBoard';
-import { refreshTasks } from 'src/utils/RefreshColumns'; // Import the refreshTasks function
+import { renderColumns } from 'src/utils/RenderColumns';
+import { t } from 'src/utils/lang/helper';
+
+type CustomCSSProperties = CSSProperties & {
+	'--column-width': string;
+};
 
 interface ColumnPropsWithSetBoards extends ColumnProps {
-	setBoards: React.Dispatch<React.SetStateAction<any[]>>; // Extend ColumnProps to include setBoards
+	setBoards: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }) => {
-	const [tasks, setTasks] = useState<Task[]>([]);
+const Column: React.FC<ColumnPropsWithSetBoards> = ({
+	app,
+	plugin,
+	columnIndex,
+	activeBoardIndex,
+	colType,
+	data,
+	tasks: externalTasks,
+	allTasks: allTasksExternal
+}) => {
+	// Local tasks state, initially set from external tasks
+	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
+	const [allTasks, setAllTasks] = useState<taskJsonMerged>(allTasksExternal);
+	const globalSettings = plugin.settings.data.globalSettings;
 
-	// Load tasks from tasks.json file
+	// Sync local tasks state with external tasks when they change
 	useEffect(() => {
-		refreshTasks(setTasks, colType, data);
-	}, [colType, data]);
+		setTasks(externalTasks);
+	}, [externalTasks]);
 
+	// Render tasks using the tasks passed from KanbanBoard
+	useEffect(() => {
+		if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
+			renderColumns(plugin, setTasks, activeBoardIndex, colType, data, allTasksExternal);
+		}
+	}, [colType, data, allTasksExternal]);
 
-	const handleCheckboxChange = (updatedTask: Task) => {
-		// Remove task from the current state
+	const handleCheckboxChange = (updatedTask: taskItem) => {
+		const moment = require("moment");
+
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
-		console.log("The task i recieved in Columns.tsx which i have marked completed=True : ", updatedTask);
-		console.log("The tasks which has been filtered : ", updatedTasks);
 		setTasks(updatedTasks); // Update state to remove completed task
 
 		// Check if the task is completed
 		if (updatedTask.completed) {
+			const taskWithCompleted = { ...updatedTask, completed: "" };
 			// Move from Completed to Pending
-			moveFromCompletedToPending(updatedTask);
+			moveFromCompletedToPending(plugin, taskWithCompleted);
+			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		} else {
+			const taskWithCompleted = { ...updatedTask, completed: moment().format(globalSettings?.taskCompletionDateTimePattern), };
 			// Move from Pending to Completed
-			moveFromPendingToCompleted(updatedTask);
+			moveFromPendingToCompleted(plugin, taskWithCompleted);
+			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		}
-
-		// Mark task in file as complete or incomplete
-		markTaskCompleteInFile(updatedTask);
-
-		// Refresh the tasks in the component
-		// refreshTasks(setTasks, colType, data);
-		refreshBoardData(setBoards);
+		// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 	};
 
+	const handleSubTasksChange = (updatedTask: taskItem) => {
+		updateTaskInJson(plugin, updatedTask);
+		updateTaskInFile(plugin, updatedTask, updatedTask);
+	};
 
-	const handleDeleteTask = (task: Task) => {
-		const app = (window as any).app as App;
+	const handleDeleteTask = (app: App, task: taskItem) => {
+		const mssg = t(61);
 		const deleteModal = new DeleteConfirmationModal(app, {
+			app,
+			mssg,
 			onConfirm: () => {
-				deleteTaskFromFile(task);
-				deleteTaskFromJson(task);
+				deleteTaskFromFile(plugin, task);
+				deleteTaskFromJson(plugin, task);
 				// Remove the task from state after deletion
 				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
 			},
@@ -69,249 +93,67 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({ colType, data, setBoards }
 		deleteModal.open();
 	};
 
-
-	const handleEditTask = (task: Task) => {
-		const app = (window as any).app as App;
-		const editModal = new EditTaskModal(app, task, (updatedTask) => {
-			updatedTask.filePath = task.filePath;
-			// Update the task in the file and JSON
-			updateTaskInFile(updatedTask, task);
-			updateTaskInJson(updatedTask);
-
-			// TODO : OPTIMIZATION : Find out whether only body is changed. Because if only body is changed, then there is no need to update the whole board, you can just use the below one line of setTasks and only that specific task component can be updated. And for other filds like, tag or due, the whole board should be changed, since the task compoent has to disappear from one column and appear into another. Or find a  better approach to this.
-			// Refresh tasks state after update
-			// setTasks((prevTasks) => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
-
-			// refreshTasks(setTasks, tag, data);
-			refreshBoardData(setBoards);
-		});
+	const handleEditTask = (task: taskItem) => {
+		const editModal = new AddOrEditTaskModal(
+			app,
+			plugin,
+			(updatedTask) => {
+				updatedTask.filePath = task.filePath;
+				// Update the task in the file and JSON
+				updateTaskInFile(plugin, updatedTask, task);
+				updateTaskInJson(plugin, updatedTask);
+				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
+			},
+			task.filePath,
+			task);
 		editModal.open();
 	};
 
+	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
+	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	return (
-		<div className="TaskBoardColumnsSection">
+		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties}>
 			<div className="taskBoardColumnSecHeader">
-				<div className="columnTitle">{data.name}</div>
-				<button className="columnDragIcon"><RxDragHandleDots2 /></button>
+				<div className="taskBoardColumnSecHeaderTitleSec">
+					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
+					<div className="columnTitle">{data.name}</div>
+				</div>
+				{/* <RxDotsVertical /> */}
 			</div>
-			<div className="tasksContainer">
+			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
-					tasks.map((task, index) => (
-						<TaskItem
-							key={index}
-							task={task}
-							onEdit={() => handleEditTask(task)}
-							onDelete={() => handleDeleteTask(task)}
-							onCheckboxChange={handleCheckboxChange}
-						/>
-					))
+					tasks.map((task, index = task.id) => {
+						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
+							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
+
+						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
+							return (
+								<TaskItem
+									key={index}
+									app={app}
+									plugin={plugin}
+									taskKey={index}
+									task={task}
+									columnIndex={columnIndex}
+									activeBoardSettings={activeBoardSettings}
+									onEdit={() => handleEditTask(task)}
+									onDelete={() => handleDeleteTask(app, task)}
+									onCheckboxChange={() => handleCheckboxChange(task)}
+									onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
+								/>
+							);
+						}
+
+						return null;
+					})
 				) : (
-					<p>No tasks available</p>
+					<p>{t(7)}</p>
 				)}
 			</div>
 		</div>
 	);
+
 };
 
 export default Column;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// /src/components/Column.tsx -------- V2 - WORKING
-
-// import React, { useEffect, useState } from 'react';
-// import TaskItem from './TaskItem';
-// import fs from 'fs';
-// import path from 'path';
-
-// interface ColumnProps {
-// 	tag: string;
-// 	data: {
-// 		collapsed: boolean;
-// 		name: string;
-// 		coltag: string;
-// 		range?: {
-// 			tag: string;
-// 			rangedata: {
-// 				from: number;
-// 				to: number;
-// 			};
-// 		};
-// 		index?: number;
-// 		limit?: number;
-// 	};
-// }
-
-// const Column: React.FC<ColumnProps> = ({ tag, data }) => {
-// 	const [tasks, setTasks] = useState<any[]>([]);
-
-// 	// Load tasks from tasks.json file
-// 	useEffect(() => {
-// 		const loadTasks = async () => {
-
-// 			const basePath = (window as any).app.vault.adapter.basePath;
-// 			const tasksPath = path.join(basePath, '.obsidian', 'plugins', 'Task-Board', 'tasks.json');
-
-// 			try {
-// 				if (fs.existsSync(tasksPath)) {
-// 					const tasksData = fs.readFileSync(tasksPath, 'utf8');
-// 					const allTasks = JSON.parse(tasksData);
-// 					const filteredTasks = filterTasksByColumn(allTasks);
-// 					setTasks(filteredTasks);
-// 				} else {
-// 					console.warn("tasks.json file not found.");
-// 				}
-// 			} catch (error) {
-// 				console.error("Error reading tasks.json:", error);
-// 			}
-// 		};
-
-// 		loadTasks();
-// 	}, [tag, data]);
-
-// 	// Function to filter tasks based on the column's tag and properties
-// 	const filterTasksByColumn = (allTasks: any) => {
-// 		const today = new Date();
-// 		const pendingTasks = allTasks.Pending || [];
-// 		const completedTasks = allTasks.Completed || [];
-// 		let tasksToDisplay: any[] = [];
-
-// 		if (tag === "undated") {
-// 			tasksToDisplay = pendingTasks.filter(task => !task.due);
-// 		} else if (data.range) {
-// 			const { from, to } = data.range.rangedata;
-// 			tasksToDisplay = pendingTasks.filter(task => {
-// 				if (!task.due) return false;
-// 				const dueDate = new Date(task.due);
-// 				const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-// 				if (from < 0 && to < 0) {
-// 					return diffDays < 0;
-// 				} else if (from === 0 && to === 0) {
-// 					return diffDays === 0;
-// 				} else if (from === 1 && to === 1) {
-// 					return diffDays === 1;
-// 				} else if (from === 1 && to === 2) {
-// 					return diffDays === 2;
-// 				}
-
-// 				return false;
-// 			});
-// 		} else if (tag === "untagged") {
-// 			tasksToDisplay = pendingTasks.filter(task => !task.tag);
-// 		} else if (tag === "nameTag") {
-// 			tasksToDisplay = pendingTasks.filter(task => task.tag === data.coltag);
-// 			console.log(task.tag);
-// 		} else if (tag === "otherTag") {
-// 			tasksToDisplay = pendingTasks.filter(task => task.tag && task.tag !== data.coltag);
-// 		} else if (tag === "completed") {
-// 			tasksToDisplay = completedTasks;
-// 		}
-
-// 		return tasksToDisplay;
-// 	};
-
-// 	return (
-// 		<div className="TaskBoardColumnsSection">
-// 			<div className="taskBoardColumnSecHeader">
-// 				<div className="columnTitle">{data.name}</div>
-// 				<div className="columnDragIcon"></div>
-// 			</div>
-// 			<div className="tasksContainer">
-// 				{tasks.length > 0 ? (
-// 					tasks.map((task, index) => <TaskItem key={index} task={task} />)
-// 				) : (
-// 					<p>No tasks available</p>
-// 				)}
-// 			</div>
-// 		</div>
-// 	);
-// };
-
-// export default Column;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // src/components/Column.tsx  -------  Before Adding Logic - WORKING
-// import React from 'react';
-// import TaskItem from './TaskItem';
-// // import "../styles/Column.css"; // CSS file specific to the column styling
-
-// interface ColumnProps {
-// 	tag: string;
-// 	data: {
-// 		collapsed: boolean;
-// 		name: string;
-// 		coltag: string;
-// 		range?: {
-// 			tag: string;
-// 			rangedata: {
-// 				from: number;
-// 				to: number;
-// 			};
-// 		};
-// 		index?: number;
-// 		limit?: number;
-// 	};
-// }
-
-// // Add some dummy tasks to display in the columns
-// const dummyTasks = [
-// 	{ id: 1, title: "Create a Photo with White Background.", dueDate: "Every day", tag: "Urgent", column: "Over Due" },
-// 	{ id: 2, title: "Create Medical Certificate: Format", dueDate: "Tomorrow", tag: "Urgent", column: "Over Due" },
-// 	{ id: 3, title: "Delete the Videos .", dueDate: "29-08-2024", tag: "Urgent", column: "Over Due" },
-// 	{ id: 4, title: "Videos you have downloaded, once you finish them.", dueDate: "29-08-2024", tag: "Urgent", column: "Over Due" },
-// 	{ id: 5, title: "ownloaded, once you finish them.", dueDate: "29-08-2024", tag: "Urgen", column: "Over Due" },
-// 	{ id: 6, title: "Delete the Videos you have downloaded, once you finish them.", dueDate: "29-08-2024", tag: "Urgent", column: "Over Due" },
-// 	{ id: 7, title: "once you finish them.", dueDate: "29-08-2024", tag: "Urgent", column: "Over Due" },
-// ];
-
-// const Column: React.FC<ColumnProps> = ({ tag, data }) => {
-// 	// const tasks = []; // Fetch and map your tasks from the vault
-// 	const tasks = dummyTasks;
-
-// 	// console.log(tag);
-// 	// console.log(data);
-
-// 	return (
-// 		<div className="TaskBoardColumnsSection">
-// 			<div className="taskBoardColumnSecHeader">
-// 				<div className="columnTitle">{data.name}</div>
-// 				<div className="columnDragIcon"></div>
-// 			</div>
-// 			<div className="tasksContainer">
-// 				{tasks.length > 0 ? (
-// 					tasks.map((task, index) => <TaskItem key={index} task={task} />)
-// 				) : (
-// 					<p>No tasks available</p>
-// 				)}
-// 			</div>
-// 		</div>
-// 	);
-// };
-
-// export default Column;

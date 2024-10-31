@@ -1,181 +1,190 @@
-import { Task } from "src/interfaces/Column";
-import fs from "fs";
-import { loadGlobalSettings } from "./SettingsOperations";
-import path from "path";
-import { priorityEmojis } from "src/interfaces/TaskItem";
-import { tasksPath } from "src/interfaces/TaskBoardGlobalValues";
+// /src/utils/TaskItemUtils.ts
 
-// utils/TaskItemUtils.ts
+import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
+import {
+	priorityEmojis,
+	taskItem,
+	tasksJson,
+} from "src/interfaces/TaskItemProps";
+import {
+	readDataOfVaultFiles,
+	writeDataToVaultFiles,
+} from "./MarkdownFileOperations";
 
-export const loadTasksFromJson = (): {
-	allTasksWithStatus: Task[];
-	pendingTasks: Task[];
-	completedTasks: Task[];
-} => {
-	try {
-		if (fs.existsSync(tasksPath)) {
-			const tasksData = fs.readFileSync(tasksPath, "utf8");
-			const allTasks = JSON.parse(tasksData);
+import { App } from "obsidian";
+import TaskBoard from "main";
+import { eventEmitter } from "src/services/EventEmitter";
 
-			const pendingTasks: Task[] = [];
-			const completedTasks: Task[] = [];
+export const taskElementsFormatter = (
+	plugin: TaskBoard,
+	updatedTask: taskItem
+) => {
+	const dayPlannerPlugin =
+		plugin.settings.data.globalSettings.dayPlannerPlugin;
+	const globalSettings = plugin.settings.data.globalSettings;
 
-			// Separate pending tasks
-			for (const [filePath, tasks] of Object.entries(
-				allTasks.Pending || {}
-			)) {
-				tasks.forEach((task: any) =>
-					pendingTasks.push({ ...task, filePath })
-				);
-			}
-
-			// Separate completed tasks
-			for (const [filePath, tasks] of Object.entries(
-				allTasks.Completed || {}
-			)) {
-				tasks.forEach((task: any) =>
-					completedTasks.push({ ...task, filePath })
-				);
-			}
-
-			// Combine both pending and completed tasks
-			const allTasksWithStatus = [...pendingTasks, ...completedTasks];
-			return { allTasksWithStatus, pendingTasks, completedTasks };
+	let dueDateWithFormat = "";
+	let completedWitFormat = "";
+	if (updatedTask.due || updatedTask.completed) {
+		if (globalSettings?.taskCompletionFormat === "1") {
+			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
+			completedWitFormat = updatedTask.completed
+				? ` ✅${updatedTask.completed} `
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "2") {
+			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
+			completedWitFormat = updatedTask.completed
+				? ` ✅ ${updatedTask.completed} `
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "3") {
+			dueDateWithFormat = updatedTask.due
+				? ` [due:: ${updatedTask.due}]`
+				: "";
+			completedWitFormat = updatedTask.completed
+				? ` [completion:: ${updatedTask.completed}] `
+				: "";
 		} else {
-			console.warn("tasks.json file not found.");
-			return {
-				allTasksWithStatus: [],
-				pendingTasks: [],
-				completedTasks: [],
-			};
+			dueDateWithFormat = updatedTask.due
+				? ` @due(${updatedTask.due})`
+				: "";
+			completedWitFormat = updatedTask.completed
+				? ` @completion(${updatedTask.completed}) `
+				: "";
 		}
-	} catch (error) {
-		console.error("Error reading tasks.json:", error);
-		return { allTasksWithStatus: [], pendingTasks: [], completedTasks: [] };
 	}
+
+	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
+	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
+
+	// Combine priority emoji if it exists
+	const priorityWithEmo =
+		updatedTask.priority > 0
+			? priorityEmojis[updatedTask.priority as number]
+			: "";
+
+	// Build the formatted string for the main task
+	let formattedTask = "";
+	if (dayPlannerPlugin) {
+		formattedTask = `${checkBoxStat} ${
+			updatedTask.time ? `${updatedTask.time} ` : ""
+		}${
+			updatedTask.title
+		} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
+			" "
+		)}${completedWitFormat}`;
+	} else {
+		formattedTask = `${checkBoxStat} ${
+			updatedTask.title
+		} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(
+			" "
+		)}${completedWitFormat}`;
+	}
+
+	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+	const bodyLines = updatedTask.body
+		.map((line: string) => `${line}`)
+		.join("\n");
+
+	const completeTask = `${formattedTask}${
+		bodyLines.trim() ? `\n${bodyLines}` : ""
+	}`;
+
+	return completeTask;
 };
 
 // For handleCheckboxChange
 
-export const moveFromPendingToCompleted = (task: Task) => {
-
-	// Toggle the completed state
-	const updatedTask = { ...task, completed: !task.completed };
-
+export const moveFromPendingToCompleted = async (
+	plugin: TaskBoard,
+	task: taskItem
+) => {
 	try {
-		const tasksData = fs.readFileSync(tasksPath, "utf8");
-		const allTasks = JSON.parse(tasksData);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Move task from Pending to Completed
-		if (allTasks.Pending[updatedTask.filePath]) {
-			console.log(
-				"moveFromPendingToCompleted : All tasks inside allTasks.Pending[updatedTask.filePath] : ",
-				allTasks.Pending[updatedTask.filePath]
-			);
-			allTasks.Pending[updatedTask.filePath] = allTasks.Pending[
-				updatedTask.filePath
-			].filter((task: any) => task.id !== updatedTask.id);
-			console.log(
-				"Lets see what is going in allTasks.Pending[updatedTask.filePath] = ",
-				allTasks.Pending[updatedTask.filePath]
-			);
-			if (!allTasks.Completed[updatedTask.filePath]) {
-				allTasks.Completed[updatedTask.filePath] = [];
+		if (allTasks.Pending[task.filePath]) {
+			allTasks.Pending[task.filePath] = allTasks.Pending[
+				task.filePath
+			].filter((t: taskItem) => t.id !== task.id);
+
+			if (!allTasks.Completed[task.filePath]) {
+				allTasks.Completed[task.filePath] = [];
 			}
-			allTasks.Completed[updatedTask.filePath].push(updatedTask);
+			allTasks.Completed[task.filePath].push(task);
 		}
 
 		// Write the updated data back to the JSON file
-		fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
+
+	eventEmitter.emit("REFRESH_COLUMN");
 };
 
-export const moveFromCompletedToPending = (task: Task) => {
-
-	// Toggle the completed state
-	const updatedTask = { ...task, completed: !task.completed };
-
+export const moveFromCompletedToPending = async (
+	plugin: TaskBoard,
+	task: taskItem
+) => {
 	try {
-		const tasksData = fs.readFileSync(tasksPath, "utf8");
-		const allTasks = JSON.parse(tasksData);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Move task from Completed to Pending
-		if (allTasks.Completed[updatedTask.filePath]) {
-			allTasks.Completed[updatedTask.filePath] = allTasks.Completed[
-				updatedTask.filePath
-			].filter((task: any) => task.id !== updatedTask.id);
-			console.log(
-				"Lets see what is going in allTasks.Completed[updatedTask.filePath] = ",
-				allTasks.Completed[updatedTask.filePath]
-			);
-			if (!allTasks.Pending[updatedTask.filePath]) {
-				allTasks.Pending[updatedTask.filePath] = [];
+		if (allTasks.Completed[task.filePath]) {
+			allTasks.Completed[task.filePath] = allTasks.Completed[
+				task.filePath
+			].filter((t: taskItem) => t.id !== task.id);
+
+			if (!allTasks.Pending[task.filePath]) {
+				allTasks.Pending[task.filePath] = [];
 			}
-			allTasks.Pending[updatedTask.filePath].push(updatedTask);
+			allTasks.Pending[task.filePath].push(task);
 		}
 
 		// Write the updated data back to the JSON file
-		fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
-};
 
-export const markTaskCompleteInFile = (task: Task) => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const filePath = path.join(basePath, task.filePath);
-
-	try {
-		const fileContent = fs.readFileSync(filePath, "utf8");
-		let newContent = "";
-
-		if (task.completed) {
-			// Mark the task as incomplete
-			const completedTaskRegex = new RegExp(
-				`^- \\[x\\] ${task.body} \\|.*`,
-				"gm"
-			);
-			newContent = fileContent.replace(completedTaskRegex, (match) =>
-				match.replace("[x]", "[ ]")
-			);
-		} else {
-			// Mark the task as complete
-			const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, "gm");
-			newContent = fileContent.replace(taskRegex, (match) =>
-				match.replace("[ ]", "[x]")
-			);
-		}
-
-		fs.writeFileSync(filePath, newContent);
-	} catch (error) {
-		console.error("Error marking task in file:", error);
-	}
+	eventEmitter.emit("REFRESH_COLUMN");
 };
 
 // For handleDeleteTask
 
-export const deleteTaskFromFile = (task: Task) => {
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const filePath = path.join(basePath, task.filePath);
+export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
+	const filePath = task.filePath;
 
 	try {
-		const fileContent = fs.readFileSync(filePath, "utf8");
-		// Updated regex to match the task body ending with '|'
-		const taskRegex = new RegExp(`^- \\[ \\] ${task.body} \\|.*`, "gm");
+		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		let taskRegex = "";
+		const startRegex = new RegExp(`^- \\[ \\] .*?${task.title}.*$`, "gm");
+		const startIndex = fileContent.search(startRegex);
+
+		if (startIndex !== -1) {
+			const lines = fileContent.substring(startIndex).split("\n");
+			const taskContent = [];
+
+			for (const line of lines) {
+				if (line.trim() === "") {
+					break;
+				}
+				taskContent.push(line);
+			}
+
+			taskRegex = taskContent.join("\n");
+		}
 		const newContent = fileContent.replace(taskRegex, ""); // Remove the matched line from the file
-		fs.writeFileSync(filePath, newContent);
+
+		await writeDataToVaultFiles(plugin, filePath, newContent);
 	} catch (error) {
 		console.error("Error deleting task from file:", error);
 	}
 };
 
-export const deleteTaskFromJson = (task: Task) => {
-
+export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 	try {
-		const tasksData = fs.readFileSync(tasksPath, "utf8");
-		const allTasks = JSON.parse(tasksData);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Remove task from Pending or Completed in tasks.json
 		if (allTasks.Pending[task.filePath]) {
@@ -189,100 +198,80 @@ export const deleteTaskFromJson = (task: Task) => {
 			].filter((t: any) => t.id !== task.id);
 		}
 
-		// Write the updated data back to the JSON file
-		fs.writeFileSync(tasksPath, JSON.stringify(allTasks, null, 2));
+		await writeTasksJsonToSS(plugin, allTasks);
 	} catch (error) {
 		console.error("Error deleting task from tasks.json:", error);
 	}
 };
 
-// For handleEditTask
+// For handleEditTask and for handleSubTasksChange, when task is edited from Modal
 
-export const updateTaskInFile = (updatedTask: Task, oldTask: Task) => {
-	console.log(
-		"updatedTask i am received in Column.tsx file -2 : ",
-		updatedTask
-	);
-	console.log("oldTask i am received in Column.tsx file -2 : ", oldTask);
-	const basePath = (window as any).app.vault.adapter.basePath;
-	const filePath = path.join(basePath, updatedTask.filePath);
-	// console.log("The File Path which needs to be updated : ", filePath);
-	let globalSettings = loadGlobalSettings(); // Load the globalSettings to check dayPlannerPlugin status
-	globalSettings = globalSettings.data.globalSettings;
-	const dayPlannerPlugin = globalSettings?.dayPlannerPlugin;
-	const dueDateWithEmo = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
-	const timeWithEmo = updatedTask.time ? ` ⏰ [${updatedTask.time}]` : "";
+export const updateTaskInFile = async (
+	plugin: TaskBoard,
+	updatedTask: taskItem,
+	oldTask: taskItem
+) => {
+	const filePath = updatedTask.filePath;
 
 	try {
-		const fileContent = fs.readFileSync(filePath, "utf8");
-		const taskRegex = new RegExp(`^- \\[ \\] .*?${oldTask.body}.*$`, "gm");
-		console.log(
-			"The line which i am going to replace, found from file : ",
-			taskRegex
-		);
+		// Read the file content using Obsidian's API
+		const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
-		let newContent = " ";
-		if (dayPlannerPlugin) {
-			newContent = fileContent.replace(
-				taskRegex,
-				`- [ ] ${updatedTask.time ? `${updatedTask.time} ` : ""}${
-					updatedTask.body
-				} |${dueDateWithEmo} ${
-					updatedTask.priority > 0
-						? priorityEmojis[updatedTask.priority]
-						: ""
-				} ${updatedTask.tag}`
-			);
-			console.log(
-				"New content i am writing in the file after Edit Task Modal : ",
-				newContent
-			);
-			console.log(
-				"What the fuck wrong in this, this line should print emoji : ",
-				priorityEmojis[updatedTask.priority]
-			);
-		} else {
-			newContent = fileContent.replace(
-				taskRegex,
-				`- [ ] ${updatedTask.body} |${timeWithEmo}${dueDateWithEmo} ${
-					updatedTask.priority > 0
-						? priorityEmojis[updatedTask.priority]
-						: ""
-				} ${updatedTask.tag}`
-			);
-			console.log(
-				"New content i am writing in the file after Edit Task Modal : ",
-				newContent
-			);
-			console.log(
-				"What the fuck wrong in this, this line should print emoji : ",
-				priorityEmojis[updatedTask.priority]
-			);
+		const completeTask = taskElementsFormatter(plugin, updatedTask);
+		let taskRegex = "";
+
+		const startRegex = new RegExp(
+			`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
+			"gm"
+		);
+		const startIndex = fileContent.search(startRegex);
+
+		if (startIndex !== -1) {
+			const lines = fileContent.substring(startIndex).split("\n");
+			const taskContent = [];
+
+			for (const line of lines) {
+				if (line.trim() === "") {
+					break;
+				}
+				taskContent.push(line);
+			}
+
+			taskRegex = taskContent.join("\n");
 		}
 
-		fs.writeFileSync(filePath, newContent);
+		// Replace the old task with the updated formatted task in the file
+		const newContent = fileContent.replace(taskRegex, completeTask);
+
+		// Write the updated content back to the file using Obsidian's API
+		await writeDataToVaultFiles(plugin, filePath, newContent);
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}
 };
 
-export const updateTaskInJson = (updatedTask: Task) => {
-
+export const updateTaskInJson = async (
+	plugin: TaskBoard,
+	updatedTask: taskItem
+) => {
 	try {
-		const tasksData = fs.readFileSync(tasksPath, "utf8");
-		const allTasks = JSON.parse(tasksData);
-		console.log("The file of Tasks.json which I am updating: ", allTasks);
+		const allTasks = await loadTasksJsonFromSS(plugin);
 
 		// Function to update a task in a given task category (Pending or Completed)
-		const updateTasksInCategory = (taskCategory: any) => {
+		const updateTasksInCategory = (taskCategory: {
+			[filePath: string]: taskItem[];
+		}) => {
 			return Object.entries(taskCategory).reduce(
-				(acc: any, [filePath, tasks]: [string, any[]]) => {
-					acc[filePath] = tasks.map((task: any) =>
+				(
+					acc: { [filePath: string]: taskItem[] },
+					[filePath, tasks]: [string, taskItem[]]
+				) => {
+					acc[filePath] = tasks.map((task: taskItem) =>
 						task.id === updatedTask.id ? updatedTask : task
 					);
 					return acc;
 				},
-				{}
+				{} as { [filePath: string]: taskItem[] } // Set the initial accumulator type
 			);
 		};
 
@@ -290,25 +279,89 @@ export const updateTaskInJson = (updatedTask: Task) => {
 		const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
 		const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
 
-		console.log(
-			"All updated Pending Tasks to be written in Tasks.json: ",
-			updatedPendingTasks
-		);
-		console.log(
-			"All updated Completed Tasks to be written in Tasks.json: ",
-			updatedCompletedTasks
-		);
-
 		// Create the updated data object with both updated Pending and Completed tasks
-		const updatedData = {
+		const updatedData: tasksJson = {
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
 		};
+		// Write the updated data back to the JSON file using the new function
+		await writeTasksJsonToSS(plugin, updatedData);
 
-		// Write the updated data back to the JSON file
-		console.log("The new data to be updated in tasks.json: ", updatedData);
-		fs.writeFileSync(tasksPath, JSON.stringify(updatedData, null, 2));
+		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
-		console.error("Error updating task in tasks.json:", error);
+		console.error(
+			"updateTaskInJson : Error updating task in tasks.json:",
+			error
+		);
+	}
+};
+
+// For Adding New Task from Modal
+
+// Generate a unique ID for each task
+export const generateTaskId = (): number => {
+	const array = new Uint32Array(1);
+	crypto.getRandomValues(array);
+	return array[0];
+};
+
+export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
+	const allTasks = await loadTasksJsonFromSS(plugin);
+
+	const newTaskWithId = {
+		...newTask,
+		id: generateTaskId(),
+		filePath: newTask.filePath,
+		completed: "", // This will be updated when task is marked as complete
+	};
+
+	// Update the task list (assuming it's a file-based task structure)
+	if (!allTasks.Pending[newTask.filePath]) {
+		allTasks.Pending[newTask.filePath] = [];
+	}
+
+	allTasks.Pending[newTask.filePath].push(newTaskWithId);
+
+	await writeTasksJsonToSS(plugin, allTasks);
+
+	eventEmitter.emit("REFRESH_COLUMN");
+};
+
+export const addTaskInActiveEditor = async (
+	app: App,
+	plugin: TaskBoard,
+	newTask: taskItem
+) => {
+	const filePath = newTask.filePath;
+
+	try {
+		const completeTask = taskElementsFormatter(plugin, newTask);
+
+		// Get the active editor and the current cursor position
+		const activeEditor = app.workspace.activeEditor?.editor;
+		if (!activeEditor) {
+			throw new Error(
+				"No active editor found. Please place your cursor in markdown file"
+			);
+		}
+
+		const cursorPosition = activeEditor.getCursor();
+
+		// Read the file content
+		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+
+		// Split file content into an array of lines
+		const fileLines = fileContent.split("\n");
+
+		// Insert the new task at the cursor line position
+		fileLines.splice(cursorPosition.line, 0, completeTask);
+
+		// Join the lines back into a single string
+		const newContent = fileLines.join("\n");
+
+		// Write the updated content back to the file
+		await writeDataToVaultFiles(plugin, filePath, newContent);
+	} catch (error) {
+		console.error("Error updating task in file:", error);
 	}
 };

@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
 		"baseUrl": ".",
-		"jsx": "react",
-		"jsxFactory": "React.createElement",
-		"jsxFragmentFactory": "React.Fragment",
+		"jsx": "react-jsx",
+		// "jsxFactory": "React.createElement",
+		// "jsxFragmentFactory": "React.Fragment",
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"module": "ESNext",
