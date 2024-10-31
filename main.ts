@@ -43,8 +43,8 @@ export default class TaskBoard extends Plugin {
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
-		this.app = app;
 		this.plugin = this;
+		this.app = this.plugin.app;
 		this.settings = DEFAULT_SETTINGS;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
@@ -174,21 +174,20 @@ export default class TaskBoard extends Plugin {
 
 	registerCommands() {
 		this.addCommand({
-			id: "task-board-1",
+			id: "command-1",
 			name: t(131),
 			callback: () => {
-				const app = this.app as App;
-				const activeEditor = app.workspace.activeEditor?.editor;
-				const activeFile = app.workspace.getActiveFile();
+				const activeEditor = this.app.workspace.activeEditor?.editor;
+				const activeFile = this.app.workspace.getActiveFile();
 				if (activeEditor && activeFile) {
-					openAddNewTaskModal(app, this.plugin, activeFile);
+					openAddNewTaskModal(this.app, this.plugin, activeFile);
 				} else {
 					new Notice(t(147));
 				}
 			},
 		});
 		this.addCommand({
-			id: "task-board-2",
+			id: "command-2",
 			name: t(132),
 			callback: () => {
 				this.app.workspace
@@ -197,7 +196,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "task-board-3",
+			id: "command-3",
 			name: t(133),
 			callback: () => {
 				this.app.workspace.getLeaf("window").setViewState({
@@ -208,7 +207,7 @@ export default class TaskBoard extends Plugin {
 		});
 		// // Add a command to Re-Scan the whole Vault
 		// this.addCommand({
-		// 	id: "task-board-6",
+		// 	id: "command-6",
 		// 	name: "Re-Scan Vault",
 		// 	callback: () => {
 		// 		this.scanningVault.scanVaultForTasks();
@@ -217,14 +216,14 @@ export default class TaskBoard extends Plugin {
 
 		// // TODO : Remove this command before publishing, DEV commands
 		// this.addCommand({
-		// 	id: "task-board-4",
+		// 	id: "command-4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
 		// 		writeTasksJsonToDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
-		// 	id: "task-board-5",
+		// 	id: "command-5",
 		// 	name: "DEV : REFRESH_COLUMN",
 		// 	callback: () => {
 		// 		eventEmitter.emit("REFRESH_COLUMN");
