@@ -111,9 +111,9 @@ I always used the [Kanban Plugin](https://github.com/mgmeyers/obsidian-kanban) t
 
 While development I took inspirations from CardBoard and Kanban plugin as well as many feature ideas from [GitHub Project KanBan board](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). I hope I am able to give the best of all this three plugins into one, and will be improving this further.
 
-## Pricing
+## Support
 
-A great effort of work was put into this idea to make it happen. I created the plugin for personal use, but I believe it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider donating for further improvement of this idea.
+A great effort of work has been put into this idea to make it happen. I created the plugin for personal use, but I believed it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider donating for further improvement of this idea.
 
 ## License
 
