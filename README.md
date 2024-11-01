@@ -14,14 +14,14 @@ An Obsidian plugin to view and manage all your tasks, throughout the vault in a 
 
 The main idea behind this plugin is to be able to document all your work from start to end while you are completing the specific task. You will be easily open the specific task without opening the markdown file and add the solution, points, resources you have found about the task and add sub-tasks in it. This feature has been inspired from the [GitHub Projects Board Layout](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). The plan is to replicate whole GitHub Projects feature into Obsidian, to maintain your private personal projects or even create a private collaborative workspace.
 
-#### **How Does it work ?**
+## **How Does it work ?**
 
 - It scans tasks from all the Markdown files from your whole vault and show them on a Kanban type Board.
 - Edit the task directly from the Task Board, without opening the Markdown file.
 - See Real-TIme changes in the parent markdown file.
 - Add task to currently opened files using a pop-up window.
 
-#### **How to start ?**
+## **How to start ?**
 
 **Step 1 :** Install and Enable the plugin.
 
@@ -38,7 +38,7 @@ The main idea behind this plugin is to be able to document all your work from st
 
 ## Basic Information
 
-> This is a basic information, Ill highly recommend to go through the docs to understand the plugin better and to use the Task Board efficiently : [Task Board Documentation](https://tu2-atmanand.github.io/task-board-docs/)
+> This is a basic information, Ill highly recommend to go through the docs to understand the plugin better and to use the Task Board efficiently : [Task Board Documentation](https://tu2-atmanand.github.io/task-board-docs/).
 
 ### Task Formats
 
@@ -58,6 +58,19 @@ If you dont want this plugin to detect your tasks, you are free to use the below
 The task can have metadata like due date, time duration, tags, priority, etc separated by pipe symbol. Additionally, you can add multi-level sub-tasks and body description with images and files with the accepted format as explained in the docs. Following is an example of a task :
 
 ![An Complete task example](./assets/TaskExample.png)
+
+### Adding a Task
+
+There are two way to add/show your task.
+
+**Obvious Method :** Your old way of adding a task, that is directly writing inside the markdow files. After you have written the content of the task switch you focus away from the editor, like click on the Task Board and your task will be directly added in the board. Provided you havent applied any [Scan Filters](https://tu2-atmanand.github.io/task-board-docs/Features/Filters_for_Scanning.html).
+
+![Adding New task using common method](./assets/AddingNewTaskFromFile.gif)
+
+
+**Using Command :** The plugin provides a command to open a `Add New Task` pop-up window to add task and many more functionalities directly using input elements. Assign a shortcut to this even more easier.
+
+![Add New Task Command Pallete](./assets/AddNewTaskCommandPallete.png)
 
 ### Marking as Complete
 
