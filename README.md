@@ -35,7 +35,6 @@ The main idea behind this plugin is to be able to document all your work from st
 
 **Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the Configure Board Settings. Enjoy !
 
----
 
 ## Basic Information
 
@@ -79,7 +78,6 @@ Directly delete unwanted task from the board using the delete Icon. The task wil
 
 Apply Board filters to filter out and see the urgent tasks on the board with ease. Filters for Columns coming soon.
 
----
 
 ## Upcoming Features
 
@@ -91,7 +89,6 @@ Apply Board filters to filter out and see the urgent tasks on the board with eas
 - **New Board Type :** A new type of Board knows as `Markdown` will be added, which will work with a single markdown file, similar to the Kanban Plugin.
 - **Comments and Activity :** From the Task Popup window, you can add comments to the task, which will help you to document everything you were doing while working on this task, similar to Github Projects Kanban boards.
 
----
 
 ## How to Contribute
 
@@ -103,7 +100,6 @@ You can contribute to this project by :
 
 **3. Contribute to the Development of the plugin Code :** : [How to join the plugin developme](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToJoinDevelopment.html).
 
----
 
 ## Motivation for the Project
 
@@ -111,9 +107,13 @@ I always used the [Kanban Plugin](https://github.com/mgmeyers/obsidian-kanban) t
 
 While development I took inspirations from CardBoard and Kanban plugin as well as many feature ideas from [GitHub Project KanBan board](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). I hope I am able to give the best of all this three plugins into one, and will be improving this further.
 
-## Pricing
+## Support
 
-A great effort of work was put into this idea to make it happen. I created the plugin for personal use, but I believe it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider spornsoring for further improvement of this idea.
+A great effort of work has been put into this idea to make it happen. I created the plugin for personal use, but I believed it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider donating for further improvement of this idea.
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/tu2-atmanand?label=Sponsor&logo=GitHub%20Sponsors&style=for-the-badge)](https://github.com/sponsors/tu2-atmanand)
+
+<a href="https://www.buymeacoffee.com/tu2_atmanand"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
 
 ## License
 
