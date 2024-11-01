@@ -97,9 +97,9 @@ Apply Board filters to filter out and see the urgent tasks on the board with eas
 
 You can contribute to this project by :
 
-**1. Requesting a new feature or suggesting a change :** [How to create a new request](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToCreateRequest.html).
+**1. Requesting a new feature, suggesting an improvement or reporting a Bug :** [How to create a new request](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToCreateRequest.html).
 
-**2. Improving the old translated languages or add a new language :** [How to Contribute for Language Translation](https://tu2-atmanand.github.io/task-board-docs/Advanced/Contribution_For_Languages.html).
+**2. Improving the translated languages or add a new language :** [How to Contribute for Language Translation](https://tu2-atmanand.github.io/task-board-docs/Advanced/Contribution_For_Languages.html).
 
 **3. Contribute to the Development of the plugin Code :** : [How to join the plugin developme](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToJoinDevelopment.html).
 
@@ -113,7 +113,7 @@ While development I took inspirations from CardBoard and Kanban plugin as well a
 
 ## Pricing
 
-A great effort of work was put into this idea to make it happen. I created the plugin for personal use, but I believe it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider donating for further improvement of this idea.
+A great effort of work was put into this idea to make it happen. I created the plugin for personal use, but I believe it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider spornsoring for further improvement of this idea.
 
 ## License
 
