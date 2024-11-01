@@ -35,7 +35,6 @@ The main idea behind this plugin is to be able to document all your work from st
 
 **Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the Configure Board Settings. Enjoy !
 
----
 
 ## Basic Information
 
@@ -79,7 +78,6 @@ Directly delete unwanted task from the board using the delete Icon. The task wil
 
 Apply Board filters to filter out and see the urgent tasks on the board with ease. Filters for Columns coming soon.
 
----
 
 ## Upcoming Features
 
@@ -91,7 +89,6 @@ Apply Board filters to filter out and see the urgent tasks on the board with eas
 - **New Board Type :** A new type of Board knows as `Markdown` will be added, which will work with a single markdown file, similar to the Kanban Plugin.
 - **Comments and Activity :** From the Task Popup window, you can add comments to the task, which will help you to document everything you were doing while working on this task, similar to Github Projects Kanban boards.
 
----
 
 ## How to Contribute
 
@@ -103,7 +100,6 @@ You can contribute to this project by :
 
 **3. Contribute to the Development of the plugin Code :** : [How to join the plugin developme](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToJoinDevelopment.html).
 
----
 
 ## Motivation for the Project
 
