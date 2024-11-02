@@ -47,20 +47,185 @@ export interface PluginDataJson {
 export const DEFAULT_SETTINGS: PluginDataJson = {
 	version: "",
 	data: {
-		boardConfigs: [],
+		boardConfigs: [
+			{
+				columns: [
+					{
+						colType: "undated",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Undated Tasks",
+							index: 5,
+						},
+					},
+					{
+						colType: "dated",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Over Due",
+							index: 1,
+							range: {
+								tag: "before",
+								rangedata: {
+									from: -1,
+									to: 0,
+								},
+							},
+						},
+					},
+					{
+						colType: "dated",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Today",
+							index: 2,
+							range: {
+								tag: "between",
+								rangedata: {
+									from: 0,
+									to: 0,
+								},
+							},
+						},
+					},
+					{
+						colType: "dated",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Tomorrow",
+							index: 3,
+							range: {
+								tag: "between",
+								rangedata: {
+									from: 1,
+									to: 1,
+								},
+							},
+						},
+					},
+					{
+						colType: "dated",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Future",
+							index: 4,
+							range: {
+								tag: "after",
+								rangedata: {
+									from: 2,
+									to: 0,
+								},
+							},
+						},
+					},
+					{
+						colType: "completed",
+						active: true,
+						collapsed: false,
+						data: {
+							limit: 20,
+							name: "Completed",
+							index: 6,
+						},
+					},
+				],
+				filters: [],
+				filterPolarity: "0",
+				filterScope: "Both",
+				name: "Time Based Workflow",
+				index: 1,
+				showColumnTags: false,
+				showFilteredTags: true,
+			},
+			{
+				columns: [
+					{
+						colType: "untagged",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Backlog",
+							index: 1,
+						},
+					},
+					{
+						colType: "namedTag",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Can Start working",
+							index: 2,
+							coltag: "pending",
+						},
+					},
+					{
+						colType: "namedTag",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "In Progress",
+							index: 3,
+							coltag: "working",
+						},
+					},
+					{
+						colType: "namedTag",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Testing",
+							index: 4,
+							coltag: "Test",
+						},
+					},
+					{
+						colType: "namedTag",
+						active: true,
+						collapsed: false,
+						data: {
+							name: "Done",
+							index: 5,
+							coltag: "done",
+						},
+					},
+					{
+						colType: "Completed",
+						active: true,
+						collapsed: false,
+						data: {
+							index: 7,
+							limit: 10,
+							name: "Completed",
+						},
+					},
+				],
+				filters: [],
+				filterPolarity: "0",
+				filterScope: "Both",
+				name: "Tag Based Workflow",
+				index: 2,
+				showColumnTags: false,
+				showFilteredTags: true,
+			},
+		],
 		globalSettings: {
 			lang: "en",
 			scanFilters: {
 				files: {
-					polarity: 0,
+					polarity: 3,
 					values: [],
 				},
 				folders: {
-					polarity: 0,
+					polarity: 3,
 					values: [],
 				},
 				tags: {
-					polarity: 0,
+					polarity: 3,
 					values: [],
 				},
 			},
