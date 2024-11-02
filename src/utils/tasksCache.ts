@@ -60,7 +60,6 @@ export const writeTasksJsonToDisk = async (
 		}
 	} catch (error) {
 		console.warn("Error writing tasks.json to disk:", error);
-		throw error;
 	}
 };
 
