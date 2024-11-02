@@ -10,10 +10,10 @@
     <a href="https://github.com/tu2-atmanand/Task-Board/contributors"><img src="https://img.shields.io/github/contributors/tu2-atmanand/Task-Board?colorA=363a4f&colorB=08b94e&style=for-the-badge" alt="List of contributors"></a>
     <br/>
 	<a href="https://obsidian.md/plugins?id=task-board"><img src="https://img.shields.io/endpoint?url=https://scambier.xyz/obsidian-endpoints/task-board.json&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
+<!-- 	<a href=""><img src="https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22Task-Board%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json"></a> -->
+	<a href="[https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=flat-square](https://img.shields.io/github/v/release/tu2-atmanand/Task-Board)"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=for-the-badge" alt="">
     <a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
-	<br/>
-	<a href="https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=flat-square"><img src="https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=flat-square" alt="GitHub release"></a>
-	<a href=""><img src="https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22Task-Board%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json"></a>
+</a>
 </p>
 <br/>
 
