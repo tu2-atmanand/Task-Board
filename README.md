@@ -1,14 +1,25 @@
-# Task Board
-
-![License](https://img.shields.io/github/license/tu2-atmanand/Task-Board)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=flat-square)
-![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22Task-Board%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
-
-> Inspired from [CardBoard Plugin](https://github.com/roovo/obsidian-card-board) by [roovo](https://github.com/roovo).
-
-**"Document your progress while completing your tasks"**
+<p align="center">
+	<h1 align="center">Task Board</h1>
+	<h3 align="center"><b>"Document your progress while completing your tasks"</b></h5>
+</p>
+<br/>
+<br/>
+<p align="center">
+    <a href="https://github.com/tu2-atmanand/Task-Board/stargazers"><img src="https://img.shields.io/github/stars/tu2-atmanand/Task-Board?colorA=363a4f&colorB=e0ac00&style=for-the-badge" alt="GitHub star count"></a>
+    <a href="https://github.com/tu2-atmanand/Task-Board/issues"><img src="https://img.shields.io/github/issues/tu2-atmanand/Task-Board?colorA=363a4f&colorB=e93147&style=for-the-badge" alt="Open issues on GitHub"></a>
+    <a href="https://github.com/tu2-atmanand/Task-Board/contributors"><img src="https://img.shields.io/github/contributors/tu2-atmanand/Task-Board?colorA=363a4f&colorB=08b94e&style=for-the-badge" alt="List of contributors"></a>
+    <br/>
+	<a href="https://obsidian.md/plugins?id=task-board"><img src="https://img.shields.io/endpoint?url=https://scambier.xyz/obsidian-endpoints/task-board.json&style=for-the-badge&colorA=363a4f&colorB=d53984"/></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=GPL-3.0&colorA=363a4f&colorB=b7bdf8" alt="GPL-3.0 license"/></a>
+	<br/>
+	<a href="https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=flat-square"><img src="https://img.shields.io/github/v/release/tu2-atmanand/Task-Board?style=flat-square" alt="GitHub release"></a>
+	<a href=""><img src="https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22Task-Board%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json"></a>
+</p>
+<br/>
 
 An Obsidian plugin to view and manage all your tasks, throughout the vault in a much more efficient Kanban Board format.
+
+> Inspired from [CardBoard Plugin](https://github.com/roovo/obsidian-card-board) by [roovo](https://github.com/roovo).
 
 ![Task Board Thumbnail](./assets/TaskBoardThumbnail.png)
 
