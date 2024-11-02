@@ -85,7 +85,7 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 					const descElement = taskRendererRef.current[uniqueKey];
 
 					if (descElement) {
-						descElement.innerHTML = '';
+						descElement.empty();
 						// Render task description using MarkdownUIRenderer
 						MarkdownUIRenderer.renderTaskDisc(
 							app,

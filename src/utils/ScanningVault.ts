@@ -1,11 +1,11 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile } from "obsidian";
+import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
 import {
-	loadTasksJsonFromSS,
-	writeTasksJsonToSS,
-} from "./tasksCache";
-import { scanFilterForFilesNFolders, scanFilterForTags } from "./FiltersVerifier";
+	scanFilterForFilesNFolders,
+	scanFilterForTags,
+} from "./FiltersVerifier";
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -100,7 +100,7 @@ export class ScanningVault {
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
-	async updateTasksFromFiles(files: TFile[]) {
+	async updateTasksFromFiles(files: (TFile | null)[]) {
 		const moment = require("moment");
 
 		// Load the existing tasks from tasks.json once
@@ -109,78 +109,84 @@ export class ScanningVault {
 			this.plugin.settings.data.globalSettings.scanFilters;
 
 		for (const file of files) {
-			const fileNameWithPath = file.path;
-			const fileContent = await this.app.vault.read(file);
-			const lines = fileContent.split("\n");
-			const newPendingTasks: any[] = [];
-			const newCompletedTasks: any[] = [];
+			if (file !== null) {
+				const fileNameWithPath = file.path;
+				const fileContent = await this.app.vault.read(file);
+				const lines = fileContent.split("\n");
+				const newPendingTasks: any[] = [];
+				const newCompletedTasks: any[] = [];
 
-			for (let i = 0; i < lines.length; i++) {
-				const line = lines[i];
-				if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
-					const tags = extractTags(line);
-					if (scanFilterForTags(tags, scanFilters)) {
-						this.TaskDetected =
-							line.startsWith("- [x]") ||
-							line.startsWith("- [ ]");
-						const isCompleted = line.startsWith("- [x]");
-						const title = extractTitle(line);
-						const time = extractTime(line);
-						const priority = extractPriority(line);
-						const completionDate = extractCompletionDate(line);
-						const body = extractBody(lines, i + 1);
-						let due = extractDueDate(line);
-						if (
-							!due &&
-							this.plugin.settings.data.globalSettings
-								.dailyNotesPluginComp
-						) {
-							const dueFormat =
+				for (let i = 0; i < lines.length; i++) {
+					const line = lines[i];
+					if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+						const tags = extractTags(line);
+						if (scanFilterForTags(tags, scanFilters)) {
+							this.TaskDetected =
+								line.startsWith("- [x]") ||
+								line.startsWith("- [ ]");
+							const isCompleted = line.startsWith("- [x]");
+							const title = extractTitle(line);
+							const time = extractTime(line);
+							const priority = extractPriority(line);
+							const completionDate = extractCompletionDate(line);
+							const body = extractBody(lines, i + 1);
+							let due = extractDueDate(line);
+							if (
+								!due &&
 								this.plugin.settings.data.globalSettings
-									.dueDateFormat;
-							const basename = file.basename;
+									.dailyNotesPluginComp
+							) {
+								const dueFormat =
+									this.plugin.settings.data.globalSettings
+										.dueDateFormat;
+								const basename = file.basename;
 
-							// Check if the basename matches the dueFormat using moment
-							if (moment(basename, dueFormat, true).isValid()) {
-								due = basename; // If the basename matches the dueFormat, assign it to due
-							} else {
-								due = ""; // If not, assign an empty string
+								// Check if the basename matches the dueFormat using moment
+								if (
+									moment(basename, dueFormat, true).isValid()
+								) {
+									due = basename; // If the basename matches the dueFormat, assign it to due
+								} else {
+									due = ""; // If not, assign an empty string
+								}
 							}
-						}
 
-						const task = {
-							id: this.generateTaskId(),
-							title,
-							body,
-							time,
-							due,
-							tags,
-							priority,
-							filePath: fileNameWithPath,
-							completed: completionDate,
-						};
+							const task = {
+								id: this.generateTaskId(),
+								title,
+								body,
+								time,
+								due,
+								tags,
+								priority,
+								filePath: fileNameWithPath,
+								completed: completionDate,
+							};
 
-						if (isCompleted) {
-							newCompletedTasks.push(task);
+							if (isCompleted) {
+								newCompletedTasks.push(task);
+							} else {
+								newPendingTasks.push(task);
+							}
 						} else {
-							newPendingTasks.push(task);
+							// console.log("The tasks is not allowed...");
 						}
-					} else {
-						// console.log("The tasks is not allowed...");
 					}
 				}
+
+				// Only replace the tasks for the specific file
+				this.tasks.Pending = {
+					...oldTasks.Pending, // Keep the existing tasks for other files
+					[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
+				};
+
+				this.tasks.Completed = {
+					...oldTasks.Completed, // Keep the existing tasks for other files
+					[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
+				};
+			} else {
+				console.warn("File is not valid...");
 			}
-
-			// Only replace the tasks for the specific file
-			this.tasks.Pending = {
-				...oldTasks.Pending, // Keep the existing tasks for other files
-				[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
-			};
-
-			this.tasks.Completed = {
-				...oldTasks.Completed, // Keep the existing tasks for other files
-				[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
-			};
 		}
 
 		this.saveTasksToFile();

@@ -1,8 +1,7 @@
 <p align="center">
-	<h1 align="center">Task Board</h1>
-	<h3 align="center"><b>"Document your progress while completing your tasks"</b></h5>
+	<h1 align="center"><b>Task Board</b></h1>
+	<h3 align="center"><b>"Document your progress while completing your tasks"</b></h3>
 </p>
-<br/>
 <br/>
 <p align="center">
     <a href="https://github.com/tu2-atmanand/Task-Board/stargazers"><img src="https://img.shields.io/github/stars/tu2-atmanand/Task-Board?colorA=363a4f&colorB=e0ac00&style=for-the-badge" alt="GitHub star count"></a>
@@ -25,19 +24,19 @@ An Obsidian plugin to view and manage all your tasks, throughout the vault in a 
 
 The main idea behind this plugin is to be able to document all your work from start to end while you are completing the specific task. You will be easily open the specific task without opening the markdown file and add the solution, points, resources you have found about the task and add sub-tasks in it. This feature has been inspired from the [GitHub Projects Board Layout](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). The plan is to replicate whole GitHub Projects feature into Obsidian, to maintain your private personal projects or even create a private collaborative workspace.
 
-## Documentation
+## **Documentation**
 
 This readme will only provide a basic information, Ill highly recommend to go through the docs to understand the plugin better and to use the Task Board efficiently : [Task Board Documentation](https://tu2-atmanand.github.io/task-board-docs/).
 
 
-## **How Does it work ?**
+## How Does it work ?
 
 - It scans tasks from all the Markdown files from your whole vault and show them on a Kanban type Board.
 - Edit the task directly from the Task Board, without opening the Markdown file.
 - See Real-TIme changes in the parent markdown file.
 - Add task to currently opened files using a pop-up window.
 
-## **How to start ?**
+## How to start ?
 
 **Step 1 :** Install and Enable the plugin.
 

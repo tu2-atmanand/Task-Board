@@ -84,7 +84,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const element = subtaskTextRefs.current[uniqueKey];
 
 			if (element) {
-				element.innerHTML = ''; // Clear previous content
+				element.empty(); // Clear previous content
 
 				const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
@@ -109,7 +109,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const descElement = taskItemBodyDescriptionRenderer.current[uniqueKey];
 
 			if (descElement) {
-				descElement.innerHTML = '';
+				descElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
 					app,
@@ -131,7 +131,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement) {
-				titleElement.innerHTML = '';
+				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
 					app,

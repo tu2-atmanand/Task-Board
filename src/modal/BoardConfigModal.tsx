@@ -208,7 +208,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (globalSettingsHTMLSection.current) {
 			// Cleanup global settings UI
 			settingManager.cleanUp();
-			globalSettingsHTMLSection.current.innerHTML = '';
+			globalSettingsHTMLSection.current.empty();
 		}
 
 		const board = localBoards[boardIndex];

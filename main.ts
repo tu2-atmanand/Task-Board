@@ -114,7 +114,7 @@ export default class TaskBoard extends Plugin {
 	onunload() {
 		console.log("TaskBoard : unloading plugin...");
 		onUnloadSave(this.plugin);
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
+		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
 	async loadSettings() {
@@ -174,7 +174,7 @@ export default class TaskBoard extends Plugin {
 
 	registerCommands() {
 		this.addCommand({
-			id: "command-1",
+			id: "1",
 			name: t(131),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
@@ -187,7 +187,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "command-2",
+			id: "2",
 			name: t(132),
 			callback: () => {
 				this.app.workspace
@@ -196,7 +196,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "command-3",
+			id: "3",
 			name: t(133),
 			callback: () => {
 				this.app.workspace.getLeaf("window").setViewState({
@@ -207,7 +207,7 @@ export default class TaskBoard extends Plugin {
 		});
 		// // Add a command to Re-Scan the whole Vault
 		// this.addCommand({
-		// 	id: "command-6",
+		// 	id: "6",
 		// 	name: "Re-Scan Vault",
 		// 	callback: () => {
 		// 		this.scanningVault.scanVaultForTasks();
@@ -216,14 +216,14 @@ export default class TaskBoard extends Plugin {
 
 		// // TODO : Remove this command before publishing, DEV commands
 		// this.addCommand({
-		// 	id: "command-4",
+		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
 		// 		writeTasksJsonToDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
-		// 	id: "command-5",
+		// 	id: "5",
 		// 	name: "DEV : REFRESH_COLUMN",
 		// 	callback: () => {
 		// 		eventEmitter.emit("REFRESH_COLUMN");

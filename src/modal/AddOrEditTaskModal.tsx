@@ -149,7 +149,7 @@ const EditTaskContent: React.FC<{
 		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
 		if (previewContainerRef.current) {
 			// Clear previous content before rendering new markdown
-			previewContainerRef.current.innerHTML = '';
+			previewContainerRef.current.empty();
 
 			MarkdownUIRenderer.renderTaskDisc(
 				app,
