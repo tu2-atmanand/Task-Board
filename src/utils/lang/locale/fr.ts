@@ -96,7 +96,7 @@ const fr = {
   95: "Ajouter automatiquement une date d'échéance aux tâches",
   96: "Lorsque cette option est activée, si vous ajoutez une tâche à l'aide de la fenêtre contextuelle Ajouter une nouvelle tâche, la date du jour sera ajoutée comme date d'échéance, si la valeur n'est pas saisie.",
   97: "Analyse automatique du coffre-fort au démarrage d'Obsidian",
-  98: "N'utilisez cette fonctionnalité que si vos tâches ne sont pas détectées. En général, toutes vos tâches nouvellement ajoutées/modifiées seront détectées directement.",
+  98: "N'utilisez cette fonctionnalité que si vous modifiez les fichiers du coffre-fort en dehors d'Obsidian. En général, toutes vos tâches nouvellement ajoutées/modifiées seront détectées automatiquement.",
   99: "Si votre coffre-fort contient de nombreux fichiers avec des données volumineuses, cela peut affecter le temps de démarrage d'Obsidian.",
   100: "Paramètres de compatibilité",
   101: "compatibilité des plugins",

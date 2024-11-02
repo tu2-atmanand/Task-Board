@@ -96,7 +96,7 @@ const nl = {
   95: "Automatisch einddatum toevoegen aan taken",
   96: "Als deze optie is ingeschakeld en u een taak toevoegt via het pop-upvenster Nieuwe taak toevoegen, wordt de datum van vandaag toegevoegd als Vervaldatum, tenzij er een waarde is ingevoerd.",
   97: "Automatisch de kluis scannen bij het opstarten van Obsidian",
-  98: "Gebruik deze functie alleen als uw taken niet worden gedetecteerd. Normaal gesproken worden al uw nieuw toegevoegde/bewerkte taken direct gedetecteerd.",
+  98: "Gebruik deze functie alleen als u de kluisbestanden buiten Obsidian bewerkt. Normaal gesproken worden al uw nieuw toegevoegde/bewerkte taken automatisch gedetecteerd.",
   99: "Als uw kluis veel bestanden met enorme hoeveelheden gegevens bevat, kan dit van invloed zijn op de opstarttijd van Obsidian.",
   100: "Compatibiliteitsinstellingen",
   101: "plugin-compatibiliteit",

@@ -96,7 +96,7 @@ const sq = {
   95: "Shtoni automatikisht datën e duhur te Tasks",
   96: "Kur aktivizohet, nëse shtoni një detyrë duke përdorur dritaren kërcyese",
   97: "Skanoni automatikisht kasafortën në fillimin e Obsidianit",
-  98: "Përdoreni këtë veçori vetëm nëse detyrat tuaja nuk zbulohen. Zakonisht të gjitha detyrat tuaja të reja të shtuara/redaktuara do të zbulohen drejtpërdrejt.",
+  98: "Përdoreni këtë veçori vetëm nëse redaktoni skedarët e kasafortës jashtë Obsidian. Zakonisht të gjitha detyrat tuaja të reja të shtuara/redaktuara do të zbulohen automatikisht.",
   99: "Nëse kasaforta juaj përmban shumë skedarë me të dhëna të mëdha, kjo mund të ndikojë në kohën e fillimit të Obsidian.",
   100: "Cilësimet e përputhshmërisë",
   101: "përputhshmëria e shtojcave",

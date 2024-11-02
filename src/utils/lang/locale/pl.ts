@@ -96,7 +96,7 @@ const pl = {
   95: "Automatyczne dodawanie daty wykonania zadań",
   96: "Po włączeniu tej opcji i dodaniu zadania za pomocą okna podręcznego Dodaj nowe zadanie, jako termin wykonania zostanie dodana bieżąca data, jeśli wartość nie zostanie wprowadzona.",
   97: "Automatyczne skanowanie skarbca podczas uruchamiania Obsidian",
-  98: "Używaj tej funkcji tylko wtedy, gdy Twoje zadania nie są wykrywane. Zazwyczaj wszystkie nowo dodane/edytowane zadania będą wykrywane bezpośrednio.",
+  98: "Używaj tej funkcji tylko wtedy, gdy edytujesz pliki vault poza Obsidian. Zazwyczaj wszystkie nowo dodane/edytowane zadania zostaną wykryte automatycznie.",
   99: "Jeśli w Twoim sejfie znajduje się wiele plików zawierających ogromne ilości danych, może to mieć wpływ na czas uruchamiania Obsidian.",
   100: "Ustawienia zgodności",
   101: "zgodność wtyczek",

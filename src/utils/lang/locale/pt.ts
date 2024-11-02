@@ -96,7 +96,7 @@ const pt = {
   95: "Adicionar data de vencimento automaticamente às tarefas",
   96: "Quando ativado, se você adicionar uma tarefa usando a janela pop-up Adicionar nova tarefa, a data de hoje será adicionada como Data de vencimento, se o valor não for inserido.",
   97: "Auto Scan do Vault na inicialização do Obsidian",
-  98: "Use este recurso somente se suas tarefas não estiverem sendo detectadas. Normalmente, todas as suas tarefas recém-adicionadas/editadas serão detectadas diretamente.",
+  98: "Use este recurso somente se você editar os arquivos do vault fora do Obsidian. Normalmente, todas as suas tarefas recém-adicionadas/editadas serão detectadas automaticamente.",
   99: "Se o seu cofre contiver muitos arquivos com dados enormes, isso pode afetar o tempo de inicialização do Obsidian.",
   100: "Configurações de compatibilidade",
   101: "compatibilidade de plugins",

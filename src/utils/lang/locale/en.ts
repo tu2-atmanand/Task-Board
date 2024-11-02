@@ -96,7 +96,7 @@ const en: Lang = {
 	95: "Auto add due date to tasks",
 	96: "When enabled, if you add a task using the add new task pop-up window, then today's date will be added as due date, if the value is not entered.",
 	97: "Auto-scan the vault on Obsidian start-up",
-	98: "Only use this feature if your tasks are not getting detected. Usually all your newly added/edited tasks will be detected directly.",
+	98: "Only use this feature if you edit the vault files outside Obsidian. Usually all your newly added/edited tasks will be detected automatically.",
 	99: "If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.",
 	100: "Compatibility for other plugins",
 	101: "plugin compatibility",

@@ -96,7 +96,7 @@ const it = {
   95: "Aggiungi automaticamente la data di scadenza alle attività",
   96: "Se abilitata, se si aggiunge un'attività utilizzando la finestra pop-up Aggiungi nuova attività, la data odierna verrà aggiunta come Data di scadenza, se il valore non viene immesso.",
   97: "Scansione automatica del Vault all'avvio di Obsidian",
-  98: "Utilizza questa funzionalità solo se i tuoi task non vengono rilevati. Di solito tutti i task appena aggiunti/modificati vengono rilevati direttamente.",
+  98: "Utilizza questa funzionalità solo se modifichi i file del vault al di fuori di Obsidian. Solitamente tutte le tue attività aggiunte/modificate di recente saranno rilevate automaticamente.",
   99: "Se il tuo vault contiene molti file con dati di grandi dimensioni, ciò potrebbe influire sul tempo di avvio di Obsidian.",
   100: "Impostazioni di compatibilità",
   101: "compatibilità dei plugin",

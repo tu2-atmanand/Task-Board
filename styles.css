@@ -860,9 +860,9 @@
 
 /* src/views/TaskBoardSettingTab.ts */
 
-.TaskBoardSettingTab {
-	/* max-width: fit-content; */
-}
+/* .TaskBoardSettingTab {
+	max-width: fit-content;
+} */
 
 .TaskBoardSettingConstructUI {
 	margin-bottom: 5px;

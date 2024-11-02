@@ -96,7 +96,7 @@ const no = {
   95: "Legg automatisk til forfallsdato i oppgaver",
   96: "Når aktivert, hvis du legger til en oppgave ved å bruke popup-vinduet Legg til ny oppgave, vil dagens dato bli lagt til som forfallsdato, hvis verdien ikke er angitt.",
   97: "Skann automatisk hvelvet ved oppstart av Obsidian",
-  98: "Bruk bare denne funksjonen hvis oppgavene dine ikke blir oppdaget. Vanligvis vil alle dine nylig lagt til/redigerte oppgaver bli oppdaget direkte.",
+  98: "Bruk kun denne funksjonen hvis du redigerer hvelvfilene utenfor Obsidian. Vanligvis vil alle dine nylig lagt til/redigerte oppgaver bli oppdaget automatisk.",
   99: "Hvis hvelvet ditt inneholder mange filer med enorme data, kan dette påvirke oppstartstiden til Obsidian.",
   100: "Kompatibilitetsinnstillinger",
   101: "plugin-kompatibilitet",

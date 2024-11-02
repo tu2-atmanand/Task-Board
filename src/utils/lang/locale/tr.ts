@@ -96,7 +96,7 @@ const tr = {
   95: "Görevlere Son Tarih Otomatik Ekleme",
   96: "Etkinleştirildiğinde, Yeni Görev Ekle açılır penceresini kullanarak bir görev eklerseniz, değer girilmemişse, bugünün tarihi Son Tarih olarak eklenecektir.",
   97: "Obsidian Başlatmada Kasayı Otomatik Tara",
-  98: "Bu özelliği yalnızca görevleriniz algılanmıyorsa kullanın. Genellikle yeni eklediğiniz/düzenlediğiniz tüm görevler doğrudan algılanır.",
+  98: "Bu özelliği yalnızca kasa dosyalarını Obsidian dışında düzenlerseniz kullanın. Genellikle yeni eklediğiniz/düzenlediğiniz tüm görevler otomatik olarak algılanır.",
   99: "Eğer kasanız çok sayıda büyük veri içeren dosyalar içeriyorsa, bu durum Obsidian'ın başlatma süresini etkileyebilir.",
   100: "Uyumluluk Ayarları",
   101: "eklenti uyumluluğu",

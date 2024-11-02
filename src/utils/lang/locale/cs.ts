@@ -96,7 +96,7 @@ const cs = {
   95: "Automatické přidání termínu splnění do úkolů",
   96: "Pokud je tato možnost povolena, přidáte-li úkol pomocí vyskakovacího okna Přidat nový úkol, bude jako datum splatnosti přidáno dnešní datum, pokud hodnota není zadána.",
   97: "Automatické skenování trezoru při spuštění Obsidian",
-  98: "Tuto funkci použijte pouze v případě, že vaše úkoly nejsou detekovány. Obvykle budou všechny vaše nově přidané/upravené úkoly detekovány přímo.",
+  98: "Tuto funkci použijte, pouze pokud upravujete soubory vaultu mimo Obsidian. Obvykle budou všechny vaše nově přidané/upravené úkoly detekovány automaticky.",
   99: "Pokud váš vault obsahuje mnoho souborů s velkými daty, může to ovlivnit dobu spuštění Obsidian.",
   100: "Nastavení kompatibility",
   101: "kompatibilita pluginu",

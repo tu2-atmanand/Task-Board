@@ -96,7 +96,7 @@ const da = {
   95: "Tilføj automatisk forfaldsdato til opgaver",
   96: "Når aktiveret, hvis du tilføjer en opgave ved hjælp af pop-up-vinduet Tilføj ny opgave, vil dagens dato blive tilføjet som forfaldsdato, hvis værdien ikke er indtastet.",
   97: "Scan automatisk boksen ved opstart af Obsidian",
-  98: "Brug kun denne funktion, hvis dine opgaver ikke bliver opdaget. Normalt vil alle dine nyligt tilføjede/redigerede opgaver blive opdaget direkte.",
+  98: "Brug kun denne funktion, hvis du redigerer vault-filerne uden for Obsidian. Normalt vil alle dine nyligt tilføjede/redigerede opgaver blive registreret automatisk.",
   99: "Hvis din boks indeholder mange filer med enorme data, kan dette påvirke opstartstiden for Obsidian.",
   100: "Kompatibilitetsindstillinger",
   101: "plugin kompatibilitet",

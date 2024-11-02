@@ -96,7 +96,7 @@ const de = {
   95: "Fälligkeitsdatum automatisch zu Aufgaben hinzufügen",
   96: "Wenn diese Option aktiviert ist und Sie über das Popup-Fenster „Neue Aufgabe hinzufügen“ eine Aufgabe hinzufügen, wird das heutige Datum als Fälligkeitsdatum hinzugefügt, sofern kein Wert eingegeben wird.",
   97: "Automatisches Scannen des Tresors beim Start von Obsidian",
-  98: "Verwenden Sie diese Funktion nur, wenn Ihre Aufgaben nicht erkannt werden. Normalerweise werden alle Ihre neu hinzugefügten/bearbeiteten Aufgaben direkt erkannt.",
+  98: "Verwenden Sie diese Funktion nur, wenn Sie die Tresordateien außerhalb von Obsidian bearbeiten. Normalerweise werden alle Ihre neu hinzugefügten/bearbeiteten Aufgaben automatisch erkannt.",
   99: "Wenn Ihr Tresor viele Dateien mit großem Datenvolumen enthält, kann dies die Startzeit von Obsidian beeinträchtigen.",
   100: "Kompatibilitätseinstellungen",
   101: "Plugin-Kompatibilität",

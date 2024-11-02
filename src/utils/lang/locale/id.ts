@@ -96,7 +96,7 @@ const id = {
   95: "Tambahkan Tanggal Jatuh Tempo ke Tugas Secara Otomatis",
   96: "Bila diaktifkan, jika Anda menambahkan tugas menggunakan jendela pop-up Tambahkan Tugas Baru, maka tanggal hari ini akan ditambahkan sebagai Tanggal jatuh tempo, jika nilainya tidak dimasukkan.",
   97: "Pindai Otomatis Vault saat Obsidian Startup",
-  98: "Gunakan fitur ini hanya jika tugas Anda tidak terdeteksi. Biasanya semua tugas yang baru ditambahkan/diedit akan terdeteksi secara langsung.",
+  98: "Gunakan fitur ini hanya jika Anda mengedit berkas brankas di luar Obsidian. Biasanya semua tugas yang baru Anda tambahkan/edit akan terdeteksi secara otomatis.",
   99: "Jika brankas Anda berisi banyak berkas dengan data besar, ini mungkin memengaruhi waktu startup Obsidian.",
   100: "Pengaturan Kompatibilitas",
   101: "kompatibilitas plugin",

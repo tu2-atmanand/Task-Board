@@ -96,7 +96,7 @@ const es = {
   95: "Agregar automáticamente fecha de vencimiento a las tareas",
   96: "Cuando esta opción está habilitada, si agrega una tarea mediante la ventana emergente Agregar nueva tarea, la fecha de hoy se agregará como Fecha de vencimiento, si no se ingresa el valor.",
   97: "Escaneo automático de la bóveda al iniciar Obsidian",
-  98: "Utilice esta función solo si no se detectan sus tareas. Por lo general, todas las tareas recién agregadas o editadas se detectarán directamente.",
+  98: "Utilice esta función únicamente si edita los archivos de la bóveda fuera de Obsidian. Por lo general, todas las tareas recién agregadas o editadas se detectarán automáticamente.",
   99: "Si su bóveda contiene muchos archivos con grandes cantidades de datos, esto podría afectar el tiempo de inicio de Obsidian.",
   100: "Configuración de compatibilidad",
   101: "compatibilidad de complementos",

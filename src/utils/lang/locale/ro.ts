@@ -96,7 +96,7 @@ const ro = {
   95: "Adăugați automat data scadentă la sarcini",
   96: "Când este activată, dacă adăugați o sarcină utilizând fereastra pop-up Adăugare sarcină nouă, atunci data de astăzi va fi adăugată ca Data scadentă, dacă valoarea nu este introdusă.",
   97: "Scanează automat seiful la pornirea Obsidian",
-  98: "Utilizați această funcție numai dacă sarcinile dvs. nu sunt detectate. De obicei, toate sarcinile dvs. nou adăugate/editate vor fi detectate direct.",
+  98: "Utilizați această funcție numai dacă editați fișierele seifului în afara Obsidian. De obicei, toate sarcinile dvs. nou adăugate/editate vor fi detectate automat.",
   99: "Dacă seiful dvs. conține o mulțime de fișiere cu date uriașe, acest lucru ar putea afecta timpul de pornire a lui Obsidian.",
   100: "Setări de compatibilitate",
   101: "compatibilitate cu pluginuri",
