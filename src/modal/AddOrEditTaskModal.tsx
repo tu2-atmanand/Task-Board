@@ -350,7 +350,7 @@ const EditTaskContent: React.FC<{
 							<input
 								className="EditTaskModalHome-tagValue"
 								type="text"
-								placeholder="Hit Enter after typing"
+								placeholder={t(148)}
 								onKeyDown={handleTagInput}  // Call handleTagInput on change
 							/>
 							{/* Render tags with cross icon */}

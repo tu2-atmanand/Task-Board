@@ -1,6 +1,6 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Setting, normalizePath } from "obsidian";
+import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
 import { globalSettingsData, langCodes } from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
@@ -19,10 +19,11 @@ export class SettingsManager {
 	}
 
 	private static createFragmentWithHTML = (html: string) =>
-		createFragment((documentFragment) => {
-			const div = documentFragment.createDiv();
-			div.appendChild(createEl("div", { text: html }));
-		});
+		sanitizeHTMLToDom(html);
+	// createFragment((documentFragment) => {
+	// 	// const div = documentFragment.createDiv();
+	// 	// div.appendChild(createEl("div", { text: html }));
+	// });
 
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
@@ -77,10 +78,10 @@ export class SettingsManager {
 			tagColors,
 		} = this.globalSettings;
 
-		contentEl.createEl("h1", {
-			text: heading,
-			cls: "mainPluginTitle",
-		});
+		// contentEl.createEl("h1", {
+		// 	text: heading,
+		// 	cls: "mainPluginTitle",
+		// });
 
 		contentEl
 			.createEl("p", {
@@ -214,7 +215,7 @@ export class SettingsManager {
 				});
 			});
 
-		// Setting to show/Hide the Header of the Task Item Card
+		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
 			.setName(t(80))
 			.setDesc(t(81))
@@ -225,7 +226,7 @@ export class SettingsManager {
 				})
 			);
 
-		// Setting to show/Hide the Footer of the Task Item Card
+		// Setting to show/Hide the Footer of the task card
 		new Setting(contentEl)
 			.setName(t(82))
 			.setDesc(t(83))
@@ -394,7 +395,7 @@ export class SettingsManager {
 			.setName(t(97))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
-					t(98) + "\n" + "*NOTE :* " + t(99)
+					t(98) + "<br/>" + "<b>NOTE :</b>" + t(99)
 				)
 			)
 			.addToggle((toggle) =>
