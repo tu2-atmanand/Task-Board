@@ -20,10 +20,6 @@ export class SettingsManager {
 
 	private static createFragmentWithHTML = (html: string) =>
 		sanitizeHTMLToDom(html);
-	// createFragment((documentFragment) => {
-	// 	// const div = documentFragment.createDiv();
-	// 	// div.appendChild(createEl("div", { text: html }));
-	// });
 
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
