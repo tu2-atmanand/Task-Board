@@ -77,7 +77,6 @@ export default class TaskBoard extends Plugin {
 			this.createLocalStorageAndScanModifiedFiles();
 		});
 
-
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		this.scanVaultAtStartup();
 
@@ -92,10 +91,15 @@ export default class TaskBoard extends Plugin {
 
 	getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
-		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(4), () => {
+		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
 			this.app.workspace
 				.getLeaf(true)
 				.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+
+			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
+			// 	active: true,
+			// 	reveal: true,
+			// });
 		});
 		ribbonIconEl.addClass("task-board-ribbon-class");
 	}
@@ -120,7 +124,11 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
 	}
 
 	async saveSettings() {
@@ -176,7 +184,7 @@ export default class TaskBoard extends Plugin {
 
 	registerCommands() {
 		this.addCommand({
-			id: "1",
+			id: "add-new-task",
 			name: t(131),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
@@ -189,7 +197,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "2",
+			id: "open-task-board",
 			name: t(132),
 			callback: () => {
 				this.app.workspace
@@ -198,7 +206,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "3",
+			id: "open-task-board-new-window",
 			name: t(133),
 			callback: () => {
 				this.app.workspace.getLeaf("window").setViewState({
