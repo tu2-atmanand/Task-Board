@@ -272,25 +272,25 @@ export default class TaskBoard extends Plugin {
 			this.onFileModifiedAndLostFocus();
 		});
 
-		this.registerEvent(
-			this.app.vault.on("create", (file) => {
-				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("rename", (file) => {
-				// console.log(
-				// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
-				// );
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("delete", (file) => {
-				// console.log(
-				// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-				// );
-			})
-		);
+		// this.registerEvent(
+		// 	this.app.vault.on("create", (file) => {
+		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("rename", (file) => {
+		// 		// console.log(
+		// 		// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
+		// 		// );
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("delete", (file) => {
+		// 		// console.log(
+		// 		// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
+		// 		// );
+		// 	})
+		// );
 
 		const closeButton = document.querySelector<HTMLElement>(
 			".titlebar-button.mod-close"
