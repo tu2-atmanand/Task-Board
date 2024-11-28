@@ -87,7 +87,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
 			},
 			onCancel: () => {
-				console.log('Task deletion canceled');
+				// console.log('Task deletion canceled');
 			}
 		});
 		deleteModal.open();

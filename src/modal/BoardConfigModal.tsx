@@ -150,7 +150,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				}
 			},
 			onCancel: () => {
-				console.log("Board Deletion Operation Cancelled.");
+				// console.log("Board Deletion Operation Cancelled.");
 			},
 		});
 		deleteModal.open();
