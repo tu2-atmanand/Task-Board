@@ -26,7 +26,7 @@ import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
@@ -145,7 +145,8 @@ export default class TaskBoard extends Plugin {
 		} else {
 			localStorage.setItem(
 				"taskBoardLang",
-				this.settings.data.globalSettings.lang
+				// this.settings.data.globalSettings.lang
+				'en'
 			);
 		}
 	}

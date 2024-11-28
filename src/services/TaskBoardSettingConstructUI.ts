@@ -91,12 +91,6 @@ export class SettingsManager {
 		// Setting for taskCompletionFormat
 		contentEl.createEl("h4", { text: t(75) });
 
-		// CSS for proper layout
-		// 	const cssStyles = `
-
-		// `;
-		// 	contentEl.createEl("style", { text: cssStyles });
-
 		// Helper to add filter rows
 		const addFilterRow = (
 			label: string,
@@ -176,26 +170,26 @@ export class SettingsManager {
 		contentEl.createEl("hr");
 
 		contentEl.createEl("h4", { text: t(79) });
-		// Setting for Plugin Language
 
-		new Setting(contentEl)
-			.setName(t(127))
-			.setDesc(t(128))
-			.addDropdown((dropdown) => {
-				// Dynamically add options from langCodes
-				Object.keys(langCodes).forEach((key) => {
-					dropdown.addOption(key, langCodes[key]); // key as value, langCodes[key] as label
-				});
+		// // Setting for Plugin Language
+		// new Setting(contentEl)
+		// 	.setName(t(127))
+		// 	.setDesc(t(128))
+		// 	.addDropdown((dropdown) => {
+		// 		// Dynamically add options from langCodes
+		// 		Object.keys(langCodes).forEach((key) => {
+		// 			dropdown.addOption(key, langCodes[key]); // key as value, langCodes[key] as label
+		// 		});
 
-				// Set the initial value (assuming lang is the current selected language)
-				dropdown.setValue(lang as string);
+		// 		// Set the initial value (assuming lang is the current selected language)
+		// 		dropdown.setValue(lang as string);
 
-				// On dropdown value change, update the global settings
-				dropdown.onChange(async (value) => {
-					this.globalSettings!.lang = value;
-					await this.saveSettings();
-				});
-			});
+		// 		// On dropdown value change, update the global settings
+		// 		dropdown.onChange(async (value) => {
+		// 			this.globalSettings!.lang = value;
+		// 			await this.saveSettings();
+		// 		});
+		// 	});
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
