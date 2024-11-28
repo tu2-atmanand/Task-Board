@@ -72,9 +72,11 @@ export default class TaskBoard extends Plugin {
 
 			// Register few commands
 			this.registerCommands();
+
+			// For non-realtime scanning and scanning last modified files
+			this.createLocalStorageAndScanModifiedFiles();
 		});
 
-		this.createLocalStorageAndScanModifiedFiles();
 
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		this.scanVaultAtStartup();
@@ -141,7 +143,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning value is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
+		// Following line will create a localStorage if the realTimeScanning setting is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
