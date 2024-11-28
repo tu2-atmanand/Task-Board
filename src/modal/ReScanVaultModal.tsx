@@ -164,8 +164,9 @@ export class ReScanVaultModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		const container = document.createElement("div");
-		contentEl.appendChild(container);
+
+		this.modalEl.setAttribute('data-type', 'task-board-view');
+		contentEl.setAttribute('data-type', 'task-board-view');
 
 		const root = ReactDOM.createRoot(this.contentEl);
 

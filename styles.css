@@ -6,15 +6,13 @@
 	padding-inline: 8px !important;
 } */
 
-.workspace-tabs .workspace-leaf .view-content {
+
+.workspace-leaf-content[data-type="task-board-view"] .view-content {
+	overflow: unset;
 	padding-block-start: 0 !important;
 }
 
-.workspace-leaf-content .view-content {
-	overflow: unset;
-}
-
-.modal {
+.modal[data-type="task-board-view"] {
 	width: auto;
 	min-height: fit-content;
 }
@@ -811,10 +809,6 @@
 	min-width: fit-content;
 	min-height: fit-content;
 } */
-
-.modal-close-button {
-	z-index: 10;
-}
 
 
 /* /src/modal/AddColumnModal.tsx */

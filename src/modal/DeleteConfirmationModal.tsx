@@ -28,6 +28,9 @@ export class DeleteConfirmationModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 
+		this.modalEl.setAttribute('data-type', 'task-board-view');
+		contentEl.setAttribute('data-type', 'task-board-view');
+
 		const homeComponenet = contentEl.createEl("span", { cls: "deleteConfirmationModalHome" });
 		homeComponenet.createEl('h2', { text: t(60) });
 		homeComponenet.createEl('p', { text: this.mssg });
