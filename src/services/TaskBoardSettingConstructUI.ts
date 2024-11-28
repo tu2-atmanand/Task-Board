@@ -76,7 +76,7 @@ export class SettingsManager {
 
 		// contentEl.createEl("h1", {
 		// 	text: heading,
-		// 	cls: "mainPluginTitle",
+		// 	cls: "TaskBoardSettingConstructUI-mainPluginTitle",
 		// });
 
 		contentEl
@@ -92,27 +92,10 @@ export class SettingsManager {
 		contentEl.createEl("h4", { text: t(75) });
 
 		// CSS for proper layout
-		const cssStyles = `
-		.scan-filter-row {
-			display: flex;
-			align-items: center;
-			margin-bottom: 10px;
-		}
-		.filter-label {
-			width: 80px;
-			font-weight: bold;
-			color: #e74c3c;
-		}
-		.filter-input {
-			flex-grow: 1;
-			margin-right: 10px;
-		}
-		.filter-dropdown {
-			width: 120px;
-			text-align: center;
-		}
-	`;
-		contentEl.createEl("style", { text: cssStyles });
+		// 	const cssStyles = `
+
+		// `;
+		// 	contentEl.createEl("style", { text: cssStyles });
 
 		// Helper to add filter rows
 		const addFilterRow = (
@@ -123,16 +106,19 @@ export class SettingsManager {
 			placeholder: string
 		) => {
 			const row = contentEl.createDiv({
-				cls: "scan-filter-row",
+				cls: "TaskBoardSettingConstructUI-scan-filter-row",
 			});
 
 			// Label
-			row.createEl("span", { text: label, cls: "filter-label" });
+			row.createEl("span", {
+				text: label,
+				cls: "TaskBoardSettingConstructUI-filter-label",
+			});
 
 			// Input for values
 			const input = row.createEl("input", {
 				type: "text",
-				cls: "filter-input",
+				cls: "TaskBoardSettingConstructUI-filter-input",
 			});
 			input.value = values.join(", ");
 			input.addEventListener("change", async () => {
@@ -144,7 +130,7 @@ export class SettingsManager {
 
 			// Dropdown for polarity
 			const dropdown = row.createEl("select", {
-				cls: "filter-dropdown",
+				cls: "TaskBoardSettingConstructUI-filter-dropdown",
 			});
 			[t(76), t(77), t(78)].forEach((optionText, idx) => {
 				const option = dropdown.createEl("option", {

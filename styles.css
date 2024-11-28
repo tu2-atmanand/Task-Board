@@ -852,7 +852,7 @@
 }
 
 
-/* src/views/TaskBoardSettingTab.ts */
+/* /src/views/TaskBoardSettingConstructUI.ts */
 
 /* .TaskBoardSettingTab {
 	max-width: fit-content;
@@ -862,7 +862,29 @@
 	margin-bottom: 5px;
 }
 
-.mainPluginTitle {
+.TaskBoardSettingConstructUI-mainPluginTitle {
+	text-align: center;
+}
+
+.TaskBoardSettingConstructUI-scan-filter-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.TaskBoardSettingConstructUI-filter-label {
+	width: 80px;
+	font-weight: bold;
+	color: var(--color-red);
+}
+
+.TaskBoardSettingConstructUI-filter-input {
+	flex-grow: 1;
+	margin-right: 10px;
+}
+
+.TaskBoardSettingConstructUI-filter-dropdown {
+	width: 120px;
 	text-align: center;
 }
 
