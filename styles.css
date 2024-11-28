@@ -895,6 +895,17 @@
 	background-color: var(--background-primary-alt);
 }
 
+.global-setting-tab-live-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.global-setting-tab-live-preview-label {
+	background-color: var(--background-primary);
+	text-align: center;
+}
+
 .settingTabFooterSection {
 	margin-top: 2em;
 	align-items: center;
