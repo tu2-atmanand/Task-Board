@@ -919,6 +919,7 @@
 	margin-top: 1em;
 	align-items: center;
 	justify-content: center;
+	max-height: 60px;
 }
 
 

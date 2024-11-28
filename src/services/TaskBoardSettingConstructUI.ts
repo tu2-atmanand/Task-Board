@@ -1,6 +1,7 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
 import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
+import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import { globalSettingsData, langCodes } from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
@@ -443,7 +444,7 @@ export class SettingsManager {
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
 			let dueDate = "2024-09-21";
-			let tags = `#tag #test`
+			let tags = `#tag #test`;
 			let completionDate = "2024-09-21/12:20:33";
 
 			let preview = "";
@@ -593,6 +594,8 @@ export class SettingsManager {
 
 		footerSection.appendChild(footerText);
 
+		const parser = new DOMParser();
+
 		const donationSection = createEl("div", {
 			cls: "settingTabFooterDonationsSec",
 		});
@@ -600,10 +603,17 @@ export class SettingsManager {
 			paypalButton("https://paypal.me/tu2atmanand")
 		);
 		donationSection.appendChild(
-			buyMeACoffeeButton("https://www.buymeacoffee.com/tu2_atmanand")
+			buyMeACoffeeButton(
+				"https://www.buymeacoffee.com/tu2_atmanand",
+				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
+					.documentElement
+			)
 		);
 		donationSection.appendChild(
-			kofiButton("https://ko-fi.com/atmanandgauns")
+			kofiButton(
+				"https://ko-fi.com/atmanandgauns",
+				parser.parseFromString(kofiSVGIcon, 'text/xml').documentElement,
+			)
 		);
 
 		footerSection.appendChild(donationSection);
@@ -686,31 +696,47 @@ const paypalButton = (link: string): HTMLElement => {
 	return a;
 };
 
-const buyMeACoffeeButton = (link: string): HTMLElement => {
-	const a = createEl("a", {
-		href: link,
-		cls: "buymeacoffee-tu2-atmanand-img",
-	});
-	const img = createEl("img", {
-		attr: {
-			src: "https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00",
-		},
-	});
+// const buyMeACoffeeButton = (link: string): HTMLElement => {
+// 	const a = createEl("a", {
+// 		href: link,
+// 		cls: "buymeacoffee-tu2-atmanand-img",
+// 	});
+// 	const img = createEl("img", {
+// 		attr: {
+// 			src: "https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00",
+// 		},
+// 	});
+// 	a.appendChild(img);
+// 	return a;
+// };
+
+const buyMeACoffeeButton = (link: string, img: HTMLElement): HTMLElement => {
+	const a = document.createElement("a");
+	a.setAttribute("href", link);
+	a.addClass("buymeacoffee-tu2-atmanand-img");
 	a.appendChild(img);
 	return a;
 };
 
-const kofiButton = (link: string): HTMLElement => {
-	const a = createEl("a", {
-		href: link,
-		cls: "buymeacoffee-tu2-atmanand-img",
-	});
-	const img = createEl("img", {
-		attr: {
-			src: "https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/assets/kofi_color.svg",
-			height: "40",
-		},
-	});
+// const kofiButton = (link: string): HTMLElement => {
+// 	const a = createEl("a", {
+// 		href: link,
+// 		cls: "buymeacoffee-tu2-atmanand-img",
+// 	});
+// 	const img = createEl("img", {
+// 		attr: {
+// 			src: "https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/assets/kofi_color.svg",
+// 			height: "40",
+// 		},
+// 	});
+// 	a.appendChild(img);
+// 	return a;
+// };
+
+const kofiButton = (link: string, img: HTMLElement): HTMLElement => {
+	const a = document.createElement("a");
+	a.setAttribute("href", link);
+	a.addClass("buymeacoffee-tu2-atmanand-img");
 	a.appendChild(img);
 	return a;
 };
