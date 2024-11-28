@@ -395,7 +395,7 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date from the Daily Notes file name.
 		new Setting(contentEl)
-			.setName("Daily Notes " + t(101))
+			.setName(t(149) + t(101))
 			.setDesc(t(103))
 			.addToggle((toggle) =>
 				toggle
@@ -427,33 +427,69 @@ export class SettingsManager {
 		});
 
 		// Create the live preview element
-		const previewEl = contentEl.createEl("div", {
-			text: t(107),
+		const previewEl = contentEl.createDiv({
 			cls: "global-setting-tab-live-preview",
 		});
-		const updatePreview = () => {
-			let dueDate = "2024-09-21";
-			let completionDate = "2024-09-21T12:20:33";
-			let taskTitle = "<Task Title>";
+		const previewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-live-preview-label",
+		});
+		previewLabel.setText(t(150));
 
-			let preview = `PREVIEW : - [ ] ${taskTitle} | `;
+		const previewData = previewEl.createDiv({
+			cls: "global-setting-tab-live-preview-data",
+		});
+		const updatePreview = () => {
+			let taskTitle = "<" + t(151) + ">";
+			let priority = "⏫";
+			let time = "10:00 - 11:00";
+			let dueDate = "2024-09-21";
+			let tags = `#tag #test`
+			let completionDate = "2024-09-21/12:20:33";
+
+			let preview = "";
 			switch (this.globalSettings!.taskCompletionFormat) {
-				case "1": // Default
-					preview += `📅${dueDate} ✅${completionDate}`;
+				// Default
+				case "1": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+					} else {
+						preview = `- [x] ${taskTitle} | ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+					}
 					break;
-				case "2": // Tasks Plugin
-					preview += `📅 ${dueDate} ✅ ${
-						completionDate.split("T")[0]
-					}`; // Only date
+				}
+				// Tasks Plugin
+				case "2": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+							completionDate.split("/")[0]
+						}`;
+					} else {
+						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+							completionDate.split("/")[0]
+						}`;
+					}
 					break;
-				case "3": // Dataview Plugin
-					preview += `[due:: ${dueDate}] [completion:: ${completionDate}]`;
+				}
+				// Dataview Plugin
+				case "3": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+					} else {
+						preview = `- [x] ${time} ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+					}
 					break;
-				case "4": // Obsidian Native
-					preview += `@due(${dueDate}) @completion(${completionDate})`;
+				}
+				// Obsidian Native
+				case "4": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+					} else {
+						preview = `- [x] ${time} ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+					}
 					break;
+				}
 			}
-			previewEl.setText(preview);
+			previewData.setText(preview);
 		};
 
 		// Setting for Due and Completion Date-Time pattern format
@@ -584,20 +620,6 @@ export class SettingsManager {
 	}
 }
 
-const buyMeACoffeeButton = (link: string): HTMLElement => {
-	const a = createEl("a", {
-		href: link,
-		cls: "buymeacoffee-tu2-atmanand-img",
-	});
-	const img = createEl("img", {
-		attr: {
-			src: "https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00",
-		},
-	});
-	a.appendChild(img);
-	return a;
-};
-
 const paypalButton = (link: string): HTMLElement => {
 	const a = createEl("a", {
 		href: link,
@@ -661,6 +683,20 @@ const paypalButton = (link: string): HTMLElement => {
 	);
 
 	a.appendChild(svg);
+	return a;
+};
+
+const buyMeACoffeeButton = (link: string): HTMLElement => {
+	const a = createEl("a", {
+		href: link,
+		cls: "buymeacoffee-tu2-atmanand-img",
+	});
+	const img = createEl("img", {
+		attr: {
+			src: "https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00",
+		},
+	});
+	a.appendChild(img);
 	return a;
 };
 

@@ -99,7 +99,7 @@ const en: Lang = {
 	98: "Only use this feature if you edit the vault files outside Obsidian. Usually all your newly added/edited tasks will be detected automatically.",
 	99: "If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.",
 	100: "Compatibility settings",
-	101: "Plugin compatibility",
+	101: "plugin compatibility",
 	102: "If you have installed 'day planner plugin', this plugin enters the time at the start of the task body, instead in the metadata. After enabling this feature, the time will be shown according to the day planner plugin inside Markdown files, but in the task card, the time will be shown in the footer as usual.",
 	103: "When enabled, if you add a task in a daily-note file, which has a file name in format like 'yyyy-MM-DD'. Then this date will be considered as the due date for the task.",
 	104: "Due date format",
@@ -147,6 +147,9 @@ const en: Lang = {
 	146: "Refresh board button",
 	147: "No active editor is open. Please place your cursor inside editor where you want to add task and run this command.",
 	148: "Hit enter after typing tag",
+	149: "Daily notes",
+	150: "Your task will look like following in your notes",
+	151: "Task title"
 };
 
 export default en;
