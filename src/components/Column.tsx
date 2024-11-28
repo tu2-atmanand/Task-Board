@@ -1,12 +1,12 @@
 // /src/components/Column.tsx
 
+import { App, moment } from 'obsidian';
 import React, { useEffect, useState } from 'react';
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
 import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItemProps';
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { App } from 'obsidian';
 import { CSSProperties } from 'react';
 import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
@@ -50,7 +50,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	}, [colType, data, allTasksExternal]);
 
 	const handleCheckboxChange = (updatedTask: taskItem) => {
-		const moment = require("moment");
+		// const moment = require("moment");
 
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
 		setTasks(updatedTasks); // Update state to remove completed task

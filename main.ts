@@ -246,7 +246,7 @@ export default class TaskBoard extends Plugin {
 		this.registerInterval(
 			window.setInterval(async () => {
 				await writeTasksFromSessionStorageToDisk(this.plugin);
-			}, 10 * 60 * 1000)
+			}, 5 * 60 * 1000)
 		);
 
 		this.registerEvent(
