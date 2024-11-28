@@ -6,15 +6,13 @@
 	padding-inline: 8px !important;
 } */
 
-.workspace-tabs .workspace-leaf .view-content {
+
+.workspace-leaf-content[data-type="task-board-view"] .view-content {
+	overflow: unset;
 	padding-block-start: 0 !important;
 }
 
-.workspace-leaf-content .view-content {
-	overflow: unset;
-}
-
-.modal {
+.modal[data-type="task-board-view"] {
 	width: auto;
 	min-height: fit-content;
 }
@@ -812,10 +810,6 @@
 	min-height: fit-content;
 } */
 
-.modal-close-button {
-	z-index: 10;
-}
-
 
 /* /src/modal/AddColumnModal.tsx */
 
@@ -858,7 +852,7 @@
 }
 
 
-/* src/views/TaskBoardSettingTab.ts */
+/* /src/views/TaskBoardSettingConstructUI.ts */
 
 /* .TaskBoardSettingTab {
 	max-width: fit-content;
@@ -868,7 +862,29 @@
 	margin-bottom: 5px;
 }
 
-.mainPluginTitle {
+.TaskBoardSettingConstructUI-mainPluginTitle {
+	text-align: center;
+}
+
+.TaskBoardSettingConstructUI-scan-filter-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.TaskBoardSettingConstructUI-filter-label {
+	width: 80px;
+	font-weight: bold;
+	color: var(--color-red);
+}
+
+.TaskBoardSettingConstructUI-filter-input {
+	flex-grow: 1;
+	margin-right: 10px;
+}
+
+.TaskBoardSettingConstructUI-filter-dropdown {
+	width: 120px;
 	text-align: center;
 }
 
@@ -877,6 +893,17 @@
 	padding-block: 1em;
 	border-radius: var(--radius-m);
 	background-color: var(--background-primary-alt);
+}
+
+.global-setting-tab-live-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.global-setting-tab-live-preview-label {
+	background-color: var(--background-primary);
+	text-align: center;
 }
 
 .settingTabFooterSection {
@@ -892,6 +919,7 @@
 	margin-top: 1em;
 	align-items: center;
 	justify-content: center;
+	max-height: 60px;
 }
 
 

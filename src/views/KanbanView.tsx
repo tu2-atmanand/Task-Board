@@ -8,7 +8,7 @@ import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
 import { StrictMode } from "react";
 import type TaskBoard from "../../main";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
 import { openReScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";

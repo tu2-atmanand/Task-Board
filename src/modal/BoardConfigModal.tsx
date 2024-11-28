@@ -150,7 +150,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				}
 			},
 			onCancel: () => {
-				console.log("Board Deletion Operation Cancelled.");
+				// console.log("Board Deletion Operation Cancelled.");
 			},
 		});
 		deleteModal.open();
@@ -528,6 +528,8 @@ export class BoardConfigureModal extends Modal {
 		this.settingsManager = new SettingsManager(app, plugin);
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
+		this.modalEl.setAttribute('data-type', 'task-board-view');
+		contentEl.setAttribute('data-type', 'task-board-view');
 	}
 
 	onOpen() {

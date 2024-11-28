@@ -26,7 +26,7 @@ import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
@@ -72,9 +72,10 @@ export default class TaskBoard extends Plugin {
 
 			// Register few commands
 			this.registerCommands();
-		});
 
-		this.createLocalStorageAndScanModifiedFiles();
+			// For non-realtime scanning and scanning last modified files
+			this.createLocalStorageAndScanModifiedFiles();
+		});
 
 		// Run scanVaultForTasks if scanVaultAtStartup is true
 		this.scanVaultAtStartup();
@@ -90,10 +91,15 @@ export default class TaskBoard extends Plugin {
 
 	getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
-		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(4), () => {
+		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
 			this.app.workspace
 				.getLeaf(true)
 				.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+
+			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
+			// 	active: true,
+			// 	reveal: true,
+			// });
 		});
 		ribbonIconEl.addClass("task-board-ribbon-class");
 	}
@@ -118,7 +124,11 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
 	}
 
 	async saveSettings() {
@@ -135,13 +145,14 @@ export default class TaskBoard extends Plugin {
 		} else {
 			localStorage.setItem(
 				"taskBoardLang",
-				this.settings.data.globalSettings.lang
+				// this.settings.data.globalSettings.lang
+				'en'
 			);
 		}
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning value is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
+		// Following line will create a localStorage if the realTimeScanning setting is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
@@ -174,7 +185,7 @@ export default class TaskBoard extends Plugin {
 
 	registerCommands() {
 		this.addCommand({
-			id: "1",
+			id: "add-new-task",
 			name: t(131),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
@@ -187,7 +198,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "2",
+			id: "open-task-board",
 			name: t(132),
 			callback: () => {
 				this.app.workspace
@@ -196,7 +207,7 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "3",
+			id: "open-task-board-new-window",
 			name: t(133),
 			callback: () => {
 				this.app.workspace.getLeaf("window").setViewState({
@@ -236,7 +247,7 @@ export default class TaskBoard extends Plugin {
 		this.registerInterval(
 			window.setInterval(async () => {
 				await writeTasksFromSessionStorageToDisk(this.plugin);
-			}, 10 * 60 * 1000)
+			}, 5 * 60 * 1000)
 		);
 
 		this.registerEvent(
@@ -262,25 +273,25 @@ export default class TaskBoard extends Plugin {
 			this.onFileModifiedAndLostFocus();
 		});
 
-		this.registerEvent(
-			this.app.vault.on("create", (file) => {
-				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("rename", (file) => {
-				// console.log(
-				// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
-				// );
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("delete", (file) => {
-				// console.log(
-				// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-				// );
-			})
-		);
+		// this.registerEvent(
+		// 	this.app.vault.on("create", (file) => {
+		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("rename", (file) => {
+		// 		// console.log(
+		// 		// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
+		// 		// );
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("delete", (file) => {
+		// 		// console.log(
+		// 		// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
+		// 		// );
+		// 	})
+		// );
 
 		const closeButton = document.querySelector<HTMLElement>(
 			".titlebar-button.mod-close"

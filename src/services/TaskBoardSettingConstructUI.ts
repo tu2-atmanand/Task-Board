@@ -1,6 +1,7 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Setting, normalizePath } from "obsidian";
+import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
+import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import { globalSettingsData, langCodes } from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
@@ -19,10 +20,7 @@ export class SettingsManager {
 	}
 
 	private static createFragmentWithHTML = (html: string) =>
-		createFragment((documentFragment) => {
-			const div = documentFragment.createDiv();
-			div.appendChild(createEl("div", { text: html }));
-		});
+		sanitizeHTMLToDom(html);
 
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
@@ -77,10 +75,10 @@ export class SettingsManager {
 			tagColors,
 		} = this.globalSettings;
 
-		contentEl.createEl("h1", {
-			text: heading,
-			cls: "mainPluginTitle",
-		});
+		// contentEl.createEl("h1", {
+		// 	text: heading,
+		// 	cls: "TaskBoardSettingConstructUI-mainPluginTitle",
+		// });
 
 		contentEl
 			.createEl("p", {
@@ -94,29 +92,6 @@ export class SettingsManager {
 		// Setting for taskCompletionFormat
 		contentEl.createEl("h4", { text: t(75) });
 
-		// CSS for proper layout
-		const cssStyles = `
-		.scan-filter-row {
-			display: flex;
-			align-items: center;
-			margin-bottom: 10px;
-		}
-		.filter-label {
-			width: 80px;
-			font-weight: bold;
-			color: #e74c3c;
-		}
-		.filter-input {
-			flex-grow: 1;
-			margin-right: 10px;
-		}
-		.filter-dropdown {
-			width: 120px;
-			text-align: center;
-		}
-	`;
-		contentEl.createEl("style", { text: cssStyles });
-
 		// Helper to add filter rows
 		const addFilterRow = (
 			label: string,
@@ -126,16 +101,19 @@ export class SettingsManager {
 			placeholder: string
 		) => {
 			const row = contentEl.createDiv({
-				cls: "scan-filter-row",
+				cls: "TaskBoardSettingConstructUI-scan-filter-row",
 			});
 
 			// Label
-			row.createEl("span", { text: label, cls: "filter-label" });
+			row.createEl("span", {
+				text: label,
+				cls: "TaskBoardSettingConstructUI-filter-label",
+			});
 
 			// Input for values
 			const input = row.createEl("input", {
 				type: "text",
-				cls: "filter-input",
+				cls: "TaskBoardSettingConstructUI-filter-input",
 			});
 			input.value = values.join(", ");
 			input.addEventListener("change", async () => {
@@ -147,7 +125,7 @@ export class SettingsManager {
 
 			// Dropdown for polarity
 			const dropdown = row.createEl("select", {
-				cls: "filter-dropdown",
+				cls: "TaskBoardSettingConstructUI-filter-dropdown",
 			});
 			[t(76), t(77), t(78)].forEach((optionText, idx) => {
 				const option = dropdown.createEl("option", {
@@ -193,28 +171,28 @@ export class SettingsManager {
 		contentEl.createEl("hr");
 
 		contentEl.createEl("h4", { text: t(79) });
-		// Setting for Plugin Language
 
-		new Setting(contentEl)
-			.setName(t(127))
-			.setDesc(t(128))
-			.addDropdown((dropdown) => {
-				// Dynamically add options from langCodes
-				Object.keys(langCodes).forEach((key) => {
-					dropdown.addOption(key, langCodes[key]); // key as value, langCodes[key] as label
-				});
+		// // Setting for Plugin Language
+		// new Setting(contentEl)
+		// 	.setName(t(127))
+		// 	.setDesc(t(128))
+		// 	.addDropdown((dropdown) => {
+		// 		// Dynamically add options from langCodes
+		// 		Object.keys(langCodes).forEach((key) => {
+		// 			dropdown.addOption(key, langCodes[key]); // key as value, langCodes[key] as label
+		// 		});
 
-				// Set the initial value (assuming lang is the current selected language)
-				dropdown.setValue(lang as string);
+		// 		// Set the initial value (assuming lang is the current selected language)
+		// 		dropdown.setValue(lang as string);
 
-				// On dropdown value change, update the global settings
-				dropdown.onChange(async (value) => {
-					this.globalSettings!.lang = value;
-					await this.saveSettings();
-				});
-			});
+		// 		// On dropdown value change, update the global settings
+		// 		dropdown.onChange(async (value) => {
+		// 			this.globalSettings!.lang = value;
+		// 			await this.saveSettings();
+		// 		});
+		// 	});
 
-		// Setting to show/Hide the Header of the Task Item Card
+		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
 			.setName(t(80))
 			.setDesc(t(81))
@@ -225,7 +203,7 @@ export class SettingsManager {
 				})
 			);
 
-		// Setting to show/Hide the Footer of the Task Item Card
+		// Setting to show/Hide the Footer of the task card
 		new Setting(contentEl)
 			.setName(t(82))
 			.setDesc(t(83))
@@ -394,7 +372,7 @@ export class SettingsManager {
 			.setName(t(97))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
-					t(98) + "\n" + "*NOTE :* " + t(99)
+					t(98) + "<br/>" + "<b>NOTE :</b>" + t(99)
 				)
 			)
 			.addToggle((toggle) =>
@@ -418,7 +396,7 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date from the Daily Notes file name.
 		new Setting(contentEl)
-			.setName("Daily Notes " + t(101))
+			.setName(t(149) + t(101))
 			.setDesc(t(103))
 			.addToggle((toggle) =>
 				toggle
@@ -450,33 +428,69 @@ export class SettingsManager {
 		});
 
 		// Create the live preview element
-		const previewEl = contentEl.createEl("div", {
-			text: t(107),
+		const previewEl = contentEl.createDiv({
 			cls: "global-setting-tab-live-preview",
 		});
-		const updatePreview = () => {
-			let dueDate = "2024-09-21";
-			let completionDate = "2024-09-21T12:20:33";
-			let taskTitle = "<Task Title>";
+		const previewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-live-preview-label",
+		});
+		previewLabel.setText(t(150));
 
-			let preview = `PREVIEW : - [ ] ${taskTitle} | `;
+		const previewData = previewEl.createDiv({
+			cls: "global-setting-tab-live-preview-data",
+		});
+		const updatePreview = () => {
+			let taskTitle = "<" + t(151) + ">";
+			let priority = "⏫";
+			let time = "10:00 - 11:00";
+			let dueDate = "2024-09-21";
+			let tags = `#tag #test`;
+			let completionDate = "2024-09-21/12:20:33";
+
+			let preview = "";
 			switch (this.globalSettings!.taskCompletionFormat) {
-				case "1": // Default
-					preview += `📅${dueDate} ✅${completionDate}`;
+				// Default
+				case "1": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+					} else {
+						preview = `- [x] ${taskTitle} | ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+					}
 					break;
-				case "2": // Tasks Plugin
-					preview += `📅 ${dueDate} ✅ ${
-						completionDate.split("T")[0]
-					}`; // Only date
+				}
+				// Tasks Plugin
+				case "2": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+							completionDate.split("/")[0]
+						}`;
+					} else {
+						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+							completionDate.split("/")[0]
+						}`;
+					}
 					break;
-				case "3": // Dataview Plugin
-					preview += `[due:: ${dueDate}] [completion:: ${completionDate}]`;
+				}
+				// Dataview Plugin
+				case "3": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+					} else {
+						preview = `- [x] ${time} ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+					}
 					break;
-				case "4": // Obsidian Native
-					preview += `@due(${dueDate}) @completion(${completionDate})`;
+				}
+				// Obsidian Native
+				case "4": {
+					if (this.globalSettings!.dayPlannerPlugin) {
+						preview = `- [x] ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+					} else {
+						preview = `- [x] ${time} ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+					}
 					break;
+				}
 			}
-			previewEl.setText(preview);
+			previewData.setText(preview);
 		};
 
 		// Setting for Due and Completion Date-Time pattern format
@@ -580,6 +594,8 @@ export class SettingsManager {
 
 		footerSection.appendChild(footerText);
 
+		const parser = new DOMParser();
+
 		const donationSection = createEl("div", {
 			cls: "settingTabFooterDonationsSec",
 		});
@@ -587,10 +603,17 @@ export class SettingsManager {
 			paypalButton("https://paypal.me/tu2atmanand")
 		);
 		donationSection.appendChild(
-			buyMeACoffeeButton("https://www.buymeacoffee.com/tu2_atmanand")
+			buyMeACoffeeButton(
+				"https://www.buymeacoffee.com/tu2_atmanand",
+				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
+					.documentElement
+			)
 		);
 		donationSection.appendChild(
-			kofiButton("https://ko-fi.com/atmanandgauns")
+			kofiButton(
+				"https://ko-fi.com/atmanandgauns",
+				parser.parseFromString(kofiSVGIcon, 'text/xml').documentElement,
+			)
 		);
 
 		footerSection.appendChild(donationSection);
@@ -606,20 +629,6 @@ export class SettingsManager {
 		this.globalSettings = null;
 	}
 }
-
-const buyMeACoffeeButton = (link: string): HTMLElement => {
-	const a = createEl("a", {
-		href: link,
-		cls: "buymeacoffee-tu2-atmanand-img",
-	});
-	const img = createEl("img", {
-		attr: {
-			src: "https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00",
-		},
-	});
-	a.appendChild(img);
-	return a;
-};
 
 const paypalButton = (link: string): HTMLElement => {
 	const a = createEl("a", {
@@ -687,17 +696,47 @@ const paypalButton = (link: string): HTMLElement => {
 	return a;
 };
 
-const kofiButton = (link: string): HTMLElement => {
-	const a = createEl("a", {
-		href: link,
-		cls: "buymeacoffee-tu2-atmanand-img",
-	});
-	const img = createEl("img", {
-		attr: {
-			src: "https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/assets/kofi_color.svg",
-			height: "40",
-		},
-	});
+// const buyMeACoffeeButton = (link: string): HTMLElement => {
+// 	const a = createEl("a", {
+// 		href: link,
+// 		cls: "buymeacoffee-tu2-atmanand-img",
+// 	});
+// 	const img = createEl("img", {
+// 		attr: {
+// 			src: "https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00",
+// 		},
+// 	});
+// 	a.appendChild(img);
+// 	return a;
+// };
+
+const buyMeACoffeeButton = (link: string, img: HTMLElement): HTMLElement => {
+	const a = document.createElement("a");
+	a.setAttribute("href", link);
+	a.addClass("buymeacoffee-tu2-atmanand-img");
+	a.appendChild(img);
+	return a;
+};
+
+// const kofiButton = (link: string): HTMLElement => {
+// 	const a = createEl("a", {
+// 		href: link,
+// 		cls: "buymeacoffee-tu2-atmanand-img",
+// 	});
+// 	const img = createEl("img", {
+// 		attr: {
+// 			src: "https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/assets/kofi_color.svg",
+// 			height: "40",
+// 		},
+// 	});
+// 	a.appendChild(img);
+// 	return a;
+// };
+
+const kofiButton = (link: string, img: HTMLElement): HTMLElement => {
+	const a = document.createElement("a");
+	a.setAttribute("href", link);
+	a.addClass("buymeacoffee-tu2-atmanand-img");
 	a.appendChild(img);
 	return a;
 };

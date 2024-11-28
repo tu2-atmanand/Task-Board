@@ -33,7 +33,7 @@ const AddColumnModal: React.FC<AddColumnModalProps> = ({ isOpen, onClose, onSubm
 	return (
 		<div className="addColumnModalOverlay">
 			<div className="addColumnModalOverlayContent">
-				<h2>Add Column</h2>
+				<h2>{t(56)}</h2>
 				<div className="addColumnModalOverlayContentField">
 					<label htmlFor="colType">{t(10)}</label>
 					<select id="colType" value={colType} onChange={handleColTypeChange}>

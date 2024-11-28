@@ -1,6 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile } from "obsidian";
+import { App, TFile, moment } from "obsidian";
 import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
 import {
 	scanFilterForFilesNFolders,
@@ -101,7 +101,6 @@ export class ScanningVault {
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: (TFile | null)[]) {
-		const moment = require("moment");
 
 		// Load the existing tasks from tasks.json once
 		const oldTasks = await loadTasksJsonFromSS(this.plugin);
