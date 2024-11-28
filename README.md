@@ -68,7 +68,9 @@ If you dont want this plugin to detect your tasks, you are free to use the below
 + [ ] 
 ```
 
-The task can have metadata like due date, time duration, tags, priority, etc separated by pipe symbol. Additionally, you can add multi-level sub-tasks and body description with images and files with the accepted format as explained in the docs. Following is an example of a task :
+The task can have metadata like due date, time duration, tags, priority, etc separated by pipe symbol (`|`).
+
+Additionally, you can add multi-level sub-tasks and body description with images and files with the accepted format as explained in the docs. Following is an example of a task :
 
 ![An Complete task example](./assets/TaskExample.png)
 
