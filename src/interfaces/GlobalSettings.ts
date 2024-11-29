@@ -1,21 +1,23 @@
 import { BoardConfigs } from "./BoardConfigs";
 
+export interface scanFilters {
+	files: {
+		polarity: number;
+		values: string[];
+	};
+	folders: {
+		polarity: number;
+		values: string[];
+	};
+	tags: {
+		polarity: number;
+		values: string[];
+	};
+}
+
 export interface globalSettingsData {
 	lang: string;
-	scanFilters: {
-		files: {
-			polarity: number;
-			values: string[];
-		};
-		folders: {
-			polarity: number;
-			values: string[];
-		};
-		tags: {
-			polarity: number;
-			values: string[];
-		};
-	};
+	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskCompletionFormat: string;
@@ -33,7 +35,6 @@ export interface globalSettingsData {
 	showFooter: boolean;
 	showVerticalScroll: boolean;
 	tagColors: { [tagName: string]: string };
-	settingsTab: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -246,7 +247,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			showHeader: true,
 			showFooter: true,
 			showVerticalScroll: false,
-			settingsTab: 'general',
 			tagColors: {
 				bug: "#ef1120dd",
 				"bug/solver": "#22f7de99",
