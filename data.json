@@ -175,8 +175,10 @@
           "values": []
         },
         "folders": {
-          "polarity": 3,
-          "values": []
+          "polarity": 2,
+          "values": [
+            "XploreProgram"
+          ]
         },
         "tags": {
           "polarity": 3,

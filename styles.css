@@ -862,29 +862,60 @@
 	margin-bottom: 5px;
 }
 
-.TaskBoardSettingConstructUI-mainPluginTitle {
+.taskBoard-mainPluginTitle {
 	text-align: center;
 }
 
-.TaskBoardSettingConstructUI-scan-filter-row {
+.taskBoard-settings-tab-bar {
+	height: 2.5rem;
+	display: flex;
+	flex-direction: row;
+	position: sticky;
+	top: 1px;
+	box-shadow: var(--input-shadow);
+}
+
+.taskBoard-settings-tab-button {
+	flex: 1;
+	background-color: var(--background-secondary);
+	align-content: center;
+	text-align-last: center;
+	font-size: large;
+	font-weight: 700;
+	border: solid 1px var(--checkbox-color-hover);
+	border-radius: 4px;
+	color: var(--color-base-60);
+}
+
+.taskBoard-settings-tab-button-active {
+	background-color: var(--color-accent) !important;
+	color: var(--text-on-accent) !important;
+}
+
+.taskBoard-settings-tab-content {}
+
+.taskBoard-tab-section-desc {
+	text-align: center;
+}
+
+.taskBoard-filter-row {
 	display: flex;
 	align-items: center;
 	margin-bottom: 10px;
 }
 
-.TaskBoardSettingConstructUI-filter-label {
+.taskBoard-filter-label {
 	width: 80px;
 	font-weight: bold;
 	color: var(--color-red);
 }
 
-.TaskBoardSettingConstructUI-filter-input {
+.taskBoard-filter-input {
 	flex-grow: 1;
 	margin-right: 10px;
 }
 
-.TaskBoardSettingConstructUI-filter-dropdown {
-	width: 120px;
+.taskBoard-filter-dropdown {
 	text-align: center;
 }
 
@@ -920,6 +951,14 @@
 	align-items: center;
 	justify-content: center;
 	max-height: 60px;
+}
+
+.taskBoard-docs-section {
+	text-align: center;
+	background-color: var(--color-base-30);
+	margin-block: 0 !important;
+	padding-block: 1em;
+	border-radius: var(--radius-m);
 }
 
 
