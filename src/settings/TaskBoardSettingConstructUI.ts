@@ -2,13 +2,9 @@
 
 import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
-import {
-	globalSettingsData,
-	langCodes,
-	scanFilters,
-} from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
 
 export class SettingsManager {
@@ -67,12 +63,27 @@ export class SettingsManager {
 		});
 
 		const tabs: { [key: string]: HTMLElement } = {};
-		const sections: { [key: string]: () => void } = {
-			Filters: () => this.renderFiltersForScanning(tabContent),
-			"Board UI": () => this.renderBoardUISettings(tabContent),
-			Automation: () => this.renderAutomationSettings(tabContent),
-			Formats: () => this.renderFormatsSettings(tabContent),
-		};
+		const sections: Record<string, () => void> = {};
+		[
+			{
+				key: t(6),
+				handler: () => this.renderFiltersForScanning(tabContent),
+			},
+			{
+				key: t(79),
+				handler: () => this.renderBoardUISettings(tabContent),
+			},
+			{
+				key: t(92),
+				handler: () => this.renderAutomationSettings(tabContent),
+			},
+			{
+				key: t(106),
+				handler: () => this.renderFormatsSettings(tabContent),
+			},
+		].forEach(({ key, handler }) => {
+			sections[key] = handler;
+		});
 
 		// Create tabs and attach click listeners
 		Object.keys(sections).forEach((tabName) => {
@@ -128,14 +139,14 @@ export class SettingsManager {
 	// Function to render the "Filters for scanning" tab content
 	private renderFiltersForScanning(contentEl: HTMLElement) {
 		contentEl.createEl("p", {
-			text: "This section contains the settings that will help you to apply filters and give you control to scan only selected files or remove certain files from scanning. Filters are highly recommended if you have a lot of files which will never contain any tasks.",
+			text: t(152),
 			cls: "taskBoard-tab-section-desc",
 		});
 
 		const { scanFilters } = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl).setName(t(75)).setDesc("Enter the names of the files, folder or tag of the task to control which files you want the plugin to scan to extract tasks from them. Its higly recommended to read the documentation if you are using all three filters at the same time.");
+		new Setting(contentEl).setName(t(75)).setDesc(t(153));
 
 		// Helper to add filter rows
 		const addFilterRow = (
@@ -192,7 +203,7 @@ export class SettingsManager {
 			"files",
 			scanFilters.files.polarity,
 			scanFilters.files.values,
-			"Personal Tasks.md, New folder/New file.md"
+			"Personal.md, FolderName/New_file.md"
 		);
 
 		// Folders Row
@@ -201,7 +212,7 @@ export class SettingsManager {
 			"folders",
 			scanFilters.folders.polarity,
 			scanFilters.folders.values,
-			"New Folder 1, New Folder 2, Parent Folder/child folder/New folder"
+			"Folder_Name 1, Folder_Name 2, Parent_Folder/child_folder/New_folder"
 		);
 
 		// Tags Row
@@ -221,7 +232,7 @@ export class SettingsManager {
 
 		footerSection
 			.createEl("p", {
-				text: "This plugin is created by ",
+				text: t(154),
 			})
 			.createEl("a", {
 				text: "Atmanand Gauns",
@@ -261,7 +272,7 @@ export class SettingsManager {
 	// Function to render "Board UI settings" tab content
 	private renderBoardUISettings(contentEl: HTMLElement) {
 		contentEl.createEl("p", {
-			text: "This section contains the settings to control the look of the board. These settings will be applied to all the boards.",
+			text: t(155),
 			cls: "taskBoard-tab-section-desc",
 		});
 
@@ -342,11 +353,7 @@ export class SettingsManager {
 
 		// Tag Colors settings
 		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl)
-			.setName(t(88))
-			.setDesc(
-				"Set cusotm colors to your specific tags."
-			);
+		new Setting(contentEl).setName(t(88)).setDesc(t(156));
 
 		// If there are existing tag colors, show them
 		const tagColorsContainer = contentEl.createDiv({
@@ -453,7 +460,7 @@ export class SettingsManager {
 	// Function to render "Automation" tab content
 	private renderAutomationSettings(contentEl: HTMLElement) {
 		contentEl.createEl("p", {
-			text: "This section contains the settings to automate certain tasks for an efficient workflow, so you can spend more time on your project than tasks management.",
+			text: t(157),
 			cls: "taskBoard-tab-section-desc",
 		});
 
@@ -492,7 +499,7 @@ export class SettingsManager {
 			.setName(t(97))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
-					t(98) + "<br/>" + "<b>NOTE :</b>" + t(99)
+					t(98) + "<br/>" + "<b>" + t(158) + " :</b>" + t(99)
 				)
 			)
 			.addToggle((toggle) =>
@@ -502,7 +509,8 @@ export class SettingsManager {
 				})
 			);
 
-		contentEl.createEl("h4", { text: t(100) });
+		// contentEl.createEl("h4", { text: t(100) });
+		new Setting(contentEl).setName(t(100)).setHeading();
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
 			.setName("Day Planner " + t(101))
@@ -531,7 +539,7 @@ export class SettingsManager {
 	// Function to render "Task formats" tab content
 	private renderFormatsSettings(contentEl: HTMLElement) {
 		contentEl.createEl("p", {
-			text: "This section contains the settings to adjust the formats you use for creating tasks.",
+			text: t(159),
 			cls: "taskBoard-tab-section-desc",
 		});
 
@@ -551,13 +559,13 @@ export class SettingsManager {
 		const previewLabel = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-label",
 		});
-		previewLabel.setText(t(150));
+		previewLabel.setText(t(107));
 
 		const previewData = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-data",
 		});
 		const updatePreview = () => {
-			let taskTitle = "<" + t(151) + ">";
+			let taskTitle = t(151);
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
 			let dueDate = "2024-09-21";

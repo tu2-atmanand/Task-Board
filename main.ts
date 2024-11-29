@@ -54,7 +54,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onload() {
-		console.log("TaskBoard : loading plugin ...");
+		console.log("TaskBoard : Loading plugin ...");
 
 		//Creates a Icon on Ribbon Bar
 		this.getRibbonIcon();
@@ -118,7 +118,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	onunload() {
-		console.log("TaskBoard : unloading plugin...");
+		console.log("TaskBoard : Unloading plugin...");
 		onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}

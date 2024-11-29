@@ -74,7 +74,7 @@ const EditTaskContent: React.FC<{
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
-		setBodyContent(['\t- [ ] Add you text here...', ...updatedBodyContent].join('\n'));
+		setBodyContent([`\t- [ ] ${t(166)}`, ...updatedBodyContent].join('\n'));
 	};
 
 	const updateSubTaskContent = (index: number, value: string) => {
@@ -265,7 +265,7 @@ const EditTaskContent: React.FC<{
 													enableBackground={0}
 													opacity={0.7}
 													style={{ marginInlineStart: '0.8em' }}
-													title="Delete Sub-Task"
+													title={t(167)}
 													onClick={() => removeSubTask(bodyLineIndex)}
 													cursor={'pointer'}
 												/>
@@ -292,7 +292,7 @@ const EditTaskContent: React.FC<{
 											<div style={{ fontWeight: '400', display: 'flex', flexDirection: 'row' }}>File : <div style={{ fontWeight: '500', paddingInline: '10px' }}>{filePath}</div></div>
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
-												aria-label="Hold CTRL button to open in new Window"
+												aria-label={t(168)}
 												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
 											>{t(27)}</button>
 										</div>
