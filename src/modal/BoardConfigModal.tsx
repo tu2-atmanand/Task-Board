@@ -11,7 +11,7 @@ import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
-import { SettingsManager } from "src/services/TaskBoardSettingConstructUI";
+import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
