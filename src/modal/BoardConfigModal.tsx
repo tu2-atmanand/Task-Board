@@ -11,7 +11,7 @@ import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
-import { SettingsManager } from "src/services/TaskBoardSettingConstructUI";
+import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
@@ -226,7 +226,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<div className="boardConfigModalMainContent-Active-Body">
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>{t(38)}</h4>
+							<h5>{t(38)}</h5>
 							<div>{t(39)}</div>
 						</div>
 						<input
@@ -237,7 +237,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>{t(40)}</h4>
+							<h5>{t(40)}</h5>
 							<div>{t(41)}</div>
 						</div>
 						<input
@@ -256,7 +256,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<h3>{t(139)}</h3>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>{t(42)}</h4>
+							<h5>{t(42)}</h5>
 							<div>{t(43)}</div>
 
 						</div>
@@ -268,7 +268,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>{t(44)}</h4>
+							<h5>{t(44)}</h5>
 							<div>{t(45)}</div>
 						</div>
 						<select
@@ -281,7 +281,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h4>{t(48)}</h4>
+							<h5>{t(48)}</h5>
 							<div>{t(49)}</div>
 						</div>
 						<input

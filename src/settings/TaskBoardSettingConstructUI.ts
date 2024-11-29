@@ -2,9 +2,9 @@
 
 import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
-import { globalSettingsData, langCodes } from "src/interfaces/GlobalSettings";
 
 import TaskBoard from "main";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
 
 export class SettingsManager {
@@ -54,43 +54,99 @@ export class SettingsManager {
 			return;
 		}
 
-		const {
-			lang,
-			firstDayOfWeek,
-			scanFilters,
-			taskCompletionFormat,
-			taskCompletionDateTimePattern,
-			taskCompletionInLocalTime,
-			taskCompletionShowUtcOffset,
-			dailyNotesPluginComp,
-			dueDateFormat,
-			autoAddDue,
-			scanVaultAtStartup,
-			dayPlannerPlugin,
-			realTimeScanning,
-			columnWidth,
-			showHeader,
-			showFooter,
-			showVerticalScroll,
-			tagColors,
-		} = this.globalSettings;
+		// Create Tab Bar
+		const tabBar = contentEl.createDiv({
+			cls: "taskBoard-settings-tab-bar",
+		});
+		const tabContent = contentEl.createDiv({
+			cls: "taskBoard-settings-tab-content",
+		});
 
-		// contentEl.createEl("h1", {
-		// 	text: heading,
-		// 	cls: "TaskBoardSettingConstructUI-mainPluginTitle",
-		// });
+		const tabs: { [key: string]: HTMLElement } = {};
+		const sections: Record<string, () => void> = {};
+		[
+			{
+				key: t(6),
+				handler: () => this.renderFiltersForScanning(tabContent),
+			},
+			{
+				key: t(79),
+				handler: () => this.renderBoardUISettings(tabContent),
+			},
+			{
+				key: t(92),
+				handler: () => this.renderAutomationSettings(tabContent),
+			},
+			{
+				key: t(106),
+				handler: () => this.renderFormatsSettings(tabContent),
+			},
+		].forEach(({ key, handler }) => {
+			sections[key] = handler;
+		});
+
+		// Create tabs and attach click listeners
+		Object.keys(sections).forEach((tabName) => {
+			const tabButton = tabBar.createEl("div", {
+				text: tabName,
+				cls: "taskBoard-settings-tab-button",
+			});
+
+			tabButton.addEventListener("click", () => {
+				// Highlight selected tab
+				Array.from(tabBar.children).forEach((child) =>
+					child.toggleClass(
+						"taskBoard-settings-tab-button-active",
+						child === tabButton
+					)
+				);
+
+				// Clear and render the appropriate content
+				tabContent.empty();
+				sections[tabName]();
+			});
+
+			tabs[tabName] = tabButton;
+		});
+
+		contentEl.createEl("hr");
+
+		// Set the default tab
+		const defaultTab = Object.keys(sections)[0];
+		tabs[defaultTab].click();
 
 		contentEl
 			.createEl("p", {
 				text: t(73),
+				cls: "taskBoard-docs-section",
 			})
 			.createEl("a", {
 				text: t(74),
-				href: "https://tu2-atmanand.github.io/task-board-docs/index.html",
+				href: "https://tu2-atmanand.github.io/task-board-docs/",
 			});
+	}
 
-		// Setting for taskCompletionFormat
-		contentEl.createEl("h4", { text: t(75) });
+	cleanUp() {
+		// Clear the content of contentEl (if set)
+		// if (this.contentEl) {
+		// 	this.contentEl.empty(); // Empty the contentEl to remove all child elements
+		// }
+
+		// Reset global settings if necessary
+		this.globalSettings = null;
+	}
+
+	// Function to render the "Filters for scanning" tab content
+	private renderFiltersForScanning(contentEl: HTMLElement) {
+		contentEl.createEl("p", {
+			text: t(152),
+			cls: "taskBoard-tab-section-desc",
+		});
+
+		const { scanFilters } = this.globalSettings!;
+
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl).setName(t(75)).setDesc(t(153));
 
 		// Helper to add filter rows
 		const addFilterRow = (
@@ -101,19 +157,19 @@ export class SettingsManager {
 			placeholder: string
 		) => {
 			const row = contentEl.createDiv({
-				cls: "TaskBoardSettingConstructUI-scan-filter-row",
+				cls: "taskBoard-filter-row",
 			});
 
 			// Label
 			row.createEl("span", {
 				text: label,
-				cls: "TaskBoardSettingConstructUI-filter-label",
+				cls: "taskBoard-filter-label",
 			});
 
 			// Input for values
 			const input = row.createEl("input", {
 				type: "text",
-				cls: "TaskBoardSettingConstructUI-filter-input",
+				cls: "taskBoard-filter-input",
 			});
 			input.value = values.join(", ");
 			input.addEventListener("change", async () => {
@@ -125,7 +181,7 @@ export class SettingsManager {
 
 			// Dropdown for polarity
 			const dropdown = row.createEl("select", {
-				cls: "TaskBoardSettingConstructUI-filter-dropdown",
+				cls: "taskBoard-filter-dropdown",
 			});
 			[t(76), t(77), t(78)].forEach((optionText, idx) => {
 				const option = dropdown.createEl("option", {
@@ -147,7 +203,7 @@ export class SettingsManager {
 			"files",
 			scanFilters.files.polarity,
 			scanFilters.files.values,
-			"Personal Tasks.md, New folder/New file.md"
+			"Personal.md, FolderName/New_file.md"
 		);
 
 		// Folders Row
@@ -156,7 +212,7 @@ export class SettingsManager {
 			"folders",
 			scanFilters.folders.polarity,
 			scanFilters.folders.values,
-			"New Folder 1, New Folder 2, Parent Folder/child folder/New folder"
+			"Folder_Name 1, Folder_Name 2, Parent_Folder/child_folder/New_folder"
 		);
 
 		// Tags Row
@@ -170,7 +226,55 @@ export class SettingsManager {
 
 		contentEl.createEl("hr");
 
-		contentEl.createEl("h4", { text: t(79) });
+		const footerSection = contentEl.createEl("div", {
+			cls: "settingTabFooterSection",
+		});
+
+		footerSection
+			.createEl("p", {
+				text: t(154),
+			})
+			.createEl("a", {
+				text: "Atmanand Gauns",
+				href: "https://www.github.com/tu2-atmanand",
+			});
+
+		const footerText = createEl("p");
+		footerText.appendText(t(126));
+
+		footerSection.appendChild(footerText);
+
+		const parser = new DOMParser();
+
+		const donationSection = createEl("div", {
+			cls: "settingTabFooterDonationsSec",
+		});
+		donationSection.appendChild(
+			paypalButton("https://paypal.me/tu2atmanand")
+		);
+		donationSection.appendChild(
+			buyMeACoffeeButton(
+				"https://www.buymeacoffee.com/tu2_atmanand",
+				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
+					.documentElement
+			)
+		);
+		donationSection.appendChild(
+			kofiButton(
+				"https://ko-fi.com/atmanandgauns",
+				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement
+			)
+		);
+
+		footerSection.appendChild(donationSection);
+	}
+
+	// Function to render "Board UI settings" tab content
+	private renderBoardUISettings(contentEl: HTMLElement) {
+		contentEl.createEl("p", {
+			text: t(155),
+			cls: "taskBoard-tab-section-desc",
+		});
 
 		// // Setting for Plugin Language
 		// new Setting(contentEl)
@@ -191,6 +295,14 @@ export class SettingsManager {
 		// 			await this.saveSettings();
 		// 		});
 		// 	});
+
+		const {
+			showHeader,
+			showFooter,
+			columnWidth,
+			showVerticalScroll,
+			tagColors,
+		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -224,7 +336,6 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.columnWidth = value;
 						await this.saveSettings();
-						updatePreview(); // Update the preview when the text pattern changes
 					})
 					.setPlaceholder("273px")
 			);
@@ -241,7 +352,8 @@ export class SettingsManager {
 			);
 
 		// Tag Colors settings
-		contentEl.createEl("h4", { text: t(88) });
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl).setName(t(88)).setDesc(t(156));
 
 		// If there are existing tag colors, show them
 		const tagColorsContainer = contentEl.createDiv({
@@ -343,8 +455,23 @@ export class SettingsManager {
 					);
 			})
 		);
+	}
 
-		contentEl.createEl("h4", { text: t(92) });
+	// Function to render "Automation" tab content
+	private renderAutomationSettings(contentEl: HTMLElement) {
+		contentEl.createEl("p", {
+			text: t(157),
+			cls: "taskBoard-tab-section-desc",
+		});
+
+		const {
+			realTimeScanning,
+			autoAddDue,
+			scanVaultAtStartup,
+			dayPlannerPlugin,
+			dailyNotesPluginComp,
+		} = this.globalSettings!;
+
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
 			.setName(t(93))
@@ -372,7 +499,7 @@ export class SettingsManager {
 			.setName(t(97))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
-					t(98) + "<br/>" + "<b>NOTE :</b>" + t(99)
+					t(98) + "<br/>" + "<b>" + t(158) + " :</b>" + t(99)
 				)
 			)
 			.addToggle((toggle) =>
@@ -382,7 +509,8 @@ export class SettingsManager {
 				})
 			);
 
-		contentEl.createEl("h4", { text: t(100) });
+		// contentEl.createEl("h4", { text: t(100) });
+		new Setting(contentEl).setName(t(100)).setHeading();
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
 			.setName("Day Planner " + t(101))
@@ -406,26 +534,23 @@ export class SettingsManager {
 						await this.saveSettings();
 					})
 			);
+	}
 
-		// Text input for the dueDateFormat
-		new Setting(contentEl)
-			.setName(t(104))
-			.setDesc(t(105))
-			.addText((text) =>
-				text
-					.setValue(dueDateFormat)
-					.onChange(async (value) => {
-						this.globalSettings!.dueDateFormat = value;
-						await this.saveSettings();
-						updatePreview(); // Update the preview when the text pattern changes
-					})
-					.setPlaceholder("yyyy-MM-DD")
-			);
-
-		// Seeting to take the format of Due and Completion values. And to take the date-Time format for the completion value.
-		contentEl.createEl("h4", {
-			text: t(106),
+	// Function to render "Task formats" tab content
+	private renderFormatsSettings(contentEl: HTMLElement) {
+		contentEl.createEl("p", {
+			text: t(159),
+			cls: "taskBoard-tab-section-desc",
 		});
+
+		const {
+			dueDateFormat,
+			taskCompletionFormat,
+			taskCompletionDateTimePattern,
+			firstDayOfWeek,
+			taskCompletionInLocalTime,
+			taskCompletionShowUtcOffset,
+		} = this.globalSettings!;
 
 		// Create the live preview element
 		const previewEl = contentEl.createDiv({
@@ -434,13 +559,13 @@ export class SettingsManager {
 		const previewLabel = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-label",
 		});
-		previewLabel.setText(t(150));
+		previewLabel.setText(t(107));
 
 		const previewData = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-data",
 		});
 		const updatePreview = () => {
-			let taskTitle = "<" + t(151) + ">";
+			let taskTitle = t(151);
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
 			let dueDate = "2024-09-21";
@@ -461,11 +586,11 @@ export class SettingsManager {
 				// Tasks Plugin
 				case "2": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+						preview = `- [x] ${taskTitle} | ${priority} 📅 ⏰ ${time} ${dueDate} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -474,24 +599,39 @@ export class SettingsManager {
 				// Dataview Plugin
 				case "3": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
-					} else {
 						preview = `- [x] ${time} ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+					} else {
+						preview = `- [x] ${taskTitle} | [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					}
 					break;
 				}
 				// Obsidian Native
 				case "4": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
-					} else {
 						preview = `- [x] ${time} ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+					} else {
+						preview = `- [x] ${taskTitle} | @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					}
 					break;
 				}
 			}
 			previewData.setText(preview);
 		};
+
+		// Text input for the dueDateFormat
+		new Setting(contentEl)
+			.setName(t(104))
+			.setDesc(t(105))
+			.addText((text) =>
+				text
+					.setValue(dueDateFormat)
+					.onChange(async (value) => {
+						this.globalSettings!.dueDateFormat = value;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the text pattern changes
+					})
+					.setPlaceholder("yyyy-MM-DD")
+			);
 
 		// Setting for Due and Completion Date-Time pattern format
 		new Setting(contentEl)
@@ -582,51 +722,6 @@ export class SettingsManager {
 						await this.saveSettings();
 					})
 			);
-
-		contentEl.createEl("hr");
-
-		const footerSection = contentEl.createEl("div", {
-			cls: "settingTabFooterSection",
-		});
-
-		const footerText = createEl("p");
-		footerText.appendText(t(126));
-
-		footerSection.appendChild(footerText);
-
-		const parser = new DOMParser();
-
-		const donationSection = createEl("div", {
-			cls: "settingTabFooterDonationsSec",
-		});
-		donationSection.appendChild(
-			paypalButton("https://paypal.me/tu2atmanand")
-		);
-		donationSection.appendChild(
-			buyMeACoffeeButton(
-				"https://www.buymeacoffee.com/tu2_atmanand",
-				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
-					.documentElement
-			)
-		);
-		donationSection.appendChild(
-			kofiButton(
-				"https://ko-fi.com/atmanandgauns",
-				parser.parseFromString(kofiSVGIcon, 'text/xml').documentElement,
-			)
-		);
-
-		footerSection.appendChild(donationSection);
-	}
-
-	cleanUp() {
-		// Clear the content of contentEl (if set)
-		// if (this.contentEl) {
-		// 	this.contentEl.empty(); // Empty the contentEl to remove all child elements
-		// }
-
-		// Reset global settings if necessary
-		this.globalSettings = null;
 	}
 }
 

@@ -168,15 +168,17 @@
       }
     ],
     "globalSettings": {
-      "lang": "ja",
+      "lang": "es",
       "scanFilters": {
         "files": {
           "polarity": 2,
           "values": []
         },
         "folders": {
-          "polarity": 3,
-          "values": []
+          "polarity": 2,
+          "values": [
+            "XploreProgram"
+          ]
         },
         "tags": {
           "polarity": 3,
@@ -201,7 +203,7 @@
       "showVerticalScroll": false,
       "tagColors": {
         "bug": "#ef1120dd",
-        "bug/solver": "#22f7de99",
+        "bug/solver": "#223fde99",
         "feat": "#b50df2f2"
       }
     }
