@@ -16,7 +16,7 @@
 </p>
 <br/>
 
-An Obsidian plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.
+<p align="center">An Obsidian plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
 
 > Inspired from [CardBoard Plugin](https://github.com/roovo/obsidian-card-board) by [roovo](https://github.com/roovo).
 
