@@ -1,6 +1,6 @@
 // /src/components/Column.tsx
 
-import { App, moment } from 'obsidian';
+import { App, moment as _moment } from 'obsidian';
 import React, { useEffect, useState } from 'react';
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
@@ -62,6 +62,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			moveFromCompletedToPending(plugin, taskWithCompleted);
 			updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
 		} else {
+			const moment = _moment as unknown as typeof _moment.default;
 			const taskWithCompleted = { ...updatedTask, completed: moment().format(globalSettings?.taskCompletionDateTimePattern), };
 			// Move from Pending to Completed
 			moveFromPendingToCompleted(plugin, taskWithCompleted);

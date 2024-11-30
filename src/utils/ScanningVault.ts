@@ -1,6 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment } from "obsidian";
+import { App, TFile, moment as _moment } from "obsidian";
 import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
 import {
 	scanFilterForFilesNFolders,
@@ -141,6 +141,7 @@ export class ScanningVault {
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
+								const moment = _moment as unknown as typeof _moment.default;
 								if (
 									moment(basename, dueFormat, true).isValid()
 								) {
