@@ -16,7 +16,7 @@
 </p>
 <br/>
 
-An Obsidian plugin to view and manage all your tasks, throughout the vault in a much more efficient Kanban Board format.
+An Obsidian plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.
 
 > Inspired from [CardBoard Plugin](https://github.com/roovo/obsidian-card-board) by [roovo](https://github.com/roovo).
 
@@ -26,7 +26,11 @@ The main idea behind this plugin is to be able to document all your work from st
 
 ## **Documentation**
 
-This readme will only provide a basic information, Ill highly recommend to go through the docs to understand the plugin better and to use the Task Board efficiently : [Task Board Documentation](https://tu2-atmanand.github.io/task-board-docs/).
+This readme will only provide a basic information. Ill highly recommend to go through the docs to understand the plugin better and to use the **Task Board** efficiently : [**Task Board Documentation**](https://tu2-atmanand.github.io/task-board-docs/).
+
+## Discussion
+
+Join the forum top to share your thoughts, ideas or requests and hear from other, how they have adapted to this GTD methodologies to get their tasks done and complete projects inside Obsidian : [**Task Board topic on Forum**](https://forum.obsidian.md/t/task-board-another-gtd-methodology-similar-to-github-projects-planning/90849?u=tu2_atmanand)
 
 
 ## How Does it work ?
@@ -40,16 +44,14 @@ This readme will only provide a basic information, Ill highly recommend to go th
 
 **Step 1 :** Install and Enable the plugin.
 
-**Step 2 :** Open Task Board using the Icon from the right side Ribbon Icon Bar. Or there is a command in the Command Pallet.
+**Step 2 :** Open Task Board using the Icon from the right-side ribbon icon bar. Or using a command from the Command Pallet.
 
-![RibbonIcon](./assets/RibbonIcon.png)
+**Step 3 :** Click on the Re-Scan Vault button from the top-right in the Task Board view header as shown in above image. Then click on the run button and it will scan all your files to look for tasks.
 
-**Step 3 :** Click on the Re-Scan Vault button from the top-right in the Task Board view header as shown in below image. Then click on the run button and it will scan all your files to look for tasks. (read the docs to learn more about it and apply filters to scan only specific files)
+**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the board settings using the gear icon.
 
-![ReScanVaultModalOpen](./assets/ReScanVaultModalOpen.png)
-
-**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the Configure Board Settings. Enjoy !
-
+>[!IMPORTANT]
+> The Scan Vault feature will scan all your notes throughout the vault. If your vault contains a lot of files, like 10 thousand and all, it will take some time. You can instead use the scan filters and exclude certain folder and files, so the plugin dont scan this files if you never put tasks in those notes. To apply filters, read the docs : [Filters for scanning](https://tu2-atmanand.github.io/task-board-docs/docs/Features/Filters_for_Scanning/).
 
 ## Features
 
@@ -145,4 +147,4 @@ A great effort of work has been put into this idea to make it happen. I created 
 
 ## License
 
-Task Board is licensed under GNU GPL V2. Refer to [LICENSE](https://github.com/tu2-atmanand/Task-Board/blob/main/LICENSE) for more information.
+Task Board is licensed under GNU GPL V3. Refer to [LICENSE](https://github.com/tu2-atmanand/Task-Board/blob/main/LICENSE) for more information.
