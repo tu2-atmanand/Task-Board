@@ -133,10 +133,10 @@ const en: Lang = {
 	132: "Open task board",
 	133: "Open task board in new window",
 	134: "Update tasks from this file",
-	135: "Add file in `Don't scan this` filter",
-	136: "Add file in `Only scan this` filter",
-	137: "Add folder in `Dont Scan this` filter",
-	138: "Add folder in `Only scan this` filter",
+	135: "Add file in scan filter",
+	136: "Add file in scan filter",
+	137: "Add folder in scan filter",
+	138: "Add folder in scan filter",
 	139: "Board filters",
 	140: "Files",
 	141: "Folders",
@@ -167,6 +167,7 @@ const en: Lang = {
 	166: "Type here...",
 	167: "Delete Sub-Task",
 	168: "Hold CTRL button to open in new Window",
+	169: "File name",
 };
 
 export default en;

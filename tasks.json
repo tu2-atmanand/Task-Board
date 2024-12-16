@@ -1594,7 +1594,7 @@
         ],
         "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md": [
             {
-                "id": 1486417668,
+                "id": 2529740171,
                 "title": "This is a test to see how Tasks plugin adds data",
                 "body": [],
                 "time": "",
@@ -1605,7 +1605,7 @@
                 "completed": ""
             },
             {
-                "id": 3768823433,
+                "id": 102038354,
                 "title": "This is a new task without any single property.",
                 "body": [],
                 "time": "",
@@ -1616,7 +1616,7 @@
                 "completed": ""
             },
             {
-                "id": 3403148286,
+                "id": 3572249087,
                 "title": "Simple task",
                 "body": [
                     "\tAdding a new line in the body",
@@ -1632,11 +1632,14 @@
                 "completed": ""
             },
             {
-                "id": 42854074,
+                "id": 2002086462,
                 "title": "Let try now if this add new task modal is working",
                 "body": [
                     "\tThis line explains this task.",
-                    "\tAnother line explaining this task."
+                    "\tAnother line explaining this task.",
+                    "\t```ts",
+                    "\tconst variable = 0;",
+                    "\t```"
                 ],
                 "time": "15:08 - 16:08",
                 "due": "2024-12-16",
