@@ -403,7 +403,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																</>
 															)}
 														</div>
-														<FaTrash style={{cursor: 'pointer'}} size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t(55)} />
+														<FaTrash style={{ cursor: 'pointer' }} size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t(55)} />
 													</div>
 												</div>
 											)}
@@ -462,7 +462,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						}}>{t(59)}</button>
 
 						<hr className="boardConfigModalHr-100" />
-						
+
 						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t(1)}</button>
 					</div>
 				</div>

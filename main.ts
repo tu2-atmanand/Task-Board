@@ -89,12 +89,37 @@ export default class TaskBoard extends Plugin {
 		this.registerTaskBoardStatusBar();
 	}
 
+	onunload() {
+		console.log("TaskBoard : Unloading plugin...");
+		onUnloadSave(this.plugin);
+		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
+	}
+
+	async activateView(leafLayout: string) {
+		let leaf: WorkspaceLeaf | null;
+		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+
+		if (leaves.length) {
+			if (leafLayout !== "window") {
+				leaf = leaves[0];
+			} else {
+				leaf = this.app.workspace.getLeaf("window");
+			}
+		} else if (leafLayout === "tab") {
+			leaf = this.app.workspace.getLeaf("tab");
+		} else if (leafLayout === "window") {
+			leaf = this.app.workspace.getLeaf("window");
+		} else {
+			leaf = this.app.workspace.getLeaf("tab");
+		}
+
+		await leaf.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+	}
+
 	getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
 		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
-			this.app.workspace
-				.getLeaf(true)
-				.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+			this.activateView("tab");
 
 			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
 			// 	active: true,
@@ -115,12 +140,6 @@ export default class TaskBoard extends Plugin {
 			// Reset the editorModified flag after the scan.
 			this.editorModified = false;
 		}
-	}
-
-	onunload() {
-		console.log("TaskBoard : Unloading plugin...");
-		onUnloadSave(this.plugin);
-		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
 	async loadSettings() {
@@ -146,7 +165,7 @@ export default class TaskBoard extends Plugin {
 			localStorage.setItem(
 				"taskBoardLang",
 				// this.settings.data.globalSettings.lang
-				'en'
+				"en"
 			);
 		}
 	}
@@ -180,7 +199,7 @@ export default class TaskBoard extends Plugin {
 	registerTaskBoardStatusBar() {
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		// const statusBarItemEl = this.addStatusBarItem();
-		// statusBarItemEl.setText("Total # Tasks Pending");
+		// statusBarItemEl.setText("Next task in # min");
 	}
 
 	registerCommands() {
@@ -201,19 +220,14 @@ export default class TaskBoard extends Plugin {
 			id: "open-task-board",
 			name: t(132),
 			callback: () => {
-				this.app.workspace
-					.getLeaf(true)
-					.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+				this.activateView("tab");
 			},
 		});
 		this.addCommand({
 			id: "open-task-board-new-window",
 			name: t(133),
 			callback: () => {
-				this.app.workspace.getLeaf("window").setViewState({
-					type: VIEW_TYPE_TASKBOARD,
-					active: true,
-				});
+				this.activateView("window");
 			},
 		});
 		// // Add a command to Re-Scan the whole Vault
