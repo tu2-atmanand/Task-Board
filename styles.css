@@ -306,6 +306,11 @@
 	text-decoration: var(--tag-decoration);
 	padding: var(--tag-padding-y) var(--tag-padding-x);
 	line-height: 1;
+	border-radius: 1em;
+	padding: 2px 8px;
+	margin-right: 2px;
+	display: inline-block;
+	white-space: nowrap;
 }
 
 .taskItemDate {
@@ -759,7 +764,7 @@
 	margin: 0 !important;
 }
 
-.boardConfigModalSidebarBtnAreaAddBoard button {
+.boardConfigModalSidebarBtnAreaAddBoard {
 	width: 100%;
 }
 
@@ -883,6 +888,10 @@
 .boardConfigModalDeleteBoardBtn:hover {
 	background-color: darkred;
 	color: white;
+}
+
+[data-rbd-drag-handle-context-id="0"] {
+	cursor: none !important;
 }
 
 /* .modal-container.mod-dim {

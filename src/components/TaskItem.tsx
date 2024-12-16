@@ -212,12 +212,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 												style={{
 													color: tagColor,
 													border: `1px solid ${borderColor}`,
-													backgroundColor: backgroundColor,
-													borderRadius: '1em',
-													padding: '2px 8px',
-													marginRight: '2px',
-													display: 'inline-block',
-													whiteSpace: 'nowrap'
+													backgroundColor: backgroundColor
 												}}
 											>
 												{tag}
