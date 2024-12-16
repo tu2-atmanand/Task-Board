@@ -1,8 +1,8 @@
 // src/views/KanbanView.tsx
 
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
-import { ReScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
 import { Root, createRoot } from "react-dom/client";
+import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
@@ -10,7 +10,7 @@ import { StrictMode } from "react";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { openReScanVaultModal } from "../services/OpenModals";
+import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
 export class KanbanView extends ItemView {
@@ -39,8 +39,8 @@ export class KanbanView extends ItemView {
 	}
 
 	async onOpen() {
-		this.addAction(ReScanVaultIcon, t(5), () => {
-			openReScanVaultModal(this.app, this.plugin);
+		this.addAction(ScanVaultIcon, t(5), () => {
+			openScanVaultModal(this.app, this.plugin);
 		});
 
 		await this.loadBoards();

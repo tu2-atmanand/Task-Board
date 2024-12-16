@@ -1056,9 +1056,9 @@
 }
 
 
-/* /src/components/ReScanVaultModal.tsx */
+/* /src/components/ScanVaultModal.tsx */
 
-.reScanVaultModalHome {
+.scanVaultModalHome {
 	min-width: 40vw;
 	min-height: 40vh;
 	display: flex;
@@ -1066,29 +1066,29 @@
 	justify-content: space-between;
 }
 
-.reScanVaultModalHome h2 {
+.scanVaultModalHome h2 {
 	margin-top: 0 !important;
 	margin-bottom: 1em;
-	text-align: center;
+	align-self: center;
 }
 
-.reScanVaultModalHome p {
+.scanVaultModalHome p {
 	margin-block: 4px !important;
 }
 
-.reScanVaultModalHomeSecondSection {
+.scanVaultModalHomeSecondSection {
 	display: flex;
 	align-items: center;
 	margin-top: 10px;
 	gap: 1em;
 }
 
-.reScanVaultModalHomeSecondSectionProgressBarContainer {
+.scanVaultModalHomeSecondSectionProgressBarContainer {
 	flex-grow: 1;
 	width: 80%;
 }
 
-.reScanVaultModalHomeSecondSectionButton {
+.scanVaultModalHomeSecondSectionButton {
 	padding: 10px 15px;
 	border: none;
 	border-radius: 4px;
@@ -1097,11 +1097,11 @@
 	cursor: pointer;
 }
 
-.reScanVaultModalHomeSecondSectionButton:hover {
+.scanVaultModalHomeSecondSectionButton:hover {
 	background-color: #007bff;
 }
 
-.reScanVaultModalHomeThirdSection {
+.scanVaultModalHomeThirdSection {
 	display: flex;
 	flex-direction: row;
 	height: 50vh;
@@ -1112,7 +1112,7 @@
 	justify-content: space-between;
 }
 
-.reScanVaultModalHomeTerminal {
+.scanVaultModalHomeTerminal {
 	height: 100%;
 	background-color: rgb(12 10 10);
 	color: rgb(109, 253, 140);
@@ -1122,17 +1122,17 @@
 	max-height: 65vh;
 }
 
-.reScanVaultModalHomeTerminalSlideIn {
+.scanVaultModalHomeTerminalSlideIn {
 	transition: width 0.3s ease-in;
 	width: 100%;
 }
 
-.reScanVaultModalHomeTerminalSlideOut {
+.scanVaultModalHomeTerminalSlideOut {
 	transition: width 0.3s ease-out;
 	width: 0;
 }
 
-.reScanVaultModalHomeTasksCollected {
+.scanVaultModalHomeTasksCollected {
 	overflow-y: scroll;
 	position: sticky;
 	height: 100%;
@@ -1152,6 +1152,6 @@
 	width: 0;
 }
 
-.reScanVaultModalHomeToggleButton {
+.scanVaultModalHomeToggleButton {
 	margin-top: 20px;
 }
