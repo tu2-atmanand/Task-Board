@@ -590,7 +590,7 @@ export class SettingsManager {
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${taskTitle} | ${priority} 📅 ⏰ ${time} ${dueDate} ${tags} ✅ ${
+						preview = `- [x] ${taskTitle} | ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -618,21 +618,6 @@ export class SettingsManager {
 			previewData.setText(preview);
 		};
 
-		// Text input for the dueDateFormat
-		new Setting(contentEl)
-			.setName(t(104))
-			.setDesc(t(105))
-			.addText((text) =>
-				text
-					.setValue(dueDateFormat)
-					.onChange(async (value) => {
-						this.globalSettings!.dueDateFormat = value;
-						await this.saveSettings();
-						updatePreview(); // Update the preview when the text pattern changes
-					})
-					.setPlaceholder("yyyy-MM-DD")
-			);
-
 		// Setting for Due and Completion Date-Time pattern format
 		new Setting(contentEl)
 			.setName(t(108))
@@ -651,6 +636,21 @@ export class SettingsManager {
 				});
 			});
 
+		// Text input for the dueDateFormat
+		new Setting(contentEl)
+			.setName(t(104))
+			.setDesc(t(105))
+			.addText((text) =>
+				text
+					.setValue(dueDateFormat)
+					.onChange(async (value) => {
+						this.globalSettings!.dueDateFormat = value;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the text pattern changes
+					})
+					.setPlaceholder("yyyy-MM-DD")
+			);
+
 		// Text input for the taskCompletionDateTimePattern
 		new Setting(contentEl)
 			.setName(t(111))
@@ -662,7 +662,7 @@ export class SettingsManager {
 						this.globalSettings!.taskCompletionDateTimePattern =
 							value;
 						await this.saveSettings();
-						updatePreview(); // Update the preview when the text pattern changes
+						updatePreview();
 					})
 					.setPlaceholder("yyyy-MM-DD/HH:mm")
 			);

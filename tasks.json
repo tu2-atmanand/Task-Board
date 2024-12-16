@@ -1623,6 +1623,19 @@
                 "filePath": "Daily_Notes/2024-11-28.md",
                 "completed": ""
             }
+        ],
+        "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md": [
+            {
+                "id": 389617015,
+                "title": "This is a test to see how Tasks plugin adds data",
+                "body": [],
+                "time": "",
+                "due": "2024-12-16",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md",
+                "completed": ""
+            }
         ]
     },
     "Completed": {
