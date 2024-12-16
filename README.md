@@ -39,16 +39,15 @@ This readme will only provide a basic information, Ill highly recommend to go th
 ## How to start ?
 
 **Step 1 :** Install and Enable the plugin.
+> Since the plugin has not been published on Obsidian Marketplace, you can install it using BRAT. Follow these steps : [Install plugin using BRAT]().
 
-**Step 2 :** Open Task Board using the Icon from the right side Ribbon Icon Bar. Or there is a command in the Command Pallet.
+![How to setup Task Board](./assets/HowToSetupTaskBoard.gif)
 
-![RibbonIcon](./assets/RibbonIcon.png)
+**Step 2 :** Open Task Board using the Icon from the right side Ribbon Icon Bar. There is also a command in the Command Pallet.
 
-**Step 3 :** Click on the Re-Scan Vault button from the top-right in the Task Board view header as shown in below image. Then click on the run button and it will scan all your files to look for tasks. (read the docs to learn more about it and apply filters to scan only specific files)
+**Step 3 :** Click on the **Scan vault window** button from the top-right in the Task Board view header as shown in below image. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters]() to exclude certains files from scanning.
 
-![ReScanVaultModalOpen](./assets/ReScanVaultModalOpen.png)
-
-**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the Configure Board Settings. Enjoy !
+**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the Configure Board settings. Enjoy !
 
 
 ## Features
