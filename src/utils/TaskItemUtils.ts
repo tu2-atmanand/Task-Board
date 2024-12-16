@@ -19,12 +19,16 @@ export const taskElementsFormatter = (
 	plugin: TaskBoard,
 	updatedTask: taskItem
 ) => {
+	if (updatedTask.title === "") {
+		return;
+	}
+
 	const dayPlannerPlugin =
 		plugin.settings.data.globalSettings.dayPlannerPlugin;
 	const globalSettings = plugin.settings.data.globalSettings;
 
-	let dueDateWithFormat = "";
-	let completedWitFormat = "";
+	let dueDateWithFormat: string = "";
+	let completedWitFormat: string = "";
 	if (updatedTask.due || updatedTask.completed) {
 		if (globalSettings?.taskCompletionFormat === "1") {
 			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
@@ -64,25 +68,41 @@ export const taskElementsFormatter = (
 
 	// Build the formatted string for the main task
 	let formattedTask = "";
-	if (dayPlannerPlugin) {
-		formattedTask = `${checkBoxStat} ${
-			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${
-			updatedTask.title
-		} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
-			" "
-		)}${completedWitFormat}`;
+	if (
+		updatedTask.time !== "" ||
+		timeWithEmo !== "" ||
+		priorityWithEmo !== "" ||
+		dueDateWithFormat !== "" ||
+		completedWitFormat !== "" ||
+		updatedTask.tags.length > 0
+	) {
+		if (dayPlannerPlugin) {
+			formattedTask = `${checkBoxStat} ${
+				updatedTask.time ? `${updatedTask.time} ` : ""
+			}${
+				updatedTask.title
+			} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
+				" "
+			)}${completedWitFormat}`;
+		} else {
+			formattedTask = `${checkBoxStat} ${
+				updatedTask.title
+			} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
+				" "
+			)}${completedWitFormat}`;
+		}
 	} else {
-		formattedTask = `${checkBoxStat} ${
-			updatedTask.title
-		} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(
-			" "
-		)}${completedWitFormat}`;
+		formattedTask = `${checkBoxStat} ${updatedTask.title}`;
 	}
-
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
-		.map((line: string) => `${line}`)
+		.map((line: string) => {
+			if (line.startsWith("\t")) {
+				return line;
+			} else {
+				return `\t${line}`;
+			}
+		})
 		.join("\n");
 
 	const completeTask = `${formattedTask}${
@@ -218,33 +238,35 @@ export const updateTaskInFile = async (
 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
 		const completeTask = taskElementsFormatter(plugin, updatedTask);
-		let taskRegex = "";
+		if (completeTask) {
+			let taskRegex = "";
 
-		const startRegex = new RegExp(
-			`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
-			"gm"
-		);
-		const startIndex = fileContent.search(startRegex);
+			const startRegex = new RegExp(
+				`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
+				"gm"
+			);
+			const startIndex = fileContent.search(startRegex);
 
-		if (startIndex !== -1) {
-			const lines = fileContent.substring(startIndex).split("\n");
-			const taskContent = [];
+			if (startIndex !== -1) {
+				const lines = fileContent.substring(startIndex).split("\n");
+				const taskContent = [];
 
-			for (const line of lines) {
-				if (line.trim() === "") {
-					break;
+				for (const line of lines) {
+					if (line.trim() === "") {
+						break;
+					}
+					taskContent.push(line);
 				}
-				taskContent.push(line);
+
+				taskRegex = taskContent.join("\n");
 			}
 
-			taskRegex = taskContent.join("\n");
+			// Replace the old task with the updated formatted task in the file
+			const newContent = fileContent.replace(taskRegex, completeTask);
+
+			// Write the updated content back to the file using Obsidian's API
+			await writeDataToVaultFiles(plugin, filePath, newContent);
 		}
-
-		// Replace the old task with the updated formatted task in the file
-		const newContent = fileContent.replace(taskRegex, completeTask);
-
-		// Write the updated content back to the file using Obsidian's API
-		await writeDataToVaultFiles(plugin, filePath, newContent);
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}
@@ -345,22 +367,24 @@ export const addTaskInActiveEditor = async (
 			);
 		}
 
-		const cursorPosition = activeEditor.getCursor();
+		if (completeTask) {
+			const cursorPosition = activeEditor.getCursor();
 
-		// Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+			// Read the file content
+			const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
-		// Split file content into an array of lines
-		const fileLines = fileContent.split("\n");
+			// Split file content into an array of lines
+			const fileLines = fileContent.split("\n");
 
-		// Insert the new task at the cursor line position
-		fileLines.splice(cursorPosition.line, 0, completeTask);
+			// Insert the new task at the cursor line position
+			fileLines.splice(cursorPosition.line, 0, completeTask);
 
-		// Join the lines back into a single string
-		const newContent = fileLines.join("\n");
+			// Join the lines back into a single string
+			const newContent = fileLines.join("\n");
 
-		// Write the updated content back to the file
-		await writeDataToVaultFiles(plugin, filePath, newContent);
+			// Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		}
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}

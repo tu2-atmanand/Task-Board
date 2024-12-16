@@ -253,10 +253,10 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 								</div>
 							)}
 							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
+								<div className="taskItemiconButton taskItemiconButtonEdit">
 									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEdit} title={t(8)} />
 								</div>
-								<div className="taskItemiconButton">
+								<div className="taskItemiconButton taskItemiconButtonDelete">
 									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
 								</div>
 							</div>

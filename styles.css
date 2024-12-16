@@ -594,7 +594,10 @@
 	height: 25vh;
 	overflow: auto;
 	border: var(--border-width) solid var(--table-header-border-color);
-	;
+}
+
+.task-list-item-checkbox {
+	vertical-align: middle;
 }
 
 .EditTaskModalBodyDescription {
@@ -893,7 +896,7 @@
 }
 
 [data-rbd-drag-handle-context-id="0"] {
-	cursor: none !important;
+	cursor: auto !important;
 }
 
 /* .modal-container.mod-dim {

@@ -147,7 +147,7 @@ const EditTaskContent: React.FC<{
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
-		if (previewContainerRef.current) {
+		if (previewContainerRef.current && formatedContent) {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.empty();
 
