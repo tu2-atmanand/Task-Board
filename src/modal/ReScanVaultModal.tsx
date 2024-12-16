@@ -80,7 +80,7 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 					};
 
 					const formatedContent = taskElementsFormatter(plugin, newTaskContent);
-					
+
 					const uniqueKey = `${filePath}-task-${taskIndex}`;
 					const descElement = taskRendererRef.current[uniqueKey];
 
@@ -102,13 +102,13 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 
 	return (
 		<div className="reScanVaultModalHome">
-			<h2 style={{ textAlign: "center" }}>{t(65)}</h2>
+			<h2>{t(65)}</h2>
 			<p>{t(66)}</p>
 			<p>{t(67)}</p>
 			<p>{t(68)}</p>
 
 			<div className="reScanVaultModalHomeSecondSection" >
-				<div style={{ flexGrow: 1, width: "80%" }}>
+				<div className="reScanVaultModalHomeSecondSectionProgressBarContainer">
 					<progress max="100" value={progress} style={{ width: "100%", height: '35px' }}></progress>
 				</div>
 				<button className="reScanVaultModalHomeSecondSectionButton" onClick={runScan} disabled={isRunning}>
@@ -144,7 +144,7 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 				</div>
 			</div>
 
-			<button onClick={toggleView} style={{ marginTop: "20px" }}>
+			<button className="reScanVaultModalHomeToggleButton" onClick={toggleView}>
 				{showCollectedTasks ? t(70) : t(71)}
 			</button>
 		</div>

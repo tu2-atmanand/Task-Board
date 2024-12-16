@@ -474,6 +474,12 @@
 	width: 100%;
 }
 
+.EditTaskModalsubTaskAddButton {
+	width: fit-content;
+	align-self: end;
+	cursor: pointer;
+}
+
 .EditTaskModalTabHeader {
 	display: flex;
 	gap: 5px;
@@ -519,6 +525,17 @@
 	justify-content: space-between;
 	background: var(--table-header-border-color);
 	align-items: center;
+}
+
+.EditTaskModalHomePreviewHeaderFilenameLabel {
+	font-weight: 400;
+	display: flex;
+	flex-direction: row;
+}
+
+.EditTaskModalHomePreviewHeaderFilenameValue {
+	font-weight: 500;
+	padding-inline: 10px
 }
 
 .EditTaskModalHomePreview ul {
@@ -611,6 +628,12 @@
 	gap: 2px;
 	margin-block: 5px;
 	flex-wrap: wrap;
+	border-radius: 1em;
+	padding: 2px 8px;
+	margin-right: 2px;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: small;
 }
 
 .EditTaskModalHomeSaveBtn {
@@ -641,6 +664,35 @@
 	align-items: center;
 }
 
+/* DeleteTaskConfirmationModal */
+
+.deleteConfirmationModalHome {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.7rem;
+}
+
+.deleteConfirmationModalHome-button-container {
+	display: flex;
+	gap: 1em;
+	margin-top: 1.5rem;
+}
+
+.deleteTaskConfirmBtn {
+	padding-block: 4px;
+	padding-inline: 25px;
+	cursor: pointer;
+}
+
+.deleteTaskCancelmBtn {
+	padding-block: 4px;
+	padding-inline: 25px;
+	cursor: pointer;
+}
+
 .deleteTaskConfirmBtn:hover {
 	background-color: red !important;
 	/* Change background to green on hover */
@@ -659,6 +711,19 @@
 	flex-direction: row;
 	width: 100%;
 	height: 100%;
+}
+
+.boardConfigModalHr-50 {
+	width: 50%;
+	height: 2px;
+	margin: 0;
+	margin-bottom: 2em;
+}
+
+.boardConfigModalHr-100 {
+	width: 100%;
+	height: 2px;
+	margin: 0;
 }
 
 .boardConfigModalHome hr {
@@ -692,6 +757,10 @@
 
 .boardConfigModalSidebarBtnArea hr {
 	margin: 0 !important;
+}
+
+.boardConfigModalSidebarBtnAreaAddBoard button {
+	width: 100%;
 }
 
 .boardConfigModalSidebarBtnAreaGlobal {
@@ -784,11 +853,21 @@
 	margin-block: 0.5em;
 }
 
+.boardConfigModalAddColumnButton {
+	width: 50%;
+}
+
 .boardConfigModalColumnRowContent {
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
 	gap: 0.5em;
+}
+
+.boardConfigModalColumnRowContentColumnType button {
+	width: 100%;
+	min-width: 5em;
+	max-width: 8em;
 }
 
 .boardConfigModalColumnRowContentColName {
@@ -976,6 +1055,7 @@
 .reScanVaultModalHome h2 {
 	margin-top: 0 !important;
 	margin-bottom: 1em;
+	text-align: center;
 }
 
 .reScanVaultModalHome p {
@@ -987,6 +1067,11 @@
 	align-items: center;
 	margin-top: 10px;
 	gap: 1em;
+}
+
+.reScanVaultModalHomeSecondSectionProgressBarContainer {
+	flex-grow: 1;
+	width: 80%;
 }
 
 .reScanVaultModalHomeSecondSectionButton {
@@ -1051,4 +1136,8 @@
 .slideOut {
 	transition: width 0.3s ease-out;
 	width: 0;
+}
+
+.reScanVaultModalHomeToggleButton {
+	margin-top: 20px;
 }

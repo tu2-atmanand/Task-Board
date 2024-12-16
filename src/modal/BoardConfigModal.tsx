@@ -215,14 +215,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		return (
 			<div className="boardConfigModalMainContent-Active">
 				<h2 className="boardConfigModalMainContent-Active-Heading">{board.name} {t(37)}</h2>
-				<hr
-					style={{
-						width: '50%',
-						height: '2px',
-						margin: 0,
-						marginBottom: '2em',
-					}}
-				/>
+				<hr className="boardConfigModalHr-50" />
 				<div className="boardConfigModalMainContent-Active-Body">
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
@@ -246,13 +239,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							onChange={(e) => handleToggleChange(boardIndex, "showColumnTags", e.target.checked)}
 						/>
 					</div>
-					<hr
-						style={{
-							width: '100%',
-							height: '2px',
-							margin: 0,
-						}}
-					/>
+
+					<hr className="boardConfigModalHr-100" />
+
 					<h3>{t(139)}</h3>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
@@ -290,13 +279,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							onChange={(e) => handleToggleChange(boardIndex, "showFilteredTags", e.target.checked)}
 						/>
 					</div>
-					<hr
-						style={{
-							width: '100%',
-							height: '2px',
-							margin: 0,
-						}}
-					/>
+
+					<hr className="boardConfigModalHr-100" />
+
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t(50)}</h3>
 						<Droppable droppableId="columns" className="boardConfigModalMainContent-Active-BodyColumnsList">
@@ -328,7 +313,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															/>
 														)}
 														<div className="boardConfigModalColumnRowContent">
-															<button style={{ width: '100%', minWidth: '5em', maxWidth: '8em' }}>{column.colType}</button>
+															<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
 															<input
 																type="text"
 																value={column.data.name}
@@ -429,15 +414,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							)}
 						</Droppable>
 					</div>
-					<button style={{ width: '50%'}} onClick={handleOpenAddColumnModal}>{t(56)}</button>
+					<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t(56)}</button>
 				</div>
-				<hr
-					style={{
-						width: '100%',
-						height: '2px',
-						marginBlock: '2em',
-					}}
-				/>
+
+				<hr className="boardConfigModalHr-100" />
+
 				<button className="boardConfigModalDeleteBoardBtn" onClick={deleteCurrentBoard}>{t(57)}</button>
 			</div>
 		);
@@ -456,13 +437,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<div className="boardConfigModalSidebar">
 					<div className="boardConfigModalSidebarBtnArea" >
 						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>{t(58)}</div>
-						<hr
-							style={{
-								width: '100%',
-								height: '2px',
-								margin: 0,
-							}}
-						/>
+
+						<hr className="boardConfigModalHr-100" />
+
 						<h6>All Boards</h6>
 						{localBoards.map((board, index) => (
 							<div
@@ -475,7 +452,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						))}
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
-						<button style={{ width: '100%' }} onClick={() => {
+						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => {
 							const newBoard: Board = {
 								name: `Board ${localBoards.length + 1}`,
 								index: localBoards.length + 1,
@@ -483,13 +460,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							};
 							setLocalBoards([...localBoards, newBoard]);
 						}}>{t(59)}</button>
-						<hr
-							style={{
-								width: '100%',
-								height: '2px',
-								marginBlock: '2em',
-							}}
-						/>
+
+						<hr className="boardConfigModalHr-100" />
+						
 						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t(1)}</button>
 					</div>
 				</div>
