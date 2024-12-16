@@ -16,7 +16,7 @@
 </p>
 <br/>
 
-An Obsidian plugin to view and manage all your tasks, throughout the vault in a much more efficient Kanban Board format.
+<p align="center">An Obsidian plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
 
 > Inspired from [CardBoard Plugin](https://github.com/roovo/obsidian-card-board) by [roovo](https://github.com/roovo).
 
@@ -26,7 +26,11 @@ The main idea behind this plugin is to be able to document all your work from st
 
 ## **Documentation**
 
-This readme will only provide a basic information, Ill highly recommend to go through the docs to understand the plugin better and to use the Task Board efficiently : [Task Board Documentation](https://tu2-atmanand.github.io/task-board-docs/).
+This readme will only provide a basic information. Ill highly recommend to go through the docs to understand the plugin better and to use the **Task Board** efficiently : [**Task Board Documentation**](https://tu2-atmanand.github.io/task-board-docs/).
+
+## Discussion
+
+Join the forum top to share your thoughts, ideas or requests and hear from other, how they have adapted to this GTD methodologies to get their tasks done and complete projects inside Obsidian : [**Task Board topic on Forum**](https://forum.obsidian.md/t/task-board-another-gtd-methodology-similar-to-github-projects-planning/90849?u=tu2_atmanand)
 
 
 ## How Does it work ?
@@ -144,4 +148,4 @@ A great effort of work has been put into this idea to make it happen. I created 
 
 ## License
 
-Task Board is licensed under GNU GPL V2. Refer to [LICENSE](https://github.com/tu2-atmanand/Task-Board/blob/main/LICENSE) for more information.
+Task Board is licensed under GNU GPL V3. Refer to [LICENSE](https://github.com/tu2-atmanand/Task-Board/blob/main/LICENSE) for more information.
