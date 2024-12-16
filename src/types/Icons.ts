@@ -1,4 +1,4 @@
-export const TaskBoardIcon = "lucide-file-check";
+export const TaskBoardIcon = "brick-wall";
 
 export const RefreshIcon = "lucide-refresh";
 
