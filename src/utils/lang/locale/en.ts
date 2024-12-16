@@ -3,7 +3,7 @@ const en: Lang = {
 	2: "Close",
 	3: "Archive",
 	4: "Add sub task",
-	5: "Re-scan vault",
+	5: "Scan vault window",
 	6: "General",
 	7: "No tasks available",
 	8: "Edit task",
