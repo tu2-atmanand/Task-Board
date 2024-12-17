@@ -1,10 +1,13 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
 import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
+import {
+	EditButtonMode,
+	globalSettingsData,
+} from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 
 import TaskBoard from "main";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
 
 export class SettingsManager {
@@ -470,7 +473,33 @@ export class SettingsManager {
 			scanVaultAtStartup,
 			dayPlannerPlugin,
 			dailyNotesPluginComp,
+			editButtonAction,
 		} = this.globalSettings!;
+
+		new Setting(contentEl)
+			.setName("Open note layout")
+			.setDesc(
+				"Select how should the parent note open. Double click on the card to open the note."
+			)
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.PopUp]: "Use edit task pop-up feature",
+						[EditButtonMode.NoteInTab]: "Open note in new tab",
+						[EditButtonMode.NoteInSplit]:
+							"Open note in right split",
+						[EditButtonMode.NoteInWindow]:
+							"Open note in new window",
+						[EditButtonMode.NoteInHover]:
+							"Open note in hover preview",
+					})
+					.setValue(this.globalSettings!.editButtonAction)
+					.onChange(async (value) => {
+						this.globalSettings!.editButtonAction =
+							value as EditButtonMode;
+						await this.plugin.saveSettings();
+					})
+			);
 
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
