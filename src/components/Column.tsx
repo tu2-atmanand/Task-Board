@@ -127,7 +127,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 				plugin.app.workspace.getLeaf("window").openFile(getFile)
 			}
 		} else {
-			console.log("Column.tsx : Open hoverPreview...");
 			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
 		}
 	};

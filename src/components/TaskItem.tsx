@@ -241,7 +241,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null;
 			}
 		} catch (error) {
-			console.log("Getting error while trying to render Header: ", error);
+			console.log("renderHeader : Getting error while trying to render Header: ", error);
 			return null;
 		}
 	};
@@ -278,7 +278,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null
 			}
 		} catch (error) {
-			console.log("Getting error while trying to render Footer : ", error);
+			console.log("renderFooter : Getting error while trying to render Footer : ", error);
 			return null;
 		}
 	};
@@ -328,7 +328,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null;
 			}
 		} catch (error) {
-			console.log('Getting error while trying to render the SubTasks: ', error);
+			console.log('renderSubTasks : Getting error while trying to render the SubTasks: ', error);
 			return null;
 		}
 	};
@@ -361,7 +361,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null
 			}
 		} catch (error) {
-			console.log("Getting error while trying to print the Description : ", error);
+			console.log("renderTaskDescriptoin : Getting error while trying to print the Description : ", error);
 			return null;
 		}
 	};
