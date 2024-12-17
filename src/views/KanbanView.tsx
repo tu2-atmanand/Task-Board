@@ -10,6 +10,7 @@ import { StrictMode } from "react";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
+import { onUnloadSave } from "src/utils/tasksCache";
 import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
@@ -71,5 +72,7 @@ export class KanbanView extends ItemView {
 	async onClose() {
 		// Clean up when view is closed
 		this.root?.unmount();
+		this.plugin.leafIsActive = false;
+		onUnloadSave(this.plugin);
 	}
 }
