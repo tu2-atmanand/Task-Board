@@ -443,7 +443,8 @@
 .EditTaskModalHomeLeftSec {
 	display: flex;
 	flex-direction: column;
-	width: 40vw;
+	min-width: 500px;
+	width: 45vw;
 	max-width: 40vw;
 	flex-grow: 1;
 	max-height: 100%;
@@ -620,7 +621,7 @@
 	border-radius: 5px;
 	padding: 0.5em;
 	min-width: 8vw;
-	max-width: 11vw;
+	max-width: 14vw;
 	box-sizing: border-box;
 }
 
