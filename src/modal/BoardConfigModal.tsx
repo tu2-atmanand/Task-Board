@@ -219,8 +219,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<div className="boardConfigModalMainContent-Active-Body">
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(38)}</h5>
-							<div>{t(39)}</div>
+							<div className="boardConfigModalSettingName">{t(38)}</div>
+							<div className="boardConfigModalSettingDescription">{t(39)}</div>
 						</div>
 						<input
 							type="text"
@@ -230,8 +230,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(40)}</h5>
-							<div>{t(41)}</div>
+							<div className="boardConfigModalSettingName">{t(40)}</div>
+							<div className="boardConfigModalSettingDescription">{t(41)}</div>
 						</div>
 						<input
 							type="checkbox"
@@ -245,8 +245,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<h3>{t(139)}</h3>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(42)}</h5>
-							<div>{t(43)}</div>
+							<div className="boardConfigModalSettingName">{t(42)}</div>
+							<div className="boardConfigModalSettingDescription">{t(43)}</div>
 
 						</div>
 						<input
@@ -257,8 +257,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(44)}</h5>
-							<div>{t(45)}</div>
+							<div className="boardConfigModalSettingName">{t(44)}</div>
+							<div className="boardConfigModalSettingDescription">{t(45)}</div>
 						</div>
 						<select
 							value={board.filterPolarity}
@@ -270,8 +270,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(48)}</h5>
-							<div>{t(49)}</div>
+							<div className="boardConfigModalSettingName">{t(48)}</div>
+							<div className="boardConfigModalSettingDescription">{t(49)}</div>
 						</div>
 						<input
 							type="checkbox"
@@ -300,7 +300,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													{...provided.dragHandleProps}
 												>
 													<div className="boardConfigModalColumnRow">
-														<RxDragHandleDots2 size={15} enableBackground={0} />
+														<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 														{column.active ? (
 															<EyeIcon
 																onClick={() => toggleActiveState(boardIndex, columnIndex)}
@@ -440,7 +440,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 						<hr className="boardConfigModalHr-100" />
 
-						<h6>All Boards</h6>
+						<div className="boardConfigModalSettingDescription">{t(170)}</div>
 						{localBoards.map((board, index) => (
 							<div
 								key={index}
