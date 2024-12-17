@@ -17,7 +17,13 @@
 	min-height: fit-content;
 }
 
-/* src/styles/KanbanBoard.tsx */
+/* src/KanbanView.tsx */
+
+.task-board-ribbon-class {
+	color: var(--color-orange);
+}
+
+/* src/KanbanBoard.tsx */
 .kanbanBoard {
 	display: flex;
 	flex-direction: column;
@@ -736,17 +742,12 @@
 	margin: 0;
 }
 
-.boardConfigModalHome hr {
-	border-color: hsl(calc(var(--accent-h) - 3), calc(var(--accent-s) * 0.9), calc(var(--accent-l) * 1.5));
-}
-
 .boardConfigModalSidebar {
 	background-color: var(--background-secondary);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-between;
-	gap: 25em;
 	padding: 1em;
 	border-radius: 4px;
 	max-height: calc(var(--dialog-max-height) - 5vh);
@@ -771,6 +772,7 @@
 
 .boardConfigModalSidebarBtnAreaAddBoard {
 	width: 100%;
+	cursor: pointer;
 }
 
 .boardConfigModalSidebarBtnAreaGlobal {
@@ -799,8 +801,13 @@
 
 .boardConfigModalSidebarSaveBtn {
 	width: 100%;
-	background-color: green !important;
+	background-color: var(--color-green) !important;
 	color: white !important;
+	cursor: pointer;
+}
+
+.boardConfigModalSidebarSaveBtn:hover {
+	background-color: var(--color-accent) !important
 }
 
 .boardConfigModalMainContent {
@@ -843,6 +850,19 @@
 	flex-direction: column;
 }
 
+.boardConfigModalSettingName {
+	color: var(--text-normal);
+	font-size: var(--font-ui-medium);
+	line-height: var(--line-height-tight);
+}
+
+.boardConfigModalSettingDescription {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	padding-top: var(--size-4-1);
+	line-height: var(--line-height-tight);
+}
+
 .boardConfigModalMainContent-Active-BodyColumnSec {
 	display: flex;
 	flex-direction: column;
@@ -863,8 +883,15 @@
 	margin-block: 0.5em;
 }
 
+.boardConfigModalColumnRowDragButton {
+	cursor: grab;
+}
+
 .boardConfigModalAddColumnButton {
-	width: 50%;
+	width: 50% !important;
+	align-self: self-end !important;
+	margin-bottom: 1em;
+	cursor: pointer;
 }
 
 .boardConfigModalColumnRowContent {
@@ -888,6 +915,11 @@
 .boardConfigModalColumnRowContentColDatedVal {
 	min-width: 70px;
 	max-width: 75px;
+}
+
+.boardConfigModalDeleteBoardBtn {
+	margin-block-start: 1em;
+	cursor: pointer;
 }
 
 .boardConfigModalDeleteBoardBtn:hover {
@@ -965,7 +997,7 @@
 	display: flex;
 	flex-direction: row;
 	position: sticky;
-	top: 1px;
+	top: calc(-1 * var(--size-4-8));
 	box-shadow: var(--input-shadow);
 }
 
@@ -1105,7 +1137,6 @@
 	display: flex;
 	flex-direction: row;
 	height: 50vh;
-	max-width: 50vw;
 	width: 50vw;
 	width: 100%;
 	margin-block: 20px;
