@@ -95,31 +95,116 @@ export default class TaskBoard extends Plugin {
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
+	// async activateView(leafLayout: string) {
+	// 	let leaf: WorkspaceLeaf | null;
+	// 	const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+
+	// 	function isFromMainWindow(leaf: WorkspaceLeaf): boolean {
+	// 		console.log(
+	// 			"isFromMainWindow :",
+	// 			leaf.containerEl.ownerDocument.defaultView
+	// 		);
+	// 		return "Notice" in leaf.containerEl.ownerDocument.defaultView;
+	// 	}
+
+	// 	if (leafLayout === "icon") {
+	// 		if (leaves.length) {
+	// 			if (isFromMainWindow(leaves[0])) {
+	// 				console.log("isFromMainWindow is TRUE");
+	// 				leaf = leaves[0];
+	// 			} else {
+	// 				console.log("isFromMainWindow is False...");
+	// 				// leaf = this.app.workspace.getLeaf("window");
+	// 				leaf = leaves[0];
+	// 			}
+	// 		} else {
+	// 			leaf = this.app.workspace.getLeaf("tab");
+	// 		}
+	// 	} else {
+	// 		if (leaves.length) {
+	// 			console.log(
+	// 				"Leaf already exists either in main window or in different window."
+	// 			);
+	// 			if (isFromMainWindow(leaves[0])) {
+	// 				console.log("isFromMainWindow is TRUE");
+	// 				leaf = leaves[0];
+	// 			} else {
+	// 				console.log("isFromMainWindow is False...");
+	// 				// leaf = this.app.workspace.getLeaf("window");
+	// 				leaf = leaves[0];
+	// 			}
+	// 		} else if (leafLayout === "tab") {
+	// 			leaf = this.app.workspace.getLeaf("tab");
+	// 		} else if (leafLayout === "window") {
+	// 			console.log(
+	// 				"No separate window exists, so creating a new window."
+	// 			);
+	// 			leaf = this.app.workspace.getLeaf("window");
+	// 		} else {
+	// 			leaf = this.app.workspace.getLeaf("tab");
+	// 		}
+	// 	}
+
+	// 	await leaf.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+	// }
+
 	async activateView(leafLayout: string) {
-		let leaf: WorkspaceLeaf | null;
+		let leaf: WorkspaceLeaf | null = null;
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 
-		if (leaves.length) {
-			if (leafLayout !== "window") {
-				leaf = leaves[0];
+		function isFromMainWindow(leaf: WorkspaceLeaf): boolean {
+			return "Notice" in leaf.containerEl.ownerDocument.defaultView;
+		}
+
+		// Separate leaves into MainWindow and SeparateWindow categories
+		const mainWindowLeaf = leaves.find((leaf) => isFromMainWindow(leaf));
+		const separateWindowLeaf = leaves.find(
+			(leaf) => !isFromMainWindow(leaf)
+		);
+
+		if (leafLayout === "icon") {
+			// Focus on any existing leaf, prioritizing MainWindow
+			leaf =
+				mainWindowLeaf ||
+				separateWindowLeaf ||
+				this.app.workspace.getLeaf("tab");
+		} else if (leafLayout === "tab") {
+			// Check if a leaf exists in MainWindow
+			if (mainWindowLeaf) {
+				// Prevent duplicate in MainWindow
+				leaf = mainWindowLeaf;
 			} else {
+				// Allow opening a new leaf in MainWindow
+				leaf = this.app.workspace.getLeaf("tab");
+			}
+		} else if (leafLayout === "window") {
+			// Check if a leaf exists in SeparateWindow
+			if (separateWindowLeaf) {
+				// Prevent duplicate in SeparateWindow
+				leaf = separateWindowLeaf;
+			} else {
+				// Allow opening a new leaf in SeparateWindow
 				leaf = this.app.workspace.getLeaf("window");
 			}
-		} else if (leafLayout === "tab") {
-			leaf = this.app.workspace.getLeaf("tab");
-		} else if (leafLayout === "window") {
-			leaf = this.app.workspace.getLeaf("window");
 		} else {
+			// Default behavior: open in MainWindow
 			leaf = this.app.workspace.getLeaf("tab");
 		}
 
-		await leaf.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+		// Open or focus the leaf
+		if (leaf) {
+			await leaf.setViewState({
+				type: VIEW_TYPE_TASKBOARD,
+				active: true,
+			});
+			this.app.workspace.revealLeaf(leaf);
+		}
 	}
 
 	getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
 		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
-			this.activateView("tab");
+			this.activateView("icon");
 
 			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
 			// 	active: true,
@@ -230,14 +315,6 @@ export default class TaskBoard extends Plugin {
 				this.activateView("window");
 			},
 		});
-		// // Add a command to Re-Scan the whole Vault
-		// this.addCommand({
-		// 	id: "6",
-		// 	name: "Re-Scan Vault",
-		// 	callback: () => {
-		// 		this.scanningVault.scanVaultForTasks();
-		// 	},
-		// });
 
 		// // TODO : Remove this command before publishing, DEV commands
 		// this.addCommand({
@@ -471,19 +548,19 @@ export default class TaskBoard extends Plugin {
 
 		// this.registerEvent(
 		// 	this.app.workspace.on("editor-menu", (menu, editor, view) => {
-		// 		const leafIsMarkdown = view instanceof MarkdownView;
+		// 		// const leafIsMarkdown = view instanceof MarkdownView;
 		// 		const leafIsKanban = view instanceof KanbanView;
 
 		// 		if (leafIsKanban) {
 		// 			console.log("MENU : If the fileIsFile ");
-		// 			menu.addItem((item) => {
-		// 				item.setTitle("Refresh Board")
-		// 					.setIcon(RefreshIcon)
-		// 					.setSection("pane")
-		// 					.onClick(() => {
-		// 						eventEmitter.emit("REFRESH_BOARD");
-		// 					});
-		// 			});
+		// 			// menu.addItem((item) => {
+		// 			// 	item.setTitle("Refresh Board")
+		// 			// 		.setIcon(RefreshIcon)
+		// 			// 		.setSection("pane")
+		// 			// 		.onClick(() => {
+		// 			// 			eventEmitter.emit("REFRESH_BOARD");
+		// 			// 		});
+		// 			// });
 		// 		}
 		// 	})
 		// );
