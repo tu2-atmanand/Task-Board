@@ -477,21 +477,21 @@ export class SettingsManager {
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
-			.setName("Open note layout")
+			.setName("Edit button mode")
 			.setDesc(
 				"Select how should the parent note open. Double click on the card to open the note."
 			)
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[EditButtonMode.PopUp]: "Use edit task pop-up feature",
+						[EditButtonMode.PopUp]: "Use edit task window feature",
 						[EditButtonMode.NoteInTab]: "Open note in new tab",
 						[EditButtonMode.NoteInSplit]:
 							"Open note in right split",
 						[EditButtonMode.NoteInWindow]:
 							"Open note in new window",
 						[EditButtonMode.NoteInHover]:
-							"Open note in hover preview",
+							"Open note in hover-preview",
 					})
 					.setValue(this.globalSettings!.editButtonAction)
 					.onChange(async (value) => {
