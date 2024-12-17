@@ -103,8 +103,9 @@ export default class TaskBoard extends Plugin {
 		let leaf: WorkspaceLeaf | null = null;
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 
-		function isFromMainWindow(leaf: WorkspaceLeaf): boolean {
-			return "Notice" in leaf.containerEl.ownerDocument.defaultView;
+		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
+			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
+			return "Notice" in leaf.view.containerEl.ownerDocument.defaultView;
 		}
 
 		// Separate leaves into MainWindow and SeparateWindow categories
