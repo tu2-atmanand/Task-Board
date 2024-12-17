@@ -18,9 +18,9 @@ export class KanbanView extends ItemView {
 	private boards: Board[];
 	root: Root | null = null;
 
-	constructor(app: App, plugin: TaskBoard, leaf: WorkspaceLeaf) {
+	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
-		this.app = app;
+		this.app = plugin.app;
 		this.plugin = plugin;
 		this.boards = [];
 		this.icon = TaskBoardIcon;

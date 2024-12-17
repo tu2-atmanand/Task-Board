@@ -224,7 +224,7 @@ export default class TaskBoard extends Plugin {
 	registerTaskBoardView() {
 		this.registerView(
 			VIEW_TYPE_TASKBOARD,
-			(leaf) => new KanbanView(this.app, this, leaf)
+			(leaf) => new KanbanView(this, leaf)
 		);
 	}
 
