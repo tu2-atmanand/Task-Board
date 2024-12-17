@@ -6,6 +6,7 @@ import { TaskProps, taskItem } from '../interfaces/TaskItemProps';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
+import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
@@ -149,10 +150,20 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemFooterBtns');
-		if (element) {
-			markdownButtonHoverPreviewEvent(app, event, element, task.filePath);
+		if (element && event.ctrlKey) {
+			markdownButtonHoverPreviewEvent(app, event, task.filePath);
 		}
 	};
+
+	const onEditButtonClicked = (event: React.MouseEvent) => {
+		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
+			onEdit(task);
+		} else {
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(app, event, task.filePath);
+			event.ctrlKey = false;
+		}
+	}
 
 	// Helper function to convert a hex color to an RGBA string with the specified opacity
 	const hexToRgba = (hex: string, opacity: number): string => {
@@ -252,9 +263,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 									{task.due ? `📅${task.due}` : ''}
 								</div>
 							)}
-							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 								<div className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEdit} title={t(8)} />
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t(8)} />
 								</div>
 								<div className="taskItemiconButton taskItemiconButtonDelete">
 									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
