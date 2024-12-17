@@ -8,7 +8,7 @@ export const readDataOfVaultFiles = async (
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
-			const fileData = await plugin.app.vault.read(file);
+			const fileData = await plugin.app.vault.cachedRead(file);
 			return fileData; // Return the raw content of the file
 		} else {
 			throw new Error(`File not found at path: ${filePath}`);
