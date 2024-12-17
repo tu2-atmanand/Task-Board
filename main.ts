@@ -40,6 +40,8 @@ export default class TaskBoard extends Plugin {
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
 	IsTasksJsonChanged: boolean;
+	private _leafIsActive: boolean; // Private property to track leaf state
+	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -51,13 +53,15 @@ export default class TaskBoard extends Plugin {
 		this.editorModified = false;
 		this.currentModifiedFile = null;
 		this.IsTasksJsonChanged = false;
+		this._leafIsActive = false;
+		this.ribbonIconEl = null;
 	}
 
 	async onload() {
 		console.log("TaskBoard : Loading plugin ...");
 
 		//Creates a Icon on Ribbon Bar
-		this.getRibbonIcon();
+		await this.getRibbonIcon();
 
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
@@ -81,7 +85,7 @@ export default class TaskBoard extends Plugin {
 
 			// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
 			this.loadTasksDataToSS();
-	
+
 			// Register the Kanban view
 			this.registerTaskBoardView();
 		});
@@ -140,6 +144,7 @@ export default class TaskBoard extends Plugin {
 
 		// Open or focus the leaf
 		if (leaf) {
+			this.leafIsActive = true;
 			await leaf.setViewState({
 				type: VIEW_TYPE_TASKBOARD,
 				active: true,
@@ -148,9 +153,9 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
-	getRibbonIcon() {
+	async getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
-		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
+		this.ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
 			this.activateView("icon");
 
 			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
@@ -158,19 +163,16 @@ export default class TaskBoard extends Plugin {
 			// 	reveal: true,
 			// });
 		});
-		ribbonIconEl.addClass("task-board-ribbon-class");
 	}
-
-	onFileModifiedAndLostFocus() {
-		if (this.editorModified && this.currentModifiedFile) {
-			this.realTimeScanning.onFileChange(
-				this.currentModifiedFile,
-				this.settings.data.globalSettings.realTimeScanning,
-				this.settings.data.globalSettings.scanFilters
-			);
-
-			// Reset the editorModified flag after the scan.
-			this.editorModified = false;
+	get leafIsActive(): boolean {
+		return this._leafIsActive;
+	}
+	set leafIsActive(value: boolean) {
+		this._leafIsActive = value;
+		if (this._leafIsActive) {
+			this.ribbonIconEl?.addClass("task-board-ribbon-class");
+		} else {
+			this.ribbonIconEl?.removeClass("task-board-ribbon-class");
 		}
 	}
 
@@ -511,5 +513,18 @@ export default class TaskBoard extends Plugin {
 		// 		}
 		// 	})
 		// );
+	}
+
+	async onFileModifiedAndLostFocus() {
+		if (this.editorModified && this.currentModifiedFile) {
+			await this.realTimeScanning.onFileChange(
+				this.currentModifiedFile,
+				this.settings.data.globalSettings.realTimeScanning,
+				this.settings.data.globalSettings.scanFilters
+			);
+
+			// Reset the editorModified flag after the scan.
+			this.editorModified = false;
+		}
 	}
 }
