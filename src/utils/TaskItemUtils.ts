@@ -18,13 +18,17 @@ import { eventEmitter } from "src/services/EventEmitter";
 export const taskElementsFormatter = (
 	plugin: TaskBoard,
 	updatedTask: taskItem
-) => {
+): string => {
+	if (updatedTask.title === "") {
+		return "";
+	}
+
 	const dayPlannerPlugin =
 		plugin.settings.data.globalSettings.dayPlannerPlugin;
 	const globalSettings = plugin.settings.data.globalSettings;
 
-	let dueDateWithFormat = "";
-	let completedWitFormat = "";
+	let dueDateWithFormat: string = "";
+	let completedWitFormat: string = "";
 	if (updatedTask.due || updatedTask.completed) {
 		if (globalSettings?.taskCompletionFormat === "1") {
 			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
@@ -64,25 +68,41 @@ export const taskElementsFormatter = (
 
 	// Build the formatted string for the main task
 	let formattedTask = "";
-	if (dayPlannerPlugin) {
-		formattedTask = `${checkBoxStat} ${
-			updatedTask.time ? `${updatedTask.time} ` : ""
-		}${
-			updatedTask.title
-		} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
-			" "
-		)}${completedWitFormat}`;
+	if (
+		updatedTask.time !== "" ||
+		timeWithEmo !== "" ||
+		priorityWithEmo !== "" ||
+		dueDateWithFormat !== "" ||
+		completedWitFormat !== "" ||
+		updatedTask.tags.length > 0
+	) {
+		if (dayPlannerPlugin) {
+			formattedTask = `${checkBoxStat} ${
+				updatedTask.time ? `${updatedTask.time} ` : ""
+			}${
+				updatedTask.title
+			} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
+				" "
+			)}${completedWitFormat}`;
+		} else {
+			formattedTask = `${checkBoxStat} ${
+				updatedTask.title
+			} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
+				" "
+			)}${completedWitFormat}`;
+		}
 	} else {
-		formattedTask = `${checkBoxStat} ${
-			updatedTask.title
-		} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${priorityWithEmo} ${updatedTask.tags.join(
-			" "
-		)}${completedWitFormat}`;
+		formattedTask = `${checkBoxStat} ${updatedTask.title}`;
 	}
-
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
-		.map((line: string) => `${line}`)
+		.map((line: string) => {
+			if (line.startsWith("\t")) {
+				return line;
+			} else {
+				return `\t${line}`;
+			}
+		})
 		.join("\n");
 
 	const completeTask = `${formattedTask}${
@@ -156,27 +176,52 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 	const filePath = task.filePath;
 
 	try {
+		// Step 1: Read the file content
 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
-		let taskRegex = "";
-		const startRegex = new RegExp(`^- \\[ \\] .*?${task.title}.*$`, "gm");
-		const startIndex = fileContent.search(startRegex);
 
-		if (startIndex !== -1) {
-			const lines = fileContent.substring(startIndex).split("\n");
-			const taskContent = [];
+		// Step 3: Split the file content into lines
+		const lines = fileContent.split("\n");
+		const taskLines: string[] = [];
+		let isTaskFound = false;
+		let taskStartIndex = -1;
 
-			for (const line of lines) {
-				if (line.trim() === "") {
-					break;
-				}
-				taskContent.push(line);
+		// Step 4: Locate the main task line and subsequent lines
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
+
+			// Check for the task starting line (e.g., "- [ ] Title...")
+			if (
+				!isTaskFound &&
+				line.match(/^- \[.{1}\]/) &&
+				line.includes(task.title)
+			) {
+				isTaskFound = true;
+				taskStartIndex = i;
+				taskLines.push(line);
+				continue;
 			}
 
-			taskRegex = taskContent.join("\n");
+			// If task is found, keep adding non-empty lines
+			if (isTaskFound) {
+				if (line.trim() === "") break; // Stop at the first empty line
+				taskLines.push(line);
+			}
 		}
-		const newContent = fileContent.replace(taskRegex, ""); // Remove the matched line from the file
 
-		await writeDataToVaultFiles(plugin, filePath, newContent);
+		// Step 5: Replace the found task block with the new one
+		if (isTaskFound && taskStartIndex !== -1) {
+			const taskBlock = taskLines.join("\n");
+
+			// Replace the old task block with the updated content
+			const newContent = fileContent.replace(taskBlock, "");
+
+			// Step 6: Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		} else {
+			console.warn(
+				"deleteTaskFromFile : Task not found in file content."
+			);
+		}
 	} catch (error) {
 		console.error("Error deleting task from file:", error);
 	}
@@ -214,41 +259,114 @@ export const updateTaskInFile = async (
 	const filePath = updatedTask.filePath;
 
 	try {
-		// Read the file content using Obsidian's API
+		// Step 1: Read the file content
 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
+		// Step 2: Prepare the updated task block
 		const completeTask = taskElementsFormatter(plugin, updatedTask);
-		let taskRegex = "";
+		if (completeTask === "")
+			throw "taskElementsFormatter returned empty string";
 
-		const startRegex = new RegExp(
-			`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
-			"gm"
-		);
-		const startIndex = fileContent.search(startRegex);
+		// Step 3: Split the file content into lines
+		const lines = fileContent.split("\n");
+		const taskLines: string[] = [];
+		let isTaskFound = false;
+		let taskStartIndex = -1;
 
-		if (startIndex !== -1) {
-			const lines = fileContent.substring(startIndex).split("\n");
-			const taskContent = [];
+		// Step 4: Locate the main task line and subsequent lines
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
 
-			for (const line of lines) {
-				if (line.trim() === "") {
-					break;
-				}
-				taskContent.push(line);
+			// Check for the task starting line (e.g., "- [ ] Title...")
+			if (
+				!isTaskFound &&
+				line.match(/^- \[.{1}\]/) &&
+				line.includes(oldTask.title)
+			) {
+				isTaskFound = true;
+				taskStartIndex = i;
+				taskLines.push(line);
+				continue;
 			}
 
-			taskRegex = taskContent.join("\n");
+			// If task is found, keep adding non-empty lines
+			if (isTaskFound) {
+				if (line.trim() === "") break; // Stop at the first empty line
+				taskLines.push(line);
+			}
 		}
 
-		// Replace the old task with the updated formatted task in the file
-		const newContent = fileContent.replace(taskRegex, completeTask);
+		// Step 5: Replace the found task block with the new one
+		if (isTaskFound && taskStartIndex !== -1) {
+			const taskBlock = taskLines.join("\n");
 
-		// Write the updated content back to the file using Obsidian's API
-		await writeDataToVaultFiles(plugin, filePath, newContent);
+			// Replace the old task block with the updated content
+			const newContent = fileContent.replace(taskBlock, completeTask);
+
+			// Step 6: Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		} else {
+			console.warn("updateTaskInFile : Task not found in file content.");
+		}
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}
 };
+
+// export const updateTaskInFile = async (
+// 	plugin: TaskBoard,
+// 	updatedTask: taskItem,
+// 	oldTask: taskItem
+// ) => {
+// 	const filePath = updatedTask.filePath;
+
+// 	try {
+// 		// Read the file content using Obsidian's API
+// 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+// 		console.log("updateTaskInFile : Old file content :\n", fileContent);
+
+// 		console.log("updateTaskInFile : updatedTask :\n", updatedTask);
+// 		const completeTask = taskElementsFormatter(plugin, updatedTask);
+// 		console.log("updateTaskInFile : completeTask :\n", completeTask);
+
+// 		if (completeTask) {
+// 			let taskRegex = "";
+
+// 			const startRegex = new RegExp(
+// 				`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
+// 				"gm"
+// 			);
+// 			console.log("updateTaskInFile : startRegex :\n", startRegex);
+
+// 			const startIndex = fileContent.search(startRegex);
+// 			console.log("updateTaskInFile : startIndex :\n", startIndex);
+
+// 			if (startIndex !== -1) {
+// 				const lines = fileContent.substring(startIndex).split("\n");
+// 				console.log("updateTaskInFile : lines :\n", lines);
+// 				const taskContent = [];
+
+// 				for (const line of lines) {
+// 					if (line.trim() === "") {
+// 						break;
+// 					}
+// 					taskContent.push(line);
+// 				}
+
+// 				taskRegex = taskContent.join("\n");
+// 				console.log("updateTaskInFile : taskRegex :\n", taskRegex);
+// 			}
+
+// 			// Replace the old task with the updated formatted task in the file
+// 			const newContent = fileContent.replace(taskRegex, completeTask);
+
+// 			// Write the updated content back to the file using Obsidian's API
+// 			await writeDataToVaultFiles(plugin, filePath, newContent);
+// 		}
+// 	} catch (error) {
+// 		console.error("Error updating task in file:", error);
+// 	}
+// };
 
 export const updateTaskInJson = async (
 	plugin: TaskBoard,
@@ -336,31 +454,35 @@ export const addTaskInActiveEditor = async (
 
 	try {
 		const completeTask = taskElementsFormatter(plugin, newTask);
+		if (completeTask === "")
+			throw "taskElementsFormatter returned empty string";
 
 		// Get the active editor and the current cursor position
 		const activeEditor = app.workspace.activeEditor?.editor;
 		if (!activeEditor) {
-			throw new Error(
+			console.error(
 				"No active editor found. Please place your cursor in markdown file"
 			);
 		}
 
-		const cursorPosition = activeEditor.getCursor();
+		if (completeTask && activeEditor) {
+			const cursorPosition = activeEditor.getCursor();
 
-		// Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+			// Read the file content
+			const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
-		// Split file content into an array of lines
-		const fileLines = fileContent.split("\n");
+			// Split file content into an array of lines
+			const fileLines = fileContent.split("\n");
 
-		// Insert the new task at the cursor line position
-		fileLines.splice(cursorPosition.line, 0, completeTask);
+			// Insert the new task at the cursor line position
+			fileLines.splice(cursorPosition.line, 0, completeTask);
 
-		// Join the lines back into a single string
-		const newContent = fileLines.join("\n");
+			// Join the lines back into a single string
+			const newContent = fileLines.join("\n");
 
-		// Write the updated content back to the file
-		await writeDataToVaultFiles(plugin, filePath, newContent);
+			// Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		}
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}

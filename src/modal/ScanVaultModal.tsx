@@ -1,4 +1,4 @@
-// /src/components/ReScanVaultModal.tsx
+// /src/components/ScanVaultModal.tsx
 
 import { App, Component, Modal, Notice } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
@@ -12,7 +12,7 @@ import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
 
-const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
+const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
 
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
@@ -80,11 +80,11 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 					};
 
 					const formatedContent = taskElementsFormatter(plugin, newTaskContent);
-					
+
 					const uniqueKey = `${filePath}-task-${taskIndex}`;
 					const descElement = taskRendererRef.current[uniqueKey];
 
-					if (descElement) {
+					if (descElement && formatedContent !== "") {
 						descElement.empty();
 						// Render task description using MarkdownUIRenderer
 						MarkdownUIRenderer.renderTaskDisc(
@@ -101,28 +101,28 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 	}, [showCollectedTasks, collectedTasks]);
 
 	return (
-		<div className="reScanVaultModalHome">
-			<h2 style={{ textAlign: "center" }}>{t(65)}</h2>
+		<div className="scanVaultModalHome">
+			<h2>{t(65)}</h2>
 			<p>{t(66)}</p>
 			<p>{t(67)}</p>
 			<p>{t(68)}</p>
 
-			<div className="reScanVaultModalHomeSecondSection" >
-				<div style={{ flexGrow: 1, width: "80%" }}>
+			<div className="scanVaultModalHomeSecondSection" >
+				<div className="scanVaultModalHomeSecondSectionProgressBarContainer">
 					<progress max="100" value={progress} style={{ width: "100%", height: '35px' }}></progress>
 				</div>
-				<button className="reScanVaultModalHomeSecondSectionButton" onClick={runScan} disabled={isRunning}>
+				<button className="scanVaultModalHomeSecondSectionButton" onClick={runScan} disabled={isRunning}>
 					{isRunning ? progress.toFixed(0) : t(69)}
 				</button>
 			</div>
 
-			<div className="reScanVaultModalHomeThirdSection">
-				<div className={`reScanVaultModalHomeTerminal ${showCollectedTasks ? 'reScanVaultModalHomeTerminalSlideOut' : 'reScanVaultModalHomeTerminalSlideIn'}`}>
+			<div className="scanVaultModalHomeThirdSection">
+				<div className={`scanVaultModalHomeTerminal ${showCollectedTasks ? 'scanVaultModalHomeTerminalSlideOut' : 'scanVaultModalHomeTerminalSlideIn'}`}>
 					{terminalOutput.map((line, index) => (
 						<div key={index}>{line}</div>
 					))}
 				</div>
-				<div className={`reScanVaultModalHomeTasksCollected ${showCollectedTasks ? 'slideIn' : 'slideOut'}`}>
+				<div className={`scanVaultModalHomeTasksCollected ${showCollectedTasks ? 'slideIn' : 'slideOut'}`}>
 					{Object.keys(collectedTasks.Pending).map((filePath, index) => (
 						<div key={index}>
 							<h3>{filePath}</h3>
@@ -144,14 +144,14 @@ const ReScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningV
 				</div>
 			</div>
 
-			<button onClick={toggleView} style={{ marginTop: "20px" }}>
+			<button className="scanVaultModalHomeToggleButton" onClick={toggleView}>
 				{showCollectedTasks ? t(70) : t(71)}
 			</button>
 		</div>
 	);
 }
 
-export class ReScanVaultModal extends Modal {
+export class ScanVaultModal extends Modal {
 	scanningVault: ScanningVault;
 	plugin: TaskBoard;
 
@@ -170,7 +170,7 @@ export class ReScanVaultModal extends Modal {
 
 		const root = ReactDOM.createRoot(this.contentEl);
 
-		root.render(<ReScanVaultModalContent
+		root.render(<ScanVaultModalContent
 			app={this.app}
 			plugin={this.plugin}
 			scanningVault={this.scanningVault}

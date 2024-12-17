@@ -1,10 +1,13 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
 import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
+import {
+	EditButtonMode,
+	globalSettingsData,
+} from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 
 import TaskBoard from "main";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
 
 export class SettingsManager {
@@ -470,7 +473,33 @@ export class SettingsManager {
 			scanVaultAtStartup,
 			dayPlannerPlugin,
 			dailyNotesPluginComp,
+			editButtonAction,
 		} = this.globalSettings!;
+
+		new Setting(contentEl)
+			.setName("Edit button mode")
+			.setDesc(
+				"Select how should the parent note open. Double click on the card to open the note."
+			)
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.PopUp]: "Use edit task window feature",
+						[EditButtonMode.NoteInTab]: "Open note in new tab",
+						[EditButtonMode.NoteInSplit]:
+							"Open note in right split",
+						[EditButtonMode.NoteInWindow]:
+							"Open note in new window",
+						[EditButtonMode.NoteInHover]:
+							"Open note in hover-preview",
+					})
+					.setValue(this.globalSettings!.editButtonAction)
+					.onChange(async (value) => {
+						this.globalSettings!.editButtonAction =
+							value as EditButtonMode;
+						await this.plugin.saveSettings();
+					})
+			);
 
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
@@ -590,7 +619,7 @@ export class SettingsManager {
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${taskTitle} | ${priority} 📅 ⏰ ${time} ${dueDate} ${tags} ✅ ${
+						preview = `- [x] ${taskTitle} | ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -618,21 +647,6 @@ export class SettingsManager {
 			previewData.setText(preview);
 		};
 
-		// Text input for the dueDateFormat
-		new Setting(contentEl)
-			.setName(t(104))
-			.setDesc(t(105))
-			.addText((text) =>
-				text
-					.setValue(dueDateFormat)
-					.onChange(async (value) => {
-						this.globalSettings!.dueDateFormat = value;
-						await this.saveSettings();
-						updatePreview(); // Update the preview when the text pattern changes
-					})
-					.setPlaceholder("yyyy-MM-DD")
-			);
-
 		// Setting for Due and Completion Date-Time pattern format
 		new Setting(contentEl)
 			.setName(t(108))
@@ -651,6 +665,21 @@ export class SettingsManager {
 				});
 			});
 
+		// Text input for the dueDateFormat
+		new Setting(contentEl)
+			.setName(t(104))
+			.setDesc(t(105))
+			.addText((text) =>
+				text
+					.setValue(dueDateFormat)
+					.onChange(async (value) => {
+						this.globalSettings!.dueDateFormat = value;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the text pattern changes
+					})
+					.setPlaceholder("yyyy-MM-DD")
+			);
+
 		// Text input for the taskCompletionDateTimePattern
 		new Setting(contentEl)
 			.setName(t(111))
@@ -662,7 +691,7 @@ export class SettingsManager {
 						this.globalSettings!.taskCompletionDateTimePattern =
 							value;
 						await this.saveSettings();
-						updatePreview(); // Update the preview when the text pattern changes
+						updatePreview();
 					})
 					.setPlaceholder("yyyy-MM-DD/HH:mm")
 			);

@@ -10,7 +10,9 @@ import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { CSSProperties } from 'react';
 import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
+import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import TaskItem from './TaskItem';
+import { markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from 'src/utils/lang/helper';
 
@@ -95,19 +97,38 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	};
 
 	const handleEditTask = (task: taskItem) => {
-		const editModal = new AddOrEditTaskModal(
-			app,
-			plugin,
-			(updatedTask) => {
-				updatedTask.filePath = task.filePath;
-				// Update the task in the file and JSON
-				updateTaskInFile(plugin, updatedTask, task);
-				updateTaskInJson(plugin, updatedTask);
-				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
-			},
-			task.filePath,
-			task);
-		editModal.open();
+		if (plugin.settings.data.globalSettings.editButtonAction === EditButtonMode.PopUp) {
+			const editModal = new AddOrEditTaskModal(
+				app,
+				plugin,
+				(updatedTask) => {
+					updatedTask.filePath = task.filePath;
+					// Update the task in the file and JSON
+					updateTaskInFile(plugin, updatedTask, task);
+					updateTaskInJson(plugin, updatedTask);
+					// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
+				},
+				task.filePath,
+				task);
+			editModal.open();
+		} else if (plugin.settings.data.globalSettings.editButtonAction === EditButtonMode.NoteInTab) {
+			const getFile = plugin.app.vault.getFileByPath(task.filePath);
+			if (getFile) {
+				plugin.app.workspace.getLeaf("tab").openFile(getFile)
+			}
+		} else if (plugin.settings.data.globalSettings.editButtonAction === EditButtonMode.NoteInSplit) {
+			const getFile = plugin.app.vault.getFileByPath(task.filePath);
+			if (getFile) {
+				plugin.app.workspace.getLeaf("split").openFile(getFile)
+			}
+		} else if (plugin.settings.data.globalSettings.editButtonAction === EditButtonMode.NoteInWindow) {
+			const getFile = plugin.app.vault.getFileByPath(task.filePath);
+			if (getFile) {
+				plugin.app.workspace.getLeaf("window").openFile(getFile)
+			}
+		} else {
+			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
+		}
 	};
 
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
@@ -138,7 +159,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 									task={task}
 									columnIndex={columnIndex}
 									activeBoardSettings={activeBoardSettings}
-									onEdit={() => handleEditTask(task)}
+									onEdit={(task) => handleEditTask(task)}
 									onDelete={() => handleDeleteTask(app, task)}
 									onCheckboxChange={() => handleCheckboxChange(task)}
 									onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}

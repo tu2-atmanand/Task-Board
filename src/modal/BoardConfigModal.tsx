@@ -215,19 +215,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		return (
 			<div className="boardConfigModalMainContent-Active">
 				<h2 className="boardConfigModalMainContent-Active-Heading">{board.name} {t(37)}</h2>
-				<hr
-					style={{
-						width: '50%',
-						height: '2px',
-						margin: 0,
-						marginBottom: '2em',
-					}}
-				/>
+				<hr className="boardConfigModalHr-50" />
 				<div className="boardConfigModalMainContent-Active-Body">
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(38)}</h5>
-							<div>{t(39)}</div>
+							<div className="boardConfigModalSettingName">{t(38)}</div>
+							<div className="boardConfigModalSettingDescription">{t(39)}</div>
 						</div>
 						<input
 							type="text"
@@ -237,8 +230,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(40)}</h5>
-							<div>{t(41)}</div>
+							<div className="boardConfigModalSettingName">{t(40)}</div>
+							<div className="boardConfigModalSettingDescription">{t(41)}</div>
 						</div>
 						<input
 							type="checkbox"
@@ -246,18 +239,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							onChange={(e) => handleToggleChange(boardIndex, "showColumnTags", e.target.checked)}
 						/>
 					</div>
-					<hr
-						style={{
-							width: '100%',
-							height: '2px',
-							margin: 0,
-						}}
-					/>
+
+					<hr className="boardConfigModalHr-100" />
+
 					<h3>{t(139)}</h3>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(42)}</h5>
-							<div>{t(43)}</div>
+							<div className="boardConfigModalSettingName">{t(42)}</div>
+							<div className="boardConfigModalSettingDescription">{t(43)}</div>
 
 						</div>
 						<input
@@ -268,8 +257,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(44)}</h5>
-							<div>{t(45)}</div>
+							<div className="boardConfigModalSettingName">{t(44)}</div>
+							<div className="boardConfigModalSettingDescription">{t(45)}</div>
 						</div>
 						<select
 							value={board.filterPolarity}
@@ -281,8 +270,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<h5>{t(48)}</h5>
-							<div>{t(49)}</div>
+							<div className="boardConfigModalSettingName">{t(48)}</div>
+							<div className="boardConfigModalSettingDescription">{t(49)}</div>
 						</div>
 						<input
 							type="checkbox"
@@ -290,13 +279,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							onChange={(e) => handleToggleChange(boardIndex, "showFilteredTags", e.target.checked)}
 						/>
 					</div>
-					<hr
-						style={{
-							width: '100%',
-							height: '2px',
-							margin: 0,
-						}}
-					/>
+
+					<hr className="boardConfigModalHr-100" />
+
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t(50)}</h3>
 						<Droppable droppableId="columns" className="boardConfigModalMainContent-Active-BodyColumnsList">
@@ -315,7 +300,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													{...provided.dragHandleProps}
 												>
 													<div className="boardConfigModalColumnRow">
-														<RxDragHandleDots2 size={15} enableBackground={0} />
+														<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 														{column.active ? (
 															<EyeIcon
 																onClick={() => toggleActiveState(boardIndex, columnIndex)}
@@ -328,7 +313,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															/>
 														)}
 														<div className="boardConfigModalColumnRowContent">
-															<button style={{ width: '100%', minWidth: '5em', maxWidth: '8em' }}>{column.colType}</button>
+															<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
 															<input
 																type="text"
 																value={column.data.name}
@@ -418,7 +403,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																</>
 															)}
 														</div>
-														<FaTrash size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t(55)} />
+														<FaTrash style={{ cursor: 'pointer' }} size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t(55)} />
 													</div>
 												</div>
 											)}
@@ -429,15 +414,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							)}
 						</Droppable>
 					</div>
-					<button style={{ width: '50%'}} onClick={handleOpenAddColumnModal}>{t(56)}</button>
+					<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t(56)}</button>
 				</div>
-				<hr
-					style={{
-						width: '100%',
-						height: '2px',
-						marginBlock: '2em',
-					}}
-				/>
+
+				<hr className="boardConfigModalHr-100" />
+
 				<button className="boardConfigModalDeleteBoardBtn" onClick={deleteCurrentBoard}>{t(57)}</button>
 			</div>
 		);
@@ -456,14 +437,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<div className="boardConfigModalSidebar">
 					<div className="boardConfigModalSidebarBtnArea" >
 						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>{t(58)}</div>
-						<hr
-							style={{
-								width: '100%',
-								height: '2px',
-								margin: 0,
-							}}
-						/>
-						<h6>All Boards</h6>
+
+						<hr className="boardConfigModalHr-100" />
+
+						<div className="boardConfigModalSettingDescription">{t(170)}</div>
 						{localBoards.map((board, index) => (
 							<div
 								key={index}
@@ -475,7 +452,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						))}
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
-						<button style={{ width: '100%' }} onClick={() => {
+						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => {
 							const newBoard: Board = {
 								name: `Board ${localBoards.length + 1}`,
 								index: localBoards.length + 1,
@@ -483,13 +460,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							};
 							setLocalBoards([...localBoards, newBoard]);
 						}}>{t(59)}</button>
-						<hr
-							style={{
-								width: '100%',
-								height: '2px',
-								marginBlock: '2em',
-							}}
-						/>
+
+						<hr className="boardConfigModalHr-100" />
+
 						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t(1)}</button>
 					</div>
 				</div>

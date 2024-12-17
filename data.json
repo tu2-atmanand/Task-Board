@@ -91,7 +91,7 @@
         "filters": [],
         "filterPolarity": "0",
         "filterScope": "Both",
-        "name": "Time Based Workflow",
+        "name": "Editing 1",
         "index": 1,
         "showColumnTags": false,
         "showFilteredTags": true
@@ -161,7 +161,7 @@
         "filters": [],
         "filterPolarity": "0",
         "filterScope": "Both",
-        "name": "Tag Based Workflow",
+        "name": "Editing 2",
         "index": 2,
         "showColumnTags": false,
         "showFilteredTags": true
@@ -187,7 +187,7 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "1",
+      "taskCompletionFormat": "2",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "dailyNotesPluginComp": true,
       "dueDateFormat": "yyyy-MM-DD",
@@ -205,7 +205,8 @@
         "bug": "#ef1120dd",
         "bug/solver": "#223fde99",
         "feat": "#b50df2f2"
-      }
+      },
+      "editButtonAction": "popUp"
     }
   }
 }

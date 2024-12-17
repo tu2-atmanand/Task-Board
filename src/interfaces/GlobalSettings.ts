@@ -15,6 +15,14 @@ export interface scanFilters {
 	};
 }
 
+export enum EditButtonMode {
+	PopUp = "popUp",
+	NoteInTab = "noteInTab",
+	NoteInSplit = "noteInSplit",
+	NoteInWindow = "noteInWindow",
+	NoteInHover = "noteInHover",
+}
+
 export interface globalSettingsData {
 	lang: string;
 	scanFilters: scanFilters;
@@ -35,6 +43,7 @@ export interface globalSettingsData {
 	showFooter: boolean;
 	showVerticalScroll: boolean;
 	tagColors: { [tagName: string]: string };
+	editButtonAction: EditButtonMode;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -252,6 +261,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				"bug/solver": "#22f7de99",
 				feat: "#b50df2f2",
 			},
+			editButtonAction: EditButtonMode.PopUp,
 		},
 	},
 };

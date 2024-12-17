@@ -35,13 +35,9 @@ export class DeleteConfirmationModal extends Modal {
 		homeComponenet.createEl('h2', { text: t(60) });
 		homeComponenet.createEl('p', { text: this.mssg });
 
-		const buttonContainer = homeComponenet.createDiv('button-container');
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.gap = '1em';
+		const buttonContainer = homeComponenet.createDiv('deleteConfirmationModalHome-button-container');
 
 		const confirmButton = buttonContainer.createEl('button', { text: t(62) });
-		confirmButton.style.paddingBlock = '4px';
-		confirmButton.style.paddingInline = '25px';
 		confirmButton.classList.add('deleteTaskConfirmBtn');
 		confirmButton.addEventListener('click', () => {
 			this.onConfirm();
@@ -49,8 +45,6 @@ export class DeleteConfirmationModal extends Modal {
 		});
 
 		const cancelButton = buttonContainer.createEl('button', { text: t(63) });
-		cancelButton.style.paddingBlock = '4px';
-		cancelButton.style.paddingInline = '25px';
 		cancelButton.classList.add('deleteTaskCancelmBtn');
 		cancelButton.addEventListener('click', () => {
 			this.onCancel();

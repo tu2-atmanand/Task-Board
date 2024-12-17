@@ -147,7 +147,7 @@ const EditTaskContent: React.FC<{
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
-		if (previewContainerRef.current) {
+		if (previewContainerRef.current && formatedContent !== "") {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.empty();
 
@@ -275,7 +275,7 @@ const EditTaskContent: React.FC<{
 									// Return null if the line doesn't match the subtask pattern
 									return null;
 								})}
-								<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>{t(4)}</button>
+								<button className="EditTaskModalsubTaskAddButton" onClick={addNewSubTask}>{t(4)}</button>
 							</div>
 
 							<div className="EditTaskModalTabHeader">
@@ -289,7 +289,7 @@ const EditTaskContent: React.FC<{
 								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
 									<div className="EditTaskModalHomePreviewContainer">
 										<div className="EditTaskModalHomePreviewHeader">
-											<div style={{ fontWeight: '400', display: 'flex', flexDirection: 'row' }}>File : <div style={{ fontWeight: '500', paddingInline: '10px' }}>{filePath}</div></div>
+											<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t(169)} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
 												aria-label={t(168)}
@@ -368,12 +368,6 @@ const EditTaskContent: React.FC<{
 												color: tagColor,
 												border: `1px solid ${borderColor}`,
 												backgroundColor: backgroundColor,
-												borderRadius: '1em',
-												padding: '2px 8px',
-												marginRight: '2px',
-												display: 'inline-block',
-												whiteSpace: 'nowrap',
-												fontSize: 'small'
 											}}
 										>
 											{tag}
