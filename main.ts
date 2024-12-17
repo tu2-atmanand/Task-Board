@@ -75,16 +75,16 @@ export default class TaskBoard extends Plugin {
 
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
+
+			// Run scanVaultForTasks if scanVaultAtStartup is true
+			this.scanVaultAtStartup();
+
+			// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
+			this.loadTasksDataToSS();
+	
+			// Register the Kanban view
+			this.registerTaskBoardView();
 		});
-
-		// Run scanVaultForTasks if scanVaultAtStartup is true
-		this.scanVaultAtStartup();
-
-		// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
-		this.loadTasksDataToSS();
-
-		// Register the Kanban view
-		this.registerTaskBoardView();
 
 		this.registerTaskBoardStatusBar();
 	}
@@ -94,59 +94,6 @@ export default class TaskBoard extends Plugin {
 		onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
-
-	// async activateView(leafLayout: string) {
-	// 	let leaf: WorkspaceLeaf | null;
-	// 	const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
-
-	// 	function isFromMainWindow(leaf: WorkspaceLeaf): boolean {
-	// 		console.log(
-	// 			"isFromMainWindow :",
-	// 			leaf.containerEl.ownerDocument.defaultView
-	// 		);
-	// 		return "Notice" in leaf.containerEl.ownerDocument.defaultView;
-	// 	}
-
-	// 	if (leafLayout === "icon") {
-	// 		if (leaves.length) {
-	// 			if (isFromMainWindow(leaves[0])) {
-	// 				console.log("isFromMainWindow is TRUE");
-	// 				leaf = leaves[0];
-	// 			} else {
-	// 				console.log("isFromMainWindow is False...");
-	// 				// leaf = this.app.workspace.getLeaf("window");
-	// 				leaf = leaves[0];
-	// 			}
-	// 		} else {
-	// 			leaf = this.app.workspace.getLeaf("tab");
-	// 		}
-	// 	} else {
-	// 		if (leaves.length) {
-	// 			console.log(
-	// 				"Leaf already exists either in main window or in different window."
-	// 			);
-	// 			if (isFromMainWindow(leaves[0])) {
-	// 				console.log("isFromMainWindow is TRUE");
-	// 				leaf = leaves[0];
-	// 			} else {
-	// 				console.log("isFromMainWindow is False...");
-	// 				// leaf = this.app.workspace.getLeaf("window");
-	// 				leaf = leaves[0];
-	// 			}
-	// 		} else if (leafLayout === "tab") {
-	// 			leaf = this.app.workspace.getLeaf("tab");
-	// 		} else if (leafLayout === "window") {
-	// 			console.log(
-	// 				"No separate window exists, so creating a new window."
-	// 			);
-	// 			leaf = this.app.workspace.getLeaf("window");
-	// 		} else {
-	// 			leaf = this.app.workspace.getLeaf("tab");
-	// 		}
-	// 	}
-
-	// 	await leaf.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
-	// }
 
 	async activateView(leafLayout: string) {
 		let leaf: WorkspaceLeaf | null = null;
