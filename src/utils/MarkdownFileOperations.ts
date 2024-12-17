@@ -1,4 +1,5 @@
-import { TFile } from "obsidian";
+import { Notice, TFile } from "obsidian";
+
 import TaskBoard from "main";
 
 export const readDataOfVaultFiles = async (
@@ -11,7 +12,9 @@ export const readDataOfVaultFiles = async (
 			const fileData = await plugin.app.vault.cachedRead(file);
 			return fileData; // Return the raw content of the file
 		} else {
-			throw new Error(`File not found at path: ${filePath}`);
+			new Notice(`File not found at path: ${filePath}`);
+			console.error(`File not found at path: ${filePath}`);
+			throw `File not found at path: ${filePath}`;
 		}
 	} catch (error) {
 		console.error("Error reading file from vault:", error);
@@ -31,7 +34,8 @@ export const writeDataToVaultFiles = async (
 		if (file && file instanceof TFile) {
 			await plugin.app.vault.modify(file, content);
 		} else {
-			throw new Error(`File not found at path: ${filePath}`);
+			new Notice(`File not found at path: ${filePath}`);
+			console.error(`File not found at path: ${filePath}`);
 		}
 	} catch (error) {
 		console.error("Error writing to file in vault:", error);

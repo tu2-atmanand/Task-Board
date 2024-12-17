@@ -362,12 +362,12 @@ export const addTaskInActiveEditor = async (
 		// Get the active editor and the current cursor position
 		const activeEditor = app.workspace.activeEditor?.editor;
 		if (!activeEditor) {
-			throw new Error(
+			console.error(
 				"No active editor found. Please place your cursor in markdown file"
 			);
 		}
 
-		if (completeTask) {
+		if (completeTask && activeEditor) {
 			const cursorPosition = activeEditor.getCursor();
 
 			// Read the file content
