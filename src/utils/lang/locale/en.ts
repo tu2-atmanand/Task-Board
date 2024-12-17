@@ -35,7 +35,7 @@ const en: Lang = {
 	34: "Tag",
 	35: "No board selected to delete.",
 	36: "Plugin global settings",
-	37: "board settings",
+	37: "board",
 	38: "Board name",
 	39: "Name of the board which will appear as a tab in the tab header inside the plugin.",
 	40: "Show tags in the columns of type 'tagged'",
@@ -168,6 +168,7 @@ const en: Lang = {
 	167: "Delete Sub-Task",
 	168: "Hold CTRL button to open in new Window",
 	169: "File name",
+	170: "Your boards",
 };
 
 export default en;
