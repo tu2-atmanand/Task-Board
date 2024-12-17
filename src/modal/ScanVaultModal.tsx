@@ -84,7 +84,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 					const uniqueKey = `${filePath}-task-${taskIndex}`;
 					const descElement = taskRendererRef.current[uniqueKey];
 
-					if (descElement && formatedContent) {
+					if (descElement && formatedContent !== "") {
 						descElement.empty();
 						// Render task description using MarkdownUIRenderer
 						MarkdownUIRenderer.renderTaskDisc(

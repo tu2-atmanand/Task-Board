@@ -1512,7 +1512,7 @@
         ],
         "DailyNotes.md": [
             {
-                "id": 3567939017,
+                "id": 940460783,
                 "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
                 "body": [],
                 "time": "",
@@ -1648,6 +1648,26 @@
                 ],
                 "priority": 1,
                 "filePath": "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md",
+                "completed": ""
+            }
+        ],
+        "Daily_Notes/2024-12-17.md": [
+            {
+                "id": 1358662958,
+                "title": "Adding a task to see `cachedRead()` will surely work similar to `read()`",
+                "body": [
+                    "\tAdding a new line in body for testing.",
+                    "\t- Yes! its working. Will go with cachedRead then.",
+                    "\t- Let see if the new `vault.process()` works similar to the `vault.modify()`.",
+                    "\tAdding another line at the end of the body."
+                ],
+                "time": "",
+                "due": "2024-12-17",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-12-17.md",
                 "completed": ""
             }
         ]
