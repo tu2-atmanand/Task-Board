@@ -1,7 +1,7 @@
 {
 	"id": "task-board",
 	"name": "Task Board",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"minAppVersion": "1.4.13",
 	"description": "Manage all your tasks throghout your vault from a single board and much more...",
 	"author": "Atmanand Gauns",
