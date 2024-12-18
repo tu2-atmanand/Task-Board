@@ -74,7 +74,7 @@ const EditTaskContent: React.FC<{
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
-		setBodyContent(['\t- [ ] Add you text here...', ...updatedBodyContent].join('\n'));
+		setBodyContent([`\t- [ ] ${t(166)}`, ...updatedBodyContent].join('\n'));
 	};
 
 	const updateSubTaskContent = (index: number, value: string) => {
@@ -147,9 +147,9 @@ const EditTaskContent: React.FC<{
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
-		if (previewContainerRef.current) {
+		if (previewContainerRef.current && formatedContent !== "") {
 			// Clear previous content before rendering new markdown
-			previewContainerRef.current.innerHTML = '';
+			previewContainerRef.current.empty();
 
 			MarkdownUIRenderer.renderTaskDisc(
 				app,
@@ -265,7 +265,7 @@ const EditTaskContent: React.FC<{
 													enableBackground={0}
 													opacity={0.7}
 													style={{ marginInlineStart: '0.8em' }}
-													title="Delete Sub-Task"
+													title={t(167)}
 													onClick={() => removeSubTask(bodyLineIndex)}
 													cursor={'pointer'}
 												/>
@@ -275,7 +275,7 @@ const EditTaskContent: React.FC<{
 									// Return null if the line doesn't match the subtask pattern
 									return null;
 								})}
-								<button style={{ width: 'fit-content', alignSelf: 'end' }} onClick={addNewSubTask}>{t(4)}</button>
+								<button className="EditTaskModalsubTaskAddButton" onClick={addNewSubTask}>{t(4)}</button>
 							</div>
 
 							<div className="EditTaskModalTabHeader">
@@ -289,10 +289,10 @@ const EditTaskContent: React.FC<{
 								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
 									<div className="EditTaskModalHomePreviewContainer">
 										<div className="EditTaskModalHomePreviewHeader">
-											<div style={{ fontWeight: '400', display: 'flex', flexDirection: 'row' }}>File : <div style={{ fontWeight: '500', paddingInline: '10px' }}>{filePath}</div></div>
+											<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t(169)} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
-												aria-label="Hold CTRL button to open in new Window"
+												aria-label={t(168)}
 												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
 											>{t(27)}</button>
 										</div>
@@ -350,7 +350,7 @@ const EditTaskContent: React.FC<{
 							<input
 								className="EditTaskModalHome-tagValue"
 								type="text"
-								placeholder="Hit Enter after typing"
+								placeholder={t(148)}
 								onKeyDown={handleTagInput}  // Call handleTagInput on change
 							/>
 							{/* Render tags with cross icon */}
@@ -368,12 +368,6 @@ const EditTaskContent: React.FC<{
 												color: tagColor,
 												border: `1px solid ${borderColor}`,
 												backgroundColor: backgroundColor,
-												borderRadius: '1em',
-												padding: '2px 8px',
-												marginRight: '2px',
-												display: 'inline-block',
-												whiteSpace: 'nowrap',
-												fontSize: 'small'
 											}}
 										>
 											{tag}
@@ -418,8 +412,8 @@ export class AddOrEditTaskModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		const container = document.createElement("div");
-		contentEl.appendChild(container);
+		this.modalEl.setAttribute('data-type', 'task-board-view');
+		contentEl.setAttribute('data-type', 'task-board-view');
 
 		const root = ReactDOM.createRoot(this.contentEl);
 

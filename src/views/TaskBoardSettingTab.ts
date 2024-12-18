@@ -1,8 +1,8 @@
 // src/views/TaskBoardSettingTab.ts
 
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab } from "obsidian";
 
-import { SettingsManager } from "../services/TaskBoardSettingConstructUI";
+import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import type TaskBoard from "../../main";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";

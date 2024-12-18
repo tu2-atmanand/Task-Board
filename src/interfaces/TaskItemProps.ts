@@ -1,16 +1,17 @@
 import { App } from "obsidian";
 import { Board } from "./BoardConfigs";
 import TaskBoard from "main";
+import { t } from "src/utils/lang/helper";
 
 export interface TaskProps {
-	key: number
+	key: number;
 	app: App;
 	plugin: TaskBoard;
 	taskKey: number;
 	task: taskItem;
 	columnIndex: number;
 	activeBoardSettings: Board;
-	onEdit: () => void;
+	onEdit: (task: taskItem) => void;
 	onDelete: () => void;
 	onCheckboxChange: (task: taskItem) => void;
 	onSubTasksChange: (task: taskItem) => void;
@@ -57,10 +58,10 @@ export const priorityEmojis: { [key: number]: string } = {
 
 // Priority Options
 export const priorityOptions = [
-	{ value: 0, text: "NONE" },
-	{ value: 1, text: "Highest : 🔺" },
-	{ value: 2, text: "High : ⏫" },
-	{ value: 3, text: "Medium : 🔼" },
-	{ value: 4, text: "Low : 🔽" },
-	{ value: 5, text: "Lowest : ⏬" },
+	{ value: 0, text: t(160) },
+	{ value: 1, text: t(161) + " : 🔺" },
+	{ value: 2, text: t(162) + " : ⏫" },
+	{ value: 3, text: t(163) + " : 🔼" },
+	{ value: 4, text: t(164) + " : 🔽" },
+	{ value: 5, text: t(165) + " : ⏬" },
 ];

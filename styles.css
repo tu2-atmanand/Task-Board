@@ -6,20 +6,24 @@
 	padding-inline: 8px !important;
 } */
 
-.workspace-tabs .workspace-leaf .view-content {
+
+.workspace-leaf-content[data-type="task-board-view"] .view-content {
+	overflow: unset;
 	padding-block-start: 0 !important;
 }
 
-.workspace-leaf-content .view-content {
-	overflow: unset;
-}
-
-.modal {
+.modal[data-type="task-board-view"] {
 	width: auto;
 	min-height: fit-content;
 }
 
-/* src/styles/KanbanBoard.tsx */
+/* src/KanbanView.tsx */
+
+.task-board-ribbon-class {
+	color: var(--color-orange);
+}
+
+/* src/KanbanBoard.tsx */
 .kanbanBoard {
 	display: flex;
 	flex-direction: column;
@@ -308,6 +312,11 @@
 	text-decoration: var(--tag-decoration);
 	padding: var(--tag-padding-y) var(--tag-padding-x);
 	line-height: 1;
+	border-radius: 1em;
+	padding: 2px 8px;
+	margin-right: 2px;
+	display: inline-block;
+	white-space: nowrap;
 }
 
 .taskItemDate {
@@ -369,7 +378,7 @@
 	gap: 0.5em;
 }
 
-.taskItemiconButton {
+.taskItem .taskItemiconButton {
 	background: none;
 	background-color: transparent;
 	border: none;
@@ -380,19 +389,20 @@
 	align-items: center;
 	justify-content: center;
 	font-size: 1.2em;
-	/* Adjust size as needed */
-	transition: transform 0.2s;
-	/* Animation for hover effect */
+
+	opacity: 0;
+	transform: scale(0.9);
+	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.taskItemiconButton:hover {
-	transform: scale(1.1);
-	/* Slightly enlarge on hover */
+.taskItem:hover .taskItemiconButton {
+	opacity: 1;
+	transform: scale(1);
 }
 
 .taskItemiconButton:focus {
-	outline: none;
-	/* Remove default focus outline */
+	opacity: 1;
+	transform: scale(1);
 }
 
 
@@ -433,7 +443,8 @@
 .EditTaskModalHomeLeftSec {
 	display: flex;
 	flex-direction: column;
-	width: 40vw;
+	min-width: 500px;
+	width: 45vw;
 	max-width: 40vw;
 	flex-grow: 1;
 	max-height: 100%;
@@ -474,6 +485,12 @@
 
 .EditTaskModalsubTaskItemInput {
 	width: 100%;
+}
+
+.EditTaskModalsubTaskAddButton {
+	width: fit-content;
+	align-self: end;
+	cursor: pointer;
 }
 
 .EditTaskModalTabHeader {
@@ -523,6 +540,17 @@
 	align-items: center;
 }
 
+.EditTaskModalHomePreviewHeaderFilenameLabel {
+	font-weight: 400;
+	display: flex;
+	flex-direction: row;
+}
+
+.EditTaskModalHomePreviewHeaderFilenameValue {
+	font-weight: 500;
+	padding-inline: 10px
+}
+
 .EditTaskModalHomePreview ul {
 	padding-inline-start: 30px;
 	margin-top: 0.7em;
@@ -562,17 +590,21 @@
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
+	width: auto;
 }
 
 .EditTaskModalHomeOpenFileBtn:hover {
-	background-color: #0056b3;
+	background-color: var(--text-accent-hover);
 }
 
 .EditTaskModalHomePreviewBody {
 	height: 25vh;
 	overflow: auto;
 	border: var(--border-width) solid var(--table-header-border-color);
-	;
+}
+
+.task-list-item-checkbox {
+	vertical-align: middle;
 }
 
 .EditTaskModalBodyDescription {
@@ -589,7 +621,7 @@
 	border-radius: 5px;
 	padding: 0.5em;
 	min-width: 8vw;
-	max-width: 11vw;
+	max-width: 14vw;
 	box-sizing: border-box;
 }
 
@@ -613,6 +645,12 @@
 	gap: 2px;
 	margin-block: 5px;
 	flex-wrap: wrap;
+	border-radius: 1em;
+	padding: 2px 8px;
+	margin-right: 2px;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: small;
 }
 
 .EditTaskModalHomeSaveBtn {
@@ -643,6 +681,35 @@
 	align-items: center;
 }
 
+/* DeleteTaskConfirmationModal */
+
+.deleteConfirmationModalHome {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.7rem;
+}
+
+.deleteConfirmationModalHome-button-container {
+	display: flex;
+	gap: 1em;
+	margin-top: 1.5rem;
+}
+
+.deleteTaskConfirmBtn {
+	padding-block: 4px;
+	padding-inline: 25px;
+	cursor: pointer;
+}
+
+.deleteTaskCancelmBtn {
+	padding-block: 4px;
+	padding-inline: 25px;
+	cursor: pointer;
+}
+
 .deleteTaskConfirmBtn:hover {
 	background-color: red !important;
 	/* Change background to green on hover */
@@ -663,8 +730,17 @@
 	height: 100%;
 }
 
-.boardConfigModalHome hr {
-	border-color: hsl(calc(var(--accent-h) - 3), calc(var(--accent-s) * 0.9), calc(var(--accent-l) * 1.5));
+.boardConfigModalHr-50 {
+	width: 50%;
+	height: 2px;
+	margin: 0;
+	margin-bottom: 2em;
+}
+
+.boardConfigModalHr-100 {
+	width: 100%;
+	height: 2px;
+	margin: 0;
 }
 
 .boardConfigModalSidebar {
@@ -673,7 +749,6 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-between;
-	gap: 25em;
 	padding: 1em;
 	border-radius: 4px;
 	max-height: calc(var(--dialog-max-height) - 5vh);
@@ -694,6 +769,11 @@
 
 .boardConfigModalSidebarBtnArea hr {
 	margin: 0 !important;
+}
+
+.boardConfigModalSidebarBtnAreaAddBoard {
+	width: 100%;
+	cursor: pointer;
 }
 
 .boardConfigModalSidebarBtnAreaGlobal {
@@ -722,7 +802,13 @@
 
 .boardConfigModalSidebarSaveBtn {
 	width: 100%;
-	background-color: green !important;
+	background-color: var(--color-green) !important;
+	color: white !important;
+	cursor: pointer;
+}
+
+.boardConfigModalSidebarSaveBtn:hover {
+	background-color: var(--color-accent) !important
 }
 
 .boardConfigModalMainContent {
@@ -736,6 +822,7 @@
 .boardConfigModalMainContentBoardSettingTab,
 .pluginGlobalSettingsTab {
 	max-width: 50vw;
+	margin-inline-start: 1em;
 }
 
 .boardConfigModalMainContent-Active {
@@ -764,6 +851,19 @@
 	flex-direction: column;
 }
 
+.boardConfigModalSettingName {
+	color: var(--text-normal);
+	font-size: var(--font-ui-medium);
+	line-height: var(--line-height-tight);
+}
+
+.boardConfigModalSettingDescription {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	padding-top: var(--size-4-1);
+	line-height: var(--line-height-tight);
+}
+
 .boardConfigModalMainContent-Active-BodyColumnSec {
 	display: flex;
 	flex-direction: column;
@@ -784,11 +884,28 @@
 	margin-block: 0.5em;
 }
 
+.boardConfigModalColumnRowDragButton {
+	cursor: grab;
+}
+
+.boardConfigModalAddColumnButton {
+	width: 50% !important;
+	align-self: self-end !important;
+	margin-bottom: 1em;
+	cursor: pointer;
+}
+
 .boardConfigModalColumnRowContent {
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
 	gap: 0.5em;
+}
+
+.boardConfigModalColumnRowContentColumnType button {
+	width: 100%;
+	min-width: 5em;
+	max-width: 8em;
 }
 
 .boardConfigModalColumnRowContentColName {
@@ -801,19 +918,24 @@
 	max-width: 75px;
 }
 
+.boardConfigModalDeleteBoardBtn {
+	margin-block-start: 1em;
+	cursor: pointer;
+}
+
 .boardConfigModalDeleteBoardBtn:hover {
 	background-color: darkred;
 	color: white;
+}
+
+[data-rbd-drag-handle-context-id="0"] {
+	cursor: auto !important;
 }
 
 /* .modal-container.mod-dim {
 	min-width: fit-content;
 	min-height: fit-content;
 } */
-
-.modal-close-button {
-	z-index: 10;
-}
 
 
 /* /src/modal/AddColumnModal.tsx */
@@ -857,18 +979,76 @@
 }
 
 
-/* src/views/TaskBoardSettingTab.ts */
+/* /src/views/TaskBoardSettingConstructUI.ts */
 
-.TaskBoardSettingTab {
-	/* max-width: fit-content; */
-}
+/* .TaskBoardSettingTab {
+	max-width: fit-content;
+} */
 
 .TaskBoardSettingConstructUI {
 	margin-bottom: 5px;
 }
 
-.mainPluginTitle {
+.taskBoard-mainPluginTitle {
 	text-align: center;
+}
+
+.taskBoard-settings-tab-bar {
+	height: 2.5rem;
+	display: flex;
+	flex-direction: row;
+	position: sticky;
+	top: calc(-1 * var(--size-4-8));
+	box-shadow: var(--input-shadow);
+}
+
+.taskBoard-settings-tab-button {
+	flex: 1;
+	background-color: var(--background-secondary);
+	align-content: center;
+	text-align-last: center;
+	font-size: large;
+	font-weight: 700;
+	border: solid 1px var(--checkbox-color-hover);
+	border-radius: 4px;
+	color: var(--color-base-60);
+}
+
+.taskBoard-settings-tab-button-active {
+	background-color: var(--color-accent) !important;
+	color: var(--text-on-accent) !important;
+}
+
+.taskBoard-settings-tab-content {}
+
+.taskBoard-tab-section-desc {
+	text-align: center;
+}
+
+.taskBoard-filter-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.taskBoard-filter-label {
+	width: 80px;
+	font-weight: bold;
+	color: var(--color-red);
+}
+
+.taskBoard-filter-input {
+	flex-grow: 1;
+	margin-right: 10px;
+}
+
+.taskBoard-filter-dropdown {
+	text-align: center;
+}
+
+.taskBoard-global-settings-tab-tag-color-preview {
+	border-radius: 20px;
+	padding: 1px 10px;
 }
 
 .global-setting-tab-live-preview {
@@ -876,6 +1056,17 @@
 	padding-block: 1em;
 	border-radius: var(--radius-m);
 	background-color: var(--background-primary-alt);
+}
+
+.global-setting-tab-live-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.global-setting-tab-live-preview-label {
+	background-color: var(--background-primary);
+	text-align: center;
 }
 
 .settingTabFooterSection {
@@ -891,12 +1082,21 @@
 	margin-top: 1em;
 	align-items: center;
 	justify-content: center;
+	max-height: 60px;
+}
+
+.taskBoard-docs-section {
+	text-align: center;
+	background-color: var(--color-base-30);
+	margin-block: 0 !important;
+	padding-block: 1em;
+	border-radius: var(--radius-m);
 }
 
 
-/* /src/components/ReScanVaultModal.tsx */
+/* /src/components/ScanVaultModal.tsx */
 
-.reScanVaultModalHome {
+.scanVaultModalHome {
 	min-width: 40vw;
 	min-height: 40vh;
 	display: flex;
@@ -904,23 +1104,29 @@
 	justify-content: space-between;
 }
 
-.reScanVaultModalHome h2 {
+.scanVaultModalHome h2 {
 	margin-top: 0 !important;
 	margin-bottom: 1em;
+	align-self: center;
 }
 
-.reScanVaultModalHome p {
+.scanVaultModalHome p {
 	margin-block: 4px !important;
 }
 
-.reScanVaultModalHomeSecondSection {
+.scanVaultModalHomeSecondSection {
 	display: flex;
 	align-items: center;
 	margin-top: 10px;
 	gap: 1em;
 }
 
-.reScanVaultModalHomeSecondSectionButton {
+.scanVaultModalHomeSecondSectionProgressBarContainer {
+	flex-grow: 1;
+	width: 80%;
+}
+
+.scanVaultModalHomeSecondSectionButton {
 	padding: 10px 15px;
 	border: none;
 	border-radius: 4px;
@@ -929,22 +1135,21 @@
 	cursor: pointer;
 }
 
-.reScanVaultModalHomeSecondSectionButton:hover {
+.scanVaultModalHomeSecondSectionButton:hover {
 	background-color: #007bff;
 }
 
-.reScanVaultModalHomeThirdSection {
+.scanVaultModalHomeThirdSection {
 	display: flex;
 	flex-direction: row;
 	height: 50vh;
-	max-width: 50vw;
 	width: 50vw;
 	width: 100%;
 	margin-block: 20px;
 	justify-content: space-between;
 }
 
-.reScanVaultModalHomeTerminal {
+.scanVaultModalHomeTerminal {
 	height: 100%;
 	background-color: rgb(12 10 10);
 	color: rgb(109, 253, 140);
@@ -954,17 +1159,17 @@
 	max-height: 65vh;
 }
 
-.reScanVaultModalHomeTerminalSlideIn {
+.scanVaultModalHomeTerminalSlideIn {
 	transition: width 0.3s ease-in;
 	width: 100%;
 }
 
-.reScanVaultModalHomeTerminalSlideOut {
+.scanVaultModalHomeTerminalSlideOut {
 	transition: width 0.3s ease-out;
 	width: 0;
 }
 
-.reScanVaultModalHomeTasksCollected {
+.scanVaultModalHomeTasksCollected {
 	overflow-y: scroll;
 	position: sticky;
 	height: 100%;
@@ -982,4 +1187,8 @@
 .slideOut {
 	transition: width 0.3s ease-out;
 	width: 0;
+}
+
+.scanVaultModalHomeToggleButton {
+	margin-top: 20px;
 }

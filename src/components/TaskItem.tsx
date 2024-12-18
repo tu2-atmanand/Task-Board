@@ -6,6 +6,7 @@ import { TaskProps, taskItem } from '../interfaces/TaskItemProps';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
+import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
@@ -84,7 +85,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const element = subtaskTextRefs.current[uniqueKey];
 
 			if (element) {
-				element.innerHTML = ''; // Clear previous content
+				element.empty(); // Clear previous content
 
 				const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
@@ -109,7 +110,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const descElement = taskItemBodyDescriptionRenderer.current[uniqueKey];
 
 			if (descElement) {
-				descElement.innerHTML = '';
+				descElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
 					app,
@@ -131,7 +132,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement) {
-				titleElement.innerHTML = '';
+				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
 					app,
@@ -149,10 +150,20 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemFooterBtns');
-		if (element) {
-			markdownButtonHoverPreviewEvent(app, event, element, task.filePath);
+		if (element && event.ctrlKey) {
+			markdownButtonHoverPreviewEvent(app, event, task.filePath);
 		}
 	};
+
+	const onEditButtonClicked = (event: React.MouseEvent) => {
+		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
+			onEdit(task);
+		} else {
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(app, event, task.filePath);
+			event.ctrlKey = false;
+		}
+	}
 
 	// Helper function to convert a hex color to an RGBA string with the specified opacity
 	const hexToRgba = (hex: string, opacity: number): string => {
@@ -212,12 +223,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 												style={{
 													color: tagColor,
 													border: `1px solid ${borderColor}`,
-													backgroundColor: backgroundColor,
-													borderRadius: '1em',
-													padding: '2px 8px',
-													marginRight: '2px',
-													display: 'inline-block',
-													whiteSpace: 'nowrap'
+													backgroundColor: backgroundColor
 												}}
 											>
 												{tag}
@@ -235,7 +241,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null;
 			}
 		} catch (error) {
-			console.log("Getting error while trying to render Header: ", error);
+			console.log("renderHeader : Getting error while trying to render Header: ", error);
 			return null;
 		}
 	};
@@ -257,11 +263,11 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 									{task.due ? `📅${task.due}` : ''}
 								</div>
 							)}
-							<div className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-								<div id="taskItemFooterBtns" className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEdit} title={t(8)} />
+							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+								<div className="taskItemiconButton taskItemiconButtonEdit">
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t(8)} />
 								</div>
-								<div className="taskItemiconButton">
+								<div className="taskItemiconButton taskItemiconButtonDelete">
 									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
 								</div>
 							</div>
@@ -272,7 +278,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null
 			}
 		} catch (error) {
-			console.log("Getting error while trying to render Footer : ", error);
+			console.log("renderFooter : Getting error while trying to render Footer : ", error);
 			return null;
 		}
 	};
@@ -322,7 +328,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null;
 			}
 		} catch (error) {
-			console.log('Getting error while trying to render the SubTasks: ', error);
+			console.log('renderSubTasks : Getting error while trying to render the SubTasks: ', error);
 			return null;
 		}
 	};
@@ -355,7 +361,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return null
 			}
 		} catch (error) {
-			console.log("Getting error while trying to print the Description : ", error);
+			console.log("renderTaskDescriptoin : Getting error while trying to print the Description : ", error);
 			return null;
 		}
 	};

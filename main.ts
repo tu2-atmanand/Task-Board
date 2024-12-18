@@ -26,7 +26,7 @@ import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
@@ -40,6 +40,8 @@ export default class TaskBoard extends Plugin {
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
 	IsTasksJsonChanged: boolean;
+	private _leafIsActive: boolean; // Private property to track leaf state
+	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -51,13 +53,15 @@ export default class TaskBoard extends Plugin {
 		this.editorModified = false;
 		this.currentModifiedFile = null;
 		this.IsTasksJsonChanged = false;
+		this._leafIsActive = false;
+		this.ribbonIconEl = null;
 	}
 
 	async onload() {
-		console.log("TaskBoard : loading plugin ...");
+		console.log("TaskBoard : Loading plugin ...");
 
 		//Creates a Icon on Ribbon Bar
-		this.getRibbonIcon();
+		await this.getRibbonIcon();
 
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
@@ -72,53 +76,113 @@ export default class TaskBoard extends Plugin {
 
 			// Register few commands
 			this.registerCommands();
+
+			// For non-realtime scanning and scanning last modified files
+			this.createLocalStorageAndScanModifiedFiles();
+
+			// Run scanVaultForTasks if scanVaultAtStartup is true
+			this.scanVaultAtStartup();
+
+			// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
+			this.loadTasksDataToSS();
+
+			// Register the Kanban view
+			this.registerTaskBoardView();
 		});
-
-		this.createLocalStorageAndScanModifiedFiles();
-
-		// Run scanVaultForTasks if scanVaultAtStartup is true
-		this.scanVaultAtStartup();
-
-		// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
-		this.loadTasksDataToSS();
-
-		// Register the Kanban view
-		this.registerTaskBoardView();
 
 		this.registerTaskBoardStatusBar();
 	}
 
-	getRibbonIcon() {
-		// Create a ribbon icon to open the Kanban board view
-		const ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(4), () => {
-			this.app.workspace
-				.getLeaf(true)
-				.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
-		});
-		ribbonIconEl.addClass("task-board-ribbon-class");
+	onunload() {
+		console.log("TaskBoard : Unloading plugin...");
+		onUnloadSave(this.plugin);
+		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
-	onFileModifiedAndLostFocus() {
-		if (this.editorModified && this.currentModifiedFile) {
-			this.realTimeScanning.onFileChange(
-				this.currentModifiedFile,
-				this.settings.data.globalSettings.realTimeScanning,
-				this.settings.data.globalSettings.scanFilters
-			);
+	async activateView(leafLayout: string) {
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 
-			// Reset the editorModified flag after the scan.
-			this.editorModified = false;
+		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
+			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
+			return "Notice" in leaf.view.containerEl.ownerDocument.defaultView;
+		}
+
+		// Separate leaves into MainWindow and SeparateWindow categories
+		const mainWindowLeaf = leaves.find((leaf) => isFromMainWindow(leaf));
+		const separateWindowLeaf = leaves.find(
+			(leaf) => !isFromMainWindow(leaf)
+		);
+
+		if (leafLayout === "icon") {
+			// Focus on any existing leaf, prioritizing MainWindow
+			leaf =
+				mainWindowLeaf ||
+				separateWindowLeaf ||
+				this.app.workspace.getLeaf("tab");
+		} else if (leafLayout === "tab") {
+			// Check if a leaf exists in MainWindow
+			if (mainWindowLeaf) {
+				// Prevent duplicate in MainWindow
+				leaf = mainWindowLeaf;
+			} else {
+				// Allow opening a new leaf in MainWindow
+				leaf = this.app.workspace.getLeaf("tab");
+			}
+		} else if (leafLayout === "window") {
+			// Check if a leaf exists in SeparateWindow
+			if (separateWindowLeaf) {
+				// Prevent duplicate in SeparateWindow
+				leaf = separateWindowLeaf;
+			} else {
+				// Allow opening a new leaf in SeparateWindow
+				leaf = this.app.workspace.getLeaf("window");
+			}
+		} else {
+			// Default behavior: open in MainWindow
+			leaf = this.app.workspace.getLeaf("tab");
+		}
+
+		// Open or focus the leaf
+		if (leaf) {
+			this.leafIsActive = true;
+			await leaf.setViewState({
+				type: VIEW_TYPE_TASKBOARD,
+				active: true,
+			});
+			this.app.workspace.revealLeaf(leaf);
 		}
 	}
 
-	onunload() {
-		console.log("TaskBoard : unloading plugin...");
-		onUnloadSave(this.plugin);
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
+	async getRibbonIcon() {
+		// Create a ribbon icon to open the Kanban board view
+		this.ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
+			this.activateView("icon");
+
+			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
+			// 	active: true,
+			// 	reveal: true,
+			// });
+		});
+	}
+	get leafIsActive(): boolean {
+		return this._leafIsActive;
+	}
+	set leafIsActive(value: boolean) {
+		this._leafIsActive = value;
+		if (this._leafIsActive) {
+			this.ribbonIconEl?.addClass("task-board-ribbon-class");
+		} else {
+			this.ribbonIconEl?.removeClass("task-board-ribbon-class");
+		}
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
 	}
 
 	async saveSettings() {
@@ -135,13 +199,14 @@ export default class TaskBoard extends Plugin {
 		} else {
 			localStorage.setItem(
 				"taskBoardLang",
-				this.settings.data.globalSettings.lang
+				// this.settings.data.globalSettings.lang
+				"en"
 			);
 		}
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning value is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
+		// Following line will create a localStorage if the realTimeScanning setting is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
 		this.realTimeScanning.initializeStack(
 			this.settings.data.globalSettings.realTimeScanning
 		);
@@ -162,19 +227,19 @@ export default class TaskBoard extends Plugin {
 	registerTaskBoardView() {
 		this.registerView(
 			VIEW_TYPE_TASKBOARD,
-			(leaf) => new KanbanView(this.app, this, leaf)
+			(leaf) => new KanbanView(this, leaf)
 		);
 	}
 
 	registerTaskBoardStatusBar() {
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		// const statusBarItemEl = this.addStatusBarItem();
-		// statusBarItemEl.setText("Total # Tasks Pending");
+		// statusBarItemEl.setText("Next task in # min");
 	}
 
 	registerCommands() {
 		this.addCommand({
-			id: "command-1",
+			id: "add-new-task",
 			name: t(131),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
@@ -187,43 +252,30 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "command-2",
+			id: "open-task-board",
 			name: t(132),
 			callback: () => {
-				this.app.workspace
-					.getLeaf(true)
-					.setViewState({ type: VIEW_TYPE_TASKBOARD, active: true });
+				this.activateView("tab");
 			},
 		});
 		this.addCommand({
-			id: "command-3",
+			id: "open-task-board-new-window",
 			name: t(133),
 			callback: () => {
-				this.app.workspace.getLeaf("window").setViewState({
-					type: VIEW_TYPE_TASKBOARD,
-					active: true,
-				});
+				this.activateView("window");
 			},
 		});
-		// // Add a command to Re-Scan the whole Vault
-		// this.addCommand({
-		// 	id: "command-6",
-		// 	name: "Re-Scan Vault",
-		// 	callback: () => {
-		// 		this.scanningVault.scanVaultForTasks();
-		// 	},
-		// });
 
 		// // TODO : Remove this command before publishing, DEV commands
 		// this.addCommand({
-		// 	id: "command-4",
+		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
 		// 		writeTasksJsonToDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
-		// 	id: "command-5",
+		// 	id: "5",
 		// 	name: "DEV : REFRESH_COLUMN",
 		// 	callback: () => {
 		// 		eventEmitter.emit("REFRESH_COLUMN");
@@ -236,7 +288,7 @@ export default class TaskBoard extends Plugin {
 		this.registerInterval(
 			window.setInterval(async () => {
 				await writeTasksFromSessionStorageToDisk(this.plugin);
-			}, 10 * 60 * 1000)
+			}, 5 * 60 * 1000)
 		);
 
 		this.registerEvent(
@@ -262,25 +314,25 @@ export default class TaskBoard extends Plugin {
 			this.onFileModifiedAndLostFocus();
 		});
 
-		this.registerEvent(
-			this.app.vault.on("create", (file) => {
-				// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("rename", (file) => {
-				// console.log(
-				// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
-				// );
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("delete", (file) => {
-				// console.log(
-				// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-				// );
-			})
-		);
+		// this.registerEvent(
+		// 	this.app.vault.on("create", (file) => {
+		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("rename", (file) => {
+		// 		// console.log(
+		// 		// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
+		// 		// );
+		// 	})
+		// );
+		// this.registerEvent(
+		// 	this.app.vault.on("delete", (file) => {
+		// 		// console.log(
+		// 		// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
+		// 		// );
+		// 	})
+		// );
 
 		const closeButton = document.querySelector<HTMLElement>(
 			".titlebar-button.mod-close"
@@ -446,21 +498,34 @@ export default class TaskBoard extends Plugin {
 
 		// this.registerEvent(
 		// 	this.app.workspace.on("editor-menu", (menu, editor, view) => {
-		// 		const leafIsMarkdown = view instanceof MarkdownView;
+		// 		// const leafIsMarkdown = view instanceof MarkdownView;
 		// 		const leafIsKanban = view instanceof KanbanView;
 
 		// 		if (leafIsKanban) {
 		// 			console.log("MENU : If the fileIsFile ");
-		// 			menu.addItem((item) => {
-		// 				item.setTitle("Refresh Board")
-		// 					.setIcon(RefreshIcon)
-		// 					.setSection("pane")
-		// 					.onClick(() => {
-		// 						eventEmitter.emit("REFRESH_BOARD");
-		// 					});
-		// 			});
+		// 			// menu.addItem((item) => {
+		// 			// 	item.setTitle("Refresh Board")
+		// 			// 		.setIcon(RefreshIcon)
+		// 			// 		.setSection("pane")
+		// 			// 		.onClick(() => {
+		// 			// 			eventEmitter.emit("REFRESH_BOARD");
+		// 			// 		});
+		// 			// });
 		// 		}
 		// 	})
 		// );
+	}
+
+	async onFileModifiedAndLostFocus() {
+		if (this.editorModified && this.currentModifiedFile) {
+			await this.realTimeScanning.onFileChange(
+				this.currentModifiedFile,
+				this.settings.data.globalSettings.realTimeScanning,
+				this.settings.data.globalSettings.scanFilters
+			);
+
+			// Reset the editorModified flag after the scan.
+			this.editorModified = false;
+		}
 	}
 }

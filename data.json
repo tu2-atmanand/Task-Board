@@ -1,9 +1,18 @@
 {
-  "version": "0.15.0",
+  "version": "",
   "data": {
     "boardConfigs": [
       {
         "columns": [
+          {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "data": {
+              "name": "Undated Tasks",
+              "index": 5
+            }
+          },
           {
             "colType": "dated",
             "active": true,
@@ -69,15 +78,6 @@
             }
           },
           {
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Undated Tasks",
-              "index": 5
-            }
-          },
-          {
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -88,13 +88,10 @@
             }
           }
         ],
-        "filters": [
-          "#Bug",
-          "#bug/solver"
-        ],
+        "filters": [],
         "filterPolarity": "0",
         "filterScope": "Both",
-        "name": "Testing This Board",
+        "name": "Editing 1",
         "index": 1,
         "showColumnTags": false,
         "showFilteredTags": true
@@ -106,7 +103,7 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Untagged",
+              "name": "Backlog",
               "index": 1
             }
           },
@@ -115,9 +112,9 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Bugs in Project",
+              "name": "Can Start working",
               "index": 2,
-              "coltag": "Bug"
+              "coltag": "pending"
             }
           },
           {
@@ -125,9 +122,9 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Features Pending",
+              "name": "In Progress",
               "index": 3,
-              "coltag": "feat"
+              "coltag": "working"
             }
           },
           {
@@ -135,7 +132,7 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Test Task",
+              "name": "Testing",
               "index": 4,
               "coltag": "Test"
             }
@@ -145,22 +142,13 @@
             "active": true,
             "collapsed": false,
             "data": {
-              "name": "Note Till Task is Done",
+              "name": "Done",
               "index": 5,
-              "coltag": "Note"
+              "coltag": "done"
             }
           },
           {
-            "colType": "otherTags",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Other Tags",
-              "index": 6
-            }
-          },
-          {
-            "colType": "completed",
+            "colType": "Completed",
             "active": true,
             "collapsed": false,
             "data": {
@@ -173,92 +161,35 @@
         "filters": [],
         "filterPolarity": "0",
         "filterScope": "Both",
-        "name": "Tag Based Board",
+        "name": "Editing 2",
         "index": 2,
         "showColumnTags": false,
         "showFilteredTags": true
-      },
-      {
-        "name": "All types of Columns",
-        "index": 3,
-        "columns": [
-          {
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Past Tasks",
-              "index": 1,
-              "range": {
-                "rangedata": {
-                  "from": -1,
-                  "to": 0
-                }
-              }
-            }
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Test Name Tag Column",
-              "index": 2,
-              "coltag": "Test"
-            }
-          },
-          {
-            "colType": "untagged",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Untagged Tasks",
-              "index": 3
-            }
-          },
-          {
-            "colType": "otherTags",
-            "active": true,
-            "collapsed": false,
-            "data": {
-              "name": "Other Tags Tasks",
-              "index": 4
-            }
-          }
-        ],
-        "showColumnTags": true,
-        "showFilteredTags": true,
-        "filterPolarity": "0"
       }
     ],
     "globalSettings": {
+      "lang": "uk",
       "scanFilters": {
         "files": {
           "polarity": 2,
-          "values": [
-            "MyReadme.md"
-          ]
+          "values": []
         },
         "folders": {
           "polarity": 2,
           "values": [
-            "Daily_Notes",
-            "DocsForPlugin"
+            "XploreProgram"
           ]
         },
         "tags": {
           "polarity": 3,
-          "values": [
-            "#Test",
-            "#important"
-          ]
+          "values": []
         }
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
       "taskCompletionFormat": "2",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
-      "dailyNotesPluginComp": false,
+      "dailyNotesPluginComp": true,
       "dueDateFormat": "yyyy-MM-DD",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
@@ -271,12 +202,11 @@
       "showFooter": true,
       "showVerticalScroll": false,
       "tagColors": {
-        "Test": "#10da0cEE",
-        "Bug": "#E6090EEE",
-        "bug/solver": "#22f7eeff",
-        "feat": "#d50df2ff"
+        "bug": "#ef1120dd",
+        "bug/solver": "#223fde99",
+        "feat": "#b50df2f2"
       },
-      "lang": "en"
+      "editButtonAction": "popUp"
     }
   }
 }

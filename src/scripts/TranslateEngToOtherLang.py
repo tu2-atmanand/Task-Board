@@ -28,6 +28,12 @@ def load_en_file():
     matches = re.findall(r'(\d+):\s*"(.+?)"', en_data)
     return {int(k): v for k, v in matches}
 
+lang_code_map = {
+    'ptBR': 'pt-BR',
+    'zhTW': 'zh-TW',
+    'zhCN': 'zh-CN'
+}
+
 # Function to update other language files with translations
 def update_lang_file(lang_code, keys, en_dict):
     lang_file = os.path.join(lang_folder, f'{lang_code}.ts')
@@ -40,11 +46,14 @@ def update_lang_file(lang_code, keys, en_dict):
     for key, value in matches:
         lang_dict[int(key)] = value
 
+    mapped_lang_code = lang_code_map.get(lang_code, lang_code)
+    print(f"\n\n Following is the mapped lang_code : {mapped_lang_code}\n\n")
     # Update the dictionary with new translations
-    translator = get_translator(lang_code)
+    translator = get_translator(mapped_lang_code)
     for key in keys:
         original_text = en_dict[key]
-        translated_text = translate_or_prompt(lang_code, original_text, translator)
+        translated_text = translate_or_prompt(mapped_lang_code, original_text, translator)
+        translated_text = translated_text.replace('"', "'")
         print(f"\nOriginal Text : {original_text} \nTranslated Text : {translated_text}\n")
         lang_dict[key] = translated_text
 

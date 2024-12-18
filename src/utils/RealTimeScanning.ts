@@ -58,8 +58,8 @@ export class RealTimeScanning {
 		await this.saveStack();
 	}
 
-	getFileFromPath(filePath: string): TFile {
-		return this.plugin.app.vault.getAbstractFileByPath(filePath) as TFile;
+	getFileFromPath(filePath: string): TFile | null {
+		return this.plugin.app.vault.getFileByPath(filePath);
 	}
 
 	async onFileChange(

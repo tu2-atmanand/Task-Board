@@ -1,5 +1,7 @@
-import { TFile } from "obsidian";
+import { Notice, TFile } from "obsidian";
+
 import TaskBoard from "main";
+import { t } from "./lang/helper";
 
 export const readDataOfVaultFiles = async (
 	plugin: TaskBoard,
@@ -8,10 +10,12 @@ export const readDataOfVaultFiles = async (
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
-			const fileData = await plugin.app.vault.read(file);
+			const fileData = await plugin.app.vault.cachedRead(file);
 			return fileData; // Return the raw content of the file
 		} else {
-			throw new Error(`File not found at path: ${filePath}`);
+			new Notice(`${t(171)} ${filePath}`);
+			console.error(`File not found at path: ${filePath}`);
+			throw `File not found at path: ${filePath}`;
 		}
 	} catch (error) {
 		console.error("Error reading file from vault:", error);
@@ -19,22 +23,40 @@ export const readDataOfVaultFiles = async (
 	}
 };
 
-
-
 export const writeDataToVaultFiles = async (
 	plugin: TaskBoard,
 	filePath: string,
-	content: string
+	newContent: string
 ): Promise<void> => {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
-			await plugin.app.vault.modify(file, content);
+			await plugin.app.vault.modify(file, newContent);
 		} else {
-			throw new Error(`File not found at path: ${filePath}`);
+			new Notice(`${t(171)} ${filePath}`);
+			console.error(`File not found at path: ${filePath}`);
 		}
 	} catch (error) {
 		console.error("Error writing to file in vault:", error);
 		throw error;
 	}
 };
+
+// export const writeDataToVaultFiles = async (
+// 	plugin: TaskBoard,
+// 	filePath: string,
+// 	newContent: string
+// ): Promise<void> => {
+// 	try {
+// 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
+// 		if (file && file instanceof TFile) {
+// 			await plugin.app.vault.process(file, () => newContent);
+// 		} else {
+// 			new Notice(`File not found at path: ${filePath}`);
+// 			console.error(`File not found at path: ${filePath}`);
+// 		}
+// 	} catch (error) {
+// 		console.error("Error writing to file in vault:", error);
+// 		throw error;
+// 	}
+// };
