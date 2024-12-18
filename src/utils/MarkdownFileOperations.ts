@@ -23,25 +23,6 @@ export const readDataOfVaultFiles = async (
 	}
 };
 
-// export const writeDataToVaultFiles = async (
-// 	plugin: TaskBoard,
-// 	filePath: string,
-// 	newContent: string
-// ): Promise<void> => {
-// 	try {
-// 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
-// 		if (file && file instanceof TFile) {
-// 			await plugin.app.vault.modify(file, newContent);
-// 		} else {
-// 			console.error(`File not found at path: ${filePath}`);
-// 			new Notice(`File not found at path: ${filePath}`);
-// 		}
-// 	} catch (error) {
-// 		console.error("Error writing to file in vault:", error);
-// 		throw error;
-// 	}
-// };
-
 export const writeDataToVaultFiles = async (
 	plugin: TaskBoard,
 	filePath: string,
@@ -50,7 +31,7 @@ export const writeDataToVaultFiles = async (
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
-			await plugin.app.vault.process(file, () => newContent);
+			await plugin.app.vault.modify(file, newContent);
 		} else {
 			new Notice(`${t(171)} ${filePath}`);
 			console.error(`File not found at path: ${filePath}`);
@@ -60,3 +41,22 @@ export const writeDataToVaultFiles = async (
 		throw error;
 	}
 };
+
+// export const writeDataToVaultFiles = async (
+// 	plugin: TaskBoard,
+// 	filePath: string,
+// 	newContent: string
+// ): Promise<void> => {
+// 	try {
+// 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
+// 		if (file && file instanceof TFile) {
+// 			await plugin.app.vault.process(file, () => newContent);
+// 		} else {
+// 			new Notice(`File not found at path: ${filePath}`);
+// 			console.error(`File not found at path: ${filePath}`);
+// 		}
+// 	} catch (error) {
+// 		console.error("Error writing to file in vault:", error);
+// 		throw error;
+// 	}
+// };
