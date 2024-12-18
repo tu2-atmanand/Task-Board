@@ -366,12 +366,11 @@ export class SettingsManager {
 		Object.entries(tagColors).forEach(([tagName, color]) => {
 			// Create the preview element after adding inputs and buttons
 			const previewElement = document.createElement("span");
-			previewElement.className = "tag-color-preview";
-			previewElement.textContent = tagName; // Show the tag name as text
-			previewElement.style.color = color; // Set text color to 'newColor'
-			previewElement.style.border = `1px solid ${color}`; // Set border with 'newColor'
-			previewElement.style.borderRadius = "20px"; // Set border-radius
-			previewElement.style.padding = "1px 10px"; // Add padding inside the border
+			previewElement.className =
+				"taskBoard-global-settings-tab-tag-color-preview";
+			previewElement.textContent = tagName;
+			previewElement.style.color = color;
+			previewElement.style.border = `1px solid ${color}`;
 
 			// Convert the color to 20% opacity for the background
 			let rgbaColor = colorTo20PercentOpacity(color);

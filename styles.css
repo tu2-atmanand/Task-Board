@@ -1046,6 +1046,11 @@
 	text-align: center;
 }
 
+.taskBoard-global-settings-tab-tag-color-preview {
+	border-radius: 20px;
+	padding: 1px 10px;
+}
+
 .global-setting-tab-live-preview {
 	padding: 5px;
 	padding-block: 1em;
