@@ -169,6 +169,14 @@ const en: Lang = {
 	168: "Hold CTRL button to open in new Window",
 	169: "File name",
 	170: "Your boards",
+	171: "File not found at path:",
+	172: "Edit button mode",
+	173: "Select how should the parent note open. Double click on the card to open the note.",
+	174: "Use edit task window feature",
+	175: "Open note in new tab",
+	176: "Open note in right split",
+	177: "Open note in new window",
+	178: "Open note in hover-preview",
 };
 
 export default en;
