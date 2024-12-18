@@ -1682,6 +1682,26 @@
                 "filePath": "Daily_Notes/2024-12-17.md",
                 "completed": ""
             }
+        ],
+        "Daily_Notes/2024-12-18.md": [
+            {
+                "id": 947820044,
+                "title": "Adding a new task for testing the following.",
+                "body": [
+                    "\t- If I read using `cachedRead()` and then write using `vault.modify()`. Will this be same as that of reading using `read()` and writing using  `vault.modify()`.",
+                    "\t- Lets see if this will work.",
+                    "\t- I have made some changes into the file using editor, so in the `cachedRead()` should have the latest changes.",
+                    "\t- Now the file has been closed, so this things should be written to the file in background."
+                ],
+                "time": "",
+                "due": "2024-12-18",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-12-18.md",
+                "completed": ""
+            }
         ]
     },
     "Completed": {
