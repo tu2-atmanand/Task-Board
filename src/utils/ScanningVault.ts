@@ -1,6 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment } from "obsidian";
+import { TFile, moment as _moment } from "obsidian";
 import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
 import {
 	scanFilterForFilesNFolders,
@@ -13,19 +13,17 @@ import { priorityEmojis } from "src/interfaces/TaskItemProps";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
 
 export class ScanningVault {
-	app: App;
 	plugin: TaskBoard;
 	tasks: any = { Pending: {}, Completed: {} };
 	TaskDetected: boolean;
 
-	constructor(app: App, plugin: TaskBoard) {
-		this.app = app;
+	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
 		this.TaskDetected = false;
 	}
 
 	async scanVaultForTasks() {
-		const files = this.app.vault.getMarkdownFiles();
+		const files = this.plugin.app.vault.getMarkdownFiles();
 		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
 
 		for (const file of files) {
@@ -110,7 +108,7 @@ export class ScanningVault {
 		for (const file of files) {
 			if (file !== null) {
 				const fileNameWithPath = file.path;
-				const fileContent = await this.app.vault.read(file);
+				const fileContent = await this.plugin.app.vault.read(file);
 				const lines = fileContent.split("\n");
 				const newPendingTasks: any[] = [];
 				const newCompletedTasks: any[] = [];

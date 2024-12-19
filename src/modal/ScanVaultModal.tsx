@@ -155,10 +155,10 @@ export class ScanVaultModal extends Modal {
 	scanningVault: ScanningVault;
 	plugin: TaskBoard;
 
-	constructor(app: App, plugin: TaskBoard) {
-		super(app);
+	constructor(plugin: TaskBoard) {
+		super(plugin.app);
 		this.plugin = plugin;
-		this.scanningVault = new ScanningVault(app, plugin);
+		this.scanningVault = new ScanningVault(plugin);
 	}
 
 	onOpen() {

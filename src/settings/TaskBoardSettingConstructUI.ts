@@ -16,9 +16,9 @@ export class SettingsManager {
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData | null = null;
 
-	constructor(app: App, plugin: TaskBoard) {
-		this.app = app;
+	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
+		this.app = plugin.app;
 		this.win = window;
 	}
 

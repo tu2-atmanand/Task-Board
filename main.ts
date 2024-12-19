@@ -31,7 +31,6 @@ import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
 export default class TaskBoard extends Plugin {
-	app: App;
 	plugin: TaskBoard;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
@@ -46,10 +45,9 @@ export default class TaskBoard extends Plugin {
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
 		this.plugin = this;
-		this.app = this.plugin.app;
 		this.settings = DEFAULT_SETTINGS;
-		this.scanningVault = new ScanningVault(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
+		this.scanningVault = new ScanningVault(this.plugin);
+		this.realTimeScanning = new RealTimeScanning(this.plugin);
 		this.editorModified = false;
 		this.currentModifiedFile = null;
 		this.IsTasksJsonChanged = false;
@@ -245,7 +243,7 @@ export default class TaskBoard extends Plugin {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeEditor && activeFile) {
-					openAddNewTaskModal(this.app, this.plugin, activeFile);
+					openAddNewTaskModal(this.plugin, activeFile);
 				} else {
 					new Notice(t(147));
 				}

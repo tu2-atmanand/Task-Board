@@ -12,7 +12,6 @@ import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import TaskItem from './TaskItem';
-import { markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from 'src/utils/lang/helper';
 
@@ -99,7 +98,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	const handleEditTask = (task: taskItem) => {
 		if (plugin.settings.data.globalSettings.editButtonAction === EditButtonMode.PopUp) {
 			const editModal = new AddOrEditTaskModal(
-				app,
 				plugin,
 				(updatedTask) => {
 					updatedTask.filePath = task.filePath;

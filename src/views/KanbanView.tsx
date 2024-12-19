@@ -41,7 +41,7 @@ export class KanbanView extends ItemView {
 
 	async onOpen() {
 		this.addAction(ScanVaultIcon, t(5), () => {
-			openScanVaultModal(this.app, this.plugin);
+			openScanVaultModal(this.plugin);
 		});
 
 		await this.loadBoards();
@@ -61,8 +61,8 @@ export class KanbanView extends ItemView {
 		this.root.render(
 			<StrictMode>
 				<KanbanBoard
+						plugin={this.plugin}
 					app={this.app}
-					plugin={this.plugin}
 					boardConfigs={this.boards}
 				/>,
 			</StrictMode>,

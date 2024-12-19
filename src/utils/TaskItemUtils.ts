@@ -446,7 +446,6 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 };
 
 export const addTaskInActiveEditor = async (
-	app: App,
 	plugin: TaskBoard,
 	newTask: taskItem
 ) => {
@@ -458,7 +457,7 @@ export const addTaskInActiveEditor = async (
 			throw "taskElementsFormatter returned empty string";
 
 		// Get the active editor and the current cursor position
-		const activeEditor = app.workspace.activeEditor?.editor;
+		const activeEditor = plugin.app.workspace.activeEditor?.editor;
 		if (!activeEditor) {
 			console.error(
 				"No active editor found. Please place your cursor in markdown file"

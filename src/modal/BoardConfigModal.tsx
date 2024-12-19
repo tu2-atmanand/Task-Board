@@ -488,17 +488,17 @@ export class BoardConfigureModal extends Modal {
 	onSave: (updatedBoards: Board[]) => void;
 
 	constructor(
-		app: App,
 		plugin: TaskBoard,
 		boards: Board[],
 		activeBoardIndex: number,
 		onSave: (updatedBoards: Board[]) => void
 	) {
-		super(app);
+		super(plugin.app);
+		this.app = plugin.app;
 		this.boards = boards;
 		this.activeBoardIndex = activeBoardIndex;
 		this.onSave = onSave;
-		this.settingsManager = new SettingsManager(app, plugin);
+		this.settingsManager = new SettingsManager(plugin);
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
 		this.modalEl.setAttribute('data-type', 'task-board-view');

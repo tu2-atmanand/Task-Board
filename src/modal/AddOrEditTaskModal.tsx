@@ -1,17 +1,18 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
+import { Component, Modal } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import ReactDOM, { Root } from "react-dom/client";
 import { extractBody, extractCompletionDate, extractDueDate, extractPriority, extractTags, extractTime, extractTitle } from "src/utils/ScanningVault";
 import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
+import { useApp } from "src/services/AppHook";
 
 const taskItemEmpty = {
 	id: 0,
@@ -27,7 +28,6 @@ const taskItemEmpty = {
 
 // Functional React component for the modal content
 const EditTaskContent: React.FC<{
-	app: App,
 	plugin: TaskBoard,
 	root: HTMLElement,
 	task?: taskItem,
@@ -35,7 +35,7 @@ const EditTaskContent: React.FC<{
 	filePath: string;
 	onSave: (updatedTask: taskItem) => void;
 	onClose: () => void;
-}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose }) => {
+}> = ({ plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose }) => {
 	const [title, setTitle] = useState(task.title || '');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
@@ -44,6 +44,8 @@ const EditTaskContent: React.FC<{
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
+
+	const myPlugin = useApp();
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
@@ -152,14 +154,14 @@ const EditTaskContent: React.FC<{
 			previewContainerRef.current.empty();
 
 			MarkdownUIRenderer.renderTaskDisc(
-				app,
+				plugin.app,
 				formatedContent,
 				previewContainerRef.current,
 				filePath,
 				componentRef.current
 			);
 
-			hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
+			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, previewContainerRef.current, filePath, filePath);
 		}
 	}, [modifiedTask]); // Re-render when modifiedTask changes
 
@@ -293,7 +295,7 @@ const EditTaskContent: React.FC<{
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
 												aria-label={t(168)}
-												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+												onClick={() => isCtrlPressed ? plugin.app.workspace.openLinkText('', filePath, 'window') : plugin.app.workspace.openLinkText('', filePath, false)}
 											>{t(27)}</button>
 										</div>
 										<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
@@ -389,16 +391,14 @@ const EditTaskContent: React.FC<{
 
 // Class component extending Modal for Obsidian
 export class AddOrEditTaskModal extends Modal {
-	app: App;
 	plugin: TaskBoard;
 	task: taskItem = taskItemEmpty;
 	filePath: string;
 	taskExist: boolean = false;
 	onSave: (updatedTask: taskItem) => void;
 
-	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, task?: taskItem) {
-		super(app);
-		this.app = app;
+	constructor(plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, task?: taskItem) {
+		super(plugin.app);
 		this.plugin = plugin;
 		this.filePath = filePath;
 		this.onSave = onSave;
@@ -418,7 +418,6 @@ export class AddOrEditTaskModal extends Modal {
 		const root = ReactDOM.createRoot(this.contentEl);
 
 		root.render(<EditTaskContent
-			app={this.app}
 			plugin={this.plugin}
 			root={contentEl}
 			task={this.task}

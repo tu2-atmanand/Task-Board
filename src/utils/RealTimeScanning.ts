@@ -7,15 +7,13 @@ import type TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "./FiltersVerifier";
 
 export class RealTimeScanning {
-	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
 	scanningVault: ScanningVault;
 
-	constructor(app: App, plugin: TaskBoard) {
-		this.app = app;
+	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
-		this.scanningVault = new ScanningVault(app, plugin);
+		this.scanningVault = new ScanningVault(plugin);
 	}
 
 	async initializeStack(realTimeScanning: boolean) {
