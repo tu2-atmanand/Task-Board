@@ -4,6 +4,7 @@ import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
 
+import { AppContext } from "src/services/AppHook";
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
 import { StrictMode } from "react";
@@ -60,11 +61,13 @@ export class KanbanView extends ItemView {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
-				<KanbanBoard
+				<AppContext.Provider value={this.plugin}>
+					<KanbanBoard
 						plugin={this.plugin}
-					app={this.app}
-					boardConfigs={this.boards}
-				/>,
+						app={this.app}
+						boardConfigs={this.boards}
+					/>
+				</AppContext.Provider>
 			</StrictMode>,
 		);
 	}
