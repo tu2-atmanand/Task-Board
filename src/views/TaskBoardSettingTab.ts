@@ -15,7 +15,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	constructor(app: App, plugin: TaskBoard) {
 		super(app, plugin);
 		this.plugin = plugin;
-		this.settingsManager = new SettingsManager(app, plugin);
+		this.settingsManager = new SettingsManager(plugin);
 	}
 
 	// Display the settings in the settings tab
