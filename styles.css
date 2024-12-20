@@ -261,21 +261,33 @@
 	width: 100%;
 }
 
-.taskItemBodyDescription {
-	overflow: hidden;
-	transition: max-height 0.4s ease-in;
-	max-height: 0;
+.taskItemMainBodyDescriptionSection {
+	width: 100%;
 }
 
-.taskItemBodyDescription-expanded {
-	padding: 2px;
-	border-radius: 4px;
-	background: var(--background-modifier-box-shadow);
-	transition: max-height 0.4s ease-out;
-	max-height: 100%;
+.taskItemMainBodyDescriptionSectionToggler {
+	opacity: 50%;
+	margin-block-start: 0.5em;
+	cursor: pointer;
+	margin-inline-start: 5px;
+}
+
+.taskItemBodyDescription {
+	overflow: hidden;
+	height: 0;
+	transition: height 0.4s ease-in-out;
+}
+
+.taskItemBodyDescription.expanded {
+	height: auto;
+	/* The height will be dynamically calculated */
+	transition: height 0.4s ease-in-out;
 }
 
 .taskItemBodyDescriptionRenderer {
+	padding: 2px;
+	border-radius: 4px;
+	background: var(--background-modifier-box-shadow);
 	margin: 0 !important;
 }
 
@@ -598,7 +610,7 @@
 }
 
 .EditTaskModalHomePreviewBody {
-	height: 25vh;
+	/* height: 25vh; */
 	overflow: auto;
 	border: var(--border-width) solid var(--table-header-border-color);
 }

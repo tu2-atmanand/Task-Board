@@ -1,7 +1,7 @@
 // src/components/KanbanBoard.tsx
 
 import { Bolt, RefreshCcw, Tally1 } from 'lucide-react';
-import React, { useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { handleUpdateBoards, refreshBoardData } from "../utils/BoardOperations";
 import { loadBoardsData, loadTasksProcessed } from "src/utils/JsonFileOperations";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
@@ -29,10 +29,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 				setBoards(data); // Update the state with the new data
 				const allTasks = await loadTasksProcessed(plugin);
 				if (allTasks) {
-					setAllTasks(allTasks);  // Set the tasks if not undefined
+					setAllTasks(allTasks);
 				}
 			} catch (error) {
-				console.error("Error loading tasks:", error);
+				console.error("refreshBoardData : Error loading tasks:", error);
 			}
 		});
 	}, [refreshCount]);
@@ -65,16 +65,19 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 		};
 	}, []);
 
-	const refreshBoardButton = () => {
-		if(plugin.settings.data.globalSettings.realTimeScanning) {
+	// Memoized refreshBoardButton to avoid re-creating the function on every render
+	const refreshBoardButton = useCallback(() => {
+		if (plugin.settings.data.globalSettings.realTimeScanning) {
 			eventEmitter.emit("REFRESH_BOARD");
 		} else {
-			if(localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined) {
+			if (
+				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
+			) {
 				plugin.realTimeScanning.processStack();
 			}
 			eventEmitter.emit("REFRESH_BOARD");
 		}
-	}
+	}, [plugin]);
 
 	return (
 		<div className="kanbanBoard">
@@ -132,4 +135,4 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	);
 };
 
-export default KanbanBoard;
+export default memo(KanbanBoard);

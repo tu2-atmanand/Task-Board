@@ -1,7 +1,7 @@
 // /src/components/Column.tsx
 
 import { App, moment as _moment } from 'obsidian';
-import React, { useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { deleteTaskFromFile, deleteTaskFromJson, updateTaskInFile, updateTaskInJson } from 'src/utils/TaskItemUtils';
 import { moveFromCompletedToPending, moveFromPendingToCompleted } from 'src/utils/TaskItemUtils';
 import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItemProps';
@@ -52,7 +52,6 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 	}, [colType, data, allTasksExternal]);
 
 	const handleCheckboxChange = (updatedTask: taskItem) => {
-		// const moment = require("moment");
 
 		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
 		setTasks(updatedTasks); // Update state to remove completed task
@@ -106,6 +105,12 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 					// Update the task in the file and JSON
 					updateTaskInFile(plugin, updatedTask, task);
 					updateTaskInJson(plugin, updatedTask);
+
+					setTasks((prevTasks) =>
+						prevTasks.map((task) =>
+							task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+						)
+					);
 					// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 				},
 				task.filePath,
@@ -130,6 +135,15 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
 		}
 	};
+
+	const handleTaskInteraction = useCallback(
+		(task: taskItem, type: string) => {
+			if (type === "edit") handleEditTask(task);
+			else if (type === "delete") handleDeleteTask(app, task);
+			else if (type === "checkbox") handleCheckboxChange(task);
+		},
+		[handleEditTask, handleDeleteTask, handleCheckboxChange, app]
+	);
 
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
 	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
@@ -159,10 +173,14 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 									task={task}
 									columnIndex={columnIndex}
 									activeBoardSettings={activeBoardSettings}
-									onEdit={(task) => handleEditTask(task)}
-									onDelete={() => handleDeleteTask(app, task)}
-									onCheckboxChange={() => handleCheckboxChange(task)}
-									onSubTasksChange={(updatedTask) => handleSubTasksChange(updatedTask)}
+									onEdit={(task) => handleTaskInteraction(task, "edit")}
+									onDelete={() => handleTaskInteraction(task, "delete")}
+									onCheckboxChange={() =>
+										handleTaskInteraction(task, "checkbox")
+									}
+									onSubTasksChange={(updatedTask) =>
+										handleSubTasksChange(updatedTask)
+									}
 								/>
 							);
 						}
@@ -178,4 +196,4 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 
 };
 
-export default Column;
+export default memo(Column);

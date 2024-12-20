@@ -1,7 +1,7 @@
 // /src/components/TaskItem.tsx
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TaskProps, taskItem } from '../interfaces/TaskItemProps';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
@@ -17,9 +17,8 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
-
 	// Determine color for the task indicator
-	const getColorIndicator = () => {
+	const getColorIndicator = useCallback(() => {
 		const today = new Date();
 		const taskDueDate = new Date(task.due);
 		if (taskDueDate.toDateString() === today.toDateString()) {
@@ -31,7 +30,8 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		} else {
 			return 'grey'; // No Due
 		}
-	};
+	}, [task.due]);
+
 
 	const handleCheckboxChange = () => {
 		setIsChecked(true); // Trigger animation
@@ -62,6 +62,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 
 	// Toggle function to expand/collapse the description
 	const toggleDescription = () => {
+		console.log("toggleDescription : isDescriptionExpanded :", isDescriptionExpanded);
 		setIsDescriptionExpanded(!isDescriptionExpanded);
 	};
 
@@ -103,11 +104,12 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 	}, [task.body, task.filePath, app]);
 
 
-	const taskItemBodyDescriptionRenderer = useRef<{ [key: string]: HTMLDivElement | null }>({});
+	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
-		if (taskItemBodyDescriptionRenderer.current && componentRef.current) {
+		if (taskItemBodyDescriptionRef.current && componentRef.current) {
 			const uniqueKey = `${task.id}-desc`;
-			const descElement = taskItemBodyDescriptionRenderer.current[uniqueKey];
+			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+			console.log("Content in taskDesc, while calling ObsidianRenderer :\n", taskDesc);
 
 			if (descElement) {
 				descElement.empty();
@@ -123,7 +125,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				hookMarkdownLinkMouseEventHandlers(app, plugin, descElement, task.filePath, task.filePath);
 			}
 		}
-	}, [taskDesc, task.filePath, app]);
+	}, [taskDesc, task.body, task.filePath, app]);
 
 	const taskIdKey = `${task.id}`; // for rendering unique title
 	const taskTitleRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -293,6 +295,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 							const isCompleted = line.trim().startsWith('- [x]');
 							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
 							const subtaskText = line.replace(/- \[.\] /, '').trim();
+							console.log("renderSubTasks : since one of the parameter updated | New data in subTaskText :\n", subtaskText);
 
 							// Calculate padding based on the number of tabs
 							const numTabs = line.match(/^\t+/)?.[0].length || 0;
@@ -333,27 +336,35 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		}
 	};
 
+	// For desction section expantion and folding animation
+	const descriptionRef = useRef<HTMLDivElement | null>(null);
+	useEffect(() => {
+		if (descriptionRef.current) {
+			if (isDescriptionExpanded) {
+				const scrollHeight = descriptionRef.current.scrollHeight;
+				descriptionRef.current.style.height = `${scrollHeight}px`;
+			} else {
+				descriptionRef.current.style.height = '0';
+			}
+		}
+	}, [isDescriptionExpanded]);
 
 	// Render Task Description
 	const renderTaskDescriptoin = () => {
+		console.log("renderTaskDescriptoin : since one of the parameter updated | New data in taskDesc :\n", taskDesc);
 		try {
-			if (taskBody.length > 0) {
+			if (taskDesc.length > 0) {
 				const uniqueKey = `${task.id}-desc`;
 				return (
 					<>
-						{taskDesc.length > 0 && taskDesc.at(0) !== "" && (
+						<div className='taskItemMainBodyDescriptionSection' key={uniqueKey} id={uniqueKey}>
+							{/* Render remaining body content with expand/collapse animation */}
 							<div
-								style={{ opacity: '50%', marginBlockStart: '0.5em', cursor: 'pointer', marginInlineStart: '5px' }}
-								onClick={toggleDescription}
+								className={`taskItemBodyDescription ${isDescriptionExpanded ? 'expanded' : ''}`}
+								ref={descriptionRef}
 							>
-								{isDescriptionExpanded ? 'Hide Description' : 'Show Description'}
+								<div className="taskItemBodyDescriptionRenderer" ref={(descEl) => taskItemBodyDescriptionRef.current[uniqueKey] = descEl} />
 							</div>
-						)}
-
-						{/* Render remaining body content with expand/collapse animation */}
-						<div className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`} key={uniqueKey} id={uniqueKey}
-						>
-							<div className="taskItemBodyDescriptionRenderer" ref={(descEl) => taskItemBodyDescriptionRenderer.current[uniqueKey] = descEl} />
 						</div>
 					</>
 				);
@@ -366,11 +377,17 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		}
 	};
 
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
+	const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completed, task.due, task.time]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
+	const memoizedRenderTaskDescription = useMemo(() => renderTaskDescriptoin(), [taskDesc]);
+
+
 	return (
 		<div className="taskItem" key={taskKey}>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
-				{renderHeader()}
+				{memoizedRenderHeader}
 				<div className="taskItemMainBody">
 					<div className="taskItemMainBodyTitleNsubTasks">
 						<input
@@ -382,18 +399,39 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 						<div className="taskItemBodyContent">
 							<div className="taskItemTitle" ref={(titleEL) => taskTitleRendererRef.current[taskIdKey] = titleEL} />
 							<div className="taskItemBody">
-								{renderSubTasks()}
+								{memoizedRenderSubTasks}
 							</div>
 						</div>
 					</div>
 					<div className="taskItemMainBodyDescription">
-						{renderTaskDescriptoin()}
+						{taskDesc.length > 0 && taskDesc.at(0) !== "" && (
+							<div
+								className='taskItemMainBodyDescriptionSectionToggler'
+								onClick={toggleDescription}
+							>
+								{isDescriptionExpanded ? 'Hide Description' : 'Show Description'}
+							</div>
+						)}
+						{memoizedRenderTaskDescription}
 					</div>
 				</div>
-				{renderFooter()}
+				{memoizedRenderFooter}
 			</div>
 		</div>
 	);
 };
 
-export default TaskItem;
+export default memo(TaskItem, (prevProps, nextProps) => {
+	return (
+		prevProps.task.id === nextProps.task.id && // Immutable check
+		prevProps.task.title === nextProps.task.title &&
+		prevProps.task.body === nextProps.task.body &&
+		prevProps.task.due === nextProps.task.due &&
+		prevProps.task.tags.join(",") === nextProps.task.tags.join(",") && // Compare arrays
+		prevProps.task.priority === nextProps.task.priority &&
+		prevProps.task.completed === nextProps.task.completed &&
+		prevProps.task.filePath === nextProps.task.filePath &&
+		prevProps.columnIndex === nextProps.columnIndex &&
+		prevProps.activeBoardSettings === nextProps.activeBoardSettings
+	);
+});

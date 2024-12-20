@@ -67,33 +67,31 @@ export class RealTimeScanning {
 		realTimeScanning: boolean,
 		scanFilters: any
 	) {
-		if (file.extension === "md") {
-			// If both checks pass, proceed with the scanning logic
-			if (scanFilterForFilesNFolders(file, scanFilters)) {
-				// If real-time scanning is enabled, scan the file immediately
-				if (realTimeScanning) {
-					this.scanningVault.updateTasksFromFiles([file]);
-				} else {
-					// If the file is already in the stack, ignore it
-					if (this.taskBoardFileStack.at(0) === undefined) {
-						this.taskBoardFileStack.push(file.path); // Add the file to the stack
-						await this.saveStack(); // Save the updated stack
-					} else if (!this.taskBoardFileStack.includes(file.path)) {
-						this.taskBoardFileStack.push(file.path);
-						await this.saveStack(); // Save the updated stack
-					} else {
-						// console.log(
-						// 	"The file already exists in taskBoardFileStack:",
-						// 	file.path
-						// );
-					}
-				}
+		// If both checks pass, proceed with the scanning logic
+		if (scanFilterForFilesNFolders(file, scanFilters)) {
+			// If real-time scanning is enabled, scan the file immediately
+			if (realTimeScanning) {
+				this.scanningVault.updateTasksFromFiles([file]);
 			} else {
-				// console.log(
-				// 	"The file is not allowed for Scanning : ",
-				// 	file.path
-				// );
+				// If the file is already in the stack, ignore it
+				if (this.taskBoardFileStack.at(0) === undefined) {
+					this.taskBoardFileStack.push(file.path); // Add the file to the stack
+					await this.saveStack(); // Save the updated stack
+				} else if (!this.taskBoardFileStack.includes(file.path)) {
+					this.taskBoardFileStack.push(file.path);
+					await this.saveStack(); // Save the updated stack
+				} else {
+					// console.log(
+					// 	"The file already exists in taskBoardFileStack:",
+					// 	file.path
+					// );
+				}
 			}
+		} else {
+			// console.log(
+			// 	"The file is not allowed for Scanning : ",
+			// 	file.path
+			// );
 		}
 	}
 }

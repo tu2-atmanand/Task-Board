@@ -93,7 +93,7 @@
         "filterScope": "Both",
         "name": "Editing 1",
         "index": 1,
-        "showColumnTags": false,
+        "showColumnTags": true,
         "showFilteredTags": true
       },
       {

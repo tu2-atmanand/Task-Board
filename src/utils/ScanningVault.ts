@@ -110,7 +110,7 @@ export class ScanningVault {
 		for (const file of files) {
 			if (file !== null) {
 				const fileNameWithPath = file.path;
-				const fileContent = await this.app.vault.read(file);
+				const fileContent = await this.app.vault.cachedRead(file);
 				const lines = fileContent.split("\n");
 				const newPendingTasks: any[] = [];
 				const newCompletedTasks: any[] = [];

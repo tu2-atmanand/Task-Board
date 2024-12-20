@@ -6,7 +6,7 @@ import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
-import { StrictMode } from "react";
+import { StrictMode, useMemo } from "react";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
