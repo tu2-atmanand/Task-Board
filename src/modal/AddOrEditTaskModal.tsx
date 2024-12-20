@@ -12,7 +12,7 @@ import TaskBoard from "main";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
-import { useApp } from "src/services/AppHook";
+import { usePlugin } from "src/services/AppHook";
 
 const taskItemEmpty = {
 	id: 0,
@@ -45,7 +45,7 @@ const EditTaskContent: React.FC<{
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 
-	const myPlugin = useApp();
+	const myPlugin = usePlugin();
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {

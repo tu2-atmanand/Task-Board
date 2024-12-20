@@ -2,8 +2,8 @@ import { createContext, useContext } from "react";
 
 import TaskBoard from "main";
 
-export const AppContext = createContext<TaskBoard | undefined>(undefined);
+export const PluginContext = createContext<TaskBoard | undefined>(undefined);
 
-export const useApp = (): TaskBoard | undefined => {
-	return useContext(AppContext);
+export const usePlugin = (): TaskBoard | undefined => {
+	return useContext(PluginContext);
 };
