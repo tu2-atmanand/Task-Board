@@ -1,36 +1,39 @@
 // /src/utils/JsonFileOperations.ts
 
-import {
+import type {
 	taskItem,
 	taskJsonMerged,
 	tasksJson,
 } from "src/interfaces/TaskItemProps";
 
-import { Board } from "../interfaces/BoardConfigs";
+import type { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
-import { loadTasksJsonFromSS } from "./tasksCache";
+import { get } from "svelte/store";
+import { loadTasksJsonFromStore } from "./tasksCache";
+import { plugin } from "src/store";
 
 // Operations with data.json
 
 // Load only the globalSettings part from the data.json
-export const loadGlobalSettings = async (plugin: TaskBoard) => {
+export const loadGlobalSettings = async () => {
 	try {
-		await plugin.loadSettings();
-		const globalSettings = plugin.settings.data.globalSettings || {};
+		const myPlugin = get(plugin);
+		await myPlugin.loadSettings();
+		const globalSettings = myPlugin.settings.data.globalSettings || {};
 		return globalSettings;
 	} catch (error) {
 		console.error("Error loading globalSettings:", error);
-		return {};
 	}
 };
 
 // Function to load boards data from the JSON file
-export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
+export const loadBoardsData = async (): Promise<Board[]> => {
+	const myPlugin = get(plugin);
 	try {
 		// Fetch settings via Obsidian's loadData method
-		await plugin.loadSettings();
+		await myPlugin.loadSettings();
 
-		const boardConfigs = plugin.settings.data.boardConfigs || [];
+		const boardConfigs = myPlugin.settings.data.boardConfigs || [];
 
 		return boardConfigs;
 	} catch (error) {
@@ -61,11 +64,10 @@ export const saveBoardsData = async (
 
 // Operations with tasks.json
 
-export const loadTasksAndMerge = async (
-	plugin: TaskBoard
-): Promise<{ allTasksMerged: taskJsonMerged }> => {
+export const loadTasksAndMerge = (
+): taskJsonMerged | undefined => {
 	try {
-		const allTasks: tasksJson = await loadTasksJsonFromSS(plugin);
+		const allTasks: tasksJson | undefined = loadTasksJsonFromStore();
 		const pendingTasks: taskItem[] = [];
 		const completedTasks: taskItem[] = [];
 
@@ -92,21 +94,9 @@ export const loadTasksAndMerge = async (
 			Completed: completedTasks,
 		};
 
-		return { allTasksMerged };
+		return allTasksMerged;
 	} catch (error) {
 		console.error("Failed to load tasks from tasks.json:", error);
-		throw error;
+		// throw error;
 	}
 };
-
-export async function loadTasksProcessed(plugin: TaskBoard) {
-	return loadTasksAndMerge(plugin)
-		.then(({ allTasksMerged }) => {
-			return allTasksMerged; // Ensure it returns the merged tasks
-		})
-		.catch((error) => {
-			console.error("Error while loading tasks:", error);
-			// Return an empty taskJsonMerged object to avoid 'undefined'
-			return { Pending: [], Completed: [] };
-		});
-}

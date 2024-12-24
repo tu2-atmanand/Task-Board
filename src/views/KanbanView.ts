@@ -1,30 +1,33 @@
-// src/views/KanbanView.tsx
+// src/views/KanbanView.ts
 
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
-import { Root, createRoot } from "react-dom/client";
 import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
 
-import { Board } from "src/interfaces/BoardConfigs";
-import KanbanBoard from "src/components/KanbanBoard";
-import { StrictMode } from "react";
+import type { Board } from "src/interfaces/BoardConfigs";
+import Root from "src/components/Root.svelte";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
-import { loadBoardsData } from "src/utils/JsonFileOperations";
+import { boardConfigs } from "src/store";
+import { get } from "svelte/store";
+import { mount } from "svelte";
 import { onUnloadSave } from "src/utils/tasksCache";
 import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
 export class KanbanView extends ItemView {
 	plugin: TaskBoard;
-	private boards: Board[];
-	root: Root | null = null;
+	private svelteRoot: Root | null;
+	private viewContent: Element;
+	private boardConfigs: Board[];
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
 		this.app = plugin.app;
 		this.plugin = plugin;
-		this.boards = [];
+		this.svelteRoot = null;
 		this.icon = TaskBoardIcon;
+		this.viewContent = this.containerEl.children[1];
+		this.boardConfigs = get(boardConfigs);
 	}
 
 	getViewType() {
@@ -44,34 +47,15 @@ export class KanbanView extends ItemView {
 			openScanVaultModal(this.app, this.plugin);
 		});
 
-		await this.loadBoards();
-		this.renderBoard();
-	}
+		// this.svelteRoot = new Root({
+		// 	target: this.viewContent,
+		// });
 
-	private async loadBoards() {
-		try {
-			this.boards = await loadBoardsData(this.plugin);
-		} catch (err) {
-			console.error("Failed to load boards data:", err);
-		}
-	}
-
-	private renderBoard() {
-		this.root = createRoot(this.containerEl.children[1]);
-		this.root.render(
-			<StrictMode>
-				<KanbanBoard
-					app={this.app}
-					plugin={this.plugin}
-					boardConfigs={this.boards}
-				/>,
-			</StrictMode>,
-		);
+		const rootMount = mount(Root, { target: this.viewContent });
 	}
 
 	async onClose() {
 		// Clean up when view is closed
-		this.root?.unmount();
 		this.plugin.leafIsActive = false;
 		onUnloadSave(this.plugin);
 	}

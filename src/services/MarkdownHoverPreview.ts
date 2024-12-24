@@ -1,6 +1,5 @@
 import { App, Keymap } from "obsidian";
 
-import React from "react";
 import TaskBoard from "main";
 
 export function hookMarkdownLinkMouseEventHandlers(
@@ -46,7 +45,7 @@ export function hookMarkdownLinkMouseEventHandlers(
 
 export function markdownButtonHoverPreviewEvent(
 	app: App,
-	event: React.MouseEvent,
+	event: MouseEvent,
 	filePath: string
 ) {
 	app.workspace.trigger("hover-link", {

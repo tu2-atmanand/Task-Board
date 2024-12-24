@@ -1,13 +1,15 @@
+import store, { allTaskJsonData, plugin } from "src/store";
+
 import TaskBoard from "main";
-import { tasksJson } from "src/interfaces/TaskItemProps";
+import { get } from "svelte/store";
+import type { tasksJson } from "src/interfaces/TaskItemProps";
 
 // Function to load tasks from disk and store in sessionStorage
-export const loadTasksJsonFromDiskToSS = async (
-	plugin: TaskBoard
-): Promise<tasksJson> => {
+export const loadTasksJsonFromDiskToStore = async (): Promise<tasksJson> => {
 	try {
-		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		const data: string = await plugin.app.vault.adapter.read(path);
+		const myPlugin = get(plugin);
+		const path = `${myPlugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+		const data: string = await myPlugin.app.vault.adapter.read(path);
 		const allTasks: tasksJson = JSON.parse(data);
 		// Store the tasks data in sessionStorage for future use
 		sessionStorage.setItem("tasksData", JSON.stringify(allTasks));
@@ -37,19 +39,17 @@ export const dataCleanup = (oldTaskData: tasksJson): tasksJson => {
 };
 
 // Function to write tasks data to disk (called after 5-minute intervals or before unload)
-export const writeTasksJsonToDisk = async (
-	plugin: TaskBoard
-): Promise<void> => {
+export const writeTasksJsonFromStoreToDisk = async (): Promise<void> => {
 	try {
-		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		const ssData = sessionStorage.getItem("tasksData");
-		let tasksData: tasksJson = JSON.parse(ssData ? ssData : "");
+		const myPlugin = get(plugin);
+		const path = `${myPlugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+		const ssData = await get(allTaskJsonData);
 
 		// Clean up data to remove empty arrays/objects before writing
-		tasksData = dataCleanup(tasksData);
+		const tasksData = dataCleanup(ssData);
 
 		if (tasksData) {
-			await plugin.app.vault.adapter.write(
+			await get(plugin).app.vault.adapter.write(
 				path,
 				JSON.stringify(tasksData, null, 4)
 			);
@@ -63,31 +63,25 @@ export const writeTasksJsonToDisk = async (
 	}
 };
 
-// Function to load tasks from sessionStorage (faster than reading from disk)
-export const loadTasksJsonFromSS = async (
-	plugin: TaskBoard
-): Promise<tasksJson> => {
+// Function to load tasksJsonData from store
+export const loadTasksJsonFromStore = (): tasksJson | undefined => {
 	try {
-		const tasksData = sessionStorage.getItem("tasksData");
-		if (tasksData) {
-			return JSON.parse(tasksData);
-		}
-		return JSON.parse(tasksData ? tasksData : "");
+		const tasksData = get(allTaskJsonData);
+		return tasksData;
 	} catch (error) {
 		console.warn("Error loading tasks from sessionStorage:", error);
-		throw error;
+		// throw error;
 	}
 };
 
-// Function to update tasks in sessionStorage (avoiding immediate disk write)
-export const writeTasksJsonToSS = async (
-	plugin: TaskBoard,
+// Function to update tasksJsonData in store
+export const writeTasksJsonToStore = async (
 	updatedData: tasksJson
 ): Promise<void> => {
 	try {
 		// Store the updated tasks data in sessionStorage
-		sessionStorage.setItem("tasksData", JSON.stringify(updatedData));
-		plugin.IsTasksJsonChanged = true;
+		// sessionStorage.setItem("tasksData", JSON.stringify(updatedData));
+		store.isTasksJsonChanged.set(true);
 	} catch (error) {
 		console.warn("Error updating tasks in sessionStorage:", error);
 		throw error;
@@ -95,14 +89,12 @@ export const writeTasksJsonToSS = async (
 };
 
 // Function to write tasks from sessionStorage to disk after 5 minutes
-export const writeTasksFromSessionStorageToDisk = async (
-	plugin: TaskBoard
-): Promise<void> => {
+export const writeTasksFromSessionStorageToDisk = async (): Promise<void> => {
 	try {
-		if (plugin.IsTasksJsonChanged) {
+		if (store.isTasksJsonChanged) {
 			// Trigger write operation to save sessionStorage data to disk
-			plugin.IsTasksJsonChanged = false;
-			await writeTasksJsonToDisk(plugin);
+			store.isTasksJsonChanged.set(false);
+			await writeTasksJsonFromStoreToDisk();
 		}
 	} catch (error) {
 		console.warn("Error writing tasks from sessionStorage to disk:", error);
@@ -111,5 +103,5 @@ export const writeTasksFromSessionStorageToDisk = async (
 
 // Call this function when the plugin is unloading
 export const onUnloadSave = async (plugin: TaskBoard) => {
-	await writeTasksJsonToDisk(plugin);
+	await writeTasksJsonFromStoreToDisk();
 };

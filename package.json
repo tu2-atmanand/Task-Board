@@ -13,26 +13,26 @@
 	"author": "Atmanand Gauns",
 	"license": "GNU",
 	"devDependencies": {
-		"@types/node": "^16.11.6",
-		"@types/react": "^18.3.4",
-		"@types/react-dom": "^18.3.0",
-		"@typescript-eslint/eslint-plugin": "5.29.0",
-		"@typescript-eslint/parser": "5.29.0",
-		"builtin-modules": "3.3.0",
-		"esbuild": "0.17.3",
+		"@tsconfig/svelte": "^5.0.4",
+		"@types/node": "^20.11.1",
+		"@typescript-eslint/eslint-plugin": "^8.18.0",
+		"@typescript-eslint/parser": "^8.18.0",
+		"builtin-modules": "^4.0.0",
+		"esbuild": "^0.24.0",
+		"esbuild-svelte": "^0.9.0",
+		"lucide-svelte": "^0.469.0",
 		"obsidian": "latest",
-		"tslib": "2.4.0",
-		"typescript": "4.7.4"
+		"svelte": "^5.15.0",
+		"svelte-preprocess": "^6.0.3",
+		"tslib": "^2.6.2",
+		"typescript": "^5.5.0",
+		"typescript-eslint": "^8.18.0"
 	},
 	"dependencies": {
-		"@codemirror/commands": "^6.7.0",
-		"@codemirror/lang-markdown": "^6.3.0",
-		"@codemirror/theme-one-dark": "^6.1.2",
-		"codemirror": "^6.0.1",
-		"lucide-react": "^0.439.0",
-		"react": "^18.3.1",
-		"react-beautiful-dnd": "^13.1.1",
-		"react-dom": "^18.3.1",
-		"react-icons": "^5.3.0"
+		"@fortawesome/fontawesome-svg-core": "^6.7.2",
+		"@fortawesome/free-solid-svg-icons": "^6.7.2",
+		"@fortawesome/svelte-fontawesome": "^0.2.3",
+		"lucide-svelte": "^0.469.0",
+		"svelte-fa": "^4.0.3"
 	}
 }

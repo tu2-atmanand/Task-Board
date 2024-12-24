@@ -1,8 +1,7 @@
-// src/utils/DeleteConfirmationModal.tsx
+// src/utils/DeleteConfirmationModal.ts
 
 import { App, Modal } from 'obsidian';
 
-import React from 'react';
 import { t } from 'src/utils/lang/helper';
 
 interface DeleteConfirmationModalProps {

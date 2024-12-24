@@ -1,10 +1,7 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
 import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
-import {
-	EditButtonMode,
-	globalSettingsData,
-} from "src/interfaces/GlobalSettings";
+import { EditButtonMode, type globalSettingsData } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 
 import TaskBoard from "main";

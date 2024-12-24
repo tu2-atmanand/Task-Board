@@ -1,5 +1,5 @@
 import { App } from "obsidian";
-import { Board } from "./BoardConfigs";
+import type { Board } from "./BoardConfigs";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 

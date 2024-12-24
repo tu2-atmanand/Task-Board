@@ -4,7 +4,7 @@ import { App, PluginSettingTab } from "obsidian";
 
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import type TaskBoard from "../../main";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
+import type { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
 
 export class TaskBoardSettingTab extends PluginSettingTab {

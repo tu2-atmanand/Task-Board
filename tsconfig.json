@@ -1,19 +1,12 @@
 {
 	"compilerOptions": {
 		"baseUrl": ".",
-		"jsx": "react-jsx",
-		// "jsxFactory": "React.createElement",
-		// "jsxFragmentFactory": "React.Fragment",
-		"inlineSourceMap": true,
 		"inlineSources": true,
 		"module": "ESNext",
 		"target": "ES6",
 		"allowJs": true,
 		"noImplicitAny": true,
 		"moduleResolution": "node",
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
 		"importHelpers": true,
 		"isolatedModules": true,
 		"strictNullChecks": true,
@@ -23,9 +16,17 @@
 			"ES6",
 			"ES7"
 		],
-		"forceConsistentCasingInFileNames": true
+		"types": [
+			"obsidian-typings",
+			"svelte",
+			"node"
+		]
 	},
+	"extends": "@tsconfig/svelte/tsconfig.json",
 	"include": [
-		"src"
+		"**/globals.d.ts",
+		"**/*.js",
+		"**/*.svelte",
+		"**/*.ts"
 	]
 }

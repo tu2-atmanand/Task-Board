@@ -1,22 +1,19 @@
 // src/utils/RenderColumns.ts
 
-import { Dispatch, SetStateAction } from "react";
-import {
-	taskItem,
-	taskJsonMerged,
-} from "src/interfaces/TaskItemProps";
+import store, { plugin } from "src/store";
+import type { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
+import { get } from "svelte/store";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
-	plugin: TaskBoard,
-	setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
 	colType: string,
 	data: any,
 	allTasks: taskJsonMerged
-) => {
+): taskItem[] => {
+	const myPlugin = get(plugin);
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
 	const pendingTasks = allTasks.Pending;
@@ -60,7 +57,7 @@ export const renderColumns = (
 			(task) => task.tags && task.tags.some((tag) => tag !== data.coltag)
 		);
 	} else if (colType === "completed") {
-		const boardConfigs = plugin.settings.data.boardConfigs;
+		const boardConfigs = myPlugin.settings.data.boardConfigs;
 		const completedColumnIndex = boardConfigs[
 			activeBoard
 		]?.columns.findIndex((column) => column.colType === "completed");
@@ -79,5 +76,6 @@ export const renderColumns = (
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);
 	}
 
-	setTasks(tasksToDisplay);
+	// store.allTaskItemsToDisplay.set(tasksToDisplay);
+	return tasksToDisplay;
 };

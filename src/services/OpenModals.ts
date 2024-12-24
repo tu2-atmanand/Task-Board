@@ -7,10 +7,7 @@ import {
 	scanFilterForTags,
 } from "src/utils/FiltersVerifier";
 
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { Board } from "../interfaces/BoardConfigs";
-import { BoardConfigureModal } from "src/modal/BoardConfigModal";
-import { ScanVaultModal } from "src/modal/ScanVaultModal";
+import type { Board } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 

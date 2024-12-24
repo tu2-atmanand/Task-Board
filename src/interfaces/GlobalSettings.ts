@@ -1,4 +1,4 @@
-import { BoardConfigs } from "./BoardConfigs";
+import type { BoardConfigs } from "./BoardConfigs";
 
 export interface scanFilters {
 	files: {

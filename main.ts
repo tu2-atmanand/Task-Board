@@ -4,7 +4,7 @@ import {
 	App,
 	Notice,
 	Plugin,
-	PluginManifest,
+	type PluginManifest,
 	TAbstractFile,
 	TFile,
 	TFolder,
@@ -12,15 +12,15 @@ import {
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
-	PluginDataJson,
+	type PluginDataJson,
 	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
-	loadTasksJsonFromDiskToSS,
+	loadTasksJsonFromDiskToStore,
 	onUnloadSave,
 	writeTasksFromSessionStorageToDisk,
 } from "src/utils/tasksCache";
-
+import store, { initializeStores } from "./src/store";
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
@@ -39,7 +39,6 @@ export default class TaskBoard extends Plugin {
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
-	IsTasksJsonChanged: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
@@ -52,7 +51,6 @@ export default class TaskBoard extends Plugin {
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.editorModified = false;
 		this.currentModifiedFile = null;
-		this.IsTasksJsonChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
 	}
@@ -66,6 +64,16 @@ export default class TaskBoard extends Plugin {
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
+		store.taskBoardSettings.subscribe(
+			async () => await this.saveSettings()
+		);
+
+		store.plugin.set(this);
+		store.app.set(this.app);
+		store.taskBoardSettings.set(this.settings.data.globalSettings);
+		store.appCache.set(this.app.metadataCache);
+
+		await initializeStores(this.plugin);
 
 		this.getLanguage();
 
@@ -93,7 +101,7 @@ export default class TaskBoard extends Plugin {
 		this.registerTaskBoardStatusBar();
 	}
 
-	onunload() {
+	async onunload() {
 		console.log("TaskBoard : Unloading plugin...");
 		onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
@@ -220,7 +228,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	loadTasksDataToSS() {
-		const _ = loadTasksJsonFromDiskToSS(this.plugin);
+		const _ = loadTasksJsonFromDiskToStore();
 		// And a setInteval is registered to start periodic saving.
 	}
 
@@ -271,7 +279,7 @@ export default class TaskBoard extends Plugin {
 		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
-		// 		writeTasksJsonToDisk(this.plugin);
+		// 		writeTasksJsonFromStoreToDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
@@ -287,7 +295,7 @@ export default class TaskBoard extends Plugin {
 		// Start a timer to write tasks from sessionStorage to disk every 5 minutes
 		this.registerInterval(
 			window.setInterval(async () => {
-				await writeTasksFromSessionStorageToDisk(this.plugin);
+				await writeTasksFromSessionStorageToDisk();
 			}, 5 * 60 * 1000)
 		);
 
