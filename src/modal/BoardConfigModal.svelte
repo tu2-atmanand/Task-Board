@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { onMount, onDestroy } from "svelte";
 	import AddColumnModal from "./AddColumnModal.svelte";
 	import DeleteConfirmationModal from "./DeleteConfirmationModal.svelte";
@@ -13,16 +13,18 @@
 	import { t } from "../utils/lang/helper";
 	import { SettingsManager } from "../settings/TaskBoardSettingConstructUI";
 
-	export let app;
-	export let plugin;
-	export let boards = [];
-	export let activeBoardIndex;
-	export let onSave;
-	export let onClose;
+	let {
+		app,
+		plugin,
+		boards = [],
+		activeBoardIndex,
+		onSave,
+		onClose
+	} = $props();
 
-	let localBoards = JSON.parse(JSON.stringify(boards));
-	let selectedBoardIndex = activeBoardIndex;
-	let isAddColumnModalOpen = false;
+	let localBoards = $state(JSON.parse(JSON.stringify(boards)));
+	let selectedBoardIndex = $state(activeBoardIndex);
+	let isAddColumnModalOpen = $state(false);
 	let globalSettingsHTMLSection;
 
 	const settingManager = new SettingsManager(app, plugin);
@@ -134,7 +136,7 @@
 	<div class="boardConfigModalSidebar">
 		<div
 			class="boardConfigModalSidebarBtnAreaGlobal"
-			on:click={() => (selectedBoardIndex = -1)}
+			onclick={() => (selectedBoardIndex = -1)}
 		>
 			{t(58)}
 		</div>
@@ -143,7 +145,7 @@
 
 		{#each localBoards as board, index}
 			<div
-				on:click={() => (selectedBoardIndex = index)}
+				onclick={() => (selectedBoardIndex = index)}
 				class="boardConfigModalSidebarBtnArea-btn"
 			>
 				{board.name}
@@ -152,7 +154,7 @@
 
 		<button
 			class="boardConfigModalSidebarBtnAreaAddBoard"
-			on:click={() => {
+			onclick={() => {
 				localBoards = [
 					...localBoards,
 					{
@@ -168,7 +170,7 @@
 
 		<hr class="boardConfigModalHr-100" />
 
-		<button class="boardConfigModalSidebarSaveBtn" on:click={handleSave}>
+		<button class="boardConfigModalSidebarSaveBtn" onclick={handleSave}>
 			{t(1)}
 		</button>
 	</div>

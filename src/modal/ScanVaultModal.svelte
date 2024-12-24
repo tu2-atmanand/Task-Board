@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount, onDestroy } from "svelte";
 	import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer";
 	import { scanFilterForFilesNFolders } from "../utils/FiltersVerifier";
@@ -6,16 +8,15 @@
 	import { taskElementsFormatter } from "../utils/TaskItemUtils";
 	import ScanningVault from "../utils/ScanningVault";
 
-	export let app;
-	export let plugin;
+	let { app, plugin } = $props();
 
 	let scanningVault = new ScanningVault(app, plugin);
-	let isRunning = false;
-	let terminalOutput = [];
-	let progress = 0;
-	let showCollectedTasks = false;
-	let collectedTasks = { Pending: {}, Completed: {} };
-	let taskRendererRef = {};
+	let isRunning = $state(false);
+	let terminalOutput = $state([]);
+	let progress = $state(0);
+	let showCollectedTasks = $state(false);
+	let collectedTasks = $state({ Pending: {}, Completed: {} });
+	let taskRendererRef = $state({});
 
 	const runScan = async () => {
 		isRunning = true;
@@ -58,41 +59,43 @@
 		// Clean up resources if necessary
 	});
 
-	$: if (showCollectedTasks) {
-		Object.keys(collectedTasks.Pending).forEach((filePath) => {
-			const tasks = collectedTasks.Pending[filePath];
-			tasks.forEach((task, taskIndex) => {
-				const newTaskContent = {
-					...task,
-					title: task.title,
-					body: task.body,
-					due: task.due,
-					tags: task.tags,
-					time: task.time,
-					priority: task.priority,
-				};
+	run(() => {
+		if (showCollectedTasks) {
+			Object.keys(collectedTasks.Pending).forEach((filePath) => {
+				const tasks = collectedTasks.Pending[filePath];
+				tasks.forEach((task, taskIndex) => {
+					const newTaskContent = {
+						...task,
+						title: task.title,
+						body: task.body,
+						due: task.due,
+						tags: task.tags,
+						time: task.time,
+						priority: task.priority,
+					};
 
-				const formattedContent = taskElementsFormatter(
-					plugin,
-					newTaskContent,
-				);
-
-				const uniqueKey = `${filePath}-task-${taskIndex}`;
-				const descElement = taskRendererRef[uniqueKey];
-
-				if (descElement && formattedContent !== "") {
-					descElement.innerHTML = "";
-					MarkdownUIRenderer.renderTaskDisc(
-						app,
-						formattedContent,
-						descElement,
-						task.filePath,
-						null,
+					const formattedContent = taskElementsFormatter(
+						plugin,
+						newTaskContent,
 					);
-				}
+
+					const uniqueKey = `${filePath}-task-${taskIndex}`;
+					const descElement = taskRendererRef[uniqueKey];
+
+					if (descElement && formattedContent !== "") {
+						descElement.innerHTML = "";
+						MarkdownUIRenderer.renderTaskDisc(
+							app,
+							formattedContent,
+							descElement,
+							task.filePath,
+							null,
+						);
+					}
+				});
 			});
-		});
-	}
+		}
+	});
 </script>
 
 <div class="scanVaultModalHome">
@@ -111,7 +114,7 @@
 		</div>
 		<button
 			class="scanVaultModalHomeSecondSectionButton"
-			on:click={runScan}
+			onclick={runScan}
 			disabled={isRunning}
 		>
 			{isRunning ? progress.toFixed(0) : t(69)}
@@ -156,7 +159,7 @@
 		</div>
 	</div>
 
-	<button class="scanVaultModalHomeToggleButton" on:click={toggleView}>
+	<button class="scanVaultModalHomeToggleButton" onclick={toggleView}>
 		{showCollectedTasks ? t(70) : t(71)}
 	</button>
 </div>

@@ -13,14 +13,19 @@
 	import type { Board } from "src/interfaces/BoardConfigs";
 	import SubTaskItem from "./SubTaskItem.svelte";
 	// import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-	// import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+	
 
-	export let task: taskItem;
-	export let columnIndex: number;
-	export let activeBoardSettings: Board;
+	interface Props {
+		// import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+		task: taskItem;
+		columnIndex: number;
+		activeBoardSettings: Board;
+	}
 
-	let isChecked = task.completed !== "" ? true : false;
-	let isDescriptionExpanded = false;
+	let { task, columnIndex, activeBoardSettings }: Props = $props();
+
+	let isChecked = $state(task.completed !== "" ? true : false);
+	let isDescriptionExpanded = $state(false);
 	let taskBody = task.body;
 	let taskDesc = task.body.filter(
 		(line) =>
@@ -205,7 +210,7 @@
 					type="checkbox"
 					class="taskItemCheckbox"
 					bind:checked={isChecked}
-					on:change={() => handleCheckboxChange(task)}
+					onchange={() => handleCheckboxChange(task)}
 				/>
 				<div class="taskItemBodyContent">
 					<div class="taskItemTitle" id={taskIdKey}></div>
@@ -229,8 +234,8 @@
 			{#if taskDesc.length > 0}
 				<div
 					style="opacity: 50%; margin: 0.5em 5px; cursor: pointer"
-					on:click={toggleDescription}
-					on:keydown={(e) => e.key === "Enter" && toggleDescription()}
+					onclick={toggleDescription}
+					onkeydown={(e) => e.key === "Enter" && toggleDescription()}
 					role="button"
 					tabindex="0"
 				>
@@ -264,8 +269,8 @@
 					<!-- Edit button -->
 					<div
 						class="taskItemiconButton taskItemiconButtonEdit"
-						on:click={() => handleEditTask(task)}
-						on:keydown={(e) =>
+						onclick={() => handleEditTask(task)}
+						onkeydown={(e) =>
 							e.key === "Enter" && handleEditTask(task)}
 						role="button"
 						tabindex="0"
@@ -275,8 +280,8 @@
 					<!-- Delete button -->
 					<div
 						class="taskItemiconButton taskItemiconButtonDelete"
-						on:click={() => handleDeleteTask(task)}
-						on:keydown={(e) =>
+						onclick={() => handleDeleteTask(task)}
+						onkeydown={(e) =>
 							e.key === "Enter" && handleDeleteTask(task)}
 						role="button"
 						tabindex="0"

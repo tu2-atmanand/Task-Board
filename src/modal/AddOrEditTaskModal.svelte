@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount, onDestroy, createEventDispatcher } from "svelte";
 	import { FaTimes, FaTrash } from "svelte/fa";
 	import { t } from "src/utils/lang/helper";
@@ -19,9 +21,19 @@
 	import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 	import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 
-	export let app;
-	export let plugin;
-	export let task: taskItem = {
+	interface Props {
+		app: any;
+		plugin: any;
+		task?: taskItem;
+		taskExists?: boolean;
+		filePath?: string;
+		onSave: (updatedTask: taskItem) => void;
+	}
+
+	let {
+		app,
+		plugin,
+		task = {
 		id: 0,
 		title: "",
 		body: [],
@@ -31,33 +43,36 @@
 		priority: 0,
 		completed: "",
 		filePath: "",
-	};
-	export let taskExists = false;
-	export let filePath = "";
-	export let onSave: (updatedTask: taskItem) => void;
+	},
+		taskExists = false,
+		filePath = "",
+		onSave
+	}: Props = $props();
 
-	let title = task.title || "";
-	let due = task.due || "";
-	let tags: string[] = task.tags || [];
-	let startTime = task.time?.split(" - ")[0] || "";
-	let endTime = task.time?.split(" - ")[1] || "";
-	let newTime = task.time || "";
-	let priority = task.priority || 0;
-	let bodyContent = task.body?.join("\n") || "";
+	let title = $state(task.title || "");
+	let due = $state(task.due || "");
+	let tags: string[] = $state(task.tags || []);
+	let startTime = $state(task.time?.split(" - ")[0] || "");
+	let endTime = $state(task.time?.split(" - ")[1] || "");
+	let newTime = $state(task.time || "");
+	let priority = $state(task.priority || 0);
+	let bodyContent = $state(task.body?.join("\n") || "");
 
-	let activeTab: "preview" | "editor" = "preview";
+	let activeTab: "preview" | "editor" = $state("preview");
 	let isCtrlPressed = false;
-	let previewContainerRef: HTMLDivElement;
+	let previewContainerRef: HTMLDivElement = $state();
 
 	const dispatch = createEventDispatcher();
 
 	// Update end time when start time changes
-	$: if (startTime) {
-		const [hours, minutes] = startTime.split(":");
-		const newEndTime = `${String(Number(hours) + 1).padStart(2, "0")}:${minutes}`;
-		endTime = newEndTime;
-		newTime = `${startTime} - ${newEndTime}`;
-	}
+	run(() => {
+		if (startTime) {
+			const [hours, minutes] = startTime.split(":");
+			const newEndTime = `${String(Number(hours) + 1).padStart(2, "0")}:${minutes}`;
+			endTime = newEndTime;
+			newTime = `${startTime} - ${newEndTime}`;
+		}
+	});
 
 	// Helper to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
@@ -166,7 +181,7 @@
 		};
 	});
 
-	$: subTaskCheckedState = true;
+	let subTaskCheckedState = $derived(true);
 </script>
 
 <div class="EditTaskModalHome">
@@ -198,14 +213,14 @@
 						</div>
 					{/if}
 				{/each} -->
-				<button on:click={addNewSubTask}>{t(4)}</button>
+				<button onclick={addNewSubTask}>{t(4)}</button>
 			</div>
 
 			<div>
-				<div on:click={() => (activeTab = "preview")}>
+				<div onclick={() => (activeTab = "preview")}>
 					{t(25)}
 				</div>
-				<div on:click={() => (activeTab = "editor")}>
+				<div onclick={() => (activeTab = "editor")}>
 					{t(26)}
 				</div>
 			</div>
@@ -216,7 +231,7 @@
 				<textarea bind:value={bodyContent}></textarea>
 			{/if}
 
-			<button on:click={handleSave}>{t(1)}</button>
+			<button onclick={handleSave}>{t(1)}</button>
 		</div>
 		<div class="EditTaskModalHomeRightSec">
 			<label>{t(30)}</label>
@@ -236,7 +251,7 @@
 			</select>
 
 			<label>{t(34)}</label>
-			<input on:keydown={handleTagInput} placeholder={t(148)} />
+			<input onkeydown={handleTagInput} placeholder={t(148)} />
 			<div>
 				{#each tags as tag}
 					<span>{tag}<FaTimes on:click={() => removeTag(tag)} /></span

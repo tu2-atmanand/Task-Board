@@ -1,12 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  export let isOpen: boolean;
-  export let t: (key: number) => string; // Localization function
+  interface Props {
+    isOpen: boolean;
+    t: (key: number) => string; // Localization function
+  }
+
+  let { isOpen, t }: Props = $props();
   const dispatch = createEventDispatcher();
 
-  let colType = "undated";
-  let name = "";
+  let colType = $state("undated");
+  let name = $state("");
 
   // Emit the submit event with column data
   function handleSubmit() {
@@ -49,8 +53,8 @@
       </div>
 
       <div class="addColumnModalOverlayContentActions">
-        <button on:click={handleSubmit}>{t(18)}</button>
-        <button on:click={handleClose}>{t(19)}</button>
+        <button onclick={handleSubmit}>{t(18)}</button>
+        <button onclick={handleClose}>{t(19)}</button>
       </div>
     </div>
   </div>
