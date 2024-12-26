@@ -1,10 +1,12 @@
-import type { App, MetadataCache } from "obsidian";
-import type { PluginDataJson, globalSettingsData } from "./interfaces/GlobalSettings";
+// /src/store.ts
+
+import type { App, ItemView, MetadataCache } from "obsidian";
+import type {
+	PluginDataJson,
+	globalSettingsData,
+} from "./interfaces/GlobalSettings";
 import { derived, writable } from "svelte/store";
-import {
-	loadBoardsData,
-	loadTasksAndMerge,
-} from "./utils/JsonFileOperations";
+import { loadBoardsData, loadTasksAndMerge } from "./utils/JsonFileOperations";
 import {
 	loadTasksJsonFromDiskToStore,
 	writeTasksJsonFromStoreToDisk,
@@ -12,7 +14,7 @@ import {
 import type {
 	taskItem,
 	taskJsonMerged,
-	tasksJson
+	tasksJson,
 } from "./interfaces/TaskItemProps";
 
 import type { Board } from "./interfaces/BoardConfigs";
@@ -24,12 +26,21 @@ export const app = writable<App>();
 export const plugin = writable<TaskBoard>();
 export const view = writable<KanbanView>();
 export const appCache = writable<MetadataCache>();
+
+// Storing plugin settings and board configs
 export const taskBoardSettings = writable<globalSettingsData>();
 export const boardConfigs = writable<Board[]>();
-export const tasks = writable<taskJsonMerged>({ Pending: [], Completed: [] });
-export const isTasksJsonChanged = writable(false);
 
+// Storing task data
 export const allTaskJsonData = writable<tasksJson>();
+export const allTasksMerged = writable<taskJsonMerged>();
+export const tasks = writable<taskJsonMerged>({ Pending: [], Completed: [] });
+export const updatedTask = writable<taskItem>();
+
+// Storing status to trigger events
+export const isTasksJsonChanged = writable(false);
+export const refreshSignal = writable<boolean>(false);
+export const recentUpdatedFilePath = writable<string>("");
 
 export const getAllTaskJsonData = async () => {
 	const taskJson = await loadTasksJsonFromDiskToStore();
@@ -40,16 +51,16 @@ export const getAllTaskJsonData = async () => {
 // export const allTasksMerged = writable<taskJsonMerged>({ Pending: [], Completed: [] });
 
 // Load tasks from disk into store
-export const allTasksMerged = derived([allTaskJsonData], async ([$allTaskJsonData]) => {
+export const getAllTasksMerged = async () => {
 	try {
-		console.log("Loading tasks from disk...");
-		const processedTasks = await loadTasksAndMerge();
-		console.log("Tasks loaded:", processedTasks);
-		return processedTasks;
+		console.log("Loading tasks from store and merging them...");
+		const mergedTasks = await loadTasksAndMerge();
+		console.log("Tasks loaded:", mergedTasks);
+		if (mergedTasks) allTasksMerged.set(mergedTasks);
 	} catch (error) {
 		console.error("Error loading tasks into store:", error);
 	}
-});
+};
 
 export const allTaskItemsToDisplay = writable<taskItem[]>([]);
 
@@ -66,12 +77,13 @@ export const getBoardConfigs = async () => {
 };
 
 // Initialize stores when plugin loads
-export const initializeStores = async (plugin: TaskBoard) => {
+export const initializeStores = async () => {
 	try {
 		console.log("Initializing stores...");
 		await Promise.all([
-			getAllTaskJsonData(),
 			getBoardConfigs(),
+			await getAllTaskJsonData(),
+			getAllTasksMerged(),
 		]);
 		console.log("Stores initialized successfully.");
 	} catch (error) {
@@ -88,5 +100,9 @@ export default {
 	boardConfigs,
 	isTasksJsonChanged,
 	allTaskJsonData,
+	allTasksMerged,
+	updatedTask,
 	allTaskItemsToDisplay,
+	refreshSignal,
+	recentUpdatedFilePath,
 };

@@ -206,7 +206,7 @@
         "bug/solver": "#223fde99",
         "feat": "#b50df2f2"
       },
-      "editButtonAction": "popUp"
+      "editButtonAction": "noteInWindow"
     }
   }
 }

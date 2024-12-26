@@ -1,3 +1,5 @@
+// /src/utils/handleTaskEvents.ts
+
 import { App, moment as _moment } from "obsidian";
 import {
 	deleteTaskFromFile,
@@ -9,12 +11,11 @@ import {
 } from "./TaskItemUtils";
 import store, {
 	allTaskItemsToDisplay,
-	app,
-	globalSettings,
 	plugin,
 	taskBoardSettings,
 } from "src/store";
 
+import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { DeleteConfirmationModal } from "src/modal/DeleteConfirmationModal";
 import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import { get } from "svelte/store";
@@ -22,6 +23,7 @@ import { t } from "./lang/helper";
 import type { taskItem } from "src/interfaces/TaskItemProps";
 
 export const handleSubTasksChange = (updatedTask: taskItem) => {
+	console.log("handleSubTasksChange : Here is the updatedTask :", updatedTask);
 	updateTaskInJson(updatedTask);
 	updateTaskInFile(get(plugin), updatedTask, updatedTask);
 };
@@ -85,8 +87,8 @@ export const handleEditTask = (task: taskItem) => {
 		EditButtonMode.PopUp
 	) {
 		const editModal = new AddOrEditTaskModal(
-			app,
-			plugin,
+			myPlugin.app,
+			myPlugin,
 			(updatedTask: taskItem) => {
 				updatedTask.filePath = task.filePath;
 				// Update the task in the file and JSON
@@ -94,6 +96,7 @@ export const handleEditTask = (task: taskItem) => {
 				updateTaskInJson(updatedTask);
 			},
 			task.filePath,
+			true,
 			task
 		);
 		editModal.open();

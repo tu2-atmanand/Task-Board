@@ -9,14 +9,20 @@
 	import { type taskItem } from "../interfaces/TaskItemProps";
 	import { priorityEmojis } from "../interfaces/TaskItemProps";
 	import { Component } from "obsidian";
-	import { taskBoardSettings, plugin } from "src/store";
+	import { taskBoardSettings, plugin, app, view } from "src/store";
 	import type { Board } from "src/interfaces/BoardConfigs";
 	import SubTaskItem from "./SubTaskItem.svelte";
+	import { EditButtonMode } from "src/interfaces/GlobalSettings";
+	import { Edit, Trash } from "lucide-svelte";
+	import {
+		hookMarkdownLinkMouseEventHandlers,
+		markdownButtonHoverPreviewEvent,
+	} from "src/services/MarkdownHoverPreview";
+	import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 	// import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-	
+	// import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 	interface Props {
-		// import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 		task: taskItem;
 		columnIndex: number;
 		activeBoardSettings: Board;
@@ -25,16 +31,24 @@
 	let { task, columnIndex, activeBoardSettings }: Props = $props();
 
 	let isChecked = $state(task.completed !== "" ? true : false);
-	let isDescriptionExpanded = $state(false);
-	let taskBody = task.body;
-	let taskDesc = task.body.filter(
-		(line) =>
-			!line.trim().startsWith("- [ ]") &&
-			!line.trim().startsWith("- [x]"),
+	let taskTitle = $state(task.title);
+	let taskBody = $state(task.body);
+	let taskDesc = $state(
+		task.body.filter(
+			(line) =>
+				!line.trim().startsWith("- [ ]") &&
+				!line.trim().startsWith("- [x]"),
+		),
 	);
 
-	let component: Component | null = null;
+	// let component: Component = $state(new Component());
 	let taskIdKey = `${task.id}`;
+	let taskTitleElement: HTMLElement | null = $state(null);
+
+	let isDescriptionExpanded = $state(false);
+	let descriptionHeight: string = $state("0px"); // Dynamically controls the height for animation
+	let descriptionBodyDiv: HTMLElement | null = $state(null);
+	let descriptionDiv: HTMLElement | null = $state(null);
 
 	const getColorIndicator = () => {
 		const today = new Date();
@@ -49,14 +63,30 @@
 		return "grey";
 	};
 
+	// Toggles the description's expanded state
 	const toggleDescription = () => {
 		isDescriptionExpanded = !isDescriptionExpanded;
+
+		if (descriptionBodyDiv) {
+			if (isDescriptionExpanded) {
+				// Set the height to its scrollHeight for animation
+				descriptionHeight = `${descriptionBodyDiv.scrollHeight}px`;
+			} else {
+				// Collapse by setting height to 0
+				descriptionHeight = "0px";
+			}
+		}
 	};
 
 	const handleSubtaskCheckboxChange = (
 		index: number,
 		isCompleted: boolean,
 	) => {
+		console.log(
+			"handleSubtaskCheckboxChange : The index and isCompleted :",
+			index,
+			isCompleted,
+		);
 		const updatedBody = taskBody.map((line, idx) => {
 			if (idx === index) {
 				return isCompleted
@@ -161,10 +191,72 @@
 		return task.completed || isChecked;
 	}
 
+	const onEditButtonClicked = (event: MouseEvent) => {
+		if (
+			$taskBoardSettings.editButtonAction !== EditButtonMode.NoteInHover
+		) {
+			handleEditTask(task);
+		} else {
+			// event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent($app, event, task.filePath);
+			// event.ctrlKey = false;
+		}
+	};
+
+	const renderTitleAndDescription = async (
+		el: HTMLElement | null,
+		data: string,
+	): Promise<void> => {
+		if (el) {
+			// Call the MarkdownUIRenderer to render the description
+			MarkdownUIRenderer.renderTaskDisc(
+				$app,
+				data,
+				el,
+				task.filePath,
+				$view,
+			);
+
+			// // Add event handlers for markdown links
+			// hookMarkdownLinkMouseEventHandlers(
+			// 	$app,
+			// 	$plugin,
+			// 	element,
+			// 	task.filePath,
+			// 	task.filePath,
+			// );
+		}
+	};
+
+	// Reactive function to regenerate the task title
+	$effect(() => {
+		console.log("TaskCard : Should only run when taskTitle changes...");
+		if (taskTitle) {
+			renderTitleAndDescription(taskTitleElement, taskTitle);
+		}
+	});
+
+	// Reactive function to regenerate the task Description
+	$effect(() => {
+		console.log("TaskCard : Should only run when taskDesc changes...");
+		if (taskDesc) {
+			renderTitleAndDescription(
+				descriptionDiv,
+				taskDesc.join("\n").trim(),
+			);
+		}
+	});
+
 	onMount(() => {
-		component = new Component();
-		component.load();
-		return () => component?.unload();
+		// MY NOTES : Okay, so what I have understood of svelte, if you pass the data from the parent component, this compoenent wont render again and again. Because, right now whenever the tasksJsonMerged data is changed after you update the parent note, the TaskCard component do not re-renders, otherwise the $effect function should have again ran. So, the best idea will be to calculate the data of createTaskDescription() function in the Column.svelte and then send it as a prop. That is somehow I have to keep the output of the Obsidian.MarkdownRenderer() function.
+		console.log(
+			"If this is running for all the cards, then that will be horrible...",
+		);
+		if (descriptionBodyDiv) {
+			descriptionHeight = isDescriptionExpanded
+				? `${descriptionBodyDiv.scrollHeight}px`
+				: "0px";
+		}
 	});
 </script>
 
@@ -213,12 +305,17 @@
 					onchange={() => handleCheckboxChange(task)}
 				/>
 				<div class="taskItemBodyContent">
-					<div class="taskItemTitle" id={taskIdKey}></div>
+					<div
+						class="taskItemTitle"
+						bind:this={taskTitleElement}
+						role="presentation"
+					></div>
 					<div class="taskItemBody">
 						{#each task.body as line, index}
 							{#if isSubTask(line)}
 								<SubTaskItem
 									{line}
+									filePath={task.filePath}
 									padding={getSubTaskPadding(line)}
 									onChange={(checked: boolean) =>
 										handleSubtaskCheckboxChange(
@@ -233,7 +330,7 @@
 			</div>
 			{#if taskDesc.length > 0}
 				<div
-					style="opacity: 50%; margin: 0.5em 5px; cursor: pointer"
+					class="taskItemMainBodyDescriptionSectionToggler"
 					onclick={toggleDescription}
 					onkeydown={(e) => e.key === "Enter" && toggleDescription()}
 					role="button"
@@ -244,10 +341,15 @@
 						: "Show Description"}
 				</div>
 				<div
-					class="taskItemBodyDescription"
-					class:expanded={isDescriptionExpanded}
+					bind:this={descriptionBodyDiv}
+					style="height: {descriptionHeight};"
+					class={`taskItemBodyDescription${isDescriptionExpanded ? "-expanded" : ""}`}
 				>
-					<div class="taskItemBodyDescriptionRenderer"></div>
+					<div
+						class="taskItemBodyDescriptionRenderer"
+						bind:this={descriptionDiv}
+						role="presentation"
+					></div>
 				</div>
 			{/if}
 		</div>
@@ -269,25 +371,25 @@
 					<!-- Edit button -->
 					<div
 						class="taskItemiconButton taskItemiconButtonEdit"
-						onclick={() => handleEditTask(task)}
+						onclick={(event) => onEditButtonClicked(event)}
 						onkeydown={(e) =>
-							e.key === "Enter" && handleEditTask(task)}
-						role="button"
+							e.key === "Enter" && handleDeleteTask(task)}
 						tabindex="0"
+						aria-label="Edit task"
+						role="button"
 					>
-						<!-- <FontAwesomeIcon icon={faEdit} /> -->
+						<Edit size={16} opacity={0.4} name="Edit task" />
 					</div>
-					<!-- Delete button -->
 					<div
 						class="taskItemiconButton taskItemiconButtonDelete"
 						onclick={() => handleDeleteTask(task)}
 						onkeydown={(e) =>
 							e.key === "Enter" && handleDeleteTask(task)}
-						role="button"
 						tabindex="0"
 						aria-label="Delete task"
+						role="button"
 					>
-						<!-- <FontAwesomeIcon icon={faTrash} /> -->
+						<Trash size={16} opacity={0.4} name="Delete task" />
 					</div>
 				</div>
 			</div>

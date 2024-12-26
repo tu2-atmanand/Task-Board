@@ -1,5 +1,5 @@
-<!-- @migration-task Error while migrating Svelte code: Cannot use `export let` in runes mode — use `$props()` instead
-https://svelte.dev/e/legacy_export_invalid -->
+<!-- /src/components/Column.svelte -->
+
 <script lang="ts">
 	import { onMount } from "svelte";
 	import TaskCard from "./TaskCard.svelte";
@@ -9,21 +9,35 @@ https://svelte.dev/e/legacy_export_invalid -->
 		taskItem,
 		taskJsonMerged,
 	} from "src/interfaces/TaskItemProps";
-	import { allTaskItemsToDisplay, plugin } from "src/store";
+	import store, {
+		allTasksMerged,
+		getAllTasksMerged,
+		plugin,
+		refreshSignal,
+	} from "src/store";
 
 	// Component props
-	export let columnIndex: number; // Run the script tomorrow, dont keep doing all this migration manually
-	export let activeBoardIndex: number;
-	export let colType: string;
-	export let data: any;
-	export let allTasks: taskJsonMerged = { Pending: [], Completed: [] };
+	interface props {
+		columnIndex: number;
+		activeBoardIndex: number;
+		colType: string;
+		data: any;
+	}
+	let { columnIndex, activeBoardIndex, colType, data }: props = $props();
 
 	// Update tasks based on props changes
 	// $: tasks = { ...tasks };
-	let tasks:taskItem[] = $state([]);
-	$: allTasks = { ...allTasks };
+	let allTasks = $state($allTasksMerged);
+	let tasks: taskItem[] = $state([]);
 
-	onMount(() => {
+	store.allTasksMerged.subscribe((p) => {
+		console.log(
+			"allTasksMerged store variable should have been changed...",
+		);
+		allTasks = p;
+	});
+
+	function getTasksToDisplayInColumn() {
 		if (allTasks.Pending.length > 0 || allTasks.Completed.length > 0) {
 			const tasksToDisplayInColumn = renderColumns(
 				activeBoardIndex,
@@ -32,7 +46,30 @@ https://svelte.dev/e/legacy_export_invalid -->
 				allTasks,
 			);
 			tasks = tasksToDisplayInColumn;
+			console.log(
+				"getTasksToDisplayInColumn : This function will only run at first mount and then when the refreshSignal will update\nFollowing tasks will be shown under each column :",
+				tasks,
+			);
 		}
+	}
+
+	function refreshAllTheColumns() {
+		getTasksToDisplayInColumn();
+		store.refreshSignal.set(false);
+	}
+
+	$effect(() => {
+		console.log(
+			"Column : This effect function should only work when the refreshSignal will update",
+		);
+		if ($refreshSignal) {
+			refreshAllTheColumns();
+		}
+	});
+
+	onMount(() => {
+		console.log("Column : data in allTasks :", allTasks);
+		getTasksToDisplayInColumn();
 	});
 
 	const columnWidth =

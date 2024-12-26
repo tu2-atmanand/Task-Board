@@ -11,6 +11,7 @@ import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { priorityEmojis } from "src/interfaces/TaskItemProps";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
+import store from "src/store";
 
 export class ScanningVault {
 	app: App;
@@ -101,9 +102,8 @@ export class ScanningVault {
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: (TFile | null)[]) {
-
 		// Load the existing tasks from tasks.json once
-		const oldTasks = await loadTasksJsonFromStore(this.plugin);
+		const oldTasks = await loadTasksJsonFromStore();
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
 
@@ -141,7 +141,8 @@ export class ScanningVault {
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
-								const moment = _moment as unknown as typeof _moment.default;
+								const moment =
+									_moment as unknown as typeof _moment.default;
 								if (
 									moment(basename, dueFormat, true).isValid()
 								) {
@@ -174,16 +175,18 @@ export class ScanningVault {
 					}
 				}
 
-				// Only replace the tasks for the specific file
-				this.tasks.Pending = {
-					...oldTasks.Pending, // Keep the existing tasks for other files
-					[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
-				};
+				if (oldTasks) {
+					// Only replace the tasks for the specific file
+					this.tasks.Pending = {
+						...oldTasks.Pending, // Keep the existing tasks for other files
+						[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
+					};
 
-				this.tasks.Completed = {
-					...oldTasks.Completed, // Keep the existing tasks for other files
-					[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
-				};
+					this.tasks.Completed = {
+						...oldTasks.Completed, // Keep the existing tasks for other files
+						[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
+					};
+				}
 			} else {
 				console.warn("File is not valid...");
 			}
@@ -194,14 +197,15 @@ export class ScanningVault {
 
 	// Save tasks to JSON file
 	async saveTasksToFile() {
-		await writeTasksJsonToStore(this.plugin, this.tasks);
+		await writeTasksJsonToStore(this.tasks);
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
 			this.TaskDetected &&
 			this.plugin.settings.data.globalSettings.realTimeScanning
 		) {
-			eventEmitter.emit("REFRESH_COLUMN");
+			// eventEmitter.emit("REFRESH_COLUMN");
+			store.refreshSignal.set(true);
 			this.TaskDetected = false;
 		}
 	}

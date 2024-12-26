@@ -1,4 +1,4 @@
-// Define the structure of Board, Column, and the Data read from JSON
+
 export type ColumnData = {
 	colType: string;
 	active: boolean;

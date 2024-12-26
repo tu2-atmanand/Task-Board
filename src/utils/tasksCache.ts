@@ -43,12 +43,16 @@ export const writeTasksJsonFromStoreToDisk = async (): Promise<void> => {
 	try {
 		const myPlugin = get(plugin);
 		const path = `${myPlugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		const ssData = await get(allTaskJsonData);
+		const ssData = get(allTaskJsonData);
 
 		// Clean up data to remove empty arrays/objects before writing
 		const tasksData = dataCleanup(ssData);
 
 		if (tasksData) {
+			// console.log(
+			// 	"writeTasksJsonFromStoreToDisk : Writing following data to the disk : ",
+			// 	JSON.stringify(tasksData, null, 4)
+			// );
 			await get(plugin).app.vault.adapter.write(
 				path,
 				JSON.stringify(tasksData, null, 4)
@@ -64,10 +68,9 @@ export const writeTasksJsonFromStoreToDisk = async (): Promise<void> => {
 };
 
 // Function to load tasksJsonData from store
-export const loadTasksJsonFromStore = (): tasksJson | undefined => {
+export const loadTasksJsonFromStore = async (): Promise<tasksJson | undefined> => {
 	try {
-		const tasksData = get(allTaskJsonData);
-		return tasksData;
+		return get(allTaskJsonData);
 	} catch (error) {
 		console.warn("Error loading tasks from sessionStorage:", error);
 		// throw error;
@@ -79,8 +82,8 @@ export const writeTasksJsonToStore = async (
 	updatedData: tasksJson
 ): Promise<void> => {
 	try {
-		// Store the updated tasks data in sessionStorage
-		// sessionStorage.setItem("tasksData", JSON.stringify(updatedData));
+		// Store the updated tasks data in svelte.store
+		store.allTaskJsonData.set(updatedData);
 		store.isTasksJsonChanged.set(true);
 	} catch (error) {
 		console.warn("Error updating tasks in sessionStorage:", error);

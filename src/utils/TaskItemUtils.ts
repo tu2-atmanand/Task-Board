@@ -123,20 +123,22 @@ export const moveFromPendingToCompleted = async (
 	try {
 		const allTasks = await loadTasksJsonFromStore();
 
-		// Move task from Pending to Completed
-		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = allTasks.Pending[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
+		if (allTasks) {
+			// Move task from Pending to Completed
+			if (allTasks.Pending[task.filePath]) {
+				allTasks.Pending[task.filePath] = allTasks.Pending[
+					task.filePath
+				].filter((t: taskItem) => t.id !== task.id);
 
-			if (!allTasks.Completed[task.filePath]) {
-				allTasks.Completed[task.filePath] = [];
+				if (!allTasks.Completed[task.filePath]) {
+					allTasks.Completed[task.filePath] = [];
+				}
+				allTasks.Completed[task.filePath].push(task);
 			}
-			allTasks.Completed[task.filePath].push(task);
-		}
 
-		// Write the updated data back to the JSON file
-		await writeTasksJsonToStore(allTasks);
+			// Write the updated data back to the JSON file
+			await writeTasksJsonToStore(allTasks);
+		}
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
@@ -151,20 +153,22 @@ export const moveFromCompletedToPending = async (
 	try {
 		const allTasks = await loadTasksJsonFromStore();
 
-		// Move task from Completed to Pending
-		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = allTasks.Completed[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
+		if (allTasks) {
+			// Move task from Completed to Pending
+			if (allTasks.Completed[task.filePath]) {
+				allTasks.Completed[task.filePath] = allTasks.Completed[
+					task.filePath
+				].filter((t: taskItem) => t.id !== task.id);
 
-			if (!allTasks.Pending[task.filePath]) {
-				allTasks.Pending[task.filePath] = [];
+				if (!allTasks.Pending[task.filePath]) {
+					allTasks.Pending[task.filePath] = [];
+				}
+				allTasks.Pending[task.filePath].push(task);
 			}
-			allTasks.Pending[task.filePath].push(task);
-		}
 
-		// Write the updated data back to the JSON file
-		await writeTasksJsonToStore(allTasks);
+			// Write the updated data back to the JSON file
+			await writeTasksJsonToStore(allTasks);
+		}
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
 	}
@@ -233,19 +237,21 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 	try {
 		const allTasks = await loadTasksJsonFromStore();
 
-		// Remove task from Pending or Completed in tasks.json
-		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = allTasks.Pending[
-				task.filePath
-			].filter((t: any) => t.id !== task.id);
-		}
-		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = allTasks.Completed[
-				task.filePath
-			].filter((t: any) => t.id !== task.id);
-		}
+		if (allTasks) {
+			// Remove task from Pending or Completed in tasks.json
+			if (allTasks.Pending[task.filePath]) {
+				allTasks.Pending[task.filePath] = allTasks.Pending[
+					task.filePath
+				].filter((t: any) => t.id !== task.id);
+			}
+			if (allTasks.Completed[task.filePath]) {
+				allTasks.Completed[task.filePath] = allTasks.Completed[
+					task.filePath
+				].filter((t: any) => t.id !== task.id);
+			}
 
-		await writeTasksJsonToStore(allTasks);
+			await writeTasksJsonToStore(allTasks);
+		}
 	} catch (error) {
 		console.error("Error deleting task from tasks.json:", error);
 	}
@@ -370,43 +376,49 @@ export const updateTaskInFile = async (
 // 	}
 // };
 
-export const updateTaskInJson = async (
-	updatedTask: taskItem
-) => {
+export const updateTaskInJson = async (updatedTask: taskItem) => {
 	try {
 		const allTasks = await loadTasksJsonFromStore();
 
-		// Function to update a task in a given task category (Pending or Completed)
-		const updateTasksInCategory = (taskCategory: {
-			[filePath: string]: taskItem[];
-		}) => {
-			return Object.entries(taskCategory).reduce(
-				(
-					acc: { [filePath: string]: taskItem[] },
-					[filePath, tasks]: [string, taskItem[]]
-				) => {
-					acc[filePath] = tasks.map((task: taskItem) =>
-						task.id === updatedTask.id ? updatedTask : task
-					);
-					return acc;
-				},
-				{} as { [filePath: string]: taskItem[] } // Set the initial accumulator type
+		if (allTasks) {
+			// Function to update a task in a given task category (Pending or Completed)
+			const updateTasksInCategory = (taskCategory: {
+				[filePath: string]: taskItem[];
+			}) => {
+				return Object.entries(taskCategory).reduce(
+					(
+						acc: { [filePath: string]: taskItem[] },
+						[filePath, tasks]: [string, taskItem[]]
+					) => {
+						acc[filePath] = tasks.map((task: taskItem) =>
+							task.id === updatedTask.id ? updatedTask : task
+						);
+						return acc;
+					},
+					{} as { [filePath: string]: taskItem[] } // Set the initial accumulator type
+				);
+			};
+
+			// Update tasks in both Pending and Completed categories
+			const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
+			const updatedCompletedTasks = updateTasksInCategory(
+				allTasks.Completed
 			);
-		};
 
-		// Update tasks in both Pending and Completed categories
-		const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
-		const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
+			// Create the updated data object with both updated Pending and Completed tasks
+			const updatedData: tasksJson = {
+				Pending: updatedPendingTasks,
+				Completed: updatedCompletedTasks,
+			};
+			console.log(
+				"updateTaskInJson : New data I am going to write to store :",
+				updatedData
+			);
+			// Write the updated data back to the JSON file using the new function
+			await writeTasksJsonToStore(updatedData);
 
-		// Create the updated data object with both updated Pending and Completed tasks
-		const updatedData: tasksJson = {
-			Pending: updatedPendingTasks,
-			Completed: updatedCompletedTasks,
-		};
-		// Write the updated data back to the JSON file using the new function
-		await writeTasksJsonToStore(updatedData);
-
-		eventEmitter.emit("REFRESH_COLUMN");
+			eventEmitter.emit("REFRESH_COLUMN");
+		}
 	} catch (error) {
 		console.error(
 			"updateTaskInJson : Error updating task in tasks.json:",
@@ -427,23 +439,25 @@ export const generateTaskId = (): number => {
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadTasksJsonFromStore();
 
-	const newTaskWithId = {
-		...newTask,
-		id: generateTaskId(),
-		filePath: newTask.filePath,
-		completed: "", // This will be updated when task is marked as complete
-	};
+	if (allTasks) {
+		const newTaskWithId = {
+			...newTask,
+			id: generateTaskId(),
+			filePath: newTask.filePath,
+			completed: "", // This will be updated when task is marked as complete
+		};
 
-	// Update the task list (assuming it's a file-based task structure)
-	if (!allTasks.Pending[newTask.filePath]) {
-		allTasks.Pending[newTask.filePath] = [];
+		// Update the task list (assuming it's a file-based task structure)
+		if (!allTasks.Pending[newTask.filePath]) {
+			allTasks.Pending[newTask.filePath] = [];
+		}
+
+		allTasks.Pending[newTask.filePath].push(newTaskWithId);
+
+		await writeTasksJsonToStore(allTasks);
+
+		eventEmitter.emit("REFRESH_COLUMN");
 	}
-
-	allTasks.Pending[newTask.filePath].push(newTaskWithId);
-
-	await writeTasksJsonToStore(allTasks);
-
-	eventEmitter.emit("REFRESH_COLUMN");
 };
 
 export const addTaskInActiveEditor = async (

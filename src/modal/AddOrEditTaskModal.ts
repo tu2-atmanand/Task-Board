@@ -1,9 +1,9 @@
 // /src/modal/AddOrEditTaskModal.ts
 
 import { App, Modal } from "obsidian";
+import { SvelteComponent, mount } from "svelte";
 
 import AddOrEditTaskModalContent from "./AddOrEditTaskModalContent.svelte";
-import { SvelteComponent } from "svelte";
 import type TaskBoard from "main";
 import type { taskItem } from "src/interfaces/TaskItemProps";
 
@@ -50,7 +50,7 @@ export class AddOrEditTaskModal extends Modal {
 
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.empty();
+		// contentEl.empty();
 
 		const plainTask = { ...this.task };
 
@@ -63,13 +63,24 @@ export class AddOrEditTaskModal extends Modal {
 		contentEl.setAttribute("data-type", "task-board-view");
 
 		// Pass props to Svelte component
-		this.component = new AddOrEditTaskModalContent({
-			target: contentEl,
+		// this.component = new AddOrEditTaskModalContent({
+		// 	target: contentEl,
+		// 	props: {
+		// 		task: this.task, // Default to an empty object if `this.task` is undefined
+		// 		taskExists: this.taskExist, // Ensure it's a boolean
+		// 		filePath: this.filePath ?? "", // Default to an empty string
+		// 		onSave: this.onSave ?? (() => {}), // Provide a fallback function
+		// 		onClose: () => this.close(),
+		// 	},
+		// });
+
+		mount(AddOrEditTaskModalContent, {
+			target: this.contentEl,
 			props: {
-				task: plainTask, // Default to an empty object if `this.task` is undefined
-				taskExists: this.taskExist, // Ensure it's a boolean
-				filePath: this.filePath ?? "", // Default to an empty string
-				onSave: this.onSave ?? (() => {}), // Provide a fallback function
+				task: this.task,
+				taskExists: this.taskExist,
+				filePath: this.filePath,
+				onSave: this.onSave ?? (() => {}),
 				onClose: () => this.close(),
 			},
 		});

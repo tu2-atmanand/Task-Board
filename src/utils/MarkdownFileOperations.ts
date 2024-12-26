@@ -1,6 +1,7 @@
 import { Notice, TFile } from "obsidian";
 
 import TaskBoard from "main";
+import store from "src/store";
 import { t } from "./lang/helper";
 
 export const readDataOfVaultFiles = async (
@@ -31,6 +32,7 @@ export const writeDataToVaultFiles = async (
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
+			store.recentUpdatedFilePath.set(filePath);
 			await plugin.app.vault.modify(file, newContent);
 		} else {
 			new Notice(`${t(171)} ${filePath}`);

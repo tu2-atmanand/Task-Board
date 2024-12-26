@@ -3,10 +3,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from "svelte";
 	import { eventEmitter } from "src/services/EventEmitter";
-	import {
-		loadBoardsData,
-		loadTasksAndMerge,
-	} from "src/utils/JsonFileOperations";
 	import { openBoardConfigModal } from "../services/OpenModals";
 	import { t } from "src/utils/lang/helper";
 	import Column from "src/components/Column.svelte";
@@ -17,44 +13,52 @@
 		taskItem,
 		taskJsonMerged,
 	} from "src/interfaces/TaskItemProps";
-	import { app, boardConfigs, plugin } from "src/store";
+	import store, {
+		allTasksMerged,
+		app,
+		boardConfigs,
+		plugin,
+	} from "src/store";
+	import { BoardConfigureModal } from "src/modal/BoardConfigModal";
+	import { saveBoardsData } from "src/utils/JsonFileOperations";
 
-	let allTasks: taskJsonMerged | undefined = $state(undefined);
+	let allTasks: taskJsonMerged | undefined = $state($allTasksMerged);
 	let boards: Board[] = $state($boardConfigs);
 	let activeBoardIndex = $state(0);
-	let refreshCount = $state(0);
 
 	const refreshBoardButton = () => {
 		if ($plugin.settings.data.globalSettings.realTimeScanning) {
-			eventEmitter.emit("REFRESH_BOARD");
+			// eventEmitter.emit("REFRESH_BOARD");
+			store.refreshSignal.set(true);
 		} else {
 			if (
 				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
 			) {
 				$plugin.realTimeScanning.processStack();
 			}
-			eventEmitter.emit("REFRESH_BOARD");
+			// eventEmitter.emit("REFRESH_BOARD");
+			store.refreshSignal.set(true);
 		}
 	};
 
 	onMount(() => {
-		const refreshBoardListener = () => {
-			refreshCount++;
-		};
+		console.log(
+			"Root component : reading allTasksMerged store variable :",
+			$allTasksMerged,
+		);
+		// const refreshColumnListener = async () => {
+		// 	try {
+		// 		const loadedTasks = loadTasksAndMerge();
+		// 		if (loadedTasks) {
+		// 			allTasks = loadedTasks;
+		// 		}
+		// 	} catch (error) {
+		// 		console.error("Error loading tasks:", error);
+		// 	}
+		// };
 
-		const refreshColumnListener = async () => {
-			try {
-				const loadedTasks = loadTasksAndMerge();
-				if (loadedTasks) {
-					allTasks = loadedTasks;
-				}
-			} catch (error) {
-				console.error("Error loading tasks:", error);
-			}
-		};
-
-		eventEmitter.on("REFRESH_BOARD", refreshBoardListener);
-		eventEmitter.on("REFRESH_COLUMN", refreshColumnListener);
+		// eventEmitter.on("REFRESH_BOARD", refreshBoardListener);
+		// eventEmitter.on("REFRESH_COLUMN", refreshColumnListener);
 
 		// refreshBoardData(setBoards, async () => {
 		// 	try {
@@ -68,8 +72,8 @@
 		// });
 
 		return () => {
-			eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
-			eventEmitter.off("REFRESH_COLUMN", refreshColumnListener);
+			// eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
+			// eventEmitter.off("REFRESH_COLUMN", refreshColumnListener);
 		};
 	});
 
@@ -77,9 +81,16 @@
 		boards = updatedBoards;
 	}
 
-	function openBoardConfigureModal () {
+	function openBoardConfigureModal() {
 		// openBoardConfigModal($ap, $plugin,)
 		console.log("This will open Board Configure Modal...");
+		const modal = new BoardConfigureModal(
+			$app,
+			boards,
+			activeBoardIndex,
+			(updatedBoards) => saveBoardsData(updatedBoards),
+		);
+		modal.open();
 	}
 </script>
 
@@ -88,9 +99,9 @@
 		<div class="boardTitles">
 			{#each boards as board, index}
 				<button
-					class="boardTitleButton {index === activeBoardIndex
-						? 'Active'
-						: ''}"
+					class={`boardTitleButton${
+						index === activeBoardIndex ? "Active" : ""
+					}`}
 					onclick={() => (activeBoardIndex = index)}
 				>
 					{board.name}
@@ -120,10 +131,9 @@
 			{#each boards[activeBoardIndex].columns.filter((column) => column.active) as column, index}
 				<Column
 					columnIndex={index}
-					activeBoardIndex={activeBoardIndex}
+					{activeBoardIndex}
 					colType={column.colType}
 					data={column.data}
-					allTasks={allTasks || { Pending: [], Completed: [] }}
 				/>
 			{/each}
 		{/if}

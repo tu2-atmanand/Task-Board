@@ -261,18 +261,36 @@
 	width: 100%;
 }
 
+.taskItemMainBodyDescriptionSectionToggler {
+	cursor: pointer;
+	opacity: 50%;
+}
+
 .taskItemBodyDescription {
+	background: var(--background-modifier-box-shadow);
 	overflow: hidden;
-	transition: max-height 0.4s ease-in;
-	max-height: 0;
+
+	height: 0;
+	transition: height 0.4s ease-in;
+
+	/* opacity: 0;
+	transform: translateY(-100);
+	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+	pointer-events: auto; */
 }
 
 .taskItemBodyDescription-expanded {
 	padding: 2px;
 	border-radius: 4px;
 	background: var(--background-modifier-box-shadow);
-	transition: max-height 0.4s ease-out;
+	overflow: hidden;
+
 	max-height: 100%;
+	transition: max-height 0.3s ease-out;
+
+	/* opacity: 1;
+	transform: translateY(0);
+	pointer-events: none; */
 }
 
 .taskItemBodyDescriptionRenderer {

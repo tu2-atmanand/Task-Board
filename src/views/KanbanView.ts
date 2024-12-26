@@ -2,12 +2,12 @@
 
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
+import store, { boardConfigs } from "src/store";
 
 import type { Board } from "src/interfaces/BoardConfigs";
 import Root from "src/components/Root.svelte";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
-import { boardConfigs } from "src/store";
 import { get } from "svelte/store";
 import { mount } from "svelte";
 import { onUnloadSave } from "src/utils/tasksCache";
@@ -43,13 +43,11 @@ export class KanbanView extends ItemView {
 	}
 
 	async onOpen() {
+		store.view.set(this);
+
 		this.addAction(ScanVaultIcon, t(5), () => {
 			openScanVaultModal(this.app, this.plugin);
 		});
-
-		// this.svelteRoot = new Root({
-		// 	target: this.viewContent,
-		// });
 
 		const rootMount = mount(Root, { target: this.viewContent });
 	}

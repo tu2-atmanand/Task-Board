@@ -19,6 +19,7 @@ import {
 	loadTasksJsonFromDiskToStore,
 	onUnloadSave,
 	writeTasksFromSessionStorageToDisk,
+	writeTasksJsonFromStoreToDisk,
 } from "src/utils/tasksCache";
 import store, { initializeStores } from "./src/store";
 import { KanbanView } from "./src/views/KanbanView";
@@ -29,6 +30,7 @@ import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
+import { storeVariablesSyncrhonizer } from "src/utils/storeSynchronizer";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -73,7 +75,7 @@ export default class TaskBoard extends Plugin {
 		store.taskBoardSettings.set(this.settings.data.globalSettings);
 		store.appCache.set(this.app.metadataCache);
 
-		await initializeStores(this.plugin);
+		await initializeStores();
 
 		this.getLanguage();
 
@@ -96,6 +98,8 @@ export default class TaskBoard extends Plugin {
 
 			// Register the Kanban view
 			this.registerTaskBoardView();
+
+			storeVariablesSyncrhonizer();
 		});
 
 		this.registerTaskBoardStatusBar();
@@ -274,21 +278,21 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 
-		// // TODO : Remove this command before publishing, DEV commands
-		// this.addCommand({
-		// 	id: "4",
-		// 	name: "DEV : Save Data from sessionStorage to Disk",
-		// 	callback: () => {
-		// 		writeTasksJsonFromStoreToDisk(this.plugin);
-		// 	},
-		// });
-		// this.addCommand({
-		// 	id: "5",
-		// 	name: "DEV : REFRESH_COLUMN",
-		// 	callback: () => {
-		// 		eventEmitter.emit("REFRESH_COLUMN");
-		// 	},
-		// });
+		// TODO : Remove this command before publishing, DEV commands
+		this.addCommand({
+			id: "4",
+			name: "DEV : Save Data from sessionStorage to Disk",
+			callback: () => {
+				writeTasksJsonFromStoreToDisk();
+			},
+		});
+		this.addCommand({
+			id: "5",
+			name: "DEV : REFRESH_COLUMN",
+			callback: () => {
+				// eventEmitter.emit("REFRESH_COLUMN");
+			},
+		});
 	}
 
 	registerEvents() {

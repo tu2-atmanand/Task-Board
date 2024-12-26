@@ -2,26 +2,32 @@
     "Pending": {
         "TODO.md": [
             {
-                "id": 1249964214,
-                "title": "Upload this image : ![[Pasted image 20241203231257.png]]",
-                "body": [],
+                "id": 3058589538,
+                "title": "Upload this image.",
+                "body": [
+                    "\t - [ ] This also : ![[Pasted image 20241226150651.png]].",
+                    "\t ![[Pasted image 20241203231257.png]]",
+                    "\t - Just adding a new point for this task."
+                ],
                 "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
+                "due": "2024-12-20",
+                "tags": [
+                    "#Image"
+                ],
+                "priority": 1,
                 "filePath": "TODO.md",
-                "completed": ""
+                "completed": "2024-12-26/19:39"
             },
             {
-                "id": 3031502755,
-                "title": "New temp task, lets see if this comes after 5 minutes",
+                "id": 2216973982,
+                "title": "New temp task, lets see if this comes after 5 minutes, updating.",
                 "body": [
                     "\t- [ ] Lets add another sub-Task",
                     "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
                     "\tAnother thing i will put is link to a markdown file from my Vault : [[0-ImportantData]]",
                     "\tSimply adding another line in the description.",
-                    "\t- [x] Also adding this new Subtask, first",
-                    "\t- [ ] And adding second subtask. Now editing will make any difference. Updating"
+                    "\t- [ ] Also adding this new Subtask, first",
+                    "\t- [x] And adding second subtask. Now editing will make any difference. Updating."
                 ],
                 "time": "13:49 - 14:49",
                 "due": "2024-11-28",
@@ -36,17 +42,18 @@
         ],
         "Testing4.md": [
             {
-                "id": 624176075,
+                "id": 3714303463,
                 "title": "Need to finish the following pending tasks before next Task Board release.",
                 "body": [
                     "\tThese features will help the plugin to achieve its intended functionality.",
+                    "\tAdding a image in the body : ![[Pasted image 20241226182313.png]]",
                     "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
                     "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
                     "\t- [x] Sorting feature for each individual Column.",
                     "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
                 ],
-                "time": "21:10 - 23:10",
-                "due": "2024-10-31",
+                "time": "21:10 - 22:10",
+                "due": "2024-11-30",
                 "tags": [
                     "#Test",
                     "#feat"
@@ -56,13 +63,13 @@
                 "completed": ""
             },
             {
-                "id": 3604543623,
+                "id": 1576350670,
                 "title": "Directly copy pasting the task content, to create this GIF. You can add the task at your own pace.",
                 "body": [
                     "\t- [ ] This is a new adding task, lets see.",
                     "\t**Description :** After you finished writting this task in this file switch to other tab or *Task Board* View to see you task automatically get added in the board.",
                     "\t- [ ] This is a simple sub-tasks to break down.",
-                    "\t- [ ] Divide and rule is a great approach."
+                    "\t- [x] Divide and rule is a great approach."
                 ],
                 "time": "",
                 "due": "2024-11-01",
@@ -97,28 +104,6 @@
                 ],
                 "priority": 2,
                 "filePath": "Testing 3.md",
-                "completed": ""
-            }
-        ],
-        "Testing 2.md": [
-            {
-                "id": 2648324177,
-                "title": "So This is to add a simple Task for testing. UPdated",
-                "body": [
-                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
-                    "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
-                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
-                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
-                    "\t\t- [ ] A sub-sub Task for the first time."
-                ],
-                "time": "19:34 - 20:34",
-                "due": "2024-11-07",
-                "tags": [
-                    "#Test",
-                    "#bug/solver"
-                ],
-                "priority": 0,
-                "filePath": "Testing 2.md",
                 "completed": ""
             }
         ],
@@ -191,7 +176,7 @@
                     "\t- Adding a bullete point in the body.",
                     "\tAdding one more line in Desc.",
                     "\t- Adding another bullete point in the description",
-                    "\t- [ ] Adding one subTask with image: ![[UANnumber-Spintly.png]]",
+                    "\t- [x] Adding one subTask with image: ![[UANnumber-Spintly.png]]",
                     "\t- [ ] Adding another subTask, second one, updaing"
                 ],
                 "time": "10:30 - 11:30",
@@ -2108,6 +2093,48 @@
                 "priority": 0,
                 "filePath": "3-Process After Offer Letter Received.md",
                 "completed": "2024-10-Fr/14:15"
+            }
+        ],
+        "Testing 2.md": [
+            {
+                "id": 2648324177,
+                "title": "So This is to add a simple Task for testing. UPdated",
+                "body": [
+                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
+                    "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
+                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
+                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
+                    "\t\t- [ ] A sub-sub Task for the first time."
+                ],
+                "time": "19:34 - 20:34",
+                "due": "2024-11-07",
+                "tags": [
+                    "#Test",
+                    "#bug/solver"
+                ],
+                "priority": 0,
+                "filePath": "Testing 2.md",
+                "completed": "2024-12-24/15:30"
+            },
+            {
+                "id": 2648324177,
+                "title": "So This is to add a simple Task for testing. UPdated",
+                "body": [
+                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
+                    "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
+                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
+                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
+                    "\t\t- [ ] A sub-sub Task for the first time."
+                ],
+                "time": "19:34 - 20:34",
+                "due": "2024-11-07",
+                "tags": [
+                    "#Test",
+                    "#bug/solver"
+                ],
+                "priority": 0,
+                "filePath": "Testing 2.md",
+                "completed": "2024-12-24/15:30"
             }
         ]
     }
