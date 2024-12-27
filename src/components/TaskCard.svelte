@@ -251,22 +251,14 @@
 	// });
 
 	function refreshTaskCard() {
-		taskTitle = task.title;
-		taskBody = task.body;
-		taskDesc = task.body.filter(
-			(line) =>
-				!line.trim().startsWith("- [ ]") &&
-				!line.trim().startsWith("- [x]"),
-		);
-		isChecked = task.completed !== "" ? true : false;
-		taskIdKey = task.id;
 		renderTitleAndDescription(taskTitleElement, taskTitle);
 		renderTitleAndDescription(descriptionDiv, taskDesc.join("\n").trim());
 	}
 
 	$effect(() => {
 		console.log(
-			"TaskCard : Should only run when prop task changes from the parent component...",
+			"TaskCard effect : Should only run when the task will update | Task :",
+			task,
 		);
 		// if ($refreshSignal) refreshTaskCard();
 	});

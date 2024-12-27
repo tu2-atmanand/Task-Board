@@ -32,11 +32,7 @@
 	}
 
 	const renderSubtask = async (el: HTMLElement | null): Promise<void> => {
-		console.log(
-			"renderSubtask: This should not run if subTask do not exists...",
-		);
 		if (el) {
-			console.log("renderSubtask : Is this even running...");
 			await MarkdownUIRenderer.renderSubtaskText(
 				$plugin.app,
 				line.replace(/- \[.*?\]/, "").trim(),

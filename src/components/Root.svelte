@@ -26,20 +26,42 @@
 	let allTasks: taskJsonMerged = $state($allTasksMerged);
 	let boards: Board[] = $state($boardConfigs);
 	let activeBoardIndex = $state(0);
-	let activeBoardColumns: ColumnData[] = $state($boardConfigs[0].columns);
+	// let activeBoardColumns: ColumnData[] = $state($boardConfigs[0].columns);
 
 	// I want to create a reactive variable activeBoardColumns which will be updated whenever activeBoardIndex or boardConfigs changes. This activeBoardColumns, will contain the columns of the active board.
 	// let activeBoardColumns;
 
 	// Reactive statement to update activeBoardColumns whenever activeBoardIndex or boardConfigs changes using $effect()
-	$effect(() => {
+	// $effect(() => {
+	// 	console.log(
+	// 		"Root Effect : Is this even running, when the activeBoardIndex, $boardConfigs and $refreshSingnal changes changes...",
+	// 	);
+	// 	activeBoardColumns = $boardConfigs[activeBoardIndex].columns;
+	// 	if ($refreshSignal) {
+	// 		allTasks = $allTasksMerged;
+	// 	}
+	// });
+
+	let activeBoardColumns = $derived.by(() => {
 		console.log(
-			"Root Effect : Is this even running, when the activeBoardIndex, $boardConfigs and $refreshSingnal changes changes...",
+			"Root derived by : Will this work, when the $boardConfigs or activeBoardIndex changes...",
 		);
-		activeBoardColumns = $boardConfigs[activeBoardIndex].columns;
-		if ($refreshSignal) {
-			allTasks = $allTasksMerged;
-		}
+		return $boardConfigs[activeBoardIndex].columns;
+	});
+
+	// This wont work, as the $allTasksMerged is a store variable, so it wont update here, when it is changed in the store.
+	// let allTasks = $derived.by(() => {
+	// 	console.log(
+	// 		"Root derived by : Will this work, when the $allTasksMerged changes...",
+	// 	);
+	// 	return $allTasksMerged;
+	// });
+
+	store.allTasksMerged.subscribe((p) => {
+		console.log(
+			"Root : This subscriber should run when the allTasksMerged store variable changes...",
+		);
+		allTasks = p;
 	});
 
 	const refreshBoardButton = () => {
@@ -150,7 +172,7 @@
 					{activeBoardIndex}
 					colType={column.colType}
 					data={column.data}
-					{allTasks}
+					allTasks={$allTasksMerged}
 				/>
 			{/each}
 		{/if}

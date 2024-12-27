@@ -38,6 +38,7 @@
 	// 	allTasks = p;
 	// });
 
+	// helper functions
 	function isTaskAllowed(task: taskItem) {
 		if (
 			(parseInt(activeBoardConfigs.filterPolarity || "0") === 1 &&
