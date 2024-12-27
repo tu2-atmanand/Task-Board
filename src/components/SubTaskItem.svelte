@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { Component, MarkdownRenderer } from "obsidian";
 	import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 	import { plugin, view } from "src/store";
 	import { onMount } from "svelte";
-	import { writable } from "svelte/store";
 	interface Props {
 		line: string; // The line to render
 		filePath: string;
@@ -15,19 +13,19 @@
 
 	let contentDiv: HTMLElement | null = $state(null);
 
-	// Writable store for checkbox checked state
-	const isChecked = writable(line.trim().startsWith("- [x]"));
+  // State store for checkbox checked state
+  let isChecked = $state(line.trim().startsWith('- [x]'));
 
 	// Handle checkbox change
-	function handleChange(event: Event) {
-		const checked = (event.target as HTMLInputElement).checked;
+	function handleChange(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+		const checked = event.currentTarget.checked;
 		console.log(
 			"SubTaskItem : I have checked, The subtask is :",
 			line,
 			"\nline the value is :",
 			checked,
 		);
-		isChecked.set(checked);
+		isChecked = checked;
 		onChange(checked);
 	}
 
@@ -48,11 +46,16 @@
 	});
 </script>
 
-<div class="taskItemBodySubtaskItem" style="padding-left: {padding}">
-	<input type="checkbox" bind:checked={$isChecked} onchange={handleChange} />
-	<div
-		class="subtaskTextRenderer"
-		bind:this={contentDiv}
-		role="presentation"
-	></div>
+<div
+  class="taskItemBodySubtaskItem"
+  style="padding-left: {padding}"
+>
+  <input
+    type="checkbox"
+    bind:checked={isChecked}
+    onchange={handleChange}
+  />
+  <div class="subtaskTextRenderer">
+    {line.replace(/^-\s*\[.\]\s*/, "")}
+  </div>
 </div>
