@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
   interface Props {
     line: string; // The line to render
     padding: string; // Padding for the sub-task
@@ -8,13 +7,13 @@
 
   let { line, padding, onChange }: Props = $props();
 
-  // Writable store for checkbox checked state
-  const isChecked = writable(line.trim().startsWith("- [x]"));
+  // State store for checkbox checked state
+  let isChecked = $state(line.trim().startsWith('- [x]'));
 
   // Handle checkbox change
-  function handleChange(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    isChecked.set(checked);
+  function handleChange(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+    const checked = event.currentTarget.checked;
+    isChecked = checked;
     onChange(checked);
   }
 </script>
@@ -25,7 +24,7 @@
 >
   <input
     type="checkbox"
-    bind:checked={$isChecked}
+    bind:checked={isChecked}
     onchange={handleChange}
   />
   <div class="subtaskTextRenderer">
