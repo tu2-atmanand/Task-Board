@@ -55,6 +55,6 @@ export class KanbanView extends ItemView {
 	async onClose() {
 		// Clean up when view is closed
 		this.plugin.leafIsActive = false;
-		onUnloadSave(this.plugin);
+		onUnloadSave();
 	}
 }

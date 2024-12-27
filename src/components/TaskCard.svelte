@@ -8,8 +8,13 @@
 	} from "../utils/handleTaskEvents";
 	import { type taskItem } from "../interfaces/TaskItemProps";
 	import { priorityEmojis } from "../interfaces/TaskItemProps";
-	import { Component } from "obsidian";
-	import { taskBoardSettings, plugin, app, view } from "src/store";
+	import {
+		taskBoardSettings,
+		plugin,
+		app,
+		view,
+		refreshSignal,
+	} from "src/store";
 	import type { Board } from "src/interfaces/BoardConfigs";
 	import SubTaskItem from "./SubTaskItem.svelte";
 	import { EditButtonMode } from "src/interfaces/GlobalSettings";
@@ -25,11 +30,12 @@
 	interface Props {
 		task: taskItem;
 		columnIndex: number;
-		activeBoardSettings: Board;
+		activeBoardConfigs: Board;
 	}
 
-	let { task, columnIndex, activeBoardSettings }: Props = $props();
+	let { task, columnIndex, activeBoardConfigs }: Props = $props();
 
+	let taskIdKey = $state(task.id);
 	let isChecked = $state(task.completed !== "" ? true : false);
 	let taskTitle = $state(task.title);
 	let taskBody = $state(task.body);
@@ -41,10 +47,7 @@
 		),
 	);
 
-	// let component: Component = $state(new Component());
-	let taskIdKey = `${task.id}`;
 	let taskTitleElement: HTMLElement | null = $state(null);
-
 	let isDescriptionExpanded = $state(false);
 	let descriptionHeight: string = $state("0px"); // Dynamically controls the height for animation
 	let descriptionBodyDiv: HTMLElement | null = $state(null);
@@ -99,8 +102,7 @@
 		handleSubTasksChange({ ...task, body: updatedBody });
 	};
 
-	const defaultTagColor = "var(--default-tag-color)"; // Define your default color
-
+	const defaultTagColor = "var(--default-tag-color)";
 	// Function to get the color of a tag
 	function getTagColor(tag: string) {
 		const customTagColor =
@@ -148,11 +150,11 @@
 
 	// Utility to determine whether to show a tag
 	function showTag(tag: string) {
-		const column = activeBoardSettings.columns[columnIndex];
+		const column = activeBoardConfigs.columns[columnIndex];
 
 		// Check if tag matches column tag and should be hidden
 		if (
-			!activeBoardSettings.showColumnTags &&
+			!activeBoardConfigs.showColumnTags &&
 			column.colType === "namedTag" &&
 			tag === column.data.coltag
 		) {
@@ -161,9 +163,9 @@
 
 		// Check if tag is in filtered tags and should be hidden
 		if (
-			!activeBoardSettings.showFilteredTags &&
-			activeBoardSettings.filters?.includes(tag) &&
-			parseInt(activeBoardSettings.filterPolarity || "0")
+			!activeBoardConfigs.showFilteredTags &&
+			activeBoardConfigs.filters?.includes(tag) &&
+			parseInt(activeBoardConfigs.filterPolarity || "0")
 		) {
 			return false;
 		}
@@ -208,6 +210,7 @@
 		data: string,
 	): Promise<void> => {
 		if (el) {
+			el.empty();
 			// Call the MarkdownUIRenderer to render the description
 			MarkdownUIRenderer.renderTaskDisc(
 				$app,
@@ -228,30 +231,53 @@
 		}
 	};
 
-	// Reactive function to regenerate the task title
-	$effect(() => {
-		console.log("TaskCard : Should only run when taskTitle changes...");
-		if (taskTitle) {
-			renderTitleAndDescription(taskTitleElement, taskTitle);
-		}
-	});
+	// // Reactive function to regenerate the task title
+	// $effect(() => {
+	// 	console.log("TaskCard : Should only run when taskTitle changes...");
+	// 	if (taskTitle) {
+	// 		renderTitleAndDescription(taskTitleElement, taskTitle);
+	// 	}
+	// });
 
-	// Reactive function to regenerate the task Description
+	// // Reactive function to regenerate the task Description
+	// $effect(() => {
+	// 	console.log("TaskCard : Should only run when taskDesc changes...");
+	// 	if (taskDesc) {
+	// 		renderTitleAndDescription(
+	// 			descriptionDiv,
+	// 			taskDesc.join("\n").trim(),
+	// 		);
+	// 	}
+	// });
+
+	function refreshTaskCard() {
+		taskTitle = task.title;
+		taskBody = task.body;
+		taskDesc = task.body.filter(
+			(line) =>
+				!line.trim().startsWith("- [ ]") &&
+				!line.trim().startsWith("- [x]"),
+		);
+		isChecked = task.completed !== "" ? true : false;
+		taskIdKey = task.id;
+		renderTitleAndDescription(taskTitleElement, taskTitle);
+		renderTitleAndDescription(descriptionDiv, taskDesc.join("\n").trim());
+	}
+
 	$effect(() => {
-		console.log("TaskCard : Should only run when taskDesc changes...");
-		if (taskDesc) {
-			renderTitleAndDescription(
-				descriptionDiv,
-				taskDesc.join("\n").trim(),
-			);
-		}
+		console.log(
+			"TaskCard : Should only run when prop task changes from the parent component...",
+		);
+		// if ($refreshSignal) refreshTaskCard();
 	});
 
 	onMount(() => {
 		// MY NOTES : Okay, so what I have understood of svelte, if you pass the data from the parent component, this compoenent wont render again and again. Because, right now whenever the tasksJsonMerged data is changed after you update the parent note, the TaskCard component do not re-renders, otherwise the $effect function should have again ran. So, the best idea will be to calculate the data of createTaskDescription() function in the Column.svelte and then send it as a prop. That is somehow I have to keep the output of the Obsidian.MarkdownRenderer() function.
 		console.log(
-			"If this is running for all the cards, then that will be horrible...",
+			"I hope this is running, only at the initial mount of the component...",
 		);
+		renderTitleAndDescription(taskTitleElement, taskTitle);
+		renderTitleAndDescription(descriptionDiv, taskDesc.join("\n").trim());
 		if (descriptionBodyDiv) {
 			descriptionHeight = isDescriptionExpanded
 				? `${descriptionBodyDiv.scrollHeight}px`
@@ -260,7 +286,7 @@
 	});
 </script>
 
-<div class="taskItem">
+<div class="taskItem" id={taskIdKey.toString()}>
 	<div
 		class="colorIndicator"
 		style="background-color: {getColorIndicator()}"
@@ -353,6 +379,7 @@
 				</div>
 			{/if}
 		</div>
+
 		{#if $taskBoardSettings.showFooter}
 			<div class="taskItemFooter">
 				<!-- Conditionally render task.completed or the date/time -->

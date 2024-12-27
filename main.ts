@@ -107,7 +107,7 @@ export default class TaskBoard extends Plugin {
 
 	async onunload() {
 		console.log("TaskBoard : Unloading plugin...");
-		onUnloadSave(this.plugin);
+		onUnloadSave();
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
@@ -351,7 +351,7 @@ export default class TaskBoard extends Plugin {
 		);
 		if (closeButton) {
 			this.registerDomEvent(closeButton, "mouseenter", () => {
-				onUnloadSave(this.plugin);
+				onUnloadSave();
 			});
 		}
 

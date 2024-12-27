@@ -10,7 +10,7 @@ export interface TaskProps {
 	taskKey: number;
 	task: taskItem;
 	columnIndex: number;
-	activeBoardSettings: Board;
+	activeBoardConfigs: Board;
 	onEdit: (task: taskItem) => void;
 	onDelete: () => void;
 	onCheckboxChange: (task: taskItem) => void;

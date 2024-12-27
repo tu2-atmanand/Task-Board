@@ -1,4 +1,4 @@
-import store, { allTaskJsonData, plugin } from "src/store";
+import store, { allTaskJsonData, isTasksJsonChanged, plugin } from "src/store";
 
 import TaskBoard from "main";
 import { get } from "svelte/store";
@@ -94,7 +94,7 @@ export const writeTasksJsonToStore = async (
 // Function to write tasks from sessionStorage to disk after 5 minutes
 export const writeTasksFromSessionStorageToDisk = async (): Promise<void> => {
 	try {
-		if (store.isTasksJsonChanged) {
+		if (get(isTasksJsonChanged)) {
 			// Trigger write operation to save sessionStorage data to disk
 			store.isTasksJsonChanged.set(false);
 			await writeTasksJsonFromStoreToDisk();
@@ -105,6 +105,6 @@ export const writeTasksFromSessionStorageToDisk = async (): Promise<void> => {
 };
 
 // Call this function when the plugin is unloading
-export const onUnloadSave = async (plugin: TaskBoard) => {
+export const onUnloadSave = async () => {
 	await writeTasksJsonFromStoreToDisk();
 };

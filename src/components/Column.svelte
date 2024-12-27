@@ -22,23 +22,41 @@
 		activeBoardIndex: number;
 		colType: string;
 		data: any;
+		allTasks: taskJsonMerged;
 	}
-	let { columnIndex, activeBoardIndex, colType, data }: props = $props();
+	let { columnIndex, activeBoardIndex, colType, data, allTasks }: props = $props();
 
 	// Update tasks based on props changes
 	// $: tasks = { ...tasks };
-	let allTasks = $state($allTasksMerged);
+	// let allTasks = $state($allTasksMerged);
 	let tasks: taskItem[] = $state([]);
 
-	store.allTasksMerged.subscribe((p) => {
-		console.log(
-			"allTasksMerged store variable should have been changed...",
-		);
-		allTasks = p;
-	});
+	// store.allTasksMerged.subscribe((p) => {
+	// 	console.log(
+	// 		"allTasksMerged store variable should have been changed...",
+	// 	);
+	// 	allTasks = p;
+	// });
+
+	function isTaskAllowed(task: taskItem) {
+		if (
+			(parseInt(activeBoardConfigs.filterPolarity || "0") === 1 &&
+				task.tags.some((tag) =>
+					activeBoardConfigs.filters?.includes(tag),
+				)) ||
+			parseInt(activeBoardConfigs.filterPolarity || "0") === 0
+		) {
+			return true;
+		}
+
+		return false;
+	}
 
 	function getTasksToDisplayInColumn() {
 		if (allTasks.Pending.length > 0 || allTasks.Completed.length > 0) {
+			console.log(
+				"getTasksToDisplayInColumn : I hope this is running after the allTasks has be set to $allTasksMerged",
+			);
 			const tasksToDisplayInColumn = renderColumns(
 				activeBoardIndex,
 				colType,
@@ -58,14 +76,25 @@
 		store.refreshSignal.set(false);
 	}
 
-	$effect(() => {
-		console.log(
-			"Column : This effect function should only work when the refreshSignal will update",
-		);
-		if ($refreshSignal) {
-			refreshAllTheColumns();
-		}
-	});
+	// Learning : This will never, work, becuase, this only refreshes the first column. You will need to update the parent, so all the columns renders again. That is the getTasksToDisplayInColumn() for all columns, so the task moves from one column to another.
+	// $effect(() => {
+	// 	console.log(
+	// 		"Column : This effect function should only work when the refreshSignal will update",
+	// 	);
+	// 	if ($refreshSignal || activeBoardIndex) {
+	// 		allTasks = $allTasksMerged;
+	// 		refreshAllTheColumns();
+	// 	}
+	// });
+
+	// Below is the alternative of using $effect.
+	// store.refreshSignal.subscribe((p) => {
+	// 	console.log("Column : refreshSignal changed...");
+	// 	if ($refreshSignal) {
+	// 		allTasks = $allTasksMerged;
+	// 		refreshAllTheColumns();
+	// 	}
+	// });
 
 	onMount(() => {
 		console.log("Column : data in allTasks :", allTasks);
@@ -74,22 +103,8 @@
 
 	const columnWidth =
 		$plugin.settings.data.globalSettings.columnWidth || "273px";
-	const activeBoardSettings =
+	const activeBoardConfigs =
 		$plugin.settings.data.boardConfigs[activeBoardIndex];
-
-	function isTaskAllowed(task: taskItem) {
-		if (
-			(parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
-				task.tags.some((tag) =>
-					activeBoardSettings.filters?.includes(tag),
-				)) ||
-			parseInt(activeBoardSettings.filterPolarity || "0") === 0
-		) {
-			return true;
-		}
-
-		return false;
-	}
 </script>
 
 <div class="TaskBoardColumnsSection" style="--column-width: {columnWidth}">
@@ -106,7 +121,7 @@
 		{#if tasks.length > 0}
 			{#each tasks as task, taskKey}
 				{#if isTaskAllowed(task)}
-					<TaskCard {task} {columnIndex} {activeBoardSettings} />
+					<TaskCard {task} {columnIndex} {activeBoardConfigs} />
 				{/if}
 			{/each}
 		{:else}

@@ -8,7 +8,7 @@
 	import Column from "src/components/Column.svelte";
 	import { Bolt, RefreshCcw, Tally1 } from "lucide-svelte";
 
-	import type { Board } from "../interfaces/BoardConfigs";
+	import type { Board, ColumnData } from "../interfaces/BoardConfigs";
 	import type {
 		taskItem,
 		taskJsonMerged,
@@ -18,13 +18,29 @@
 		app,
 		boardConfigs,
 		plugin,
+		refreshSignal,
 	} from "src/store";
 	import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 	import { saveBoardsData } from "src/utils/JsonFileOperations";
 
-	let allTasks: taskJsonMerged | undefined = $state($allTasksMerged);
+	let allTasks: taskJsonMerged = $state($allTasksMerged);
 	let boards: Board[] = $state($boardConfigs);
 	let activeBoardIndex = $state(0);
+	let activeBoardColumns: ColumnData[] = $state($boardConfigs[0].columns);
+
+	// I want to create a reactive variable activeBoardColumns which will be updated whenever activeBoardIndex or boardConfigs changes. This activeBoardColumns, will contain the columns of the active board.
+	// let activeBoardColumns;
+
+	// Reactive statement to update activeBoardColumns whenever activeBoardIndex or boardConfigs changes using $effect()
+	$effect(() => {
+		console.log(
+			"Root Effect : Is this even running, when the activeBoardIndex, $boardConfigs and $refreshSingnal changes changes...",
+		);
+		activeBoardColumns = $boardConfigs[activeBoardIndex].columns;
+		if ($refreshSignal) {
+			allTasks = $allTasksMerged;
+		}
+	});
 
 	const refreshBoardButton = () => {
 		if ($plugin.settings.data.globalSettings.realTimeScanning) {
@@ -42,10 +58,11 @@
 	};
 
 	onMount(() => {
-		console.log(
-			"Root component : reading allTasksMerged store variable :",
-			$allTasksMerged,
-		);
+		// Learning : onMount function runs only after this whole component has been successfully mounted, as well as, all the child components has been mounted.
+		// console.log(
+		// 	"Root component : reading allTasksMerged store variable :",
+		// 	$allTasksMerged,
+		// );
 		// const refreshColumnListener = async () => {
 		// 	try {
 		// 		const loadedTasks = loadTasksAndMerge();
@@ -82,7 +99,6 @@
 	}
 
 	function openBoardConfigureModal() {
-		// openBoardConfigModal($ap, $plugin,)
 		console.log("This will open Board Configure Modal...");
 		const modal = new BoardConfigureModal(
 			$app,
@@ -128,12 +144,13 @@
 	</div>
 	<div class="columnsContainer">
 		{#if boards[activeBoardIndex]}
-			{#each boards[activeBoardIndex].columns.filter((column) => column.active) as column, index}
+			{#each activeBoardColumns.filter((column: ColumnData) => column.active) as column, index}
 				<Column
 					columnIndex={index}
 					{activeBoardIndex}
 					colType={column.colType}
 					data={column.data}
+					{allTasks}
 				/>
 			{/each}
 		{/if}
