@@ -13,18 +13,24 @@
 		taskItem,
 		taskJsonMerged,
 	} from "src/interfaces/TaskItemProps";
-	import store, {
-		allTasksMerged,
-		app,
-		boardConfigs,
-		plugin,
-		refreshSignal,
-	} from "src/store";
+	// import store, {
+	// 	allTasksMerged,
+	// 	app,
+	// 	boardConfigs,
+	// 	plugin,
+	// 	refreshSignal,
+	// } from "src/store";
 	import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 	import { saveBoardsData } from "src/utils/JsonFileOperations";
+	import {
+		allTasksMerged,
+		boardConfigs,
+		refreshSignal,
+		store,
+	} from "src/shared.svelte";
 
-	let allTasks: taskJsonMerged = $state($allTasksMerged);
-	let boards: Board[] = $state($boardConfigs);
+	let allTasks: taskJsonMerged = $state(allTasksMerged);
+	let boards: Board[] = $state(boardConfigs);
 	let activeBoardIndex = $state(0);
 	// let activeBoardColumns: ColumnData[] = $state($boardConfigs[0].columns);
 
@@ -46,7 +52,7 @@
 		console.log(
 			"Root derived by : Will this work, when the $boardConfigs or activeBoardIndex changes...",
 		);
-		return $boardConfigs[activeBoardIndex].columns;
+		return boardConfigs[activeBoardIndex].columns;
 	});
 
 	// This wont work, as the $allTasksMerged is a store variable, so it wont update here, when it is changed in the store.
@@ -57,26 +63,26 @@
 	// 	return $allTasksMerged;
 	// });
 
-	store.allTasksMerged.subscribe((p) => {
-		console.log(
-			"Root : This subscriber should run when the allTasksMerged store variable changes...\nNew allTasks :",
-			p,
-		);
-		allTasks = p;
-	});
+	// store.allTasksMerged.subscribe((p) => {
+	// 	console.log(
+	// 		"Root : This subscriber should run when the allTasksMerged store variable changes...\nNew allTasks :",
+	// 		p,
+	// 	);
+	// 	allTasks = p;
+	// });
 
 	const refreshBoardButton = () => {
-		if ($plugin.settings.data.globalSettings.realTimeScanning) {
+		if (store.plugin?.settings.data.globalSettings.realTimeScanning) {
 			// eventEmitter.emit("REFRESH_BOARD");
-			store.refreshSignal.set(true);
+			store.refreshSignal = true;
 		} else {
 			if (
 				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
 			) {
-				$plugin.realTimeScanning.processStack();
+				store.plugin?.realTimeScanning.processStack();
 			}
 			// eventEmitter.emit("REFRESH_BOARD");
-			store.refreshSignal.set(true);
+			store.refreshSignal = true;
 		}
 	};
 
@@ -117,19 +123,30 @@
 		};
 	});
 
+	if (refreshSignal) {
+		console.log(
+			"Root : Refresh signal is true, so refreshing the columns...",
+		);
+		store.refreshSignal = false;
+	}
+
 	function setBoards(updatedBoards: Board[]) {
 		boards = updatedBoards;
 	}
 
 	function openBoardConfigureModal() {
 		console.log("This will open Board Configure Modal...");
-		const modal = new BoardConfigureModal(
-			$app,
-			boards,
-			activeBoardIndex,
-			(updatedBoards) => saveBoardsData(updatedBoards),
-		);
-		modal.open();
+		if (store.app) {
+			const modal = new BoardConfigureModal(
+				store.app,
+				boards,
+				activeBoardIndex,
+				(updatedBoards) => saveBoardsData(updatedBoards),
+			);
+			modal.open();
+		} else {
+			console.log("Error accesing the store.app");
+		}
 	}
 </script>
 
@@ -173,7 +190,7 @@
 					{activeBoardIndex}
 					colType={column.colType}
 					data={column.data}
-					allTasks={allTasks}
+					{allTasks}
 				/>
 			{/each}
 		{/if}

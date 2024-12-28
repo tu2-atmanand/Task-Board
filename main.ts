@@ -16,12 +16,12 @@ import {
 	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
-	loadTasksJsonFromDiskToStore,
+	loadTasksJsonFromDiskToShared,
 	onUnloadSave,
 	writeTasksFromSessionStorageToDisk,
 	writeTasksJsonFromStoreToDisk,
 } from "src/utils/tasksCache";
-import store, { initializeStores } from "./src/store";
+// import store, { initializeStores } from "./src/store";
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
@@ -31,6 +31,7 @@ import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { storeVariablesSyncrhonizer } from "src/utils/storeSynchronizer";
+import { initializeSharedState, store } from "src/shared.svelte";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -66,16 +67,21 @@ export default class TaskBoard extends Plugin {
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
-		store.taskBoardSettings.subscribe(
-			async () => await this.saveSettings()
-		);
+		// store.taskBoardSettings.subscribe(
+		// 	async () => await this.saveSettings()
+		// );
 
-		store.plugin.set(this);
-		store.app.set(this.app);
-		store.taskBoardSettings.set(this.settings.data.globalSettings);
-		store.appCache.set(this.app.metadataCache);
+		// store.plugin.set(this);
+		// store.app.set(this.app);
+		// store.taskBoardSettings.set(this.settings.data.globalSettings);
+		// store.appCache.set(this.app.metadataCache);
 
-		await initializeStores();
+		store.plugin = this;
+		store.app = this.app;
+		store.appCache = this.app.metadataCache;
+		store.taskBoardSettings = this.settings.data.globalSettings;
+
+		await initializeSharedState();
 
 		this.getLanguage();
 
@@ -232,7 +238,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	loadTasksDataToSS() {
-		const _ = loadTasksJsonFromDiskToStore();
+		const _ = loadTasksJsonFromDiskToShared();
 		// And a setInteval is registered to start periodic saving.
 	}
 

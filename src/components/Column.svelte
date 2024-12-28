@@ -9,12 +9,13 @@
 		taskItem,
 		taskJsonMerged,
 	} from "src/interfaces/TaskItemProps";
-	import store, {
-		allTasksMerged,
-		getAllTasksMerged,
-		plugin,
-		refreshSignal,
-	} from "src/store";
+	import { store } from "src/shared.svelte";
+	// import store, {
+	// 	allTasksMerged,
+	// 	getAllTasksMerged,
+	// 	plugin,
+	// 	refreshSignal,
+	// } from "src/store";
 
 	// Component props
 	interface props {
@@ -24,7 +25,8 @@
 		data: any;
 		allTasks: taskJsonMerged;
 	}
-	let { columnIndex, activeBoardIndex, colType, data, allTasks }: props = $props();
+	let { columnIndex, activeBoardIndex, colType, data, allTasks }: props =
+		$props();
 
 	// Update tasks based on props changes
 	// $: tasks = { ...tasks };
@@ -34,11 +36,11 @@
 	// helper functions
 	function isTaskAllowed(task: taskItem) {
 		if (
-			(parseInt(activeBoardConfigs.filterPolarity || "0") === 1 &&
+			(parseInt(activeBoardConfigs?.filterPolarity || "0") === 1 &&
 				task.tags.some((tag) =>
-					activeBoardConfigs.filters?.includes(tag),
+					activeBoardConfigs?.filters?.includes(tag),
 				)) ||
-			parseInt(activeBoardConfigs.filterPolarity || "0") === 0
+			parseInt(activeBoardConfigs?.filterPolarity || "0") === 0
 		) {
 			return true;
 		}
@@ -67,7 +69,7 @@
 
 	function refreshAllTheColumns() {
 		getTasksToDisplayInColumn();
-		store.refreshSignal.set(false);
+		// store.refreshSignal.set(false);
 	}
 
 	// Learning : This will never, work, becuase, this only refreshes the first column. You will need to update the parent, so all the columns renders again. That is the getTasksToDisplayInColumn() for all columns, so the task moves from one column to another.
@@ -95,10 +97,9 @@
 		getTasksToDisplayInColumn();
 	});
 
-	const columnWidth =
-		$plugin.settings.data.globalSettings.columnWidth || "273px";
+	const columnWidth = store.taskBoardSettings?.columnWidth || "273px";
 	const activeBoardConfigs =
-		$plugin.settings.data.boardConfigs[activeBoardIndex];
+		store.plugin?.settings.data.boardConfigs[activeBoardIndex];
 </script>
 
 <div class="TaskBoardColumnsSection" style="--column-width: {columnWidth}">
@@ -109,7 +110,9 @@
 	</div>
 	<div
 		class={`tasksContainer${
-			$plugin.settings.data.globalSettings.showVerticalScroll ? "" : "-SH"
+			store.plugin?.settings.data.globalSettings.showVerticalScroll
+				? ""
+				: "-SH"
 		}`}
 	>
 		{#if tasks.length > 0}

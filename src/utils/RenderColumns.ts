@@ -1,6 +1,6 @@
 // src/utils/RenderColumns.ts
 
-import store, { plugin } from "src/store";
+// import store, { plugin } from "src/store";
 import type { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";

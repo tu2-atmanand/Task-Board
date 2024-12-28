@@ -30,7 +30,7 @@
 	interface Props {
 		task: taskItem;
 		columnIndex: number;
-		activeBoardConfigs: Board;
+		activeBoardConfigs: Board | undefined;
 	}
 
 	let { task, columnIndex, activeBoardConfigs }: Props = $props();
@@ -150,12 +150,12 @@
 
 	// Utility to determine whether to show a tag
 	function showTag(tag: string) {
-		const column = activeBoardConfigs.columns[columnIndex];
+		const column = activeBoardConfigs?.columns[columnIndex];
 
 		// Check if tag matches column tag and should be hidden
 		if (
-			!activeBoardConfigs.showColumnTags &&
-			column.colType === "namedTag" &&
+			!activeBoardConfigs?.showColumnTags &&
+			column?.colType === "namedTag" &&
 			tag === column.data.coltag
 		) {
 			return false;
@@ -163,8 +163,8 @@
 
 		// Check if tag is in filtered tags and should be hidden
 		if (
-			!activeBoardConfigs.showFilteredTags &&
-			activeBoardConfigs.filters?.includes(tag) &&
+			!activeBoardConfigs?.showFilteredTags &&
+			activeBoardConfigs?.filters?.includes(tag) &&
 			parseInt(activeBoardConfigs.filterPolarity || "0")
 		) {
 			return false;

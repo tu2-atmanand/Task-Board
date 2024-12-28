@@ -1,13 +1,14 @@
 // /src/modal/BoardConfigModal.ts
 
 import { App, Modal } from "obsidian";
+import type { Board, ColumnData } from "src/interfaces/BoardConfigs";
 
-import type { Board } from "src/interfaces/BoardConfigs";
 import type { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
+import { store } from "src/shared.svelte";
 import { t } from "src/utils/lang/helper";
 
 interface BoardConfigureModalProps {
-	app: App;
+	app: App | undefined;
 	settingsManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
@@ -161,9 +162,12 @@ export class BoardConfigureModal extends Modal {
 		boardSettingsSection
 			.createEl("button", { text: t(59) })
 			.addEventListener("click", () => {
-				const newColumn = {
+				const newColumn: ColumnData = {
 					colType: "undated",
-					name: "New Column",
+					data: {
+						name: "New Column",
+						index: 1,
+					},
 					active: true,
 				};
 				board.columns.push(newColumn);

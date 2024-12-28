@@ -9,7 +9,7 @@ import type {
 import type { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
 import { get } from "svelte/store";
-import { loadTasksJsonFromStore } from "./tasksCache";
+import { loadTasksJsonFromShared } from "./tasksCache";
 import { plugin } from "src/store";
 
 // Operations with data.json
@@ -62,7 +62,7 @@ export const saveBoardsData = async (updatedBoards: Board[]) => {
 
 export const loadTasksAndMerge = async (): Promise<taskJsonMerged | undefined> => {
 	try {
-		const allTasks: tasksJson | undefined = await loadTasksJsonFromStore();
+		const allTasks: tasksJson | undefined = await loadTasksJsonFromShared();
 		console.log(
 			"loadTasksAndMerge : What have I got from store :",
 			allTasks

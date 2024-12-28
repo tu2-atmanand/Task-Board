@@ -8,7 +8,7 @@ import type {
 import { derived, writable } from "svelte/store";
 import { loadBoardsData, loadTasksAndMerge } from "./utils/JsonFileOperations";
 import {
-	loadTasksJsonFromDiskToStore,
+	loadTasksJsonFromDiskToShared,
 	writeTasksJsonFromStoreToDisk,
 } from "./utils/tasksCache";
 import type {
@@ -43,7 +43,7 @@ export const refreshSignal = writable<boolean>(false);
 export const recentUpdatedFilePath = writable<string>("");
 
 export const getAllTaskJsonData = async () => {
-	const taskJson = await loadTasksJsonFromDiskToStore();
+	const taskJson = await loadTasksJsonFromDiskToShared();
 	console.log("allTaskJsonData : Loading taskJson from disk :", taskJson);
 	allTaskJsonData.set(taskJson);
 };

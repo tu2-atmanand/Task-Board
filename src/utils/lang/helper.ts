@@ -1,6 +1,6 @@
 // Import all the language files
 
-import en, { Lang } from "./locale/en";
+import en, { type Lang } from "./locale/en";
 
 import ar from "./locale/ar";
 import cs from "./locale/cs";

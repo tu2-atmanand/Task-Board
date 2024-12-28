@@ -1,7 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
-import { loadTasksJsonFromStore, writeTasksJsonToStore } from "./tasksCache";
+import { loadTasksJsonFromShared, writeTasksJsonToSharedStore } from "./tasksCache";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -11,7 +11,9 @@ import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { priorityEmojis } from "src/interfaces/TaskItemProps";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
-import store from "src/store";
+import { store } from "src/shared.svelte";
+
+// import store from "src/store";
 
 export class ScanningVault {
 	app: App;
@@ -103,7 +105,7 @@ export class ScanningVault {
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: (TFile | null)[]) {
 		// Load the existing tasks from tasks.json once
-		const oldTasks = await loadTasksJsonFromStore();
+		const oldTasks = await loadTasksJsonFromShared();
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
 
@@ -197,7 +199,7 @@ export class ScanningVault {
 
 	// Save tasks to JSON file
 	async saveTasksToFile() {
-		await writeTasksJsonToStore(this.tasks);
+		await writeTasksJsonToSharedStore(this.tasks);
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
@@ -205,7 +207,7 @@ export class ScanningVault {
 			this.plugin.settings.data.globalSettings.realTimeScanning
 		) {
 			// eventEmitter.emit("REFRESH_COLUMN");
-			store.refreshSignal.set(true);
+			store.refreshSignal = true;
 			this.TaskDetected = false;
 		}
 	}

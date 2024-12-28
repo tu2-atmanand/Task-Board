@@ -9,46 +9,54 @@ import {
 	updateTaskInFile,
 	updateTaskInJson,
 } from "./TaskItemUtils";
-import store, {
-	allTaskItemsToDisplay,
-	plugin,
-	taskBoardSettings,
-} from "src/store";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { DeleteConfirmationModal } from "src/modal/DeleteConfirmationModal";
 import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import { get } from "svelte/store";
+import { store } from "src/shared.svelte";
 import { t } from "./lang/helper";
 import type { taskItem } from "src/interfaces/TaskItemProps";
 
+// import store, {
+// 	allTaskItemsToDisplay,
+// 	plugin,
+// 	taskBoardSettings,
+// } from "src/store";
+
 export const handleSubTasksChange = (updatedTask: taskItem) => {
-	console.log("handleSubTasksChange : Here is the updatedTask :", updatedTask);
-	updateTaskInJson(updatedTask);
-	updateTaskInFile(get(plugin), updatedTask, updatedTask);
+	console.log(
+		"handleSubTasksChange : Here is the updatedTask :",
+		updatedTask
+	);
+	const plugin = store.plugin;
+	if (plugin) {
+		updateTaskInJson(updatedTask);
+		updateTaskInFile(plugin, updatedTask, updatedTask);
+	}
 };
 
 export const handleCheckboxChange = (updatedTask: taskItem) => {
-	const myPlugin = get(plugin);
+	const myPlugin = store.plugin;
 	// const moment = require("moment");
 
-	const updatedTasks = get(allTaskItemsToDisplay).filter(
+	const updatedTasks = store.allTaskItemsToDisplay.filter(
 		(t: taskItem) => t.id !== updatedTask.id
 	);
-	store.allTaskItemsToDisplay.set(updatedTasks); // Update state to remove completed task
+	store.allTaskItemsToDisplay = updatedTasks; // Update state to remove completed task
 
 	// Check if the task is completed
-	if (updatedTask.completed) {
+	if (updatedTask.completed && myPlugin) {
 		const taskWithCompleted = { ...updatedTask, completed: "" };
 		// Move from Completed to Pending
 		moveFromCompletedToPending(myPlugin, taskWithCompleted);
 		updateTaskInFile(myPlugin, taskWithCompleted, taskWithCompleted);
-	} else {
+	} else if (myPlugin) {
 		const moment = _moment as unknown as typeof _moment.default;
 		const taskWithCompleted = {
 			...updatedTask,
 			completed: moment().format(
-				get(taskBoardSettings)?.taskCompletionDateTimePattern
+				store.taskBoardSettings?.taskCompletionDateTimePattern
 			),
 		};
 		// Move from Pending to Completed
@@ -58,8 +66,9 @@ export const handleCheckboxChange = (updatedTask: taskItem) => {
 };
 
 export const handleDeleteTask = (task: taskItem) => {
-	const myPlugin = get(plugin);
-	const app = myPlugin.app;
+	const myPlugin = store.plugin;
+	if (!myPlugin) return;
+	const app = myPlugin?.app;
 	const mssg = t(61);
 	const deleteModal = new DeleteConfirmationModal(app, {
 		app,
@@ -68,10 +77,10 @@ export const handleDeleteTask = (task: taskItem) => {
 			deleteTaskFromFile(myPlugin, task);
 			deleteTaskFromJson(myPlugin, task);
 			// Remove the task from state after deletion
-			const newTasks = get(allTaskItemsToDisplay).filter(
+			const newTasks = store.allTaskItemsToDisplay.filter(
 				(t: taskItem) => t.id !== task.id
 			);
-			store.allTaskItemsToDisplay.set(newTasks);
+			store.allTaskItemsToDisplay = newTasks;
 		},
 		onCancel: () => {
 			// console.log('Task deletion canceled');
@@ -81,7 +90,8 @@ export const handleDeleteTask = (task: taskItem) => {
 };
 
 export const handleEditTask = (task: taskItem) => {
-	const myPlugin = get(plugin);
+	const myPlugin = store.plugin;
+	if (!myPlugin) return;
 	if (
 		myPlugin.settings.data.globalSettings.editButtonAction ===
 		EditButtonMode.PopUp

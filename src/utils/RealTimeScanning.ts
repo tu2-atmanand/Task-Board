@@ -1,12 +1,15 @@
 // /src/utils/RealTimeScanning.ts
 
 import { App, TFile } from "obsidian";
-import store, { recentUpdatedFilePath } from "src/store";
 
 import { ScanningVault } from "src/utils/ScanningVault";
 import type TaskBoard from "main";
 import { get } from "svelte/store";
 import { scanFilterForFilesNFolders } from "./FiltersVerifier";
+import { store } from "src/shared.svelte";
+
+// import store, { recentUpdatedFilePath } from "src/store";
+
 
 export class RealTimeScanning {
 	app: App;
@@ -74,13 +77,13 @@ export class RealTimeScanning {
 			if (scanFilterForFilesNFolders(file, scanFilters)) {
 				// If real-time scanning is enabled, scan the file immediately
 				if (realTimeScanning) {
-					if (file.path !== get(recentUpdatedFilePath)) {
+					if (file.path !== store.recentUpdatedFilePath) {
 						this.scanningVault.updateTasksFromFiles([file]);
 					} else {
 						console.warn(
-							"onFileChange : Since the file was updated from the board and its updated data is already in the store, so no need to scan"
+							"onFileChange : This should run when the task has been updated through the plugin, that is using plugin features. ",
 						);
-						store.recentUpdatedFilePath.set("");
+						store.recentUpdatedFilePath = "";
 					}
 				} else {
 					// If the file is already in the stack, ignore it

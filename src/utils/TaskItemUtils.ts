@@ -1,6 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
-import { loadTasksJsonFromStore, writeTasksJsonToStore } from "./tasksCache";
+import { loadTasksJsonFromShared, writeTasksJsonToSharedStore } from "./tasksCache";
 import {
 	priorityEmojis,
 	type taskItem,
@@ -16,6 +16,7 @@ import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { get } from "svelte/store";
 import { plugin } from "src/store";
+import { store } from "src/shared.svelte";
 
 export const taskElementsFormatter = (
 	plugin: TaskBoard,
@@ -121,7 +122,8 @@ export const moveFromPendingToCompleted = async (
 	task: taskItem
 ) => {
 	try {
-		const allTasks = await loadTasksJsonFromStore();
+		// const allTasks = await loadTasksJsonFromShared();
+		const allTasks = store.allTaskJsonData;;
 
 		if (allTasks) {
 			// Move task from Pending to Completed
@@ -137,7 +139,7 @@ export const moveFromPendingToCompleted = async (
 			}
 
 			// Write the updated data back to the JSON file
-			await writeTasksJsonToStore(allTasks);
+			await writeTasksJsonToSharedStore(allTasks);
 		}
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
@@ -151,7 +153,7 @@ export const moveFromCompletedToPending = async (
 	task: taskItem
 ) => {
 	try {
-		const allTasks = await loadTasksJsonFromStore();
+		const allTasks = await loadTasksJsonFromShared();
 
 		if (allTasks) {
 			// Move task from Completed to Pending
@@ -167,7 +169,7 @@ export const moveFromCompletedToPending = async (
 			}
 
 			// Write the updated data back to the JSON file
-			await writeTasksJsonToStore(allTasks);
+			await writeTasksJsonToSharedStore(allTasks);
 		}
 	} catch (error) {
 		console.error("Error updating task in tasks.json:", error);
@@ -235,7 +237,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 
 export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 	try {
-		const allTasks = await loadTasksJsonFromStore();
+		const allTasks = await loadTasksJsonFromShared();
 
 		if (allTasks) {
 			// Remove task from Pending or Completed in tasks.json
@@ -250,7 +252,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 				].filter((t: any) => t.id !== task.id);
 			}
 
-			await writeTasksJsonToStore(allTasks);
+			await writeTasksJsonToSharedStore(allTasks);
 		}
 	} catch (error) {
 		console.error("Error deleting task from tasks.json:", error);
@@ -378,7 +380,7 @@ export const updateTaskInFile = async (
 
 export const updateTaskInJson = async (updatedTask: taskItem) => {
 	try {
-		const allTasks = await loadTasksJsonFromStore();
+		const allTasks = await loadTasksJsonFromShared();
 
 		if (allTasks) {
 			// Function to update a task in a given task category (Pending or Completed)
@@ -415,7 +417,7 @@ export const updateTaskInJson = async (updatedTask: taskItem) => {
 				updatedData
 			);
 			// Write the updated data back to the JSON file using the new function
-			await writeTasksJsonToStore(updatedData);
+			await writeTasksJsonToSharedStore(updatedData);
 
 			eventEmitter.emit("REFRESH_COLUMN");
 		}
@@ -437,7 +439,7 @@ export const generateTaskId = (): number => {
 };
 
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
-	const allTasks = await loadTasksJsonFromStore();
+	const allTasks = await loadTasksJsonFromShared();
 
 	if (allTasks) {
 		const newTaskWithId = {
@@ -454,7 +456,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 		allTasks.Pending[newTask.filePath].push(newTaskWithId);
 
-		await writeTasksJsonToStore(allTasks);
+		await writeTasksJsonToSharedStore(allTasks);
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	}

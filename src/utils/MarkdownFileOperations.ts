@@ -1,7 +1,7 @@
 import { Notice, TFile } from "obsidian";
 
 import TaskBoard from "main";
-import store from "src/store";
+// import store from "src/store";
 import { t } from "./lang/helper";
 
 export const readDataOfVaultFiles = async (
