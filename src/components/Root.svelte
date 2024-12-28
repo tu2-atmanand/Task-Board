@@ -59,7 +59,8 @@
 
 	store.allTasksMerged.subscribe((p) => {
 		console.log(
-			"Root : This subscriber should run when the allTasksMerged store variable changes...",
+			"Root : This subscriber should run when the allTasksMerged store variable changes...\nNew allTasks :",
+			p,
 		);
 		allTasks = p;
 	});
@@ -172,7 +173,7 @@
 					{activeBoardIndex}
 					colType={column.colType}
 					data={column.data}
-					allTasks={$allTasksMerged}
+					allTasks={allTasks}
 				/>
 			{/each}
 		{/if}

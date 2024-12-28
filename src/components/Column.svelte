@@ -31,13 +31,6 @@
 	// let allTasks = $state($allTasksMerged);
 	let tasks: taskItem[] = $state([]);
 
-	// store.allTasksMerged.subscribe((p) => {
-	// 	console.log(
-	// 		"allTasksMerged store variable should have been changed...",
-	// 	);
-	// 	allTasks = p;
-	// });
-
 	// helper functions
 	function isTaskAllowed(task: taskItem) {
 		if (
@@ -56,7 +49,7 @@
 	function getTasksToDisplayInColumn() {
 		if (allTasks.Pending.length > 0 || allTasks.Completed.length > 0) {
 			console.log(
-				"getTasksToDisplayInColumn : I hope this is running after the allTasks has be set to $allTasksMerged",
+				"getTasksToDisplayInColumn : I hope this is only running on the initial mount and later when the allTasks prop changes ...",
 			);
 			const tasksToDisplayInColumn = renderColumns(
 				activeBoardIndex,

@@ -53,9 +53,8 @@ export const getAllTaskJsonData = async () => {
 // Load tasks from disk into store
 export const getAllTasksMerged = async () => {
 	try {
-		console.log("Loading tasks from store and merging them...");
 		const mergedTasks = await loadTasksAndMerge();
-		console.log("Tasks loaded:", mergedTasks);
+		console.log("getAllTasksMerged : Tasks loaded:", mergedTasks);
 		if (mergedTasks) allTasksMerged.set(mergedTasks);
 	} catch (error) {
 		console.error("Error loading tasks into store:", error);
