@@ -40,10 +40,10 @@ export const handleCheckboxChange = (updatedTask: taskItem) => {
 	const myPlugin = store.plugin;
 	// const moment = require("moment");
 
-	const updatedTasks = store.allTaskItemsToDisplay.filter(
+	const updatedTasks = store.allTaskItemsToDisplay?.filter(
 		(t: taskItem) => t.id !== updatedTask.id
 	);
-	store.allTaskItemsToDisplay = updatedTasks; // Update state to remove completed task
+	store.allTaskItemsToDisplay = updatedTasks ?? null; // Update state to remove completed task
 
 	// Check if the task is completed
 	if (updatedTask.completed && myPlugin) {
@@ -77,10 +77,10 @@ export const handleDeleteTask = (task: taskItem) => {
 			deleteTaskFromFile(myPlugin, task);
 			deleteTaskFromJson(myPlugin, task);
 			// Remove the task from state after deletion
-			const newTasks = store.allTaskItemsToDisplay.filter(
+			const newTasks = store.allTaskItemsToDisplay?.filter(
 				(t: taskItem) => t.id !== task.id
 			);
-			store.allTaskItemsToDisplay = newTasks;
+			store.allTaskItemsToDisplay = newTasks ?? null;
 		},
 		onCancel: () => {
 			// console.log('Task deletion canceled');

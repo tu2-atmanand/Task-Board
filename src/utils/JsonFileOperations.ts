@@ -10,14 +10,18 @@ import type { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
 import { get } from "svelte/store";
 import { loadTasksJsonFromShared } from "./tasksCache";
-import { plugin } from "src/store";
+import { store } from "src/shared.svelte";
 
 // Operations with data.json
 
 // Load only the globalSettings part from the data.json
 export const loadGlobalSettings = async () => {
 	try {
-		const myPlugin = get(plugin);
+		const myPlugin = store.plugin;
+		if (!myPlugin) {
+			console.error("Plugin not initialized");
+			return;
+		}
 		await myPlugin.loadSettings();
 		const globalSettings = myPlugin.settings.data.globalSettings || {};
 		return globalSettings;
@@ -26,8 +30,12 @@ export const loadGlobalSettings = async () => {
 	}
 };
 // Function to load boards data from the JSON file
-export const loadBoardsData = async (): Promise<Board[]> => {
-	const myPlugin = get(plugin);
+export const loadBoardsData = async (): Promise<Board[] | undefined> => {
+	const myPlugin = store.plugin;
+	if (!myPlugin) {
+		console.error("Plugin not initialized");
+		return;
+	}
 	try {
 		// Fetch settings via Obsidian's loadData method
 		await myPlugin.loadSettings();
@@ -43,7 +51,11 @@ export const loadBoardsData = async (): Promise<Board[]> => {
 // Function to save boards data to the JSON file
 export const saveBoardsData = async (updatedBoards: Board[]) => {
 	try {
-		const myPlugin = get(plugin);
+		const myPlugin = store.plugin;
+		if (!myPlugin) {
+			console.error("Plugin not initialized");
+			return;
+		}
 		// Fetch current settings
 		await myPlugin.loadSettings();
 
@@ -60,7 +72,9 @@ export const saveBoardsData = async (updatedBoards: Board[]) => {
 
 // Operations with tasks.json
 
-export const loadTasksAndMerge = async (): Promise<taskJsonMerged | undefined> => {
+export const loadTasksAndMerge = async (): Promise<
+	taskJsonMerged | undefined
+> => {
 	try {
 		const allTasks: tasksJson | undefined = await loadTasksJsonFromShared();
 		console.log(

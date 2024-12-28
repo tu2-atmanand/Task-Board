@@ -79,7 +79,7 @@ export const loadTasksJsonFromShared = async (): Promise<
 	tasksJson | undefined
 > => {
 	try {
-		return store.allTaskJsonData;
+		return store.allTaskJsonData ?? undefined;
 	} catch (error) {
 		console.warn("Error loading tasks from sessionStorage:", error);
 		// throw error;

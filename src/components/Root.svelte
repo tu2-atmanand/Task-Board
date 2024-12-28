@@ -22,15 +22,10 @@
 	// } from "src/store";
 	import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 	import { saveBoardsData } from "src/utils/JsonFileOperations";
-	import {
-		allTasksMerged,
-		boardConfigs,
-		refreshSignal,
-		store,
-	} from "src/shared.svelte";
+	import { store } from "src/shared.svelte";
 
-	let allTasks: taskJsonMerged = $state(allTasksMerged);
-	let boards: Board[] = $state(boardConfigs);
+	let allTasks: taskJsonMerged = $state(store.allTasksMerged);
+	let boards: Board[] = $state(store.boardConfigs ?? []);
 	let activeBoardIndex = $state(0);
 	// let activeBoardColumns: ColumnData[] = $state($boardConfigs[0].columns);
 
@@ -52,7 +47,10 @@
 		console.log(
 			"Root derived by : Will this work, when the $boardConfigs or activeBoardIndex changes...",
 		);
-		return boardConfigs[activeBoardIndex].columns;
+		if (!store.boardConfigs) {
+			return [];
+		}
+		return store.boardConfigs[activeBoardIndex].columns;
 	});
 
 	// This wont work, as the $allTasksMerged is a store variable, so it wont update here, when it is changed in the store.
@@ -123,7 +121,7 @@
 		};
 	});
 
-	if (refreshSignal) {
+	if (store.refreshSignal) {
 		console.log(
 			"Root : Refresh signal is true, so refreshing the columns...",
 		);

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
-	import { plugin, view } from "src/store";
+	import { store } from "src/shared.svelte";
 	import { onMount } from "svelte";
 	interface Props {
 		line: string; // The line to render
@@ -30,13 +30,14 @@
 	}
 
 	const renderSubtask = async (el: HTMLElement | null): Promise<void> => {
-		if (el) {
+		const myPlugin = store.plugin;
+		if (el && myPlugin && store.view) {
 			await MarkdownUIRenderer.renderSubtaskText(
-				$plugin.app,
+				myPlugin.app,
 				line.replace(/- \[.*?\]/, "").trim(),
 				el,
 				filePath,
-				$view,
+				store.view,
 			);
 		}
 	};

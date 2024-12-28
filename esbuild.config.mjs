@@ -42,10 +42,8 @@ const context = await esbuild.context({
 	],
 	format: "cjs",
 	loader: {
-		".js": "jsx", // Ensure .js files with JSX are handled
-		".jsx": "jsx",
-		".ts": "tsx",
-		".tsx": "tsx", // Ensure .tsx files are recognized
+		".js": "js", // Ensure .js files with JSX are handled
+		".ts": "ts",
 	},
 	target: "es2018",
 	logLevel: "info",

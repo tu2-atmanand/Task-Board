@@ -8,13 +8,6 @@
 	} from "../utils/handleTaskEvents";
 	import { type taskItem } from "../interfaces/TaskItemProps";
 	import { priorityEmojis } from "../interfaces/TaskItemProps";
-	import {
-		taskBoardSettings,
-		plugin,
-		app,
-		view,
-		refreshSignal,
-	} from "src/store";
 	import type { Board } from "src/interfaces/BoardConfigs";
 	import SubTaskItem from "./SubTaskItem.svelte";
 	import { EditButtonMode } from "src/interfaces/GlobalSettings";
@@ -24,6 +17,7 @@
 		markdownButtonHoverPreviewEvent,
 	} from "src/services/MarkdownHoverPreview";
 	import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+	import { store } from "src/shared.svelte";
 	// import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
 	// import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 
@@ -106,9 +100,7 @@
 	// Function to get the color of a tag
 	function getTagColor(tag: string) {
 		const customTagColor =
-			$plugin.settings.data.globalSettings.tagColors?.[
-				tag.replace("#", "")
-			];
+			store.taskBoardSettings?.tagColors?.[tag.replace("#", "")];
 		return customTagColor || defaultTagColor;
 	}
 
@@ -121,9 +113,7 @@
 	// Function to get the background color of a tag
 	function getTagBackgroundColor(tag: string) {
 		const customTagColor =
-			$plugin.settings.data.globalSettings.tagColors?.[
-				tag.replace("#", "")
-			];
+			store.taskBoardSettings?.tagColors?.[tag.replace("#", "")];
 		return customTagColor
 			? hexToRgba(customTagColor, 0.1) // 10% opacity background
 			: "var(--tag-background)";
@@ -195,12 +185,14 @@
 
 	const onEditButtonClicked = (event: MouseEvent) => {
 		if (
-			$taskBoardSettings.editButtonAction !== EditButtonMode.NoteInHover
+			store.taskBoardSettings?.editButtonAction !==
+			EditButtonMode.NoteInHover
 		) {
 			handleEditTask(task);
 		} else {
 			// event.ctrlKey = true;
-			markdownButtonHoverPreviewEvent($app, event, task.filePath);
+			if(!store.app) return;
+			markdownButtonHoverPreviewEvent(store.app, event, task.filePath);
 			// event.ctrlKey = false;
 		}
 	};
@@ -210,15 +202,18 @@
 		data: string,
 	): Promise<void> => {
 		if (el) {
+			const myPlugin = store.plugin;
 			el.empty();
-			// Call the MarkdownUIRenderer to render the description
-			MarkdownUIRenderer.renderTaskDisc(
-				$app,
-				data,
-				el,
-				task.filePath,
-				$view,
-			);
+
+			if (myPlugin && store.view) {
+				MarkdownUIRenderer.renderTaskDisc(
+					myPlugin.app,
+					data,
+					el,
+					task.filePath,
+					store.view,
+				);
+			}
 
 			// // Add event handlers for markdown links
 			// hookMarkdownLinkMouseEventHandlers(
@@ -284,7 +279,7 @@
 		style="background-color: {getColorIndicator()}"
 	></div>
 	<div class="taskItemMainContent">
-		{#if $plugin.settings.data.globalSettings.showHeader}
+		{#if store.taskBoardSettings?.showHeader}
 			<div class="taskItemHeader">
 				<div class="taskItemHeaderLeft">
 					<div class="taskItemPrio">
@@ -372,7 +367,7 @@
 			{/if}
 		</div>
 
-		{#if $taskBoardSettings.showFooter}
+		{#if store.taskBoardSettings?.showFooter}
 			<div class="taskItemFooter">
 				<!-- Conditionally render task.completed or the date/time -->
 				{#if task.completed}

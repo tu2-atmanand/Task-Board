@@ -29,10 +29,10 @@ interface types {
 	appCache: MetadataCache | null;
 	view: KanbanView | null;
 	taskBoardSettings: globalSettingsData | null;
-	boardConfigs: Board[] | [];
-	allTaskJsonData: tasksJson | {};
+	boardConfigs: Board[] | null;
+	allTaskJsonData: tasksJson | null;
 	allTasksMerged: taskJsonMerged | { Pending: []; Completed: [] };
-	allTaskItemsToDisplay: taskItem[] | [];
+	allTaskItemsToDisplay: taskItem[] | null;
 	refreshSignal: boolean;
 	recentUpdatedFilePath: string;
 	isTasksJsonChanged: boolean;
@@ -44,10 +44,10 @@ export const store = $state<types>({
 	appCache: null,
 	view: null,
 	taskBoardSettings: null,
-	boardConfigs: [],
-	allTaskJsonData: {},
+	boardConfigs: null,
+	allTaskJsonData: null,
 	allTasksMerged: { Pending: [], Completed: [] },
-	allTaskItemsToDisplay: [],
+	allTaskItemsToDisplay: null,
 	refreshSignal: false,
 	recentUpdatedFilePath: "",
 	isTasksJsonChanged: false,
@@ -55,6 +55,7 @@ export const store = $state<types>({
 
 export const setTaskBoardSettings = (data: globalSettingsData) => {
 	store.taskBoardSettings = data;
+	store.plugin?.saveSettings();
 };
 
 // Board configs
@@ -64,13 +65,14 @@ export const initializeBoardConfigs = async () => {
 		console.log("Loading boards data...");
 		const boardData = await loadBoardsData();
 		console.log("Boards data loaded:", boardData);
+		if (!boardData) return null;
 		store.boardConfigs = boardData;
 	} catch (error) {
 		console.error("Error loading boards data:", error);
 	}
 };
 export const getBoardConfigs = () => {
-	return store.boardConfigs;
+	return store.boardConfigs ?? [];
 };
 export const setBoardConfigs = (data: Board[]) => {
 	store.boardConfigs = data;
@@ -133,11 +135,9 @@ export const setAllTasksMerged = (data: taskJsonMerged) => {
 export const initializeSharedState = async () => {
 	try {
 		console.log("Initializing shared state...");
-		await Promise.all([
-			initializeBoardConfigs(),
-			initializeAllTasksJsonData(),
-			initializeAllTasksMerged(),
-		]);
+		await initializeBoardConfigs();
+		await initializeAllTasksJsonData();
+		await initializeAllTasksMerged();
 		console.log("Shared state initialized successfully.");
 	} catch (error) {
 		console.error("Error initializing shared state:", error);

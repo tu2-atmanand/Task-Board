@@ -14,8 +14,6 @@ import {
 import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { get } from "svelte/store";
-import { plugin } from "src/store";
 import { store } from "src/shared.svelte";
 
 export const taskElementsFormatter = (
