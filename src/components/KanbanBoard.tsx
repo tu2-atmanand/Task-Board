@@ -85,6 +85,21 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	// 	}
 	// }, [allTasks, boards, activeBoardIndex]);
 
+	const debouncedRefreshColumn = useCallback(debounce(async () => {
+		try {
+			const allTasks = await loadTasksAndMerge(plugin);
+			setAllTasks(allTasks);
+		} catch (error) {
+			console.error("Error loading tasks:", error);
+		}
+	}, 300), [plugin]);
+
+	useEffect(() => {
+		eventEmitter.on('REFRESH_COLUMN', debouncedRefreshColumn);
+		return () => {
+			eventEmitter.off('REFRESH_COLUMN', debouncedRefreshColumn);
+		};
+	}, [debouncedRefreshColumn]);
 
 	// Pub Sub method similar to Kafka to read events/messages.
 	useEffect(() => {
@@ -94,23 +109,23 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 			setRefreshCount((prev) => prev + 1);
 		};
 
-		const refreshColumnListener = async () => {
-			try {
-				const allTasks = await loadTasksAndMerge(plugin);
-				// setAllTasksArrangedPerColumn([]);
-				setAllTasks(allTasks);
-			} catch (error) {
-				console.error("Error loading tasks:", error);
-			}
-		};
+		// const refreshColumnListener = async () => {
+		// 	try {
+		// 		const allTasks = await loadTasksAndMerge(plugin);
+		// 		// setAllTasksArrangedPerColumn([]);
+		// 		setAllTasks(allTasks);
+		// 	} catch (error) {
+		// 		console.error("Error loading tasks:", error);
+		// 	}
+		// };
 
 		eventEmitter.on('REFRESH_BOARD', refreshBoardListener);
-		eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
+		// eventEmitter.on('REFRESH_COLUMN', refreshColumnListener);
 
 		// Clean up the listener when component unmounts
 		return () => {
 			eventEmitter.off('REFRESH_BOARD', refreshBoardListener);
-			eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
+			// eventEmitter.off('REFRESH_COLUMN', refreshColumnListener);
 		};
 	}, []);
 
@@ -136,7 +151,6 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	// const isLoading =
 	// 	allTasksArrangedPerColumn.length !== boards[activeBoardIndex]?.columns.length ||
 	// 	allTasksArrangedPerColumn.some((tasks) => tasks.length === 0);
-
 
 	return (
 		<div className="kanbanBoard">
