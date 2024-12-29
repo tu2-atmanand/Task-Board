@@ -1,12 +1,12 @@
 // /src/modal/BoardConfigModal.tsx - V2
 
+import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
 import { App, Modal, Notice } from "obsidian";
+import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import React, { ComponentPropsWithRef, useEffect, useRef, useState } from "react";
 
-import AddColumnModal from "src/modal/AddColumnModal";
-import { Board } from "src/interfaces/BoardConfigs";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
@@ -118,13 +118,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// Function to render the Add Column Modal
 	const renderAddColumnModal = () => {
 		if (!isAddColumnModalOpen) return null;
-		return (
-			<AddColumnModal
-				isOpen={isAddColumnModalOpen}
-				onClose={handleCloseAddColumnModal}
-				onSubmit={(columnData) => handleAddColumn(activeBoardIndex, columnData)}
-			/>
-		);
+		// TODO : THis wont work if you havent assigned a very high z-index to this specific modal.
+		const modal = new AddColumnModal(app, {
+			app,
+			onCancel: handleCloseAddColumnModal, // Previously onClose
+			onSubmit: (columnData: columnDataProp) => handleAddColumn(activeBoardIndex, columnData),
+		});
+		modal.open();
 	};
 
 	// Function to delete a column from the selected board
