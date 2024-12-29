@@ -192,7 +192,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 					boards[activeBoardIndex]?.columns
 						.filter((column) => column.active)
 						.map((column, index) => (
-							<Column
+							<MemoizedColumn
 								key={index}
 								app={app}
 								plugin={plugin}
@@ -207,5 +207,13 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 		</div>
 	);
 };
+
+// Wrap Column in React.memo
+const MemoizedColumn = memo(Column, (prevProps, nextProps) => {
+	return (
+		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
+		prevProps.columnData === nextProps.columnData
+	);
+});
 
 export default memo(KanbanBoard);
