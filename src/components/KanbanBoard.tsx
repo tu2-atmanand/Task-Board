@@ -197,7 +197,6 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 						.map((column, index) => (
 							<MemoizedColumn
 								key={index}
-								app={app}
 								plugin={plugin}
 								columnIndex={index}
 								activeBoardIndex={activeBoardIndex}

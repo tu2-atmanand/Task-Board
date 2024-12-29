@@ -19,7 +19,6 @@ type CustomCSSProperties = CSSProperties & {
 };
 
 const Column: React.FC<ColumnProps> = ({
-	app,
 	plugin,
 	columnIndex,
 	activeBoardIndex,
@@ -91,7 +90,7 @@ const Column: React.FC<ColumnProps> = ({
 	const handleEditTask = (task: taskItem) => {
 		if (plugin.settings.data.globalSettings.editButtonAction === EditButtonMode.PopUp) {
 			const editModal = new AddOrEditTaskModal(
-				app,
+				plugin.app,
 				plugin,
 				(updatedTask) => {
 					updatedTask.filePath = task.filePath;
@@ -132,10 +131,10 @@ const Column: React.FC<ColumnProps> = ({
 	const handleTaskInteraction = useCallback(
 		(task: taskItem, type: string) => {
 			if (type === "edit") handleEditTask(task);
-			else if (type === "delete") handleDeleteTask(app, task);
+			else if (type === "delete") handleDeleteTask(plugin.app, task);
 			else if (type === "checkbox") handleCheckboxChange(task);
 		},
-		[handleEditTask, handleDeleteTask, handleCheckboxChange, app]
+		[handleEditTask, handleDeleteTask, handleCheckboxChange, plugin.app]
 	);
 
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
@@ -160,7 +159,7 @@ const Column: React.FC<ColumnProps> = ({
 							return (
 								<TaskItem
 									key={index}
-									app={app}
+									app={plugin.app}
 									plugin={plugin}
 									taskKey={index}
 									task={task}

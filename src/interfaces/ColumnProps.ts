@@ -5,7 +5,6 @@ import TaskBoard from "main";
 
 export interface ColumnProps {
 	key: number;
-	app: App;
 	plugin: TaskBoard;
 	columnIndex: number;
 	activeBoardIndex: number;
