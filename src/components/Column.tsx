@@ -27,14 +27,15 @@ const Column: React.FC<ColumnProps> = ({
 	tasksForThisColumn,
 }) => {
 	// Local tasks state, initially set from external tasks
-	const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
+	// const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
+	const tasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
 	const globalSettings = plugin.settings.data.globalSettings;
 	console.log("Column.tsx : Data in tasks :", tasks);
 
-	// Sync local tasks state with external tasks when they change
-	useEffect(() => {
-		setTasks(tasksForThisColumn);
-	}, [tasksForThisColumn]);
+	// // Sync local tasks state with external tasks when they change
+	// useEffect(() => {
+	// 	setTasks(tasksForThisColumn);
+	// }, [tasksForThisColumn]);
 
 	// // Render tasks using the tasks passed from KanbanBoard
 	// useEffect(() => {
@@ -45,8 +46,8 @@ const Column: React.FC<ColumnProps> = ({
 
 	const handleCheckboxChange = (updatedTask: taskItem) => {
 
-		const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
-		setTasks(updatedTasks); // Update state to remove completed task
+		// const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
+		// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
 
 		// Check if the task is completed
 		if (updatedTask.completed) {
@@ -78,7 +79,7 @@ const Column: React.FC<ColumnProps> = ({
 				deleteTaskFromFile(plugin, task);
 				deleteTaskFromJson(plugin, task);
 				// Remove the task from state after deletion
-				setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id));
+				// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
 			},
 			onCancel: () => {
 				// console.log('Task deletion canceled');
