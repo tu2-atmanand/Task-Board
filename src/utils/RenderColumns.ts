@@ -6,12 +6,13 @@ import {
 	taskJsonMerged,
 } from "src/interfaces/TaskItemProps";
 
+import { ColumnData } from "src/interfaces/BoardConfigs";
 import TaskBoard from "main";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
 	plugin: TaskBoard,
-	setTasks: Dispatch<SetStateAction<taskItem[]>>,
+	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
 	columnData: any,
 	allTasks: taskJsonMerged
@@ -78,5 +79,6 @@ export const renderColumns = (
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);
 	}
 
-	setTasks(tasksToDisplay);
+	// setTasks(tasksToDisplay);
+	return tasksToDisplay;
 };
