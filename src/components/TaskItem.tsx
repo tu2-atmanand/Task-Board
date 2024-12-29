@@ -79,62 +79,14 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		};
 	}, []);
 
-	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-	useEffect(() => {
-		// Render subtasks after componentRef is initialized
-		task.body.forEach((subtaskText, index) => {
-			const uniqueKey = `${task.id}-${index}`;
-			const element = subtaskTextRefs.current[uniqueKey];
-
-			if (element) {
-				element.empty(); // Clear previous content
-
-				const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
-
-				MarkdownUIRenderer.renderSubtaskText(
-					app,
-					strippedSubtaskText,
-					element,
-					task.filePath,
-					componentRef.current
-				);
-
-				hookMarkdownLinkMouseEventHandlers(app, plugin, element, task.filePath, task.filePath);
-			}
-		});
-	}, [task.body, task.filePath, app]);
-
-
-	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
-	useEffect(() => {
-		if (taskItemBodyDescriptionRef.current && componentRef.current) {
-			const uniqueKey = `${task.id}-desc`;
-			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-			console.log("Content in taskDesc, while calling ObsidianRenderer :\n", taskDesc);
-
-			if (descElement) {
-				descElement.empty();
-				// Call the MarkdownUIRenderer to render the description
-				MarkdownUIRenderer.renderTaskDisc(
-					app,
-					taskDesc.join('\n').trim(),
-					descElement,
-					task.filePath,
-					componentRef.current
-				);
-
-				hookMarkdownLinkMouseEventHandlers(app, plugin, descElement, task.filePath, task.filePath);
-			}
-		}
-	}, [taskDesc, task.body, task.filePath, app]);
-
 	const taskIdKey = `${task.id}`; // for rendering unique title
 	const taskTitleRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
 		if (taskTitleRendererRef.current && componentRef.current) {
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
-			if (titleElement) {
+			if (titleElement && task.title !== "") {
+				console.log("TaskItem.tsx : Rendering title... | Title :", task.title);
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
@@ -148,8 +100,56 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				hookMarkdownLinkMouseEventHandlers(app, plugin, titleElement, task.filePath, task.filePath);
 			}
 		}
-	}, [task.title, task.filePath, app]);
+	}, [task.title, task.filePath]);
 
+	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+	useEffect(() => {
+		// Render subtasks after componentRef is initialized
+		task.body.forEach((subtaskText, index) => {
+			const uniqueKey = `${task.id}-${index}`;
+			const element = subtaskTextRefs.current[uniqueKey];
+			const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+
+			if (element && strippedSubtaskText !== "") {
+				// console.log("renderSubTasks : since one of the parameter updated | New data in subTaskText :\n", subtaskText);
+				element.empty(); // Clear previous content
+
+				MarkdownUIRenderer.renderSubtaskText(
+					app,
+					strippedSubtaskText,
+					element,
+					task.filePath,
+					componentRef.current
+				);
+
+				hookMarkdownLinkMouseEventHandlers(app, plugin, element, task.filePath, task.filePath);
+			}
+		});
+	}, [task.body, task.filePath]);
+
+	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+	useEffect(() => {
+		if (taskItemBodyDescriptionRef.current && componentRef.current && taskDesc.length > 0) {
+			const uniqueKey = `${task.id}-desc`;
+			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+			const descriptionContent = taskDesc.join('\n').trim();
+
+			if (descElement && descriptionContent !== "") {
+				// console.log("Content in taskDesc, while calling ObsidianRenderer :\n", taskDesc);
+				descElement.empty();
+				// Call the MarkdownUIRenderer to render the description
+				MarkdownUIRenderer.renderTaskDisc(
+					app,
+					descriptionContent,
+					descElement,
+					task.filePath,
+					componentRef.current
+				);
+
+				hookMarkdownLinkMouseEventHandlers(app, plugin, descElement, task.filePath, task.filePath);
+			}
+		}
+	}, [taskDesc, task.body, task.filePath]);
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemFooterBtns');
@@ -191,7 +191,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
 										const column = activeBoardSettings.columns[columnIndex];
-										if (!activeBoardSettings.showColumnTags && activeBoardSettings.columns[columnIndex].colType === "namedTag" && tag === column.data.coltag) {
+										if (!activeBoardSettings.showColumnTags && activeBoardSettings.columns[columnIndex].colType === "namedTag" && tag === column.coltag) {
 											return null;
 										}
 
@@ -232,43 +232,6 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		}
 	};
 
-	// Render Footer based on the settings
-	const renderFooter = () => {
-		try {
-			if (plugin.settings.data.globalSettings.showFooter) {
-				return (
-					<>
-						<div className="taskItemFooter">
-							{/* Conditionally render task.completed or the date/time */}
-							{task.completed ? (
-								<div className='taskItemDateCompleted'>✅ {task.completed}</div>
-							) : (
-								<div className='taskItemDate'>
-									{task.time ? `⏰${task.time}` : ''}
-									{task.time && task.due ? ' | ' : ''}
-									{task.due ? `📅${task.due}` : ''}
-								</div>
-							)}
-							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-								<div className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t(8)} />
-								</div>
-								<div className="taskItemiconButton taskItemiconButtonDelete">
-									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
-								</div>
-							</div>
-						</div>
-					</>
-				);
-			} else {
-				return null
-			}
-		} catch (error) {
-			console.log("renderFooter : Getting error while trying to render Footer : ", error);
-			return null;
-		}
-	};
-
 	// Render sub-tasks and remaining body separately
 	const renderSubTasks = () => {
 		try {
@@ -278,8 +241,6 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 						{task.body.map((line, index) => {
 							const isCompleted = line.trim().startsWith('- [x]');
 							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
-							const subtaskText = line.replace(/- \[.\] /, '').trim();
-							console.log("renderSubTasks : since one of the parameter updated | New data in subTaskText :\n", subtaskText);
 
 							// Calculate padding based on the number of tabs
 							const numTabs = line.match(/^\t+/)?.[0].length || 0;
@@ -320,22 +281,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		}
 	};
 
-	// For desction section expantion and folding animation
-	const descriptionRef = useRef<HTMLDivElement | null>(null);
-	useEffect(() => {
-		if (descriptionRef.current) {
-			if (isDescriptionExpanded) {
-				const scrollHeight = descriptionRef.current.scrollHeight;
-				descriptionRef.current.style.height = `${scrollHeight}px`;
-			} else {
-				descriptionRef.current.style.height = '0';
-			}
-		}
-	}, [isDescriptionExpanded]);
-
 	// Render Task Description
 	const renderTaskDescriptoin = () => {
-		console.log("renderTaskDescriptoin : since one of the parameter updated | New data in taskDesc :\n", taskDesc);
+		console.log("renderTaskDescriptoin : This is using memo, I dont think, this memo is even working. | New data in taskDesc :\n", taskDesc);
 		try {
 			if (taskDesc.length > 0) {
 				const uniqueKey = `${task.id}-desc`;
@@ -357,6 +305,56 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			}
 		} catch (error) {
 			console.log("renderTaskDescriptoin : Getting error while trying to print the Description : ", error);
+			return null;
+		}
+	};
+
+	// For desction section expantion and folding animation
+	const descriptionRef = useRef<HTMLDivElement | null>(null);
+	useEffect(() => {
+		if (descriptionRef.current) {
+			if (isDescriptionExpanded) {
+				const scrollHeight = descriptionRef.current.scrollHeight;
+				descriptionRef.current.style.height = `${scrollHeight}px`;
+			} else {
+				descriptionRef.current.style.height = '0';
+			}
+		}
+	}, [isDescriptionExpanded]);
+
+	// Render Footer based on the settings
+	const renderFooter = () => {
+		try {
+			if (plugin.settings.data.globalSettings.showFooter) {
+				return (
+					<>
+						<div className="taskItemFooter">
+							{/* Conditionally render task.completed or the date/time */}
+							{task.completed ? (
+								<div className='taskItemDateCompleted'>✅ {task.completed}</div>
+							) : (
+								<div className='taskItemDate'>
+									{task.time ? `⏰${task.time}` : ''}
+									{task.time && task.due ? ' | ' : ''}
+									{task.due ? `📅${task.due}` : ''}
+								</div>
+							)}
+							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+								<div className="taskItemiconButton taskItemiconButtonEdit">
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t(8)} />
+								</div>
+								<div className="taskItemiconButton taskItemiconButtonDelete">
+									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
+								</div>
+							</div>
+						</div>
+					</>
+				);
+			} else {
+				return null
+			}
+		} catch (error) {
+			console.log("renderFooter : Getting error while trying to render Footer : ", error);
 			return null;
 		}
 	};
@@ -405,17 +403,19 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 	);
 };
 
-export default memo(TaskItem, (prevProps, nextProps) => {
-	return (
-		prevProps.task.id === nextProps.task.id && // Immutable check
-		prevProps.task.title === nextProps.task.title &&
-		prevProps.task.body === nextProps.task.body &&
-		prevProps.task.due === nextProps.task.due &&
-		prevProps.task.tags.join(",") === nextProps.task.tags.join(",") && // Compare arrays
-		prevProps.task.priority === nextProps.task.priority &&
-		prevProps.task.completed === nextProps.task.completed &&
-		prevProps.task.filePath === nextProps.task.filePath &&
-		prevProps.columnIndex === nextProps.columnIndex &&
-		prevProps.activeBoardSettings === nextProps.activeBoardSettings
-	);
-});
+// export default memo(TaskItem, (prevProps, nextProps) => {
+// 	return (
+// 		prevProps.task.id === nextProps.task.id && // Immutable check
+// 		prevProps.task.title === nextProps.task.title &&
+// 		prevProps.task.body === nextProps.task.body &&
+// 		prevProps.task.due === nextProps.task.due &&
+// 		prevProps.task.tags.join(",") === nextProps.task.tags.join(",") &&
+// 		prevProps.task.priority === nextProps.task.priority &&
+// 		prevProps.task.completed === nextProps.task.completed &&
+// 		prevProps.task.filePath === nextProps.task.filePath &&
+// 		prevProps.columnIndex === nextProps.columnIndex &&
+// 		prevProps.activeBoardSettings === nextProps.activeBoardSettings
+// 	);
+// });
+
+export default memo(TaskItem);
