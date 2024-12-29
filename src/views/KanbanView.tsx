@@ -3,10 +3,10 @@
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
+import { StrictMode, useMemo } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
-import { StrictMode, useMemo } from "react";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
@@ -16,7 +16,7 @@ import { t } from "src/utils/lang/helper";
 
 export class KanbanView extends ItemView {
 	plugin: TaskBoard;
-	private boards: Board[];
+	boards: Board[];
 	root: Root | null = null;
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
