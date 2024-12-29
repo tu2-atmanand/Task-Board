@@ -39,6 +39,7 @@ export default class TaskBoard extends Plugin {
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
+	fileUpdatedUsingModal: string;
 	IsTasksJsonChanged: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
@@ -52,6 +53,7 @@ export default class TaskBoard extends Plugin {
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.editorModified = false;
 		this.currentModifiedFile = null;
+		this.fileUpdatedUsingModal = "";
 		this.IsTasksJsonChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
@@ -518,11 +520,15 @@ export default class TaskBoard extends Plugin {
 
 	async onFileModifiedAndLostFocus() {
 		if (this.editorModified && this.currentModifiedFile) {
-			await this.realTimeScanning.onFileChange(
-				this.currentModifiedFile,
-				this.settings.data.globalSettings.realTimeScanning,
-				this.settings.data.globalSettings.scanFilters
-			);
+			if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
+				await this.realTimeScanning.onFileChange(
+					this.currentModifiedFile,
+					this.settings.data.globalSettings.realTimeScanning,
+					this.settings.data.globalSettings.scanFilters
+				);
+			} else {
+				this.fileUpdatedUsingModal = "";
+			}
 
 			// Reset the editorModified flag after the scan.
 			this.editorModified = false;

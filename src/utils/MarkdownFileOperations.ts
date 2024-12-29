@@ -32,6 +32,7 @@ export const writeDataToVaultFiles = async (
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
 			await plugin.app.vault.modify(file, newContent);
+			plugin.fileUpdatedUsingModal = file.path;
 		} else {
 			new Notice(`${t(171)} ${filePath}`);
 			console.error(`File not found at path: ${filePath}`);
