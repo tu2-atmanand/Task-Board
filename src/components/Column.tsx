@@ -12,44 +12,36 @@ import { ColumnProps } from '../interfaces/ColumnProps';
 import { DeleteConfirmationModal } from '../modal/DeleteConfirmationModal';
 import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import TaskItem from './TaskItem';
-import { markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
-import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from 'src/utils/lang/helper';
 
 type CustomCSSProperties = CSSProperties & {
 	'--column-width': string;
 };
 
-interface ColumnPropsWithSetBoards extends ColumnProps {
-	setBoards: React.Dispatch<React.SetStateAction<any[]>>;
-}
-
-const Column: React.FC<ColumnPropsWithSetBoards> = ({
+const Column: React.FC<ColumnProps> = ({
 	app,
 	plugin,
 	columnIndex,
 	activeBoardIndex,
-	colType,
-	data,
-	tasks: externalTasks,
-	allTasks: allTasksExternal
+	columnData,
+	tasksForThisColumn,
 }) => {
 	// Local tasks state, initially set from external tasks
-	const [tasks, setTasks] = useState<taskItem[]>(externalTasks);
-	const [allTasks, setAllTasks] = useState<taskJsonMerged>(allTasksExternal);
+	const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
 	const globalSettings = plugin.settings.data.globalSettings;
+	console.log("Column.tsx : Data in tasks :", tasks);
 
 	// Sync local tasks state with external tasks when they change
 	useEffect(() => {
-		setTasks(externalTasks);
-	}, [externalTasks]);
+		setTasks(tasksForThisColumn);
+	}, [tasksForThisColumn]);
 
-	// Render tasks using the tasks passed from KanbanBoard
-	useEffect(() => {
-		if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
-			renderColumns(plugin, setTasks, activeBoardIndex, colType, data, allTasksExternal);
-		}
-	}, [colType, data, allTasksExternal]);
+	// // Render tasks using the tasks passed from KanbanBoard
+	// useEffect(() => {
+	// 	if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
+	// 		renderColumns(plugin, setTasks, activeBoardIndex, colType, columnData, allTasksExternal);
+	// 	}
+	// }, [colType, columnData, allTasksExternal]);
 
 	const handleCheckboxChange = (updatedTask: taskItem) => {
 
@@ -106,11 +98,11 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 					updateTaskInFile(plugin, updatedTask, task);
 					updateTaskInJson(plugin, updatedTask);
 
-					setTasks((prevTasks) =>
-						prevTasks.map((task) =>
-							task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-						)
-					);
+					// setTasks((prevTasks) =>
+					// 	prevTasks.map((task) =>
+					// 		task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+					// 	)
+					// );
 					// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 				},
 				task.filePath,
@@ -153,7 +145,7 @@ const Column: React.FC<ColumnPropsWithSetBoards> = ({
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
 					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
-					<div className="columnTitle">{data.name}</div>
+					<div className="columnTitle">{columnData.name}</div>
 				</div>
 				{/* <RxDotsVertical /> */}
 			</div>
