@@ -63,7 +63,7 @@ export const saveBoardsData = async (
 
 export const loadTasksAndMerge = async (
 	plugin: TaskBoard
-): Promise<{ allTasksMerged: taskJsonMerged }> => {
+): Promise<taskJsonMerged> => {
 	try {
 		const allTasks: tasksJson = await loadTasksJsonFromSS(plugin);
 		const pendingTasks: taskItem[] = [];
@@ -92,21 +92,21 @@ export const loadTasksAndMerge = async (
 			Completed: completedTasks,
 		};
 
-		return { allTasksMerged };
+		return allTasksMerged;
 	} catch (error) {
 		console.error("Failed to load tasks from tasks.json:", error);
 		throw error;
 	}
 };
 
-export async function loadTasksProcessed(plugin: TaskBoard) {
-	return loadTasksAndMerge(plugin)
-		.then(({ allTasksMerged }) => {
-			return allTasksMerged; // Ensure it returns the merged tasks
-		})
-		.catch((error) => {
-			console.error("Error while loading tasks:", error);
-			// Return an empty taskJsonMerged object to avoid 'undefined'
-			return { Pending: [], Completed: [] };
-		});
-}
+// export async function loadTasksProcessed(plugin: TaskBoard) {
+// 	return loadTasksAndMerge(plugin)
+// 		.then(({ allTasksMerged }) => {
+// 			return allTasksMerged; // Ensure it returns the merged tasks
+// 		})
+// 		.catch((error) => {
+// 			console.error("Error while loading tasks:", error);
+// 			// Return an empty taskJsonMerged object to avoid 'undefined'
+// 			return { Pending: [], Completed: [] };
+// 		});
+// }
