@@ -9,10 +9,8 @@ export interface ColumnProps {
 	plugin: TaskBoard;
 	columnIndex: number;
 	activeBoardIndex: number;
-	colType: string;
-	active?: boolean;
 	collapsed?: boolean;
-	data: {
+	columnData: {
 		name: string;
 		index: number;
 		coltag?: string;
@@ -25,6 +23,5 @@ export interface ColumnProps {
 		};
 		limit?: number;
 	};
-	tasks: taskItem[];
-	allTasks: taskJsonMerged;
+	tasksForThisColumn: taskItem[];
 }
