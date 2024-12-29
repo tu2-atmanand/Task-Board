@@ -9,6 +9,7 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 import { App } from "obsidian";
 import Column from "./Column";
 import type TaskBoard from "main";
+import debounce from "debounce";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
 import { openBoardConfigModal } from "../services/OpenModals";
@@ -19,7 +20,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
-	const [allTasksArrangedPerColumn, setAllTasksArrangedPerColumn] = useState<taskItem[][]>([]);
+	// const [allTasksArrangedPerColumn, setAllTasksArrangedPerColumn] = useState<taskItem[][]>([]);
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 
@@ -43,19 +44,21 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 		// fetchData().finally(() => setLoading(false));
 	}, [refreshCount]);
 
-	useEffect(() => {
+	const allTasksArrangedPerColumn = useMemo(() => {
 		if (allTasks && boards[activeBoardIndex]) {
-			const columns = boards[activeBoardIndex].columns;
-			const arrangedTasks = columns.map((column: ColumnData) =>
+			return boards[activeBoardIndex].columns.map((column: ColumnData) =>
 				renderColumns(plugin, activeBoardIndex, column, allTasks)
 			);
-			console.log("KanbanBoard.tsx : Data in allTasksArrangedPerColumn:", arrangedTasks);
-			setAllTasksArrangedPerColumn(arrangedTasks);
-			if (allTasksArrangedPerColumn.length > 0) {
-				setLoading(false);
-			}
 		}
+		return [];
 	}, [allTasks, boards, activeBoardIndex]);
+
+	useEffect(() => {
+		if (allTasksArrangedPerColumn.length > 0) {
+			setLoading(false);
+		}
+	}, [allTasksArrangedPerColumn]);
+
 
 	// // Load tasks only once when the board is refreshed
 	// useEffect(() => {
