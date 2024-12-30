@@ -30,7 +30,7 @@ This readme will only provide a basic information. Ill highly recommend to go th
 
 ## Discussion
 
-Join the forum top to share your thoughts, ideas or requests and hear from other, how they have adapted to this GTD methodologies to get their tasks done and complete projects inside Obsidian : [**Task Board topic on Forum**](https://forum.obsidian.md/t/task-board-another-gtd-methodology-similar-to-github-projects-planning/90849?u=tu2_atmanand)
+Join the forum top to share your thoughts, ideas or requests and hear from other, how they have adapted to this GTD methodologies to get their tasks done and complete projects inside Obsidian : [**Task Board topic on Obsidian forum**](https://forum.obsidian.md/t/task-board-another-gtd-methodology-similar-to-github-projects-planning/90849?u=tu2_atmanand)
 
 
 ## How Does it work ?
@@ -43,7 +43,7 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 ## How to start ?
 
 **Step 1 :** Install and Enable the plugin.
-> Since the plugin has not been published on Obsidian Marketplace, you can install it using BRAT. Follow these steps : [Install plugin using BRAT]().
+> Since the plugin has not been published on Obsidian Marketplace, you can install it using BRAT. Follow these steps : [Install plugin using BRAT](https://tu2-atmanand.github.io/task-board-docs/docs/Installation/#method-2--using-brat-plugin).
 
 ![How to setup Task Board](./assets/HowToSetupTaskBoard.gif)
 
