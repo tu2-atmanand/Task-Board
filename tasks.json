@@ -2,35 +2,18 @@
     "Pending": {
         "TODO.md": [
             {
-                "id": 151391929,
-                "title": "Upload this image, updating.",
-                "body": [
-                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render.",
-                    "\t ![[Pasted image 20241203231257.png]]",
-                    "\t - Just adding a new point for this task."
-                ],
-                "time": "",
-                "due": "2024-12-24",
-                "tags": [
-                    "#Image"
-                ],
-                "priority": 1,
-                "filePath": "TODO.md",
-                "completed": ""
-            },
-            {
-                "id": 2547323211,
-                "title": "New temp task, lets see if this comes after 5 minutes.",
+                "id": 527799533,
+                "title": "New temp task, lets see if this comes after 5 minutes, lets update this.",
                 "body": [
                     "\t- [ ] Lets add another sub-Task, updating.",
-                    "\t- [x] Also adding this new Subtask, first",
-                    "\t- [x] And adding second subtask. Now editing will make any difference. Updating.",
+                    "\t- [x] Also adding this new Subtask, first ✅ 2024-12-30",
+                    "\t- [x] And adding second subtask. Now editing will make any difference.",
                     "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
                     "\tAnother thing i will put is link to a markdown file from my Vault : [[0-ImportantData]]",
                     "\tSimply adding another line in the description. Updating..."
                 ],
                 "time": "13:49 - 14:49",
-                "due": "2024-12-29",
+                "due": "2024-12-30",
                 "tags": [
                     "#Test",
                     "#New"
@@ -42,22 +25,22 @@
         ],
         "Testing 3.md": [
             {
-                "id": 722771656,
+                "id": 1530030772,
                 "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks",
                 "body": [
-                    "\t- [ ] This is the first Sub Task, updating",
+                    "\t- [ ] This is the first Sub Task.",
                     "\t\t- [x] This is the first sub-sub Task",
-                    "\t\t\t- [ ] This is first sub-sub-sub task",
+                    "\t\t\t- [x] This is first sub-sub-sub task",
                     "\t\t\t- [ ] Adding New three level Indentation subTask.",
-                    "\t\t- [ ] This is second sub-sub Task",
-                    "\t This is an H1 heading",
-                    "\tAdding a line here, the below tasks has been achieved. This line was added from the Modal using textArea box.",
+                    "\t\t- [ ] This is second sub-sub Task. Updating.",
+                    "\t This is an H1 heading, updating.",
+                    "\tAdding a line here, the below tasks has been achieved. This line was added from the Modal using textArea box. Updating...",
                     "\t- [x] This is the Second Sub Task",
                     "\t\t- [x] This is the first sub-sub Task",
-                    "\t\t- [x] This is second sub-sub Task, Updated"
+                    "\t\t- [ ] This is second sub-sub Task, Updated"
                 ],
                 "time": "",
-                "due": "2024-12-22",
+                "due": "2024-12-29",
                 "tags": [
                     "#TEST",
                     "#Test",
@@ -71,14 +54,14 @@
         ],
         "Testing 2.md": [
             {
-                "id": 283789525,
-                "title": "So This is to add a simple Task for testing. UPdated",
+                "id": 259954644,
+                "title": "So This is to add a simple Task for testing.",
                 "body": [
                     "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
                     "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
                     "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
                     "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
-                    "\t\t- [ ] A sub-sub Task for the first time."
+                    "\t\t- [ ] A sub-sub Task for the first time. updating."
                 ],
                 "time": "19:34 - 20:34",
                 "due": "2024-11-07",
@@ -97,7 +80,7 @@
                 "title": "This is a normal task, I am adding in the file, Updating",
                 "body": [
                     "\tThis a line as a description for the Task Description.",
-                    "\t- [ ] Adding a Subtask in file manually.",
+                    "\t- [ ] Adding a Subtask in file manually. Updating.",
                     "\t- [ ] Adding a Second SubTask Manually in the file, to see if it will show up in the board automatically. No, its wont show up automatically REFRESH_COLUMN not working."
                 ],
                 "time": "15:46 - 16:46",
@@ -1631,19 +1614,6 @@
                 "priority": 3,
                 "filePath": "Daily_Notes/01-08-2024.md",
                 "completed": ""
-            },
-            {
-                "id": 3121796519,
-                "title": "All the Documents submitted to TCS, Waiting for JL.",
-                "body": [],
-                "time": "",
-                "due": "2024-08-31",
-                "tags": [
-                    "#Finance"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/01-08-2024.md",
-                "completed": ""
             }
         ],
         "Daily_Notes/2024-12-20.md": [
@@ -1979,6 +1949,27 @@
                 "priority": 0,
                 "filePath": "Daily_Notes/03-09-2024.md",
                 "completed": "2024-09-26T11"
+            }
+        ],
+        "TODO.md": [
+            {
+                "id": 3888680771,
+                "title": "Upload this image to the new release of task board.",
+                "body": [
+                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render. Updating...",
+                    "\t- Let me add a new point in description.",
+                    "\t ![[Pasted image 20241203231257.png]]",
+                    "\t Adding another line in body.",
+                    "\t - Just adding a new point for this task. Updating."
+                ],
+                "time": "",
+                "due": "2024-12-24",
+                "tags": [
+                    "#Image"
+                ],
+                "priority": 1,
+                "filePath": "TODO.md",
+                "completed": "2024-12-30/14:12"
             }
         ]
     }

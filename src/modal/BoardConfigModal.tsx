@@ -60,8 +60,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		value: any
 	) => {
 		const updatedBoards = [...localBoards];
-		if (field in updatedBoards[boardIndex].columns[columnIndex].data) {
-			(updatedBoards[boardIndex].columns[columnIndex].data as any)[field] = value;
+		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
+			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
 		}
 		setLocalBoards(updatedBoards);
 	};
@@ -106,10 +106,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			colType: columnData.colType,
 			active: columnData.active,
 			collapsed: false,
-			data: {
-				name: columnData.name,
-				index: updatedBoards[boardIndex].columns.length + 1,
-			},
+			name: columnData.name,
+			index: updatedBoards[boardIndex].columns.length + 1,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -173,7 +171,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 		// Update indices
 		updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
-			col.data.index = idx + 1;
+			col.index = idx + 1;
 		});
 
 		setLocalBoards(updatedBoards);
@@ -316,7 +314,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
 															<input
 																type="text"
-																value={column.data.name}
+																value={column.name}
 																onChange={(e) =>
 																	handleColumnChange(
 																		boardIndex,
@@ -331,7 +329,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																<input
 																	type="text"
 																	placeholder={t(51)}
-																	value={column.data.coltag || ""}
+																	value={column.coltag || ""}
 																	onChange={(e) =>
 																		handleColumnChange(
 																			boardIndex,
@@ -347,7 +345,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																<input
 																	type="number"
 																	placeholder={t(52)}
-																	value={column.data.limit || ""}
+																	value={column.limit || ""}
 																	onChange={(e) =>
 																		handleColumnChange(
 																			boardIndex,
@@ -363,16 +361,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																	<input
 																		type="number"
 																		placeholder={t(53)}
-																		value={column.data.range?.rangedata.from || ""}
+																		value={column.range?.rangedata.from || ""}
 																		onChange={(e) =>
 																			handleColumnChange(
 																				boardIndex,
 																				columnIndex,
 																				"range",
 																				{
-																					...column.data.range,
+																					...column.range,
 																					rangedata: {
-																						...column.data.range?.rangedata,
+																						...column.range?.rangedata,
 																						from: Number(e.target.value),
 																					},
 																				}
@@ -383,16 +381,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																	<input
 																		type="number"
 																		placeholder={t(54)}
-																		value={column.data.range?.rangedata.to || ""}
+																		value={column.range?.rangedata.to || ""}
 																		onChange={(e) =>
 																			handleColumnChange(
 																				boardIndex,
 																				columnIndex,
 																				"range",
 																				{
-																					...column.data.range,
+																					...column.range,
 																					rangedata: {
-																						...column.data.range?.rangedata,
+																						...column.range?.rangedata,
 																						to: Number(e.target.value),
 																					},
 																				}
