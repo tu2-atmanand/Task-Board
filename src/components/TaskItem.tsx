@@ -15,9 +15,6 @@ import { t } from 'src/utils/lang/helper';
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
-	// const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
-	// const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))));
-	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
 	const handleTaskInteraction = useCallback(
@@ -83,43 +80,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		});
 	}, [task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))), task.filePath]);
 
-	// useEffect(() => {
-		// 	if (taskItemBodyDescriptionRef.current && componentRef.current && task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0) {
-			// 		const uniqueKey = `${task.id}-desc`;
-			// 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-			// 		const descriptionContent = task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).join('\n').trim();
-
-	// 		if (descElement && descriptionContent !== "") {
-	// 			console.log("renderTaskDescriptoin : This useEffect should only run when taskDesc updates | Calling rendered with:\n", descriptionContent);
-	// 			descElement.empty();
-	// 			// Call the MarkdownUIRenderer to render the description
-	// 			MarkdownUIRenderer.renderTaskDisc(
-	// 				plugin.app,
-	// 				descriptionContent,
-	// 				descElement,
-	// 				task.filePath,
-	// 				componentRef.current
-	// 			);
-
-	// 			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, descElement, task.filePath, task.filePath);
-	// 		}
-	// 	}
-	// }, [task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))), task.filePath]);
-	
+	// Render the task description only when the description section is expanded
 	const descriptionRef = useRef<HTMLDivElement | null>(null);
 	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
-	// useEffect(() => {
-	// 	if (descriptionRef.current) {
-	// 		if (isDescriptionExpanded) {
-	// 			const scrollHeight = descriptionRef.current.scrollHeight;
-	// 			descriptionRef.current.style.height = `${scrollHeight}px`;
-	// 		} else {
-	// 			descriptionRef.current.style.height = '0';
-	// 		}
-	// 	}
-	// }, [isDescriptionExpanded]);
-
-	// Render the task description using Obsidian API
 	const renderTaskDescriptionWithObsidianAPI = async () => {
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
@@ -146,15 +109,27 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
-	// useEffect(() => {
-	// 	if (isDescriptionExpanded) {
-	// 		renderTaskDescriptionWithObsidianAPI();
-	// 	} else {
-	// 		const uniqueKey = `${task.id}-desc`;
-	// 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-	// 		descElement?.empty();
-	// 	}
-	// }, [isDescriptionExpanded]);
+	// Toggle function to expand/collapse the description
+	const toggleDescription = async () => {
+		const status = isDescriptionExpanded;
+		setIsDescriptionExpanded((prev) => !prev);
+		console.log("toggleDescription : isDescriptionExpanded :", !status);
+		if (!status) {
+			await renderTaskDescriptionWithObsidianAPI();
+			if (descriptionRef.current) {
+				descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
+				descriptionRef.current.style.opacity = "1"; // Add fade-in effect
+			}
+		} else {
+			if (descriptionRef.current) {
+				descriptionRef.current.style.height = "0";
+				descriptionRef.current.style.opacity = "0"; // Add fade-out effect
+			}
+			const uniqueKey = `${task.id}-desc`;
+			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+			descElement?.empty();
+		}
+	};
 
 	// Determine color for the task indicator
 	const getColorIndicator = useCallback(() => {
@@ -170,41 +145,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			return 'grey'; // No Due
 		}
 	}, [task.due]);
-
-	// // Handle the expansion/collapse animation
-	// useEffect(() => {
-	// 	if (descriptionRef.current) {
-	// 		if (isDescriptionExpanded) {
-	// 			descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
-	// 			descriptionRef.current.style.opacity = "1"; // Add fade-in effect
-	// 		} else {
-	// 			descriptionRef.current.style.height = "0";
-	// 			descriptionRef.current.style.opacity = "0"; // Add fade-out effect
-	// 		}
-	// 	}
-	// }, [isDescriptionExpanded]);
-
-	// Toggle function to expand/collapse the description
-	const toggleDescription = async () => {
-		const status = isDescriptionExpanded;
-		setIsDescriptionExpanded((prev) => !prev);
-		console.log("toggleDescription : isDescriptionExpanded :", !status);
-		if (!status) {
-			await renderTaskDescriptionWithObsidianAPI();
-			if(descriptionRef.current) {
-				descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
-				descriptionRef.current.style.opacity = "1"; // Add fade-in effect
-			}
-		} else {
-			if(descriptionRef.current) {
-				descriptionRef.current.style.height = "0";
-				descriptionRef.current.style.opacity = "0"; // Add fade-out effect
-			}
-			const uniqueKey = `${task.id}-desc`;
-			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-			descElement?.empty();
-		}
-	};
 
 	const handleMainCheckBoxClick = () => {
 		setIsChecked(true); // Trigger animation
@@ -231,19 +171,11 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			return line;
 		});
 
-		setTaskBody(updatedBody);
-
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 		// onSubTasksChange(updatedTask); // Notify parent of the change
 		handleSubTasksChange(plugin, updatedTask)
 	};
-
-	// // Toggle function to expand/collapse the description
-	// const toggleDescription = () => {
-	// 	console.log("toggleDescription : isDescriptionExpanded :", isDescriptionExpanded);
-	// 	setIsDescriptionExpanded(!isDescriptionExpanded);
-	// };
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemFooterBtns');
@@ -262,10 +194,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	}
 
-	// Default color when tag isn't found in the settings
-	const defaultTagColor = 'var(--tag-color)';
-	// console.log("The Current Board Settings Data : ", activeBoardSettings);
-
 	const renderHeader = () => {
 		try {
 			if (plugin.settings.data.globalSettings.showHeader) {
@@ -279,7 +207,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								<div className="taskItemTags">
 									{task.tags.map((tag: string) => {
 										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
-										const tagColor = customTagColor || defaultTagColor;
+										const tagColor = customTagColor || 'var(--tag-color)';
 										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
 										const borderColor = customTagColor ? hexToRgba(tagColor, 0.5) : `var(--tag-color-hover)`;
 
@@ -377,34 +305,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
-	// // Render Task Description
-	// const renderTaskDescriptoin = () => {
-	// 	console.log("renderTaskDescriptoin : This uses memo, so only run when the taskDesc state variable updates...");
-	// 	try {
-	// 		if (task.body.length > 0) {
-	// 			const uniqueKey = `${task.id}-desc`;
-	// 			return (
-	// 				<>
-	// 					<div className='taskItemMainBodyDescriptionSection' key={uniqueKey} id={uniqueKey}>
-	// 						{/* Render remaining body content with expand/collapse animation */}
-	// 						<div
-	// 							className={`taskItemBodyDescription ${isDescriptionExpanded ? 'expanded' : ''}`}
-	// 							ref={descriptionRef}
-	// 						>
-	// 							<div className="taskItemBodyDescriptionRenderer" ref={(descEl) => taskItemBodyDescriptionRef.current[uniqueKey] = descEl} />
-	// 						</div>
-	// 					</div>
-	// 				</>
-	// 			);
-	// 		} else {
-	// 			return null
-	// 		}
-	// 	} catch (error) {
-	// 		console.log("renderTaskDescriptoin : Getting error while trying to print the Description : ", error);
-	// 		return null;
-	// 	}
-	// };
-
 	// Render Footer based on the settings
 	const renderFooter = () => {
 		try {
@@ -445,8 +345,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
 	const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completed, task.due, task.time]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
-	// const memoizedRenderTaskDescription = useMemo(() => renderTaskDescriptoin(), [task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]')))]);
-
 
 	return (
 		<div className="taskItem" key={taskKey}>
