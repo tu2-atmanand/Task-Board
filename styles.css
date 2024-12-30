@@ -91,7 +91,7 @@
 .columnsContainer {
 	display: flex;
 	overflow-x: auto;
-	padding-block: 10px;
+	padding-block: 4px;
 	height: 100%;
 }
 
