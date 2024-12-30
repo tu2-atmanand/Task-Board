@@ -1,5 +1,6 @@
 // /src/components/Column.tsx
 
+import { AnimatePresence, motion } from "framer-motion";
 import React, { memo, useMemo } from 'react';
 
 import { CSSProperties } from 'react';
@@ -48,29 +49,39 @@ const Column: React.FC<ColumnProps> = ({
 				{/* <RxDotsVertical /> */}
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
-				{tasks.length > 0 ? (
-					tasks.map((task, index = task.id) => {
-						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
-							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
+				<AnimatePresence>
+					{tasks.length > 0 ? (
+						tasks.map((task, index = task.id) => {
+							const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
+								task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
 
-						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
-							return (
-								<TaskItem
-									key={index}
-									plugin={plugin}
-									taskKey={index}
-									task={task}
-									columnIndex={columnIndex}
-									activeBoardSettings={activeBoardSettings}
-								/>
-							);
-						}
+							if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
+								return (
+									<motion.div
+										key={index}
+										initial={{ opacity: 0, y: 10 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -10 }}
+										transition={{ duration: 0.3 }}
+									>
+										<TaskItem
+											key={index}
+											plugin={plugin}
+											taskKey={index}
+											task={task}
+											columnIndex={columnIndex}
+											activeBoardSettings={activeBoardSettings}
+										/>
+									</motion.div>
+								);
+							}
 
-						return null;
-					})
-				) : (
-					<p>{t(7)}</p>
-				)}
+							return null;
+						})
+					) : (
+						<p>{t(7)}</p>
+					)}
+				</AnimatePresence>
 			</div>
 		</div>
 	);

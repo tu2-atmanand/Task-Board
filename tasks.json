@@ -21,6 +21,25 @@
                 "priority": 2,
                 "filePath": "TODO.md",
                 "completed": ""
+            },
+            {
+                "id": 3888680771,
+                "title": "Upload this image to the new release of task board.",
+                "body": [
+                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render. Updating...",
+                    "\t- Let me add a new point in description.",
+                    "\t ![[Pasted image 20241203231257.png]]",
+                    "\t Adding another line in body.",
+                    "\t - Just adding a new point for this task. Updating."
+                ],
+                "time": "",
+                "due": "2024-12-24",
+                "tags": [
+                    "#Image"
+                ],
+                "priority": 1,
+                "filePath": "TODO.md",
+                "completed": ""
             }
         ],
         "Testing 3.md": [
@@ -64,7 +83,7 @@
                     "\t\t- [ ] A sub-sub Task for the first time. updating."
                 ],
                 "time": "19:34 - 20:34",
-                "due": "2024-11-07",
+                "due": "2024-12-30",
                 "tags": [
                     "#Test",
                     "#bug/solver"
@@ -1636,6 +1655,26 @@
                 "filePath": "Daily_Notes/2024-12-20.md",
                 "completed": ""
             }
+        ],
+        "Daily_Notes/2024-12-31.md": [
+            {
+                "id": 3953512177,
+                "title": "This is a first task created from a daily note",
+                "body": [
+                    "\tThis task has not been given any due date, but it will auto considered based on the file name.",
+                    "\tThis is a first task created after the **animation library integration**. This will give a smoother animation to Task Card.",
+                    "\t- [ ] This is a first task created after the *animation library* integration.",
+                    "\t- [ ] Also this is a first task created after the smooth animation for the `description expanding` feature."
+                ],
+                "time": "",
+                "due": "2024-12-31",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-12-31.md",
+                "completed": ""
+            }
         ]
     },
     "Completed": {
@@ -1949,27 +1988,6 @@
                 "priority": 0,
                 "filePath": "Daily_Notes/03-09-2024.md",
                 "completed": "2024-09-26T11"
-            }
-        ],
-        "TODO.md": [
-            {
-                "id": 3888680771,
-                "title": "Upload this image to the new release of task board.",
-                "body": [
-                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render. Updating...",
-                    "\t- Let me add a new point in description.",
-                    "\t ![[Pasted image 20241203231257.png]]",
-                    "\t Adding another line in body.",
-                    "\t - Just adding a new point for this task. Updating."
-                ],
-                "time": "",
-                "due": "2024-12-24",
-                "tags": [
-                    "#Image"
-                ],
-                "priority": 1,
-                "filePath": "TODO.md",
-                "completed": "2024-12-30/14:12"
             }
         ]
     }
