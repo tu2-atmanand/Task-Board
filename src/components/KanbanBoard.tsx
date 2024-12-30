@@ -108,7 +108,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	useEffect(() => {
 		const refreshBoardListener = () => {
 			// Clear the tasks array
-			// setTasks([]);
+			// setAllTasks(undefined);
 			setRefreshCount((prev) => prev + 1);
 		};
 
