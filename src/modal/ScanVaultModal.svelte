@@ -7,6 +7,8 @@
 	import { t } from "../utils/lang/helper";
 	import { taskElementsFormatter } from "../utils/TaskItemUtils";
 	import ScanningVault from "../utils/ScanningVault";
+	import { Notice } from 'obsidian';
+	import type { taskItem } from 'src/interfaces/TaskItemProps';
 
 	let { app, plugin } = $props();
 
@@ -63,7 +65,7 @@
 		if (showCollectedTasks) {
 			Object.keys(collectedTasks.Pending).forEach((filePath) => {
 				const tasks = collectedTasks.Pending[filePath];
-				tasks.forEach((task, taskIndex) => {
+				tasks.forEach((task: taskItem, taskIndex: number) => {
 					const newTaskContent = {
 						...task,
 						title: task.title,

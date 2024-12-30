@@ -30,7 +30,6 @@ import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
-import { storeVariablesSyncrhonizer } from "src/utils/storeSynchronizer";
 import { initializeSharedState, store } from "src/shared.svelte";
 
 export default class TaskBoard extends Plugin {
@@ -104,8 +103,6 @@ export default class TaskBoard extends Plugin {
 
 			// Register the Kanban view
 			this.registerTaskBoardView();
-
-			storeVariablesSyncrhonizer();
 		});
 
 		this.registerTaskBoardStatusBar();

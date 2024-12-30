@@ -1,8 +1,12 @@
 import { Notice, TFile } from "obsidian";
 
 import TaskBoard from "main";
-// import store from "src/store";
+import { store } from "src/shared.svelte";
 import { t } from "./lang/helper";
+
+// import store from "src/store";
+
+
 
 export const readDataOfVaultFiles = async (
 	plugin: TaskBoard,
@@ -32,7 +36,7 @@ export const writeDataToVaultFiles = async (
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
-			store.recentUpdatedFilePath.set(filePath);
+			store.recentUpdatedFilePath = filePath;
 			await plugin.app.vault.modify(file, newContent);
 		} else {
 			new Notice(`${t(171)} ${filePath}`);
