@@ -5,16 +5,11 @@ import { t } from "src/utils/lang/helper";
 
 export interface TaskProps {
 	key: number;
-	app: App;
 	plugin: TaskBoard;
 	taskKey: number;
 	task: taskItem;
 	columnIndex: number;
 	activeBoardSettings: Board;
-	onEdit: (task: taskItem) => void;
-	onDelete: () => void;
-	onCheckboxChange: (task: taskItem) => void;
-	onSubTasksChange: (task: taskItem) => void;
 }
 
 export interface taskItem {

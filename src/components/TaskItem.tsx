@@ -3,6 +3,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TaskProps, taskItem } from '../interfaces/TaskItemProps';
+import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
@@ -12,61 +13,21 @@ import { hexToRgba } from 'src/utils/UIHelpers';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
 
-const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex, activeBoardSettings, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
+const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
 	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
 	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))));
 	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
-	// Determine color for the task indicator
-	const getColorIndicator = useCallback(() => {
-		const today = new Date();
-		const taskDueDate = new Date(task.due);
-		if (taskDueDate.toDateString() === today.toDateString()) {
-			return 'var(--color-yellow)'; // Due today
-		} else if (taskDueDate > today) {
-			return 'var(--color-green)'; // Due in the future
-		} else if (taskDueDate < today) {
-			return 'var(--color-red)'; // Past due
-		} else {
-			return 'grey'; // No Due
-		}
-	}, [task.due]);
-
-
-	const handleCheckboxChange = () => {
-		setIsChecked(true); // Trigger animation
-		setTimeout(() => {
-			onCheckboxChange(task); // Call parent function after 1 second
-			setIsChecked(false); // Reset checkbox state
-		}, 1000); // 1-second delay for animation
-	};
-
-	// Function to handle the checkbox toggle inside the task body
-	const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
-		const updatedBody = taskBody.map((line, idx) => {
-			if (idx === index) {
-				// Toggle the checkbox status only for the specific line
-				return isCompleted
-					? line.replace('- [x]', '- [ ]')
-					: line.replace('- [ ]', '- [x]');
-			}
-			return line;
-		});
-
-		setTaskBody(updatedBody);
-
-		// Update the task with the modified body content
-		const updatedTask: taskItem = { ...task, body: updatedBody };
-		onSubTasksChange(updatedTask); // Notify parent of the change
-	};
-
-	// Toggle function to expand/collapse the description
-	const toggleDescription = () => {
-		console.log("toggleDescription : isDescriptionExpanded :", isDescriptionExpanded);
-		setIsDescriptionExpanded(!isDescriptionExpanded);
-	};
+	const handleTaskInteraction = useCallback(
+		(task: taskItem, type: string) => {
+			if (type === "edit") handleEditTask(plugin, task);
+			else if (type === "delete") handleDeleteTask(plugin, task);
+			else if (type === "checkbox") handleCheckboxChange(plugin, task);
+		},
+		[handleEditTask, handleDeleteTask, handleCheckboxChange, plugin]
+	);
 
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
@@ -91,14 +52,14 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
-					app,
+					plugin.app,
 					task.title,
 					titleElement,
 					task.filePath,
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, plugin, titleElement, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, titleElement, task.filePath, task.filePath);
 			}
 		}
 	}, [task.title, task.filePath]);
@@ -116,14 +77,14 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				element.empty(); // Clear previous content
 
 				MarkdownUIRenderer.renderSubtaskText(
-					app,
+					plugin.app,
 					strippedSubtaskText,
 					element,
 					task.filePath,
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, plugin, element, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
 			}
 		});
 	}, [task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))), task.filePath]);
@@ -140,31 +101,98 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				descElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
-					app,
+					plugin.app,
 					descriptionContent,
 					descElement,
 					task.filePath,
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(app, plugin, descElement, task.filePath, task.filePath);
+				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, descElement, task.filePath, task.filePath);
 			}
 		}
 	}, [task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))), task.filePath]);
 
+	// For desction section expantion and folding animation
+	const descriptionRef = useRef<HTMLDivElement | null>(null);
+	useEffect(() => {
+		if (descriptionRef.current) {
+			if (isDescriptionExpanded) {
+				const scrollHeight = descriptionRef.current.scrollHeight;
+				descriptionRef.current.style.height = `${scrollHeight}px`;
+			} else {
+				descriptionRef.current.style.height = '0';
+			}
+		}
+	}, [isDescriptionExpanded]);
+
+	// Determine color for the task indicator
+	const getColorIndicator = useCallback(() => {
+		const today = new Date();
+		const taskDueDate = new Date(task.due);
+		if (taskDueDate.toDateString() === today.toDateString()) {
+			return 'var(--color-yellow)'; // Due today
+		} else if (taskDueDate > today) {
+			return 'var(--color-green)'; // Due in the future
+		} else if (taskDueDate < today) {
+			return 'var(--color-red)'; // Past due
+		} else {
+			return 'grey'; // No Due
+		}
+	}, [task.due]);
+
+	const handleMainCheckBoxClick = () => {
+		setIsChecked(true); // Trigger animation
+		setTimeout(() => {
+			// onCheckboxChange(task); // Call parent function after 1 second
+			handleTaskInteraction(task, "checkbox");
+			setIsChecked(false); // Reset checkbox state
+		}, 1000); // 1-second delay for animation
+	};
+
+	const handleMainTaskDelete = () => {
+		handleTaskInteraction(task, "delete");
+	}
+
+	// Function to handle the checkbox toggle inside the task body
+	const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
+		const updatedBody = task.body.map((line, idx) => {
+			if (idx === index) {
+				// Toggle the checkbox status only for the specific line
+				return isCompleted
+					? line.replace('- [x]', '- [ ]')
+					: line.replace('- [ ]', '- [x]');
+			}
+			return line;
+		});
+
+		setTaskBody(updatedBody);
+
+		// Update the task with the modified body content
+		const updatedTask: taskItem = { ...task, body: updatedBody };
+		// onSubTasksChange(updatedTask); // Notify parent of the change
+		handleSubTasksChange(plugin, updatedTask)
+	};
+
+	// Toggle function to expand/collapse the description
+	const toggleDescription = () => {
+		console.log("toggleDescription : isDescriptionExpanded :", isDescriptionExpanded);
+		setIsDescriptionExpanded(!isDescriptionExpanded);
+	};
+
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemFooterBtns');
 		if (element && event.ctrlKey) {
-			markdownButtonHoverPreviewEvent(app, event, task.filePath);
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
 		}
 	};
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
 		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
-			onEdit(task);
+			handleTaskInteraction(task, "edit");
 		} else {
 			event.ctrlKey = true;
-			markdownButtonHoverPreviewEvent(app, event, task.filePath);
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
 			event.ctrlKey = false;
 		}
 	}
@@ -312,19 +340,6 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 		}
 	};
 
-	// For desction section expantion and folding animation
-	const descriptionRef = useRef<HTMLDivElement | null>(null);
-	useEffect(() => {
-		if (descriptionRef.current) {
-			if (isDescriptionExpanded) {
-				const scrollHeight = descriptionRef.current.scrollHeight;
-				descriptionRef.current.style.height = `${scrollHeight}px`;
-			} else {
-				descriptionRef.current.style.height = '0';
-			}
-		}
-	}, [isDescriptionExpanded]);
-
 	// Render Footer based on the settings
 	const renderFooter = () => {
 		try {
@@ -347,7 +362,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t(8)} />
 								</div>
 								<div className="taskItemiconButton taskItemiconButtonDelete">
-									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={onDelete} title={t(9)} />
+									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t(9)} />
 								</div>
 							</div>
 						</div>
@@ -379,7 +394,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 							type="checkbox"
 							checked={(task.completed || isChecked) ? true : false}
 							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
-							onChange={handleCheckboxChange}
+							onChange={handleMainCheckBoxClick}
 						/>
 						<div className="taskItemBodyContent">
 							<div className="taskItemTitle" ref={(titleEL) => taskTitleRendererRef.current[taskIdKey] = titleEL} />
@@ -389,7 +404,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 						</div>
 					</div>
 					<div className="taskItemMainBodyDescription">
-						{taskDesc.length > 0 && taskDesc.at(0) !== "" && (
+						{task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
 							<div
 								className='taskItemMainBodyDescriptionSectionToggler'
 								onClick={toggleDescription}
