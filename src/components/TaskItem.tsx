@@ -15,8 +15,8 @@ import { t } from 'src/utils/lang/helper';
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
-	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
-	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))));
+	// const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
+	// const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))));
 	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
@@ -73,7 +73,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
 			if (element && strippedSubtaskText !== "") {
-				console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
+				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 				element.empty(); // Clear previous content
 
 				MarkdownUIRenderer.renderSubtaskText(
@@ -91,13 +91,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
-		if (taskItemBodyDescriptionRef.current && componentRef.current && taskDesc.length > 0) {
+		if (taskItemBodyDescriptionRef.current && componentRef.current && task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0) {
 			const uniqueKey = `${task.id}-desc`;
 			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-			const descriptionContent = taskDesc.join('\n').trim();
+			const descriptionContent = task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).join('\n').trim();
 
 			if (descElement && descriptionContent !== "") {
-				// console.log("renderTaskDescriptoin : This useEffect should only run when taskDesc updates | Calling rendered with:\n", descriptionContent);
+				console.log("renderTaskDescriptoin : This useEffect should only run when taskDesc updates | Calling rendered with:\n", descriptionContent);
 				descElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
@@ -270,7 +270,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						{task.body.map((line, index) => {
 							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
 							if (!isSubTask) return;
-							console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
+							// console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
 							const isCompleted = line.trim().startsWith('- [x]');
 
 							// Calculate padding based on the number of tabs
@@ -314,7 +314,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	// Render Task Description
 	const renderTaskDescriptoin = () => {
-		// console.log("renderTaskDescriptoin : This uses memo, so only run when the taskDesc state variable updates...");
+		console.log("renderTaskDescriptoin : This uses memo, so only run when the taskDesc state variable updates...");
 		try {
 			if (task.body.length > 0) {
 				const uniqueKey = `${task.id}-desc`;
