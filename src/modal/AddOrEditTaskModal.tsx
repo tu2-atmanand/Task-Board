@@ -135,13 +135,7 @@ const EditTaskContent: React.FC<{
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
 		// Initialize Obsidian Component on mount
-		componentRef.current = new Component();
-		componentRef.current.load();
-
-		return () => {
-			// Cleanup the component on unmount
-			componentRef.current?.unload();
-		};
+		componentRef.current = plugin.view;
 	}, []);
 
 	const previewContainerRef = useRef<HTMLDivElement>(null);

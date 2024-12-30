@@ -33,6 +33,7 @@ import { t } from "src/utils/lang/helper";
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
+	view: KanbanView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
@@ -48,6 +49,7 @@ export default class TaskBoard extends Plugin {
 		super(app, menifest);
 		this.plugin = this;
 		this.app = this.plugin.app;
+		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
@@ -229,7 +231,10 @@ export default class TaskBoard extends Plugin {
 	registerTaskBoardView() {
 		this.registerView(
 			VIEW_TYPE_TASKBOARD,
-			(leaf) => new KanbanView(this, leaf)
+			(leaf) => {
+				this.view = new KanbanView(this, leaf)
+				return this.view;
+			}
 		);
 	}
 

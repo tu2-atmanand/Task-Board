@@ -31,14 +31,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
-		// Initialize Obsidian Component on mount
-		componentRef.current = new Component();
-		componentRef.current.load();
-
-		return () => {
-			// Cleanup the component on unmount
-			componentRef.current?.unload();
-		};
+		// Initialize KanbanView Component on mount
+		componentRef.current = plugin.view;
 	}, []);
 
 	const taskIdKey = `${task.id}`; // for rendering unique title
