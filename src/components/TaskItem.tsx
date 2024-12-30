@@ -15,6 +15,7 @@ import { t } from 'src/utils/lang/helper';
 const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex, activeBoardSettings, onEdit, onDelete, onCheckboxChange, onSubTasksChange }) => {
 	const [isChecked, setIsChecked] = useState(false);
 	const [taskDesc, setTaskDesc] = useState<string[]>(task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))));
+	const [subTasks, setSubTasks] = useState<string[]>(task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))));
 	const [taskBody, setTaskBody] = useState<string[]>(task.body);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
@@ -111,7 +112,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
 			if (element && strippedSubtaskText !== "") {
-				// console.log("renderSubTasks : since one of the parameter updated | New data in subTaskText :\n", subtaskText);
+				console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 				element.empty(); // Clear previous content
 
 				MarkdownUIRenderer.renderSubtaskText(
@@ -125,7 +126,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				hookMarkdownLinkMouseEventHandlers(app, plugin, element, task.filePath, task.filePath);
 			}
 		});
-	}, [task.body, task.filePath]);
+	}, [task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))), task.filePath]);
 
 	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
@@ -135,7 +136,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 			const descriptionContent = taskDesc.join('\n').trim();
 
 			if (descElement && descriptionContent !== "") {
-				// console.log("Content in taskDesc, while calling ObsidianRenderer :\n", taskDesc);
+				// console.log("renderTaskDescriptoin : This useEffect should only run when taskDesc updates | Calling rendered with:\n", descriptionContent);
 				descElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
@@ -149,7 +150,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				hookMarkdownLinkMouseEventHandlers(app, plugin, descElement, task.filePath, task.filePath);
 			}
 		}
-	}, [taskDesc, task.body, task.filePath]);
+	}, [task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))), task.filePath]);
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
 		const element = document.getElementById('taskItemFooterBtns');
@@ -239,8 +240,10 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 				return (
 					<>
 						{task.body.map((line, index) => {
-							const isCompleted = line.trim().startsWith('- [x]');
 							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
+							if (!isSubTask) return;
+							console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
+							const isCompleted = line.trim().startsWith('- [x]');
 
 							// Calculate padding based on the number of tabs
 							const numTabs = line.match(/^\t+/)?.[0].length || 0;
@@ -283,9 +286,9 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 
 	// Render Task Description
 	const renderTaskDescriptoin = () => {
-		console.log("renderTaskDescriptoin : This is using memo, I dont think, this memo is even working. | New data in taskDesc :\n", taskDesc);
+		// console.log("renderTaskDescriptoin : This uses memo, so only run when the taskDesc state variable updates...");
 		try {
-			if (taskDesc.length > 0) {
+			if (task.body.length > 0) {
 				const uniqueKey = `${task.id}-desc`;
 				return (
 					<>
@@ -362,7 +365,7 @@ const TaskItem: React.FC<TaskProps> = ({ app, plugin, taskKey, task, columnIndex
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
 	const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completed, task.due, task.time]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
-	const memoizedRenderTaskDescription = useMemo(() => renderTaskDescriptoin(), [taskDesc]);
+	const memoizedRenderTaskDescription = useMemo(() => renderTaskDescriptoin(), [task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]')))]);
 
 
 	return (
