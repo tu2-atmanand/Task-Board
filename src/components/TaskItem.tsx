@@ -480,7 +480,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						{/* Expandable section */}
 						<div className='taskItemMainBodyDescriptionSection'>
 							<div
-								className={`taskItemBodyDescription ${isDescriptionExpanded ? 'expanded' : ''}`}
+								className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
 								ref={descriptionRef}
 							>
 								<div

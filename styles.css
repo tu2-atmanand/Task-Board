@@ -275,13 +275,12 @@
 .taskItemBodyDescription {
 	overflow: hidden;
 	height: 0;
-	transition: height 0.4s ease-in-out;
+	opacity: 0;
+	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
 }
 
-.taskItemBodyDescription.expanded {
-	height: auto;
-	/* The height will be dynamically calculated */
-	transition: height 0.4s ease-in-out;
+.taskItemBodyDescription-expanded {
+	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
 }
 
 .taskItemBodyDescriptionRenderer {
