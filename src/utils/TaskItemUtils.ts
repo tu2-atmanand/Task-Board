@@ -244,6 +244,8 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 		}
 
 		await writeTasksJsonToSS(plugin, allTasks);
+
+		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
 		console.error("Error deleting task from tasks.json:", error);
 	}
