@@ -8,11 +8,14 @@ export type columnDataProp = {
 	colType: string;
 	name: string;
 	active: boolean;
+	range?: { tag: string; rangedata: { from: number; to: number } };
+	coltag?: string;
+	limit?: number;
 };
 
 interface AddColumnModalProps {
 	app: App;
-	onCancel: () => void; // Renamed from onClose to onCancel
+	onCancel: () => void;
 	onSubmit: (columnData: columnDataProp) => void;
 }
 
@@ -21,8 +24,11 @@ export class AddColumnModal extends Modal {
 		colType: string;
 		name: string;
 		active: boolean;
+		range?: { tag: string; rangedata: { from: number; to: number } };
+		coltag?: string;
+		limit?: number;
 	}) => void;
-	private onCancel: () => void; // Renamed from onClose to onCancel
+	private onCancel: () => void;
 	private colType: string;
 	private name: string;
 
@@ -64,8 +70,8 @@ export class AddColumnModal extends Modal {
 			{ value: "dated", text: t(12) },
 			{ value: "namedTag", text: t(13) },
 			{ value: "untagged", text: t(14) },
-			{ value: "completed", text: t(15) },
 			{ value: "otherTags", text: t(16) },
+			{ value: "completed", text: t(15) },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },
@@ -98,7 +104,15 @@ export class AddColumnModal extends Modal {
 		const submitButton = actions.createEl("button", { text: t(18) });
 		submitButton.addEventListener("click", () => {
 			const active = true;
-			this.onSubmit({ colType: this.colType, name: this.name, active });
+			if(this.colType === "dated") {
+				this.onSubmit({ colType: this.colType, name: this.name, active, range: { tag: "", rangedata: { from: 0, to: 0 } } }); // Add range data
+			} else if(this.colType === "namedTag") {
+				this.onSubmit({ colType: this.colType, name: this.name, active, coltag: "" }); // Add coltag
+			} else if(this.colType === "completed") {
+				this.onSubmit({ colType: this.colType, name: this.name, active, limit: 20 }); // Add limit
+			} else {
+				this.onSubmit({ colType: this.colType, name: this.name, active });
+			}
 			this.close();
 		});
 

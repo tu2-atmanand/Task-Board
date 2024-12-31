@@ -41,9 +41,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		}
 	});
 
-	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(
-		activeBoardIndex
-	);
+	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
@@ -100,14 +98,17 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsAddColumnModalOpen(false);
 	};
 
-	const handleAddColumn = (boardIndex: number, columnData: { colType: string; name: string, active: boolean }) => {
+	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
 			colType: columnData.colType,
-			active: columnData.active,
+			active: true,
 			collapsed: false,
 			name: columnData.name,
 			index: updatedBoards[boardIndex].columns.length + 1,
+			coltag: columnData.coltag,
+			range: columnData.range,
+			limit: columnData.limit,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -120,7 +121,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const modal = new AddColumnModal(app, {
 			app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
-			onSubmit: (columnData: columnDataProp) => handleAddColumn(activeBoardIndex, columnData),
+			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
 		});
 		modal.open();
 	};
@@ -142,7 +143,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					const updatedBoards = [...localBoards];
 					updatedBoards.splice(selectedBoardIndex, 1);
 					setLocalBoards(updatedBoards);
-					setSelectedBoardIndex(-1); // Reset to global settings or no board selected
+					setSelectedBoardIndex(0); // Reset to global settings or no board selected
 				} else {
 					new Notice(t(35));
 				}
@@ -186,7 +187,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		if (globalSettingsHTMLSection.current) {
-
 			// Render global settings
 			settingManager.constructUI(globalSettingsHTMLSection.current, t(36));
 		}
@@ -457,6 +457,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								columns: [],
 							};
 							setLocalBoards([...localBoards, newBoard]);
+							setSelectedBoardIndex(localBoards.length);
 						}}>{t(59)}</button>
 
 						<hr className="boardConfigModalHr-100" />
