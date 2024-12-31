@@ -15,11 +15,6 @@ import {
 	PluginDataJson,
 	langCodes,
 } from "src/interfaces/GlobalSettings";
-import {
-	loadTasksJsonFromDiskToSS,
-	onUnloadSave,
-	writeTasksFromSessionStorageToDisk,
-} from "src/utils/tasksCache";
 
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
@@ -87,9 +82,6 @@ export default class TaskBoard extends Plugin {
 			// Run scanVaultForTasks if scanVaultAtStartup is true
 			this.scanVaultAtStartup();
 
-			// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
-			this.loadTasksDataToSS();
-
 			// Register the Kanban view
 			this.registerTaskBoardView();
 		});
@@ -99,7 +91,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
-		onUnloadSave(this.plugin);
+		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
@@ -223,11 +215,6 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
-	loadTasksDataToSS() {
-		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		// And a setInteval is registered to start periodic saving.
-	}
-
 	registerTaskBoardView() {
 		this.registerView(
 			VIEW_TYPE_TASKBOARD,
@@ -291,12 +278,12 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerEvents() {
-		// Start a timer to write tasks from sessionStorage to disk every 5 minutes
-		this.registerInterval(
-			window.setInterval(async () => {
-				await writeTasksFromSessionStorageToDisk(this.plugin);
-			}, 5 * 60 * 1000)
-		);
+		// // Start a timer to write tasks from sessionStorage to disk every 5 minutes
+		// this.registerInterval(
+		// 	window.setInterval(async () => {
+		// 		await writeTasksFromSessionStorageToDisk(this.plugin);
+		// 	}, 5 * 60 * 1000)
+		// );
 
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
@@ -341,14 +328,14 @@ export default class TaskBoard extends Plugin {
 		// 	})
 		// );
 
-		const closeButton = document.querySelector<HTMLElement>(
-			".titlebar-button.mod-close"
-		);
-		if (closeButton) {
-			this.registerDomEvent(closeButton, "mouseenter", () => {
-				onUnloadSave(this.plugin);
-			});
-		}
+		// const closeButton = document.querySelector<HTMLElement>(
+		// 	".titlebar-button.mod-close"
+		// );
+		// if (closeButton) {
+		// 	this.registerDomEvent(closeButton, "mouseenter", () => {
+		// 		onUnloadSave(this.plugin);
+		// 	});
+		// }
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file, source, leaf) => {

@@ -10,7 +10,6 @@ import KanbanBoard from "src/components/KanbanBoard";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { onUnloadSave } from "src/utils/tasksCache";
 import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
@@ -73,6 +72,6 @@ export class KanbanView extends ItemView {
 		// Clean up when view is closed
 		this.root?.unmount();
 		this.plugin.leafIsActive = false;
-		onUnloadSave(this.plugin);
+		// onUnloadSave(this.plugin);
 	}
 }
