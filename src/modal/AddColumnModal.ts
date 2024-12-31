@@ -104,14 +104,33 @@ export class AddColumnModal extends Modal {
 		const submitButton = actions.createEl("button", { text: t(18) });
 		submitButton.addEventListener("click", () => {
 			const active = true;
-			if(this.colType === "dated") {
-				this.onSubmit({ colType: this.colType, name: this.name, active, range: { tag: "", rangedata: { from: 0, to: 0 } } }); // Add range data
-			} else if(this.colType === "namedTag") {
-				this.onSubmit({ colType: this.colType, name: this.name, active, coltag: "" }); // Add coltag
-			} else if(this.colType === "completed") {
-				this.onSubmit({ colType: this.colType, name: this.name, active, limit: 20 }); // Add limit
+			if (this.colType === "dated") {
+				this.onSubmit({
+					colType: this.colType,
+					name: this.name,
+					active,
+					range: { tag: "", rangedata: { from: 0, to: 0 } },
+				}); // Add range data
+			} else if (this.colType === "namedTag") {
+				this.onSubmit({
+					colType: this.colType,
+					name: this.name,
+					active,
+					coltag: "",
+				}); // Add coltag
+			} else if (this.colType === "completed") {
+				this.onSubmit({
+					colType: this.colType,
+					name: this.name,
+					active,
+					limit: 20,
+				}); // Add limit
 			} else {
-				this.onSubmit({ colType: this.colType, name: this.name, active });
+				this.onSubmit({
+					colType: this.colType,
+					name: this.name,
+					active,
+				});
 			}
 			this.close();
 		});
