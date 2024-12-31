@@ -164,7 +164,7 @@
                     "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2024-11-30",
+                "due": "2025-01-01",
                 "tags": [
                     "#Test",
                     "#feat"
@@ -1991,6 +1991,7 @@
                 "filePath": "Daily_Notes/03-09-2024.md",
                 "completed": "2024-09-26T11"
             }
-        ]
+        ],
+        "Testing 3.md": []
     }
 }
