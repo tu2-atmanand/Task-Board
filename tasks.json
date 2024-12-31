@@ -1839,7 +1839,7 @@
                 "id": 1320234164,
                 "title": "Just creating an undated task but will have time.",
                 "body": [
-                    "\t- [ ] This is a first sub task."
+                    "\t- [x] This is a first sub task."
                 ],
                 "time": "18:24 - 19:24",
                 "due": "2024-09-26",
