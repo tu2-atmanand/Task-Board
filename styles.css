@@ -893,6 +893,7 @@
 	justify-content: flex-start;
 	gap: 0.5em;
 	margin-block: 0.5em;
+	cursor: default;
 }
 
 .boardConfigModalColumnRowDragButton {
@@ -966,11 +967,16 @@
 .addColumnModalOverlayContent {
 	background: var(--background-secondary);
 	border: var(--border-width) solid var(--border-width) solid var(--interactive-accent);
-	;
 	border-radius: 5px;
 	padding: 20px;
 	width: 400px;
-	max-width: 90%;
+	/* max-width: 90%; */
+	text-align: center;
+	display: block;
+}
+
+.addColumnModalOverlayContent h2 {
+	margin-bottom: 1.5em !important;
 }
 
 .addColumnModalOverlayContentField {
