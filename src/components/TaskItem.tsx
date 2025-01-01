@@ -324,10 +324,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							)}
 							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 								<div className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t(8)} />
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
 								</div>
 								<div className="taskItemiconButton taskItemiconButtonDelete">
-									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t(9)} />
+									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
 								</div>
 							</div>
 						</div>
@@ -372,7 +372,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								className='taskItemMainBodyDescriptionSectionToggler'
 								onClick={toggleDescription}
 							>
-								{isDescriptionExpanded ? 'Hide Description' : 'Show Description'}
+								{isDescriptionExpanded ? t("hide-description") : t("show-description")}
 							</div>
 						)}
 						{/* Expandable section */}

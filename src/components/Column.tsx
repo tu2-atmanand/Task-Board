@@ -79,7 +79,7 @@ const Column: React.FC<ColumnProps> = ({
 							return null;
 						})
 					) : (
-						<p>{t(7)}</p>
+						<p>{t("no-tasks-available")}</p>
 					)}
 				</AnimatePresence>
 			</div>

@@ -32,19 +32,19 @@ export class DeleteConfirmationModal extends Modal {
 		contentEl.setAttribute('data-type', 'task-board-view');
 
 		const homeComponenet = contentEl.createEl("span", { cls: "deleteConfirmationModalHome" });
-		homeComponenet.createEl('h2', { text: t(60) });
+		homeComponenet.createEl('h2', { text: t("confirm-delete") });
 		homeComponenet.createEl('p', { text: this.mssg });
 
 		const buttonContainer = homeComponenet.createDiv('deleteConfirmationModalHome-button-container');
 
-		const confirmButton = buttonContainer.createEl('button', { text: t(62) });
+		const confirmButton = buttonContainer.createEl('button', { text: t("yes") });
 		confirmButton.classList.add('deleteTaskConfirmBtn');
 		confirmButton.addEventListener('click', () => {
 			this.onConfirm();
 			this.close();
 		});
 
-		const cancelButton = buttonContainer.createEl('button', { text: t(63) });
+		const cancelButton = buttonContainer.createEl('button', { text: t("no") });
 		cancelButton.classList.add('deleteTaskCancelmBtn');
 		cancelButton.addEventListener('click', () => {
 			this.onCancel();

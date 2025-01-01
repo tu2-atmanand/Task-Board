@@ -31,7 +31,7 @@ export class KanbanView extends ItemView {
 	}
 
 	getDisplayText() {
-		return t(130);
+		return t("task-board");
 	}
 
 	getSettings() {
@@ -39,7 +39,7 @@ export class KanbanView extends ItemView {
 	}
 
 	async onOpen() {
-		this.addAction(ScanVaultIcon, t(5), () => {
+		this.addAction(ScanVaultIcon, t("scan-vault-window"), () => {
 			openScanVaultModal(this.app, this.plugin);
 		});
 

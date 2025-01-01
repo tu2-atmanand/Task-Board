@@ -152,7 +152,7 @@ export default class TaskBoard extends Plugin {
 
 	async getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
-		this.ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
+		this.ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t("open-task-board"), () => {
 			this.activateView("icon");
 
 			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
@@ -234,27 +234,27 @@ export default class TaskBoard extends Plugin {
 	registerCommands() {
 		this.addCommand({
 			id: "add-new-task",
-			name: t(131),
+			name: t("add-new-task-in-current-file"),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeEditor && activeFile) {
 					openAddNewTaskModal(this.app, this.plugin, activeFile);
 				} else {
-					new Notice(t(147));
+					new Notice(t("no-active-editor-is-open-error-notice"));
 				}
 			},
 		});
 		this.addCommand({
 			id: "open-task-board",
-			name: t(132),
+			name: t("open-task-board"),
 			callback: () => {
 				this.activateView("tab");
 			},
 		});
 		this.addCommand({
 			id: "open-task-board-new-window",
-			name: t(133),
+			name: t("open-task-board-in-new-window"),
 			callback: () => {
 				this.activateView("window");
 			},
@@ -360,7 +360,7 @@ export default class TaskBoard extends Plugin {
 
 				if (fileIsFile) {
 					menu.addItem((item) => {
-						item.setTitle(t(134))
+						item.setTitle(t("update-tasks-from-this-file"))
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
@@ -373,7 +373,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 2
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(135))
+							item.setTitle(t("add-file-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -389,7 +389,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 1
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(136))
+							item.setTitle(t("add-file-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -426,7 +426,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 2
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(137))
+							item.setTitle(t("add-folder-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -442,7 +442,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 1
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(138))
+							item.setTitle(t("add-folder-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {

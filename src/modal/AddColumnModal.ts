@@ -51,7 +51,7 @@ export class AddColumnModal extends Modal {
 		});
 
 		// Header
-		modalContent.createEl("h2", { text: t(56) });
+		modalContent.createEl("h2", { text: t("add-column") });
 
 		// Column Type Field
 		const colTypeField = modalContent.createDiv({
@@ -59,19 +59,19 @@ export class AddColumnModal extends Modal {
 		});
 		colTypeField.createEl("label", {
 			attr: { for: "colType" },
-			text: t(10),
+			text: t("column-type"),
 		});
 		const colTypeSelect = colTypeField.createEl("select", {
 			attr: { id: "colType" },
 		});
 
 		[
-			{ value: "undated", text: t(11) },
-			{ value: "dated", text: t(12) },
-			{ value: "namedTag", text: t(13) },
-			{ value: "untagged", text: t(14) },
-			{ value: "otherTags", text: t(16) },
-			{ value: "completed", text: t(15) },
+			{ value: "undated", text: t("column-type") },
+			{ value: "dated", text: t("dated") },
+			{ value: "namedTag", text: t("tagged") },
+			{ value: "untagged", text: t("untagged") },
+			{ value: "otherTags", text: t("other-tags") },
+			{ value: "completed", text: t("completed") },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },
@@ -88,9 +88,9 @@ export class AddColumnModal extends Modal {
 		const nameField = modalContent.createDiv({
 			cls: "addColumnModalOverlayContentField",
 		});
-		nameField.createEl("label", { attr: { for: "name" }, text: t(17) });
+		nameField.createEl("label", { attr: { for: "name" }, text: t("column-name") });
 		const nameInput = nameField.createEl("input", {
-			attr: { type: "text", id: "name", placeholder: t(20) },
+			attr: { type: "text", id: "name", placeholder: t("enter-column-name") },
 		});
 		nameInput.addEventListener("input", (event: Event) => {
 			const target = event.target as HTMLInputElement;
@@ -101,7 +101,7 @@ export class AddColumnModal extends Modal {
 		const actions = modalContent.createDiv({
 			cls: "addColumnModalOverlayContentActions",
 		});
-		const submitButton = actions.createEl("button", { text: t(18) });
+		const submitButton = actions.createEl("button", { text: t("submit") });
 		submitButton.addEventListener("click", () => {
 			const active = true;
 			if (this.colType === "dated") {
@@ -135,7 +135,7 @@ export class AddColumnModal extends Modal {
 			this.close();
 		});
 
-		const cancelButton = actions.createEl("button", { text: t(19) });
+		const cancelButton = actions.createEl("button", { text: t("cancel") });
 		cancelButton.addEventListener("click", () => {
 			this.onCancel(); // Renamed from onClose to onCancel
 			this.close();

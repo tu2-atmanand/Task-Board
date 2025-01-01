@@ -42,7 +42,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 
 		setCollectedTasks(scanningVault.tasks);
 		// setIsRunning(false);
-		new Notice(t(64));
+		new Notice(t("vault-scanning-complete"));
 		scanningVault.saveTasksToFile();
 	};
 
@@ -96,17 +96,17 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 
 	return (
 		<div className="scanVaultModalHome">
-			<h2>{t(65)}</h2>
-			<p>{t(66)}</p>
-			<p>{t(67)}</p>
-			<p>{t(68)}</p>
+			<h2>{t("scan-tasks-from-the-vault")}</h2>
+			<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</div>
+			<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</div>
+			<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</div>
 
 			<div className="scanVaultModalHomeSecondSection" >
 				<div className="scanVaultModalHomeSecondSectionProgressBarContainer">
 					<progress max="100" value={progress} style={{ width: "100%", height: '35px' }}></progress>
 				</div>
 				<button className="scanVaultModalHomeSecondSectionButton" onClick={runScan} disabled={isRunning}>
-					{isRunning ? progress.toFixed(0) : t(69)}
+					{isRunning ? progress.toFixed(0) : t("run")}
 				</button>
 			</div>
 
@@ -139,7 +139,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			</div>
 
 			<button className="scanVaultModalHomeToggleButton" onClick={toggleView}>
-				{showCollectedTasks ? t(70) : t(71)}
+				{showCollectedTasks ? t("hide-collected-tasks") : t("show-collected-tasks")}
 			</button>
 		</div>
 	);

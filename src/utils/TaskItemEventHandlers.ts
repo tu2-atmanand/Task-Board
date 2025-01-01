@@ -53,7 +53,7 @@ export const handleSubTasksChange = (
 };
 
 export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
-	const mssg = t(61);
+	const mssg = t("confirm-task-delete-description");
 	const app = plugin.app;
 	const deleteModal = new DeleteConfirmationModal(app, {
 		app,

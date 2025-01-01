@@ -24,6 +24,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		containerEl.empty();
 		containerEl.addClass("TaskBoardSettingTab");
 
-		this.settingsManager.constructUI(containerEl, t(130));
+		this.settingsManager.constructUI(containerEl, t("task-board"));
 	}
 }
