@@ -22,7 +22,7 @@ const Column: React.FC<ColumnProps> = ({
 	// Local tasks state, initially set from external tasks
 	// const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
 	const tasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
-	console.log("Column.tsx : Data in tasks :", tasks);
+	// console.log("Column.tsx : Data in tasks :", tasks);
 
 	// // Sync local tasks state with external tasks when they change
 	// useEffect(() => {

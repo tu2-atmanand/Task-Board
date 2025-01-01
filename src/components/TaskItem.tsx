@@ -91,8 +91,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			.join("\n")
 			.trim();
 
-		console.log("renderTaskDescriptionWithObsidianAPI : Content :", descriptionContent);
-
 		if (descElement && descriptionContent !== "") {
 			// Clear existing content
 			descElement.empty();
@@ -113,7 +111,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const toggleDescription = async () => {
 		const status = isDescriptionExpanded;
 		setIsDescriptionExpanded((prev) => !prev);
-		console.log("toggleDescription : isDescriptionExpanded :", !status);
+
 		if (!status) {
 			await renderTaskDescriptionWithObsidianAPI();
 			if (descriptionRef.current) {
