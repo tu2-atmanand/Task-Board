@@ -35,7 +35,7 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 ## How Does it work ?
 
-- It scans tasks from all the Markdown files from your whole vault and show them on a Kanban type Board.
+- It scans tasks from all the Markdown files from your whole vault and show them on a Kanban type board.
 - Edit the task directly from the Task Board, without opening the Markdown file.
 - See Real-TIme changes in the parent markdown file.
 - Add task to currently opened files using a pop-up window.
@@ -49,9 +49,9 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 **Step 2 :** Open Task Board using the Icon from the right side Ribbon Icon Bar. There is also a command in the Command Pallet.
 
-**Step 3 :** Click on the **Scan vault window** button from the top-right in the Task Board view header as shown in below image. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters]() to exclude certains files from scanning.
+**Step 3 :** Click on the **Scan vault window** button from the top-right in the Task Board view header as shown in above video. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters](https://tu2-atmanand.github.io/task-board-docs/docs/Features/Filters_for_Scanning/) to exclude certains files from scanning.
 
-**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/How_To/HowToCreateNewBoard.html) from the Configure Board settings. Enjoy !
+**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToCreateNewBoard/) from the Configure Board settings. Enjoy !
 
 
 ## Features
@@ -81,7 +81,7 @@ Additionally, you can add multi-level sub-tasks and body description with images
 
 There are two way to add/show your task.
 
-**Obvious Method :** Your old way of adding a task, that is directly writing inside the markdow files. After you have written the content of the task switch you focus away from the editor, like click on the Task Board and your task will be directly added in the board. Provided you havent applied any [Scan Filters](https://tu2-atmanand.github.io/task-board-docs/Features/Filters_for_Scanning.html).
+**Obvious Method :** Your old way of adding a task, that is directly writing inside the markdow files. After you have written the content of the task switch you focus away from the editor, like click on the Task Board and your task will be directly added in the board. Provided you havent applied Scan Filters on that edited file.
 
 ![Adding New task using common method](./assets/AddingNewTaskFromFile.gif)
 
