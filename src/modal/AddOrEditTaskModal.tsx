@@ -74,7 +74,7 @@ const EditTaskContent: React.FC<{
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
-		setBodyContent([`\t- [ ] ${t("delete-sub-task")}`, ...updatedBodyContent].join('\n'));
+		setBodyContent([`\t- [ ] `, ...updatedBodyContent].join('\n'));
 	};
 
 	const updateSubTaskContent = (index: number, value: string) => {
@@ -101,13 +101,17 @@ const EditTaskContent: React.FC<{
 
 	// Function to handle saving the updated task
 	const handleSave = () => {
+		let newDue = due;
+		if (plugin.settings.data.globalSettings.autoAddDue) {
+			newDue = new Date().toISOString().split('T')[0];
+		}
 		const updatedTask = {
 			...task,
 			title,
 			body: [
 				...bodyContent.split('\n'),
 			],
-			due,
+			due: newDue,
 			tags,
 			time: newTime,
 			priority,
@@ -283,7 +287,7 @@ const EditTaskContent: React.FC<{
 								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
 									<div className="EditTaskModalHomePreviewContainer">
 										<div className="EditTaskModalHomePreviewHeader">
-											<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t("your-boards")} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
+											<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t("file-path")} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
 												aria-label={t("hold-ctrl-button-to-open-in-new-window")}
