@@ -1,13 +1,13 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, HoverParent, HoverPopover, MarkdownPreviewView, MarkdownRenderer, Modal, TFile } from "obsidian";
+import { App, Component, Modal } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import ReactDOM, { Root } from "react-dom/client";
 import { extractBody, extractCompletionDate, extractDueDate, extractPriority, extractTags, extractTime, extractTitle } from "src/utils/ScanningVault";
 import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
