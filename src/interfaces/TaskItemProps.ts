@@ -5,16 +5,11 @@ import { t } from "src/utils/lang/helper";
 
 export interface TaskProps {
 	key: number;
-	app: App;
 	plugin: TaskBoard;
 	taskKey: number;
 	task: taskItem;
 	columnIndex: number;
 	activeBoardSettings: Board;
-	onEdit: (task: taskItem) => void;
-	onDelete: () => void;
-	onCheckboxChange: (task: taskItem) => void;
-	onSubTasksChange: (task: taskItem) => void;
 }
 
 export interface taskItem {
@@ -58,10 +53,10 @@ export const priorityEmojis: { [key: number]: string } = {
 
 // Priority Options
 export const priorityOptions = [
-	{ value: 0, text: t(160) },
-	{ value: 1, text: t(161) + " : 🔺" },
-	{ value: 2, text: t(162) + " : ⏫" },
-	{ value: 3, text: t(163) + " : 🔼" },
-	{ value: 4, text: t(164) + " : 🔽" },
-	{ value: 5, text: t(165) + " : ⏬" },
+	{ value: 0, text: t("highest") },
+	{ value: 1, text: t("high") + " : 🔺" },
+	{ value: 2, text: t("medium") + " : ⏫" },
+	{ value: 3, text: t("low") + " : 🔼" },
+	{ value: 4, text: t("lowest") + " : 🔽" },
+	{ value: 5, text: t("type-here") + " : ⏬" },
 ];

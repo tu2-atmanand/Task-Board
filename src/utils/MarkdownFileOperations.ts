@@ -13,7 +13,7 @@ export const readDataOfVaultFiles = async (
 			const fileData = await plugin.app.vault.cachedRead(file);
 			return fileData; // Return the raw content of the file
 		} else {
-			new Notice(`${t(171)} ${filePath}`);
+			new Notice(`${t("file-not-found-at-path")} ${filePath}`);
 			console.error(`File not found at path: ${filePath}`);
 			throw `File not found at path: ${filePath}`;
 		}
@@ -32,8 +32,9 @@ export const writeDataToVaultFiles = async (
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
 			await plugin.app.vault.modify(file, newContent);
+			plugin.fileUpdatedUsingModal = file.path;
 		} else {
-			new Notice(`${t(171)} ${filePath}`);
+			new Notice(`${t("file-not-found-at-path")} ${filePath}`);
 			console.error(`File not found at path: ${filePath}`);
 		}
 	} catch (error) {

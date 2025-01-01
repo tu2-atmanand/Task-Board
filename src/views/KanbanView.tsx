@@ -3,20 +3,19 @@
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
+import { StrictMode, useMemo } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import KanbanBoard from "src/components/KanbanBoard";
-import { StrictMode } from "react";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { onUnloadSave } from "src/utils/tasksCache";
 import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
 export class KanbanView extends ItemView {
 	plugin: TaskBoard;
-	private boards: Board[];
+	boards: Board[];
 	root: Root | null = null;
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
@@ -32,7 +31,7 @@ export class KanbanView extends ItemView {
 	}
 
 	getDisplayText() {
-		return t(130);
+		return t("task-board");
 	}
 
 	getSettings() {
@@ -40,7 +39,7 @@ export class KanbanView extends ItemView {
 	}
 
 	async onOpen() {
-		this.addAction(ScanVaultIcon, t(5), () => {
+		this.addAction(ScanVaultIcon, t("scan-vault-window"), () => {
 			openScanVaultModal(this.app, this.plugin);
 		});
 
@@ -73,6 +72,6 @@ export class KanbanView extends ItemView {
 		// Clean up when view is closed
 		this.root?.unmount();
 		this.plugin.leafIsActive = false;
-		onUnloadSave(this.plugin);
+		// onUnloadSave(this.plugin);
 	}
 }
