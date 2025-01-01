@@ -71,7 +71,7 @@ const getLocale = (): Partial<Lang> => {
 };
 
 // Main translation function
-export function t(strIndex: number): string {
-	const locale = getLocale();
-	return locale[strIndex] || en[strIndex];
+export function t(key: string): string {
+  const locale = getLocale();
+  return locale[key] || en[key] || `Missing translation for "${key}"`;
 }

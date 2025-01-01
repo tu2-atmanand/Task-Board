@@ -3,19 +3,17 @@ export type ColumnData = {
 	colType: string;
 	active: boolean;
 	collapsed?: boolean;
-	data: {
-		name: string;
-		index: number;
-		coltag?: string;
-		range?: {
-			tag: string;
-			rangedata: {
-				from: number;
-				to: number;
-			};
+	name: string;
+	index: number;
+	coltag?: string;
+	range?: {
+		tag: string;
+		rangedata: {
+			from: number;
+			to: number;
 		};
-		limit?: number;
 	};
+	limit?: number;
 	sort?: {
 		criteria: string;
 		order: boolean; // Ascending = 0 AND Descending = 1

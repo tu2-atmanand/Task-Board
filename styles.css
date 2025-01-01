@@ -91,7 +91,7 @@
 .columnsContainer {
 	display: flex;
 	overflow-x: auto;
-	padding-block: 10px;
+	padding-block: 4px;
 	height: 100%;
 }
 
@@ -173,7 +173,7 @@
 
 .taskItem {
 	background: var(--background-primary-alt);
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 2), calc(var(--accent-s) * 1.5), calc(var(--accent-l) * 0.9));
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 2), calc(var(--accent-s) * 1.6), calc(var(--accent-l) * 1.2));
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
@@ -181,7 +181,7 @@
 
 .colorIndicator {
 	width: 0.3em;
-	height: 100%;
+	/* height: 100%; */
 	/* float: left; */
 	margin-right: 5px;
 	border-radius: 6px 0px 0px 6px;
@@ -261,21 +261,32 @@
 	width: 100%;
 }
 
+.taskItemMainBodyDescriptionSection {
+	width: 100%;
+}
+
+.taskItemMainBodyDescriptionSectionToggler {
+	opacity: 50%;
+	margin-block-start: 0.5em;
+	cursor: pointer;
+	margin-inline-start: 5px;
+}
+
 .taskItemBodyDescription {
 	overflow: hidden;
-	transition: max-height 0.4s ease-in;
-	max-height: 0;
+	height: 0;
+	opacity: 0;
+	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
 }
 
 .taskItemBodyDescription-expanded {
-	padding: 2px;
-	border-radius: 4px;
-	background: var(--background-modifier-box-shadow);
-	transition: max-height 0.4s ease-out;
-	max-height: 100%;
+	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
 }
 
 .taskItemBodyDescriptionRenderer {
+	padding: 2px;
+	border-radius: 4px;
+	background: var(--background-modifier-box-shadow);
 	margin: 0 !important;
 }
 
@@ -598,7 +609,7 @@
 }
 
 .EditTaskModalHomePreviewBody {
-	height: 25vh;
+	/* height: 25vh; */
 	overflow: auto;
 	border: var(--border-width) solid var(--table-header-border-color);
 }
@@ -882,6 +893,7 @@
 	justify-content: flex-start;
 	gap: 0.5em;
 	margin-block: 0.5em;
+	cursor: default;
 }
 
 .boardConfigModalColumnRowDragButton {
@@ -955,11 +967,16 @@
 .addColumnModalOverlayContent {
 	background: var(--background-secondary);
 	border: var(--border-width) solid var(--border-width) solid var(--interactive-accent);
-	;
 	border-radius: 5px;
 	padding: 20px;
 	width: 400px;
-	max-width: 90%;
+	/* max-width: 90%; */
+	text-align: center;
+	display: block;
+}
+
+.addColumnModalOverlayContent h2 {
+	margin-bottom: 1.5em !important;
 }
 
 .addColumnModalOverlayContentField {
@@ -998,8 +1015,10 @@
 	display: flex;
 	flex-direction: row;
 	position: sticky;
+	z-index: 1;
 	top: calc(-1 * var(--size-4-8));
-	box-shadow: var(--input-shadow);
+	box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
+	backdrop-filter: blur(5px);
 }
 
 .taskBoard-settings-tab-button {
@@ -1019,7 +1038,9 @@
 	color: var(--text-on-accent) !important;
 }
 
-.taskBoard-settings-tab-content {}
+.taskBoard-settings-tab-content {
+	margin-top: 1.2em;
+}
 
 .taskBoard-tab-section-desc {
 	text-align: center;

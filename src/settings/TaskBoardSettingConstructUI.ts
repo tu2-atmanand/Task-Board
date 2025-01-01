@@ -6,6 +6,11 @@ import {
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
+import {
+	colorTo20PercentOpacity,
+	hexToHexAlpha,
+	hexToRgba,
+} from "src/utils/UIHelpers";
 
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
@@ -52,7 +57,7 @@ export class SettingsManager {
 
 		if (!this.globalSettings) {
 			contentEl.createEl("p", {
-				text: t(72),
+				text: t("falied-to-load-settings"),
 			});
 			return;
 		}
@@ -69,19 +74,19 @@ export class SettingsManager {
 		const sections: Record<string, () => void> = {};
 		[
 			{
-				key: t(6),
-				handler: () => this.renderFiltersForScanning(tabContent),
+				key: t("general"),
+				handler: () => this.renderGeneralTabSettings(tabContent),
 			},
 			{
-				key: t(79),
+				key: t("board-ui"),
 				handler: () => this.renderBoardUISettings(tabContent),
 			},
 			{
-				key: t(92),
+				key: t("automation"),
 				handler: () => this.renderAutomationSettings(tabContent),
 			},
 			{
-				key: t(106),
+				key: t("formats"),
 				handler: () => this.renderFormatsSettings(tabContent),
 			},
 		].forEach(({ key, handler }) => {
@@ -120,11 +125,13 @@ export class SettingsManager {
 
 		contentEl
 			.createEl("p", {
-				text: t(73),
+				text: t(
+					"please-read-the-documentation-to-make-an-efficient-use-of-this-plugin"
+				),
 				cls: "taskBoard-docs-section",
 			})
 			.createEl("a", {
-				text: t(74),
+				text: t("task-board-docs"),
 				href: "https://tu2-atmanand.github.io/task-board-docs/",
 			});
 	}
@@ -140,16 +147,29 @@ export class SettingsManager {
 	}
 
 	// Function to render the "Filters for scanning" tab content
-	private renderFiltersForScanning(contentEl: HTMLElement) {
-		contentEl.createEl("p", {
-			text: t(152),
-			cls: "taskBoard-tab-section-desc",
-		});
+	private renderGeneralTabSettings(contentEl: HTMLElement) {
+		// contentEl.createEl("p", {
+		// 	text: t("general-settings-section-description"),
+		// 	cls: "taskBoard-tab-section-desc",
+		// });
 
-		const { scanFilters } = this.globalSettings!;
+		const { scanFilters,showHeader, openOnStartup } = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl).setName(t(75)).setDesc(t(153));
+		new Setting(contentEl)
+			.setName(t("open-board-on-obsidian-startup"))
+			.setDesc(t("open-board-on-obsidian-startup-info"))
+			.addToggle((toggle) =>
+				toggle.setValue(openOnStartup).onChange(async (value) => {
+					this.globalSettings!.openOnStartup = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl)
+			.setName(t("filters-for-scanning"))
+			.setDesc(t("name-of-the-file-folder-tag-for-filter-info"));
 
 		// Helper to add filter rows
 		const addFilterRow = (
@@ -186,13 +206,15 @@ export class SettingsManager {
 			const dropdown = row.createEl("select", {
 				cls: "taskBoard-filter-dropdown",
 			});
-			[t(76), t(77), t(78)].forEach((optionText, idx) => {
-				const option = dropdown.createEl("option", {
-					text: optionText,
-				});
-				option.value = (idx + 1).toString();
-				if (idx + 1 === polarity) option.selected = true;
-			});
+			[t("only-scan-this"), t("dont-scan-this"), t("disable")].forEach(
+				(optionText, idx) => {
+					const option = dropdown.createEl("option", {
+						text: optionText,
+					});
+					option.value = (idx + 1).toString();
+					if (idx + 1 === polarity) option.selected = true;
+				}
+			);
 			dropdown.addEventListener("change", async () => {
 				this.globalSettings!.scanFilters[filterType].polarity =
 					parseInt(dropdown.value, 10);
@@ -202,7 +224,7 @@ export class SettingsManager {
 
 		// Files Row
 		addFilterRow(
-			t(140),
+			t("files"),
 			"files",
 			scanFilters.files.polarity,
 			scanFilters.files.values,
@@ -211,7 +233,7 @@ export class SettingsManager {
 
 		// Folders Row
 		addFilterRow(
-			t(141),
+			t("folders"),
 			"folders",
 			scanFilters.folders.polarity,
 			scanFilters.folders.values,
@@ -220,7 +242,7 @@ export class SettingsManager {
 
 		// Tags Row
 		addFilterRow(
-			t(142),
+			t("tags"),
 			"tags",
 			scanFilters.tags.polarity,
 			scanFilters.tags.values,
@@ -235,7 +257,7 @@ export class SettingsManager {
 
 		footerSection
 			.createEl("p", {
-				text: t(154),
+				text: t("this-plugin-is-created-by"),
 			})
 			.createEl("a", {
 				text: "Atmanand Gauns",
@@ -243,7 +265,7 @@ export class SettingsManager {
 			});
 
 		const footerText = createEl("p");
-		footerText.appendText(t(126));
+		footerText.appendText(t("donation-message"));
 
 		footerSection.appendChild(footerText);
 
@@ -274,15 +296,15 @@ export class SettingsManager {
 
 	// Function to render "Board UI settings" tab content
 	private renderBoardUISettings(contentEl: HTMLElement) {
-		contentEl.createEl("p", {
-			text: t(155),
-			cls: "taskBoard-tab-section-desc",
-		});
+		// contentEl.createEl("p", {
+		// 	text: t("board-ui-section-description"),
+		// 	cls: "taskBoard-tab-section-desc",
+		// });
 
 		// // Setting for Plugin Language
 		// new Setting(contentEl)
-		// 	.setName(t(127))
-		// 	.setDesc(t(128))
+		// 	.setName(t("plugin-language"))
+		// 	.setDesc(t("plugin-language-info"))
 		// 	.addDropdown((dropdown) => {
 		// 		// Dynamically add options from langCodes
 		// 		Object.keys(langCodes).forEach((key) => {
@@ -309,8 +331,8 @@ export class SettingsManager {
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
-			.setName(t(80))
-			.setDesc(t(81))
+			.setName(t("show-header-of-the-task-card"))
+			.setDesc(t("enable-this-to-see-the-header-in-the-task-card"))
 			.addToggle((toggle) =>
 				toggle.setValue(showHeader).onChange(async (value) => {
 					this.globalSettings!.showHeader = value;
@@ -320,8 +342,8 @@ export class SettingsManager {
 
 		// Setting to show/Hide the Footer of the task card
 		new Setting(contentEl)
-			.setName(t(82))
-			.setDesc(t(83))
+			.setName(t("show-footer-of-the-task-card"))
+			.setDesc(t("enable-this-to-see-the-footer-in-the-task-card"))
 			.addToggle((toggle) =>
 				toggle.setValue(showFooter).onChange(async (value) => {
 					this.globalSettings!.showFooter = value;
@@ -331,8 +353,8 @@ export class SettingsManager {
 
 		// Setting to take the width of each Column in px.
 		new Setting(contentEl)
-			.setName(t(84))
-			.setDesc(t(85))
+			.setName(t("width-of-each-column"))
+			.setDesc(t("enter-the-value-of-width-for-each-column"))
 			.addText((text) =>
 				text
 					.setValue(columnWidth)
@@ -345,8 +367,8 @@ export class SettingsManager {
 
 		// Setting to show/Hide the Vertical ScrollBar of each Column
 		new Setting(contentEl)
-			.setName(t(86))
-			.setDesc(t(87))
+			.setName(t("show-column-scroll-bar"))
+			.setDesc(t("enable-to-see-a-scrollbar-for-each-column"))
 			.addToggle((toggle) =>
 				toggle.setValue(showVerticalScroll).onChange(async (value) => {
 					this.globalSettings!.showVerticalScroll = value;
@@ -356,7 +378,9 @@ export class SettingsManager {
 
 		// Tag Colors settings
 		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl).setName(t(88)).setDesc(t(156));
+		new Setting(contentEl)
+			.setName(t("tag-colors"))
+			.setDesc(t("tag-colors-info"));
 
 		// If there are existing tag colors, show them
 		const tagColorsContainer = contentEl.createDiv({
@@ -400,7 +424,7 @@ export class SettingsManager {
 					})
 				)
 				.addButton((btn) =>
-					btn.setButtonText(t(89)).onClick(async () => {
+					btn.setButtonText(t("delete")).onClick(async () => {
 						delete this.globalSettings!.tagColors[tagName];
 						tagSetting.settingEl.remove();
 						await this.saveSettings();
@@ -412,14 +436,16 @@ export class SettingsManager {
 		});
 
 		const addTagColorButton = new Setting(contentEl).addButton((btn) =>
-			btn.setButtonText(t(90)).onClick(() => {
+			btn.setButtonText(t("add-tag-color")).onClick(() => {
 				const newTagSetting = new Setting(tagColorsContainer)
 					.addText((text) =>
-						text.setPlaceholder(t(91)).onChange(async (newTag) => {
-							// if (!this.globalSettings!.tagColors[newTag]) {
-							// 	this.globalSettings!.tagColors[newTag] = ""; // Set empty color initially
-							// }
-						})
+						text
+							.setPlaceholder(t("tag-name"))
+							.onChange(async (newTag) => {
+								// if (!this.globalSettings!.tagColors[newTag]) {
+								// 	this.globalSettings!.tagColors[newTag] = ""; // Set empty color initially
+								// }
+							})
 					)
 					.addColorPicker((picker) =>
 						picker.onChange(async (hexColor) => {
@@ -461,10 +487,10 @@ export class SettingsManager {
 
 	// Function to render "Automation" tab content
 	private renderAutomationSettings(contentEl: HTMLElement) {
-		contentEl.createEl("p", {
-			text: t(157),
-			cls: "taskBoard-tab-section-desc",
-		});
+		// contentEl.createEl("p", {
+		// 	text: t("automation-section-description"),
+		// 	cls: "taskBoard-tab-section-desc",
+		// });
 
 		const {
 			realTimeScanning,
@@ -476,16 +502,24 @@ export class SettingsManager {
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
-			.setName(t(172))
-			.setDesc(t(173))
+			.setName(t("edit-button-mode"))
+			.setDesc(t("edit-button-mode-info"))
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[EditButtonMode.PopUp]: t(174),
-						[EditButtonMode.NoteInTab]: t(175),
-						[EditButtonMode.NoteInSplit]: t(176),
-						[EditButtonMode.NoteInWindow]: t(177),
-						[EditButtonMode.NoteInHover]: t(178),
+						[EditButtonMode.PopUp]: t(
+							"use-edit-task-window-feature"
+						),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split"
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window"
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview"
+						),
 					})
 					.setValue(this.globalSettings!.editButtonAction)
 					.onChange(async (value) => {
@@ -497,8 +531,8 @@ export class SettingsManager {
 
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
-			.setName(t(93))
-			.setDesc(t(94))
+			.setName(t("real-time-scanning"))
+			.setDesc(t("real-time-scanning-info"))
 			.addToggle((toggle) =>
 				toggle.setValue(realTimeScanning).onChange(async (value) => {
 					this.globalSettings!.realTimeScanning = value;
@@ -508,8 +542,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t(95))
-			.setDesc(t(96))
+			.setName(t("auto-add-due-date-to-tasks"))
+			.setDesc(t("auto-add-due-date-to-tasks-info"))
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddDue).onChange(async (value) => {
 					this.globalSettings!.autoAddDue = value;
@@ -519,10 +553,15 @@ export class SettingsManager {
 
 		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
 		new Setting(contentEl)
-			.setName(t(97))
+			.setName(t("auto-scan-the-vault-on-obsidian-startup"))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
-					t(98) + "<br/>" + "<b>" + t(158) + " :</b>" + t(99)
+					t("auto-scan-the-vault-on-obsidian-startup-info") +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b>" +
+						t("auto-scan-the-vault-on-obsidian-startup-info-2")
 				)
 			)
 			.addToggle((toggle) =>
@@ -532,12 +571,12 @@ export class SettingsManager {
 				})
 			);
 
-		// contentEl.createEl("h4", { text: t(100) });
-		new Setting(contentEl).setName(t(100)).setHeading();
+		// contentEl.createEl("h4", { text: t("compatible-plugins") });
+		new Setting(contentEl).setName(t("compatible-plugins")).setHeading();
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName("Day Planner " + t(101))
-			.setDesc(t(102))
+			.setName("Day Planner " + t("plugin-compatibility"))
+			.setDesc(t("day-planner-plugin-compatibility"))
 			.addToggle((toggle) =>
 				toggle.setValue(dayPlannerPlugin).onChange(async (value) => {
 					this.globalSettings!.dayPlannerPlugin = value;
@@ -547,8 +586,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date from the Daily Notes file name.
 		new Setting(contentEl)
-			.setName(t(149) + t(101))
-			.setDesc(t(103))
+			.setName(t("daily-notes") + t("plugin-compatibility"))
+			.setDesc(t("daily-notes-plugin-compatibility"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(dailyNotesPluginComp)
@@ -561,10 +600,10 @@ export class SettingsManager {
 
 	// Function to render "Task formats" tab content
 	private renderFormatsSettings(contentEl: HTMLElement) {
-		contentEl.createEl("p", {
-			text: t(159),
-			cls: "taskBoard-tab-section-desc",
-		});
+		// contentEl.createEl("p", {
+		// 	text: t("format-section-description"),
+		// 	cls: "taskBoard-tab-section-desc",
+		// });
 
 		const {
 			dueDateFormat,
@@ -582,13 +621,15 @@ export class SettingsManager {
 		const previewLabel = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-label",
 		});
-		previewLabel.setText(t(107));
+		previewLabel.setText(
+			t("your-task-will-look-like-following-in-your-notes")
+		);
 
 		const previewData = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-data",
 		});
 		const updatePreview = () => {
-			let taskTitle = t(151);
+			let taskTitle = t("task-title");
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
 			let dueDate = "2024-09-21";
@@ -643,13 +684,13 @@ export class SettingsManager {
 
 		// Setting for Due and Completion Date-Time pattern format
 		new Setting(contentEl)
-			.setName(t(108))
-			.setDesc(t(109))
+			.setName(t("supported-plugin-formats"))
+			.setDesc(t("supported-plugin-formats-info"))
 			.addDropdown((dropdown) => {
-				dropdown.addOption("1", t(110));
-				dropdown.addOption("2", "Tasks " + t(143));
-				dropdown.addOption("3", "Dataview " + t(143));
-				dropdown.addOption("4", "Obsidian " + t(144));
+				dropdown.addOption("1", t("default"));
+				dropdown.addOption("2", "Tasks " + t("plugin"));
+				dropdown.addOption("3", "Dataview " + t("plugin"));
+				dropdown.addOption("4", "Obsidian " + t("native"));
 
 				dropdown.setValue(taskCompletionFormat as string);
 				dropdown.onChange(async (value) => {
@@ -661,8 +702,8 @@ export class SettingsManager {
 
 		// Text input for the dueDateFormat
 		new Setting(contentEl)
-			.setName(t(104))
-			.setDesc(t(105))
+			.setName(t("due-date-format"))
+			.setDesc(t("due-date-format-info"))
 			.addText((text) =>
 				text
 					.setValue(dueDateFormat)
@@ -676,8 +717,8 @@ export class SettingsManager {
 
 		// Text input for the taskCompletionDateTimePattern
 		new Setting(contentEl)
-			.setName(t(111))
-			.setDesc(t(112))
+			.setName(t("task-completion-date-time-pattern"))
+			.setDesc(t("task-completion-date-time-pattern-info"))
 			.addText((text) =>
 				text
 					.setValue(taskCompletionDateTimePattern)
@@ -695,8 +736,8 @@ export class SettingsManager {
 
 		// Setting for firstDayOfWeek
 		new Setting(contentEl)
-			.setName(t(113))
-			.setDesc(t(114))
+			.setName(t("first-day-of-the-week"))
+			.setDesc(t("first-day-of-the-week-info"))
 			// .addText((text) =>
 			// 	text.setValue(firstDayOfWeek).onChange(async (value) => {
 			// 		this.globalSettings!.firstDayOfWeek = value;
@@ -704,13 +745,13 @@ export class SettingsManager {
 			// 	})
 			// );
 			.addDropdown((dropdown) => {
-				dropdown.addOption("1", t(115));
-				dropdown.addOption("2", t(116));
-				dropdown.addOption("3", t(117));
-				dropdown.addOption("4", t(118));
-				dropdown.addOption("5", t(119));
-				dropdown.addOption("6", t(120));
-				dropdown.addOption("7", t(121));
+				dropdown.addOption("1", t("sunday"));
+				dropdown.addOption("2", t("monday"));
+				dropdown.addOption("3", t("tuesday"));
+				dropdown.addOption("4", t("monday"));
+				dropdown.addOption("5", t("thursday"));
+				dropdown.addOption("6", t("friday"));
+				dropdown.addOption("7", t("saturday"));
 
 				dropdown.setValue(firstDayOfWeek as string);
 				dropdown.onChange(async (value) => {
@@ -721,8 +762,8 @@ export class SettingsManager {
 
 		// Setting for taskCompletionInLocalTime
 		new Setting(contentEl)
-			.setName(t(122))
-			.setDesc(t(123))
+			.setName(t("task-completion-in-local-time"))
+			.setDesc(t("task-completion-in-local-time-info"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(taskCompletionInLocalTime)
@@ -734,8 +775,8 @@ export class SettingsManager {
 
 		// Setting for taskCompletionShowUtcOffset
 		new Setting(contentEl)
-			.setName(t(124))
-			.setDesc(t(125))
+			.setName(t("show-utc-offset-for-task-completion"))
+			.setDesc(t("show-utc-offset-for-task-completion-info"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(taskCompletionShowUtcOffset)
@@ -858,39 +899,3 @@ const kofiButton = (link: string, img: HTMLElement): HTMLElement => {
 	a.appendChild(img);
 	return a;
 };
-
-// Utility to convert hex to RGBA with specific opacity
-function hexToRgba(hex: string, opacity: number): string {
-	let r = 0,
-		g = 0,
-		b = 0;
-
-	if (hex.length === 4) {
-		r = parseInt(hex[1] + hex[1], 16);
-		g = parseInt(hex[2] + hex[2], 16);
-		b = parseInt(hex[3] + hex[3], 16);
-	} else if (hex.length === 7 || hex.length === 9) {
-		r = parseInt(hex[1] + hex[2], 16);
-		g = parseInt(hex[3] + hex[4], 16);
-		b = parseInt(hex[5] + hex[6], 16);
-	}
-
-	return `rgba(${r},${g},${b},${opacity})`;
-}
-
-// Convert hex color to hex with Alpha
-function hexToHexAlpha(hex: string, alpha: number = 1): string {
-	hex = hex.slice(0, 7);
-	const alphaHex = Math.floor(alpha * 255)
-		.toString(16)
-		.padStart(2, "0");
-	return `${hex}${alphaHex}`;
-}
-
-// Function to convert RGBA/Hex color to 20% opacity background color
-function colorTo20PercentOpacity(color: string): string {
-	if (color.startsWith("#")) {
-		return hexToRgba(color, 0.1);
-	}
-	return color; // If it's already RGBA, return the same color
-}

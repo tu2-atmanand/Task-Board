@@ -1,7 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
-import { loadTasksJsonFromSS, writeTasksJsonToSS } from "./tasksCache";
+import { loadTasksJsonFromDisk, writeTasksJsonToDisk } from "./JsonFileOperations";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -103,14 +103,14 @@ export class ScanningVault {
 	async updateTasksFromFiles(files: (TFile | null)[]) {
 
 		// Load the existing tasks from tasks.json once
-		const oldTasks = await loadTasksJsonFromSS(this.plugin);
+		const oldTasks = await loadTasksJsonFromDisk(this.plugin);
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
 
 		for (const file of files) {
 			if (file !== null) {
 				const fileNameWithPath = file.path;
-				const fileContent = await this.app.vault.read(file);
+				const fileContent = await this.app.vault.cachedRead(file);
 				const lines = fileContent.split("\n");
 				const newPendingTasks: any[] = [];
 				const newCompletedTasks: any[] = [];
@@ -194,7 +194,7 @@ export class ScanningVault {
 
 	// Save tasks to JSON file
 	async saveTasksToFile() {
-		await writeTasksJsonToSS(this.plugin, this.tasks);
+		await writeTasksJsonToDisk(this.plugin, this.tasks);
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (

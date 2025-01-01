@@ -24,6 +24,7 @@ export enum EditButtonMode {
 }
 
 export interface globalSettingsData {
+	openOnStartup:boolean;
 	lang: string;
 	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
@@ -65,24 +66,20 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "undated",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Undated Tasks",
-							index: 5,
-						},
+						name: "Undated Tasks",
+						index: 5,
 					},
 					{
 						colType: "dated",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Over Due",
-							index: 1,
-							range: {
-								tag: "before",
-								rangedata: {
-									from: -1,
-									to: 0,
-								},
+						name: "Over Due",
+						index: 1,
+						range: {
+							tag: "before",
+							rangedata: {
+								from: -1,
+								to: 0,
 							},
 						},
 					},
@@ -90,15 +87,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "dated",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Today",
-							index: 2,
-							range: {
-								tag: "between",
-								rangedata: {
-									from: 0,
-									to: 0,
-								},
+						name: "Today",
+						index: 2,
+						range: {
+							tag: "between",
+							rangedata: {
+								from: 0,
+								to: 0,
 							},
 						},
 					},
@@ -106,15 +101,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "dated",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Tomorrow",
-							index: 3,
-							range: {
-								tag: "between",
-								rangedata: {
-									from: 1,
-									to: 1,
-								},
+						name: "Tomorrow",
+						index: 3,
+						range: {
+							tag: "between",
+							rangedata: {
+								from: 1,
+								to: 1,
 							},
 						},
 					},
@@ -122,15 +115,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "dated",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Future",
-							index: 4,
-							range: {
-								tag: "after",
-								rangedata: {
-									from: 2,
-									to: 0,
-								},
+						name: "Future",
+						index: 4,
+						range: {
+							tag: "after",
+							rangedata: {
+								from: 2,
+								to: 0,
 							},
 						},
 					},
@@ -138,11 +129,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "completed",
 						active: true,
 						collapsed: false,
-						data: {
-							limit: 20,
-							name: "Completed",
-							index: 6,
-						},
+						limit: 20,
+						name: "Completed",
+						index: 6,
 					},
 				],
 				filters: [],
@@ -159,60 +148,48 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "untagged",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Backlog",
-							index: 1,
-						},
+						name: "Backlog",
+						index: 1,
 					},
 					{
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Can Start working",
-							index: 2,
-							coltag: "pending",
-						},
+						name: "Can Start working",
+						index: 2,
+						coltag: "pending",
 					},
 					{
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "In Progress",
-							index: 3,
-							coltag: "working",
-						},
+						name: "In Progress",
+						index: 3,
+						coltag: "working",
 					},
 					{
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Testing",
-							index: 4,
-							coltag: "Test",
-						},
+						name: "Testing",
+						index: 4,
+						coltag: "Test",
 					},
 					{
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
-						data: {
-							name: "Done",
-							index: 5,
-							coltag: "done",
-						},
+						name: "Done",
+						index: 5,
+						coltag: "done",
 					},
 					{
 						colType: "Completed",
 						active: true,
 						collapsed: false,
-						data: {
-							index: 7,
-							limit: 10,
-							name: "Completed",
-						},
+						index: 7,
+						limit: 10,
+						name: "Completed",
 					},
 				],
 				filters: [],
@@ -226,6 +203,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		],
 		globalSettings: {
 			lang: "en",
+			openOnStartup:false,
 			scanFilters: {
 				files: {
 					polarity: 3,

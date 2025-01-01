@@ -4,13 +4,13 @@ import { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
 import { saveBoardsData } from "./JsonFileOperations";
 
-// Function to refresh the board data
-export const refreshBoardData = async (
-	setBoards: React.Dispatch<React.SetStateAction<Board[]>>,
-	callback: () => void // Add this callback
-) => {
-	callback();
-};
+// // Function to refresh the board data
+// export const refreshBoardData = async (
+// 	setBoards: React.Dispatch<React.SetStateAction<Board[]>>,
+// 	callback: () => void // Add this callback
+// ) => {
+// 	callback();
+// };
 
 // Function to handle saving boards
 export const handleUpdateBoards = async (
@@ -20,5 +20,5 @@ export const handleUpdateBoards = async (
 ) => {
 	setBoards(updatedBoards);
 	saveBoardsData(plugin, updatedBoards);
-	await refreshBoardData(setBoards, () => {});
+	// await refreshBoardData(setBoards, () => {}); // this wont work anymore, use some different way to refresh the whole shit, maybe load the everything again from KanbanView.tsx.
 };

@@ -15,11 +15,6 @@ import {
 	PluginDataJson,
 	langCodes,
 } from "src/interfaces/GlobalSettings";
-import {
-	loadTasksJsonFromDiskToSS,
-	onUnloadSave,
-	writeTasksFromSessionStorageToDisk,
-} from "src/utils/tasksCache";
 
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
@@ -33,12 +28,14 @@ import { t } from "src/utils/lang/helper";
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
+	view: KanbanView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
+	fileUpdatedUsingModal: string;
 	IsTasksJsonChanged: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
@@ -47,11 +44,13 @@ export default class TaskBoard extends Plugin {
 		super(app, menifest);
 		this.plugin = this;
 		this.app = this.plugin.app;
+		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.editorModified = false;
 		this.currentModifiedFile = null;
+		this.fileUpdatedUsingModal = "";
 		this.IsTasksJsonChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
@@ -83,19 +82,19 @@ export default class TaskBoard extends Plugin {
 			// Run scanVaultForTasks if scanVaultAtStartup is true
 			this.scanVaultAtStartup();
 
-			// Load all the tasks from the tasks.json into sessionStorage and start Periodic scanning
-			this.loadTasksDataToSS();
-
 			// Register the Kanban view
 			this.registerTaskBoardView();
-		});
 
-		this.registerTaskBoardStatusBar();
+			this.openAtStartup();
+
+			// Register status bar element
+			this.registerTaskBoardStatusBar();
+		});
 	}
 
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
-		onUnloadSave(this.plugin);
+		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
@@ -156,14 +155,18 @@ export default class TaskBoard extends Plugin {
 
 	async getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
-		this.ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t(132), () => {
-			this.activateView("icon");
+		this.ribbonIconEl = this.addRibbonIcon(
+			TaskBoardIcon,
+			t("open-task-board"),
+			() => {
+				this.activateView("icon");
 
-			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
-			// 	active: true,
-			// 	reveal: true,
-			// });
-		});
+				// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
+				// 	active: true,
+				// 	reveal: true,
+				// });
+			}
+		);
 	}
 	get leafIsActive(): boolean {
 		return this._leafIsActive;
@@ -219,16 +222,17 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
-	loadTasksDataToSS() {
-		const _ = loadTasksJsonFromDiskToSS(this.plugin);
-		// And a setInteval is registered to start periodic saving.
+	registerTaskBoardView() {
+		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
+			this.view = new KanbanView(this, leaf);
+			return this.view;
+		});
 	}
 
-	registerTaskBoardView() {
-		this.registerView(
-			VIEW_TYPE_TASKBOARD,
-			(leaf) => new KanbanView(this, leaf)
-		);
+	openAtStartup() {
+		if (!this.settings.data.globalSettings.openOnStartup) return;
+
+		this.activateView("icon");
 	}
 
 	registerTaskBoardStatusBar() {
@@ -240,27 +244,27 @@ export default class TaskBoard extends Plugin {
 	registerCommands() {
 		this.addCommand({
 			id: "add-new-task",
-			name: t(131),
+			name: t("add-new-task-in-current-file"),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeEditor && activeFile) {
 					openAddNewTaskModal(this.app, this.plugin, activeFile);
 				} else {
-					new Notice(t(147));
+					new Notice(t("no-active-editor-is-open-error-notice"));
 				}
 			},
 		});
 		this.addCommand({
 			id: "open-task-board",
-			name: t(132),
+			name: t("open-task-board"),
 			callback: () => {
 				this.activateView("tab");
 			},
 		});
 		this.addCommand({
 			id: "open-task-board-new-window",
-			name: t(133),
+			name: t("open-task-board-in-new-window"),
 			callback: () => {
 				this.activateView("window");
 			},
@@ -284,12 +288,12 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerEvents() {
-		// Start a timer to write tasks from sessionStorage to disk every 5 minutes
-		this.registerInterval(
-			window.setInterval(async () => {
-				await writeTasksFromSessionStorageToDisk(this.plugin);
-			}, 5 * 60 * 1000)
-		);
+		// // Start a timer to write tasks from sessionStorage to disk every 5 minutes
+		// this.registerInterval(
+		// 	window.setInterval(async () => {
+		// 		await writeTasksFromSessionStorageToDisk(this.plugin);
+		// 	}, 5 * 60 * 1000)
+		// );
 
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
@@ -334,14 +338,14 @@ export default class TaskBoard extends Plugin {
 		// 	})
 		// );
 
-		const closeButton = document.querySelector<HTMLElement>(
-			".titlebar-button.mod-close"
-		);
-		if (closeButton) {
-			this.registerDomEvent(closeButton, "mouseenter", () => {
-				onUnloadSave(this.plugin);
-			});
-		}
+		// const closeButton = document.querySelector<HTMLElement>(
+		// 	".titlebar-button.mod-close"
+		// );
+		// if (closeButton) {
+		// 	this.registerDomEvent(closeButton, "mouseenter", () => {
+		// 		onUnloadSave(this.plugin);
+		// 	});
+		// }
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
@@ -366,7 +370,7 @@ export default class TaskBoard extends Plugin {
 
 				if (fileIsFile) {
 					menu.addItem((item) => {
-						item.setTitle(t(134))
+						item.setTitle(t("update-tasks-from-this-file"))
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
@@ -379,7 +383,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 2
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(135))
+							item.setTitle(t("add-file-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -395,7 +399,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 1
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(136))
+							item.setTitle(t("add-file-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -432,7 +436,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 2
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(137))
+							item.setTitle(t("add-folder-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -448,7 +452,7 @@ export default class TaskBoard extends Plugin {
 							.polarity === 1
 					) {
 						menu.addItem((item) => {
-							item.setTitle(t(138))
+							item.setTitle(t("add-folder-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
@@ -518,11 +522,15 @@ export default class TaskBoard extends Plugin {
 
 	async onFileModifiedAndLostFocus() {
 		if (this.editorModified && this.currentModifiedFile) {
-			await this.realTimeScanning.onFileChange(
-				this.currentModifiedFile,
-				this.settings.data.globalSettings.realTimeScanning,
-				this.settings.data.globalSettings.scanFilters
-			);
+			if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
+				await this.realTimeScanning.onFileChange(
+					this.currentModifiedFile,
+					this.settings.data.globalSettings.realTimeScanning,
+					this.settings.data.globalSettings.scanFilters
+				);
+			} else {
+				this.fileUpdatedUsingModal = "";
+			}
 
 			// Reset the editorModified flag after the scan.
 			this.editorModified = false;
