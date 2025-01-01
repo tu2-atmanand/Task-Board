@@ -183,7 +183,7 @@ const en: Lang = {
 	"general-settings-section-description":
 		"This section contains the settings that will help you to apply filters and give you control to scan only selected files or remove certain files from scanning. Filters are highly recommended if you have a lot of files which will never contain any tasks.",
 	"name-of-the-file-folder-tag-for-filter-info":
-		"Enter the names of the files, folder or tag of the task to control which files you want the plugin to scan to extract tasks from them. Its higly recommended to read the documentation if you are using all three filters at the same time.",
+		"Enter the names of the files, folder or tag separated by comman and select the option, to control which files and tasks you want the plugin to scan and show on the board. If you vault contains tens of thousands of notes, using this filters will boost the performance of the plugin even further. Its higly recommended to read the documentation if you are using all three filters at the same time.",
 	"this-plugin-is-created-by": "This plugin is created by ",
 	"board-ui-section-description":
 		"This section contains the settings to control the look of the board. These settings will be applied to all the boards.",
@@ -215,6 +215,9 @@ const en: Lang = {
 	"open-note-in-hover-preview": "Open note in hover-preview",
 	"hide-description": "Hide description",
 	"show-description": "Show description",
+	"open-board-on-obsidian-startup": "Open board on Obsidian startup",
+	"open-board-on-obsidian-startup-info":
+		"Enable this option if you want to see the task board to be visible, when you close and open Obsidian.",
 };
 
 export default en;
