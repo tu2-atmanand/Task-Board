@@ -218,6 +218,7 @@ const en: Lang = {
 	"open-board-on-obsidian-startup": "Open board on Obsidian startup",
 	"open-board-on-obsidian-startup-info":
 		"Enable this option if you want to see the task board to be visible, when you close and open Obsidian.",
+	"file-path": "File path",
 };
 
 export default en;
