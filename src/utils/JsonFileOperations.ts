@@ -76,7 +76,7 @@ export const loadTasksJsonFromDisk = async (
 };
 
 // Helper function to clean up the empty entries in tasks.json
-export const dataCleanup = (oldTaskData: tasksJson): tasksJson => {
+export const dataCleanup = async (oldTaskData: tasksJson): Promise<tasksJson> => {
 	// Function to remove keys with empty arrays from a specified section
 	const removeEmptyKeys = (section: any) => {
 		Object.keys(section).forEach((key) => {
@@ -101,15 +101,15 @@ export const writeTasksJsonToDisk = async (
 	try {
 		const path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
 
-		if (tasksData) {
+		const cleanedTasksData = await dataCleanup(tasksData);
+
+		if (cleanedTasksData) {
 			await plugin.app.vault.adapter.write(
 				path,
-				JSON.stringify(tasksData, null, 4)
+				JSON.stringify(cleanedTasksData, null, 4)
 			);
 		} else {
-			console.warn(
-				"Improper tasksData to write to disk."
-			);
+			console.warn("Improper cleanedTasksData to write to disk.");
 		}
 	} catch (error) {
 		console.warn("Error writing tasks.json to disk:", error);
