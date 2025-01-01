@@ -24,6 +24,7 @@ export enum EditButtonMode {
 }
 
 export interface globalSettingsData {
+	openOnStartup:boolean;
 	lang: string;
 	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
@@ -202,6 +203,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		],
 		globalSettings: {
 			lang: "en",
+			openOnStartup:false,
 			scanFilters: {
 				files: {
 					polarity: 3,

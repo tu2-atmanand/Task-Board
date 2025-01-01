@@ -75,7 +75,7 @@ export class SettingsManager {
 		[
 			{
 				key: t("general"),
-				handler: () => this.renderFiltersForScanning(tabContent),
+				handler: () => this.renderGeneralTabSettings(tabContent),
 			},
 			{
 				key: t("board-ui"),
@@ -147,21 +147,21 @@ export class SettingsManager {
 	}
 
 	// Function to render the "Filters for scanning" tab content
-	private renderFiltersForScanning(contentEl: HTMLElement) {
+	private renderGeneralTabSettings(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("general-settings-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
 		// });
 
-		const { scanFilters,showHeader } = this.globalSettings!;
+		const { scanFilters,showHeader, openOnStartup } = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
-			.setName(t("show-header-of-the-task-card"))
-			.setDesc(t("enable-this-to-see-the-header-in-the-task-card"))
+			.setName(t("open-board-on-obsidian-startup"))
+			.setDesc(t("open-board-on-obsidian-startup-info"))
 			.addToggle((toggle) =>
-				toggle.setValue(showHeader).onChange(async (value) => {
-					this.globalSettings!.showHeader = value;
+				toggle.setValue(openOnStartup).onChange(async (value) => {
+					this.globalSettings!.openOnStartup = value;
 					await this.saveSettings();
 				})
 			);

@@ -84,9 +84,12 @@ export default class TaskBoard extends Plugin {
 
 			// Register the Kanban view
 			this.registerTaskBoardView();
-		});
 
-		this.registerTaskBoardStatusBar();
+			this.openAtStartup();
+
+			// Register status bar element
+			this.registerTaskBoardStatusBar();
+		});
 	}
 
 	onunload() {
@@ -152,14 +155,18 @@ export default class TaskBoard extends Plugin {
 
 	async getRibbonIcon() {
 		// Create a ribbon icon to open the Kanban board view
-		this.ribbonIconEl = this.addRibbonIcon(TaskBoardIcon, t("open-task-board"), () => {
-			this.activateView("icon");
+		this.ribbonIconEl = this.addRibbonIcon(
+			TaskBoardIcon,
+			t("open-task-board"),
+			() => {
+				this.activateView("icon");
 
-			// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
-			// 	active: true,
-			// 	reveal: true,
-			// });
-		});
+				// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
+				// 	active: true,
+				// 	reveal: true,
+				// });
+			}
+		);
 	}
 	get leafIsActive(): boolean {
 		return this._leafIsActive;
@@ -216,13 +223,16 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerTaskBoardView() {
-		this.registerView(
-			VIEW_TYPE_TASKBOARD,
-			(leaf) => {
-				this.view = new KanbanView(this, leaf)
-				return this.view;
-			}
-		);
+		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
+			this.view = new KanbanView(this, leaf);
+			return this.view;
+		});
+	}
+
+	openAtStartup() {
+		if (!this.settings.data.globalSettings.openOnStartup) return;
+
+		this.activateView("icon");
 	}
 
 	registerTaskBoardStatusBar() {
