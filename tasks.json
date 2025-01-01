@@ -262,19 +262,6 @@
                 "completed": ""
             }
         ],
-        "obsidian-hub-0.2.1/00 - Contribute to the Obsidian Hub/01 Templates/T - TODO.md": [
-            {
-                "id": 2808987672,
-                "title": "",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "obsidian-hub-0.2.1/00 - Contribute to the Obsidian Hub/01 Templates/T - TODO.md",
-                "completed": ""
-            }
-        ],
         "Parent/Child/12-JAN-2002.md": [
             {
                 "id": 2071395412,
@@ -329,19 +316,6 @@
                 "tags": [],
                 "priority": 0,
                 "filePath": "Resources/obsidian-pentesting-vault/Assessment Info.md",
-                "completed": ""
-            }
-        ],
-        "Resources/obsidian-demo/_templates/_people.md": [
-            {
-                "id": 2880939422,
-                "title": "Met",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Resources/obsidian-demo/_templates/_people.md",
                 "completed": ""
             }
         ],
@@ -1991,7 +1965,6 @@
                 "filePath": "Daily_Notes/03-09-2024.md",
                 "completed": "2024-09-26T11"
             }
-        ],
-        "Testing 3.md": []
+        ]
     }
 }
