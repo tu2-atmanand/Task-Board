@@ -76,13 +76,16 @@
             "index": 6
           }
         ],
-        "filters": [],
-        "filterPolarity": "0",
+        "filters": [
+          "#Test",
+          "#working"
+        ],
+        "filterPolarity": "1",
         "filterScope": "Both",
-        "name": "Editing 1",
+        "name": "Time based workflow",
         "index": 1,
         "showColumnTags": true,
-        "showFilteredTags": true
+        "showFilteredTags": false
       },
       {
         "columns": [
@@ -97,7 +100,7 @@
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Can Start working",
+            "name": "Can be implemented",
             "index": 2,
             "coltag": "pending"
           },
@@ -113,38 +116,26 @@
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Done",
+            "name": "In Review",
             "index": 4,
-            "coltag": "done"
-          },
-          {
-            "colType": "Completed",
-            "active": true,
-            "collapsed": false,
-            "index": 5,
-            "limit": 10,
-            "name": "Completed"
+            "coltag": "Test"
           },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Testing",
-            "index": 6,
-            "coltag": "Test"
-          },
-          {
-            "colType": "otherTags",
-            "active": true,
-            "collapsed": false,
-            "name": "All other tags",
-            "index": 7
+            "name": "Done",
+            "index": 5,
+            "coltag": "done"
           }
         ],
-        "filters": [],
+        "filters": [
+          "#Test",
+          "#working"
+        ],
         "filterPolarity": "0",
         "filterScope": "Both",
-        "name": "Second board",
+        "name": "Tag based board",
         "index": 2,
         "showColumnTags": false,
         "showFilteredTags": true
@@ -247,7 +238,7 @@
         "feat": "#b50df2f2"
       },
       "editButtonAction": "popUp",
-      "openOnStartup": true
+      "openOnStartup": false
     }
   }
 }

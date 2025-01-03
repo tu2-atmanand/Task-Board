@@ -2,28 +2,7 @@
     "Pending": {
         "TODO.md": [
             {
-                "id": 527799533,
-                "title": "New temp task, lets see if this comes after 5 minutes, lets update this.",
-                "body": [
-                    "\t- [ ] Lets add another sub-Task, updating.",
-                    "\t- [x] Also adding this new Subtask, first ✅ 2024-12-30",
-                    "\t- [x] And adding second subtask. Now editing will make any difference.",
-                    "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
-                    "\tAnother thing i will put is link to a markdown file from my Vault : [[0-ImportantData]]",
-                    "\tSimply adding another line in the description. Updating..."
-                ],
-                "time": "13:49 - 14:49",
-                "due": "2024-12-30",
-                "tags": [
-                    "#Test",
-                    "#New"
-                ],
-                "priority": 2,
-                "filePath": "TODO.md",
-                "completed": ""
-            },
-            {
-                "id": 3888680771,
+                "id": 1186008258,
                 "title": "Upload this image to the new release of task board.",
                 "body": [
                     "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render. Updating...",
@@ -38,6 +17,27 @@
                     "#Image"
                 ],
                 "priority": 1,
+                "filePath": "TODO.md",
+                "completed": ""
+            },
+            {
+                "id": 3427500787,
+                "title": "New temp task, lets see if this comes after 5 minutes, lets update this.",
+                "body": [
+                    "\t- [ ] Lets add another sub-Task, updating.",
+                    "\t- [x] Also adding this new Subtask, first ✅ 2024-12-30",
+                    "\t- [x] And adding second subtask. Now editing will make any difference.",
+                    "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
+                    "\tAnother thing i will put is link to a markdown file from my Vault : [[0-ImportantData]]",
+                    "\tSimply adding another line in the description. Updating..."
+                ],
+                "time": "13:49 - 14:49",
+                "due": "",
+                "tags": [
+                    "#New",
+                    "#working"
+                ],
+                "priority": 2,
                 "filePath": "TODO.md",
                 "completed": ""
             }
@@ -83,10 +83,10 @@
                     "\t\t- [ ] A sub-sub Task for the first time. updating."
                 ],
                 "time": "19:34 - 20:34",
-                "due": "2024-12-31",
+                "due": "2025-01-03",
                 "tags": [
-                    "#Test",
-                    "#bug/solver"
+                    "#bug/solver",
+                    "#done"
                 ],
                 "priority": 0,
                 "filePath": "Testing 2.md",
@@ -131,9 +131,8 @@
                     "\t\t\t\tThis is a normal line in Desc with four levels of indentation. Updating"
                 ],
                 "time": "",
-                "due": "2024-10-29",
+                "due": "2025-01-02",
                 "tags": [
-                    "#Test",
                     "#Bug"
                 ],
                 "priority": 0,
@@ -166,7 +165,6 @@
                 "time": "21:10 - 22:10",
                 "due": "2025-01-01",
                 "tags": [
-                    "#Test",
                     "#feat"
                 ],
                 "priority": 2,
@@ -175,7 +173,7 @@
             },
             {
                 "id": 1812305496,
-                "title": "Directly copy pasting the task content, to create this GIF. You can add the task at your own pace.",
+                "title": "Directly copy pasting the task content, to create this GIF.",
                 "body": [
                     "\t- [ ] This is a new adding task, lets see.",
                     "\t**Description :** After you finished writting this task in this file switch to other tab or *Task Board* View to see you task automatically get added in the board.",
@@ -183,8 +181,10 @@
                     "\t- [ ] Divide and rule is a great approach."
                 ],
                 "time": "",
-                "due": "2024-12-17",
-                "tags": [],
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
                 "priority": 2,
                 "filePath": "Testing4.md",
                 "completed": ""
@@ -192,32 +192,34 @@
         ],
         "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md": [
             {
-                "id": 211691483,
+                "id": 2720694953,
                 "title": "Adding a simple task to test sub-tasks",
                 "body": [
                     "\t- [ ] Adding another simple sub-task.",
                     "\t- [ ] A simple sub-task added"
                 ],
                 "time": "",
-                "due": "2025-01-01",
+                "due": "2025-01-30",
                 "tags": [],
                 "priority": 0,
                 "filePath": "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md",
                 "completed": ""
             },
             {
-                "id": 1561524673,
+                "id": 2063675483,
                 "title": "This is a test to see how Tasks plugin adds data",
                 "body": [],
                 "time": "",
-                "due": "2024-12-16",
-                "tags": [],
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
                 "priority": 0,
                 "filePath": "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md",
                 "completed": ""
             },
             {
-                "id": 418434593,
+                "id": 3417767020,
                 "title": "This is a new task without any single property.",
                 "body": [],
                 "time": "",
@@ -228,7 +230,7 @@
                 "completed": ""
             },
             {
-                "id": 1380450456,
+                "id": 2321212732,
                 "title": "Simple task",
                 "body": [
                     "\tAdding a new line in the body",
@@ -244,7 +246,7 @@
                 "completed": ""
             },
             {
-                "id": 4247028593,
+                "id": 1871582125,
                 "title": "Let try now if this add new task modal is working",
                 "body": [
                     "\tThis line explains this task.",
@@ -396,10 +398,14 @@
             {
                 "id": 2128076230,
                 "title": "[[Designing Your Life - How to Build a Well-Lived, Joyful Life at Work]]",
-                "body": [],
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "",
-                "tags": [],
+                "tags": [
+                    "#pending"
+                ],
                 "priority": 0,
                 "filePath": "Resources/Bookshelf/Book Tracker.md",
                 "completed": ""
@@ -1061,10 +1067,10 @@
                     "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
                 ],
                 "time": "13:00 - 14:00",
-                "due": "2025-06-05",
+                "due": "",
                 "tags": [
-                    "#Test",
-                    "#feat"
+                    "#feat",
+                    "#working"
                 ],
                 "priority": 2,
                 "filePath": "Daily_Notes/2024-11-06.md",
@@ -1665,6 +1671,25 @@
                 "filePath": "Daily_Notes/2024-12-31.md",
                 "completed": ""
             }
+        ],
+        "Daily_Notes/2025-01-02.md": [
+            {
+                "id": 187136379,
+                "title": "Adding a simple task from the Add new task pop-up",
+                "body": [
+                    "\t- [ ] This is a sub-task",
+                    "\tThis is a line in the task dsecription.",
+                    "\tI will do this task tomorrow."
+                ],
+                "time": "",
+                "due": "2025-01-03",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 1,
+                "filePath": "Daily_Notes/2025-01-02.md",
+                "completed": ""
+            }
         ]
     },
     "Completed": {
@@ -1696,36 +1721,6 @@
                 "priority": 4,
                 "filePath": "Testing 1.md",
                 "completed": "2024-11-28/14:13"
-            }
-        ],
-        "Parent/Child/2002-01-12.md": [
-            {
-                "id": 3961433701,
-                "title": "I was born on Saturday",
-                "body": [],
-                "time": "",
-                "due": "2002-01-12",
-                "tags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "filePath": "Parent/Child/2002-01-12.md",
-                "completed": "2024-10-04/22:08"
-            }
-        ],
-        "Parent/Child/12-01-2002.md": [
-            {
-                "id": 2576008763,
-                "title": "I was born",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "filePath": "Parent/Child/12-01-2002.md",
-                "completed": "2024-10-17/21:22"
             }
         ],
         "DocsForPlugin/Readme of CardBoard-HTML.md": [
