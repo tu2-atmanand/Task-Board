@@ -17,14 +17,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const [isChecked, setIsChecked] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
 
-	const handleTaskInteraction = useCallback(
-		(task: taskItem, type: string) => {
-			if (type === "edit") handleEditTask(plugin, task);
-			else if (type === "delete") handleDeleteTask(plugin, task);
-			else if (type === "checkbox") handleCheckboxChange(plugin, task);
-		},
-		[handleEditTask, handleDeleteTask, handleCheckboxChange, plugin]
-	);
+	// const handleTaskInteraction = useCallback(
+	// 	(task: taskItem, type: string) => {
+	// 		if (type === "edit") handleEditTask(plugin, task);
+	// 		else if (type === "delete") handleDeleteTask(plugin, task);
+	// 		else if (type === "checkbox") handleCheckboxChange(plugin, task);
+	// 	},
+	// 	[handleEditTask, handleDeleteTask, handleCheckboxChange, plugin]
+	// );
 
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
@@ -148,13 +148,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		setIsChecked(true); // Trigger animation
 		setTimeout(() => {
 			// onCheckboxChange(task); // Call parent function after 1 second
-			handleTaskInteraction(task, "checkbox");
+			handleCheckboxChange(plugin, task);
 			setIsChecked(false); // Reset checkbox state
 		}, 1000); // 1-second delay for animation
 	};
 
 	const handleMainTaskDelete = () => {
-		handleTaskInteraction(task, "delete");
+		handleDeleteTask(plugin, task);
 	}
 
 	// Function to handle the checkbox toggle inside the task body
@@ -184,7 +184,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
 		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
-			handleTaskInteraction(task, "edit");
+			handleEditTask(plugin, task);
 		} else {
 			event.ctrlKey = true;
 			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
