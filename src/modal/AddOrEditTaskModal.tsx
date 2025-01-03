@@ -102,7 +102,7 @@ const EditTaskContent: React.FC<{
 	// Function to handle saving the updated task
 	const handleSave = () => {
 		let newDue = due;
-		if (plugin.settings.data.globalSettings.autoAddDue) {
+		if (plugin.settings.data.globalSettings.autoAddDue && !taskExists && due === "") {
 			newDue = new Date().toISOString().split('T')[0];
 		}
 		const updatedTask = {
@@ -391,18 +391,18 @@ export class AddOrEditTaskModal extends Modal {
 	plugin: TaskBoard;
 	task: taskItem = taskItemEmpty;
 	filePath: string;
-	taskExist: boolean = false;
+	taskExists: boolean;
 	onSave: (updatedTask: taskItem) => void;
 
-	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, task?: taskItem) {
+	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, taskExists: boolean, task?: taskItem) {
 		super(app);
 		this.app = app;
 		this.plugin = plugin;
 		this.filePath = filePath;
+		this.taskExists = taskExists;
 		this.onSave = onSave;
-		if (task) {
+		if (taskExists && task) {
 			this.task = task;
-			this.taskExist = true;
 		}
 	}
 
@@ -420,7 +420,7 @@ export class AddOrEditTaskModal extends Modal {
 			plugin={this.plugin}
 			root={contentEl}
 			task={this.task}
-			taskExists={this.taskExist}
+			taskExists={this.taskExists}
 			filePath={this.filePath}
 			onSave={this.onSave}
 			onClose={() => this.close()}

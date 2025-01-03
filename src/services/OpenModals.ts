@@ -56,7 +56,8 @@ export const openAddNewTaskModal = (
 
 			eventEmitter.emit("REFRESH_COLUMN");
 		},
-		activeFile.path
+		activeFile.path,
+		false
 	);
 	AddTaskModal.open();
 };
