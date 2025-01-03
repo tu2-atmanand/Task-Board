@@ -67,14 +67,14 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						active: true,
 						collapsed: false,
 						name: "Undated Tasks",
-						index: 5,
+						index: 1,
 					},
 					{
 						colType: "dated",
 						active: true,
 						collapsed: false,
 						name: "Over Due",
-						index: 1,
+						index: 2,
 						range: {
 							tag: "before",
 							rangedata: {
@@ -88,7 +88,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						active: true,
 						collapsed: false,
 						name: "Today",
-						index: 2,
+						index: 3,
 						range: {
 							tag: "between",
 							rangedata: {
@@ -102,7 +102,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						active: true,
 						collapsed: false,
 						name: "Tomorrow",
-						index: 3,
+						index: 4,
 						range: {
 							tag: "between",
 							rangedata: {
@@ -116,7 +116,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						active: true,
 						collapsed: false,
 						name: "Future",
-						index: 4,
+						index: 5,
 						range: {
 							tag: "after",
 							rangedata: {
@@ -148,14 +148,14 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "untagged",
 						active: true,
 						collapsed: false,
-						name: "Backlog",
+						name: "Backlogs",
 						index: 1,
 					},
 					{
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
-						name: "Can Start working",
+						name: "Can be implemented",
 						index: 2,
 						coltag: "pending",
 					},
@@ -171,23 +171,23 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
-						name: "Testing",
+						name: "Done",
 						index: 4,
-						coltag: "Test",
+						coltag: "done",
 					},
 					{
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
-						name: "Done",
+						name: "In Review",
 						index: 5,
-						coltag: "done",
+						coltag: "Test",
 					},
 					{
 						colType: "Completed",
 						active: true,
 						collapsed: false,
-						index: 7,
+						index: 6,
 						limit: 10,
 						name: "Completed",
 					},
@@ -195,7 +195,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				filters: [],
 				filterPolarity: "0",
 				filterScope: "Both",
-				name: "Tag Based Workflow",
+				name: "Static Kanban",
 				index: 2,
 				showColumnTags: false,
 				showFilteredTags: true,
