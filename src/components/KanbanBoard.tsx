@@ -31,7 +31,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 				setBoards(data);
 
 				const allTasks = await loadTasksAndMerge(plugin);
-				console.log("KanbanBoard.tsx : Data in allTasks :", allTasks);
+				// console.log("KanbanBoard.tsx : Data in allTasks :", allTasks);
 				if (allTasks) {
 					setAllTasks(allTasks);
 				}
