@@ -40,20 +40,21 @@ const en: Lang = {
 	"board-name-info":
 		"Name of the board which will appear as a tab in the tab header inside the plugin.",
 	"show-tags-in-the-columns-of-type-tagged":
-		"Show tags of the cards in the columns of type tagged",
+		"Show tags in task card header",
 	"show-tags-in-the-columns-of-type-tagged-info":
-		"Only works for tagged type columns. If you dont want to see the tag on the card for the type of column.",
+		"Only works for tagged type columns. If you dont want to see the tag in the task card if the task is under the nammed type column, disable this feature.",
 	"filter-tags": "Filter tags",
-	"filter-tags-input-placeholder":
-		"Enter the tags, separated with comma, you want to see in this board. Only tasks with these tags will be shown.",
+	"filter-tags-setting-info":
+		"Only the tasks with the entered tags will be shown under the current board.Enter the tags, separated with comma and dont forget to add # in the beginning. Enable or disable this using below filter polarity.",
 	"filter-polarity": "Filter polarity",
 	"filter-polarity-info":
 		"Activate or deactivate the above filter tags inside the boards.",
+	"filter-tags-input-placeholder": "#tag1, #tag2, #tag3",
 	activate: "Activate",
 	deactivate: "Deactivate",
 	"show-filtered-tags": "Show filtered tags",
 	"show-filtered-tags-info":
-		"Whether to show the above mention filtered tags on the task card.",
+		"Whether to show the above mentioned filtered tags in the task card header.",
 	columns: "Columns",
 	"enter-tag": "Enter tag",
 	"max-items": "Max items",

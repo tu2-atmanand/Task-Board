@@ -244,11 +244,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 							<div className="boardConfigModalSettingName">{t("filter-tags")}</div>
-							<div className="boardConfigModalSettingDescription">{t("filter-tags-input-placeholder")}</div>
+							<div className="boardConfigModalSettingDescription">{t("filter-tags-setting-info")}</div>
 
 						</div>
 						<input
 							type="text"
+							placeholder={t("filter-tags-input-placeholder")}
 							value={board.filters?.join(", ")}
 							onChange={(e) => handleFiltersChange(boardIndex, e.target.value)}
 						/>
