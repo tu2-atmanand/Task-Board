@@ -229,7 +229,7 @@
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
-      "showHeader": true,
+      "showHeader": false,
       "showFooter": true,
       "showVerticalScroll": false,
       "tagColors": {
