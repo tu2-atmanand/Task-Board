@@ -50,7 +50,7 @@
                     "\t- [ ] This is the first Sub Task.",
                     "\t\t- [x] This is the first sub-sub Task",
                     "\t\t\t- [x] This is first sub-sub-sub task",
-                    "\t\t\t- [ ] Adding New three level Indentation subTask.",
+                    "\t\t\t- [x] Adding New three level Indentation subTask.",
                     "\t\t- [ ] This is second sub-sub Task. Updating.",
                     "\t This is an H1 heading, updating.",
                     "\tAdding a line here, the below tasks has been achieved. This line was added from the Modal using textArea box. Updating...",
@@ -76,10 +76,10 @@
                 "id": 259954644,
                 "title": "So This is to add a simple Task for testing.",
                 "body": [
-                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The REFRESH_COLUMN command is not working properly. ",
+                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The **REFRESH_COLUMN** command is not working properly. ",
                     "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
-                    "\t- [x] Trace how you code is running for the REFRESH_COLUMN  command.",
-                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_Board. Updated",
+                    "\t- [x] Trace how you code is running for the *REFRESH_COLUMN*  command.",
+                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_BOARD. Updated",
                     "\t\t- [ ] A sub-sub Task for the first time. updating."
                 ],
                 "time": "19:34 - 20:34",
@@ -1063,8 +1063,8 @@
                     "\tJust adding a normal line for this task as a body.",
                     "\tThis is an image in the body : [[1721576562712.jpg|Image]]",
                     "\t- [ ] Adding a simple New SubTask",
-                    "\t- [x] Adding a first subtask, with **checked** state true.",
-                    "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work."
+                    "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work.",
+                    "\t- [x] Adding a first subtask, with **checked** state true."
                 ],
                 "time": "13:00 - 14:00",
                 "due": "",
@@ -1688,6 +1688,100 @@
                 ],
                 "priority": 1,
                 "filePath": "Daily_Notes/2025-01-02.md",
+                "completed": ""
+            }
+        ],
+        "TestForNewBug.md": [
+            {
+                "id": 1870585101,
+                "title": "#✔️дел Task-1 🔺 📅 2025-01-04",
+                "body": [
+                    "\t- [ ] Adding sub-task for testing.",
+                    "\tAdding a new line in description for testing."
+                ],
+                "time": "",
+                "due": "2025-01-04",
+                "tags": [
+                    "#✔️дел",
+                    "#✔️дел",
+                    "#Testing"
+                ],
+                "priority": 1,
+                "filePath": "TestForNewBug.md",
+                "completed": ""
+            },
+            {
+                "id": 2581419397,
+                "title": "#✔️дел Task-2 🔺 🔁 every week on Thursday 📅 2025-01-09",
+                "body": [],
+                "time": "",
+                "due": "2025-01-09",
+                "tags": [
+                    "#✔️дел"
+                ],
+                "priority": 1,
+                "filePath": "TestForNewBug.md",
+                "completed": ""
+            },
+            {
+                "id": 469978639,
+                "title": "#✔️дел Task-3 🔺 📅 2025-01-09",
+                "body": [],
+                "time": "",
+                "due": "2025-01-09",
+                "tags": [
+                    "#✔️дел"
+                ],
+                "priority": 1,
+                "filePath": "TestForNewBug.md",
+                "completed": ""
+            },
+            {
+                "id": 3181122361,
+                "title": "#✔️дел Task-4 🔺 📅 2025-01-01",
+                "body": [],
+                "time": "",
+                "due": "2025-01-01",
+                "tags": [
+                    "#✔️дел"
+                ],
+                "priority": 1,
+                "filePath": "TestForNewBug.md",
+                "completed": ""
+            },
+            {
+                "id": 4157033687,
+                "title": "Adding new simple task",
+                "body": [],
+                "time": "",
+                "due": "2025-01-07",
+                "tags": [],
+                "priority": 0,
+                "filePath": "TestForNewBug.md",
+                "completed": ""
+            },
+            {
+                "id": 2238313444,
+                "title": "Revise the refresher training, updating.",
+                "body": [],
+                "time": "",
+                "due": "2025-01-10",
+                "tags": [
+                    "#working"
+                ],
+                "priority": 0,
+                "filePath": "TestForNewBug.md",
+                "completed": ""
+            },
+            {
+                "id": 2677612763,
+                "title": "Adding a simple task using the Tasks plugin **Create or edit Task** popup. ⏫ ➕ 2025-01-08",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 2,
+                "filePath": "TestForNewBug.md",
                 "completed": ""
             }
         ]

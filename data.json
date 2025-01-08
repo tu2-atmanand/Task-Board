@@ -80,7 +80,7 @@
           "#Test",
           "#working"
         ],
-        "filterPolarity": "1",
+        "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Time based workflow",
         "index": 1,
@@ -218,7 +218,7 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "2",
+      "taskCompletionFormat": "3",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "dailyNotesPluginComp": true,
       "dueDateFormat": "yyyy-MM-DD",
