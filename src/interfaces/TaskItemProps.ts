@@ -53,10 +53,10 @@ export const priorityEmojis: { [key: number]: string } = {
 
 // Priority Options
 export const priorityOptions = [
-	{ value: 0, text: t("highest") },
-	{ value: 1, text: t("high") + " : 🔺" },
-	{ value: 2, text: t("medium") + " : ⏫" },
-	{ value: 3, text: t("low") + " : 🔼" },
-	{ value: 4, text: t("lowest") + " : 🔽" },
-	{ value: 5, text: t("type-here") + " : ⏬" },
+	{ value: 0, text: t("none") },
+	{ value: 1, text: t("highest") + " : 🔺" },
+	{ value: 2, text: t("high") + " : ⏫" },
+	{ value: 3, text: t("medium") + " : 🔼" },
+	{ value: 4, text: t("low") + " : 🔽" },
+	{ value: 5, text: t("lowest") + " : ⏬" },
 ];
