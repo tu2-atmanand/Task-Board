@@ -341,8 +341,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
-	const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completed, task.due, task.time]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
+	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completed, task.due, task.time]);
 
 	return (
 		<div className="taskItem" key={taskKey}>
@@ -392,7 +392,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						</div>
 					</div>
 				</div>
-				{memoizedRenderFooter}
+				{renderFooter()}
 			</div>
 		</div>
 	);
