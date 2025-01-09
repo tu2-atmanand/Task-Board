@@ -294,8 +294,13 @@ export const updateTaskInFile = async (
 
 			// If task is found, keep adding non-empty lines
 			if (isTaskFound) {
-				if (!line.startsWith("\t") || !line.startsWith("    ")) break; // Stop at the first empty line
-				taskLines.push(line);
+				console.log("updateTaskInFile : Line which is a part of the task :\n", line);
+				if (line.startsWith("\t") || line.startsWith("    ")) {
+					taskLines.push(line);
+				} else {
+					break; // Stop at the first line which is either empty or doesn't start with a tab
+				}
+				
 			}
 		}
 
