@@ -1693,16 +1693,17 @@
         ],
         "TestForNewBug.md": [
             {
-                "id": 1870585101,
+                "id": 1293863443,
                 "title": "#✔️дел Task-1 🔺 📅 2025-01-04",
                 "body": [
+                    "\t- [ ] Adding sub-task for testing.",
+                    "\tAdding a new line in description for testing.",
                     "\t- [ ] Adding sub-task for testing.",
                     "\tAdding a new line in description for testing."
                 ],
                 "time": "",
                 "due": "2025-01-04",
                 "tags": [
-                    "#✔️дел",
                     "#✔️дел",
                     "#Testing"
                 ],
@@ -1711,7 +1712,7 @@
                 "completed": ""
             },
             {
-                "id": 2581419397,
+                "id": 1554769018,
                 "title": "#✔️дел Task-2 🔺 🔁 every week on Thursday 📅 2025-01-09",
                 "body": [],
                 "time": "",
@@ -1724,20 +1725,25 @@
                 "completed": ""
             },
             {
-                "id": 469978639,
+                "id": 1995700233,
                 "title": "#✔️дел Task-3 🔺 📅 2025-01-09",
-                "body": [],
+                "body": [
+                    "\t- [ ] Adding a simple sub-task. Testing",
+                    "\tAdding a simple line in description for testing the Memoization.",
+                    "\tAdding another line in body, updating.",
+                    "Adding another line to test if the description lines duplication issue is solved."
+                ],
                 "time": "",
                 "due": "2025-01-09",
                 "tags": [
-                    "#✔️дел"
+                    "#Testing"
                 ],
                 "priority": 1,
                 "filePath": "TestForNewBug.md",
                 "completed": ""
             },
             {
-                "id": 3181122361,
+                "id": 4012713913,
                 "title": "#✔️дел Task-4 🔺 📅 2025-01-01",
                 "body": [],
                 "time": "",
@@ -1750,31 +1756,27 @@
                 "completed": ""
             },
             {
-                "id": 4157033687,
-                "title": "Adding new simple task",
-                "body": [],
-                "time": "",
-                "due": "2025-01-07",
-                "tags": [],
-                "priority": 0,
-                "filePath": "TestForNewBug.md",
-                "completed": ""
-            },
-            {
-                "id": 2238313444,
+                "id": 1323681523,
                 "title": "Revise the refresher training, updating.",
-                "body": [],
+                "body": [
+                    "\t- [ ] Adding a third sub-task, to fix the issue of task body duplication bug.",
+                    "\t- [ ] Adding a sub-task for testing.",
+                    "\tAdding a line in the body, updating.",
+                    "\t- [ ] Adding a sub-task for testing.",
+                    "\tAdding a line in the body."
+                ],
                 "time": "",
                 "due": "2025-01-10",
                 "tags": [
-                    "#working"
+                    "#working",
+                    "#Testing"
                 ],
                 "priority": 0,
                 "filePath": "TestForNewBug.md",
                 "completed": ""
             },
             {
-                "id": 2677612763,
+                "id": 2616902683,
                 "title": "Adding a simple task using the Tasks plugin **Create or edit Task** popup. ⏫ ➕ 2025-01-08",
                 "body": [],
                 "time": "",
@@ -1966,8 +1968,10 @@
             },
             {
                 "id": 2771074265,
-                "title": "Did same thing of updating the Obsidian Theme, found some good  extension also, created a whole new TCS theme",
-                "body": [],
+                "title": "Did same thing of updating the Obsidian Theme, found some good  extension",
+                "body": [
+                    ""
+                ],
                 "time": "10:00 - 11:00",
                 "due": "",
                 "tags": [],
