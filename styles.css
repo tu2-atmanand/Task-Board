@@ -628,7 +628,7 @@
 .EditTaskModalHomeRightSec {
 	display: flex;
 	flex-direction: column;
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 3), calc(var(--accent-s) * 0.9), calc(var(--accent-l) * 1.5));
+	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
 	border-radius: 5px;
 	padding: 0.5em;
 	min-width: 8vw;
