@@ -5,7 +5,7 @@
                 "id": 1186008258,
                 "title": "Upload this image to the new release of task board.",
                 "body": [
-                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render. Updating...",
+                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render.",
                     "\t- Let me add a new point in description.",
                     "\t ![[Pasted image 20241203231257.png]]",
                     "\t Adding another line in body.",
@@ -1764,7 +1764,6 @@
                 "body": [
                     "\t- [ ] Adding a third sub-task, to fix the issue of task body duplication bug.",
                     "\t- [ ] Adding a sub-task for testing.",
-                    "\tAdding a line in the body, updating.",
                     "\tAdding a line in the body."
                 ],
                 "time": "",

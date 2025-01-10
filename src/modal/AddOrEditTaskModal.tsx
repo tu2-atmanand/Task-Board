@@ -3,12 +3,14 @@
 import { App, Component, Modal } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { extractBody, extractCompletionDate, extractDueDate, extractPriority, extractTags, extractTime, extractTitle } from "src/utils/ScanningVault";
 import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
 
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
+import { hexToRgba } from "src/utils/UIHelpers";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskElementsFormatter } from "src/utils/TaskItemUtils";
@@ -35,7 +37,8 @@ const EditTaskContent: React.FC<{
 	filePath: string;
 	onSave: (updatedTask: taskItem) => void;
 	onClose: () => void;
-}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose }) => {
+	setIsEdited: (value: boolean) => void;
+}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(task.title || '');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
@@ -44,6 +47,7 @@ const EditTaskContent: React.FC<{
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
+	// const [isEdited, setIsEdited] = useState(false);
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
@@ -63,24 +67,34 @@ const EditTaskContent: React.FC<{
 			? updatedBodyContent[index].replace('- [x]', '- [ ]')
 			: updatedBodyContent[index].replace('- [ ]', '- [x]');
 		setBodyContent(updatedBodyContent.join('\n'));
+		setIsEdited(true);
 	};
 
 	// Function to remove a subtask
 	const removeSubTask = (index: number) => {
 		const updatedSubTasks = bodyContent.split('\n').filter((_, idx) => idx !== index);
 		setBodyContent(updatedSubTasks.join('\n'));
+		setIsEdited(true);
 	};
 
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
 		setBodyContent([`\t- [ ] `, ...updatedBodyContent].join('\n'));
+		setIsEdited(true);
 	};
 
 	const updateSubTaskContent = (index: number, value: string) => {
 		const updatedBodyContent = bodyContent.split('\n');
 		updatedBodyContent[index] = `\t- [ ] ${value}`; // Change task state to incomplete upon editing
 		setBodyContent(updatedBodyContent.join('\n'));
+		setIsEdited(true);
+	};
+
+	// Function to handle textarea changes
+	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setBodyContent(e.target.value);
+		setIsEdited(true);
 	};
 
 	// Tags input
@@ -90,6 +104,7 @@ const EditTaskContent: React.FC<{
 			if (!tags.includes(input)) {
 				setTags(prevTags => [...prevTags, input.startsWith("#") ? input : `#${input}`]);
 				e.currentTarget.value = '';
+				setIsEdited(true);
 			}
 		}
 	};
@@ -97,6 +112,7 @@ const EditTaskContent: React.FC<{
 	// Function to remove a tag
 	const removeTag = (tagToRemove: string) => {
 		setTags(prevTags => prevTags.filter(tag => tag !== tagToRemove));
+		setIsEdited(true);
 	};
 
 	// Function to handle saving the updated task
@@ -118,9 +134,8 @@ const EditTaskContent: React.FC<{
 			filePath: filePath,
 		};
 		onSave(updatedTask);
-		onClose();
+		// onClose();
 	};
-
 
 	const modifiedTask: taskItem = {
 		...task,
@@ -161,7 +176,6 @@ const EditTaskContent: React.FC<{
 		}
 	}, [modifiedTask]); // Re-render when modifiedTask changes
 
-
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -187,45 +201,7 @@ const EditTaskContent: React.FC<{
 	const [activeTab, setActiveTab] = useState<'preview' | 'editor'>('preview');
 	const handleTabSwitch = (tab: 'preview' | 'editor') => setActiveTab(tab);
 
-	// Helper function to convert a hex color to an RGBA string with the specified opacity
-	const hexToRgba = (hex: string, opacity: number): string => {
-		let r = 0, g = 0, b = 0;
-
-		if (hex.length === 4) {
-			r = parseInt(hex[1] + hex[1], 16);
-			g = parseInt(hex[2] + hex[2], 16);
-			b = parseInt(hex[3] + hex[3], 16);
-		} else if (hex.length === 7 || hex.length === 9) {
-			r = parseInt(hex[1] + hex[2], 16);
-			g = parseInt(hex[3] + hex[4], 16);
-			b = parseInt(hex[5] + hex[6], 16);
-		}
-
-		return `rgba(${r},${g},${b},${opacity})`;
-	};
 	const defaultTagColor = 'var(--tag-color)';
-
-	// Function to parse the textarea content back to task properties
-	const parseTaskContent = (content: string) => {
-		// Simulate extracting task properties like due, priority, etc.
-		const updatedTask = {
-			...task,
-			title: extractTitle(content),
-			body: extractBody(content.split("\n"), 1),
-			due: extractDueDate(content),
-			tags: extractTags(content),
-			time: extractTime(content),
-			priority: extractPriority(content),
-			completed: extractCompletionDate(content),
-			filePath: task.filePath,
-		};
-		return updatedTask;
-	};
-
-	// Function to handle textarea changes
-	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setBodyContent(e.target.value);
-	};
 
 	return (
 		<>
@@ -392,6 +368,7 @@ export class AddOrEditTaskModal extends Modal {
 	task: taskItem = taskItemEmpty;
 	filePath: string;
 	taskExists: boolean;
+	isEdited: boolean;
 	onSave: (updatedTask: taskItem) => void;
 
 	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, taskExists: boolean, task?: taskItem) {
@@ -404,6 +381,7 @@ export class AddOrEditTaskModal extends Modal {
 		if (taskExists && task) {
 			this.task = task;
 		}
+		this.isEdited = false;
 	}
 
 	onOpen() {
@@ -422,13 +400,58 @@ export class AddOrEditTaskModal extends Modal {
 			task={this.task}
 			taskExists={this.taskExists}
 			filePath={this.filePath}
-			onSave={this.onSave}
+			onSave={(updatedTask) => {
+				this.isEdited = false;
+				this.onSave(updatedTask);
+				this.close();
+			}}
 			onClose={() => this.close()}
+			setIsEdited={(value: boolean) => { this.isEdited = value; }}
 		/>);
 	}
+
+	handleCloseAttempt() {
+		// Open confirmation modal
+		const mssg = t("edit-task-modal-close-confirm-mssg");
+		console.log(mssg);
+		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
+			app: this.app,
+			mssg,
+			onDiscard: () => {
+				this.isEdited = false;
+				this.close();
+			},
+			onGoBack: () => {
+				// Do nothing
+			}
+		});
+		closeConfirmModal.open();
+	}
+
+	handleSave() {
+		// Trigger save functionality if required before closing
+		this.onSave(this.task);
+		this.isEdited = false;
+		this.close();
+	}
+
+	// onCloseRequested(event: Event) {
+	// 	event.stopImmediatePropagation();
+	// 	this.handleCloseAttempt();
+	// }
 
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+	}
+
+	public close(): void {
+		console.log("AddOrEditTaskModal close : value of isEdited : ", this.isEdited);
+		if (this.isEdited) {
+			this.handleCloseAttempt();
+		} else {
+			this.onClose();
+			super.close();
+		}
 	}
 }
