@@ -1764,7 +1764,7 @@
                 "body": [
                     "\t- [ ] Adding a third sub-task, to fix the issue of task body duplication bug.",
                     "\t- [ ] Adding a sub-task for testing.",
-                    "\tAdding a line in the body."
+                    "\tAdding a line in the body. Updating."
                 ],
                 "time": "",
                 "due": "2025-01-10",
