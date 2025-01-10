@@ -332,7 +332,20 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					</>
 				);
 			} else {
-				return null
+				return (
+					<>
+						<div className="taskItemFooterHidden">
+							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+								<div className="taskItemiconButton taskItemiconButtonEdit">
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+								</div>
+								<div className="taskItemiconButton taskItemiconButtonDelete">
+									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+								</div>
+							</div>
+						</div>
+					</>
+				);
 			}
 		} catch (error) {
 			console.log("renderFooter : Getting error while trying to render Footer : ", error);

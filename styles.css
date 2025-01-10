@@ -383,6 +383,15 @@
 	align-items: flex-end;
 }
 
+.taskItemFooterHidden {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-end;
+	align-self: end;
+	height: 0;
+}
+
 .taskItemFooterBtns {
 	display: flex;
 	flex-direction: row;
