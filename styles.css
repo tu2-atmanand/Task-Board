@@ -270,6 +270,7 @@
 	margin-block-start: 0.5em;
 	cursor: pointer;
 	margin-inline-start: 5px;
+	width: fit-content;
 }
 
 .taskItemBodyDescription {
