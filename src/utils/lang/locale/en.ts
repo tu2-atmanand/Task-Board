@@ -39,8 +39,7 @@ const en: Lang = {
 	"board-name": "Board name",
 	"board-name-info":
 		"Name of the board which will appear as a tab in the tab header inside the plugin.",
-	"show-tags-in-the-columns-of-type-tagged":
-		"Show tags in task card header",
+	"show-tags-in-the-columns-of-type-tagged": "Show tags in task card header",
 	"show-tags-in-the-columns-of-type-tagged-info":
 		"Only works for tagged type columns. If you dont want to see the tag in the task card if the task is under the nammed type column, disable this feature.",
 	"filter-tags": "Filter tags",
@@ -220,6 +219,10 @@ const en: Lang = {
 	"open-board-on-obsidian-startup-info":
 		"Enable this option if you want to see the task board to be visible, when you close and open Obsidian.",
 	"file-path": "File path",
+	discard: "Discard",
+	"go-back": "Go back and save",
+	"edit-task-modal-close-confirm-mssg":
+		"You have unsaved changes. Do you want to save or discard them?",
 };
 
 export default en;
