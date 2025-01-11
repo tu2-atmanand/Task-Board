@@ -150,7 +150,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			// onCheckboxChange(task); // Call parent function after 1 second
 			handleCheckboxChange(plugin, task);
 			setIsChecked(false); // Reset checkbox state
-		}, 1000); // 1-second delay for animation
+		}, 500); // 1-second delay for animation
 	};
 
 	const handleMainTaskDelete = () => {
