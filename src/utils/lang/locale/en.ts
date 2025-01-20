@@ -223,6 +223,7 @@ const en: Lang = {
 	"go-back": "Go back and save",
 	"edit-task-modal-close-confirm-mssg":
 		"You have unsaved changes. Do you want to save or discard them?",
+		"task-status" : "Task status",
 };
 
 export default en;
