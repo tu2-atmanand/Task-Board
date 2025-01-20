@@ -3,7 +3,7 @@
 import { App, Component, Modal } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
+import { priorityOptions, taskItem, taskStatuses, taskStatusesDropdown } from "src/interfaces/TaskItemProps";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
@@ -23,9 +23,15 @@ const taskItemEmpty = {
 	tags: [],
 	time: "",
 	priority: 0,
-	completed: "",
+	completion: "",
 	filePath: "",
+	status: taskStatuses.unchecked,
 };
+
+export interface filterOptions {
+	value: string;
+	text: string;
+}
 
 // Functional React component for the modal content
 const EditTaskContent: React.FC<{
@@ -47,7 +53,26 @@ const EditTaskContent: React.FC<{
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
+	const [status, setStatus] = useState(task.status || '');
 	// const [isEdited, setIsEdited] = useState(false);
+
+	// Load statuses dynamically
+	let filteredStatusesDropdown: filterOptions[] = [];
+
+	// Check if tasksPluginCustomStatuses is available and use it
+	if (plugin.settings.data.globalSettings.tasksPluginCustomStatuses?.length > 0) {
+		filteredStatusesDropdown = plugin.settings.data.globalSettings.tasksPluginCustomStatuses.map((customStatus) => ({
+			value: customStatus.symbol,
+			text: `${customStatus.name} [${customStatus.symbol}]`,
+		}));
+	}
+	// Fallback to customStatuses if tasksPluginCustomStatuses is empty
+	else if (plugin.settings.data.globalSettings.customStatuses?.length > 0) {
+		filteredStatusesDropdown = plugin.settings.data.globalSettings.customStatuses.map((customStatus) => ({
+			value: customStatus.symbol,
+			text: `${customStatus.name} [${customStatus.symbol}]`,
+		}));
+	}
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
@@ -132,6 +157,7 @@ const EditTaskContent: React.FC<{
 			time: newTime,
 			priority,
 			filePath: filePath,
+			status,
 		};
 		onSave(updatedTask);
 		// onClose();
@@ -148,6 +174,7 @@ const EditTaskContent: React.FC<{
 		time: newTime,
 		priority: priority,
 		filePath: filePath,
+		status,
 	};
 	// Reference to the HTML element where markdown will be rendered
 
@@ -292,6 +319,16 @@ const EditTaskContent: React.FC<{
 						<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 					<div className="EditTaskModalHomeRightSec">
+						{/* Task Status */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("task-status")}</label>
+							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => setStatus(e.target.value)}>
+								{filteredStatusesDropdown.map((option) => (
+									<option key={option.value} value={option.value}>{option.text}</option>
+								))}
+							</select>
+						</div>
+
 						{/* Task Time Input */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
