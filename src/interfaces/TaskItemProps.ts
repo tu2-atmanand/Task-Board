@@ -20,8 +20,9 @@ export interface taskItem {
 	tags: string[];
 	time: string;
 	priority: number;
-	completed?: string;
-	filePath: string; // Include filePath since it's in the tasks
+	completion?: string;
+	status: string;
+	filePath: string;
 }
 
 export interface tasksInFile {
