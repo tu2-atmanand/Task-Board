@@ -22,6 +22,7 @@ import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
+import { fetchTasksPluginCustomStatuses } from "src/services/CommunityPlugins";
 import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
@@ -89,6 +90,9 @@ export default class TaskBoard extends Plugin {
 
 			// Register status bar element
 			this.registerTaskBoardStatusBar();
+
+			fetchTasksPluginCustomStatuses(this.plugin);
+
 		});
 	}
 
