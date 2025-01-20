@@ -85,6 +85,11 @@ const EditTaskContent: React.FC<{
 		}
 	}, [startTime, endTime]);
 
+	const onTaskTitleUpchange = (value: string) => {
+		setTitle(value);
+		setIsEdited(true);
+	}
+
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
 		const updatedBodyContent = bodyContent.split('\n');
@@ -139,6 +144,15 @@ const EditTaskContent: React.FC<{
 		setTags(prevTags => prevTags.filter(tag => tag !== tagToRemove));
 		setIsEdited(true);
 	};
+
+	const onOpenFilBtnClicked = (newWindow: boolean) => {
+		if (newWindow) {
+			app.workspace.openLinkText('', filePath, 'window')
+		} else {
+			app.workspace.openLinkText('', filePath, false)
+		}
+		onClose();
+	}
 
 	// Function to handle saving the updated task
 	const handleSave = () => {
@@ -240,7 +254,7 @@ const EditTaskContent: React.FC<{
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
 							<label className="EditTaskModalHomeFieldTitle">{t("task-title")}</label>
-							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
+							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => onTaskTitleUpchange(e.target.value)} />
 
 							{/* Subtasks */}
 							<label className="EditTaskModalHomeFieldTitle">{t("sub-tasks")}</label>
@@ -294,7 +308,7 @@ const EditTaskContent: React.FC<{
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
 												aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+												onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
 											>{t("open-file")}</button>
 										</div>
 										<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
