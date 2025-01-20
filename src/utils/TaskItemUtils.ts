@@ -29,36 +29,36 @@ export const taskElementsFormatter = (
 
 	let dueDateWithFormat: string = "";
 	let completedWitFormat: string = "";
-	if (updatedTask.due || updatedTask.completed) {
+	if (updatedTask.due || updatedTask.completion) {
 		if (globalSettings?.taskCompletionFormat === "1") {
 			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completed
-				? ` ✅${updatedTask.completed} `
+			completedWitFormat = updatedTask.completion
+				? ` ✅${updatedTask.completion} `
 				: "";
 		} else if (globalSettings?.taskCompletionFormat === "2") {
 			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completed
-				? ` ✅ ${updatedTask.completed} `
+			completedWitFormat = updatedTask.completion
+				? ` ✅ ${updatedTask.completion} `
 				: "";
 		} else if (globalSettings?.taskCompletionFormat === "3") {
 			dueDateWithFormat = updatedTask.due
 				? ` [due:: ${updatedTask.due}]`
 				: "";
-			completedWitFormat = updatedTask.completed
-				? ` [completion:: ${updatedTask.completed}] `
+			completedWitFormat = updatedTask.completion
+				? ` [completion:: ${updatedTask.completion}] `
 				: "";
 		} else {
 			dueDateWithFormat = updatedTask.due
 				? ` @due(${updatedTask.due})`
 				: "";
-			completedWitFormat = updatedTask.completed
-				? ` @completion(${updatedTask.completed}) `
+			completedWitFormat = updatedTask.completion
+				? ` @completion(${updatedTask.completion}) `
 				: "";
 		}
 	}
 
 	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
-	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
+	const checkBoxStat = updatedTask.completion ? "- [x]" : "- [ ]";
 
 	// Combine priority emoji if it exists
 	const priorityWithEmo =
