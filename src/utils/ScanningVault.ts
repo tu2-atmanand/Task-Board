@@ -70,6 +70,7 @@ export class ScanningVault {
 
 					const task = {
 						id: this.generateTaskId(),
+						status: taskStatus,
 						title,
 						body,
 						time,
@@ -77,7 +78,7 @@ export class ScanningVault {
 						tags,
 						priority,
 						filePath: fileNameWithPath,
-						completed: completionDate,
+						completion: completionDate,
 					};
 
 					if (isCompleted) {
@@ -153,6 +154,7 @@ export class ScanningVault {
 
 							const task = {
 								id: this.generateTaskId(),
+								status: taskStatus,
 								title,
 								body,
 								time,
@@ -160,7 +162,7 @@ export class ScanningVault {
 								tags,
 								priority,
 								filePath: fileNameWithPath,
-								completed: completionDate,
+								completion: completionDate,
 							};
 
 							if (isCompleted) {

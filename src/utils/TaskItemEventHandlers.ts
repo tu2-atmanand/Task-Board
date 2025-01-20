@@ -23,8 +23,8 @@ export const handleCheckboxChange = (
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
 
 	// Check if the task is completed
-	if (updatedTask.completed) {
-		const taskWithCompleted = { ...updatedTask, completed: "" };
+	if (updatedTask.completion) {
+		const taskWithCompleted = { ...updatedTask, completion: "" };
 		// Move from Completed to Pending
 		moveFromCompletedToPending(plugin, taskWithCompleted);
 		updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
@@ -33,7 +33,7 @@ export const handleCheckboxChange = (
 		const moment = _moment as unknown as typeof _moment.default;
 		const taskWithCompleted = {
 			...updatedTask,
-			completed: moment().format(
+			completion: moment().format(
 				globalSettings?.taskCompletionDateTimePattern
 			),
 		};
