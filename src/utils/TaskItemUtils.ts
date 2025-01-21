@@ -58,7 +58,7 @@ export const taskElementsFormatter = (
 	}
 
 	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
-	const checkBoxStat = updatedTask.completion ? "- [x]" : "- [ ]";
+	const checkBoxStat = `- [${updatedTask.status}]`;
 
 	// Combine priority emoji if it exists
 	const priorityWithEmo =
