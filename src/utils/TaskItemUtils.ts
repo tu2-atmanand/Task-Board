@@ -266,7 +266,6 @@ export const updateTaskInFile = async (
 
 		// Step 2: Prepare the updated task block
 		const completeTask = taskElementsFormatter(plugin, updatedTask);
-		console.log("updateTaskInFile : new task content :\n", completeTask);
 		if (completeTask === "")
 			throw "taskElementsFormatter returned empty string";
 
@@ -294,7 +293,6 @@ export const updateTaskInFile = async (
 
 			// If task is found, keep adding non-empty lines
 			if (isTaskFound) {
-				console.log("updateTaskInFile : Line which is a part of the task :\n", line);
 				if (line.startsWith("\t") || line.startsWith("    ")) {
 					taskLines.push(line);
 				} else {
@@ -307,7 +305,6 @@ export const updateTaskInFile = async (
 		// Step 5: Replace the found task block with the new one
 		if (isTaskFound && taskStartIndex !== -1) {
 			const taskBlock = taskLines.join("\n");
-			console.log("updateTaskInFile : taskBlock :\n", taskBlock);
 
 			// Replace the old task block with the updated content
 			const newContent = fileContent.replace(taskBlock, completeTask);
