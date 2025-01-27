@@ -3,6 +3,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TaskProps, taskItem, taskStatuses } from '../interfaces/TaskItemProps';
+import { checkboxStateSwitcher, extractCheckboxSymbol } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
@@ -162,9 +163,11 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		const updatedBody = task.body.map((line, idx) => {
 			if (idx === index) {
 				// Toggle the checkbox status only for the specific line
-				return isCompleted
-					? line.replace('- [x]', '- [ ]')
-					: line.replace('- [ ]', '- [x]');
+
+				const symbol = extractCheckboxSymbol(line);
+				const nextSymbol = checkboxStateSwitcher(plugin, symbol);
+
+				return line.replace(`- [${symbol}]`, `- [${nextSymbol}]`);
 			}
 			return line;
 		});

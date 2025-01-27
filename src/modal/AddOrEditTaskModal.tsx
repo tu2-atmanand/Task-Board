@@ -3,7 +3,8 @@
 import { App, Component, Modal } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { priorityOptions, taskItem, taskStatuses, taskStatusesDropdown } from "src/interfaces/TaskItemProps";
+import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
+import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
@@ -90,15 +91,33 @@ const EditTaskContent: React.FC<{
 		setIsEdited(true);
 	}
 
+	// // Function to toggle subtask completion
+	// const toggleSubTaskCompletion = (index: number) => {
+	// 	const updatedBodyContent = bodyContent.split('\n');
+	// 	updatedBodyContent[index] = updatedBodyContent[index].startsWith('- [x]')
+	// 		? updatedBodyContent[index].replace('- [x]', '- [ ]')
+	// 		: updatedBodyContent[index].replace('- [ ]', '- [x]');
+	// 	setBodyContent(updatedBodyContent.join('\n'));
+	// 	setIsEdited(true);
+	// };
+
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
 		const updatedBodyContent = bodyContent.split('\n');
-		updatedBodyContent[index] = updatedBodyContent[index].startsWith('- [x]')
-			? updatedBodyContent[index].replace('- [x]', '- [ ]')
-			: updatedBodyContent[index].replace('- [ ]', '- [x]');
+
+		// Check if the line is a task and toggle its state
+		if (isTaskLine(updatedBodyContent[index].trim())) {
+			const symbol = extractCheckboxSymbol(updatedBodyContent[index]);
+			const nextSymbol = checkboxStateSwitcher(plugin, symbol);
+
+			updatedBodyContent[index] = updatedBodyContent[index].replace(`- [${symbol}]`, `- [${nextSymbol}]`);
+
+		}
+
 		setBodyContent(updatedBodyContent.join('\n'));
 		setIsEdited(true);
 	};
+
 
 	// Function to remove a subtask
 	const removeSubTask = (index: number) => {

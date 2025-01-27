@@ -1,6 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
+import { extractCheckboxSymbol, isCompleted, isTaskLine } from "./CheckBoxUtils";
 import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
@@ -69,14 +70,13 @@ export class ScanningVault {
 
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
-			if (/^- \[.\]/.test(line)) {
+			if (isTaskLine(line)) {
 				const tags = extractTags(line);
 				if (scanFilterForTags(tags, scanFilters)) {
 					this.TaskDetected = true;
-					const taskStatus = extractTaskStatusSymbol(line);
+					const taskStatus = extractCheckboxSymbol(line);
 					// const isCompleted = line.startsWith(`- [${taskStatuses.regular}]`);
-					const isCompleted =
-						taskStatus === taskStatuses.regular ? true : false;
+					const isTaskCompleted = isCompleted(line);
 					const title = extractTitle(line);
 					const time = extractTime(line);
 					const due = extractDueDate(line);
@@ -97,7 +97,7 @@ export class ScanningVault {
 						completion: completionDate,
 					};
 
-					if (isCompleted) {
+					if (isTaskCompleted) {
 						tasks.Completed[fileNameWithPath].push(task);
 					} else {
 						tasks.Pending[fileNameWithPath].push(task);
@@ -133,17 +133,14 @@ export class ScanningVault {
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i];
-					if (/^- \[.\]/.test(line)) {
+					if (isTaskLine(line)) {
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
 							this.TaskDetected = true;
-							const taskStatus = extractTaskStatusSymbol(line);
+							const taskStatus = extractCheckboxSymbol(line);
 							// const isCompleted = line.startsWith(`- [${taskStatuses.regular}]`);
 							console.log("Task Status : ", taskStatus);
-							const isCompleted =
-								taskStatus === taskStatuses.regular
-									? true
-									: false;
+							const isTaskCompleted = isCompleted(line);
 							const title = extractTitle(line);
 							const time = extractTime(line);
 							const priority = extractPriority(line);
@@ -185,7 +182,7 @@ export class ScanningVault {
 								completion: completionDate,
 							};
 
-							if (isCompleted) {
+							if (isTaskCompleted) {
 								newCompletedTasks.push(task);
 							} else {
 								newPendingTasks.push(task);
@@ -227,16 +224,6 @@ export class ScanningVault {
 			this.TaskDetected = false;
 		}
 	}
-}
-
-function extractTaskStatusSymbol(taskLine: string) {
-	const statusSymbolRegex = /\[(.*?)\]/;
-	const match = taskLine.match(statusSymbolRegex);
-	// return match && match[1].trim();
-	if (!match || !match[1]) {
-		return taskStatuses.regular;
-	}
-	return match[1];
 }
 
 // New function to extract task body
