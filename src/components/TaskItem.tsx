@@ -372,6 +372,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							checked={(task.status === taskStatuses.checked || task.status === taskStatuses.regular || isChecked) ? true : false}
 							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
 							data-task={task.status} // Add the data-task attribute
+							dir='auto'
 							onChange={handleMainCheckBoxClick}
 						/>
 						<div className="taskItemBodyContent">
