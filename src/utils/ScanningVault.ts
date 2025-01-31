@@ -75,7 +75,6 @@ export class ScanningVault {
 				if (scanFilterForTags(tags, scanFilters)) {
 					this.TaskDetected = true;
 					const taskStatus = extractCheckboxSymbol(line);
-					// const isCompleted = line.startsWith(`- [${taskStatuses.regular}]`);
 					const isTaskCompleted = isCompleted(line);
 					const title = extractTitle(line);
 					const time = extractTime(line);
@@ -138,8 +137,6 @@ export class ScanningVault {
 						if (scanFilterForTags(tags, scanFilters)) {
 							this.TaskDetected = true;
 							const taskStatus = extractCheckboxSymbol(line);
-							// const isCompleted = line.startsWith(`- [${taskStatuses.regular}]`);
-							console.log("Task Status : ", taskStatus);
 							const isTaskCompleted = isCompleted(line);
 							const title = extractTitle(line);
 							const time = extractTime(line);

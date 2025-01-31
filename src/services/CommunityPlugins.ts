@@ -37,10 +37,6 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
 				customStatuses;
 			plugin.saveSettings();
-			console.log(
-				"Custom statuses from tasks plugin fetched successfully:",
-				customStatuses
-			);
 		}
 	} catch (error) {
 		console.error(

@@ -1235,7 +1235,7 @@
 }
 
 
-/* Checkboxes Icons */
+/* ------- Checkboxes Icons -------------- */
 
 /*Icon: ITS Icons*/
 @font-face {
@@ -1901,5 +1901,5 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	[data-task="s"],
 	[data-task="H"],
 	[data-task="<"]) {
-	border: 0 !important;
+	border: 0 !important; /* This will remove the border of the checkbox so only the icon is visible*/
 }
