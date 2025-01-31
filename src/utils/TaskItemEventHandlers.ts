@@ -25,7 +25,7 @@ export const handleCheckboxChange = (
 
 	// Check if the task is completed
 	const newStatus = checkboxStateSwitcher(plugin, updatedTask.status);
-	if (isCompleted(updatedTask.status)) {
+	if (isCompleted(`- [${updatedTask.status}]`)) {
 		const taskWithCompleted = {
 			...updatedTask,
 			completion: "",
