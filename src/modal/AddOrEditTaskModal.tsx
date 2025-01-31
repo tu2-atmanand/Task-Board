@@ -101,6 +101,11 @@ const EditTaskContent: React.FC<{
 	// 	setIsEdited(true);
 	// };
 
+	const handleStatusChange = (symbol: string) => {
+		setStatus(symbol);
+		setIsEdited(true);
+	}
+
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
 		const updatedBodyContent = bodyContent.split('\n');
@@ -355,7 +360,7 @@ const EditTaskContent: React.FC<{
 						{/* Task Status */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("task-status")}</label>
-							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => setStatus(e.target.value)}>
+							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => handleStatusChange(e.target.value)}>
 								{filteredStatusesDropdown.map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
 								))}
@@ -483,7 +488,6 @@ export class AddOrEditTaskModal extends Modal {
 	handleCloseAttempt() {
 		// Open confirmation modal
 		const mssg = t("edit-task-modal-close-confirm-mssg");
-		console.log(mssg);
 		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
 			app: this.app,
 			mssg,
@@ -516,7 +520,6 @@ export class AddOrEditTaskModal extends Modal {
 	}
 
 	public close(): void {
-		console.log("AddOrEditTaskModal close : value of isEdited : ", this.isEdited);
 		if (this.isEdited) {
 			this.handleCloseAttempt();
 		} else {
