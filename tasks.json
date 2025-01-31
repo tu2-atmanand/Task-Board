@@ -2,26 +2,6 @@
     "Pending": {
         "TODO.md": [
             {
-                "id": 3558841044,
-                "status": "!",
-                "title": "Upload this image to the new release of task board.",
-                "body": [
-                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render.",
-                    "\t- Let me add a new point in description.",
-                    "\t ![[Pasted image 20241203231257.png]]",
-                    "\t Adding another line in body.",
-                    "\t - Just adding a new point for this task. Updating."
-                ],
-                "time": "",
-                "due": "2024-12-24",
-                "tags": [
-                    "#Image"
-                ],
-                "priority": 1,
-                "filePath": "TODO.md",
-                "completion": ""
-            },
-            {
                 "id": 755985385,
                 "status": " ",
                 "title": "New temp task, lets see if this comes after 5 minutes, lets update this.",
@@ -46,27 +26,7 @@
         ],
         "Testing4.md": [
             {
-                "id": 3066619153,
-                "status": ">",
-                "title": "Need to finish the following pending tasks before next Task Board release.",
-                "body": [
-                    "\tThese features will help the plugin to achieve its intended functionality.",
-                    "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
-                    "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
-                    "\t- [x] Sorting feature for each individual Column.",
-                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
-                ],
-                "time": "21:10 - 22:10",
-                "due": "2025-01-01",
-                "tags": [
-                    "#feat"
-                ],
-                "priority": 2,
-                "filePath": "Testing4.md",
-                "completion": ""
-            },
-            {
-                "id": 2939785255,
+                "id": 1613093416,
                 "status": " ",
                 "title": "Directly copy pasting the task content, to create this GIF.",
                 "body": [
@@ -83,12 +43,32 @@
                 "priority": 2,
                 "filePath": "Testing4.md",
                 "completion": ""
+            },
+            {
+                "id": 1568647598,
+                "status": " ",
+                "title": "Need to finish the following pending tasks before next Task Board release.",
+                "body": [
+                    "\tThese features will help the plugin to achieve its intended functionality.",
+                    "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
+                    "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
+                    "\t- [x] Sorting feature for each individual Column.",
+                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
+                ],
+                "time": "21:10 - 22:10",
+                "due": "2025-01-31",
+                "tags": [
+                    "#feat"
+                ],
+                "priority": 2,
+                "filePath": "Testing4.md",
+                "completion": ""
             }
         ],
         "Testing 3.md": [
             {
                 "id": 3381912225,
-                "status": " ",
+                "status": ">",
                 "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks",
                 "body": [
                     "\t- [ ] This is the first Sub Task.",
@@ -140,8 +120,8 @@
         ],
         "Testing 1.md": [
             {
-                "id": 305918552,
-                "status": "!",
+                "id": 3185566959,
+                "status": "r",
                 "title": "This is a normal task, I am adding in the file, Updating",
                 "body": [
                     "\tThis a line as a description for the Task Description.",
@@ -157,10 +137,10 @@
                 ],
                 "priority": 0,
                 "filePath": "Testing 1.md",
-                "completion": ""
+                "completion": "2025-01-27/12:58"
             },
             {
-                "id": 2096006984,
+                "id": 3273995528,
                 "status": " ",
                 "title": "Adding a new task to encounter a different issue",
                 "body": [
@@ -187,7 +167,23 @@
                 "completion": ""
             },
             {
-                "id": 3028874712,
+                "id": 1809572262,
+                "status": ">",
+                "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
+                "body": [
+                    "\t![[Pasted image 20241014211429.png]]"
+                ],
+                "time": "",
+                "due": "2024-10-23",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 4,
+                "filePath": "Testing 1.md",
+                "completion": "2025-01-27/12:46"
+            },
+            {
+                "id": 2427742004,
                 "status": " ",
                 "title": "A simple task with the priority emoji",
                 "body": [],
@@ -201,7 +197,7 @@
                 "completion": "2025-01-21/21:50"
             },
             {
-                "id": 3001596185,
+                "id": 2855026263,
                 "status": " ",
                 "title": "Adding Many tasks right after one another.",
                 "body": [],
@@ -483,7 +479,7 @@
         "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md": [
             {
                 "id": 4071014033,
-                "status": " ",
+                "status": "/",
                 "title": "Adding a simple task to test sub-tasks",
                 "body": [
                     "\t- [ ] Adding another simple sub-task.",
@@ -1558,7 +1554,7 @@
         ],
         "Daily_Notes/30-09-2024.md": [
             {
-                "id": 1212316068,
+                "id": 178693620,
                 "status": " ",
                 "title": "This is a task, and this is very bad way since the board is getting refreshed but it is refreshing the whole shit.",
                 "body": [],
@@ -1572,7 +1568,7 @@
                 "completion": ""
             },
             {
-                "id": 2462317338,
+                "id": 1875522260,
                 "status": " ",
                 "title": "Now after this board is updated only the file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version.",
                 "body": [
@@ -1825,7 +1821,7 @@
         "Daily_Notes/2024-12-20.md": [
             {
                 "id": 2852052159,
-                "status": " ",
+                "status": "-",
                 "title": "This is a new task to test. Updating",
                 "body": [
                     "\t- [ ] Lets add another sub-task.",
@@ -2566,24 +2562,6 @@
         ]
     },
     "Completed": {
-        "Testing 1.md": [
-            {
-                "id": 713053721,
-                "status": "x",
-                "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
-                "body": [
-                    "\t![[Pasted image 20241014211429.png]]"
-                ],
-                "time": "",
-                "due": "2024-10-23",
-                "tags": [
-                    "#Test"
-                ],
-                "priority": 4,
-                "filePath": "Testing 1.md",
-                "completion": "2024-10-26/13:45"
-            }
-        ],
         "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md": [
             {
                 "id": 3980284575,
@@ -2941,6 +2919,28 @@
                 "priority": 0,
                 "filePath": "Parent/Child/12-JAN-2002.md",
                 "completion": "2025-01-21/21:49"
+            }
+        ],
+        "TODO.md": [
+            {
+                "id": 3558841044,
+                "status": "x",
+                "title": "Upload this image to the new release of task board.",
+                "body": [
+                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render.",
+                    "\t- Let me add a new point in description.",
+                    "\t ![[Pasted image 20241203231257.png]]",
+                    "\t Adding another line in body.",
+                    "\t - Just adding a new point for this task. Updating."
+                ],
+                "time": "",
+                "due": "2024-12-24",
+                "tags": [
+                    "#Image"
+                ],
+                "priority": 1,
+                "filePath": "TODO.md",
+                "completion": "2025-01-27/12:46"
             }
         ]
     }
