@@ -68,9 +68,9 @@ export const renderColumns = (
 			boardConfigs[activeBoard]?.columns[completedColumnIndex].limit;
 
 		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
-			if (a.completed && b.completed) {
-				const dateA = new Date(a.completed).getTime();
-				const dateB = new Date(b.completed).getTime();
+			if (a.completion && b.completion) {
+				const dateA = new Date(a.completion).getTime();
+				const dateB = new Date(b.completion).getTime();
 				return dateB - dateA;
 			}
 			return 0;

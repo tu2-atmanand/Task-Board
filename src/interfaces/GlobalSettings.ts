@@ -23,8 +23,16 @@ export enum EditButtonMode {
 	NoteInHover = "noteInHover",
 }
 
+interface CustomStatus {
+	symbol: string; // The symbol representing the status (e.g., "/", "-")
+	name: string; // The human-readable name of the status (e.g., "In Progress")
+	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
+	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
+	type: string; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+}
+
 export interface globalSettingsData {
-	openOnStartup:boolean;
+	openOnStartup: boolean;
 	lang: string;
 	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
@@ -45,6 +53,8 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: { [tagName: string]: string };
 	editButtonAction: EditButtonMode;
+	tasksPluginCustomStatuses: CustomStatus[];
+	customStatuses: CustomStatus[];
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -203,7 +213,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		],
 		globalSettings: {
 			lang: "en",
-			openOnStartup:false,
+			openOnStartup: false,
 			scanFilters: {
 				files: {
 					polarity: 3,
@@ -240,6 +250,37 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				feat: "#b50df2f2",
 			},
 			editButtonAction: EditButtonMode.PopUp,
+			tasksPluginCustomStatuses: [],
+			customStatuses: [
+				{
+					symbol: " ",
+					name: "Unchecked",
+					nextStatusSymbol: "x",
+					availableAsCommand: false,
+					type: "TODO",
+				},
+				{
+					symbol: "/",
+					name: "In Progress",
+					nextStatusSymbol: "x",
+					availableAsCommand: true,
+					type: "IN_PROGRESS",
+				},
+				{
+					symbol: "-",
+					name: "Cancelled",
+					nextStatusSymbol: "x",
+					availableAsCommand: true,
+					type: "CANCELLED",
+				},
+				{
+					symbol: "x",
+					name: "Done",
+					nextStatusSymbol: " ",
+					availableAsCommand: true,
+					type: "DONE",
+				},
+			],
 		},
 	},
 };

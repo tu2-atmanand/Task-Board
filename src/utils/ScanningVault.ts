@@ -1,7 +1,18 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
-import { loadTasksJsonFromDisk, writeTasksJsonToDisk } from "./JsonFileOperations";
+import { extractCheckboxSymbol, isCompleted, isTaskLine } from "./CheckBoxUtils";
+import {
+	loadTasksJsonFromDisk,
+	writeTasksJsonToDisk,
+} from "./JsonFileOperations";
+import {
+	priorityEmojis,
+	taskItem,
+	taskJsonMerged,
+	taskStatuses,
+	tasksJson,
+} from "src/interfaces/TaskItemProps";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -9,8 +20,8 @@ import {
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { priorityEmojis } from "src/interfaces/TaskItemProps";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
+import { scanFilters } from "src/interfaces/GlobalSettings";
 
 export class ScanningVault {
 	app: App;
@@ -42,7 +53,11 @@ export class ScanningVault {
 	}
 
 	// Extract tasks from a specific file
-	async extractTasksFromFile(file: TFile, tasks: any, scanFilters: any) {
+	async extractTasksFromFile(
+		file: TFile,
+		tasks: tasksJson,
+		scanFilters: scanFilters
+	) {
 		const fileNameWithPath = file.path;
 		const fileContent = await readDataOfVaultFiles(
 			this.plugin,
@@ -55,12 +70,12 @@ export class ScanningVault {
 
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
-			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+			if (isTaskLine(line)) {
 				const tags = extractTags(line);
 				if (scanFilterForTags(tags, scanFilters)) {
-					this.TaskDetected =
-						line.startsWith("- [x]") || line.startsWith("- [ ]");
-					const isCompleted = line.startsWith("- [x]");
+					this.TaskDetected = true;
+					const taskStatus = extractCheckboxSymbol(line);
+					const isTaskCompleted = isCompleted(line);
 					const title = extractTitle(line);
 					const time = extractTime(line);
 					const due = extractDueDate(line);
@@ -70,6 +85,7 @@ export class ScanningVault {
 
 					const task = {
 						id: this.generateTaskId(),
+						status: taskStatus,
 						title,
 						body,
 						time,
@@ -77,10 +93,10 @@ export class ScanningVault {
 						tags,
 						priority,
 						filePath: fileNameWithPath,
-						completed: completionDate,
+						completion: completionDate,
 					};
 
-					if (isCompleted) {
+					if (isTaskCompleted) {
 						tasks.Completed[fileNameWithPath].push(task);
 					} else {
 						tasks.Pending[fileNameWithPath].push(task);
@@ -101,7 +117,6 @@ export class ScanningVault {
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: (TFile | null)[]) {
-
 		// Load the existing tasks from tasks.json once
 		const oldTasks = await loadTasksJsonFromDisk(this.plugin);
 		const scanFilters =
@@ -117,13 +132,12 @@ export class ScanningVault {
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i];
-					if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+					if (isTaskLine(line)) {
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
-							this.TaskDetected =
-								line.startsWith("- [x]") ||
-								line.startsWith("- [ ]");
-							const isCompleted = line.startsWith("- [x]");
+							this.TaskDetected = true;
+							const taskStatus = extractCheckboxSymbol(line);
+							const isTaskCompleted = isCompleted(line);
 							const title = extractTitle(line);
 							const time = extractTime(line);
 							const priority = extractPriority(line);
@@ -141,7 +155,8 @@ export class ScanningVault {
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
-								const moment = _moment as unknown as typeof _moment.default;
+								const moment =
+									_moment as unknown as typeof _moment.default;
 								if (
 									moment(basename, dueFormat, true).isValid()
 								) {
@@ -153,6 +168,7 @@ export class ScanningVault {
 
 							const task = {
 								id: this.generateTaskId(),
+								status: taskStatus,
 								title,
 								body,
 								time,
@@ -160,10 +176,10 @@ export class ScanningVault {
 								tags,
 								priority,
 								filePath: fileNameWithPath,
-								completed: completionDate,
+								completion: completionDate,
 							};
 
-							if (isCompleted) {
+							if (isTaskCompleted) {
 								newCompletedTasks.push(task);
 							} else {
 								newPendingTasks.push(task);
@@ -233,13 +249,13 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 // Extract title from task line
 export function extractTitle(text: string): string {
 	const timeAtStartMatch = text.match(
-		/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
+		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
 	);
 
 	if (timeAtStartMatch) {
 		// If time is at the start, extract title after the time and till the pipe symbol
 		return text
-			.replace(/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
+			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
 			.split("|")[0]
 			.trim();
 	} else {
@@ -247,9 +263,9 @@ export function extractTitle(text: string): string {
 		return text.includes("|")
 			? text
 					.split("|")[0]
-					.replace(/^- \[[x ]\]\s*/, "")
+					.replace(/^- \[.\]\s*/, "")
 					.trim()
-			: text.replace(/^- \[[x ]\]\s*/, "").trim();
+			: text.replace(/^- \[.\]\s*/, "").trim();
 	}
 }
 
@@ -257,7 +273,7 @@ export function extractTitle(text: string): string {
 export function extractTime(text: string): string {
 	// Check if time is at the start of the task
 	const timeAtStartMatch = text.match(
-		/^- \[[x ]\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
+		/^- \[.\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
 	);
 
 	if (timeAtStartMatch) {

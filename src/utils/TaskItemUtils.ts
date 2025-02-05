@@ -29,36 +29,36 @@ export const taskElementsFormatter = (
 
 	let dueDateWithFormat: string = "";
 	let completedWitFormat: string = "";
-	if (updatedTask.due || updatedTask.completed) {
+	if (updatedTask.due || updatedTask.completion) {
 		if (globalSettings?.taskCompletionFormat === "1") {
 			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completed
-				? ` ✅${updatedTask.completed} `
+			completedWitFormat = updatedTask.completion
+				? ` ✅${updatedTask.completion} `
 				: "";
 		} else if (globalSettings?.taskCompletionFormat === "2") {
 			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completed
-				? ` ✅ ${updatedTask.completed} `
+			completedWitFormat = updatedTask.completion
+				? ` ✅ ${updatedTask.completion} `
 				: "";
 		} else if (globalSettings?.taskCompletionFormat === "3") {
 			dueDateWithFormat = updatedTask.due
 				? ` [due:: ${updatedTask.due}]`
 				: "";
-			completedWitFormat = updatedTask.completed
-				? ` [completion:: ${updatedTask.completed}] `
+			completedWitFormat = updatedTask.completion
+				? ` [completion:: ${updatedTask.completion}] `
 				: "";
 		} else {
 			dueDateWithFormat = updatedTask.due
 				? ` @due(${updatedTask.due})`
 				: "";
-			completedWitFormat = updatedTask.completed
-				? ` @completion(${updatedTask.completed}) `
+			completedWitFormat = updatedTask.completion
+				? ` @completion(${updatedTask.completion}) `
 				: "";
 		}
 	}
 
 	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
-	const checkBoxStat = updatedTask.completed ? "- [x]" : "- [ ]";
+	const checkBoxStat = `- [${updatedTask.status}]`;
 
 	// Combine priority emoji if it exists
 	const priorityWithEmo =
@@ -266,7 +266,6 @@ export const updateTaskInFile = async (
 
 		// Step 2: Prepare the updated task block
 		const completeTask = taskElementsFormatter(plugin, updatedTask);
-		console.log("updateTaskInFile : new task content :\n", completeTask);
 		if (completeTask === "")
 			throw "taskElementsFormatter returned empty string";
 
@@ -294,7 +293,6 @@ export const updateTaskInFile = async (
 
 			// If task is found, keep adding non-empty lines
 			if (isTaskFound) {
-				console.log("updateTaskInFile : Line which is a part of the task :\n", line);
 				if (line.startsWith("\t") || line.startsWith("    ")) {
 					taskLines.push(line);
 				} else {
@@ -307,7 +305,6 @@ export const updateTaskInFile = async (
 		// Step 5: Replace the found task block with the new one
 		if (isTaskFound && taskStartIndex !== -1) {
 			const taskBlock = taskLines.join("\n");
-			console.log("updateTaskInFile : taskBlock :\n", taskBlock);
 
 			// Replace the old task block with the updated content
 			const newContent = fileContent.replace(taskBlock, completeTask);

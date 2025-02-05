@@ -3,7 +3,8 @@
 import { App, Component, Modal } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
+import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
+import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
@@ -23,9 +24,15 @@ const taskItemEmpty = {
 	tags: [],
 	time: "",
 	priority: 0,
-	completed: "",
+	completion: "",
 	filePath: "",
+	status: taskStatuses.unchecked,
 };
+
+export interface filterOptions {
+	value: string;
+	text: string;
+}
 
 // Functional React component for the modal content
 const EditTaskContent: React.FC<{
@@ -47,7 +54,26 @@ const EditTaskContent: React.FC<{
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
+	const [status, setStatus] = useState(task.status || '');
 	// const [isEdited, setIsEdited] = useState(false);
+
+	// Load statuses dynamically
+	let filteredStatusesDropdown: filterOptions[] = [];
+
+	// Check if tasksPluginCustomStatuses is available and use it
+	if (plugin.settings.data.globalSettings.tasksPluginCustomStatuses?.length > 0) {
+		filteredStatusesDropdown = plugin.settings.data.globalSettings.tasksPluginCustomStatuses.map((customStatus) => ({
+			value: customStatus.symbol,
+			text: `${customStatus.name} [${customStatus.symbol}]`,
+		}));
+	}
+	// Fallback to customStatuses if tasksPluginCustomStatuses is empty
+	else if (plugin.settings.data.globalSettings.customStatuses?.length > 0) {
+		filteredStatusesDropdown = plugin.settings.data.globalSettings.customStatuses.map((customStatus) => ({
+			value: customStatus.symbol,
+			text: `${customStatus.name} [${customStatus.symbol}]`,
+		}));
+	}
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
@@ -60,15 +86,43 @@ const EditTaskContent: React.FC<{
 		}
 	}, [startTime, endTime]);
 
+	const onTaskTitleUpchange = (value: string) => {
+		setTitle(value);
+		setIsEdited(true);
+	}
+
+	// // Function to toggle subtask completion
+	// const toggleSubTaskCompletion = (index: number) => {
+	// 	const updatedBodyContent = bodyContent.split('\n');
+	// 	updatedBodyContent[index] = updatedBodyContent[index].startsWith('- [x]')
+	// 		? updatedBodyContent[index].replace('- [x]', '- [ ]')
+	// 		: updatedBodyContent[index].replace('- [ ]', '- [x]');
+	// 	setBodyContent(updatedBodyContent.join('\n'));
+	// 	setIsEdited(true);
+	// };
+
+	const handleStatusChange = (symbol: string) => {
+		setStatus(symbol);
+		setIsEdited(true);
+	}
+
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
 		const updatedBodyContent = bodyContent.split('\n');
-		updatedBodyContent[index] = updatedBodyContent[index].startsWith('- [x]')
-			? updatedBodyContent[index].replace('- [x]', '- [ ]')
-			: updatedBodyContent[index].replace('- [ ]', '- [x]');
+
+		// Check if the line is a task and toggle its state
+		if (isTaskLine(updatedBodyContent[index].trim())) {
+			const symbol = extractCheckboxSymbol(updatedBodyContent[index]);
+			const nextSymbol = checkboxStateSwitcher(plugin, symbol);
+
+			updatedBodyContent[index] = updatedBodyContent[index].replace(`- [${symbol}]`, `- [${nextSymbol}]`);
+
+		}
+
 		setBodyContent(updatedBodyContent.join('\n'));
 		setIsEdited(true);
 	};
+
 
 	// Function to remove a subtask
 	const removeSubTask = (index: number) => {
@@ -115,6 +169,15 @@ const EditTaskContent: React.FC<{
 		setIsEdited(true);
 	};
 
+	const onOpenFilBtnClicked = (newWindow: boolean) => {
+		if (newWindow) {
+			app.workspace.openLinkText('', filePath, 'window')
+		} else {
+			app.workspace.openLinkText('', filePath, false)
+		}
+		onClose();
+	}
+
 	// Function to handle saving the updated task
 	const handleSave = () => {
 		let newDue = due;
@@ -132,6 +195,7 @@ const EditTaskContent: React.FC<{
 			time: newTime,
 			priority,
 			filePath: filePath,
+			status,
 		};
 		onSave(updatedTask);
 		// onClose();
@@ -148,6 +212,7 @@ const EditTaskContent: React.FC<{
 		time: newTime,
 		priority: priority,
 		filePath: filePath,
+		status,
 	};
 	// Reference to the HTML element where markdown will be rendered
 
@@ -213,7 +278,7 @@ const EditTaskContent: React.FC<{
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
 							<label className="EditTaskModalHomeFieldTitle">{t("task-title")}</label>
-							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
+							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => onTaskTitleUpchange(e.target.value)} />
 
 							{/* Subtasks */}
 							<label className="EditTaskModalHomeFieldTitle">{t("sub-tasks")}</label>
@@ -267,7 +332,7 @@ const EditTaskContent: React.FC<{
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
 												aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+												onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
 											>{t("open-file")}</button>
 										</div>
 										<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
@@ -292,6 +357,16 @@ const EditTaskContent: React.FC<{
 						<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 					<div className="EditTaskModalHomeRightSec">
+						{/* Task Status */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("task-status")}</label>
+							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => handleStatusChange(e.target.value)}>
+								{filteredStatusesDropdown.map((option) => (
+									<option key={option.value} value={option.value}>{option.text}</option>
+								))}
+							</select>
+						</div>
+
 						{/* Task Time Input */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
@@ -413,7 +488,6 @@ export class AddOrEditTaskModal extends Modal {
 	handleCloseAttempt() {
 		// Open confirmation modal
 		const mssg = t("edit-task-modal-close-confirm-mssg");
-		console.log(mssg);
 		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
 			app: this.app,
 			mssg,
@@ -446,7 +520,6 @@ export class AddOrEditTaskModal extends Modal {
 	}
 
 	public close(): void {
-		console.log("AddOrEditTaskModal close : value of isEdited : ", this.isEdited);
 		if (this.isEdited) {
 			this.handleCloseAttempt();
 		} else {
