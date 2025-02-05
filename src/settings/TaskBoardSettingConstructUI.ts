@@ -622,7 +622,7 @@ export class SettingsManager {
 			cls: "global-setting-tab-live-preview-label",
 		});
 		previewLabel.setText(
-			t("your-task-will-look-like-following-in-your-notes")
+			t("preview")
 		);
 
 		const previewData = previewEl.createDiv({

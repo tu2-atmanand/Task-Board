@@ -20,7 +20,7 @@ const en: Lang = {
 	cancel: "Cancel",
 	"enter-column-name": "Enter column name",
 	"add-new-task": "Add new task",
-	"task-title": "Task title",
+	"task-title": "This is how your task will look like.",
 	"sub-tasks": "Sub tasks",
 	preview: "Preview",
 	editor: "Editor",
@@ -129,8 +129,6 @@ const en: Lang = {
 	"due-date-format-info":
 		"Enter the format of the date which you are using to name your daily-nots files. Please use either 'yyyy-MM-DD' or 'DD-MM-yyyy' formats.",
 	formats: "Formats",
-	"your-task-will-look-like-following-in-your-notes":
-		"Your task will look like following in your notes",
 	"supported-plugin-formats": "Supported plugin formats",
 	"supported-plugin-formats-info":
 		"Different plugins have different format to give the 'due' and 'completion' values to the task. Please select one of the value and see the above format, if its compatible with your current setup.",

@@ -223,29 +223,6 @@ export class ScanningVault {
 	}
 }
 
-// New function to extract task body
-export function extractBody(lines: string[], startLineIndex: number): string[] {
-	const bodyLines = [];
-	for (let i = startLineIndex; i < lines.length; i++) {
-		const line = lines[i];
-
-		if (line.trim() === "") {
-			break;
-		}
-
-		// If the line has one level of indentation, consider it part of the body
-		if (line.startsWith("\t") || line.startsWith("    ")) {
-			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
-			bodyLines.push(line);
-		} else {
-			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
-			// bodyLines.push(`\t${line}`);
-			break;
-		}
-	}
-	return bodyLines;
-}
-
 // Extract title from task line
 export function extractTitle(text: string): string {
 	const timeAtStartMatch = text.match(
@@ -267,6 +244,29 @@ export function extractTitle(text: string): string {
 					.trim()
 			: text.replace(/^- \[.\]\s*/, "").trim();
 	}
+}
+
+// New function to extract task body
+export function extractBody(lines: string[], startLineIndex: number): string[] {
+	const bodyLines = [];
+	for (let i = startLineIndex; i < lines.length; i++) {
+		const line = lines[i];
+
+		if (line.trim() === "") {
+			break;
+		}
+
+		// If the line has one level of indentation, consider it part of the body
+		if (line.startsWith("\t") || line.startsWith("    ")) {
+			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
+			bodyLines.push(line);
+		} else {
+			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
+			// bodyLines.push(`\t${line}`);
+			break;
+		}
+	}
+	return bodyLines;
 }
 
 // Extract time from task line

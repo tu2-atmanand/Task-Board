@@ -14,7 +14,7 @@ import TaskBoard from "main";
 import { hexToRgba } from "src/utils/UIHelpers";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
-import { taskElementsFormatter } from "src/utils/TaskItemUtils";
+import { taskContentFormatter } from "src/utils/TaskItemUtils";
 
 const taskItemEmpty = {
 	id: 0,
@@ -224,7 +224,7 @@ const EditTaskContent: React.FC<{
 
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
+		const formatedContent = taskContentFormatter(plugin, modifiedTask);
 		if (previewContainerRef.current && formatedContent !== "") {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.empty();

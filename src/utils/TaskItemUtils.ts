@@ -15,7 +15,7 @@ import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 
-export const taskElementsFormatter = (
+export const taskContentFormatter = (
 	plugin: TaskBoard,
 	updatedTask: taskItem
 ): string => {
@@ -265,9 +265,9 @@ export const updateTaskInFile = async (
 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
 		// Step 2: Prepare the updated task block
-		const completeTask = taskElementsFormatter(plugin, updatedTask);
+		const completeTask = taskContentFormatter(plugin, updatedTask);
 		if (completeTask === "")
-			throw "taskElementsFormatter returned empty string";
+			throw "taskContentFormatter returned empty string";
 
 		// Step 3: Split the file content into lines
 		const lines = fileContent.split("\n");
@@ -332,7 +332,7 @@ export const updateTaskInFile = async (
 // 		console.log("updateTaskInFile : Old file content :\n", fileContent);
 
 // 		console.log("updateTaskInFile : updatedTask :\n", updatedTask);
-// 		const completeTask = taskElementsFormatter(plugin, updatedTask);
+// 		const completeTask = taskContentFormatter(plugin, updatedTask);
 // 		console.log("updateTaskInFile : completeTask :\n", completeTask);
 
 // 		if (completeTask) {
@@ -459,9 +459,9 @@ export const addTaskInActiveEditor = async (
 	const filePath = newTask.filePath;
 
 	try {
-		const completeTask = taskElementsFormatter(plugin, newTask);
+		const completeTask = taskContentFormatter(plugin, newTask);
 		if (completeTask === "")
-			throw "taskElementsFormatter returned empty string";
+			throw "taskContentFormatter returned empty string";
 
 		// Get the active editor and the current cursor position
 		const activeEditor = app.workspace.activeEditor?.editor;
