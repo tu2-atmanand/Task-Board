@@ -56,7 +56,7 @@
                     "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2025-01-31",
+                "due": "2025-02-06",
                 "tags": [
                     "#feat"
                 ],
@@ -83,7 +83,7 @@
                     "\t\t- [ ] This is second sub-sub Task, Updated."
                 ],
                 "time": "",
-                "due": "2025-01-14",
+                "due": "2025-02-05",
                 "tags": [
                     "#TEST",
                     "#Test",
@@ -255,7 +255,7 @@
                     "\tAdding another line to test if the description lines duplication issue is solved."
                 ],
                 "time": "",
-                "due": "2025-01-09",
+                "due": "2025-02-06",
                 "tags": [
                     "#✔️дел",
                     "#Testing"
