@@ -252,7 +252,7 @@ export class ScanningVault {
 
 // Extract title from task line
 export function extractTitle(text: string): string {
-		// Default case: no time at start, extract title till the pipe symbol
+	// Default case: no time at start, extract title till the pipe symbol
 	return text.replace(/^- \[.\]\s*/, "").trim();
 }
 
@@ -313,36 +313,28 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
-	// Create a regex pattern to match any priority emoji
-	const emojiPattern = new RegExp(
-		`\\|?\\s*(${Object.values(priorityEmojis).join("|")})\\s*`,
-		"g"
-	);
+    // Create a regex pattern to match any priority emoji
+    const emojiPattern = new RegExp(
+        `(${Object.values(priorityEmojis).map(emoji => `\\s*${emoji}\\s*`).join("|")})`,
+        "g"
+    );
 
-	// Execute the regex to find the emoji in the text
-	const match = text.match(emojiPattern);
+    // Execute the regex to find the emoji in the text
+    const match = text.match(emojiPattern);
+	console.log("Match : ", match);
 
-	// If a match is found, map it back to the corresponding priority number
-	if (match) {
-		const emojiFound = match[0].trim().replace("|", "").trim();
-		// console.log(
-		// 	"Following is the match I found for the Priority :",
-		// 	emojiFound
-		// );
+    // If a match is found, map it back to the corresponding priority number
+    if (match) {
+        const emojiFound = match[0].trim();
 
-		const priorityMatch = Object.entries(priorityEmojis).find(
-			([, emoji]) => emoji === emojiFound
-		);
+        const priorityMatch = Object.entries(priorityEmojis).find(
+            ([, emoji]) => emoji === emojiFound
+        );
+        return parseInt(priorityMatch?.[0] || "0") || 0;
+    }
 
-		// console.log(
-		// 	"The match i found for this emoji from the mapping :",
-		// 	priorityMatch
-		// );
-		return parseInt(priorityMatch?.[0] || "0") || 0;
-	}
-
-	// Default priority if no emoji is found
-	return 0;
+    // Default priority if no emoji is found
+    return 0;
 }
 
 // Extract tags from task title
