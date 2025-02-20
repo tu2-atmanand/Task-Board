@@ -14,7 +14,7 @@ import TaskBoard from "main";
 import { hexToRgba } from "src/utils/UIHelpers";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
-import { taskContentFormatter } from "src/utils/TaskItemUtils";
+import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 
 const taskItemEmpty = {
 	id: 0,

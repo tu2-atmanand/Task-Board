@@ -1,7 +1,11 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
-import { extractCheckboxSymbol, isCompleted, isTaskLine } from "./CheckBoxUtils";
+import {
+	extractCheckboxSymbol,
+	isCompleted,
+	isTaskLine,
+} from "./CheckBoxUtils";
 import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
@@ -223,27 +227,33 @@ export class ScanningVault {
 	}
 }
 
+// // Extract title from task line
+// export function extractTitle(text: string): string {
+// 	const timeAtStartMatch = text.match(
+// 		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
+// 	);
+
+// 	if (timeAtStartMatch) {
+// 		// If time is at the start, extract title after the time and till the pipe symbol
+// 		return text
+// 			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
+// 			.split("|")[0]
+// 			.trim();
+// 	} else {
+// 		// Default case: no time at start, extract title till the pipe symbol
+// 		return text.includes("|")
+// 			? text
+// 					.split("|")[0]
+// 					.replace(/^- \[.\]\s*/, "")
+// 					.trim()
+// 			: text.replace(/^- \[.\]\s*/, "").trim();
+// 	}
+// }
+
 // Extract title from task line
 export function extractTitle(text: string): string {
-	const timeAtStartMatch = text.match(
-		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
-	);
-
-	if (timeAtStartMatch) {
-		// If time is at the start, extract title after the time and till the pipe symbol
-		return text
-			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
-			.split("|")[0]
-			.trim();
-	} else {
 		// Default case: no time at start, extract title till the pipe symbol
-		return text.includes("|")
-			? text
-					.split("|")[0]
-					.replace(/^- \[.\]\s*/, "")
-					.trim()
-			: text.replace(/^- \[.\]\s*/, "").trim();
-	}
+	return text.replace(/^- \[.\]\s*/, "").trim();
 }
 
 // New function to extract task body

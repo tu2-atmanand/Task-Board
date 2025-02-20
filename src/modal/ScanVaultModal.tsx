@@ -10,7 +10,7 @@ import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
-import { taskContentFormatter } from "src/utils/TaskItemUtils";
+import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
 

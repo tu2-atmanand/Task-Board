@@ -1,6 +1,9 @@
 // /src/utils/TaskItemUtils.ts
 
-import { loadTasksJsonFromDisk, writeTasksJsonToDisk } from "./JsonFileOperations";
+import {
+	loadTasksJsonFromDisk,
+	writeTasksJsonToDisk,
+} from "./JsonFileOperations";
 import {
 	priorityEmojis,
 	taskItem,
@@ -14,105 +17,7 @@ import {
 import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-
-export const taskContentFormatter = (
-	plugin: TaskBoard,
-	updatedTask: taskItem
-): string => {
-	if (updatedTask.title === "") {
-		return "";
-	}
-
-	const dayPlannerPlugin =
-		plugin.settings.data.globalSettings.dayPlannerPlugin;
-	const globalSettings = plugin.settings.data.globalSettings;
-
-	let dueDateWithFormat: string = "";
-	let completedWitFormat: string = "";
-	if (updatedTask.due || updatedTask.completion) {
-		if (globalSettings?.taskCompletionFormat === "1") {
-			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completion
-				? ` ✅${updatedTask.completion} `
-				: "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
-			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
-			completedWitFormat = updatedTask.completion
-				? ` ✅ ${updatedTask.completion} `
-				: "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
-			dueDateWithFormat = updatedTask.due
-				? ` [due:: ${updatedTask.due}]`
-				: "";
-			completedWitFormat = updatedTask.completion
-				? ` [completion:: ${updatedTask.completion}] `
-				: "";
-		} else {
-			dueDateWithFormat = updatedTask.due
-				? ` @due(${updatedTask.due})`
-				: "";
-			completedWitFormat = updatedTask.completion
-				? ` @completion(${updatedTask.completion}) `
-				: "";
-		}
-	}
-
-	const timeWithEmo = updatedTask.time ? ` ⏰[${updatedTask.time}]` : "";
-	const checkBoxStat = `- [${updatedTask.status}]`;
-
-	// Combine priority emoji if it exists
-	const priorityWithEmo =
-		updatedTask.priority > 0
-			? priorityEmojis[updatedTask.priority as number]
-			: "";
-
-	// Build the formatted string for the main task
-	let formattedTask = "";
-	if (
-		updatedTask.time !== "" ||
-		timeWithEmo !== "" ||
-		priorityWithEmo !== "" ||
-		dueDateWithFormat !== "" ||
-		completedWitFormat !== "" ||
-		updatedTask.tags.length > 0
-	) {
-		if (dayPlannerPlugin) {
-			formattedTask = `${checkBoxStat} ${
-				updatedTask.time ? `${updatedTask.time} ` : ""
-			}${
-				updatedTask.title
-			} | ${priorityWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
-				" "
-			)}${completedWitFormat}`;
-		} else {
-			formattedTask = `${checkBoxStat} ${
-				updatedTask.title
-			} |${priorityWithEmo}${timeWithEmo}${dueDateWithFormat} ${updatedTask.tags.join(
-				" "
-			)}${completedWitFormat}`;
-		}
-	} else {
-		formattedTask = `${checkBoxStat} ${updatedTask.title}`;
-	}
-	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = updatedTask.body
-		.map((line: string) => {
-			if (line.startsWith("\t")) {
-				return line;
-			} else {
-				return `\t${line}`;
-			}
-		})
-		.join("\n");
-
-	const completeTask = `${formattedTask}${
-		bodyLines.trim() ? `\n${bodyLines}` : ""
-	}`;
-
-	return completeTask;
-};
-
-// For handleCheckboxChange
+import { taskContentFormatter } from "./TaskContentFormatter";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -298,7 +203,6 @@ export const updateTaskInFile = async (
 				} else {
 					break; // Stop at the first line which is either empty or doesn't start with a tab
 				}
-				
 			}
 		}
 
