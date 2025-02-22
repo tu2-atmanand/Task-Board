@@ -639,7 +639,7 @@ export class SettingsManager {
 			cls: "global-setting-tab-live-preview-data",
 		});
 		const updatePreview = () => {
-			let taskTitle = t("task-title");
+			let taskTitle = t("dummy-task-title");
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
 			let dueDate = "2024-09-21";
