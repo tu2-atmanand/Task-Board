@@ -1,6 +1,7 @@
 import { priorityEmojis, taskItem } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
+import { extractPriority } from "./ScanningVault";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 
 export const taskContentFormatter = (
@@ -22,6 +23,9 @@ export const taskContentFormatter = (
 
 	// Sanitize all the properties from the task title
 	let updatedTitle = updatedTask.title;
+	if (priorityWithEmo) {
+		updatedTitle = sanitizePriority(updatedTitle, updatedTask.priority);
+	}
 	if (updatedTask.time) {
 		updatedTitle = sanitizeTime(
 			updatedTitle,
@@ -35,9 +39,6 @@ export const taskContentFormatter = (
 			updatedTitle,
 			updatedTask
 		);
-	}
-	if (priorityWithEmo) {
-		updatedTitle = sanitizePriority(updatedTitle, updatedTask.priority);
 	}
 	if (updatedTask.tags.length > 0) {
 		updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
@@ -94,16 +95,16 @@ const sanitizeDueDate = (
 	updatedTask: taskItem
 ): string => {
 	const dueDateRegex =
-		/📅 ?\d{4}-\d{2}-\d{2}|\[due:: ?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
+		/📅\s*?\d{4}-\d{2}-\d{2}|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
 	const extractedDueDateMatch = title.match(dueDateRegex);
-	console.log("extractedDueDateMatch", extractedDueDateMatch);
+	// console.log("extractedDueDateMatch", extractedDueDateMatch);
 
 	let dueDateWithFormat: string = "";
 	if (updatedTask.due || updatedTask.completion) {
 		if (globalSettings?.taskCompletionFormat === "1") {
-			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
+			dueDateWithFormat = updatedTask.due ? `📅${updatedTask.due}` : "";
 		} else if (globalSettings?.taskCompletionFormat === "2") {
-			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
+			dueDateWithFormat = updatedTask.due ? `📅 ${updatedTask.due}` : "";
 		} else if (globalSettings?.taskCompletionFormat === "3") {
 			dueDateWithFormat = updatedTask.due
 				? ` [due:: ${updatedTask.due}]`
@@ -143,11 +144,11 @@ const sanitizeCompletionDate = (
 	if (updatedTask.due || updatedTask.completion) {
 		if (globalSettings?.taskCompletionFormat === "1") {
 			completedWitFormat = updatedTask.completion
-				? ` ✅${updatedTask.completion} `
+				? `✅${updatedTask.completion} `
 				: "";
 		} else if (globalSettings?.taskCompletionFormat === "2") {
 			completedWitFormat = updatedTask.completion
-				? ` ✅ ${updatedTask.completion} `
+				? `✅ ${updatedTask.completion} `
 				: "";
 		} else if (globalSettings?.taskCompletionFormat === "3") {
 			completedWitFormat = updatedTask.completion
@@ -161,12 +162,12 @@ const sanitizeCompletionDate = (
 	}
 
 	const completionDateRegex =
-		/✅ ?\d{4}-\d{2}-\d{2}|\[completion:: ?\d{4}-\d{2}-\d{2}\]|@completion\(\d{4}-\d{2}-\d{2}\)/;
+		/✅\s*?\d{4}-\d{2}-\d{2}|\[completion::\s*?\d{4}-\d{2}-\d{2}\]|@completion\(\d{4}-\d{2}-\d{2}\)/;
 	const extractedCompletionDateMatch = title.match(completionDateRegex);
 
 	if (!extractedCompletionDateMatch) {
 		// No existing completion date found, append new one at the end
-		return `${title}${completedWitFormat}`;
+		return `${title} ${completedWitFormat}`;
 	}
 
 	const extractedCompletionDate = extractedCompletionDateMatch[0];
@@ -188,8 +189,8 @@ const sanitizeTime = (
 	newTime: string,
 	globalSettings: globalSettingsData
 ): string => {
-	const timeAtStartRegex = /^\s*(\d{2}:\d{2} - \d{2}:\d{2})/;
-	const timeEmojiRegex = /⏰\[\d{2}:\d{2} - \d{2}:\d{2}\]/;
+	const timeAtStartRegex = /^\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
+	const timeEmojiRegex = /⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]/;
 
 	if (globalSettings.dayPlannerPlugin) {
 		const timeAtStartMatch = title.match(timeAtStartRegex);
@@ -231,30 +232,81 @@ const sanitizeTime = (
  * Function to sanitize the priority inside the task title.
  */
 const sanitizePriority = (title: string, newPriority: number): string => {
-	// Create a regex pattern to match any priority emoji
-	const emojiPattern = new RegExp(
-		`\\s*(${Object.values(priorityEmojis).join("|")})\\s*`,
-		"g"
-	);
+	// // Create a regex pattern to match any priority emoji
+	// const emojiPattern = new RegExp(
+	// 	`(${Object.values(priorityEmojis)
+	// 		.map((emoji) => `\\s*${emoji}\\s*`)
+	// 		.join("|")})`,
+	// 	"g"
+	// );
 
-	// Execute the regex to find the emoji in the text
-	const extractedPriorityMatch = title.match(emojiPattern);
-	console.log("extractedPriorityMatch", extractedPriorityMatch);
+	// // Execute the regex to find all emojis in the text
+	// const extractedPriorityMatch = title.match(emojiPattern);
+	// console.log("extractedPriorityMatch", extractedPriorityMatch);
 
-	if (!extractedPriorityMatch) {
-		// No existing priority found, append new one at the end
-		return `${title} ${priorityEmojis[newPriority]}`;
-	}
+	// // If no priority emoji exists, append the new priority at the end
+	// if (!extractedPriorityMatch) {
+	// 	return newPriority > 0
+	// 		? `${title} ${priorityEmojis[newPriority]}`
+	// 		: title;
+	// }
 
-	const extractedPriority = extractedPriorityMatch[0].trim();
+	// // Check if all extracted values are zero ("0")
+	// const allZero = extractedPriorityMatch.every((item) => item.trim() === "0");
 
-	if (extractedPriority === priorityEmojis[newPriority]) {
-		// If extracted priority matches the new one, no need to change
+	// if (allZero) {
+	// 	// If all elements are zero, append new priority emoji at the end
+	// 	return newPriority > 0
+	// 		? `${title} ${priorityEmojis[newPriority]}`
+	// 		: title;
+	// }
+
+	// // Find the first **non-zero** valid priority emoji from extracted matches
+	// const extractedPriority = extractedPriorityMatch.find((emoji) =>
+	// 	Object.values(priorityEmojis).includes(emoji.trim())
+	// );
+	// console.log(
+	// 	"extractedPriority : first **non-zero** valid priority emoji",
+	// 	extractedPriority
+	// );
+
+	// // If no valid priority emoji is found, append the new one
+	// if (!extractedPriority) {
+	// 	return newPriority > 0
+	// 		? `${title} ${priorityEmojis[newPriority]}`
+	// 		: title;
+	// }
+
+	// // If extracted priority matches the new one, return the title as is
+	// if (extractedPriority.trim() === priorityEmojis[newPriority]) {
+	// 	return title;
+	// }
+
+	// // Replace the old priority emoji with the new one
+	// return title
+	// 	.replace(
+	// 		extractedPriority,
+	// 		newPriority > 0 ? priorityEmojis[newPriority] : ""
+	// 	)
+	// 	.trim();
+
+	const extractedPriorityMatch = extractPriority(title);
+
+	if (extractedPriorityMatch === 0) {
+		if (newPriority > 0) {
+			return `${title} ${priorityEmojis[newPriority]}`;
+		}
 		return title;
+	} else {
+		if (extractedPriorityMatch === newPriority) {
+			return title;
+		} else {
+			return title.replace(
+				priorityEmojis[extractedPriorityMatch],
+				priorityEmojis[newPriority]
+			);
+		}
 	}
-
-	// Replace the old priority with the updated one
-	return title.replace(extractedPriority, priorityEmojis[newPriority]);
 };
 
 /**
@@ -403,32 +455,44 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Remove time (handles both formats)
 	if (task.time) {
 		const timeRegex =
-			/\s*(⏰\[\d{2}:\d{2} - \d{2}:\d{2}\]|\b\d{2}:\d{2} - \d{2}:\d{2}\b)/g;
+			/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b)/g;
 		cleanedTitle = cleanedTitle.replace(timeRegex, "");
 	}
 
 	// Remove due date in various formats
 	if (task.due) {
 		const dueDateRegex =
-			/\s*(📅 ?\d{4}-\d{2}-\d{2}|\[due:: ?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\))/g;
+			/\s*(📅\s*?\d{4}-\d{2}-\d{2}|\[due::.*?\]|@due\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
 	}
 
 	// Remove completion date in various formats
 	if (task.completion) {
 		const completionRegex =
-			/\s*(✅ ?\d{4}-\d{2}-\d{2}|\[completion:: ?\d{4}-\d{2}-\d{2}\]|@completion\(\d{4}-\d{2}-\d{2}\))/g;
+			/\s*(✅\s*?\d{4}-\d{2}-\d{2}|\[completion::.*?\]|@completion\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(completionRegex, "");
 	}
 
 	if (task.priority > 0) {
 		const priorityIcon = priorityEmojis[task.priority];
+
 		if (priorityIcon) {
-			const priorityRegex = new RegExp(`\\s*${priorityIcon}`, "g");
-			cleanedTitle = cleanedTitle.replace(priorityRegex, "");
+			// Create a regex pattern to match any priority emoji in text
+			const priorityRegex = new RegExp(
+				`(${Object.values(priorityEmojis)
+					.map((emoji) => `\\s*${emoji}\\s*`)
+					.join("|")})`,
+				"g"
+			);
+
+			// Replace the first valid priority emoji found
+			cleanedTitle = cleanedTitle.replace(priorityRegex, (match) => {
+				return match.trim() === priorityIcon ? "" : match;
+			});
 		}
 	}
-	console.log("cleanedTitle", cleanedTitle.trim());
+
+	// console.log("cleanedTitle", cleanedTitle.trim());
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();
