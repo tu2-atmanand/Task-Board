@@ -313,29 +313,36 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
-    // Create a regex pattern to match any priority emoji
-    const emojiPattern = new RegExp(
-        `(${Object.values(priorityEmojis).map(emoji => `\\s*${emoji}\\s*`).join("|")})`,
-        "g"
-    );
+	// Create a regex pattern to match any priority emoji
+	const emojiPattern = new RegExp(
+		`(${Object.values(priorityEmojis)
+			.map((emoji) => `\\s*${emoji}\\s*`)
+			.join("|")})`,
+		"g"
+	);
 
-    // Execute the regex to find the emoji in the text
-    const match = text.match(emojiPattern);
-	console.log("Match : ", match);
+	// Execute the regex to find all priority emoji matches
+	const matches = text.match(emojiPattern) || [];
 
-    // If a match is found, map it back to the corresponding priority number
-    if (match) {
-        const emojiFound = match[0].trim();
+	// Filter out any empty or incorrect values
+	const validMatches = matches
+		.map((match) => match.trim()) // Trim spaces
+		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
 
-        const priorityMatch = Object.entries(priorityEmojis).find(
-            ([, emoji]) => emoji === emojiFound
-        );
-        return parseInt(priorityMatch?.[0] || "0") || 0;
-    }
+	// Find the first match in the priorityEmojis mapping
+	for (const emoji of validMatches) {
+		const priorityMatch = Object.entries(priorityEmojis).find(
+			([, value]) => value === emoji
+		);
+		if (priorityMatch) {
+			return parseInt(priorityMatch[0]); // Return the first matching priority
+		}
+	}
 
-    // Default priority if no emoji is found
-    return 0;
+	// Default priority if no emoji is found
+	return 0;
 }
+
 
 // Extract tags from task title
 export function extractTags(text: string): string[] {
