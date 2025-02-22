@@ -86,7 +86,7 @@ const EditTaskContent: React.FC<{
 		}
 	}, [startTime, endTime]);
 
-	const onTaskTitleUpchange = (value: string) => {
+	const handleTaskTitleChange = (value: string) => {
 		setTitle(value);
 		setIsEdited(true);
 	}
@@ -103,6 +103,26 @@ const EditTaskContent: React.FC<{
 
 	const handleStatusChange = (symbol: string) => {
 		setStatus(symbol);
+		setIsEdited(true);
+	}
+
+	const handleDueDateChange = (value: string) => {
+		setDue(value);
+		setIsEdited(true);
+	}
+
+	const handlePriorityChange = (value: number) => {
+		setPriority(value);
+		setIsEdited(true);
+	}
+
+	const handleStartTimeChange = (startTime: string) => {
+		setStartTime(startTime);
+		setIsEdited(true);
+	}
+
+	const handleEndTimeChange = (endTime: string) => {
+		setStartTime(endTime);
 		setIsEdited(true);
 	}
 
@@ -278,7 +298,7 @@ const EditTaskContent: React.FC<{
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
 							<label className="EditTaskModalHomeFieldTitle">{t("task-title")}</label>
-							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => onTaskTitleUpchange(e.target.value)} />
+							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => handleTaskTitleChange(e.target.value)} />
 
 							{/* Subtasks */}
 							<label className="EditTaskModalHomeFieldTitle">{t("sub-tasks")}</label>
@@ -370,23 +390,23 @@ const EditTaskContent: React.FC<{
 						{/* Task Time Input */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
-							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} />
 						</div>
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("end-time")}</label>
-							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} />
 						</div>
 
 						{/* Task Due Date */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("due-date")}</label>
-							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => handleDueDateChange(e.target.value)} />
 						</div>
 
 						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
-							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => setPriority(parseInt(e.target.value))}>
+							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => handlePriorityChange(parseInt(e.target.value))}>
 								{priorityOptions.map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
 								))}
