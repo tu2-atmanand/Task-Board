@@ -20,7 +20,7 @@ const en: Lang = {
 	cancel: "Cancel",
 	"enter-column-name": "Enter column name",
 	"add-new-task": "Add new task",
-	"task-title": "This is how your task will look like.",
+	"task-title": "Task title",
 	"sub-tasks": "Sub tasks",
 	preview: "Preview",
 	editor: "Editor",
@@ -223,7 +223,9 @@ const en: Lang = {
 		"You have unsaved changes. Do you want to save or discard them?",
 	"task-status": "Task status",
 	"show-task-without-metadata": "Show task without metadata",
-	"show-task-without-metadata-info": "Enable this setting if you want to see the task without any metadata/properties on the task board. But if you prefer viewing the task with metadata, disable this setting along with disabling the above two settings, if you dont prefer to see the data twice.",
+	"show-task-without-metadata-info":
+		"Enable this setting if you want to see the task without any metadata/properties on the task board. But if you prefer viewing the task with metadata, disable this setting along with disabling the above two settings, if you dont prefer to see the data twice.",
+	"dummy-task-title": "This is how your task will look like.",
 };
 
 export default en;
