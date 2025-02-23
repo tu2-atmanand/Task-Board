@@ -276,7 +276,7 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 			break;
 		}
 	}
-	return bodyLines;
+	return bodyLines.at(0) === "" ? [] : bodyLines;
 }
 
 // Extract time from task line
