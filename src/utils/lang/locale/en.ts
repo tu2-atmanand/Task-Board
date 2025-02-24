@@ -129,8 +129,6 @@ const en: Lang = {
 	"due-date-format-info":
 		"Enter the format of the date which you are using to name your daily-nots files. Please use either 'yyyy-MM-DD' or 'DD-MM-yyyy' formats.",
 	formats: "Formats",
-	"your-task-will-look-like-following-in-your-notes":
-		"Your task will look like following in your notes",
 	"supported-plugin-formats": "Supported plugin formats",
 	"supported-plugin-formats-info":
 		"Different plugins have different format to give the 'due' and 'completion' values to the task. Please select one of the value and see the above format, if its compatible with your current setup.",
@@ -223,7 +221,11 @@ const en: Lang = {
 	"go-back": "Go back and save",
 	"edit-task-modal-close-confirm-mssg":
 		"You have unsaved changes. Do you want to save or discard them?",
-		"task-status" : "Task status",
+	"task-status": "Task status",
+	"show-task-without-metadata": "Show task without metadata",
+	"show-task-without-metadata-info":
+		"Enable this setting if you want to see the task without any metadata/properties on the task board. But if you prefer viewing the task with metadata, disable this setting along with disabling the above two settings, if you dont prefer to see the data twice.",
+	"dummy-task-title": "This is how your task will look like.",
 };
 
 export default en;

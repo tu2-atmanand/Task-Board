@@ -1,7 +1,11 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
-import { extractCheckboxSymbol, isCompleted, isTaskLine } from "./CheckBoxUtils";
+import {
+	extractCheckboxSymbol,
+	isCompleted,
+	isTaskLine,
+} from "./CheckBoxUtils";
 import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
@@ -223,6 +227,35 @@ export class ScanningVault {
 	}
 }
 
+// // Extract title from task line
+// export function extractTitle(text: string): string {
+// 	const timeAtStartMatch = text.match(
+// 		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
+// 	);
+
+// 	if (timeAtStartMatch) {
+// 		// If time is at the start, extract title after the time and till the pipe symbol
+// 		return text
+// 			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
+// 			.split("|")[0]
+// 			.trim();
+// 	} else {
+// 		// Default case: no time at start, extract title till the pipe symbol
+// 		return text.includes("|")
+// 			? text
+// 					.split("|")[0]
+// 					.replace(/^- \[.\]\s*/, "")
+// 					.trim()
+// 			: text.replace(/^- \[.\]\s*/, "").trim();
+// 	}
+// }
+
+// Extract title from task line
+export function extractTitle(text: string): string {
+	// Default case: no time at start, extract title till the pipe symbol
+	return text.replace(/^- \[.\]\s*/, "").trim();
+}
+
 // New function to extract task body
 export function extractBody(lines: string[], startLineIndex: number): string[] {
 	const bodyLines = [];
@@ -243,34 +276,22 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 			break;
 		}
 	}
-	return bodyLines;
-}
-
-// Extract title from task line
-export function extractTitle(text: string): string {
-	const timeAtStartMatch = text.match(
-		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
-	);
-
-	if (timeAtStartMatch) {
-		// If time is at the start, extract title after the time and till the pipe symbol
-		return text
-			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
-			.split("|")[0]
-			.trim();
-	} else {
-		// Default case: no time at start, extract title till the pipe symbol
-		return text.includes("|")
-			? text
-					.split("|")[0]
-					.replace(/^- \[.\]\s*/, "")
-					.trim()
-			: text.replace(/^- \[.\]\s*/, "").trim();
-	}
+	return bodyLines.at(0) === "" ? [] : bodyLines;
 }
 
 // Extract time from task line
 export function extractTime(text: string): string {
+	let match = text.match(/\[time::\s*(.*?)\]/);
+	if (match) {
+		return match[1];
+	}
+
+	match = text.match(/@time\((.*?)\)/);
+	console.log("Following time detected for @time() pattern : ", match);
+	if (match) {
+		return match[1];
+	}
+
 	// Check if time is at the start of the task
 	const timeAtStartMatch = text.match(
 		/^- \[.\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
@@ -303,32 +324,40 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
+	let match = text.match(/\[priority::\s*(\d{1,2})\]/);
+	if (match) {
+		return parseInt(match[1]);
+	}
+
+	match = text.match(/@priority\(\s*(\d{1,2})\s*\)/);
+	if (match) {
+		return parseInt(match[1]);
+	}
+
 	// Create a regex pattern to match any priority emoji
 	const emojiPattern = new RegExp(
-		`\\|?\\s*(${Object.values(priorityEmojis).join("|")})\\s*`,
+		`(${Object.values(priorityEmojis)
+			.map((emoji) => `\\s*${emoji}\\s*`)
+			.join("|")})`,
 		"g"
 	);
 
-	// Execute the regex to find the emoji in the text
-	const match = text.match(emojiPattern);
+	// Execute the regex to find all priority emoji matches
+	const matches = text.match(emojiPattern) || [];
 
-	// If a match is found, map it back to the corresponding priority number
-	if (match) {
-		const emojiFound = match[0].trim().replace("|", "").trim();
-		// console.log(
-		// 	"Following is the match I found for the Priority :",
-		// 	emojiFound
-		// );
+	// Filter out any empty or incorrect values
+	const validMatches = matches
+		.map((match) => match.trim()) // Trim spaces
+		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
 
+	// Find the first match in the priorityEmojis mapping
+	for (const emoji of validMatches) {
 		const priorityMatch = Object.entries(priorityEmojis).find(
-			([, emoji]) => emoji === emojiFound
+			([, value]) => value === emoji
 		);
-
-		// console.log(
-		// 	"The match i found for this emoji from the mapping :",
-		// 	priorityMatch
-		// );
-		return parseInt(priorityMatch?.[0] || "0") || 0;
+		if (priorityMatch) {
+			return parseInt(priorityMatch[0]); // Return the first matching priority
+		}
 	}
 
 	// Default priority if no emoji is found
@@ -347,12 +376,10 @@ export function extractCompletionDate(text: string): string {
 		/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?/
 	);
 
-	// If not found, try to match the completion:: 2024-09-28 format
+	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
-		match = text.match(
-			/\[completion::\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\]/
-		);
-
+		match = text.match(/\[completion::\s*(.*?)\]/);
+		console.log("Following completion date matched : ", match);
 		if (match) {
 			return match
 				? match[0].replace("[completion::", "").replace("]", "").trim()
@@ -361,10 +388,8 @@ export function extractCompletionDate(text: string): string {
 	}
 
 	if (!match) {
-		match = text.match(
-			/\@completion\(\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\)/
-		);
-
+		match = text.match(/\@completion\(\s*(.*?)\s*\)/);
+		console.log("Following completion date matched : ", match);
 		if (match) {
 			return match
 				? match[0].replace("@completion(", "").replace(")", "").trim()

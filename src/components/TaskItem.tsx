@@ -10,6 +10,7 @@ import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } f
 import { Component } from 'obsidian';
 import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
+import { cleanTaskTitle } from 'src/utils/TaskContentFormatter';
 import { hexToRgba } from 'src/utils/UIHelpers';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
@@ -41,11 +42,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 			if (titleElement && task.title !== "") {
 				// console.log("TaskItem.tsx : Rendering title... | Title :", task.title);
+				const cleanedTitle = cleanTaskTitle(plugin, task);
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
 					plugin.app,
-					task.title,
+					cleanedTitle,
 					titleElement,
 					task.filePath,
 					componentRef.current
@@ -383,7 +385,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						</div>
 					</div>
 					<div className="taskItemMainBodyDescription">
-						{task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
+						{task.body.at(0) !== "" && task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
 							<div
 								className='taskItemMainBodyDescriptionSectionToggler'
 								onClick={toggleDescription}

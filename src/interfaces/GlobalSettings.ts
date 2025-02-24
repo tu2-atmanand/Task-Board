@@ -55,6 +55,7 @@ export interface globalSettingsData {
 	editButtonAction: EditButtonMode;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
+	showTaskWithoutMetadata: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -229,6 +230,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 			},
 			firstDayOfWeek: "Mon",
+			showTaskWithoutMetadata: false,
 			ignoreFileNameDates: false,
 			taskCompletionFormat: "1",
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",

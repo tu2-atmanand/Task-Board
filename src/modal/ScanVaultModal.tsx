@@ -10,7 +10,7 @@ import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
-import { taskElementsFormatter } from "src/utils/TaskItemUtils";
+import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
 
@@ -73,7 +73,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 						priority: task.priority,
 					};
 
-					const formatedContent = taskElementsFormatter(plugin, newTaskContent);
+					const formatedContent = taskContentFormatter(plugin, newTaskContent);
 
 					const uniqueKey = `${filePath}-task-${taskIndex}`;
 					const descElement = taskRendererRef.current[uniqueKey];
