@@ -90,11 +90,12 @@
       {
         "columns": [
           {
-            "colType": "untagged",
+            "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Backlog",
-            "index": 1
+            "name": "Backlogs",
+            "index": 1,
+            "coltag": "done"
           },
           {
             "colType": "namedTag",
@@ -121,12 +122,11 @@
             "coltag": "Test"
           },
           {
-            "colType": "namedTag",
+            "colType": "untagged",
             "active": true,
             "collapsed": false,
-            "name": "Done",
-            "index": 5,
-            "coltag": "done"
+            "name": "Working as Expected",
+            "index": 5
           }
         ],
         "filters": [
@@ -218,7 +218,7 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "3",
+      "taskCompletionFormat": "2",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "dailyNotesPluginComp": true,
       "dueDateFormat": "yyyy-MM-DD",
@@ -229,8 +229,8 @@
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
-      "showHeader": true,
-      "showFooter": true,
+      "showHeader": false,
+      "showFooter": false,
       "showVerticalScroll": false,
       "tagColors": {
         "bug": "#ef1120dd",
@@ -330,7 +330,8 @@
           "availableAsCommand": false,
           "type": "TODO"
         }
-      ]
+      ],
+      "showTaskWithoutMetadata": true
     }
   }
 }

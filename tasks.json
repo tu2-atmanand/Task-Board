@@ -2,12 +2,12 @@
     "Pending": {
         "TODO.md": [
             {
-                "id": 755985385,
-                "status": " ",
-                "title": "New temp task, lets see if this comes after 5 minutes, lets update this.",
+                "id": 4036096265,
+                "status": "!",
+                "title": "Add the status functionality for Task board in `v1.3.0`. ⏫ ⏰[13:49 - 14:49] #New #working",
                 "body": [
                     "\t- [ ] Lets add another sub-Task, updating.",
-                    "\t- [x] Also adding this new Subtask, first ✅ 2024-12-30",
+                    "\t- [ ] This task should have important status. ✅ 2024-12-30",
                     "\t- [x] And adding second subtask. Now editing will make any difference.",
                     "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
                     "\tAnother thing i will put is link to a markdown file from my Vault : [[0-ImportantData]]",
@@ -26,50 +26,32 @@
         ],
         "Testing4.md": [
             {
-                "id": 1613093416,
+                "id": 2085853290,
                 "status": " ",
-                "title": "Directly copy pasting the task content, to create this GIF.",
-                "body": [
-                    "\t- [ ] This is a new adding task, lets see.",
-                    "\t**Description :** After you finished writting this task in this file switch to other tab or *Task Board* View to see you task automatically get added in the board.",
-                    "\t- [ ] This is a simple sub-tasks to break down.",
-                    "\t- [ ] Divide and rule is a great approach."
-                ],
-                "time": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "priority": 2,
-                "filePath": "Testing4.md",
-                "completion": ""
-            },
-            {
-                "id": 1568647598,
-                "status": " ",
-                "title": "Need to finish the following pending tasks before next Task Board release.",
+                "title": "21:10 - 22:10 Need to finish the following pending tasks before next Task Board release. 🔺    [due:: 2025-02-17] #feat #test",
                 "body": [
                     "\tThese features will help the plugin to achieve its intended functionality.",
                     "\tThe plugin will start having all the features to document all about the task properly. Here is the image of how the `Edit Task window` should look like in future : ",
-                    "\t- [ ] **Drag and Drop** feature to update the task fields easily.",
+                    "\t- [ ] **Drag and Drop** feature to update the task fields easily. ",
                     "\t- [x] Sorting feature for each individual Column.",
                     "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
                 ],
                 "time": "21:10 - 22:10",
-                "due": "2025-02-06",
+                "due": "2025-02-17",
                 "tags": [
-                    "#feat"
+                    "#feat",
+                    "#test"
                 ],
-                "priority": 2,
+                "priority": 1,
                 "filePath": "Testing4.md",
                 "completion": ""
             }
         ],
         "Testing 3.md": [
             {
-                "id": 3381912225,
+                "id": 3646420237,
                 "status": ">",
-                "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks",
+                "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks. [due::2025-02-05] #TEST #Test #SubTasks/🔥bugs #bug",
                 "body": [
                     "\t- [ ] This is the first Sub Task.",
                     "\t\t- [ ] This is the first sub-sub Task",
@@ -90,21 +72,37 @@
                     "#SubTasks/🔥bugs",
                     "#bug"
                 ],
-                "priority": 2,
+                "priority": 0,
+                "filePath": "Testing 3.md",
+                "completion": ""
+            },
+            {
+                "id": 1660329467,
+                "status": " ",
+                "title": "This is a first test task which will not going to follow the pipe symbol format to separate the metadata.🔺📅 2025-02-17  #Test",
+                "body": [
+                    "\t- Properties to this task has been added using the tasks plugin.",
+                    "\t- This task can follows any format to enter th"
+                ],
+                "time": "",
+                "due": "2025-02-17",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 1,
                 "filePath": "Testing 3.md",
                 "completion": ""
             }
         ],
         "Testing 2.md": [
             {
-                "id": 2302416818,
-                "status": "?",
-                "title": "So This is to add a simple Task for testing.",
+                "id": 1918879544,
+                "status": " ",
+                "title": "Give some time for Notes Explorer plugin. 🔼 @time(19:34 - 20:34)   @due(2025-01-03) #bug/solver #done",
                 "body": [
-                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The **REFRESH_COLUMN** command is not working properly. ",
-                    "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
-                    "\t- [x] Trace how you code is running for the *REFRESH_COLUMN*  command.",
-                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_BOARD. Updated",
+                    "\tNeed to update the thumbnail: ![[Thumbnail4.png]]",
+                    "\t- [ ] Try to implement the **search** functionality ASAP.",
+                    "\t- [ ] **Bug :** Fix the bug of checkboxes not aligned with the cards.",
                     "\t\t- [ ] A sub-sub Task for the first time. updating."
                 ],
                 "time": "19:34 - 20:34",
@@ -116,13 +114,45 @@
                 "priority": 3,
                 "filePath": "Testing 2.md",
                 "completion": ""
+            },
+            {
+                "id": 2372721153,
+                "status": "?",
+                "title": "So This is to add a simple Task for testing. 🔼 ⏰ [19:34 - 20:34]   📅 2025-01-03 #bug/solver",
+                "body": [
+                    "\tBasically with this new sessionStorage feature, i will now have to trace how the tasks are getting loaded and refreshed on the board, because with the refresh button the tasks are getting updated. But after i edit any task, or checkbox change, or anything else. The **REFRESH_COLUMN** command is not working properly. ",
+                    "\tOne probable solution i can think of is, because now everything is asynchronous, thats why this shit is happening.",
+                    "\t- [x] Trace how you code is running for the *REFRESH_COLUMN*  command.",
+                    "\t- [x] Accordingly update the code to get smooth refresh and not hard refresh like REFRESH_BOARD. Updated",
+                    "\t\t- [ ] A sub-sub Task for the first time. updating."
+                ],
+                "time": "19:34 - 20:34",
+                "due": "2025-01-03",
+                "tags": [
+                    "#bug/solver"
+                ],
+                "priority": 3,
+                "filePath": "Testing 2.md",
+                "completion": ""
+            },
+            {
+                "id": 2114929423,
+                "status": " ",
+                "title": "This task has simple time in 4th format @time(12:30 AM)",
+                "body": [],
+                "time": "12:30 AM",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 2.md",
+                "completion": ""
             }
         ],
         "Testing 1.md": [
             {
-                "id": 3185566959,
+                "id": 1412098508,
                 "status": "r",
-                "title": "This is a normal task, I am adding in the file, Updating",
+                "title": "This is a normal task, I am adding in the file, Updating. ⏰[15:46 - 16:46] [due:: 2025-08-16] #Feat #secondTag😀/fun #Bug [completion:: 2025-01-27/12:58]",
                 "body": [
                     "\tThis a line as a description for the Task Description.",
                     "\t- [ ] Adding a Subtask in file manually. Updating.",
@@ -140,9 +170,9 @@
                 "completion": "2025-01-27/12:58"
             },
             {
-                "id": 3273995528,
+                "id": 4256287626,
                 "status": " ",
-                "title": "Adding a new task to encounter a different issue",
+                "title": "Adding a new task to encounter a different issue.  [due:: 2025-01-02] #Bug",
                 "body": [
                     "\t- [ ] This is a first level Sub-Task so this will going to get detected very well, without any problem.",
                     "\t\tThis is the body/Description of this task. This line should be bigger in size so the overall content looks good",
@@ -167,9 +197,9 @@
                 "completion": ""
             },
             {
-                "id": 1809572262,
+                "id": 3862968260,
                 "status": ">",
-                "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor",
+                "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor 🔽 [due:: 2024-10-23] #Test [completion:: 2025-01-27/12:46]",
                 "body": [
                     "\t![[Pasted image 20241014211429.png]]"
                 ],
@@ -183,9 +213,9 @@
                 "completion": "2025-01-27/12:46"
             },
             {
-                "id": 2427742004,
+                "id": 3978754030,
                 "status": " ",
-                "title": "A simple task with the priority emoji",
+                "title": "A simple task with the priority emoji 🔽 #Test [completion:: 2025-01-21/21:50] ✅ 2025-01-21/21:50",
                 "body": [],
                 "time": "",
                 "due": "",
@@ -197,10 +227,12 @@
                 "completion": "2025-01-21/21:50"
             },
             {
-                "id": 2855026263,
+                "id": 1329731569,
                 "status": " ",
                 "title": "Adding Many tasks right after one another.",
-                "body": [],
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "",
                 "tags": [],
@@ -211,9 +243,9 @@
         ],
         "TestForNewBug.md": [
             {
-                "id": 3160742336,
+                "id": 771488466,
                 "status": " ",
-                "title": "#✔️дел Task-1 🔺 📅 2025-01-04",
+                "title": "#✔️дел Task-1 🔺 📅 2025-01-04 #Testing",
                 "body": [
                     "\t- [ ] Adding sub-task for testing.",
                     "\tAdding a new line in description for testing.",
@@ -231,23 +263,24 @@
                 "completion": ""
             },
             {
-                "id": 3230368368,
+                "id": 3763577844,
                 "status": " ",
-                "title": "#✔️дел Task-2 🔺 🔁 every week on Thursday 📅 2025-01-09",
+                "title": "#✔️дел Task-2 🔺 🔁 every week on Thursday  📅 2025-01-09 #Test",
                 "body": [],
                 "time": "",
                 "due": "2025-01-09",
                 "tags": [
-                    "#✔️дел"
+                    "#✔️дел",
+                    "#Test"
                 ],
                 "priority": 1,
                 "filePath": "TestForNewBug.md",
                 "completion": ""
             },
             {
-                "id": 323065390,
+                "id": 381791595,
                 "status": " ",
-                "title": "#✔️дел Task-3 🔺 📅 2025-01-09",
+                "title": "#✔️дел Task-3 🔺  [due:: 2025-01-09] #Testing",
                 "body": [
                     "\t- [ ] Adding a simple sub-task. Testing",
                     "\tAdding a simple line in description for testing the Memoization.",
@@ -255,7 +288,7 @@
                     "\tAdding another line to test if the description lines duplication issue is solved."
                 ],
                 "time": "",
-                "due": "2025-02-06",
+                "due": "2025-01-09",
                 "tags": [
                     "#✔️дел",
                     "#Testing"
@@ -265,7 +298,7 @@
                 "completion": ""
             },
             {
-                "id": 3720265068,
+                "id": 3410171859,
                 "status": " ",
                 "title": "#✔️дел Task-4 🔺 📅 2025-01-01",
                 "body": [],
@@ -279,9 +312,9 @@
                 "completion": ""
             },
             {
-                "id": 2377824950,
+                "id": 361728558,
                 "status": " ",
-                "title": "Revise the refresher training, updating.",
+                "title": "Revise the refresher training, updating. [due:: 2025-01-10] #working #Testing",
                 "body": [
                     "\t- [ ] Adding a third sub-task, to fix the issue of task body duplication bug.",
                     "\t- [ ] Adding a sub-task for testing.",
@@ -298,7 +331,7 @@
                 "completion": ""
             },
             {
-                "id": 2462742054,
+                "id": 215445396,
                 "status": " ",
                 "title": "Adding a simple task using the Tasks plugin **Create or edit Task** popup. ⏫ ➕ 2025-01-08",
                 "body": [],
@@ -312,7 +345,7 @@
         ],
         "Resources/obsidian-pentesting-vault/Assessment Info.md": [
             {
-                "id": 3086266705,
+                "id": 303573173,
                 "status": " ",
                 "title": "Development",
                 "body": [],
@@ -324,7 +357,7 @@
                 "completion": ""
             },
             {
-                "id": 3194392322,
+                "id": 3718874512,
                 "status": " ",
                 "title": "Staging",
                 "body": [],
@@ -336,7 +369,7 @@
                 "completion": ""
             },
             {
-                "id": 2303915131,
+                "id": 1583210032,
                 "status": " ",
                 "title": "Production",
                 "body": [],
@@ -350,10 +383,12 @@
         ],
         "Resources/obsidian-demo/_templates/_dailynotes.md": [
             {
-                "id": 3154883760,
+                "id": 3699367398,
                 "status": " ",
-                "title": "Review yesterday's notes",
-                "body": [],
+                "title": "14:03 - 15:03 Review yesterday's notes 📅2024-11-12",
+                "body": [
+                    ""
+                ],
                 "time": "14:03 - 15:03",
                 "due": "2024-11-12",
                 "tags": [],
@@ -364,7 +399,7 @@
         ],
         "Resources/obsidian-demo/Daily Notes/2022-04-24.md": [
             {
-                "id": 231381970,
+                "id": 1592157379,
                 "status": " ",
                 "title": "Add this sample project on [[GitHub]]",
                 "body": [],
@@ -378,7 +413,7 @@
         ],
         "Resources/Bookshelf/Book Tracker.md": [
             {
-                "id": 216579135,
+                "id": 2016523856,
                 "status": " ",
                 "title": "[[The Little Black Book of Workout Motivation]]",
                 "body": [],
@@ -390,7 +425,7 @@
                 "completion": ""
             },
             {
-                "id": 1118140095,
+                "id": 2750455177,
                 "status": " ",
                 "title": "[[How to Grow Old - Ancient Wisdom for the Second Half of Life (Ancient Wisdom for Modern Readers)]]",
                 "body": [],
@@ -402,7 +437,7 @@
                 "completion": ""
             },
             {
-                "id": 1045659334,
+                "id": 2020595120,
                 "status": " ",
                 "title": "[[Dialogues and Essays (Oxford World's Classics)]]",
                 "body": [],
@@ -414,10 +449,12 @@
                 "completion": ""
             },
             {
-                "id": 1547028514,
+                "id": 2083361502,
                 "status": " ",
-                "title": "[[Designing Your Life - How to Build a Well-Lived, Joyful Life at Work]]",
-                "body": [],
+                "title": "[[Designing Your Life - How to Build a Well-Lived, Joyful Life at Work]] #pending",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "",
                 "tags": [
@@ -428,7 +465,7 @@
                 "completion": ""
             },
             {
-                "id": 39461139,
+                "id": 2733546008,
                 "status": " ",
                 "title": "[[Beowulf - A New Verse Translation]]",
                 "body": [],
@@ -440,7 +477,7 @@
                 "completion": ""
             },
             {
-                "id": 635921355,
+                "id": 3292494055,
                 "status": " ",
                 "title": "[[The Divine Comedy]]",
                 "body": [],
@@ -452,7 +489,7 @@
                 "completion": ""
             },
             {
-                "id": 3647673674,
+                "id": 1160158562,
                 "status": " ",
                 "title": "[[Le Morte Darthur - The Winchester Manuscript]]",
                 "body": [],
@@ -464,7 +501,7 @@
                 "completion": ""
             },
             {
-                "id": 916147654,
+                "id": 711915797,
                 "status": " ",
                 "title": "[[Starting Strength - Basic Barbell Training]]",
                 "body": [],
@@ -478,9 +515,9 @@
         ],
         "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md": [
             {
-                "id": 4071014033,
+                "id": 4281685684,
                 "status": "/",
-                "title": "Adding a simple task to test sub-tasks",
+                "title": "Adding a simple task to test sub-tasks [due:: 2025-01-30]",
                 "body": [
                     "\t- [ ] Adding another simple sub-task.",
                     "\t- [ ] A simple sub-task added"
@@ -493,10 +530,12 @@
                 "completion": ""
             },
             {
-                "id": 2533079165,
+                "id": 3371916897,
                 "status": " ",
-                "title": "This is a test to see how Tasks plugin adds data",
-                "body": [],
+                "title": "This is a test to see how Tasks plugin adds data. #pending",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "",
                 "tags": [
@@ -507,7 +546,7 @@
                 "completion": ""
             },
             {
-                "id": 3231745557,
+                "id": 537323276,
                 "status": " ",
                 "title": "This is a new task without any single property.",
                 "body": [],
@@ -519,9 +558,9 @@
                 "completion": ""
             },
             {
-                "id": 614971413,
+                "id": 3241710108,
                 "status": " ",
-                "title": "Simple task",
+                "title": "Simple task. ⏫ ⏰[16:04 - 17:04] 📅 2024-12-16 #Test",
                 "body": [
                     "\tAdding a new line in the body",
                     "\tAnother line in the body."
@@ -536,9 +575,9 @@
                 "completion": ""
             },
             {
-                "id": 2731330911,
+                "id": 921307497,
                 "status": " ",
-                "title": "Let try now if this add new task modal is working",
+                "title": "15:08 - 16:08 Let try now if this add new task modal is working.🔺   [due:: 2024-12-16] #Testing",
                 "body": [
                     "\tThis line explains this task.",
                     "\tAnother line explaining this task.",
@@ -554,11 +593,23 @@
                 "priority": 1,
                 "filePath": "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md",
                 "completion": ""
+            },
+            {
+                "id": 775960688,
+                "status": " ",
+                "title": "This task only contains time in 3rd format [time:: 16:30 - 17:30] 📅 2025-02-23",
+                "body": [],
+                "time": "16:30 - 17:30",
+                "due": "2025-02-23",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md",
+                "completion": ""
             }
         ],
         "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md": [
             {
-                "id": 3359598064,
+                "id": 476758414,
                 "status": " ",
                 "title": "to-do",
                 "body": [],
@@ -570,7 +621,7 @@
                 "completion": ""
             },
             {
-                "id": 3689788861,
+                "id": 2692045404,
                 "status": "/",
                 "title": "incomplete",
                 "body": [],
@@ -582,19 +633,7 @@
                 "completion": ""
             },
             {
-                "id": 432768775,
-                "status": "-",
-                "title": "canceled",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md",
-                "completion": ""
-            },
-            {
-                "id": 1850118441,
+                "id": 2713761565,
                 "status": ">",
                 "title": "forwarded",
                 "body": [],
@@ -606,7 +645,7 @@
                 "completion": ""
             },
             {
-                "id": 939606069,
+                "id": 2840295042,
                 "status": "<",
                 "title": "scheduling",
                 "body": [],
@@ -618,7 +657,7 @@
                 "completion": ""
             },
             {
-                "id": 63702716,
+                "id": 2739474273,
                 "status": "?",
                 "title": "question",
                 "body": [],
@@ -630,7 +669,7 @@
                 "completion": ""
             },
             {
-                "id": 1218389565,
+                "id": 1651506102,
                 "status": "!",
                 "title": "important",
                 "body": [],
@@ -642,7 +681,7 @@
                 "completion": ""
             },
             {
-                "id": 2537071701,
+                "id": 3435702209,
                 "status": "*",
                 "title": "star",
                 "body": [],
@@ -654,7 +693,7 @@
                 "completion": ""
             },
             {
-                "id": 2105548032,
+                "id": 771050353,
                 "status": "\"",
                 "title": "quote",
                 "body": [],
@@ -666,7 +705,7 @@
                 "completion": ""
             },
             {
-                "id": 2301090502,
+                "id": 930223411,
                 "status": "l",
                 "title": "location",
                 "body": [],
@@ -678,7 +717,7 @@
                 "completion": ""
             },
             {
-                "id": 585439708,
+                "id": 579870613,
                 "status": "b",
                 "title": "bookmark",
                 "body": [],
@@ -690,7 +729,7 @@
                 "completion": ""
             },
             {
-                "id": 1398069307,
+                "id": 2187275785,
                 "status": "i",
                 "title": "information",
                 "body": [],
@@ -702,7 +741,7 @@
                 "completion": ""
             },
             {
-                "id": 2022482854,
+                "id": 1031009953,
                 "status": "S",
                 "title": "savings",
                 "body": [],
@@ -714,7 +753,7 @@
                 "completion": ""
             },
             {
-                "id": 3946972145,
+                "id": 3428294056,
                 "status": "I",
                 "title": "idea",
                 "body": [],
@@ -726,7 +765,7 @@
                 "completion": ""
             },
             {
-                "id": 2145877285,
+                "id": 1265361231,
                 "status": "p",
                 "title": "pros",
                 "body": [],
@@ -738,7 +777,7 @@
                 "completion": ""
             },
             {
-                "id": 2157702472,
+                "id": 1056948148,
                 "status": "c",
                 "title": "cons",
                 "body": [],
@@ -750,7 +789,7 @@
                 "completion": ""
             },
             {
-                "id": 2197112007,
+                "id": 4094452762,
                 "status": "f",
                 "title": "fire",
                 "body": [],
@@ -762,7 +801,7 @@
                 "completion": ""
             },
             {
-                "id": 192283876,
+                "id": 4074936737,
                 "status": "k",
                 "title": "key",
                 "body": [],
@@ -774,7 +813,7 @@
                 "completion": ""
             },
             {
-                "id": 3405097273,
+                "id": 2849980927,
                 "status": "w",
                 "title": "win",
                 "body": [],
@@ -786,7 +825,7 @@
                 "completion": ""
             },
             {
-                "id": 3913940558,
+                "id": 4001293354,
                 "status": "u",
                 "title": "up",
                 "body": [],
@@ -798,7 +837,7 @@
                 "completion": ""
             },
             {
-                "id": 421989838,
+                "id": 938273139,
                 "status": "d",
                 "title": "down---",
                 "body": [],
@@ -812,7 +851,7 @@
         ],
         "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md": [
             {
-                "id": 702272763,
+                "id": 1711611185,
                 "status": " ",
                 "title": "Unchecked.",
                 "body": [],
@@ -824,7 +863,7 @@
                 "completion": ""
             },
             {
-                "id": 635607121,
+                "id": 838519115,
                 "status": ">",
                 "title": "Forward",
                 "body": [],
@@ -836,7 +875,7 @@
                 "completion": ""
             },
             {
-                "id": 2374909866,
+                "id": 2290074720,
                 "status": "<",
                 "title": "Migrated",
                 "body": [],
@@ -848,7 +887,7 @@
                 "completion": ""
             },
             {
-                "id": 1354153305,
+                "id": 3757093893,
                 "status": "D",
                 "title": "Date",
                 "body": [],
@@ -860,7 +899,7 @@
                 "completion": ""
             },
             {
-                "id": 2085572750,
+                "id": 541573683,
                 "status": "?",
                 "title": "Question",
                 "body": [],
@@ -872,7 +911,7 @@
                 "completion": ""
             },
             {
-                "id": 296027596,
+                "id": 725805099,
                 "status": "/",
                 "title": "Half Done",
                 "body": [],
@@ -884,7 +923,7 @@
                 "completion": ""
             },
             {
-                "id": 793624630,
+                "id": 4221076050,
                 "status": "+",
                 "title": "Add",
                 "body": [],
@@ -896,7 +935,7 @@
                 "completion": ""
             },
             {
-                "id": 4015425744,
+                "id": 1594871579,
                 "status": "R",
                 "title": "Research",
                 "body": [],
@@ -908,7 +947,7 @@
                 "completion": ""
             },
             {
-                "id": 3339572257,
+                "id": 2154197893,
                 "status": "!",
                 "title": "Important",
                 "body": [],
@@ -920,7 +959,7 @@
                 "completion": ""
             },
             {
-                "id": 2728235927,
+                "id": 2202054631,
                 "status": "i",
                 "title": "Idea",
                 "body": [],
@@ -932,7 +971,7 @@
                 "completion": ""
             },
             {
-                "id": 3924537303,
+                "id": 2797663467,
                 "status": "B",
                 "title": "Brainstorm",
                 "body": [],
@@ -944,7 +983,7 @@
                 "completion": ""
             },
             {
-                "id": 2312014887,
+                "id": 3114709329,
                 "status": "P",
                 "title": "Pro",
                 "body": [],
@@ -956,7 +995,7 @@
                 "completion": ""
             },
             {
-                "id": 3981672856,
+                "id": 2677608506,
                 "status": "C",
                 "title": "Con",
                 "body": [],
@@ -968,7 +1007,7 @@
                 "completion": ""
             },
             {
-                "id": 3699972071,
+                "id": 1747306939,
                 "status": "Q",
                 "title": "Quote",
                 "body": [],
@@ -980,7 +1019,7 @@
                 "completion": ""
             },
             {
-                "id": 3186241128,
+                "id": 1921464144,
                 "status": "N",
                 "title": "Note",
                 "body": [],
@@ -992,7 +1031,7 @@
                 "completion": ""
             },
             {
-                "id": 851291845,
+                "id": 2801507347,
                 "status": "b",
                 "title": "Bookmark",
                 "body": [],
@@ -1004,7 +1043,7 @@
                 "completion": ""
             },
             {
-                "id": 2311683183,
+                "id": 989240246,
                 "status": "I",
                 "title": "Information",
                 "body": [],
@@ -1016,7 +1055,7 @@
                 "completion": ""
             },
             {
-                "id": 3635824398,
+                "id": 2441345450,
                 "status": "p",
                 "title": "Paraphrase",
                 "body": [],
@@ -1028,7 +1067,7 @@
                 "completion": ""
             },
             {
-                "id": 808630756,
+                "id": 1963464939,
                 "status": "L",
                 "title": "Location",
                 "body": [],
@@ -1040,7 +1079,7 @@
                 "completion": ""
             },
             {
-                "id": 4019891334,
+                "id": 2742196846,
                 "status": "E",
                 "title": "Example",
                 "body": [],
@@ -1052,7 +1091,7 @@
                 "completion": ""
             },
             {
-                "id": 3981400004,
+                "id": 2638177199,
                 "status": "A",
                 "title": "Answer",
                 "body": [],
@@ -1064,7 +1103,7 @@
                 "completion": ""
             },
             {
-                "id": 822422403,
+                "id": 2044724291,
                 "status": "r",
                 "title": "Reward",
                 "body": [],
@@ -1076,7 +1115,7 @@
                 "completion": ""
             },
             {
-                "id": 4242741239,
+                "id": 4212073681,
                 "status": "c",
                 "title": "Choice",
                 "body": [],
@@ -1088,7 +1127,7 @@
                 "completion": ""
             },
             {
-                "id": 39785100,
+                "id": 2167371692,
                 "status": "d",
                 "title": "Doing",
                 "body": [],
@@ -1100,7 +1139,7 @@
                 "completion": ""
             },
             {
-                "id": 1010839197,
+                "id": 763402822,
                 "status": "T",
                 "title": "Time",
                 "body": [],
@@ -1112,7 +1151,7 @@
                 "completion": ""
             },
             {
-                "id": 2219323262,
+                "id": 2355633377,
                 "status": "@",
                 "title": "Character / Person",
                 "body": [],
@@ -1124,7 +1163,7 @@
                 "completion": ""
             },
             {
-                "id": 623278359,
+                "id": 2395484585,
                 "status": "t",
                 "title": "Talk",
                 "body": [],
@@ -1136,7 +1175,7 @@
                 "completion": ""
             },
             {
-                "id": 2669430145,
+                "id": 3121530617,
                 "status": "O",
                 "title": "Outline / Plot",
                 "body": [],
@@ -1148,7 +1187,7 @@
                 "completion": ""
             },
             {
-                "id": 2092301398,
+                "id": 1179536122,
                 "status": "~",
                 "title": "Conflict",
                 "body": [],
@@ -1160,7 +1199,7 @@
                 "completion": ""
             },
             {
-                "id": 2518796442,
+                "id": 3749493753,
                 "status": "W",
                 "title": "World",
                 "body": [],
@@ -1172,7 +1211,7 @@
                 "completion": ""
             },
             {
-                "id": 630427057,
+                "id": 565391502,
                 "status": "f",
                 "title": "Clue / Find",
                 "body": [],
@@ -1184,7 +1223,7 @@
                 "completion": ""
             },
             {
-                "id": 2968364249,
+                "id": 589094845,
                 "status": "F",
                 "title": "Foreshadow",
                 "body": [],
@@ -1196,7 +1235,7 @@
                 "completion": ""
             },
             {
-                "id": 2143754688,
+                "id": 698174808,
                 "status": "H",
                 "title": "Favorite / Health",
                 "body": [],
@@ -1208,7 +1247,7 @@
                 "completion": ""
             },
             {
-                "id": 3271635193,
+                "id": 296842518,
                 "status": "&",
                 "title": "Symbolism",
                 "body": [],
@@ -1220,7 +1259,7 @@
                 "completion": ""
             },
             {
-                "id": 298985919,
+                "id": 2033423205,
                 "status": "s",
                 "title": "Secret",
                 "body": [],
@@ -1232,7 +1271,7 @@
                 "completion": ""
             },
             {
-                "id": 2317774927,
+                "id": 799297177,
                 "status": "1",
                 "title": "One",
                 "body": [],
@@ -1244,7 +1283,7 @@
                 "completion": ""
             },
             {
-                "id": 3917229284,
+                "id": 918852154,
                 "status": "2",
                 "title": "Two",
                 "body": [],
@@ -1258,7 +1297,7 @@
         ],
         "obsidian-hub-0.2.1/03 - Showcases & Templates/Vaults/🗂️ Vaults.md": [
             {
-                "id": 252193855,
+                "id": 1612895958,
                 "status": " ",
                 "title": "Add examples for the other types of contributions",
                 "body": [],
@@ -1272,7 +1311,7 @@
         ],
         "DocsForPlugin/Readme of CardBoard.md": [
             {
-                "id": 2270205717,
+                "id": 1048565753,
                 "status": " ",
                 "title": "run erands @due(2022-12-02)",
                 "body": [],
@@ -1284,7 +1323,7 @@
                 "completion": ""
             },
             {
-                "id": 2169048023,
+                "id": 2956808238,
                 "status": " ",
                 "title": "Task title @autocomplete(true)",
                 "body": [],
@@ -1296,7 +1335,7 @@
                 "completion": ""
             },
             {
-                "id": 30516190,
+                "id": 1795130234,
                 "status": " ",
                 "title": "My task @due(2021-10-31)",
                 "body": [],
@@ -1308,7 +1347,7 @@
                 "completion": ""
             },
             {
-                "id": 2817593059,
+                "id": 3087879157,
                 "status": " ",
                 "title": "My task [due:: 2021-10-31]",
                 "body": [],
@@ -1320,7 +1359,7 @@
                 "completion": ""
             },
             {
-                "id": 2772349805,
+                "id": 1059983232,
                 "status": " ",
                 "title": "My task 📅 2021-10-31",
                 "body": [],
@@ -1332,7 +1371,7 @@
                 "completion": ""
             },
             {
-                "id": 4015546652,
+                "id": 2640592457,
                 "status": " ",
                 "title": "My task @due(none)",
                 "body": [],
@@ -1344,7 +1383,7 @@
                 "completion": ""
             },
             {
-                "id": 4088790247,
+                "id": 1669140693,
                 "status": " ",
                 "title": "this task will automatically have the recipe and cooking tags",
                 "body": [],
@@ -1358,9 +1397,9 @@
         ],
         "DocsForPlugin/Readme of CardBoard-HTML.md": [
             {
-                "id": 3426817664,
+                "id": 2230892615,
                 "status": " ",
-                "title": "My task [due:: 2021-10-31]",
+                "title": "My task 📅 2024-10-04",
                 "body": [],
                 "time": "",
                 "due": "2024-10-04",
@@ -1370,7 +1409,7 @@
                 "completion": ""
             },
             {
-                "id": 1211493450,
+                "id": 4186790312,
                 "status": " ",
                 "title": "run erands @due(2022-12-02)",
                 "body": [],
@@ -1382,19 +1421,21 @@
                 "completion": ""
             },
             {
-                "id": 3591257731,
+                "id": 3418704671,
                 "status": " ",
-                "title": "Task title",
-                "body": [],
+                "title": "Task title.",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "",
                 "tags": [],
                 "priority": 0,
                 "filePath": "DocsForPlugin/Readme of CardBoard-HTML.md",
-                "completion": ""
+                "completion": "2021-10-30T13:57:48"
             },
             {
-                "id": 2799572674,
+                "id": 3320922470,
                 "status": " ",
                 "title": "Task title @autocomplete(true)",
                 "body": [],
@@ -1406,7 +1447,7 @@
                 "completion": ""
             },
             {
-                "id": 680787877,
+                "id": 1719760201,
                 "status": " ",
                 "title": "My task @due(2021-10-31)",
                 "body": [],
@@ -1418,7 +1459,7 @@
                 "completion": ""
             },
             {
-                "id": 4262701918,
+                "id": 2477134593,
                 "status": " ",
                 "title": "My task [due:: 2021-10-31]",
                 "body": [],
@@ -1430,7 +1471,7 @@
                 "completion": ""
             },
             {
-                "id": 2849913787,
+                "id": 1773303210,
                 "status": " ",
                 "title": "My task 📅 2021-10-31",
                 "body": [],
@@ -1442,7 +1483,7 @@
                 "completion": ""
             },
             {
-                "id": 1494499412,
+                "id": 4265093003,
                 "status": " ",
                 "title": "My task @due(none)",
                 "body": [],
@@ -1454,7 +1495,7 @@
                 "completion": ""
             },
             {
-                "id": 1065006082,
+                "id": 621829501,
                 "status": " ",
                 "title": "this task will automatically have the recipe and cooking tags",
                 "body": [],
@@ -1468,7 +1509,7 @@
         ],
         "DocsForPlugin/Readme of CardBoard - Archived.md": [
             {
-                "id": 4197798421,
+                "id": 2344131,
                 "status": " ",
                 "title": "run erands @due(2022-12-02)",
                 "body": [],
@@ -1480,7 +1521,7 @@
                 "completion": ""
             },
             {
-                "id": 5467886,
+                "id": 3671385712,
                 "status": " ",
                 "title": "Task title @autocomplete(true)",
                 "body": [],
@@ -1492,7 +1533,7 @@
                 "completion": ""
             },
             {
-                "id": 2506518888,
+                "id": 2427253067,
                 "status": " ",
                 "title": "My task @due(2021-10-31)",
                 "body": [],
@@ -1504,7 +1545,7 @@
                 "completion": ""
             },
             {
-                "id": 4179670753,
+                "id": 3136027842,
                 "status": " ",
                 "title": "My task [due:: 2021-10-31]",
                 "body": [],
@@ -1516,7 +1557,7 @@
                 "completion": ""
             },
             {
-                "id": 1778503219,
+                "id": 2210962993,
                 "status": " ",
                 "title": "My task 📅 2021-10-31",
                 "body": [],
@@ -1528,7 +1569,7 @@
                 "completion": ""
             },
             {
-                "id": 3839523846,
+                "id": 1721232463,
                 "status": " ",
                 "title": "My task @due(none)",
                 "body": [],
@@ -1540,7 +1581,7 @@
                 "completion": ""
             },
             {
-                "id": 2418090177,
+                "id": 369911610,
                 "status": " ",
                 "title": "this task will automatically have the recipe and cooking tags",
                 "body": [],
@@ -1554,27 +1595,29 @@
         ],
         "Daily_Notes/30-09-2024.md": [
             {
-                "id": 178693620,
+                "id": 159612201,
                 "status": " ",
-                "title": "This is a task, and this is very bad way since the board is getting refreshed but it is refreshing the whole shit.",
-                "body": [],
+                "title": "This is a task, and this is very bad way since the board is getting refreshed but it is refreshing the whole shit.  @due(2024-09-30)  #RealTime",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "2024-09-30",
                 "tags": [
                     "#RealTime"
                 ],
-                "priority": 0,
+                "priority": 3,
                 "filePath": "Daily_Notes/30-09-2024.md",
                 "completion": ""
             },
             {
-                "id": 1875522260,
+                "id": 806453507,
                 "status": " ",
-                "title": "Now after this board is updated only the file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version.",
+                "title": "Now after this board is updated only the file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version. [due:: 2024-10-11]",
                 "body": [
                     "\tAdding a body line, updating. more updating.",
                     "\tAnd for those who dont want their cpu to keep running at 20% all the time when i am doing the simplest thing that is typing then they can directly disable this feature, the best way .",
-                    "\t- [ ] Alright now the refreshing should look faster, since removed the sleep, but no, still seeing equal amount of delay."
+                    "\t- [x] Alright now the refreshing should look faster, since removed the sleep, but no, still seeing equal amount of delay."
                 ],
                 "time": "",
                 "due": "2024-10-11",
@@ -1586,53 +1629,39 @@
         ],
         "Daily_Notes/28-09-2024.md": [
             {
-                "id": 3114055592,
+                "id": 1364704591,
                 "status": " ",
-                "title": "This is a new task with due date with the format of dataview. Updating",
+                "title": "This is a new task with due date with the format of dataview. Updating | 📅2024-09-28 🔽 #Test",
                 "body": [],
                 "time": "",
                 "due": "2024-09-28",
                 "tags": [
                     "#Test"
                 ],
-                "priority": 0,
+                "priority": 4,
                 "filePath": "Daily_Notes/28-09-2024.md",
                 "completion": ""
             }
         ],
         "Daily_Notes/25-08-2024.md": [
             {
-                "id": 2347423232,
+                "id": 2643732797,
                 "status": " ",
-                "title": "Cut Nails",
+                "title": "10:00 - 11:00 Cut Nails🔺",
                 "body": [],
                 "time": "10:00 - 11:00",
                 "due": "",
                 "tags": [],
-                "priority": 0,
+                "priority": 1,
                 "filePath": "Daily_Notes/25-08-2024.md",
-                "completion": ""
-            }
-        ],
-        "Daily_Notes/24-08-2024.md": [
-            {
-                "id": 3908970362,
-                "status": " ",
-                "title": "Completed Three Hand-on Courses",
-                "body": [],
-                "time": "11:00 - 13:30",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/24-08-2024.md",
                 "completion": ""
             }
         ],
         "Daily_Notes/24-09-2024.md": [
             {
-                "id": 1201562287,
+                "id": 1559148143,
                 "status": " ",
-                "title": "This is a simple task with random note, but this doesnt have either a body nor subtasks. But the problem is this has a tab on the immediate next line.",
+                "title": "17:08 - 18:08 This is a simple task with random note, but this doesnt have either a body nor subtasks. But the problem is this has a tab on the immediate next line. | 📅2024-10-04  #Testing",
                 "body": [
                     "\tNo tab doesnt come on the next line now anymore."
                 ],
@@ -1646,9 +1675,9 @@
                 "completion": ""
             },
             {
-                "id": 2247460259,
+                "id": 854275816,
                 "status": " ",
-                "title": "Adding a Task to see if this task dont have body and only have the subtasks, then there shouldnt be any empty line between Main task and SubTasks.",
+                "title": "17:51 - 18:51 Adding a Task to see if this task dont have body and only have the subtasks, then there shouldnt be any empty line between Main task and SubTasks. | 📅2024-11-06  #Error",
                 "body": [],
                 "time": "17:51 - 18:51",
                 "due": "2024-11-06",
@@ -1660,9 +1689,9 @@
                 "completion": ""
             },
             {
-                "id": 4140926119,
+                "id": 2939361074,
                 "status": " ",
-                "title": "Now please dont come empty line between title and subtasks, removing body",
+                "title": "22:35 - 23:35 Now please dont come empty line between title and subtasks, removing body | 📅2024-10-03  #Working",
                 "body": [
                     "\tFirst adding a body so i can delete this complete task to test delete functionality",
                     "\t- [ ] First sub task",
@@ -1678,25 +1707,27 @@
                 "completion": ""
             }
         ],
-        "Daily_Notes/23-08-2024.md": [
+        "Daily_Notes/24-08-2024.md": [
             {
-                "id": 3577581727,
+                "id": 4023378241,
                 "status": " ",
-                "title": "Learn the questions that will come for tomorrows Hackathon ⏳ 2024-08-24",
-                "body": [],
+                "title": "11:00 - 13:30 Completed Three Hand-on Courses.",
+                "body": [
+                    ""
+                ],
                 "time": "11:00 - 12:00",
-                "due": "2024-10-31",
+                "due": "",
                 "tags": [],
                 "priority": 0,
-                "filePath": "Daily_Notes/23-08-2024.md",
+                "filePath": "Daily_Notes/24-08-2024.md",
                 "completion": ""
             }
         ],
         "Daily_Notes/23-09-2024.md": [
             {
-                "id": 2385843535,
+                "id": 2296552382,
                 "status": " ",
-                "title": "Now for sure there wont be any empty line between title and subtasks",
+                "title": "23:37 - 24:37 Now for sure there wont be any empty line between title and subtasks. 📅2024-10-03",
                 "body": [
                     "\t- [ ] This is first subtask"
                 ],
@@ -1708,26 +1739,14 @@
                 "completion": ""
             }
         ],
-        "Daily_Notes/22-08-2024.md": [
-            {
-                "id": 3532859185,
-                "status": " ",
-                "title": "Give a shot to Java Hackathon ➕ 2024-08-22",
-                "body": [],
-                "time": "17:00 - 18:00",
-                "due": "2024-10-17",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/22-08-2024.md",
-                "completion": ""
-            }
-        ],
         "Daily_Notes/22-09-2024.md": [
             {
-                "id": 3166591723,
+                "id": 2063232853,
                 "status": " ",
-                "title": "Adding task from command to see if the taskboard refreshes now",
-                "body": [],
+                "title": "Adding task from command to see if the taskboard refreshes now. ⏰[16:17 - 17:17] [due:: 2025-01-10] #Testing",
+                "body": [
+                    ""
+                ],
                 "time": "16:17 - 17:17",
                 "due": "2025-01-10",
                 "tags": [
@@ -1738,9 +1757,9 @@
                 "completion": ""
             },
             {
-                "id": 1618495174,
+                "id": 2408556220,
                 "status": " ",
-                "title": "A tempararory new task",
+                "title": "20:45 - 21:45 A tempararory new task. 📅2024-10-18  #Test",
                 "body": [
                     "\tJust updating the body.",
                     "\t- Adding one bullete line in body.",
@@ -1756,9 +1775,9 @@
                 "completion": ""
             },
             {
-                "id": 2604464668,
+                "id": 165536000,
                 "status": " ",
-                "title": "This is a main Task, updating, Updating more",
+                "title": "20:00 - 21:00 This is a main Task, updating, Updating more. 📅2024-10-18  #Tested",
                 "body": [
                     "\tThis is a body i am going to replace all the three bullete lines with this one sentence, because i think usually people will going to simply add a one sentence for the body or maybe bullete points also.",
                     "\t- How this will look like in the TaskItem Card on board.",
@@ -1777,11 +1796,43 @@
                 "completion": ""
             }
         ],
+        "Daily_Notes/23-08-2024.md": [
+            {
+                "id": 3333124726,
+                "status": " ",
+                "title": "11:00 - 12:00 Learn the questions that will come for tomorrows Hackathon ⏳ 2024-08-24 📅2024-10-31",
+                "body": [
+                    ""
+                ],
+                "time": "11:00 - 12:00",
+                "due": "2024-10-31",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/22-08-2024.md": [
+            {
+                "id": 1773794741,
+                "status": " ",
+                "title": "17:00 - 18:00 Give a shot to Java Hackathon ➕ 2024-08-22 📅2024-10-17",
+                "body": [
+                    ""
+                ],
+                "time": "17:00 - 18:00",
+                "due": "2024-10-17",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/22-08-2024.md",
+                "completion": ""
+            }
+        ],
         "Daily_Notes/21-09-2024.md": [
             {
-                "id": 3997024308,
+                "id": 3739339434,
                 "status": " ",
-                "title": "Adding random task for today to see how the board updates.",
+                "title": "12:02 - 13:02 Adding random task for today to see how the board updates. 📅2024-09-29 ⏫ #Testing",
                 "body": [
                     "\tAdding body to this task from file itself not using any Modal. So, now when this file will be scanned, it will first get detected as well as, the whole board should re-render. updating more...",
                     "\t- [ ] Changing the complete content of the subTask, updating",
@@ -1792,16 +1843,53 @@
                 "tags": [
                     "#Testing"
                 ],
-                "priority": 0,
+                "priority": 2,
                 "filePath": "Daily_Notes/21-09-2024.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/2025-02-20.md": [
+            {
+                "id": 2150371202,
+                "status": " ",
+                "title": "15:00 - 16:00 From **v1.3.0** user should be free to use any kind of format. #pending   📅 2025-02-18 🔺",
+                "body": [
+                    "\t- [ ] No restriction to use pipe symbol for separating metadata.",
+                    "\t**Description :** After you finished writting this task in this file switch to other tab or *Task Board* View to see you task automatically get added in the board.",
+                    "\t- [ ] Properties placed in any order should be scanned properly.",
+                    "\t- [ ] Divide and rule is a great approach."
+                ],
+                "time": "15:00 - 16:00",
+                "due": "2025-02-18",
+                "tags": [
+                    "#pending"
+                ],
+                "priority": 1,
+                "filePath": "Daily_Notes/2025-02-20.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/2025-02-18.md": [
+            {
+                "id": 3582692707,
+                "status": " ",
+                "title": "15:00 - 16:10 This is a temp task added directly from the day planner plugin timeline #test 📅 2025-02-18 ⏫",
+                "body": [],
+                "time": "15:00 - 16:10",
+                "due": "2025-02-18",
+                "tags": [
+                    "#test"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/2025-02-18.md",
                 "completion": ""
             }
         ],
         "Daily_Notes/2024-12-31.md": [
             {
-                "id": 504095239,
+                "id": 1260353945,
                 "status": " ",
-                "title": "This is a first task created from a daily note",
+                "title": "This is a first task created from a daily note ⏫ #Test",
                 "body": [
                     "\tThis task has not been given any due date, but it will auto considered based on the file name.",
                     "\tThis is a first task created after the **animation library integration**. This will give a smoother animation to Task Card.",
@@ -1818,54 +1906,11 @@
                 "completion": ""
             }
         ],
-        "Daily_Notes/2024-12-20.md": [
-            {
-                "id": 2852052159,
-                "status": "-",
-                "title": "This is a new task to test. Updating",
-                "body": [
-                    "\t- [ ] Lets add another sub-task.",
-                    "\t- [ ] I actually added a subtask earlier here.",
-                    "\tI want to add a new line in the body of this task. To test memo.",
-                    "\t- Lets also add a bullete point for this task's description. Updating line from file.",
-                    "\t- This is a test, after making some changes for description not updating issue."
-                ],
-                "time": "",
-                "due": "2025-03-30",
-                "tags": [
-                    "#memo"
-                ],
-                "priority": 2,
-                "filePath": "Daily_Notes/2024-12-20.md",
-                "completion": ""
-            }
-        ],
-        "Daily_Notes/2024-12-17.md": [
-            {
-                "id": 1256850899,
-                "status": " ",
-                "title": "Adding a task to see `cachedRead()` will surely work similar to `read()`",
-                "body": [
-                    "\tAdding a new line in body for testing.",
-                    "\t- Yes! its working. Will go with cachedRead then.",
-                    "\t- Let see if the new `vault.process()` works similar to the `vault.modify()`.",
-                    "\tAdding another line at the end of the body."
-                ],
-                "time": "",
-                "due": "2024-12-17",
-                "tags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/2024-12-17.md",
-                "completion": ""
-            }
-        ],
         "Daily_Notes/2024-12-18.md": [
             {
-                "id": 1033577015,
+                "id": 1868880342,
                 "status": " ",
-                "title": "Adding a new task for testing the following.",
+                "title": "Adding a new task for testing the following. ⏫ [due:: 2025-01-11] #Test",
                 "body": [
                     "\t- If I read using `cachedRead()` and then write using `vault.modify()`. Will this be same as that of reading using `read()` and writing using  `vault.modify()`.",
                     "\t- Lets see if this will work.",
@@ -1882,12 +1927,35 @@
                 "completion": ""
             }
         ],
+        "Daily_Notes/2024-12-17.md": [
+            {
+                "id": 1107162151,
+                "status": " ",
+                "title": "Adding a task to see `cachedRead()` will surely work similar to `read()` 📅 2024-12-17 #Test",
+                "body": [
+                    "\tAdding a new line in body for testing.",
+                    "\t- Yes! its working. Will go with cachedRead then.",
+                    "\t- Let see if the new `vault.process()` works similar to the `vault.modify()`.",
+                    "\tAdding another line at the end of the body."
+                ],
+                "time": "",
+                "due": "2024-12-17",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-12-17.md",
+                "completion": ""
+            }
+        ],
         "Daily_Notes/2024-11-30.md": [
             {
-                "id": 375159629,
+                "id": 3111895866,
                 "status": " ",
-                "title": "New task to see if it auto add the due date based on file name",
-                "body": [],
+                "title": "New task to see if it auto add the due date based on file name 🔼 📅2024-11-30 🔼 #Test",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "2024-11-30",
                 "tags": [
@@ -1900,10 +1968,12 @@
         ],
         "Daily_Notes/2024-11-28.md": [
             {
-                "id": 791431165,
+                "id": 389858691,
                 "status": " ",
-                "title": "This is a simple task with only priority",
-                "body": [],
+                "title": "This is a simple task with only priority 🔼 #New",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "",
                 "tags": [
@@ -1916,9 +1986,9 @@
         ],
         "Daily_Notes/2024-11-06.md": [
             {
-                "id": 3834366097,
+                "id": 165828551,
                 "status": " ",
-                "title": "Need to complete all the Documents work  and submit to company.",
+                "title": "Need to complete all the Documents work  and submit to company. ⏫ ⏰[13:00 - 14:00] #feat #working",
                 "body": [
                     "\tJust adding a normal line for this task as a body.",
                     "\tThis is an image in the body : [[1721576562712.jpg|Image]]",
@@ -1937,7 +2007,7 @@
                 "completion": ""
             },
             {
-                "id": 139606062,
+                "id": 2327709679,
                 "status": " ",
                 "title": "This is a simple task with separated metadata. 🔼 ⏰[13:00 - 14:00] 📅 2024-11-06 #home #Test",
                 "body": [
@@ -1957,9 +2027,9 @@
         ],
         "Daily_Notes/2024-11-04.md": [
             {
-                "id": 2887042010,
+                "id": 701702581,
                 "status": " ",
-                "title": "New Task to this file",
+                "title": "New Task to this file. 🔺",
                 "body": [
                     "\t- [ ] New Sub Task"
                 ],
@@ -1971,12 +2041,46 @@
                 "completion": ""
             }
         ],
+        "Daily_Notes/09-09-2024.md": [
+            {
+                "id": 1377532167,
+                "status": " ",
+                "title": "New logic added to edit the task and replace in line.",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/09-09-2024.md",
+                "completion": ""
+            },
+            {
+                "id": 824249292,
+                "status": " ",
+                "title": "23:18 - 24:18 Adding testing task, time will come first, thats it. 📅2024-09-29 ⏫ #Testing",
+                "body": [
+                    ""
+                ],
+                "time": "23:18 - 24:18",
+                "due": "2024-09-29",
+                "tags": [
+                    "#Testing"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/09-09-2024.md",
+                "completion": ""
+            }
+        ],
         "Daily_Notes/2024-10-27.md": [
             {
-                "id": 2731068916,
+                "id": 2634383187,
                 "status": " ",
-                "title": "Adding a new task",
-                "body": [],
+                "title": "Adding a new task. #Test",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "",
                 "tags": [
@@ -1987,39 +2091,11 @@
                 "completion": ""
             }
         ],
-        "Daily_Notes/09-09-2024.md": [
-            {
-                "id": 2314880454,
-                "status": " ",
-                "title": "New logic added to edit the task and replace in line",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/09-09-2024.md",
-                "completion": ""
-            },
-            {
-                "id": 3056367444,
-                "status": " ",
-                "title": "Adding testing task, time will come first, thats it",
-                "body": [],
-                "time": "23:18 - 24:18",
-                "due": "2024-09-29",
-                "tags": [
-                    "#Testing"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/09-09-2024.md",
-                "completion": ""
-            }
-        ],
         "Daily_Notes/2024-10-10.md": [
             {
-                "id": 3556655556,
+                "id": 4140431536,
                 "status": " ",
-                "title": "Adding a new task, to see if everything works fine",
+                "title": "Adding a new task, to see if everything works fine  📅 2024-10-14 🔽 #Test  @time(22:28 - 23:28)",
                 "body": [
                     "\tJust a simple line in body",
                     "\t- [ ] Adding a simple SubTask- [ ] 20:10 - 21:10 This is a new Task I am adding from the Combined Modal. | @due(2024-10-14) 🔼 #Test",
@@ -2033,14 +2109,14 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": 0,
+                "priority": 4,
                 "filePath": "Daily_Notes/2024-10-10.md",
                 "completion": ""
             },
             {
-                "id": 1163747598,
+                "id": 3091038305,
                 "status": " ",
-                "title": "Adding a simple Task, to see if everything works correctly",
+                "title": "Adding a simple Task, to see if everything works correctly. 📅 2024-10-10 ⏫ #Test ⏰ [22:29 - 23:29]",
                 "body": [
                     "\tAdding a simple line",
                     "\t- [ ] SubTask"
@@ -2050,17 +2126,17 @@
                 "tags": [
                     "#Test"
                 ],
-                "priority": 0,
+                "priority": 2,
                 "filePath": "Daily_Notes/2024-10-10.md",
                 "completion": ""
             },
             {
-                "id": 367585720,
+                "id": 1493607116,
                 "status": " ",
                 "title": "Adding a simple task",
                 "body": [],
                 "time": "",
-                "due": "",
+                "due": "2024-10-10",
                 "tags": [],
                 "priority": 0,
                 "filePath": "Daily_Notes/2024-10-10.md",
@@ -2069,12 +2145,12 @@
         ],
         "Daily_Notes/2024-09-15.md": [
             {
-                "id": 3023723352,
+                "id": 604855251,
                 "status": " ",
-                "title": "Time and Tag and Priority",
+                "title": "Time and Tag and Priority  #Test ⏰ [22:01 - 23:01]",
                 "body": [],
                 "time": "22:01 - 23:01",
-                "due": "",
+                "due": "2024-09-15",
                 "tags": [
                     "#Test"
                 ],
@@ -2083,10 +2159,12 @@
                 "completion": ""
             },
             {
-                "id": 167223878,
+                "id": 1184418051,
                 "status": " ",
-                "title": "New task adding to see if the task directly shows up in the board, after adding through the modal",
-                "body": [],
+                "title": "15:50 - 16:50 New task adding to see if the task directly shows up in the board, after adding through the modal. @due(2024-10-10)  #Test",
+                "body": [
+                    ""
+                ],
                 "time": "15:50 - 16:50",
                 "due": "2024-10-10",
                 "tags": [
@@ -2097,10 +2175,12 @@
                 "completion": ""
             },
             {
-                "id": 1840160168,
+                "id": 1413059884,
                 "status": " ",
-                "title": "A fresh new task, after rectifying the errors, only adding time, due will come automatically.",
-                "body": [],
+                "title": "A fresh new task, after rectifying the errors, only adding time, due will come automatically. ⏰[21:01 - 22:01] 📅 2025-04-30 #Test",
+                "body": [
+                    ""
+                ],
                 "time": "21:01 - 22:01",
                 "due": "2025-04-30",
                 "tags": [
@@ -2111,9 +2191,9 @@
                 "completion": ""
             },
             {
-                "id": 3653370011,
+                "id": 1886712265,
                 "status": " ",
-                "title": "Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.",
+                "title": "21:45 - 22:45 Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.   [due:: 2025-02-20] #Test",
                 "body": [
                     "\tSimple Body Content, Which will go inside the markdown.",
                     "\t- [ ] A subTask"
@@ -2128,12 +2208,12 @@
                 "completion": ""
             },
             {
-                "id": 3765244751,
+                "id": 1691404123,
                 "status": " ",
                 "title": "file this new task. #Test",
                 "body": [],
                 "time": "",
-                "due": "",
+                "due": "2024-09-15",
                 "tags": [
                     "#Test"
                 ],
@@ -2144,10 +2224,12 @@
         ],
         "Daily_Notes/18-09-2024.md": [
             {
-                "id": 1418557477,
+                "id": 327495333,
                 "status": " ",
-                "title": "Adding a new task, i think now everything is working. Adding all the fields now.",
-                "body": [],
+                "title": "12:09 - 13:09 Adding a new task, i think now everything is working. Adding all the fields now. 📅 2024-11-08  #Complete",
+                "body": [
+                    ""
+                ],
                 "time": "12:09 - 13:09",
                 "due": "2024-11-08",
                 "tags": [
@@ -2158,9 +2240,9 @@
                 "completion": ""
             },
             {
-                "id": 3843139929,
+                "id": 3365923672,
                 "status": " ",
-                "title": "ading simple task to see if the time afterwards will come or not",
+                "title": "ading simple task to see if the time afterwards will come or not. 📅2024-10-02 🔺 #Testing",
                 "body": [
                     "\tThis function dont have any body, hence adding one line.",
                     "\t- [x] One subtask also, for fun"
@@ -2170,44 +2252,46 @@
                 "tags": [
                     "#Testing"
                 ],
-                "priority": 0,
+                "priority": 1,
                 "filePath": "Daily_Notes/18-09-2024.md",
                 "completion": ""
             },
             {
-                "id": 348289590,
+                "id": 2135343310,
                 "status": " ",
-                "title": "Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly",
+                "title": "18:21 - 19:21 ⏫ Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly. [due:: 2024-10-04] #Testing",
                 "body": [],
                 "time": "18:21 - 19:21",
                 "due": "2024-10-04",
                 "tags": [
                     "#Testing"
                 ],
-                "priority": 0,
+                "priority": 2,
                 "filePath": "Daily_Notes/18-09-2024.md",
                 "completion": ""
             }
         ],
         "Daily_Notes/17-09-2024.md": [
             {
-                "id": 3437329367,
+                "id": 4040642998,
                 "status": " ",
-                "title": "If i add any other due it should work, autoAddDue is off",
-                "body": [],
+                "title": "If i add any other due it should work, autoAddDue is off. 📅2024-09-30 🔼 #Testing",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "2024-09-30",
                 "tags": [
                     "#Testing"
                 ],
-                "priority": 0,
+                "priority": 3,
                 "filePath": "Daily_Notes/17-09-2024.md",
                 "completion": ""
             },
             {
-                "id": 4124512272,
+                "id": 2752533310,
                 "status": " ",
-                "title": "This task will be updated in the json file after 10 seconds",
+                "title": "This task will be updated in the json file after 10 seconds 📅2024-09-27  #Testing",
                 "body": [],
                 "time": "",
                 "due": "2024-09-27",
@@ -2219,9 +2303,9 @@
                 "completion": ""
             },
             {
-                "id": 802227866,
+                "id": 1646168507,
                 "status": " ",
-                "title": "Adding new task, this will update in the file after 5 minutes",
+                "title": "Adding new task, this will update in the file after 5 minutes ⏫ #Testing ⏰ [12:45 - 13:45]",
                 "body": [],
                 "time": "12:45 - 13:45",
                 "due": "",
@@ -2233,9 +2317,9 @@
                 "completion": ""
             },
             {
-                "id": 3744513764,
+                "id": 4289826008,
                 "status": " ",
-                "title": "Now auto add due option is false, so the due date shouldnt be added",
+                "title": "Now auto add due option is false, so the due date shouldnt be added  #Test",
                 "body": [],
                 "time": "",
                 "due": "",
@@ -2247,9 +2331,9 @@
                 "completion": ""
             },
             {
-                "id": 2081414146,
+                "id": 1924768975,
                 "status": " ",
-                "title": "Adding tomorrow date, it should come even autoAddDue is ON",
+                "title": "Adding tomorrow date, it should come even autoAddDue is ON | 📅2024-09-27  #Testing",
                 "body": [],
                 "time": "",
                 "due": "2024-09-27",
@@ -2263,9 +2347,9 @@
         ],
         "Daily_Notes/14-09-2024.md": [
             {
-                "id": 363769357,
+                "id": 842706369,
                 "status": " ",
-                "title": "Final testing if all fields come correctly, now the time will come front instead of back.",
+                "title": "13:21 - 14:21 Final testing if all fields come correctly, now the time will come front instead of back. | 📅2024-09-17  #Testing",
                 "body": [],
                 "time": "13:21 - 14:21",
                 "due": "2024-09-17",
@@ -2277,9 +2361,9 @@
                 "completion": ""
             },
             {
-                "id": 3659438609,
+                "id": 2776817673,
                 "status": " ",
-                "title": "Creating an Untagged future task",
+                "title": "18:42 - 19:42 Creating an Untagged future task | 📅2024-09-21",
                 "body": [],
                 "time": "18:42 - 19:42",
                 "due": "2024-09-21",
@@ -2291,10 +2375,12 @@
         ],
         "Daily_Notes/08-09-2024.md": [
             {
-                "id": 442205240,
+                "id": 3327830725,
                 "status": " ",
-                "title": "This is a task for tomorrow, updating",
-                "body": [],
+                "title": "This is a task for tomorrow, updating. @due(2024-10-05)  #Test",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "2024-10-05",
                 "tags": [
@@ -2307,9 +2393,9 @@
         ],
         "Daily_Notes/07-09-2024.md": [
             {
-                "id": 1836915576,
+                "id": 1958681337,
                 "status": " ",
-                "title": "ChatGPT sometimes do things amazing",
+                "title": "14:11 - 15:11 ChatGPT sometimes do things amazing | 📅2024-10-03  #GPT",
                 "body": [],
                 "time": "14:11 - 15:11",
                 "due": "2024-10-03",
@@ -2323,7 +2409,7 @@
         ],
         "Daily_Notes/04-10-2024.md": [
             {
-                "id": 1214166477,
+                "id": 355423923,
                 "status": " ",
                 "title": "Task with Tag #First",
                 "body": [],
@@ -2337,7 +2423,7 @@
                 "completion": ""
             },
             {
-                "id": 1474676601,
+                "id": 2234812597,
                 "status": " ",
                 "title": "Task without tag",
                 "body": [],
@@ -2349,7 +2435,7 @@
                 "completion": ""
             },
             {
-                "id": 260149335,
+                "id": 818613429,
                 "status": " ",
                 "title": "Task with other tag #Second",
                 "body": [],
@@ -2365,7 +2451,7 @@
         ],
         "Daily_Notes/03-10-2024.md": [
             {
-                "id": 3093822005,
+                "id": 1388546656,
                 "status": " ",
                 "title": "Task with Tag #First",
                 "body": [],
@@ -2379,7 +2465,7 @@
                 "completion": ""
             },
             {
-                "id": 446692250,
+                "id": 738246770,
                 "status": " ",
                 "title": "Task without tag",
                 "body": [],
@@ -2391,7 +2477,7 @@
                 "completion": ""
             },
             {
-                "id": 2468505563,
+                "id": 2028938921,
                 "status": " ",
                 "title": "Task with other tag #Second",
                 "body": [],
@@ -2407,9 +2493,9 @@
         ],
         "Daily_Notes/03-09-2024.md": [
             {
-                "id": 2974115887,
+                "id": 1447177993,
                 "status": " ",
-                "title": "Finish all the Courses ASAP. updating",
+                "title": "Finish all the Courses ASAP. updating | 📅2024-10-01 🔺 #Course",
                 "body": [
                     "\t- [ ] Adding subTask"
                 ],
@@ -2418,14 +2504,14 @@
                 "tags": [
                     "#Course"
                 ],
-                "priority": 0,
+                "priority": 1,
                 "filePath": "Daily_Notes/03-09-2024.md",
                 "completion": ""
             },
             {
-                "id": 1483998350,
+                "id": 2647729295,
                 "status": " ",
-                "title": "Completely Updating the content of this task",
+                "title": "Completely Updating the content of this task | 📅2024-10-03  #Test",
                 "body": [],
                 "time": "",
                 "due": "2024-10-03",
@@ -2437,79 +2523,11 @@
                 "completion": ""
             }
         ],
-        "Daily_Notes/01-10-2024.md": [
-            {
-                "id": 3805052892,
-                "status": " ",
-                "title": "Lets see after 2 min if this is getting updated on the board. UPDATE THIS IN THE BOARD",
-                "body": [],
-                "time": "",
-                "due": "2024-10-23",
-                "tags": [
-                    "#Testing"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/01-10-2024.md",
-                "completion": ""
-            },
-            {
-                "id": 449978965,
-                "status": " ",
-                "title": "Now you will see something, updating more, even more, will it update, so say a user is updating a task, he will be able to see it live now, issue resolved, but the problem is, my cpu is running at more than 30%, when a user will be typing very fast.",
-                "body": [],
-                "time": "",
-                "due": "2024-10-25",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/01-10-2024.md",
-                "completion": ""
-            },
-            {
-                "id": 2941145852,
-                "status": " ",
-                "title": "UPdating,  this will refresh New task has been added, lets see REFRESH_BOARD, mssg works. Also updating this.",
-                "body": [],
-                "time": "",
-                "due": "2024-10-01",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/01-10-2024.md",
-                "completion": ""
-            },
-            {
-                "id": 1888674483,
-                "status": " ",
-                "title": "Task for tomorrow, will be updated on the board auto after 2 min",
-                "body": [],
-                "time": "",
-                "due": "2024-10-02",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/01-10-2024.md",
-                "completion": ""
-            }
-        ],
-        "Daily_Notes/02-09-2024.md": [
-            {
-                "id": 999957568,
-                "status": " ",
-                "title": "adding a task",
-                "body": [],
-                "time": "",
-                "due": "2024-10-06",
-                "tags": [
-                    "#testing"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/02-09-2024.md",
-                "completion": ""
-            }
-        ],
         "Daily_Notes/02-10-2024.md": [
             {
-                "id": 3380540465,
+                "id": 3586554352,
                 "status": " ",
-                "title": "New task title",
+                "title": "16:45 - 17:45 New task title. 📅2024-10-03  #Working",
                 "body": [
                     "\tPutting something nice instead of just the body body. This is good, i think now it is working.",
                     "\t- [ ] New sub task only one.",
@@ -2526,11 +2544,89 @@
                 "completion": ""
             }
         ],
+        "Daily_Notes/02-09-2024.md": [
+            {
+                "id": 332848735,
+                "status": " ",
+                "title": "adding a task. 📅2024-10-06  #testing",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "2024-10-06",
+                "tags": [
+                    "#testing"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/02-09-2024.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/01-10-2024.md": [
+            {
+                "id": 862123320,
+                "status": " ",
+                "title": "Lets see after 2 min if this is getting updated on the board. UPDATE THIS IN THE BOARD. 📅2024-10-23 🔼 #Testing",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "2024-10-23",
+                "tags": [
+                    "#Testing"
+                ],
+                "priority": 3,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "completion": ""
+            },
+            {
+                "id": 1199967995,
+                "status": " ",
+                "title": "Now you will see something, updating more, even more, will it update, so say a user is updating a task, he will be able to see it live now, issue resolved, but the problem is, my cpu is running at more than 30%, when a user will be typing very fast. 📅2024-10-25 🔼",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "2024-10-25",
+                "tags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "completion": ""
+            },
+            {
+                "id": 1491185375,
+                "status": " ",
+                "title": "UPdating,  this will refresh New task has been added, lets see REFRESH_BOARD, mssg works. Also updating this. 📅 2024-10-01",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "2024-10-01",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "completion": ""
+            },
+            {
+                "id": 1920714762,
+                "status": " ",
+                "title": "Task for tomorrow, will be updated on the board auto after 2 min 📅2024-10-02 🔽",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "2024-10-02",
+                "tags": [],
+                "priority": 4,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "completion": ""
+            }
+        ],
         "Daily_Notes/01-08-2024.md": [
             {
-                "id": 529815336,
+                "id": 2209496006,
                 "status": " ",
-                "title": "Watch the following Unix Sessions, Pending",
+                "title": "Watch the following Unix Sessions, Pending. 🔼 #OfflineVideo",
                 "body": [
                     "\t- [ ] I think I havent done this yet. Do it."
                 ],
@@ -2546,10 +2642,12 @@
         ],
         "DailyNotes.md": [
             {
-                "id": 626790130,
+                "id": 2124878751,
                 "status": " ",
-                "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task.",
-                "body": [],
+                "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task. ⏫ 📅 2024-10-30 #Test",
+                "body": [
+                    ""
+                ],
                 "time": "",
                 "due": "2024-10-30",
                 "tags": [
@@ -2562,347 +2660,11 @@
         ]
     },
     "Completed": {
-        "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md": [
-            {
-                "id": 3980284575,
-                "status": "x",
-                "title": "done",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md",
-                "completion": ""
-            }
-        ],
-        "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md": [
-            {
-                "id": 571523508,
-                "status": "x",
-                "title": "Regular",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md",
-                "completion": ""
-            },
-            {
-                "id": 709440693,
-                "status": "X",
-                "title": "Checked",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md",
-                "completion": ""
-            },
-            {
-                "id": 4056060473,
-                "status": "-",
-                "title": "Dropped",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md",
-                "completion": ""
-            }
-        ],
-        "DocsForPlugin/Readme of CardBoard.md": [
-            {
-                "id": 2900944462,
-                "status": "x",
-                "title": "Task title @completed(2021-10-30T13:57:48)",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard.md",
-                "completion": ""
-            },
-            {
-                "id": 1538666390,
-                "status": "x",
-                "title": "todo in Dataview format [due:: 2021-10-30] [completion:: 2021-10-29]",
-                "body": [],
-                "time": "",
-                "due": "2021-10-30",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard.md",
-                "completion": "2021-10-29"
-            },
-            {
-                "id": 1569199896,
-                "status": "x",
-                "title": "todo in Tasks format 📅 2021-10-30 ✅ 2021-10-29",
-                "body": [],
-                "time": "",
-                "due": "2021-10-30",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard.md",
-                "completion": "2021-10-29"
-            },
-            {
-                "id": 1569199896,
-                "status": " ",
-                "title": "todo in Tasks format 📅 2021-10-30 ✅ 2021-10-29",
-                "body": [],
-                "time": "",
-                "due": "2021-10-30",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard.md",
-                "completion": "2025-01-21/21:53"
-            }
-        ],
-        "DocsForPlugin/Readme of CardBoard-HTML.md": [
-            {
-                "id": 1770478396,
-                "status": "x",
-                "title": "todo in Dataview format",
-                "body": [],
-                "time": "",
-                "due": "2021-10-30",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard-HTML.md",
-                "completion": "2021-10-29"
-            },
-            {
-                "id": 1441568436,
-                "status": "x",
-                "title": "todo in Tasks format",
-                "body": [],
-                "time": "",
-                "due": "2021-10-30",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard-HTML.md",
-                "completion": "2021-10-29"
-            }
-        ],
-        "DocsForPlugin/Readme of CardBoard - Archived.md": [
-            {
-                "id": 3412574041,
-                "status": "x",
-                "title": "Task title @completed(2021-10-30T13:57:48)",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard - Archived.md",
-                "completion": ""
-            },
-            {
-                "id": 1025898002,
-                "status": "x",
-                "title": "todo in Dataview format [due:: 2021-10-30] [completion:: 2021-10-29]",
-                "body": [],
-                "time": "",
-                "due": "2021-10-30",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard - Archived.md",
-                "completion": "2021-10-29"
-            },
-            {
-                "id": 446834911,
-                "status": "x",
-                "title": "todo in Tasks format 📅 2021-10-30 ✅ 2021-10-29",
-                "body": [],
-                "time": "",
-                "due": "2021-10-30",
-                "tags": [],
-                "priority": 0,
-                "filePath": "DocsForPlugin/Readme of CardBoard - Archived.md",
-                "completion": "2021-10-29"
-            }
-        ],
-        "Daily_Notes/26-09-2024.md": [
-            {
-                "id": 115490475,
-                "status": "x",
-                "title": "Just creating an undated task but will have time.",
-                "body": [
-                    "\t- [x] This is a first sub task."
-                ],
-                "time": "18:24 - 19:24",
-                "due": "2024-09-26",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/26-09-2024.md",
-                "completion": "2024-10-02T21"
-            }
-        ],
-        "Daily_Notes/25-08-2024.md": [
-            {
-                "id": 3885943502,
-                "status": "x",
-                "title": "Tata Crucible Quiz",
-                "body": [],
-                "time": "17:30 - 18:30",
-                "due": "2024-09-27",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/25-08-2024.md",
-                "completion": "2024-09-27T18"
-            }
-        ],
-        "Daily_Notes/24-08-2024.md": [
-            {
-                "id": 1038610879,
-                "status": "x",
-                "title": "Fantastic Four 2 watched",
-                "body": [],
-                "time": "16:00 - 18:00",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/24-08-2024.md",
-                "completion": "2024-09-28T13"
-            }
-        ],
-        "Daily_Notes/23-08-2024.md": [
-            {
-                "id": 3447056230,
-                "status": "x",
-                "title": "Dinner",
-                "body": [],
-                "time": "21:30 - 22:00",
-                "due": "2024-08-23",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/23-08-2024.md",
-                "completion": "2024-09-28"
-            },
-            {
-                "id": 352998261,
-                "status": "x",
-                "title": "Did same thing of updating the Obsidian Theme, found some good  extension.",
-                "body": [],
-                "time": "10:00 - 11:00",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/23-08-2024.md",
-                "completion": "2024-09-28"
-            },
-            {
-                "id": 4293822142,
-                "status": "x",
-                "title": "Watched Fantastic 4 movie",
-                "body": [],
-                "time": "15:30 - 17:30",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/23-08-2024.md",
-                "completion": "2024-08-23"
-            }
-        ],
-        "Daily_Notes/21-08-2024.md": [
-            {
-                "id": 2432864514,
-                "status": "x",
-                "title": "This is a new task with completion date even with millisecond",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/21-08-2024.md",
-                "completion": ""
-            },
-            {
-                "id": 3350280169,
-                "status": "x",
-                "title": "I missed lot of Slides before this, get them from the Recording Video afterwards",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/21-08-2024.md",
-                "completion": ""
-            }
-        ],
-        "Daily_Notes/2024-09-15.md": [
-            {
-                "id": 3245992701,
-                "status": "x",
-                "title": "Not time, no tag, no due, no priority, ITS WORKING",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/2024-09-15.md",
-                "completion": "2024-10-04/18:44"
-            }
-        ],
-        "Daily_Notes/14-09-2024.md": [
-            {
-                "id": 2788644272,
-                "status": "x",
-                "title": "Let me see if due comes of today, it shouldnt come",
-                "body": [],
-                "time": "",
-                "due": "2024-10-05",
-                "tags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/14-09-2024.md",
-                "completion": "2024-10-05"
-            }
-        ],
-        "Daily_Notes/07-08-2024.md": [
-            {
-                "id": 380306717,
-                "status": "x",
-                "title": "Watch the following Javascript Course.",
-                "body": [],
-                "time": "",
-                "due": "",
-                "tags": [
-                    "#OfflineVideo"
-                ],
-                "priority": 0,
-                "filePath": "Daily_Notes/07-08-2024.md",
-                "completion": "2024-08-24T11"
-            }
-        ],
-        "Daily_Notes/03-09-2024.md": [
-            {
-                "id": 2202265387,
-                "status": "x",
-                "title": "This  is a third task",
-                "body": [],
-                "time": "",
-                "due": "2024-09-26",
-                "tags": [],
-                "priority": 0,
-                "filePath": "Daily_Notes/03-09-2024.md",
-                "completion": "2024-09-26T11"
-            }
-        ],
         "Parent/Child/12-JAN-2002.md": [
             {
-                "id": 225028839,
+                "id": 535003428,
                 "status": "x",
-                "title": "Adding temp task, updated.",
+                "title": "Adding temp task, updated. ⏰[21:15 - 22:15] [due:: 2024-10-26] #Test #feat [completion:: 2025-01-21/21:49]",
                 "body": [
                     "\tAdding a line in body to see if it instantly updates in the board. That Bro.",
                     "\t> No, just found that after you add a fresh line and click save button, the taskItem is not refreshed, so i was not able to see the `Show Description` button.",
@@ -2923,9 +2685,9 @@
         ],
         "TODO.md": [
             {
-                "id": 3558841044,
+                "id": 1170493545,
                 "status": "x",
-                "title": "Upload this image to the new release of task board.",
+                "title": "Upload this image to the new release of task board.🔺 [due:: 2024-12-24] #Image [completion:: 2025-01-27/12:46]",
                 "body": [
                     "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render.",
                     "\t- Let me add a new point in description.",
@@ -2941,6 +2703,362 @@
                 "priority": 1,
                 "filePath": "TODO.md",
                 "completion": "2025-01-27/12:46"
+            }
+        ],
+        "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md": [
+            {
+                "id": 2351595114,
+                "status": "x",
+                "title": "done",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md",
+                "completion": ""
+            },
+            {
+                "id": 4252900791,
+                "status": "-",
+                "title": "canceled",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/Customer Relationship Management.md",
+                "completion": ""
+            }
+        ],
+        "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md": [
+            {
+                "id": 324190056,
+                "status": "x",
+                "title": "Regular",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md",
+                "completion": ""
+            },
+            {
+                "id": 2371502360,
+                "status": "X",
+                "title": "Checked",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md",
+                "completion": ""
+            },
+            {
+                "id": 2240355415,
+                "status": "-",
+                "title": "Dropped",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md",
+                "completion": ""
+            }
+        ],
+        "DocsForPlugin/Readme of CardBoard.md": [
+            {
+                "id": 112849363,
+                "status": "x",
+                "title": "Task title @completed(2021-10-30T13:57:48)",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "DocsForPlugin/Readme of CardBoard.md",
+                "completion": ""
+            },
+            {
+                "id": 2188510012,
+                "status": "x",
+                "title": "todo in Dataview format [due:: 2021-10-30] [completion:: 2021-10-29]",
+                "body": [],
+                "time": "",
+                "due": "2021-10-30",
+                "tags": [],
+                "priority": 0,
+                "filePath": "DocsForPlugin/Readme of CardBoard.md",
+                "completion": "2021-10-29"
+            }
+        ],
+        "DocsForPlugin/Readme of CardBoard-HTML.md": [
+            {
+                "id": 3331629387,
+                "status": "x",
+                "title": "todo in Dataview format. 📅 2021-10-30 ✅ 2021-10-29",
+                "body": [],
+                "time": "",
+                "due": "2021-10-30",
+                "tags": [],
+                "priority": 0,
+                "filePath": "DocsForPlugin/Readme of CardBoard-HTML.md",
+                "completion": "2021-10-29"
+            },
+            {
+                "id": 103395651,
+                "status": "x",
+                "title": "todo in Tasks format 📅 2021-10-30 ✅ 2021-10-29",
+                "body": [],
+                "time": "",
+                "due": "2021-10-30",
+                "tags": [],
+                "priority": 0,
+                "filePath": "DocsForPlugin/Readme of CardBoard-HTML.md",
+                "completion": "2021-10-29"
+            }
+        ],
+        "DocsForPlugin/Readme of CardBoard - Archived.md": [
+            {
+                "id": 230647341,
+                "status": "x",
+                "title": "Task title @completion(2021-10-30T13:57:48)",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "DocsForPlugin/Readme of CardBoard - Archived.md",
+                "completion": "2021-10-30T13:57:48"
+            },
+            {
+                "id": 1481831710,
+                "status": "x",
+                "title": "todo in Dataview format [due:: 2021-10-30] [completion:: 2021-10-29]",
+                "body": [],
+                "time": "",
+                "due": "2021-10-30",
+                "tags": [],
+                "priority": 0,
+                "filePath": "DocsForPlugin/Readme of CardBoard - Archived.md",
+                "completion": "2021-10-29"
+            },
+            {
+                "id": 3542952121,
+                "status": "x",
+                "title": "todo in Tasks format 📅 2021-10-30 ✅ 2021-10-29",
+                "body": [],
+                "time": "",
+                "due": "2021-10-30",
+                "tags": [],
+                "priority": 0,
+                "filePath": "DocsForPlugin/Readme of CardBoard - Archived.md",
+                "completion": "2021-10-29"
+            }
+        ],
+        "Daily_Notes/21-08-2024.md": [
+            {
+                "id": 3872584475,
+                "status": "x",
+                "title": "This is a new task with completion date even with millisecond. @completion(2024-08-23T14:21:05)",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/21-08-2024.md",
+                "completion": "2024-08-23T14:21:05"
+            },
+            {
+                "id": 485217258,
+                "status": "x",
+                "title": "I missed lot of Slides before this, get them from the Recording Video afterwards. @completion(2024-08-23T14:21:05+05:30)",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/21-08-2024.md",
+                "completion": "2024-08-23T14:21:05+05:30"
+            }
+        ],
+        "Daily_Notes/26-09-2024.md": [
+            {
+                "id": 4274173352,
+                "status": "x",
+                "title": "Just creating an undated task but will have time. | ⏰[18:24 - 19:24] 📅 2024-09-26  ✅ 2024-10-02T21",
+                "body": [
+                    "\t- [x] This is a first sub task."
+                ],
+                "time": "18:24 - 19:24",
+                "due": "2024-09-26",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/26-09-2024.md",
+                "completion": "2024-10-02T21"
+            }
+        ],
+        "Daily_Notes/25-08-2024.md": [
+            {
+                "id": 2021743741,
+                "status": "x",
+                "title": "17:30 - 18:30 Tata Crucible Quiz | 📅2024-09-27   ✅2024-09-27T18:49",
+                "body": [],
+                "time": "17:30 - 18:30",
+                "due": "2024-09-27",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/25-08-2024.md",
+                "completion": "2024-09-27T18"
+            }
+        ],
+        "Daily_Notes/24-08-2024.md": [
+            {
+                "id": 2445854030,
+                "status": "x",
+                "title": "16:00 - 18:00 Fantastic Four 2 watched |   ✅2024-09-28T13:13",
+                "body": [],
+                "time": "16:00 - 18:00",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/24-08-2024.md",
+                "completion": "2024-09-28T13"
+            }
+        ],
+        "Daily_Notes/23-08-2024.md": [
+            {
+                "id": 1346178968,
+                "status": "x",
+                "title": "21:30 - 22:00 Dinner. 📅 2024-08-23 ✅ 2024-09-28",
+                "body": [
+                    ""
+                ],
+                "time": "21:30 - 22:30",
+                "due": "2024-08-23",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "completion": "2024-09-28"
+            },
+            {
+                "id": 2081256136,
+                "status": "x",
+                "title": "Did same thing of updating the Obsidian Theme, found some good  extension. ⏰[10:00 - 11:00]  [completion:: 2024-09-28]",
+                "body": [
+                    ""
+                ],
+                "time": "10:00 - 11:00",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "completion": "2024-09-28"
+            },
+            {
+                "id": 4206084249,
+                "status": "x",
+                "title": "15:30 - 17:30 Watched Fantastic 4 movie. ✅ 2024-08-23",
+                "body": [
+                    ""
+                ],
+                "time": "15:30 - 16:30",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "completion": "2024-08-23"
+            }
+        ],
+        "Daily_Notes/2024-12-20.md": [
+            {
+                "id": 3608895551,
+                "status": "-",
+                "title": "This is a new task to test. Updating |⏫ [due:: 2025-03-30] #memo",
+                "body": [
+                    "\t- [ ] Lets add another sub-task.",
+                    "\t- [ ] I actually added a subtask earlier here.",
+                    "\tI want to add a new line in the body of this task. To test memo.",
+                    "\t- Lets also add a bullete point for this task's description. Updating line from file.",
+                    "\t- This is a test, after making some changes for description not updating issue."
+                ],
+                "time": "",
+                "due": "2025-03-30",
+                "tags": [
+                    "#memo"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-12-20.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/2024-09-15.md": [
+            {
+                "id": 2265304795,
+                "status": "x",
+                "title": "Not time, no tag, no due, no priority, ITS WORKING.  #Test @completion(2024-10-04/18:44)",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "2024-09-15",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-09-15.md",
+                "completion": "2024-10-04/18:44"
+            }
+        ],
+        "Daily_Notes/14-09-2024.md": [
+            {
+                "id": 1504697915,
+                "status": "x",
+                "title": "Let me see if due comes of today, it shouldnt come. #Test 📅 2024-10-05 ✅ 2024-10-05",
+                "body": [
+                    ""
+                ],
+                "time": "",
+                "due": "2024-10-05",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/14-09-2024.md",
+                "completion": "2024-10-05"
+            }
+        ],
+        "Daily_Notes/07-08-2024.md": [
+            {
+                "id": 2978465686,
+                "status": "x",
+                "title": "Watch the following Javascript Course. |  #OfflineVideo ✅ 2024-08-24T11:30",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [
+                    "#OfflineVideo"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/07-08-2024.md",
+                "completion": "2024-08-24T11"
+            }
+        ],
+        "Daily_Notes/03-09-2024.md": [
+            {
+                "id": 864216854,
+                "status": "x",
+                "title": "This  is a third task | 📅2024-09-26   ✅2024-09-26T11:15",
+                "body": [],
+                "time": "",
+                "due": "2024-09-26",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/03-09-2024.md",
+                "completion": "2024-09-26T11"
             }
         ]
     }
