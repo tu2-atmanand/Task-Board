@@ -49,8 +49,8 @@ const EditTaskContent: React.FC<{
 	const [title, setTitle] = useState(task.title || '');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
-	const [startTime, setStartTime] = useState(task.time?.split(' - ')[0] || '');
-	const [endTime, setEndTime] = useState(task.time?.split(' - ')[1] || '');
+	const [startTime, setStartTime] = useState(task?.time?.split('-')[0]?.trim() || '');
+	const [endTime, setEndTime] = useState(task?.time?.split('-')[1]?.trim() || '');
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
