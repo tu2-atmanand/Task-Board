@@ -281,6 +281,17 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 
 // Extract time from task line
 export function extractTime(text: string): string {
+	let match = text.match(/\[time::\s*(.*?)\]/);
+	if (match) {
+		return match[1];
+	}
+
+	match = text.match(/@time\((.*?)\)/);
+	console.log("Following time detected for @time() pattern : ", match);
+	if (match) {
+		return match[1];
+	}
+
 	// Check if time is at the start of the task
 	const timeAtStartMatch = text.match(
 		/^- \[.\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
@@ -313,6 +324,16 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
+	let match = text.match(/\[priority::\s*(\d{1,2})\]/);
+	if (match) {
+		return parseInt(match[1]);
+	}
+
+	match = text.match(/@priority\(\s*(\d{1,2})\s*\)/);
+	if (match) {
+		return parseInt(match[1]);
+	}
+
 	// Create a regex pattern to match any priority emoji
 	const emojiPattern = new RegExp(
 		`(${Object.values(priorityEmojis)
@@ -343,7 +364,6 @@ export function extractPriority(text: string): number {
 	return 0;
 }
 
-
 // Extract tags from task title
 export function extractTags(text: string): string[] {
 	const matches = text.match(/\s+#\S+/g);
@@ -356,12 +376,10 @@ export function extractCompletionDate(text: string): string {
 		/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?/
 	);
 
-	// If not found, try to match the completion:: 2024-09-28 format
+	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
-		match = text.match(
-			/\[completion::\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\]/
-		);
-
+		match = text.match(/\[completion::\s*(.*?)\]/);
+		console.log("Following completion date matched : ", match);
 		if (match) {
 			return match
 				? match[0].replace("[completion::", "").replace("]", "").trim()
@@ -370,10 +388,8 @@ export function extractCompletionDate(text: string): string {
 	}
 
 	if (!match) {
-		match = text.match(
-			/\@completion\(\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\)/
-		);
-
+		match = text.match(/\@completion\(\s*(.*?)\s*\)/);
+		console.log("Following completion date matched : ", match);
 		if (match) {
 			return match
 				? match[0].replace("@completion(", "").replace(")", "").trim()

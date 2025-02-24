@@ -190,7 +190,7 @@ const sanitizeTime = (
 	globalSettings: globalSettingsData
 ): string => {
 	const timeAtStartRegex = /^\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
-	const timeEmojiRegex = /⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]/;
+	const timeFormatsRegex = /\s*(⏰\s*\[.*?\]|\[time::.*?\]|@time\(.*?\))/g; // Match all three formats
 
 	if (globalSettings.dayPlannerPlugin) {
 		const timeAtStartMatch = title.match(timeAtStartRegex);
@@ -199,10 +199,10 @@ const sanitizeTime = (
 			return title.replace(timeAtStartMatch[0], newTime);
 		}
 
-		const timeEmojiMatch = title.match(timeEmojiRegex);
-		if (timeEmojiMatch) {
-			// If time is present in emoji format, move it to the start
-			title = title.replace(timeEmojiMatch[0], "").trim();
+		const timeFormatMatch = title.match(timeFormatsRegex);
+		if (timeFormatMatch) {
+			// If time is present in any format, move it to the start
+			title = title.replace(timeFormatsRegex, "").trim();
 			return `${newTime} ${title}`;
 		}
 
@@ -213,17 +213,41 @@ const sanitizeTime = (
 		if (timeAtStartMatch) {
 			// If time is at the start of the title, move it to the end with emoji format
 			title = title.replace(timeAtStartMatch[0], "").trim();
-			return `${title} ⏰[${newTime}]`;
+			if (globalSettings.taskCompletionFormat === "1") {
+				return `${title} ⏰[${newTime}]`;
+			} else if (globalSettings.taskCompletionFormat === "2") {
+				return `${title} ⏰ [${newTime}]`;
+			} else if (globalSettings.taskCompletionFormat === "3") {
+				return `${title} [time:: ${newTime}]`;
+			} else {
+				return `${title} @time(${newTime})`;
+			}
 		}
 
-		const timeEmojiMatch = title.match(timeEmojiRegex);
-		if (timeEmojiMatch) {
-			// If time is present in emoji format, replace it with the new time
-			return title.replace(timeEmojiMatch[0], `⏰[${newTime}]`);
+		const timeFormatMatch = title.match(timeFormatsRegex);
+		if (timeFormatMatch) {
+			// If time is present in any format, replace it with the new time
+			if (globalSettings.taskCompletionFormat === "1") {
+				return title.replace(timeFormatsRegex, ` ⏰[${newTime}]`);
+			} else if (globalSettings.taskCompletionFormat === "2") {
+				return title.replace(timeFormatsRegex, ` ⏰ [${newTime}]`);
+			} else if (globalSettings.taskCompletionFormat === "3") {
+				return title.replace(timeFormatsRegex, ` [time:: ${newTime}]`);
+			} else {
+				return title.replace(timeFormatsRegex, ` @time(${newTime})`);
+			}
 		}
 
 		// If no time is present, add it at the end
-		return `${title} ⏰[${newTime}]`;
+		if (globalSettings.taskCompletionFormat === "1") {
+			return `${title} ⏰[${newTime}]`;
+		} else if (globalSettings.taskCompletionFormat === "2") {
+			return `${title} ⏰ [${newTime}]`;
+		} else if (globalSettings.taskCompletionFormat === "3") {
+			return `${title} [time:: ${newTime}]`;
+		} else {
+			return `${title} @time(${newTime})`;
+		}
 	}
 };
 
@@ -291,6 +315,20 @@ const sanitizePriority = (title: string, newPriority: number): string => {
 	// 	.trim();
 
 	const extractedPriorityMatch = extractPriority(title);
+
+	let match = title.match(
+		new RegExp(`\\[priority::\\s*${extractedPriorityMatch}\\s*\\]`)
+	);
+	if (match) {
+		return title.replace(match[0], `[priority:: ${newPriority}]`);
+	}
+
+	match = title.match(
+		new RegExp(`@priority\\(\\s*${extractedPriorityMatch}\\s*\\)`)
+	);
+	if (match) {
+		return title.replace(match[0], `@priority(${newPriority})`);
+	}
 
 	if (extractedPriorityMatch === 0) {
 		if (newPriority > 0) {
@@ -455,8 +493,11 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Remove time (handles both formats)
 	if (task.time) {
 		const timeRegex =
-			/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b)/g;
-		cleanedTitle = cleanedTitle.replace(timeRegex, "");
+			/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|\[time::.*?\]|\@time\(.*?\))/g;
+		const timeMatch = cleanedTitle.match(timeRegex);
+		if (timeMatch) {
+			cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
+		}
 	}
 
 	// Remove due date in various formats
@@ -474,6 +515,16 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	}
 
 	if (task.priority > 0) {
+		let match = cleanedTitle.match(/\[priority::\s*(\d{1,2})\]/);
+		if (match) {
+			cleanedTitle = cleanedTitle.replace(match[0], "");
+		}
+
+		match = cleanedTitle.match(/@priority\(\s*(\d{1,2})\s*\)/);
+		if (match) {
+			cleanedTitle = cleanedTitle.replace(match[0], "");
+		}
+
 		const priorityIcon = priorityEmojis[task.priority];
 
 		if (priorityIcon) {
