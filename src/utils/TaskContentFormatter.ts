@@ -486,8 +486,11 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	// Remove tags
 	task.tags.forEach((tag) => {
-		const tagRegex = new RegExp(`\\s*${tag}\\b`, "g");
-		cleanedTitle = cleanedTitle.replace(tagRegex, "");
+		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
+		const tagsMatch = cleanedTitle.match(tagRegex);
+		if (tagsMatch) {
+			cleanedTitle = cleanedTitle.replace(tagsMatch[0], "");
+		}
 	});
 
 	// Remove time (handles both formats)
