@@ -95,6 +95,42 @@
 	height: 100%;
 }
 
+.loadingContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	text-align: center;
+	padding: 20px;
+}
+
+.spinner {
+	width: 40px;
+	height: 40px;
+	border: 4px solid rgba(0, 0, 0, 0.1);
+	border-left-color: #007bff;
+	/* Blue */
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.initializationMessage {
+	margin-top: 15px;
+	max-width: 600px;
+}
+
 
 /* src/styles/Column.tsx */
 .TaskBoardColumnsSection {
@@ -1901,5 +1937,6 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	[data-task="s"],
 	[data-task="H"],
 	[data-task="<"]) {
-	border: 0 !important; /* This will remove the border of the checkbox so only the icon is visible*/
+	border: 0 !important;
+	/* This will remove the border of the checkbox so only the icon is visible*/
 }
