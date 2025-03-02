@@ -96,7 +96,7 @@
         ],
         "Testing 2.md": [
             {
-                "id": 1918879544,
+                "id": 1806372858,
                 "status": " ",
                 "title": "Give some time for Notes Explorer plugin. 🔼 @time(19:34 - 20:34)   @due(2025-01-03) #bug/solver #done",
                 "body": [
@@ -116,7 +116,7 @@
                 "completion": ""
             },
             {
-                "id": 2372721153,
+                "id": 3067970845,
                 "status": "?",
                 "title": "So This is to add a simple Task for testing. 🔼 ⏰ [19:34 - 20:34]   📅 2025-01-03 #bug/solver",
                 "body": [
@@ -136,13 +136,27 @@
                 "completion": ""
             },
             {
-                "id": 2114929423,
+                "id": 3963517574,
                 "status": " ",
                 "title": "This task has simple time in 4th format @time(12:30 AM)",
                 "body": [],
                 "time": "12:30 AM",
                 "due": "",
                 "tags": [],
+                "priority": 0,
+                "filePath": "Testing 2.md",
+                "completion": ""
+            },
+            {
+                "id": 82150720,
+                "status": " ",
+                "title": "#📋 [[Nexus Book Project|Nexus]]: Determine next action 🔁 every month 📅 ⏳ 2024-12-20 2024-12-20",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [
+                    "#📋"
+                ],
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "completion": ""
@@ -851,7 +865,7 @@
         ],
         "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md": [
             {
-                "id": 1711611185,
+                "id": 3876231502,
                 "status": " ",
                 "title": "Unchecked.",
                 "body": [],
@@ -863,7 +877,7 @@
                 "completion": ""
             },
             {
-                "id": 838519115,
+                "id": 3802243325,
                 "status": ">",
                 "title": "Forward",
                 "body": [],
@@ -875,7 +889,7 @@
                 "completion": ""
             },
             {
-                "id": 2290074720,
+                "id": 3044286165,
                 "status": "<",
                 "title": "Migrated",
                 "body": [],
@@ -887,7 +901,7 @@
                 "completion": ""
             },
             {
-                "id": 3757093893,
+                "id": 2045543716,
                 "status": "D",
                 "title": "Date",
                 "body": [],
@@ -899,7 +913,7 @@
                 "completion": ""
             },
             {
-                "id": 541573683,
+                "id": 2875028031,
                 "status": "?",
                 "title": "Question",
                 "body": [],
@@ -911,7 +925,7 @@
                 "completion": ""
             },
             {
-                "id": 725805099,
+                "id": 1376517961,
                 "status": "/",
                 "title": "Half Done",
                 "body": [],
@@ -923,7 +937,7 @@
                 "completion": ""
             },
             {
-                "id": 4221076050,
+                "id": 3077965148,
                 "status": "+",
                 "title": "Add",
                 "body": [],
@@ -935,7 +949,7 @@
                 "completion": ""
             },
             {
-                "id": 1594871579,
+                "id": 4011055218,
                 "status": "R",
                 "title": "Research",
                 "body": [],
@@ -947,7 +961,7 @@
                 "completion": ""
             },
             {
-                "id": 2154197893,
+                "id": 806920260,
                 "status": "!",
                 "title": "Important",
                 "body": [],
@@ -959,7 +973,7 @@
                 "completion": ""
             },
             {
-                "id": 2202054631,
+                "id": 348558420,
                 "status": "i",
                 "title": "Idea",
                 "body": [],
@@ -971,7 +985,7 @@
                 "completion": ""
             },
             {
-                "id": 2797663467,
+                "id": 1886099471,
                 "status": "B",
                 "title": "Brainstorm",
                 "body": [],
@@ -983,7 +997,7 @@
                 "completion": ""
             },
             {
-                "id": 3114709329,
+                "id": 4203077552,
                 "status": "P",
                 "title": "Pro",
                 "body": [],
@@ -995,7 +1009,7 @@
                 "completion": ""
             },
             {
-                "id": 2677608506,
+                "id": 2676925217,
                 "status": "C",
                 "title": "Con",
                 "body": [],
@@ -1007,7 +1021,7 @@
                 "completion": ""
             },
             {
-                "id": 1747306939,
+                "id": 4228970640,
                 "status": "Q",
                 "title": "Quote",
                 "body": [],
@@ -1019,7 +1033,7 @@
                 "completion": ""
             },
             {
-                "id": 1921464144,
+                "id": 2812944679,
                 "status": "N",
                 "title": "Note",
                 "body": [],
@@ -1031,7 +1045,7 @@
                 "completion": ""
             },
             {
-                "id": 2801507347,
+                "id": 2666775497,
                 "status": "b",
                 "title": "Bookmark",
                 "body": [],
@@ -1043,7 +1057,7 @@
                 "completion": ""
             },
             {
-                "id": 989240246,
+                "id": 1653205503,
                 "status": "I",
                 "title": "Information",
                 "body": [],
@@ -1055,7 +1069,7 @@
                 "completion": ""
             },
             {
-                "id": 2441345450,
+                "id": 2874831255,
                 "status": "p",
                 "title": "Paraphrase",
                 "body": [],
@@ -1067,7 +1081,7 @@
                 "completion": ""
             },
             {
-                "id": 1963464939,
+                "id": 2785300657,
                 "status": "L",
                 "title": "Location",
                 "body": [],
@@ -1079,7 +1093,7 @@
                 "completion": ""
             },
             {
-                "id": 2742196846,
+                "id": 3605555265,
                 "status": "E",
                 "title": "Example",
                 "body": [],
@@ -1091,7 +1105,7 @@
                 "completion": ""
             },
             {
-                "id": 2638177199,
+                "id": 2537651407,
                 "status": "A",
                 "title": "Answer",
                 "body": [],
@@ -1103,7 +1117,7 @@
                 "completion": ""
             },
             {
-                "id": 2044724291,
+                "id": 1738340769,
                 "status": "r",
                 "title": "Reward",
                 "body": [],
@@ -1115,7 +1129,7 @@
                 "completion": ""
             },
             {
-                "id": 4212073681,
+                "id": 582152338,
                 "status": "c",
                 "title": "Choice",
                 "body": [],
@@ -1127,7 +1141,7 @@
                 "completion": ""
             },
             {
-                "id": 2167371692,
+                "id": 2245781876,
                 "status": "d",
                 "title": "Doing",
                 "body": [],
@@ -1139,7 +1153,7 @@
                 "completion": ""
             },
             {
-                "id": 763402822,
+                "id": 3010866797,
                 "status": "T",
                 "title": "Time",
                 "body": [],
@@ -1151,7 +1165,7 @@
                 "completion": ""
             },
             {
-                "id": 2355633377,
+                "id": 4141719854,
                 "status": "@",
                 "title": "Character / Person",
                 "body": [],
@@ -1163,7 +1177,7 @@
                 "completion": ""
             },
             {
-                "id": 2395484585,
+                "id": 3164778901,
                 "status": "t",
                 "title": "Talk",
                 "body": [],
@@ -1175,7 +1189,7 @@
                 "completion": ""
             },
             {
-                "id": 3121530617,
+                "id": 3690674031,
                 "status": "O",
                 "title": "Outline / Plot",
                 "body": [],
@@ -1187,7 +1201,7 @@
                 "completion": ""
             },
             {
-                "id": 1179536122,
+                "id": 4202809627,
                 "status": "~",
                 "title": "Conflict",
                 "body": [],
@@ -1199,7 +1213,7 @@
                 "completion": ""
             },
             {
-                "id": 3749493753,
+                "id": 3451517916,
                 "status": "W",
                 "title": "World",
                 "body": [],
@@ -1211,7 +1225,7 @@
                 "completion": ""
             },
             {
-                "id": 565391502,
+                "id": 3211542432,
                 "status": "f",
                 "title": "Clue / Find",
                 "body": [],
@@ -1223,7 +1237,7 @@
                 "completion": ""
             },
             {
-                "id": 589094845,
+                "id": 1578520854,
                 "status": "F",
                 "title": "Foreshadow",
                 "body": [],
@@ -1235,7 +1249,7 @@
                 "completion": ""
             },
             {
-                "id": 698174808,
+                "id": 1667582427,
                 "status": "H",
                 "title": "Favorite / Health",
                 "body": [],
@@ -1247,7 +1261,7 @@
                 "completion": ""
             },
             {
-                "id": 296842518,
+                "id": 1119560868,
                 "status": "&",
                 "title": "Symbolism",
                 "body": [],
@@ -1259,7 +1273,7 @@
                 "completion": ""
             },
             {
-                "id": 2033423205,
+                "id": 2256446752,
                 "status": "s",
                 "title": "Secret",
                 "body": [],
@@ -1271,7 +1285,7 @@
                 "completion": ""
             },
             {
-                "id": 799297177,
+                "id": 3274970587,
                 "status": "1",
                 "title": "One",
                 "body": [],
@@ -1283,7 +1297,7 @@
                 "completion": ""
             },
             {
-                "id": 918852154,
+                "id": 3479615810,
                 "status": "2",
                 "title": "Two",
                 "body": [],
@@ -2657,6 +2671,79 @@
                 "filePath": "DailyNotes.md",
                 "completion": ""
             }
+        ],
+        "NGAP.md": [
+            {
+                "id": 4004920459,
+                "status": ">",
+                "title": "This is a new task adding for the release v1.3.0 🔼 ⏰ [04:18 - 05:18] 📅 2025-02-27 #test",
+                "body": [
+                    "\t- [ ] A new sub-task for testing purposes.",
+                    "\tA line in body explaining this task further in detail."
+                ],
+                "time": "04:18 - 05:18",
+                "due": "2025-02-27",
+                "tags": [
+                    "#test"
+                ],
+                "priority": 3,
+                "filePath": "NGAP.md",
+                "completion": ""
+            }
+        ],
+        "obsidian-hub-0.2.1/06 - Inbox/Testing indentations of tasks..md": [
+            {
+                "id": 3958384750,
+                "status": " ",
+                "title": "This is a normal task without any indentation.",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "obsidian-hub-0.2.1/06 - Inbox/Testing indentations of tasks..md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/2025-02-28.md": [
+            {
+                "id": 1451905785,
+                "status": " ",
+                "title": "This is a first test in order to understand how to integrate **recurring tasks** in Task board. 🔁 every day",
+                "body": [],
+                "time": "",
+                "due": "2025-02-28",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-02-28.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/2025-03-01.md": [
+            {
+                "id": 2023215398,
+                "status": " ",
+                "title": "This is a first test. 🔁 every day",
+                "body": [],
+                "time": "",
+                "due": "2025-03-01",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-03-01.md",
+                "completion": ""
+            },
+            {
+                "id": 1220037498,
+                "status": " ",
+                "title": "07:30 - 08:00 Temp task for testing",
+                "body": [],
+                "time": "07:30 - 08:00",
+                "due": "2025-03-01",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-03-01.md",
+                "completion": ""
+            }
         ]
     },
     "Completed": {
@@ -2733,7 +2820,7 @@
         ],
         "obsidian-hub-0.2.1/06 - Inbox/ClubMacStories.md": [
             {
-                "id": 324190056,
+                "id": 748820316,
                 "status": "x",
                 "title": "Regular",
                 "body": [],
@@ -2745,7 +2832,7 @@
                 "completion": ""
             },
             {
-                "id": 2371502360,
+                "id": 447047305,
                 "status": "X",
                 "title": "Checked",
                 "body": [],
@@ -2757,7 +2844,7 @@
                 "completion": ""
             },
             {
-                "id": 2240355415,
+                "id": 4282307812,
                 "status": "-",
                 "title": "Dropped",
                 "body": [],
