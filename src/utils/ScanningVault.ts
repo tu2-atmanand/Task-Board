@@ -287,7 +287,6 @@ export function extractTime(text: string): string {
 	}
 
 	match = text.match(/@time\((.*?)\)/);
-	console.log("Following time detected for @time() pattern : ", match);
 	if (match) {
 		return match[1];
 	}
@@ -379,7 +378,6 @@ export function extractCompletionDate(text: string): string {
 	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
 		match = text.match(/\[completion::\s*(.*?)\]/);
-		console.log("Following completion date matched : ", match);
 		if (match) {
 			return match
 				? match[0].replace("[completion::", "").replace("]", "").trim()
@@ -389,7 +387,6 @@ export function extractCompletionDate(text: string): string {
 
 	if (!match) {
 		match = text.match(/\@completion\(\s*(.*?)\s*\)/);
-		console.log("Following completion date matched : ", match);
 		if (match) {
 			return match
 				? match[0].replace("@completion(", "").replace(")", "").trim()
