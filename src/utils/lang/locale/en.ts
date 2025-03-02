@@ -132,7 +132,7 @@ const en: Lang = {
 	"supported-plugin-formats": "Supported plugin formats",
 	"supported-plugin-formats-info":
 		"Different plugins have different format to give the 'due' and 'completion' values to the task. Please select one of the value and see the above format, if its compatible with your current setup.",
-	default: "Default",
+	"default": "Default",
 	"task-completion-date-time-pattern": "Task completion date-time pattern",
 	"task-completion-date-time-pattern-info":
 		"Enter the pattern of the date-time which you would like to see for the completion value. Eg. yyyy-MM-dd/HH:mm:ss",
