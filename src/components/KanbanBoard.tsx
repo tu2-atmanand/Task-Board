@@ -23,6 +23,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	// const [allTasksArrangedPerColumn, setAllTasksArrangedPerColumn] = useState<taskItem[][]>([]);
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
+	const [freshInstall, setFreshInstall] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -34,8 +35,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 				// console.log("KanbanBoard.tsx : Data in allTasks :", allTasks);
 				if (allTasks) {
 					setAllTasks(allTasks);
+					setFreshInstall(false);
 				}
 			} catch (error) {
+				setFreshInstall(true);
 				console.error("Error loading board data:", error);
 			}
 		};
@@ -190,7 +193,22 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 			</div>
 			<div className="columnsContainer">
 				{loading ? (
-					<p>Loading tasks...</p> // Replace with a spinner or skeleton if needed
+					<div className="loadingContainer">
+						{freshInstall ? (
+							<h2 className="initializationMessage">
+								Looks like this is a fresh install.
+								<br />
+								<br />
+								Please use the <strong>Scan Vault</strong> button (top right) to collect tasks for this board.
+								This is only required for first-time setup or after changing filters in the <strong>"Filters for Scanning"</strong> settings.
+							</h2>
+						) : (
+							<>
+								<div className="spinner"></div>
+								<p>Loading your tasks...</p>
+							</>
+						)}
+					</div>
 				) : (
 					boards[activeBoardIndex]?.columns
 						.filter((column) => column.active)
