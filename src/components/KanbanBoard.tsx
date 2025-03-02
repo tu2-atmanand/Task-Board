@@ -196,16 +196,18 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 					<div className="loadingContainer">
 						{freshInstall ? (
 							<h2 className="initializationMessage">
-								Looks like this is a fresh install.
+								{t("fresh-install-1")}
 								<br />
 								<br />
-								Please use the <strong>Scan Vault</strong> button (top right) to collect tasks for this board.
-								This is only required for first-time setup or after changing filters in the <strong>"Filters for Scanning"</strong> settings.
+								{t("fresh-install-2")}
+								<br />
+								<br />
+								{t("fresh-install-3")}
 							</h2>
 						) : (
 							<>
 								<div className="spinner"></div>
-								<p>Loading your tasks...</p>
+								<p>{t('loading-tasks')}</p>
 							</>
 						)}
 					</div>
