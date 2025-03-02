@@ -15,6 +15,7 @@ import {
 	PluginDataJson,
 	langCodes,
 } from "src/interfaces/GlobalSettings";
+import { openAddNewTaskModal, openScanVaultModal } from "src/services/OpenModals";
 
 import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
@@ -23,7 +24,6 @@ import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { fetchTasksPluginCustomStatuses } from "src/services/CommunityPlugins";
-import { openAddNewTaskModal } from "src/services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
 export default class TaskBoard extends Plugin {
@@ -273,6 +273,13 @@ export default class TaskBoard extends Plugin {
 				this.activateView("window");
 			},
 		});
+		this.addCommand({
+			id: "open-scan-vault-modal",
+			name: t("open-scan-vault-modal"),
+			callback: () => {
+				openScanVaultModal(this.app, this.plugin);
+			},
+		})
 
 		// // TODO : Remove this command before publishing, DEV commands
 		// this.addCommand({

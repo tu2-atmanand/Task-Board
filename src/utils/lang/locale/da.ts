@@ -191,5 +191,6 @@ const da = {
   "fresh-install-1": "Det ser ud til, at dette er en frisk installation.",
   "fresh-install-2": "Brug knappen 'Scan Vault' (øverst til højre) til at indsamle opgaver til dette bord.",
   "fresh-install-3": "Dette er kun påkrævet til førstegangsopsætning eller efter at have ændret filtre i indstillingerne 'Filtre til scanning'.",
+  "open-scan-vault-modal": "Åbn scan hvælvning modal",
 };
 export default da;

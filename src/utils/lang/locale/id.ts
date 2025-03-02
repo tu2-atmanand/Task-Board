@@ -191,5 +191,6 @@ const id = {
   "fresh-install-1": "Sepertinya ini adalah instalasi baru.",
   "fresh-install-2": "Harap gunakan tombol 'Scan Vault' (kanan atas) untuk mengumpulkan tugas untuk papan ini.",
   "fresh-install-3": "Ini hanya diperlukan untuk pengaturan pertama kali atau setelah mengubah filter dalam pengaturan 'filter untuk pemindaian'.",
+  "open-scan-vault-modal": "Open Scan Vault Modal",
 };
 export default id;

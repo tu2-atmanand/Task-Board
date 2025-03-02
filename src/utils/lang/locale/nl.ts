@@ -191,5 +191,6 @@ const nl = {
   "fresh-install-1": "Het lijkt erop dat dit een nieuwe installatie is.",
   "fresh-install-2": "Gebruik de knop 'Scan kluis' (rechtsboven) om taken voor dit bord te verzamelen.",
   "fresh-install-3": "Dit is alleen vereist voor de eerste installatie of na het wijzigen van filters in de 'filters voor het scannen' instellingen.",
+  "open-scan-vault-modal": "Open scan kluismodaal",
 };
 export default nl;

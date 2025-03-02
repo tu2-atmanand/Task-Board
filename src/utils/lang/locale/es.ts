@@ -191,5 +191,6 @@ const es = {
   "fresh-install-1": "Parece que esta es una instalación nueva.",
   "fresh-install-2": "Utilice el botón 'escanear bóveda' (arriba a la derecha) para recopilar tareas para este tablero.",
   "fresh-install-3": "Esto solo se requiere para la configuración por primera vez o después de cambiar los filtros en la configuración 'Filtros para escanear'.",
+  "open-scan-vault-modal": "Abra de bóveda de escaneo de escaneo modal",
 };
 export default es;

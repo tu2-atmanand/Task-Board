@@ -191,5 +191,6 @@ const tr = {
   "fresh-install-1": "Görünüşe göre bu yeni bir kurulum.",
   "fresh-install-2": "Bu pano için görevleri toplamak için lütfen 'Tonoz Tarama' düğmesini (sağ üst) kullanın.",
   "fresh-install-3": "Bu yalnızca ilk kez kurulum için veya 'tarama için filtreler' ayarlarındaki filtreleri değiştirdikten sonra gereklidir.",
+  "open-scan-vault-modal": "Scan Vault Modal'ı açın",
 };
 export default tr;

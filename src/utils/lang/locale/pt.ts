@@ -191,5 +191,6 @@ const pt = {
   "fresh-install-1": "Parece que esta é uma nova instalação.",
   "fresh-install-2": "Use o botão 'Scan Vault' (canto superior direito) para coletar tarefas para esta placa.",
   "fresh-install-3": "Isso é necessário apenas para a configuração pela primeira vez ou após a alteração dos filtros nas configurações 'Filtros para digitalização'.",
+  "open-scan-vault-modal": "Open Scan Vault Modal",
 };
 export default pt;

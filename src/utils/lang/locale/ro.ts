@@ -191,5 +191,6 @@ const ro = {
   "fresh-install-1": "Se pare că aceasta este o instalare nouă.",
   "fresh-install-2": "Vă rugăm să utilizați butonul „Scan Vault” (dreapta sus) pentru a colecta sarcini pentru această placă.",
   "fresh-install-3": "Acest lucru este necesar numai pentru configurarea pentru prima dată sau după modificarea filtrelor din setările „filtre pentru scanare”.",
+  "open-scan-vault-modal": "Open Scan Vault Modal",
 };
 export default ro;

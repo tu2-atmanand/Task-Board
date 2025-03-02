@@ -191,5 +191,6 @@ const ko = {
   "fresh-install-1": "이것은 새로운 설치 인 것 같습니다.",
   "fresh-install-2": "'Vault Scan'버튼 (오른쪽 상단)을 사용 하여이 보드의 작업을 수집하십시오.",
   "fresh-install-3": "이는 첫 번째 설정에만 필요합니다. 또는 '스캔을위한 필터'에서 필터를 변경 한 후에 만 ​​필요합니다.",
+  "open-scan-vault-modal": "스캔 금고 모달을 엽니 다",
 };
 export default ko;

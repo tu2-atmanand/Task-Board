@@ -191,5 +191,6 @@ const no = {
   "fresh-install-1": "Ser ut som dette er en ny installasjon.",
   "fresh-install-2": "Bruk 'Scan Vault' -knappen (øverst til høyre) for å samle oppgaver for dette brettet.",
   "fresh-install-3": "Dette er bare nødvendig for førstegangsoppsett eller etter å ha endret filtre i 'filtrene for skanning' -innstillinger.",
+  "open-scan-vault-modal": "Åpen skannehvelvmodal",
 };
 export default no;

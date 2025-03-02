@@ -191,5 +191,6 @@ const it = {
   "fresh-install-1": "Sembra che questa sia una nuova installazione.",
   "fresh-install-2": "Si prega di utilizzare il pulsante 'Scansione Vault' (in alto a destra) per raccogliere attività per questa scheda.",
   "fresh-install-3": "Ciò è richiesto solo per la configurazione per la prima volta o dopo aver modificato i filtri nelle impostazioni 'Filtri per la scansione'.",
+  "open-scan-vault-modal": "Apri Modal di Vault Scan",
 };
 export default it;

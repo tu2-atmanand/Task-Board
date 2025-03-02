@@ -191,5 +191,6 @@ const cs = {
   "fresh-install-1": "Vypadá to, že se jedná o čerstvou instalaci.",
   "fresh-install-2": "Použijte prosím tlačítko „Scan Vault“ (vpravo nahoře) ke sběru úkolů pro tuto desku.",
   "fresh-install-3": "To je vyžadováno pouze pro první nastavení nebo po změně filtrů v nastavení „Filtry pro skenování“.",
+  "open-scan-vault-modal": "Otevřená modální modál",
 };
 export default cs;

@@ -191,5 +191,6 @@ const zhTW = {
   "fresh-install-1": "看起來這是一個新的安裝。",
   "fresh-install-2": "請使用“掃描保險庫”按鈕（右上）收集此板的任務。",
   "fresh-install-3": "這僅是首次設置或更改“用於掃描”設置的過濾器之後所必需的。",
+  "open-scan-vault-modal": "打開掃描庫模式",
 };
 export default zhTW;

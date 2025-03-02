@@ -191,5 +191,6 @@ const fr = {
   "fresh-install-1": "On dirait que c'est une nouvelle installation.",
   "fresh-install-2": "Veuillez utiliser le bouton «Scan Vault» (en haut à droite) pour collecter des tâches pour cette carte.",
   "fresh-install-3": "Ceci n'est requis que pour la première configuration ou après la modification des filtres dans les paramètres «Filtres pour la numérisation».",
+  "open-scan-vault-modal": "Vault à scan ouvert modal",
 };
 export default fr;

@@ -191,5 +191,6 @@ const sq = {
   "fresh-install-1": "Duket sikur kjo është një instalim i freskët.",
   "fresh-install-2": "Ju lutemi përdorni butonin 'Scan Vault' (sipër djathtas) për të mbledhur detyra për këtë bord.",
   "fresh-install-3": "Kjo kërkohet vetëm për konfigurimin për herë të parë ose pas ndryshimit të filtrave në 'Filtrat për Skanimin'.",
+  "open-scan-vault-modal": "Hapni Skanimin e Vault Modal",
 };
 export default sq;

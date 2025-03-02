@@ -191,5 +191,6 @@ const zhCN = {
   "fresh-install-1": "看起来这是一个新的安装。",
   "fresh-install-2": "请使用“扫描保险库”按钮（右上）收集此板的任务。",
   "fresh-install-3": "这仅是首次设置或更改“用于扫描”设置的过滤器之后所必需的。",
+  "open-scan-vault-modal": "打开扫描库模式",
 };
 export default zhCN;

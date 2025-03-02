@@ -191,5 +191,6 @@ const pl = {
   "fresh-install-1": "Wygląda na to, że jest to nowa instalacja.",
   "fresh-install-2": "Użyj przycisku „skanowania” (po prawej górnej części), aby zebrać zadania dla tej płyty.",
   "fresh-install-3": "Jest to wymagane tylko do konfiguracji po raz pierwszy lub po zmianie filtrów w ustawieniach „filtrów do skanowania”.",
+  "open-scan-vault-modal": "Otwarte skanowanie Vault Modal",
 };
 export default pl;

@@ -191,5 +191,6 @@ const ar = {
   "fresh-install-1": "يبدو أن هذا تثبيت جديد.",
   "fresh-install-2": "يرجى استخدام زر 'Scan Vault' (أعلى يمين) لجمع المهام لهذا اللوحة.",
   "fresh-install-3": "هذا مطلوب فقط للإعداد لأول مرة أو بعد تغيير المرشحات في إعدادات 'المرشحات للمسح الضوئي'.",
+  "open-scan-vault-modal": "افتح مسح Vault Modal",
 };
 export default ar;

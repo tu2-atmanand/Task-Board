@@ -191,5 +191,6 @@ const de = {
   "fresh-install-1": "Sieht so aus, als wäre dies eine frische Installation.",
   "fresh-install-2": "Bitte verwenden Sie die Schaltfläche 'Vault' (oben rechts), um Aufgaben für diese Karte zu sammeln.",
   "fresh-install-3": "Dies ist nur für das Erstaufbau oder nach dem Ändern von Filtern in den Einstellungen 'Filter für das Scannen' erforderlich.",
+  "open-scan-vault-modal": "Öffnen Sie das Vault -Modal des Scans",
 };
 export default de;
