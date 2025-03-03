@@ -23,6 +23,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	// const [allTasksArrangedPerColumn, setAllTasksArrangedPerColumn] = useState<taskItem[][]>([]);
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
+	const [freshInstall, setFreshInstall] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -34,8 +35,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 				// console.log("KanbanBoard.tsx : Data in allTasks :", allTasks);
 				if (allTasks) {
 					setAllTasks(allTasks);
+					setFreshInstall(false);
 				}
 			} catch (error) {
+				setFreshInstall(true);
 				console.error("Error loading board data:", error);
 			}
 		};
@@ -190,7 +193,24 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 			</div>
 			<div className="columnsContainer">
 				{loading ? (
-					<p>Loading tasks...</p> // Replace with a spinner or skeleton if needed
+					<div className="loadingContainer">
+						{freshInstall ? (
+							<h2 className="initializationMessage">
+								{t("fresh-install-1")}
+								<br />
+								<br />
+								{t("fresh-install-2")}
+								<br />
+								<br />
+								{t("fresh-install-3")}
+							</h2>
+						) : (
+							<>
+								<div className="spinner"></div>
+								<p>{t('loading-tasks')}</p>
+							</>
+						)}
+					</div>
 				) : (
 					boards[activeBoardIndex]?.columns
 						.filter((column) => column.active)

@@ -651,20 +651,20 @@ export class SettingsManager {
 				// Default
 				case "1": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [x] ${time} ${taskTitle} ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} | ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [x] ${taskTitle} ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
 					}
 					break;
 				}
 				// Tasks Plugin
 				case "2": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+						preview = `- [x] ${time} ${taskTitle} ${priority} 📅 ${dueDate} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${taskTitle} | ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
+						preview = `- [x] ${taskTitle} ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -673,18 +673,18 @@ export class SettingsManager {
 				// Dataview Plugin
 				case "3": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [x] ${time} ${taskTitle} [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} | [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [x] ${taskTitle} [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					}
 					break;
 				}
 				// Obsidian Native
 				case "4": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [x] ${time} ${taskTitle} @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					} else {
-						preview = `- [x] ${taskTitle} | @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [x] ${taskTitle} @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					}
 					break;
 				}

@@ -24,7 +24,7 @@ export const taskContentFormatter = (
 	// Sanitize all the properties from the task title
 	let updatedTitle = updatedTask.title;
 	if (priorityWithEmo) {
-		updatedTitle = sanitizePriority(updatedTitle, updatedTask.priority);
+		updatedTitle = sanitizePriority(updatedTitle, updatedTask.priority, globalSettings);
 	}
 	if (updatedTask.time) {
 		updatedTitle = sanitizeTime(
@@ -255,7 +255,7 @@ const sanitizeTime = (
 /**
  * Function to sanitize the priority inside the task title.
  */
-const sanitizePriority = (title: string, newPriority: number): string => {
+const sanitizePriority = (title: string, newPriority: number, globalSettings: globalSettingsData): string => {
 	// // Create a regex pattern to match any priority emoji
 	// const emojiPattern = new RegExp(
 	// 	`(${Object.values(priorityEmojis)
@@ -332,7 +332,13 @@ const sanitizePriority = (title: string, newPriority: number): string => {
 
 	if (extractedPriorityMatch === 0) {
 		if (newPriority > 0) {
-			return `${title} ${priorityEmojis[newPriority]}`;
+			if (globalSettings?.taskCompletionFormat === "3") {
+				return `${title} [priority:: ${newPriority}]`;
+			} else if (globalSettings?.taskCompletionFormat === "4") {
+				return `${title} @priority(${newPriority})`;
+			} else {
+				return `${title} ${priorityEmojis[newPriority]}`;
+			}
 		}
 		return title;
 	} else {
@@ -486,8 +492,11 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	// Remove tags
 	task.tags.forEach((tag) => {
-		const tagRegex = new RegExp(`\\s*${tag}\\b`, "g");
-		cleanedTitle = cleanedTitle.replace(tagRegex, "");
+		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
+		const tagsMatch = cleanedTitle.match(tagRegex);
+		if (tagsMatch) {
+			cleanedTitle = cleanedTitle.replace(tagsMatch[0], "");
+		}
 	});
 
 	// Remove time (handles both formats)
