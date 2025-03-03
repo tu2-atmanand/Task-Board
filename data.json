@@ -90,12 +90,11 @@
       {
         "columns": [
           {
-            "colType": "namedTag",
+            "colType": "untagged",
             "active": true,
             "collapsed": false,
             "name": "Backlogs",
-            "index": 1,
-            "coltag": "done"
+            "index": 1
           },
           {
             "colType": "namedTag",
@@ -122,11 +121,12 @@
             "coltag": "Test"
           },
           {
-            "colType": "untagged",
+            "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Working as Expected",
-            "index": 5
+            "index": 5,
+            "coltag": "done"
           }
         ],
         "filters": [
@@ -199,7 +199,7 @@
       }
     ],
     "globalSettings": {
-      "lang": "cs",
+      "lang": "zh-TW",
       "scanFilters": {
         "files": {
           "polarity": 3,
@@ -218,7 +218,7 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "2",
+      "taskCompletionFormat": "3",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "dailyNotesPluginComp": true,
       "dueDateFormat": "yyyy-MM-DD",
