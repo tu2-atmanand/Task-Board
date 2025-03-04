@@ -310,6 +310,6 @@ export const langCodes: { [key: string]: string } = {
 	tr: "Türkçe",
 	uk: "Українська",
 	"pt-BR": "Portugues do Brasil",
-	"zh-CN": "简体中文",
+	zh: "简体中文",
 	"zh-TW": "繁體中文",
 };
