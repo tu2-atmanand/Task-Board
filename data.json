@@ -199,7 +199,7 @@
       }
     ],
     "globalSettings": {
-      "lang": "zh-TW",
+      "lang": "zh",
       "scanFilters": {
         "files": {
           "polarity": 3,
@@ -229,8 +229,8 @@
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
-      "showHeader": true,
-      "showFooter": true,
+      "showHeader": false,
+      "showFooter": false,
       "showVerticalScroll": false,
       "tagColors": {
         "bug": "#ef1120dd",
@@ -331,7 +331,7 @@
           "type": "TODO"
         }
       ],
-      "showTaskWithoutMetadata": true
+      "showTaskWithoutMetadata": false
     }
   }
 }
