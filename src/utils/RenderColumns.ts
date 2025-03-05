@@ -37,17 +37,12 @@ export const renderColumns = (
 				(dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
 			);
 
-			if (from < 0 && to === 0) {
-				return diffDays < 0;
-			} else if (from === 0 && to === 0) {
-				return diffDays === 0;
-			} else if (from === 1 && to === 1) {
-				return diffDays === 1;
-			} else if (from === 2 && to === 0) {
-				return diffDays >= 2;
+			// Handle cases where 'from' is greater than 'to'
+			if (from > to) {
+				return diffDays >= to && diffDays <= from;
 			}
 
-			return false;
+			return diffDays >= from && diffDays <= to;
 		});
 	} else if (columnData.colType === "untagged") {
 		tasksToDisplay = pendingTasks.filter((task) => !(task.tags.length > 0));
