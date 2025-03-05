@@ -1,9 +1,6 @@
 // src/utils/RenderColumns.ts
 
-import { Dispatch, SetStateAction } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
-
-import { ColumnData } from "src/interfaces/BoardConfigs";
 import TaskBoard from "main";
 
 // Function to refresh tasks in any column by calling this utility function
