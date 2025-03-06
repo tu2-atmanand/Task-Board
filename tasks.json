@@ -13,7 +13,7 @@
                     "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
                 ],
                 "time": "",
-                "due": "2025-02-17",
+                "due": "2025-03-06",
                 "tags": [
                     "#feat",
                     "#test"
@@ -119,7 +119,7 @@
                     "\t\t- [ ] A sub-sub Task for the first time. updating."
                 ],
                 "time": "19:34 - 20:34",
-                "due": "2025-03-04",
+                "due": "2025-03-07",
                 "tags": [
                     "#bug/solver",
                     "#done"
@@ -231,7 +231,7 @@
                     "\t![[Pasted image 20241014211429.png]]"
                 ],
                 "time": "",
-                "due": "2024-10-23",
+                "due": "2025-03-07",
                 "tags": [
                     "#Test"
                 ],
@@ -326,9 +326,11 @@
                 "id": 2716061818,
                 "status": " ",
                 "title": "#✔️дел Task-4 🔺 📅 2025-01-01",
-                "body": [],
+                "body": [
+                    ""
+                ],
                 "time": "",
-                "due": "2025-01-01",
+                "due": "2025-03-06",
                 "tags": [
                     "#✔️дел"
                 ],

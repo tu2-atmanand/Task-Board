@@ -63,7 +63,7 @@
               "tag": "after",
               "rangedata": {
                 "from": 2,
-                "to": 200
+                "to": 300
               }
             }
           },
@@ -199,7 +199,7 @@
       }
     ],
     "globalSettings": {
-      "lang": "zh",
+      "lang": "zh-TW",
       "scanFilters": {
         "files": {
           "polarity": 3,
