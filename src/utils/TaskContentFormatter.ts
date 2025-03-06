@@ -12,19 +12,8 @@ export const taskContentFormatter = (
 		return "";
 	}
 
-	console.log(
-		"Task content formatter : Received following task: ",
-		updatedTask
-	);
-
 	const globalSettings = plugin.settings.data.globalSettings;
 	const checkBoxStat = `- [${updatedTask.status}]`;
-
-	// // Combine priority emoji if it exists
-	// const priorityWithEmo =
-	// 	updatedTask.priority > 0
-	// 		? priorityEmojis[updatedTask.priority as number]
-	// 		: "";
 
 	// TODO : Sanitizations not only correcting the format and replacing the old content with the latest one, but also very important is to clean if any old properties are there.
 
@@ -42,20 +31,6 @@ export const taskContentFormatter = (
 
 	// Build the formatted string for the main task
 	let formattedTask = `${checkBoxStat} ${updatedTitle}`;
-
-	// let formattedTask = "";
-	// if (
-	// 	updatedTask.time !== "" ||
-	// 	timeWithEmo !== "" ||
-	// 	priorityWithEmo !== "" ||
-	// 	dueDateWithFormat !== "" ||
-	// 	completedWitFormat !== "" ||
-	// 	updatedTask.tags.length > 0
-	// ) {
-	// 	formattedTask = `${checkBoxStat} ${updatedTitle} ${priorityWithEmo}${timeWithEmo}${dueDateWithFormat}${completedWitFormat}`;
-	// } else {
-	// 	formattedTask = `${checkBoxStat} ${updatedTitle}`;
-	// }
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
@@ -142,8 +117,6 @@ const sanitizeCompletionDate = (
 		/\[completion::[^\]]+\]|\@completion\(.*?\)|✅\s*.*?(?=\s|$)/;
 	const extractedCompletionDateMatch = title.match(completionDateRegex);
 
-	console.log("extractedCompletionDateMatch", extractedCompletionDateMatch);
-	console.log("Value of updatedTask.completion", updatedTask.completion);
 	if (!updatedTask.completion) {
 		// If completion date is empty, remove any existing completion date
 		if (extractedCompletionDateMatch) {
