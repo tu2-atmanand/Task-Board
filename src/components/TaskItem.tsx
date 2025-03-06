@@ -316,7 +316,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemFooter">
 							{/* Conditionally render task.completed or the date/time */}
-							{task.completion ? (
+							{task.status === "X" || task.status === "x" ? (
 								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
 							) : (
 								<div className='taskItemDate'>
