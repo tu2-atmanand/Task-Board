@@ -1,6 +1,7 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
+
 import TaskBoard from "main";
 
 // Function to refresh tasks in any column by calling this utility function
@@ -24,22 +25,27 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter((task) => {
 			if (!task.due) return false;
 
-			// Get today's date (local time)
+			// Get today's date in UTC (ignoring time)
 			const today = new Date();
-			today.setHours(0, 0, 0, 0); // Reset to midnight
-
-			// Get due date in local time and adjust it to midnight
-			const dueDate = new Date(task.due);
-			const timeZoneOffset = dueDate.getTimezoneOffset() * 60000; // Convert minutes to milliseconds
-			const dueDateAdjusted = new Date(
-				dueDate.getTime() - timeZoneOffset
+			today.setHours(0, 0, 0, 0);
+			const todayUTC = Date.UTC(
+				today.getUTCFullYear(),
+				today.getUTCMonth(),
+				today.getUTCDate()
 			);
-			dueDateAdjusted.setHours(0, 0, 0, 0); // Ensure it's midnight
 
-			// Calculate difference in days
+			// Parse the task's due date in UTC
+			const dueDate = new Date(task.due);
+			dueDate.setHours(0, 0, 0, 0);
+			const dueDateUTC = Date.UTC(
+				dueDate.getUTCFullYear(),
+				dueDate.getUTCMonth(),
+				dueDate.getUTCDate()
+			);
+
+			// Calculate difference in full days
 			const diffDays = Math.round(
-				(dueDateAdjusted.getTime() - today.getTime()) /
-					(1000 * 3600 * 24)
+				(dueDateUTC - todayUTC) / (1000 * 3600 * 24)
 			);
 
 			// Handle cases where 'from' is greater than 'to'
