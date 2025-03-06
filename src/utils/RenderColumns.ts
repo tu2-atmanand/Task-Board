@@ -1,12 +1,6 @@
 // src/utils/RenderColumns.ts
 
-import { Dispatch, SetStateAction } from "react";
-import {
-	taskItem,
-	taskJsonMerged,
-} from "src/interfaces/TaskItemProps";
-
-import { ColumnData } from "src/interfaces/BoardConfigs";
+import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 import TaskBoard from "main";
 
 // Function to refresh tasks in any column by calling this utility function
@@ -26,28 +20,34 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter((task) => !task.due);
 	} else if (columnData.range) {
 		const { from, to } = columnData.range.rangedata;
+
 		tasksToDisplay = pendingTasks.filter((task) => {
 			if (!task.due) return false;
-			const today = new Date();
-			today.setHours(0, 0, 0, 0); // Set time to 00:00
-			const dueDate = new Date(task.due);
-			dueDate.setHours(0, 0, 0, 0); // Set time to 00:00
 
+			// Get today's date (local time)
+			const today = new Date();
+			today.setHours(0, 0, 0, 0); // Reset to midnight
+
+			// Get due date in local time and adjust it to midnight
+			const dueDate = new Date(task.due);
+			const timeZoneOffset = dueDate.getTimezoneOffset() * 60000; // Convert minutes to milliseconds
+			const dueDateAdjusted = new Date(
+				dueDate.getTime() - timeZoneOffset
+			);
+			dueDateAdjusted.setHours(0, 0, 0, 0); // Ensure it's midnight
+
+			// Calculate difference in days
 			const diffDays = Math.round(
-				(dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
+				(dueDateAdjusted.getTime() - today.getTime()) /
+					(1000 * 3600 * 24)
 			);
 
-			if (from < 0 && to === 0) {
-				return diffDays < 0;
-			} else if (from === 0 && to === 0) {
-				return diffDays === 0;
-			} else if (from === 1 && to === 1) {
-				return diffDays === 1;
-			} else if (from === 2 && to === 0) {
-				return diffDays >= 2;
+			// Handle cases where 'from' is greater than 'to'
+			if (from > to) {
+				return diffDays >= to && diffDays <= from;
 			}
 
-			return false;
+			return diffDays >= from && diffDays <= to;
 		});
 	} else if (columnData.colType === "untagged") {
 		tasksToDisplay = pendingTasks.filter((task) => !(task.tags.length > 0));
@@ -57,7 +57,8 @@ export const renderColumns = (
 		);
 	} else if (columnData.colType === "otherTags") {
 		tasksToDisplay = pendingTasks.filter(
-			(task) => task.tags && task.tags.some((tag) => tag !== columnData.coltag)
+			(task) =>
+				task.tags && task.tags.some((tag) => tag !== columnData.coltag)
 		);
 	} else if (columnData.colType === "completed") {
 		const boardConfigs = plugin.settings.data.boardConfigs;
@@ -68,9 +69,9 @@ export const renderColumns = (
 			boardConfigs[activeBoard]?.columns[completedColumnIndex].limit;
 
 		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
-			if (a.completed && b.completed) {
-				const dateA = new Date(a.completed).getTime();
-				const dateB = new Date(b.completed).getTime();
+			if (a.completion && b.completion) {
+				const dateA = new Date(a.completion).getTime();
+				const dateB = new Date(b.completion).getTime();
 				return dateB - dateA;
 			}
 			return 0;

@@ -23,7 +23,10 @@
 			"ES6",
 			"ES7"
 		],
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"types": [
+			"obsidian-typings"
+		]
 	},
 	"include": [
 		"src"

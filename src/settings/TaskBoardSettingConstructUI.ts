@@ -153,7 +153,7 @@ export class SettingsManager {
 		// 	cls: "taskBoard-tab-section-desc",
 		// });
 
-		const { scanFilters,showHeader, openOnStartup } = this.globalSettings!;
+		const { scanFilters, showHeader, openOnStartup } = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -327,6 +327,7 @@ export class SettingsManager {
 			columnWidth,
 			showVerticalScroll,
 			tagColors,
+			showTaskWithoutMetadata,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -347,6 +348,17 @@ export class SettingsManager {
 			.addToggle((toggle) =>
 				toggle.setValue(showFooter).onChange(async (value) => {
 					this.globalSettings!.showFooter = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to show/Hide the Footer of the task card
+		new Setting(contentEl)
+			.setName(t("show-task-without-metadata"))
+			.setDesc(t("show-task-without-metadata-info"))
+			.addToggle((toggle) =>
+				toggle.setValue(showTaskWithoutMetadata).onChange(async (value) => {
+					this.globalSettings!.showTaskWithoutMetadata = value;
 					await this.saveSettings();
 				})
 			);
@@ -621,15 +633,13 @@ export class SettingsManager {
 		const previewLabel = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-label",
 		});
-		previewLabel.setText(
-			t("your-task-will-look-like-following-in-your-notes")
-		);
+		previewLabel.setText(t("preview"));
 
 		const previewData = previewEl.createDiv({
 			cls: "global-setting-tab-live-preview-data",
 		});
 		const updatePreview = () => {
-			let taskTitle = t("task-title");
+			let taskTitle = t("dummy-task-title");
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
 			let dueDate = "2024-09-21";
@@ -641,20 +651,20 @@ export class SettingsManager {
 				// Default
 				case "1": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [x] ${time} ${taskTitle} ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} | ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [x] ${taskTitle} ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
 					}
 					break;
 				}
 				// Tasks Plugin
 				case "2": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | ${priority} 📅 ${dueDate} ${tags} ✅ ${
+						preview = `- [x] ${time} ${taskTitle} ${priority} 📅 ${dueDate} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${taskTitle} | ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
+						preview = `- [x] ${taskTitle} ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -663,18 +673,18 @@ export class SettingsManager {
 				// Dataview Plugin
 				case "3": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [x] ${time} ${taskTitle} [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} | [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [x] ${taskTitle} [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					}
 					break;
 				}
 				// Obsidian Native
 				case "4": {
 					if (this.globalSettings!.dayPlannerPlugin) {
-						preview = `- [x] ${time} ${taskTitle} | @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [x] ${time} ${taskTitle} @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					} else {
-						preview = `- [x] ${taskTitle} | @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [x] ${taskTitle} @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					}
 					break;
 				}
