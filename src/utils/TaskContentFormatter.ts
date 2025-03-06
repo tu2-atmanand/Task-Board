@@ -12,44 +12,33 @@ export const taskContentFormatter = (
 		return "";
 	}
 
+	console.log(
+		"Task content formatter : Received following task: ",
+		updatedTask
+	);
+
 	const globalSettings = plugin.settings.data.globalSettings;
 	const checkBoxStat = `- [${updatedTask.status}]`;
 
-	// Combine priority emoji if it exists
-	const priorityWithEmo =
-		updatedTask.priority > 0
-			? priorityEmojis[updatedTask.priority as number]
-			: "";
+	// // Combine priority emoji if it exists
+	// const priorityWithEmo =
+	// 	updatedTask.priority > 0
+	// 		? priorityEmojis[updatedTask.priority as number]
+	// 		: "";
+
+	// TODO : Sanitizations not only correcting the format and replacing the old content with the latest one, but also very important is to clean if any old properties are there.
 
 	// Sanitize all the properties from the task title
 	let updatedTitle = updatedTask.title;
-	if (priorityWithEmo) {
-		updatedTitle = sanitizePriority(updatedTitle, updatedTask.priority, globalSettings);
-	}
-	if (updatedTask.time) {
-		updatedTitle = sanitizeTime(
-			updatedTitle,
-			updatedTask.time,
-			globalSettings
-		);
-	}
-	if (updatedTask.due) {
-		updatedTitle = sanitizeDueDate(
-			globalSettings,
-			updatedTitle,
-			updatedTask
-		);
-	}
-	if (updatedTask.tags.length > 0) {
-		updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
-	}
-	if (updatedTask.completion) {
-		updatedTitle = sanitizeCompletionDate(
-			globalSettings,
-			updatedTitle,
-			updatedTask
-		);
-	}
+	updatedTitle = sanitizePriority( updatedTitle, updatedTask.priority, globalSettings);
+
+	updatedTitle = sanitizeTime(updatedTitle, updatedTask.time, globalSettings);
+
+	updatedTitle = sanitizeDueDate(globalSettings, updatedTitle, updatedTask);
+
+	updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
+
+	updatedTitle = sanitizeCompletionDate(globalSettings, updatedTitle,	updatedTask);
 
 	// Build the formatted string for the main task
 	let formattedTask = `${checkBoxStat} ${updatedTitle}`;
@@ -99,19 +88,28 @@ const sanitizeDueDate = (
 	const extractedDueDateMatch = title.match(dueDateRegex);
 	// console.log("extractedDueDateMatch", extractedDueDateMatch);
 
+	// If user has removed the due date, remove it from the title inside the note.
+	if (!updatedTask.due) {
+		if (extractedDueDateMatch) {
+			// If due date is empty, remove any existing due date
+			return title.replace(extractedDueDateMatch[0], "").trim();
+		}
+		return title;
+	}
+
 	let dueDateWithFormat: string = "";
-	if (updatedTask.due || updatedTask.completion) {
+	if (updatedTask.due) {
 		if (globalSettings?.taskCompletionFormat === "1") {
 			dueDateWithFormat = updatedTask.due ? `📅${updatedTask.due}` : "";
 		} else if (globalSettings?.taskCompletionFormat === "2") {
 			dueDateWithFormat = updatedTask.due ? `📅 ${updatedTask.due}` : "";
 		} else if (globalSettings?.taskCompletionFormat === "3") {
 			dueDateWithFormat = updatedTask.due
-				? ` [due:: ${updatedTask.due}]`
+				? `[due:: ${updatedTask.due}]`
 				: "";
 		} else {
 			dueDateWithFormat = updatedTask.due
-				? ` @due(${updatedTask.due})`
+				? `@due(${updatedTask.due})`
 				: "";
 		}
 	}
@@ -140,6 +138,20 @@ const sanitizeCompletionDate = (
 	title: string,
 	updatedTask: taskItem
 ): string => {
+	const completionDateRegex =
+		/\[completion::[^\]]+\]|\@completion\(.*?\)|✅\s+.*?(?=\s|$)/;
+	const extractedCompletionDateMatch = title.match(completionDateRegex);
+
+	console.log("extractedCompletionDateMatch", extractedCompletionDateMatch);
+	console.log("Value of updatedTask.completion", updatedTask.completion);
+	if (!updatedTask.completion) {
+		// If completion date is empty, remove any existing completion date
+		if (extractedCompletionDateMatch) {
+			return title.replace(extractedCompletionDateMatch[0], "").trim();
+		}
+		return title;
+	}
+
 	let completedWitFormat: string = "";
 	if (updatedTask.due || updatedTask.completion) {
 		if (globalSettings?.taskCompletionFormat === "1") {
@@ -152,18 +164,14 @@ const sanitizeCompletionDate = (
 				: "";
 		} else if (globalSettings?.taskCompletionFormat === "3") {
 			completedWitFormat = updatedTask.completion
-				? ` [completion:: ${updatedTask.completion}] `
+				? `[completion:: ${updatedTask.completion}] `
 				: "";
 		} else {
 			completedWitFormat = updatedTask.completion
-				? ` @completion(${updatedTask.completion}) `
+				? `@completion(${updatedTask.completion}) `
 				: "";
 		}
 	}
-
-	const completionDateRegex =
-		/✅\s*?\d{4}-\d{2}-\d{2}|\[completion::\s*?\d{4}-\d{2}-\d{2}\]|@completion\(\d{4}-\d{2}-\d{2}\)/;
-	const extractedCompletionDateMatch = title.match(completionDateRegex);
 
 	if (!extractedCompletionDateMatch) {
 		// No existing completion date found, append new one at the end
@@ -210,6 +218,20 @@ const sanitizeTime = (
 		return `${newTime} ${title}`;
 	} else {
 		const timeAtStartMatch = title.match(timeAtStartRegex);
+		const timeFormatMatch = title.match(timeFormatsRegex);
+
+		if (newTime === "") {
+			if (timeAtStartMatch) {
+				return title.replace(timeAtStartMatch[0], "").trim();
+			}
+
+			if (timeFormatMatch) {
+				return title.replace(timeFormatMatch[0], "").trim();
+			}
+
+			return title;
+		}
+
 		if (timeAtStartMatch) {
 			// If time is at the start of the title, move it to the end with emoji format
 			title = title.replace(timeAtStartMatch[0], "").trim();
@@ -224,17 +246,16 @@ const sanitizeTime = (
 			}
 		}
 
-		const timeFormatMatch = title.match(timeFormatsRegex);
 		if (timeFormatMatch) {
 			// If time is present in any format, replace it with the new time
 			if (globalSettings.taskCompletionFormat === "1") {
-				return title.replace(timeFormatsRegex, ` ⏰[${newTime}]`);
+				return title.replace(timeFormatsRegex, `⏰[${newTime}]`);
 			} else if (globalSettings.taskCompletionFormat === "2") {
-				return title.replace(timeFormatsRegex, ` ⏰ [${newTime}]`);
+				return title.replace(timeFormatsRegex, `⏰ [${newTime}]`);
 			} else if (globalSettings.taskCompletionFormat === "3") {
-				return title.replace(timeFormatsRegex, ` [time:: ${newTime}]`);
+				return title.replace(timeFormatsRegex, `[time:: ${newTime}]`);
 			} else {
-				return title.replace(timeFormatsRegex, ` @time(${newTime})`);
+				return title.replace(timeFormatsRegex, `@time(${newTime})`);
 			}
 		}
 
@@ -255,7 +276,11 @@ const sanitizeTime = (
 /**
  * Function to sanitize the priority inside the task title.
  */
-const sanitizePriority = (title: string, newPriority: number, globalSettings: globalSettingsData): string => {
+const sanitizePriority = (
+	title: string,
+	newPriority: number,
+	globalSettings: globalSettingsData
+): string => {
 	// // Create a regex pattern to match any priority emoji
 	// const emojiPattern = new RegExp(
 	// 	`(${Object.values(priorityEmojis)
@@ -316,20 +341,6 @@ const sanitizePriority = (title: string, newPriority: number, globalSettings: gl
 
 	const extractedPriorityMatch = extractPriority(title);
 
-	let match = title.match(
-		new RegExp(`\\[priority::\\s*${extractedPriorityMatch}\\s*\\]`)
-	);
-	if (match) {
-		return title.replace(match[0], `[priority:: ${newPriority}]`);
-	}
-
-	match = title.match(
-		new RegExp(`@priority\\(\\s*${extractedPriorityMatch}\\s*\\)`)
-	);
-	if (match) {
-		return title.replace(match[0], `@priority(${newPriority})`);
-	}
-
 	if (extractedPriorityMatch === 0) {
 		if (newPriority > 0) {
 			if (globalSettings?.taskCompletionFormat === "3") {
@@ -341,15 +352,33 @@ const sanitizePriority = (title: string, newPriority: number, globalSettings: gl
 			}
 		}
 		return title;
+	}
+
+	let match = title.match(
+		new RegExp(`\\[priority::\\s*${extractedPriorityMatch}\\s*\\]`)
+	);
+	if (match) {
+		return newPriority > 0
+			? title.replace(match[0], `[priority:: ${newPriority}]`)
+			: title.replace(match[0], "");
+	}
+
+	match = title.match(
+		new RegExp(`@priority\\(\\s*${extractedPriorityMatch}\\s*\\)`)
+	);
+	if (match) {
+		return newPriority > 0
+			? title.replace(match[0], `@priority(${newPriority})`)
+			: title.replace(match[0], "");
+	}
+
+	if (extractedPriorityMatch === newPriority) {
+		return title;
 	} else {
-		if (extractedPriorityMatch === newPriority) {
-			return title;
-		} else {
-			return title.replace(
-				priorityEmojis[extractedPriorityMatch],
-				priorityEmojis[newPriority]
-			);
-		}
+		return title.replace(
+			priorityEmojis[extractedPriorityMatch],
+			priorityEmojis[newPriority]
+		);
 	}
 };
 
@@ -362,6 +391,14 @@ const sanitizeTags = (title: string, newTags: string[]): string => {
 
 	// Create a set for quick lookup of newTags
 	const newTagsSet = new Set(newTags);
+
+	if (newTagsSet.size === 0) {
+		// If no tags are present, remove all existing tags
+		extractedTagsMatch.forEach((element) => {
+			title = title.replace(element, "").trim();
+		});
+		return title;
+	}
 
 	// Remove tags from the title that are not in newTags
 	let updatedTitle = title;

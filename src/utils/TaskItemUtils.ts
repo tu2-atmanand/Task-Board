@@ -1,5 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
+import { cleanTaskTitle, taskContentFormatter } from "./TaskContentFormatter";
 import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
@@ -17,7 +18,6 @@ import {
 import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { taskContentFormatter } from "./TaskContentFormatter";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -188,7 +188,7 @@ export const updateTaskInFile = async (
 			if (
 				!isTaskFound &&
 				line.match(/^- \[.{1}\]/) &&
-				line.includes(oldTask.title)
+				line.includes(cleanTaskTitle(plugin, oldTask))
 			) {
 				isTaskFound = true;
 				taskStartIndex = i;
