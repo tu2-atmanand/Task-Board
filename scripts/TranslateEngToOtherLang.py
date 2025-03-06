@@ -32,7 +32,7 @@ def load_en_file():
 
 
 lang_code_map = {
-    "ptBR": "pt-BR",
+    "ptBR": "pt",
     "zhTW": "zh-TW",
     "zhCN": "zh-CN",
 }
@@ -56,6 +56,7 @@ def update_lang_file(lang_code, keys, en_dict):
     # Update the dictionary with new translations
     translator = get_translator(mapped_lang_code)
     for key in keys:
+        print(f"\n\n Following is the key : {key}\n")
         original_text = en_dict[key]
         translated_text = translate_or_prompt(mapped_lang_code, original_text, translator)
         translated_text = translated_text.replace('"', "'")
@@ -86,17 +87,35 @@ def translate_or_prompt(lang_code, text, translator):
 def main():
     # Load English key-value pairs
     en_dict = load_en_file()
+    print(f"\n\n Following is the en_dict : {en_dict}\n\n")
     # Get keys from the user
-    keys_input = input("Enter the keys that have been changed (e.g., save close archive): ")
-    if keys_input.strip() == "0":
-        keys = list(en_dict.keys())
+    keys_input = input("Enter the keys that have been changed (leave empty to translate all keys): ").strip()
+
+    # If the user enters nothing, translate all keys
+    if not keys_input:
+        #keys = list(en_dict.keys())
+        print("Please do not translate all the keys. Because some of the files has been edited by contributors with correct translations. This API might ruin the text.\nOnly use new keys to to translate.")
     else:
-        keys = [k.strip() for k in re.split(r"[,\s]+", keys_input.strip())]
+        # Ensure empty keys are not included
+        keys = [k.strip() for k in re.split(r"[,\s]+", keys_input) if k.strip()]
+
+    # Check for invalid keys before proceeding
+    invalid_keys = [k for k in keys if k not in en_dict]
+    if invalid_keys:
+        print(f"Warning: The following keys are not found in en.ts and will be ignored: {invalid_keys}")
+        keys = [k for k in keys if k in en_dict]
+
+    # If there are no valid keys left, exit
+    if not keys:
+        print("No valid keys to translate. Exiting.")
+        return
+
     # Iterate through language files and update them
     for lang_file in os.listdir(lang_folder):
         if lang_file.endswith(".ts") and lang_file != "en.ts":
             lang_code = lang_file.replace(".ts", "")
             print(f"\n-------------------- Updating the following file : {lang_code}.ts ... --------------\n")
+            print(f"\n\n Following is the keys : {keys}\n\n")
             update_lang_file(lang_code, keys, en_dict)
 
 

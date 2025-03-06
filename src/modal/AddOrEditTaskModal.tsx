@@ -3,15 +3,18 @@
 import { App, Component, Modal } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { extractBody, extractCompletionDate, extractDueDate, extractPriority, extractTags, extractTime, extractTitle } from "src/utils/ScanningVault";
-import { priorityOptions, taskItem } from "src/interfaces/TaskItemProps";
+import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
+import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
 
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
+import { hexToRgba } from "src/utils/UIHelpers";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
-import { taskElementsFormatter } from "src/utils/TaskItemUtils";
+import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 
 const taskItemEmpty = {
 	id: 0,
@@ -21,9 +24,15 @@ const taskItemEmpty = {
 	tags: [],
 	time: "",
 	priority: 0,
-	completed: "",
+	completion: "",
 	filePath: "",
+	status: taskStatuses.unchecked,
 };
+
+export interface filterOptions {
+	value: string;
+	text: string;
+}
 
 // Functional React component for the modal content
 const EditTaskContent: React.FC<{
@@ -35,15 +44,36 @@ const EditTaskContent: React.FC<{
 	filePath: string;
 	onSave: (updatedTask: taskItem) => void;
 	onClose: () => void;
-}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose }) => {
+	setIsEdited: (value: boolean) => void;
+}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(task.title || '');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
-	const [startTime, setStartTime] = useState(task.time?.split(' - ')[0] || '');
-	const [endTime, setEndTime] = useState(task.time?.split(' - ')[1] || '');
+	const [startTime, setStartTime] = useState(task?.time?.split('-')[0]?.trim() || '');
+	const [endTime, setEndTime] = useState(task?.time?.split('-')[1]?.trim() || '');
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
+	const [status, setStatus] = useState(task.status || '');
+	// const [isEdited, setIsEdited] = useState(false);
+
+	// Load statuses dynamically
+	let filteredStatusesDropdown: filterOptions[] = [];
+
+	// Check if tasksPluginCustomStatuses is available and use it
+	if (plugin.settings.data.globalSettings.tasksPluginCustomStatuses?.length > 0) {
+		filteredStatusesDropdown = plugin.settings.data.globalSettings.tasksPluginCustomStatuses.map((customStatus) => ({
+			value: customStatus.symbol,
+			text: `${customStatus.name} [${customStatus.symbol}]`,
+		}));
+	}
+	// Fallback to customStatuses if tasksPluginCustomStatuses is empty
+	else if (plugin.settings.data.globalSettings.customStatuses?.length > 0) {
+		filteredStatusesDropdown = plugin.settings.data.globalSettings.customStatuses.map((customStatus) => ({
+			value: customStatus.symbol,
+			text: `${customStatus.name} [${customStatus.symbol}]`,
+		}));
+	}
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
@@ -56,31 +86,89 @@ const EditTaskContent: React.FC<{
 		}
 	}, [startTime, endTime]);
 
+	const handleTaskTitleChange = (value: string) => {
+		setTitle(value);
+		setIsEdited(true);
+	}
+
+	// // Function to toggle subtask completion
+	// const toggleSubTaskCompletion = (index: number) => {
+	// 	const updatedBodyContent = bodyContent.split('\n');
+	// 	updatedBodyContent[index] = updatedBodyContent[index].startsWith('- [x]')
+	// 		? updatedBodyContent[index].replace('- [x]', '- [ ]')
+	// 		: updatedBodyContent[index].replace('- [ ]', '- [x]');
+	// 	setBodyContent(updatedBodyContent.join('\n'));
+	// 	setIsEdited(true);
+	// };
+
+	const handleStatusChange = (symbol: string) => {
+		setStatus(symbol);
+		setIsEdited(true);
+	}
+
+	const handleDueDateChange = (value: string) => {
+		setDue(value);
+		setIsEdited(true);
+	}
+
+	const handlePriorityChange = (value: number) => {
+		setPriority(value);
+		setIsEdited(true);
+	}
+
+	const handleStartTimeChange = (startTime: string) => {
+		setStartTime(startTime);
+		setIsEdited(true);
+	}
+
+	const handleEndTimeChange = (endTime: string) => {
+		setStartTime(endTime);
+		setIsEdited(true);
+	}
+
 	// Function to toggle subtask completion
 	const toggleSubTaskCompletion = (index: number) => {
 		const updatedBodyContent = bodyContent.split('\n');
-		updatedBodyContent[index] = updatedBodyContent[index].startsWith('- [x]')
-			? updatedBodyContent[index].replace('- [x]', '- [ ]')
-			: updatedBodyContent[index].replace('- [ ]', '- [x]');
+
+		// Check if the line is a task and toggle its state
+		if (isTaskLine(updatedBodyContent[index].trim())) {
+			const symbol = extractCheckboxSymbol(updatedBodyContent[index]);
+			const nextSymbol = checkboxStateSwitcher(plugin, symbol);
+
+			updatedBodyContent[index] = updatedBodyContent[index].replace(`- [${symbol}]`, `- [${nextSymbol}]`);
+
+		}
+
 		setBodyContent(updatedBodyContent.join('\n'));
+		setIsEdited(true);
 	};
+
 
 	// Function to remove a subtask
 	const removeSubTask = (index: number) => {
 		const updatedSubTasks = bodyContent.split('\n').filter((_, idx) => idx !== index);
 		setBodyContent(updatedSubTasks.join('\n'));
+		setIsEdited(true);
 	};
 
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
 		setBodyContent([`\t- [ ] `, ...updatedBodyContent].join('\n'));
+		setIsEdited(true);
 	};
 
 	const updateSubTaskContent = (index: number, value: string) => {
 		const updatedBodyContent = bodyContent.split('\n');
 		updatedBodyContent[index] = `\t- [ ] ${value}`; // Change task state to incomplete upon editing
 		setBodyContent(updatedBodyContent.join('\n'));
+		setIsEdited(true);
+	};
+
+	// Function to handle textarea changes
+	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setBodyContent(e.target.value);
+		setIsEdited(true);
 	};
 
 	// Tags input
@@ -90,6 +178,7 @@ const EditTaskContent: React.FC<{
 			if (!tags.includes(input)) {
 				setTags(prevTags => [...prevTags, input.startsWith("#") ? input : `#${input}`]);
 				e.currentTarget.value = '';
+				setIsEdited(true);
 			}
 		}
 	};
@@ -97,7 +186,17 @@ const EditTaskContent: React.FC<{
 	// Function to remove a tag
 	const removeTag = (tagToRemove: string) => {
 		setTags(prevTags => prevTags.filter(tag => tag !== tagToRemove));
+		setIsEdited(true);
 	};
+
+	const onOpenFilBtnClicked = (newWindow: boolean) => {
+		if (newWindow) {
+			app.workspace.openLinkText('', filePath, 'window')
+		} else {
+			app.workspace.openLinkText('', filePath, false)
+		}
+		onClose();
+	}
 
 	// Function to handle saving the updated task
 	const handleSave = () => {
@@ -116,11 +215,11 @@ const EditTaskContent: React.FC<{
 			time: newTime,
 			priority,
 			filePath: filePath,
+			status,
 		};
 		onSave(updatedTask);
-		onClose();
+		// onClose();
 	};
-
 
 	const modifiedTask: taskItem = {
 		...task,
@@ -133,6 +232,7 @@ const EditTaskContent: React.FC<{
 		time: newTime,
 		priority: priority,
 		filePath: filePath,
+		status,
 	};
 	// Reference to the HTML element where markdown will be rendered
 
@@ -144,7 +244,7 @@ const EditTaskContent: React.FC<{
 
 	const previewContainerRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		const formatedContent = taskElementsFormatter(plugin, modifiedTask);
+		const formatedContent = taskContentFormatter(plugin, modifiedTask);
 		if (previewContainerRef.current && formatedContent !== "") {
 			// Clear previous content before rendering new markdown
 			previewContainerRef.current.empty();
@@ -160,7 +260,6 @@ const EditTaskContent: React.FC<{
 			hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
 		}
 	}, [modifiedTask]); // Re-render when modifiedTask changes
-
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
 	useEffect(() => {
@@ -187,45 +286,7 @@ const EditTaskContent: React.FC<{
 	const [activeTab, setActiveTab] = useState<'preview' | 'editor'>('preview');
 	const handleTabSwitch = (tab: 'preview' | 'editor') => setActiveTab(tab);
 
-	// Helper function to convert a hex color to an RGBA string with the specified opacity
-	const hexToRgba = (hex: string, opacity: number): string => {
-		let r = 0, g = 0, b = 0;
-
-		if (hex.length === 4) {
-			r = parseInt(hex[1] + hex[1], 16);
-			g = parseInt(hex[2] + hex[2], 16);
-			b = parseInt(hex[3] + hex[3], 16);
-		} else if (hex.length === 7 || hex.length === 9) {
-			r = parseInt(hex[1] + hex[2], 16);
-			g = parseInt(hex[3] + hex[4], 16);
-			b = parseInt(hex[5] + hex[6], 16);
-		}
-
-		return `rgba(${r},${g},${b},${opacity})`;
-	};
 	const defaultTagColor = 'var(--tag-color)';
-
-	// Function to parse the textarea content back to task properties
-	const parseTaskContent = (content: string) => {
-		// Simulate extracting task properties like due, priority, etc.
-		const updatedTask = {
-			...task,
-			title: extractTitle(content),
-			body: extractBody(content.split("\n"), 1),
-			due: extractDueDate(content),
-			tags: extractTags(content),
-			time: extractTime(content),
-			priority: extractPriority(content),
-			completed: extractCompletionDate(content),
-			filePath: task.filePath,
-		};
-		return updatedTask;
-	};
-
-	// Function to handle textarea changes
-	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setBodyContent(e.target.value);
-	};
 
 	return (
 		<>
@@ -237,7 +298,7 @@ const EditTaskContent: React.FC<{
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
 							<label className="EditTaskModalHomeFieldTitle">{t("task-title")}</label>
-							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => setTitle(e.target.value)} />
+							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => handleTaskTitleChange(e.target.value)} />
 
 							{/* Subtasks */}
 							<label className="EditTaskModalHomeFieldTitle">{t("sub-tasks")}</label>
@@ -291,7 +352,7 @@ const EditTaskContent: React.FC<{
 											<button className="EditTaskModalHomeOpenFileBtn"
 												id="EditTaskModalHomeOpenFileBtn"
 												aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-												onClick={() => isCtrlPressed ? app.workspace.openLinkText('', filePath, 'window') : app.workspace.openLinkText('', filePath, false)}
+												onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
 											>{t("open-file")}</button>
 										</div>
 										<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
@@ -316,26 +377,36 @@ const EditTaskContent: React.FC<{
 						<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 					<div className="EditTaskModalHomeRightSec">
+						{/* Task Status */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("task-status")}</label>
+							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => handleStatusChange(e.target.value)}>
+								{filteredStatusesDropdown.map((option) => (
+									<option key={option.value} value={option.value}>{option.text}</option>
+								))}
+							</select>
+						</div>
+
 						{/* Task Time Input */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
-							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} />
 						</div>
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("end-time")}</label>
-							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} />
 						</div>
 
 						{/* Task Due Date */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("due-date")}</label>
-							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => handleDueDateChange(e.target.value)} />
 						</div>
 
 						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
-							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => setPriority(parseInt(e.target.value))}>
+							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => handlePriorityChange(parseInt(e.target.value))}>
 								{priorityOptions.map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
 								))}
@@ -392,6 +463,7 @@ export class AddOrEditTaskModal extends Modal {
 	task: taskItem = taskItemEmpty;
 	filePath: string;
 	taskExists: boolean;
+	isEdited: boolean;
 	onSave: (updatedTask: taskItem) => void;
 
 	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, taskExists: boolean, task?: taskItem) {
@@ -404,6 +476,7 @@ export class AddOrEditTaskModal extends Modal {
 		if (taskExists && task) {
 			this.task = task;
 		}
+		this.isEdited = false;
 	}
 
 	onOpen() {
@@ -422,13 +495,56 @@ export class AddOrEditTaskModal extends Modal {
 			task={this.task}
 			taskExists={this.taskExists}
 			filePath={this.filePath}
-			onSave={this.onSave}
+			onSave={(updatedTask) => {
+				this.isEdited = false;
+				this.onSave(updatedTask);
+				this.close();
+			}}
 			onClose={() => this.close()}
+			setIsEdited={(value: boolean) => { this.isEdited = value; }}
 		/>);
 	}
+
+	handleCloseAttempt() {
+		// Open confirmation modal
+		const mssg = t("edit-task-modal-close-confirm-mssg");
+		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
+			app: this.app,
+			mssg,
+			onDiscard: () => {
+				this.isEdited = false;
+				this.close();
+			},
+			onGoBack: () => {
+				// Do nothing
+			}
+		});
+		closeConfirmModal.open();
+	}
+
+	handleSave() {
+		// Trigger save functionality if required before closing
+		this.onSave(this.task);
+		this.isEdited = false;
+		this.close();
+	}
+
+	// onCloseRequested(event: Event) {
+	// 	event.stopImmediatePropagation();
+	// 	this.handleCloseAttempt();
+	// }
 
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+	}
+
+	public close(): void {
+		if (this.isEdited) {
+			this.handleCloseAttempt();
+		} else {
+			this.onClose();
+			super.close();
+		}
 	}
 }

@@ -20,8 +20,8 @@
             "range": {
               "tag": "before",
               "rangedata": {
-                "from": -1,
-                "to": 0
+                "from": -300,
+                "to": -1
               }
             }
           },
@@ -63,7 +63,7 @@
               "tag": "after",
               "rangedata": {
                 "from": 2,
-                "to": 0
+                "to": 300
               }
             }
           },
@@ -93,7 +93,7 @@
             "colType": "untagged",
             "active": true,
             "collapsed": false,
-            "name": "Backlog",
+            "name": "Backlogs",
             "index": 1
           },
           {
@@ -124,7 +124,7 @@
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Done",
+            "name": "Working as Expected",
             "index": 5,
             "coltag": "done"
           }
@@ -199,10 +199,10 @@
       }
     ],
     "globalSettings": {
-      "lang": "cs",
+      "lang": "zh-TW",
       "scanFilters": {
         "files": {
-          "polarity": 2,
+          "polarity": 3,
           "values": []
         },
         "folders": {
@@ -229,8 +229,8 @@
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
-      "showHeader": true,
-      "showFooter": true,
+      "showHeader": false,
+      "showFooter": false,
       "showVerticalScroll": false,
       "tagColors": {
         "bug": "#ef1120dd",
@@ -242,7 +242,96 @@
         "pending": "#955cff"
       },
       "editButtonAction": "popUp",
-      "openOnStartup": false
+      "openOnStartup": false,
+      "customStatuses": [
+        {
+          "symbol": "x",
+          "name": "Checked",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "/",
+          "name": "Half Done",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": true,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "-",
+          "name": "Cancelled",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": true,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": " ",
+          "name": "Unchecked",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        }
+      ],
+      "tasksPluginCustomStatuses": [
+        {
+          "symbol": "/",
+          "name": "In Progress",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": true,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "-",
+          "name": "Cancelled",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": true,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": " ",
+          "name": "Unchecked",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "x",
+          "name": "Checked",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": ">",
+          "name": "Deferred",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "!",
+          "name": "Important",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "?",
+          "name": "Question",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "r",
+          "name": "Review",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        }
+      ],
+      "showTaskWithoutMetadata": false
     }
   }
 }

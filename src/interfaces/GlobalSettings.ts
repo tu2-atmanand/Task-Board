@@ -23,8 +23,16 @@ export enum EditButtonMode {
 	NoteInHover = "noteInHover",
 }
 
+interface CustomStatus {
+	symbol: string; // The symbol representing the status (e.g., "/", "-")
+	name: string; // The human-readable name of the status (e.g., "In Progress")
+	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
+	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
+	type: string; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+}
+
 export interface globalSettingsData {
-	openOnStartup:boolean;
+	openOnStartup: boolean;
 	lang: string;
 	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
@@ -45,6 +53,9 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: { [tagName: string]: string };
 	editButtonAction: EditButtonMode;
+	tasksPluginCustomStatuses: CustomStatus[];
+	customStatuses: CustomStatus[];
+	showTaskWithoutMetadata: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -78,8 +89,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						range: {
 							tag: "before",
 							rangedata: {
-								from: -1,
-								to: 0,
+								from: -300,
+								to: -1,
 							},
 						},
 					},
@@ -121,7 +132,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							tag: "after",
 							rangedata: {
 								from: 2,
-								to: 0,
+								to: 300,
 							},
 						},
 					},
@@ -203,7 +214,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		],
 		globalSettings: {
 			lang: "en",
-			openOnStartup:false,
+			openOnStartup: false,
 			scanFilters: {
 				files: {
 					polarity: 3,
@@ -219,6 +230,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 			},
 			firstDayOfWeek: "Mon",
+			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
 			taskCompletionFormat: "1",
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
@@ -240,6 +252,37 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				feat: "#b50df2f2",
 			},
 			editButtonAction: EditButtonMode.PopUp,
+			tasksPluginCustomStatuses: [],
+			customStatuses: [
+				{
+					symbol: " ",
+					name: "Unchecked",
+					nextStatusSymbol: "x",
+					availableAsCommand: false,
+					type: "TODO",
+				},
+				{
+					symbol: "/",
+					name: "In Progress",
+					nextStatusSymbol: "x",
+					availableAsCommand: true,
+					type: "IN_PROGRESS",
+				},
+				{
+					symbol: "-",
+					name: "Cancelled",
+					nextStatusSymbol: "x",
+					availableAsCommand: true,
+					type: "CANCELLED",
+				},
+				{
+					symbol: "x",
+					name: "Done",
+					nextStatusSymbol: " ",
+					availableAsCommand: true,
+					type: "DONE",
+				},
+			],
 		},
 	},
 };
@@ -267,6 +310,6 @@ export const langCodes: { [key: string]: string } = {
 	tr: "Türkçe",
 	uk: "Українська",
 	"pt-BR": "Portugues do Brasil",
-	"zh-CN": "简体中文",
+	zh: "简体中文",
 	"zh-TW": "繁體中文",
 };
