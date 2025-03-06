@@ -89,8 +89,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						range: {
 							tag: "before",
 							rangedata: {
-								from: -1,
-								to: 0,
+								from: -300,
+								to: -1,
 							},
 						},
 					},
@@ -132,7 +132,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							tag: "after",
 							rangedata: {
 								from: 2,
-								to: 0,
+								to: 300,
 							},
 						},
 					},
@@ -230,7 +230,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 			},
 			firstDayOfWeek: "Mon",
-			showTaskWithoutMetadata: false,
+			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
 			taskCompletionFormat: "1",
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
