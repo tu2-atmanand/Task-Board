@@ -2,13 +2,15 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TaskProps, taskItem } from '../interfaces/TaskItemProps';
+import { TaskProps, taskItem, taskStatuses } from '../interfaces/TaskItemProps';
+import { checkboxStateSwitcher, extractCheckboxSymbol } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
 import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
+import { cleanTaskTitle } from 'src/utils/TaskContentFormatter';
 import { hexToRgba } from 'src/utils/UIHelpers';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
@@ -40,11 +42,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 			if (titleElement && task.title !== "") {
 				// console.log("TaskItem.tsx : Rendering title... | Title :", task.title);
+				const cleanedTitle = cleanTaskTitle(plugin, task);
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
 					plugin.app,
-					task.title,
+					cleanedTitle,
 					titleElement,
 					task.filePath,
 					componentRef.current
@@ -150,7 +153,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			// onCheckboxChange(task); // Call parent function after 1 second
 			handleCheckboxChange(plugin, task);
 			setIsChecked(false); // Reset checkbox state
-		}, 1000); // 1-second delay for animation
+		}, 500); // 1-second delay for animation
 	};
 
 	const handleMainTaskDelete = () => {
@@ -162,9 +165,11 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		const updatedBody = task.body.map((line, idx) => {
 			if (idx === index) {
 				// Toggle the checkbox status only for the specific line
-				return isCompleted
-					? line.replace('- [x]', '- [ ]')
-					: line.replace('- [ ]', '- [x]');
+
+				const symbol = extractCheckboxSymbol(line);
+				const nextSymbol = checkboxStateSwitcher(plugin, symbol);
+
+				return line.replace(`- [${symbol}]`, `- [${nextSymbol}]`);
 			}
 			return line;
 		});
@@ -311,8 +316,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemFooter">
 							{/* Conditionally render task.completed or the date/time */}
-							{task.completed ? (
-								<div className='taskItemDateCompleted'>✅ {task.completed}</div>
+							{task.completion ? (
+								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
 							) : (
 								<div className='taskItemDate'>
 									{task.time ? `⏰${task.time}` : ''}
@@ -332,7 +337,20 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					</>
 				);
 			} else {
-				return null
+				return (
+					<>
+						<div className="taskItemFooterHidden">
+							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+								<div className="taskItemiconButton taskItemiconButtonEdit">
+									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+								</div>
+								<div className="taskItemiconButton taskItemiconButtonDelete">
+									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+								</div>
+							</div>
+						</div>
+					</>
+				);
 			}
 		} catch (error) {
 			console.log("renderFooter : Getting error while trying to render Footer : ", error);
@@ -342,7 +360,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
-	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completed, task.due, task.time]);
+	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, task.due, task.time]);
 
 	return (
 		<div className="taskItem" key={taskKey}>
@@ -353,8 +371,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<div className="taskItemMainBodyTitleNsubTasks">
 						<input
 							type="checkbox"
-							checked={(task.completed || isChecked) ? true : false}
+							checked={(task.status === taskStatuses.checked || task.status === taskStatuses.regular || isChecked) ? true : false}
 							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
+							data-task={task.status} // Add the data-task attribute
+							dir='auto'
 							onChange={handleMainCheckBoxClick}
 						/>
 						<div className="taskItemBodyContent">
@@ -365,7 +385,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						</div>
 					</div>
 					<div className="taskItemMainBodyDescription">
-						{task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
+						{task.body.at(0) !== "" && task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
 							<div
 								className='taskItemMainBodyDescriptionSectionToggler'
 								onClick={toggleDescription}

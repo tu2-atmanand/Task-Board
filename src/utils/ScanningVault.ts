@@ -1,7 +1,22 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
-import { loadTasksJsonFromDisk, writeTasksJsonToDisk } from "./JsonFileOperations";
+import {
+	extractCheckboxSymbol,
+	isCompleted,
+	isTaskLine,
+} from "./CheckBoxUtils";
+import {
+	loadTasksJsonFromDisk,
+	writeTasksJsonToDisk,
+} from "./JsonFileOperations";
+import {
+	priorityEmojis,
+	taskItem,
+	taskJsonMerged,
+	taskStatuses,
+	tasksJson,
+} from "src/interfaces/TaskItemProps";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -9,8 +24,8 @@ import {
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { priorityEmojis } from "src/interfaces/TaskItemProps";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
+import { scanFilters } from "src/interfaces/GlobalSettings";
 
 export class ScanningVault {
 	app: App;
@@ -42,7 +57,11 @@ export class ScanningVault {
 	}
 
 	// Extract tasks from a specific file
-	async extractTasksFromFile(file: TFile, tasks: any, scanFilters: any) {
+	async extractTasksFromFile(
+		file: TFile,
+		tasks: tasksJson,
+		scanFilters: scanFilters
+	) {
 		const fileNameWithPath = file.path;
 		const fileContent = await readDataOfVaultFiles(
 			this.plugin,
@@ -55,12 +74,12 @@ export class ScanningVault {
 
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
-			if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+			if (isTaskLine(line)) {
 				const tags = extractTags(line);
 				if (scanFilterForTags(tags, scanFilters)) {
-					this.TaskDetected =
-						line.startsWith("- [x]") || line.startsWith("- [ ]");
-					const isCompleted = line.startsWith("- [x]");
+					this.TaskDetected = true;
+					const taskStatus = extractCheckboxSymbol(line);
+					const isTaskCompleted = isCompleted(line);
 					const title = extractTitle(line);
 					const time = extractTime(line);
 					const due = extractDueDate(line);
@@ -70,6 +89,7 @@ export class ScanningVault {
 
 					const task = {
 						id: this.generateTaskId(),
+						status: taskStatus,
 						title,
 						body,
 						time,
@@ -77,10 +97,10 @@ export class ScanningVault {
 						tags,
 						priority,
 						filePath: fileNameWithPath,
-						completed: completionDate,
+						completion: completionDate,
 					};
 
-					if (isCompleted) {
+					if (isTaskCompleted) {
 						tasks.Completed[fileNameWithPath].push(task);
 					} else {
 						tasks.Pending[fileNameWithPath].push(task);
@@ -101,7 +121,6 @@ export class ScanningVault {
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: (TFile | null)[]) {
-
 		// Load the existing tasks from tasks.json once
 		const oldTasks = await loadTasksJsonFromDisk(this.plugin);
 		const scanFilters =
@@ -117,13 +136,12 @@ export class ScanningVault {
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i];
-					if (line.startsWith("- [ ]") || line.startsWith("- [x]")) {
+					if (isTaskLine(line)) {
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
-							this.TaskDetected =
-								line.startsWith("- [x]") ||
-								line.startsWith("- [ ]");
-							const isCompleted = line.startsWith("- [x]");
+							this.TaskDetected = true;
+							const taskStatus = extractCheckboxSymbol(line);
+							const isTaskCompleted = isCompleted(line);
 							const title = extractTitle(line);
 							const time = extractTime(line);
 							const priority = extractPriority(line);
@@ -141,7 +159,8 @@ export class ScanningVault {
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
-								const moment = _moment as unknown as typeof _moment.default;
+								const moment =
+									_moment as unknown as typeof _moment.default;
 								if (
 									moment(basename, dueFormat, true).isValid()
 								) {
@@ -153,6 +172,7 @@ export class ScanningVault {
 
 							const task = {
 								id: this.generateTaskId(),
+								status: taskStatus,
 								title,
 								body,
 								time,
@@ -160,10 +180,10 @@ export class ScanningVault {
 								tags,
 								priority,
 								filePath: fileNameWithPath,
-								completed: completionDate,
+								completion: completionDate,
 							};
 
-							if (isCompleted) {
+							if (isTaskCompleted) {
 								newCompletedTasks.push(task);
 							} else {
 								newPendingTasks.push(task);
@@ -207,6 +227,35 @@ export class ScanningVault {
 	}
 }
 
+// // Extract title from task line
+// export function extractTitle(text: string): string {
+// 	const timeAtStartMatch = text.match(
+// 		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
+// 	);
+
+// 	if (timeAtStartMatch) {
+// 		// If time is at the start, extract title after the time and till the pipe symbol
+// 		return text
+// 			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
+// 			.split("|")[0]
+// 			.trim();
+// 	} else {
+// 		// Default case: no time at start, extract title till the pipe symbol
+// 		return text.includes("|")
+// 			? text
+// 					.split("|")[0]
+// 					.replace(/^- \[.\]\s*/, "")
+// 					.trim()
+// 			: text.replace(/^- \[.\]\s*/, "").trim();
+// 	}
+// }
+
+// Extract title from task line
+export function extractTitle(text: string): string {
+	// Default case: no time at start, extract title till the pipe symbol
+	return text.replace(/^- \[.\]\s*/, "").trim();
+}
+
 // New function to extract task body
 export function extractBody(lines: string[], startLineIndex: number): string[] {
 	const bodyLines = [];
@@ -227,37 +276,24 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 			break;
 		}
 	}
-	return bodyLines;
-}
-
-// Extract title from task line
-export function extractTitle(text: string): string {
-	const timeAtStartMatch = text.match(
-		/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
-	);
-
-	if (timeAtStartMatch) {
-		// If time is at the start, extract title after the time and till the pipe symbol
-		return text
-			.replace(/^- \[[x ]\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
-			.split("|")[0]
-			.trim();
-	} else {
-		// Default case: no time at start, extract title till the pipe symbol
-		return text.includes("|")
-			? text
-					.split("|")[0]
-					.replace(/^- \[[x ]\]\s*/, "")
-					.trim()
-			: text.replace(/^- \[[x ]\]\s*/, "").trim();
-	}
+	return bodyLines.at(0) === "" ? [] : bodyLines;
 }
 
 // Extract time from task line
 export function extractTime(text: string): string {
+	let match = text.match(/\[time::\s*(.*?)\]/);
+	if (match) {
+		return match[1];
+	}
+
+	match = text.match(/@time\((.*?)\)/);
+	if (match) {
+		return match[1];
+	}
+
 	// Check if time is at the start of the task
 	const timeAtStartMatch = text.match(
-		/^- \[[x ]\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
+		/^- \[.\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
 	);
 
 	if (timeAtStartMatch) {
@@ -287,32 +323,40 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
+	let match = text.match(/\[priority::\s*(\d{1,2})\]/);
+	if (match) {
+		return parseInt(match[1]);
+	}
+
+	match = text.match(/@priority\(\s*(\d{1,2})\s*\)/);
+	if (match) {
+		return parseInt(match[1]);
+	}
+
 	// Create a regex pattern to match any priority emoji
 	const emojiPattern = new RegExp(
-		`\\|?\\s*(${Object.values(priorityEmojis).join("|")})\\s*`,
+		`(${Object.values(priorityEmojis)
+			.map((emoji) => `\\s*${emoji}\\s*`)
+			.join("|")})`,
 		"g"
 	);
 
-	// Execute the regex to find the emoji in the text
-	const match = text.match(emojiPattern);
+	// Execute the regex to find all priority emoji matches
+	const matches = text.match(emojiPattern) || [];
 
-	// If a match is found, map it back to the corresponding priority number
-	if (match) {
-		const emojiFound = match[0].trim().replace("|", "").trim();
-		// console.log(
-		// 	"Following is the match I found for the Priority :",
-		// 	emojiFound
-		// );
+	// Filter out any empty or incorrect values
+	const validMatches = matches
+		.map((match) => match.trim()) // Trim spaces
+		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
 
+	// Find the first match in the priorityEmojis mapping
+	for (const emoji of validMatches) {
 		const priorityMatch = Object.entries(priorityEmojis).find(
-			([, emoji]) => emoji === emojiFound
+			([, value]) => value === emoji
 		);
-
-		// console.log(
-		// 	"The match i found for this emoji from the mapping :",
-		// 	priorityMatch
-		// );
-		return parseInt(priorityMatch?.[0] || "0") || 0;
+		if (priorityMatch) {
+			return parseInt(priorityMatch[0]); // Return the first matching priority
+		}
 	}
 
 	// Default priority if no emoji is found
@@ -331,12 +375,9 @@ export function extractCompletionDate(text: string): string {
 		/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?/
 	);
 
-	// If not found, try to match the completion:: 2024-09-28 format
+	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
-		match = text.match(
-			/\[completion::\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\]/
-		);
-
+		match = text.match(/\[completion::\s*(.*?)\]/);
 		if (match) {
 			return match
 				? match[0].replace("[completion::", "").replace("]", "").trim()
@@ -345,10 +386,7 @@ export function extractCompletionDate(text: string): string {
 	}
 
 	if (!match) {
-		match = text.match(
-			/\@completion\(\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?\)/
-		);
-
+		match = text.match(/\@completion\(\s*(.*?)\s*\)/);
 		if (match) {
 			return match
 				? match[0].replace("@completion(", "").replace(")", "").trim()
