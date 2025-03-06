@@ -3,6 +3,7 @@
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
+import { parseDueDate } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
@@ -34,8 +35,10 @@ export const renderColumns = (
 				today.getUTCDate()
 			);
 
-			// Parse the task's due date in UTC
-			const dueDate = new Date(task.due);
+			// Parse the task's due date
+			const dueDate = parseDueDate(task.due);
+			if (!dueDate) return false;
+
 			dueDate.setHours(0, 0, 0, 0);
 			const dueDateUTC = Date.UTC(
 				dueDate.getUTCFullYear(),

@@ -84,7 +84,7 @@ const sanitizeDueDate = (
 	updatedTask: taskItem
 ): string => {
 	const dueDateRegex =
-		/📅\s*?\d{4}-\d{2}-\d{2}|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
+		/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
 	const extractedDueDateMatch = title.match(dueDateRegex);
 	// console.log("extractedDueDateMatch", extractedDueDateMatch);
 
@@ -139,7 +139,7 @@ const sanitizeCompletionDate = (
 	updatedTask: taskItem
 ): string => {
 	const completionDateRegex =
-		/\[completion::[^\]]+\]|\@completion\(.*?\)|✅\s+.*?(?=\s|$)/;
+		/\[completion::[^\]]+\]|\@completion\(.*?\)|✅\s*.*?(?=\s|$)/;
 	const extractedCompletionDateMatch = title.match(completionDateRegex);
 
 	console.log("extractedCompletionDateMatch", extractedCompletionDateMatch);
@@ -549,14 +549,14 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Remove due date in various formats
 	if (task.due) {
 		const dueDateRegex =
-			/\s*(📅\s*?\d{4}-\d{2}-\d{2}|\[due::.*?\]|@due\(.*?\))/g;
+			/\s*(📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::.*?\]|@due\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
 	}
 
 	// Remove completion date in various formats
 	if (task.completion) {
 		const completionRegex =
-			/\s*(✅\s*?\d{4}-\d{2}-\d{2}|\[completion::.*?\]|@completion\(.*?\))/g;
+			/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(completionRegex, "");
 	}
 

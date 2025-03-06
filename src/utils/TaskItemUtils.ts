@@ -397,3 +397,19 @@ export const addTaskInActiveEditor = async (
 		console.error("Error updating task in file:", error);
 	}
 };
+
+// Function to parse due date correctly
+export const parseDueDate = (dueStr: string): Date | null => {
+	// Regular expression to check if dueStr starts with a two-digit day
+	const ddMmYyyyPattern = /^\d{2}-\d{2}-\d{4}$/;
+
+	if (ddMmYyyyPattern.test(dueStr)) {
+		// Convert "DD-MM-YYYY" → "YYYY-MM-DD"
+		const [day, month, year] = dueStr.split("-");
+		dueStr = `${year}-${month}-${day}`;
+	}
+
+	// Parse the date
+	const parsedDate = new Date(dueStr);
+	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+};

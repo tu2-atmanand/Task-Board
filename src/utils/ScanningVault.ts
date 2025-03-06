@@ -308,14 +308,14 @@ export function extractTime(text: string): string {
 
 // Extract date from task title
 export function extractDueDate(text: string): string {
-	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(/\[due::\s*(\d{4}-\d{2}-\d{2})\]/);
+		match = text.match(/\[due::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/);
 	}
 
 	if (!match) {
-		match = text.match(/\@due\(\s*(\d{4}-\d{2}-\d{2})\)/);
+		match = text.match(/\@due\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/);
 	}
 
 	return match ? match[1] : "";
@@ -371,9 +371,7 @@ export function extractTags(text: string): string[] {
 
 // Extract completion date-time value
 export function extractCompletionDate(text: string): string {
-	let match = text.match(
-		/✅\s*([\d\w]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)[\s.\-\/\\](?:[a-zA-Z0-9]+)([T\s.\-/\\]\d{2}:\d{2})?/
-	);
+	let match = text.match(/✅\s*.*?(?=\s|$)/);
 
 	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
