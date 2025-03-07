@@ -18,11 +18,11 @@
 
 <p align="center">An Obsidian plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
 
-![Task Board Thumbnail](./assets/MainThumbnail.png)
+![Task Board Thumbnail](./assets/MainThumbnail-2.jpg)
 
 > Introductory YouTube video : [Task Board plugin - Introduction](https://youtu.be/ZizsPBuXW8g)
 
-This plugin is designed to help you document your work seamlessly from start to finish while completing a specific task. With it, you can quickly open a task without manually accessing the markdown file, allowing you to add solutions, key points, resources, and even sub-tasks effortlessly.  
+This plugin is designed to help you document your work seamlessly from start to finish while completing a specific task. With this plugin, you can quickly open a task without manually accessing the markdown file, allowing you to add solutions, key points, resources, and even sub-tasks effortlessly.
 
 Inspired by the [GitHub Projects Board Layout](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout), the goal is to bring the full functionality of GitHub Projects into Obsidian. This will enable you to manage private projects efficiently or even create a collaborative workspace within Obsidian.
 
@@ -33,7 +33,7 @@ This readme will only provide a basic information. Ill highly recommend to go th
 
 ## Discussion
 
-Join the forum top to share your thoughts, ideas or requests and hear from other, how they have adapted to this GTD methodologies to get their tasks done and complete projects inside Obsidian : [**Task Board topic on Obsidian forum**](https://forum.obsidian.md/t/task-board-another-gtd-methodology-similar-to-github-projects-planning/90849?u=tu2_atmanand)
+Join the forum top to share your thoughts, ideas or requests and hear from other, how they have adapted to this GTD methodologies to get their tasks done and complete projects inside Obsidian : [**Task Board topic on Obsidian forum**](https://forum.obsidian.md/invites/WDTPqhvJUD)
 
 
 ## How Does it work ?
