@@ -18,15 +18,18 @@
 
 <p align="center">An Obsidian plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
 
-![Task Board Thumbnail](./assets/TaskBoardThumbnail-2.png)
+![Task Board Thumbnail](./assets/MainThumbnail.png)
 
 > Introductory YouTube video : [Task Board plugin - Introduction](https://youtu.be/ZizsPBuXW8g)
 
-The main idea behind this plugin is to be able to document all your work from start to end while you are completing the specific task. You will be easily open the specific task without opening the markdown file and add the solution, points, resources you have found about the task and add sub-tasks in it. This feature has been inspired from the [GitHub Projects Board Layout](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). The plan is to replicate whole GitHub Projects feature into Obsidian, to maintain your private personal projects or even create a private collaborative workspace.
+This plugin is designed to help you document your work seamlessly from start to finish while completing a specific task. With it, you can quickly open a task without manually accessing the markdown file, allowing you to add solutions, key points, resources, and even sub-tasks effortlessly.  
+
+Inspired by the [GitHub Projects Board Layout](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout), the goal is to bring the full functionality of GitHub Projects into Obsidian. This will enable you to manage private projects efficiently or even create a collaborative workspace within Obsidian.
+
 
 ## **Documentation**
 
-This readme will only provide a basic information. Ill highly recommend to go through the docs to understand the plugin better and to use the **Task Board** efficiently : [**Task Board Documentation**](https://tu2-atmanand.github.io/task-board-docs/).
+This readme will only provide a basic information. Ill highly recommend to go through the docs to understand the plugin better and to make use of **Task Board** efficiently : [**Task Board Documentation**](https://tu2-atmanand.github.io/task-board-docs/).
 
 ## Discussion
 
@@ -42,12 +45,11 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 ## How to start ?
 
-**Step 1 :** Install and Enable the plugin.
-> Since the plugin has not been published on Obsidian Marketplace, you can install it using BRAT. Follow these steps : [Install plugin using BRAT](https://tu2-atmanand.github.io/task-board-docs/docs/Installation/#method-2--using-brat-plugin).
-
-![How to setup Task Board](./assets/HowToSetupTaskBoard.gif)
+**Step 1 :** Install and Enable the plugin : [How to install Task Board](https://tu2-atmanand.github.io/task-board-docs/docs/Installation/).
 
 **Step 2 :** Open Task Board using the Icon from the right side Ribbon Icon Bar. There is also a command in the Command Pallet.
+
+![How to setup Task Board](./assets/HowToSetupTaskBoard.gif)
 
 **Step 3 :** Click on the **Scan vault window** button from the top-right in the Task Board view header as shown in above video. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters](https://tu2-atmanand.github.io/task-board-docs/docs/Features/Filters_for_Scanning/) to exclude certains files from scanning.
 

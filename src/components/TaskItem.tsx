@@ -12,6 +12,7 @@ import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitle } from 'src/utils/TaskContentFormatter';
 import { hexToRgba } from 'src/utils/UIHelpers';
+import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
 
@@ -135,7 +136,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// Determine color for the task indicator
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
-		const taskDueDate = new Date(task.due);
+		const taskDueDate = parseDueDate(task.due) || new Date(task.due);
 		if (taskDueDate.toDateString() === today.toDateString()) {
 			return 'var(--color-yellow)'; // Due today
 		} else if (taskDueDate > today) {
@@ -316,7 +317,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemFooter">
 							{/* Conditionally render task.completed or the date/time */}
-							{task.completion ? (
+							{task.status === "X" || task.status === "x" ? (
 								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
 							) : (
 								<div className='taskItemDate'>

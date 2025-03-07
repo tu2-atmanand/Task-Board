@@ -229,8 +229,8 @@
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
-      "showHeader": false,
-      "showFooter": false,
+      "showHeader": true,
+      "showFooter": true,
       "showVerticalScroll": false,
       "tagColors": {
         "bug": "#ef1120dd",
@@ -331,7 +331,7 @@
           "type": "TODO"
         }
       ],
-      "showTaskWithoutMetadata": false
+      "showTaskWithoutMetadata": true
     }
   }
 }

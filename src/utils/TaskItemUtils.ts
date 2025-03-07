@@ -1,5 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
+import { cleanTaskTitle, taskContentFormatter } from "./TaskContentFormatter";
 import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
@@ -17,7 +18,6 @@ import {
 import { App } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { taskContentFormatter } from "./TaskContentFormatter";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -188,7 +188,7 @@ export const updateTaskInFile = async (
 			if (
 				!isTaskFound &&
 				line.match(/^- \[.{1}\]/) &&
-				line.includes(oldTask.title)
+				line.includes(cleanTaskTitle(plugin, oldTask))
 			) {
 				isTaskFound = true;
 				taskStartIndex = i;
@@ -396,4 +396,20 @@ export const addTaskInActiveEditor = async (
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}
+};
+
+// Function to parse due date correctly
+export const parseDueDate = (dueStr: string): Date | null => {
+	// Regular expression to check if dueStr starts with a two-digit day
+	const ddMmYyyyPattern = /^\d{2}-\d{2}-\d{4}$/;
+
+	if (ddMmYyyyPattern.test(dueStr)) {
+		// Convert "DD-MM-YYYY" → "YYYY-MM-DD"
+		const [day, month, year] = dueStr.split("-");
+		dueStr = `${year}-${month}-${day}`;
+	}
+
+	// Parse the date
+	const parsedDate = new Date(dueStr);
+	return isNaN(parsedDate.getTime()) ? null : parsedDate;
 };

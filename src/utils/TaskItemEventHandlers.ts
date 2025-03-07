@@ -33,7 +33,7 @@ export const handleCheckboxChange = (
 		};
 		// Move from Completed to Pending
 		moveFromCompletedToPending(plugin, taskWithCompleted);
-		updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
+		updateTaskInFile(plugin, taskWithCompleted, updatedTask);
 	} else {
 		const globalSettings = plugin.settings.data.globalSettings;
 		const moment = _moment as unknown as typeof _moment.default;
