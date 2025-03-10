@@ -16,7 +16,7 @@
 </p>
 <br/>
 
-<p align="center">An Obsidian plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
+<p align="center">An [Obsidian](https://obsidian.md/) plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
 
 ![Task Board Thumbnail](./assets/MainThumbnail-2.jpg)
 
