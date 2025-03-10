@@ -2728,6 +2728,52 @@
                 "filePath": "DailyNotes.md",
                 "completion": ""
             }
+        ],
+        "Fixing UTC due date bug.md": [
+            {
+                "id": 2734003570,
+                "status": ">",
+                "title": "Suppose say this  is a Main task which will going to have only Sub-Tasks and their Sub-sub Tasks.     [due:: 2025-03-08]   #SubTasks/🔥bugs #bug #new [priority:: 2] [time:: 01:43 - 02:43]",
+                "body": [
+                    "\t- [ ] This is the first Sub Task.",
+                    "\t\t- [ ] This is the first sub-sub Task",
+                    "\t\t\t- [x] This is first sub-sub-sub task",
+                    "\t\t\t- [x] Adding New three level Indentation subTask.",
+                    "\t\t- [x] This is second sub-sub Task. Updating.",
+                    "\t This is an H1 heading, updating.",
+                    "\tAdding a line here, the below tasks has been achieved. This line was added from the Modal using textArea box. Updating...",
+                    "\t- [ ] This is the Second Sub Task",
+                    "\t\t- [x] This is the first sub-sub Task",
+                    "\t\t- [ ] This is second sub-sub Task, Updated. "
+                ],
+                "time": "01:43 - 02:43",
+                "due": "2025-03-08",
+                "tags": [
+                    "#SubTasks/🔥bugs",
+                    "#bug",
+                    "#new"
+                ],
+                "priority": 2,
+                "filePath": "Fixing UTC due date bug.md",
+                "completion": ""
+            },
+            {
+                "id": 1677278116,
+                "status": " ",
+                "title": "This is a first test task which will not going to follow the pipe symbol format to separate the metadata.🔺📅 2025-02-17  #Test",
+                "body": [
+                    "\t- Properties to this task has been added using the tasks plugin.",
+                    "\t- Look the downloads number : ![[Pasted image 20250310200441.png]]"
+                ],
+                "time": "",
+                "due": "2025-02-17",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 1,
+                "filePath": "Fixing UTC due date bug.md",
+                "completion": ""
+            }
         ]
     },
     "Completed": {
@@ -3081,9 +3127,9 @@
         ],
         "Daily_Notes/07-08-2024.md": [
             {
-                "id": 227335576,
-                "status": "x",
-                "title": "Watch the following Javascript Course. |  #OfflineVideo ✅ 2024-08-24T11:30",
+                "id": 1251346485,
+                "status": "X",
+                "title": "Watch the following Javascript Course.  #OfflineVideo ✅ 2024-08-24T11:30",
                 "body": [],
                 "time": "",
                 "due": "",
