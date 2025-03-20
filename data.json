@@ -127,6 +127,13 @@
             "name": "Working as Expected",
             "index": 5,
             "coltag": "done"
+          },
+          {
+            "colType": "otherTags",
+            "active": true,
+            "collapsed": false,
+            "name": "All other tags",
+            "index": 6
           }
         ],
         "filters": [

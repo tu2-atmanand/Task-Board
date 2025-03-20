@@ -14,7 +14,7 @@
                     "\tSimply adding another line in the description. Updating..."
                 ],
                 "time": "13:49 - 14:49",
-                "due": "",
+                "due": "2025-03-20",
                 "tags": [
                     "#New",
                     "#working"
@@ -63,7 +63,7 @@
         ],
         "Testing 2.md": [
             {
-                "id": 3399771403,
+                "id": 271947103,
                 "status": " ",
                 "title": "Give some time for Notes Explorer plugin. 🔼 [time:: 19:34 - 20:34]    [due:: 2025-03-07] #bug/solver #done",
                 "body": [
@@ -83,7 +83,7 @@
                 "completion": ""
             },
             {
-                "id": 4229846584,
+                "id": 3244888194,
                 "status": "!",
                 "title": "This is a task for testing, ill add status using Tasks plugin. 🔼 ⏰ [19:34 - 20:34] #bug/solver 📅 2025-01-03",
                 "body": [
@@ -103,19 +103,21 @@
                 "completion": ""
             },
             {
-                "id": 3981923703,
+                "id": 3337896613,
                 "status": " ",
-                "title": "This task has simple time in 4th format @time(12:30 AM) [due:: 07-03-2025]",
-                "body": [],
-                "time": "12:30 AM",
-                "due": "07-03-2025",
+                "title": "This task has simple time in 4th format @time(12:30 AM)",
+                "body": [
+                    ""
+                ],
+                "time": "12:30 AM - 13:30 AM",
+                "due": "2025-03-21",
                 "tags": [],
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "completion": ""
             },
             {
-                "id": 2258249098,
+                "id": 2903992091,
                 "status": " ",
                 "title": "#📋 [[Nexus Book Project|Nexus]]: Determine next action 🔁 every month ⏳ 2024-12-20 📅 2024-12-20",
                 "body": [],
@@ -147,7 +149,7 @@
                     "\t\t- [ ] This is second sub-sub Task, Updated. "
                 ],
                 "time": "01:43 - 02:43",
-                "due": "2025-03-08",
+                "due": "2025-04-04",
                 "tags": [
                     "#SubTasks/🔥bugs",
                     "#bug",
@@ -348,7 +350,7 @@
                     "\tAdding a line in the body. Updating."
                 ],
                 "time": "",
-                "due": "2025-01-10",
+                "due": "2025-03-21",
                 "tags": [
                     "#working",
                     "#Testing"
@@ -424,12 +426,12 @@
         ],
         "Resources/obsidian-demo/Daily Notes/2022-04-24.md": [
             {
-                "id": 3990177117,
+                "id": 290978872,
                 "status": " ",
                 "title": "Add this sample project on [[GitHub]]",
                 "body": [],
                 "time": "",
-                "due": "",
+                "due": "2022-04-24",
                 "tags": [],
                 "priority": 0,
                 "filePath": "Resources/obsidian-demo/Daily Notes/2022-04-24.md",
@@ -546,7 +548,7 @@
                     "\t- [ ] A simple sub-task added"
                 ],
                 "time": "",
-                "due": "2025-01-30",
+                "due": "2025-04-10",
                 "tags": [],
                 "priority": 0,
                 "filePath": "obsidian-hub-0.2.1/06 - Inbox/🗂️ 06 - Inbox.md",
@@ -2086,7 +2088,7 @@
                     "\t- [x] Adding a first subtask, with **checked** state true."
                 ],
                 "time": "13:00 - 14:00",
-                "due": "",
+                "due": "2025-03-20",
                 "tags": [
                     "#feat",
                     "#working"
