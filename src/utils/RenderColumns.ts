@@ -26,29 +26,69 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter((task) => {
 			if (!task.due) return false;
 
-			// Get today's date in UTC (ignoring time)
+			// ---------- METHOD 1 -------------
+
+			// // Get today's date in UTC (ignoring time)
+			// const today = new Date();
+			// today.setHours(0, 0, 0, 0);
+			// const todayUTC = Date.UTC(
+			// 	today.getUTCFullYear(),
+			// 	today.getUTCMonth(),
+			// 	today.getUTCDate()
+			// );
+
+			// // Parse the task's due date
+			// const dueDate = parseDueDate(task.due);
+			// if (!dueDate) return false;
+
+			// dueDate.setHours(0, 0, 0, 0);
+			// const dueDateUTC = Date.UTC(
+			// 	dueDate.getUTCFullYear(),
+			// 	dueDate.getUTCMonth(),
+			// 	dueDate.getUTCDate()
+			// );
+
+			// // Calculate difference in full days
+			// const diffDays = Math.round(
+			// 	(dueDateUTC - todayUTC) / (1000 * 3600 * 24)
+			// );
+
+			//  ---------- METHOD 2 -------------
 			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-			const todayUTC = Date.UTC(
-				today.getUTCFullYear(),
-				today.getUTCMonth(),
-				today.getUTCDate()
-			);
+			/**
+			 * Formats a Date object into "DD/MM/YYYY" format.
+			 */
+			function formatDate(date: Date): string {
+				const day = String(date.getDate()).padStart(2, "0");
+				const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+				const year = date.getFullYear();
 
-			// Parse the task's due date
-			const dueDate = parseDueDate(task.due);
-			if (!dueDate) return false;
+				return `${year}-${month}-${day}`;
+			}
 
-			dueDate.setHours(0, 0, 0, 0);
-			const dueDateUTC = Date.UTC(
-				dueDate.getUTCFullYear(),
-				dueDate.getUTCMonth(),
-				dueDate.getUTCDate()
-			);
+			function treatAsUTC(date: string): number {
+				let result = new Date(date);
+				result.setMinutes(
+					result.getMinutes() - result.getTimezoneOffset()
+				);
+				return result.getTime();
+			}
 
-			// Calculate difference in full days
-			const diffDays = Math.round(
-				(dueDateUTC - todayUTC) / (1000 * 3600 * 24)
+			function daysBetween(startDate: string, endDate: string): number {
+				const millisecondsPerDay = 24 * 60 * 60 * 1000;
+				const diff: number = (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
+				return diff;
+			}
+
+			const diffDays = daysBetween(formatDate(today), task.due);
+
+			console.log(
+				"diffDays",
+				diffDays,
+				" | For today : ",
+				today,
+				" | Due Date : ",
+				task.due
 			);
 
 			// Handle cases where 'from' is greater than 'to'
