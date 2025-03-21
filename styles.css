@@ -690,6 +690,91 @@
 	min-width: 8vw;
 	max-width: 14vw;
 	box-sizing: border-box;
+	transition: transform 0.3s ease-in-out;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+	.EditTaskModalHomeBody {
+		flex-direction: column;
+		position: relative;
+	}
+
+	.EditTaskModalHomeLeftSec {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		max-width: 95vw;
+		min-width: 80vw;
+		flex-grow: 1;
+		max-height: 100%;
+		justify-content: space-between;
+	}
+
+	.EditTaskModalHomeLeftSecScrollable {
+		display: flex;
+		flex-direction: column;
+		max-width: 100%;
+		overflow-y: auto;
+		padding-inline-end: 0px;
+	}
+
+	/* Initially hide the right section on small screens */
+	.EditTaskModalHomeRightSec {
+		position: absolute;
+		top: 0;
+		right: 0;
+		min-width: 40vw;
+		height: 100%;
+		background: rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(10px);
+		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
+		transform: translateX(100%);
+	}
+
+	/* Show when toggled */
+	.EditTaskModalHomeRightSec.visible {
+		transform: translateX(0);
+	}
+
+	/* Button to toggle right section */
+	.EditTaskModalFooter {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+	}
+
+	.EditTaskModalHomeSaveBtn {
+		background-color: green !important;
+		color: white !important;
+		font-weight: 600;
+		/* width: 100%; */
+		border: none;
+		cursor: pointer;
+		width: 75%;
+	}
+
+	.EditTaskModalHomeToggleBtn {
+		background-color: var(--accent-color, blue);
+		color: white;
+		border: none;
+		padding: 8px 12px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: block;
+	}
+
+	.EditTaskModalHomeToggleBtn:hover {
+		background-color: darkblue;
+	}
+
+	/* Ensure the toggle button is only visible on small screens */
+	@media (min-width: 769px) {
+		.EditTaskModalHomeToggleBtn {
+			display: none;
+		}
+	}
 }
 
 .EditTaskModalHomeField {
@@ -720,18 +805,25 @@
 	font-size: small;
 }
 
-.EditTaskModalHomeSaveBtn {
+.EditTaskModalHomeFooterBtnSec {
 	position: sticky;
+	bottom: 0;
+	padding: 10px;
+	margin-inline: 1em 2.5em;
+	margin-block-start: 1em;
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.EditTaskModalHomeSaveBtn {
 	bottom: 0;
 	background-color: green !important;
 	color: white !important;
 	font-weight: 600;
 	/* width: 100%; */
-	padding: 10px;
 	border: none;
 	cursor: pointer;
-	margin-inline: 1em 2.5em;
-	margin-block-start: 1em;
 }
 
 .EditTaskModalHomeSaveBtn:hover {

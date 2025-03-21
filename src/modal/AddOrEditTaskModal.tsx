@@ -56,6 +56,25 @@ const EditTaskContent: React.FC<{
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [status, setStatus] = useState(task.status || '');
 	// const [isEdited, setIsEdited] = useState(false);
+	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
+	const rightSecRef = useRef<HTMLDivElement>(null);
+
+	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);
+
+	const handleClickOutside = (event: MouseEvent) => {
+		if (rightSecRef.current && !rightSecRef.current.contains(event.target as Node)) {
+			setIsRightSecVisible(false);
+		}
+	};
+
+	useEffect(() => {
+		if (isRightSecVisible) {
+			document.addEventListener("mousedown", handleClickOutside);
+		} else {
+			document.removeEventListener("mousedown", handleClickOutside);
+		}
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [isRightSecVisible]);
 
 	// Load statuses dynamically
 	let filteredStatusesDropdown: filterOptions[] = [];
@@ -374,9 +393,17 @@ const EditTaskContent: React.FC<{
 							</div>
 						</div>
 
-						<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
+						<div className="EditTaskModalHomeFooterBtnSec">
+							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
+							<button className="EditTaskModalHomeToggleBtn" onClick={toggleRightSec} aria-label="Toggle Details">
+								☰
+							</button>
+						</div>
 					</div>
-					<div className="EditTaskModalHomeRightSec">
+					<div
+						ref={rightSecRef}
+						className={`EditTaskModalHomeRightSec ${isRightSecVisible ? "visible" : ""}`}
+					>
 						{/* Task Status */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("task-status")}</label>
