@@ -3,6 +3,7 @@
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
+import { moment as _moment } from "obsidian";
 import { parseDueDate } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
@@ -53,43 +54,50 @@ export const renderColumns = (
 			// 	(dueDateUTC - todayUTC) / (1000 * 3600 * 24)
 			// );
 
-			//  ---------- METHOD 2 -------------
+			// //  ---------- METHOD 2 -------------
+			// const today = new Date();
+			// /**
+			//  * Formats a Date object into "DD/MM/YYYY" format.
+			//  */
+			// function formatDate(date: Date): string {
+			// 	const day = String(date.getDate()).padStart(2, "0");
+			// 	const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+			// 	const year = date.getFullYear();
+
+			// 	return `${year}-${month}-${day}`;
+			// }
+
+			// function treatAsUTC(date: string): number {
+			// 	let result = new Date(date);
+			// 	result.setMinutes(
+			// 		result.getMinutes() - result.getTimezoneOffset()
+			// 	);
+			// 	return result.getTime();
+			// }
+
+			// function daysBetween(startDate: string, endDate: string): number {
+			// 	const millisecondsPerDay = 24 * 60 * 60 * 1000;
+			// 	const diff: number = (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
+			// 	return diff;
+			// }
+
+			// const diffDays = daysBetween(formatDate(today), task.due);
+
+			//  ---------- METHOD 3 -------------
 			const today = new Date();
-			/**
-			 * Formats a Date object into "DD/MM/YYYY" format.
-			 */
-			function formatDate(date: Date): string {
-				const day = String(date.getDate()).padStart(2, "0");
-				const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-				const year = date.getFullYear();
+			today.setHours(0, 0, 0, 0);
 
-				return `${year}-${month}-${day}`;
-			}
+			const moment = _moment as unknown as typeof _moment.default;
+			const diffDays = moment(task.due).diff(moment(today), "days");
 
-			function treatAsUTC(date: string): number {
-				let result = new Date(date);
-				result.setMinutes(
-					result.getMinutes() - result.getTimezoneOffset()
-				);
-				return result.getTime();
-			}
-
-			function daysBetween(startDate: string, endDate: string): number {
-				const millisecondsPerDay = 24 * 60 * 60 * 1000;
-				const diff: number = (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
-				return diff;
-			}
-
-			const diffDays = daysBetween(formatDate(today), task.due);
-
-			console.log(
-				"diffDays",
-				diffDays,
-				" | For today : ",
-				today,
-				" | Due Date : ",
-				task.due
-			);
+			// console.log(
+			// 	"diffDays",
+			// 	diffDays,
+			// 	" | For today : ",
+			// 	today,
+			// 	" | Due Date : ",
+			// 	task.due
+			// );
 
 			// Handle cases where 'from' is greater than 'to'
 			if (from > to) {
