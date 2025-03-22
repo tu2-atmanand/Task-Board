@@ -730,6 +730,7 @@
 		backdrop-filter: blur(10px);
 		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
 		transform: translateX(100%);
+		overflow: auto;
 	}
 
 	/* Show when toggled */
