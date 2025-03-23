@@ -303,12 +303,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														{column.active ? (
 															<EyeIcon
 																onClick={() => toggleActiveState(boardIndex, columnIndex)}
-																style={{ cursor: 'pointer' }}
+																className="boardConfigModalColumnRowEyeButton"
 															/>
 														) : (
 															<EyeOffIcon
 																onClick={() => toggleActiveState(boardIndex, columnIndex)}
-																style={{ cursor: 'pointer' }}
+																className="boardConfigModalColumnRowEyeButton"
 															/>
 														)}
 														<div className="boardConfigModalColumnRowContent">
@@ -355,6 +355,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																			Number(e.target.value)
 																		)
 																	}
+																	className="boardConfigModalColumnRowContentColDatedVal"
 																/>
 															)}
 															{column.colType === "dated" && (
@@ -402,7 +403,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																</>
 															)}
 														</div>
-														<FaTrash style={{ cursor: 'pointer' }} size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
+														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 													</div>
 												</div>
 											)}
