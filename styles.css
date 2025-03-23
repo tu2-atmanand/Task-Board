@@ -1002,6 +1002,7 @@
 	.boardConfigModalHome {
 		flex-direction: column;
 		width: 100vw;
+		padding-top: 1em;
 	}
 
 	/* Hide sidebar by default */
@@ -1035,11 +1036,11 @@
 
 	/* Toggle button */
 	.boardConfigModalSidebarToggleBtn {
-		position: sticky;
-		top: 2px;
+		position: absolute;
+		top: 0;
 		left: 1em;
-		width: 2em !important;
-		height: 2em !important;
+		width: 2.5em !important;
+		height: 2.5em !important;
 		background-color: var(--accent-color, blue);
 		color: white;
 		border: none;
