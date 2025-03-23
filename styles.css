@@ -886,7 +886,6 @@
 .boardConfigModalHome {
 	display: flex;
 	flex-direction: row;
-	width: 100%;
 	height: 100%;
 }
 
@@ -917,6 +916,7 @@
 	overflow: hidden;
 	min-width: 180px;
 	max-width: 250px;
+	transition: transform 0.3s ease-in-out;
 }
 
 .boardConfigModalSidebarBtnArea {
@@ -977,6 +977,70 @@
 	overflow-y: auto;
 	max-width: 50vw;
 	/* Allow scrolling for main content */
+}
+
+/* Responsive styles for small screens */
+@media (max-width: 768px) {
+	.boardConfigModalHome {
+		flex-direction: column;
+		width: 100vw;
+	}
+
+	/* Hide sidebar by default */
+	.boardConfigModalSidebar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 40vw;
+		height: 100%;
+		background: var(--background-secondary);
+		box-shadow: 4px 0px 10px rgba(0, 0, 0, 0.2);
+		transform: translateX(-100%);
+		z-index: 100;
+	}
+
+	.boardConfigModalMainContent {
+		max-width: 95vw;
+		width: 95vw;
+	}
+
+	.boardConfigModalMainContentBoardSettingTab {
+		max-width: 95vw !important;
+		width: 95vw !important;
+		margin-inline-start: 0 !important;
+	}
+
+	/* Show when toggled */
+	.boardConfigModalSidebar.visible {
+		transform: translateX(0);
+	}
+
+	/* Toggle button */
+	.boardConfigModalSidebarToggleBtn {
+		position: sticky;
+		top: 2px;
+		left: 1em;
+		width: 2em !important;
+		height: 2em !important;
+		background-color: var(--accent-color, blue);
+		color: white;
+		border: none;
+		padding: 8px 12px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: block;
+	}
+
+	.boardConfigModalSidebarToggleBtn:hover {
+		background-color: darkblue;
+	}
+
+	/* Hide button on larger screens */
+	@media (min-width: 769px) {
+		.boardConfigModalSidebarToggleBtn {
+			display: none;
+		}
+	}
 }
 
 .boardConfigModalMainContentBoardSettingTab,

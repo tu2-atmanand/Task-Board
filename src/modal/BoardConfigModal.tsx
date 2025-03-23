@@ -429,11 +429,34 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 	}
 
+	const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+	const sidebarRef = useRef<HTMLDivElement>(null);
+
+	const toggleSidebar = () => setIsSidebarVisible(!isSidebarVisible);
+
+	const handleClickOutside = (event: MouseEvent) => {
+		if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+			setIsSidebarVisible(false);
+		}
+	};
+
+	useEffect(() => {
+		if (isSidebarVisible) {
+			document.addEventListener("mousedown", handleClickOutside);
+		} else {
+			document.removeEventListener("mousedown", handleClickOutside);
+		}
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [isSidebarVisible]);
+
 	return (
 		<>
 			{renderAddColumnModal()}
+			<button className="boardConfigModalSidebarToggleBtn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
+				☰ {/* Replace with an icon later */}
+			</button>
 			<div className="boardConfigModalHome">
-				<div className="boardConfigModalSidebar">
+				<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
 					<div className="boardConfigModalSidebarBtnArea" >
 						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>{t("global-settings")}</div>
 
