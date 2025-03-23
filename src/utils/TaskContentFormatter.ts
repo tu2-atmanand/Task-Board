@@ -19,7 +19,11 @@ export const taskContentFormatter = (
 
 	// Sanitize all the properties from the task title
 	let updatedTitle = updatedTask.title;
-	updatedTitle = sanitizePriority( updatedTitle, updatedTask.priority, globalSettings);
+	updatedTitle = sanitizePriority(
+		updatedTitle,
+		updatedTask.priority,
+		globalSettings
+	);
 
 	updatedTitle = sanitizeTime(updatedTitle, updatedTask.time, globalSettings);
 
@@ -27,7 +31,11 @@ export const taskContentFormatter = (
 
 	updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
 
-	updatedTitle = sanitizeCompletionDate(globalSettings, updatedTitle,	updatedTask);
+	updatedTitle = sanitizeCompletionDate(
+		globalSettings,
+		updatedTitle,
+		updatedTask
+	);
 
 	// Build the formatted string for the main task
 	let formattedTask = `${checkBoxStat} ${updatedTitle}`;
@@ -359,16 +367,17 @@ const sanitizePriority = (
  * Function to sanitize the tags inside the task title.
  */
 const sanitizeTags = (title: string, newTags: string[]): string => {
-	const tagsRegex = /#[^\s]+/g;
-	const extractedTagsMatch = title.match(tagsRegex) || [];
+	// Regex for valid tags based on new rules
+	const tagsRegex = /\s+#([^\s;@()\[\]{}<>]{1,20})/g;
+	const extractedTagsMatch = title.match(tagsRegex)?.map((tag) => tag.trim()) || [];
 
 	// Create a set for quick lookup of newTags
 	const newTagsSet = new Set(newTags);
 
 	if (newTagsSet.size === 0) {
 		// If no tags are present, remove all existing tags
-		extractedTagsMatch.forEach((element) => {
-			title = title.replace(element, "").trim();
+		extractedTagsMatch.forEach((tag) => {
+			title = title.replace(tag, "").trim();
 		});
 		return title;
 	}
@@ -382,7 +391,8 @@ const sanitizeTags = (title: string, newTags: string[]): string => {
 	}
 
 	// Append tags from newTags that are not already in the title
-	const updatedTagsMatch = updatedTitle.match(tagsRegex) || [];
+	const updatedTagsMatch =
+		updatedTitle.match(tagsRegex)?.map((tag) => tag.trim()) || [];
 	const updatedTagsSet = new Set(updatedTagsMatch);
 
 	for (const tag of newTags) {
