@@ -143,6 +143,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
+	const handleAddNewBoard = async (oldBoards: Board[]) => {
+		const newBoard: Board = {
+			name: t("new-board"),
+			index: localBoards.length + 1,
+			columns: [],
+		};
+		console.log("Old Boards: ", localBoards);
+		setLocalBoards([...oldBoards, newBoard]);
+		setSelectedBoardIndex(localBoards.length);
+		setIsEdited(true);
+	};
+
 	const deleteCurrentBoard = () => {
 		const mssg = t("board-delete-confirmation-message")
 		const deleteModal = new DeleteConfirmationModal(app, {
@@ -153,8 +165,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					const updatedBoards = [...localBoards];
 					updatedBoards.splice(selectedBoardIndex, 1);
 					setLocalBoards(updatedBoards);
-					setSelectedBoardIndex(0); // Reset to global settings or no board selected
 					setIsEdited(true);
+					console.log("Board Deleted. New Boards: ", updatedBoards);
+					if (updatedBoards.length === 0) {
+						handleAddNewBoard(updatedBoards);
+						setSelectedBoardIndex(0);
+					} else if (selectedBoardIndex !== 0) {
+						setSelectedBoardIndex(selectedBoardIndex - 1);
+					}
 				} else {
 					new Notice(t("no-board-selected-to-delete"));
 				}
@@ -463,16 +481,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						))}
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
-						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => {
-							const newBoard: Board = {
-								name: `Board ${localBoards.length + 1}`,
-								index: localBoards.length + 1,
-								columns: [],
-							};
-							setLocalBoards([...localBoards, newBoard]);
-							setSelectedBoardIndex(localBoards.length);
-							setIsEdited(true);
-						}}>{t("add-board")}</button>
+						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
 
 						<hr className="boardConfigModalHr-100" />
 
@@ -527,7 +536,7 @@ export class BoardConfigureModal extends Modal {
 				settingManager={this.settingsManager}
 				boards={this.boards}
 				activeBoardIndex={this.activeBoardIndex}
-				onSave={(updatedBoards: Board[]) =>{
+				onSave={(updatedBoards: Board[]) => {
 					this.isEdited = false;
 					this.onSave(updatedBoards);
 					this.close();

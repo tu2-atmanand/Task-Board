@@ -188,7 +188,9 @@ const en: Lang = {
 	"fresh-install-1": "Looks like this is a fresh install.",
 	"fresh-install-2": "Please use the 'Scan Vault' button (top right) to collect tasks for this board.",
 	"fresh-install-3": "This is only required for first-time setup or after changing filters in the 'Filters for Scanning' settings.",
-	"open-scan-vault-modal": "Open scan vault modal"
+	"open-scan-vault-modal": "Open scan vault modal",
+	"new-board": "New board",
+	"are-you-sure": "Are you sure?",
 };
 
 export default en;
