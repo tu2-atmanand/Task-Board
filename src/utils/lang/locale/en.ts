@@ -104,7 +104,7 @@ const en: Lang = {
 	"day-planner-plugin-compatibility": "If you have installed 'day planner' plugin, enable this to see the time at the start of the task title, instead in the metadata. After enabling this feature, the time will be shown according to the day planner plugin inside Markdown files, but in the task card, the time will be shown in the footer as usual.",
 	"daily-notes-plugin-compatibility": "When enabled, if you add a task in a daily-note file, which has a file name in format like 'yyyy-MM-DD'. Then this date will be considered as the due date for the task.",
 	"due-date-format": "Due date format",
-	"due-date-format-info": "Enter the format of the date which you are using to name your daily-nots files. Please use either 'yyyy-MM-DD' or 'DD-MM-yyyy' formats.",
+	"due-date-format-info": "Enter the format of the date which you are using to name your daily-note files. Please use either 'yyyy-MM-DD' or 'DD-MM-yyyy' format.",
 	"formats": "Formats",
 	"supported-plugin-formats": "Supported plugin formats",
 	"supported-plugin-formats-info": "Different plugins have different format to give the 'due' and 'completion' values to the task. Please select one of the value and see the above format, if its compatible with your current setup.",
