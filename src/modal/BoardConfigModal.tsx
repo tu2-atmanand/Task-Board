@@ -506,6 +506,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 				</DragDropContext>
 			</div>
+			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
 		</>
 	);
 };
