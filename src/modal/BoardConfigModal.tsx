@@ -459,7 +459,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			<div className="boardConfigModalHome">
 				<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
 					<div className="boardConfigModalSidebarBtnArea" >
-						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => setSelectedBoardIndex(-1)}>{t("global-settings")}</div>
+						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => {
+							setSelectedBoardIndex(-1);
+							toggleSidebar();
+						}}>{t("global-settings")}</div>
 
 						<hr className="boardConfigModalHr-100" />
 
@@ -467,7 +470,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						{localBoards.map((board, index) => (
 							<div
 								key={index}
-								onClick={() => setSelectedBoardIndex(index)}
+								onClick={() => {
+									setSelectedBoardIndex(index);
+									toggleSidebar();
+
+								}}
 								className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
 							>
 								{board.name}
