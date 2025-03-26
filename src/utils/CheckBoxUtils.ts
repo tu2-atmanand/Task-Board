@@ -50,7 +50,8 @@ export function isCompleted(task: string): boolean {
  * @returns True if the line matches the task pattern, otherwise false.
  */
 export function isTaskLine(line: string): boolean {
-	return /^- \[.\]/.test(line);
+	const trimmedLine = line.trim();
+	return /^- \[.\]/.test(trimmedLine) && trimmedLine.length > 5;
 }
 
 /**
