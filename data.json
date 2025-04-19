@@ -20,7 +20,7 @@
             "range": {
               "tag": "before",
               "rangedata": {
-                "from": -300,
+                "from": -400,
                 "to": -1
               }
             }
@@ -85,7 +85,7 @@
         "name": "Time based workflow",
         "index": 1,
         "showColumnTags": true,
-        "showFilteredTags": false
+        "showFilteredTags": true
       },
       {
         "columns": [
@@ -127,11 +127,17 @@
             "name": "Working as Expected",
             "index": 5,
             "coltag": "done"
+          },
+          {
+            "colType": "otherTags",
+            "active": true,
+            "collapsed": false,
+            "name": "All other tags",
+            "index": 6
           }
         ],
         "filters": [
-          "#Test",
-          "#working"
+          "#Testing"
         ],
         "filterPolarity": "0",
         "filterScope": "Both",

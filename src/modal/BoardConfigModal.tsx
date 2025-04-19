@@ -14,14 +14,16 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 
 interface ConfigModalProps {
 	app: App;
 	settingManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
-	onClose: () => void;
 	onSave: (updatedBoards: Board[]) => void;
+	onClose: () => void;
+	setIsEdited: (value: boolean) => void;
 }
 
 const ConfigModalContent: React.FC<ConfigModalProps> = ({
@@ -29,8 +31,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	settingManager,
 	boards,
 	activeBoardIndex,
-	onClose,
 	onSave,
+	onClose,
+	setIsEdited,
 }) => {
 	const [localBoards, setLocalBoards] = useState<Board[]>(() => {
 		try {
@@ -48,6 +51,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const updatedBoards = [...localBoards];
 		updatedBoards[index].name = newName;
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	// Function to handle column change
@@ -62,6 +66,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
 		}
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	const handleFiltersChange = (boardIndex: number, value: string) => {
@@ -69,12 +74,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// Split input string by commas and trim spaces to create an array
 		updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	const handleFilterPolarityChange = (boardIndex: number, value: string) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].filterPolarity = value;
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags';
@@ -84,6 +91,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			updatedBoards[boardIndex][field] = value as boolean;
 		}
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	// Function to add a new column to the selected board
@@ -112,6 +120,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
+		setIsEdited(true);
 	};
 
 	// Function to render the Add Column Modal
@@ -131,6 +140,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.splice(columnIndex, 1);
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	const handleAddNewBoard = async (oldBoards: Board[]) => {
+		const newBoard: Board = {
+			name: t("new-board"),
+			index: localBoards.length + 1,
+			columns: [],
+		};
+		console.log("Old Boards: ", localBoards);
+		setLocalBoards([...oldBoards, newBoard]);
+		setSelectedBoardIndex(localBoards.length);
+		setIsEdited(true);
 	};
 
 	const deleteCurrentBoard = () => {
@@ -143,7 +165,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					const updatedBoards = [...localBoards];
 					updatedBoards.splice(selectedBoardIndex, 1);
 					setLocalBoards(updatedBoards);
-					setSelectedBoardIndex(0); // Reset to global settings or no board selected
+					setIsEdited(true);
+					console.log("Board Deleted. New Boards: ", updatedBoards);
+					if (updatedBoards.length === 0) {
+						handleAddNewBoard(updatedBoards);
+						setSelectedBoardIndex(0);
+					} else if (selectedBoardIndex !== 0) {
+						setSelectedBoardIndex(selectedBoardIndex - 1);
+					}
 				} else {
 					new Notice(t("no-board-selected-to-delete"));
 				}
@@ -176,12 +205,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		});
 
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	// Function to save changes
 	const handleSave = () => {
 		onSave(localBoards);
-		onClose();
+		// onClose();
 	};
 
 	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
@@ -451,15 +481,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						))}
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
-						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => {
-							const newBoard: Board = {
-								name: `Board ${localBoards.length + 1}`,
-								index: localBoards.length + 1,
-								columns: [],
-							};
-							setLocalBoards([...localBoards, newBoard]);
-							setSelectedBoardIndex(localBoards.length);
-						}}>{t("add-board")}</button>
+						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
 
 						<hr className="boardConfigModalHr-100" />
 
@@ -485,6 +507,7 @@ export class BoardConfigureModal extends Modal {
 	settingsManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
+	isEdited: boolean;
 	onSave: (updatedBoards: Board[]) => void;
 
 	constructor(
@@ -497,6 +520,7 @@ export class BoardConfigureModal extends Modal {
 		super(app);
 		this.boards = boards;
 		this.activeBoardIndex = activeBoardIndex;
+		this.isEdited = false;
 		this.onSave = onSave;
 		this.settingsManager = new SettingsManager(app, plugin);
 		const { contentEl } = this;
@@ -512,10 +536,39 @@ export class BoardConfigureModal extends Modal {
 				settingManager={this.settingsManager}
 				boards={this.boards}
 				activeBoardIndex={this.activeBoardIndex}
+				onSave={(updatedBoards: Board[]) => {
+					this.isEdited = false;
+					this.onSave(updatedBoards);
+					this.close();
+				}}
 				onClose={() => this.close()}
-				onSave={this.onSave}
+				setIsEdited={(value: boolean) => this.isEdited = value}
 			/>
 		);
+	}
+
+	handleCloseAttempt() {
+		// Open confirmation modal
+		const mssg = t("edit-task-modal-close-confirm-mssg");
+		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
+			app: this.app,
+			mssg,
+			onDiscard: () => {
+				this.isEdited = false;
+				this.close();
+			},
+			onGoBack: () => {
+				// Do nothing
+			}
+		});
+		closeConfirmModal.open();
+	}
+
+	handleSave() {
+		// Trigger save functionality if required before closing
+		this.onSave(this.boards);
+		this.isEdited = false;
+		this.close();
 	}
 
 	onClose() {
@@ -535,6 +588,15 @@ export class BoardConfigureModal extends Modal {
 
 		// Call the super method to correctly close the modal
 		super.onClose();
+	}
+
+	public close(): void {
+		if (this.isEdited) {
+			this.handleCloseAttempt();
+		} else {
+			this.onClose();
+			super.close();
+		}
 	}
 
 }

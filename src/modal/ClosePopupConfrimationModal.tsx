@@ -32,7 +32,7 @@ export class ClosePopupConfrimationModal extends Modal {
 		contentEl.setAttribute('data-type', 'task-board-view');
 
 		const homeComponenet = contentEl.createEl("span", { cls: "deleteConfirmationModalHome" });
-		homeComponenet.createEl('h2', { text: t("confirm-delete") });
+		homeComponenet.createEl('h2', { text: t("are-you-sure") });
 		homeComponenet.createEl('p', { text: this.mssg });
 
 		const buttonContainer = homeComponenet.createDiv('deleteConfirmationModalHome-button-container');
