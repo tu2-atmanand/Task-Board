@@ -28,7 +28,7 @@
             {
                 "id": 2215403784,
                 "status": " ",
-                "title": "Just get rid of the pipe symbol from your task, no restriction anymore. 🔺     [due:: 2025-03-06] #feat #test",
+                "title": "Just get rid of the pipe symbol from your task, no restriction anymore. 🔺 [due:: 2025-03-06] #feat #test",
                 "body": [
                     "\tAll the properties will still be scanned as usual.",
                     "\tFollowing are the most important features, I have to achieve ASAP : ",
@@ -36,7 +36,7 @@
                     "\t- [x] Sorting feature for each individual Column.",
                     "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions."
                 ],
-                "time": "",
+                "time": "20:51 - 20:58",
                 "due": "2025-03-06",
                 "tags": [
                     "#feat",
@@ -2137,8 +2137,10 @@
                 "id": 4009519399,
                 "status": " ",
                 "title": "Adding a new task. #Test",
-                "body": [],
-                "time": "",
+                "body": [
+                    ""
+                ],
+                "time": "14:30 - 17:30",
                 "due": "",
                 "tags": [
                     "#Test"
@@ -2155,11 +2157,12 @@
                 "title": "Adding a new task, to see if everything works fine  📅 2024-10-14 🔽 #Test ⏰ [22:28 - 23:28]",
                 "body": [
                     "\tJust a simple line in body",
-                    "\t- [ ] Adding a simple SubTask- [ ] 20:10 - 21:10 This is a new Task I am adding from the Combined Modal. | @due(2024-10-14) 🔼 #Test",
+                    "\t- [ ] Adding a simple SubTask",
+                    "\t- [ ] 20:10 - 21:10 This is a new Task I am adding from the Combined Modal. | @due(2024-10-14) 🔼 #Test",
                     "\tI will be adding all the fields.",
                     "\t- This is a bullete point in the Description.",
-                    "\t- [ ] Just first SubTask",
-                    "\t- [ ] Another SubTask, second One"
+                    "\t\t- [ ] Just first SubTask",
+                    "\t\t- [ ] Another SubTask, second One"
                 ],
                 "time": "22:28 - 23:28",
                 "due": "2025-06-04",
@@ -2774,6 +2777,22 @@
                 ],
                 "priority": 1,
                 "filePath": "Fixing UTC due date bug.md",
+                "completion": ""
+            }
+        ],
+        "Web Clippings/useMemo – React.md": [
+            {
+                "id": 2645315315,
+                "status": " ",
+                "title": "This is a first task of <mark style=\"background: #D2B3FFA6;\">today</mark>.  📅 2025-04-19",
+                "body": [],
+                "time": "",
+                "due": "2025-04-19",
+                "tags": [
+                    "#D2B3FFA6"
+                ],
+                "priority": 0,
+                "filePath": "Web Clippings/useMemo – React.md",
                 "completion": ""
             }
         ]
