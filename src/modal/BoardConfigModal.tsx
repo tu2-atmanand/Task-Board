@@ -313,135 +313,137 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t("columns")}</h3>
-						<Droppable droppableId="columns" className="boardConfigModalMainContent-Active-BodyColumnsList">
-							{(provided: any) => (
-								<div ref={provided.innerRef} {...provided.droppableProps}>
-									{board.columns.map((column, columnIndex) => (
-										<Draggable
-											key={columnIndex}
-											draggableId={columnIndex.toString()}
-											index={columnIndex}
-										>
-											{(provided: any) => (
-												<div
-													ref={provided.innerRef}
-													{...provided.draggableProps}
-													{...provided.dragHandleProps}
-												>
-													<div className="boardConfigModalColumnRow">
-														<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
-														{column.active ? (
-															<EyeIcon
-																onClick={() => toggleActiveState(boardIndex, columnIndex)}
-																style={{ cursor: 'pointer' }}
-															/>
-														) : (
-															<EyeOffIcon
-																onClick={() => toggleActiveState(boardIndex, columnIndex)}
-																style={{ cursor: 'pointer' }}
-															/>
-														)}
-														<div className="boardConfigModalColumnRowContent">
-															<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
-															<input
-																type="text"
-																value={column.name}
-																onChange={(e) =>
-																	handleColumnChange(
-																		boardIndex,
-																		columnIndex,
-																		"name",
-																		e.target.value
-																	)
-																}
-																className="boardConfigModalColumnRowContentColName"
-															/>
-															{column.colType === "namedTag" && (
+						<DragDropContext onDragEnd={onDragEnd}>
+							<Droppable droppableId="columns" className="boardConfigModalMainContent-Active-BodyColumnsList">
+								{(provided: any) => (
+									<div ref={provided.innerRef} {...provided.droppableProps}>
+										{board.columns.map((column, columnIndex) => (
+											<Draggable
+												key={columnIndex}
+												draggableId={columnIndex.toString()}
+												index={columnIndex}
+											>
+												{(provided: any) => (
+													<div
+														ref={provided.innerRef}
+														{...provided.draggableProps}
+														{...provided.dragHandleProps}
+													>
+														<div className="boardConfigModalColumnRow">
+															<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
+															{column.active ? (
+																<EyeIcon
+																	onClick={() => toggleActiveState(boardIndex, columnIndex)}
+																	style={{ cursor: 'pointer' }}
+																/>
+															) : (
+																<EyeOffIcon
+																	onClick={() => toggleActiveState(boardIndex, columnIndex)}
+																	style={{ cursor: 'pointer' }}
+																/>
+															)}
+															<div className="boardConfigModalColumnRowContent">
+																<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
 																<input
 																	type="text"
-																	placeholder={t("enter-tag")}
-																	value={column.coltag || ""}
+																	value={column.name}
 																	onChange={(e) =>
 																		handleColumnChange(
 																			boardIndex,
 																			columnIndex,
-																			"coltag",
+																			"name",
 																			e.target.value
 																		)
 																	}
 																	className="boardConfigModalColumnRowContentColName"
 																/>
-															)}
-															{column.colType === "completed" && (
-																<input
-																	type="number"
-																	placeholder={t("max-items")}
-																	value={column.limit || ""}
-																	onChange={(e) =>
-																		handleColumnChange(
-																			boardIndex,
-																			columnIndex,
-																			"limit",
-																			Number(e.target.value)
-																		)
-																	}
-																/>
-															)}
-															{column.colType === "dated" && (
-																<>
+																{column.colType === "namedTag" && (
 																	<input
-																		type="number"
-																		placeholder={t("from")}
-																		value={column.range?.rangedata.from || ""}
+																		type="text"
+																		placeholder={t("enter-tag")}
+																		value={column.coltag || ""}
 																		onChange={(e) =>
 																			handleColumnChange(
 																				boardIndex,
 																				columnIndex,
-																				"range",
-																				{
-																					...column.range,
-																					rangedata: {
-																						...column.range?.rangedata,
-																						from: Number(e.target.value),
-																					},
-																				}
+																				"coltag",
+																				e.target.value
 																			)
 																		}
-																		className="boardConfigModalColumnRowContentColDatedVal"
+																		className="boardConfigModalColumnRowContentColName"
 																	/>
+																)}
+																{column.colType === "completed" && (
 																	<input
 																		type="number"
-																		placeholder={t("to")}
-																		value={column.range?.rangedata.to || ""}
+																		placeholder={t("max-items")}
+																		value={column.limit || ""}
 																		onChange={(e) =>
 																			handleColumnChange(
 																				boardIndex,
 																				columnIndex,
-																				"range",
-																				{
-																					...column.range,
-																					rangedata: {
-																						...column.range?.rangedata,
-																						to: Number(e.target.value),
-																					},
-																				}
+																				"limit",
+																				Number(e.target.value)
 																			)
 																		}
-																		className="boardConfigModalColumnRowContentColDatedVal"
 																	/>
-																</>
-															)}
+																)}
+																{column.colType === "dated" && (
+																	<>
+																		<input
+																			type="number"
+																			placeholder={t("from")}
+																			value={column.range?.rangedata.from || ""}
+																			onChange={(e) =>
+																				handleColumnChange(
+																					boardIndex,
+																					columnIndex,
+																					"range",
+																					{
+																						...column.range,
+																						rangedata: {
+																							...column.range?.rangedata,
+																							from: Number(e.target.value),
+																						},
+																					}
+																				)
+																			}
+																			className="boardConfigModalColumnRowContentColDatedVal"
+																		/>
+																		<input
+																			type="number"
+																			placeholder={t("to")}
+																			value={column.range?.rangedata.to || ""}
+																			onChange={(e) =>
+																				handleColumnChange(
+																					boardIndex,
+																					columnIndex,
+																					"range",
+																					{
+																						...column.range,
+																						rangedata: {
+																							...column.range?.rangedata,
+																							to: Number(e.target.value),
+																						},
+																					}
+																				)
+																			}
+																			className="boardConfigModalColumnRowContentColDatedVal"
+																		/>
+																	</>
+																)}
+															</div>
+															<FaTrash style={{ cursor: 'pointer' }} size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 														</div>
-														<FaTrash style={{ cursor: 'pointer' }} size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 													</div>
-												</div>
-											)}
-										</Draggable>
-									))}
-									{provided.placeholder}
-								</div>
-							)}
-						</Droppable>
+												)}
+											</Draggable>
+										))}
+										{provided.placeholder}
+									</div>
+								)}
+							</Droppable>
+						</DragDropContext>
 					</div>
 					<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t("add-column")}</button>
 				</div>
@@ -488,14 +490,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 				</div>
-				<DragDropContext onDragEnd={onDragEnd}>
-					<div className="boardConfigModalMainContent">
-						{selectedBoardIndex === -1
-							? <div>{renderGlobalSettingsTab(selectedBoardIndex)}</div>
-							: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
-						}
-					</div>
-				</DragDropContext>
+				<div className="boardConfigModalMainContent">
+					{selectedBoardIndex === -1
+						? <div>{renderGlobalSettingsTab(selectedBoardIndex)}</div>
+						: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
+					}
+				</div>
 			</div>
 		</>
 	);
