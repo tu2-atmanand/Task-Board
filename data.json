@@ -5,13 +5,6 @@
       {
         "columns": [
           {
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Undated Tasks",
-            "index": 5
-          },
-          {
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -66,6 +59,13 @@
                 "to": 300
               }
             }
+          },
+          {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Undated Tasks",
+            "index": 5
           },
           {
             "colType": "completed",
