@@ -5,18 +5,11 @@
       {
         "columns": [
           {
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Undated Tasks",
-            "index": 1
-          },
-          {
             "colType": "dated",
             "active": true,
             "collapsed": false,
             "name": "Over Due",
-            "index": 2,
+            "index": 1,
             "range": {
               "tag": "before",
               "rangedata": {
@@ -30,7 +23,7 @@
             "active": true,
             "collapsed": false,
             "name": "Today",
-            "index": 3,
+            "index": 2,
             "range": {
               "tag": "between",
               "rangedata": {
@@ -44,7 +37,7 @@
             "active": true,
             "collapsed": false,
             "name": "Tomorrow",
-            "index": 4,
+            "index": 3,
             "range": {
               "tag": "between",
               "rangedata": {
@@ -58,7 +51,7 @@
             "active": true,
             "collapsed": false,
             "name": "Future",
-            "index": 5,
+            "index": 4,
             "range": {
               "tag": "after",
               "rangedata": {
@@ -66,6 +59,13 @@
                 "to": 300
               }
             }
+          },
+          {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Undated Tasks",
+            "index": 5
           },
           {
             "colType": "completed",
