@@ -21,6 +21,7 @@
 	width: auto;
 	overflow: auto;
 	min-height: fit-content;
+	max-height: 80vh;
 }
 
 /* src/KanbanView.tsx */
@@ -1144,6 +1145,7 @@
 		width: 100vw;
 		padding-top: 1em;
 		overflow: auto;
+		max-height: 80vh;
 	}
 
 	/* Hide sidebar by default */
