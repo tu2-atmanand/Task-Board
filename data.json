@@ -13,7 +13,7 @@
             "range": {
               "tag": "before",
               "rangedata": {
-                "from": -400,
+                "from": -300,
                 "to": -1
               }
             }
@@ -85,24 +85,24 @@
         "name": "Time based workflow",
         "index": 1,
         "showColumnTags": true,
-        "showFilteredTags": true
+        "showFilteredTags": false
       },
       {
         "columns": [
-          {
-            "colType": "untagged",
-            "active": true,
-            "collapsed": false,
-            "name": "Backlogs",
-            "index": 1
-          },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Can be implemented",
-            "index": 2,
+            "index": 1,
             "coltag": "pending"
+          },
+          {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "index": 2
           },
           {
             "colType": "namedTag",
@@ -137,7 +137,8 @@
           }
         ],
         "filters": [
-          "#Testing"
+          "#Test",
+          "#working"
         ],
         "filterPolarity": "0",
         "filterScope": "Both",
