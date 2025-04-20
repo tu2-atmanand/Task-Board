@@ -49,9 +49,11 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 
 	const allTasksArrangedPerColumn = useMemo(() => {
 		if (allTasks && boards[activeBoardIndex]) {
-			return boards[activeBoardIndex].columns.map((column: ColumnData) =>
-				renderColumns(plugin, activeBoardIndex, column, allTasks)
-			);
+			return boards[activeBoardIndex].columns
+				.filter((column) => column.active)
+				.map((column: ColumnData) =>
+					renderColumns(plugin, activeBoardIndex, column, allTasks)
+				);
 		}
 		return [];
 	}, [allTasks, boards, activeBoardIndex]);
@@ -218,7 +220,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 							<MemoizedColumn
 								key={index}
 								plugin={plugin}
-								columnIndex={index}
+								columnIndex={column.index}
 								activeBoardIndex={activeBoardIndex}
 								columnData={column}
 								tasksForThisColumn={allTasksArrangedPerColumn[index]}
