@@ -1792,8 +1792,8 @@
                 "body": [
                     "\t- [ ] This is first subtask"
                 ],
-                "time": "23:37 - 24:37",
-                "due": "2024-10-03",
+                "time": "13:37 - 15:19",
+                "due": "2025-04-20",
                 "tags": [],
                 "priority": 0,
                 "filePath": "Daily_Notes/23-09-2024.md",
@@ -2088,7 +2088,7 @@
                     "\t- [x] Adding a first subtask, with **checked** state true."
                 ],
                 "time": "13:00 - 14:00",
-                "due": "2025-03-20",
+                "due": "2025-04-21",
                 "tags": [
                     "#feat",
                     "#working"
@@ -2749,7 +2749,7 @@
                     "\t\t- [ ] This is second sub-sub Task, Updated. "
                 ],
                 "time": "01:43 - 02:43",
-                "due": "2025-03-08",
+                "due": "2025-04-21",
                 "tags": [
                     "#SubTasks/🔥bugs",
                     "#bug",
