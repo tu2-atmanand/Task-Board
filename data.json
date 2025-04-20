@@ -5,13 +5,6 @@
       {
         "columns": [
           {
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Undated Tasks",
-            "index": 5
-          },
-          {
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -20,7 +13,7 @@
             "range": {
               "tag": "before",
               "rangedata": {
-                "from": -300,
+                "from": -400,
                 "to": -1
               }
             }
@@ -68,6 +61,13 @@
             }
           },
           {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Undated Tasks",
+            "index": 5
+          },
+          {
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -85,7 +85,7 @@
         "name": "Time based workflow",
         "index": 1,
         "showColumnTags": true,
-        "showFilteredTags": false
+        "showFilteredTags": true
       },
       {
         "columns": [
@@ -137,8 +137,7 @@
           }
         ],
         "filters": [
-          "#Test",
-          "#working"
+          "#Testing"
         ],
         "filterPolarity": "0",
         "filterScope": "Both",

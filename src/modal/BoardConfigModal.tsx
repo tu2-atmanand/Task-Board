@@ -3,7 +3,7 @@
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
 import { App, Modal, Notice } from "obsidian";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd"; // For drag-and-drop
+import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import React, { ComponentPropsWithRef, useEffect, useRef, useState } from "react";
 
@@ -14,14 +14,16 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 
 interface ConfigModalProps {
 	app: App;
 	settingManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
-	onClose: () => void;
 	onSave: (updatedBoards: Board[]) => void;
+	onClose: () => void;
+	setIsEdited: (value: boolean) => void;
 }
 
 const ConfigModalContent: React.FC<ConfigModalProps> = ({
@@ -29,8 +31,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	settingManager,
 	boards,
 	activeBoardIndex,
-	onClose,
 	onSave,
+	onClose,
+	setIsEdited,
 }) => {
 	const [localBoards, setLocalBoards] = useState<Board[]>(() => {
 		try {
@@ -42,12 +45,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
+	const columnListRef = useRef<HTMLDivElement | null>(null);
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[index].name = newName;
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	// Function to handle column change
@@ -62,6 +67,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
 		}
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	const handleFiltersChange = (boardIndex: number, value: string) => {
@@ -69,12 +75,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// Split input string by commas and trim spaces to create an array
 		updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	const handleFilterPolarityChange = (boardIndex: number, value: string) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].filterPolarity = value;
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags';
@@ -84,6 +92,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			updatedBoards[boardIndex][field] = value as boolean;
 		}
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	// Function to add a new column to the selected board
@@ -112,6 +121,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
+		setIsEdited(true);
 	};
 
 	// Function to render the Add Column Modal
@@ -131,6 +141,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.splice(columnIndex, 1);
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	const handleAddNewBoard = async (oldBoards: Board[]) => {
+		const newBoard: Board = {
+			name: t("new-board"),
+			index: localBoards.length + 1,
+			columns: [],
+		};
+		console.log("Old Boards: ", localBoards);
+		setLocalBoards([...oldBoards, newBoard]);
+		setSelectedBoardIndex(localBoards.length);
+		setIsEdited(true);
 	};
 
 	const deleteCurrentBoard = () => {
@@ -143,7 +166,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					const updatedBoards = [...localBoards];
 					updatedBoards.splice(selectedBoardIndex, 1);
 					setLocalBoards(updatedBoards);
-					setSelectedBoardIndex(0); // Reset to global settings or no board selected
+					setIsEdited(true);
+					console.log("Board Deleted. New Boards: ", updatedBoards);
+					if (updatedBoards.length === 0) {
+						handleAddNewBoard(updatedBoards);
+						setSelectedBoardIndex(0);
+					} else if (selectedBoardIndex !== 0) {
+						setSelectedBoardIndex(selectedBoardIndex - 1);
+					}
 				} else {
 					new Notice(t("no-board-selected-to-delete"));
 				}
@@ -176,12 +206,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		});
 
 		setLocalBoards(updatedBoards);
+		setIsEdited(true);
 	};
 
 	// Function to save changes
 	const handleSave = () => {
 		onSave(localBoards);
-		onClose();
+		// onClose();
 	};
 
 	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
@@ -198,18 +229,50 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const column = updatedBoards[boardIndex].columns[columnIndex];
 		column.active = !column.active; // Toggle the active state
 		setLocalBoards(updatedBoards); // Update the state
-		onSave(updatedBoards); // Save the updated state
+		// onSave(updatedBoards); // Save the updated state
 	};
+
+	const renderGlobalSettingsTab = (boardIndex: number) => {
+		return (
+			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
+		);
+	}
 
 	// Function to render board settings
 	const renderBoardSettings = (boardIndex: number) => {
 		if (globalSettingsHTMLSection.current) {
-			// Cleanup global settings UI
 			settingManager.cleanUp();
 			globalSettingsHTMLSection.current.empty();
 		}
 
 		const board = localBoards[boardIndex];
+
+		useEffect(() => {
+			if (!columnListRef.current) return;
+
+			const sortable = Sortable.create(columnListRef.current, {
+				animation: 150,
+				handle: ".boardConfigModalColumnRowDragButton",
+				onEnd: (evt) => {
+					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+					const updatedBoards = [...localBoards];
+					// const columns = updatedBoards[selectedBoardIndex].columns;
+					const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+					updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+
+					updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
+
+					setLocalBoards(updatedBoards);
+					setIsEdited(true);
+				},
+			});
+
+			return () => {
+				sortable.destroy();
+			};
+		}, [selectedBoardIndex, localBoards]);
+
 		return (
 			<div className="boardConfigModalMainContent-Active">
 				<h2 className="boardConfigModalMainContent-Active-Heading">{board.name} {t("configurations")}</h2>
@@ -280,143 +343,125 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 
 					<hr className="boardConfigModalHr-100" />
-
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t("columns")}</h3>
-						<Droppable droppableId="columns" className="boardConfigModalMainContent-Active-BodyColumnsList">
-							{(provided: any) => (
-								<div ref={provided.innerRef} {...provided.droppableProps}>
-									{board.columns.map((column, columnIndex) => (
-										<Draggable
-											key={columnIndex}
-											draggableId={columnIndex.toString()}
-											index={columnIndex}
-										>
-											{(provided: any) => (
-												<div
-													ref={provided.innerRef}
-													{...provided.draggableProps}
-													{...provided.dragHandleProps}
-												>
-													<div className="boardConfigModalColumnRow">
-														<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
-														{column.active ? (
-															<EyeIcon
-																onClick={() => toggleActiveState(boardIndex, columnIndex)}
-																className="boardConfigModalColumnRowEyeButton"
-															/>
-														) : (
-															<EyeOffIcon
-																onClick={() => toggleActiveState(boardIndex, columnIndex)}
-																className="boardConfigModalColumnRowEyeButton"
-															/>
-														)}
-														<div className="boardConfigModalColumnRowContent">
-															<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
-															<input
-																type="text"
-																value={column.name}
-																onChange={(e) =>
-																	handleColumnChange(
-																		boardIndex,
-																		columnIndex,
-																		"name",
-																		e.target.value
-																	)
-																}
-																className="boardConfigModalColumnRowContentColName"
-															/>
-															{column.colType === "namedTag" && (
-																<input
-																	type="text"
-																	placeholder={t("enter-tag")}
-																	value={column.coltag || ""}
-																	onChange={(e) =>
-																		handleColumnChange(
-																			boardIndex,
-																			columnIndex,
-																			"coltag",
-																			e.target.value
-																		)
-																	}
-																	className="boardConfigModalColumnRowContentColName"
-																/>
-															)}
-															{column.colType === "completed" && (
-																<input
-																	type="number"
-																	placeholder={t("max-items")}
-																	value={column.limit || ""}
-																	onChange={(e) =>
-																		handleColumnChange(
-																			boardIndex,
-																			columnIndex,
-																			"limit",
-																			Number(e.target.value)
-																		)
-																	}
-																	className="boardConfigModalColumnRowContentColDatedVal"
-																/>
-															)}
-															{column.colType === "dated" && (
-																<>
-																	<input
-																		type="number"
-																		placeholder={t("from")}
-																		value={column.range?.rangedata.from || ""}
-																		onChange={(e) =>
-																			handleColumnChange(
-																				boardIndex,
-																				columnIndex,
-																				"range",
-																				{
-																					...column.range,
-																					rangedata: {
-																						...column.range?.rangedata,
-																						from: Number(e.target.value),
-																					},
-																				}
-																			)
-																		}
-																		className="boardConfigModalColumnRowContentColDatedVal"
-																	/>
-																	<input
-																		type="number"
-																		placeholder={t("to")}
-																		value={column.range?.rangedata.to || ""}
-																		onChange={(e) =>
-																			handleColumnChange(
-																				boardIndex,
-																				columnIndex,
-																				"range",
-																				{
-																					...column.range,
-																					rangedata: {
-																						...column.range?.rangedata,
-																						to: Number(e.target.value),
-																					},
-																				}
-																			)
-																		}
-																		className="boardConfigModalColumnRowContentColDatedVal"
-																	/>
-																</>
-															)}
-														</div>
-														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
-													</div>
-												</div>
-											)}
-										</Draggable>
-									))}
-									{provided.placeholder}
+						<div
+							ref={columnListRef}
+							className="boardConfigModalMainContent-Active-BodyColumnsList"
+						>
+							{board.columns.map((column, columnIndex) => (
+								<div key={Math.random()} className="boardConfigModalColumnRow">
+									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
+									{column.active ? (
+										<EyeIcon
+											onClick={() => toggleActiveState(boardIndex, columnIndex)}
+											className="boardConfigModalColumnRowEyeButton"
+										/>
+									) : (
+										<EyeOffIcon
+											onClick={() => toggleActiveState(boardIndex, columnIndex)}
+												className="boardConfigModalColumnRowEyeButton"
+										/>
+									)}
+									<div className="boardConfigModalColumnRowContent">
+										<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
+										<input
+											type="text"
+											value={column.name}
+											onChange={(e) =>
+												handleColumnChange(
+													boardIndex,
+													columnIndex,
+													"name",
+													e.target.value
+												)
+											}
+											className="boardConfigModalColumnRowContentColName"
+										/>
+										{column.colType === "namedTag" && (
+											<input
+												type="text"
+												placeholder={t("enter-tag")}
+												value={column.coltag || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"coltag",
+														e.target.value
+													)
+												}
+												className="boardConfigModalColumnRowContentColName"
+											/>
+										)}
+										{column.colType === "completed" && (
+											<input
+												type="number"
+												placeholder={t("max-items")}
+												value={column.limit || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"limit",
+														Number(e.target.value)
+													)
+												}
+												className="boardConfigModalColumnRowContentColDatedVal"
+											/>
+										)}
+										{column.colType === "dated" && (
+											<>
+												<input
+													type="number"
+													placeholder={t("from")}
+													value={column.range?.rangedata.from || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"range",
+															{
+																...column.range,
+																rangedata: {
+																	...column.range?.rangedata,
+																	from: Number(e.target.value),
+																},
+															}
+														)
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												/>
+												<input
+													type="number"
+													placeholder={t("to")}
+													value={column.range?.rangedata.to || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"range",
+															{
+																...column.range,
+																rangedata: {
+																	...column.range?.rangedata,
+																	to: Number(e.target.value),
+																},
+															}
+														)
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												/>
+											</>
+										)}
+									</div>
+									<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 								</div>
-							)}
-						</Droppable>
+							))}
+						</div>
 					</div>
 					<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t("add-column")}</button>
 				</div>
-
 				<hr className="boardConfigModalHr-100" />
 
 				<button className="boardConfigModalDeleteBoardBtn" onClick={deleteCurrentBoard}>{t("delete-this-board")}</button>
@@ -424,11 +469,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 	};
 
-	const renderGlobalSettingsTab = (boardIndex: number) => {
-		return (
-			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
-		);
-	}
 
 	const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 	const sidebarRef = useRef<HTMLDivElement>(null);
@@ -482,29 +522,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						))}
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
-						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => {
-							const newBoard: Board = {
-								name: `Board ${localBoards.length + 1}`,
-								index: localBoards.length + 1,
-								columns: [],
-							};
-							setLocalBoards([...localBoards, newBoard]);
-							setSelectedBoardIndex(localBoards.length);
-						}}>{t("add-board")}</button>
+						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
 
 						<hr className="boardConfigModalHr-100" />
 
 						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 				</div>
-				<DragDropContext onDragEnd={onDragEnd}>
-					<div className="boardConfigModalMainContent">
-						{selectedBoardIndex === -1
-							? <div>{renderGlobalSettingsTab(selectedBoardIndex)}</div>
-							: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
-						}
-					</div>
-				</DragDropContext>
+				<div className="boardConfigModalMainContent">
+					{selectedBoardIndex === -1
+						? <div>{renderGlobalSettingsTab(selectedBoardIndex)}</div>
+						: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
+					}
+				</div>
 			</div>
 			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
 		</>
@@ -517,6 +547,7 @@ export class BoardConfigureModal extends Modal {
 	settingsManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
+	isEdited: boolean;
 	onSave: (updatedBoards: Board[]) => void;
 
 	constructor(
@@ -529,6 +560,7 @@ export class BoardConfigureModal extends Modal {
 		super(app);
 		this.boards = boards;
 		this.activeBoardIndex = activeBoardIndex;
+		this.isEdited = false;
 		this.onSave = onSave;
 		this.settingsManager = new SettingsManager(app, plugin);
 		const { contentEl } = this;
@@ -544,10 +576,39 @@ export class BoardConfigureModal extends Modal {
 				settingManager={this.settingsManager}
 				boards={this.boards}
 				activeBoardIndex={this.activeBoardIndex}
+				onSave={(updatedBoards: Board[]) => {
+					this.isEdited = false;
+					this.onSave(updatedBoards);
+					this.close();
+				}}
 				onClose={() => this.close()}
-				onSave={this.onSave}
+				setIsEdited={(value: boolean) => this.isEdited = value}
 			/>
 		);
+	}
+
+	handleCloseAttempt() {
+		// Open confirmation modal
+		const mssg = t("edit-task-modal-close-confirm-mssg");
+		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
+			app: this.app,
+			mssg,
+			onDiscard: () => {
+				this.isEdited = false;
+				this.close();
+			},
+			onGoBack: () => {
+				// Do nothing
+			}
+		});
+		closeConfirmModal.open();
+	}
+
+	handleSave() {
+		// Trigger save functionality if required before closing
+		this.onSave(this.boards);
+		this.isEdited = false;
+		this.close();
 	}
 
 	onClose() {
@@ -567,6 +628,15 @@ export class BoardConfigureModal extends Modal {
 
 		// Call the super method to correctly close the modal
 		super.onClose();
+	}
+
+	public close(): void {
+		if (this.isEdited) {
+			this.handleCloseAttempt();
+		} else {
+			this.onClose();
+			super.close();
+		}
 	}
 
 }

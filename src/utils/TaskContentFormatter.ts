@@ -367,9 +367,8 @@ const sanitizePriority = (
  * Function to sanitize the tags inside the task title.
  */
 const sanitizeTags = (title: string, newTags: string[]): string => {
-	// Regex for valid tags based on new rules
-	const tagsRegex = /\s+#([^\s;@()\[\]{}<>]{1,20})/g;
-	const extractedTagsMatch = title.match(tagsRegex)?.map((tag) => tag.trim()) || [];
+	const tagsRegex = /#[^\s]+/g;
+	const extractedTagsMatch = title.match(tagsRegex) || [];
 
 	// Create a set for quick lookup of newTags
 	const newTagsSet = new Set(newTags);

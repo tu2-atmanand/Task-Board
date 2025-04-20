@@ -96,11 +96,14 @@ const EditTaskContent: React.FC<{
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
-		if (startTime) {
+		if (startTime && !endTime) {
 			const [hours, minutes] = startTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
 			const newTime = `${startTime} - ${newEndTime}`;
+			setNewTime(newTime);
+		} else if (startTime && endTime) {
+			const newTime = `${startTime} - ${endTime}`;
 			setNewTime(newTime);
 		}
 	}, [startTime, endTime]);
@@ -141,7 +144,7 @@ const EditTaskContent: React.FC<{
 	}
 
 	const handleEndTimeChange = (endTime: string) => {
-		setStartTime(endTime);
+		setEndTime(endTime);
 		setIsEdited(true);
 	}
 
