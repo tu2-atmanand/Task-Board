@@ -43,9 +43,42 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			return [];
 		}
 	});
-
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
+	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+
 	const columnListRef = useRef<HTMLDivElement | null>(null);
+	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (
+			selectedBoardIndex === -1 ||
+			!columnListRef.current ||
+			!localBoards[selectedBoardIndex]
+		)
+			return;
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+				const updatedBoards = [...localBoards];
+				// const columns = updatedBoards[selectedBoardIndex].columns;
+				const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+				updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+				updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
+
+				setLocalBoards(updatedBoards);
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedBoardIndex, localBoards]);
+
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
@@ -96,8 +129,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Function to add a new column to the selected board
-	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
-
 	const handleOpenAddColumnModal = () => {
 		setIsAddColumnModalOpen(true);
 		// renderAddColumnModal();
@@ -185,44 +216,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		deleteModal.open();
 	};
 
-	// Function to handle column drag-and-drop
-	const onDragEnd = (result: any) => {
-		if (!result.destination) return;
-
-		const updatedBoards = [...localBoards];
-		const [movedColumn] = updatedBoards[selectedBoardIndex].columns.splice(
-			result.source.index,
-			1
-		);
-		updatedBoards[selectedBoardIndex].columns.splice(
-			result.destination.index,
-			0,
-			movedColumn
-		);
-
-		// Update indices
-		updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
-			col.index = idx + 1;
-		});
-
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
 	// Function to save changes
 	const handleSave = () => {
 		onSave(localBoards);
 		// onClose();
 	};
-
-	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		if (globalSettingsHTMLSection.current) {
-			// Render global settings
-			settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
-		}
-	}, [selectedBoardIndex]);
-
 
 	const toggleActiveState = (boardIndex: number, columnIndex: number) => {
 		const updatedBoards = [...localBoards];
@@ -232,10 +230,34 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// onSave(updatedBoards); // Save the updated state
 	};
 
+	useEffect(() => {
+		// if (selectedBoardIndex !== -1) return;
+
+		console.log("Selected Board Index: ", selectedBoardIndex);
+		if (globalSettingsHTMLSection.current) {
+			console.log("Cleaning up global settings section");
+			settingManager.cleanUp();
+			globalSettingsHTMLSection.current.empty();
+			// Render global settings
+			settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
+		}
+	}, [selectedBoardIndex]);
+
 	const renderGlobalSettingsTab = (boardIndex: number) => {
+		console.log("Rendering global settings");
+
+		// console.log("Selected Board Index: ", selectedBoardIndex);
+		// if (globalSettingsHTMLSection.current) {
+		// 	console.log("Cleaning up global settings section");
+		// 	// Render global settings
+		// 	settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
+		// }
 		return (
 			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
 		);
+		// return (
+		// 	<div>This is a test</div>
+		// );
 	}
 
 	// Function to render board settings
@@ -247,31 +269,31 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 		const board = localBoards[boardIndex];
 
-		useEffect(() => {
-			if (!columnListRef.current) return;
+		// useEffect(() => {
+		// 	if (!columnListRef.current) return;
 
-			const sortable = Sortable.create(columnListRef.current, {
-				animation: 150,
-				handle: ".boardConfigModalColumnRowDragButton",
-				onEnd: (evt) => {
-					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+		// 	const sortable = Sortable.create(columnListRef.current, {
+		// 		animation: 150,
+		// 		handle: ".boardConfigModalColumnRowDragButton",
+		// 		onEnd: (evt) => {
+		// 			if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
-					const updatedBoards = [...localBoards];
-					// const columns = updatedBoards[selectedBoardIndex].columns;
-					const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-					updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+		// 			const updatedBoards = [...localBoards];
+		// 			// const columns = updatedBoards[selectedBoardIndex].columns;
+		// 			const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+		// 			updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
 
-					updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
+		// 			updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
 
-					setLocalBoards(updatedBoards);
-					setIsEdited(true);
-				},
-			});
+		// 			setLocalBoards(updatedBoards);
+		// 			setIsEdited(true);
+		// 		},
+		// 	});
 
-			return () => {
-				sortable.destroy();
-			};
-		}, [selectedBoardIndex, localBoards]);
+		// 	return () => {
+		// 		sortable.destroy();
+		// 	};
+		// }, [selectedBoardIndex, localBoards]);
 
 		return (
 			<div className="boardConfigModalMainContent-Active">
@@ -360,7 +382,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 									) : (
 										<EyeOffIcon
 											onClick={() => toggleActiveState(boardIndex, columnIndex)}
-												className="boardConfigModalColumnRowEyeButton"
+											className="boardConfigModalColumnRowEyeButton"
 										/>
 									)}
 									<div className="boardConfigModalColumnRowContent">
@@ -531,7 +553,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				</div>
 				<div className="boardConfigModalMainContent">
 					{selectedBoardIndex === -1
-						? <div>{renderGlobalSettingsTab(selectedBoardIndex)}</div>
+						? renderGlobalSettingsTab(selectedBoardIndex)
 						: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
 					}
 				</div>
