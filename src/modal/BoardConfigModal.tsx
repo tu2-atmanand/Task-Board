@@ -1,4 +1,4 @@
-// /src/modal/BoardConfigModal.tsx - V2
+// /src/modal/BoardConfigModal.tsx
 
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
 import { App, Modal, Notice } from "obsidian";
@@ -47,7 +47,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
 
 	const columnListRef = useRef<HTMLDivElement | null>(null);
-	let globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (
@@ -168,7 +168,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Function to delete a column from the selected board
-	const deleteColumnFromBoard = (boardIndex: number, columnIndex: number) => {
+	const handleDeleteColumnFromBoard = (boardIndex: number, columnIndex: number) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.splice(columnIndex, 1);
 		setLocalBoards(updatedBoards);
@@ -181,13 +181,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			index: localBoards.length + 1,
 			columns: [],
 		};
-		console.log("Old Boards: ", localBoards);
 		setLocalBoards([...oldBoards, newBoard]);
 		setSelectedBoardIndex(localBoards.length);
 		setIsEdited(true);
 	};
 
-	const deleteCurrentBoard = () => {
+	const handleDeleteCurrentBoard = () => {
 		const mssg = t("board-delete-confirmation-message")
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app,
@@ -198,7 +197,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					updatedBoards.splice(selectedBoardIndex, 1);
 					setLocalBoards(updatedBoards);
 					setIsEdited(true);
-					console.log("Board Deleted. New Boards: ", updatedBoards);
 					if (updatedBoards.length === 0) {
 						handleAddNewBoard(updatedBoards);
 						setSelectedBoardIndex(0);
@@ -231,11 +229,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	useEffect(() => {
-		// if (selectedBoardIndex !== -1) return;
+		if (selectedBoardIndex !== -1) return;
 
-		console.log("Selected Board Index: ", selectedBoardIndex);
 		if (globalSettingsHTMLSection.current) {
-			console.log("Cleaning up global settings section");
 			settingManager.cleanUp();
 			globalSettingsHTMLSection.current.empty();
 			// Render global settings
@@ -244,20 +240,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	}, [selectedBoardIndex]);
 
 	const renderGlobalSettingsTab = (boardIndex: number) => {
-		console.log("Rendering global settings");
-
-		// console.log("Selected Board Index: ", selectedBoardIndex);
-		// if (globalSettingsHTMLSection.current) {
-		// 	console.log("Cleaning up global settings section");
-		// 	// Render global settings
-		// 	settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
-		// }
 		return (
 			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
 		);
-		// return (
-		// 	<div>This is a test</div>
-		// );
 	}
 
 	// Function to render board settings
@@ -268,32 +253,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		}
 
 		const board = localBoards[boardIndex];
-
-		// useEffect(() => {
-		// 	if (!columnListRef.current) return;
-
-		// 	const sortable = Sortable.create(columnListRef.current, {
-		// 		animation: 150,
-		// 		handle: ".boardConfigModalColumnRowDragButton",
-		// 		onEnd: (evt) => {
-		// 			if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
-
-		// 			const updatedBoards = [...localBoards];
-		// 			// const columns = updatedBoards[selectedBoardIndex].columns;
-		// 			const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-		// 			updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-
-		// 			updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
-
-		// 			setLocalBoards(updatedBoards);
-		// 			setIsEdited(true);
-		// 		},
-		// 	});
-
-		// 	return () => {
-		// 		sortable.destroy();
-		// 	};
-		// }, [selectedBoardIndex, localBoards]);
 
 		return (
 			<div className="boardConfigModalMainContent-Active">
@@ -477,7 +436,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											</>
 										)}
 									</div>
-									<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => deleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
+									<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 								</div>
 							))}
 						</div>
@@ -486,12 +445,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				</div>
 				<hr className="boardConfigModalHr-100" />
 
-				<button className="boardConfigModalDeleteBoardBtn" onClick={deleteCurrentBoard}>{t("delete-this-board")}</button>
+				<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentBoard}>{t("delete-this-board")}</button>
 			</div>
 		);
 	};
 
-
+	// For Small Screens UI
 	const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 	const sidebarRef = useRef<HTMLDivElement>(null);
 
