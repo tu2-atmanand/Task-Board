@@ -5,18 +5,11 @@
       {
         "columns": [
           {
-            "colType": "dated",
+            "colType": "undated",
             "active": true,
             "collapsed": false,
-            "name": "Over Due",
-            "index": 1,
-            "range": {
-              "tag": "before",
-              "rangedata": {
-                "from": -300,
-                "to": -1
-              }
-            }
+            "name": "Undated Tasks",
+            "index": 1
           },
           {
             "colType": "dated",
@@ -61,11 +54,18 @@
             }
           },
           {
-            "colType": "undated",
+            "colType": "dated",
             "active": true,
             "collapsed": false,
-            "name": "Undated Tasks",
-            "index": 5
+            "name": "Over Due",
+            "index": 5,
+            "range": {
+              "tag": "before",
+              "rangedata": {
+                "from": -300,
+                "to": -1
+              }
+            }
           },
           {
             "colType": "completed",
