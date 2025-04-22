@@ -27,7 +27,6 @@
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
-		"codemirror": "^6.0.1",
 		"debounce": "^2.2.0",
 		"lucide-react": "^0.439.0",
 		"react": "^18.3.1",
