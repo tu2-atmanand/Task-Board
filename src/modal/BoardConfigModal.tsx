@@ -507,7 +507,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 						<hr className="boardConfigModalHr-100" />
 
-						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
+						{selectedBoardIndex !== -1 && (
+							<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
+						)}
 					</div>
 				</div>
 				<div className="boardConfigModalMainContent">
@@ -517,7 +519,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					}
 				</div>
 			</div>
-			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
+			{selectedBoardIndex !== -1 && (
+				<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
+			)}
 		</>
 	);
 };
