@@ -40,7 +40,6 @@ jobs:
             - name: Build plugin
               run: |
                   npm install
-                  cat node_modules/obsidian/obsidian.d.ts
                   npm run build
 
             - name: Create release
