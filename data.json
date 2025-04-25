@@ -9,21 +9,7 @@
             "active": true,
             "collapsed": false,
             "name": "Undated Tasks",
-            "index": 5
-          },
-          {
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "name": "Over Due",
-            "index": 1,
-            "range": {
-              "tag": "before",
-              "rangedata": {
-                "from": -400,
-                "to": -1
-              }
-            }
+            "index": 1
           },
           {
             "colType": "dated",
@@ -68,6 +54,20 @@
             }
           },
           {
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Over Due",
+            "index": 5,
+            "range": {
+              "tag": "before",
+              "rangedata": {
+                "from": -300,
+                "to": -1
+              }
+            }
+          },
+          {
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -85,24 +85,24 @@
         "name": "Time based workflow",
         "index": 1,
         "showColumnTags": true,
-        "showFilteredTags": true
+        "showFilteredTags": false
       },
       {
         "columns": [
-          {
-            "colType": "untagged",
-            "active": true,
-            "collapsed": false,
-            "name": "Backlogs",
-            "index": 1
-          },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Can be implemented",
-            "index": 2,
+            "index": 1,
             "coltag": "pending"
+          },
+          {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "index": 2
           },
           {
             "colType": "namedTag",
@@ -137,7 +137,8 @@
           }
         ],
         "filters": [
-          "#Testing"
+          "#Test",
+          "#working"
         ],
         "filterPolarity": "0",
         "filterScope": "Both",
@@ -224,7 +225,7 @@
       },
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
-      "taskCompletionFormat": "3",
+      "taskCompletionFormat": "2",
       "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
       "dailyNotesPluginComp": true,
       "dueDateFormat": "yyyy-MM-DD",
@@ -236,7 +237,7 @@
       "realTimeScanning": true,
       "columnWidth": "300px",
       "showHeader": true,
-      "showFooter": true,
+      "showFooter": false,
       "showVerticalScroll": false,
       "tagColors": {
         "bug": "#ef1120dd",

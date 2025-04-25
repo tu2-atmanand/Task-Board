@@ -2,9 +2,9 @@
     "Pending": {
         "TODO.md": [
             {
-                "id": 1095355513,
+                "id": 4012737570,
                 "status": " ",
-                "title": "New temp task, lets see if this comes after 5 minutes, lets update this. ⏫ ⏰ [13:49 - 14:49] #New #working",
+                "title": "New temp task, lets see if this comes after 5 minutes, lets update this. ⏫[time:: 13:49 - 14:49] #New #working [due:: 2025-03-20]",
                 "body": [
                     "\t- [ ] Lets add another sub-Task, updating.",
                     "\t- [x] Also adding this new Subtask, first ✅ 2024-12-30",
@@ -20,6 +20,21 @@
                     "#working"
                 ],
                 "priority": 2,
+                "filePath": "TODO.md",
+                "completion": ""
+            },
+            {
+                "id": 301043799,
+                "status": " ",
+                "title": "something 📅 2025-03-20",
+                "body": [
+                    "\t- [ ] something sub",
+                    "\t\t- [ ] something sub sub"
+                ],
+                "time": "",
+                "due": "2025-03-20",
+                "tags": [],
+                "priority": 0,
                 "filePath": "TODO.md",
                 "completion": ""
             }
@@ -179,7 +194,7 @@
         ],
         "Testing 1.md": [
             {
-                "id": 1682031924,
+                "id": 824199773,
                 "status": "r",
                 "title": "This is a normal task, I am adding in the file, Updating. ⏰ [15:46 - 16:46] 📅 2025-08-16 #Feat #secondTag😀/fun #Bug [completion:: 2025-01-27/12:58] ✅ 2025-01-27/12:58",
                 "body": [
@@ -199,7 +214,33 @@
                 "completion": "2025-01-27/12:58"
             },
             {
-                "id": 2523877992,
+                "id": 52343990,
+                "status": " ",
+                "title": "- [ ] Adding a Subtask in file manually. Updating.",
+                "body": [
+                    "\t- [ ] Adding a Second SubTask Manually in the file, to see if it will show up in the board automatically. No, its wont show up automatically REFRESH_COLUMN not working."
+                ],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completion": ""
+            },
+            {
+                "id": 693467630,
+                "status": " ",
+                "title": "- [ ] Adding a Second SubTask Manually in the file, to see if it will show up in the board automatically. No, its wont show up automatically REFRESH_COLUMN not working.",
+                "body": [],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completion": ""
+            },
+            {
+                "id": 2550219301,
                 "status": " ",
                 "title": "Adding a new task to encounter a different issue.  [due:: 2025-01-02] #Bug",
                 "body": [
@@ -226,7 +267,52 @@
                 "completion": ""
             },
             {
-                "id": 2798818139,
+                "id": 3793251970,
+                "status": " ",
+                "title": "- [ ] This is a first level Sub-Task so this will going to get detected very well, without any problem.",
+                "body": [
+                    "\t\tThis is the body/Description of this task. This line should be bigger in size so the overall content looks good",
+                    "\t\t- [x] This is a Third level of SubTask I dont know anything about this.",
+                    "\t\t\t- [ ] This is a fourth level Sub-Task, lets see what will happen with this.",
+                    "\t\tThis is another line in the description , with one level of indentation and this line is followed by multiple bulletes :",
+                    "\t\t- This is a bullete point in the Desc, with two levels of indentation.",
+                    "\t\t\t- This is another line in the body with third level of indentation.",
+                    "\t\t\t\t- This the a fourth level of indentation.",
+                    "\t\t\t\t- This the another fourth level of indentation.",
+                    "\t\tThis is a normal line in the Desc with two levels of indentation.",
+                    "\t\t\tThis is a normal line in Desc with three levels of Indentation.",
+                    "\t\t\t\tThis is a normal line in Desc with four levels of indentation. Updating"
+                ],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completion": ""
+            },
+            {
+                "id": 3664661606,
+                "status": " ",
+                "title": "- [ ] This is a fourth level Sub-Task, lets see what will happen with this.",
+                "body": [
+                    "\t\tThis is another line in the description , with one level of indentation and this line is followed by multiple bulletes :",
+                    "\t\t- This is a bullete point in the Desc, with two levels of indentation.",
+                    "\t\t\t- This is another line in the body with third level of indentation.",
+                    "\t\t\t\t- This the a fourth level of indentation.",
+                    "\t\t\t\t- This the another fourth level of indentation.",
+                    "\t\tThis is a normal line in the Desc with two levels of indentation.",
+                    "\t\t\tThis is a normal line in Desc with three levels of Indentation.",
+                    "\t\t\t\tThis is a normal line in Desc with four levels of indentation. Updating"
+                ],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completion": ""
+            },
+            {
+                "id": 3747797812,
                 "status": " ",
                 "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor. 🔺  [due:: 2025-03-07] #Test  [completion:: 2025-03-06/20:38]",
                 "body": [
@@ -242,13 +328,14 @@
                 "completion": "2025-03-06/20:38"
             },
             {
-                "id": 1560090543,
+                "id": 1738697154,
                 "status": " ",
-                "title": "A simple task with the priority emoji 🔽 #Test [completion:: 2025-01-21/21:50] ✅ 2025-01-21/21:50",
+                "title": "A simple task with the <mark style=\"background: #D2B3FFA6;\">priority</mark> emoji 🔽 #Test [completion:: 2025-01-21/21:50] ✅ 2025-01-21/21:50",
                 "body": [],
                 "time": "",
                 "due": "",
                 "tags": [
+                    "#D2B3FFA6",
                     "#Test"
                 ],
                 "priority": 4,
@@ -256,7 +343,7 @@
                 "completion": "2025-01-21/21:50"
             },
             {
-                "id": 490001878,
+                "id": 171037420,
                 "status": " ",
                 "title": "Adding Many tasks right after one another.",
                 "body": [],
@@ -270,7 +357,7 @@
         ],
         "TestForNewBug.md": [
             {
-                "id": 2158942139,
+                "id": 711497061,
                 "status": " ",
                 "title": "#✔️дел Task-1 🔺 📅 2025-01-04 #Testing",
                 "body": [
@@ -290,14 +377,12 @@
                 "completion": ""
             },
             {
-                "id": 2351572489,
+                "id": 3069366423,
                 "status": " ",
                 "title": "#✔️дел Task-2 🔺 🔁 every week on Thursday  📅 2025-01-09 #Test",
-                "body": [
-                    ""
-                ],
+                "body": [],
                 "time": "",
-                "due": "2025-04-11",
+                "due": "2025-01-09",
                 "tags": [
                     "#✔️дел",
                     "#Test"
@@ -307,9 +392,9 @@
                 "completion": ""
             },
             {
-                "id": 3009995681,
+                "id": 580660153,
                 "status": " ",
-                "title": "#✔️дел Task-3 🔺  [due:: 2025-01-09] #Testing",
+                "title": "#✔️дел Task-3 🔺  [due:: 2025-04-03] #Testing",
                 "body": [
                     "\t- [ ] Adding a simple sub-task. Testing",
                     "\tAdding a simple line in description for testing the Memoization.",
@@ -327,7 +412,7 @@
                 "completion": ""
             },
             {
-                "id": 2725162790,
+                "id": 3873105588,
                 "status": " ",
                 "title": "#✔️дел Task-4 🔺  [due:: 2025-03-06]",
                 "body": [],
@@ -341,9 +426,9 @@
                 "completion": ""
             },
             {
-                "id": 1412625634,
+                "id": 660480367,
                 "status": " ",
-                "title": "Revise the refresher training, updating. 📅 2025-01-10 #working #Testing",
+                "title": "Revise the refresher training, updating. [due:: 2025-03-21] #working #Testing",
                 "body": [
                     "\t- [ ] Adding a third sub-task, to fix the issue of task body duplication bug.",
                     "\t- [ ] Adding a sub-task for testing.",
@@ -360,7 +445,7 @@
                 "completion": ""
             },
             {
-                "id": 1002343549,
+                "id": 1717633257,
                 "status": " ",
                 "title": "Adding a simple task using the Tasks plugin **Create or edit Task** popup. ⏫ ➕ 2025-01-08",
                 "body": [],
@@ -368,6 +453,30 @@
                 "due": "",
                 "tags": [],
                 "priority": 2,
+                "filePath": "TestForNewBug.md",
+                "completion": ""
+            },
+            {
+                "id": 2865500860,
+                "status": " ",
+                "title": "Test 1 🔼 ⏰ [10:00 - 11:00] 📅 2025-03-24",
+                "body": [],
+                "time": "10:00 - 11:00",
+                "due": "2025-03-24",
+                "tags": [],
+                "priority": 3,
+                "filePath": "TestForNewBug.md",
+                "completion": ""
+            },
+            {
+                "id": 2508840627,
+                "status": " ",
+                "title": "Test 2 ⏰ 11:00 - 12:00 📅 2025-03-24",
+                "body": [],
+                "time": "",
+                "due": "2025-03-24",
+                "tags": [],
+                "priority": 0,
                 "filePath": "TestForNewBug.md",
                 "completion": ""
             }
@@ -544,7 +653,7 @@
                 "status": "/",
                 "title": "Adding a simple task to test sub-tasks 📅 2025-01-30",
                 "body": [
-                    "\t- [ ] Adding another simple sub-task.",
+                    "\t- [x] Adding another simple sub-task.",
                     "\t- [ ] A simple sub-task added"
                 ],
                 "time": "",
@@ -1334,7 +1443,7 @@
         ],
         "NGAP.md": [
             {
-                "id": 4010517054,
+                "id": 3176437115,
                 "status": ">",
                 "title": "This is a new task adding for the release v1.3.0 🔼 ⏰ [04:18 - 05:18] 📅 2025-02-27 #test",
                 "body": [
@@ -1792,8 +1901,8 @@
                 "body": [
                     "\t- [ ] This is first subtask"
                 ],
-                "time": "23:37 - 24:37",
-                "due": "2024-10-03",
+                "time": "13:37 - 15:19",
+                "due": "2025-04-20",
                 "tags": [],
                 "priority": 0,
                 "filePath": "Daily_Notes/23-09-2024.md",
@@ -2088,7 +2197,7 @@
                     "\t- [x] Adding a first subtask, with **checked** state true."
                 ],
                 "time": "13:00 - 14:00",
-                "due": "2025-03-20",
+                "due": "2025-04-21",
                 "tags": [
                     "#feat",
                     "#working"
@@ -2752,7 +2861,7 @@
                     "\t\t- [ ] This is second sub-sub Task, Updated. "
                 ],
                 "time": "01:43 - 02:43",
-                "due": "2025-03-08",
+                "due": "2025-04-21",
                 "tags": [
                     "#SubTasks/🔥bugs",
                     "#bug",
@@ -2800,7 +2909,7 @@
     "Completed": {
         "TODO.md": [
             {
-                "id": 3716146141,
+                "id": 798757711,
                 "status": "x",
                 "title": "Upload this image to the new release of task board.🔺  [due:: 2024-12-24] #Image [completion:: 2025-01-27/12:46]  [completion:: 2025-01-27/12:46] /12:46",
                 "body": [
@@ -3174,6 +3283,30 @@
                 "priority": 0,
                 "filePath": "Daily_Notes/03-09-2024.md",
                 "completion": "2024-09-26T11:15"
+            }
+        ],
+        "Testing 1.md": [
+            {
+                "id": 1333638148,
+                "status": "x",
+                "title": "- [x] This is a Third level of SubTask I dont know anything about this.",
+                "body": [
+                    "\t\t\t- [ ] This is a fourth level Sub-Task, lets see what will happen with this.",
+                    "\t\tThis is another line in the description , with one level of indentation and this line is followed by multiple bulletes :",
+                    "\t\t- This is a bullete point in the Desc, with two levels of indentation.",
+                    "\t\t\t- This is another line in the body with third level of indentation.",
+                    "\t\t\t\t- This the a fourth level of indentation.",
+                    "\t\t\t\t- This the another fourth level of indentation.",
+                    "\t\tThis is a normal line in the Desc with two levels of indentation.",
+                    "\t\t\tThis is a normal line in Desc with three levels of Indentation.",
+                    "\t\t\t\tThis is a normal line in Desc with four levels of indentation. Updating"
+                ],
+                "time": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 1.md",
+                "completion": ""
             }
         ]
     }

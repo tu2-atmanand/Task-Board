@@ -17,6 +17,13 @@
 	min-height: fit-content;
 }
 
+.is-phone .modal[data-type="task-board-view"] {
+	width: auto;
+	overflow: auto;
+	min-height: fit-content;
+	max-height: 80vh;
+}
+
 /* src/KanbanView.tsx */
 
 .task-board-ribbon-class {
@@ -201,6 +208,24 @@
 	&::-webkit-scrollbar {
 		/* Chrome, Safari, Opera */
 		display: none;
+	}
+}
+
+.taskItemFadeIn {
+	opacity: 0;
+	transform: translateY(10px);
+	animation: fadeInTask 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeInTask {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
 	}
 }
 
@@ -690,6 +715,7 @@
 	min-width: 8vw;
 	max-width: 14vw;
 	box-sizing: border-box;
+	transition: transform 0.3s ease-in-out;
 }
 
 .EditTaskModalHomeField {
@@ -720,22 +746,111 @@
 	font-size: small;
 }
 
-.EditTaskModalHomeSaveBtn {
+.EditTaskModalHomeFooterBtnSec {
 	position: sticky;
+	bottom: 0;
+	padding: 10px;
+	margin-inline: 1em 2.5em;
+	margin-block-start: 1em;
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.EditTaskModalHomeSaveBtn {
 	bottom: 0;
 	background-color: green !important;
 	color: white !important;
 	font-weight: 600;
-	/* width: 100%; */
-	padding: 10px;
+	width: 100%;
 	border: none;
 	cursor: pointer;
-	margin-inline: 1em 2.5em;
-	margin-block-start: 1em;
 }
 
 .EditTaskModalHomeSaveBtn:hover {
 	background-color: green;
+}
+
+.EditTaskModalHomeToggleBtn {
+	display: none;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 820px) {
+	.EditTaskModalHomeBody {
+		flex-direction: column;
+		position: relative;
+	}
+
+	.EditTaskModalHomeLeftSec {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		max-width: 84vw;
+		min-width: 75vw;
+		flex-grow: 1;
+		max-height: 100%;
+		justify-content: space-between;
+	}
+
+	.EditTaskModalHomeLeftSecScrollable {
+		display: flex;
+		flex-direction: column;
+		max-width: 100%;
+		overflow-y: auto;
+		padding-inline-end: 0px;
+	}
+
+	/* Initially hide the right section on small screens */
+	.EditTaskModalHomeRightSec {
+		position: absolute;
+		top: 0;
+		right: 0;
+		min-width: 40vw;
+		height: 100%;
+		background: rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(10px);
+		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
+		transform: translateX(100%);
+		overflow: auto;
+	}
+
+	/* Show when toggled */
+	.EditTaskModalHomeRightSec.visible {
+		transform: translateX(0);
+	}
+
+	/* Button to toggle right section */
+	.EditTaskModalFooter {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+	}
+
+	.EditTaskModalHomeSaveBtn {
+		background-color: green !important;
+		color: white !important;
+		font-weight: 600;
+		/* width: 100%; */
+		border: none;
+		cursor: pointer;
+		width: 75%;
+	}
+
+	.EditTaskModalHomeToggleBtn {
+		background-color: var(--accent-color, blue);
+		color: white;
+		border: none;
+		padding: 8px 12px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: block;
+	}
+
+	.EditTaskModalHomeToggleBtn:hover {
+		background-color: darkblue;
+	}
 }
 
 
@@ -793,7 +908,6 @@
 .boardConfigModalHome {
 	display: flex;
 	flex-direction: row;
-	width: 100%;
 	height: 100%;
 }
 
@@ -824,6 +938,7 @@
 	overflow: hidden;
 	min-width: 180px;
 	max-width: 250px;
+	transition: transform 0.3s ease-in-out;
 }
 
 .boardConfigModalSidebarBtnArea {
@@ -884,6 +999,10 @@
 	overflow-y: auto;
 	max-width: 50vw;
 	/* Allow scrolling for main content */
+}
+
+.boardConfigModalSidebarToggleBtn {
+	display: none;
 }
 
 .boardConfigModalMainContentBoardSettingTab,
@@ -956,6 +1075,12 @@
 	cursor: grab;
 }
 
+.boardConfigModalColumnRowEyeButton,
+.boardConfigModalColumnRowDeleteButton {
+	cursor: pointer;
+	min-width: fit-content;
+}
+
 .boardConfigModalAddColumnButton {
 	width: 50% !important;
 	align-self: self-end !important;
@@ -996,6 +1121,10 @@
 	color: white;
 }
 
+.boardConfigModalSaveBtn-mobile {
+	display: none;
+}
+
 [data-rbd-drag-handle-context-id="0"] {
 	cursor: auto !important;
 }
@@ -1004,6 +1133,108 @@
 	min-width: fit-content;
 	min-height: fit-content;
 } */
+
+
+/* Responsive styles for small screens */
+@media (max-width: 768px) {
+	.boardConfigModalHome {
+		/* flex-direction: column; */
+		width: 100vw;
+		padding-top: 1em;
+		overflow: auto;
+		max-height: 80vh;
+	}
+
+	/* Hide sidebar by default */
+	.boardConfigModalSidebar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 40vw;
+		height: 100%;
+		background: var(--background-secondary);
+		box-shadow: 4px 0px 10px rgba(0, 0, 0, 0.2);
+		transform: translateX(-100%);
+		z-index: 100;
+	}
+
+	.boardConfigModalMainContent {
+		max-width: 95vw;
+		width: 95vw;
+		padding-left: 0 !important;
+		overflow-y: unset !important;
+	}
+
+	.boardConfigModalMainContentBoardSettingTab,
+	.pluginGlobalSettingsTab {
+		max-width: 95vw !important;
+		width: 95vw !important;
+		margin-inline-start: 0 !important;
+		overflow: auto;
+	}
+
+	/* Show when toggled */
+	.boardConfigModalSidebar.visible {
+		transform: translateX(0);
+	}
+
+	/* Toggle button */
+	.boardConfigModalSidebarToggleBtn {
+		position: absolute !important;
+		top: 0;
+		left: 1em;
+		width: 2.5em !important;
+		height: 2.5em !important;
+		background-color: var(--accent-color, blue);
+		color: white;
+		border: none;
+		padding: 8px 12px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: block;
+	}
+
+	.boardConfigModalSidebarToggleBtn:hover {
+		background-color: darkblue;
+	}
+
+	.boardConfigModalColumnRowContentColName {
+		min-width: 70px !important;
+		max-width: 150px !important;
+	}
+
+	.boardConfigModalColumnRow {
+		align-items: center;
+	}
+
+	.boardConfigModalColumnRowDragButton {
+		min-width: fit-content !important;
+	}
+
+	.boardConfigModalDeleteBoardBtn {
+		background-color: darkred !important;
+		max-width: 50%;
+		align-self: end;
+		margin-bottom: 1.5em;
+	}
+
+	.boardConfigModalSidebarSaveBtn {
+		display: none;
+		height: 0;
+	}
+
+	.boardConfigModalSaveBtn-mobile {
+		display: block !important;
+		position: sticky;
+		bottom: 1px;
+		/* right: 1px; */
+		/* left: 1px; */
+		align-self: center;
+		background-color: var(--color-green) !important;
+		cursor: pointer;
+		width: 90%;
+	}
+}
 
 
 /* /src/modal/AddColumnModal.tsx */
@@ -1159,7 +1390,7 @@
 	margin-top: 1em;
 	align-items: center;
 	justify-content: center;
-	max-height: 60px;
+	max-height: unset;
 }
 
 .taskBoard-docs-section {
@@ -1168,6 +1399,19 @@
 	margin-block: 0 !important;
 	padding-block: 1em;
 	border-radius: var(--radius-m);
+}
+
+@media (max-width: 768px) {
+	.settingTabFooterDonationsSec {
+		display: flex;
+		flex-direction: row;
+		gap: 1em;
+		margin-top: 1em;
+		align-items: center;
+		justify-content: center;
+		/* max-height: 150px; */
+		flex-wrap: wrap;
+	}
 }
 
 
