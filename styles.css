@@ -701,6 +701,11 @@
 	border: var(--border-width) solid var(--table-header-border-color);
 }
 
+.EditTaskModalHomePreviewBody ol {
+	padding-inline-start: 20px;
+	margin-block: 0 !important;
+}
+
 .taskItemCheckbox {
 	vertical-align: middle;
 }

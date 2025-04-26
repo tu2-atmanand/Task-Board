@@ -320,6 +320,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
 							) : (
 								<div className='taskItemDate'>
+									{task.title.contains("(@") && task.completion === "" ? `🔔 ` : ""}
 									{task.time ? `⏰${task.time}` : ''}
 									{task.time && task.due ? ' | ' : ''}
 									{task.due ? `📅${task.due}` : ''}

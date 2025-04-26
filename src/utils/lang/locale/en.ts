@@ -191,6 +191,7 @@ const en: Lang = {
 	"open-scan-vault-modal": "Open scan vault modal",
 	"new-board": "New board",
 	"are-you-sure": "Are you sure?",
+	"reminder-label": "Reminder : ",
 };
 
 export default en;
