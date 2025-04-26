@@ -252,7 +252,6 @@ export class ScanningVault {
 
 // Extract title from task line
 export function extractTitle(text: string): string {
-	// Default case: no time at start, extract title till the pipe symbol
 	return text.replace(/^- \[.\]\s*/, "").trim();
 }
 

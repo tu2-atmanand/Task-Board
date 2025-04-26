@@ -42,7 +42,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement && task.title !== "") {
-				// console.log("TaskItem.tsx : Rendering title... | Title :", task.title);
 				const cleanedTitle = cleanTaskTitle(plugin, task);
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
@@ -317,7 +316,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemFooter">
 							{/* Conditionally render task.completed or the date/time */}
-							{task.status === "X" || task.status === "x" ? (
+							{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
 								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
 							) : (
 								<div className='taskItemDate'>
