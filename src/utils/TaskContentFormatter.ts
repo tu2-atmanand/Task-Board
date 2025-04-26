@@ -368,8 +368,11 @@ const sanitizePriority = (
  * Function to sanitize the tags inside the task title.
  */
 const sanitizeTags = (title: string, newTags: string[]): string => {
+	// Remove the <mark> tags from the title first before processing
+	const tempTitle = title.replace(/<mark.*?>/g, "");
+	
 	const tagsRegex = /#[^\s]+/g;
-	const extractedTagsMatch = title.match(tagsRegex) || [];
+	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
 
 	// Create a set for quick lookup of newTags
 	const newTagsSet = new Set(newTags);
@@ -543,6 +546,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		cleanedTitle = cleanedTitle.replace(completionRegex, "");
 	}
 
+	// Remove priority in various formats
 	if (task.priority > 0) {
 		let match = cleanedTitle.match(/\[priority::\s*(\d{1,2})\]/);
 		if (match) {
@@ -570,6 +574,13 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				return match.trim() === priorityIcon ? "" : match;
 			});
 		}
+	}
+
+	// Remove reminder if it exists
+	const reminderRegex = /(\(@\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?\))/;
+	const reminderMatch = cleanedTitle.match(reminderRegex);
+	if (reminderMatch) {
+		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "");
 	}
 
 	// console.log("cleanedTitle", cleanedTitle.trim());

@@ -55,10 +55,10 @@ const EditTaskContent: React.FC<{
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [status, setStatus] = useState(task.status || '');
-	// const [isEdited, setIsEdited] = useState(false);
 	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
+	const [reminder, setReminder] = useState(task.title.contains("(@") || false);
+	
 	const rightSecRef = useRef<HTMLDivElement>(null);
-
 	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);
 
 	const handleClickOutside = (event: MouseEvent) => {
@@ -130,6 +130,17 @@ const EditTaskContent: React.FC<{
 
 	const handleDueDateChange = (value: string) => {
 		setDue(value);
+		setIsEdited(true);
+	}
+
+	const handleReminderChange = (value: boolean) => {
+		setReminder(value);
+		if (value) {
+			setTitle(`${title} (@${due} ${startTime})`);
+		} else {
+			const reminderRegex = /(\(@\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?\))/;
+			setTitle(title.replace(reminderRegex, ""));
+		}
 		setIsEdited(true);
 	}
 
@@ -431,6 +442,12 @@ const EditTaskContent: React.FC<{
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("due-date")}</label>
 							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => handleDueDateChange(e.target.value)} />
+						</div>
+
+						{/* Task reminder checkbox */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("Reminder-label")}</label>
+							<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} onChange={(e) => handleReminderChange(e.target.checked)} />
 						</div>
 
 						{/* Task Priority */}
