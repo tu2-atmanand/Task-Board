@@ -166,7 +166,7 @@ const EditTaskContent: React.FC<{
 	};
 
 
-	// Function to remove a subtask
+	// Function to remove a subtask	
 	const removeSubTask = (index: number) => {
 		const updatedSubTasks = bodyContent.split('\n').filter((_, idx) => idx !== index);
 		setBodyContent(updatedSubTasks.join('\n'));

@@ -179,7 +179,8 @@ const sanitizeTime = (
 	globalSettings: globalSettingsData
 ): string => {
 	const timeAtStartRegex = /^\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
-	const timeFormatsRegex = /\s*(⏰\s*\[.*?\]|\[time::.*?\]|@time\(.*?\))/g; // Match all three formats
+	const timeFormatsRegex =
+		/\s*(⏰\s*\[.*?\]|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|@time\(.*?\))/g; // Match all three formats
 
 	if (globalSettings.dayPlannerPlugin) {
 		const timeAtStartMatch = title.match(timeAtStartRegex);
@@ -521,7 +522,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Remove time (handles both formats)
 	if (task.time) {
 		const timeRegex =
-			/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|\[time::.*?\]|\@time\(.*?\))/g;
+			/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|\@time\(.*?\))/g;
 		const timeMatch = cleanedTitle.match(timeRegex);
 		if (timeMatch) {
 			cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
