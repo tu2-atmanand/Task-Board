@@ -47,10 +47,10 @@ export function isCompleted(task: string): boolean {
 /**
  * Determines if a line is a task.
  * @param line - The line of text to check.
- * @returns True if the line matches the task pattern, otherwise false.
+ * @returns Returns "True" if the line matches the task pattern, otherwise "False".
  */
 export function isTaskLine(line: string): boolean {
-	const trimmedLine = line.trim();
+	const trimmedLine = line;
 	return /^- \[.\]/.test(trimmedLine) && trimmedLine.length > 5;
 }
 

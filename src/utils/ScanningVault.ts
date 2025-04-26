@@ -252,7 +252,6 @@ export class ScanningVault {
 
 // Extract title from task line
 export function extractTitle(text: string): string {
-	// Default case: no time at start, extract title till the pipe symbol
 	return text.replace(/^- \[.\]\s*/, "").trim();
 }
 
@@ -291,9 +290,14 @@ export function extractTime(text: string): string {
 		return match[1];
 	}
 
+	match = text.match(/⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/)
+	if (match) {
+		return match[1];
+	}
+
 	// Check if time is at the start of the task
 	const timeAtStartMatch = text.match(
-		/^- \[.\]\s*(\d{2}:\d{2} - \d{2}:\d{2})/
+		/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/
 	);
 
 	if (timeAtStartMatch) {
@@ -302,7 +306,7 @@ export function extractTime(text: string): string {
 	}
 
 	// Otherwise, look for time elsewhere in the line
-	const timeIntitleMatch = text.match(/⏰\s*\[(\d{2}:\d{2} - \d{2}:\d{2})\]/);
+	const timeIntitleMatch = text.match(/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/);
 	return timeIntitleMatch ? timeIntitleMatch[1] : "";
 }
 

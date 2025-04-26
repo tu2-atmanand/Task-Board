@@ -66,7 +66,7 @@ export class AddColumnModal extends Modal {
 		});
 
 		[
-			{ value: "undated", text: t("column-type") },
+			{ value: "undated", text: t("undated") },
 			{ value: "dated", text: t("dated") },
 			{ value: "namedTag", text: t("tagged") },
 			{ value: "untagged", text: t("untagged") },
