@@ -5,18 +5,11 @@
       {
         "columns": [
           {
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Undated Tasks",
-            "index": 1
-          },
-          {
             "colType": "dated",
             "active": true,
             "collapsed": false,
             "name": "Today",
-            "index": 2,
+            "index": 1,
             "range": {
               "tag": "between",
               "rangedata": {
@@ -24,6 +17,13 @@
                 "to": 0
               }
             }
+          },
+          {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Undated Tasks",
+            "index": 2
           },
           {
             "colType": "dated",
@@ -213,9 +213,9 @@
           "values": []
         },
         "folders": {
-          "polarity": 2,
+          "polarity": 3,
           "values": [
-            "XploreProgram"
+            "/"
           ]
         },
         "tags": {
@@ -237,7 +237,7 @@
       "realTimeScanning": true,
       "columnWidth": "300px",
       "showHeader": true,
-      "showFooter": false,
+      "showFooter": true,
       "showVerticalScroll": false,
       "tagColors": {
         "bug": "#ef1120dd",
