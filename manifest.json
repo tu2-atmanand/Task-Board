@@ -1,7 +1,7 @@
 {
 	"id": "task-board",
 	"name": "Task Board",
-	"version": "1.3.2",
+	"version": "1.3.1",
 	"minAppVersion": "1.4.13",
 	"description": "Manage all your tasks throghout your vault from a single board and much more...",
 	"author": "Atmanand Gauns",
@@ -12,5 +12,5 @@
 		"Paypal": "https://paypal.me/tu2atmanand",
 		"ko-fi": "https://ko-fi.com/atmanandgauns"
 	},
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }
