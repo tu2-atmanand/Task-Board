@@ -238,6 +238,7 @@
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
+	box-shadow: 3px 4px 3px -1px rgb(209, 144, 255), -1px 4px 10px 0 rgba(209, 144, 255, 0.2);
 }
 
 .colorIndicator {
