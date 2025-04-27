@@ -395,8 +395,8 @@ export class SettingsManager {
 			.setDesc(t("tag-colors-info"));
 
 		new Setting(contentEl)
-			.setName(t("tag-color-type"))
-			.setDesc(t("tag-color-type-info"))
+			.setName(t("tag-color-indicator-type"))
+			.setDesc(t("tag-color-indicator-type-info"))
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
