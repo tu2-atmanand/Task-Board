@@ -11,7 +11,7 @@ import { Component } from 'obsidian';
 import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitle } from 'src/utils/TaskContentFormatter';
-import { hexToRgba, updateRGBAOpacity } from 'src/utils/UIHelpers';
+import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';

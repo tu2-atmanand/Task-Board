@@ -7,11 +7,10 @@ import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/ut
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
-import { hexToRgba } from "src/utils/UIHelpers";
+import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
@@ -472,10 +471,11 @@ const EditTaskContent: React.FC<{
 							{/* Render tags with cross icon */}
 							<div className="EditTaskModalHome-taskItemTags">
 								{tags.map((tag: string) => {
-									const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
-									const tagColor = customTagColor || defaultTagColor;
-									const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`;
-									const borderColor = customTagColor ? hexToRgba(tagColor, 0.5) : `var(--tag-color-hover)`;
+									const tagName = tag.replace('#', '');
+									const customTagData = plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+									const tagColor = customTagData?.color || defaultTagColor;
+									const backgroundColor = customTagData ? updateRGBAOpacity(tagColor, 0.1) : `var(--tag-background)`;
+									const borderColor = customTagData ? updateRGBAOpacity(tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
 											key={tag}

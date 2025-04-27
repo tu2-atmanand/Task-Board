@@ -4,7 +4,6 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
-import { parseDueDate } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (

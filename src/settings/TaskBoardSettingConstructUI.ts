@@ -534,7 +534,6 @@ export class SettingsManager {
 								},
 							},
 						});
-						console.log("tagColorType", tagColorsType);
 
 						pickr
 							.on("change", (color: any) => {
