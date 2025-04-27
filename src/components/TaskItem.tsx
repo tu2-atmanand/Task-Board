@@ -132,20 +132,42 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
-	// Determine color for the task indicator
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
 		const taskDueDate = parseDueDate(task.due) || new Date(task.due);
+
 		if (taskDueDate.toDateString() === today.toDateString()) {
-			return 'var(--color-yellow)'; // Due today
+			if (task.time) {
+				const [startStr, endStr] = task.time.split(' - ');
+				const [startHours, startMinutes] = startStr.split(':').map(Number);
+				const [endHours, endMinutes] = endStr.split(':').map(Number);
+
+				const startTime = new Date(today);
+				startTime.setHours(startHours, startMinutes, 0, 0);
+
+				const endTime = new Date(today);
+				endTime.setHours(endHours, endMinutes, 0, 0);
+
+				const now = new Date();
+
+				if (now < startTime) {
+					return 'var(--color-yellow)'; // Not started yet
+				} else if (now >= startTime && now <= endTime) {
+					return 'var(--color-blue)'; // In progress
+				} else if (now > endTime) {
+					return 'var(--color-red)'; // Over
+				}
+			} else {
+				return 'var(--color-yellow)'; // Due today but no time info
+			}
 		} else if (taskDueDate > today) {
-			return 'var(--color-green)'; // Due in the future
+			return 'var(--color-green)'; // Due in future
 		} else if (taskDueDate < today) {
 			return 'var(--color-red)'; // Past due
 		} else {
-			return 'grey'; // No Due
+			return 'grey'; // No due date
 		}
-	}, [task.due]);
+	}, [task.due, task.time]);
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
