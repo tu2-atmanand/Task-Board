@@ -5,11 +5,32 @@
       {
         "columns": [
           {
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Undated Tasks",
+            "index": 1
+          },
+          {
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Over Due",
+            "index": 2,
+            "range": {
+              "tag": "before",
+              "rangedata": {
+                "from": -300,
+                "to": -1
+              }
+            }
+          },
+          {
             "colType": "dated",
             "active": true,
             "collapsed": false,
             "name": "Today",
-            "index": 1,
+            "index": 3,
             "range": {
               "tag": "between",
               "rangedata": {
@@ -19,18 +40,11 @@
             }
           },
           {
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Undated Tasks",
-            "index": 2
-          },
-          {
             "colType": "dated",
             "active": true,
             "collapsed": false,
             "name": "Tomorrow",
-            "index": 3,
+            "index": 4,
             "range": {
               "tag": "between",
               "rangedata": {
@@ -44,26 +58,12 @@
             "active": true,
             "collapsed": false,
             "name": "Future",
-            "index": 4,
+            "index": 5,
             "range": {
               "tag": "after",
               "rangedata": {
                 "from": 2,
                 "to": 300
-              }
-            }
-          },
-          {
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "name": "Over Due",
-            "index": 5,
-            "range": {
-              "tag": "before",
-              "rangedata": {
-                "from": -300,
-                "to": -1
               }
             }
           },
@@ -236,18 +236,36 @@
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
-      "showHeader": true,
-      "showFooter": true,
+      "showHeader": false,
+      "showFooter": false,
       "showVerticalScroll": false,
-      "tagColors": {
-        "bug": "#ef1120dd",
-        "bug/solver": "#f23fqe19",
-        "feat": "#b50df2f2",
-        "Test": "#dcf519",
-        "working": "#67ff5c",
-        "New": "#2e74ff",
-        "pending": "#955cff"
-      },
+      "tagColors": [
+        {
+          "name": "bug",
+          "color": "rgba(177, 213, 11, 0.72)",
+          "priority": 1
+        },
+        {
+          "name": "working",
+          "color": "rgba(10, 235, 10, 0.66)",
+          "priority": 2
+        },
+        {
+          "name": "New",
+          "color": "rgba(3, 3, 250, 1)",
+          "priority": 3
+        },
+        {
+          "name": "test",
+          "color": "rgba(0, 232, 229, 1)",
+          "priority": 4
+        },
+        {
+          "name": "feat",
+          "color": "rgba(175, 30, 245, 1)",
+          "priority": 5
+        }
+      ],
       "editButtonAction": "popUp",
       "openOnStartup": false,
       "customStatuses": [
@@ -338,7 +356,8 @@
           "type": "TODO"
         }
       ],
-      "showTaskWithoutMetadata": true
+      "showTaskWithoutMetadata": true,
+      "tagColorsType": "background"
     }
   }
 }
