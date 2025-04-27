@@ -1370,6 +1370,90 @@
 	padding: 1px 10px;
 }
 
+/* Container for all tag rows */
+.tag-colors-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 1em;
+}
+
+/* Each draggable tag color row */
+.tag-color-row {
+	display: flex;
+	align-items: center;
+	padding: 8px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background-color: var(--background-primary);
+	transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tag-color-row-element .setting-item-info {
+	display: none !important;
+}
+
+/* Highlighted row while dragging */
+.task-board-sortable-ghost {
+	opacity: 0.5;
+	background-color: var(--background-secondary-alt);
+}
+
+.task-board-sortable-chosen {
+	box-shadow: 0 0 8px var(--interactive-accent);
+}
+
+/* Inside setting layout (small tweak to better align) */
+.tag-color-row-element {
+	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-bottom: 0 !important;
+}
+
+/* Make the grip icon and buttons smaller and draggable looking */
+.tag-color-row-element .setting-item-control button {
+	background: none;
+	border: none;
+	cursor: grab;
+}
+
+/* Tag name input */
+.tag-color-row-element input[type="text"] {
+	flex: 1;
+	min-width: 0;
+	padding: 4px 6px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+}
+
+/* Color value input */
+.tag-color-row-element input[type="text"]:last-of-type {
+	width: 140px;
+	text-align: center;
+	font-family: monospace;
+}
+
+/* Pickr color button */
+.tag-color-row-element .pickr {
+	width: 28px;
+	height: 28px;
+	margin-left: 4px;
+	cursor: pointer;
+}
+
+/* Delete button */
+.tag-color-row-element .mod-cta {
+	background-color: var(--color-red);
+	color: white;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+}
+
 .global-setting-tab-live-preview {
 	padding: 5px;
 	padding-block: 1em;

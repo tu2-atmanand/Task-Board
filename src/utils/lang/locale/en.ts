@@ -192,6 +192,10 @@ const en: Lang = {
 	"new-board": "New board",
 	"are-you-sure": "Are you sure?",
 	"reminder-label": "Reminder : ",
+	"tag-color-indicator-type": "Tag color indicator type",
+	"tag-color-type-info": "Select how the tag color should be applied.",
+	"text-of-the-tag": "Text of the tag",
+	"background-of-the-card": "Background of the card",
 };
 
 export default en;

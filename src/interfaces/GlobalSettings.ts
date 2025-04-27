@@ -15,12 +15,23 @@ export interface scanFilters {
 	};
 }
 
+export interface TagColor {
+	name: string;
+	color: string;
+	priority: number;
+}
+
 export enum EditButtonMode {
 	PopUp = "popUp",
 	NoteInTab = "noteInTab",
 	NoteInSplit = "noteInSplit",
 	NoteInWindow = "noteInWindow",
 	NoteInHover = "noteInHover",
+}
+
+export enum TagColorType {
+	Text = "text",
+	Background = "background",
 }
 
 interface CustomStatus {
@@ -51,11 +62,12 @@ export interface globalSettingsData {
 	showHeader: boolean;
 	showFooter: boolean;
 	showVerticalScroll: boolean;
-	tagColors: { [tagName: string]: string };
+	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
+	tagColorsType: TagColorType;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -246,13 +258,26 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			showHeader: true,
 			showFooter: true,
 			showVerticalScroll: false,
-			tagColors: {
-				bug: "#ef1120dd",
-				"bug/solver": "#22f7de99",
-				feat: "#b50df2f2",
-			},
+			tagColors: [
+				{
+					name: "bug",
+					color: "rgba(255, 0, 0, 1)",
+					priority: 1,
+				},
+				{
+					name: "working",
+					color: "rgba(0, 255, 0, 0.8)",
+					priority: 2,
+				},
+				{
+					name: "new",
+					color: "rgba(0, 0, 255, 1)",
+					priority: 3,
+				},
+			],
 			editButtonAction: EditButtonMode.PopUp,
 			tasksPluginCustomStatuses: [],
+			tagColorsType: TagColorType.Text,
 			customStatuses: [
 				{
 					symbol: " ",
