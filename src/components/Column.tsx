@@ -38,8 +38,13 @@ const Column: React.FC<ColumnProps> = ({
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
 	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
+	// Extra code to provide special data-types for theme support.
+	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
+	const tagData = tagColorMap.get(columnData?.coltag || '');
+
 	return (
-		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties}>
+		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties} data-column-type={columnData.colType} data-column-tag-name={tagData?.name} data-column-tag-color={tagData?.color}>
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
 					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
