@@ -21,7 +21,7 @@ import { KanbanView } from "./src/views/KanbanView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
-import { TaskBoardSettingTab } from "./src/views/TaskBoardSettingTab";
+import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { fetchTasksPluginCustomStatuses } from "src/services/CommunityPlugins";
 import { t } from "src/utils/lang/helper";
