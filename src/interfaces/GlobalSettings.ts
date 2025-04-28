@@ -68,6 +68,11 @@ export interface globalSettingsData {
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
+	compatiblePlugins: {
+		dailyNotesPlugin: boolean;
+		tasksPlugin: boolean;
+		reminderPlugin: boolean;
+	};
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -308,6 +313,11 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					type: "DONE",
 				},
 			],
+			compatiblePlugins: {
+				dailyNotesPlugin: false,
+				tasksPlugin: false,
+				reminderPlugin: false,
+			},
 		},
 	},
 };

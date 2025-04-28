@@ -56,7 +56,7 @@ const EditTaskContent: React.FC<{
 	const [status, setStatus] = useState(task.status || '');
 	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
 	const [reminder, setReminder] = useState(task.title.contains("(@") || false);
-	
+
 	const rightSecRef = useRef<HTMLDivElement>(null);
 	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);
 
@@ -444,11 +444,13 @@ const EditTaskContent: React.FC<{
 						</div>
 
 						{/* Task reminder checkbox */}
-						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">{t("reminder-label")}</label>
-							<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} onChange={(e) => handleReminderChange(e.target.checked)} />
-						</div>
-
+						{plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin && (
+							<div className="EditTaskModalHomeField">
+								<label className="EditTaskModalHomeFieldTitle">{t("reminder-label")}</label>
+								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} onChange={(e) => handleReminderChange(e.target.checked)} />
+							</div>
+						)}
+						
 						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
