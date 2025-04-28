@@ -112,10 +112,26 @@ export const renderColumns = (
 			task.tags.some((tag) => tag === `#${columnData.coltag}`)
 		);
 	} else if (columnData.colType === "otherTags") {
-		tasksToDisplay = pendingTasks.filter(
-			(task) =>
-				task.tags && task.tags.some((tag) => tag !== columnData.coltag)
+		// 1. Get the current board based on activeBoard index
+		const currentBoard = plugin.settings.data.boardConfigs.find(
+			(board) => board.index === activeBoard + 1
 		);
+
+		// 2. Collect all coltags from columns where colType is 'namedTag'
+		const namedTags =
+			currentBoard?.columns
+				.filter((col) => col.colType === "namedTag" && col.coltag)
+				.map((col) => col.coltag?.toLowerCase()) || [];
+
+		// 3. Now filter tasks
+		tasksToDisplay = pendingTasks.filter((task) => {
+			if (!task.tags || task.tags.length === 0) return false;
+
+			// Check if none of the task's tags are in the namedTags list
+			return task.tags.every(
+				(tag) => !namedTags.includes(tag.replace("#", "").toLowerCase())
+			);
+		});
 	} else if (columnData.colType === "completed") {
 		const boardConfigs = plugin.settings.data.boardConfigs;
 		const completedColumnIndex = boardConfigs[

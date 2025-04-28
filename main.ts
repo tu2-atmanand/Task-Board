@@ -558,7 +558,6 @@ export default class TaskBoard extends Plugin {
 		// Check if the Tasks plugin is installed and fetch the custom statuses
 		fetchTasksPluginCustomStatuses(this.plugin);
 
-		console.log("Tasks Plugin Custom Statuses");
 		// Check if the Reminder plugin is installed
 		isReminderPluginInstalled(this.plugin);
 	}

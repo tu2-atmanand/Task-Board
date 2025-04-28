@@ -286,8 +286,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
-										const column = activeBoardSettings.columns[columnIndex];
-										if (!activeBoardSettings.showColumnTags && activeBoardSettings.columns[columnIndex].colType === "namedTag" && tag === column.coltag) {
+										const column = activeBoardSettings.columns[columnIndex - 1];
+										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
 											return null;
 										}
 
