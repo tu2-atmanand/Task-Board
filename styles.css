@@ -238,7 +238,7 @@
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
-	box-shadow: 3px 4px 3px -1px rgb(209, 144, 255), -1px 4px 10px 0 rgba(209, 144, 255, 0.2);
+	box-shadow: 3px 4px 1px -1px rgb(82 52 102 / 48%), -1px 4px 10px 0 rgba(209, 144, 255, 0.2);
 }
 
 .colorIndicator {
@@ -1443,7 +1443,11 @@
 	width: 28px;
 	height: 28px;
 	margin-left: 4px;
-	cursor: pointer;
+	cursor: pointer !important;
+}
+
+.tag-color-row-element .pickr .pcr-button::after {
+	cursor: pointer !important;
 }
 
 /* Delete button */
@@ -1453,6 +1457,15 @@
 	padding: 4px 8px;
 	border-radius: 4px;
 	font-size: 12px;
+}
+
+.taskboard-setting-tag-color-row-element-drag-handle {
+	max-width: 3em;
+}
+
+.taskboard-setting-tag-color-row-element-delete {
+	max-width: 3em;
+	background-color: var(--color-red) !important;
 }
 
 .global-setting-tab-live-preview {

@@ -419,6 +419,7 @@ export class SettingsManager {
 		// Initialize Sortable.js
 		Sortable.create(tagColorsContainer, {
 			animation: 150,
+			handle: ".taskboard-setting-tag-color-row-element-drag-handle",
 			ghostClass: "task-board-sortable-ghost",
 			chosenClass: "task-board-sortable-chosen",
 			dragClass: "task-board-sortable-drag",
@@ -470,6 +471,9 @@ export class SettingsManager {
 						drag
 							.setTooltip("Hold and drag")
 							.setIcon("grip-horizontal")
+							.setClass(
+								"taskboard-setting-tag-color-row-element-drag-handle"
+							)
 							.buttonEl.setCssStyles({
 								cursor: "grab",
 								backgroundColor:
@@ -514,6 +518,7 @@ export class SettingsManager {
 									TagColorType.Text
 										? `1px solid ${tag.color}`
 										: "",
+								minWidth: "23vw !important",
 							})
 					)
 					.addButton((btn) => {
@@ -579,12 +584,16 @@ export class SettingsManager {
 									TagColorType.Text
 										? `1px solid ${tag.color}`
 										: "",
+								minWidth: "23vw !important",
 							});
 					})
 					.addButton((del) =>
 						del
 							.setButtonText("Delete")
 							.setIcon("trash")
+							.setClass(
+								"taskboard-setting-tag-color-row-element-delete"
+							)
 							.setCta()
 							.onClick(async () => {
 								this.globalSettings!.tagColors.splice(index, 1);
