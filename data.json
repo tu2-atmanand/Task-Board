@@ -236,8 +236,8 @@
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
       "columnWidth": "300px",
-      "showHeader": false,
-      "showFooter": false,
+      "showHeader": true,
+      "showFooter": true,
       "showVerticalScroll": false,
       "tagColors": [
         {
@@ -354,10 +354,253 @@
           "nextStatusSymbol": "x",
           "availableAsCommand": false,
           "type": "TODO"
+        },
+        {
+          "symbol": "x",
+          "name": "Regular",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "X",
+          "name": "Checked",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "-",
+          "name": "Dropped",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": ">",
+          "name": "Forward",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "D",
+          "name": "Date",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "/",
+          "name": "Half Done",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "+",
+          "name": "Add",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "R",
+          "name": "Research",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "i",
+          "name": "Idea",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "B",
+          "name": "Brainstorm",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "P",
+          "name": "Pro",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "C",
+          "name": "Con",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "Q",
+          "name": "Quote",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "N",
+          "name": "Note",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "b",
+          "name": "Bookmark",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "I",
+          "name": "Information",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "p",
+          "name": "Paraphrase",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "L",
+          "name": "Location",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "E",
+          "name": "Example",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "A",
+          "name": "Answer",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "r",
+          "name": "Reward",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "c",
+          "name": "Choice",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "d",
+          "name": "Doing",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "T",
+          "name": "Time",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "@",
+          "name": "Character / Person",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "t",
+          "name": "Talk",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "O",
+          "name": "Outline / Plot",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "~",
+          "name": "Conflict",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "W",
+          "name": "World",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "f",
+          "name": "Clue / Find",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "F",
+          "name": "Foreshadow",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "H",
+          "name": "Favorite / Health",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "&",
+          "name": "Symbolism",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "s",
+          "name": "Secret",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
         }
       ],
       "showTaskWithoutMetadata": true,
-      "tagColorsType": "background"
+      "tagColorsType": "background",
+      "compatiblePlugins": {
+        "dailyNotesPlugin": false,
+        "tasksPlugin": false,
+        "reminderPlugin": false
+      }
     }
   }
 }

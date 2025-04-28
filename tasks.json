@@ -2,15 +2,13 @@
     "Pending": {
         "Web Clippings/useMemo – React.md": [
             {
-                "id": 1512802019,
+                "id": 523420556,
                 "status": " ",
                 "title": "This is a first task of <mark style=\"background: #D2B3FFA6;\">today</mark>.  📅 2025-04-19",
                 "body": [],
                 "time": "",
                 "due": "2025-04-19",
-                "tags": [
-                    "#D2B3FFA6"
-                ],
+                "tags": [],
                 "priority": 0,
                 "filePath": "Web Clippings/useMemo – React.md",
                 "completion": ""
