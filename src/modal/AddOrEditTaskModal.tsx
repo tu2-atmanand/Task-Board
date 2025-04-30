@@ -186,7 +186,7 @@ const EditTaskContent: React.FC<{
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
-		setBodyContent([`\t- [ ] `, ...updatedBodyContent].join('\n'));
+		setBodyContent([...updatedBodyContent, `\t- [ ] `].join('\n'));
 		setIsEdited(true);
 	};
 
@@ -450,7 +450,7 @@ const EditTaskContent: React.FC<{
 								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} onChange={(e) => handleReminderChange(e.target.checked)} />
 							</div>
 						)}
-						
+
 						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
