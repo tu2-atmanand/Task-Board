@@ -368,8 +368,8 @@ const sanitizePriority = (
  * Function to sanitize the tags inside the task title.
  */
 const sanitizeTags = (title: string, newTags: string[]): string => {
-	// Remove the <mark> tags from the title first before processing
-	const tempTitle = title.replace(/<mark.*?>/g, "");
+	// Remove the <mark> and <font> tags from the title first before processing
+	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 	
 	const tagsRegex = /#[^\s]+/g;
 	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
