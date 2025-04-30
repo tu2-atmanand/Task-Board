@@ -1220,7 +1220,7 @@
 	}
 
 	.boardConfigModalColumnRowDragButton {
-		min-width: fit-content !important;
+		min-width: 1.4em !important;
 	}
 
 	.boardConfigModalDeleteBoardBtn {
@@ -1448,6 +1448,10 @@
 
 .tag-color-row-element .pickr .pcr-button::after {
 	cursor: pointer !important;
+	min-width: 28px !important;
+	min-height: 28px !important;
+	width: 28px;
+	height: 28px;
 }
 
 /* Delete button */
