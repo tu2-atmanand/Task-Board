@@ -809,9 +809,23 @@
 		display: flex;
 		flex-direction: column;
 		max-width: 100%;
+		max-height: 60vh;
 		overflow-y: auto;
 		padding-inline-end: 0px;
 	}
+
+	.EditTaskModalHomeFooterBtnSec {
+		padding-top: 5px;
+		margin-top: 5px;
+	}
+
+	/* .EditTaskModalHomePreviewBody {
+		height: 30vh;
+	}
+
+	.EditTaskModalTabContent.show {
+		height: 30vh;
+	} */
 
 	/* Initially hide the right section on small screens */
 	.EditTaskModalHomeRightSec {
