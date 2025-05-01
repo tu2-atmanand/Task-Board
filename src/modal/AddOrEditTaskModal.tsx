@@ -447,7 +447,7 @@ const EditTaskContent: React.FC<{
 						{plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin && (
 							<div className="EditTaskModalHomeField">
 								<label className="EditTaskModalHomeFieldTitle">{t("reminder-label")}</label>
-								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} onChange={(e) => handleReminderChange(e.target.checked)} />
+								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} disabled={due===""} onChange={(e) => handleReminderChange(e.target.checked)} />
 							</div>
 						)}
 
