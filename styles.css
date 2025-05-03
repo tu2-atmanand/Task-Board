@@ -10,6 +10,7 @@
 .workspace-leaf-content[data-type="task-board-view"] .view-content {
 	overflow: unset;
 	padding-block-start: 0 !important;
+	padding-inline: 5px !important;
 }
 
 .modal[data-type="task-board-view"] {
