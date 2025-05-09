@@ -192,5 +192,12 @@ const de = {
   "fresh-install-2": "Bitte verwenden Sie die Schaltfläche 'Vault' (oben rechts), um Aufgaben für diese Karte zu sammeln.",
   "fresh-install-3": "Dies ist nur für das Erstaufbau oder nach dem Ändern von Filtern in den Einstellungen 'Filter für das Scannen' erforderlich.",
   "open-scan-vault-modal": "Öffnen Sie das Vault -Modal des Scans",
+  "new-board": "Neues Vorstand",
+  "are-you-sure": "Bist du sicher?",
+  "reminder-label": "Erinnerung :",
+  "tag-color-indicator-type": "Tag -Farbanzeigen -Indikatortyp",
+  "tag-color-indicator-type-info": "Wählen Sie, wie die Tag -Farbe angewendet werden soll. Beachten Sie, dass, wenn Sie \ ausgewählt haben",
+  "text-of-the-tag": "Text des Tags",
+  "background-of-the-card": "Hintergrund der Karte",
 };
 export default de;

@@ -192,5 +192,12 @@ const sq = {
   "fresh-install-2": "Ju lutemi përdorni butonin 'Scan Vault' (sipër djathtas) për të mbledhur detyra për këtë bord.",
   "fresh-install-3": "Kjo kërkohet vetëm për konfigurimin për herë të parë ose pas ndryshimit të filtrave në 'Filtrat për Skanimin'.",
   "open-scan-vault-modal": "Hapni Skanimin e Vault Modal",
+  "new-board": "Bord i ri",
+  "are-you-sure": "A jeni i sigurt?",
+  "reminder-label": "Kujtesë:",
+  "tag-color-indicator-type": "Lloji i treguesit të ngjyrës së etiketave",
+  "tag-color-indicator-type-info": "Zgjidhni se si duhet të aplikohet ngjyra e etiketave. Vini re se, nëse keni zgjedhur ",
+  "text-of-the-tag": "Teksti i etiketës",
+  "background-of-the-card": "Sfondi i kartës",
 };
 export default sq;

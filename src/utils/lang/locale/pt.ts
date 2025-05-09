@@ -192,5 +192,12 @@ const pt = {
   "fresh-install-2": "Use o botão 'Scan Vault' (canto superior direito) para coletar tarefas para esta placa.",
   "fresh-install-3": "Isso é necessário apenas para a configuração pela primeira vez ou após a alteração dos filtros nas configurações 'Filtros para digitalização'.",
   "open-scan-vault-modal": "Open Scan Vault Modal",
+  "new-board": "Novo Conselho",
+  "are-you-sure": "Tem certeza?",
+  "reminder-label": "Lembrete :",
+  "tag-color-indicator-type": "Tipo de indicador de cor da etiqueta",
+  "tag-color-indicator-type-info": "Selecione como a cor da tag deve ser aplicada. Observe que, se você selecionou ",
+  "text-of-the-tag": "Texto da tag",
+  "background-of-the-card": "Antecedentes do cartão",
 };
 export default pt;

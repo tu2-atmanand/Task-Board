@@ -192,5 +192,12 @@ const zhTW = {
   "fresh-install-2": "請使用“掃描保險庫”按鈕（右上）收集此板的任務。",
   "fresh-install-3": "這僅是首次設置或更改“用於掃描”設置的過濾器之後所必需的。",
   "open-scan-vault-modal": "打開掃描庫模式",
+  "new-board": "新董事會",
+  "are-you-sure": "你確定嗎？",
+  "reminder-label": "提醒 ：",
+  "tag-color-indicator-type": "標籤顏色指示燈類型",
+  "tag-color-indicator-type-info": "選擇應如何應用標籤顏色。請注意，如果您選擇了",
+  "text-of-the-tag": "標籤的文字",
+  "background-of-the-card": "卡的背景",
 };
 export default zhTW;

@@ -192,5 +192,12 @@ const ja = {
   "fresh-install-2": "「スキャンボールト」ボタン（右上）を使用して、このボードのタスクを収集してください。",
   "fresh-install-3": "これは、初めてのセットアップや、「スキャン用のフィルター」設定のフィルターを変更した後にのみ必要です。",
   "open-scan-vault-modal": "ボールトモーダルを開きます",
+  "new-board": "新しいボード",
+  "are-you-sure": "本気ですか？",
+  "reminder-label": "リマインダー ：",
+  "tag-color-indicator-type": "タグカラーインジケータータイプ",
+  "tag-color-indicator-type-info": "タグの色を適用する方法を選択します。選択した場合",
+  "text-of-the-tag": "タグのテキスト",
+  "background-of-the-card": "カードの背景",
 };
 export default ja;

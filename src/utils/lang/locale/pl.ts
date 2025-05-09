@@ -192,5 +192,12 @@ const pl = {
   "fresh-install-2": "Użyj przycisku „skanowania” (po prawej górnej części), aby zebrać zadania dla tej płyty.",
   "fresh-install-3": "Jest to wymagane tylko do konfiguracji po raz pierwszy lub po zmianie filtrów w ustawieniach „filtrów do skanowania”.",
   "open-scan-vault-modal": "Otwarte skanowanie Vault Modal",
+  "new-board": "Nowa tablica",
+  "are-you-sure": "Jesteś pewien?",
+  "reminder-label": "Przypomnienie :",
+  "tag-color-indicator-type": "Typ wskaźnika koloru tagu",
+  "tag-color-indicator-type-info": "Wybierz sposób zastosowania koloru znacznika. Zauważ, że jeśli wybrałeś ",
+  "text-of-the-tag": "Tekst tagu",
+  "background-of-the-card": "Tło karty",
 };
 export default pl;
