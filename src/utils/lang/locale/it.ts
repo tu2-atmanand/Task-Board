@@ -192,5 +192,12 @@ const it = {
   "fresh-install-2": "Si prega di utilizzare il pulsante 'Scansione Vault' (in alto a destra) per raccogliere attività per questa scheda.",
   "fresh-install-3": "Ciò è richiesto solo per la configurazione per la prima volta o dopo aver modificato i filtri nelle impostazioni 'Filtri per la scansione'.",
   "open-scan-vault-modal": "Apri Modal di Vault Scan",
+  "new-board": "Nuova tavola",
+  "are-you-sure": "Sei sicuro?",
+  "reminder-label": "Promemoria :",
+  "tag-color-indicator-type": "Tipo di indicatore del colore tag",
+  "tag-color-indicator-type-info": "Seleziona come applicare il colore del tag. Nota che, se hai selezionato ",
+  "text-of-the-tag": "Testo del tag",
+  "background-of-the-card": "Sfondo della carta",
 };
 export default it;

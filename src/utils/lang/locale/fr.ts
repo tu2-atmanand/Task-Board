@@ -192,5 +192,12 @@ const fr = {
   "fresh-install-2": "Veuillez utiliser le bouton «Scan Vault» (en haut à droite) pour collecter des tâches pour cette carte.",
   "fresh-install-3": "Ceci n'est requis que pour la première configuration ou après la modification des filtres dans les paramètres «Filtres pour la numérisation».",
   "open-scan-vault-modal": "Vault à scan ouvert modal",
+  "new-board": "Nouvelle planche",
+  "are-you-sure": "Es-tu sûr?",
+  "reminder-label": "Rappel :",
+  "tag-color-indicator-type": "Type d'indicateur de couleur de balise",
+  "tag-color-indicator-type-info": "Sélectionnez comment la couleur de la balise doit être appliquée. Notez que, si vous avez sélectionné",
+  "text-of-the-tag": "Texte de la balise",
+  "background-of-the-card": "Contexte de la carte",
 };
 export default fr;

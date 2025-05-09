@@ -191,6 +191,11 @@ const en: Lang = {
 	"open-scan-vault-modal": "Open scan vault modal",
 	"new-board": "New board",
 	"are-you-sure": "Are you sure?",
+	"reminder-label": "Reminder : ",
+	"tag-color-indicator-type": "Tag color indicator type",
+	"tag-color-indicator-type-info": "Select how the tag color should be applied. Note that, if you have selected \"Text of the tag\" as the tag color indicator type, then the opacity of the color will be reduced to 0.2 for better visibility of the text.",
+	"text-of-the-tag": "Text of the tag",
+	"background-of-the-card": "Background of the card",
 };
 
 export default en;

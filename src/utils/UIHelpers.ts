@@ -33,3 +33,16 @@ export function colorTo20PercentOpacity(color: string): string {
 	}
 	return color; // If it's already RGBA, return the same color
 }
+
+// Function to convert RGBA color to hex with Alpha
+export function updateRGBAOpacity(rgba: string, newOpacity: number): string {
+	const regex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)$/;
+	const match = rgba.match(regex);
+
+	if (match) {
+		return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${newOpacity})`;
+	} else {
+		console.error(`Invalid RGBA color string: ${rgba}`);
+		return rgba;
+	}
+}

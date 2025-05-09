@@ -192,5 +192,12 @@ const da = {
   "fresh-install-2": "Brug knappen 'Scan Vault' (øverst til højre) til at indsamle opgaver til dette bord.",
   "fresh-install-3": "Dette er kun påkrævet til førstegangsopsætning eller efter at have ændret filtre i indstillingerne 'Filtre til scanning'.",
   "open-scan-vault-modal": "Åbn scan hvælvning modal",
+  "new-board": "Nyt bestyrelse",
+  "are-you-sure": "Er du sikker?",
+  "reminder-label": "Påmindelse:",
+  "tag-color-indicator-type": "Tag farveindikatortype",
+  "tag-color-indicator-type-info": "Vælg, hvordan tagfarven skal påføres. Bemærk, at hvis du har valgt ",
+  "text-of-the-tag": "Tekst til mærket",
+  "background-of-the-card": "Baggrunden på kortet",
 };
 export default da;

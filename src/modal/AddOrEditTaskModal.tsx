@@ -7,11 +7,10 @@ import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/ut
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
-import { hexToRgba } from "src/utils/UIHelpers";
+import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
@@ -55,10 +54,10 @@ const EditTaskContent: React.FC<{
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [status, setStatus] = useState(task.status || '');
-	// const [isEdited, setIsEdited] = useState(false);
 	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
-	const rightSecRef = useRef<HTMLDivElement>(null);
+	const [reminder, setReminder] = useState(task.title.contains("(@") || false);
 
+	const rightSecRef = useRef<HTMLDivElement>(null);
 	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);
 
 	const handleClickOutside = (event: MouseEvent) => {
@@ -133,6 +132,17 @@ const EditTaskContent: React.FC<{
 		setIsEdited(true);
 	}
 
+	const handleReminderChange = (value: boolean) => {
+		setReminder(value);
+		if (value) {
+			setTitle(`${title} (@${due} ${startTime})`);
+		} else {
+			const reminderRegex = /(\(@\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?\))/;
+			setTitle(title.replace(reminderRegex, ""));
+		}
+		setIsEdited(true);
+	}
+
 	const handlePriorityChange = (value: number) => {
 		setPriority(value);
 		setIsEdited(true);
@@ -176,7 +186,7 @@ const EditTaskContent: React.FC<{
 	// Function to add a new subtask (blank input)
 	const addNewSubTask = () => {
 		const updatedBodyContent = bodyContent.split('\n');
-		setBodyContent([`\t- [ ] `, ...updatedBodyContent].join('\n'));
+		setBodyContent([...updatedBodyContent, `\t- [ ] `].join('\n'));
 		setIsEdited(true);
 	};
 
@@ -433,6 +443,14 @@ const EditTaskContent: React.FC<{
 							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => handleDueDateChange(e.target.value)} />
 						</div>
 
+						{/* Task reminder checkbox */}
+						{plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin && (
+							<div className="EditTaskModalHomeField">
+								<label className="EditTaskModalHomeFieldTitle">{t("reminder-label")}</label>
+								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} disabled={due===""} onChange={(e) => handleReminderChange(e.target.checked)} />
+							</div>
+						)}
+
 						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
@@ -455,10 +473,11 @@ const EditTaskContent: React.FC<{
 							{/* Render tags with cross icon */}
 							<div className="EditTaskModalHome-taskItemTags">
 								{tags.map((tag: string) => {
-									const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
-									const tagColor = customTagColor || defaultTagColor;
-									const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`;
-									const borderColor = customTagColor ? hexToRgba(tagColor, 0.5) : `var(--tag-color-hover)`;
+									const tagName = tag.replace('#', '');
+									const customTagData = plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+									const tagColor = customTagData?.color || defaultTagColor;
+									const backgroundColor = customTagData ? updateRGBAOpacity(tagColor, 0.1) : `var(--tag-background)`;
+									const borderColor = customTagData ? updateRGBAOpacity(tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
 											key={tag}

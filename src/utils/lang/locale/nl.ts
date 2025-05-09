@@ -192,5 +192,12 @@ const nl = {
   "fresh-install-2": "Gebruik de knop 'Scan kluis' (rechtsboven) om taken voor dit bord te verzamelen.",
   "fresh-install-3": "Dit is alleen vereist voor de eerste installatie of na het wijzigen van filters in de 'filters voor het scannen' instellingen.",
   "open-scan-vault-modal": "Open scan kluismodaal",
+  "new-board": "Nieuw bestuur",
+  "are-you-sure": "Weet je het zeker?",
+  "reminder-label": "Herinnering :",
+  "tag-color-indicator-type": "Tagkleurindicatortype",
+  "tag-color-indicator-type-info": "Selecteer hoe de tagkleur moet worden toegepast. Merk op dat, als u heeft geselecteerd ",
+  "text-of-the-tag": "Tekst van de tag",
+  "background-of-the-card": "Achtergrond van de kaart",
 };
 export default nl;

@@ -192,5 +192,12 @@ const ar = {
   "fresh-install-2": "يرجى استخدام زر 'Scan Vault' (أعلى يمين) لجمع المهام لهذا اللوحة.",
   "fresh-install-3": "هذا مطلوب فقط للإعداد لأول مرة أو بعد تغيير المرشحات في إعدادات 'المرشحات للمسح الضوئي'.",
   "open-scan-vault-modal": "افتح مسح Vault Modal",
+  "new-board": "مجلس جديد",
+  "are-you-sure": "هل أنت متأكد؟",
+  "reminder-label": "تذكير :",
+  "tag-color-indicator-type": "نوع مؤشر لون العلامة",
+  "tag-color-indicator-type-info": "حدد كيفية تطبيق لون العلامة. لاحظ أنه إذا كنت قد حددت ",
+  "text-of-the-tag": "نص العلامة",
+  "background-of-the-card": "خلفية البطاقة",
 };
 export default ar;

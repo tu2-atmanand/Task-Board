@@ -192,5 +192,12 @@ const es = {
   "fresh-install-2": "Utilice el botón 'escanear bóveda' (arriba a la derecha) para recopilar tareas para este tablero.",
   "fresh-install-3": "Esto solo se requiere para la configuración por primera vez o después de cambiar los filtros en la configuración 'Filtros para escanear'.",
   "open-scan-vault-modal": "Abra de bóveda de escaneo de escaneo modal",
+  "new-board": "Nuevo tablero",
+  "are-you-sure": "¿Está seguro?",
+  "reminder-label": "Recordatorio :",
+  "tag-color-indicator-type": "Tipo de indicador de color de la etiqueta",
+  "tag-color-indicator-type-info": "Seleccione cómo se debe aplicar el color de la etiqueta. Tenga en cuenta que, si ha seleccionado ",
+  "text-of-the-tag": "Texto de la etiqueta",
+  "background-of-the-card": "Antecedentes de la tarjeta",
 };
 export default es;
