@@ -4,7 +4,7 @@ import { Board, ColumnData } from "../interfaces/BoardConfigs";
 import { Bolt, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
-import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
+import { taskJsonMerged } from "src/interfaces/TaskItemProps";
 
 import { App } from "obsidian";
 import Column from "./Column";

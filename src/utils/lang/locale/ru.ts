@@ -191,5 +191,10 @@ const ru = {
   "open-scan-vault-modal": "Открыть режим сканирования хранилища",
   "new-board": "Новая доска",
   "are-you-sure": "Вы уверены?",
+  "reminder-label": "Напоминание :",
+  "tag-color-indicator-type": "Тип индикатора цвета тега",
+  "tag-color-indicator-type-info": "Выберите, как должен применяться цвет тега. Обратите внимание, что, если вы выбрали ",
+  "text-of-the-tag": "Текст тега",
+  "background-of-the-card": "Фон карты",
 };
 export default ru;

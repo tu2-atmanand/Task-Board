@@ -192,5 +192,12 @@ const ro = {
   "fresh-install-2": "Vă rugăm să utilizați butonul „Scan Vault” (dreapta sus) pentru a colecta sarcini pentru această placă.",
   "fresh-install-3": "Acest lucru este necesar numai pentru configurarea pentru prima dată sau după modificarea filtrelor din setările „filtre pentru scanare”.",
   "open-scan-vault-modal": "Open Scan Vault Modal",
+  "new-board": "Nou consiliu",
+  "are-you-sure": "Ești sigur?",
+  "reminder-label": "Memento:",
+  "tag-color-indicator-type": "Tipul indicatorului de culoare etichetă",
+  "tag-color-indicator-type-info": "Selectați cum trebuie aplicată culoarea etichetelor. Rețineți că, dacă ați selectat ",
+  "text-of-the-tag": "Text al etichetei",
+  "background-of-the-card": "Fundalul cărții",
 };
 export default ro;

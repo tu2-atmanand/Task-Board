@@ -6,7 +6,6 @@ import {
 	writeTasksJsonToDisk,
 } from "./JsonFileOperations";
 import {
-	priorityEmojis,
 	taskItem,
 	tasksJson,
 } from "src/interfaces/TaskItemProps";

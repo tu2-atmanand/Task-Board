@@ -192,5 +192,12 @@ const no = {
   "fresh-install-2": "Bruk 'Scan Vault' -knappen (øverst til høyre) for å samle oppgaver for dette brettet.",
   "fresh-install-3": "Dette er bare nødvendig for førstegangsoppsett eller etter å ha endret filtre i 'filtrene for skanning' -innstillinger.",
   "open-scan-vault-modal": "Åpen skannehvelvmodal",
+  "new-board": "Nytt styre",
+  "are-you-sure": "Er du sikker?",
+  "reminder-label": "Påminnelse:",
+  "tag-color-indicator-type": "Tag Color Indicator Type",
+  "tag-color-indicator-type-info": "Velg hvordan taggfargen skal brukes. Merk at hvis du har valgt ",
+  "text-of-the-tag": "Tekst av taggen",
+  "background-of-the-card": "Bakgrunnen på kortet",
 };
 export default no;

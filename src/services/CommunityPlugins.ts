@@ -1,13 +1,21 @@
-import type TaskBoard from "main";
+import TaskBoard from "main";
 import { TaskBoardSubmodule } from "./subModules";
 
-export class TasksPlugin extends TaskBoardSubmodule {
+export class CommunityPlugins extends TaskBoardSubmodule {
 	get tasksPlugin() {
 		return this.app.plugins.plugins["obsidian-tasks-plugin"] ?? null;
 	}
 
-	isEnabled() {
+	isTasksPluginEnabled() {
 		return !!this.tasksPlugin;
+	}
+
+	get reminderPlugin() {
+		return this.app.plugins.plugins["obsidian-reminder-plugin"] ?? null;
+	}
+
+	isReminderPluginEnabled() {
+		return !!this.reminderPlugin;
 	}
 
 	// async getSettings(): Promise<void> {
@@ -19,9 +27,9 @@ export class TasksPlugin extends TaskBoardSubmodule {
 
 export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 	try {
-		const tasksPluginO = new TasksPlugin(plugin);
+		const tasksPluginO = new CommunityPlugins(plugin);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
-		if (tasksPluginO.isEnabled()) {
+		if (tasksPluginO.isTasksPluginEnabled()) {
 			// Define the path to the tasks plugin data.json file
 			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
 
@@ -44,4 +52,13 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			error
 		);
 	}
+}
+
+export function isReminderPluginInstalled(plugin: TaskBoard) {
+	const reminderPlugin = new CommunityPlugins(plugin);
+
+	console.log("Reminder Plugin Installed: ", reminderPlugin.isReminderPluginEnabled());
+
+	plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin =
+		reminderPlugin.isReminderPluginEnabled();
 }

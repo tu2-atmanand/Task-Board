@@ -3,15 +3,12 @@
 import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
 import {
 	EditButtonMode,
+	TagColorType,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
-import {
-	colorTo20PercentOpacity,
-	hexToHexAlpha,
-	hexToRgba,
-} from "src/utils/UIHelpers";
-
+import Pickr from "@simonwep/pickr";
+import Sortable from "sortablejs";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
@@ -327,6 +324,7 @@ export class SettingsManager {
 			columnWidth,
 			showVerticalScroll,
 			tagColors,
+			tagColorsType,
 			showTaskWithoutMetadata,
 		} = this.globalSettings!;
 
@@ -357,10 +355,12 @@ export class SettingsManager {
 			.setName(t("show-task-without-metadata"))
 			.setDesc(t("show-task-without-metadata-info"))
 			.addToggle((toggle) =>
-				toggle.setValue(showTaskWithoutMetadata).onChange(async (value) => {
-					this.globalSettings!.showTaskWithoutMetadata = value;
-					await this.saveSettings();
-				})
+				toggle
+					.setValue(showTaskWithoutMetadata)
+					.onChange(async (value) => {
+						this.globalSettings!.showTaskWithoutMetadata = value;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting to take the width of each Column in px.
@@ -394,106 +394,234 @@ export class SettingsManager {
 			.setName(t("tag-colors"))
 			.setDesc(t("tag-colors-info"));
 
-		// If there are existing tag colors, show them
+		new Setting(contentEl)
+			.setName(t("tag-color-indicator-type"))
+			.setDesc(t("tag-color-indicator-type-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[TagColorType.Text]: t("text-of-the-tag"),
+						[TagColorType.Background]: t("background-of-the-card"),
+					})
+					.setValue(tagColorsType)
+					.onChange(async (value) => {
+						this.globalSettings!.tagColorsType =
+							value as TagColorType;
+						await this.plugin.saveSettings();
+						renderTagColors();
+					})
+			);
+
 		const tagColorsContainer = contentEl.createDiv({
 			cls: "tag-colors-container",
 		});
 
-		Object.entries(tagColors).forEach(([tagName, color]) => {
-			// Create the preview element after adding inputs and buttons
-			const previewElement = document.createElement("span");
-			previewElement.className =
-				"taskBoard-global-settings-tab-tag-color-preview";
-			previewElement.textContent = tagName;
-			previewElement.style.color = color;
-			previewElement.style.border = `1px solid ${color}`;
-
-			// Convert the color to 20% opacity for the background
-			let rgbaColor = colorTo20PercentOpacity(color);
-			previewElement.style.backgroundColor = rgbaColor; // Apply 20% opacity background color
-
-			const tagSetting = new Setting(tagColorsContainer)
-				.setName("")
-				.setDesc("") // Setting an empty description to allow space for the custom preview
-				.addText((text) => text.setValue(tagName).setDisabled(true)) // Tag name input
-				.addText((text) =>
-					text.setValue(color).onChange(async (newColor) => {
-						this.globalSettings!.tagColors[tagName] = newColor;
-
-						// Update the preview color dynamically
-						const previewElement =
-							tagSetting.settingEl.querySelector(
-								".tag-color-preview"
-							) as HTMLElement;
-						if (previewElement) {
-							previewElement.style.color = newColor;
-							previewElement.style.border = `1px solid ${newColor}`;
-							previewElement.style.backgroundColor =
-								colorTo20PercentOpacity(newColor);
+		// Initialize Sortable.js
+		Sortable.create(tagColorsContainer, {
+			animation: 150,
+			handle: ".taskboard-setting-tag-color-row-element-drag-handle",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: async () => {
+				const newOrder = Array.from(tagColorsContainer.children)
+					.map((child, index) => {
+						const tagName = child.getAttribute("data-tag-name");
+						const tag = tagColors.find((t) => t.name === tagName);
+						if (tag) {
+							tag.priority = index + 1;
+							return tag;
 						}
-
-						await this.saveSettings();
+						return null;
 					})
-				)
-				.addButton((btn) =>
-					btn.setButtonText(t("delete")).onClick(async () => {
-						delete this.globalSettings!.tagColors[tagName];
-						tagSetting.settingEl.remove();
-						await this.saveSettings();
-					})
-				);
+					.filter(
+						(
+							tag
+						): tag is {
+							name: string;
+							color: string;
+							priority: number;
+						} => tag !== null
+					);
 
-			// Append the preview element to the tag setting container
-			tagSetting.settingEl.prepend(previewElement);
+				this.globalSettings!.tagColors = newOrder;
+				await this.saveSettings();
+			},
 		});
 
-		const addTagColorButton = new Setting(contentEl).addButton((btn) =>
-			btn.setButtonText(t("add-tag-color")).onClick(() => {
-				const newTagSetting = new Setting(tagColorsContainer)
+		const renderTagColors = () => {
+			tagColorsContainer.empty(); // Clear existing rendered rows
+
+			this.globalSettings!.tagColors.sort(
+				(a, b) => a.priority - b.priority
+			).forEach((tag, index) => {
+				const row = tagColorsContainer.createDiv({
+					cls: "tag-color-row",
+					attr: { "data-tag-name": tag.name },
+				});
+				let colorInputRef: any;
+
+				new Setting(row)
+					.setClass("tag-color-row-element")
+					.addButton((drag) =>
+						drag
+							.setTooltip("Hold and drag")
+							.setIcon("grip-horizontal")
+							.setClass(
+								"taskboard-setting-tag-color-row-element-drag-handle"
+							)
+							.buttonEl.setCssStyles({
+								cursor: "grab",
+								backgroundColor:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Background
+										? tag.color
+										: "",
+								color:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Text
+										? tag.color
+										: "",
+								border:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Text
+										? `1px solid ${tag.color}`
+										: "",
+							})
+					)
 					.addText((text) =>
 						text
-							.setPlaceholder(t("tag-name"))
-							.onChange(async (newTag) => {
-								// if (!this.globalSettings!.tagColors[newTag]) {
-								// 	this.globalSettings!.tagColors[newTag] = ""; // Set empty color initially
-								// }
+							.setPlaceholder("Tag Name")
+							.setValue(tag.name)
+							.onChange(async (value) => {
+								tag.name = value;
+								row.setAttribute("data-tag-name", value);
+								await this.saveSettings();
+							})
+							.inputEl.setCssStyles({
+								backgroundColor:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Background
+										? tag.color
+										: "",
+								color:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Text
+										? tag.color
+										: "",
+								border:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Text
+										? `1px solid ${tag.color}`
+										: "",
+								minWidth: "23vw !important",
 							})
 					)
-					.addColorPicker((picker) =>
-						picker.onChange(async (hexColor) => {
-							const tagName =
-								newTagSetting.settingEl.querySelector(
-									"input"
-								)?.value;
-							if (tagName) {
-								this.globalSettings!.tagColors[tagName] =
-									hexColor; // Save as hex initially
+					.addButton((btn) => {
+						const pickr = new Pickr({
+							el: btn.buttonEl,
+							theme: "nano",
+							default: tag.color || "#ff0000",
+							components: {
+								preview: true,
+								opacity: true,
+								hue: true,
+								interaction: {
+									rgba: true,
+									input: true,
+									clear: true,
+									cancel: true,
+									save: false,
+								},
+							},
+						});
+
+						pickr
+							.on("change", (color: any) => {
+								const rgbaColor = `rgba(${color
+									.toRGBA()
+									.map((v: number, i: number) =>
+										i < 3 ? Math.round(v) : v
+									)
+									.join(", ")})`;
+								tag.color = rgbaColor;
+								colorInputRef.setValue(rgbaColor);
+								// row.style.backgroundColor = rgbaColor;
+							})
+							.on("hide", () => {
+								renderTagColors();
+								this.saveSettings();
+							})
+							.on("cancel", () => pickr.hide())
+							.on("clear", () => pickr.hide());
+					})
+					.addText((colorInput) => {
+						colorInputRef = colorInput;
+						colorInput
+							.setPlaceholder("Color Value")
+							.setValue(tag.color)
+							.onChange(async (newColor) => {
+								tag.color = newColor;
 								await this.saveSettings();
-							}
-						})
-					)
-					.addText((alphaText) =>
-						alphaText
-							.setPlaceholder("Alpha (0-1)")
-							.onChange(async (alpha) => {
-								const tagName =
-									newTagSetting.settingEl.querySelector(
-										"input"
-									)?.value;
-								if (tagName) {
-									const hexColor =
-										this.globalSettings!.tagColors[tagName];
-									const rgbaColor = hexToHexAlpha(
-										hexColor,
-										parseFloat(alpha)
-									); // Convert hex to RGBA with alpha
-									this.globalSettings!.tagColors[tagName] =
-										rgbaColor;
-									await this.saveSettings();
-								}
+							})
+							.inputEl.setCssStyles({
+								backgroundColor:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Background
+										? tag.color
+										: "",
+								color:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Text
+										? tag.color
+										: "",
+								border:
+									this.globalSettings!.tagColorsType ===
+									TagColorType.Text
+										? `1px solid ${tag.color}`
+										: "",
+								minWidth: "23vw !important",
+							});
+					})
+					.addButton((del) =>
+						del
+							.setButtonText("Delete")
+							.setIcon("trash")
+							.setClass(
+								"taskboard-setting-tag-color-row-element-delete"
+							)
+							.setCta()
+							.onClick(async () => {
+								this.globalSettings!.tagColors.splice(index, 1);
+								await this.saveSettings();
+								renderTagColors(); // Re-render after delete
 							})
 					);
-			})
+			});
+		};
+
+		// Initial render
+		renderTagColors();
+
+		// Add "Add New Tag Color" button
+		new Setting(contentEl).addButton((btn) =>
+			btn
+				.setButtonText(t("add-tag-color"))
+				.setCta()
+				.onClick(async () => {
+					const newTag = {
+						name: "",
+						color: "rgba(255, 0, 0, 1)",
+						priority: this.globalSettings!.tagColors.length + 1,
+					};
+					this.globalSettings!.tagColors.push(newTag);
+					await this.saveSettings();
+					renderTagColors();
+				})
 		);
 	}
 

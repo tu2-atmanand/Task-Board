@@ -1,7 +1,6 @@
-import { taskItem, taskJsonMerged } from "./TaskItemProps";
-
-import { App } from "obsidian";
+import { taskItem } from "./TaskItemProps";
 import TaskBoard from "main";
+import { ColumnData } from "./BoardConfigs";
 
 export interface ColumnProps {
 	key: number;
@@ -9,18 +8,6 @@ export interface ColumnProps {
 	columnIndex: number;
 	activeBoardIndex: number;
 	collapsed?: boolean;
-	columnData: {
-		name: string;
-		index: number;
-		coltag?: string;
-		range?: {
-			tag: string;
-			rangedata: {
-				from: number;
-				to: number;
-			};
-		};
-		limit?: number;
-	};
+	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
 }

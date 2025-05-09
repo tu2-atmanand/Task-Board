@@ -11,7 +11,7 @@ import { Component } from 'obsidian';
 import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitle } from 'src/utils/TaskContentFormatter';
-import { hexToRgba } from 'src/utils/UIHelpers';
+import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
@@ -132,21 +132,91 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
-	// Determine color for the task indicator
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
 		const taskDueDate = parseDueDate(task.due) || new Date(task.due);
+
 		if (taskDueDate.toDateString() === today.toDateString()) {
-			return 'var(--color-yellow)'; // Due today
+			if (task.time) {
+				const [startStr, endStr] = task.time.split(' - ');
+				const [startHours, startMinutes] = startStr.split(':').map(Number);
+				const [endHours, endMinutes] = endStr.split(':').map(Number);
+
+				const startTime = new Date(today);
+				startTime.setHours(startHours, startMinutes, 0, 0);
+
+				const endTime = new Date(today);
+				endTime.setHours(endHours, endMinutes, 0, 0);
+
+				const now = new Date();
+
+				if (now < startTime) {
+					return 'var(--color-yellow)'; // Not started yet
+				} else if (now >= startTime && now <= endTime) {
+					return 'var(--color-blue)'; // In progress
+				} else if (now > endTime) {
+					return 'var(--color-red)'; // Over
+				}
+			} else {
+				return 'var(--color-yellow)'; // Due today but no time info
+			}
 		} else if (taskDueDate > today) {
-			return 'var(--color-green)'; // Due in the future
+			return 'var(--color-green)'; // Due in future
 		} else if (taskDueDate < today) {
 			return 'var(--color-red)'; // Past due
 		} else {
-			return 'grey'; // No Due
+			return 'grey'; // No due date
 		}
-	}, [task.due]);
+	}, [task.due, task.time]);
 
+	// Function to get the card background color based on tags
+	function getCardBgBasedOnTag(tags: string[]): string | undefined {
+		if (plugin.settings.data.globalSettings.tagColorsType === "text") {
+			return undefined;
+		}
+
+		const tagColors = plugin.settings.data.globalSettings.tagColors;
+
+		if (!Array.isArray(tagColors) || tagColors.length === 0) {
+			return undefined;
+		}
+
+		// Prepare a map for faster lookup
+		const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
+
+		let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
+
+		for (const rawTag of tags) {
+			const tagName = rawTag.replace('#', '');
+			const tagData = tagColorMap.get(tagName);
+
+			if (tagData) {
+				if (
+					!highestPriorityTag ||
+					(tagData.priority) < (highestPriorityTag.priority)
+				) {
+					highestPriorityTag = tagData;
+				}
+			}
+		}
+
+		const getOpacityValue = (color: string): number => {
+			const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+			if (rgbaMatch) {
+				const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+				return opacity;
+			}
+			return 1;
+		};
+
+		if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+			return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+		}
+
+		return highestPriorityTag?.color;
+	}
+
+	// Function to handle the main checkbox click
 	const handleMainCheckBoxClick = () => {
 		setIsChecked(true); // Trigger animation
 		setTimeout(() => {
@@ -209,14 +279,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								{/* Render tags individually */}
 								<div className="taskItemTags">
 									{task.tags.map((tag: string) => {
-										const customTagColor = plugin.settings.data.globalSettings.tagColors[tag.replace('#', '')];
-										const tagColor = customTagColor || 'var(--tag-color)';
-										const backgroundColor = customTagColor ? hexToRgba(customTagColor, 0.1) : `var(--tag-background)`; // 10% opacity background
-										const borderColor = customTagColor ? hexToRgba(tagColor, 0.5) : `var(--tag-color-hover)`;
+										const tagName = tag.replace('#', '');
+										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
+										const tagColor = customTag?.color || `var(--tag-color)`;
+										const backgroundColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
-										const column = activeBoardSettings.columns[columnIndex];
-										if (!activeBoardSettings.showColumnTags && activeBoardSettings.columns[columnIndex].colType === "namedTag" && tag === column.coltag) {
+										const column = activeBoardSettings.columns[columnIndex - 1];
+										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
 											return null;
 										}
 
@@ -320,6 +391,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
 							) : (
 								<div className='taskItemDate'>
+									{task.title.contains("(@") && task.completion === "" ? `🔔 ` : ""}
 									{task.time ? `⏰${task.time}` : ''}
 									{task.time && task.due ? ' | ' : ''}
 									{task.due ? `📅${task.due}` : ''}
@@ -363,7 +435,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, task.due, task.time]);
 
 	return (
-		<div className="taskItem" key={taskKey}>
+		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				{memoizedRenderHeader}

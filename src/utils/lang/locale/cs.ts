@@ -192,5 +192,12 @@ const cs = {
   "fresh-install-2": "Použijte prosím tlačítko „Scan Vault“ (vpravo nahoře) ke sběru úkolů pro tuto desku.",
   "fresh-install-3": "To je vyžadováno pouze pro první nastavení nebo po změně filtrů v nastavení „Filtry pro skenování“.",
   "open-scan-vault-modal": "Otevřená modální modál",
+  "new-board": "Nová deska",
+  "are-you-sure": "Jsi si jistý?",
+  "reminder-label": "Připomínka:",
+  "tag-color-indicator-type": "Typ indikátoru barev značky",
+  "tag-color-indicator-type-info": "Vyberte, jak by měla být použita barva značky. Všimněte si, že pokud jste vybrali ",
+  "text-of-the-tag": "Text značky",
+  "background-of-the-card": "Pozadí karty",
 };
 export default cs;

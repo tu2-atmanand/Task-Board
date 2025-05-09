@@ -192,5 +192,12 @@ const tr = {
   "fresh-install-2": "Bu pano için görevleri toplamak için lütfen 'Tonoz Tarama' düğmesini (sağ üst) kullanın.",
   "fresh-install-3": "Bu yalnızca ilk kez kurulum için veya 'tarama için filtreler' ayarlarındaki filtreleri değiştirdikten sonra gereklidir.",
   "open-scan-vault-modal": "Scan Vault Modal'ı açın",
+  "new-board": "Yeni tahta",
+  "are-you-sure": "Emin misin?",
+  "reminder-label": "Hatırlatma:",
+  "tag-color-indicator-type": "Etiket Renk Göstergesi Türü",
+  "tag-color-indicator-type-info": "Etiket renginin nasıl uygulanması gerektiğini seçin. Not, eğer seçtiyseniz ",
+  "text-of-the-tag": "Etiketin metni",
+  "background-of-the-card": "Kartın arka planı",
 };
 export default tr;
