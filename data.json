@@ -241,13 +241,13 @@
       "showVerticalScroll": false,
       "tagColors": [
         {
-          "name": "bug",
-          "color": "rgba(177, 213, 11, 0.72)",
+          "name": "working",
+          "color": "rgba(10, 235, 10, 0.66)",
           "priority": 1
         },
         {
-          "name": "working",
-          "color": "rgba(10, 235, 10, 0.66)",
+          "name": "bug",
+          "color": "rgba(240, 40, 40, 1)",
           "priority": 2
         },
         {
@@ -257,7 +257,7 @@
         },
         {
           "name": "test",
-          "color": "rgba(0, 232, 229, 1)",
+          "color": "rgba(46, 244, 241, 1)",
           "priority": 4
         },
         {
@@ -599,7 +599,7 @@
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
-        "reminderPlugin": false
+        "reminderPlugin": true
       }
     }
   }
