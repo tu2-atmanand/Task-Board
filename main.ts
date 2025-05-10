@@ -566,7 +566,20 @@ export default class TaskBoard extends Plugin {
 		for (const key in defaults) {
 			if (!(key in settings)) {
 				settings[key] = defaults[key];
-			} else if (
+			}
+			 // If defaults[key] is an array but settings[key] isn't, use the default array
+			else if (Array.isArray(defaults[key])) {
+				if (!Array.isArray(settings[key])) {
+					// Support migration from old tagColors object to array format
+					if (key === 'tagColors' && typeof settings[key] === 'object' && settings[key] !== null) {
+						settings[key] = Object.entries(settings[key] as Record<string, string>)
+							.map(([name, color], idx) => ({ name, color, priority: idx + 1 } as any));
+					} else {
+						settings[key] = defaults[key];
+					}
+				}
+			}
+			else if (
 				typeof defaults[key] === "object" &&
 				defaults[key] !== null &&
 				!Array.isArray(defaults[key])
