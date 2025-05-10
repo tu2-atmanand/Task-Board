@@ -567,11 +567,11 @@ export default class TaskBoard extends Plugin {
 			if (!(key in settings)) {
 				settings[key] = defaults[key];
 			} else if ( // This is a temporary fix for the tagColors
+				!Array.isArray(settings[key]) &&
 				key === "tagColors" &&
 				typeof settings[key] === "object" &&
 				settings[key] !== null
 			) {
-				console.log("Syncing tagColors");
 				settings[key] = Object.entries(
 					settings[key] as Record<string, string>
 				).map(
