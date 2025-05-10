@@ -241,29 +241,39 @@
       "showVerticalScroll": false,
       "tagColors": [
         {
-          "name": "working",
-          "color": "rgba(10, 235, 10, 0.66)",
+          "name": "bug",
+          "color": "rgba(253, 17, 33, 0.75)",
           "priority": 1
         },
         {
-          "name": "bug",
-          "color": "rgba(240, 40, 40, 1)",
+          "name": "bug/solver",
+          "color": "#f23fqe19",
           "priority": 2
         },
         {
-          "name": "New",
-          "color": "rgba(3, 3, 250, 1)",
+          "name": "feat",
+          "color": "#b50df2f2",
           "priority": 3
         },
         {
-          "name": "test",
-          "color": "rgba(46, 244, 241, 1)",
+          "name": "Test",
+          "color": "#dcf519",
           "priority": 4
         },
         {
-          "name": "feat",
-          "color": "rgba(175, 30, 245, 1)",
+          "name": "working",
+          "color": "#67ff5c",
           "priority": 5
+        },
+        {
+          "name": "New",
+          "color": "#2e74ff",
+          "priority": 6
+        },
+        {
+          "name": "pending",
+          "color": "#955cff",
+          "priority": 7
         }
       ],
       "editButtonAction": "popUp",

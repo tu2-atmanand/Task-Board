@@ -57,8 +57,6 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 export function isReminderPluginInstalled(plugin: TaskBoard) {
 	const reminderPlugin = new CommunityPlugins(plugin);
 
-	console.log("Reminder Plugin Installed: ", reminderPlugin.isReminderPluginEnabled());
-
 	plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin =
 		reminderPlugin.isReminderPluginEnabled();
 }

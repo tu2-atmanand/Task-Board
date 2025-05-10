@@ -65,7 +65,7 @@ const getLocale = (): Partial<Lang> => {
 	const lang = getLanguage();
 	const locale = localeMap[lang] || localeMap["en"]; // Fallback to 'en' if the language is not found
 	if (!locale) {
-		console.error("Error: kanban locale not found", lang);
+		console.error("Error: Task board locale not found for the language : ", lang);
 	}
 	return locale;
 };
