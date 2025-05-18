@@ -1,6 +1,6 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, Modal } from "obsidian";
+import { App, Component, Modal, debounce } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -14,6 +14,9 @@ import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
+import { buildTaskFromRawContent } from "src/utils/ScanningVault";
+import { RefreshCcw } from "lucide-react";
 
 const taskItemEmpty = {
 	id: 0,
@@ -33,6 +36,78 @@ export interface filterOptions {
 	text: string;
 }
 
+// function setupMarkdownEditor(app: App, container: HTMLElement, targetFileEl?: HTMLElement) {
+// 	// Create the markdown editor with our EmbeddableMarkdownEditor
+// 	setTimeout(() => {
+// 		this.markdownEditor = createEmbeddableMarkdownEditor(
+// 			app,
+// 			container,
+// 			{
+// 				placeholder: "Temp",
+
+// 				onEnter: (editor, mod, shift) => {
+// 					if (mod) {
+// 						// Submit on Cmd/Ctrl+Enter
+// 						this.handleSubmit();
+// 						return true;
+// 					}
+// 					// Allow normal Enter key behavior
+// 					return false;
+// 				},
+
+// 				onEscape: (editor) => {
+// 					// Close the modal on Escape
+// 					this.close();
+// 				},
+
+// 				onSubmit: (editor) => {
+// 					this.handleSubmit();
+// 				},
+
+// 				onChange: (update) => {
+// 					// Handle changes if needed
+// 					this.capturedContent = this.markdownEditor?.value || "";
+
+// 					if (this.updatePreview) {
+// 						this.updatePreview();
+// 					}
+// 				},
+// 			}
+// 		);
+
+// 		this.markdownEditor?.scope.register(
+// 			["Alt"],
+// 			"c",
+// 			(e: KeyboardEvent) => {
+// 				e.preventDefault();
+// 				if (!this.markdownEditor) return false;
+// 				if (this.markdownEditor.value.trim() === "") {
+// 					this.close();
+// 					return true;
+// 				} else {
+// 					this.handleSubmit();
+// 				}
+// 				return true;
+// 			}
+// 		);
+
+// 		if (targetFileEl) {
+// 			this.markdownEditor?.scope.register(
+// 				["Alt"],
+// 				"x",
+// 				(e: KeyboardEvent) => {
+// 					e.preventDefault();
+// 					targetFileEl.focus();
+// 					return true;
+// 				}
+// 			);
+// 		}
+
+// 		// Focus the editor when it's created
+// 		this.markdownEditor?.editor?.focus();
+// 	}, 50);
+// }
+
 // Functional React component for the modal content
 const EditTaskContent: React.FC<{
 	app: App,
@@ -45,17 +120,21 @@ const EditTaskContent: React.FC<{
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
 }> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose, setIsEdited }) => {
-	const [title, setTitle] = useState(task.title || '');
+	const [title, setTitle] = useState(task.title || ' ');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
 	const [startTime, setStartTime] = useState(task?.time?.split('-')[0]?.trim() || '');
 	const [endTime, setEndTime] = useState(task?.time?.split('-')[1]?.trim() || '');
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
-	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [status, setStatus] = useState(task.status || '');
-	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
 	const [reminder, setReminder] = useState(task.title.contains("(@") || false);
+	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
+	const [formattedTaskContent, setFormattedTaskContent] = useState<string>('');
+
+	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
+	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
+	const [updateEditorContent, setUpdateEditorContent] = useState<Boolean>(false);
 
 	const rightSecRef = useRef<HTMLDivElement>(null);
 	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);
@@ -125,11 +204,13 @@ const EditTaskContent: React.FC<{
 	const handleStatusChange = (symbol: string) => {
 		setStatus(symbol);
 		setIsEdited(true);
+		setUpdateEditorContent(true);
 	}
 
 	const handleDueDateChange = (value: string) => {
 		setDue(value);
 		setIsEdited(true);
+		setUpdateEditorContent(true);
 	}
 
 	const handleReminderChange = (value: boolean) => {
@@ -141,21 +222,25 @@ const EditTaskContent: React.FC<{
 			setTitle(title.replace(reminderRegex, ""));
 		}
 		setIsEdited(true);
+		setUpdateEditorContent(true);
 	}
 
 	const handlePriorityChange = (value: number) => {
 		setPriority(value);
 		setIsEdited(true);
+		setUpdateEditorContent(true);
 	}
 
 	const handleStartTimeChange = (startTime: string) => {
 		setStartTime(startTime);
 		setIsEdited(true);
+		setUpdateEditorContent(true);
 	}
 
 	const handleEndTimeChange = (endTime: string) => {
 		setEndTime(endTime);
 		setIsEdited(true);
+		setUpdateEditorContent(true);
 	}
 
 	// Function to toggle subtask completion
@@ -199,8 +284,9 @@ const EditTaskContent: React.FC<{
 
 	// Function to handle textarea changes
 	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setBodyContent(e.target.value);
-		setIsEdited(true);
+		// setBodyContent(e.target.value);
+		handleTaskEditedThroughEditors(e.target.value);
+		// setIsEdited(true);
 	};
 
 	// Tags input
@@ -211,6 +297,7 @@ const EditTaskContent: React.FC<{
 				setTags(prevTags => [...prevTags, input.startsWith("#") ? input : `#${input}`]);
 				e.currentTarget.value = '';
 				setIsEdited(true);
+				setUpdateEditorContent(true);
 			}
 		}
 	};
@@ -219,6 +306,7 @@ const EditTaskContent: React.FC<{
 	const removeTag = (tagToRemove: string) => {
 		setTags(prevTags => prevTags.filter(tag => tag !== tagToRemove));
 		setIsEdited(true);
+		setUpdateEditorContent(true);
 	};
 
 	const onOpenFilBtnClicked = (newWindow: boolean) => {
@@ -268,30 +356,158 @@ const EditTaskContent: React.FC<{
 	};
 	// Reference to the HTML element where markdown will be rendered
 
-	const componentRef = useRef<Component | null>(null);
+	// const componentRef = useRef<Component | null>(null);
+	// useEffect(() => {
+	// 	// Initialize Obsidian Component on mount
+	// 	componentRef.current = plugin.view;
+	// }, []);
+
+	// const previewContainerRef = useRef<HTMLDivElement>(null);
+	// useEffect(() => {
+	// 	const formatedContent = taskContentFormatter(plugin, modifiedTask);
+	// 	setFormattedTaskContent(formatedContent);
+	// 	if (previewContainerRef.current && formatedContent !== "") {
+	// 		// Clear previous content before rendering new markdown
+	// 		previewContainerRef.current.empty();
+
+	// 		MarkdownUIRenderer.renderTaskDisc(
+	// 			app,
+	// 			formatedContent,
+	// 			previewContainerRef.current,
+	// 			filePath,
+	// 			componentRef.current
+	// 		);
+
+	// 		hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
+	// 	}
+	// }, [modifiedTask]); // Re-render when modifiedTask changes
+
+
+	const handleTaskEditedThroughEditors = debounce((value: string) => {
+		const updatedTask = buildTaskFromRawContent(value);
+		setTitle(updatedTask.title || '');
+		setBodyContent(updatedTask.body?.join('\n') || '');
+		setDue(updatedTask.due || '');
+		setTags(updatedTask.tags || []);
+		setStartTime(updatedTask.time?.split('-')[0].trim() || '');
+		setEndTime(updatedTask.time?.split('-')[1].trim() || '');
+		setPriority(updatedTask.priority || 0);
+		setStatus(updatedTask.status || '');
+		setIsEdited(true);
+	}, 50);
+
+
+	// // This useEffect is used to get the formatted content of the updated task, which will be rendered in the editor(s).
+	// useEffect(() => {
+	// 	const formatedContent = taskContentFormatter(plugin, modifiedTask);
+	// 	console.log("formattedTaskContent : ", formatedContent);
+	// 	setFormattedTaskContent(formatedContent);
+	// }, [modifiedTask]); // Re-render when modifiedTask changes
+
+	// I think this useEffect should be called only once and not again and again, it initializes the editor.
+	const markdownEditorEmbeddedContainer = useRef<HTMLElement>(null);
 	useEffect(() => {
-		// Initialize Obsidian Component on mount
-		componentRef.current = plugin.view;
-	}, []);
+		if (markdownEditorEmbeddedContainer.current) {
+			if (markdownEditor) {
+				markdownEditor.destroy();
+			}
+			setTimeout(() => {
+				if (markdownEditorEmbeddedContainer.current) {
+					markdownEditorEmbeddedContainer.current.empty();
 
-	const previewContainerRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		const formatedContent = taskContentFormatter(plugin, modifiedTask);
-		if (previewContainerRef.current && formatedContent !== "") {
-			// Clear previous content before rendering new markdown
-			previewContainerRef.current.empty();
+					const formattedTaskContent = taskContentFormatter(plugin, modifiedTask);
+					setFormattedTaskContent(formattedTaskContent);
+					console.log("formattedTaskContent : ", formattedTaskContent);
 
-			MarkdownUIRenderer.renderTaskDisc(
-				app,
-				formatedContent,
-				previewContainerRef.current,
-				filePath,
-				componentRef.current
-			);
+					const fullMarkdownEditor = createEmbeddableMarkdownEditor(
+						app,
+						markdownEditorEmbeddedContainer.current,
+						{
+							placeholder: "Start entering your task in the various input fields or directly in this editor.",
+							value: formattedTaskContent,
+							cls: "addOrEditTaskModal-markdown-editor-embed",
+							cursorLocation: {
+								anchor: formattedTaskContent.split("\n")[0].length,
+								head: formattedTaskContent.split("\n")[0].length,
+							},
 
-			hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
+							onEnter: (editor, mod, shift) => {
+								if (mod) {
+									// Submit on Cmd/Ctrl+Enter
+									// this.handleSubmit();
+									handleSave();
+									// return true;
+								}
+								// Allow normal Enter key behavior
+								return false;
+							},
+
+							onEscape: (editor) => {
+								// Close the modal on Escape
+								// this.close();
+								onClose();
+							},
+
+							onSubmit: (editor) => {
+								// this.handleSubmit();
+								handleSave();
+							},
+
+							onChange: (update) => {
+								// Handle changes if needed
+								const capturedContent = fullMarkdownEditor?.value || "";
+								handleTaskEditedThroughEditors(capturedContent);
+								// console.log("Captured content:", fullMarkdownEditor?.value);
+								// setFormattedTaskContent(capturedContent);
+
+								// if (this.updatePreview) {
+								// 	this.updatePreview();
+								// }
+							},
+						}
+					)
+					setMarkdownEditor(fullMarkdownEditor);
+
+					fullMarkdownEditor?.scope.register(
+						["Alt"],
+						"c",
+						(e: KeyboardEvent) => {
+							e.preventDefault();
+							if (!fullMarkdownEditor) return false;
+							if (fullMarkdownEditor.value.trim() === "") {
+								// this.close();
+								onClose();
+								return true;
+							} else {
+								// this.handleSubmit();
+								handleSave();
+							}
+							return true;
+						}
+					);
+
+					// if (targetFileEl) {
+					// 	markdownEditor?.scope.register(
+					// 		["Alt"],
+					// 		"x",
+					// 		(e: KeyboardEvent) => {
+					// 			e.preventDefault();
+					// 			targetFileEl.focus();
+					// 			return true;
+					// 		}
+					// 	);
+					// }
+
+					// Focus the editor when it's created
+					// markdownEditor?.editor?.focus();
+					console.log("Markdown editor initialized");
+				}
+			}, 50);
 		}
-	}, [modifiedTask]); // Re-render when modifiedTask changes
+		setUpdateEditorContent(false);
+	}, [updateEditorContent]);
+
+	markdownEditor?.editor?.focus();
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
 	useEffect(() => {
@@ -315,8 +531,8 @@ const EditTaskContent: React.FC<{
 	}, []);
 
 	// Tab Switching
-	const [activeTab, setActiveTab] = useState<'preview' | 'editor'>('preview');
-	const handleTabSwitch = (tab: 'preview' | 'editor') => setActiveTab(tab);
+	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
+	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
 
 	const defaultTagColor = 'var(--tag-color)';
 
@@ -329,81 +545,52 @@ const EditTaskContent: React.FC<{
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
-							<label className="EditTaskModalHomeFieldTitle">{t("task-title")}</label>
-							<input type="text" className="EditTaskModalHomeFieldTitleInput" value={title} onChange={(e) => handleTaskTitleChange(e.target.value)} />
+							<label className="EditTaskModalHomeFieldTitle">{title || "Task title"}</label>
 
-							{/* Subtasks */}
-							<label className="EditTaskModalHomeFieldTitle">{t("sub-tasks")}</label>
-							<div className="EditTaskModalsubTasksContainer">
-								{bodyContent.split('\n').map((bodyLine: string, bodyLineIndex: number) => {
-									// Filter only the lines that start with the task patterns
-									if (bodyLine.startsWith('\t- [ ]') || bodyLine.startsWith('\t- [x]')) {
-										return (
-											<div key={bodyLineIndex} className="EditTaskModalsubTaskItem">
-												<input
-													type="checkbox"
-													checked={bodyLine.trim().startsWith('- [x]')}
-													onChange={() => toggleSubTaskCompletion(bodyLineIndex)}
-												/>
-												<input
-													className="EditTaskModalsubTaskItemInput"
-													type="text"
-													value={bodyLine.replace(/\t- \[(.)\] /, '')}
-													onChange={(e) => updateSubTaskContent(bodyLineIndex, e.target.value)}
-												/>
-												<FaTrash
-													size={15}
-													enableBackground={0}
-													opacity={0.7}
-													style={{ marginInlineStart: '0.8em' }}
-													title={"delete-sub-task"}
-													onClick={() => removeSubTask(bodyLineIndex)}
-													cursor={'pointer'}
-												/>
-											</div>
-										);
-									}
-									// Return null if the line doesn't match the subtask pattern
-									return null;
-								})}
-								<button className="EditTaskModalsubTaskAddButton" onClick={addNewSubTask}>{t("add-sub-task")}</button>
-							</div>
-
+							{/* Editor tab switcher */}
 							<div className="EditTaskModalTabHeader">
-								<div onClick={() => handleTabSwitch('preview')} className={`EditTaskModalTabHeaderBtn${activeTab === 'preview' ? '-active' : ''}`}>{t("preview")}</div>
-								<div onClick={() => handleTabSwitch('editor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'editor' ? '-active' : ''}`}>{t("editor")}</div>
+								<div onClick={() => handleTabSwitch('liveEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'liveEditor' ? '-active' : ''}`}>{t("liveEditor")}</div>
+								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
+							</div>
+							<div className="EditTaskModalHomePreviewHeader">
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t("file-path")} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
+								<button className="EditTaskModalHomeLiveEditorRefreshBtn"
+									id="EditTaskModalHomeLiveEditorRefreshBtn"
+									aria-label="Refresh the live editor"
+									onClick={() => setUpdateEditorContent(true)}><RefreshCcw /></button>
+								<button className="EditTaskModalHomeOpenFileBtn"
+									id="EditTaskModalHomeOpenFileBtn"
+									aria-label={t("hold-ctrl-button-to-open-in-new-window")}
+									onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
+								>{t("open-file")}</button>
 							</div>
 
 							{/* Conditional rendering based on active tab */}
-							<div className={`EditTaskModalTabContent ${activeTab === 'preview' ? 'show' : 'hide'}`}>
-								{/* Preview Section */}
-								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
+							{/* liveEditor Section */}
+							<div className={`EditTaskModalTabContent ${activeTab === 'liveEditor' ? 'show' : 'hide'}`}>
+								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'liveEditor' ? 'block' : 'none' }}>
 									<div className="EditTaskModalHomePreviewContainer">
-										<div className="EditTaskModalHomePreviewHeader">
-											<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t("file-path")} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
-											<button className="EditTaskModalHomeOpenFileBtn"
-												id="EditTaskModalHomeOpenFileBtn"
-												aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-												onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
-											>{t("open-file")}</button>
-										</div>
-										<div className="EditTaskModalHomePreviewBody" ref={previewContainerRef}>
-											{/* The markdown content will be rendered here */}
-										</div>
+										<span className="EditTaskModalBodyDescription" ref={markdownEditorEmbeddedContainer}></span>
 									</div>
 								</div>
 							</div>
-							<div className={`EditTaskModalTabContent ${activeTab === 'editor' ? 'show' : 'hide'}`}>
-								<div className="EditTaskModalHomePreviewHeader">{t("task-description-texarea-placeholder")}</div>
-								{/* Editor Section */}
+
+							{/* Raw text rawEditor */}
+							<div className={`EditTaskModalTabContent ${activeTab === 'rawEditor' ? 'show' : 'hide'}`}>
 								<textarea
 									className="EditTaskModalBodyDescription"
-									value={bodyContent}
+									value={formattedTaskContent}
 									onChange={handleTextareaChange}
 									placeholder={t("body-content")}
-									style={{ display: activeTab === 'editor' ? 'block' : 'none', width: '100%' }}
+									style={{ display: activeTab === 'rawEditor' ? 'block' : 'none', width: '100%' }}
 								/>
 							</div>
+						</div>
+
+						{/* Children Tasks */}
+						<label className="EditTaskModalHomeFieldTitle">{t("children-tasks")}</label>
+						<div className="EditTaskModalsubTasksContainer">
+							Coming soon...
 						</div>
 
 						<div className="EditTaskModalHomeFooterBtnSec">
@@ -422,7 +609,7 @@ const EditTaskContent: React.FC<{
 							<label className="EditTaskModalHomeFieldTitle">{t("task-status")}</label>
 							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => handleStatusChange(e.target.value)}>
 								{filteredStatusesDropdown.map((option) => (
-									<option key={option.value} value={option.value}>{option.text}</option>
+									<option key={`${option.value}-${Math.floor(1000 + Math.random() * 9000)}`} value={option.value}>{option.text}</option>
 								))}
 							</select>
 						</div>
@@ -447,7 +634,7 @@ const EditTaskContent: React.FC<{
 						{plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin && (
 							<div className="EditTaskModalHomeField">
 								<label className="EditTaskModalHomeFieldTitle">{t("reminder-label")}</label>
-								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} disabled={due===""} onChange={(e) => handleReminderChange(e.target.checked)} />
+								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} disabled={due === ""} onChange={(e) => handleReminderChange(e.target.checked)} />
 							</div>
 						)}
 
