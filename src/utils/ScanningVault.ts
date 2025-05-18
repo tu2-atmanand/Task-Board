@@ -12,6 +12,7 @@ import {
 } from "./JsonFileOperations";
 import {
 	priorityEmojis,
+	taskItem,
 	tasksJson,
 } from "src/interfaces/TaskItemProps";
 import {
@@ -222,6 +223,32 @@ export class ScanningVault {
 			this.TaskDetected = false;
 		}
 	}
+}
+
+export function buildTaskFromRawContent(
+	rawContent: string,
+	filePath?: string,
+): Partial<taskItem> {
+	const lines = rawContent.split("\n");
+	const taskStatus = extractCheckboxSymbol(lines[0]);
+	const title = extractTitle(lines[0]);
+	const time = extractTime(lines[0]);
+	const due = extractDueDate(lines[0]);
+	const priority = extractPriority(lines[0]);
+	const tags = extractTags(lines[0]);
+	const completionDate = extractCompletionDate(lines[0]);
+	const body = extractBody(lines, 1);
+
+	return {
+		status: taskStatus,
+		title,
+		body,
+		time,
+		due,
+		tags,
+		priority,
+		completion: completionDate,
+	};
 }
 
 // // Extract title from task line
