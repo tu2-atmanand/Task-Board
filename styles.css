@@ -524,9 +524,9 @@
 }
 
 .EditTaskModalHomeModalTitle {
-	font-size: 1.5em;
+	font-size: 1.2em;
 	font-weight: bold;
-	text-align: center;
+	margin-bottom: 1.4em;
 }
 
 .EditTaskModalHomeBody {
@@ -571,7 +571,7 @@
 	margin-bottom: 15px;
 }
 
-.EditTaskModalsubTasksContainer {
+.EditTaskModalChildTasksContainer {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
@@ -623,6 +623,9 @@
 .EditTaskModalTabContent.show {
 	opacity: 1;
 	height: 100%;
+	border: 2px solid var(--table-header-border-color);
+	border-radius: 0px 0px 10px 10px;
+	margin-bottom: 2em;
 }
 
 .EditTaskModalTabContent.hide {
@@ -664,6 +667,7 @@
 	border-radius: 4px;
 	background-color: var(--background-primary-alt);
 	position: relative;
+	padding-bottom: 1em;
 }
 
 .EditTaskModalHomePreviewContainer h6 {
@@ -710,6 +714,10 @@
 
 .taskItemCheckbox {
 	vertical-align: middle;
+}
+
+.EditTaskModalLiveEditor {
+	min-height: 20vh;
 }
 
 .EditTaskModalBodyDescription {

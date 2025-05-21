@@ -545,7 +545,7 @@ const EditTaskContent: React.FC<{
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
-							<label className="EditTaskModalHomeFieldTitle">{title || "Task title"}</label>
+							<label className="EditTaskModalHomeModalTitle">{title || "Task title"}</label>
 
 							{/* Editor tab switcher */}
 							<div className="EditTaskModalTabHeader">
@@ -570,7 +570,7 @@ const EditTaskContent: React.FC<{
 							<div className={`EditTaskModalTabContent ${activeTab === 'liveEditor' ? 'show' : 'hide'}`}>
 								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'liveEditor' ? 'block' : 'none' }}>
 									<div className="EditTaskModalHomePreviewContainer">
-										<span className="EditTaskModalBodyDescription" ref={markdownEditorEmbeddedContainer}></span>
+										<span className="EditTaskModalLiveEditor" ref={markdownEditorEmbeddedContainer}></span>
 									</div>
 								</div>
 							</div>
@@ -585,13 +585,14 @@ const EditTaskContent: React.FC<{
 									style={{ display: activeTab === 'rawEditor' ? 'block' : 'none', width: '100%' }}
 								/>
 							</div>
+
+							{/* Child Tasks */}
+							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
+							<div className="EditTaskModalChildTasksContainer">
+								Coming soon...
+							</div>
 						</div>
 
-						{/* Children Tasks */}
-						<label className="EditTaskModalHomeFieldTitle">{t("children-tasks")}</label>
-						<div className="EditTaskModalsubTasksContainer">
-							Coming soon...
-						</div>
 
 						<div className="EditTaskModalHomeFooterBtnSec">
 							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
@@ -663,8 +664,8 @@ const EditTaskContent: React.FC<{
 									const tagName = tag.replace('#', '');
 									const customTagData = plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
 									const tagColor = customTagData?.color || defaultTagColor;
-									const backgroundColor = customTagData ? updateRGBAOpacity(tagColor, 0.1) : `var(--tag-background)`;
-									const borderColor = customTagData ? updateRGBAOpacity(tagColor, 0.5) : `var(--tag-color-hover)`;
+									const backgroundColor = customTagData ? updateRGBAOpacity(plugin, tagColor, 0.1) : `var(--tag-background)`;
+									const borderColor = customTagData ? updateRGBAOpacity(plugin, tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
 											key={tag}
