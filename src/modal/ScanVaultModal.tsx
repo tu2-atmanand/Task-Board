@@ -11,6 +11,7 @@ import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
 
@@ -44,6 +45,14 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 		// setIsRunning(false);
 		new Notice(t("vault-scanning-complete"));
 		scanningVault.saveTasksToFile();
+
+		if (localStorage.getItem("manadatoryScan") === "true") {
+			localStorage.setItem("manadatoryScan", "false");
+			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD).forEach((leaf) => {
+				leaf.detach();
+			});
+			plugin.registerTaskBoardView();
+		}
 	};
 
 	const toggleView = () => {
@@ -97,9 +106,20 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 	return (
 		<div className="scanVaultModalHome">
 			<h2>{t("scan-tasks-from-the-vault")}</h2>
-			<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</div>
-			<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</div>
-			<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</div>
+			{localStorage.getItem("manadatoryScan") === "true" ?
+				(<>
+					<div className="scanVaultModalHomeMandatoryScan">Looks like you have recently updated this plugin.</div>
+					<div className="scanVaultModalHomeMandatoryScan">This new release has brought various new features, which requires you to re-scan the whole vault.</div>
+					<div className="scanVaultModalHomeMandatoryScan">Read the release notes for this new version here : .</div>
+				</>
+				) :
+				(<>
+					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</div>
+					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</div>
+					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</div>
+				</>
+
+				)}
 
 			<div className="scanVaultModalHomeSecondSection" >
 				<div className="scanVaultModalHomeSecondSectionProgressBarContainer">

@@ -71,6 +71,7 @@ export default class TaskBoard extends Plugin {
 
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
+		this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		this.getLanguage();
@@ -566,7 +567,8 @@ export default class TaskBoard extends Plugin {
 		for (const key in defaults) {
 			if (!(key in settings)) {
 				settings[key] = defaults[key];
-			} else if ( // This is a temporary fix for the tagColors
+			} else if (
+				// This is a temporary fix for the tagColors
 				!Array.isArray(settings[key]) &&
 				key === "tagColors" &&
 				typeof settings[key] === "object" &&
@@ -594,5 +596,30 @@ export default class TaskBoard extends Plugin {
 
 		this.settings = settings;
 		this.saveSettings();
+	}
+
+	private runOnPluginUpdate() {
+		// Check if the plugin version has changed
+		const currentVersion = this.manifest.version;
+		console.log("currentVersion", currentVersion);
+		const previousVersion = this.settings.version;
+		console.log("previousVersion[2] : ", previousVersion[2], " | currentVersion[2] : ", currentVersion[2]);
+
+		if (previousVersion == "" || currentVersion[2] !== previousVersion[2]) {
+			// make the localStorage flag, 'manadatoryScan' to True
+			localStorage.setItem(
+				"manadatoryScan",
+				'true'
+			);
+			
+			this.settings.version = currentVersion;
+			this.saveSettings();
+
+			// new Notice(
+			// 	t("plugin-updated-notice", {
+			// 		version: currentVersion,
+			// 	})
+			// );
+		}
 	}
 }

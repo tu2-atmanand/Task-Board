@@ -85,7 +85,7 @@ export interface PluginDataJson {
 }
 
 export const DEFAULT_SETTINGS: PluginDataJson = {
-	version: "",
+	version: "1.4.2",
 	data: {
 		boardConfigs: [
 			{

@@ -41,10 +41,24 @@ export class KanbanView extends ItemView {
 	async onOpen() {
 		this.addAction(ScanVaultIcon, t("scan-vault-window"), () => {
 			openScanVaultModal(this.app, this.plugin);
-		});
+		}).addClass("scan-vault-btn");
+
+		if (localStorage.getItem("manadatoryScan") === "true") this.highlighgtScanvaultIcon();
 
 		await this.loadBoards();
 		this.renderBoard();
+	}
+
+	async highlighgtScanvaultIcon() {
+		const scanVaultIcon = this.containerEl.querySelector(
+			".scan-vault-btn"
+		) as HTMLElement;
+		if (scanVaultIcon) {
+			scanVaultIcon.classList.add("highlight");
+			setInterval(() => {
+				scanVaultIcon.classList.toggle("highlight");
+			}, 800); // Toggle highlight class every 500ms for blinking effect
+		}
 	}
 
 	private async loadBoards() {

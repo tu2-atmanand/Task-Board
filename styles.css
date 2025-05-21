@@ -31,6 +31,12 @@
 	color: var(--color-orange);
 }
 
+button.clickable-icon.view-action.scan-vault-btn.highlight {
+	background-color: var(--color-yellow) !important;
+	color: black !important;
+	cursor: pointer;
+}
+
 /* src/KanbanBoard.tsx */
 .kanbanBoard {
 	display: flex;
