@@ -210,7 +210,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		};
 
 		if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-			return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+			return updateRGBAOpacity(plugin, highestPriorityTag.color, 0.2);
 		}
 
 		return highestPriorityTag?.color;
@@ -282,8 +282,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const tagName = tag.replace('#', '');
 										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
 										const tagColor = customTag?.color || `var(--tag-color)`;
-										const backgroundColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-										const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
+										const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If showColumnTags is false and column type is namedTag, skip the column's tag
 										const column = activeBoardSettings.columns[columnIndex - 1];
