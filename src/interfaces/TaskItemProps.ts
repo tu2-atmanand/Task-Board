@@ -19,9 +19,9 @@ export interface taskItem {
 	tags: string[];
 	time: string;
 	priority: number;
-	completion?: string;
 	status: string;
 	filePath: string;
+	completion?: string;
 }
 
 export interface tasksInFile {

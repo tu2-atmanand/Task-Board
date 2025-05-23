@@ -1,6 +1,6 @@
 // src/services/OpenModals.ts
 
-import { App, TFile } from "obsidian";
+import { App, Notice, TFile } from "obsidian";
 import { addTaskInActiveEditor, addTaskInJson } from "src/utils/TaskItemUtils";
 import {
 	scanFilterForFilesNFolders,
@@ -13,6 +13,7 @@ import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { ScanVaultModal } from "src/modal/ScanVaultModal";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
+import { BugReporterModal } from "src/modal/BugReporterModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -60,4 +61,103 @@ export const openAddNewTaskModal = (
 		false
 	);
 	AddTaskModal.open();
+};
+
+export const bugReporter = (
+	plugin: TaskBoard,
+	message: string,
+	bugContent: string,
+	context: string
+) => {
+	// const leaves = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+	// if (leaves.length > 0) {
+	// 	const firstLeaf = leaves.at(0);
+	// 	if (firstLeaf) {
+	// 		const actionButton = firstLeaf.view.addAction("Report Bug", "Open Bug Reporter", "bug");
+	// 		actionButton.addEventListener("click", () => {
+	// 			bugReportModal.open();
+	// 		});
+	// 	}
+	// }
+
+	// const bugReportNotice = new Notice(
+	// 	"Task board encountered an issue while completing the bug. Please click on this message and report the bug. Right-click to dismiss.",
+	// 	0
+	// );
+
+	// bugReportNotice.noticeEl.oncontextmenu = () => {
+	// 	// Perform an action here
+	// };
+
+	// bugReportNotice.messageEl.oncontextmenu = () => {
+	// 	bugReportNotice.hide();
+	// };
+
+	// bugReportNotice.messageEl.oncontextmenu = () => {
+	// 	bugReportModal.open();
+	// 	bugReportNotice.hide();
+	// };
+
+	// Anotehr method to open the bug reporter modal
+
+	const bugReportNotice = new Notice(
+		createFragment((f) => {
+			f.createDiv("bugReportNotice", (el) => {
+				el.createEl("p", {
+					text: "Task board encountered an issue while completing the bug. Please click on this message and report the bug. Right-click to dismiss.",
+				});
+				el.createEl("button", {
+					text: "Report Bug",
+					cls: "reportBugButton",
+					onclick: () => {
+						const bugReportModal = new BugReporterModal(
+							plugin.app,
+							message,
+							bugContent,
+							context
+						);
+						bugReportModal.open();
+						el.hide();
+					},
+				});
+				el.createEl("button", {
+					text: "Ignore this bug",
+					cls: "ignoreBugButton",
+					onclick: () => {
+						el.hide();
+					},
+				});
+			});
+		}),
+		0
+	);
+
+	bugReportNotice.messageEl.onClickEvent((e) => {
+		if (!(e.target instanceof HTMLButtonElement)) {
+			e.stopPropagation();
+			e.preventDefault();
+			e.stopImmediatePropagation();
+		}
+	});
+
+	// ------- Working Code --------
+	// const bugReportNotice = new Notice(
+	// 	"Task board encountered an issue while completing the bug. Please click on this message and report the bug. Right-click to dismiss.",
+	// 	0
+	// );
+	// bugReportNotice.messageEl.oncontextmenu = () => {
+	// 	const bugReportModal = new BugReporterModal(
+	// 		plugin.app,
+	// 		message,
+	// 		bugContent,
+	// 		context
+	// 	);
+	// 	bugReportModal.open();
+
+	// 	bugReportNotice.hide();
+	// };
+
+	// bugReportNotice.messageEl.onclick = () => {
+	// 	bugReportNotice.hide();
+	// };
 };

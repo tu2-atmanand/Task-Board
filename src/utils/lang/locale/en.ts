@@ -25,7 +25,6 @@ const en: Lang = {
 	"preview": "Preview",
 	"editor": "Editor",
 	"open-file": "Open file",
-	"task-description-texarea-placeholder": "Edit or add description for the task or add more sub-tasks.",
 	"body-content": "Body content",
 	"start-time": "Start time",
 	"end-time": "End time",
@@ -64,8 +63,8 @@ const en: Lang = {
 	"no": "No",
 	"scan-tasks-from-the-vault": "Scan tasks from the vault",
 	"scan-tasks-from-the-vault-description-1":"Run this feature only if your tasks has not been properly detected/scanned or the board is acting weired.",
-	"scan-tasks-from-the-vault-description-2": "You dont have to run this feature often, the plugin will auto detect newly added/edited tasks.",
-	"scan-tasks-from-the-vault-description-3": "NOTE : Please check your 'filters for scanning' from the plugin settings first, if you are scanning to detect undetected tasks.",
+	"scan-tasks-from-the-vault-description-2": "You dont have to run this feature often. The plugin will auto detect newly added/edited tasks.",
+	"scan-tasks-from-the-vault-description-3": "NOTE : Please check your 'filters for scanning' from the plugin settings first to avoid any confusion.",
 	"vault-scanning-complete": "Vault scanning complete.",
 	"run": "Run",
 	"hide-collected-tasks": "Hide collected tasks",
@@ -196,6 +195,14 @@ const en: Lang = {
 	"tag-color-indicator-type-info": "Select how the tag color should be applied. Note that, if you have selected \"Text of the tag\" as the tag color indicator type, then the opacity of the color will be reduced to 0.2 for better visibility of the text.",
 	"text-of-the-tag": "Text of the tag",
 	"background-of-the-card": "Background of the card",
+	"liveEditor": "Live Editor",
+	"rawEditor": "Raw Editor",
+	"child-tasks": "Child tasks",
+	"bug-reporter": "Bug reporter",
+	"report": "Report",
+	"ignore-this-bug": "Ignore this bug",
+	"bug-context": "Bug context",
+	"copy-report": "Copy report",
 };
 
 export default en;

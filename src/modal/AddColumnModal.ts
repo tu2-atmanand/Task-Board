@@ -34,7 +34,7 @@ export class AddColumnModal extends Modal {
 
 	constructor(app: App, { onCancel, onSubmit }: AddColumnModalProps) {
 		super(app);
-		this.onCancel = onCancel; // Renamed
+		this.onCancel = onCancel;
 		this.onSubmit = onSubmit;
 		this.colType = "undated";
 		this.name = "";

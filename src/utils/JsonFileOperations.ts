@@ -8,6 +8,7 @@ import {
 
 import { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
+import { bugReporter } from "src/services/OpenModals";
 
 // --------------- Operations with data.json ---------------
 
@@ -150,7 +151,8 @@ export const loadTasksAndMerge = async (
 
 		return allTasksMerged;
 	} catch (error) {
-		console.error("Failed to load tasks from tasks.json:", error);
+		// console.error("Failed to load tasks from tasks.json:", error);
+		bugReporter(plugin, "Failed to load tasks from tasks.json file.", String(error), "loadTasksAndMerge");
 		throw error;
 	}
 };

@@ -1,3 +1,7 @@
+import TaskBoard from "main";
+import { App, sanitizeHTMLToDom } from "obsidian";
+import { bugReporter } from "src/services/OpenModals";
+
 // Utility to convert hex to RGBA with specific opacity
 export function hexToRgba(hex: string, opacity: number): string {
 	let r = 0,
@@ -35,7 +39,11 @@ export function colorTo20PercentOpacity(color: string): string {
 }
 
 // Function to convert RGBA color to hex with Alpha
-export function updateRGBAOpacity(rgba: string, newOpacity: number): string {
+export function updateRGBAOpacity(
+	plugin: TaskBoard,
+	rgba: string,
+	newOpacity: number
+): string {
 	if (rgba.startsWith("#")) {
 		rgba = hexToRgba(rgba, newOpacity);
 
@@ -46,6 +54,12 @@ export function updateRGBAOpacity(rgba: string, newOpacity: number): string {
 			return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${newOpacity})`;
 		} else {
 			console.error(`Invalid RGBA color string: ${rgba}`);
+			bugReporter(
+				plugin,
+				"Invalid RGBA color string",
+				`Invalid RGBA color string: ${rgba}`,
+				"updateRGBAOpacity function"
+			);
 			return rgba;
 		}
 	}
@@ -60,3 +74,6 @@ export function updateRGBAOpacity(rgba: string, newOpacity: number): string {
 		return rgba;
 	}
 }
+
+// Function to return HTML formatted UI from string
+export const createFragmentWithHTML = (html: string) => sanitizeHTMLToDom(html);

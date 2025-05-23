@@ -31,6 +31,12 @@
 	color: var(--color-orange);
 }
 
+button.clickable-icon.view-action.scan-vault-btn.highlight {
+	background-color: var(--color-yellow) !important;
+	color: black !important;
+	cursor: pointer;
+}
+
 /* src/KanbanBoard.tsx */
 .kanbanBoard {
 	display: flex;
@@ -524,9 +530,9 @@
 }
 
 .EditTaskModalHomeModalTitle {
-	font-size: 1.5em;
+	font-size: 1.2em;
 	font-weight: bold;
-	text-align: center;
+	margin-bottom: 1.4em;
 }
 
 .EditTaskModalHomeBody {
@@ -571,7 +577,7 @@
 	margin-bottom: 15px;
 }
 
-.EditTaskModalsubTasksContainer {
+.EditTaskModalChildTasksContainer {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
@@ -623,6 +629,9 @@
 .EditTaskModalTabContent.show {
 	opacity: 1;
 	height: 100%;
+	border: 2px solid var(--table-header-border-color);
+	border-radius: 0px 0px 10px 10px;
+	margin-bottom: 2em;
 }
 
 .EditTaskModalTabContent.hide {
@@ -664,6 +673,7 @@
 	border-radius: 4px;
 	background-color: var(--background-primary-alt);
 	position: relative;
+	padding-bottom: 1em;
 }
 
 .EditTaskModalHomePreviewContainer h6 {
@@ -710,6 +720,10 @@
 
 .taskItemCheckbox {
 	vertical-align: middle;
+}
+
+.EditTaskModalLiveEditor {
+	min-height: 20vh;
 }
 
 .EditTaskModalBodyDescription {
@@ -2311,4 +2325,43 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	[data-task="<"]) {
 	border: 0 !important;
 	/* This will remove the border of the checkbox so only the icon is visible*/
+}
+
+
+/* BugReporterModal.ts */
+
+.reportBugButton {
+	border: 1px solid var(--text-accent);
+}
+
+.ignoreBugButton {
+	margin-left: 1.5rem;
+}
+
+.bugReporterModal {
+	min-width: 40vw;
+	max-width: 50vw;
+}
+
+@media (max-width: 768px) {
+	.bugReporterModal {
+		width: auto;
+		min-height: fit-content;
+		max-width: 100%;
+	}
+}
+
+.bugReporterModal h2 {
+	font-size: 1.5rem;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.bugReportContent {
+	background: var(--background-modifier-border-hover);
+	padding: 0.5rem;
+	border-radius: 10px;
+	border: 2px solid var(--text-accent);
 }

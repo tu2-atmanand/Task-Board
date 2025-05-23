@@ -1,5 +1,5 @@
 {
-  "version": "",
+  "version": "1.4.2",
   "data": {
     "boardConfigs": [
       {
@@ -134,6 +134,14 @@
             "collapsed": false,
             "name": "All other tags",
             "index": 6
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "A Tasks",
+            "index": 7,
+            "coltag": "A"
           }
         ],
         "filters": [
@@ -609,7 +617,7 @@
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
-        "reminderPlugin": true
+        "reminderPlugin": false
       }
     }
   }
