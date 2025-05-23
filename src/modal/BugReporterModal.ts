@@ -56,7 +56,7 @@ export class BugReporterModal extends Modal {
 
 		messageForUser.createEl("p", {
 			text: createFragmentWithHTML(
-				"<li>Under the <b>ERROR</b> section, please find if there is any personal information captured. If yes, please replace each of those characters in that part with equal amounts of <b>'*'</b> symbol, so the developers can understand the format of your content for easier debugging.<br/>Kindly copy this content and create a new issue on <a href='github.com/tu2-atmanand/task-board/issues'>GitHub</a> or mail it to <link href='mailto:sanketgauns8@gmail.com'>sanketgauns8@gmail.com</link> with any additional information and screenshots. Thank you for your contribution.</li>"
+				"<li>Under the <b>ERROR</b> section, please find if there is any personal information captured. If yes, please replace only that part with some dummy data, so the developers can understand the format of your content for easier debugging.</li><br/><li>Kindly copy the report using button below.</li><li>Either mail it to <a href='mailto:sanketgauns8@gmail.com'>sanketgauns8@gmail.com</a> with any additional information and screenshots</li><li style='align-item: 'center';''>OR</li><li>Open the following link in your browser and login with your GitHub account :  <a href='https://github.com/tu2-atmanand/Task-Board/issues/new'>New GitHub Issue</a></li><li>Paste the report and add any additional information or screenshots.</li><li>Click on <b>create</b> to submit the issue.</b><li>Thank you for your contribution.</li>"
 			),
 		});
 
@@ -117,12 +117,13 @@ export class BugReporterModal extends Modal {
 		// This sanitization function will also going to hide user data to preserve privacy. To do this, I will be replacing all the alphabets and nembers with '*', and keep the rest of characters as it is. This will help me to get the format of the their content and also preserve the privacy of the user.
 		// sanitizedContent = sanitizedContent.replace(/[a-zA-Z0-9]/g, "*");
 
-		const finalContent = `<b>Developer message</b> : ${message}<br/><br/><b>Context</b> : ${context}<br/><br/><h5>ERROR</h5><i>${sanitizedContent}</i><br/>`;
+		const finalContent = `<b>Developer message</b> : ${message}<br/><br/><b>Context</b> : ${context}<br/><br/><h4>ERROR</h4><i>${sanitizedContent}</i><br/>`;
 
 		return finalContent;
 	}
 
 	handleCopyBtnEvent(bugReportContent: string) {
+		bugReportContent = "# Bug Report\n\n" + bugReportContent + "\n\n## Any additional information and screenshots\n\n";
 		// Copy the bug report content to clipboard
 		navigator.clipboard.writeText(bugReportContent).then(() => {
 			new Notice(t("copied-to-clipboard"));
