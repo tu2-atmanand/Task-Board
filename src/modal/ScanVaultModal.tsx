@@ -110,7 +110,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 				(<>
 					<div className="scanVaultModalHomeMandatoryScan">Looks like you have recently updated this plugin.</div>
 					<div className="scanVaultModalHomeMandatoryScan">This new release has brought various new features, which requires you to re-scan the whole vault.</div>
-					<div className="scanVaultModalHomeMandatoryScan">Read the release notes for this new version here : .</div>
+					<br />
+					<div className="scanVaultModalHomeMandatoryScan">Read the release notes for this new version here : <a href="https://github.com/tu2-atmanand/Task-Board/tag/1.5.0">Task Board v1.5.0</a>.</div>
 				</>
 				) :
 				(<>
