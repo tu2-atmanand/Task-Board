@@ -1,22 +1,22 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, Modal, debounce } from "obsidian";
-import { FaTimes, FaTrash } from 'react-icons/fa';
+import { App, Modal, debounce } from "obsidian";
+import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
-import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
-import { RefreshCcw } from "lucide-react";
+import { FileInput, RefreshCcw } from "lucide-react";
+import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices } from "src/services/MultiSuggest";
+import { CommunityPlugins } from "src/services/CommunityPlugins";
 
 const taskItemEmpty = {
 	id: 0,
@@ -131,6 +131,8 @@ const EditTaskContent: React.FC<{
 	const [reminder, setReminder] = useState(task.title.contains("(@") || false);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>('');
+	const [newFilePath, setNewFilePath] = useState<string>(filePath);
+	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
 	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
@@ -311,9 +313,9 @@ const EditTaskContent: React.FC<{
 
 	const onOpenFilBtnClicked = (newWindow: boolean) => {
 		if (newWindow) {
-			app.workspace.openLinkText('', filePath, 'window')
+			app.workspace.openLinkText('', newFilePath, 'window')
 		} else {
-			app.workspace.openLinkText('', filePath, false)
+			app.workspace.openLinkText('', newFilePath, false)
 		}
 		onClose();
 	}
@@ -334,7 +336,7 @@ const EditTaskContent: React.FC<{
 			tags,
 			time: newTime,
 			priority,
-			filePath: filePath,
+			filePath: newFilePath,
 			status,
 		};
 		onSave(updatedTask);
@@ -351,7 +353,7 @@ const EditTaskContent: React.FC<{
 		tags: tags,
 		time: newTime,
 		priority: priority,
-		filePath: filePath,
+		filePath: newFilePath,
 		status,
 	};
 	// Reference to the HTML element where markdown will be rendered
@@ -423,7 +425,7 @@ const EditTaskContent: React.FC<{
 						app,
 						markdownEditorEmbeddedContainer.current,
 						{
-							placeholder: "Start entering your task in the various input fields or directly in this editor.",
+							placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
 							value: formattedTaskContent,
 							cls: "addOrEditTaskModal-markdown-editor-embed",
 							cursorLocation: {
@@ -507,10 +509,16 @@ const EditTaskContent: React.FC<{
 		setUpdateEditorContent(false);
 	}, [updateEditorContent]);
 
-	markdownEditor?.editor?.focus();
-
-	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
 	useEffect(() => {
+		if (markdownEditor) {
+			markdownEditor.editor.focus();
+		}
+	}, [markdownEditor]);
+	// markdownEditor?.editor?.focus();
+
+	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+	useEffect(() => {
+		markdownEditor?.editor?.focus();
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.ctrlKey || e.metaKey) {
 				setIsCtrlPressed(true);
@@ -536,6 +544,31 @@ const EditTaskContent: React.FC<{
 
 	const defaultTagColor = 'var(--tag-color)';
 
+	const filePathRef = useRef<HTMLInputElement>(null);
+
+	const communityPlugins = new CommunityPlugins(plugin);
+	useEffect(() => {
+		if (!filePathRef.current) return;
+
+		if (communityPlugins.isQuickAddPluginEnabled() && !taskExists) {
+			const suggestionContent = getQuickAddPluginChoices(
+				app,
+				communityPlugins.quickAddPlugin
+			);
+			const onSelectCallback = (choice: string) => {
+				setQuickAddPluginChoice(choice);
+				// setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, app);
+		} else {
+			const suggestionContent = getFileSuggestions(app);
+			const onSelectCallback = (selectedPath: string) => {
+				setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, app);
+		}
+	}, [app]);
+
 	return (
 		<>
 			<div className="EditTaskModalHome">
@@ -553,16 +586,36 @@ const EditTaskContent: React.FC<{
 								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t("file-path")} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
-								<button className="EditTaskModalHomeLiveEditorRefreshBtn"
-									id="EditTaskModalHomeLiveEditorRefreshBtn"
-									aria-label="Refresh the live editor"
-									onClick={() => setUpdateEditorContent(true)}><RefreshCcw /></button>
-								<button className="EditTaskModalHomeOpenFileBtn"
-									id="EditTaskModalHomeOpenFileBtn"
-									aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-									onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
-								>{t("open-file")}</button>
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginEnabled() && !taskExists) ? t("file-path") : t("quickadd-choice")}:
+									<input
+										type="text"
+										ref={filePathRef}
+										className="EditTaskModalHomePreviewHeaderFilenameValue"
+										value={(communityPlugins.isQuickAddPluginEnabled() && !taskExists) ? quickAddPluginChoice : newFilePath}
+										onChange={(e) => {
+											setIsEdited(true);
+											setNewFilePath(e.target.value);
+											// Optionally propagate the change:
+											// props.onFilePathChange?.(e.target.value);
+										}}
+										placeholder={(communityPlugins.isQuickAddPluginEnabled() && !taskExists) ? "Select the QuickAdd choice" : "Select file path..."}
+									/>
+								</div>
+								<div className="EditTaskModalHomePreviewHeaderBtnSec">
+									<button className="EditTaskModalHomeLiveEditorRefreshBtn"
+										id="EditTaskModalHomeLiveEditorRefreshBtn"
+										aria-label="Refresh the live editor"
+										onClick={() => setUpdateEditorContent(true)}>
+										<RefreshCcw height={20} />
+									</button>
+									<button className="EditTaskModalHomeOpenFileBtn"
+										id="EditTaskModalHomeOpenFileBtn"
+										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
+										onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
+									>
+										<FileInput height={20} />
+									</button>
+								</div>
 							</div>
 
 							{/* Conditional rendering based on active tab */}
@@ -703,11 +756,11 @@ export class AddOrEditTaskModal extends Modal {
 	isEdited: boolean;
 	onSave: (updatedTask: taskItem) => void;
 
-	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, taskExists: boolean, task?: taskItem) {
+	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, taskExists: boolean, task?: taskItem, filePath?: string) {
 		super(app);
 		this.app = app;
 		this.plugin = plugin;
-		this.filePath = filePath;
+		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;
 		this.onSave = onSave;
 		if (taskExists && task) {

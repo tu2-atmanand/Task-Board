@@ -14,6 +14,8 @@ import { ScanVaultModal } from "src/modal/ScanVaultModal";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
+import { CommunityPlugins } from "./CommunityPlugins";
+import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -40,16 +42,31 @@ export const openScanVaultModal = (app: App, plugin: TaskBoard) => {
 export const openAddNewTaskModal = (
 	app: App,
 	plugin: TaskBoard,
-	activeFile: TFile
+	activeFile?: TFile
 ) => {
 	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
+	const activeFilePath = activeFile ? activeFile : "";
+	const communityPlugins = new CommunityPlugins(plugin);
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
 		plugin,
 		(newTask) => {
-			addTaskInActiveEditor(app, plugin, newTask);
+			if (communityPlugins.isQuickAddPluginEnabled()) {
+				// Call the API of QuickAdd plugin and pass the formatted content.
+				const completeTask = taskContentFormatter(plugin, newTask);
+				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
+					plugin.settings.data.globalSettings.quickAddPluginDefaultChoice,
+					{
+						value: completeTask + '\n',
+						// format: { enabled: true, format: completeTask },
+					}
+				);
+			} else {
+				addTaskInActiveEditor(app, plugin, newTask);
+			}
 			if (
-				scanFilterForFilesNFolders(activeFile, scanFilters) &&
+				activeFilePath &&
+				scanFilterForFilesNFolders(activeFilePath, scanFilters) &&
 				scanFilterForTags(newTask.tags, scanFilters)
 			) {
 				addTaskInJson(plugin, newTask);
@@ -57,8 +74,9 @@ export const openAddNewTaskModal = (
 
 			eventEmitter.emit("REFRESH_COLUMN");
 		},
-		activeFile.path,
-		false
+		false,
+		undefined,
+		activeFilePath instanceof TFile ? activeFilePath.path : ""
 	);
 	AddTaskModal.open();
 };
