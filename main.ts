@@ -255,6 +255,13 @@ export default class TaskBoard extends Plugin {
 	registerCommands() {
 		this.addCommand({
 			id: "add-new-task",
+			name: t("add-new-task"),
+			callback: () => {
+				openAddNewTaskModal(this.app, this.plugin);
+			},
+		});
+		this.addCommand({
+			id: "add-new-task-current-file",
 			name: t("add-new-task-in-current-file"),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
@@ -603,15 +610,11 @@ export default class TaskBoard extends Plugin {
 		const currentVersion = this.manifest.version;
 		console.log("currentVersion", currentVersion);
 		const previousVersion = this.settings.version;
-		console.log("previousVersion[2] : ", previousVersion[2], " | currentVersion[2] : ", currentVersion[2]);
 
 		if (previousVersion == "" || currentVersion[2] !== previousVersion[2]) {
 			// make the localStorage flag, 'manadatoryScan' to True
-			localStorage.setItem(
-				"manadatoryScan",
-				'true'
-			);
-			
+			localStorage.setItem("manadatoryScan", "true");
+
 			this.settings.version = currentVersion;
 			this.saveSettings();
 
