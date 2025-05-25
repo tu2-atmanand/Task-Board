@@ -1,7 +1,7 @@
 // src/components/KanbanBoard.tsx
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, RefreshCcw, Tally1 } from 'lucide-react';
+import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItemProps";
@@ -12,7 +12,7 @@ import type TaskBoard from "main";
 import debounce from "debounce";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
-import { openBoardConfigModal } from "../services/OpenModals";
+import { openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 
@@ -151,6 +151,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 		}
 	}, [plugin]);
 
+	function handleOpenAddNewTaskModal() {
+		openAddNewTaskModal(app, plugin);
+	}
+
 	// const isLoading = !boards[activeBoardIndex]?.columns.every(
 	// 	(_, index) => allTasksArrangedPerColumn[index]?.length > 0
 	// );
@@ -179,6 +183,9 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 					{/* <button className="addTaskBtn" style={{ backgroundColor: "none" }} onClick={AddNewTaskIn}>
 						<CirclePlus size={20} />
 					</button> */}
+					<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={handleOpenAddNewTaskModal}>
+						<CirclePlus size={18} />
+					</button>
 					<button
 						className="ConfigureBtn"
 						aria-label={t("board-configure-button")}
@@ -186,10 +193,10 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 							handleUpdateBoards(plugin, updatedBoards, setBoards)
 						)}
 					>
-						<Bolt size={20} />
+						<Bolt size={18} />
 					</button>
 					<button className="RefreshBtn" aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
-						<RefreshCcw size={20} />
+						<RefreshCcw size={18} />
 					</button>
 				</div>
 			</div>
