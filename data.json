@@ -152,7 +152,7 @@
         "filterScope": "Both",
         "name": "Tag based board",
         "index": 2,
-        "showColumnTags": false,
+        "showColumnTags": true,
         "showFilteredTags": true
       },
       {
@@ -265,12 +265,12 @@
         },
         {
           "name": "Test",
-          "color": "#dcf519",
+          "color": "rgba(134, 150, 14, 1)",
           "priority": 4
         },
         {
           "name": "working",
-          "color": "#67ff5c",
+          "color": "rgba(34, 149, 25, 1)",
           "priority": 5
         },
         {
@@ -617,8 +617,12 @@
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
-        "reminderPlugin": false
-      }
+        "reminderPlugin": false,
+        "dayPlannerPlugin": false,
+        "quickAddPlugin": true
+      },
+      "preDefinedNote": "Task_Board_Temp_Tasks.md",
+      "quickAddPluginDefaultChoice": "Task to daily note"
     }
   }
 }
