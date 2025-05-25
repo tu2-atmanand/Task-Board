@@ -124,8 +124,8 @@ const EditTaskContent: React.FC<{
 	const [title, setTitle] = useState(task.title || ' ');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
-	const [startTime, setStartTime] = useState(task?.time?.split('-')[0]?.trim() || '');
-	const [endTime, setEndTime] = useState(task?.time?.split('-')[1]?.trim() || '');
+	const [startTime, setStartTime] = useState(task.time ? task?.time?.split('-')[0]?.trim() || '' : "");
+	const [endTime, setEndTime] = useState(task.time ? task?.time?.split('-')[1]?.trim() || '' : "");
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [status, setStatus] = useState(task.status || '');
@@ -395,8 +395,9 @@ const EditTaskContent: React.FC<{
 		setBodyContent(updatedTask.body?.join('\n') || '');
 		setDue(updatedTask.due || '');
 		setTags(updatedTask.tags || []);
-		setStartTime(updatedTask.time?.split('-')[0].trim() || '');
-		setEndTime(updatedTask.time?.split('-')[1].trim() || '');
+		setStartTime(updatedTask.time ? updatedTask.time?.split('-')[0].trim() || '' : "");
+		setEndTime(updatedTask.time ? updatedTask.time?.split('-')[1]?.trim() || '' : "");
+		setNewTime(updatedTask.time ? updatedTask.time : "");
 		setPriority(updatedTask.priority || 0);
 		setStatus(updatedTask.status || '');
 		setIsEdited(true);
@@ -461,6 +462,7 @@ const EditTaskContent: React.FC<{
 
 							onChange: (update) => {
 								// Handle changes if needed
+								setIsEdited(true);
 								const capturedContent = fullMarkdownEditor?.value || "";
 								handleTaskEditedThroughEditors(capturedContent);
 								// console.log("Captured content:", fullMarkdownEditor?.value);
@@ -766,7 +768,15 @@ export class AddOrEditTaskModal extends Modal {
 	activeNote: boolean;
 	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void;
 
-	constructor(app: App, plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void, taskExists: boolean, activeNote: boolean, task?: taskItem, filePath?: string) {
+	// public waitForClose: Promise<string>;
+	// private resolvePromise: (input: string) => void;
+	// private rejectPromise: (reason?: unknown) => void;
+
+	public waitForClose: Promise<string>;
+	private resolvePromise: (input: string) => void = (input: string) => { };
+	private rejectPromise: (reason?: unknown) => void = (reason?: unknown) => { };
+
+	constructor(app: App, plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
 		super(app);
 		this.app = app;
 		this.plugin = plugin;
@@ -778,6 +788,12 @@ export class AddOrEditTaskModal extends Modal {
 		}
 		this.isEdited = false;
 		this.activeNote = activeNote;
+
+		this.waitForClose = new Promise<string>((resolve, reject) => {
+			this.resolvePromise = resolve;
+			this.rejectPromise = reject;
+			console.log("Promise will return : \n", this.resolvePromise, "\n", this.rejectPromise);
+		});
 	}
 
 	onOpen() {
@@ -799,6 +815,7 @@ export class AddOrEditTaskModal extends Modal {
 			filePath={this.filePath}
 			onSave={(updatedTask, quickAddPluginChoice) => {
 				this.isEdited = false;
+				this.resolvePromise(taskContentFormatter(this.plugin, updatedTask))
 				this.saveTask(updatedTask, quickAddPluginChoice);
 				this.close();
 			}}
@@ -815,6 +832,7 @@ export class AddOrEditTaskModal extends Modal {
 			mssg,
 			onDiscard: () => {
 				this.isEdited = false;
+				this.rejectPromise("Task was not submitted.")
 				this.close();
 			},
 			onGoBack: () => {
@@ -845,6 +863,7 @@ export class AddOrEditTaskModal extends Modal {
 		if (this.isEdited) {
 			this.handleCloseAttempt();
 		} else {
+			this.rejectPromise("Task was not submitted.")
 			this.onClose();
 			super.close();
 		}

@@ -99,8 +99,8 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 				// );
 				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 			},
-			true,
 			false,
+			true,
 			task,
 			task.filePath,
 		);

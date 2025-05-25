@@ -32,6 +32,7 @@ import {
 	isReminderPluginInstalled,
 } from "src/services/CommunityPlugins";
 import { t } from "src/utils/lang/helper";
+import { TaskBoardApi } from "src/taskboardAPIs";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -62,6 +63,10 @@ export default class TaskBoard extends Plugin {
 		this.IsTasksJsonChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
+	}
+
+	get api(): ReturnType<typeof TaskBoardApi.GetApi> {
+		return TaskBoardApi.GetApi(this.app, this.plugin);
 	}
 
 	async onload() {

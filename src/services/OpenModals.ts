@@ -60,8 +60,8 @@ export const openAddNewTaskInCurrentFileModal = (
 
 			eventEmitter.emit("REFRESH_COLUMN");
 		},
-		false,
 		true,
+		false,
 		undefined,
 		activeFile.path
 	);
