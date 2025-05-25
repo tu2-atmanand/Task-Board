@@ -128,7 +128,6 @@ const en: Lang = {
 	"plugin-language-info": "Select the language of the plugin UI. To contribute for improving the current language or to add your own native language, please refer the docs.",
 	"board-delete-confirmation-message": "Are you sure you want to delete this board?\nYou can easily create it back if you remember the configuration.",
 	"task-board": "Task Board",
-	"add-new-task-in-current-file": "Add new task in current file",
 	"open-task-board": "Open task board",
 	"open-task-board-in-new-window": "Open task board in new window",
 	"update-tasks-from-this-file": "Update tasks from this file",
@@ -203,6 +202,7 @@ const en: Lang = {
 	"ignore-this-bug": "Ignore this bug",
 	"bug-context": "Bug context",
 	"copy-report": "Copy report",
+	"add-new-task-in-current-file": "Add new task in current file",
 };
 
 export default en;
