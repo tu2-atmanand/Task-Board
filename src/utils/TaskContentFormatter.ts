@@ -182,7 +182,7 @@ const sanitizeTime = (
 	const timeFormatsRegex =
 		/\s*(⏰\s*\[.*?\]|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|@time\(.*?\))/g; // Match all three formats
 
-	if (globalSettings.dayPlannerPlugin) {
+	if (globalSettings.compatiblePlugins.dayPlannerPlugin) {
 		const timeAtStartMatch = title.match(timeAtStartRegex);
 		if (timeAtStartMatch) {
 			// If time is at the start of the title, replace it
