@@ -82,7 +82,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding-inline: 0;
 }
 
-.addTaskBtn,
+.AddNewTaskBtn,
 .ConfigureBtn,
 .RefreshBtn {
 	background-color: transparent !important;
@@ -96,7 +96,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	/* font-size: 14px; */
 }
 
-.addTaskBtn:hover,
+.AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
 .RefreshBtn:hover {
 	border: var(--border-width) solid olive;
@@ -653,11 +653,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-weight: 400;
 	display: flex;
 	flex-direction: row;
+	align-items: center;
+	width: 100%;
 }
 
 .EditTaskModalHomePreviewHeaderFilenameValue {
 	font-weight: 500;
-	padding-inline: 10px
+	padding-inline: 10px;
+	width: 85%;
 }
 
 .EditTaskModalHomePreview ul {
@@ -695,9 +698,17 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	overflow-y: auto;
 }
 
+.EditTaskModalHomePreviewHeaderBtnSec {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+	justify-content: flex-end;
+}
+
+.EditTaskModalHomeLiveEditorRefreshBtn,
 .EditTaskModalHomeOpenFileBtn {
-	padding: 4px 8px !important;
-	border: none;
+	padding: 4px 4px !important;
+	border: 1px solid var(--bold-color);
 	border-radius: 4px;
 	cursor: pointer;
 	width: auto;

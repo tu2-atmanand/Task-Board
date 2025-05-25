@@ -5,16 +5,13 @@ import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
 } from "./JsonFileOperations";
-import {
-	taskItem,
-	tasksJson,
-} from "src/interfaces/TaskItemProps";
+import { taskItem, tasksJson } from "src/interfaces/TaskItemProps";
 import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
 } from "./MarkdownFileOperations";
 
-import { App } from "obsidian";
+import { App, Notice } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 
@@ -354,42 +351,69 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	eventEmitter.emit("REFRESH_COLUMN");
 };
 
-export const addTaskInActiveEditor = async (
+export const addTaskInNote = async (
 	app: App,
 	plugin: TaskBoard,
-	newTask: taskItem
+	newTask: taskItem,
+	editorActive: boolean
 ) => {
-	const filePath = newTask.filePath;
+	const filePath = newTask.filePath.endsWith(".md")
+		? newTask.filePath
+		: `${newTask.filePath}.md`;
+
+	console.warn(
+		"QuickAdd plugin is not enabled : ",
+		await plugin.fileExists(filePath)
+	);
+	if (!(await plugin.fileExists(filePath))) {
+		new Notice(
+			`New note created since it does not exists : "${filePath}"`,
+			5000
+		);
+		console.log("New file path :", filePath);
+		await plugin.app.vault.create(filePath, "");
+	}
 
 	try {
 		const completeTask = taskContentFormatter(plugin, newTask);
 		if (completeTask === "")
 			throw "taskContentFormatter returned empty string";
 
-		// Get the active editor and the current cursor position
-		const activeEditor = app.workspace.activeEditor?.editor;
-		if (!activeEditor) {
-			console.error(
-				"No active editor found. Please place your cursor in markdown file"
-			);
-		}
+		if (editorActive) {
+			// Get the active editor and the current cursor position
+			const activeEditor = app.workspace.activeEditor?.editor;
+			if (!activeEditor) {
+				console.error(
+					"No active editor found. Please place your cursor in markdown file"
+				);
+			}
 
-		if (completeTask && activeEditor) {
-			const cursorPosition = activeEditor.getCursor();
+			if (completeTask && activeEditor) {
+				const cursorPosition = activeEditor.getCursor();
 
-			// Read the file content
+				// Read the file content
+				const fileContent = await readDataOfVaultFiles(
+					plugin,
+					filePath
+				);
+
+				// Split file content into an array of lines
+				const fileLines = fileContent.split("\n");
+
+				// Insert the new task at the cursor line position
+				fileLines.splice(cursorPosition.line, 0, completeTask);
+
+				// Join the lines back into a single string
+				const newContent = fileLines.join("\n");
+				// Write the updated content back to the file
+				await writeDataToVaultFiles(plugin, filePath, newContent);
+			}
+		} else {
 			const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
-			// Split file content into an array of lines
-			const fileLines = fileContent.split("\n");
-
-			// Insert the new task at the cursor line position
-			fileLines.splice(cursorPosition.line, 0, completeTask);
-
 			// Join the lines back into a single string
-			const newContent = fileLines.join("\n");
-
-			// Write the updated content back to the file
+			const newContent = fileContent.concat("\n\n", completeTask);
+			console.log("addTaskInNote : newContent :\n", newContent);
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		}
 	} catch (error) {

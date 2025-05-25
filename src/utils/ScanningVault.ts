@@ -240,14 +240,15 @@ export function buildTaskFromRawContent(
 	const body = extractBody(lines, 1);
 
 	return {
-		status: taskStatus,
 		title,
+		status: taskStatus,
 		body,
 		time,
 		due,
 		tags,
 		priority,
 		completion: completionDate,
+		filePath: filePath || "",
 	};
 }
 

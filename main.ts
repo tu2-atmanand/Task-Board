@@ -16,6 +16,7 @@ import {
 	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
+	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openScanVaultModal,
 } from "src/services/OpenModals";
@@ -31,6 +32,7 @@ import {
 	isReminderPluginInstalled,
 } from "src/services/CommunityPlugins";
 import { t } from "src/utils/lang/helper";
+import { TaskBoardApi } from "src/taskboardAPIs";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -61,6 +63,10 @@ export default class TaskBoard extends Plugin {
 		this.IsTasksJsonChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
+	}
+
+	get api(): ReturnType<typeof TaskBoardApi.GetApi> {
+		return TaskBoardApi.GetApi(this.app, this.plugin);
 	}
 
 	async onload() {
@@ -255,12 +261,29 @@ export default class TaskBoard extends Plugin {
 	registerCommands() {
 		this.addCommand({
 			id: "add-new-task",
+			name: t("add-new-task"),
+			callback: () => {
+				openAddNewTaskModal(this.app, this.plugin);
+			},
+		});
+		this.addCommand({
+			id: "add-new-task-current-file",
 			name: t("add-new-task-in-current-file"),
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
 				const activeFile = this.app.workspace.getActiveFile();
+				console.log(
+					"Active Editor: ",
+					activeEditor,
+					"Active File: ",
+					activeFile
+				);
 				if (activeEditor && activeFile) {
-					openAddNewTaskModal(this.app, this.plugin, activeFile);
+					openAddNewTaskInCurrentFileModal(
+						this.app,
+						this.plugin,
+						activeFile
+					);
 				} else {
 					new Notice(t("no-active-editor-is-open-error-notice"));
 				}
@@ -601,17 +624,12 @@ export default class TaskBoard extends Plugin {
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed
 		const currentVersion = this.manifest.version;
-		console.log("currentVersion", currentVersion);
 		const previousVersion = this.settings.version;
-		console.log("previousVersion[2] : ", previousVersion[2], " | currentVersion[2] : ", currentVersion[2]);
 
 		if (previousVersion == "" || currentVersion[2] !== previousVersion[2]) {
 			// make the localStorage flag, 'manadatoryScan' to True
-			localStorage.setItem(
-				"manadatoryScan",
-				'true'
-			);
-			
+			localStorage.setItem("manadatoryScan", "true");
+
 			this.settings.version = currentVersion;
 			this.saveSettings();
 
@@ -621,5 +639,9 @@ export default class TaskBoard extends Plugin {
 			// 	})
 			// );
 		}
+	}
+
+	async fileExists(filePath: string): Promise<boolean> {
+		return await this.app.vault.adapter.exists(filePath);
 	}
 }

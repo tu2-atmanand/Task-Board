@@ -1,22 +1,22 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, Modal, debounce } from "obsidian";
-import { FaTimes, FaTrash } from 'react-icons/fa';
+import { App, Modal, debounce } from "obsidian";
+import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
-import { hookMarkdownLinkMouseEventHandlers } from "src/services/MarkdownHoverPreview";
 import { t } from "src/utils/lang/helper";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
-import { RefreshCcw } from "lucide-react";
+import { FileInput, RefreshCcw } from "lucide-react";
+import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices } from "src/services/MultiSuggest";
+import { CommunityPlugins } from "src/services/CommunityPlugins";
 
 const taskItemEmpty = {
 	id: 0,
@@ -115,22 +115,25 @@ const EditTaskContent: React.FC<{
 	root: HTMLElement,
 	task?: taskItem,
 	taskExists?: boolean,
+	activeNote: boolean,
 	filePath: string;
-	onSave: (updatedTask: taskItem) => void;
+	onSave: (updatedTask: taskItem, quickAddPluginChoice: string) => void;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
-}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose, setIsEdited }) => {
+}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(task.title || ' ');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
-	const [startTime, setStartTime] = useState(task?.time?.split('-')[0]?.trim() || '');
-	const [endTime, setEndTime] = useState(task?.time?.split('-')[1]?.trim() || '');
+	const [startTime, setStartTime] = useState(task.time ? task?.time?.split('-')[0]?.trim() || '' : "");
+	const [endTime, setEndTime] = useState(task.time ? task?.time?.split('-')[1]?.trim() || '' : "");
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [status, setStatus] = useState(task.status || '');
 	const [reminder, setReminder] = useState(task.title.contains("(@") || false);
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>('');
+	const [newFilePath, setNewFilePath] = useState<string>(filePath);
+	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
 	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
@@ -311,9 +314,9 @@ const EditTaskContent: React.FC<{
 
 	const onOpenFilBtnClicked = (newWindow: boolean) => {
 		if (newWindow) {
-			app.workspace.openLinkText('', filePath, 'window')
+			app.workspace.openLinkText('', newFilePath, 'window')
 		} else {
-			app.workspace.openLinkText('', filePath, false)
+			app.workspace.openLinkText('', newFilePath, false)
 		}
 		onClose();
 	}
@@ -334,10 +337,10 @@ const EditTaskContent: React.FC<{
 			tags,
 			time: newTime,
 			priority,
-			filePath: filePath,
+			filePath: newFilePath,
 			status,
 		};
-		onSave(updatedTask);
+		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	};
 
@@ -351,7 +354,7 @@ const EditTaskContent: React.FC<{
 		tags: tags,
 		time: newTime,
 		priority: priority,
-		filePath: filePath,
+		filePath: newFilePath,
 		status,
 	};
 	// Reference to the HTML element where markdown will be rendered
@@ -384,13 +387,17 @@ const EditTaskContent: React.FC<{
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
+		console.log("handleTaskEditedThroughEditors called with value:", value);
 		const updatedTask = buildTaskFromRawContent(value);
+		console.log("Updated Task:", updatedTask);
+
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
 		setDue(updatedTask.due || '');
 		setTags(updatedTask.tags || []);
-		setStartTime(updatedTask.time?.split('-')[0].trim() || '');
-		setEndTime(updatedTask.time?.split('-')[1].trim() || '');
+		setStartTime(updatedTask.time ? updatedTask.time?.split('-')[0].trim() || '' : "");
+		setEndTime(updatedTask.time ? updatedTask.time?.split('-')[1]?.trim() || '' : "");
+		setNewTime(updatedTask.time ? updatedTask.time : "");
 		setPriority(updatedTask.priority || 0);
 		setStatus(updatedTask.status || '');
 		setIsEdited(true);
@@ -423,7 +430,7 @@ const EditTaskContent: React.FC<{
 						app,
 						markdownEditorEmbeddedContainer.current,
 						{
-							placeholder: "Start entering your task in the various input fields or directly in this editor.",
+							placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
 							value: formattedTaskContent,
 							cls: "addOrEditTaskModal-markdown-editor-embed",
 							cursorLocation: {
@@ -455,6 +462,7 @@ const EditTaskContent: React.FC<{
 
 							onChange: (update) => {
 								// Handle changes if needed
+								setIsEdited(true);
 								const capturedContent = fullMarkdownEditor?.value || "";
 								handleTaskEditedThroughEditors(capturedContent);
 								// console.log("Captured content:", fullMarkdownEditor?.value);
@@ -507,10 +515,16 @@ const EditTaskContent: React.FC<{
 		setUpdateEditorContent(false);
 	}, [updateEditorContent]);
 
-	markdownEditor?.editor?.focus();
-
-	const [isCtrlPressed, setIsCtrlPressed] = useState(false);  // Track CTRL/CMD press
 	useEffect(() => {
+		if (markdownEditor) {
+			markdownEditor.editor.focus();
+		}
+	}, [markdownEditor]);
+	// markdownEditor?.editor?.focus();
+
+	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+	useEffect(() => {
+		markdownEditor?.editor?.focus();
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.ctrlKey || e.metaKey) {
 				setIsCtrlPressed(true);
@@ -536,6 +550,31 @@ const EditTaskContent: React.FC<{
 
 	const defaultTagColor = 'var(--tag-color)';
 
+	const filePathRef = useRef<HTMLInputElement>(null);
+
+	const communityPlugins = new CommunityPlugins(plugin);
+	useEffect(() => {
+		if (!filePathRef.current) return;
+
+		if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists) {
+			const suggestionContent = getQuickAddPluginChoices(
+				app,
+				communityPlugins.quickAddPlugin
+			);
+			const onSelectCallback = (choice: string) => {
+				setQuickAddPluginChoice(choice);
+				// setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, app);
+		} else {
+			const suggestionContent = getFileSuggestions(app);
+			const onSelectCallback = (selectedPath: string) => {
+				setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, app);
+		}
+	}, [app]);
+
 	return (
 		<>
 			<div className="EditTaskModalHome">
@@ -553,16 +592,41 @@ const EditTaskContent: React.FC<{
 								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{t("file-path")} : <div className="EditTaskModalHomePreviewHeaderFilenameValue">{filePath}</div></div>
-								<button className="EditTaskModalHomeLiveEditorRefreshBtn"
-									id="EditTaskModalHomeLiveEditorRefreshBtn"
-									aria-label="Refresh the live editor"
-									onClick={() => setUpdateEditorContent(true)}><RefreshCcw /></button>
-								<button className="EditTaskModalHomeOpenFileBtn"
-									id="EditTaskModalHomeOpenFileBtn"
-									aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-									onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
-								>{t("open-file")}</button>
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file-path")}:
+									<input
+										type="text"
+										ref={filePathRef}
+										className="EditTaskModalHomePreviewHeaderFilenameValue"
+										value={(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? quickAddPluginChoice : newFilePath}
+										onChange={(e) => {
+											setIsEdited(true);
+											if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) {
+												setQuickAddPluginChoice(e.target.value);
+												// setNewFilePath(e.target.value); // Don't set file path if it's a QuickAdd choice
+											} else {
+												setNewFilePath(e.target.value);
+											}
+											// Optionally propagate the change:
+											// props.onFilePathChange?.(e.target.value);
+										}}
+										placeholder={(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? "Select the QuickAdd choice" : "Select file path..."}
+									/>
+								</div>
+								<div className="EditTaskModalHomePreviewHeaderBtnSec">
+									<button className="EditTaskModalHomeLiveEditorRefreshBtn"
+										id="EditTaskModalHomeLiveEditorRefreshBtn"
+										aria-label="Refresh the live editor"
+										onClick={() => setUpdateEditorContent(true)}>
+										<RefreshCcw height={20} />
+									</button>
+									{taskExists && <button className="EditTaskModalHomeOpenFileBtn"
+										id="EditTaskModalHomeOpenFileBtn"
+										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
+										onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
+									>
+										<FileInput height={20} />
+									</button>}
+								</div>
 							</div>
 
 							{/* Conditional rendering based on active tab */}
@@ -701,19 +765,35 @@ export class AddOrEditTaskModal extends Modal {
 	filePath: string;
 	taskExists: boolean;
 	isEdited: boolean;
-	onSave: (updatedTask: taskItem) => void;
+	activeNote: boolean;
+	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void;
 
-	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, filePath: string, taskExists: boolean, task?: taskItem) {
+	// public waitForClose: Promise<string>;
+	// private resolvePromise: (input: string) => void;
+	// private rejectPromise: (reason?: unknown) => void;
+
+	public waitForClose: Promise<string>;
+	private resolvePromise: (input: string) => void = (input: string) => { };
+	private rejectPromise: (reason?: unknown) => void = (reason?: unknown) => { };
+
+	constructor(app: App, plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
 		super(app);
 		this.app = app;
 		this.plugin = plugin;
-		this.filePath = filePath;
+		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;
-		this.onSave = onSave;
+		this.saveTask = saveTask;
 		if (taskExists && task) {
 			this.task = task;
 		}
 		this.isEdited = false;
+		this.activeNote = activeNote;
+
+		this.waitForClose = new Promise<string>((resolve, reject) => {
+			this.resolvePromise = resolve;
+			this.rejectPromise = reject;
+			console.log("Promise will return : \n", this.resolvePromise, "\n", this.rejectPromise);
+		});
 	}
 
 	onOpen() {
@@ -731,10 +811,12 @@ export class AddOrEditTaskModal extends Modal {
 			root={contentEl}
 			task={this.task}
 			taskExists={this.taskExists}
+			activeNote={this.activeNote}
 			filePath={this.filePath}
-			onSave={(updatedTask) => {
+			onSave={(updatedTask, quickAddPluginChoice) => {
 				this.isEdited = false;
-				this.onSave(updatedTask);
+				this.resolvePromise(taskContentFormatter(this.plugin, updatedTask))
+				this.saveTask(updatedTask, quickAddPluginChoice);
 				this.close();
 			}}
 			onClose={() => this.close()}
@@ -750,6 +832,7 @@ export class AddOrEditTaskModal extends Modal {
 			mssg,
 			onDiscard: () => {
 				this.isEdited = false;
+				this.rejectPromise("Task was not submitted.")
 				this.close();
 			},
 			onGoBack: () => {
@@ -761,7 +844,7 @@ export class AddOrEditTaskModal extends Modal {
 
 	handleSave() {
 		// Trigger save functionality if required before closing
-		this.onSave(this.task);
+		this.saveTask(this.task, 'temp choice');
 		this.isEdited = false;
 		this.close();
 	}
@@ -780,6 +863,7 @@ export class AddOrEditTaskModal extends Modal {
 		if (this.isEdited) {
 			this.handleCloseAttempt();
 		} else {
+			this.rejectPromise("Task was not submitted.")
 			this.onClose();
 			super.close();
 		}

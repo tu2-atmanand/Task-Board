@@ -1,7 +1,7 @@
 // src/services/OpenModals.ts
 
 import { App, Notice, TFile } from "obsidian";
-import { addTaskInActiveEditor, addTaskInJson } from "src/utils/TaskItemUtils";
+import { addTaskInNote, addTaskInJson } from "src/utils/TaskItemUtils";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -14,6 +14,8 @@ import { ScanVaultModal } from "src/modal/ScanVaultModal";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
+import { CommunityPlugins } from "./CommunityPlugins";
+import { taskContentFormatter } from "src/utils/TaskContentFormatter";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -37,7 +39,7 @@ export const openScanVaultModal = (app: App, plugin: TaskBoard) => {
 	new ScanVaultModal(app, plugin).open();
 };
 
-export const openAddNewTaskModal = (
+export const openAddNewTaskInCurrentFileModal = (
 	app: App,
 	plugin: TaskBoard,
 	activeFile: TFile
@@ -46,9 +48,10 @@ export const openAddNewTaskModal = (
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
 		plugin,
-		(newTask) => {
-			addTaskInActiveEditor(app, plugin, newTask);
+		(newTask, quickAddPluginChoice) => {
+			addTaskInNote(app, plugin, newTask, true);
 			if (
+				activeFile &&
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
 				scanFilterForTags(newTask.tags, scanFilters)
 			) {
@@ -57,8 +60,57 @@ export const openAddNewTaskModal = (
 
 			eventEmitter.emit("REFRESH_COLUMN");
 		},
-		activeFile.path,
-		false
+		true,
+		false,
+		undefined,
+		activeFile.path
+	);
+	AddTaskModal.open();
+};
+
+export const openAddNewTaskModal = (
+	app: App,
+	plugin: TaskBoard,
+	activeFile?: TFile
+) => {
+	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
+	const preDefinedNoteFile = plugin.app.vault.getAbstractFileByPath(
+		plugin.settings.data.globalSettings.preDefinedNote
+	);
+	const activeTFile = activeFile ? activeFile : preDefinedNoteFile;
+	const communityPlugins = new CommunityPlugins(plugin);
+	const AddTaskModal = new AddOrEditTaskModal(
+		app,
+		plugin,
+		async (newTask, quickAddPluginChoice) => {
+			if (communityPlugins.isQuickAddPluginEnabled()) {
+				// Call the API of QuickAdd plugin and pass the formatted content.
+				const completeTask = taskContentFormatter(plugin, newTask);
+				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
+					quickAddPluginChoice,
+					{
+						value: completeTask + "\n",
+					}
+				);
+			} else {
+				addTaskInNote(app, plugin, newTask, false);
+			}
+			if (
+				activeTFile instanceof TFile &&
+				scanFilterForFilesNFolders(activeTFile, scanFilters) &&
+				scanFilterForTags(newTask.tags, scanFilters)
+			) {
+				addTaskInJson(plugin, newTask);
+			}
+
+			eventEmitter.emit("REFRESH_COLUMN");
+		},
+		false,
+		false,
+		undefined,
+		activeTFile
+			? activeTFile.path
+			: plugin.settings.data.globalSettings.preDefinedNote
 	);
 	AddTaskModal.open();
 };

@@ -16,7 +16,7 @@
         ],
         "TODO.md": [
             {
-                "id": 2207708091,
+                "id": 2119931221,
                 "status": " ",
                 "title": "New temp task, lets see if this comes after 5 minutes, lets update this. ⏫⏰ [13:49 - 14:49] #New #working 📅 2025-05-17",
                 "body": [
@@ -40,7 +40,7 @@
                 "completion": ""
             },
             {
-                "id": 3078569223,
+                "id": 2534216766,
                 "status": " ",
                 "title": "something 📅 2025-03-20, updating few more things. #bug",
                 "body": [
@@ -2011,7 +2011,7 @@
         ],
         "Daily_Notes/2025-05-08.md": [
             {
-                "id": 838468365,
+                "id": 888578602,
                 "status": "r",
                 "title": "This 🔺⏰ [22:54 - 13:54] 📅 2025-05-18 #bug",
                 "body": [
@@ -2027,13 +2027,13 @@
                 "completion": ""
             },
             {
-                "id": 598116528,
+                "id": 2619477592,
                 "status": "r",
                 "title": "This is a first task, successfully able to add through the new editor in modal.⏰ [23:00 - 24:00] 🔼 📅 2025-05-18 #new",
                 "body": [
                     "\t- [ ] This is a sub-task.",
                     "\t- The properties are getting added perfectly as well.",
-                    "\t- ![[Pasted image 20250518225025.png]]"
+                    "\t- ![[Pasted image 20250518225025.png|425]]"
                 ],
                 "time": "23:00 - 24:00",
                 "due": "2025-05-18",
@@ -2099,27 +2099,6 @@
                 "tags": [],
                 "priority": 0,
                 "filePath": "Daily_Notes/2025-02-28.md",
-                "completion": ""
-            }
-        ],
-        "Daily_Notes/2025-02-20.md": [
-            {
-                "id": 253936312,
-                "status": " ",
-                "title": "From **v1.3.0** user should be free to use any kind of format. #pending   📅 2025-02-18 🔺 ⏰ [15:00 - 16:00]",
-                "body": [
-                    "\t- [ ] No restriction to use pipe symbol for separating metadata.",
-                    "\t**Description :** After you finished writting this task in this file switch to other tab or *Task Board* View to see you task automatically get added in the board.",
-                    "\t- [ ] Properties placed in any order should be scanned properly.",
-                    "\t- [ ] Divide and rule is a great approach."
-                ],
-                "time": "15:00 - 16:00",
-                "due": "2025-02-18",
-                "tags": [
-                    "#pending"
-                ],
-                "priority": 1,
-                "filePath": "Daily_Notes/2025-02-20.md",
                 "completion": ""
             }
         ],
@@ -2894,12 +2873,154 @@
                 "filePath": "DailyNotes.md",
                 "completion": ""
             }
+        ],
+        "Task_Board_Temp_Tasks.md": [
+            {
+                "id": 1449691586,
+                "status": " ",
+                "title": "Here we go, another one. 🔺⏰ [10:00 - 11:30] #test 📅 2025-05-25",
+                "body": [],
+                "time": "10:00 - 11:30",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "priority": 1,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "completion": ""
+            },
+            {
+                "id": 1390188291,
+                "status": " ",
+                "title": "Another a third task. ⏬ 📅 2025-05-26 #working",
+                "body": [
+                    "\tLets see, if this task correctly comes in the switched **QuickAdd** choice file."
+                ],
+                "time": "",
+                "due": "2025-05-26",
+                "tags": [
+                    "#working"
+                ],
+                "priority": 5,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "completion": ""
+            },
+            {
+                "id": 2794788881,
+                "status": " ",
+                "title": "Adding another task to the same **choice** directly from the `Add new task modal`. 0 #test 📅 2025-05-25",
+                "body": [],
+                "time": "",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "completion": ""
+            },
+            {
+                "id": 3650103404,
+                "status": " ",
+                "title": "Now I should be able to switch between the **QuickAdd** choices directly from the `Add new task modal`. 🔼 📅 2025-05-25 #test",
+                "body": [],
+                "time": "",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "priority": 3,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "completion": ""
+            },
+            {
+                "id": 1847234484,
+                "status": "/",
+                "title": "This is a new task for tomorrow. 0 📅 2025-05-26 #New",
+                "body": [
+                    "\t- Adding it directly through the button from board header.",
+                    "\t- Lets see"
+                ],
+                "time": "",
+                "due": "2025-05-26",
+                "tags": [
+                    "#New"
+                ],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "completion": ""
+            },
+            {
+                "id": 1261904657,
+                "status": " ",
+                "title": "Another quick task 🔺 📅 2025-05-25 #test",
+                "body": [],
+                "time": "",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "priority": 1,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/2025-02-20.md": [
+            {
+                "id": 253936312,
+                "status": " ",
+                "title": "From **v1.3.0** user should be free to use any kind of format. #pending   📅 2025-02-18 🔺 ⏰ [15:00 - 16:00]",
+                "body": [
+                    "\t- [ ] No restriction to use pipe symbol for separating metadata.",
+                    "\t**Description :** After you finished writting this task in this file switch to other tab or *Task Board* View to see you task automatically get added in the board.",
+                    "\t- [ ] Properties placed in any order should be scanned properly.",
+                    "\t- [ ] Divide and rule is a great approach."
+                ],
+                "time": "15:00 - 16:00",
+                "due": "2025-02-18",
+                "tags": [
+                    "#pending"
+                ],
+                "priority": 1,
+                "filePath": "Daily_Notes/2025-02-20.md",
+                "completion": ""
+            }
+        ],
+        "Daily_Notes/2025-05-24.md": [
+            {
+                "id": 540008483,
+                "status": " ",
+                "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task. ⏫ 📅 2024-10-30 #Test",
+                "body": [],
+                "time": "",
+                "due": "2024-10-30",
+                "tags": [
+                    "#Test"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/2025-05-24.md",
+                "completion": ""
+            },
+            {
+                "id": 2251377313,
+                "status": "?",
+                "title": "This is a first task added directly from the modal with the new file **suggester**. 📅 2025-05-23 #test",
+                "body": [],
+                "time": "",
+                "due": "2025-05-23",
+                "tags": [
+                    "#test"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-05-24.md",
+                "completion": ""
+            }
         ]
     },
     "Completed": {
         "TODO.md": [
             {
-                "id": 712875038,
+                "id": 2322412647,
                 "status": "x",
                 "title": "Upload this image to the new release of task board.🔺  [due:: 2024-12-24] #Image [completion:: 2025-01-27/12:46]",
                 "body": [

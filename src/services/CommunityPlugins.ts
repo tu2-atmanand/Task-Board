@@ -18,6 +18,18 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 		return !!this.reminderPlugin;
 	}
 
+	get quickAddPlugin() {
+		return this.app.plugins.plugins["quickadd"] ?? null;
+	}
+
+	isQuickAddPluginEnabled() {
+		return !!this.quickAddPlugin;
+	}
+
+	isQuickAddPluginIntegrationEnabled() {
+		return this.settings.data.globalSettings.compatiblePlugins.quickAddPlugin && this.isQuickAddPluginEnabled();
+	}
+
 	// async getSettings(): Promise<void> {
 	// 	const tasksPlugin = this.app.plugins.getPlugin("");
 	// 	if (!tasksPlugin) return;

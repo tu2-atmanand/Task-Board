@@ -56,7 +56,6 @@ export interface globalSettingsData {
 	taskCompletionShowUtcOffset: boolean;
 	autoAddDue: boolean;
 	scanVaultAtStartup: boolean;
-	dayPlannerPlugin: boolean;
 	realTimeScanning: boolean;
 	columnWidth: string;
 	showHeader: boolean;
@@ -68,10 +67,14 @@ export interface globalSettingsData {
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
+	preDefinedNote: string;
+	quickAddPluginDefaultChoice: string;
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
+		dayPlannerPlugin: boolean;
 		tasksPlugin: boolean;
 		reminderPlugin: boolean;
+		quickAddPlugin: boolean;
 	};
 }
 
@@ -257,7 +260,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			taskCompletionShowUtcOffset: false,
 			autoAddDue: true,
 			scanVaultAtStartup: false,
-			dayPlannerPlugin: false,
 			realTimeScanning: true,
 			columnWidth: "273px",
 			showHeader: true,
@@ -315,9 +317,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			],
 			compatiblePlugins: {
 				dailyNotesPlugin: false,
+				dayPlannerPlugin: false,
 				tasksPlugin: false,
 				reminderPlugin: false,
+				quickAddPlugin: false,
 			},
+			preDefinedNote: "Task_board_note.md",
+			quickAddPluginDefaultChoice: "",
 		},
 	},
 };

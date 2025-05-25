@@ -1,6 +1,12 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Setting, normalizePath, sanitizeHTMLToDom } from "obsidian";
+import {
+	App,
+	Notice,
+	Setting,
+	normalizePath,
+	sanitizeHTMLToDom,
+} from "obsidian";
 import {
 	EditButtonMode,
 	TagColorType,
@@ -11,6 +17,12 @@ import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import {
+	MultiSuggest,
+	getFileSuggestions,
+	getQuickAddPluginChoices,
+} from "src/services/MultiSuggest";
+import { CommunityPlugins } from "src/services/CommunityPlugins";
 
 export class SettingsManager {
 	win: Window;
@@ -636,9 +648,11 @@ export class SettingsManager {
 			realTimeScanning,
 			autoAddDue,
 			scanVaultAtStartup,
-			dayPlannerPlugin,
+			compatiblePlugins,
 			dailyNotesPluginComp,
 			editButtonAction,
+			preDefinedNote,
+			quickAddPluginDefaultChoice,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -668,6 +682,37 @@ export class SettingsManager {
 						await this.plugin.saveSettings();
 					})
 			);
+
+		new Setting(contentEl)
+			.setName(t("Default note for new tasks"))
+			.setDesc(
+				t(
+					"Select the default note in which all the newly added tasks through 'add new task modal' should be saved."
+				)
+			)
+			.addText((text) => {
+				text.setValue(preDefinedNote).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.preDefinedNote = value;
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFileSuggestions(this.app);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.preDefinedNote = selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.plugin.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
 
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
@@ -713,16 +758,6 @@ export class SettingsManager {
 
 		// contentEl.createEl("h4", { text: t("compatible-plugins") });
 		new Setting(contentEl).setName(t("compatible-plugins")).setHeading();
-		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
-		new Setting(contentEl)
-			.setName("Day Planner " + t("plugin-compatibility"))
-			.setDesc(t("day-planner-plugin-compatibility"))
-			.addToggle((toggle) =>
-				toggle.setValue(dayPlannerPlugin).onChange(async (value) => {
-					this.globalSettings!.dayPlannerPlugin = value;
-					await this.saveSettings();
-				})
-			);
 
 		// Setting for Auto Adding Due Date from the Daily Notes file name.
 		new Setting(contentEl)
@@ -736,6 +771,77 @@ export class SettingsManager {
 						await this.saveSettings();
 					})
 			);
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName("Day Planner " + t("plugin-compatibility"))
+			.setDesc(t("day-planner-plugin-compatibility"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(compatiblePlugins.dayPlannerPlugin)
+					.onChange(async (value) => {
+						this.globalSettings!.compatiblePlugins.dayPlannerPlugin =
+							value;
+						await this.saveSettings();
+					})
+			);
+
+		// Setting for choosing the default QuickAdd plugin run command
+		const communityPlugins = new CommunityPlugins(this.plugin);
+		new Setting(contentEl)
+			.setName("QuickAdd " + t("plugin-compatibility"))
+			.setDesc(t("quickadd-plugin-compatibility-description"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(compatiblePlugins.quickAddPlugin)
+					.onChange(async (value) => {
+						if (!communityPlugins.isQuickAddPluginEnabled()) {
+							new Notice(t("quickadd-plugin-not-enabled"));
+							this.globalSettings!.compatiblePlugins.quickAddPlugin =
+								false;
+						} else {
+							this.globalSettings!.compatiblePlugins.quickAddPlugin =
+								value;
+						}
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("Default QuickAdd plugin choice"))
+			.setDesc(
+				t(
+					"Select the choice you have created in QuickAdd plugin. Once you submit the task from 'add new task modal', it will use this choice to save the task content in the specified file and at the specified position as per the selected choice."
+				)
+			)
+			.addText((text) => {
+				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.quickAddPluginDefaultChoice = value;
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getQuickAddPluginChoices(
+					this.app,
+					communityPlugins.quickAddPlugin
+				);
+				console.log("suggestionContent", suggestionContent);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.quickAddPluginDefaultChoice =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.plugin.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
 	}
 
 	// Function to render "Task formats" tab content
@@ -778,7 +884,9 @@ export class SettingsManager {
 			switch (this.globalSettings!.taskCompletionFormat) {
 				// Default
 				case "1": {
-					if (this.globalSettings!.dayPlannerPlugin) {
+					if (
+						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
+					) {
 						preview = `- [x] ${time} ${taskTitle} ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
 					} else {
 						preview = `- [x] ${taskTitle} ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
@@ -787,7 +895,9 @@ export class SettingsManager {
 				}
 				// Tasks Plugin
 				case "2": {
-					if (this.globalSettings!.dayPlannerPlugin) {
+					if (
+						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
+					) {
 						preview = `- [x] ${time} ${taskTitle} ${priority} 📅 ${dueDate} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
@@ -800,7 +910,9 @@ export class SettingsManager {
 				}
 				// Dataview Plugin
 				case "3": {
-					if (this.globalSettings!.dayPlannerPlugin) {
+					if (
+						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
+					) {
 						preview = `- [x] ${time} ${taskTitle} [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					} else {
 						preview = `- [x] ${taskTitle} [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
@@ -809,7 +921,9 @@ export class SettingsManager {
 				}
 				// Obsidian Native
 				case "4": {
-					if (this.globalSettings!.dayPlannerPlugin) {
+					if (
+						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
+					) {
 						preview = `- [x] ${time} ${taskTitle} @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					} else {
 						preview = `- [x] ${taskTitle} @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
