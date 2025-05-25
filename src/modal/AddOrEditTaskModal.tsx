@@ -115,11 +115,12 @@ const EditTaskContent: React.FC<{
 	root: HTMLElement,
 	task?: taskItem,
 	taskExists?: boolean,
+	activeNote: boolean,
 	filePath: string;
-	onSave: (updatedTask: taskItem) => void;
+	onSave: (updatedTask: taskItem, quickAddPluginChoice: string) => void;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
-}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, filePath, onSave, onClose, setIsEdited }) => {
+}> = ({ app, plugin, root, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(task.title || ' ');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
@@ -339,7 +340,7 @@ const EditTaskContent: React.FC<{
 			filePath: newFilePath,
 			status,
 		};
-		onSave(updatedTask);
+		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	};
 
@@ -386,7 +387,10 @@ const EditTaskContent: React.FC<{
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
+		console.log("handleTaskEditedThroughEditors called with value:", value);
 		const updatedTask = buildTaskFromRawContent(value);
+		console.log("Updated Task:", updatedTask);
+
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
 		setDue(updatedTask.due || '');
@@ -550,7 +554,7 @@ const EditTaskContent: React.FC<{
 	useEffect(() => {
 		if (!filePathRef.current) return;
 
-		if (communityPlugins.isQuickAddPluginEnabled() && !taskExists) {
+		if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists) {
 			const suggestionContent = getQuickAddPluginChoices(
 				app,
 				communityPlugins.quickAddPlugin
@@ -586,19 +590,24 @@ const EditTaskContent: React.FC<{
 								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginEnabled() && !taskExists) ? t("file-path") : t("quickadd-choice")}:
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file-path")}:
 									<input
 										type="text"
 										ref={filePathRef}
 										className="EditTaskModalHomePreviewHeaderFilenameValue"
-										value={(communityPlugins.isQuickAddPluginEnabled() && !taskExists) ? quickAddPluginChoice : newFilePath}
+										value={(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? quickAddPluginChoice : newFilePath}
 										onChange={(e) => {
 											setIsEdited(true);
-											setNewFilePath(e.target.value);
+											if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) {
+												setQuickAddPluginChoice(e.target.value);
+												// setNewFilePath(e.target.value); // Don't set file path if it's a QuickAdd choice
+											} else {
+												setNewFilePath(e.target.value);
+											}
 											// Optionally propagate the change:
 											// props.onFilePathChange?.(e.target.value);
 										}}
-										placeholder={(communityPlugins.isQuickAddPluginEnabled() && !taskExists) ? "Select the QuickAdd choice" : "Select file path..."}
+										placeholder={(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? "Select the QuickAdd choice" : "Select file path..."}
 									/>
 								</div>
 								<div className="EditTaskModalHomePreviewHeaderBtnSec">
@@ -608,13 +617,13 @@ const EditTaskContent: React.FC<{
 										onClick={() => setUpdateEditorContent(true)}>
 										<RefreshCcw height={20} />
 									</button>
-									<button className="EditTaskModalHomeOpenFileBtn"
+									{taskExists && <button className="EditTaskModalHomeOpenFileBtn"
 										id="EditTaskModalHomeOpenFileBtn"
 										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
 										onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
 									>
 										<FileInput height={20} />
-									</button>
+									</button>}
 								</div>
 							</div>
 
@@ -754,19 +763,21 @@ export class AddOrEditTaskModal extends Modal {
 	filePath: string;
 	taskExists: boolean;
 	isEdited: boolean;
-	onSave: (updatedTask: taskItem) => void;
+	activeNote: boolean;
+	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void;
 
-	constructor(app: App, plugin: TaskBoard, onSave: (updatedTask: taskItem) => void, taskExists: boolean, task?: taskItem, filePath?: string) {
+	constructor(app: App, plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void, taskExists: boolean, activeNote: boolean, task?: taskItem, filePath?: string) {
 		super(app);
 		this.app = app;
 		this.plugin = plugin;
 		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;
-		this.onSave = onSave;
+		this.saveTask = saveTask;
 		if (taskExists && task) {
 			this.task = task;
 		}
 		this.isEdited = false;
+		this.activeNote = activeNote;
 	}
 
 	onOpen() {
@@ -784,10 +795,11 @@ export class AddOrEditTaskModal extends Modal {
 			root={contentEl}
 			task={this.task}
 			taskExists={this.taskExists}
+			activeNote={this.activeNote}
 			filePath={this.filePath}
-			onSave={(updatedTask) => {
+			onSave={(updatedTask, quickAddPluginChoice) => {
 				this.isEdited = false;
-				this.onSave(updatedTask);
+				this.saveTask(updatedTask, quickAddPluginChoice);
 				this.close();
 			}}
 			onClose={() => this.close()}
@@ -814,7 +826,7 @@ export class AddOrEditTaskModal extends Modal {
 
 	handleSave() {
 		// Trigger save functionality if required before closing
-		this.onSave(this.task);
+		this.saveTask(this.task, 'temp choice');
 		this.isEdited = false;
 		this.close();
 	}

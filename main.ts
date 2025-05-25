@@ -16,6 +16,7 @@ import {
 	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
+	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openScanVaultModal,
 } from "src/services/OpenModals";
@@ -266,8 +267,18 @@ export default class TaskBoard extends Plugin {
 			callback: () => {
 				const activeEditor = this.app.workspace.activeEditor?.editor;
 				const activeFile = this.app.workspace.getActiveFile();
+				console.log(
+					"Active Editor: ",
+					activeEditor,
+					"Active File: ",
+					activeFile
+				);
 				if (activeEditor && activeFile) {
-					openAddNewTaskModal(this.app, this.plugin, activeFile);
+					openAddNewTaskInCurrentFileModal(
+						this.app,
+						this.plugin,
+						activeFile
+					);
 				} else {
 					new Notice(t("no-active-editor-is-open-error-notice"));
 				}
@@ -608,7 +619,6 @@ export default class TaskBoard extends Plugin {
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed
 		const currentVersion = this.manifest.version;
-		console.log("currentVersion", currentVersion);
 		const previousVersion = this.settings.version;
 
 		if (previousVersion == "" || currentVersion[2] !== previousVersion[2]) {
@@ -624,5 +634,9 @@ export default class TaskBoard extends Plugin {
 			// 	})
 			// );
 		}
+	}
+
+	async fileExists(filePath: string): Promise<boolean> {
+		return await this.app.vault.adapter.exists(filePath);
 	}
 }

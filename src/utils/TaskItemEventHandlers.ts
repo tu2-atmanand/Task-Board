@@ -86,7 +86,7 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 		const editTaskModal = new AddOrEditTaskModal(
 			plugin.app,
 			plugin,
-			(updatedTask) => {
+			(updatedTask, quickAddPluginChoice) => {
 				updatedTask.filePath = task.filePath;
 				// Update the task in the file and JSON
 				updateTaskInFile(plugin, updatedTask, task);
@@ -100,8 +100,9 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 			},
 			true,
+			false,
 			task,
-			task.filePath
+			task.filePath,
 		);
 		editTaskModal.open();
 	} else if (
