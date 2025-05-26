@@ -791,6 +791,7 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName("QuickAdd " + t("plugin-compatibility"))
 			.setDesc(t("quickadd-plugin-compatibility-description"))
+			.setTooltip(t("Install and enable QuickAdd plugin to use this setting."))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(compatiblePlugins.quickAddPlugin)
@@ -805,7 +806,8 @@ export class SettingsManager {
 						}
 						await this.saveSettings();
 					})
-			);
+			)
+			.setDisabled(!communityPlugins.isQuickAddPluginEnabled());
 
 		new Setting(contentEl)
 			.setName(t("Default QuickAdd plugin choice"))
@@ -813,6 +815,9 @@ export class SettingsManager {
 				t(
 					"Select the choice you have created in QuickAdd plugin. Once you submit the task from 'add new task modal', it will use this choice to save the task content in the specified file and at the specified position as per the selected choice."
 				)
+			)
+			.setTooltip(
+				t("Enable the above setting to use this setting.")
 			)
 			.addText((text) => {
 				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {
@@ -841,7 +846,10 @@ export class SettingsManager {
 					onSelectCallback,
 					this.app
 				);
-			});
+			})
+			.setDisabled(
+				!this.globalSettings!.compatiblePlugins.quickAddPlugin
+			);
 	}
 
 	// Function to render "Task formats" tab content
