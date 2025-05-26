@@ -11,7 +11,6 @@ import {
 	TFile,
 } from "obsidian";
 import { Component } from "obsidian";
-import { HabitProps } from "./habit-card";
 
 interface Token extends EditorRange {
 	/** @todo Documentation incomplete. */
@@ -352,47 +351,6 @@ declare module "obsidian" {
 
 	interface Component {
 		_loaded: boolean;
-	}
-
-	interface Workspace {
-		on(
-			event: "task-genius:task-added",
-			callback: (task: Task) => void
-		): EventRef;
-		on(
-			event: "task-genius:task-updated",
-			callback: (task: Task) => void
-		): EventRef;
-		on(
-			event: "task-genius:task-deleted",
-			callback: (taskId: string) => void
-		): EventRef;
-
-		on(
-			event: "task-genius:task-cache-updated",
-			callback: (cache: TaskCache) => void
-		): EventRef;
-		on(
-			event: "task-genius:task-completed",
-			callback: (task: Task) => void
-		): EventRef;
-		on(
-			event: "task-genius:habit-index-updated",
-			callback: (habits: HabitProps[]) => void
-		): EventRef;
-
-		trigger(event: "task-genius:task-completed", task: Task): void;
-		trigger(event: "task-genius:task-added", task: Task): void;
-		trigger(event: "task-genius:task-updated", task: Task): void;
-		trigger(event: "task-genius:task-deleted", taskId: string): void;
-		trigger(
-			event: "task-genius:task-cache-updated",
-			cache: TaskCache
-		): void;
-		trigger(
-			event: "task-genius:habit-index-updated",
-			habits: HabitProps[]
-		): void;
 	}
 
 	interface WorkspaceLeaf {
