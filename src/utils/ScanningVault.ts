@@ -355,7 +355,7 @@ export function extractTime(text: string): string {
 	return timeIntitleMatch ? timeIntitleMatch[1] : "";
 }
 
-// Extract date from task title
+// Extract Created date from task title
 export function extractCreatedDate(text: string): string {
 	let match = text.match(/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
@@ -374,7 +374,7 @@ export function extractCreatedDate(text: string): string {
 	return match ? match[1] : "";
 }
 
-// Extract date from task title
+// Extract Start date from task title
 export function extractStartDate(text: string): string {
 	let match = text.match(/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
@@ -394,7 +394,7 @@ export function extractStartDate(text: string): string {
 	return match ? match[1] : "";
 }
 
-// Extract date from task title
+// Extract Scheduled date from task title
 export function extractScheduledDate(text: string): string {
 	let match = text.match(/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
@@ -413,7 +413,7 @@ export function extractScheduledDate(text: string): string {
 	return match ? match[1] : "";
 }
 
-// Extract date from task title
+// Extract Due date from task title
 export function extractDueDate(text: string): string {
 	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
