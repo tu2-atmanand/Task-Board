@@ -202,7 +202,7 @@ export default class TaskBoard extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData()
 		);
-		this.syncSettings(DEFAULT_SETTINGS, this.settings);
+		this.migrateSettings(DEFAULT_SETTINGS, this.settings);
 	}
 
 	async saveSettings() {
@@ -586,7 +586,7 @@ export default class TaskBoard extends Plugin {
 		isReminderPluginInstalled(this.plugin);
 	}
 
-	private syncSettings(defaults: any, settings: any) {
+	private migrateSettings(defaults: any, settings: any) {
 		for (const key in defaults) {
 			if (!(key in settings)) {
 				settings[key] = defaults[key];
@@ -607,13 +607,35 @@ export default class TaskBoard extends Plugin {
 							priority: idx + 1,
 						} as any)
 				);
+			} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
+				// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
+				settings[key].forEach((boardConfig: any) => {
+					boardConfig.columns.forEach((column: any) => {
+						if (column.colType === "dated" && column.range) {
+							column.datedBasedColumn = {
+								dateType: this.settings.data.globalSettings.universalDate,
+								from: column.range.rangedata.from,
+								to: column.range.rangedata.to,
+							};
+							delete column.range;
+						}
+					});
+				});
 			} else if (
 				typeof defaults[key] === "object" &&
 				defaults[key] !== null &&
 				!Array.isArray(defaults[key])
 			) {
 				// Recursively sync nested objects
-				this.syncSettings(defaults[key], settings[key]);
+				// console.log(
+				// 	"Syncing settings for key:",
+				// 	key,
+				// 	"Defaults:",
+				// 	defaults[key],
+				// 	"Settings:",
+				// 	settings[key]
+				// );
+				this.migrateSettings(defaults[key], settings[key]);
 			}
 		}
 
