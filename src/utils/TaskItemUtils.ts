@@ -16,6 +16,7 @@ import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { ScanningVault } from "./ScanningVault";
+import { TasksApi } from "src/services/tasks-plugin/api";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -363,10 +364,10 @@ export const updateRecurringTaskInFile = async (
 		}
 
 		if (isTaskFound && taskStartIndex !== -1) {
-			const communityPlugin = new CommunityPlugins(plugin);
-			if (communityPlugin.isTasksPluginEnabled()) {
+			const taskPlugin = new TasksApi(plugin);
+			if (taskPlugin.isTasksPluginEnabled()) {
 				const tasksPluginApiOutput =
-					await communityPlugin.tasksPlugin.apiV1.executeToggleTaskDoneCommand(
+					await taskPlugin.executeToggleTaskDoneCommand(
 						`- [${oldTask.status}] ${oldTask.title}`,
 						oldTask.filePath
 					);

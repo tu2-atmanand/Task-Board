@@ -27,12 +27,10 @@ import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
-import {
-	fetchTasksPluginCustomStatuses,
-	isReminderPluginInstalled,
-} from "src/services/CommunityPlugins";
+import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import { t } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
+import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -618,7 +616,9 @@ export default class TaskBoard extends Plugin {
 					boardConfig.columns.forEach((column: any) => {
 						if (column.colType === "dated" && column.range) {
 							column.datedBasedColumn = {
-								dateType: this.settings.data.globalSettings.universalDate,
+								dateType:
+									this.settings.data.globalSettings
+										.universalDate,
 								from: column.range.rangedata.from,
 								to: column.range.rangedata.to,
 							};
