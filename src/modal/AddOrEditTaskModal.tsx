@@ -11,17 +11,21 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { getUniversalDate, taskContentFormatter } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
 import { FileInput, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
+import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
 const taskItemEmpty = {
 	id: 0,
 	title: "",
 	body: [],
+	createdDate: "",
+	startDate: "",
+	scheduledDate: "",
 	due: "",
 	tags: [],
 	time: "",
@@ -122,6 +126,9 @@ const EditTaskContent: React.FC<{
 	setIsEdited: (value: boolean) => void;
 }> = ({ app, plugin, root, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(task.title || ' ');
+	const [createdDate, setCreatedDate] = useState(task.createdDate || '');
+	const [startDate, setStartDate] = useState(task.startDate || '');
+	const [scheduledDate, setScheduledDate] = useState(task.scheduledDate || '');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
 	const [startTime, setStartTime] = useState(task.time ? task?.time?.split('-')[0]?.trim() || '' : "");
@@ -206,6 +213,24 @@ const EditTaskContent: React.FC<{
 
 	const handleStatusChange = (symbol: string) => {
 		setStatus(symbol);
+		setIsEdited(true);
+		setUpdateEditorContent(true);
+	}
+
+	const handleCreatedDateChange = (value: string) => {
+		setCreatedDate(value);
+		setIsEdited(true);
+		setUpdateEditorContent(true);
+	}
+
+	const handleStartDateChange = (value: string) => {
+		setStartDate(value);
+		setIsEdited(true);
+		setUpdateEditorContent(true);
+	}
+
+	const handleScheduledDateChange = (value: string) => {
+		setScheduledDate(value);
 		setIsEdited(true);
 		setUpdateEditorContent(true);
 	}
@@ -324,8 +349,21 @@ const EditTaskContent: React.FC<{
 	// Function to handle saving the updated task
 	const handleSave = () => {
 		let newDue = due;
-		if (plugin.settings.data.globalSettings.autoAddDue && !taskExists && due === "") {
-			newDue = new Date().toISOString().split('T')[0];
+		let newStartDate = startDate;
+		let newScheduledDate = scheduledDate;
+		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists && task[plugin.settings.data.globalSettings.universalDate] === "") {
+			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate) {
+				newDue = new Date().toISOString().split('T')[0];
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate) {
+				newStartDate = new Date().toISOString().split('T')[0];
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate) {
+				newScheduledDate = new Date().toISOString().split('T')[0];
+			}
+		}
+
+		let newCreatedDate = createdDate;
+		if (plugin.settings.data.globalSettings.autoAddCreatedDate && !taskExists) {
+			newCreatedDate = new Date().toISOString().split('T')[0];
 		}
 		const updatedTask = {
 			...task,
@@ -333,6 +371,9 @@ const EditTaskContent: React.FC<{
 			body: [
 				...bodyContent.split('\n'),
 			],
+			createdDate: newCreatedDate,
+			startDate: newStartDate,
+			scheduledDate: newScheduledDate,
 			due: newDue,
 			tags,
 			time: newTime,
@@ -350,6 +391,9 @@ const EditTaskContent: React.FC<{
 		body: [
 			...bodyContent.split('\n'),
 		],
+		createdDate: createdDate,
+		startDate: startDate,
+		scheduledDate: scheduledDate,
 		due: due,
 		tags: tags,
 		time: newTime,
@@ -393,6 +437,9 @@ const EditTaskContent: React.FC<{
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
+		setCreatedDate(updatedTask.createdDate || '');
+		setStartDate(updatedTask.startDate || '');
+		setScheduledDate(updatedTask.scheduledDate || '');
 		setDue(updatedTask.due || '');
 		setTags(updatedTask.tags || []);
 		setStartTime(updatedTask.time ? updatedTask.time?.split('-')[0].trim() || '' : "");
@@ -439,24 +486,19 @@ const EditTaskContent: React.FC<{
 							},
 
 							onEnter: (editor, mod, shift) => {
-								if (mod) {
-									// Submit on Cmd/Ctrl+Enter
-									// this.handleSubmit();
-									handleSave();
-									// return true;
-								}
-								// Allow normal Enter key behavior
+								// if (mod) {
+								// 	// Submit on Cmd/Ctrl+Enter
+								// 	handleSave();
+								// }
+								// // Allow normal Enter key behavior
 								return false;
 							},
 
 							onEscape: (editor) => {
-								// Close the modal on Escape
-								// this.close();
 								onClose();
 							},
 
 							onSubmit: (editor) => {
-								// this.handleSubmit();
 								handleSave();
 							},
 
@@ -465,12 +507,6 @@ const EditTaskContent: React.FC<{
 								setIsEdited(true);
 								const capturedContent = fullMarkdownEditor?.value || "";
 								handleTaskEditedThroughEditors(capturedContent);
-								// console.log("Captured content:", fullMarkdownEditor?.value);
-								// setFormattedTaskContent(capturedContent);
-
-								// if (this.updatePreview) {
-								// 	this.updatePreview();
-								// }
 							},
 						}
 					)
@@ -689,6 +725,26 @@ const EditTaskContent: React.FC<{
 							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} />
 						</div>
 
+						{/* Task Created Date */}
+						{!plugin.settings.data.globalSettings.autoAddCreatedDate &&
+							<div className="EditTaskModalHomeField">
+								<label className="EditTaskModalHomeFieldTitle">{t("created-date")}</label>
+								<input className="EditTaskModalHomeDueInput" type="date" value={createdDate} onChange={(e) => handleCreatedDateChange(e.target.value)} />
+							</div>
+						}
+
+						{/* Task Start Date */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("start-date")}</label>
+							<input className="EditTaskModalHomeDueInput" type="date" value={startDate} onChange={(e) => handleStartDateChange(e.target.value)} />
+						</div>
+
+						{/* Task Scheduled Date */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("scheduled-date")}</label>
+							<input className="EditTaskModalHomeDueInput" type="date" value={scheduledDate} onChange={(e) => handleScheduledDateChange(e.target.value)} />
+						</div>
+
 						{/* Task Due Date */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("due-date")}</label>
@@ -727,9 +783,9 @@ const EditTaskContent: React.FC<{
 								{tags.map((tag: string) => {
 									const tagName = tag.replace('#', '');
 									const customTagData = plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
-									const tagColor = customTagData?.color || defaultTagColor;
-									const backgroundColor = customTagData ? updateRGBAOpacity(plugin, tagColor, 0.1) : `var(--tag-background)`;
-									const borderColor = customTagData ? updateRGBAOpacity(plugin, tagColor, 0.5) : `var(--tag-color-hover)`;
+									const tagColor = customTagData?.color;
+									const backgroundColor = tagColor ? updateRGBAOpacity(plugin, tagColor, 0.1) : `var(--tag-background)`;
+									const borderColor = tagColor ? updateRGBAOpacity(plugin, tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
 											key={tag}

@@ -15,6 +15,9 @@ export interface taskItem {
 	id: number;
 	title: string;
 	body: string[];
+	createdDate: string;
+	startDate: string;
+	scheduledDate: string;
 	due: string;
 	tags: string[];
 	time: string;

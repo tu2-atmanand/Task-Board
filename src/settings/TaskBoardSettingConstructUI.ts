@@ -10,6 +10,7 @@ import {
 import {
 	EditButtonMode,
 	TagColorType,
+	UniversalDateOptions,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
@@ -646,7 +647,8 @@ export class SettingsManager {
 
 		const {
 			realTimeScanning,
-			autoAddDue,
+			autoAddUniversalDate,
+			autoAddCreatedDate,
 			scanVaultAtStartup,
 			compatiblePlugins,
 			dailyNotesPluginComp,
@@ -725,13 +727,45 @@ export class SettingsManager {
 				})
 			);
 
+		new Setting(contentEl)
+			.setName(t("universal-date"))
+			.setDesc(t("universal-date-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[UniversalDateOptions.startDate]: t("start-date"),
+						[UniversalDateOptions.scheduledDate]:
+							t("scheduled-date"),
+						[UniversalDateOptions.dueDate]: t("due-date"),
+					})
+					.setValue(this.globalSettings!.universalDate)
+					.onChange(async (value) => {
+						this.globalSettings!.universalDate =
+							value as UniversalDateOptions;
+						await this.plugin.saveSettings();
+					})
+			);
+
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("auto-add-due-date-to-tasks"))
-			.setDesc(t("auto-add-due-date-to-tasks-info"))
+			.setName(t("auto-add-universal-date-to-tasks"))
+			.setDesc(t("auto-add-universal-date-to-tasks-info"))
 			.addToggle((toggle) =>
-				toggle.setValue(autoAddDue).onChange(async (value) => {
-					this.globalSettings!.autoAddDue = value;
+				toggle
+					.setValue(autoAddUniversalDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddUniversalDate = value;
+						await this.saveSettings();
+					})
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-created-date-to-tasks"))
+			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.addToggle((toggle) =>
+				toggle.setValue(autoAddCreatedDate).onChange(async (value) => {
+					this.globalSettings!.autoAddCreatedDate = value;
 					await this.saveSettings();
 				})
 			);
@@ -791,7 +825,9 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName("QuickAdd " + t("plugin-compatibility"))
 			.setDesc(t("quickadd-plugin-compatibility-description"))
-			.setTooltip(t("Install and enable QuickAdd plugin to use this setting."))
+			.setTooltip(
+				t("Install and enable QuickAdd plugin to use this setting.")
+			)
 			.addToggle((toggle) =>
 				toggle
 					.setValue(compatiblePlugins.quickAddPlugin)
@@ -816,9 +852,7 @@ export class SettingsManager {
 					"Select the choice you have created in QuickAdd plugin. Once you submit the task from 'add new task modal', it will use this choice to save the task content in the specified file and at the specified position as per the selected choice."
 				)
 			)
-			.setTooltip(
-				t("Enable the above setting to use this setting.")
-			)
+			.setTooltip(t("Enable the above setting to use this setting."))
 			.addText((text) => {
 				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {
 					if (this.globalSettings)

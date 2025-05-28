@@ -2,7 +2,10 @@ import { priorityEmojis, taskItem } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
 import { extractPriority } from "./ScanningVault";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
+import {
+	UniversalDateOptions,
+	globalSettingsData,
+} from "src/interfaces/GlobalSettings";
 
 export const taskContentFormatter = (
 	plugin: TaskBoard,
@@ -26,6 +29,20 @@ export const taskContentFormatter = (
 	);
 
 	updatedTitle = sanitizeTime(updatedTitle, updatedTask.time, globalSettings);
+
+	updatedTitle = sanitizeCreatedDate(
+		globalSettings,
+		updatedTitle,
+		updatedTask
+	);
+
+	updatedTitle = sanitizeStartDate(globalSettings, updatedTitle, updatedTask);
+
+	updatedTitle = sanitizeScheduledDate(
+		globalSettings,
+		updatedTitle,
+		updatedTask
+	);
 
 	updatedTitle = sanitizeDueDate(globalSettings, updatedTitle, updatedTask);
 
@@ -56,6 +73,180 @@ export const taskContentFormatter = (
 	}`;
 
 	return completeTask;
+};
+
+/**
+ * Function to sanitize the created date inside the task title.
+ */
+const sanitizeCreatedDate = (
+	globalSettings: globalSettingsData,
+	title: string,
+	updatedTask: taskItem
+): string => {
+	const createdDateRegex =
+		/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::\s*?\d{4}-\d{2}-\d{2}\]|@created\(\d{4}-\d{2}-\d{2}\)/;
+	const extractedCreatedDateMatch = title.match(createdDateRegex);
+
+	// If user has removed the created date, remove it from the title inside the note.
+	if (!updatedTask.createdDate) {
+		if (extractedCreatedDateMatch) {
+			// If created date is empty, remove any existing due date
+			return title.replace(extractedCreatedDateMatch[0], "").trim();
+		}
+		return title;
+	}
+
+	let createdDateWithFormat: string = "";
+	if (updatedTask.createdDate) {
+		if (globalSettings?.taskCompletionFormat === "1") {
+			createdDateWithFormat = updatedTask.createdDate
+				? `➕${updatedTask.createdDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "2") {
+			createdDateWithFormat = updatedTask.createdDate
+				? `➕ ${updatedTask.createdDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "3") {
+			createdDateWithFormat = updatedTask.createdDate
+				? `[created:: ${updatedTask.createdDate}]`
+				: "";
+		} else {
+			createdDateWithFormat = updatedTask.createdDate
+				? `@created(${updatedTask.createdDate})`
+				: "";
+		}
+	}
+
+	if (!extractedCreatedDateMatch) {
+		// No existing created date found, append new one at the end
+		return `${title} ${createdDateWithFormat}`;
+	}
+
+	const extractedCreatedDate = extractedCreatedDateMatch[0];
+
+	if (extractedCreatedDate.includes(createdDateWithFormat)) {
+		// If extracted created date matches the new one, no need to change
+		return title;
+	}
+
+	// Replace the old created date with the updated one
+	return title.replace(createdDateRegex, createdDateWithFormat);
+};
+
+/**
+ * Function to sanitize the start date inside the task title.
+ */
+const sanitizeStartDate = (
+	globalSettings: globalSettingsData,
+	title: string,
+	updatedTask: taskItem
+): string => {
+	const startDateRegex =
+		/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::\s*?\d{4}-\d{2}-\d{2}\]|@start\(\d{4}-\d{2}-\d{2}\)/;
+	const extractedStartDateMatch = title.match(startDateRegex);
+
+	// If user has removed the created date, remove it from the title inside the note.
+	if (!updatedTask.startDate) {
+		if (extractedStartDateMatch) {
+			// If created date is empty, remove any existing due date
+			return title.replace(extractedStartDateMatch[0], "").trim();
+		}
+		return title;
+	}
+
+	let startDateWithFormat: string = "";
+	if (updatedTask.startDate) {
+		if (globalSettings?.taskCompletionFormat === "1") {
+			startDateWithFormat = updatedTask.startDate
+				? `🛫${updatedTask.startDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "2") {
+			startDateWithFormat = updatedTask.startDate
+				? `🛫 ${updatedTask.startDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "3") {
+			startDateWithFormat = updatedTask.startDate
+				? `[start:: ${updatedTask.startDate}]`
+				: "";
+		} else {
+			startDateWithFormat = updatedTask.startDate
+				? `@start(${updatedTask.startDate})`
+				: "";
+		}
+	}
+
+	if (!extractedStartDateMatch) {
+		// No existing created date found, append new one at the end
+		return `${title} ${startDateWithFormat}`;
+	}
+
+	const extractedStartDate = extractedStartDateMatch[0];
+
+	if (extractedStartDate.includes(startDateWithFormat)) {
+		// If extracted created date matches the new one, no need to change
+		return title;
+	}
+
+	// Replace the old created date with the updated one
+	return title.replace(startDateRegex, startDateWithFormat);
+};
+
+/**
+ * Function to sanitize the scheduled date inside the task title.
+ */
+const sanitizeScheduledDate = (
+	globalSettings: globalSettingsData,
+	title: string,
+	updatedTask: taskItem
+): string => {
+	const scheduledDateRegex =
+		/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::\s*?\d{4}-\d{2}-\d{2}\]|@scheduled\(\d{4}-\d{2}-\d{2}\)/;
+	const extractedScheduledDateMatch = title.match(scheduledDateRegex);
+
+	// If user has removed the scheduled date, remove it from the title inside the note.
+	if (!updatedTask.scheduledDate) {
+		if (extractedScheduledDateMatch) {
+			// If scheduled date is empty, remove any existing due date
+			return title.replace(extractedScheduledDateMatch[0], "").trim();
+		}
+		return title;
+	}
+
+	let scheduledDateWithFormat: string = "";
+	if (updatedTask.scheduledDate) {
+		if (globalSettings?.taskCompletionFormat === "1") {
+			scheduledDateWithFormat = updatedTask.scheduledDate
+				? `⏳${updatedTask.scheduledDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "2") {
+			scheduledDateWithFormat = updatedTask.scheduledDate
+				? `⏳ ${updatedTask.scheduledDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "3") {
+			scheduledDateWithFormat = updatedTask.scheduledDate
+				? `[scheduled:: ${updatedTask.scheduledDate}]`
+				: "";
+		} else {
+			scheduledDateWithFormat = updatedTask.scheduledDate
+				? `@scheduled(${updatedTask.scheduledDate})`
+				: "";
+		}
+	}
+
+	if (!extractedScheduledDateMatch) {
+		// No existing scheduled date found, append new one at the end
+		return `${title} ${scheduledDateWithFormat}`;
+	}
+
+	const extractedScheduledDate = extractedScheduledDateMatch[0];
+
+	if (extractedScheduledDate.includes(scheduledDateWithFormat)) {
+		// If extracted scheduled date matches the new one, no need to change
+		return title;
+	}
+
+	// Replace the old scheduled date with the updated one
+	return title.replace(scheduledDateRegex, scheduledDateWithFormat);
 };
 
 /**
@@ -370,7 +561,7 @@ const sanitizePriority = (
 const sanitizeTags = (title: string, newTags: string[]): string => {
 	// Remove the <mark> and <font> tags from the title first before processing
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
-	
+
 	const tagsRegex = /#[^\s]+/g;
 	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
 
@@ -539,6 +730,27 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
 	}
 
+	// Remove Created date in various formats
+	if (task.createdDate) {
+		const createdDateRegex =
+			/\s*(➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::.*?\]|@created\(.*?\))/g;
+		cleanedTitle = cleanedTitle.replace(createdDateRegex, "");
+	}
+
+	// Remove start date in various formats
+	if (task.startDate) {
+		const startDateRegex =
+			/\s*(🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::.*?\]|@start\(.*?\))/g;
+		cleanedTitle = cleanedTitle.replace(startDateRegex, "");
+	}
+
+	// Remove scheduled date in various formats
+	if (task.scheduledDate) {
+		const scheduledDateRegex =
+			/\s*(⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::.*?\]|@scheduled\(.*?\))/g;
+		cleanedTitle = cleanedTitle.replace(scheduledDateRegex, "");
+	}
+
 	// Remove completion date in various formats
 	if (task.completion) {
 		const completionRegex =
@@ -587,4 +799,45 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();
+};
+
+export const getUniversalDate = (task: taskItem, plugin: TaskBoard): string => {
+	// Method 1 - Comparing
+	// const universalDateChoice =
+	// 	plugin.settings.data.globalSettings.universalDate;
+
+	// if (universalDateChoice === UniversalDateOptions.dueDate) {
+	// 	return task.due;
+	// } else if (universalDateChoice === UniversalDateOptions.startDate) {
+	// 	return task.startDate || "";
+	// } else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
+	// 	return task.scheduledDate || "";
+	// }
+	// return "";
+
+	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.globalSettings.universalDate
+	const universalDateChoice =
+		plugin.settings.data.globalSettings.universalDate;
+	if (
+		!universalDateChoice ||
+		!task[universalDateChoice] ||
+		task[universalDateChoice] === ""
+	) {
+		return "";
+	}
+	// Return the value of the universal date key from the task object
+	return task[universalDateChoice] || "";
+};
+
+export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
+	const universalDateChoice =
+		plugin.settings.data.globalSettings.universalDate;
+	if (universalDateChoice === UniversalDateOptions.dueDate) {
+		return "📅";
+	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
+		return "⏳";
+	} else if (universalDateChoice === UniversalDateOptions.startDate) {
+		return "🛫";
+	}
+	return "";
 };

@@ -10,7 +10,7 @@ import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } f
 import { Component } from 'obsidian';
 import { EditButtonMode } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { cleanTaskTitle } from 'src/utils/TaskContentFormatter';
+import { cleanTaskTitle, getUniversalDate, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
@@ -19,6 +19,11 @@ import { t } from 'src/utils/lang/helper';
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
+
+	let universalDate = getUniversalDate(task, plugin);
+	useEffect(() => {
+		universalDate = getUniversalDate(task, plugin);
+	}, [task.due, task.startDate, task.scheduledDate]);
 
 	// const handleTaskInteraction = useCallback(
 	// 	(task: taskItem, type: string) => {
@@ -134,7 +139,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
-		const taskDueDate = parseDueDate(task.due) || new Date(task.due);
+		const taskDueDate = parseDueDate(universalDate) || new Date(universalDate);
 
 		if (taskDueDate.toDateString() === today.toDateString()) {
 			if (task.time) {
@@ -167,7 +172,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		} else {
 			return 'grey'; // No due date
 		}
-	}, [task.due, task.time]);
+	}, [universalDate, task.time]);
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
@@ -393,8 +398,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								<div className='taskItemDate'>
 									{task.title.contains("(@") && task.completion === "" ? `🔔 ` : ""}
 									{task.time ? `⏰${task.time}` : ''}
-									{task.time && task.due ? ' | ' : ''}
-									{task.due ? `📅${task.due}` : ''}
+									{task.time && universalDate ? ' | ' : ''}
+									{universalDate ? `${getUniversalDateEmoji(plugin)}${universalDate}` : ''}
 								</div>
 							)}
 							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
@@ -432,7 +437,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
-	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, task.due, task.time]);
+	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (
 		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}>

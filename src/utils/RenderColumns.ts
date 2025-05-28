@@ -4,13 +4,15 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
+import { ColumnData } from "src/interfaces/BoardConfigs";
+import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
 	plugin: TaskBoard,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
-	columnData: any,
+	columnData: ColumnData,
 	allTasks: taskJsonMerged
 ) => {
 	// Call the filter function based on the column's tag and properties
@@ -20,11 +22,22 @@ export const renderColumns = (
 
 	if (columnData.colType === "undated") {
 		tasksToDisplay = pendingTasks.filter((task) => !task.due);
-	} else if (columnData.range) {
-		const { from, to } = columnData.range.rangedata;
+	} else if (columnData.colType === "dated") {
+		const { dateType, from, to } = columnData.datedBasedColumn || {
+			dateType: "due",
+			from: 0,
+			to: 0,
+		};
 
+		
 		tasksToDisplay = pendingTasks.filter((task) => {
-			if (!task.due) return false;
+			let taskUniversalDate = task.due;
+			if (dateType === UniversalDateOptions.startDate) {
+				taskUniversalDate = task.startDate;
+			} else if (dateType === UniversalDateOptions.scheduledDate) {
+				taskUniversalDate = task.scheduledDate;
+			}
+			if (!taskUniversalDate || taskUniversalDate === "") return false;
 
 			// ---------- METHOD 1 -------------
 
@@ -38,7 +51,7 @@ export const renderColumns = (
 			// );
 
 			// // Parse the task's due date
-			// const dueDate = parseDueDate(task.due);
+			// const dueDate = parseDueDate(taskUniversalDate);
 			// if (!dueDate) return false;
 
 			// dueDate.setHours(0, 0, 0, 0);
@@ -80,22 +93,25 @@ export const renderColumns = (
 			// 	return diff;
 			// }
 
-			// const diffDays = daysBetween(formatDate(today), task.due);
+			// const diffDays = daysBetween(formatDate(today), taskUniversalDate);
 
 			//  ---------- METHOD 3 -------------
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
 
 			const moment = _moment as unknown as typeof _moment.default;
-			const diffDays = moment(task.due).diff(moment(today), "days");
+			const diffDays = moment(taskUniversalDate).diff(
+				moment(today),
+				"days"
+			);
 
 			// console.log(
 			// 	"diffDays",
 			// 	diffDays,
 			// 	" | For today : ",
 			// 	today,
-			// 	" | Due Date : ",
-			// 	task.due
+			// 	" | Universal Date : ",
+			// 	taskUniversalDate
 			// );
 
 			// Handle cases where 'from' is greater than 'to'

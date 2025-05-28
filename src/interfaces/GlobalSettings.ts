@@ -29,6 +29,12 @@ export enum EditButtonMode {
 	NoteInHover = "noteInHover",
 }
 
+export enum UniversalDateOptions {
+	startDate = "startDate",
+	scheduledDate = "scheduledDate",
+	dueDate = "due",
+}
+
 export enum TagColorType {
 	Text = "text",
 	Background = "background",
@@ -54,7 +60,8 @@ export interface globalSettingsData {
 	dueDateFormat: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
-	autoAddDue: boolean;
+	autoAddCreatedDate: boolean;
+	autoAddUniversalDate: boolean;
 	scanVaultAtStartup: boolean;
 	realTimeScanning: boolean;
 	columnWidth: string;
@@ -63,6 +70,7 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
+	universalDate: UniversalDateOptions;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
@@ -106,12 +114,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "Over Due",
 						index: 2,
-						range: {
-							tag: "before",
-							rangedata: {
-								from: -300,
-								to: -1,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: -300,
+							to: -1,
 						},
 					},
 					{
@@ -120,12 +126,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "Today",
 						index: 3,
-						range: {
-							tag: "between",
-							rangedata: {
-								from: 0,
-								to: 0,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
 						},
 					},
 					{
@@ -134,12 +138,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "Tomorrow",
 						index: 4,
-						range: {
-							tag: "between",
-							rangedata: {
-								from: 1,
-								to: 1,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: 1,
+							to: 1,
 						},
 					},
 					{
@@ -148,12 +150,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "Future",
 						index: 5,
-						range: {
-							tag: "after",
-							rangedata: {
-								from: 2,
-								to: 300,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: 2,
+							to: 300,
 						},
 					},
 					{
@@ -258,7 +258,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			dueDateFormat: "yyyy-MM-DD",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
-			autoAddDue: true,
+			autoAddCreatedDate: false,
+			autoAddUniversalDate: true,
 			scanVaultAtStartup: false,
 			realTimeScanning: true,
 			columnWidth: "273px",
@@ -283,6 +284,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 			],
 			editButtonAction: EditButtonMode.PopUp,
+			universalDate: UniversalDateOptions.dueDate,
 			tasksPluginCustomStatuses: [],
 			tagColorsType: TagColorType.Text,
 			customStatuses: [

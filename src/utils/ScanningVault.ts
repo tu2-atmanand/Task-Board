@@ -80,6 +80,9 @@ export class ScanningVault {
 					const isTaskCompleted = isCompleted(line);
 					const title = extractTitle(line);
 					const time = extractTime(line);
+					const createdDate = extractCreatedDate(line);
+					const startDate = extractStartDate(line);
+					const scheduledDate = extractScheduledDate(line);
 					const due = extractDueDate(line);
 					const priority = extractPriority(line);
 					const completionDate = extractCompletionDate(line);
@@ -91,6 +94,9 @@ export class ScanningVault {
 						title,
 						body,
 						time,
+						createdDate,
+						startDate,
+						scheduledDate,
 						due,
 						tags,
 						priority,
@@ -129,8 +135,8 @@ export class ScanningVault {
 				const fileNameWithPath = file.path;
 				const fileContent = await this.app.vault.cachedRead(file);
 				const lines = fileContent.split("\n");
-				const newPendingTasks: any[] = [];
-				const newCompletedTasks: any[] = [];
+				const newPendingTasks: taskItem[] = [];
+				const newCompletedTasks: taskItem[] = [];
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i];
@@ -142,6 +148,9 @@ export class ScanningVault {
 							const isTaskCompleted = isCompleted(line);
 							const title = extractTitle(line);
 							const time = extractTime(line);
+							const createdDate = extractCreatedDate(line);
+							const startDate = extractStartDate(line);
+							const scheduledDate = extractScheduledDate(line);
 							const priority = extractPriority(line);
 							const completionDate = extractCompletionDate(line);
 							const body = extractBody(lines, i + 1);
@@ -174,6 +183,9 @@ export class ScanningVault {
 								title,
 								body,
 								time,
+								createdDate,
+								startDate,
+								scheduledDate,
 								due,
 								tags,
 								priority,
@@ -227,12 +239,15 @@ export class ScanningVault {
 
 export function buildTaskFromRawContent(
 	rawContent: string,
-	filePath?: string,
+	filePath?: string
 ): Partial<taskItem> {
 	const lines = rawContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
 	const title = extractTitle(lines[0]);
 	const time = extractTime(lines[0]);
+	const createdDate = extractCreatedDate(lines[0]);
+	const startDate = extractStartDate(lines[0]);
+	const scheduledDate = extractScheduledDate(lines[0]);
 	const due = extractDueDate(lines[0]);
 	const priority = extractPriority(lines[0]);
 	const tags = extractTags(lines[0]);
@@ -244,6 +259,9 @@ export function buildTaskFromRawContent(
 		status: taskStatus,
 		body,
 		time,
+		createdDate,
+		startDate,
+		scheduledDate,
 		due,
 		tags,
 		priority,
@@ -315,7 +333,7 @@ export function extractTime(text: string): string {
 		return match[1];
 	}
 
-	match = text.match(/⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/)
+	match = text.match(/⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);
 	if (match) {
 		return match[1];
 	}
@@ -331,8 +349,68 @@ export function extractTime(text: string): string {
 	}
 
 	// Otherwise, look for time elsewhere in the line
-	const timeIntitleMatch = text.match(/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/);
+	const timeIntitleMatch = text.match(
+		/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/
+	);
 	return timeIntitleMatch ? timeIntitleMatch[1] : "";
+}
+
+// Extract date from task title
+export function extractCreatedDate(text: string): string {
+	let match = text.match(/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
+
+	if (!match) {
+		match = text.match(
+			/\[created::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+		);
+	}
+
+	if (!match) {
+		match = text.match(
+			/\@created\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+		);
+	}
+
+	return match ? match[1] : "";
+}
+
+// Extract date from task title
+export function extractStartDate(text: string): string {
+	let match = text.match(/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
+
+	if (!match) {
+		match = text.match(
+			/\[start::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+		);
+	}
+
+	if (!match) {
+		match = text.match(
+			/\@start\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+		);
+	}
+	console.log("Start Date Match", match, " | for text : ", text);
+
+	return match ? match[1] : "";
+}
+
+// Extract date from task title
+export function extractScheduledDate(text: string): string {
+	let match = text.match(/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
+
+	if (!match) {
+		match = text.match(
+			/\[scheduled::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+		);
+	}
+
+	if (!match) {
+		match = text.match(
+			/\@scheduled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+		);
+	}
+
+	return match ? match[1] : "";
 }
 
 // Extract date from task title

@@ -8,7 +8,7 @@ export type columnDataProp = {
 	colType: string;
 	name: string;
 	active: boolean;
-	range?: { tag: string; rangedata: { from: number; to: number } };
+	datedBasedColumn?: { dateType: string; from: number; to: number };
 	coltag?: string;
 	limit?: number;
 };
@@ -24,7 +24,7 @@ export class AddColumnModal extends Modal {
 		colType: string;
 		name: string;
 		active: boolean;
-		range?: { tag: string; rangedata: { from: number; to: number } };
+		range?: { from: number; to: number };
 		coltag?: string;
 		limit?: number;
 	}) => void;
@@ -88,9 +88,16 @@ export class AddColumnModal extends Modal {
 		const nameField = modalContent.createDiv({
 			cls: "addColumnModalOverlayContentField",
 		});
-		nameField.createEl("label", { attr: { for: "name" }, text: t("column-name") });
+		nameField.createEl("label", {
+			attr: { for: "name" },
+			text: t("column-name"),
+		});
 		const nameInput = nameField.createEl("input", {
-			attr: { type: "text", id: "name", placeholder: t("enter-column-name") },
+			attr: {
+				type: "text",
+				id: "name",
+				placeholder: t("enter-column-name"),
+			},
 		});
 		nameInput.addEventListener("input", (event: Event) => {
 			const target = event.target as HTMLInputElement;
@@ -109,7 +116,7 @@ export class AddColumnModal extends Modal {
 					colType: this.colType,
 					name: this.name,
 					active,
-					range: { tag: "", rangedata: { from: 0, to: 0 } },
+					range: { from: 0, to: 0 },
 				}); // Add range data
 			} else if (this.colType === "namedTag") {
 				this.onSubmit({

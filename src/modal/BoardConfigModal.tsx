@@ -15,6 +15,7 @@ import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
+import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
 interface ConfigModalProps {
 	app: App;
@@ -147,7 +148,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			name: columnData.name,
 			index: updatedBoards[boardIndex].columns.length + 1,
 			coltag: columnData.coltag,
-			range: columnData.range,
+			datedBasedColumn: columnData.datedBasedColumn,
 			limit: columnData.limit,
 		});
 		setLocalBoards(updatedBoards);
@@ -396,18 +397,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("from")}
-													value={column.range?.rangedata.from || ""}
+													value={column.datedBasedColumn?.from || ""}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
-															"range",
+															"datedBasedColumn",
 															{
-																...column.range,
-																rangedata: {
-																	...column.range?.rangedata,
-																	from: Number(e.target.value),
-																},
+																...column.datedBasedColumn,
+																from: Number(e.target.value),
 															}
 														)
 													}
@@ -416,23 +414,40 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("to")}
-													value={column.range?.rangedata.to || ""}
+													value={column.datedBasedColumn?.to || ""}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
-															"range",
+															"datedBasedColumn",
 															{
-																...column.range,
-																rangedata: {
-																	...column.range?.rangedata,
-																	to: Number(e.target.value),
-																},
+																...column.datedBasedColumn,
+																to: Number(e.target.value),
 															}
 														)
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												/>
+												<select
+													aria-label="Select Date Type"
+													value={column.datedBasedColumn?.dateType || UniversalDateOptions.dueDate}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"datedBasedColumn",
+															{
+																...column.datedBasedColumn,
+																dateType: e.target.value,
+															}
+														)
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												>
+													<option value={UniversalDateOptions.dueDate}>{UniversalDateOptions.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{UniversalDateOptions.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{UniversalDateOptions.scheduledDate}</option>
+												</select>
 											</>
 										)}
 									</div>

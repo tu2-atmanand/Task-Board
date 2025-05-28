@@ -6,19 +6,17 @@ export type ColumnData = {
 	name: string;
 	index: number;
 	coltag?: string;
-	range?: {
-		tag: string;
-		rangedata: {
-			from: number;
-			to: number;
-		};
+	datedBasedColumn?: {
+		dateType: string; // e.g., "due", "created", "scheduled"
+		from: number;
+		to: number;
 	};
 	limit?: number;
 	sort?: {
 		criteria: string;
 		order: boolean; // Ascending = 0 AND Descending = 1
 	};
-}
+};
 
 export type Board = {
 	name: string;
@@ -29,7 +27,6 @@ export type Board = {
 	filterScope?: string;
 	showColumnTags?: boolean;
 	showFilteredTags?: boolean;
-}
+};
 
 export type BoardConfigs = Board[];
-
