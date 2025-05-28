@@ -93,8 +93,8 @@ const en: Lang = {
 	"automation": "Automation",
 	"real-time-scanning": "Real-time scanning",
 	"real-time-scanning-info": "After you loose focus from the file you have edited, the task will be immediately refreshed on the task boad.\nDisabling this setting will scan the modified files after some time.",
-	"auto-add-due-date-to-tasks": "Auto add due date to tasks",
-	"auto-add-due-date-to-tasks-info": "When enabled, if you add a task using the 'add new task' pop-up window, then today's date will be added as due date, if no date is entered.",
+	"auto-add-universal-date-to-tasks": "Auto add the selected universal date",
+	"auto-add-universal-date-to-tasks-info": "When enabled, if you add a task using the 'add new task' pop-up window, then today's date will be added as the universal date you have selected.",
 	"auto-scan-the-vault-on-obsidian-startup": "Auto scan the vault on Obsidian startup",
 	"auto-scan-the-vault-on-obsidian-startup-info": "Only use this feature if you edit the vault files outside Obsidian. Usually all your newly added/edited tasks will be detected automatically.",
 	"auto-scan-the-vault-on-obsidian-startup-info-2": "If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.",
@@ -202,7 +202,7 @@ const en: Lang = {
 	"ignore-this-bug": "Ignore this bug",
 	"bug-context": "Bug context",
 	"copy-report": "Copy report",
-	"add-new-task-in-current-file": "Add new task in current file",
+	"add-new-task-in-current-file": "Add new task in current note",
 };
 
 export default en;
