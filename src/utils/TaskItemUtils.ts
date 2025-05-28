@@ -11,9 +11,11 @@ import {
 	writeDataToVaultFiles,
 } from "./MarkdownFileOperations";
 
-import { App, Notice } from "obsidian";
+import { App, Notice, TFile } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
+import { CommunityPlugins } from "src/services/CommunityPlugins";
+import { ScanningVault } from "./ScanningVault";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -181,10 +183,14 @@ export const updateTaskInFile = async (
 			const line = lines[i];
 
 			// Check for the task starting line (e.g., "- [ ] Title...")
+			console.log(
+				"Trying to match if the oldTask.title is present inside the current line in note :",
+				line
+			);
 			if (
 				!isTaskFound &&
 				line.match(/^- \[.{1}\]/) &&
-				line.includes(cleanTaskTitle(plugin, oldTask))
+				line.includes(oldTask.title)
 			) {
 				isTaskFound = true;
 				taskStartIndex = i;
@@ -320,6 +326,121 @@ export const updateTaskInJson = async (
 	}
 };
 
+export const updateRecurringTaskInFile = async (
+	plugin: TaskBoard,
+	updatedTask: taskItem,
+	oldTask: taskItem
+) => {
+	const filePath = updatedTask.filePath;
+
+	try {
+		// Read the file content
+		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+
+		// Prepare the updated task block
+		const completeOldTaskContent = taskContentFormatter(plugin, oldTask);
+		if (completeOldTaskContent === "")
+			throw "taskContentFormatter returned empty string";
+
+		// Split the file content into lines
+		const lines = fileContent.split("\n");
+		let isTaskFound = false;
+		let taskStartIndex = -1;
+
+		// Locate the main task line and subsequent lines
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
+
+			if (
+				!isTaskFound &&
+				line.match(/^- \[.{1}\]/) &&
+				line.includes(oldTask.title)
+			) {
+				isTaskFound = true;
+				taskStartIndex = i;
+				break;
+			}
+		}
+
+		if (isTaskFound && taskStartIndex !== -1) {
+			const communityPlugin = new CommunityPlugins(plugin);
+			if (communityPlugin.isTasksPluginEnabled()) {
+				const tasksPluginApiOutput =
+					await communityPlugin.tasksPlugin.apiV1.executeToggleTaskDoneCommand(
+						`- [${oldTask.status}] ${oldTask.title}`,
+						oldTask.filePath
+					);
+
+				const twoTaskTitles = tasksPluginApiOutput.split("\n");
+				console.log(
+					"updateRecurringTaskInFile : tasksPluginApiOutput :\n",
+					tasksPluginApiOutput,
+					"\n| first line :",
+					twoTaskTitles[0],
+					"\n| second line :",
+					twoTaskTitles[1]
+				);
+				let newContent = "";
+				if ((twoTaskTitles.length = 1)) {
+					newContent = tasksPluginApiOutput;
+				} else if ((twoTaskTitles.length = 2)) {
+					if (twoTaskTitles[1].trim().startsWith("- [x]")) {
+						newContent = `${twoTaskTitles[0]}${
+							updatedTask.body.length > 0
+								? `\n${updatedTask.body.join("\n")}`
+								: ""
+						}\n${twoTaskTitles[1]}${
+							oldTask.body.length > 0
+								? `\n${oldTask.body.join("\n")}`
+								: ""
+						}`;
+					} else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
+						newContent = `${twoTaskTitles[0]}${
+							oldTask.body.length > 0
+								? `\n${oldTask.body.join("\n")}`
+								: ""
+						}\n${twoTaskTitles[1]}${
+							updatedTask.body.length > 0
+								? `\n${updatedTask.body.join("\n")}`
+								: ""
+						}`;
+					}
+				} else {
+					console.warn(
+						"updateRecurringTaskInFile : Unexpected output from Tasks plugin API."
+					);
+					return;
+				}
+				console.log("New content build using the API : ", newContent);
+				const newFileContent = fileContent.replace(
+					completeOldTaskContent,
+					newContent
+				);
+				console.log(
+					"updateRecurringTaskInFile : newTaskContent :\n",
+					newFileContent
+				);
+				await writeDataToVaultFiles(plugin, filePath, newFileContent);
+
+				// Just to scan the file after updating.
+				plugin.fileUpdatedUsingModal = "";
+				const scannVault = new ScanningVault(plugin.app, plugin);
+				const file = plugin.app.vault.getAbstractFileByPath(filePath);
+				if (file && file instanceof TFile)
+					scannVault.updateTasksFromFiles([file]);
+				eventEmitter.emit("REFRESH_COLUMN");
+			} else {
+				//fallback to normal function
+				updateTaskInFile(plugin, updatedTask, oldTask);
+			}
+		} else {
+			console.warn("updateRecurringTaskInFile : Task not found in file.");
+		}
+	} catch (error) {
+		console.error("Error updating recurring task in file:", error);
+	}
+};
+
 // For Adding New Task from Modal
 
 // Generate a unique ID for each task
@@ -384,7 +505,7 @@ export const addTaskInNote = async (
 		if (editorActive) {
 			// Split file content into an array of lines
 			const fileLines = fileContent.split("\n");
-			if(cursorPosition && cursorPosition.line > 0) {
+			if (cursorPosition && cursorPosition.line > 0) {
 				// Insert the new task at the cursor line position
 				fileLines.splice(cursorPosition.line, 0, completeTask);
 				// Join the lines back into a single string
