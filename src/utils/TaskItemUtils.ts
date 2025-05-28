@@ -355,16 +355,14 @@ export const addTaskInNote = async (
 	app: App,
 	plugin: TaskBoard,
 	newTask: taskItem,
-	editorActive: boolean
+	editorActive: boolean,
+	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
 	const filePath = newTask.filePath.endsWith(".md")
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
 
-	console.warn(
-		"QuickAdd plugin is not enabled : ",
-		await plugin.fileExists(filePath)
-	);
+	console.warn("Is the file exists : ", await plugin.fileExists(filePath));
 	if (!(await plugin.fileExists(filePath))) {
 		new Notice(
 			`New note created since it does not exists : "${filePath}"`,
@@ -379,43 +377,32 @@ export const addTaskInNote = async (
 		if (completeTask === "")
 			throw "taskContentFormatter returned empty string";
 
+		// Read the file content
+		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		let newContent = fileContent;
+
 		if (editorActive) {
-			// Get the active editor and the current cursor position
-			const activeEditor = app.workspace.activeEditor?.editor;
-			if (!activeEditor) {
-				console.error(
-					"No active editor found. Please place your cursor in markdown file"
-				);
-			}
-
-			if (completeTask && activeEditor) {
-				const cursorPosition = activeEditor.getCursor();
-
-				// Read the file content
-				const fileContent = await readDataOfVaultFiles(
-					plugin,
-					filePath
-				);
-
-				// Split file content into an array of lines
-				const fileLines = fileContent.split("\n");
-
+			// Split file content into an array of lines
+			const fileLines = fileContent.split("\n");
+			if(cursorPosition && cursorPosition.line > 0) {
 				// Insert the new task at the cursor line position
 				fileLines.splice(cursorPosition.line, 0, completeTask);
-
 				// Join the lines back into a single string
-				const newContent = fileLines.join("\n");
-				// Write the updated content back to the file
-				await writeDataToVaultFiles(plugin, filePath, newContent);
+				newContent = fileLines.join("\n");
+			} else {
+				newContent = fileContent.concat("\n\n", completeTask);
 			}
-		} else {
-			const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
+			// Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		} else {
 			// Join the lines back into a single string
-			const newContent = fileContent.concat("\n\n", completeTask);
+			newContent = fileContent.concat("\n\n", completeTask);
 			console.log("addTaskInNote : newContent :\n", newContent);
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		}
+		cursorPosition = undefined;
+		return true;
 	} catch (error) {
 		console.error("Error updating task in file:", error);
 	}

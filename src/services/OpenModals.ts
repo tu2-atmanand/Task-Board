@@ -42,14 +42,15 @@ export const openScanVaultModal = (app: App, plugin: TaskBoard) => {
 export const openAddNewTaskInCurrentFileModal = (
 	app: App,
 	plugin: TaskBoard,
-	activeFile: TFile
+	activeFile: TFile,
+	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
 	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
 		plugin,
 		(newTask, quickAddPluginChoice) => {
-			addTaskInNote(app, plugin, newTask, true);
+			addTaskInNote(app, plugin, newTask, true, cursorPosition);
 			if (
 				activeFile &&
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
@@ -59,6 +60,8 @@ export const openAddNewTaskInCurrentFileModal = (
 			}
 
 			eventEmitter.emit("REFRESH_COLUMN");
+			cursorPosition = undefined;
+			return true;
 		},
 		true,
 		false,
@@ -66,6 +69,7 @@ export const openAddNewTaskInCurrentFileModal = (
 		activeFile.path
 	);
 	AddTaskModal.open();
+	return true;
 };
 
 export const openAddNewTaskModal = (

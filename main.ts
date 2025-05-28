@@ -270,22 +270,27 @@ export default class TaskBoard extends Plugin {
 			id: "add-new-task-current-file",
 			name: t("add-new-task-in-current-file"),
 			callback: () => {
-				const activeEditor = this.app.workspace.activeEditor?.editor;
-				const activeFile = this.app.workspace.getActiveFile();
+				let activeEditor = this.app.workspace.activeEditor?.editor;
+				let activeFile = this.app.workspace.getActiveFile();
 				console.log(
 					"Active Editor: ",
 					activeEditor,
 					"Active File: ",
 					activeFile
 				);
+				console.log("Curesor position : ", activeEditor?.getCursor());
 				if (activeEditor && activeFile) {
 					openAddNewTaskInCurrentFileModal(
 						this.app,
 						this.plugin,
-						activeFile
+						activeFile,
+						activeEditor?.getCursor()
 					);
+					activeEditor = undefined;
+					return true;
 				} else {
 					new Notice(t("no-active-editor-is-open-error-notice"));
+					return true;
 				}
 			},
 		});
