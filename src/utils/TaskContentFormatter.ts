@@ -841,3 +841,13 @@ export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
 	}
 	return "";
 };
+
+export const isTaskRecurring = (taskTitle: string): boolean => {
+	// This function will simly check if the task title contatins the recurring tag: 🔁
+	const recurringTag = "🔁";
+	if (taskTitle.includes(recurringTag)) {
+		return true;
+	}
+	// If the recurring tag is not found, return false
+	return false;
+};
