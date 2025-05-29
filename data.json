@@ -17,12 +17,10 @@
             "collapsed": false,
             "name": "Over Due",
             "index": 2,
-            "range": {
-              "tag": "before",
-              "rangedata": {
-                "from": -300,
-                "to": -1
-              }
+            "datedBasedColumn": {
+              "dateType": "startDate",
+              "from": -300,
+              "to": -1
             }
           },
           {
@@ -31,12 +29,10 @@
             "collapsed": false,
             "name": "Today",
             "index": 3,
-            "range": {
-              "tag": "between",
-              "rangedata": {
-                "from": 0,
-                "to": 0
-              }
+            "datedBasedColumn": {
+              "dateType": "due",
+              "from": 0,
+              "to": 0
             }
           },
           {
@@ -45,12 +41,10 @@
             "collapsed": false,
             "name": "Tomorrow",
             "index": 4,
-            "range": {
-              "tag": "between",
-              "rangedata": {
-                "from": 1,
-                "to": 1
-              }
+            "datedBasedColumn": {
+              "dateType": "due",
+              "from": 1,
+              "to": 1
             }
           },
           {
@@ -59,12 +53,10 @@
             "collapsed": false,
             "name": "Future",
             "index": 5,
-            "range": {
-              "tag": "after",
-              "rangedata": {
-                "from": 2,
-                "to": 300
-              }
+            "datedBasedColumn": {
+              "dateType": "due",
+              "from": 2,
+              "to": 300
             }
           },
           {
@@ -172,12 +164,10 @@
             "collapsed": false,
             "name": "For next seven days",
             "index": 2,
-            "range": {
-              "tag": "",
-              "rangedata": {
-                "from": 0,
-                "to": 6
-              }
+            "datedBasedColumn": {
+              "dateType": "due",
+              "from": 0,
+              "to": 6
             }
           },
           {
@@ -209,6 +199,17 @@
             "name": "All done tasks",
             "index": 6,
             "limit": 20
+          },
+          {
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Tomorrow",
+            "index": 7,
+            "datedBasedColumn": {
+              "from": 1,
+              "to": 1
+            }
           }
         ]
       }
@@ -239,7 +240,7 @@
       "dueDateFormat": "yyyy-MM-DD",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
-      "autoAddDue": true,
+      "autoAddUniversalDate": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": false,
       "realTimeScanning": true,
@@ -255,7 +256,7 @@
         },
         {
           "name": "bug/solver",
-          "color": "#f23fqe19",
+          "color": "rgba(215, 39, 148, 0.95)",
           "priority": 2
         },
         {
@@ -619,10 +620,12 @@
         "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": false,
-        "quickAddPlugin": true
+        "quickAddPlugin": false
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
-      "quickAddPluginDefaultChoice": "Task to daily note"
+      "quickAddPluginDefaultChoice": "Task to daily notes",
+      "autoAddCreatedDate": true,
+      "universalDate": "due"
     }
   }
 }
