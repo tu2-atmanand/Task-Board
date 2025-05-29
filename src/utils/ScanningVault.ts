@@ -76,9 +76,9 @@ export class ScanningVault {
 				const tags = extractTags(line);
 				if (scanFilterForTags(tags, scanFilters)) {
 					this.TaskDetected = true;
+					const title = line;
 					const taskStatus = extractCheckboxSymbol(line);
 					const isTaskCompleted = isCompleted(line);
-					const title = extractTitle(line);
 					const time = extractTime(line);
 					const createdDate = extractCreatedDate(line);
 					const startDate = extractStartDate(line);
@@ -144,17 +144,17 @@ export class ScanningVault {
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
 							this.TaskDetected = true;
+							const title = line;
 							const taskStatus = extractCheckboxSymbol(line);
 							const isTaskCompleted = isCompleted(line);
-							const title = extractTitle(line);
 							const time = extractTime(line);
 							const createdDate = extractCreatedDate(line);
 							const startDate = extractStartDate(line);
 							const scheduledDate = extractScheduledDate(line);
 							const priority = extractPriority(line);
 							const completionDate = extractCompletionDate(line);
-							const body = extractBody(lines, i + 1);
 							let due = extractDueDate(line);
+							const body = extractBody(lines, i + 1);
 							if (
 								!due &&
 								this.plugin.settings.data.globalSettings
@@ -242,8 +242,8 @@ export function buildTaskFromRawContent(
 	filePath?: string
 ): Partial<taskItem> {
 	const lines = rawContent.split("\n");
+	const title = lines[0];
 	const taskStatus = extractCheckboxSymbol(lines[0]);
-	const title = extractTitle(lines[0]);
 	const time = extractTime(lines[0]);
 	const createdDate = extractCreatedDate(lines[0]);
 	const startDate = extractStartDate(lines[0]);
@@ -295,7 +295,7 @@ export function buildTaskFromRawContent(
 
 // Extract title from task line
 export function extractTitle(text: string): string {
-	return text.replace(/^- \[.\]\s*/, "").trim();
+	return text.replace(/^.*- \[.\]\s*/, "").trim();
 }
 
 // New function to extract task body
@@ -304,13 +304,18 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 	for (let i = startLineIndex; i < lines.length; i++) {
 		const line = lines[i];
 
-		if (line.trim() === "") {
+		if (line.trim() === "" || line.trim() === ">") {
 			break;
 		}
 
-		// If the line has one level of indentation, consider it part of the body
-		if (line.startsWith("\t") || line.startsWith("    ")) {
-			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
+		/*
+		Enter inside the if body if the line starts with:
+			- One or more tabs
+			- 4 or more spaces
+			- > followed by one or more tabs
+			- > followed by 4 or more spaces
+		*/
+		if (/^(\t+| {4,}|>(\t+| {4,}))/.test(line)) {
 			bodyLines.push(line);
 		} else {
 			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.

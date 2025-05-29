@@ -46,13 +46,18 @@ export function isCompleted(task: string): boolean {
 
 /**
  * Determines if a line is a task.
+ * A task must:
+ * - Optionally be preceded by any characters (including `>` and whitespace).
+ * - Contain the pattern '- [x]' or '- [ ]' (with any single character inside the brackets).
+ * - Have at least one non-space character after the checkbox.
+ *
  * @param line - The line of text to check.
- * @returns Returns "True" if the line matches the task pattern, otherwise "False".
+ * @returns Returns "true" if the line matches the task pattern, otherwise "false".
  */
 export function isTaskLine(line: string): boolean {
-	const trimmedLine = line;
-	return /^- \[.\]/.test(trimmedLine) && trimmedLine.length > 5;
+	return /^[\s>]*- \[[^\]]\]\s*\S+/.test(line);
 }
+
 
 /**
  * Extracts the checkbox symbol from a task string.

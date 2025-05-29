@@ -1,7 +1,7 @@
 import { priorityEmojis, taskItem } from "src/interfaces/TaskItemProps";
 
 import TaskBoard from "main";
-import { extractPriority } from "./ScanningVault";
+import { extractPriority, extractTitle } from "./ScanningVault";
 import {
 	UniversalDateOptions,
 	globalSettingsData,
@@ -11,7 +11,7 @@ export const taskContentFormatter = (
 	plugin: TaskBoard,
 	updatedTask: taskItem
 ): string => {
-	if (updatedTask.title === "") {
+	if (extractTitle(updatedTask.title) === "") {
 		return "";
 	}
 
@@ -55,7 +55,7 @@ export const taskContentFormatter = (
 	);
 
 	// Build the formatted string for the main task
-	let formattedTask = `${checkBoxStat} ${updatedTitle}`;
+	let formattedTask = updatedTitle.replace(/- \[.\]/, `- [${updatedTask.status}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
@@ -702,7 +702,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		return task.title;
 	}
 
-	let cleanedTitle = task.title;
+	let cleanedTitle = extractTitle(task.title);
 
 	// Remove tags
 	task.tags.forEach((tag) => {

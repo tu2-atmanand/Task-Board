@@ -15,7 +15,7 @@ import { App, Notice, TFile } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { ScanningVault } from "./ScanningVault";
+import { ScanningVault, extractTitle } from "./ScanningVault";
 import { TasksApi } from "src/services/tasks-plugin/api";
 
 export const moveFromPendingToCompleted = async (
@@ -97,7 +97,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 			if (
 				!isTaskFound &&
 				line.match(/^- \[.{1}\]/) &&
-				line.includes(task.title)
+				line.includes(extractTitle(task.title))
 			) {
 				isTaskFound = true;
 				taskStartIndex = i;
@@ -191,7 +191,7 @@ export const updateTaskInFile = async (
 			if (
 				!isTaskFound &&
 				line.match(/^- \[.{1}\]/) &&
-				line.includes(oldTask.title)
+				line.includes(extractTitle(oldTask.title))
 			) {
 				isTaskFound = true;
 				taskStartIndex = i;
@@ -355,7 +355,7 @@ export const updateRecurringTaskInFile = async (
 			if (
 				!isTaskFound &&
 				line.match(/^- \[.{1}\]/) &&
-				line.includes(oldTask.title)
+				line.includes(extractTitle(oldTask.title))
 			) {
 				isTaskFound = true;
 				taskStartIndex = i;
@@ -367,8 +367,8 @@ export const updateRecurringTaskInFile = async (
 			const taskPlugin = new TasksApi(plugin);
 			if (taskPlugin.isTasksPluginEnabled()) {
 				const tasksPluginApiOutput =
-					await taskPlugin.executeToggleTaskDoneCommand(
-						`- [${oldTask.status}] ${oldTask.title}`,
+					taskPlugin.executeToggleTaskDoneCommand(
+						oldTask.title,
 						oldTask.filePath
 					);
 
@@ -385,7 +385,7 @@ export const updateRecurringTaskInFile = async (
 				if ((twoTaskTitles.length = 1)) {
 					newContent = tasksPluginApiOutput;
 				} else if ((twoTaskTitles.length = 2)) {
-					if (twoTaskTitles[1].trim().startsWith("- [x]")) {
+					if (twoTaskTitles[1].trim().includes("- [x]")) {
 						newContent = `${twoTaskTitles[0]}${
 							updatedTask.body.length > 0
 								? `\n${updatedTask.body.join("\n")}`
@@ -395,7 +395,7 @@ export const updateRecurringTaskInFile = async (
 								? `\n${oldTask.body.join("\n")}`
 								: ""
 						}`;
-					} else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
+					} else if (twoTaskTitles[0].trim().includes("- [x]")) {
 						newContent = `${twoTaskTitles[0]}${
 							oldTask.body.length > 0
 								? `\n${oldTask.body.join("\n")}`

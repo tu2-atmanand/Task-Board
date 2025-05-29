@@ -15,6 +15,7 @@ import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
+import { extractTitle } from 'src/utils/ScanningVault';
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
@@ -46,7 +47,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		if (taskTitleRendererRef.current && componentRef.current) {
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
-			if (titleElement && task.title !== "") {
+			if (titleElement && extractTitle(task.title) !== "") {
 				const cleanedTitle = cleanTaskTitle(plugin, task);
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
