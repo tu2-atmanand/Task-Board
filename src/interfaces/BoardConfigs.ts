@@ -25,6 +25,7 @@ export type Board = {
 	filters?: string[];
 	filterPolarity?: string;
 	filterScope?: string;
+	hideEmptyColumns?: boolean;
 	showColumnTags?: boolean;
 	showFilteredTags?: boolean;
 };

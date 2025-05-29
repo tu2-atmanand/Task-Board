@@ -119,7 +119,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
-	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags';
+	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags' | 'hideEmptyColumns';
 	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
 		const updatedBoards = [...localBoards];
 		if (updatedBoards[boardIndex]) {
@@ -283,6 +283,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
+					<div className="boardConfigModalMainContent-Active-Body-InputItems">
+						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+							<div className="boardConfigModalSettingName">{t("automatically-hide-empty-columns")}</div>
+							<div className="boardConfigModalSettingDescription">{t("automatically-hide-empty-columns-info")}</div>
+						</div>
+						<input
+							type="checkbox"
+							checked={board.hideEmptyColumns}
+							onChange={(e) => handleToggleChange(boardIndex, "hideEmptyColumns", e.target.checked)}
+						/>
+					</div>
+
 					<hr className="boardConfigModalHr-100" />
 
 					<h3>{t("board-filters")}</h3>
@@ -290,7 +302,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 							<div className="boardConfigModalSettingName">{t("filter-tags")}</div>
 							<div className="boardConfigModalSettingDescription">{t("filter-tags-setting-info")}</div>
-
 						</div>
 						<input
 							type="text"
