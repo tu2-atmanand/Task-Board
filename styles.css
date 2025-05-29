@@ -342,6 +342,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-weight: 600 !important;
 }
 
+.subtaskTextRenderer-checked {
+	text-decoration: line-through !important;
+	opacity: 50% !important;
+}
+
 .taskItemMainBodyDescription {
 	width: 100%;
 }

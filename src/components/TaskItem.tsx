@@ -343,7 +343,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
 							if (!isSubTask) return;
 							// console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
-							const isCompleted = line.trim().startsWith('- [x]');
+							const isCompleted = line.trim().startsWith('- [x]') || line.trim().startsWith('- [X]');
 
 							// Calculate padding based on the number of tabs
 							const numTabs = line.match(/^\t+/)?.[0].length || 0;
@@ -367,7 +367,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 									/>
 									{/* Render each subtask separately */}
 									<div
-										className="subtaskTextRenderer"
+										className={isCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
 										ref={(el) => (subtaskTextRefs.current[uniqueKey] = el)} // Assign unique ref to each subtask
 									/>
 								</div>
