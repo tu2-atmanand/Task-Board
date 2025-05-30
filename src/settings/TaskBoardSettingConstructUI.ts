@@ -929,7 +929,7 @@ export class SettingsManager {
 		const {
 			dueDateFormat,
 			taskCompletionFormat,
-			taskCompletionDateTimePattern,
+			// taskCompletionDateTimePattern,
 			firstDayOfWeek,
 			taskCompletionInLocalTime,
 			taskCompletionShowUtcOffset,
@@ -1043,20 +1043,20 @@ export class SettingsManager {
 			);
 
 		// Text input for the taskCompletionDateTimePattern
-		new Setting(contentEl)
-			.setName(t("task-completion-date-time-pattern"))
-			.setDesc(t("task-completion-date-time-pattern-info"))
-			.addText((text) =>
-				text
-					.setValue(taskCompletionDateTimePattern)
-					.onChange(async (value) => {
-						this.globalSettings!.taskCompletionDateTimePattern =
-							value;
-						await this.saveSettings();
-						updatePreview();
-					})
-					.setPlaceholder("yyyy-MM-DD/HH:mm")
-			);
+		// new Setting(contentEl)
+		// 	.setName(t("task-completion-date-time-pattern"))
+		// 	.setDesc(t("task-completion-date-time-pattern-info"))
+		// 	.addText((text) =>
+		// 		text
+		// 			.setValue(taskCompletionDateTimePattern)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.taskCompletionDateTimePattern =
+		// 					value;
+		// 				await this.saveSettings();
+		// 				updatePreview();
+		// 			})
+		// 			.setPlaceholder("yyyy-MM-DD/HH:mm")
+		// 	);
 
 		// Initialize the preview on page load
 		updatePreview();
