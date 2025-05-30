@@ -203,6 +203,8 @@ const en: Lang = {
 	"bug-context": "Bug context",
 	"copy-report": "Copy report",
 	"add-new-task-in-current-file": "Add new task in current note",
+	"automatically-hide-empty-columns": "Auto hide empty columns",
+	"automatically-hide-empty-columns-info": "Enable this setting to automatically hide the columns which has no tasks in it. This will help you to focus on the tasks which are relevant to you.",
 };
 
 export default en;
