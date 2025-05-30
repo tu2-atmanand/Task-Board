@@ -1,4 +1,4 @@
-import { taskStatuses } from "src/interfaces/TaskItemProps";
+import { taskStatuses } from "src/interfaces/TaskItem";
 
 /**
  * Switches the checkbox state based on the current symbol.

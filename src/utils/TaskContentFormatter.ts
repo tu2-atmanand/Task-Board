@@ -1,4 +1,4 @@
-import { priorityEmojis, taskItem } from "src/interfaces/TaskItemProps";
+import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { extractPriority } from "./ScanningVault";

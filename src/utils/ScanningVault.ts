@@ -14,7 +14,7 @@ import {
 	priorityEmojis,
 	taskItem,
 	tasksJson,
-} from "src/interfaces/TaskItemProps";
+} from "src/interfaces/TaskItem";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,

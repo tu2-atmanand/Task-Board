@@ -4,7 +4,7 @@ import { App, Modal, debounce } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
-import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
+import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItem";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import ReactDOM from "react-dom/client";

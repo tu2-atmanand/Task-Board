@@ -5,7 +5,7 @@ import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
 } from "./JsonFileOperations";
-import { taskItem, tasksJson } from "src/interfaces/TaskItemProps";
+import { taskItem, tasksJson } from "src/interfaces/TaskItem";
 import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,

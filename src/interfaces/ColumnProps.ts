@@ -1,4 +1,4 @@
-import { taskItem } from "./TaskItemProps";
+import { taskItem } from "./TaskItem";
 import TaskBoard from "main";
 import { ColumnData } from "./BoardConfigs";
 

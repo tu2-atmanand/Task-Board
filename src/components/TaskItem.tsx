@@ -2,7 +2,7 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TaskProps, taskItem, taskStatuses } from '../interfaces/TaskItemProps';
+import { TaskProps, taskItem, taskStatuses } from '../interfaces/TaskItem';
 import { checkboxStateSwitcher, extractCheckboxSymbol } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
@@ -13,7 +13,7 @@ import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitle, getUniversalDate, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseDueDate } from 'src/utils/TaskItemUtils';
-import { priorityEmojis } from '../interfaces/TaskItemProps';
+import { priorityEmojis } from '../interfaces/TaskItem';
 import { t } from 'src/utils/lang/helper';
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {

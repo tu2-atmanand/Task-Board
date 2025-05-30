@@ -16,7 +16,7 @@ import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { t } from "./lang/helper";
-import { taskItem } from "src/interfaces/TaskItemProps";
+import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {

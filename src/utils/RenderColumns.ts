@@ -1,6 +1,6 @@
 // src/utils/RenderColumns.ts
 
-import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
+import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";

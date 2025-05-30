@@ -4,7 +4,7 @@ import {
 	taskItem,
 	taskJsonMerged,
 	tasksJson,
-} from "src/interfaces/TaskItemProps";
+} from "src/interfaces/TaskItem";
 
 import { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
