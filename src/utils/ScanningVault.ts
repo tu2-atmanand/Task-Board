@@ -10,11 +10,7 @@ import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
 } from "./JsonFileOperations";
-import {
-	priorityEmojis,
-	taskItem,
-	tasksJson,
-} from "src/interfaces/TaskItem";
+import { priorityEmojis, taskItem, tasksJson } from "src/interfaces/TaskItem";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -86,6 +82,7 @@ export class ScanningVault {
 					const due = extractDueDate(line);
 					const priority = extractPriority(line);
 					const completionDate = extractCompletionDate(line);
+					const cancelledDate = extractCancelledDate(line);
 					const body = extractBody(lines, i + 1);
 
 					const task = {
@@ -103,6 +100,7 @@ export class ScanningVault {
 						filePath: fileNameWithPath,
 						lineNumber: i + 1,
 						completion: completionDate,
+						cancelledDate: cancelledDate,
 					};
 
 					if (isTaskCompleted) {
@@ -154,6 +152,7 @@ export class ScanningVault {
 							const scheduledDate = extractScheduledDate(line);
 							const priority = extractPriority(line);
 							const completionDate = extractCompletionDate(line);
+							const cancelledDate = extractCancelledDate(line);
 							const body = extractBody(lines, i + 1);
 							let due = extractDueDate(line);
 							if (
@@ -163,7 +162,7 @@ export class ScanningVault {
 							) {
 								const dueFormat =
 									this.plugin.settings.data.globalSettings
-										.dueDateFormat;
+										.universalDateFormat;
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
@@ -193,6 +192,7 @@ export class ScanningVault {
 								filePath: fileNameWithPath,
 								lineNumber: i + 1,
 								completion: completionDate,
+								cancelledDate: cancelledDate,
 							};
 
 							if (isTaskCompleted) {
@@ -239,11 +239,17 @@ export class ScanningVault {
 	}
 }
 
+/**
+ * Function to build a task from raw content
+ * @param rawTaskContent - The raw content of the task ONLY.
+ * @param filePath - Optional file path where the task is located
+ * @returns A partial taskItem object with extracted properties
+ */
 export function buildTaskFromRawContent(
-	rawContent: string,
+	rawTaskContent: string,
 	filePath?: string
 ): Partial<taskItem> {
-	const lines = rawContent.split("\n");
+	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
 	const title = extractTitle(lines[0]);
 	const time = extractTime(lines[0]);
@@ -254,6 +260,7 @@ export function buildTaskFromRawContent(
 	const priority = extractPriority(lines[0]);
 	const tags = extractTags(lines[0]);
 	const completionDate = extractCompletionDate(lines[0]);
+	const cancelledDate = extractCancelledDate(lines[0]);
 	const body = extractBody(lines, 1);
 
 	return {
@@ -268,6 +275,7 @@ export function buildTaskFromRawContent(
 		tags,
 		priority,
 		completion: completionDate,
+		cancelledDate: cancelledDate,
 		filePath: filePath || "",
 	};
 }
@@ -504,4 +512,25 @@ export function extractCompletionDate(text: string): string {
 	}
 	// Return the matched date or date-time, or an empty string if no match
 	return match ? match[0].replace("✅", "").trim() : "";
+}
+
+export function extractCancelledDate(text: string): string {
+	let match = text.match(/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
+
+	console.log("Cancelled Date Match", match, " | for text : ", text);
+
+	// If not found, try to match the [cancelled:: 2024-09-28] format
+	if (!match) {
+		match = text.match(
+			/\[cancelled::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+		);
+	}
+
+	if (!match) {
+		match = text.match(
+			/\@cancelled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+		);
+	}
+	// Return the matched date or date-time, or an empty string if no match
+	return match ? match[0].trim() : "";
 }

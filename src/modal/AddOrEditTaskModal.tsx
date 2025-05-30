@@ -31,6 +31,7 @@ const taskItemEmpty = {
 	time: "",
 	priority: 0,
 	completion: "",
+	cancelledDate: "",
 	filePath: "",
 	lineNumber: 0,
 	status: taskStatuses.unchecked,
@@ -403,6 +404,7 @@ const EditTaskContent: React.FC<{
 			priority,
 			filePath: newFilePath,
 			lineNumber: task.lineNumber,
+			cancelledDate: task.cancelledDate || '',
 			status,
 		};
 		onSave(updatedTask, quickAddPluginChoice);
@@ -419,6 +421,8 @@ const EditTaskContent: React.FC<{
 		startDate: startDate,
 		scheduledDate: scheduledDate,
 		due: due,
+		completion: task.completion || '',
+		cancelledDate: task.cancelledDate || '',
 		tags: tags,
 		time: newTime,
 		priority: priority,

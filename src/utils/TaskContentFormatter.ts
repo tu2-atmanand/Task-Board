@@ -54,6 +54,12 @@ export const taskContentFormatter = (
 		updatedTask
 	);
 
+	updatedTitle = sanitizeCancellationDate(
+		globalSettings,
+		updatedTitle,
+		updatedTask
+	);
+
 	// Build the formatted string for the main task
 	let formattedTask = `${checkBoxStat} ${updatedTitle}`;
 
@@ -360,6 +366,60 @@ const sanitizeCompletionDate = (
 	// Replace the old completion date with the updated one
 	return title.replace(completionDateRegex, completedWitFormat);
 };
+
+const sanitizeCancellationDate = (
+	globalSettings: globalSettingsData,
+	title: string,
+	updatedTask: taskItem
+): string => {
+	const cancellationDateRegex =
+		/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[cancelled::\s*?\d{4}-\d{2}-\d{2}\]|@cancelled\(\d{4}-\d{2}-\d{2}\)/;
+	const extractedCancellationDateMatch = title.match(cancellationDateRegex);
+
+	if (!updatedTask.cancelledDate) {
+		// If cancellation date is empty, remove any existing cancellation date
+		if (extractedCancellationDateMatch) {
+			return title.replace(extractedCancellationDateMatch[0], "").trim();
+		}
+		return title;
+	}
+
+	let cancelledWithFormat: string = "";
+	if (updatedTask.cancelledDate) {
+		if (globalSettings?.taskCompletionFormat === "1") {
+			cancelledWithFormat = updatedTask.cancelledDate
+				? `❌${updatedTask.cancelledDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "2") {
+			cancelledWithFormat = updatedTask.cancelledDate
+				? `❌ ${updatedTask.cancelledDate}`
+				: "";
+		} else if (globalSettings?.taskCompletionFormat === "3") {
+			cancelledWithFormat = updatedTask.cancelledDate
+				? `[cancelled:: ${updatedTask.cancelledDate}]`
+				: "";
+		} else {
+			cancelledWithFormat = updatedTask.cancelledDate
+				? `@cancelled(${updatedTask.cancelledDate})`
+				: "";
+		}
+	}
+
+	if (!extractedCancellationDateMatch) {
+		// No existing cancellation date found, append new one at the end
+		return `${title} ${cancelledWithFormat}`;
+	}
+
+	const extractedCancellationDate = extractedCancellationDateMatch[0];
+
+	if (extractedCancellationDate.includes(cancelledWithFormat)) {
+		// If extracted cancellation date matches the new one, no need to change
+		return title;
+	}
+
+	// Replace the old cancellation date with the updated one
+	return title.replace(cancellationDateRegex, cancelledWithFormat);
+}
 
 /**
  * Function to sanitize the time inside the task title.
@@ -756,6 +816,13 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		const completionRegex =
 			/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(completionRegex, "");
+	}
+
+	// Remove cancelled date in various formats
+	if (task.cancelledDate) {
+		const cancelledRegex =
+			/\s*(❌\s*.*?(?=\s|$)|\[cancelled::.*?\]|@cancelled\(.*?\))/g;
+		cleanedTitle = cleanedTitle.replace(cancelledRegex, "");
 	}
 
 	// Remove priority in various formats

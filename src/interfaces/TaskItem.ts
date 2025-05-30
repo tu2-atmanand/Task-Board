@@ -26,6 +26,7 @@ export interface taskItem {
 	filePath: string;
 	lineNumber: number;
 	completion?: string;
+	cancelledDate?: string;
 }
 
 export interface tasksInFile {
