@@ -927,7 +927,7 @@ export class SettingsManager {
 		// });
 
 		const {
-			dueDateFormat,
+			universalDateFormat,
 			taskCompletionFormat,
 			// taskCompletionDateTimePattern,
 			firstDayOfWeek,
@@ -1027,15 +1027,15 @@ export class SettingsManager {
 				});
 			});
 
-		// Text input for the dueDateFormat
+		// Text input for the universalDateFormat
 		new Setting(contentEl)
-			.setName(t("due-date-format"))
-			.setDesc(t("due-date-format-info"))
+			.setName(t("universal-date-format"))
+			.setDesc(t("universal-date-format-info"))
 			.addText((text) =>
 				text
-					.setValue(dueDateFormat)
+					.setValue(universalDateFormat)
 					.onChange(async (value) => {
-						this.globalSettings!.dueDateFormat = value;
+						this.globalSettings!.universalDateFormat = value;
 						await this.saveSettings();
 						updatePreview(); // Update the preview when the text pattern changes
 					})
