@@ -101,6 +101,7 @@ export class ScanningVault {
 						tags,
 						priority,
 						filePath: fileNameWithPath,
+						lineNumber: i + 1,
 						completion: completionDate,
 					};
 
@@ -190,6 +191,7 @@ export class ScanningVault {
 								tags,
 								priority,
 								filePath: fileNameWithPath,
+								lineNumber: i + 1,
 								completion: completionDate,
 							};
 

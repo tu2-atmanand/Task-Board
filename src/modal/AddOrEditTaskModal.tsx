@@ -1,6 +1,6 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Modal, debounce } from "obsidian";
+import { App, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -32,6 +32,7 @@ const taskItemEmpty = {
 	priority: 0,
 	completion: "",
 	filePath: "",
+	lineNumber: 0,
 	status: taskStatuses.unchecked,
 };
 
@@ -337,11 +338,33 @@ const EditTaskContent: React.FC<{
 		setUpdateEditorContent(true);
 	};
 
-	const onOpenFilBtnClicked = (newWindow: boolean) => {
+	const onOpenFilBtnClicked = async (evt: UserEvent, newWindow: boolean) => {
 		if (newWindow) {
-			app.workspace.openLinkText('', newFilePath, 'window')
+			// app.workspace.openLinkText('', newFilePath, 'window')
+			const leaf = app.workspace.getLeaf('window');
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.lineNumber - 1 } });
+			} else {
+				new Notice(t("file-not-found"));
+			}
 		} else {
-			app.workspace.openLinkText('', newFilePath, false)
+			// await app.workspace.openLinkText('', newFilePath, false);
+			// const activeEditor = app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+			// console.log("Note View:", activeEditor);
+			// activeEditor?.scrollIntoView({
+			// 	from: { line: 5, ch: 0 },
+			// 	to: { line: 5, ch: 5 },
+			// }, true);
+
+			const leaf = app.workspace.getLeaf(Keymap.isModEvent(evt));
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+			console.log("File to open:", file, " | Line Number : ", task.lineNumber);
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.lineNumber - 1 } });
+			} else {
+				new Notice(t("file-not-found"));
+			}
 		}
 		onClose();
 	}
@@ -379,6 +402,7 @@ const EditTaskContent: React.FC<{
 			time: newTime,
 			priority,
 			filePath: newFilePath,
+			lineNumber: task.lineNumber,
 			status,
 		};
 		onSave(updatedTask, quickAddPluginChoice);
@@ -399,6 +423,7 @@ const EditTaskContent: React.FC<{
 		time: newTime,
 		priority: priority,
 		filePath: newFilePath,
+		lineNumber: task.lineNumber,
 		status,
 	};
 	// Reference to the HTML element where markdown will be rendered
@@ -584,8 +609,6 @@ const EditTaskContent: React.FC<{
 	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
 	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
 
-	const defaultTagColor = 'var(--tag-color)';
-
 	const filePathRef = useRef<HTMLInputElement>(null);
 
 	const communityPlugins = new CommunityPlugins(plugin);
@@ -658,7 +681,7 @@ const EditTaskContent: React.FC<{
 									{taskExists && <button className="EditTaskModalHomeOpenFileBtn"
 										id="EditTaskModalHomeOpenFileBtn"
 										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-										onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
+										onClick={(event) => isCtrlPressed ? onOpenFilBtnClicked(event.nativeEvent, true) : onOpenFilBtnClicked(event.nativeEvent, false)}
 									>
 										<FileInput height={20} />
 									</button>}

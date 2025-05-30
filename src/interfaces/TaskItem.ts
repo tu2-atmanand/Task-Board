@@ -24,6 +24,7 @@ export interface taskItem {
 	priority: number;
 	status: string;
 	filePath: string;
+	lineNumber: number;
 	completion?: string;
 }
 
