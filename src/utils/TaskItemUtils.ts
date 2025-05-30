@@ -155,6 +155,73 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 	}
 };
 
+export const archiveTask = async (plugin: TaskBoard, task: taskItem) => {
+	// THis function will first going to read the value of plugin.setting.data.globalsetting.archivedTasksFile. If this settings contains the path of the file, then it will simply remove that task from its original file and put it into this new archived file at the top of the content. If the setting do not contains any file path, then it will add '%%' at the beginning and end of the task content and then paste in the same original file.
+	const archivedFilePath =
+		plugin.settings.data.globalSettings.archivedTasksFilePath;
+	if (archivedFilePath) {
+		try {
+			// Read the content of the file where archived tasks will be stored
+			const archivedFileContent = await readDataOfVaultFiles(
+				plugin,
+				archivedFilePath
+			);
+
+			// Prepare the task content to be archived
+			const completeTask = taskContentFormatter(plugin, task);
+			console.log(
+				"archiveTask : completeTask :\n",
+				completeTask
+			);
+			if (completeTask === "")
+				throw "taskContentFormatter returned empty string";
+
+			// Add the task to the top of the archived file content
+			const newArchivedContent = `> Archived at ${new Date().toLocaleString()}\n${completeTask}\n\n${archivedFileContent}`;
+
+			// Write the updated content back to the archived file
+			await writeDataToVaultFiles(
+				plugin,
+				archivedFilePath,
+				newArchivedContent
+			);
+
+			// Now delete the task from its original file
+			await deleteTaskFromFile(plugin, task);
+			await deleteTaskFromJson(plugin, task);
+			eventEmitter.emit("REFRESH_COLUMN");
+		} catch (error) {
+			console.error("Error archiving task:", error);
+		}
+	} else if (archivedFilePath === "") {
+		// If the archived file path is empty, just mark the task as archived in the same file
+		const completeTask = taskContentFormatter(plugin, task);
+		if (completeTask === "")
+			throw "taskContentFormatter returned empty string";
+		const filePath = task.filePath;
+		try {
+			// Read the file content
+			const fileContent = await readDataOfVaultFiles(plugin, filePath);
+
+			const newContet = fileContent.replace(
+				completeTask,
+				`%%${completeTask}%%`
+			);
+
+			// Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContet);
+			await deleteTaskFromJson(plugin, task);
+			eventEmitter.emit("REFRESH_COLUMN");
+		} catch (error) {
+			console.error("Error archiving task in same file:", error);
+		}
+	} else {
+		console.warn(
+			"archiveTask : No archived tasks file path specified in settings."
+		);
+	}
+};
+
 // For handleEditTask and for handleSubTasksChange, when task is edited from Modal
 
 export const updateTaskInFile = async (

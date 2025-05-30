@@ -84,6 +84,7 @@ export interface globalSettingsData {
 		reminderPlugin: boolean;
 		quickAddPlugin: boolean;
 	};
+	archivedTasksFilePath: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -326,6 +327,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			},
 			preDefinedNote: "Task_board_note.md",
 			quickAddPluginDefaultChoice: "",
+			archivedTasksFilePath: "",
 		},
 	},
 };

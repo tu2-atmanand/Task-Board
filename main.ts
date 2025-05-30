@@ -341,6 +341,9 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
+				if(file.path === this.settings.data.globalSettings.archivedTasksFilePath) {
+					return false;
+				}
 				this.editorModified = true;
 				if (file instanceof TFile) {
 					if (!file.path.endsWith(".excalidraw.md")) {

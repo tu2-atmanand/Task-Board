@@ -655,6 +655,7 @@ export class SettingsManager {
 			editButtonAction,
 			preDefinedNote,
 			quickAddPluginDefaultChoice,
+			archivedTasksFilePath,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -770,6 +771,39 @@ export class SettingsManager {
 				})
 			);
 
+		// Setting for choosing the default file to archive tasks
+		new Setting(contentEl)
+			.setName(t("Note to add your archived tasks"))
+			.setDesc(
+				t(
+					"Select the note in which all the archived tasks should be saved. Leave blank to simply comment out the task in the note itself."
+				)
+			)
+			.addText((text) => {
+				text.setValue(archivedTasksFilePath).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.archivedTasksFilePath = value;
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFileSuggestions(app);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.archivedTasksFilePath =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.plugin.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
+
 		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
 		new Setting(contentEl)
 			.setName(t("auto-scan-the-vault-on-obsidian-startup"))
@@ -864,7 +898,6 @@ export class SettingsManager {
 					this.app,
 					communityPlugins.quickAddPlugin
 				);
-				console.log("suggestionContent", suggestionContent);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.quickAddPluginDefaultChoice =

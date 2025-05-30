@@ -1,5 +1,6 @@
 import { checkboxStateSwitcher, isCompleted } from "./CheckBoxUtils";
 import {
+	archiveTask,
 	deleteTaskFromFile,
 	deleteTaskFromJson,
 	moveFromCompletedToPending,
@@ -81,6 +82,9 @@ export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
 		},
 		onCancel: () => {
 			// console.log('Task deletion canceled');
+		},
+		onArchive: () => {
+			archiveTask(plugin, task);
 		},
 	});
 	deleteModal.open();

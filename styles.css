@@ -943,6 +943,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	cursor: pointer;
 }
 
+.archiveTaskCancelmBtn {
+	padding-block: 4px;
+	padding-inline: 25px;
+	cursor: pointer;
+}
+
 .deleteTaskCancelmBtn {
 	padding-block: 4px;
 	padding-inline: 25px;
@@ -952,6 +958,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .deleteTaskConfirmBtn:hover {
 	background-color: red !important;
 	/* Change background to green on hover */
+}
+
+.archiveTaskCancelmBtn:hover {
+	background-color: #818108 !important;
+	/* Change background to red on hover */
 }
 
 .deleteTaskCancelmBtn:hover {
