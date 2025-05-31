@@ -13,40 +13,27 @@
             "index": 1
           },
           {
-            "id": 3492,
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "name": "Over Due",
-            "index": 2,
-            "datedBasedColumn": {
-              "from": -300,
-              "to": -1
-            }
-          },
-          {
-            "id": 3493,
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "name": "Tomorrow",
-            "index": 4,
-            "datedBasedColumn": {
-              "from": 1,
-              "to": 1,
-              "dateType": "due"
-            }
-          },
-          {
             "id": 3494,
             "colType": "dated",
             "active": true,
             "collapsed": false,
-            "name": "Today, updating",
-            "index": 3,
+            "name": "Today, updated",
+            "index": 2,
             "datedBasedColumn": {
               "from": 0,
               "to": 0
+            }
+          },
+          {
+            "id": 3492,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Over Due, updating",
+            "index": 3,
+            "datedBasedColumn": {
+              "from": -300,
+              "to": -1
             }
           },
           {
@@ -55,10 +42,23 @@
             "active": true,
             "collapsed": false,
             "name": "Future",
-            "index": 5,
+            "index": 4,
             "datedBasedColumn": {
               "from": 2,
               "to": 300,
+              "dateType": "due"
+            }
+          },
+          {
+            "id": 3493,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Tomorrow",
+            "index": 5,
+            "datedBasedColumn": {
+              "from": 1,
+              "to": 1,
               "dateType": "due"
             }
           },
@@ -72,12 +72,31 @@
             "index": 6
           },
           {
-            "id": 3496,
-            "colType": "dated",
+            "id": 4988,
+            "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Test",
-            "index": 7
+            "name": "Bug",
+            "index": 8,
+            "coltag": "bug"
+          },
+          {
+            "id": 5794,
+            "index": 8,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "In Progress",
+            "taskStatus": "/"
+          },
+          {
+            "id": 9075,
+            "index": 9,
+            "colType": "taskPriority",
+            "active": true,
+            "collapsed": false,
+            "name": "Highest Priority",
+            "taskPriority": 1
           }
         ],
         "filters": [
@@ -101,22 +120,25 @@
             "collapsed": false,
             "name": "Can be implemented",
             "index": 1,
-            "coltag": "pending"
-          },
-          {
-            "colType": "untagged",
-            "active": true,
-            "collapsed": false,
-            "name": "Backlogs",
-            "index": 2
+            "coltag": "pending",
+            "id": 47626
           },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "In Progress",
+            "index": 2,
+            "coltag": "working",
+            "id": 908753
+          },
+          {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
             "index": 3,
-            "coltag": "working"
+            "id": 226119
           },
           {
             "colType": "namedTag",
@@ -124,7 +146,8 @@
             "collapsed": false,
             "name": "In Review",
             "index": 4,
-            "coltag": "Test"
+            "coltag": "Test",
+            "id": 396902
           },
           {
             "colType": "namedTag",
@@ -132,22 +155,25 @@
             "collapsed": false,
             "name": "Working as Expected",
             "index": 5,
-            "coltag": "done"
+            "coltag": "done",
+            "id": 328227
           },
           {
             "colType": "otherTags",
             "active": true,
             "collapsed": false,
             "name": "All other tags",
-            "index": 6
+            "index": 6,
+            "id": 272793
           },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "A Tasks",
+            "name": "A Tasks, update",
             "index": 7,
-            "coltag": "A"
+            "coltag": "A",
+            "id": 710408
           }
         ],
         "filters": [
@@ -171,7 +197,8 @@
             "active": true,
             "collapsed": false,
             "name": "Un tracked",
-            "index": 1
+            "index": 1,
+            "id": 70513
           },
           {
             "colType": "dated",
@@ -182,7 +209,8 @@
             "datedBasedColumn": {
               "from": 0,
               "to": 6
-            }
+            },
+            "id": 923196
           },
           {
             "colType": "namedTag",
@@ -190,21 +218,24 @@
             "collapsed": false,
             "name": "Testing tasks",
             "index": 3,
-            "coltag": "Test"
+            "coltag": "Test",
+            "id": 179607
           },
           {
             "colType": "untagged",
             "active": true,
             "collapsed": false,
             "name": "All untagged tasks",
-            "index": 4
+            "index": 4,
+            "id": 994868
           },
           {
             "colType": "otherTags",
             "active": true,
             "collapsed": false,
             "name": "All other tagged tasks",
-            "index": 5
+            "index": 5,
+            "id": 626251
           },
           {
             "colType": "completed",
@@ -212,7 +243,8 @@
             "collapsed": false,
             "name": "All done tasks",
             "index": 6,
-            "limit": 20
+            "limit": 20,
+            "id": 815916
           }
         ],
         "hideEmptyColumns": true
