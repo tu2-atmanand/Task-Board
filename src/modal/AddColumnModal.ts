@@ -1,15 +1,20 @@
 // /src/modal/AddColumnModal.ts
 
+import { randomInt } from "crypto";
 import { App, Modal } from "obsidian";
+import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
 import { t } from "src/utils/lang/helper";
 
 export type columnDataProp = {
+	id: number;
 	colType: string;
 	name: string;
-	active: boolean;
+	active?: boolean;
 	datedBasedColumn?: { dateType: string; from: number; to: number };
 	coltag?: string;
+	taskStatus?: string;
+	taskPriority?: number;
 	limit?: number;
 };
 
@@ -21,11 +26,14 @@ interface AddColumnModalProps {
 
 export class AddColumnModal extends Modal {
 	private onSubmit: (columnData: {
+		id: number;
 		colType: string;
 		name: string;
-		active: boolean;
-		range?: { from: number; to: number };
+		active?: boolean;
+		datedBasedColumn?: { dateType: string; from: number; to: number };
 		coltag?: string;
+		taskStatus?: string;
+		taskPriority?: number;
 		limit?: number;
 	}) => void;
 	private onCancel: () => void;
@@ -71,6 +79,8 @@ export class AddColumnModal extends Modal {
 			{ value: "namedTag", text: t("tagged") },
 			{ value: "untagged", text: t("untagged") },
 			{ value: "otherTags", text: t("other-tags") },
+			{ value: "taskStatus", text: t("status") },
+			{ value: "taskPriority", text: t("priority") },
 			{ value: "completed", text: t("completed") },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
@@ -110,33 +120,50 @@ export class AddColumnModal extends Modal {
 		});
 		const submitButton = actions.createEl("button", { text: t("submit") });
 		submitButton.addEventListener("click", () => {
-			const active = true;
 			if (this.colType === "dated") {
 				this.onSubmit({
+					id: randomInt(1000, 9999),
 					colType: this.colType,
 					name: this.name,
-					active,
-					range: { from: 0, to: 0 },
+					datedBasedColumn: {
+						dateType: UniversalDateOptions.dueDate,
+						from: 0,
+						to: 0,
+					},
 				}); // Add range data
 			} else if (this.colType === "namedTag") {
 				this.onSubmit({
+					id: randomInt(1000, 9999),
 					colType: this.colType,
 					name: this.name,
-					active,
 					coltag: "",
-				}); // Add coltag
+				});
+			} else if (this.colType === "taskStatus") {
+				this.onSubmit({
+					id: randomInt(1000, 9999),
+					colType: this.colType,
+					name: this.name,
+					taskStatus: "",
+				});
+			} else if (this.colType === "taskPriority") {
+				this.onSubmit({
+					id: randomInt(1000, 9999),
+					colType: this.colType,
+					name: this.name,
+					taskPriority: 1,
+				});
 			} else if (this.colType === "completed") {
 				this.onSubmit({
+					id: randomInt(1000, 9999),
 					colType: this.colType,
 					name: this.name,
-					active,
 					limit: 20,
 				}); // Add limit
 			} else {
 				this.onSubmit({
+					id: randomInt(1000, 9999),
 					colType: this.colType,
 					name: this.name,
-					active,
 				});
 			}
 			this.close();

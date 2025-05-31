@@ -29,7 +29,6 @@ export const renderColumns = (
 			to: 0,
 		};
 
-		
 		tasksToDisplay = pendingTasks.filter((task) => {
 			let taskUniversalDate = task.due;
 			if (dateType === UniversalDateOptions.startDate) {
@@ -166,6 +165,14 @@ export const renderColumns = (
 		});
 
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);
+	} else if (columnData.colType === "taskStatus") {
+		tasksToDisplay = pendingTasks.filter(
+			(task) => task.status === columnData.taskStatus
+		);
+	} else if (columnData.colType === "taskPriority") {
+		tasksToDisplay = pendingTasks.filter(
+			(task) => task.priority === columnData.taskPriority
+		);
 	}
 
 	// setTasks(tasksToDisplay);

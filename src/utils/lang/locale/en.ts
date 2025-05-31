@@ -205,6 +205,9 @@ const en: Lang = {
 	"add-new-task-in-current-file": "Add new task in current note",
 	"automatically-hide-empty-columns": "Auto hide empty columns",
 	"automatically-hide-empty-columns-info": "Enable this setting to automatically hide the columns which has no tasks in it. This will help you to focus on the tasks which are relevant to you.",
+	"status": "Status",
+	"enter-status-placeholder": "eg.: /",
+	"enter-tag-placeholder": "enter number from 1-5"
 };
 
 export default en;

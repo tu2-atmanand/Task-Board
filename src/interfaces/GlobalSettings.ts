@@ -103,6 +103,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				columns: [
 					{
+						id: 1,
 						colType: "undated",
 						active: true,
 						collapsed: false,
@@ -110,6 +111,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 1,
 					},
 					{
+						id: 2,
 						colType: "dated",
 						active: true,
 						collapsed: false,
@@ -122,6 +124,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
+						id: 3,
 						colType: "dated",
 						active: true,
 						collapsed: false,
@@ -134,6 +137,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
+						id: 4,
 						colType: "dated",
 						active: true,
 						collapsed: false,
@@ -146,6 +150,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
+						id: 5,
 						colType: "dated",
 						active: true,
 						collapsed: false,
@@ -158,6 +163,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
+						id: 6,
 						colType: "completed",
 						active: true,
 						collapsed: false,
@@ -177,6 +183,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				columns: [
 					{
+						id: 7,
 						colType: "untagged",
 						active: true,
 						collapsed: false,
@@ -184,6 +191,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 1,
 					},
 					{
+						id: 8,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -192,6 +200,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "pending",
 					},
 					{
+						id: 9,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -200,6 +209,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "working",
 					},
 					{
+						id: 10,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -208,6 +218,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "done",
 					},
 					{
+						id: 11,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -216,6 +227,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "Test",
 					},
 					{
+						id: 12,
 						colType: "Completed",
 						active: true,
 						collapsed: false,

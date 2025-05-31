@@ -1,16 +1,19 @@
 // Define the structure of Board, Column, and the Data read from JSON
 export type ColumnData = {
+	id: number;
+	index: number;
 	colType: string;
 	active: boolean;
 	collapsed?: boolean;
 	name: string;
-	index: number;
 	coltag?: string;
 	datedBasedColumn?: {
 		dateType: string; // e.g., "due", "created", "scheduled"
 		from: number;
 		to: number;
 	};
+	taskStatus?: string;
+	taskPriority?: number;
 	limit?: number;
 	sort?: {
 		criteria: string;

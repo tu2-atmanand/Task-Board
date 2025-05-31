@@ -341,7 +341,10 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
-				if(file.path === this.settings.data.globalSettings.archivedTasksFilePath) {
+				if (
+					file.path ===
+					this.settings.data.globalSettings.archivedTasksFilePath
+				) {
 					return false;
 				}
 				this.editorModified = true;
@@ -617,6 +620,9 @@ export default class TaskBoard extends Plugin {
 				// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
 				settings[key].forEach((boardConfig: any) => {
 					boardConfig.columns.forEach((column: any) => {
+						if (!column.id) {
+							column.id = Math.floor(Math.random() * 1000000);
+						}
 						if (column.colType === "dated" && column.range) {
 							column.datedBasedColumn = {
 								dateType:
