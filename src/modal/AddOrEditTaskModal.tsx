@@ -1,6 +1,6 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce } from "obsidian";
+import { App, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -15,7 +15,7 @@ import { getUniversalDate, taskContentFormatter } from "src/utils/TaskContentFor
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
 import { FileInput, RefreshCcw } from "lucide-react";
-import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices } from "src/services/MultiSuggest";
+import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
@@ -614,7 +614,6 @@ const EditTaskContent: React.FC<{
 	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
 
 	const filePathRef = useRef<HTMLInputElement>(null);
-
 	const communityPlugins = new CommunityPlugins(plugin);
 	useEffect(() => {
 		if (!filePathRef.current) return;
@@ -636,6 +635,22 @@ const EditTaskContent: React.FC<{
 			};
 			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, app);
 		}
+	}, [app]);
+
+	const tagsInputFieldRef = useRef<HTMLInputElement>(null);
+	useEffect(() => {
+		if (!tagsInputFieldRef.current) return;
+
+		const suggestionContent = getTagSuggestions(app);
+		console.log("Tag Suggestions: ", suggestionContent);
+		const onSelectCallback = (choice: string) => {
+			handleTagInput({
+				key: 'Enter',
+				currentTarget: { value: choice },
+			} as React.KeyboardEvent<HTMLInputElement>);
+			// setNewFilePath(selectedPath);
+		};
+		new MultiSuggest(tagsInputFieldRef.current, new Set(suggestionContent), onSelectCallback, app);
 	}, [app]);
 
 	return (
@@ -800,6 +815,7 @@ const EditTaskContent: React.FC<{
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("tag")}</label>
 							<input
+								ref={tagsInputFieldRef}
 								className="EditTaskModalHome-tagValue"
 								type="text"
 								placeholder={t("hit-enter-after-typing-tag")}
