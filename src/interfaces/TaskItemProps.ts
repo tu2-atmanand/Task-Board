@@ -17,11 +17,13 @@ export interface taskItem {
 	body: string[];
 	due: string;
 	tags: string[];
+	frontmatterTags: string[]; // Tags extracted from frontmatter
 	time: string;
 	priority: number;
 	completion?: string;
 	status: string;
 	filePath: string;
+	frontmatter?: any; // Add new frontmatter property
 }
 
 export interface tasksInFile {

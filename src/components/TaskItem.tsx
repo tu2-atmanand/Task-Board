@@ -274,10 +274,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemHeader">
 							<div className="taskItemHeaderLeft">
-								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
-
-								{/* Render tags individually */}
+								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>								{/* Render tags individually */}
 								<div className="taskItemTags">
+									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
 										const tagName = tag.replace('#', '');
 										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
@@ -307,6 +306,44 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 													border: `1px solid ${borderColor}`,
 													backgroundColor: backgroundColor
 												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+									
+									{/* Render frontmatter tags (read-only) */}
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+										const tagName = tag.replace('#', '');
+										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
+										const tagColor = customTag?.color || `var(--tag-color)`;
+										const backgroundColor = customTag ? updateRGBAOpacity(customTag.color, 0.05) : `var(--tag-background-hover)`; // More transparent for frontmatter tags
+										const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.3) : `var(--tag-color)`;
+
+										// Check column filtering same as regular tags
+										const column = activeBoardSettings.columns[columnIndex - 1];
+										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
+											return null;
+										}
+
+										// Check filter visibility same as regular tags
+										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters?.at(0) != null && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
+											return null;
+										}
+
+										const tagKey = `${task.id}-fm-${tag}`;
+										// Render frontmatter tags with different styling
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTag taskItemTagFrontmatter"
+												style={{
+													color: tagColor,
+													border: `1px dashed ${borderColor}`,
+													backgroundColor: backgroundColor,
+													opacity: 0.8
+												}}
+												title="Tag from frontmatter (read-only)"
 											>
 												{tag}
 											</div>

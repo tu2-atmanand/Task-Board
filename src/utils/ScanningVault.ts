@@ -1,6 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, TFile, moment as _moment } from "obsidian";
+import * as yaml from "js-yaml";
 import {
 	extractCheckboxSymbol,
 	isCompleted,
@@ -23,6 +24,64 @@ import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
 import { scanFilters } from "src/interfaces/GlobalSettings";
+
+// Function to extract frontmatter from file content
+export function extractFrontmatter(fileContent: string): any {
+	// Check if the file starts with frontmatter delimiter
+	if (!fileContent.startsWith('---\n')) {
+		return null;
+	}
+
+	// Find the end of frontmatter
+	const secondDelimiterIndex = fileContent.indexOf('\n---\n', 4);
+	if (secondDelimiterIndex === -1) {
+		return null;
+	}
+
+	// Extract the YAML content between delimiters
+	const yamlContent = fileContent.substring(4, secondDelimiterIndex);
+	
+	try {
+		// Parse the YAML content
+		const frontmatter = yaml.load(yamlContent);
+		return frontmatter;
+	} catch (error) {
+		console.warn('Failed to parse frontmatter:', error);
+		return null;
+	}
+}
+
+// Function to extract tags from frontmatter
+export function extractFrontmatterTags(frontmatter: any): string[] {
+	if (!frontmatter) {
+		return [];
+	}
+
+	let tags: string[] = [];
+
+	// Check if there's a 'tags' property in frontmatter
+	if (frontmatter.tags) {
+		if (Array.isArray(frontmatter.tags)) {
+			// If tags is an array, process each tag
+			tags = frontmatter.tags.map((tag: any) => {
+				const tagStr = String(tag).trim();
+				// Ensure tags start with # if they don't already
+				return tagStr.startsWith('#') ? tagStr : `#${tagStr}`;
+			});
+		} else if (typeof frontmatter.tags === 'string') {
+			// If tags is a string, split by commas and process
+			tags = frontmatter.tags
+				.split(',')
+				.map((tag: string) => {
+					const tagStr = tag.trim();
+					return tagStr.startsWith('#') ? tagStr : `#${tagStr}`;
+				})
+				.filter((tag: string) => tag.length > 1); // Filter out empty tags
+		}
+	}
+
+	return tags;
+}
 
 export class ScanningVault {
 	app: App;
@@ -52,7 +111,6 @@ export class ScanningVault {
 		// Emit the event
 		eventEmitter.emit("REFRESH_BOARD");
 	}
-
 	// Extract tasks from a specific file
 	async extractTasksFromFile(
 		file: TFile,
@@ -66,6 +124,9 @@ export class ScanningVault {
 		);
 		const lines = fileContent.split("\n");
 
+		// Extract frontmatter from the file
+		const frontmatter = extractFrontmatter(fileContent);
+
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
 
@@ -76,13 +137,15 @@ export class ScanningVault {
 				if (scanFilterForTags(tags, scanFilters)) {
 					this.TaskDetected = true;
 					const taskStatus = extractCheckboxSymbol(line);
-					const isTaskCompleted = isCompleted(line);
-					const title = extractTitle(line);
+					const isTaskCompleted = isCompleted(line);					const title = extractTitle(line);
 					const time = extractTime(line);
 					const due = extractDueDate(line);
 					const priority = extractPriority(line);
 					const completionDate = extractCompletionDate(line);
 					const body = extractBody(lines, i + 1);
+
+					// Extract frontmatter tags
+					const frontmatterTags = extractFrontmatterTags(frontmatter);
 
 					const task = {
 						id: this.generateTaskId(),
@@ -92,9 +155,11 @@ export class ScanningVault {
 						time,
 						due,
 						tags,
+						frontmatterTags,
 						priority,
 						filePath: fileNameWithPath,
 						completion: completionDate,
+						frontmatter: frontmatter,
 					};
 
 					if (isTaskCompleted) {
@@ -122,7 +187,6 @@ export class ScanningVault {
 		const oldTasks = await loadTasksJsonFromDisk(this.plugin);
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
-
 		for (const file of files) {
 			if (file !== null) {
 				const fileNameWithPath = file.path;
@@ -130,6 +194,9 @@ export class ScanningVault {
 				const lines = fileContent.split("\n");
 				const newPendingTasks: any[] = [];
 				const newCompletedTasks: any[] = [];
+
+				// Extract frontmatter from the file
+				const frontmatter = extractFrontmatter(fileContent);
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i];
@@ -164,8 +231,10 @@ export class ScanningVault {
 									due = basename; // If the basename matches the dueFormat, assign it to due
 								} else {
 									due = ""; // If not, assign an empty string
-								}
-							}
+								}							}
+
+							// Extract frontmatter tags
+							const frontmatterTags = extractFrontmatterTags(frontmatter);
 
 							const task = {
 								id: this.generateTaskId(),
@@ -175,9 +244,11 @@ export class ScanningVault {
 								time,
 								due,
 								tags,
+								frontmatterTags,
 								priority,
 								filePath: fileNameWithPath,
 								completion: completionDate,
+								frontmatter: frontmatter,
 							};
 
 							if (isTaskCompleted) {
