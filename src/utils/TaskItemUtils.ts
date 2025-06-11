@@ -13,6 +13,7 @@ import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
 } from "./MarkdownFileOperations";
+import { extractFrontmatter, extractFrontmatterTags } from "./ScanningVault";
 
 import { App } from "obsidian";
 import TaskBoard from "main";
@@ -335,11 +336,18 @@ export const generateTaskId = (): number => {
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadTasksJsonFromDisk(plugin);
 
+	// Read the file content to extract frontmatter
+	const fileContent = await readDataOfVaultFiles(plugin, newTask.filePath);
+	const frontmatter = extractFrontmatter(fileContent);
+	const frontmatterTags = extractFrontmatterTags(frontmatter);
+
 	const newTaskWithId = {
 		...newTask,
 		id: generateTaskId(),
 		filePath: newTask.filePath,
 		completed: "", // This will be updated when task is marked as complete
+		frontmatter: frontmatter,
+		frontmatterTags: frontmatterTags,
 	};
 
 	// Update the task list (assuming it's a file-based task structure)
