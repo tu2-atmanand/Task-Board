@@ -149,6 +149,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			coltag: columnData.coltag,
 			range: columnData.range,
 			limit: columnData.limit,
+			path: columnData.path,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -389,6 +390,22 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													)
 												}
 												className="boardConfigModalColumnRowContentColDatedVal"
+											/>
+										)}
+										{column.colType === "pathFiltered" && (
+											<input
+												type="text"
+												placeholder={t("enter-path-pattern")}
+												value={column.path || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"path",
+														e.target.value
+													)
+												}
+												className="boardConfigModalColumnRowContentColName"
 											/>
 										)}
 										{column.colType === "dated" && (

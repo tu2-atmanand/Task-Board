@@ -11,6 +11,7 @@ export type columnDataProp = {
 	range?: { tag: string; rangedata: { from: number; to: number } };
 	coltag?: string;
 	limit?: number;
+	path?: string;
 };
 
 interface AddColumnModalProps {
@@ -27,6 +28,7 @@ export class AddColumnModal extends Modal {
 		range?: { tag: string; rangedata: { from: number; to: number } };
 		coltag?: string;
 		limit?: number;
+		path?: string;
 	}) => void;
 	private onCancel: () => void;
 	private colType: string;
@@ -72,6 +74,7 @@ export class AddColumnModal extends Modal {
 			{ value: "untagged", text: t("untagged") },
 			{ value: "otherTags", text: t("other-tags") },
 			{ value: "completed", text: t("completed") },
+			{ value: "pathFiltered", text: t("path-filtered") },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },
@@ -125,6 +128,13 @@ export class AddColumnModal extends Modal {
 					active,
 					limit: 20,
 				}); // Add limit
+			} else if (this.colType === "pathFiltered") {
+				this.onSubmit({
+					colType: this.colType,
+					name: this.name,
+					active,
+					path: "",
+				}); // Add path filter
 			} else {
 				this.onSubmit({
 					colType: this.colType,
