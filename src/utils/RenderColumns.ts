@@ -111,6 +111,34 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter((task) =>
 			task.tags.some((tag) => tag === `#${columnData.coltag}`)
 		);
+	} else if (columnData.colType === "pathFiltered") {
+	
+		// Filter tasks based on their file path
+		if (columnData.path) {
+			// Split the path patterns by comma and trim whitespace
+			const pathPatterns = columnData.path
+				.split(',')
+				.map((pattern: string) => pattern.trim().toLowerCase())
+				.filter((pattern: string) => pattern.length > 0);
+			
+			if (pathPatterns.length > 0) {
+				tasksToDisplay = pendingTasks.filter((task) => {
+					if (!task.filePath) {
+						console.log("Task missing filePath:", task);
+						return false;
+					}
+					
+					const lowerCasePath = task.filePath.toLowerCase();
+					const matchedPattern = pathPatterns.some((pattern: string) => lowerCasePath.includes(pattern));
+					console.log(`Checking task path: ${lowerCasePath}, matched: ${matchedPattern}`);
+					return matchedPattern;
+				});
+			} else {
+				tasksToDisplay = [];
+			}
+		} else {
+			tasksToDisplay = [];
+		}
 	} else if (columnData.colType === "otherTags") {
 		// 1. Get the current board based on activeBoard index
 		const currentBoard = plugin.settings.data.boardConfigs.find(
