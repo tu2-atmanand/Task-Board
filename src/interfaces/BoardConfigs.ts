@@ -6,6 +6,7 @@ export type ColumnData = {
 	name: string;
 	index: number;
 	coltag?: string;
+	path?: string;
 	range?: {
 		tag: string;
 		rangedata: {
