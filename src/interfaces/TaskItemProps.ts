@@ -1,4 +1,4 @@
-import { Board } from "./BoardConfigs";
+import { Board, ColumnData } from "./BoardConfigs";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
@@ -9,6 +9,7 @@ export interface TaskProps {
 	task: taskItem;
 	columnIndex: number;
 	activeBoardSettings: Board;
+	columnData?: ColumnData; // Agregado para soporte de drag & drop
 }
 
 export interface taskItem {

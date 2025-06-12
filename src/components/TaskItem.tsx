@@ -16,9 +16,10 @@ import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItemProps';
 import { t } from 'src/utils/lang/helper';
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
+const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings, columnData }) => {
 	const [isChecked, setIsChecked] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
+	const [isDragging, setIsDragging] = useState(false);
 
 	// const handleTaskInteraction = useCallback(
 	// 	(task: taskItem, type: string) => {
@@ -28,6 +29,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// 	},
 	// 	[handleEditTask, handleDeleteTask, handleCheckboxChange, plugin]
 	// );
+
+	// Ref to access the DOM element of the task item
+	const taskItemRef = useRef<HTMLDivElement>(null);
 
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
@@ -56,7 +60,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, titleElement, task.filePath, task.filePath);
 			}
 		}
-	}, [task.title, task.filePath]);
+	}, [task.title, task.filePath, task.tags]);
 
 	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
@@ -216,6 +220,40 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		return highestPriorityTag?.color;
 	}
 
+	
+	// Handlers for drag and drop
+	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// Only allow dragging if this column is of type "namedTag"
+		if (columnData?.colType !== 'namedTag') {
+			e.preventDefault();
+			return;
+		}
+
+		// Add task data and source column to the dataTransfer object
+		e.dataTransfer.setData('application/json', JSON.stringify({
+			task,
+			sourceColumnData: columnData
+		}));
+		
+		// Set visual effect for dragging
+		e.dataTransfer.effectAllowed = 'move';
+		
+		// Add dragging class for visual effects
+		setIsDragging(true);
+		
+		// Define the drag image (optional)
+		if (taskItemRef.current) {
+			// Create a copy of the element for the drag image
+			const rect = taskItemRef.current.getBoundingClientRect();
+			e.dataTransfer.setDragImage(taskItemRef.current, rect.width / 2, 20);
+		}
+	}, [task, columnData]);
+
+	const handleDragEnd = useCallback(() => {
+		setIsDragging(false);
+	}, []);
+
+
 	// Function to handle the main checkbox click
 	const handleMainCheckBoxClick = () => {
 		setIsChecked(true); // Trigger animation
@@ -276,7 +314,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							<div className="taskItemHeaderLeft">
 								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
 
-								{/* Render tags individually */}
+								{activeBoardSettings.showColumnTags && (
 								<div className="taskItemTags">
 									{task.tags.map((tag: string) => {
 										const tagName = tag.replace('#', '');
@@ -313,10 +351,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										);
 									})}
 								</div>
-
+							)}
 							</div>
-							{/* Drag Handle */}
-							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} /></div> */}
 						</div>
 					</>);
 			} else {
@@ -430,12 +466,20 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings, columnData]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, task.due, task.time]);
 
 	return (
-		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}>
+		<div 
+			ref={taskItemRef}
+			className={`taskItem ${isDragging ? 'taskItem-dragging' : ''}`} 
+			key={taskKey} 
+			style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+			draggable={columnData?.colType === 'namedTag'}
+			onDragStart={handleDragStart}
+			onDragEnd={handleDragEnd}
+		>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				{memoizedRenderHeader}
