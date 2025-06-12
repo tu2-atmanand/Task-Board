@@ -5,6 +5,13 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItemProps";
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 
+// Function to get all tags from a task (both line tags and frontmatter tags)
+const getAllTaskTags = (task: taskItem): string[] => {
+	const lineTags = task.tags || [];
+	const frontmatterTags = task.frontmatterTags || [];
+	return [...lineTags, ...frontmatterTags];
+};
+
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
 	plugin: TaskBoard,
@@ -104,12 +111,11 @@ export const renderColumns = (
 			}
 
 			return diffDays >= from && diffDays <= to;
-		});
-	} else if (columnData.colType === "untagged") {
-		tasksToDisplay = pendingTasks.filter((task) => !(task.tags.length > 0));
+		});	} else if (columnData.colType === "untagged") {
+		tasksToDisplay = pendingTasks.filter((task) => getAllTaskTags(task).length === 0);
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) =>
-			task.tags.some((tag) => tag === `#${columnData.coltag}`)
+			getAllTaskTags(task).some((tag) => tag === `#${columnData.coltag}`)
 		);
 	} else if (columnData.colType === "otherTags") {
 		// 1. Get the current board based on activeBoard index
@@ -122,13 +128,13 @@ export const renderColumns = (
 			currentBoard?.columns
 				.filter((col) => col.colType === "namedTag" && col.coltag)
 				.map((col) => col.coltag?.toLowerCase()) || [];
-
 		// 3. Now filter tasks
 		tasksToDisplay = pendingTasks.filter((task) => {
-			if (!task.tags || task.tags.length === 0) return false;
+			const allTaskTags = getAllTaskTags(task);
+			if (allTaskTags.length === 0) return false;
 
 			// Check if none of the task's tags are in the namedTags list
-			return task.tags.every(
+			return allTaskTags.every(
 				(tag) => !namedTags.includes(tag.replace("#", "").toLowerCase())
 			);
 		});
