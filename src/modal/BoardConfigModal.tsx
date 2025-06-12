@@ -552,7 +552,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<hr className="boardConfigModalHr-100" />
 
 						<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-						<div ref={boardListRef}> {/* Add ref to the div wrapping board items */}
+						<div className="boardConfigModalSidebarBtnArea" ref={boardListRef}> {/* Add ref to the div wrapping board items */}
 							{localBoards.map((board, index) => (
 								<div
 									key={board.name} // Changed key from index to board.name
