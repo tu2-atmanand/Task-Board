@@ -31,13 +31,31 @@ export const updateTaskTagsForColumnMove = async (
 
     // Remove the source column tag if it exists
     if (sourceColumn.coltag) {
-        const sourceTag = sourceColumn.coltag.startsWith('#') ? sourceColumn.coltag : `#${sourceColumn.coltag}`;
-        updatedTask.tags = updatedTask.tags.filter(tag => tag !== sourceTag);
+        let sourceTag = sourceColumn.coltag.startsWith('#') ? sourceColumn.coltag : `#${sourceColumn.coltag}`;
+        
+        // If the source column tag ends with '/', we need to handle the special matching logic
+        // This matches the logic in RenderColumns.ts where tags ending with '/' are treated specially
+        if (sourceTag.endsWith('/')) {
+            const tagWithoutSlash = sourceTag.slice(0, -1);
+            // Remove tags that match exactly without '/' OR that start with the tag with '/'
+            updatedTask.tags = updatedTask.tags.filter(tag => 
+                tag !== tagWithoutSlash && !tag.startsWith(sourceTag)
+            );
+        } else {
+            // Standard exact match removal
+            updatedTask.tags = updatedTask.tags.filter(tag => tag !== sourceTag);        }
     }
 
     // Add the target column tag if it doesn't exist
     if (targetColumn.coltag) {
-        const targetTag = targetColumn.coltag.startsWith('#') ? targetColumn.coltag : `#${targetColumn.coltag}`;
+        let targetTag = targetColumn.coltag.startsWith('#') ? targetColumn.coltag : `#${targetColumn.coltag}`;
+        
+        // If the target column tag ends with '/', we should add the tag WITHOUT the '/'
+        // This matches the logic in RenderColumns.ts where tags ending with '/' are treated specially
+        if (targetTag.endsWith('/')) {
+            targetTag = targetTag.slice(0, -1);
+        }
+        
         // Make sure we don't have duplicates
         if (!updatedTask.tags.includes(targetTag)) {
             updatedTask.tags.push(targetTag);
