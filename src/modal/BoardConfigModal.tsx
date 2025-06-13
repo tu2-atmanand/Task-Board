@@ -42,15 +42,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			console.error("Failed to parse boards:", e);
 			return [];
 		}
-	});
-	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
+	});	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [forceRender, setForceRender] = useState(0);
+	const sortableRef = useRef<Sortable | null>(null);
 
 	const columnListRef = useRef<HTMLDivElement | null>(null);
 	const boardListRef = useRef<HTMLDivElement | null>(null); // Add a ref for the board list
-	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
+	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);useEffect(() => {
 		if (
 			selectedBoardIndex === -1 ||
 			!columnListRef.current ||
@@ -62,15 +61,26 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			animation: 150,
 			handle: ".boardConfigModalColumnRowDragButton",
 			onEnd: (evt) => {
-				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) return;
 
-				const updatedBoards = [...localBoards];
-				// const columns = updatedBoards[selectedBoardIndex].columns;
-				const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-				updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-				updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
+				const oldIndex = evt.oldIndex;
+				const newIndex = evt.newIndex;
 
-				setLocalBoards(updatedBoards);
+				setLocalBoards(prevBoards => {
+					const updatedBoards = JSON.parse(JSON.stringify(prevBoards)); // Deep copy
+					const columns = updatedBoards[selectedBoardIndex].columns;
+
+					const [movedItem] = columns.splice(oldIndex, 1);
+					columns.splice(newIndex, 0, movedItem);
+					
+					columns.forEach((col: ColumnData, idx: number) => {
+						col.index = idx + 1;
+					});
+					
+					return updatedBoards;
+				});
+				
+				setForceRender(prev => prev + 1);
 				setIsEdited(true);
 			},
 		});
@@ -78,8 +88,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		return () => {
 			sortable.destroy();
 		};
-	}, [selectedBoardIndex, localBoards]);
-
+	}, [selectedBoardIndex, forceRender]);
 	// useEffect for board sorting
 	useEffect(() => {
 		if (!boardListRef.current) return;
@@ -92,27 +101,30 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					return;
 				}
 
-				const currentBoards = [...localBoards];
-				const [movedBoard] = currentBoards.splice(evt.oldIndex, 1);
-				currentBoards.splice(evt.newIndex, 0, movedBoard);
+				const oldIndex = evt.oldIndex;
+				const newIndex = evt.newIndex;
 
-				// Update board.index to be the new 0-based array index
-				const finalBoards = currentBoards.map((board, idx) => ({
-					...board,
-					index: idx // 0-based index
-				}));
+				setLocalBoards(prevBoards => {
+					const currentBoards = [...prevBoards];
+					const [movedBoard] = currentBoards.splice(oldIndex, 1);
+					currentBoards.splice(newIndex, 0, movedBoard);
 
-				setLocalBoards(finalBoards);
+					// Update board.index to be the new 0-based array index
+					return currentBoards.map((board, idx) => ({
+						...board,
+						index: idx // 0-based index
+					}));
+				});
 
 				// Update selectedBoardIndex (which is a 0-based array index)
-				if (selectedBoardIndex === evt.oldIndex) {
-					setSelectedBoardIndex(evt.newIndex);
+				if (selectedBoardIndex === oldIndex) {
+					setSelectedBoardIndex(newIndex);
 				} else {
 					// Adjust selectedBoardIndex if an item moved across it
-					if (evt.oldIndex < selectedBoardIndex && evt.newIndex >= selectedBoardIndex) {
+					if (oldIndex < selectedBoardIndex && newIndex >= selectedBoardIndex) {
 						// Item moved from before selected to at or after selected: selected moves left
 						setSelectedBoardIndex(prevIdx => prevIdx - 1);
-					} else if (evt.oldIndex > selectedBoardIndex && evt.newIndex <= selectedBoardIndex) {
+					} else if (oldIndex > selectedBoardIndex && newIndex <= selectedBoardIndex) {
 						// Item moved from after selected to at or before selected: selected moves right
 						setSelectedBoardIndex(prevIdx => prevIdx + 1);
 					}
@@ -124,7 +136,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		return () => {
 			sortableBoards.destroy();
 		};
-	}, [localBoards, selectedBoardIndex]);
+	}, [selectedBoardIndex]);
 
 
 	// Function to handle board name change
@@ -376,9 +388,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<h3>{t("columns")}</h3>
 						<div
 							ref={columnListRef}
-							className="boardConfigModalMainContent-Active-BodyColumnsList"
-						>							{board.columns.map((column, columnIndex) => (
-								<div key={`column-${boardIndex}-${columnIndex}`} className="boardConfigModalColumnRow">
+							className="boardConfigModalMainContent-Active-BodyColumnsList"						>							{board.columns.map((column, columnIndex) => (
+								<div key={`${forceRender}-${column.name}-${column.colType}-${columnIndex}`} className="boardConfigModalColumnRow">
 									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 									{column.active ? (
 										<EyeIcon
