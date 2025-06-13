@@ -172,6 +172,37 @@ export class ScanningVault {
 				}
 			}
 		}
+
+		// If there are no tasks and the frontmatter has TaskBoard, create a normal task inheriting tags and frontmatter, and set the file content as the body
+		if (
+			tasks.Pending[fileNameWithPath].length === 0 &&
+			frontmatter && Object.prototype.hasOwnProperty.call(frontmatter, "TaskBoard")
+		) {
+			const frontmatterTags = extractFrontmatterTags(frontmatter);
+			const tags = Array.isArray(frontmatterTags) ? frontmatterTags : [];
+			// Extract only the content after the frontmatter
+			let contentStart = 0;
+			if (fileContent.startsWith('---\n')) {
+				const endFrontmatter = fileContent.indexOf('\n---\n', 4);
+				if (endFrontmatter !== -1) {
+					contentStart = endFrontmatter + 5; // 5 = length of '\n---\n'
+				}
+			}
+			const contentBody = fileContent.slice(contentStart).split('\n').filter(l => l.trim() !== "");
+			tasks.Pending[fileNameWithPath].push({
+				id: this.generateTaskId(),
+				title: file.name.replace(/\.md$/, ""),
+				body: contentBody,
+				due: "",
+				tags,
+				frontmatterTags: tags,
+				time: "",
+				priority: 0,
+				status: " ",
+				filePath: fileNameWithPath,
+				frontmatter: frontmatter,
+			});
+		}
 	}
 
 	// Generate a unique ID for each task
