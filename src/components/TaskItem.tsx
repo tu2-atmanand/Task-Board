@@ -220,14 +220,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		return highestPriorityTag?.color;
 	}
 
-	
-	// Handlers for drag and drop
+		// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		// Only allow dragging if this column is of type "namedTag"
-		if (columnData?.colType !== 'namedTag') {
-			e.preventDefault();
-			return;
-		}
+		// Allow dragging from any column (including untagged)
+		// The target column will decide if it accepts the drop
 
 		// Add task data and source column to the dataTransfer object
 		e.dataTransfer.setData('application/json', JSON.stringify({
@@ -250,8 +246,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-		setIsDragging(false);
-	}, []);
+		setIsDragging(false);	}, []);
 
 
 	// Function to handle the main checkbox click
@@ -513,9 +508,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		<div 
 			ref={taskItemRef}
 			className={`taskItem ${isDragging ? 'taskItem-dragging' : ''}`} 
-			key={taskKey} 
-			style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
-			draggable={columnData?.colType === 'namedTag'}
+			key={taskKey}			style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+			draggable={true}
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
 		>

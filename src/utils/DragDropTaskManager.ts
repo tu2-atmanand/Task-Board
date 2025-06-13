@@ -21,16 +21,15 @@ export const updateTaskTagsForColumnMove = async (
     sourceColumn: ColumnData,
     targetColumn: ColumnData
 ): Promise<taskItem> => {
-    // Only handle tag updates if both columns are of type "namedTag"
-    if (sourceColumn.colType !== "namedTag" || targetColumn.colType !== "namedTag") {
+    // Only handle tag updates if target column is of type "namedTag"
+    // Source column can be any type (including "untagged")
+    if (targetColumn.colType !== "namedTag") {
         return task;
     }
 
     // Create a modified copy of the task
-    const updatedTask: taskItem = { ...task };
-
-    // Remove the source column tag if it exists
-    if (sourceColumn.coltag) {
+    const updatedTask: taskItem = { ...task };    // Remove the source column tag if it exists and if source column is of type "namedTag"
+    if (sourceColumn.colType === "namedTag" && sourceColumn.coltag) {
         let sourceTag = sourceColumn.coltag.startsWith('#') ? sourceColumn.coltag : `#${sourceColumn.coltag}`;
         
         // If the source column tag ends with '/', we need to handle the special matching logic
@@ -198,20 +197,38 @@ export const updateTaskOrderInColumn = async (
         const allTasks = await loadTasksJsonFromDisk(plugin);
         // We only support columns of type namedTag and Pending
         if (columnData.colType === 'namedTag') {
-            // Find the filePath of the tasks (all must be from the same file)
             if (newOrderedTasks.length === 0) return;
-            const filePath = newOrderedTasks[0].filePath;
-            if (allTasks.Pending[filePath]) {
-                // Filter only the tasks in this column
-                const idsInColumn = newOrderedTasks.map(t => t.id);
-                // Maintain the order of tasks in the column and then those not in the column
-                allTasks.Pending[filePath] = [
-                    ...newOrderedTasks,
-                    ...allTasks.Pending[filePath].filter(t => !idsInColumn.includes(t.id))
-                ];
-                await writeTasksJsonToDisk(plugin, allTasks);
-                eventEmitter.emit("REFRESH_COLUMN");
-            }
+            
+            // Group tasks by their file paths
+            const tasksByFilePath: { [filePath: string]: taskItem[] } = {};
+            
+            // Collect all task IDs by filePath for tracking
+            const taskIdsByFilePath: { [filePath: string]: number[] } = {};
+            
+            // Organize ordered tasks by file path
+            newOrderedTasks.forEach(task => {
+                if (!tasksByFilePath[task.filePath]) {
+                    tasksByFilePath[task.filePath] = [];
+                    taskIdsByFilePath[task.filePath] = [];
+                }
+                tasksByFilePath[task.filePath].push(task);
+                taskIdsByFilePath[task.filePath].push(task.id);
+            });
+            
+            // Now update each file's tasks while preserving the order within the file
+            Object.keys(tasksByFilePath).forEach(filePath => {
+                if (allTasks.Pending[filePath]) {
+                    // For each filePath, maintain the order of tasks from newOrderedTasks
+                    // and then include those not in the reordered tasks
+                    allTasks.Pending[filePath] = [
+                        ...tasksByFilePath[filePath],
+                        ...allTasks.Pending[filePath].filter(t => !taskIdsByFilePath[filePath].includes(t.id))
+                    ];
+                }
+            });
+            
+            await writeTasksJsonToDisk(plugin, allTasks);
+            eventEmitter.emit("REFRESH_COLUMN");
         }
     } catch (error) {
         console.error("Error updating task order in column:", error);

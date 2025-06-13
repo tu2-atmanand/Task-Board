@@ -37,10 +37,16 @@ const Column: React.FC<ColumnProps> = ({
 	const tagColors = plugin.settings.data.globalSettings.tagColors;
 	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
 	const tagData = tagColorMap.get(columnData?.coltag || '');
-
 	// Detect external changes in tasksForThisColumn
 	React.useEffect(() => {
-		setLocalTasks(tasksForThisColumn);
+		// Ensure we don't have duplicate tasks when updating from external source
+		// by creating a unique list based on id-filePath combination
+		const uniqueTasks = Array.from(
+			new Map(tasksForThisColumn.map((task: taskItem) => 
+				[`${task.id}-${task.filePath}`, task]
+			)).values()
+		);
+		setLocalTasks(uniqueTasks);
 	}, [tasksForThisColumn]);
 
 	// Drag and drop handlers to reorder within the column
@@ -48,26 +54,43 @@ const Column: React.FC<ColumnProps> = ({
 		e.dataTransfer.setData('text/plain', dragIndex.toString());
 		e.dataTransfer.effectAllowed = 'move';
 	};
-
 	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
 		e.preventDefault();
 		setIsDragOver(false);
 		const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+		
 		if (isNaN(dragIndex) || dragIndex === dropIndex) return;
-		const updated = [...localTasks];
-		const [moved] = updated.splice(dragIndex, 1);
-		updated.splice(dropIndex, 0, moved);
+		
+		// Make a deep copy to avoid mutations
+		const updated = JSON.parse(JSON.stringify(localTasks));
+		
+		// Save the task that's being moved
+		const movedTask = updated[dragIndex];
+		
+		// Remove task from original position
+		updated.splice(dragIndex, 1);
+		
+		// Insert at new position
+		updated.splice(dropIndex, 0, movedTask);
+		
+		// Update local state for immediate visual feedback
 		setLocalTasks(updated);
-		// Persistir el nuevo orden
+				// Ensure uniqueness of tasks by checking ID and filePath combination
+		// This prevents duplication issues
+		const uniqueTasks = Array.from(
+			new Map(updated.map((task: taskItem) => [`${task.id}-${task.filePath}`, task])).values()
+		);
+		
+		// Persist the new order with the deduplicated task list
 		const { updateTaskOrderInColumn } = await import('../utils/DragDropTaskManager');
-		await updateTaskOrderInColumn(plugin, columnData, updated);
+		await updateTaskOrderInColumn(plugin, columnData, uniqueTasks);
 	};
-
 	// Handler for when a task is dropped onto this column
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(false);
 
+		// Only allow drops on namedTag columns (we need a tag to assign)
 		if (columnData.colType !== 'namedTag') return;
 
 		try {
@@ -79,11 +102,8 @@ const Column: React.FC<ColumnProps> = ({
 				// Ensure we have valid data
 				if (!task || !sourceColumnData) return;
 
-				// If the source column is not of type "namedTag", cancel
-				if (sourceColumnData.colType !== 'namedTag') return;
-
 				// If it is the same lane (coltag), DO NOT change tags, just reorder
-				if (sourceColumnData.coltag === columnData.coltag) {
+				if (sourceColumnData.colType === 'namedTag' && sourceColumnData.coltag === columnData.coltag) {
 					// Do nothing here, the reordering is already handled by handleTaskDrop
 					return;
 				}
