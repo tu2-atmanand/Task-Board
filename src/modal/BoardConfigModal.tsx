@@ -377,9 +377,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<div
 							ref={columnListRef}
 							className="boardConfigModalMainContent-Active-BodyColumnsList"
-						>
-							{board.columns.map((column, columnIndex) => (
-								<div key={Math.random()} className="boardConfigModalColumnRow">
+						>							{board.columns.map((column, columnIndex) => (
+								<div key={`column-${boardIndex}-${columnIndex}`} className="boardConfigModalColumnRow">
 									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 									{column.active ? (
 										<EyeIcon
