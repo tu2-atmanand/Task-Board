@@ -59,7 +59,7 @@
         ],
         "TODO.md": [
             {
-                "id": 4211878113,
+                "id": 2113314078,
                 "status": " ",
                 "title": "New temp task, lets see if this comes after 5 minutes, lets update this. ⏫⏰ [13:49 - 14:49] #New #working 📅 2025-05-17",
                 "body": [
@@ -88,7 +88,7 @@
                 "cancelledDate": ""
             },
             {
-                "id": 1915511983,
+                "id": 3215715275,
                 "status": " ",
                 "title": "something 📅 2025-03-20, updating few more things. #bug",
                 "body": [
@@ -106,16 +106,16 @@
                 ],
                 "priority": 0,
                 "filePath": "TODO.md",
-                "lineNumber": 55,
+                "lineNumber": 60,
                 "completion": "",
                 "cancelledDate": ""
             }
         ],
         "Testing4.md": [
             {
-                "id": 2118334300,
+                "id": 3281853120,
                 "status": " ",
-                "title": "Just get rid of the pipe symbol from your task, no restriction anymore. 🔺 📅 2025-05-03 #feat  [20:51 - 20:58]  [20:51 - 20:58] #test",
+                "title": "Just get rid of the pipe symbol from your task, no restriction anymore. 🔺 📅 2025-05-03 #feat #test",
                 "body": [
                     "\tAll the properties will still be scanned as usual.",
                     "\tFollowing are the most important features, I have to achieve ASAP : ",
@@ -134,7 +134,7 @@
                 ],
                 "priority": 1,
                 "filePath": "Testing4.md",
-                "lineNumber": 10,
+                "lineNumber": 12,
                 "completion": "",
                 "cancelledDate": ""
             }
@@ -998,7 +998,7 @@
         ],
         "QuickCapture.md": [
             {
-                "id": 2388112130,
+                "id": 3820072458,
                 "status": " ",
                 "title": "This is a simple task. 🛫 2025-05-18 📅 2025-05-19 ⏳ 2025-05-18 #project/personal @bug 🔁 every day",
                 "body": [],
@@ -1017,7 +1017,7 @@
                 "cancelledDate": ""
             },
             {
-                "id": 329373897,
+                "id": 6032068,
                 "status": " ",
                 "title": "This is another line. 🛫 2025-05-18 📅 2025-05-19 ⏳ 2025-05-18 #project/personal @bug 🔁 every day",
                 "body": [],
@@ -1031,7 +1031,7 @@
                 ],
                 "priority": 0,
                 "filePath": "QuickCapture.md",
-                "lineNumber": 5,
+                "lineNumber": 6,
                 "completion": "",
                 "cancelledDate": ""
             }
@@ -4317,7 +4317,7 @@
     "Completed": {
         "TODO.md": [
             {
-                "id": 1240450706,
+                "id": 2039251709,
                 "status": "x",
                 "title": "Upload this image to the new release of task board.🔺  📅 2024-12-24 #Image ✅ 2025-01-27/12:46",
                 "body": [
@@ -4344,7 +4344,7 @@
         ],
         "Testing4.md": [
             {
-                "id": 2143958336,
+                "id": 2325245965,
                 "status": "x",
                 "title": "#📋 This is a recurring test 🔁 every day   📅 2025-06-06 ✅ 2025-05-27/11:24",
                 "body": [],
@@ -4358,7 +4358,7 @@
                 ],
                 "priority": 0,
                 "filePath": "Testing4.md",
-                "lineNumber": 23,
+                "lineNumber": 25,
                 "completion": "2025-05-27/11:24",
                 "cancelledDate": ""
             }
@@ -4432,7 +4432,26 @@
         ],
         "QuickCapture.md": [
             {
-                "id": 3770037133,
+                "id": 2985912266,
+                "status": "x",
+                "title": "This is a simple task. 🛫 2025-05-18 📅 2025-05-19 ⏳ 2025-05-18 #project/personal @bug 🔁 every day ✅ 2025-06-01",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "2025-05-18",
+                "scheduledDate": "2025-05-18",
+                "due": "2025-05-19",
+                "tags": [
+                    "#project/personal"
+                ],
+                "priority": 0,
+                "filePath": "QuickCapture.md",
+                "lineNumber": 4,
+                "completion": "2025-06-01",
+                "cancelledDate": ""
+            },
+            {
+                "id": 504654531,
                 "status": "x",
                 "title": "This is a simple task. 🛫 2025-05-18 📅 2025-05-19 ⏳ 2025-05-18 #project/personal @bug 🔁 every day ✅ 2025-05-17",
                 "body": [],
@@ -4446,12 +4465,12 @@
                 ],
                 "priority": 0,
                 "filePath": "QuickCapture.md",
-                "lineNumber": 4,
+                "lineNumber": 5,
                 "completion": "2025-05-17",
                 "cancelledDate": ""
             },
             {
-                "id": 1547722654,
+                "id": 2376851740,
                 "status": "x",
                 "title": "This is another line. 🛫 2025-05-18 📅 2025-05-19 ⏳ 2025-05-18 #project/personal @bug 🔁 every day ✅ 2025-05-17",
                 "body": [
@@ -4467,7 +4486,7 @@
                 ],
                 "priority": 0,
                 "filePath": "QuickCapture.md",
-                "lineNumber": 6,
+                "lineNumber": 7,
                 "completion": "2025-05-17",
                 "cancelledDate": ""
             }
