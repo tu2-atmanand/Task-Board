@@ -12,6 +12,8 @@ export type columnDataProp = {
 	coltag?: string;
 	limit?: number;
 	path?: string;
+	frontmatterKey?: string;
+	frontmatterValue?: any;
 };
 
 interface AddColumnModalProps {
@@ -75,6 +77,7 @@ export class AddColumnModal extends Modal {
 			{ value: "otherTags", text: t("other-tags") },
 			{ value: "completed", text: t("completed") },
 			{ value: "pathFiltered", text: t("path-filtered") },
+			{ value: "frontmatter", text: "Frontmatter" },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },

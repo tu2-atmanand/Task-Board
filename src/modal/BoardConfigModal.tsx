@@ -155,9 +155,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		value: any
 	) => {
 		const updatedBoards = [...localBoards];
-		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
-			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
-		}
+		(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
 		setLocalBoards(updatedBoards);
 		setIsEdited(true);
 	};
@@ -208,7 +206,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			coltag: columnData.coltag,
 			range: columnData.range,
 			limit: columnData.limit,
-			path: columnData.path,
+			path: columnData.path,			
+			frontmatterKey: columnData.frontmatterKey,
+			frontmatterValue: columnData.frontmatterValue,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -506,6 +506,39 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														)
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
+												/>
+											</>
+										)}
+										{column.colType === "frontmatter" && (
+											<>
+												<input
+													type="text"
+													placeholder="Frontmatter Key"
+													value={column.frontmatterKey || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"frontmatterKey",
+															e.target.value
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+												<input
+													type="text"
+													placeholder="Frontmatter Value (comma separated for array)"
+													value={Array.isArray(column.frontmatterValue) ? column.frontmatterValue.join(", ") : (column.frontmatterValue || "")}
+													onChange={(e) => {
+														const val = e.target.value;
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"frontmatterValue",
+															val.includes(",") ? val.split(",").map((v) => v.trim()) : val
+														);
+													}}
+													className="boardConfigModalColumnRowContentColName"
 												/>
 											</>
 										)}

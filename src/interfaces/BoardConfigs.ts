@@ -19,6 +19,8 @@ export type ColumnData = {
 		criteria: string;
 		order: boolean; // Ascending = 0 AND Descending = 1
 	};
+	frontmatterKey?: string;
+	frontmatterValue?: any;
 }
 
 export type Board = {

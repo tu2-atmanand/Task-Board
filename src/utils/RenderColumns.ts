@@ -189,6 +189,27 @@ export const renderColumns = (
 		});
 
 		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);
+	} else if (columnData.colType === "frontmatter") {		
+		const key = columnData.frontmatterKey;
+		const value = columnData.frontmatterValue;
+		if (key && value !== undefined) {
+			tasksToDisplay = pendingTasks.filter((task) => {
+				console.log("Checking task frontmatter for key:", key, "value:", task.frontmatter);
+				if (!task.frontmatter || !(key in task.frontmatter)) return false;
+				const prop = task.frontmatter[key];
+				if (Array.isArray(prop)) {
+					if (Array.isArray(value)) {
+						return value.some((v) => prop.includes(v));
+					} else {
+						return prop.includes(value);
+					}
+				} else {
+					return prop === value;
+				}
+			});
+		} else {
+			tasksToDisplay = [];
+		}
 	}
 
 	// setTasks(tasksToDisplay);
