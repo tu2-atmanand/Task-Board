@@ -114,9 +114,14 @@ export const renderColumns = (
 		});	} else if (columnData.colType === "untagged") {
 		tasksToDisplay = pendingTasks.filter((task) => getAllTaskTags(task).length === 0);
 	} else if (columnData.colType === "namedTag") {
-		tasksToDisplay = pendingTasks.filter((task) =>
-			getAllTaskTags(task).some((tag) => tag === `#${columnData.coltag}`)
-		);
+		tasksToDisplay = pendingTasks.filter((task) => {
+			const coltag = `#${columnData.coltag}`;
+			if (coltag.endsWith('/')) {
+				return getAllTaskTags(task).some((tag) => tag === coltag.slice(0, -1) || tag.startsWith(coltag));
+			} else {
+				return getAllTaskTags(task).some((tag) => tag === coltag);
+			}
+		});
 	} else if (columnData.colType === "pathFiltered") {
 	
 		// Filter tasks based on their file path
