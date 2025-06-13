@@ -4,7 +4,7 @@ import { Board, ColumnData } from "../interfaces/BoardConfigs";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
-import { taskJsonMerged } from "src/interfaces/TaskItem";
+import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
 import Column from "./Column";
@@ -46,14 +46,24 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 		fetchData();
 		// fetchData().finally(() => setLoading(false));
 	}, [refreshCount]);
-
 	const allTasksArrangedPerColumn = useMemo(() => {
 		if (allTasks && boards[activeBoardIndex]) {
 			return boards[activeBoardIndex].columns
 				.filter((column) => column.active)
-				.map((column: ColumnData) =>
-					renderColumns(plugin, activeBoardIndex, column, allTasks)
-				);
+				.map((column: ColumnData) => {
+					// Get tasks for this column using the existing renderer
+					const renderedTasks = renderColumns(plugin, activeBoardIndex, column, allTasks);
+					
+					// Remove duplicates by creating a unique list based on id-filePath combination
+					// This prevents the duplication issue when tasks with the same tag exist in different files
+					const uniqueTasks = Array.from(
+						new Map(renderedTasks.map((task: taskItem) => 
+							[`${task.id}-${task.filePath}`, task]
+						)).values()
+					);
+					
+					return uniqueTasks;
+				});
 		}
 		return [];
 	}, [allTasks, boards, activeBoardIndex]);

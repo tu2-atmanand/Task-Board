@@ -1,4 +1,4 @@
-import { Board } from "./BoardConfigs";
+import { Board, ColumnData } from "./BoardConfigs";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
@@ -9,6 +9,7 @@ export interface TaskProps {
 	task: taskItem;
 	columnIndex: number;
 	activeBoardSettings: Board;
+	columnData?: ColumnData; // Agregado para soporte de drag & drop
 }
 
 export interface taskItem {
@@ -20,10 +21,12 @@ export interface taskItem {
 	scheduledDate: string;
 	due: string;
 	tags: string[];
+	frontmatterTags: string[]; // Tags extracted from frontmatter
 	time: string;
 	priority: number;
 	status: string;
 	filePath: string;
+	frontmatter?: any;
 	lineNumber: number;
 	completion?: string;
 	cancelledDate?: string;

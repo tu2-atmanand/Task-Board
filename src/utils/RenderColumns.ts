@@ -7,6 +7,13 @@ import { moment as _moment } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
+// Function to get all tags from a task (both line tags and frontmatter tags)
+const getAllTaskTags = (task: taskItem): string[] => {
+	const lineTags = task.tags || [];
+	const frontmatterTags = task.frontmatterTags || [];
+	return [...lineTags, ...frontmatterTags];
+};
+
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
 	plugin: TaskBoard,
@@ -119,13 +126,45 @@ export const renderColumns = (
 			}
 
 			return diffDays >= from && diffDays <= to;
-		});
-	} else if (columnData.colType === "untagged") {
-		tasksToDisplay = pendingTasks.filter((task) => !(task.tags.length > 0));
+		});	} else if (columnData.colType === "untagged") {
+		tasksToDisplay = pendingTasks.filter((task) => getAllTaskTags(task).length === 0);
 	} else if (columnData.colType === "namedTag") {
-		tasksToDisplay = pendingTasks.filter((task) =>
-			task.tags.some((tag) => tag === `#${columnData.coltag}`)
-		);
+		tasksToDisplay = pendingTasks.filter((task) => {
+			const coltag = `#${columnData.coltag}`;
+			if (coltag.endsWith('/')) {
+				return getAllTaskTags(task).some((tag) => tag === coltag.slice(0, -1) || tag.startsWith(coltag));
+			} else {
+				return getAllTaskTags(task).some((tag) => tag === coltag);
+			}
+		});
+	} else if (columnData.colType === "pathFiltered") {
+	
+		// Filter tasks based on their file path
+		if (columnData.path) {
+			// Split the path patterns by comma and trim whitespace
+			const pathPatterns = columnData.path
+				.split(',')
+				.map((pattern: string) => pattern.trim().toLowerCase())
+				.filter((pattern: string) => pattern.length > 0);
+			
+			if (pathPatterns.length > 0) {
+				tasksToDisplay = pendingTasks.filter((task) => {
+					if (!task.filePath) {
+						console.log("Task missing filePath:", task);
+						return false;
+					}
+					
+					const lowerCasePath = task.filePath.toLowerCase();
+					const matchedPattern = pathPatterns.some((pattern: string) => lowerCasePath.includes(pattern));
+					console.log(`Checking task path: ${lowerCasePath}, matched: ${matchedPattern}`);
+					return matchedPattern;
+				});
+			} else {
+				tasksToDisplay = [];
+			}
+		} else {
+			tasksToDisplay = [];
+		}
 	} else if (columnData.colType === "otherTags") {
 		// 1. Get the current board based on activeBoard index
 		const currentBoard = plugin.settings.data.boardConfigs.find(
@@ -137,13 +176,13 @@ export const renderColumns = (
 			currentBoard?.columns
 				.filter((col) => col.colType === "namedTag" && col.coltag)
 				.map((col) => col.coltag?.toLowerCase()) || [];
-
 		// 3. Now filter tasks
 		tasksToDisplay = pendingTasks.filter((task) => {
-			if (!task.tags || task.tags.length === 0) return false;
+			const allTaskTags = getAllTaskTags(task);
+			if (allTaskTags.length === 0) return false;
 
 			// Check if none of the task's tags are in the namedTags list
-			return task.tags.every(
+			return allTaskTags.every(
 				(tag) => !namedTags.includes(tag.replace("#", "").toLowerCase())
 			);
 		});
@@ -173,6 +212,27 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.priority === columnData.taskPriority
 		);
+	} else if (columnData.colType === "frontmatter") {		
+		const key = columnData.frontmatterKey;
+		const value = columnData.frontmatterValue;
+		if (key && value !== undefined) {
+			tasksToDisplay = pendingTasks.filter((task) => {
+				console.log("Checking task frontmatter for key:", key, "value:", task.frontmatter);
+				if (!task.frontmatter || !(key in task.frontmatter)) return false;
+				const prop = task.frontmatter[key];
+				if (Array.isArray(prop)) {
+					if (Array.isArray(value)) {
+						return value.some((v) => prop.includes(v));
+					} else {
+						return prop.includes(value);
+					}
+				} else {
+					return prop === value;
+				}
+			});
+		} else {
+			tasksToDisplay = [];
+		}
 	}
 
 	// setTasks(tasksToDisplay);

@@ -976,7 +976,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalHome {
 	display: flex;
 	flex-direction: row;
-	height: 100%;
+	height: auto;
+	max-height: 80vh;
+	overflow-y: auto;
 }
 
 .boardConfigModalHr-50 {

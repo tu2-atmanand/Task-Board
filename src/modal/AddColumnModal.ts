@@ -16,6 +16,9 @@ export type columnDataProp = {
 	taskStatus?: string;
 	taskPriority?: number;
 	limit?: number;
+	path?: string;
+	frontmatterKey?: string;
+	frontmatterValue?: any;
 };
 
 interface AddColumnModalProps {
@@ -35,6 +38,7 @@ export class AddColumnModal extends Modal {
 		taskStatus?: string;
 		taskPriority?: number;
 		limit?: number;
+		path?: string;
 	}) => void;
 	private onCancel: () => void;
 	private colType: string;
@@ -82,6 +86,8 @@ export class AddColumnModal extends Modal {
 			{ value: "taskStatus", text: t("status") },
 			{ value: "taskPriority", text: t("priority") },
 			{ value: "completed", text: t("completed") },
+			{ value: "pathFiltered", text: t("path-filtered") },
+			{ value: "frontmatter", text: "Frontmatter" },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },
@@ -159,6 +165,13 @@ export class AddColumnModal extends Modal {
 					name: this.name,
 					limit: 20,
 				}); // Add limit
+			} else if (this.colType === "pathFiltered") {
+				this.onSubmit({
+					colType: this.colType,
+					name: this.name,
+					active,
+					path: "",
+				}); // Add path filter
 			} else {
 				this.onSubmit({
 					id: randomInt(1000, 9999),

@@ -28,6 +28,7 @@ const taskItemEmpty = {
 	scheduledDate: "",
 	due: "",
 	tags: [],
+	frontmatterTags: [],
 	time: "",
 	priority: 0,
 	completion: "",

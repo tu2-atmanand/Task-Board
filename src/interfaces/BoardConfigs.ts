@@ -7,6 +7,7 @@ export type ColumnData = {
 	collapsed?: boolean;
 	name: string;
 	coltag?: string;
+	path?: string;
 	datedBasedColumn?: {
 		dateType: string; // e.g., "due", "created", "scheduled"
 		from: number;
@@ -19,6 +20,8 @@ export type ColumnData = {
 		criteria: string;
 		order: boolean; // Ascending = 0 AND Descending = 1
 	};
+	frontmatterKey?: string;
+	frontmatterValue?: any;
 };
 
 export type Board = {

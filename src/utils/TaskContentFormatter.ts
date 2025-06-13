@@ -647,16 +647,13 @@ const sanitizeTags = (title: string, newTags: string[]): string => {
 	// Append tags from newTags that are not already in the title
 	const updatedTagsMatch =
 		updatedTitle.match(tagsRegex)?.map((tag) => tag.trim()) || [];
-	const updatedTagsSet = new Set(updatedTagsMatch);
 
-	for (const tag of newTags) {
-		if (!updatedTagsSet.has(tag)) {
-			updatedTitle += ` ${tag}`;
-		}
-	}
+	const tagsToAdd = newTags.filter((tag) => !updatedTagsMatch.includes(tag));
 
-	return updatedTitle.trim();
+	return `${updatedTitle}${tagsToAdd.length > 0 ? ` ${tagsToAdd.join(" ")}` : ""
+		}`.trim();
 };
+
 
 // export const taskContentFormatter = (
 // 	plugin: TaskBoard,
@@ -765,13 +762,16 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	let cleanedTitle = task.title;
 
 	// Remove tags
-	task.tags.forEach((tag) => {
-		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
-		const tagsMatch = cleanedTitle.match(tagRegex);
-		if (tagsMatch) {
-			cleanedTitle = cleanedTitle.replace(tagsMatch[0], "");
-		}
-	});
+	// TODO: Thing a better way to do this
+	// 	task.tags.forEach((tag) => {
+	// 	const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
+	// 	const tagsMatch = cleanedTitle.match(tagRegex);
+	// 	if (tagsMatch) {
+	// 		cleanedTitle = cleanedTitle.replace(tagsMatch[0], "");
+	// 	}
+	// });
+
+	cleanedTitle = cleanedTitle.replace(/#[\w\u00C0-\u00FF-]+/g, '');
 
 	// Remove time (handles both formats)
 	if (task.time) {

@@ -43,11 +43,148 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			console.error("Failed to parse boards:", e);
 			return [];
 		}
-	});
-	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
+	});	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [forceRender, setForceRender] = useState(0);
+	const sortableRef = useRef<Sortable | null>(null);
 
-	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+	const columnListRef = useRef<HTMLDivElement | null>(null);
+	const boardListRef = useRef<HTMLDivElement | null>(null); // Add a ref for the board list
+	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);useEffect(() => {
+		if (
+			selectedBoardIndex === -1 ||
+			!columnListRef.current ||
+			!localBoards[selectedBoardIndex]
+		)
+			return;
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) return;
+
+				const oldIndex = evt.oldIndex;
+				const newIndex = evt.newIndex;
+
+				setLocalBoards(prevBoards => {
+					const updatedBoards = JSON.parse(JSON.stringify(prevBoards)); // Deep copy
+					const columns = updatedBoards[selectedBoardIndex].columns;
+
+					const [movedItem] = columns.splice(oldIndex, 1);
+					columns.splice(newIndex, 0, movedItem);
+					
+					columns.forEach((col: ColumnData, idx: number) => {
+						col.index = idx + 1;
+					});
+					
+					return updatedBoards;
+				});
+				
+				setForceRender(prev => prev + 1);
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedBoardIndex, forceRender]);
+	// useEffect for board sorting
+	useEffect(() => {
+		if (!boardListRef.current) return;
+
+		const sortableBoards = Sortable.create(boardListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
+					return;
+				}
+
+				const oldIndex = evt.oldIndex;
+				const newIndex = evt.newIndex;
+
+				setLocalBoards(prevBoards => {
+					const currentBoards = [...prevBoards];
+					const [movedBoard] = currentBoards.splice(oldIndex, 1);
+					currentBoards.splice(newIndex, 0, movedBoard);
+
+					// Update board.index to be the new 0-based array index
+					return currentBoards.map((board, idx) => ({
+						...board,
+						index: idx // 0-based index
+					}));
+				});
+
+				// Update selectedBoardIndex (which is a 0-based array index)
+				if (selectedBoardIndex === oldIndex) {
+					setSelectedBoardIndex(newIndex);
+				} else {
+					// Adjust selectedBoardIndex if an item moved across it
+					if (oldIndex < selectedBoardIndex && newIndex >= selectedBoardIndex) {
+						// Item moved from before selected to at or after selected: selected moves left
+						setSelectedBoardIndex(prevIdx => prevIdx - 1);
+					} else if (oldIndex > selectedBoardIndex && newIndex <= selectedBoardIndex) {
+						// Item moved from after selected to at or before selected: selected moves right
+						setSelectedBoardIndex(prevIdx => prevIdx + 1);
+					}
+				}
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortableBoards.destroy();
+		};
+	}, [selectedBoardIndex]);
+
+
+	// Function to handle board name change
+	const handleBoardNameChange = (index: number, newName: string) => {
+		const updatedBoards = [...localBoards];
+		updatedBoards[index].name = newName;
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	// Function to handle column change
+	const handleColumnChange = (
+		boardIndex: number,
+		columnIndex: number,
+		field: string,
+		value: any
+	) => {
+		const updatedBoards = [...localBoards];
+		(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	const handleFiltersChange = (boardIndex: number, value: string) => {
+		const updatedBoards = [...localBoards];
+		// Split input string by commas and trim spaces to create an array
+		updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	const handleFilterPolarityChange = (boardIndex: number, value: string) => {
+		const updatedBoards = [...localBoards];
+		updatedBoards[boardIndex].filterPolarity = value;
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags';
+	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
+		const updatedBoards = [...localBoards];
+		if (updatedBoards[boardIndex]) {
+			updatedBoards[boardIndex][field] = value as boolean;
+		}
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
 
 	// Function to add a new column to the selected board
 	const handleOpenAddColumnModal = () => {
@@ -73,6 +210,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			taskStatus: columnData.taskStatus,
 			taskPriority: columnData.taskPriority,
 			limit: columnData.limit,
+			path: columnData.path,			
+			frontmatterKey: columnData.frontmatterKey,
+			frontmatterValue: columnData.frontmatterValue,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -382,10 +522,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<h3>{t("columns")}</h3>
 						<div
 							ref={columnListRef}
-							className="boardConfigModalMainContent-Active-BodyColumnsList"
-						>
-							{board.columns.map((column, columnIndex) => (
-								<div key={column.id} className="boardConfigModalColumnRow">
+							className="boardConfigModalMainContent-Active-BodyColumnsList"						>							{board.columns.map((column, columnIndex) => (
+								<div key={`${forceRender}-${column.name}-${column.colType}-${columnIndex}`} className="boardConfigModalColumnRow">
 									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 									{column.active ? (
 										<EyeIcon
@@ -477,6 +615,22 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												className="boardConfigModalColumnRowContentColDatedVal"
 											/>
 										)}
+										{column.colType === "pathFiltered" && (
+											<input
+												type="text"
+												placeholder={t("enter-path-pattern")}
+												value={column.path || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"path",
+														e.target.value
+													)
+												}
+												className="boardConfigModalColumnRowContentColName"
+											/>
+										)}
 										{column.colType === "dated" && (
 											<>
 												<input
@@ -535,6 +689,72 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												</select>
 											</>
 										)}
+										{column.colType === "frontmatter" && (
+											<>
+												<input
+													type="text"
+													placeholder="Frontmatter Key"
+													value={column.frontmatterKey || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"frontmatterKey",
+															e.target.value
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+												<input
+													type="text"
+													placeholder="Frontmatter Value (comma separated for array)"
+													value={Array.isArray(column.frontmatterValue) ? column.frontmatterValue.join(", ") : (column.frontmatterValue || "")}
+													onChange={(e) => {
+														const val = e.target.value;
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"frontmatterValue",
+															val.includes(",") ? val.split(",").map((v) => v.trim()) : val
+														);
+													}}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
+										)}
+										{column.colType === "frontmatter" && (
+											<>
+												<input
+													type="text"
+													placeholder="Frontmatter Key"
+													value={column.frontmatterKey || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"frontmatterKey",
+															e.target.value
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+												<input
+													type="text"
+													placeholder="Frontmatter Value (comma separated for array)"
+													value={Array.isArray(column.frontmatterValue) ? column.frontmatterValue.join(", ") : (column.frontmatterValue || "")}
+													onChange={(e) => {
+														const val = e.target.value;
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"frontmatterValue",
+															val.includes(",") ? val.split(",").map((v) => v.trim()) : val
+														);
+													}}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
+										)}
 									</div>
 									<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 								</div>
@@ -588,19 +808,22 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<hr className="boardConfigModalHr-100" />
 
 						<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-						{localBoards.map((board, index) => (
-							<div
-								key={index}
-								onClick={() => {
-									setSelectedBoardIndex(index);
-									toggleSidebar();
-
-								}}
-								className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-							>
-								{board.name}
-							</div>
-						))}
+						<div className="boardConfigModalSidebarBtnArea" ref={boardListRef}> {/* Add ref to the div wrapping board items */}
+							{localBoards.map((board, index) => (
+								<div
+									key={board.name} // Changed key from index to board.name
+									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
+								>
+									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+									<span onClick={() => {
+										setSelectedBoardIndex(index);
+										toggleSidebar();
+									}}>
+										{board.name}
+									</span>
+								</div>
+							))}
+						</div>
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
 						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
