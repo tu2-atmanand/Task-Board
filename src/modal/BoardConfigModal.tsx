@@ -535,8 +535,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												</select>
 											</>
 										)}
+										<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 									</div>
-									<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 								</div>
 							))}
 						</div>
