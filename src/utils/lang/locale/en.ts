@@ -204,6 +204,8 @@ const en: Lang = {
 	"enter-tag-placeholder": "enter number from 1-5",
 	"delete-tag-color": "Delete tag color",
 	"pick-color-for-tag": "Pick color for tag",
+	"show-note-name-in-task-header": "Show note name in task header",
+	"show-note-name-in-task-header-description": "Enable this setting to show the note name in the task header. Hover over the name to see the full path of the note.",
 };
 
 export default en;

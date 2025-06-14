@@ -658,7 +658,8 @@
       "autoAddCreatedDate": false,
       "autoAddUniversalDate": true,
       "universalDate": "due",
-      "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md"
+      "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md",
+      "showFileNameInCard": true
     }
   }
 }

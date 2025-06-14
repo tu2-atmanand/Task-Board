@@ -443,6 +443,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
+				<div className="taskItemFileNameSection">
+					{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
+						<div className="taskItemFileName" aria-label={task.filePath}>
+							{task.filePath.split('/').pop()?.replace('.md', '')}
+						</div>
+					)}
+				</div>
 				{memoizedRenderHeader}
 				<div className="taskItemMainBody">
 					<div className="taskItemMainBodyTitleNsubTasks">

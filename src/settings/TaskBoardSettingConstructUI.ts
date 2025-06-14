@@ -339,6 +339,7 @@ export class SettingsManager {
 			tagColors,
 			tagColorsType,
 			showTaskWithoutMetadata,
+			showFileNameInCard,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -359,6 +360,17 @@ export class SettingsManager {
 			.addToggle((toggle) =>
 				toggle.setValue(showFooter).onChange(async (value) => {
 					this.globalSettings!.showFooter = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to show/Hide the Footer of the task card
+		new Setting(contentEl)
+			.setName(t("show-note-name-in-task-header"))
+			.setDesc(t("show-note-name-in-task-header-description"))
+			.addToggle((toggle) =>
+				toggle.setValue(showFileNameInCard).onChange(async (value) => {
+					this.globalSettings!.showFileNameInCard = value;
 					await this.saveSettings();
 				})
 			);
