@@ -182,5 +182,7 @@ export class AddColumnModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+		this.onCancel();
+		// this.close();
 	}
 }
