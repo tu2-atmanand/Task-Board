@@ -483,8 +483,9 @@ export function extractPriority(text: string): number {
 // Extract tags from task title
 export function extractTags(text: string): string[] {
 	text = text.replace(/<(mark|font).*?>/g, "");
-
-	const matches = text.match(/\s+#([^\s;@()\[\]{}<>]{1,20})/g);
+	const matches = text.match(
+		/\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g
+	);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
 

@@ -419,7 +419,7 @@ const sanitizeCancellationDate = (
 
 	// Replace the old cancellation date with the updated one
 	return title.replace(cancellationDateRegex, cancelledWithFormat);
-}
+};
 
 /**
  * Function to sanitize the time inside the task title.
@@ -622,7 +622,7 @@ const sanitizeTags = (title: string, newTags: string[]): string => {
 	// Remove the <mark> and <font> tags from the title first before processing
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 
-	const tagsRegex = /#[^\s]+/g;
+	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
 	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
 
 	// Create a set for quick lookup of newTags
