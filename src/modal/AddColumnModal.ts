@@ -2,6 +2,7 @@
 
 import { randomInt } from "crypto";
 import { App, Modal } from "obsidian";
+import { columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
 import { t } from "src/utils/lang/helper";
@@ -74,14 +75,17 @@ export class AddColumnModal extends Modal {
 		});
 
 		[
-			{ value: "undated", text: t("undated") },
-			{ value: "dated", text: t("dated") },
-			{ value: "namedTag", text: t("tagged") },
-			{ value: "untagged", text: t("untagged") },
-			{ value: "otherTags", text: t("other-tags") },
-			{ value: "taskStatus", text: t("status") },
-			{ value: "taskPriority", text: t("priority") },
-			{ value: "completed", text: t("completed") },
+			{ value: "undated", text: columnTypeAndNameMapping.undated },
+			{ value: "dated", text: columnTypeAndNameMapping.dated },
+			{ value: "namedTag", text: columnTypeAndNameMapping.namedTag },
+			{ value: "untagged", text: columnTypeAndNameMapping.untagged },
+			{ value: "otherTags", text: columnTypeAndNameMapping.otherTags },
+			{ value: "taskStatus", text: columnTypeAndNameMapping.taskStatus },
+			{
+				value: "taskPriority",
+				text: columnTypeAndNameMapping.taskPriority,
+			},
+			{ value: "completed", text: columnTypeAndNameMapping.completed },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },

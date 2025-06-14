@@ -34,3 +34,15 @@ export type Board = {
 };
 
 export type BoardConfigs = Board[];
+
+export const columnTypeAndNameMapping: { [key: string]: string } = {
+	undated: "Undated",
+	dated: "Dated",
+	namedTag: "Tagged",
+	untagged: "Untagged",
+	otherTags: "Other Tags",
+	taskStatus: "Status",
+	taskPriority: "Priority",
+	notePath: "Folder",
+	completed: "Completed",
+};

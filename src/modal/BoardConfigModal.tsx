@@ -2,7 +2,7 @@
 
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
 import { App, Modal, Notice } from "obsidian";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import React, { ComponentPropsWithRef, useCallback, useEffect, useRef, useState } from "react";
@@ -399,7 +399,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										/>
 									)}
 									<div className="boardConfigModalColumnRowContent">
-										<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
+										<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
 										<input
 											type="text"
 											value={column.name || ""}
