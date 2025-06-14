@@ -9,12 +9,6 @@ const en: Lang = {
 	"edit-task": "Edit task",
 	"delete-task": "Delete task",
 	"column-type": "Column type",
-	"undated": "Undated",
-	"dated": "Dated",
-	"tagged": "Tagged",
-	"untagged": "Untagged",
-	"completed": "Completed",
-	"other-tags": "Other tags",
 	"column-name": "Column name",
 	"submit": "Submit",
 	"cancel": "Cancel",
@@ -207,7 +201,9 @@ const en: Lang = {
 	"automatically-hide-empty-columns-info": "Enable this setting to automatically hide the columns which has no tasks in it. This will help you to focus on the tasks which are relevant to you.",
 	"status": "Status",
 	"enter-status-placeholder": "eg.: /",
-	"enter-tag-placeholder": "enter number from 1-5"
+	"enter-tag-placeholder": "enter number from 1-5",
+	"delete-tag-color": "Delete tag color",
+	"pick-color-for-tag": "Pick color for tag",
 };
 
 export default en;
