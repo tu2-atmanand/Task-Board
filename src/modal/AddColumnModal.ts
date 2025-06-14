@@ -1,6 +1,5 @@
 // /src/modal/AddColumnModal.ts
 
-import { randomInt } from "crypto";
 import { App, Modal } from "obsidian";
 import { columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
@@ -126,7 +125,7 @@ export class AddColumnModal extends Modal {
 		submitButton.addEventListener("click", () => {
 			if (this.colType === "dated") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0], // Generate a random ID
 					colType: this.colType,
 					name: this.name,
 					datedBasedColumn: {
@@ -137,35 +136,35 @@ export class AddColumnModal extends Modal {
 				}); // Add range data
 			} else if (this.colType === "namedTag") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					coltag: "",
 				});
 			} else if (this.colType === "taskStatus") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					taskStatus: "",
 				});
 			} else if (this.colType === "taskPriority") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					taskPriority: 1,
 				});
 			} else if (this.colType === "completed") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					limit: 20,
 				}); // Add limit
 			} else {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 				});
@@ -175,7 +174,7 @@ export class AddColumnModal extends Modal {
 
 		const cancelButton = actions.createEl("button", { text: t("cancel") });
 		cancelButton.addEventListener("click", () => {
-			this.onCancel(); // Renamed from onClose to onCancel
+			this.onCancel();
 			this.close();
 		});
 	}
