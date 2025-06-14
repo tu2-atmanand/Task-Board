@@ -291,11 +291,6 @@
           "priority": 1
         },
         {
-          "name": "bug/solver",
-          "color": "rgba(143, 7, 164, 0.75)",
-          "priority": 2
-        },
-        {
           "name": "feat",
           "color": "#b50df2f2",
           "priority": 3

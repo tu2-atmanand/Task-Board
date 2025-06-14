@@ -535,42 +535,68 @@ export class SettingsManager {
 							})
 					)
 					.addButton((btn) => {
-						const pickr = new Pickr({
-							el: btn.buttonEl,
-							theme: "nano",
-							default: tag.color || "#ff0000",
-							components: {
-								preview: true,
-								opacity: true,
-								hue: true,
-								interaction: {
-									rgba: true,
-									input: true,
-									clear: true,
-									cancel: true,
-									save: false,
-								},
-							},
-						});
+						btn.setTooltip(t("pick-color-for-tag"))
+							.setIcon("palette")
+							.setClass(
+								"taskboard-setting-tag-color-row-element-color-picker"
+							)
+							.then(() => {
+								const colorMap =
+									this.plugin.settings.data.globalSettings.tagColors.map(
+										(tagColor) => ({
+											color:
+												this.plugin.settings.data
+													.globalSettings.tagColors[
+													tagColor.priority - 1
+												]?.color || "#ff0000",
+										})
+									);
+								const pickr = new Pickr({
+									el: btn.buttonEl,
+									theme: "nano",
+									swatches: colorMap.map(
+										(item) => item.color
+									),
+									defaultRepresentation: "HEXA",
+									default: tag.color || "#ff0000",
+									comparison: false,
+									components: {
+										preview: true,
+										opacity: true,
+										hue: true,
+										interaction: {
+											hex: true,
+											rgba: true,
+											hsla: false,
+											hsva: false,
+											cmyk: false,
+											input: true,
+											clear: true,
+											cancel: true,
+											save: false,
+										},
+									},
+								});
 
-						pickr
-							.on("change", (color: any) => {
-								const rgbaColor = `rgba(${color
-									.toRGBA()
-									.map((v: number, i: number) =>
-										i < 3 ? Math.round(v) : v
-									)
-									.join(", ")})`;
-								tag.color = rgbaColor;
-								colorInputRef.setValue(rgbaColor);
-								// row.style.backgroundColor = rgbaColor;
-							})
-							.on("hide", () => {
-								renderTagColors();
-								this.saveSettings();
-							})
-							.on("cancel", () => pickr.hide())
-							.on("clear", () => pickr.hide());
+								pickr
+									.on("change", (color: any) => {
+										const rgbaColor = `rgba(${color
+											.toRGBA()
+											.map((v: number, i: number) =>
+												i < 3 ? Math.round(v) : v
+											)
+											.join(", ")})`;
+										tag.color = rgbaColor;
+										colorInputRef.setValue(rgbaColor);
+										// row.style.backgroundColor = rgbaColor;
+									})
+									.on("hide", () => {
+										renderTagColors();
+										this.saveSettings();
+									})
+									.on("cancel", () => pickr.hide())
+									.on("clear", () => pickr.hide());
+							});
 					})
 					.addText((colorInput) => {
 						colorInputRef = colorInput;
@@ -607,7 +633,7 @@ export class SettingsManager {
 							.setClass(
 								"taskboard-setting-tag-color-row-element-delete"
 							)
-							.setCta()
+							.setTooltip(t("delete-tag-color"))
 							.onClick(async () => {
 								this.globalSettings!.tagColors.splice(index, 1);
 								await this.saveSettings();
