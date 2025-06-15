@@ -15,7 +15,8 @@
 
 .modal[data-type="task-board-view"] {
 	width: auto;
-	min-height: fit-content;
+	min-height: auto;
+	max-width: none;
 }
 
 .is-phone .modal[data-type="task-board-view"] {
@@ -993,7 +994,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalHome {
 	display: flex;
 	flex-direction: row;
-	height: 100%;
+	height: auto;
+	/* max-height: 90vh; */
+	overflow-y: auto;
 }
 
 .boardConfigModalHr-50 {
@@ -1081,9 +1084,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalMainContent {
 	flex: 1;
 	padding-left: 1em;
-	overflow-y: auto;
+	/* overflow-y: auto; */
 	max-width: 50vw;
-	/* Allow scrolling for main content */
+	max-height: calc(var(--dialog-max-height) - 6vh);
 }
 
 .boardConfigModalSidebarToggleBtn {
@@ -1231,12 +1234,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 	.modal[modal-type="task-board-board-config"] {
 		min-width: 100vw;
-		min-height: fit-content;
+		min-height: auto;
 	}
 
 	.boardConfigModalHome {
 		/* flex-direction: column; */
-		width: 100vw;
+		/* width: 100vw; */
 		padding-top: 1em;
 		overflow: auto;
 		max-height: 80vh;
@@ -1265,8 +1268,6 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	.boardConfigModalMainContentBoardSettingTab,
 	.pluginGlobalSettingsTab {
 		max-width: 95vw !important;
-		width: 95vw !important;
-		margin-inline-start: 0 !important;
 		overflow: auto;
 	}
 

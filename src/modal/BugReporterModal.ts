@@ -14,6 +14,7 @@ export class BugReporterModal extends Modal {
 		this.message = message;
 		this.bugContent = bug;
 		this.context = context;
+		this.titleEl.setText(t("bug-reporter"));
 	}
 
 	onOpen() {
@@ -27,7 +28,7 @@ export class BugReporterModal extends Modal {
 		});
 
 		// Header
-		modalContent.createEl("h2", { text: t("bug-reporter") });
+		// modalContent.createEl("h2", { text: t("bug-reporter") });
 
 		const bugReportSection = modalContent.createDiv({
 			cls: "bugReportSection",
