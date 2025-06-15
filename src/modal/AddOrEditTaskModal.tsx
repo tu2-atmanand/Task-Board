@@ -18,6 +18,7 @@ import { FileInput, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { bugReporter } from "src/services/OpenModals";
 
 const taskItemEmpty = {
 	id: 0,
@@ -360,11 +361,11 @@ const EditTaskContent: React.FC<{
 
 			const leaf = app.workspace.getLeaf(Keymap.isModEvent(evt));
 			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-			console.log("File to open:", file, " | Line Number : ", task.lineNumber);
+
 			if (file && file instanceof TFile) {
 				await leaf.openFile(file, { eState: { line: task.lineNumber - 1 } });
 			} else {
-				new Notice(t("file-not-found"));
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 			}
 		}
 		onClose();
@@ -460,9 +461,7 @@ const EditTaskContent: React.FC<{
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
-		console.log("handleTaskEditedThroughEditors called with value:", value);
 		const updatedTask = buildTaskFromRawContent(value);
-		console.log("Updated Task:", updatedTask);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
@@ -500,7 +499,6 @@ const EditTaskContent: React.FC<{
 
 					const formattedTaskContent = taskContentFormatter(plugin, modifiedTask);
 					setFormattedTaskContent(formattedTaskContent);
-					console.log("formattedTaskContent : ", formattedTaskContent);
 
 					const fullMarkdownEditor = createEmbeddableMarkdownEditor(
 						app,
@@ -573,7 +571,6 @@ const EditTaskContent: React.FC<{
 
 					// Focus the editor when it's created
 					// markdownEditor?.editor?.focus();
-					console.log("Markdown editor initialized");
 				}
 			}, 50);
 		}
@@ -642,7 +639,6 @@ const EditTaskContent: React.FC<{
 		if (!tagsInputFieldRef.current) return;
 
 		const suggestionContent = getTagSuggestions(app);
-		console.log("Tag Suggestions: ", suggestionContent);
 		const onSelectCallback = (choice: string) => {
 			handleTagInput({
 				key: 'Enter',
@@ -891,7 +887,6 @@ export class AddOrEditTaskModal extends Modal {
 		this.waitForClose = new Promise<string>((resolve, reject) => {
 			this.resolvePromise = resolve;
 			this.rejectPromise = reject;
-			console.log("Promise will return : \n", this.resolvePromise, "\n", this.rejectPromise);
 		});
 	}
 

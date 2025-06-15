@@ -17,6 +17,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { ScanningVault } from "./ScanningVault";
 import { TasksApi } from "src/services/tasks-plugin/api";
+import { bugReporter } from "src/services/OpenModals";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -169,10 +170,7 @@ export const archiveTask = async (plugin: TaskBoard, task: taskItem) => {
 
 			// Prepare the task content to be archived
 			const completeTask = taskContentFormatter(plugin, task);
-			console.log(
-				"archiveTask : completeTask :\n",
-				completeTask
-			);
+
 			if (completeTask === "")
 				throw "taskContentFormatter returned empty string";
 
@@ -191,7 +189,12 @@ export const archiveTask = async (plugin: TaskBoard, task: taskItem) => {
 			await deleteTaskFromJson(plugin, task);
 			eventEmitter.emit("REFRESH_COLUMN");
 		} catch (error) {
-			console.error("Error archiving task:", error);
+			bugReporter(
+				plugin,
+				"Error archiving task",
+				error as string,
+				"TaskItemUtils.ts/archiveTask"
+			);
 		}
 	} else if (archivedFilePath === "") {
 		// If the archived file path is empty, just mark the task as archived in the same file

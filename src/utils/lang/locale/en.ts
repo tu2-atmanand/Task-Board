@@ -206,6 +206,7 @@ const en: Lang = {
 	"pick-color-for-tag": "Pick color for tag",
 	"show-note-name-in-task-header": "Show note name in task header",
 	"show-note-name-in-task-header-description": "Enable this setting to show the note name in the task header. Hover over the name to see the full path of the note.",
+	"debug-info": "Debug info"
 };
 
 export default en;

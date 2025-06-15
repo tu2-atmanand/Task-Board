@@ -63,26 +63,17 @@
             }
           },
           {
-            "id": 3497,
-            "colType": "completed",
-            "active": true,
-            "collapsed": false,
-            "limit": 20,
-            "name": "Completed",
-            "index": 6
-          },
-          {
             "id": 4988,
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Bug",
-            "index": 8,
+            "index": 6,
             "coltag": "bug"
           },
           {
             "id": 5794,
-            "index": 8,
+            "index": 7,
             "colType": "taskStatus",
             "active": true,
             "collapsed": false,
@@ -91,12 +82,21 @@
           },
           {
             "id": 9075,
-            "index": 9,
+            "index": 8,
             "colType": "taskPriority",
             "active": true,
             "collapsed": false,
             "name": "Highest Priority",
             "taskPriority": 1
+          },
+          {
+            "id": 3497,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "limit": 20,
+            "name": "Completed, updated",
+            "index": 9
           }
         ],
         "filters": [

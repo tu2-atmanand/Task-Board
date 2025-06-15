@@ -15,6 +15,7 @@ import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItem';
 import { t } from 'src/utils/lang/helper';
+import { bugReporter } from 'src/services/OpenModals';
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
@@ -328,7 +329,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				return null;
 			}
 		} catch (error) {
-			console.log("renderHeader : Getting error while trying to render Header: ", error);
+			bugReporter(plugin, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
 			return null;
 		}
 	};
@@ -379,7 +380,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				return null;
 			}
 		} catch (error) {
-			console.log('renderSubTasks : Getting error while trying to render the SubTasks: ', error);
+			bugReporter(plugin, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
 			return null;
 		}
 	};
@@ -430,7 +431,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				);
 			}
 		} catch (error) {
-			console.log("renderFooter : Getting error while trying to render Footer : ", error);
+			bugReporter(plugin, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
 			return null;
 		}
 	};

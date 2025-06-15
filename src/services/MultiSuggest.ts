@@ -83,7 +83,7 @@ export function getQuickAddPluginChoices(
 	if (!quickAddPlugin) return [];
 
 	const choices = quickAddPluginObj.settings.choices;
-	console.log("QuickAdd Choices:", quickAddPluginObj);
+
 	return Object.keys(choices)
 		.filter((key) => choices[key].type === "Capture")
 		.map((key) => choices[key].name);

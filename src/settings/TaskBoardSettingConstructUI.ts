@@ -30,9 +30,10 @@ export class SettingsManager {
 	app: App;
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData | null = null;
+	allPickrs: Pickr[] = [];
 
-	constructor(app: App, plugin: TaskBoard) {
-		this.app = app;
+	constructor(plugin: TaskBoard) {
+		this.app = plugin.app;
 		this.plugin = plugin;
 		this.win = window;
 	}
@@ -154,6 +155,18 @@ export class SettingsManager {
 
 		// Reset global settings if necessary
 		this.globalSettings = null;
+
+		console.log("Cleaning up TaskBoard settings UI...");
+		//Destroy all Pickr instances
+		this.allPickrs.forEach((pickr) => pickr.destroy());
+
+		//find all the div with calls picr-app using query-selector and remove them from the main window
+		const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
+		if (pickrApps) {
+			pickrApps.forEach((app) => {
+				app.remove();
+			});
+		}
 	}
 
 	// Function to render the "Filters for scanning" tab content
@@ -590,6 +603,8 @@ export class SettingsManager {
 									},
 								});
 
+								this.allPickrs.push(pickr);
+
 								pickr
 									.on("change", (color: any) => {
 										const rgbaColor = `rgba(${color
@@ -606,7 +621,7 @@ export class SettingsManager {
 										renderTagColors();
 										this.saveSettings();
 									})
-									.on("cancel", () => pickr.hide())
+									.on("cancel", () => pickr.destroy())
 									.on("clear", () => pickr.hide());
 							});
 					})

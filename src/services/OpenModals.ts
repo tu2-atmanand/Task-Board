@@ -26,7 +26,6 @@ export const openBoardConfigModal = (
 	onSave: (updatedBoards: Board[]) => void
 ) => {
 	new BoardConfigureModal(
-		app,
 		plugin,
 		boards,
 		activeBoardIndex,
