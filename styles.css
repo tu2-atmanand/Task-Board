@@ -1518,7 +1518,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 /* Tag name input */
 .tag-color-row-element input[type="text"] {
 	flex: 1;
-	min-width: 0;
+	min-width: 10em;
 	padding: 4px 6px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
