@@ -143,7 +143,7 @@ const ar = {
   "show-description": "عرض الوصف",
   "open-board-on-obsidian-startup": "اللوحة المفتوحة على بدء التشغيل Obsidian",
   "open-board-on-obsidian-startup-info": "قم بتمكين هذا الخيار إذا كنت ترغب في رؤية لوحة المهام لتكون مرئية ، عندما تغلق وفتح Obsidian.",
-  "file-path": "مسار الملف",
+  "file": "مسار الملف",
   "discard": "ينبذ",
   "go-back": "ارجع وحفظ",
   "edit-task-modal-close-confirm-mssg": "لديك تغييرات غير محفوظة. هل تريد حفظها أو تجاهلها؟",

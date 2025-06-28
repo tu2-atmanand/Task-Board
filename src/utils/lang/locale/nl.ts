@@ -143,7 +143,7 @@ const nl = {
   "show-description": "Toon beschrijving",
   "open-board-on-obsidian-startup": "Open bord op Obsidian Startup",
   "open-board-on-obsidian-startup-info": "Schakel deze optie in als u wilt zien dat het taakbord zichtbaar is wanneer u Obsidian sluit en opent.",
-  "file-path": "Bestandspad",
+  "file": "Bestandspad",
   "discard": "Weggooien",
   "go-back": "Ga terug en bewaar",
   "edit-task-modal-close-confirm-mssg": "Je hebt niet -geredde veranderingen. Wilt u ze opslaan of weggooien?",

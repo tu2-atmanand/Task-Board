@@ -189,7 +189,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 					<button
 						className="ConfigureBtn"
 						aria-label={t("board-configure-button")}
-						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
+						onClick={() => openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
 							handleUpdateBoards(plugin, updatedBoards, setBoards)
 						)}
 					>

@@ -529,6 +529,7 @@ export class SettingsManager {
 									TagColorType.Text
 										? `1px solid ${tag.color}`
 										: "",
+								maxWidth: "max-content !important",
 							})
 					)
 					.addText((text) =>

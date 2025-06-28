@@ -143,7 +143,7 @@ const da = {
   "show-description": "Vis beskrivelse",
   "open-board-on-obsidian-startup": "Åben bestyrelse om Obsidian Startup",
   "open-board-on-obsidian-startup-info": "Aktivér denne indstilling, hvis du vil se, at opgavebestyrelsen skal være synlig, når du lukker og åbner Obsidian.",
-  "file-path": "Filsti",
+  "file": "Filsti",
   "discard": "Kasser",
   "go-back": "Gå tilbage og spar",
   "edit-task-modal-close-confirm-mssg": "Du har ufrelste ændringer. Vil du gemme eller kassere dem?",

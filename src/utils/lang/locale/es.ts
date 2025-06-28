@@ -174,7 +174,7 @@ const es = {
   "show-description": "Mostrar descripción",
   "open-board-on-obsidian-startup": "ABRIBA ABLOZA EN LA SIRECUPA DEL OBSIDIANA",
   "open-board-on-obsidian-startup-info": "Habilite esta opción si desea ver que el tablero de tareas sea visible, cuando cierre y abra Obsidian.",
-  "file-path": "Ruta de archivo",
+  "file": "Ruta de archivo",
   "discard": "Desechar",
   "go-back": "Vuelve y guardar",
   "edit-task-modal-close-confirm-mssg": "Tienes cambios no salvos. ¿Quieres guardarlos o descartarlos?",

@@ -143,7 +143,7 @@ const sq = {
   "show-description": "Shfaq përshkrimin",
   "open-board-on-obsidian-startup": "Bordi i hapur në fillimin e obsidianit",
   "open-board-on-obsidian-startup-info": "Aktivizoni këtë mundësi nëse doni të shihni se bordin e detyrave të jetë i dukshëm, kur mbylleni dhe hapni Obsidian.",
-  "file-path": "Shteg",
+  "file": "Shteg",
   "discard": "Hedh poshtë",
   "go-back": "Kthehuni dhe kurseni",
   "edit-task-modal-close-confirm-mssg": "Ju keni ndryshime të pasigurta. A doni t'i ruani apo hidhni ato?",

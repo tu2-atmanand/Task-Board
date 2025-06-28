@@ -1,6 +1,7 @@
 // /src/modal/BugReporter.ts
 
 import { App, Modal, Notice, Plugin, PluginManifest } from "obsidian";
+import { getObsidianDebugInfo } from "src/services/obsidian-debug-info";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
 
@@ -14,17 +15,17 @@ export class BugReporterModal extends Modal {
 		this.message = message;
 		this.bugContent = bug;
 		this.context = context;
-		this.titleEl.setText(t("bug-reporter"));
+		this.setTitle(t("bug-reporter"));
 	}
 
-	onOpen() {
+	async onOpen() {
 		const { contentEl } = this;
 
 		this.modalEl.setAttribute("data-type", "task-board-view");
 		contentEl.setAttribute("data-type", "task-board-view");
 
 		const modalContent = contentEl.createDiv({
-			cls: "bugReporterModal",
+			cls: "taskBoardBugReporterModal",
 		});
 
 		// Header
@@ -37,13 +38,16 @@ export class BugReporterModal extends Modal {
 		const bugReportContent = bugReportSection.createDiv({
 			cls: "bugReportContent",
 		});
-		const sanitizedBugReportContent = this.sanitizeBugReportContent(
+		const sanitizedBugReportContent = await this.sanitizeBugReportContent(
 			this.message,
 			this.bugContent,
 			this.context
 		);
+		console.log(sanitizedBugReportContent);
 		bugReportContent.createEl("p", {
-			text: createFragmentWithHTML(sanitizedBugReportContent),
+			text: createFragmentWithHTML(
+				sanitizedBugReportContent.finalContentForHTMLDom
+			),
 		});
 
 		const userMessageSection = modalContent.createDiv({
@@ -73,7 +77,9 @@ export class BugReporterModal extends Modal {
 		});
 
 		closeButton.addEventListener("click", () => {
-			this.handleCopyBtnEvent(sanitizedBugReportContent);
+			this.handleCopyBtnEvent(
+				sanitizedBugReportContent.finalContentForMarkdown
+			);
 		});
 
 		// const submitButton = modalContent.createEl("button", {
@@ -102,27 +108,46 @@ export class BugReporterModal extends Modal {
 		actions.appendChild(closeButton);
 		// actions.appendChild(submitButton);
 		actions.appendChild(cancelButton);
-
-		this.modalEl.addClass("bugReporterModal");
 	}
 
-	sanitizeBugReportContent(
+	async sanitizeBugReportContent(
 		message: String,
 		bugContent: String,
 		context: String
 	) {
 		// Sanitize the bug report content to prevent XSS attacks
-		let sanitizedContent = bugContent
+		let sanitizedErrorContent = bugContent
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;");
 		// This sanitization function will also going to hide user data to preserve privacy. To do this, I will be replacing all the alphabets and nembers with '*', and keep the rest of characters as it is. This will help me to get the format of the their content and also preserve the privacy of the user.
-		// sanitizedContent = sanitizedContent.replace(/[a-zA-Z0-9]/g, "*");
+		// sanitizedErrorContent = sanitizedErrorContent.replace(/[a-zA-Z0-9]/g, "*");
 
-		const systemInfo = this.getSystemInfo();
+		// const systemInfo = this.getSystemInfo();
+		const systemInfo = await getObsidianDebugInfo(this.app);
+		const systemInfoTextHTMLDom = Object.entries(systemInfo)
+			.map(
+				([key, value]) =>
+					`${key}: ${
+						Array.isArray(value) ? value.join("<br/>") : value
+					}`
+			)
+			.join("<br/>");
 
-		const finalContent = `<h4>Developer message</h4><br/>${message}<br/><br/><h5>Error Message</h5><i>${sanitizedContent}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfo}<br/><h5>Any additional information and screenshots</h5>`;
+		const systemInfoTextMarkdown = Object.entries(systemInfo)
+			.map(
+				([key, value]) =>
+					`${key}: ${
+						Array.isArray(value) ? value.join("\n\t") : value
+					}`
+			)
+			.join("\n");
+		console.log("System Info:", systemInfoTextHTMLDom);
 
-		return finalContent;
+		const finalContentForHTMLDom = `<h4>Developer message</h4><br/>${message}<br/><br/><h5>Error Message</h5><i>${sanitizedErrorContent}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfoTextHTMLDom}<br/><h5>Any additional information and screenshots</h5>`;
+
+		const finalContentForMarkdown = `# Bug Report\n\n## Developer message\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n### Any additional information and screenshots`;
+
+		return { finalContentForHTMLDom, finalContentForMarkdown };
 	}
 
 	getSystemInfo() {
@@ -153,10 +178,6 @@ export class BugReporterModal extends Modal {
 	}
 
 	handleCopyBtnEvent(bugReportContent: string) {
-		bugReportContent =
-			"# Bug Report\n\n" +
-			bugReportContent +
-			"\n\n## Any additional information and screenshots\n\n";
 		// Copy the bug report content to clipboard
 		navigator.clipboard.writeText(bugReportContent).then(() => {
 			new Notice(t("copied-to-clipboard"));

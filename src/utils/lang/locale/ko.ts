@@ -143,7 +143,7 @@ const ko = {
   "show-description": "설명 설명",
   "open-board-on-obsidian-startup": "Obsidian Startup에 오픈 보드",
   "open-board-on-obsidian-startup-info": "Obsidian을 닫고 열 때 작업 보드가 표시되는 경우이 옵션을 활성화하십시오.",
-  "file-path": "파일 경로",
+  "file": "파일 경로",
   "discard": "버리다",
   "go-back": "돌아가서 저장하십시오",
   "edit-task-modal-close-confirm-mssg": "구원받지 못한 변화가 있습니다. 저장하거나 버리고 싶습니까?",

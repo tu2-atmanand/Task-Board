@@ -1,6 +1,6 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
+import { App, Component, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -11,7 +11,7 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { getUniversalDate, taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { cleanTaskTitle, getUniversalDate, taskContentFormatter } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
 import { FileInput, RefreshCcw } from "lucide-react";
@@ -19,6 +19,7 @@ import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices, getTagSugge
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 
 const taskItemEmpty = {
 	id: 0,
@@ -431,33 +432,31 @@ const EditTaskContent: React.FC<{
 		lineNumber: task.lineNumber,
 		status,
 	};
+
 	// Reference to the HTML element where markdown will be rendered
+	const componentRef = useRef<Component | null>(null);
+	useEffect(() => {
+		// Initialize Obsidian Component on mount
+		componentRef.current = plugin.view;
+	}, []);
 
-	// const componentRef = useRef<Component | null>(null);
-	// useEffect(() => {
-	// 	// Initialize Obsidian Component on mount
-	// 	componentRef.current = plugin.view;
-	// }, []);
+	const titleComponentRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const formatedContent = cleanTaskTitle(plugin, modifiedTask);
+		setFormattedTaskContent(formatedContent);
+		if (titleComponentRef.current && formatedContent !== "") {
+			// Clear previous content before rendering new markdown
+			titleComponentRef.current.empty();
 
-	// const previewContainerRef = useRef<HTMLDivElement>(null);
-	// useEffect(() => {
-	// 	const formatedContent = taskContentFormatter(plugin, modifiedTask);
-	// 	setFormattedTaskContent(formatedContent);
-	// 	if (previewContainerRef.current && formatedContent !== "") {
-	// 		// Clear previous content before rendering new markdown
-	// 		previewContainerRef.current.empty();
-
-	// 		MarkdownUIRenderer.renderTaskDisc(
-	// 			app,
-	// 			formatedContent,
-	// 			previewContainerRef.current,
-	// 			filePath,
-	// 			componentRef.current
-	// 		);
-
-	// 		hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
-	// 	}
-	// }, [modifiedTask]); // Re-render when modifiedTask changes
+			MarkdownUIRenderer.renderTaskDisc(
+				app,
+				formatedContent,
+				titleComponentRef.current,
+				filePath,
+				componentRef.current
+			);
+		}
+	}, [title]); // Re-render when modifiedTask changes
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
@@ -652,13 +651,10 @@ const EditTaskContent: React.FC<{
 	return (
 		<>
 			<div className="EditTaskModalHome">
-				<div className="EditTaskModalHomeTitle">
-					{taskExists ? t("edit-task") : t("add-new-task")}
-				</div>
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
-							<label className="EditTaskModalHomeModalTitle">{title || "Task title"}</label>
+							<div className="EditTaskModalHomeModalTitle" ref={titleComponentRef}></div>
 
 							{/* Editor tab switcher */}
 							<div className="EditTaskModalTabHeader">
@@ -666,7 +662,7 @@ const EditTaskContent: React.FC<{
 								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file-path")}:
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file")}:
 									<input
 										type="text"
 										ref={filePathRef}
@@ -898,6 +894,8 @@ export class AddOrEditTaskModal extends Modal {
 		contentEl.setAttribute('data-type', 'task-board-view');
 
 		const root = ReactDOM.createRoot(this.contentEl);
+
+		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
 		root.render(<EditTaskContent
 			app={this.app}

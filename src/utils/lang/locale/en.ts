@@ -168,7 +168,7 @@ const en: Lang = {
 	"show-description": "Show description",
 	"open-board-on-obsidian-startup": "Open board on Obsidian startup",
 	"open-board-on-obsidian-startup-info": "Enable this option if you want to see the task board to be visible, when you close and open Obsidian.",
-	"file-path": "File path",
+	"file": "File",
 	"discard": "Discard",
 	"go-back": "Go back and save",
 	"edit-task-modal-close-confirm-mssg": "You have unsaved changes. Do you want to save or discard them?",

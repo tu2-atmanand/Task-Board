@@ -176,7 +176,7 @@ const ru = {
   "show-description": "Показать описание",
   "open-board-on-obsidian-startup": "Открывать панель задач при запуске Obsidian",
   "open-board-on-obsidian-startup-info": "Включите этот параметр, если вы хотите, чтобы панель задач открывалась при запуске Obsidian.",
-  "file-path": "Путь к файлу",
+  "file": "Путь к файлу",
   "discard": "Отказаться",
   "go-back": "Вернуться и сохранить",
   "edit-task-modal-close-confirm-mssg": "У вас есть неспасенные изменения. Вы хотите сохранить или отказаться от них?",

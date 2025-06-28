@@ -47,8 +47,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+	const columnListRef = useRef<HTMLDivElement | null>(null);
 
 	// Function to add a new column to the selected board
 	const handleOpenAddColumnModal = () => {
@@ -145,6 +147,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// onClose();
 	};
 
+	const renderGlobalSettingsTab = (boardIndex: number) => {
+		return (
+			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
+		);
+	}
 
 	useEffect(() => {
 		if (selectedBoardIndex !== -1) return;
@@ -156,16 +163,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
 		}
 	}, [selectedBoardIndex]);
-
-	const renderGlobalSettingsTab = (boardIndex: number) => {
-		return (
-			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
-		);
-	}
-
-	const columnListRef = useRef<HTMLDivElement | null>(null);
-
-	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
 
 	// Function to handle column change
 	const handleColumnChange = (
@@ -228,63 +225,63 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
+	useEffect(() => {
+		console.warn("This is just to check whether this section of code runs whenever I make any input inside the input fields of the board settings section.");
+		if (
+			selectedBoardIndex === -1 ||
+			!columnListRef.current ||
+			!localBoards[selectedBoardIndex]
+		)
+			return;
+
+		setFiltersData(localBoards[selectedBoardIndex].filters?.join(", ") || "");
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: (evt) => {
+				try {
+					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+					const updatedBoards = [...localBoards];
+					const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+					updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+					updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
+						col.index = idx + 1;
+					});
+
+					setLocalBoards(updatedBoards);
+					setIsEdited(true);
+
+					// I need to re-render the columnListRef section here
+					// if (columnListRef.current) {
+					// 	// Force re-render by updating the ref
+					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
+					// }
+				} catch (error) {
+					bugReporter(plugin, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
+				}
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedBoardIndex, localBoards]);
+
 	// Function to render board settings
 	const renderBoardSettings = (boardIndex: number) => {
 		if (globalSettingsHTMLSection.current) {
 			settingManager.cleanUp();
 			globalSettingsHTMLSection.current.empty();
 		}
-
-		useEffect(() => {
-			console.warn("This is just to check whether this section of code runs whenever I make any input inside the input fields of the board settings section.");
-			if (
-				selectedBoardIndex === -1 ||
-				!columnListRef.current ||
-				!localBoards[selectedBoardIndex]
-			)
-				return;
-
-			setFiltersData(localBoards[boardIndex].filters?.join(", ") || "");
-
-			const sortable = Sortable.create(columnListRef.current, {
-				animation: 150,
-				handle: ".boardConfigModalColumnRowDragButton",
-				ghostClass: "task-board-sortable-ghost",
-				chosenClass: "task-board-sortable-chosen",
-				dragClass: "task-board-sortable-drag",
-				dragoverBubble: true,
-				forceFallback: true,
-				fallbackClass: "task-board-sortable-fallback",
-				easing: "cubic-bezier(1, 0, 0, 1)",
-				onSort: (evt) => {
-					try {
-						if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
-
-						const updatedBoards = [...localBoards];
-						const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-						updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-						updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
-							col.index = idx + 1;
-						});
-
-						setLocalBoards(updatedBoards);
-						setIsEdited(true);
-
-						// I need to re-render the columnListRef section here
-						// if (columnListRef.current) {
-						// 	// Force re-render by updating the ref
-						// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
-						// }
-					} catch (error) {
-						bugReporter(plugin, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
-					}
-				},
-			});
-
-			return () => {
-				sortable.destroy();
-			};
-		}, [selectedBoardIndex, localBoards]);
 
 		const board = localBoards[boardIndex];
 
@@ -440,13 +437,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<input
 												type="number"
 												placeholder={t("enter-tag-placeholder")}
-												value={column.taskPriority || 1}
+												value={column.taskPriority || ""}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
 														"taskPriority",
-														e.target.value
+														Number(e.target.value)
 													)
 												}
 												className="boardConfigModalColumnRowContentColName"
@@ -605,7 +602,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				</div>
 				<div className="boardConfigModalMainContent">
 					{selectedBoardIndex === -1
-						? renderGlobalSettingsTab(selectedBoardIndex)
+						? <>{renderGlobalSettingsTab(selectedBoardIndex)}</>
 						: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
 					}
 				</div>

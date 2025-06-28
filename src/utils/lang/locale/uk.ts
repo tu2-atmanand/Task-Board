@@ -143,7 +143,7 @@ const uk = {
   "show-description": "Показати опис",
   "open-board-on-obsidian-startup": "Відкрита дошка на Obsidian Startup",
   "open-board-on-obsidian-startup-info": "Увімкніть цю опцію, якщо ви хочете побачити, як дошка завдань була видимим, коли ви закриваєте та відкриваєте обсидіан.",
-  "file-path": "Шлях до файлу",
+  "file": "Шлях до файлу",
   "discard": "Відкинути",
   "go-back": "Поверніться назад і зберегти",
   "edit-task-modal-close-confirm-mssg": "У вас були незберечені зміни. Ви хочете їх зберегти чи відкинути?",

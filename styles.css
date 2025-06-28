@@ -555,7 +555,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .EditTaskModalHomeModalTitle {
 	font-size: 1.2em;
 	font-weight: bold;
-	margin-bottom: 1.4em;
+	margin-bottom: 0.5em;
 }
 
 .EditTaskModalHomeBody {
@@ -664,6 +664,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalHomePreviewHeader {
 	display: flex;
+	gap: 1rem;
 	padding: 5px;
 	flex-direction: row;
 	/* border-radius: 10px 0 5px 0; */
@@ -1506,6 +1507,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	align-items: center;
 	gap: 8px;
 	padding-bottom: 0 !important;
+	flex-wrap: wrap;
+}
+
+.taskboard-setting-tag-color-row-element-drag-handle {
+	max-width: max-content !important;
 }
 
 /* Make the grip icon and buttons smaller and draggable looking */
@@ -1561,6 +1567,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskboard-setting-tag-color-row-element-delete {
 	background-color: var(--color-red) !important;
 	cursor: pointer !important;
+	max-width: max-content !important;
 }
 
 .taskboard-setting-tag-color-row-element-color-picker {
@@ -2404,20 +2411,19 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	margin-left: 1.5rem;
 }
 
-.bugReporterModal {
+.taskBoardBugReporterModal {
 	min-width: 40vw;
 	max-width: 50vw;
 }
 
 @media (max-width: 768px) {
-	.bugReporterModal {
+	.taskBoardBugReporterModal {
 		width: auto;
-		min-height: fit-content;
 		max-width: 100%;
 	}
 }
 
-.bugReporterModal h2 {
+.taskBoardBugReporterModal h2 {
 	font-size: 1.5rem;
 	align-items: center;
 	justify-content: center;

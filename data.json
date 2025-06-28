@@ -645,7 +645,7 @@
         }
       ],
       "showTaskWithoutMetadata": true,
-      "tagColorsType": "background",
+      "tagColorsType": "text",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,

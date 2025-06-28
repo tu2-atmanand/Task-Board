@@ -143,7 +143,7 @@ const id = {
   "show-description": "Tampilkan deskripsi",
   "open-board-on-obsidian-startup": "Papan terbuka di startup obsidian",
   "open-board-on-obsidian-startup-info": "Aktifkan opsi ini jika Anda ingin melihat papan tugas terlihat, ketika Anda menutup dan membuka Obsidian.",
-  "file-path": "Jalur file",
+  "file": "Jalur file",
   "discard": "Membuang",
   "go-back": "Kembali dan simpan",
   "edit-task-modal-close-confirm-mssg": "Anda memiliki perubahan yang belum disimpan. Apakah Anda ingin menyimpan atau membuangnya?",
