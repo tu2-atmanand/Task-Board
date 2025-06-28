@@ -741,12 +741,8 @@ export class SettingsManager {
 			);
 
 		new Setting(contentEl)
-			.setName(t("Default note for new tasks"))
-			.setDesc(
-				t(
-					"Select the default note in which all the newly added tasks through 'add new task modal' should be saved."
-				)
-			)
+			.setName(t("default-note-for-new-tasks"))
+			.setDesc(t("default-note-for-new-tasks-description"))
 			.addText((text) => {
 				text.setValue(preDefinedNote).onChange((value) => {
 					if (this.globalSettings)
@@ -784,7 +780,7 @@ export class SettingsManager {
 
 		new Setting(contentEl)
 			.setName(t("universal-date"))
-			.setDesc(t("universal-date-info"))
+			.setDesc(t("universal-date-description"))
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
@@ -827,12 +823,8 @@ export class SettingsManager {
 
 		// Setting for choosing the default file to archive tasks
 		new Setting(contentEl)
-			.setName(t("Note to add your archived tasks"))
-			.setDesc(
-				t(
-					"Select the note in which all the archived tasks should be saved. Leave blank to simply comment out the task in the note itself."
-				)
-			)
+			.setName(t("note-for-archived-tasks"))
+			.setDesc(t("note-for-archived-tasks-description"))
 			.addText((text) => {
 				text.setValue(archivedTasksFilePath).onChange((value) => {
 					if (this.globalSettings)
@@ -934,12 +926,8 @@ export class SettingsManager {
 			.setDisabled(!communityPlugins.isQuickAddPluginEnabled());
 
 		new Setting(contentEl)
-			.setName(t("Default QuickAdd plugin choice"))
-			.setDesc(
-				t(
-					"Select the choice you have created in QuickAdd plugin. Once you submit the task from 'add new task modal', it will use this choice to save the task content in the specified file and at the specified position as per the selected choice."
-				)
-			)
+			.setName(t("default-quickadd-choice"))
+			.setDesc(t("default-quickadd-choice-description"))
 			.setTooltip(t("Enable the above setting to use this setting."))
 			.addText((text) => {
 				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {

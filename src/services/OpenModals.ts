@@ -159,10 +159,10 @@ export const bugReporter = (
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
 				el.createEl("p", {
-					text: t("Task board encountered an issue while completing the operation. Click on the report bug button to read more."),
+					text: t("bug-report-notice-message"),
 				});
 				el.createEl("button", {
-					text: t("Report Bug"),
+					text: t("show-error"),
 					cls: "reportBugButton",
 					onclick: () => {
 						const bugReportModal = new BugReporterModal(
@@ -176,7 +176,7 @@ export const bugReporter = (
 					},
 				});
 				el.createEl("button", {
-					text: t("Ignore this bug"),
+					text: t("ignore-this-bug"),
 					cls: "ignoreBugButton",
 					onclick: () => {
 						el.hide();

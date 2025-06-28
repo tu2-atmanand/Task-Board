@@ -541,7 +541,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	max-height: calc(var(--dialog-max-height) - 5vh);
+	max-height: calc(var(--dialog-max-height) - 11vh);
 	box-sizing: border-box;
 	position: relative;
 }
@@ -778,6 +778,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	max-width: 14vw;
 	box-sizing: border-box;
 	transition: transform 0.3s ease-in-out;
+	overflow: auto;
 }
 
 .EditTaskModalHomeField {
@@ -838,7 +839,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 /* Mobile-specific styles */
-@media (max-width: 820px) {
+@media (max-width: 1100px) {
 	.EditTaskModalHomeBody {
 		flex-direction: column;
 		position: relative;
@@ -882,18 +883,24 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		position: absolute;
 		top: 0;
 		right: 0;
-		min-width: 40vw;
+		min-width: 200px;
 		height: 100%;
-		background: rgba(255, 255, 255, 0.2);
-		backdrop-filter: blur(10px);
-		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
 		transform: translateX(100%);
 		overflow: auto;
+
+		border: none;
+		box-shadow: none;
+		background: transparent;
 	}
 
 	/* Show when toggled */
 	.EditTaskModalHomeRightSec.visible {
 		transform: translateX(0);
+
+		border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
+		background: rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(10px);
+		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
 	}
 
 	/* Button to toggle right section */
@@ -1311,7 +1318,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	}
 
 	.boardConfigModalColumnRowDragButton {
-		min-width: 1.4em !important;
+		min-width: 2em !important;
 	}
 
 	.boardConfigModalDeleteBoardBtn {
