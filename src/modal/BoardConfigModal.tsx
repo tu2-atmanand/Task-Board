@@ -41,7 +41,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		try {
 			return boards ? JSON.parse(JSON.stringify(boards)) : [];
 		} catch (e) {
-			console.error("Failed to parse boards:", e);
+			bugReporter(plugin, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
 			return [];
 		}
 	});
@@ -226,7 +226,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	useEffect(() => {
-		console.warn("This is just to check whether this section of code runs whenever I make any input inside the input fields of the board settings section.");
 		if (
 			selectedBoardIndex === -1 ||
 			!columnListRef.current ||

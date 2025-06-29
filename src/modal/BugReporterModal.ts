@@ -1,7 +1,7 @@
 // /src/modal/BugReporter.ts
 
 import { App, Modal, Notice, Plugin, PluginManifest } from "obsidian";
-import { getObsidianDebugInfo } from "src/services/obsidian-debug-info";
+import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
 
@@ -43,7 +43,6 @@ export class BugReporterModal extends Modal {
 			this.bugContent,
 			this.context
 		);
-		console.log(sanitizedBugReportContent);
 		bugReportContent.createEl("p", {
 			text: createFragmentWithHTML(
 				sanitizedBugReportContent.finalContentForHTMLDom
@@ -141,7 +140,6 @@ export class BugReporterModal extends Modal {
 					}`
 			)
 			.join("\n");
-		console.log("System Info:", systemInfoTextHTMLDom);
 
 		const finalContentForHTMLDom = `<h4>Developer message</h4><br/>${message}<br/><br/><h5>Error Message</h5><i>${sanitizedErrorContent}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfoTextHTMLDom}<br/><h5>Any additional information and screenshots</h5>`;
 
@@ -169,11 +167,6 @@ export class BugReporterModal extends Modal {
 			.map((plugin) => `${plugin.id} = ${plugin.version}`)
 			.join("    <br/>");
 
-		console.log(
-			"Enabled Plugins with Version Map:",
-			enabledPluginsWithVersionMap
-		);
-
 		return `<b>App version</b>: ${appVersion}<br/><br/><b>Obsidian Version</b>: ${obsidianVersion}<br/><br/><b>Enabled Plugins</b>:<br/>${stringifyEnabledPlugins}`;
 	}
 
@@ -187,8 +180,8 @@ export class BugReporterModal extends Modal {
 	handleSubmit() {
 		// Handle the submission of the bug report
 		// You can send the bug report to your server or handle it as needed
-		console.log("Bug Report Submitted:", this.bugContent);
-		console.log("Context:", this.context);
+		// console.log("Bug Report Submitted:", this.bugContent);
+		// console.log("Context:", this.context);
 		// this.onClose();
 	}
 

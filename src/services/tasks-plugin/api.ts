@@ -42,7 +42,7 @@ export class TasksApi implements TasksApiV1 {
         if (!apiV1) {
             // throw new Error("obsidian-tasks-plugin must be installed");
 			console.log("obsidian-tasks-plugin must be installed");
-			new Notice("You are using feature for which Tasks plugin must be installed");
+			new Notice("You are trying to use features for which Tasks plugin must be installed");
         }
         this.apiV1 = apiV1;
     }

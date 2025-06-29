@@ -1,10 +1,6 @@
 // /src/utils/JsonFileOperations.ts
 
-import {
-	taskItem,
-	taskJsonMerged,
-	tasksJson,
-} from "src/interfaces/TaskItem";
+import { taskItem, taskJsonMerged, tasksJson } from "src/interfaces/TaskItem";
 
 import { Board } from "../interfaces/BoardConfigs";
 import TaskBoard from "main";
@@ -19,7 +15,12 @@ export const loadGlobalSettings = async (plugin: TaskBoard) => {
 		const globalSettings = plugin.settings.data.globalSettings || {};
 		return globalSettings;
 	} catch (error) {
-		console.error("Error loading globalSettings:", error);
+		bugReporter(
+			plugin,
+			"Failed to load global settings from data.json",
+			String(error),
+			"JsonFileOperations.ts/loadGlobalSettings"
+		);
 		return {};
 	}
 };
@@ -34,7 +35,12 @@ export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
 
 		return boardConfigs;
 	} catch (error) {
-		console.error("Error loading board configurations:", error);
+		bugReporter(
+			plugin,
+			"Failed to load board configurations from data.json",
+			String(error),
+			"JsonFileOperations.ts/loadBoardsData"
+		);
 		throw error;
 	}
 };
@@ -54,7 +60,12 @@ export const saveBoardsData = async (
 		// Save updated settings
 		await plugin.saveSettings();
 	} catch (error) {
-		console.error("Error saving board configurations:", error);
+		bugReporter(
+			plugin,
+			"Failed to save board configurations to data.json",
+			String(error),
+			"JsonFileOperations.ts/saveBoardsData"
+		);
 		throw error;
 	}
 };
@@ -71,13 +82,15 @@ export const loadTasksJsonFromDisk = async (
 		const allTasks: tasksJson = JSON.parse(data);
 		return allTasks;
 	} catch (error) {
-		console.error("Error reading tasks.json from disk:", error);
+		console.error("Error reading tasks.json from disk:", error); // This error will be shown for a fresh install hence dont use the bugReporter here.
 		throw error;
 	}
 };
 
 // Helper function to clean up the empty entries in tasks.json
-export const dataCleanup = async (oldTaskData: tasksJson): Promise<tasksJson> => {
+export const dataCleanup = async (
+	oldTaskData: tasksJson
+): Promise<tasksJson> => {
 	// Function to remove keys with empty arrays from a specified section
 	const removeEmptyKeys = (section: any) => {
 		Object.keys(section).forEach((key) => {
@@ -113,7 +126,12 @@ export const writeTasksJsonToDisk = async (
 			console.warn("Improper cleanedTasksData to write to disk.");
 		}
 	} catch (error) {
-		console.warn("Error writing tasks.json to disk:", error);
+		bugReporter(
+			plugin,
+			"Failed to write tasks to tasks.json file. Or failed to create the a new file. Maybe write permission is not granted.",
+			String(error),
+			"JsonFileOperations.ts/writeTasksJsonToDisk"
+		);
 	}
 };
 
@@ -152,7 +170,12 @@ export const loadTasksAndMerge = async (
 		return allTasksMerged;
 	} catch (error) {
 		// console.error("Failed to load tasks from tasks.json:", error);
-		bugReporter(plugin, "Failed to load tasks from tasks.json file.", String(error), "loadTasksAndMerge");
+		bugReporter(
+			plugin,
+			"Failed to load tasks from tasks.json file.",
+			String(error),
+			"loadTasksAndMerge"
+		);
 		throw error;
 	}
 };

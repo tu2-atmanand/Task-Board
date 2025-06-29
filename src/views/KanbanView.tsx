@@ -10,7 +10,7 @@ import KanbanBoard from "src/components/KanbanBoard";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { openScanVaultModal } from "../services/OpenModals";
+import { bugReporter, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
 export class KanbanView extends ItemView {
@@ -65,7 +65,12 @@ export class KanbanView extends ItemView {
 		try {
 			this.boards = await loadBoardsData(this.plugin);
 		} catch (err) {
-			console.error("Failed to load boards data:", err);
+			bugReporter(
+				this.plugin,
+				"Failed to load board configurations from data.json",
+				String(err),
+				"KanbanView.tsx/loadBoards"
+			);
 		}
 	}
 

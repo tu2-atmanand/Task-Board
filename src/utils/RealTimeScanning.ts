@@ -5,6 +5,7 @@ import { App, TFile } from "obsidian";
 import { ScanningVault } from "src/utils/ScanningVault";
 import type TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "./FiltersVerifier";
+import { bugReporter } from "src/services/OpenModals";
 
 export class RealTimeScanning {
 	app: App;
@@ -39,7 +40,12 @@ export class RealTimeScanning {
 				JSON.stringify(this.taskBoardFileStack)
 			);
 		} catch (error) {
-			console.error("Error saving file stack:", error);
+			bugReporter(
+				this.plugin,
+				"Error saving file stack to localStorage.",
+				String(error),
+				"RealTimeScanning.ts/saveStack"
+			);
 		}
 	}
 

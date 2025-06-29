@@ -399,7 +399,6 @@ export function extractStartDate(text: string): string {
 			/\@start\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
 		);
 	}
-	console.log("Start Date Match", match, " | for text : ", text);
 
 	return match ? match[1] : "";
 }
@@ -517,8 +516,6 @@ export function extractCompletionDate(text: string): string {
 
 export function extractCancelledDate(text: string): string {
 	let match = text.match(/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	console.log("Cancelled Date Match", match, " | for text : ", text);
 
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {

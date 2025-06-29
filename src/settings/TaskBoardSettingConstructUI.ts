@@ -24,6 +24,7 @@ import {
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
+import { bugReporter } from "src/services/OpenModals";
 
 export class SettingsManager {
 	win: Window;
@@ -47,7 +48,12 @@ export class SettingsManager {
 			const settingsData = this.plugin.settings.data.globalSettings;
 			this.globalSettings = settingsData;
 		} catch (err) {
-			console.error("Error loading settings:", err);
+			bugReporter(
+				this.plugin,
+				"Failed to load settings",
+				err as string,
+				"TaskBoardSettingConstructUI.ts/SettingsManager/loadSettings"
+			);
 		}
 	}
 
@@ -59,7 +65,12 @@ export class SettingsManager {
 			this.plugin.settings.data.globalSettings = this.globalSettings;
 			this.plugin.saveSettings();
 		} catch (err) {
-			console.error("Error saving settings:", err);
+			bugReporter(
+				this.plugin,
+				"Failed to save settings",
+				err as string,
+				"TaskBoardSettingConstructUI.ts/SettingsManager/saveSettings"
+			);
 		}
 	}
 
@@ -156,7 +167,6 @@ export class SettingsManager {
 		// Reset global settings if necessary
 		this.globalSettings = null;
 
-		console.log("Cleaning up TaskBoard settings UI...");
 		//Destroy all Pickr instances
 		this.allPickrs.forEach((pickr) => pickr.destroy());
 
@@ -823,8 +833,8 @@ export class SettingsManager {
 
 		// Setting for choosing the default file to archive tasks
 		new Setting(contentEl)
-			.setName(t("note-for-archived-tasks"))
-			.setDesc(t("note-for-archived-tasks-description"))
+			.setName(t("file-for-archived-tasks"))
+			.setDesc(t("file-for-archived-tasks-description"))
 			.addText((text) => {
 				text.setValue(archivedTasksFilePath).onChange((value) => {
 					if (this.globalSettings)

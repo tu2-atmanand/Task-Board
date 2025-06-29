@@ -22,7 +22,7 @@
 .is-phone .modal[data-type="task-board-view"] {
 	width: auto;
 	overflow: auto;
-	min-height: fit-content;
+	/* min-height: fit-content; */
 	max-height: 80vh;
 }
 
@@ -1428,7 +1428,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	background-color: var(--background-secondary);
 	align-content: center;
 	text-align-last: center;
-	font-size: large;
+	font-size: 0.9rem;
 	font-weight: 700;
 	border: solid 1px var(--checkbox-color-hover);
 	border-radius: 4px;
@@ -1495,6 +1495,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .tag-color-row-element .setting-item-info {
 	display: none !important;
+}
+
+.tag-color-row .setting-item-control {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap !important;
 }
 
 /* Highlighted row while dragging */
