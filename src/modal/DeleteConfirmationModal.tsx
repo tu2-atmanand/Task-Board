@@ -8,19 +8,22 @@ interface DeleteConfirmationModalProps {
 	mssg: string;
 	onConfirm: () => void;
 	onCancel: () => void;
+	onArchive?: () => void;
 }
 
 export class DeleteConfirmationModal extends Modal {
 	mssg: string;
 	onConfirm: () => void;
 	onCancel: () => void;
+	onArchive?: () => void;
 
-	constructor(app: App, { mssg, onConfirm, onCancel }: DeleteConfirmationModalProps) {
+	constructor(app: App, { mssg, onConfirm, onCancel, onArchive }: DeleteConfirmationModalProps) {
 		super(app);
 		this.app = app;
 		this.mssg = mssg;
 		this.onConfirm = onConfirm;
 		this.onCancel = onCancel;
+		this.onArchive = onArchive;
 	}
 
 	onOpen() {
@@ -41,6 +44,17 @@ export class DeleteConfirmationModal extends Modal {
 			this.onConfirm();
 			this.close();
 		});
+
+		if (this.onArchive) {
+			const archiveButton = buttonContainer.createEl('button', { text: t("archive-instead") });
+			archiveButton.classList.add('archiveTaskCancelmBtn');
+			archiveButton.addEventListener('click', () => {
+				if (this.onArchive) {
+					this.onArchive();
+					this.close();
+				}
+			});
+		}
 
 		const cancelButton = buttonContainer.createEl('button', { text: t("no") });
 		cancelButton.classList.add('deleteTaskCancelmBtn');

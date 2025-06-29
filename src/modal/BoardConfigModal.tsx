@@ -2,22 +2,24 @@
 
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
 import { App, Modal, Notice } from "obsidian";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import React, { ComponentPropsWithRef, useEffect, useRef, useState } from "react";
+import React, { ComponentPropsWithRef, useCallback, useEffect, useRef, useState } from "react";
 
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
-import { FaTrash } from 'react-icons/fa';
+import { FaAlignCenter, FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
+import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { bugReporter } from "src/services/OpenModals";
 
 interface ConfigModalProps {
-	app: App;
+	plugin: TaskBoard;
 	settingManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
@@ -27,7 +29,7 @@ interface ConfigModalProps {
 }
 
 const ConfigModalContent: React.FC<ConfigModalProps> = ({
-	app,
+	plugin,
 	settingManager,
 	boards,
 	activeBoardIndex,
@@ -39,94 +41,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		try {
 			return boards ? JSON.parse(JSON.stringify(boards)) : [];
 		} catch (e) {
-			console.error("Failed to parse boards:", e);
+			bugReporter(plugin, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
 			return [];
 		}
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
 
-	const columnListRef = useRef<HTMLDivElement | null>(null);
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		if (
-			selectedBoardIndex === -1 ||
-			!columnListRef.current ||
-			!localBoards[selectedBoardIndex]
-		)
-			return;
-
-		const sortable = Sortable.create(columnListRef.current, {
-			animation: 150,
-			handle: ".boardConfigModalColumnRowDragButton",
-			onEnd: (evt) => {
-				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
-
-				const updatedBoards = [...localBoards];
-				// const columns = updatedBoards[selectedBoardIndex].columns;
-				const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-				updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-				updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
-
-				setLocalBoards(updatedBoards);
-				setIsEdited(true);
-			},
-		});
-
-		return () => {
-			sortable.destroy();
-		};
-	}, [selectedBoardIndex, localBoards]);
-
-
-	// Function to handle board name change
-	const handleBoardNameChange = (index: number, newName: string) => {
-		const updatedBoards = [...localBoards];
-		updatedBoards[index].name = newName;
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	// Function to handle column change
-	const handleColumnChange = (
-		boardIndex: number,
-		columnIndex: number,
-		field: string,
-		value: any
-	) => {
-		const updatedBoards = [...localBoards];
-		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
-			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
-		}
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	const handleFiltersChange = (boardIndex: number, value: string) => {
-		const updatedBoards = [...localBoards];
-		// Split input string by commas and trim spaces to create an array
-		updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	const handleFilterPolarityChange = (boardIndex: number, value: string) => {
-		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex].filterPolarity = value;
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags';
-	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
-		const updatedBoards = [...localBoards];
-		if (updatedBoards[boardIndex]) {
-			updatedBoards[boardIndex][field] = value as boolean;
-		}
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
+	const columnListRef = useRef<HTMLDivElement | null>(null);
 
 	// Function to add a new column to the selected board
 	const handleOpenAddColumnModal = () => {
@@ -141,13 +65,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
+			id: columnData.id,
+			index: updatedBoards[boardIndex].columns.length + 1,
 			colType: columnData.colType,
 			active: true,
 			collapsed: false,
 			name: columnData.name,
-			index: updatedBoards[boardIndex].columns.length + 1,
 			coltag: columnData.coltag,
-			range: columnData.range,
+			datedBasedColumn: columnData.datedBasedColumn,
+			taskStatus: columnData.taskStatus,
+			taskPriority: columnData.taskPriority,
 			limit: columnData.limit,
 		});
 		setLocalBoards(updatedBoards);
@@ -165,14 +92,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
 		});
 		modal.open();
-	};
-
-	// Function to delete a column from the selected board
-	const handleDeleteColumnFromBoard = (boardIndex: number, columnIndex: number) => {
-		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex].columns.splice(columnIndex, 1);
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
 	};
 
 	const handleAddNewBoard = async (oldBoards: Board[]) => {
@@ -214,12 +133,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		deleteModal.open();
 	};
 
-	// Function to save changes
-	const handleSave = () => {
-		onSave(localBoards);
-		// onClose();
-	};
-
 	const toggleActiveState = (boardIndex: number, columnIndex: number) => {
 		const updatedBoards = [...localBoards];
 		const column = updatedBoards[boardIndex].columns[columnIndex];
@@ -227,6 +140,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setLocalBoards(updatedBoards); // Update the state
 		// onSave(updatedBoards); // Save the updated state
 	};
+
+	// Function to save changes
+	const handleSave = () => {
+		onSave(localBoards);
+		// onClose();
+	};
+
+	const renderGlobalSettingsTab = (boardIndex: number) => {
+		return (
+			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
+		);
+	}
 
 	useEffect(() => {
 		if (selectedBoardIndex !== -1) return;
@@ -239,11 +164,116 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		}
 	}, [selectedBoardIndex]);
 
-	const renderGlobalSettingsTab = (boardIndex: number) => {
-		return (
-			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
-		);
-	}
+	// Function to handle column change
+	const handleColumnChange = (
+		boardIndex: number,
+		columnIndex: number,
+		field: string,
+		value: any
+	) => {
+		// evt?.preventDefault();
+		// evt?.stopPropagation();
+		// console.log(`Updating column at boardIndex: ${boardIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
+		const updatedBoards = [...localBoards];
+		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
+			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
+		}
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+
+	// Function to handle board name change
+	const handleBoardNameChange = (index: number, newName: string) => {
+		const updatedBoards = [...localBoards];
+		updatedBoards[index].name = newName;
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	const handleFiltersChange = (boardIndex: number, value: string) => {
+		setFiltersData(value);
+		const updatedBoards = [...localBoards];
+		// Split input string by commas and trim spaces to create an array
+		updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	const handleFilterPolarityChange = (boardIndex: number, value: string) => {
+		const updatedBoards = [...localBoards];
+		updatedBoards[boardIndex].filterPolarity = value;
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags' | 'hideEmptyColumns';
+	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
+		const updatedBoards = [...localBoards];
+		if (updatedBoards[boardIndex]) {
+			updatedBoards[boardIndex][field] = value as boolean;
+		}
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	// Function to delete a column from the selected board
+	const handleDeleteColumnFromBoard = (boardIndex: number, columnIndex: number) => {
+		const updatedBoards = [...localBoards];
+		updatedBoards[boardIndex].columns.splice(columnIndex, 1);
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
+	useEffect(() => {
+		if (
+			selectedBoardIndex === -1 ||
+			!columnListRef.current ||
+			!localBoards[selectedBoardIndex]
+		)
+			return;
+
+		setFiltersData(localBoards[selectedBoardIndex].filters?.join(", ") || "");
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: (evt) => {
+				try {
+					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+					const updatedBoards = [...localBoards];
+					const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+					updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+					updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
+						col.index = idx + 1;
+					});
+
+					setLocalBoards(updatedBoards);
+					setIsEdited(true);
+
+					// I need to re-render the columnListRef section here
+					// if (columnListRef.current) {
+					// 	// Force re-render by updating the ref
+					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
+					// }
+				} catch (error) {
+					bugReporter(plugin, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
+				}
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedBoardIndex, localBoards]);
 
 	// Function to render board settings
 	const renderBoardSettings = (boardIndex: number) => {
@@ -282,6 +312,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
+					<div className="boardConfigModalMainContent-Active-Body-InputItems">
+						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+							<div className="boardConfigModalSettingName">{t("automatically-hide-empty-columns")}</div>
+							<div className="boardConfigModalSettingDescription">{t("automatically-hide-empty-columns-info")}</div>
+						</div>
+						<input
+							type="checkbox"
+							checked={board.hideEmptyColumns}
+							onChange={(e) => handleToggleChange(boardIndex, "hideEmptyColumns", e.target.checked)}
+						/>
+					</div>
+
 					<hr className="boardConfigModalHr-100" />
 
 					<h3>{t("board-filters")}</h3>
@@ -289,12 +331,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 							<div className="boardConfigModalSettingName">{t("filter-tags")}</div>
 							<div className="boardConfigModalSettingDescription">{t("filter-tags-setting-info")}</div>
-
 						</div>
 						<input
 							type="text"
 							placeholder={t("filter-tags-input-placeholder")}
-							value={board.filters?.join(", ")}
+							value={filtersData}
 							onChange={(e) => handleFiltersChange(boardIndex, e.target.value)}
 						/>
 					</div>
@@ -331,7 +372,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							className="boardConfigModalMainContent-Active-BodyColumnsList"
 						>
 							{board.columns.map((column, columnIndex) => (
-								<div key={Math.random()} className="boardConfigModalColumnRow">
+								<div key={column.id} className="boardConfigModalColumnRow">
 									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 									{column.active ? (
 										<EyeIcon
@@ -345,10 +386,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										/>
 									)}
 									<div className="boardConfigModalColumnRowContent">
-										<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
+										<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
 										<input
 											type="text"
-											value={column.name}
+											value={column.name || ""}
 											onChange={(e) =>
 												handleColumnChange(
 													boardIndex,
@@ -375,6 +416,38 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												className="boardConfigModalColumnRowContentColName"
 											/>
 										)}
+										{column.colType === "taskStatus" && (
+											<input
+												type="text"
+												placeholder={t("enter-status-placeholder")}
+												value={column.taskStatus || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"taskStatus",
+														e.target.value
+													)
+												}
+												className="boardConfigModalColumnRowContentColName"
+											/>
+										)}
+										{column.colType === "taskPriority" && (
+											<input
+												type="number"
+												placeholder={t("enter-tag-placeholder")}
+												value={column.taskPriority || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"taskPriority",
+														Number(e.target.value)
+													)
+												}
+												className="boardConfigModalColumnRowContentColName"
+											/>
+										)}
 										{column.colType === "completed" && (
 											<input
 												type="number"
@@ -396,18 +469,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("from")}
-													value={column.range?.rangedata.from || ""}
+													value={column.datedBasedColumn?.from || ""}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
-															"range",
+															"datedBasedColumn",
 															{
-																...column.range,
-																rangedata: {
-																	...column.range?.rangedata,
-																	from: Number(e.target.value),
-																},
+																...column.datedBasedColumn,
+																from: Number(e.target.value),
 															}
 														)
 													}
@@ -416,27 +486,44 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("to")}
-													value={column.range?.rangedata.to || ""}
+													value={column.datedBasedColumn?.to || ""}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
-															"range",
+															"datedBasedColumn",
 															{
-																...column.range,
-																rangedata: {
-																	...column.range?.rangedata,
-																	to: Number(e.target.value),
-																},
+																...column.datedBasedColumn,
+																to: Number(e.target.value),
 															}
 														)
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												/>
+												<select
+													aria-label="Select Date Type"
+													value={column.datedBasedColumn?.dateType || UniversalDateOptions.dueDate}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"datedBasedColumn",
+															{
+																...column.datedBasedColumn,
+																dateType: e.target.value,
+															}
+														)
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												>
+													<option value={UniversalDateOptions.dueDate}>{UniversalDateOptions.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{UniversalDateOptions.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{UniversalDateOptions.scheduledDate}</option>
+												</select>
 											</>
 										)}
+										<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 									</div>
-									<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(boardIndex, columnIndex)} title={t("delete-column")} />
 								</div>
 							))}
 						</div>
@@ -475,7 +562,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		<>
 			{renderAddColumnModal()}
 			<button className="boardConfigModalSidebarToggleBtn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
-				☰ {/* Replace with an icon later */}
+				<FaAlignJustify className="boardConfigModalSidebarToggleBtnIcon" size={15} enableBackground={0} />
 			</button>
 			<div className="boardConfigModalHome">
 				<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
@@ -514,7 +601,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				</div>
 				<div className="boardConfigModalMainContent">
 					{selectedBoardIndex === -1
-						? renderGlobalSettingsTab(selectedBoardIndex)
+						? <>{renderGlobalSettingsTab(selectedBoardIndex)}</>
 						: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
 					}
 				</div>
@@ -534,30 +621,32 @@ export class BoardConfigureModal extends Modal {
 	activeBoardIndex: number;
 	isEdited: boolean;
 	onSave: (updatedBoards: Board[]) => void;
+	plugin: TaskBoard;
 
 	constructor(
-		app: App,
 		plugin: TaskBoard,
 		boards: Board[],
 		activeBoardIndex: number,
 		onSave: (updatedBoards: Board[]) => void
 	) {
-		super(app);
+		super(plugin.app);
+		this.plugin = plugin;
 		this.boards = boards;
 		this.activeBoardIndex = activeBoardIndex;
 		this.isEdited = false;
 		this.onSave = onSave;
-		this.settingsManager = new SettingsManager(app, plugin);
+		this.settingsManager = new SettingsManager(plugin);
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
 		this.modalEl.setAttribute('data-type', 'task-board-view');
 		contentEl.setAttribute('data-type', 'task-board-view');
+		this.modalEl.setAttribute('modal-type', 'task-board-board-config');
 	}
 
 	onOpen() {
 		this.root.render(
 			<ConfigModalContent
-				app={this.app}
+				plugin={this.plugin}
 				settingManager={this.settingsManager}
 				boards={this.boards}
 				activeBoardIndex={this.activeBoardIndex}

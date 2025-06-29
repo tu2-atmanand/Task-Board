@@ -15,13 +15,18 @@ export interface taskItem {
 	id: number;
 	title: string;
 	body: string[];
+	createdDate: string;
+	startDate: string;
+	scheduledDate: string;
 	due: string;
 	tags: string[];
 	time: string;
 	priority: number;
 	status: string;
 	filePath: string;
+	lineNumber: number;
 	completion?: string;
+	cancelledDate?: string;
 }
 
 export interface tasksInFile {

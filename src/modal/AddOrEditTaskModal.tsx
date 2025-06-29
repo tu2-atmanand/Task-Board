@@ -1,33 +1,41 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Modal, debounce } from "obsidian";
+import { App, Component, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
-import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItemProps";
+import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItem";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { cleanTaskTitle, getUniversalDate, taskContentFormatter } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
 import { FileInput, RefreshCcw } from "lucide-react";
-import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices } from "src/services/MultiSuggest";
+import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
+import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { bugReporter } from "src/services/OpenModals";
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 
 const taskItemEmpty = {
 	id: 0,
 	title: "",
 	body: [],
+	createdDate: "",
+	startDate: "",
+	scheduledDate: "",
 	due: "",
 	tags: [],
 	time: "",
 	priority: 0,
 	completion: "",
+	cancelledDate: "",
 	filePath: "",
+	lineNumber: 0,
 	status: taskStatuses.unchecked,
 };
 
@@ -122,6 +130,9 @@ const EditTaskContent: React.FC<{
 	setIsEdited: (value: boolean) => void;
 }> = ({ app, plugin, root, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(task.title || ' ');
+	const [createdDate, setCreatedDate] = useState(task.createdDate || '');
+	const [startDate, setStartDate] = useState(task.startDate || '');
+	const [scheduledDate, setScheduledDate] = useState(task.scheduledDate || '');
 	const [due, setDue] = useState(task.due || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
 	const [startTime, setStartTime] = useState(task.time ? task?.time?.split('-')[0]?.trim() || '' : "");
@@ -206,6 +217,24 @@ const EditTaskContent: React.FC<{
 
 	const handleStatusChange = (symbol: string) => {
 		setStatus(symbol);
+		setIsEdited(true);
+		setUpdateEditorContent(true);
+	}
+
+	const handleCreatedDateChange = (value: string) => {
+		setCreatedDate(value);
+		setIsEdited(true);
+		setUpdateEditorContent(true);
+	}
+
+	const handleStartDateChange = (value: string) => {
+		setStartDate(value);
+		setIsEdited(true);
+		setUpdateEditorContent(true);
+	}
+
+	const handleScheduledDateChange = (value: string) => {
+		setScheduledDate(value);
 		setIsEdited(true);
 		setUpdateEditorContent(true);
 	}
@@ -312,11 +341,33 @@ const EditTaskContent: React.FC<{
 		setUpdateEditorContent(true);
 	};
 
-	const onOpenFilBtnClicked = (newWindow: boolean) => {
+	const onOpenFilBtnClicked = async (evt: UserEvent, newWindow: boolean) => {
 		if (newWindow) {
-			app.workspace.openLinkText('', newFilePath, 'window')
+			// app.workspace.openLinkText('', newFilePath, 'window')
+			const leaf = app.workspace.getLeaf('window');
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.lineNumber - 1 } });
+			} else {
+				new Notice(t("file-not-found"));
+			}
 		} else {
-			app.workspace.openLinkText('', newFilePath, false)
+			// await app.workspace.openLinkText('', newFilePath, false);
+			// const activeEditor = app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+			// console.log("Note View:", activeEditor);
+			// activeEditor?.scrollIntoView({
+			// 	from: { line: 5, ch: 0 },
+			// 	to: { line: 5, ch: 5 },
+			// }, true);
+
+			const leaf = app.workspace.getLeaf(Keymap.isModEvent(evt));
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.lineNumber - 1 } });
+			} else {
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+			}
 		}
 		onClose();
 	}
@@ -324,8 +375,21 @@ const EditTaskContent: React.FC<{
 	// Function to handle saving the updated task
 	const handleSave = () => {
 		let newDue = due;
-		if (plugin.settings.data.globalSettings.autoAddDue && !taskExists && due === "") {
-			newDue = new Date().toISOString().split('T')[0];
+		let newStartDate = startDate;
+		let newScheduledDate = scheduledDate;
+		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists && task[plugin.settings.data.globalSettings.universalDate] === "") {
+			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate) {
+				newDue = new Date().toISOString().split('T')[0];
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate) {
+				newStartDate = new Date().toISOString().split('T')[0];
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate) {
+				newScheduledDate = new Date().toISOString().split('T')[0];
+			}
+		}
+
+		let newCreatedDate = createdDate;
+		if (plugin.settings.data.globalSettings.autoAddCreatedDate && !taskExists) {
+			newCreatedDate = new Date().toISOString().split('T')[0];
 		}
 		const updatedTask = {
 			...task,
@@ -333,11 +397,16 @@ const EditTaskContent: React.FC<{
 			body: [
 				...bodyContent.split('\n'),
 			],
+			createdDate: newCreatedDate,
+			startDate: newStartDate,
+			scheduledDate: newScheduledDate,
 			due: newDue,
 			tags,
 			time: newTime,
 			priority,
 			filePath: newFilePath,
+			lineNumber: task.lineNumber,
+			cancelledDate: task.cancelledDate || '',
 			status,
 		};
 		onSave(updatedTask, quickAddPluginChoice);
@@ -350,49 +419,54 @@ const EditTaskContent: React.FC<{
 		body: [
 			...bodyContent.split('\n'),
 		],
+		createdDate: createdDate,
+		startDate: startDate,
+		scheduledDate: scheduledDate,
 		due: due,
+		completion: task.completion || '',
+		cancelledDate: task.cancelledDate || '',
 		tags: tags,
 		time: newTime,
 		priority: priority,
 		filePath: newFilePath,
+		lineNumber: task.lineNumber,
 		status,
 	};
+
 	// Reference to the HTML element where markdown will be rendered
+	const componentRef = useRef<Component | null>(null);
+	useEffect(() => {
+		// Initialize Obsidian Component on mount
+		componentRef.current = plugin.view;
+	}, []);
 
-	// const componentRef = useRef<Component | null>(null);
-	// useEffect(() => {
-	// 	// Initialize Obsidian Component on mount
-	// 	componentRef.current = plugin.view;
-	// }, []);
+	const titleComponentRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const formatedContent = cleanTaskTitle(plugin, modifiedTask);
+		setFormattedTaskContent(formatedContent);
+		if (titleComponentRef.current && formatedContent !== "") {
+			// Clear previous content before rendering new markdown
+			titleComponentRef.current.empty();
 
-	// const previewContainerRef = useRef<HTMLDivElement>(null);
-	// useEffect(() => {
-	// 	const formatedContent = taskContentFormatter(plugin, modifiedTask);
-	// 	setFormattedTaskContent(formatedContent);
-	// 	if (previewContainerRef.current && formatedContent !== "") {
-	// 		// Clear previous content before rendering new markdown
-	// 		previewContainerRef.current.empty();
-
-	// 		MarkdownUIRenderer.renderTaskDisc(
-	// 			app,
-	// 			formatedContent,
-	// 			previewContainerRef.current,
-	// 			filePath,
-	// 			componentRef.current
-	// 		);
-
-	// 		hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
-	// 	}
-	// }, [modifiedTask]); // Re-render when modifiedTask changes
+			MarkdownUIRenderer.renderTaskDisc(
+				app,
+				formatedContent,
+				titleComponentRef.current,
+				filePath,
+				componentRef.current
+			);
+		}
+	}, [title]); // Re-render when modifiedTask changes
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
-		console.log("handleTaskEditedThroughEditors called with value:", value);
 		const updatedTask = buildTaskFromRawContent(value);
-		console.log("Updated Task:", updatedTask);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
+		setCreatedDate(updatedTask.createdDate || '');
+		setStartDate(updatedTask.startDate || '');
+		setScheduledDate(updatedTask.scheduledDate || '');
 		setDue(updatedTask.due || '');
 		setTags(updatedTask.tags || []);
 		setStartTime(updatedTask.time ? updatedTask.time?.split('-')[0].trim() || '' : "");
@@ -424,7 +498,6 @@ const EditTaskContent: React.FC<{
 
 					const formattedTaskContent = taskContentFormatter(plugin, modifiedTask);
 					setFormattedTaskContent(formattedTaskContent);
-					console.log("formattedTaskContent : ", formattedTaskContent);
 
 					const fullMarkdownEditor = createEmbeddableMarkdownEditor(
 						app,
@@ -439,24 +512,19 @@ const EditTaskContent: React.FC<{
 							},
 
 							onEnter: (editor, mod, shift) => {
-								if (mod) {
-									// Submit on Cmd/Ctrl+Enter
-									// this.handleSubmit();
-									handleSave();
-									// return true;
-								}
-								// Allow normal Enter key behavior
+								// if (mod) {
+								// 	// Submit on Cmd/Ctrl+Enter
+								// 	handleSave();
+								// }
+								// // Allow normal Enter key behavior
 								return false;
 							},
 
 							onEscape: (editor) => {
-								// Close the modal on Escape
-								// this.close();
 								onClose();
 							},
 
 							onSubmit: (editor) => {
-								// this.handleSubmit();
 								handleSave();
 							},
 
@@ -465,12 +533,6 @@ const EditTaskContent: React.FC<{
 								setIsEdited(true);
 								const capturedContent = fullMarkdownEditor?.value || "";
 								handleTaskEditedThroughEditors(capturedContent);
-								// console.log("Captured content:", fullMarkdownEditor?.value);
-								// setFormattedTaskContent(capturedContent);
-
-								// if (this.updatePreview) {
-								// 	this.updatePreview();
-								// }
 							},
 						}
 					)
@@ -508,7 +570,6 @@ const EditTaskContent: React.FC<{
 
 					// Focus the editor when it's created
 					// markdownEditor?.editor?.focus();
-					console.log("Markdown editor initialized");
 				}
 			}, 50);
 		}
@@ -548,10 +609,7 @@ const EditTaskContent: React.FC<{
 	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
 	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
 
-	const defaultTagColor = 'var(--tag-color)';
-
 	const filePathRef = useRef<HTMLInputElement>(null);
-
 	const communityPlugins = new CommunityPlugins(plugin);
 	useEffect(() => {
 		if (!filePathRef.current) return;
@@ -575,16 +633,28 @@ const EditTaskContent: React.FC<{
 		}
 	}, [app]);
 
+	const tagsInputFieldRef = useRef<HTMLInputElement>(null);
+	useEffect(() => {
+		if (!tagsInputFieldRef.current) return;
+
+		const suggestionContent = getTagSuggestions(app);
+		const onSelectCallback = (choice: string) => {
+			handleTagInput({
+				key: 'Enter',
+				currentTarget: { value: choice },
+			} as React.KeyboardEvent<HTMLInputElement>);
+			// setNewFilePath(selectedPath);
+		};
+		new MultiSuggest(tagsInputFieldRef.current, new Set(suggestionContent), onSelectCallback, app);
+	}, [app]);
+
 	return (
 		<>
 			<div className="EditTaskModalHome">
-				<div className="EditTaskModalHomeTitle">
-					{taskExists ? t("edit-task") : t("add-new-task")}
-				</div>
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
-							<label className="EditTaskModalHomeModalTitle">{title || "Task title"}</label>
+							<div className="EditTaskModalHomeModalTitle" ref={titleComponentRef}></div>
 
 							{/* Editor tab switcher */}
 							<div className="EditTaskModalTabHeader">
@@ -592,7 +662,7 @@ const EditTaskContent: React.FC<{
 								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file-path")}:
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file")}:
 									<input
 										type="text"
 										ref={filePathRef}
@@ -622,7 +692,7 @@ const EditTaskContent: React.FC<{
 									{taskExists && <button className="EditTaskModalHomeOpenFileBtn"
 										id="EditTaskModalHomeOpenFileBtn"
 										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-										onClick={() => isCtrlPressed ? onOpenFilBtnClicked(true) : onOpenFilBtnClicked(false)}
+										onClick={(event) => isCtrlPressed ? onOpenFilBtnClicked(event.nativeEvent, true) : onOpenFilBtnClicked(event.nativeEvent, false)}
 									>
 										<FileInput height={20} />
 									</button>}
@@ -689,6 +759,26 @@ const EditTaskContent: React.FC<{
 							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} />
 						</div>
 
+						{/* Task Created Date */}
+						{!plugin.settings.data.globalSettings.autoAddCreatedDate &&
+							<div className="EditTaskModalHomeField">
+								<label className="EditTaskModalHomeFieldTitle">{t("created-date")}</label>
+								<input className="EditTaskModalHomeDueInput" type="date" value={createdDate} onChange={(e) => handleCreatedDateChange(e.target.value)} />
+							</div>
+						}
+
+						{/* Task Start Date */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("start-date")}</label>
+							<input className="EditTaskModalHomeDueInput" type="date" value={startDate} onChange={(e) => handleStartDateChange(e.target.value)} />
+						</div>
+
+						{/* Task Scheduled Date */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("scheduled-date")}</label>
+							<input className="EditTaskModalHomeDueInput" type="date" value={scheduledDate} onChange={(e) => handleScheduledDateChange(e.target.value)} />
+						</div>
+
 						{/* Task Due Date */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("due-date")}</label>
@@ -717,6 +807,7 @@ const EditTaskContent: React.FC<{
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("tag")}</label>
 							<input
+								ref={tagsInputFieldRef}
 								className="EditTaskModalHome-tagValue"
 								type="text"
 								placeholder={t("hit-enter-after-typing-tag")}
@@ -727,9 +818,9 @@ const EditTaskContent: React.FC<{
 								{tags.map((tag: string) => {
 									const tagName = tag.replace('#', '');
 									const customTagData = plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
-									const tagColor = customTagData?.color || defaultTagColor;
-									const backgroundColor = customTagData ? updateRGBAOpacity(plugin, tagColor, 0.1) : `var(--tag-background)`;
-									const borderColor = customTagData ? updateRGBAOpacity(plugin, tagColor, 0.5) : `var(--tag-color-hover)`;
+									const tagColor = customTagData?.color;
+									const backgroundColor = tagColor ? updateRGBAOpacity(plugin, tagColor, 0.1) : `var(--tag-background)`;
+									const borderColor = tagColor ? updateRGBAOpacity(plugin, tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
 											key={tag}
@@ -792,7 +883,6 @@ export class AddOrEditTaskModal extends Modal {
 		this.waitForClose = new Promise<string>((resolve, reject) => {
 			this.resolvePromise = resolve;
 			this.rejectPromise = reject;
-			console.log("Promise will return : \n", this.resolvePromise, "\n", this.rejectPromise);
 		});
 	}
 
@@ -804,6 +894,8 @@ export class AddOrEditTaskModal extends Modal {
 		contentEl.setAttribute('data-type', 'task-board-view');
 
 		const root = ReactDOM.createRoot(this.contentEl);
+
+		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
 		root.render(<EditTaskContent
 			app={this.app}

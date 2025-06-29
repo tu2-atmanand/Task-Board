@@ -29,6 +29,12 @@ export enum EditButtonMode {
 	NoteInHover = "noteInHover",
 }
 
+export enum UniversalDateOptions {
+	startDate = "startDate",
+	scheduledDate = "scheduledDate",
+	dueDate = "due",
+}
+
 export enum TagColorType {
 	Text = "text",
 	Background = "background",
@@ -51,10 +57,11 @@ export interface globalSettingsData {
 	taskCompletionFormat: string;
 	taskCompletionDateTimePattern: string;
 	dailyNotesPluginComp: boolean;
-	dueDateFormat: string;
+	universalDateFormat: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
-	autoAddDue: boolean;
+	autoAddCreatedDate: boolean;
+	autoAddUniversalDate: boolean;
 	scanVaultAtStartup: boolean;
 	realTimeScanning: boolean;
 	columnWidth: string;
@@ -63,6 +70,7 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
+	universalDate: UniversalDateOptions;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
@@ -76,6 +84,8 @@ export interface globalSettingsData {
 		reminderPlugin: boolean;
 		quickAddPlugin: boolean;
 	};
+	archivedTasksFilePath: string;
+	showFileNameInCard: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -94,6 +104,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				columns: [
 					{
+						id: 1,
 						colType: "undated",
 						active: true,
 						collapsed: false,
@@ -101,62 +112,59 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 1,
 					},
 					{
+						id: 2,
 						colType: "dated",
 						active: true,
 						collapsed: false,
 						name: "Over Due",
 						index: 2,
-						range: {
-							tag: "before",
-							rangedata: {
-								from: -300,
-								to: -1,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: -300,
+							to: -1,
 						},
 					},
 					{
+						id: 3,
 						colType: "dated",
 						active: true,
 						collapsed: false,
 						name: "Today",
 						index: 3,
-						range: {
-							tag: "between",
-							rangedata: {
-								from: 0,
-								to: 0,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
 						},
 					},
 					{
+						id: 4,
 						colType: "dated",
 						active: true,
 						collapsed: false,
 						name: "Tomorrow",
 						index: 4,
-						range: {
-							tag: "between",
-							rangedata: {
-								from: 1,
-								to: 1,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: 1,
+							to: 1,
 						},
 					},
 					{
+						id: 5,
 						colType: "dated",
 						active: true,
 						collapsed: false,
 						name: "Future",
 						index: 5,
-						range: {
-							tag: "after",
-							rangedata: {
-								from: 2,
-								to: 300,
-							},
+						datedBasedColumn: {
+							dateType: "due",
+							from: 2,
+							to: 300,
 						},
 					},
 					{
+						id: 6,
 						colType: "completed",
 						active: true,
 						collapsed: false,
@@ -176,6 +184,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				columns: [
 					{
+						id: 7,
 						colType: "untagged",
 						active: true,
 						collapsed: false,
@@ -183,6 +192,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 1,
 					},
 					{
+						id: 8,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -191,6 +201,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "pending",
 					},
 					{
+						id: 9,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -199,6 +210,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "working",
 					},
 					{
+						id: 10,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -207,6 +219,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "done",
 					},
 					{
+						id: 11,
 						colType: "namedTag",
 						active: true,
 						collapsed: false,
@@ -215,6 +228,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "Test",
 					},
 					{
+						id: 12,
 						colType: "Completed",
 						active: true,
 						collapsed: false,
@@ -255,10 +269,11 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			taskCompletionFormat: "1",
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
 			dailyNotesPluginComp: false,
-			dueDateFormat: "yyyy-MM-DD",
+			universalDateFormat: "yyyy-MM-DD",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
-			autoAddDue: true,
+			autoAddCreatedDate: false,
+			autoAddUniversalDate: true,
 			scanVaultAtStartup: false,
 			realTimeScanning: true,
 			columnWidth: "273px",
@@ -283,6 +298,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 			],
 			editButtonAction: EditButtonMode.PopUp,
+			universalDate: UniversalDateOptions.dueDate,
 			tasksPluginCustomStatuses: [],
 			tagColorsType: TagColorType.Text,
 			customStatuses: [
@@ -324,6 +340,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			},
 			preDefinedNote: "Task_board_note.md",
 			quickAddPluginDefaultChoice: "",
+			archivedTasksFilePath: "",
+			showFileNameInCard: false,
 		},
 	},
 };

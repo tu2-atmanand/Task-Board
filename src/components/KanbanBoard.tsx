@@ -4,7 +4,7 @@ import { Board, ColumnData } from "../interfaces/BoardConfigs";
 import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
-import { taskJsonMerged } from "src/interfaces/TaskItemProps";
+import { taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
 import Column from "./Column";
@@ -12,7 +12,7 @@ import type TaskBoard from "main";
 import debounce from "debounce";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
-import { openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
+import { bugReporter, openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 
@@ -39,7 +39,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 				}
 			} catch (error) {
 				setFreshInstall(true);
-				console.error("Error loading board data:", error);
+				bugReporter(plugin, "Error loading boards or tasks data", error as string, "KanbanBoard.tsx/useEffect");
 			}
 		};
 
@@ -98,7 +98,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 			const allTasks = await loadTasksAndMerge(plugin);
 			setAllTasks(allTasks);
 		} catch (error) {
-			console.error("Error loading tasks:", error);
+			bugReporter(plugin, "Error loading tasks on column refresh", error as string, "KanbanBoard.tsx/debouncedRefreshColumn");
 		}
 	}, 300), [plugin]);
 
@@ -189,7 +189,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 					<button
 						className="ConfigureBtn"
 						aria-label={t("board-configure-button")}
-						onClick={() => openBoardConfigModal(app, plugin, boards, activeBoardIndex, (updatedBoards) =>
+						onClick={() => openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
 							handleUpdateBoards(plugin, updatedBoards, setBoards)
 						)}
 					>

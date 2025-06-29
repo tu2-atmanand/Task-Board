@@ -15,13 +15,14 @@
 
 .modal[data-type="task-board-view"] {
 	width: auto;
-	min-height: fit-content;
+	min-height: auto;
+	max-width: none;
 }
 
 .is-phone .modal[data-type="task-board-view"] {
 	width: auto;
 	overflow: auto;
-	min-height: fit-content;
+	/* min-height: fit-content; */
 	max-height: 80vh;
 }
 
@@ -342,6 +343,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-weight: 600 !important;
 }
 
+.subtaskTextRenderer-checked {
+	text-decoration: line-through !important;
+	opacity: 50% !important;
+}
+
 .taskItemMainBodyDescription {
 	width: 100%;
 }
@@ -424,6 +430,23 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskItemDateCompleted {
 	color: var(--text-success);
 	font-size: small;
+}
+
+.taskItemFileNameSection {
+	background-color: var(--color-base-35);
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0 4px 0 0;
+	margin: -4px;
+	margin-bottom: 5px;
+	margin-inline-start: -5px;
+}
+
+.taskItemFileName {
+	font-weight: 500;
+	color: hsl(var(--interactive-accent-hsl))
 }
 
 .taskItemHeader {
@@ -518,7 +541,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	max-height: calc(var(--dialog-max-height) - 5vh);
+	max-height: calc(var(--dialog-max-height) - 11vh);
 	box-sizing: border-box;
 	position: relative;
 }
@@ -532,7 +555,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .EditTaskModalHomeModalTitle {
 	font-size: 1.2em;
 	font-weight: bold;
-	margin-bottom: 1.4em;
+	margin-bottom: 0.5em;
 }
 
 .EditTaskModalHomeBody {
@@ -641,6 +664,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalHomePreviewHeader {
 	display: flex;
+	gap: 1rem;
 	padding: 5px;
 	flex-direction: row;
 	/* border-radius: 10px 0 5px 0; */
@@ -754,6 +778,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	max-width: 14vw;
 	box-sizing: border-box;
 	transition: transform 0.3s ease-in-out;
+	overflow: auto;
 }
 
 .EditTaskModalHomeField {
@@ -814,7 +839,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 /* Mobile-specific styles */
-@media (max-width: 820px) {
+@media (max-width: 1100px) {
 	.EditTaskModalHomeBody {
 		flex-direction: column;
 		position: relative;
@@ -858,18 +883,24 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		position: absolute;
 		top: 0;
 		right: 0;
-		min-width: 40vw;
+		min-width: 200px;
 		height: 100%;
-		background: rgba(255, 255, 255, 0.2);
-		backdrop-filter: blur(10px);
-		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
 		transform: translateX(100%);
 		overflow: auto;
+
+		border: none;
+		box-shadow: none;
+		background: transparent;
 	}
 
 	/* Show when toggled */
 	.EditTaskModalHomeRightSec.visible {
 		transform: translateX(0);
+
+		border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
+		background: rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(10px);
+		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
 	}
 
 	/* Button to toggle right section */
@@ -938,6 +969,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	cursor: pointer;
 }
 
+.archiveTaskCancelmBtn {
+	padding-block: 4px;
+	padding-inline: 25px;
+	cursor: pointer;
+}
+
 .deleteTaskCancelmBtn {
 	padding-block: 4px;
 	padding-inline: 25px;
@@ -947,6 +984,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .deleteTaskConfirmBtn:hover {
 	background-color: red !important;
 	/* Change background to green on hover */
+}
+
+.archiveTaskCancelmBtn:hover {
+	background-color: #818108 !important;
+	/* Change background to red on hover */
 }
 
 .deleteTaskCancelmBtn:hover {
@@ -960,7 +1002,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalHome {
 	display: flex;
 	flex-direction: row;
-	height: 100%;
+	height: auto;
+	/* max-height: 90vh; */
+	overflow-y: auto;
 }
 
 .boardConfigModalHr-50 {
@@ -1048,9 +1092,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalMainContent {
 	flex: 1;
 	padding-left: 1em;
-	overflow-y: auto;
+	/* overflow-y: auto; */
 	max-width: 50vw;
-	/* Allow scrolling for main content */
+	max-height: calc(var(--dialog-max-height) - 6vh);
 }
 
 .boardConfigModalSidebarToggleBtn {
@@ -1111,7 +1155,6 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalMainContent-Active-BodyColumnsList {
 	display: flex;
 	flex-direction: column;
-	gap: 1em;
 }
 
 .boardConfigModalColumnRow {
@@ -1121,16 +1164,21 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 0.5em;
 	margin-block: 0.5em;
 	cursor: default;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	padding: 4px;
 }
 
 .boardConfigModalColumnRowDragButton {
 	cursor: grab;
+	align-self: center
 }
 
 .boardConfigModalColumnRowEyeButton,
 .boardConfigModalColumnRowDeleteButton {
 	cursor: pointer;
 	min-width: fit-content;
+	align-self: center !important;
 }
 
 .boardConfigModalAddColumnButton {
@@ -1145,6 +1193,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	flex-direction: row;
 	justify-content: flex-start;
 	gap: 0.5em;
+	max-width: 55vw;
+	flex-wrap: wrap;
 }
 
 .boardConfigModalColumnRowContentColumnType button {
@@ -1189,9 +1239,15 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 /* Responsive styles for small screens */
 @media (max-width: 768px) {
+
+	.modal[modal-type="task-board-board-config"] {
+		min-width: 100vw;
+		min-height: auto;
+	}
+
 	.boardConfigModalHome {
 		/* flex-direction: column; */
-		width: 100vw;
+		/* width: 100vw; */
 		padding-top: 1em;
 		overflow: auto;
 		max-height: 80vh;
@@ -1220,8 +1276,6 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	.boardConfigModalMainContentBoardSettingTab,
 	.pluginGlobalSettingsTab {
 		max-width: 95vw !important;
-		width: 95vw !important;
-		margin-inline-start: 0 !important;
 		overflow: auto;
 	}
 
@@ -1232,15 +1286,15 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 	/* Toggle button */
 	.boardConfigModalSidebarToggleBtn {
-		position: absolute !important;
-		top: 0;
+		position: sticky !important;
+		top: 1em;
 		left: 1em;
-		width: 2.5em !important;
+		width: 4.2em !important;
 		height: 2.5em !important;
-		background-color: var(--accent-color, blue);
+		border: 2px solid var(--accent-color, blue) !important;
 		color: white;
 		border: none;
-		padding: 8px 12px;
+		padding: 9px 20px !important;
 		border-radius: 4px;
 		cursor: pointer;
 		display: block;
@@ -1248,6 +1302,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 	.boardConfigModalSidebarToggleBtn:hover {
 		background-color: darkblue;
+	}
+
+	.boardConfigModalColumnRowContent {
+		max-width: 75vw;
 	}
 
 	.boardConfigModalColumnRowContentColName {
@@ -1260,11 +1318,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	}
 
 	.boardConfigModalColumnRowDragButton {
-		min-width: 1.4em !important;
+		min-width: 2em !important;
 	}
 
 	.boardConfigModalDeleteBoardBtn {
 		background-color: darkred !important;
+		color: white !important;
 		max-width: 50%;
 		align-self: end;
 		margin-bottom: 1.5em;
@@ -1285,6 +1344,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		background-color: var(--color-green) !important;
 		cursor: pointer;
 		width: 90%;
+	}
+
+	.addColumnModalOverlayContent {
+		width: auto !important;
 	}
 }
 
@@ -1365,7 +1428,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	background-color: var(--background-secondary);
 	align-content: center;
 	text-align-last: center;
-	font-size: large;
+	font-size: 0.9rem;
 	font-weight: 700;
 	border: solid 1px var(--checkbox-color-hover);
 	border-radius: 4px;
@@ -1434,6 +1497,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	display: none !important;
 }
 
+.tag-color-row .setting-item-control {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap !important;
+}
+
 /* Highlighted row while dragging */
 .task-board-sortable-ghost {
 	opacity: 0.5;
@@ -1451,19 +1520,24 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	align-items: center;
 	gap: 8px;
 	padding-bottom: 0 !important;
+	flex-wrap: wrap;
+}
+
+.taskboard-setting-tag-color-row-element-drag-handle {
+	max-width: max-content !important;
 }
 
 /* Make the grip icon and buttons smaller and draggable looking */
-.tag-color-row-element .setting-item-control button {
+/* .tag-color-row-element .setting-item-control button {
 	background: none;
 	border: none;
 	cursor: grab;
-}
+} */
 
 /* Tag name input */
 .tag-color-row-element input[type="text"] {
 	flex: 1;
-	min-width: 0;
+	min-width: 10em;
 	padding: 4px 6px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
@@ -1503,13 +1577,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-size: 12px;
 }
 
-.taskboard-setting-tag-color-row-element-drag-handle {
-	max-width: 3em;
+.taskboard-setting-tag-color-row-element-delete {
+	background-color: var(--color-red) !important;
+	cursor: pointer !important;
+	max-width: max-content !important;
 }
 
-.taskboard-setting-tag-color-row-element-delete {
-	max-width: 3em;
-	background-color: var(--color-red) !important;
+.taskboard-setting-tag-color-row-element-color-picker {
+	cursor: pointer !important;
 }
 
 .global-setting-tab-live-preview {
@@ -2349,20 +2424,19 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	margin-left: 1.5rem;
 }
 
-.bugReporterModal {
+.taskBoardBugReporterModal {
 	min-width: 40vw;
 	max-width: 50vw;
 }
 
 @media (max-width: 768px) {
-	.bugReporterModal {
+	.taskBoardBugReporterModal {
 		width: auto;
-		min-height: fit-content;
 		max-width: 100%;
 	}
 }
 
-.bugReporterModal h2 {
+.taskBoardBugReporterModal h2 {
 	font-size: 1.5rem;
 	align-items: center;
 	justify-content: center;
@@ -2375,4 +2449,475 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	padding: 0.5rem;
 	border-radius: 10px;
 	border: 2px solid var(--text-accent);
+}
+
+.bugReporterActions {
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.bugReporterCloseButton,
+.bugReporterCancelButton {
+	cursor: pointer;
+}
+
+
+/* Pickr library modifications */
+
+.pcr-app .pcr-swatches>button {
+	padding: 0;
+}
+
+.pickr .pcr-button {
+	margin-right: 0;
+}
+
+/*----------------------------------------------------------------
+PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
+----------------------------------------------------------------*/
+.pickr {
+	position: relative;
+	overflow: visible;
+	transform: translateY(0);
+}
+
+.pickr * {
+	box-sizing: border-box;
+	outline: none;
+	border: none;
+	-webkit-appearance: none;
+}
+
+.pickr .pcr-button {
+	position: relative;
+	height: 2em;
+	width: 2em;
+	padding: 0.5em;
+	cursor: pointer;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+		"Helvetica Neue", Arial, sans-serif;
+	border-radius: 0.15em;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" stroke="%2342445A" stroke-width="5px" stroke-linecap="round"><path d="M45,45L5,5"></path><path d="M45,5L5,45"></path></svg>') no-repeat center;
+	background-size: 0;
+	transition: all 0.3s;
+}
+
+.pickr .pcr-button::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 0.5em;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pickr .pcr-button::before {
+	z-index: initial;
+}
+
+.pickr .pcr-button::after {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	transition: background 0.3s;
+	background: var(--pcr-color);
+	border-radius: 0.15em;
+}
+
+.pickr .pcr-button.clear {
+	background-size: 70%;
+}
+
+.pickr .pcr-button.clear::before {
+	opacity: 0;
+}
+
+.pickr .pcr-button.clear:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px var(--pcr-color);
+}
+
+.pickr .pcr-button.disabled {
+	cursor: not-allowed;
+}
+
+.pickr *,
+.pcr-app * {
+	box-sizing: border-box;
+	outline: none;
+	border: none;
+	-webkit-appearance: none;
+}
+
+.pickr input:focus,
+.pickr input.pcr-active,
+.pickr button:focus,
+.pickr button.pcr-active,
+.pcr-app input:focus,
+.pcr-app input.pcr-active,
+.pcr-app button:focus,
+.pcr-app button.pcr-active {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px var(--pcr-color);
+}
+
+.pickr .pcr-palette,
+.pickr .pcr-slider,
+.pcr-app .pcr-palette,
+.pcr-app .pcr-slider {
+	transition: box-shadow 0.3s;
+}
+
+.pickr .pcr-palette:focus,
+.pickr .pcr-slider:focus,
+.pcr-app .pcr-palette:focus,
+.pcr-app .pcr-slider:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px rgba(0, 0, 0, 0.25);
+}
+
+.pcr-app {
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	z-index: 10000;
+	border-radius: 0.1em;
+	background: #fff;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s, visibility 0s 0.3s;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+		"Helvetica Neue", Arial, sans-serif;
+	box-shadow: 0 0.15em 1.5em 0 rgba(0, 0, 0, 0.1), 0 0 1em 0 rgba(0, 0, 0, 0.03);
+	left: 0;
+	top: 0;
+}
+
+.pcr-app.visible {
+	transition: opacity 0.3s;
+	visibility: visible;
+	opacity: 1;
+}
+
+.pcr-app .pcr-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 0.75em;
+}
+
+.pcr-app .pcr-swatches.pcr-last {
+	margin: 0;
+}
+
+@supports (display: grid) {
+	.pcr-app .pcr-swatches {
+		display: grid;
+		align-items: center;
+		grid-template-columns: repeat(auto-fit, 1.75em);
+	}
+}
+
+.pcr-app .pcr-swatches>button {
+	font-size: 1em;
+	position: relative;
+	width: calc(1.75em - 5px);
+	height: calc(1.75em - 5px);
+	border-radius: 0.15em;
+	cursor: pointer;
+	margin: 2.5px;
+	flex-shrink: 0;
+	justify-self: center;
+	transition: all 0.15s;
+	overflow: hidden;
+	background: transparent;
+	z-index: 1;
+}
+
+.pcr-app .pcr-swatches>button::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 6px;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pcr-app .pcr-swatches>button::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--pcr-color);
+	border: 1px solid rgba(0, 0, 0, 0.05);
+	border-radius: 0.15em;
+	box-sizing: border-box;
+}
+
+.pcr-app .pcr-swatches>button:hover {
+	filter: brightness(1.05);
+}
+
+.pcr-app .pcr-swatches>button:not(.pcr-active) {
+	box-shadow: none;
+}
+
+.pcr-app .pcr-interaction {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin: 0 -0.2em 0 -0.2em;
+}
+
+.pcr-app .pcr-interaction>* {
+	margin: 0 0.2em;
+}
+
+.pcr-app .pcr-interaction input {
+	letter-spacing: 0.07em;
+	font-size: 0.75em;
+	text-align: center;
+	cursor: pointer;
+	color: #75797e;
+	background: #f1f3f4;
+	border-radius: 0.15em;
+	transition: all 0.15s;
+	padding: 0.45em 0.5em;
+	margin-top: 0.75em;
+}
+
+.pcr-app .pcr-interaction input:hover {
+	filter: brightness(0.975);
+}
+
+.pcr-app .pcr-interaction input:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85),
+		0 0 0 3px rgba(66, 133, 244, 0.75);
+}
+
+.pcr-app .pcr-interaction .pcr-result {
+	color: #75797e;
+	text-align: left;
+	flex: 1 1 8em;
+	min-width: 8em;
+	transition: all 0.2s;
+	border-radius: 0.15em;
+	background: #f1f3f4;
+	cursor: text;
+}
+
+.pcr-app .pcr-interaction .pcr-result::-moz-selection {
+	background: #4285f4;
+	color: #fff;
+}
+
+.pcr-app .pcr-interaction .pcr-result::selection {
+	background: #4285f4;
+	color: #fff;
+}
+
+.pcr-app .pcr-interaction .pcr-type.active {
+	color: #fff;
+	background: #4285f4;
+}
+
+.pcr-app .pcr-interaction .pcr-save,
+.pcr-app .pcr-interaction .pcr-cancel,
+.pcr-app .pcr-interaction .pcr-clear {
+	color: #fff;
+	width: auto;
+}
+
+.pcr-app .pcr-interaction .pcr-save,
+.pcr-app .pcr-interaction .pcr-cancel,
+.pcr-app .pcr-interaction .pcr-clear {
+	color: #fff;
+}
+
+.pcr-app .pcr-interaction .pcr-save:hover,
+.pcr-app .pcr-interaction .pcr-cancel:hover,
+.pcr-app .pcr-interaction .pcr-clear:hover {
+	filter: brightness(0.925);
+}
+
+.pcr-app .pcr-interaction .pcr-save {
+	background: #4285f4;
+}
+
+.pcr-app .pcr-interaction .pcr-clear,
+.pcr-app .pcr-interaction .pcr-cancel {
+	background: #f44250;
+}
+
+.pcr-app .pcr-interaction .pcr-clear:focus,
+.pcr-app .pcr-interaction .pcr-cancel:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85),
+		0 0 0 3px rgba(244, 66, 80, 0.75);
+}
+
+.pcr-app .pcr-selection .pcr-picker {
+	position: absolute;
+	height: 18px;
+	width: 18px;
+	border: 2px solid #fff;
+	border-radius: 100%;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.pcr-app .pcr-selection .pcr-color-palette,
+.pcr-app .pcr-selection .pcr-color-chooser,
+.pcr-app .pcr-selection .pcr-color-opacity {
+	position: relative;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	display: flex;
+	flex-direction: column;
+	cursor: grab;
+	cursor: -webkit-grab;
+}
+
+.pcr-app .pcr-selection .pcr-color-palette:active,
+.pcr-app .pcr-selection .pcr-color-chooser:active,
+.pcr-app .pcr-selection .pcr-color-opacity:active {
+	cursor: grabbing;
+	cursor: -webkit-grabbing;
+}
+
+.pcr-app[data-theme="nano"] {
+	width: 14.25em;
+	max-width: 95vw;
+}
+
+.pcr-app[data-theme="nano"] .pcr-swatches {
+	margin-top: 0.6em;
+	padding: 0 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-interaction {
+	padding: 0 0.6em 0.6em 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection {
+	display: grid;
+	grid-gap: 0.6em;
+	grid-template-columns: 1fr 4fr;
+	grid-template-rows: 5fr auto auto;
+	align-items: center;
+	height: 10.5em;
+	width: 100%;
+	align-self: flex-start;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview {
+	grid-area: 2 / 1 / 4 / 1;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	margin-left: 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview .pcr-last-color {
+	display: none;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview .pcr-current-color {
+	position: relative;
+	background: var(--pcr-color);
+	width: 2em;
+	height: 2em;
+	border-radius: 50em;
+	overflow: hidden;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview .pcr-current-color::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 0.5em;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-palette {
+	grid-area: 1 / 1 / 2 / 3;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-palette .pcr-palette {
+	border-radius: 0.15em;
+	width: 100%;
+	height: 100%;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-palette .pcr-palette::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 0.5em;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser {
+	grid-area: 2 / 2 / 2 / 2;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity {
+	grid-area: 3 / 2 / 3 / 2;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser,
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity {
+	height: 0.5em;
+	margin: 0 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser .pcr-picker,
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity .pcr-picker {
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser .pcr-slider,
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity .pcr-slider {
+	flex-grow: 1;
+	border-radius: 50em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser .pcr-slider {
+	background: linear-gradient(to right, red, #ff0, lime, cyan, blue, #f0f, red);
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity .pcr-slider {
+	background: linear-gradient(to right, transparent, black),
+		url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+
+	background-size: 100%, 0.25em;
 }

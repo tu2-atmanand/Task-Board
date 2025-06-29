@@ -5,15 +5,19 @@ import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
 } from "./JsonFileOperations";
-import { taskItem, tasksJson } from "src/interfaces/TaskItemProps";
+import { taskItem, tasksJson } from "src/interfaces/TaskItem";
 import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
 } from "./MarkdownFileOperations";
 
-import { App, Notice } from "obsidian";
+import { App, Notice, TFile } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
+import { CommunityPlugins } from "src/services/CommunityPlugins";
+import { ScanningVault } from "./ScanningVault";
+import { TasksApi } from "src/services/tasks-plugin/api";
+import { bugReporter } from "src/services/OpenModals";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -37,7 +41,12 @@ export const moveFromPendingToCompleted = async (
 		// Write the updated data back to the JSON file
 		await writeTasksJsonToDisk(plugin, allTasks);
 	} catch (error) {
-		console.error("Error updating task in tasks.json:", error);
+		bugReporter(
+			plugin,
+			"Error updating task in tasks.json",
+			error as string,
+			"TaskItemUtils.ts/moveFromPendingToCompleted"
+		);
 	}
 
 	eventEmitter.emit("REFRESH_COLUMN");
@@ -65,7 +74,12 @@ export const moveFromCompletedToPending = async (
 		// Write the updated data back to the JSON file
 		await writeTasksJsonToDisk(plugin, allTasks);
 	} catch (error) {
-		console.error("Error updating task in tasks.json:", error);
+		bugReporter(
+			plugin,
+			"Error updating task in tasks.json",
+			error as string,
+			"TaskItemUtils.ts/moveFromCompletedToPending"
+		);
 	}
 
 	eventEmitter.emit("REFRESH_COLUMN");
@@ -119,12 +133,20 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 			// Step 6: Write the updated content back to the file
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		} else {
-			console.warn(
-				"deleteTaskFromFile : Task not found in file content."
+			bugReporter(
+				plugin,
+				"Looks like the task you are trying to delete is not present in the file. Or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
+				"deleteTaskFromFile : Task not found in file content.",
+				"TaskItemUtils.ts/deleteTaskFromFile"
 			);
 		}
 	} catch (error) {
-		console.error("Error deleting task from file:", error);
+		bugReporter(
+			plugin,
+			"Error deleting task from file. Following the error message might help you to find the issue.",
+			String(error),
+			"TaskItemUtils.ts/deleteTaskFromFile"
+		);
 	}
 };
 
@@ -148,7 +170,89 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
-		console.error("Error deleting task from tasks.json:", error);
+		bugReporter(
+			plugin,
+			"Error deleting task from tasks.json",
+			String(error),
+			"TaskItemUtils.ts/deleteTaskFromJson"
+		);
+	}
+};
+
+export const archiveTask = async (plugin: TaskBoard, task: taskItem) => {
+	// THis function will first going to read the value of plugin.setting.data.globalsetting.archivedTasksFile. If this settings contains the path of the file, then it will simply remove that task from its original file and put it into this new archived file at the top of the content. If the setting do not contains any file path, then it will add '%%' at the beginning and end of the task content and then paste in the same original file.
+	const archivedFilePath =
+		plugin.settings.data.globalSettings.archivedTasksFilePath;
+	if (archivedFilePath) {
+		try {
+			// Read the content of the file where archived tasks will be stored
+			const archivedFileContent = await readDataOfVaultFiles(
+				plugin,
+				archivedFilePath
+			);
+
+			// Prepare the task content to be archived
+			const completeTask = taskContentFormatter(plugin, task);
+
+			if (completeTask === "")
+				throw "taskContentFormatter returned empty string";
+
+			// Add the task to the top of the archived file content
+			const newArchivedContent = `> Archived at ${new Date().toLocaleString()}\n${completeTask}\n\n${archivedFileContent}`;
+
+			// Write the updated content back to the archived file
+			await writeDataToVaultFiles(
+				plugin,
+				archivedFilePath,
+				newArchivedContent
+			);
+
+			// Now delete the task from its original file
+			await deleteTaskFromFile(plugin, task);
+			await deleteTaskFromJson(plugin, task);
+			eventEmitter.emit("REFRESH_COLUMN");
+		} catch (error) {
+			bugReporter(
+				plugin,
+				"Error archiving task",
+				error as string,
+				"TaskItemUtils.ts/archiveTask"
+			);
+		}
+	} else if (archivedFilePath === "") {
+		// If the archived file path is empty, just mark the task as archived in the same file
+		const completeTask = taskContentFormatter(plugin, task);
+		if (completeTask === "")
+			throw "taskContentFormatter returned empty string";
+		const filePath = task.filePath;
+		try {
+			// Read the file content
+			const fileContent = await readDataOfVaultFiles(plugin, filePath);
+
+			const newContet = fileContent.replace(
+				completeTask,
+				`%%${completeTask}%%`
+			);
+
+			// Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContet);
+			await deleteTaskFromJson(plugin, task);
+			eventEmitter.emit("REFRESH_COLUMN");
+		} catch (error) {
+			bugReporter(
+				plugin,
+				"Error archiving task in the same file. Either the task is not present in the file or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
+				error as string,
+				"TaskItemUtils.ts/archiveTask"
+			);
+		}
+	} else {
+		bugReporter(
+			plugin,
+			"Error archiving task. The below error message might help you to find the issue.",
+			"Archived file path is not set in the plugin settings.",
+			"TaskItemUtils.ts/archiveTask"
+		);
 	}
 };
 
@@ -184,7 +288,7 @@ export const updateTaskInFile = async (
 			if (
 				!isTaskFound &&
 				line.match(/^- \[.{1}\]/) &&
-				line.includes(cleanTaskTitle(plugin, oldTask))
+				line.includes(oldTask.title)
 			) {
 				isTaskFound = true;
 				taskStartIndex = i;
@@ -212,10 +316,20 @@ export const updateTaskInFile = async (
 			// Step 6: Write the updated content back to the file
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		} else {
-			console.warn("updateTaskInFile : Task not found in file content.");
+			bugReporter(
+				plugin,
+				"Looks like the task you are trying to update is not present in the file. Or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
+				"updateTaskInFile : Task not found in file content.",
+				"TaskItemUtils.ts/updateTaskInFile"
+			);
 		}
 	} catch (error) {
-		console.error("Error updating task in file:", error);
+		bugReporter(
+			plugin,
+			"Error updating task in file. Following the error message might help you to find the issue.",
+			String(error),
+			"TaskItemUtils.ts/updateTaskInFile"
+		);
 	}
 };
 
@@ -313,9 +427,135 @@ export const updateTaskInJson = async (
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
-		console.error(
-			"updateTaskInJson : Error updating task in tasks.json:",
-			error
+		bugReporter(
+			plugin,
+			"Error updating task in tasks.json",
+			String(error),
+			"TaskItemUtils.ts/updateTaskInJson"
+		);
+	}
+};
+
+export const updateRecurringTaskInFile = async (
+	plugin: TaskBoard,
+	updatedTask: taskItem,
+	oldTask: taskItem
+) => {
+	const filePath = updatedTask.filePath;
+
+	try {
+		// Read the file content
+		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+
+		// Prepare the updated task block
+		const completeOldTaskContent = taskContentFormatter(plugin, oldTask);
+		if (completeOldTaskContent === "")
+			throw "taskContentFormatter returned empty string";
+
+		// Split the file content into lines
+		const lines = fileContent.split("\n");
+		let isTaskFound = false;
+		let taskStartIndex = -1;
+
+		// Locate the main task line and subsequent lines
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
+
+			if (
+				!isTaskFound &&
+				line.match(/^- \[.{1}\]/) &&
+				line.includes(oldTask.title)
+			) {
+				isTaskFound = true;
+				taskStartIndex = i;
+				break;
+			}
+		}
+
+		if (isTaskFound && taskStartIndex !== -1) {
+			const taskPlugin = new TasksApi(plugin);
+			if (taskPlugin.isTasksPluginEnabled()) {
+				const tasksPluginApiOutput =
+					await taskPlugin.executeToggleTaskDoneCommand(
+						`- [${oldTask.status}] ${oldTask.title}`,
+						oldTask.filePath
+					);
+
+				const twoTaskTitles = tasksPluginApiOutput.split("\n");
+				// console.log(
+				// 	"updateRecurringTaskInFile : tasksPluginApiOutput :\n",
+				// 	tasksPluginApiOutput,
+				// 	"\n| first line :",
+				// 	twoTaskTitles[0],
+				// 	"\n| second line :",
+				// 	twoTaskTitles[1]
+				// );
+				let newContent = "";
+				if ((twoTaskTitles.length = 1)) {
+					newContent = tasksPluginApiOutput;
+				} else if ((twoTaskTitles.length = 2)) {
+					if (twoTaskTitles[1].trim().startsWith("- [x]")) {
+						newContent = `${twoTaskTitles[0]}${
+							updatedTask.body.length > 0
+								? `\n${updatedTask.body.join("\n")}`
+								: ""
+						}\n${twoTaskTitles[1]}${
+							oldTask.body.length > 0
+								? `\n${oldTask.body.join("\n")}`
+								: ""
+						}`;
+					} else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
+						newContent = `${twoTaskTitles[0]}${
+							oldTask.body.length > 0
+								? `\n${oldTask.body.join("\n")}`
+								: ""
+						}\n${twoTaskTitles[1]}${
+							updatedTask.body.length > 0
+								? `\n${updatedTask.body.join("\n")}`
+								: ""
+						}`;
+					}
+				} else {
+					bugReporter(
+						plugin,
+						"Unexpected output from tasks plugin API. Please report this issue.",
+						`tasksPluginApiOutput: ${tasksPluginApiOutput}`,
+						"TaskItemUtils.ts/updateRecurringTaskInFile"
+					);
+					return;
+				}
+				const newFileContent = fileContent.replace(
+					completeOldTaskContent,
+					newContent
+				);
+
+				await writeDataToVaultFiles(plugin, filePath, newFileContent);
+
+				// Just to scan the file after updating.
+				plugin.fileUpdatedUsingModal = "";
+				const scannVault = new ScanningVault(plugin.app, plugin);
+				const file = plugin.app.vault.getAbstractFileByPath(filePath);
+				if (file && file instanceof TFile)
+					scannVault.updateTasksFromFiles([file]);
+				eventEmitter.emit("REFRESH_COLUMN");
+			} else {
+				//fallback to normal function
+				updateTaskInFile(plugin, updatedTask, oldTask);
+			}
+		} else {
+			bugReporter(
+				plugin,
+				"Looks like the recurring task you are trying to update is not present in the file. Or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
+				"updateRecurringTaskInFile : Task not found in file content.",
+				"TaskItemUtils.ts/updateRecurringTaskInFile"
+			);
+		}
+	} catch (error) {
+		bugReporter(
+			plugin,
+			"Error updating recurring task in file. Following the error message might help you to find the issue.",
+			String(error),
+			"TaskItemUtils.ts/updateRecurringTaskInFile"
 		);
 	}
 };
@@ -355,22 +595,20 @@ export const addTaskInNote = async (
 	app: App,
 	plugin: TaskBoard,
 	newTask: taskItem,
-	editorActive: boolean
+	editorActive: boolean,
+	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
 	const filePath = newTask.filePath.endsWith(".md")
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
 
-	console.warn(
-		"QuickAdd plugin is not enabled : ",
-		await plugin.fileExists(filePath)
-	);
+	// Clean the task title to ensure it doesn't contain any special characters
 	if (!(await plugin.fileExists(filePath))) {
 		new Notice(
 			`New note created since it does not exists : "${filePath}"`,
 			5000
 		);
-		console.log("New file path :", filePath);
+		// Create a new file if it doesn't exist
 		await plugin.app.vault.create(filePath, "");
 	}
 
@@ -379,45 +617,38 @@ export const addTaskInNote = async (
 		if (completeTask === "")
 			throw "taskContentFormatter returned empty string";
 
+		// Read the file content
+		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		let newContent = fileContent;
+
 		if (editorActive) {
-			// Get the active editor and the current cursor position
-			const activeEditor = app.workspace.activeEditor?.editor;
-			if (!activeEditor) {
-				console.error(
-					"No active editor found. Please place your cursor in markdown file"
-				);
-			}
-
-			if (completeTask && activeEditor) {
-				const cursorPosition = activeEditor.getCursor();
-
-				// Read the file content
-				const fileContent = await readDataOfVaultFiles(
-					plugin,
-					filePath
-				);
-
-				// Split file content into an array of lines
-				const fileLines = fileContent.split("\n");
-
+			// Split file content into an array of lines
+			const fileLines = fileContent.split("\n");
+			if (cursorPosition && cursorPosition.line > 0) {
 				// Insert the new task at the cursor line position
 				fileLines.splice(cursorPosition.line, 0, completeTask);
-
 				// Join the lines back into a single string
-				const newContent = fileLines.join("\n");
-				// Write the updated content back to the file
-				await writeDataToVaultFiles(plugin, filePath, newContent);
+				newContent = fileLines.join("\n");
+			} else {
+				newContent = fileContent.concat("\n\n", completeTask);
 			}
-		} else {
-			const fileContent = await readDataOfVaultFiles(plugin, filePath);
 
+			// Write the updated content back to the file
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		} else {
 			// Join the lines back into a single string
-			const newContent = fileContent.concat("\n\n", completeTask);
-			console.log("addTaskInNote : newContent :\n", newContent);
+			newContent = fileContent.concat("\n\n", completeTask);
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		}
+		cursorPosition = undefined;
+		return true;
 	} catch (error) {
-		console.error("Error updating task in file:", error);
+		bugReporter(
+			plugin,
+			"Error adding task in note. Following the error message might help you to find the issue.",
+			String(error),
+			"TaskItemUtils.ts/addTaskInNote"
+		);
 	}
 };
 

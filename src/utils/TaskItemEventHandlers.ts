@@ -1,9 +1,11 @@
 import { checkboxStateSwitcher, isCompleted } from "./CheckBoxUtils";
 import {
+	archiveTask,
 	deleteTaskFromFile,
 	deleteTaskFromJson,
 	moveFromCompletedToPending,
 	moveFromPendingToCompleted,
+	updateRecurringTaskInFile,
 	updateTaskInFile,
 	updateTaskInJson,
 } from "./TaskItemUtils";
@@ -14,39 +16,46 @@ import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { t } from "./lang/helper";
-import { taskItem } from "src/interfaces/TaskItemProps";
+import { taskItem } from "src/interfaces/TaskItem";
+import { isTaskRecurring } from "./TaskContentFormatter";
 
-export const handleCheckboxChange = (
-	plugin: TaskBoard,
-	updatedTask: taskItem
-) => {
-	// const updatedTasks = tasks.filter(t => t.id !== updatedTask.id);
+export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
+	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
 
 	// Check if the task is completed
-	const newStatus = checkboxStateSwitcher(plugin, updatedTask.status);
-	if (isCompleted(`- [${updatedTask.status}]`)) {
-		const taskWithCompleted = {
-			...updatedTask,
+	const newStatus = checkboxStateSwitcher(plugin, task.status);
+	if (isCompleted(`- [${task.status}]`)) {
+		const taskWithUpdatedStatus = {
+			...task,
 			completion: "",
 			status: newStatus,
 		};
 		// Move from Completed to Pending
-		moveFromCompletedToPending(plugin, taskWithCompleted);
-		updateTaskInFile(plugin, taskWithCompleted, updatedTask);
+		moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+		updateTaskInFile(plugin, taskWithUpdatedStatus, taskWithUpdatedStatus);
 	} else {
 		const globalSettings = plugin.settings.data.globalSettings;
 		const moment = _moment as unknown as typeof _moment.default;
-		const taskWithCompleted = {
-			...updatedTask,
+		const taskWithUpdatedStatus = {
+			...task,
 			completion: moment().format(
 				globalSettings?.taskCompletionDateTimePattern
 			),
 			status: newStatus,
 		};
 		// Move from Pending to Completed
-		moveFromPendingToCompleted(plugin, taskWithCompleted);
-		updateTaskInFile(plugin, taskWithCompleted, taskWithCompleted);
+		moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+
+		if (!isTaskRecurring(task.title)) {
+			updateTaskInFile(
+				plugin,
+				taskWithUpdatedStatus,
+				taskWithUpdatedStatus
+			);
+		} else {
+			updateRecurringTaskInFile(plugin, taskWithUpdatedStatus, task);
+		}
 	}
 	// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 };
@@ -73,6 +82,9 @@ export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
 		},
 		onCancel: () => {
 			// console.log('Task deletion canceled');
+		},
+		onArchive: () => {
+			archiveTask(plugin, task);
 		},
 	});
 	deleteModal.open();
@@ -102,7 +114,7 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 			false,
 			true,
 			task,
-			task.filePath,
+			task.filePath
 		);
 		editTaskModal.open();
 	} else if (

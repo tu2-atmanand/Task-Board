@@ -16,17 +16,16 @@ import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { t } from "src/utils/lang/helper";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
-	app: App,
 	plugin: TaskBoard,
 	boards: Board[],
 	activeBoardIndex: number,
 	onSave: (updatedBoards: Board[]) => void
 ) => {
 	new BoardConfigureModal(
-		app,
 		plugin,
 		boards,
 		activeBoardIndex,
@@ -42,14 +41,15 @@ export const openScanVaultModal = (app: App, plugin: TaskBoard) => {
 export const openAddNewTaskInCurrentFileModal = (
 	app: App,
 	plugin: TaskBoard,
-	activeFile: TFile
+	activeFile: TFile,
+	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
 	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
 		plugin,
 		(newTask, quickAddPluginChoice) => {
-			addTaskInNote(app, plugin, newTask, true);
+			addTaskInNote(app, plugin, newTask, true, cursorPosition);
 			if (
 				activeFile &&
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
@@ -59,6 +59,8 @@ export const openAddNewTaskInCurrentFileModal = (
 			}
 
 			eventEmitter.emit("REFRESH_COLUMN");
+			cursorPosition = undefined;
+			return true;
 		},
 		true,
 		false,
@@ -66,6 +68,7 @@ export const openAddNewTaskInCurrentFileModal = (
 		activeFile.path
 	);
 	AddTaskModal.open();
+	return true;
 };
 
 export const openAddNewTaskModal = (
@@ -156,10 +159,10 @@ export const bugReporter = (
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
 				el.createEl("p", {
-					text: "Task board encountered an issue while completing the bug. Please click on this message and report the bug. Right-click to dismiss.",
+					text: t("bug-report-notice-message"),
 				});
 				el.createEl("button", {
-					text: "Report Bug",
+					text: t("show-error"),
 					cls: "reportBugButton",
 					onclick: () => {
 						const bugReportModal = new BugReporterModal(
@@ -173,7 +176,7 @@ export const bugReporter = (
 					},
 				});
 				el.createEl("button", {
-					text: "Ignore this bug",
+					text: t("ignore-this-bug"),
 					cls: "ignoreBugButton",
 					onclick: () => {
 						el.hide();

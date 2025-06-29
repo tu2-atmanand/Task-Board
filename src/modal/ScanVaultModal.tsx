@@ -2,7 +2,7 @@
 
 import { App, Component, Modal, Notice } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
-import { taskItem, tasksJson } from "src/interfaces/TaskItemProps";
+import { taskItem, tasksJson } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";

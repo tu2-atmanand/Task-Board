@@ -64,15 +64,16 @@ export function getFileSuggestions(app: App): string[] {
 	return files;
 }
 
-// export function getTagSuggestions(app: App): string[] {
-// 	// Get all tags from the vault
-// 	const tags = new Set<string>();
-// 	app.vault.getAllTags().forEach((tag) => {
-// 		tags.add(tag);
-// 	});
+export function getTagSuggestions(app: App): string[] {
+	// Get all tags from the vault
+	const allTagsDict = app.metadataCache.getTags() || {};
+	const tagsArray = Object.entries(allTagsDict)
+		.filter(([tag]) => tag.startsWith("#"))
+		.sort(([, countA], [, countB]) => countB - countA) // Sort by number of occurrences in descending order
+		.map(([tag]) => tag); // Extract the tag names
 
-// 	return Array.from(tags);
-// }
+	return tagsArray;
+}
 
 export function getQuickAddPluginChoices(
 	app: App,
@@ -82,7 +83,7 @@ export function getQuickAddPluginChoices(
 	if (!quickAddPlugin) return [];
 
 	const choices = quickAddPluginObj.settings.choices;
-	console.log("QuickAdd Choices:", quickAddPluginObj);
+
 	return Object.keys(choices)
 		.filter((key) => choices[key].type === "Capture")
 		.map((key) => choices[key].name);
