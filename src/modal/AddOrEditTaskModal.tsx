@@ -377,12 +377,13 @@ const EditTaskContent: React.FC<{
 		let newDue = due;
 		let newStartDate = startDate;
 		let newScheduledDate = scheduledDate;
-		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists && task[plugin.settings.data.globalSettings.universalDate] === "") {
-			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate) {
+		console.log("Value of task.universalDate:", task[plugin.settings.data.globalSettings.universalDate]);
+		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists) {
+			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate && !due) {
 				newDue = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate) {
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate && !startDate) {
 				newStartDate = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate) {
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate && !scheduledDate) {
 				newScheduledDate = new Date().toISOString().split('T')[0];
 			}
 		}
@@ -409,6 +410,7 @@ const EditTaskContent: React.FC<{
 			cancelledDate: task.cancelledDate || '',
 			status,
 		};
+		console.log("Updated Task:", updatedTask);
 		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	};
