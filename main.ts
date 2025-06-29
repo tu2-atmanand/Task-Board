@@ -104,14 +104,6 @@ export default class TaskBoard extends Plugin {
 			this.registerTaskBoardStatusBar();
 
 			this.compatiblePluginsAvailabilityCheck();
-
-			//testing bugReporter
-			bugReporter(
-				this.plugin,
-				"Test Bug Reporter",
-				"This is a test bug report.",
-				"main.ts/onload/onLayoutReady"
-			);
 		});
 	}
 
