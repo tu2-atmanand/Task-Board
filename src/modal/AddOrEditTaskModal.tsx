@@ -491,89 +491,86 @@ const EditTaskContent: React.FC<{
 	const markdownEditorEmbeddedContainer = useRef<HTMLElement>(null);
 	useEffect(() => {
 		if (markdownEditorEmbeddedContainer.current) {
-			if (markdownEditor) {
-				markdownEditor.destroy();
-			}
-			setTimeout(() => {
-				if (markdownEditorEmbeddedContainer.current) {
-					markdownEditorEmbeddedContainer.current.empty();
 
-					const formattedTaskContent = taskContentFormatter(plugin, modifiedTask);
-					setFormattedTaskContent(formattedTaskContent);
+			const formattedTaskContent = taskContentFormatter(plugin, modifiedTask);
+			setFormattedTaskContent(formattedTaskContent);
 
-					const fullMarkdownEditor = createEmbeddableMarkdownEditor(
-						app,
-						markdownEditorEmbeddedContainer.current,
-						{
-							placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
-							value: formattedTaskContent,
-							cls: "addOrEditTaskModal-markdown-editor-embed",
-							cursorLocation: {
-								anchor: formattedTaskContent.split("\n")[0].length,
-								head: formattedTaskContent.split("\n")[0].length,
-							},
+			if (!markdownEditor) {
+				markdownEditorEmbeddedContainer.current.empty();
+				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
+					app,
+					markdownEditorEmbeddedContainer.current,
+					{
+						placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
+						value: formattedTaskContent,
+						cls: "addOrEditTaskModal-markdown-editor-embed",
+						cursorLocation: {
+							anchor: formattedTaskContent.split("\n")[0].length,
+							head: formattedTaskContent.split("\n")[0].length,
+						},
 
-							onEnter: (editor, mod, shift) => {
-								// if (mod) {
-								// 	// Submit on Cmd/Ctrl+Enter
-								// 	handleSave();
-								// }
-								// // Allow normal Enter key behavior
-								return false;
-							},
+						onEnter: (editor, mod, shift) => {
+							// if (mod) {
+							// 	// Submit on Cmd/Ctrl+Enter
+							// 	handleSave();
+							// }
+							// // Allow normal Enter key behavior
+							return false;
+						},
 
-							onEscape: (editor) => {
-								onClose();
-							},
+						onEscape: (editor) => {
+							onClose();
+						},
 
-							onSubmit: (editor) => {
-								handleSave();
-							},
+						onSubmit: (editor) => {
+							handleSave();
+						},
 
-							onChange: (update) => {
-								// Handle changes if needed
-								setIsEdited(true);
-								const capturedContent = fullMarkdownEditor?.value || "";
-								handleTaskEditedThroughEditors(capturedContent);
-							},
-						}
-					)
-					setMarkdownEditor(fullMarkdownEditor);
-
-					fullMarkdownEditor?.scope.register(
-						["Alt"],
-						"c",
-						(e: KeyboardEvent) => {
-							e.preventDefault();
-							if (!fullMarkdownEditor) return false;
-							if (fullMarkdownEditor.value.trim() === "") {
-								// this.close();
-								onClose();
-								return true;
-							} else {
-								// this.handleSubmit();
-								handleSave();
-							}
+						onChange: (update) => {
+							// Handle changes if needed
+							setIsEdited(true);
+							const capturedContent = fullMarkdownEditor?.value || "";
+							handleTaskEditedThroughEditors(capturedContent);
+						},
+					}
+				)
+				setMarkdownEditor(fullMarkdownEditor);
+				fullMarkdownEditor?.scope.register(
+					["Alt"],
+					"c",
+					(e: KeyboardEvent) => {
+						e.preventDefault();
+						if (!fullMarkdownEditor) return false;
+						if (fullMarkdownEditor.value.trim() === "") {
+							// this.close();
+							onClose();
 							return true;
+						} else {
+							// this.handleSubmit();
+							handleSave();
 						}
-					);
+						return true;
+					}
+				);
 
-					// if (targetFileEl) {
-					// 	markdownEditor?.scope.register(
-					// 		["Alt"],
-					// 		"x",
-					// 		(e: KeyboardEvent) => {
-					// 			e.preventDefault();
-					// 			targetFileEl.focus();
-					// 			return true;
-					// 		}
-					// 	);
-					// }
+				// if (targetFileEl) {
+				// 	fullMarkdownEditor?.scope.register(
+				// 		["Alt"],
+				// 		"x",
+				// 		(e: KeyboardEvent) => {
+				// 			e.preventDefault();
+				// 			targetFileEl.focus();
+				// 			return true;
+				// 		}
+				// 	);
+				// }
 
-					// Focus the editor when it's created
-					// markdownEditor?.editor?.focus();
-				}
-			}, 50);
+				// Focus the editor when it's created
+				// fullMarkdownEditor?.editor?.focus();
+			} else {
+				// If the editor already exists, just update its content
+				markdownEditor.set(formattedTaskContent, false);
+			}
 		}
 		setUpdateEditorContent(false);
 	}, [updateEditorContent]);
