@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2",
+  "version": "1.5.1",
   "data": {
     "boardConfigs": [
       {
@@ -655,11 +655,11 @@
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "DocsForPlugin/ArchivedTasks.md",
-      "autoAddCreatedDate": false,
+      "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
       "universalDate": "due",
       "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md",
-      "showFileNameInCard": true
+      "showFileNameInCard": false
     }
   }
 }
