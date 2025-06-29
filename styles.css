@@ -1164,7 +1164,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 0.5em;
 	margin-block: 0.5em;
 	cursor: default;
-	border: 1px solid var(--text-accent);
+	border: 1px solid var(--background-modifier-border);
 	border-radius: 10px;
 	padding: 4px;
 }
