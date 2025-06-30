@@ -15,7 +15,7 @@ export class BugReporterModal extends Modal {
 		this.message = message;
 		this.bugContent = bug;
 		this.context = context;
-		this.setTitle(t("bug-reporter"));
+		this.setTitle(t("task-board-bug-reporter"));
 	}
 
 	async onOpen() {
@@ -27,9 +27,6 @@ export class BugReporterModal extends Modal {
 		const modalContent = contentEl.createDiv({
 			cls: "taskBoardBugReporterModal",
 		});
-
-		// Header
-		// modalContent.createEl("h2", { text: t("bug-reporter") });
 
 		const bugReportSection = modalContent.createDiv({
 			cls: "bugReportSection",
