@@ -324,7 +324,7 @@
         ],
         "Testing 2.md": [
             {
-                "id": 3164618645,
+                "id": 4288870826,
                 "status": "/",
                 "title": "Give some time for Notes Explorer plugin. 🔼⏰ [19:34 - 20:34]    📅 2025-05-04  #done #bug",
                 "body": [
@@ -349,7 +349,7 @@
                 "cancelledDate": ""
             },
             {
-                "id": 2676246946,
+                "id": 1045213475,
                 "status": " ",
                 "title": "This task has simple time in 4th format[time:: 12:30 AM - 13:30 AM] [due:: 2025-03-21]",
                 "body": [],
@@ -366,7 +366,7 @@
                 "cancelledDate": ""
             },
             {
-                "id": 567008592,
+                "id": 3349905241,
                 "status": " ",
                 "title": "#📋 [[Nexus Book Project|Nexus]]: Determine next action 🔁 every month ⏳ 2024-12-20 📅 2024-12-20",
                 "body": [],
@@ -381,6 +381,27 @@
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "lineNumber": 28,
+                "completion": "",
+                "cancelledDate": ""
+            },
+            {
+                "id": 4146339721,
+                "status": " ",
+                "title": "These are all **Gift List** tasks",
+                "body": [
+                    "\t- [ ] x and y",
+                    "\t- [ ] a and b",
+                    "\t- [ ] z and a?"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "priority": 0,
+                "filePath": "Testing 2.md",
+                "lineNumber": 36,
                 "completion": "",
                 "cancelledDate": ""
             }
@@ -4513,7 +4534,7 @@
         ],
         "Testing 2.md": [
             {
-                "id": 1449021154,
+                "id": 2705014881,
                 "status": "x",
                 "title": "This is a task for testing, ill add status using Tasks plugin. 🔼⏰ [19:34 - 20:34] #bug/solver 📅 2025-05-02 (@2025-05-02 19:34) ✅ 2025-05-30",
                 "body": [
