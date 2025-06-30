@@ -191,7 +191,7 @@ const en: Lang = {
 	"liveEditor": "Live Editor",
 	"rawEditor": "Raw Editor",
 	"child-tasks": "Child tasks",
-	"bug-reporter": "Bug reporter",
+	"task-board-bug-reporter": "Task Board bug reporter",
 	"report": "Report",
 	"ignore-this-bug": "Ignore this bug",
 	"bug-context": "Bug context",

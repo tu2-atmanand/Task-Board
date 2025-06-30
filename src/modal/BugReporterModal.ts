@@ -15,7 +15,7 @@ export class BugReporterModal extends Modal {
 		this.message = message;
 		this.bugContent = bug;
 		this.context = context;
-		this.setTitle(t("bug-reporter"));
+		this.setTitle(t("task-board-bug-reporter"));
 	}
 
 	async onOpen() {
@@ -27,9 +27,6 @@ export class BugReporterModal extends Modal {
 		const modalContent = contentEl.createDiv({
 			cls: "taskBoardBugReporterModal",
 		});
-
-		// Header
-		// modalContent.createEl("h2", { text: t("bug-reporter") });
 
 		const bugReportSection = modalContent.createDiv({
 			cls: "bugReportSection",
@@ -115,9 +112,9 @@ export class BugReporterModal extends Modal {
 		context: String
 	) {
 		// Sanitize the bug report content to prevent XSS attacks
-		let sanitizedErrorContent = bugContent
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;");
+		let sanitizedErrorContent = bugContent;
+			// .replace(/</g, "&lt;")
+			// .replace(/>/g, "&gt;");
 		// This sanitization function will also going to hide user data to preserve privacy. To do this, I will be replacing all the alphabets and nembers with '*', and keep the rest of characters as it is. This will help me to get the format of the their content and also preserve the privacy of the user.
 		// sanitizedErrorContent = sanitizedErrorContent.replace(/[a-zA-Z0-9]/g, "*");
 
