@@ -10,6 +10,7 @@ import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
 } from "./MarkdownFileOperations";
+import { extractFrontmatter, extractFrontmatterTags } from "./ScanningVault";
 
 import { App, Notice, TFile } from "obsidian";
 import TaskBoard from "main";
@@ -572,11 +573,16 @@ export const generateTaskId = (): number => {
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadTasksJsonFromDisk(plugin);
 
+	const file = plugin.app.vault.getFileByPath(newTask.filePath);
+	const frontmatter = file ? extractFrontmatter(plugin, file) : {};
+	const frontmatterTags = extractFrontmatterTags(frontmatter);
+
 	const newTaskWithId = {
 		...newTask,
 		id: generateTaskId(),
 		filePath: newTask.filePath,
-		completed: "", // This will be updated when task is marked as complete
+		completed: "",
+		frontmatterTags: frontmatterTags,
 	};
 
 	// Update the task list (assuming it's a file-based task structure)
@@ -666,4 +672,11 @@ export const parseDueDate = (dueStr: string): Date | null => {
 	// Parse the date
 	const parsedDate = new Date(dueStr);
 	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+// Function to get all tags from a task (both line tags and frontmatter tags)
+export const getAllTaskTags = (task: taskItem): string[] => {
+	const lineTags = task.tags || [];
+	const frontmatterTags = task.frontmatterTags || [];
+	return [...lineTags, ...frontmatterTags];
 };

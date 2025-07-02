@@ -86,6 +86,7 @@ export interface globalSettingsData {
 	};
 	archivedTasksFilePath: string;
 	showFileNameInCard: boolean;
+	showFrontmatterTagsOnCards: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -342,6 +343,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
 			showFileNameInCard: false,
+			showFrontmatterTagsOnCards: false,
 		},
 	},
 };

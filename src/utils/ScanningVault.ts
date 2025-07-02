@@ -1,6 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment } from "obsidian";
+import { App, TFile, moment as _moment, getFrontMatterInfo } from "obsidian";
+// import * as yaml from "js-yaml";
 import {
 	extractCheckboxSymbol,
 	isCompleted,
@@ -21,6 +22,83 @@ import { eventEmitter } from "src/services/EventEmitter";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 
+// Function to extract frontmatter from file content
+export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
+	// Method 1 - Find the frontmatter using delimiters
+	// // Check if the file starts with frontmatter delimiter
+	// if (!fileContent.startsWith("---\n")) {
+	// 	return null;
+	// }
+
+	// // Find the end of frontmatter
+	// const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
+	// if (secondDelimiterIndex === -1) {
+	// 	return null;
+	// }
+
+	// // Extract the YAML content between delimiters
+	// const yamlContent = fileContent.substring(4, secondDelimiterIndex);
+
+	// try {
+	// 	// Parse the YAML content
+	// 	const frontmatter = yaml.load(yamlContent);
+	// 	return frontmatter;
+	// } catch (error) {
+	// 	console.warn("Failed to parse frontmatter:", error);
+	// 	return null;
+	// }
+
+	// Method 2 - Get frontmatter using Obsidian API
+	try {
+		// API-1 : Get fronmatter as a string
+		// const fileContent = await this.app.vault.cachedRead(file);
+		// const frontmatterAsString =
+		// 	getFrontMatterInfo(fileContent).frontmatter;
+
+		// API-2 : Get frontmatter as an object
+		const frontmatterAsObject =
+			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+		console.log("Frontmatter extracted as an object:", frontmatterAsObject);
+
+		return frontmatterAsObject;
+	} catch (error) {
+		// console.warn("Failed to parse frontmatter:", error);
+		return null;
+	}
+}
+
+// Function to extract tags from frontmatter
+export function extractFrontmatterTags(frontmatter: any): string[] {
+	if (!frontmatter) {
+		return [];
+	}
+
+	let tags: string[] = [];
+
+	// Check if there's a 'tags' property in frontmatter
+	if (frontmatter.tags) {
+		if (Array.isArray(frontmatter.tags)) {
+			// If tags is an array, process each tag
+			tags = frontmatter.tags.map((tag: any) => {
+				const tagStr = String(tag).trim();
+				// Ensure tags start with # if they don't already
+				return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+			});
+		} else if (typeof frontmatter.tags === "string") {
+			// If tags is a string, split by commas and process
+			tags = frontmatter.tags
+				.split(",")
+				.map((tag: string) => {
+					const tagStr = tag.trim();
+					return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+				})
+				.filter((tag: string) => tag.length > 1); // Filter out empty tags
+		}
+	}
+
+	return tags;
+}
+
 export class ScanningVault {
 	app: App;
 	plugin: TaskBoard;
@@ -31,6 +109,13 @@ export class ScanningVault {
 		this.app = app;
 		this.plugin = plugin;
 		this.TaskDetected = false;
+	}
+
+	// Generate a unique ID for each task
+	generateTaskId(): number {
+		const array = new Uint32Array(1);
+		crypto.getRandomValues(array);
+		return array[0];
 	}
 
 	async scanVaultForTasks() {
@@ -85,7 +170,21 @@ export class ScanningVault {
 					const cancelledDate = extractCancelledDate(line);
 					const body = extractBody(lines, i + 1);
 
-					const task = {
+					let frontmatterTags: string[] = []; // Initialize frontmatterTags
+					if (
+						this.plugin.settings.data.globalSettings
+							.showFrontmatterTagsOnCards
+					) {
+						// Extract frontmatter from the file
+						const frontmatter = extractFrontmatter(
+							this.plugin,
+							file
+						);
+						// Extract frontmatter tags
+						frontmatterTags = extractFrontmatterTags(frontmatter);
+					}
+
+					const task: taskItem = {
 						id: this.generateTaskId(),
 						status: taskStatus,
 						title,
@@ -96,6 +195,7 @@ export class ScanningVault {
 						scheduledDate,
 						due,
 						tags,
+						frontmatterTags,
 						priority,
 						filePath: fileNameWithPath,
 						lineNumber: i + 1,
@@ -115,20 +215,12 @@ export class ScanningVault {
 		}
 	}
 
-	// Generate a unique ID for each task
-	generateTaskId(): number {
-		const array = new Uint32Array(1);
-		crypto.getRandomValues(array);
-		return array[0];
-	}
-
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: (TFile | null)[]) {
 		// Load the existing tasks from tasks.json once
 		const oldTasks = await loadTasksJsonFromDisk(this.plugin);
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
-
 		for (const file of files) {
 			if (file !== null) {
 				const fileNameWithPath = file.path;
@@ -177,7 +269,22 @@ export class ScanningVault {
 								}
 							}
 
-							const task = {
+							let frontmatterTags: string[] = []; // Initialize frontmatterTags
+							if (
+								this.plugin.settings.data.globalSettings
+									.showFrontmatterTagsOnCards
+							) {
+								// Extract frontmatter from the file
+								const frontmatter = extractFrontmatter(
+									this.plugin,
+									file
+								);
+								// Extract frontmatter tags
+								frontmatterTags =
+									extractFrontmatterTags(frontmatter);
+							}
+
+							const task: taskItem = {
 								id: this.generateTaskId(),
 								status: taskStatus,
 								title,
@@ -188,6 +295,7 @@ export class ScanningVault {
 								scheduledDate,
 								due,
 								tags,
+								frontmatterTags,
 								priority,
 								filePath: fileNameWithPath,
 								lineNumber: i + 1,
@@ -343,7 +451,7 @@ export function extractTime(text: string): string {
 		return match[1];
 	}
 
-	match = text.match(/⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);
+	match = text.match(/⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);;
 	if (match) {
 		return match[1];
 	}
@@ -359,6 +467,9 @@ export function extractTime(text: string): string {
 	}
 
 	// Otherwise, look for time elsewhere in the line
+	const timeIntitleMatch = text.match(
+		/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/
+	);
 	const timeIntitleMatch = text.match(
 		/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/
 	);

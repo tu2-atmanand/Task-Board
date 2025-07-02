@@ -1,6 +1,6 @@
 // /src/utils/RealTimeScanning.ts
 
-import { App, TFile } from "obsidian";
+import { App, TFile, getFrontMatterInfo } from "obsidian";
 
 import { ScanningVault } from "src/utils/ScanningVault";
 import type TaskBoard from "main";

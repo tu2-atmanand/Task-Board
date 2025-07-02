@@ -717,6 +717,7 @@ export class SettingsManager {
 			compatiblePlugins,
 			dailyNotesPluginComp,
 			editButtonAction,
+			showFrontmatterTagsOnCards,
 			preDefinedNote,
 			quickAddPluginDefaultChoice,
 			archivedTasksFilePath,
@@ -829,6 +830,23 @@ export class SettingsManager {
 					this.globalSettings!.autoAddCreatedDate = value;
 					await this.saveSettings();
 				})
+			);
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("Show note frontmatter tags in the card header"))
+			.setDesc(
+				t(
+					"Enable this feature to use see the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks."
+				)
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(showFrontmatterTagsOnCards)
+					.onChange(async (value) => {
+						this.globalSettings!.showFrontmatterTagsOnCards = value;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting for choosing the default file to archive tasks

@@ -280,10 +280,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemHeader">
 							<div className="taskItemHeaderLeft">
-								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
-
-								{/* Render tags individually */}
+								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>								{/* Render tags individually */}
 								<div className="taskItemTags">
+									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
 										const tagName = tag.replace('#', '');
 										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
@@ -313,6 +312,21 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 													border: `1px solid ${borderColor}`,
 													backgroundColor: backgroundColor
 												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+									
+									{/* Render frontmatter tags (read-only) */}
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+										const tagKey = `${task.id}-fm-${tag}`;
+										// Render frontmatter tags with different styling
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTag taskItemTagFrontmatter"
+												title="Tag from note frontmatter (read-only)"
 											>
 												{tag}
 											</div>

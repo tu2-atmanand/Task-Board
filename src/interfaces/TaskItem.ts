@@ -20,6 +20,7 @@ export interface taskItem {
 	scheduledDate: string;
 	due: string;
 	tags: string[];
+	frontmatterTags: string[]; // Tags extracted from frontmatter
 	time: string;
 	priority: number;
 	status: string;

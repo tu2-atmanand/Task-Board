@@ -6,6 +6,7 @@ import { CSSProperties } from 'react';
 import { ColumnProps } from '../interfaces/ColumnProps';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
+import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 
 type CustomCSSProperties = CSSProperties & {
 	'--column-width': string;
@@ -55,11 +56,11 @@ const Column: React.FC<ColumnProps> = ({
 				</div>
 				{/* <RxDotsVertical /> */}
 			</div>
-			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
-				{tasks.length > 0 ? (
+			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>				{tasks.length > 0 ? (
 					tasks.map((task, index = task.id) => {
+						const allTaskTags = getAllTaskTags(task);
 						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
-							task.tags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
+							allTaskTags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
 
 						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
 							return (
