@@ -11,7 +11,7 @@ import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
 } from "./JsonFileOperations";
-import { priorityEmojis, tasksJson } from "src/interfaces/TaskItemProps";
+import { priorityEmojis, taskItem, tasksJson } from "src/interfaces/TaskItemProps";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -180,7 +180,7 @@ export class ScanningVault {
 						frontmatterTags = extractFrontmatterTags(frontmatter);
 					}
 
-					const task = {
+					const task: taskItem = {
 						id: this.generateTaskId(),
 						status: taskStatus,
 						title,
@@ -271,7 +271,7 @@ export class ScanningVault {
 									extractFrontmatterTags(frontmatter);
 							}
 
-							const task = {
+							const task: taskItem = {
 								id: this.generateTaskId(),
 								status: taskStatus,
 								title,
