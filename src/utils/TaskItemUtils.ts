@@ -5,10 +5,7 @@ import {
 	loadTasksJsonFromDisk,
 	writeTasksJsonToDisk,
 } from "./JsonFileOperations";
-import {
-	taskItem,
-	tasksJson,
-} from "src/interfaces/TaskItemProps";
+import { taskItem, tasksJson } from "src/interfaces/TaskItemProps";
 import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
@@ -336,17 +333,15 @@ export const generateTaskId = (): number => {
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadTasksJsonFromDisk(plugin);
 
-	// Read the file content to extract frontmatter
-	const fileContent = await readDataOfVaultFiles(plugin, newTask.filePath);
-	const frontmatter = extractFrontmatter(fileContent);
+	const file = plugin.app.vault.getFileByPath(newTask.filePath);
+	const frontmatter = file ? extractFrontmatter(plugin, file) : {};
 	const frontmatterTags = extractFrontmatterTags(frontmatter);
 
 	const newTaskWithId = {
 		...newTask,
 		id: generateTaskId(),
 		filePath: newTask.filePath,
-		completed: "", // This will be updated when task is marked as complete
-		frontmatter: frontmatter,
+		completed: "",
 		frontmatterTags: frontmatterTags,
 	};
 
@@ -419,4 +414,11 @@ export const parseDueDate = (dueStr: string): Date | null => {
 	// Parse the date
 	const parsedDate = new Date(dueStr);
 	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+// Function to get all tags from a task (both line tags and frontmatter tags)
+export const getAllTaskTags = (task: taskItem): string[] => {
+	const lineTags = task.tags || [];
+	const frontmatterTags = task.frontmatterTags || [];
+	return [...lineTags, ...frontmatterTags];
 };

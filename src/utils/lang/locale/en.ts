@@ -93,7 +93,7 @@ const en: Lang = {
 	"tag-name": "Tag name",
 	"automation": "Automation",
 	"real-time-scanning": "Real-time scanning",
-	"real-time-scanning-info": "After you loose focus from the file you have edited, the task will be immediately refreshed on the task boad.\nDisabling this setting will scan the modified files after some time.",
+	"real-time-scanning-info": "After you loose focus from the file you have edited, the task will be immediately refreshed on the task boad.\nIf you disable this feature, you will be required to manually run the refresh button on task board to get your latest changes.",
 	"auto-add-due-date-to-tasks": "Auto add due date to tasks",
 	"auto-add-due-date-to-tasks-info": "When enabled, if you add a task using the 'add new task' pop-up window, then today's date will be added as due date, if no date is entered.",
 	"auto-scan-the-vault-on-obsidian-startup": "Auto scan the vault on Obsidian startup",

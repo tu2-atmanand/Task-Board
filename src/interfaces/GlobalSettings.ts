@@ -68,6 +68,7 @@ export interface globalSettingsData {
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
+	showFrontmatterTagsOnCards: boolean;
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
 		tasksPlugin: boolean;
@@ -263,6 +264,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			showHeader: true,
 			showFooter: true,
 			showVerticalScroll: false,
+			showFrontmatterTagsOnCards: false,
 			tagColors: [
 				{
 					name: "bug",

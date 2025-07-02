@@ -6,14 +6,7 @@ import { CSSProperties } from 'react';
 import { ColumnProps } from '../interfaces/ColumnProps';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
-import { taskItem } from 'src/interfaces/TaskItemProps';
-
-// Function to get all tags from a task (both line tags and frontmatter tags)
-const getAllTaskTags = (task: taskItem): string[] => {
-	const lineTags = task.tags || [];
-	const frontmatterTags = task.frontmatterTags || [];
-	return [...lineTags, ...frontmatterTags];
-};
+import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 
 type CustomCSSProperties = CSSProperties & {
 	'--column-width': string;

@@ -23,7 +23,6 @@ export interface taskItem {
 	completion?: string;
 	status: string;
 	filePath: string;
-	frontmatter?: any; // Add new frontmatter property
 }
 
 export interface tasksInFile {

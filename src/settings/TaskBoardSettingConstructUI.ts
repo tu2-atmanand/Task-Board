@@ -639,6 +639,7 @@ export class SettingsManager {
 			dayPlannerPlugin,
 			dailyNotesPluginComp,
 			editButtonAction,
+			showFrontmatterTagsOnCards,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -689,6 +690,23 @@ export class SettingsManager {
 					this.globalSettings!.autoAddDue = value;
 					await this.saveSettings();
 				})
+			);
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("Show note frontmatter tags in the card header"))
+			.setDesc(
+				t(
+					"Enable this feature to use see the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks."
+				)
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(showFrontmatterTagsOnCards)
+					.onChange(async (value) => {
+						this.globalSettings!.showFrontmatterTagsOnCards = value;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
