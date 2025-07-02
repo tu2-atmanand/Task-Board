@@ -405,6 +405,17 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	flex-wrap: wrap;
 }
 
+.taskItemTagFrontmatter {
+	background-color: var(--tag-background) !important;
+	border: var(--pill-border-width) solid var(--pill-border-color) !important;
+	border-radius: var(--pill-radius) !important;
+	color: var(--pill-color) !important;
+	cursor: var(--cursor);
+	font-weight: var(--pill-weight);
+	padding: 0 var(--pill-padding-y) !important;
+	max-width: calc(100% - var(--size-2-3) - 1ch);
+}
+
 .taskItemTag {
 	/* background-color: var(--tag-background); */
 	/* border: var(--tag-border-width) solid var(--tag-border-color); */

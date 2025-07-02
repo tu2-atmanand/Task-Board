@@ -325,7 +325,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										return (
 											<div
 												key={tagKey}
-												className="taskItemTag taskItemTagFrontmatter"
+												className="taskItemTagFrontmatter"
 												title="Tag from note frontmatter (read-only)"
 											>
 												{tag}
