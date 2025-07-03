@@ -126,32 +126,34 @@ export const renderColumns = (
 			}
 
 			return diffDays >= from && diffDays <= to;
-		});	} else if (columnData.colType === "untagged") {
-		tasksToDisplay = pendingTasks.filter((task) => getAllTaskTags(task).length === 0);
+		});
+	} else if (columnData.colType === "untagged") {
+		tasksToDisplay = pendingTasks.filter(
+			(task) => getAllTaskTags(task).length === 0
+		);
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) =>
 			getAllTaskTags(task).some((tag) => tag === `#${columnData.coltag}`)
 		);
 	} else if (columnData.colType === "pathFiltered") {
-	
 		// Filter tasks based on their file path
 		if (columnData.filePaths) {
 			// Split the path patterns by comma and trim whitespace
 			const pathPatterns = columnData.filePaths
-				.split(',')
+				.split(",")
 				.map((pattern: string) => pattern.trim().toLowerCase())
 				.filter((pattern: string) => pattern.length > 0);
-			
+
 			if (pathPatterns.length > 0) {
 				tasksToDisplay = pendingTasks.filter((task) => {
 					if (!task.filePath) {
-						console.log("Task missing filePath:", task);
 						return false;
 					}
-					
+
 					const lowerCasePath = task.filePath.toLowerCase();
-					const matchedPattern = pathPatterns.some((pattern: string) => lowerCasePath.includes(pattern));
-					console.log(`Checking task path: ${lowerCasePath}, matched: ${matchedPattern}`);
+					const matchedPattern = pathPatterns.some(
+						(pattern: string) => pattern === lowerCasePath
+					);
 					return matchedPattern;
 				});
 			} else {
