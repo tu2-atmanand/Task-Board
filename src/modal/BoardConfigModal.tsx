@@ -17,7 +17,8 @@ import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
-import { MultiSuggest, getFileSuggestions } from "src/services/MultiSuggest";
+import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
+import { priorityOptions } from "src/interfaces/TaskItem";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -172,13 +173,20 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			const fileInputElement = filePathInputRefs.current[column.id];
 			if (!fileInputElement) return;
 
-			const suggestionContent = getFileSuggestions(plugin.app);
-			const onSelectCallback = (selectedPath: string) => {
-				// setNewFilePath(selectedPath);
-				console.log(`Selected file path: ${selectedPath}`);
-				handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
-			};
 			if (filePathInputRefs.current[column.id] !== null && column.colType === "pathFiltered") {
+				const suggestionContent = getFileSuggestions(plugin.app);
+				const onSelectCallback = (selectedPath: string) => {
+					// setNewFilePath(selectedPath);
+					console.log(`Selected file path: ${selectedPath}`);
+					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
+				};
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			} else if (filePathInputRefs.current[column.id] !== null && column.colType === "namedTag") {
+				const suggestionContent = getTagSuggestions(plugin.app);
+				const onSelectCallback = (selectedTag: string) => {
+					console.log(`Selected tag: ${selectedTag}`);
+					handleColumnChange(selectedBoardIndex, index, "coltag", selectedTag);
+				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
 			}
 		});
@@ -422,6 +430,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "namedTag" && (
 											<input
 												type="text"
+												ref={(el) => (filePathInputRefs.current[column.id] = el)}
 												placeholder={t("enter-tag")}
 												value={column.coltag || ""}
 												onChange={(e) =>
@@ -452,20 +461,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											/>
 										)}
 										{column.colType === "taskPriority" && (
-											<input
-												type="number"
-												placeholder={t("enter-tag-placeholder")}
-												value={column.taskPriority || ""}
+											<select
+												aria-label="Select priority"
+												value={column.taskPriority || priorityOptions[0].value}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
 														"taskPriority",
-														Number(e.target.value)
+														e.target.value
 													)
 												}
-												className="boardConfigModalColumnRowContentColName"
-											/>
+												className="boardConfigModalColumnRowContentColDatedVal"
+											>
+												{priorityOptions.map((option) => (
+													<option key={option.value} value={option.value}>{option.text}</option>
+												))}
+											</select>
 										)}
 										{column.colType === "completed" && (
 											<input
