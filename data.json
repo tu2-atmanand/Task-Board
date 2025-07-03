@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2",
+  "version": "1.5.2",
   "data": {
     "boardConfigs": [
       {
@@ -63,33 +63,6 @@
             }
           },
           {
-            "id": 4988,
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "name": "Bug",
-            "index": 6,
-            "coltag": "bug"
-          },
-          {
-            "id": 5794,
-            "index": 7,
-            "colType": "taskStatus",
-            "active": true,
-            "collapsed": false,
-            "name": "In Progress",
-            "taskStatus": "/"
-          },
-          {
-            "id": 9075,
-            "index": 8,
-            "colType": "taskPriority",
-            "active": true,
-            "collapsed": false,
-            "name": "Highest Priority",
-            "taskPriority": 1
-          },
-          {
             "id": 3497,
             "colType": "completed",
             "active": true,
@@ -97,6 +70,15 @@
             "limit": 20,
             "name": "Completed, updated",
             "index": 9
+          },
+          {
+            "id": 4257554450,
+            "index": 7,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "DailyNotes.md",
+            "filePaths": "DailyNotes.md"
           }
         ],
         "filters": [

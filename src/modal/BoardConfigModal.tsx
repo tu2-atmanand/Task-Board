@@ -17,6 +17,7 @@ import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
+import { MultiSuggest, getFileSuggestions } from "src/services/MultiSuggest";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -165,6 +166,24 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		}
 	}, [selectedBoardIndex]);
 
+	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+	useEffect(() => {
+		localBoards[selectedBoardIndex]?.columns.forEach((column, index) => {
+			const fileInputElement = filePathInputRefs.current[column.id];
+			if (!fileInputElement) return;
+
+			const suggestionContent = getFileSuggestions(plugin.app);
+			const onSelectCallback = (selectedPath: string) => {
+				// setNewFilePath(selectedPath);
+				console.log(`Selected file path: ${selectedPath}`);
+				handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
+			};
+			if (filePathInputRefs.current[column.id] !== null && column.colType === "pathFiltered") {
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			}
+		});
+	}, [plugin.app, selectedBoardIndex, localBoards]);
+
 	// Function to handle column change
 	const handleColumnChange = (
 		boardIndex: number,
@@ -182,7 +201,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setLocalBoards(updatedBoards);
 		setIsEdited(true);
 	};
-
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
@@ -468,7 +486,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "pathFiltered" && (
 											<input
 												type="text"
-												placeholder={t("enter-path-pattern")}
+												ref={(el) => (filePathInputRefs.current[column.id] = el)}
+												className="boardConfigModalColumnRowContentColName"
 												value={column.filePaths || ""}
 												onChange={(e) =>
 													handleColumnChange(
@@ -478,7 +497,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														e.target.value
 													)
 												}
-												className="boardConfigModalColumnRowContentColName"
+												placeholder={t("enter-path-pattern")}
 											/>
 										)}
 										{column.colType === "dated" && (

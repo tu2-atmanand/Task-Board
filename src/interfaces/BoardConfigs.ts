@@ -44,6 +44,6 @@ export const columnTypeAndNameMapping: { [key: string]: string } = {
 	otherTags: "Other Tags",
 	taskStatus: "Status",
 	taskPriority: "Priority",
-	notePath: "Folder",
+	pathFiltered: "Path filtered",
 	completed: "Completed",
 };

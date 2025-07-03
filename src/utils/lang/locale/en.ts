@@ -53,7 +53,7 @@ const en: Lang = {
 	"add-board": "Add board",
 	"confirm-delete": "Confirm delete",
 	"path-filtered": "Path filtered",
-	"enter-path-pattern": "Enter path pattern",
+	"enter-path-pattern": "Enter complete file paths seperated by comma",
 	"path-filter-description": "Shows tasks from files whose path contains the specified pattern. Use this to group tasks by folder or file location.",
 	"confirm-task-delete-description": "Are you sure you want to delete this task?",
 	"yes": "Yes",
