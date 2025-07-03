@@ -7,6 +7,7 @@ export type ColumnData = {
 	collapsed?: boolean;
 	name: string;
 	coltag?: string;
+	filePaths?: string;
 	datedBasedColumn?: {
 		dateType: string; // e.g., "due", "created", "scheduled"
 		from: number;

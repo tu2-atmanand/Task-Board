@@ -76,6 +76,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			taskStatus: columnData.taskStatus,
 			taskPriority: columnData.taskPriority,
 			limit: columnData.limit,
+			filePaths: columnData.filePaths,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -462,6 +463,22 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													)
 												}
 												className="boardConfigModalColumnRowContentColDatedVal"
+											/>
+										)}
+										{column.colType === "pathFiltered" && (
+											<input
+												type="text"
+												placeholder={t("enter-path-pattern")}
+												value={column.filePaths || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"filePaths",
+														e.target.value
+													)
+												}
+												className="boardConfigModalColumnRowContentColName"
 											/>
 										)}
 										{column.colType === "dated" && (
