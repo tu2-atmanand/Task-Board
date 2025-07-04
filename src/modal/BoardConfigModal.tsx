@@ -53,6 +53,83 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
+	const boardListRef = useRef<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		if (
+			selectedBoardIndex === -1 ||
+			!columnListRef.current ||
+			!localBoards[selectedBoardIndex]
+		)
+			return;
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+				const updatedBoards = [...localBoards];
+				// const columns = updatedBoards[selectedBoardIndex].columns;
+				const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+				updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+				updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
+
+				setLocalBoards(updatedBoards);
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedBoardIndex, localBoards]);
+
+	// useEffect for board sorting
+	useEffect(() => {
+		if (!boardListRef.current) return;
+
+		const sortableBoards = Sortable.create(boardListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
+					return;
+				}
+
+				const currentBoards = [...localBoards];
+				const [movedBoard] = currentBoards.splice(evt.oldIndex, 1);
+				currentBoards.splice(evt.newIndex, 0, movedBoard);
+
+				// Update board.index to be the new 0-based array index
+				const finalBoards = currentBoards.map((board, idx) => ({
+					...board,
+					index: idx // 0-based index
+				}));
+
+				setLocalBoards(finalBoards);
+
+				// Update selectedBoardIndex (which is a 0-based array index)
+				if (selectedBoardIndex === evt.oldIndex) {
+					setSelectedBoardIndex(evt.newIndex);
+				} else {
+					// Adjust selectedBoardIndex if an item moved across it
+					if (evt.oldIndex < selectedBoardIndex && evt.newIndex >= selectedBoardIndex) {
+						// Item moved from before selected to at or after selected: selected moves left
+						setSelectedBoardIndex(prevIdx => prevIdx - 1);
+					} else if (evt.oldIndex > selectedBoardIndex && evt.newIndex <= selectedBoardIndex) {
+						// Item moved from after selected to at or before selected: selected moves right
+						setSelectedBoardIndex(prevIdx => prevIdx + 1);
+					}
+				}
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortableBoards.destroy();
+		};
+	}, [localBoards, selectedBoardIndex]);
 
 	// Function to add a new column to the selected board
 	const handleOpenAddColumnModal = () => {
@@ -623,19 +700,22 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<hr className="boardConfigModalHr-100" />
 
 						<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-						{localBoards.map((board, index) => (
-							<div
-								key={index}
-								onClick={() => {
-									setSelectedBoardIndex(index);
-									toggleSidebar();
-
-								}}
-								className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-							>
-								{board.name}
-							</div>
-						))}
+						<div ref={boardListRef}> {/* Add ref to the div wrapping board items */}
+							{localBoards.map((board, index) => (
+								<div
+									key={board.name} // Changed key from index to board.name
+									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
+								>
+									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+									<span onClick={() => {
+										setSelectedBoardIndex(index);
+										toggleSidebar();
+									}}>
+										{board.name}
+									</span>
+								</div>
+							))}
+						</div>
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
 						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
