@@ -153,7 +153,7 @@ const en: Lang = {
 	"lowest": "Lowest",
 	"type-here": "Type here...",
 	"delete-sub-task": "Delete Sub-Task",
-	"hold-ctrl-button-to-open-in-new-window": "Hold CTRL button to open in new window",
+	"hold-ctrl-button-to-open-in-new-window": "Open note in new tab. Hold CTRL to open in new window",
 	"file-name": "File name",
 	"your-boards": "Your boards",
 	"file-not-found-at-path": "File not found at path:",
@@ -225,6 +225,7 @@ const en: Lang = {
 	"scheduled-date": "Scheduled date",
 	"show-error": "Show error",
 	"bug-report-notice-message":"Task board encountered an issue while completing the operation. Click on the show error button to read more and report.",
+	"archive-instead": "Archive instead",
 };
 
 export default en;
