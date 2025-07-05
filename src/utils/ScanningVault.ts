@@ -22,83 +22,6 @@ import { eventEmitter } from "src/services/EventEmitter";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 
-// Function to extract frontmatter from file content
-export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
-	// Method 1 - Find the frontmatter using delimiters
-	// // Check if the file starts with frontmatter delimiter
-	// if (!fileContent.startsWith("---\n")) {
-	// 	return null;
-	// }
-
-	// // Find the end of frontmatter
-	// const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
-	// if (secondDelimiterIndex === -1) {
-	// 	return null;
-	// }
-
-	// // Extract the YAML content between delimiters
-	// const yamlContent = fileContent.substring(4, secondDelimiterIndex);
-
-	// try {
-	// 	// Parse the YAML content
-	// 	const frontmatter = yaml.load(yamlContent);
-	// 	return frontmatter;
-	// } catch (error) {
-	// 	console.warn("Failed to parse frontmatter:", error);
-	// 	return null;
-	// }
-
-	// Method 2 - Get frontmatter using Obsidian API
-	try {
-		// API-1 : Get fronmatter as a string
-		// const fileContent = await this.app.vault.cachedRead(file);
-		// const frontmatterAsString =
-		// 	getFrontMatterInfo(fileContent).frontmatter;
-
-		// API-2 : Get frontmatter as an object
-		const frontmatterAsObject =
-			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-		console.log("Frontmatter extracted as an object:", frontmatterAsObject);
-
-		return frontmatterAsObject;
-	} catch (error) {
-		// console.warn("Failed to parse frontmatter:", error);
-		return null;
-	}
-}
-
-// Function to extract tags from frontmatter
-export function extractFrontmatterTags(frontmatter: any): string[] {
-	if (!frontmatter) {
-		return [];
-	}
-
-	let tags: string[] = [];
-
-	// Check if there's a 'tags' property in frontmatter
-	if (frontmatter.tags) {
-		if (Array.isArray(frontmatter.tags)) {
-			// If tags is an array, process each tag
-			tags = frontmatter.tags.map((tag: any) => {
-				const tagStr = String(tag).trim();
-				// Ensure tags start with # if they don't already
-				return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
-			});
-		} else if (typeof frontmatter.tags === "string") {
-			// If tags is a string, split by commas and process
-			tags = frontmatter.tags
-				.split(",")
-				.map((tag: string) => {
-					const tagStr = tag.trim();
-					return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
-				})
-				.filter((tag: string) => tag.length > 1); // Filter out empty tags
-		}
-	}
-
-	return tags;
-}
-
 export class ScanningVault {
 	app: App;
 	plugin: TaskBoard;
@@ -151,89 +74,24 @@ export class ScanningVault {
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
 
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			if (isTaskLine(line)) {
-				const tags = extractTags(line);
-				if (scanFilterForTags(tags, scanFilters)) {
-					this.TaskDetected = true;
-					const taskStatus = extractCheckboxSymbol(line);
-					const isTaskCompleted = isCompleted(line);
-					const title = extractTitle(line);
-					const time = extractTime(line);
-					const createdDate = extractCreatedDate(line);
-					const startDate = extractStartDate(line);
-					const scheduledDate = extractScheduledDate(line);
-					const due = extractDueDate(line);
-					const priority = extractPriority(line);
-					const completionDate = extractCompletionDate(line);
-					const cancelledDate = extractCancelledDate(line);
-					const body = extractBody(lines, i + 1);
+		// Extract frontmatter from the file
+		const frontmatter = extractFrontmatter(this.plugin, file);
 
-					let frontmatterTags: string[] = []; // Initialize frontmatterTags
-					if (
-						this.plugin.settings.data.globalSettings
-							.showFrontmatterTagsOnCards
-					) {
-						// Extract frontmatter from the file
-						const frontmatter = extractFrontmatter(
-							this.plugin,
-							file
-						);
-						// Extract frontmatter tags
-						frontmatterTags = extractFrontmatterTags(frontmatter);
-					}
-
-					const task: taskItem = {
-						id: this.generateTaskId(),
-						status: taskStatus,
-						title,
-						body,
-						time,
-						createdDate,
-						startDate,
-						scheduledDate,
-						due,
-						tags,
-						frontmatterTags,
-						priority,
-						filePath: fileNameWithPath,
-						lineNumber: i + 1,
-						completion: completionDate,
-						cancelledDate: cancelledDate,
-					};
-
-					if (isTaskCompleted) {
-						tasks.Completed[fileNameWithPath].push(task);
-					} else {
-						tasks.Pending[fileNameWithPath].push(task);
-					}
-				} else {
-					// console.log("The tasks is not allowed...");
-				}
-			}
-		}
-
-		// If there are no tasks and the frontmatter has TaskBoard, create a normal task inheriting tags and frontmatter, and set the file content as the body
+		// First check if the note contains the 'TaskBoard' frontmatter tag. If yes then consider the whole file as a task. And fetch the individual properties from its frontmatter. The whole content of the note will be the task body and the individual tasks inside the note will be the sub-tasks.
 		if (
 			tasks.Pending[fileNameWithPath].length === 0 &&
-			frontmatter && Object.prototype.hasOwnProperty.call(frontmatter, "TaskBoard")
+			frontmatter &&
+			Object.prototype.hasOwnProperty.call(frontmatter, "TaskBoard")
 		) {
 			const frontmatterTags = extractFrontmatterTags(frontmatter);
 			const tags = Array.isArray(frontmatterTags) ? frontmatterTags : [];
-			// Extract only the content after the frontmatter
-			let contentStart = 0;
-			if (fileContent.startsWith('---\n')) {
-				const endFrontmatter = fileContent.indexOf('\n---\n', 4);
-				if (endFrontmatter !== -1) {
-					contentStart = endFrontmatter + 5; // 5 = length of '\n---\n'
-				}
-			}
-			const contentBody = fileContent.slice(contentStart).split('\n').filter(l => l.trim() !== "");
+
+			// TODO : Here I will need to extract all the following properties from the frontmatter and it should be assigned to the task object : due, time, createdDate, startDate, scheduledDate, priority, status(can be either the symbol such as '/' or the mapped name 'In progress') etc.
+
 			tasks.Pending[fileNameWithPath].push({
 				id: this.generateTaskId(),
 				title: file.name.replace(/\.md$/, ""),
-				body: contentBody,
+				body: [], // Do not save the whole content of the note as body, it will simply increase the size of the task.json file. Instead read the content of the note using the filePath whenever needed using the extractFileContentWithoutFrontmatter() function.
 				due: "",
 				tags,
 				frontmatterTags: tags,
@@ -241,8 +99,70 @@ export class ScanningVault {
 				priority: 0,
 				status: " ",
 				filePath: fileNameWithPath,
-				frontmatter: frontmatter,
+				createdDate: "",
+				startDate: "",
+				scheduledDate: "",
+				lineNumber: 0,
 			});
+		} else {
+			for (let i = 0; i < lines.length; i++) {
+				const line = lines[i];
+				if (isTaskLine(line)) {
+					const tags = extractTags(line);
+					if (scanFilterForTags(tags, scanFilters)) {
+						this.TaskDetected = true;
+						const taskStatus = extractCheckboxSymbol(line);
+						const isTaskCompleted = isCompleted(line);
+						const title = extractTitle(line);
+						const time = extractTime(line);
+						const createdDate = extractCreatedDate(line);
+						const startDate = extractStartDate(line);
+						const scheduledDate = extractScheduledDate(line);
+						const due = extractDueDate(line);
+						const priority = extractPriority(line);
+						const completionDate = extractCompletionDate(line);
+						const cancelledDate = extractCancelledDate(line);
+						const body = extractBody(lines, i + 1);
+
+						let frontmatterTags: string[] = []; // Initialize frontmatterTags
+						if (
+							this.plugin.settings.data.globalSettings
+								.showFrontmatterTagsOnCards
+						) {
+							// Extract frontmatter tags
+							frontmatterTags =
+								extractFrontmatterTags(frontmatter);
+						}
+
+						const task: taskItem = {
+							id: this.generateTaskId(),
+							status: taskStatus,
+							title,
+							body,
+							time,
+							createdDate,
+							startDate,
+							scheduledDate,
+							due,
+							tags,
+							frontmatterTags,
+							priority,
+							filePath: fileNameWithPath,
+							lineNumber: i + 1,
+							completion: completionDate,
+							cancelledDate: cancelledDate,
+						};
+
+						if (isTaskCompleted) {
+							tasks.Completed[fileNameWithPath].push(task);
+						} else {
+							tasks.Pending[fileNameWithPath].push(task);
+						}
+					} else {
+						// console.log("The tasks is not allowed...");
+					}
+				}
+			}
 		}
 	}
 
@@ -418,29 +338,6 @@ export function buildTaskFromRawContent(
 		filePath: filePath || "",
 	};
 }
-
-// // Extract title from task line
-// export function extractTitle(text: string): string {
-// 	const timeAtStartMatch = text.match(
-// 		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
-// 	);
-
-// 	if (timeAtStartMatch) {
-// 		// If time is at the start, extract title after the time and till the pipe symbol
-// 		return text
-// 			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
-// 			.split("|")[0]
-// 			.trim();
-// 	} else {
-// 		// Default case: no time at start, extract title till the pipe symbol
-// 		return text.includes("|")
-// 			? text
-// 					.split("|")[0]
-// 					.replace(/^- \[.\]\s*/, "")
-// 					.trim()
-// 			: text.replace(/^- \[.\]\s*/, "").trim();
-// 	}
-// }
 
 // Extract title from task line
 export function extractTitle(text: string): string {
@@ -670,4 +567,106 @@ export function extractCancelledDate(text: string): string {
 	}
 	// Return the matched date or date-time, or an empty string if no match
 	return match ? match[0].trim() : "";
+}
+
+// Function to extract frontmatter from file content
+export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
+	// Method 1 - Find the frontmatter using delimiters
+	// // Check if the file starts with frontmatter delimiter
+	// if (!fileContent.startsWith("---\n")) {
+	// 	return null;
+	// }
+
+	// // Find the end of frontmatter
+	// const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
+	// if (secondDelimiterIndex === -1) {
+	// 	return null;
+	// }
+
+	// // Extract the YAML content between delimiters
+	// const yamlContent = fileContent.substring(4, secondDelimiterIndex);
+
+	// try {
+	// 	// Parse the YAML content
+	// 	const frontmatter = yaml.load(yamlContent);
+	// 	return frontmatter;
+	// } catch (error) {
+	// 	console.warn("Failed to parse frontmatter:", error);
+	// 	return null;
+	// }
+
+	// Method 2 - Get frontmatter using Obsidian API
+	try {
+		// API-1 : Get fronmatter as a string
+		// const fileContent = await this.app.vault.cachedRead(file);
+		// const frontmatterAsString =
+		// 	getFrontMatterInfo(fileContent).frontmatter;
+
+		// API-2 : Get frontmatter as an object
+		const frontmatterAsObject =
+			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+		console.log("Frontmatter extracted as an object:", frontmatterAsObject);
+
+		return frontmatterAsObject;
+	} catch (error) {
+		// console.warn("Failed to parse frontmatter:", error);
+		return null;
+	}
+}
+
+// Function to extract tags from frontmatter
+export function extractFrontmatterTags(frontmatter: any): string[] {
+	if (!frontmatter) {
+		return [];
+	}
+
+	let tags: string[] = [];
+
+	// Check if there's a 'tags' property in frontmatter
+	if (frontmatter.tags) {
+		if (Array.isArray(frontmatter.tags)) {
+			// If tags is an array, process each tag
+			tags = frontmatter.tags.map((tag: any) => {
+				const tagStr = String(tag).trim();
+				// Ensure tags start with # if they don't already
+				return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+			});
+		} else if (typeof frontmatter.tags === "string") {
+			// If tags is a string, split by commas and process
+			tags = frontmatter.tags
+				.split(",")
+				.map((tag: string) => {
+					const tagStr = tag.trim();
+					return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+				})
+				.filter((tag: string) => tag.length > 1); // Filter out empty tags
+		}
+	}
+
+	return tags;
+}
+
+// Function to extract file content without frontmatter
+export async function extractFileContentWithoutFrontmatter(
+	plugin: TaskBoard,
+	file: TFile
+): Promise<string> {
+	try {
+		const fileContent = await plugin.app.vault.cachedRead(file);
+		const frontmatterInfo = getFrontMatterInfo(fileContent);
+		const frontmatter = frontmatterInfo.frontmatter;
+
+		if (frontmatter) {
+			const frontmatterDelimiter = "\n---\n";
+			const contentStart = fileContent.startsWith("---\n")
+				? fileContent.indexOf(frontmatterDelimiter, 4) + frontmatterDelimiter.length
+				: 0;
+
+			return contentStart > 0 ? fileContent.slice(contentStart) : fileContent;
+		}
+		return fileContent; // Return the full content if no frontmatter
+	} catch (error) {
+		console.error("Error reading file content:", error);
+		return "";
+	}
 }
