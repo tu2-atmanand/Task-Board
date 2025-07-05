@@ -180,20 +180,18 @@
             {
                 "id": 801910158,
                 "status": " ",
-                "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor. 🔺  [due:: 2025-03-07] #Test  [completion:: 2025-03-06/20:38]",
+                "title": "This is just a TaskTitle and it doesnt have anything in its body, Except an image pasted from the Editor., updating more...",
                 "body": [
-                    "\t![[Pasted image 20241014211429.png]]"
+                    ""
                 ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "",
-                "due": "2025-03-07",
-                "tags": [
-                    "#Test"
-                ],
+                "due": "",
+                "tags": [],
                 "frontmatterTags": [],
-                "priority": 1,
+                "priority": 0,
                 "filePath": "Testing 1.md",
                 "lineNumber": 34,
                 "completion": "2025-03-06/20:38",
