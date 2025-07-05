@@ -20,7 +20,10 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 	}
 
 	isQuickAddPluginIntegrationEnabled() {
-		return this.settings.data.globalSettings.compatiblePlugins.quickAddPlugin && this.isQuickAddPluginEnabled();
+		return (
+			this.settings.data.globalSettings.compatiblePlugins
+				.quickAddPlugin && this.isQuickAddPluginEnabled()
+		);
 	}
 
 	// async getSettings(): Promise<void> {

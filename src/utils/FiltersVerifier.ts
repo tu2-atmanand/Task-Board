@@ -12,7 +12,7 @@ export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 		folderInFilters = folderFilters.some((filter: string) =>
 			parentFolder.includes(filter)
 		);
-	} 
+	}
 
 	const folderCheckPass =
 		(folderInFilters && scanFilters.folders.polarity === 1) ||

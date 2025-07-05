@@ -46,7 +46,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			bugReporter(plugin, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
 			return [];
 		}
-	});	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
+	}); const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
 	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
 	const [forceRender, setForceRender] = useState(0);
@@ -54,7 +54,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
-	const boardListRef = useRef<HTMLDivElement | null>(null);useEffect(() => {
+	const boardListRef = useRef<HTMLDivElement | null>(null); useEffect(() => {
 		if (
 			selectedBoardIndex === -1 ||
 			!columnListRef.current ||
@@ -77,14 +77,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 					const [movedItem] = columns.splice(oldIndex, 1);
 					columns.splice(newIndex, 0, movedItem);
-					
+
 					columns.forEach((col: ColumnData, idx: number) => {
 						col.index = idx + 1;
 					});
-					
+
 					return updatedBoards;
 				});
-				
+
 				setForceRender(prev => prev + 1);
 				setIsEdited(true);
 			},
@@ -180,7 +180,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
-	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags';
+	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags' | 'hideEmptyColumns';
 	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
 		const updatedBoards = [...localBoards];
 		if (updatedBoards[boardIndex]) {
@@ -327,58 +327,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			}
 		});
 	}, [plugin.app, selectedBoardIndex, localBoards]);
-
-	// Function to handle column change
-	const handleColumnChange = (
-		boardIndex: number,
-		columnIndex: number,
-		field: string,
-		value: any
-	) => {
-		// evt?.preventDefault();
-		// evt?.stopPropagation();
-		// console.log(`Updating column at boardIndex: ${boardIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
-		const updatedBoards = [...localBoards];
-		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
-			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
-		}
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	// Function to handle board name change
-	const handleBoardNameChange = (index: number, newName: string) => {
-		const updatedBoards = [...localBoards];
-		updatedBoards[index].name = newName;
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	const handleFiltersChange = (boardIndex: number, value: string) => {
-		setFiltersData(value);
-		const updatedBoards = [...localBoards];
-		// Split input string by commas and trim spaces to create an array
-		updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	const handleFilterPolarityChange = (boardIndex: number, value: string) => {
-		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex].filterPolarity = value;
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
-
-	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags' | 'hideEmptyColumns';
-	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
-		const updatedBoards = [...localBoards];
-		if (updatedBoards[boardIndex]) {
-			updatedBoards[boardIndex][field] = value as boolean;
-		}
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
 
 	// Function to delete a column from the selected board
 	const handleDeleteColumnFromBoard = (boardIndex: number, columnIndex: number) => {

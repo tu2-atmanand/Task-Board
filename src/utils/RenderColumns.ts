@@ -6,6 +6,7 @@ import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { extractFrontmatter } from "./ScanningVault";
 
 // Function to get all tags from a task (both line tags and frontmatter tags)
 const getAllTaskTags = (task: taskItem): string[] => {
@@ -134,8 +135,11 @@ export const renderColumns = (
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) => {
 			const coltag = `#${columnData.coltag}`;
-			if (coltag.endsWith('/')) {
-				return getAllTaskTags(task).some((tag) => tag === coltag.slice(0, -1) || tag.startsWith(coltag));
+			if (coltag.endsWith("/")) {
+				return getAllTaskTags(task).some(
+					(tag) =>
+						tag === coltag.slice(0, -1) || tag.startsWith(coltag)
+				);
 			} else {
 				return getAllTaskTags(task).some((tag) => tag === coltag);
 			}
@@ -214,14 +218,27 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.priority === columnData.taskPriority
 		);
-	} else if (columnData.colType === "frontmatter") {		
+	} else if (columnData.colType === "frontmatter") {
 		const key = columnData.frontmatterKey;
 		const value = columnData.frontmatterValue;
 		if (key && value !== undefined) {
 			tasksToDisplay = pendingTasks.filter((task) => {
-				console.log("Checking task frontmatter for key:", key, "value:", task.frontmatter);
-				if (!task.frontmatter || !(key in task.frontmatter)) return false;
-				const prop = task.frontmatter[key];
+				const file = plugin.app.vault.getFileByPath(task.filePath);
+				if (file === null) {
+					console.warn("File not found for task:", task);
+					return false;
+				}
+				const frontmatter = extractFrontmatter(plugin, file);
+				console.log(
+					"Checking task frontmatter for key:",
+					key,
+					"value:",
+					frontmatter[key],
+					"in task:",
+					task
+				);
+				if (!frontmatter || !(key in frontmatter)) return false;
+				const prop = frontmatter[key];
 				if (Array.isArray(prop)) {
 					if (Array.isArray(value)) {
 						return value.some((v) => prop.includes(v));

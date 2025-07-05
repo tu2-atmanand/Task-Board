@@ -53,15 +53,15 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 				.map((column: ColumnData) => {
 					// Get tasks for this column using the existing renderer
 					const renderedTasks = renderColumns(plugin, activeBoardIndex, column, allTasks);
-					
+
 					// Remove duplicates by creating a unique list based on id-filePath combination
 					// This prevents the duplication issue when tasks with the same tag exist in different files
 					const uniqueTasks = Array.from(
-						new Map(renderedTasks.map((task: taskItem) => 
+						new Map(renderedTasks.map((task: taskItem) =>
 							[`${task.id}-${task.filePath}`, task]
 						)).values()
 					);
-					
+
 					return uniqueTasks;
 				});
 		}

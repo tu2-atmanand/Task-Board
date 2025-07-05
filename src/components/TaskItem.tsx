@@ -226,7 +226,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		return highestPriorityTag?.color;
 	}
 
-		// Handlers for drag and drop
+	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		// Allow dragging from any column (including untagged)
 		// The target column will decide if it accepts the drop
@@ -236,13 +236,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			task,
 			sourceColumnData: columnData
 		}));
-		
+
 		// Set visual effect for dragging
 		e.dataTransfer.effectAllowed = 'move';
-		
+
 		// Add dragging class for visual effects
 		setIsDragging(true);
-		
+
 		// Define the drag image (optional)
 		if (taskItemRef.current) {
 			// Create a copy of the element for the drag image
@@ -252,7 +252,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-		setIsDragging(false);	}, []);
+		setIsDragging(false);
+	}, []);
 
 
 	// Function to handle the main checkbox click
@@ -316,59 +317,59 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
 
 								{activeBoardSettings.showColumnTags && (
-								<div className="taskItemTags">
-									{/* Render line tags (editable) */}
-									{task.tags.map((tag: string) => {
-										const tagName = tag.replace('#', '');
-										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
-										const tagColor = customTag?.color || `var(--tag-color)`;
-										const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
+									<div className="taskItemTags">
+										{/* Render line tags (editable) */}
+										{task.tags.map((tag: string) => {
+											const tagName = tag.replace('#', '');
+											const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
+											const tagColor = customTag?.color || `var(--tag-color)`;
+											const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+											const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
-										// If showColumnTags is false and column type is namedTag, skip the column's tag
-										const column = activeBoardSettings.columns[columnIndex - 1];
-										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
-											return null;
-										}
+											// If showColumnTags is false and column type is namedTag, skip the column's tag
+											const column = activeBoardSettings.columns[columnIndex - 1];
+											if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
+												return null;
+											}
 
-										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters?.at(0) != null && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
-											return null;
-										}
+											// If showFilteredTags is false, skip tags in the filters array
+											if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters?.at(0) != null && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
+												return null;
+											}
 
-										const tagKey = `${task.id}-${tag}`;
-										// Render the remaining tags
-										return (
-											<div
-												key={tagKey}
-												className="taskItemTag"
-												style={{
-													color: tagColor,
-													border: `1px solid ${borderColor}`,
-													backgroundColor: backgroundColor
-												}}
-											>
-												{tag}
-											</div>
-										);
-									})}
-									
-									{/* Render frontmatter tags (read-only) */}
-									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
-										const tagKey = `${task.id}-fm-${tag}`;
-										// Render frontmatter tags with different styling
-										return (
-											<div
-												key={tagKey}
-												className="taskItemTagFrontmatter"
-												title="Tag from note frontmatter (read-only)"
-											>
-												{tag}
-											</div>
-										);
-									})}
-								</div>
-							)}
+											const tagKey = `${task.id}-${tag}`;
+											// Render the remaining tags
+											return (
+												<div
+													key={tagKey}
+													className="taskItemTag"
+													style={{
+														color: tagColor,
+														border: `1px solid ${borderColor}`,
+														backgroundColor: backgroundColor
+													}}
+												>
+													{tag}
+												</div>
+											);
+										})}
+
+										{/* Render frontmatter tags (read-only) */}
+										{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+											const tagKey = `${task.id}-fm-${tag}`;
+											// Render frontmatter tags with different styling
+											return (
+												<div
+													key={tagKey}
+													className="taskItemTagFrontmatter"
+													title="Tag from note frontmatter (read-only)"
+												>
+													{tag}
+												</div>
+											);
+										})}
+									</div>
+								)}
 							</div>
 						</div>
 					</>);
@@ -488,10 +489,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (
-		<div 
+		<div
 			ref={taskItemRef}
-			className={`taskItem ${isDragging ? 'taskItem-dragging' : ''}`} 
-			key={taskKey}			style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+			className={`taskItem ${isDragging ? 'taskItem-dragging' : ''}`}
+			key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 			draggable={true}
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}

@@ -7,6 +7,7 @@ import { ColumnProps } from '../interfaces/ColumnProps';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import { getAllTaskTags } from 'src/utils/TaskItemUtils';
+import { taskItem } from 'src/interfaces/TaskItem';
 
 type CustomCSSProperties = CSSProperties & {
 	'--column-width': string;
@@ -38,7 +39,7 @@ const Column: React.FC<ColumnProps> = ({
 		// Ensure we don't have duplicate tasks when updating from external source
 		// by creating a unique list based on id-filePath combination
 		const uniqueTasks = Array.from(
-			new Map(tasksForThisColumn.map((task: taskItem) => 
+			new Map(tasksForThisColumn.map((task: taskItem) =>
 				[`${task.id}-${task.filePath}`, task]
 			)).values()
 		);
@@ -54,29 +55,29 @@ const Column: React.FC<ColumnProps> = ({
 		e.preventDefault();
 		setIsDragOver(false);
 		const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-		
+
 		if (isNaN(dragIndex) || dragIndex === dropIndex) return;
-		
+
 		// Make a deep copy to avoid mutations
 		const updated = JSON.parse(JSON.stringify(localTasks));
-		
+
 		// Save the task that's being moved
 		const movedTask = updated[dragIndex];
-		
+
 		// Remove task from original position
 		updated.splice(dragIndex, 1);
-		
+
 		// Insert at new position
 		updated.splice(dropIndex, 0, movedTask);
-		
+
 		// Update local state for immediate visual feedback
 		setLocalTasks(updated);
-				// Ensure uniqueness of tasks by checking ID and filePath combination
+		// Ensure uniqueness of tasks by checking ID and filePath combination
 		// This prevents duplication issues
 		const uniqueTasks = Array.from(
 			new Map(updated.map((task: taskItem) => [`${task.id}-${task.filePath}`, task])).values()
 		);
-		
+
 		// Persist the new order with the deduplicated task list
 		const { updateTaskOrderInColumn } = await import('../utils/DragDropTaskManager');
 		await updateTaskOrderInColumn(plugin, columnData, uniqueTasks);
@@ -135,11 +136,11 @@ const Column: React.FC<ColumnProps> = ({
 	}, []);
 
 	return (
-		<div 
+		<div
 			className={`TaskBoardColumnsSection ${isDragOver ? 'dragover' : ''}`}
-			style={{ '--column-width': columnWidth } as CustomCSSProperties} 
-			data-column-type={columnData.colType} 
-			data-column-tag-name={tagData?.name} 
+			style={{ '--column-width': columnWidth } as CustomCSSProperties}
+			data-column-type={columnData.colType}
+			data-column-tag-name={tagData?.name}
 			data-column-tag-color={tagData?.color}
 			onDrop={handleDrop}
 			onDragOver={handleDragOver}
@@ -155,7 +156,7 @@ const Column: React.FC<ColumnProps> = ({
 				{localTasks.length > 0 ? (
 					localTasks.map((task, index) => {
 						const allTaskTags = getAllTaskTags(task);
-						
+
 						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
 							allTaskTags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
 
