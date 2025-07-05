@@ -170,12 +170,12 @@ export const loadTasksAndMerge = async (
 		return allTasksMerged;
 	} catch (error) {
 		// console.error("Failed to load tasks from tasks.json:", error);
-		bugReporter(
-			plugin,
-			"Failed to load tasks from tasks.json file. If this is your fresh install kindly run the scan vault using the top right corner button and open the board again. If the issue persists, please report it to the developer using steps mentioned below.",
-			String(error),
-			"JsonFileOperations.ts/loadTasksAndMerge"
-		);
+		// bugReporter(
+		// 	plugin,
+		// 	"Failed to load tasks from tasks.json file. If this is your fresh install kindly run the scan vault using the top right corner button and open the board again. If the issue persists, please report it to the developer using steps mentioned below.",
+		// 	String(error),
+		// 	"JsonFileOperations.ts/loadTasksAndMerge"
+		// );
 		throw error;
 	}
 };
