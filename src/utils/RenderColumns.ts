@@ -189,7 +189,7 @@ export const renderColumns = (
 			activeBoard
 		]?.columns.findIndex((column) => column.colType === "completed");
 		const tasksLimit =
-			boardConfigs[activeBoard]?.columns[completedColumnIndex].limit;
+			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
 
 		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
 			if (a.completion && b.completion) {
