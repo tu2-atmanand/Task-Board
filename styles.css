@@ -1652,6 +1652,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	align-items: center;
 	justify-content: center;
 	max-height: unset;
+	flex-wrap: wrap;
 }
 
 .taskBoard-docs-section {
