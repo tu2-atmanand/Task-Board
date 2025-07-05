@@ -143,7 +143,7 @@ const ja = {
   "show-description": "説明を表示します",
   "open-board-on-obsidian-startup": "黒曜石のスタートアップのオープンボード",
   "open-board-on-obsidian-startup-info": "タスクボードが表示されて開いているときに、タスクボードを表示したい場合は、このオプションを有効にします。",
-  "file-path": "ファイルパス",
+  "file": "ファイルパス",
   "discard": "破棄",
   "go-back": "戻って保存します",
   "edit-task-modal-close-confirm-mssg": "救われていない変更があります。それらを保存または廃棄したいですか？",

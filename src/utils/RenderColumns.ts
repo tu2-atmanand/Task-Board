@@ -126,8 +126,11 @@ export const renderColumns = (
 			}
 
 			return diffDays >= from && diffDays <= to;
-		});	} else if (columnData.colType === "untagged") {
-		tasksToDisplay = pendingTasks.filter((task) => getAllTaskTags(task).length === 0);
+		});
+	} else if (columnData.colType === "untagged") {
+		tasksToDisplay = pendingTasks.filter(
+			(task) => getAllTaskTags(task).length === 0
+		);
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) => {
 			const coltag = `#${columnData.coltag}`;
@@ -138,25 +141,24 @@ export const renderColumns = (
 			}
 		});
 	} else if (columnData.colType === "pathFiltered") {
-	
 		// Filter tasks based on their file path
-		if (columnData.path) {
+		if (columnData.filePaths) {
 			// Split the path patterns by comma and trim whitespace
-			const pathPatterns = columnData.path
-				.split(',')
+			const pathPatterns = columnData.filePaths
+				.split(",")
 				.map((pattern: string) => pattern.trim().toLowerCase())
 				.filter((pattern: string) => pattern.length > 0);
-			
+
 			if (pathPatterns.length > 0) {
 				tasksToDisplay = pendingTasks.filter((task) => {
 					if (!task.filePath) {
-						console.log("Task missing filePath:", task);
 						return false;
 					}
-					
+
 					const lowerCasePath = task.filePath.toLowerCase();
-					const matchedPattern = pathPatterns.some((pattern: string) => lowerCasePath.includes(pattern));
-					console.log(`Checking task path: ${lowerCasePath}, matched: ${matchedPattern}`);
+					const matchedPattern = pathPatterns.some(
+						(pattern: string) => pattern === lowerCasePath
+					);
 					return matchedPattern;
 				});
 			} else {
@@ -192,7 +194,7 @@ export const renderColumns = (
 			activeBoard
 		]?.columns.findIndex((column) => column.colType === "completed");
 		const tasksLimit =
-			boardConfigs[activeBoard]?.columns[completedColumnIndex].limit;
+			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
 
 		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
 			if (a.completion && b.completion) {

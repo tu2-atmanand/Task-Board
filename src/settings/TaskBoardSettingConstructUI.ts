@@ -24,15 +24,17 @@ import {
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
+import { bugReporter } from "src/services/OpenModals";
 
 export class SettingsManager {
 	win: Window;
 	app: App;
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData | null = null;
+	allPickrs: Pickr[] = [];
 
-	constructor(app: App, plugin: TaskBoard) {
-		this.app = app;
+	constructor(plugin: TaskBoard) {
+		this.app = plugin.app;
 		this.plugin = plugin;
 		this.win = window;
 	}
@@ -46,7 +48,12 @@ export class SettingsManager {
 			const settingsData = this.plugin.settings.data.globalSettings;
 			this.globalSettings = settingsData;
 		} catch (err) {
-			console.error("Error loading settings:", err);
+			bugReporter(
+				this.plugin,
+				"Failed to load settings",
+				err as string,
+				"TaskBoardSettingConstructUI.ts/SettingsManager/loadSettings"
+			);
 		}
 	}
 
@@ -58,7 +65,12 @@ export class SettingsManager {
 			this.plugin.settings.data.globalSettings = this.globalSettings;
 			this.plugin.saveSettings();
 		} catch (err) {
-			console.error("Error saving settings:", err);
+			bugReporter(
+				this.plugin,
+				"Failed to save settings",
+				err as string,
+				"TaskBoardSettingConstructUI.ts/SettingsManager/saveSettings"
+			);
 		}
 	}
 
@@ -154,6 +166,17 @@ export class SettingsManager {
 
 		// Reset global settings if necessary
 		this.globalSettings = null;
+
+		//Destroy all Pickr instances
+		this.allPickrs.forEach((pickr) => pickr.destroy());
+
+		//find all the div with calls picr-app using query-selector and remove them from the main window
+		const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
+		if (pickrApps) {
+			pickrApps.forEach((app) => {
+				app.remove();
+			});
+		}
 	}
 
 	// Function to render the "Filters for scanning" tab content
@@ -339,6 +362,7 @@ export class SettingsManager {
 			tagColors,
 			tagColorsType,
 			showTaskWithoutMetadata,
+			showFileNameInCard,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -359,6 +383,17 @@ export class SettingsManager {
 			.addToggle((toggle) =>
 				toggle.setValue(showFooter).onChange(async (value) => {
 					this.globalSettings!.showFooter = value;
+					await this.saveSettings();
+				})
+			);
+
+		// Setting to show/Hide the Footer of the task card
+		new Setting(contentEl)
+			.setName(t("show-note-name-in-task-header"))
+			.setDesc(t("show-note-name-in-task-header-description"))
+			.addToggle((toggle) =>
+				toggle.setValue(showFileNameInCard).onChange(async (value) => {
+					this.globalSettings!.showFileNameInCard = value;
 					await this.saveSettings();
 				})
 			);
@@ -504,6 +539,7 @@ export class SettingsManager {
 									TagColorType.Text
 										? `1px solid ${tag.color}`
 										: "",
+								maxWidth: "max-content !important",
 							})
 					)
 					.addText((text) =>
@@ -535,42 +571,70 @@ export class SettingsManager {
 							})
 					)
 					.addButton((btn) => {
-						const pickr = new Pickr({
-							el: btn.buttonEl,
-							theme: "nano",
-							default: tag.color || "#ff0000",
-							components: {
-								preview: true,
-								opacity: true,
-								hue: true,
-								interaction: {
-									rgba: true,
-									input: true,
-									clear: true,
-									cancel: true,
-									save: false,
-								},
-							},
-						});
+						btn.setTooltip(t("pick-color-for-tag"))
+							.setIcon("palette")
+							.setClass(
+								"taskboard-setting-tag-color-row-element-color-picker"
+							)
+							.then(() => {
+								const colorMap =
+									this.plugin.settings.data.globalSettings.tagColors.map(
+										(tagColor) => ({
+											color:
+												this.plugin.settings.data
+													.globalSettings.tagColors[
+													tagColor.priority - 1
+												]?.color || "#ff0000",
+										})
+									);
+								const pickr = new Pickr({
+									el: btn.buttonEl,
+									theme: "nano",
+									swatches: colorMap.map(
+										(item) => item.color
+									),
+									defaultRepresentation: "HEXA",
+									default: tag.color || "#ff0000",
+									comparison: false,
+									components: {
+										preview: true,
+										opacity: true,
+										hue: true,
+										interaction: {
+											hex: true,
+											rgba: true,
+											hsla: false,
+											hsva: false,
+											cmyk: false,
+											input: true,
+											clear: true,
+											cancel: true,
+											save: false,
+										},
+									},
+								});
 
-						pickr
-							.on("change", (color: any) => {
-								const rgbaColor = `rgba(${color
-									.toRGBA()
-									.map((v: number, i: number) =>
-										i < 3 ? Math.round(v) : v
-									)
-									.join(", ")})`;
-								tag.color = rgbaColor;
-								colorInputRef.setValue(rgbaColor);
-								// row.style.backgroundColor = rgbaColor;
-							})
-							.on("hide", () => {
-								renderTagColors();
-								this.saveSettings();
-							})
-							.on("cancel", () => pickr.hide())
-							.on("clear", () => pickr.hide());
+								this.allPickrs.push(pickr);
+
+								pickr
+									.on("change", (color: any) => {
+										const rgbaColor = `rgba(${color
+											.toRGBA()
+											.map((v: number, i: number) =>
+												i < 3 ? Math.round(v) : v
+											)
+											.join(", ")})`;
+										tag.color = rgbaColor;
+										colorInputRef.setValue(rgbaColor);
+										// row.style.backgroundColor = rgbaColor;
+									})
+									.on("hide", () => {
+										renderTagColors();
+										this.saveSettings();
+									})
+									.on("cancel", () => pickr.destroy())
+									.on("clear", () => pickr.hide());
+							});
 					})
 					.addText((colorInput) => {
 						colorInputRef = colorInput;
@@ -607,7 +671,7 @@ export class SettingsManager {
 							.setClass(
 								"taskboard-setting-tag-color-row-element-delete"
 							)
-							.setCta()
+							.setTooltip(t("delete-tag-color"))
 							.onClick(async () => {
 								this.globalSettings!.tagColors.splice(index, 1);
 								await this.saveSettings();
@@ -653,6 +717,7 @@ export class SettingsManager {
 			compatiblePlugins,
 			dailyNotesPluginComp,
 			editButtonAction,
+			showFrontmatterTagsOnCards,
 			preDefinedNote,
 			quickAddPluginDefaultChoice,
 			archivedTasksFilePath,
@@ -687,12 +752,8 @@ export class SettingsManager {
 			);
 
 		new Setting(contentEl)
-			.setName(t("Default note for new tasks"))
-			.setDesc(
-				t(
-					"Select the default note in which all the newly added tasks through 'add new task modal' should be saved."
-				)
-			)
+			.setName(t("default-note-for-new-tasks"))
+			.setDesc(t("default-note-for-new-tasks-description"))
 			.addText((text) => {
 				text.setValue(preDefinedNote).onChange((value) => {
 					if (this.globalSettings)
@@ -730,7 +791,7 @@ export class SettingsManager {
 
 		new Setting(contentEl)
 			.setName(t("universal-date"))
-			.setDesc(t("universal-date-info"))
+			.setDesc(t("universal-date-description"))
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
@@ -771,14 +832,27 @@ export class SettingsManager {
 				})
 			);
 
-		// Setting for choosing the default file to archive tasks
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("Note to add your archived tasks"))
+			.setName(t("Show note frontmatter tags in the card header"))
 			.setDesc(
 				t(
-					"Select the note in which all the archived tasks should be saved. Leave blank to simply comment out the task in the note itself."
+					"Enable this feature to use see the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks."
 				)
 			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(showFrontmatterTagsOnCards)
+					.onChange(async (value) => {
+						this.globalSettings!.showFrontmatterTagsOnCards = value;
+						await this.saveSettings();
+					})
+			);
+
+		// Setting for choosing the default file to archive tasks
+		new Setting(contentEl)
+			.setName(t("file-for-archived-tasks"))
+			.setDesc(t("file-for-archived-tasks-description"))
 			.addText((text) => {
 				text.setValue(archivedTasksFilePath).onChange((value) => {
 					if (this.globalSettings)
@@ -880,12 +954,8 @@ export class SettingsManager {
 			.setDisabled(!communityPlugins.isQuickAddPluginEnabled());
 
 		new Setting(contentEl)
-			.setName(t("Default QuickAdd plugin choice"))
-			.setDesc(
-				t(
-					"Select the choice you have created in QuickAdd plugin. Once you submit the task from 'add new task modal', it will use this choice to save the task content in the specified file and at the specified position as per the selected choice."
-				)
-			)
+			.setName(t("default-quickadd-choice"))
+			.setDesc(t("default-quickadd-choice-description"))
 			.setTooltip(t("Enable the above setting to use this setting."))
 			.addText((text) => {
 				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {

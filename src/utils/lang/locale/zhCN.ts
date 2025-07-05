@@ -127,7 +127,7 @@ const zhCN = {
   "show-description": "显示描述",
   "open-board-on-obsidian-startup": "Obsidian启动时打开看板",
   "open-board-on-obsidian-startup-info": "启用此选项可在Obsidian重启后自动显示任务看板",
-  "file-path": "文件路径",
+  "file": "文件路径",
   "discard": "放弃",
   "go-back": "返回并保存",
   "edit-task-modal-close-confirm-mssg": "您有未保存的更改。是否要保存或放弃这些更改?",

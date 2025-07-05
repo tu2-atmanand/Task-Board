@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2",
+  "version": "1.5.2",
   "data": {
     "boardConfigs": [
       {
@@ -68,35 +68,17 @@
             "active": true,
             "collapsed": false,
             "limit": 20,
-            "name": "Completed",
-            "index": 6
+            "name": "Completed, updated",
+            "index": 9
           },
           {
-            "id": 4988,
-            "colType": "namedTag",
+            "id": 4257554450,
+            "index": 7,
+            "colType": "pathFiltered",
             "active": true,
             "collapsed": false,
-            "name": "Bug",
-            "index": 8,
-            "coltag": "bug"
-          },
-          {
-            "id": 5794,
-            "index": 8,
-            "colType": "taskStatus",
-            "active": true,
-            "collapsed": false,
-            "name": "In Progress",
-            "taskStatus": "/"
-          },
-          {
-            "id": 9075,
-            "index": 9,
-            "colType": "taskPriority",
-            "active": true,
-            "collapsed": false,
-            "name": "Highest Priority",
-            "taskPriority": 1
+            "name": "DailyNotes.md",
+            "filePaths": "DailyNotes.md"
           }
         ],
         "filters": [
@@ -107,7 +89,7 @@
         "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Time based workflow",
-        "index": 1,
+        "index": 0,
         "showColumnTags": true,
         "showFilteredTags": false,
         "hideEmptyColumns": false
@@ -183,14 +165,14 @@
         "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Tag based board",
-        "index": 2,
+        "index": 1,
         "showColumnTags": true,
         "showFilteredTags": true,
         "hideEmptyColumns": false
       },
       {
         "name": "Third board",
-        "index": 3,
+        "index": 2,
         "columns": [
           {
             "colType": "undated",
@@ -289,11 +271,6 @@
           "name": "bug",
           "color": "rgba(253, 17, 33, 0.75)",
           "priority": 1
-        },
-        {
-          "name": "bug/solver",
-          "color": "rgba(143, 7, 164, 0.75)",
-          "priority": 2
         },
         {
           "name": "feat",
@@ -650,7 +627,7 @@
         }
       ],
       "showTaskWithoutMetadata": true,
-      "tagColorsType": "background",
+      "tagColorsType": "text",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
@@ -660,10 +637,12 @@
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "DocsForPlugin/ArchivedTasks.md",
-      "autoAddCreatedDate": false,
+      "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
       "universalDate": "due",
-      "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md"
+      "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md",
+      "showFileNameInCard": false,
+      "showFrontmatterTagsOnCards": true
     }
   }
 }

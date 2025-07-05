@@ -143,7 +143,7 @@ const pt = {
   "show-description": "Mostrar descrição",
   "open-board-on-obsidian-startup": "Board Open na obsidiana startup",
   "open-board-on-obsidian-startup-info": "Habilite esta opção se quiser ver o quadro de tarefas ser visível, quando você fechar e abrir a obsidiana.",
-  "file-path": "Caminho do arquivo",
+  "file": "Caminho do arquivo",
   "discard": "Descartar",
   "go-back": "Volte e salve",
   "edit-task-modal-close-confirm-mssg": "Você tem mudanças não salvas. Você quer salvá -los ou descartá -los?",

@@ -143,7 +143,7 @@ const tr = {
   "show-description": "Açıklama Göster",
   "open-board-on-obsidian-startup": "Obsidiyen girişimde açık tahta",
   "open-board-on-obsidian-startup-info": "Obsidian'ı kapatıp açtığınızda Görev Kurulu'nun görünür olduğunu görmek istiyorsanız bu seçeneği etkinleştirin.",
-  "file-path": "Dosya Yolu",
+  "file": "Dosya Yolu",
   "discard": "Atmak",
   "go-back": "Geri dön ve kurtar",
   "edit-task-modal-close-confirm-mssg": "Kaydedilmemiş değişiklikleriniz var. Onları kurtarmak mı yoksa atmak mı istiyorsunuz?",

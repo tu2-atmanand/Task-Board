@@ -143,7 +143,7 @@ const no = {
   "show-description": "Vis beskrivelse",
   "open-board-on-obsidian-startup": "Åpent brett på Obsidian oppstart",
   "open-board-on-obsidian-startup-info": "Aktiver dette alternativet hvis du vil se oppgavebrettet være synlig, når du lukker og åpner obsidian.",
-  "file-path": "Filsti",
+  "file": "Filsti",
   "discard": "Kast",
   "go-back": "Gå tilbake og spar",
   "edit-task-modal-close-confirm-mssg": "Du har ufrelte endringer. Vil du lagre eller forkaste dem?",

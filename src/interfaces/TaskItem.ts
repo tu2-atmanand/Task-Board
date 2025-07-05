@@ -26,7 +26,6 @@ export interface taskItem {
 	priority: number;
 	status: string;
 	filePath: string;
-	frontmatter?: any;
 	lineNumber: number;
 	completion?: string;
 	cancelledDate?: string;

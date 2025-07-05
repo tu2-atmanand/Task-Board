@@ -143,7 +143,7 @@ const zhTW = {
   "show-description": "顯示描述",
   "open-board-on-obsidian-startup": "在黑曜石創業公司上打開董事會",
   "open-board-on-obsidian-startup-info": "如果您想查看任務板，當您關閉並打開黑曜石時，請啟用此選項。",
-  "file-path": "文件路徑",
+  "file": "文件路徑",
   "discard": "丟棄",
   "go-back": "回去保存",
   "edit-task-modal-close-confirm-mssg": "您有未保存的更改。您要保存或丟棄它們嗎？",

@@ -16,6 +16,7 @@ import {
 	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
+	bugReporter,
 	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openScanVaultModal,
@@ -270,13 +271,7 @@ export default class TaskBoard extends Plugin {
 			callback: () => {
 				let activeEditor = this.app.workspace.activeEditor?.editor;
 				let activeFile = this.app.workspace.getActiveFile();
-				console.log(
-					"Active Editor: ",
-					activeEditor,
-					"Active File: ",
-					activeFile
-				);
-				console.log("Curesor position : ", activeEditor?.getCursor());
+
 				if (activeEditor && activeFile) {
 					openAddNewTaskInCurrentFileModal(
 						this.app,

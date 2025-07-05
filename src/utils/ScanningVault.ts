@@ -1,7 +1,7 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment } from "obsidian";
-import * as yaml from "js-yaml";
+import { App, TFile, moment as _moment, getFrontMatterInfo } from "obsidian";
+// import * as yaml from "js-yaml";
 import {
 	extractCheckboxSymbol,
 	isCompleted,
@@ -23,27 +23,46 @@ import { readDataOfVaultFiles } from "./MarkdownFileOperations";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 
 // Function to extract frontmatter from file content
-export function extractFrontmatter(fileContent: string): any {
-	// Check if the file starts with frontmatter delimiter
-	if (!fileContent.startsWith('---\n')) {
-		return null;
-	}
+export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
+	// Method 1 - Find the frontmatter using delimiters
+	// // Check if the file starts with frontmatter delimiter
+	// if (!fileContent.startsWith("---\n")) {
+	// 	return null;
+	// }
 
-	// Find the end of frontmatter
-	const secondDelimiterIndex = fileContent.indexOf('\n---\n', 4);
-	if (secondDelimiterIndex === -1) {
-		return null;
-	}
+	// // Find the end of frontmatter
+	// const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
+	// if (secondDelimiterIndex === -1) {
+	// 	return null;
+	// }
 
-	// Extract the YAML content between delimiters
-	const yamlContent = fileContent.substring(4, secondDelimiterIndex);
-	
+	// // Extract the YAML content between delimiters
+	// const yamlContent = fileContent.substring(4, secondDelimiterIndex);
+
+	// try {
+	// 	// Parse the YAML content
+	// 	const frontmatter = yaml.load(yamlContent);
+	// 	return frontmatter;
+	// } catch (error) {
+	// 	console.warn("Failed to parse frontmatter:", error);
+	// 	return null;
+	// }
+
+	// Method 2 - Get frontmatter using Obsidian API
 	try {
-		// Parse the YAML content
-		const frontmatter = yaml.load(yamlContent);
-		return frontmatter;
+		// API-1 : Get fronmatter as a string
+		// const fileContent = await this.app.vault.cachedRead(file);
+		// const frontmatterAsString =
+		// 	getFrontMatterInfo(fileContent).frontmatter;
+
+		// API-2 : Get frontmatter as an object
+		const frontmatterAsObject =
+			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+		console.log("Frontmatter extracted as an object:", frontmatterAsObject);
+
+		return frontmatterAsObject;
 	} catch (error) {
-		console.warn('Failed to parse frontmatter:', error);
+		// console.warn("Failed to parse frontmatter:", error);
 		return null;
 	}
 }
@@ -63,15 +82,15 @@ export function extractFrontmatterTags(frontmatter: any): string[] {
 			tags = frontmatter.tags.map((tag: any) => {
 				const tagStr = String(tag).trim();
 				// Ensure tags start with # if they don't already
-				return tagStr.startsWith('#') ? tagStr : `#${tagStr}`;
+				return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
 			});
-		} else if (typeof frontmatter.tags === 'string') {
+		} else if (typeof frontmatter.tags === "string") {
 			// If tags is a string, split by commas and process
 			tags = frontmatter.tags
-				.split(',')
+				.split(",")
 				.map((tag: string) => {
 					const tagStr = tag.trim();
-					return tagStr.startsWith('#') ? tagStr : `#${tagStr}`;
+					return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
 				})
 				.filter((tag: string) => tag.length > 1); // Filter out empty tags
 		}
@@ -92,6 +111,13 @@ export class ScanningVault {
 		this.TaskDetected = false;
 	}
 
+	// Generate a unique ID for each task
+	generateTaskId(): number {
+		const array = new Uint32Array(1);
+		crypto.getRandomValues(array);
+		return array[0];
+	}
+
 	async scanVaultForTasks() {
 		const files = this.app.vault.getMarkdownFiles();
 		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
@@ -108,6 +134,7 @@ export class ScanningVault {
 		// Emit the event
 		eventEmitter.emit("REFRESH_BOARD");
 	}
+
 	// Extract tasks from a specific file
 	async extractTasksFromFile(
 		file: TFile,
@@ -121,9 +148,6 @@ export class ScanningVault {
 		);
 		const lines = fileContent.split("\n");
 
-		// Extract frontmatter from the file
-		const frontmatter = extractFrontmatter(fileContent);
-
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
 
@@ -134,7 +158,8 @@ export class ScanningVault {
 				if (scanFilterForTags(tags, scanFilters)) {
 					this.TaskDetected = true;
 					const taskStatus = extractCheckboxSymbol(line);
-					const isTaskCompleted = isCompleted(line);					const title = extractTitle(line);
+					const isTaskCompleted = isCompleted(line);
+					const title = extractTitle(line);
 					const time = extractTime(line);
 					const createdDate = extractCreatedDate(line);
 					const startDate = extractStartDate(line);
@@ -145,10 +170,21 @@ export class ScanningVault {
 					const cancelledDate = extractCancelledDate(line);
 					const body = extractBody(lines, i + 1);
 
-					// Extract frontmatter tags
-					const frontmatterTags = extractFrontmatterTags(frontmatter);
+					let frontmatterTags: string[] = []; // Initialize frontmatterTags
+					if (
+						this.plugin.settings.data.globalSettings
+							.showFrontmatterTagsOnCards
+					) {
+						// Extract frontmatter from the file
+						const frontmatter = extractFrontmatter(
+							this.plugin,
+							file
+						);
+						// Extract frontmatter tags
+						frontmatterTags = extractFrontmatterTags(frontmatter);
+					}
 
-					const task = {
+					const task: taskItem = {
 						id: this.generateTaskId(),
 						status: taskStatus,
 						title,
@@ -164,7 +200,6 @@ export class ScanningVault {
 						filePath: fileNameWithPath,
 						lineNumber: i + 1,
 						completion: completionDate,
-						frontmatter: frontmatter,
 						cancelledDate: cancelledDate,
 					};
 
@@ -211,13 +246,6 @@ export class ScanningVault {
 		}
 	}
 
-	// Generate a unique ID for each task
-	generateTaskId(): number {
-		const array = new Uint32Array(1);
-		crypto.getRandomValues(array);
-		return array[0];
-	}
-
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async updateTasksFromFiles(files: (TFile | null)[]) {
 		// Load the existing tasks from tasks.json once
@@ -231,9 +259,6 @@ export class ScanningVault {
 				const lines = fileContent.split("\n");
 				const newPendingTasks: taskItem[] = [];
 				const newCompletedTasks: taskItem[] = [];
-
-				// Extract frontmatter from the file
-				const frontmatter = extractFrontmatter(fileContent);
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i];
@@ -272,12 +297,25 @@ export class ScanningVault {
 									due = basename; // If the basename matches the dueFormat, assign it to due
 								} else {
 									due = ""; // If not, assign an empty string
-								}							}
+								}
+							}
 
-							// Extract frontmatter tags
-							const frontmatterTags = extractFrontmatterTags(frontmatter);
+							let frontmatterTags: string[] = []; // Initialize frontmatterTags
+							if (
+								this.plugin.settings.data.globalSettings
+									.showFrontmatterTagsOnCards
+							) {
+								// Extract frontmatter from the file
+								const frontmatter = extractFrontmatter(
+									this.plugin,
+									file
+								);
+								// Extract frontmatter tags
+								frontmatterTags =
+									extractFrontmatterTags(frontmatter);
+							}
 
-							const task = {
+							const task: taskItem = {
 								id: this.generateTaskId(),
 								status: taskStatus,
 								title,
@@ -294,7 +332,6 @@ export class ScanningVault {
 								lineNumber: i + 1,
 								completion: completionDate,
 								cancelledDate: cancelledDate,
-								frontmatter: frontmatter,
 							};
 
 							if (isTaskCompleted) {
@@ -501,7 +538,6 @@ export function extractStartDate(text: string): string {
 			/\@start\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
 		);
 	}
-	console.log("Start Date Match", match, " | for text : ", text);
 
 	return match ? match[1] : "";
 }
@@ -585,8 +621,9 @@ export function extractPriority(text: string): number {
 // Extract tags from task title
 export function extractTags(text: string): string[] {
 	text = text.replace(/<(mark|font).*?>/g, "");
-
-	const matches = text.match(/\s+#([^\s;@()\[\]{}<>]{1,20})/g);
+	const matches = text.match(
+		/\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g
+	);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
 
@@ -618,8 +655,6 @@ export function extractCompletionDate(text: string): string {
 
 export function extractCancelledDate(text: string): string {
 	let match = text.match(/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	console.log("Cancelled Date Match", match, " | for text : ", text);
 
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {

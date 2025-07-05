@@ -143,7 +143,7 @@ const ro = {
   "show-description": "Afișează descrierea",
   "open-board-on-obsidian-startup": "Deschideți bordul pe Obsidian Startup",
   "open-board-on-obsidian-startup-info": "Activați această opțiune dacă doriți să vedeți că este vizibilă placa de activitate, atunci când închideți și deschideți Obsidian.",
-  "file-path": "Calea fișierului",
+  "file": "Calea fișierului",
   "discard": "Aruncat",
   "go-back": "Du -te înapoi și salvează",
   "edit-task-modal-close-confirm-mssg": "Aveți modificări nevăzute. Doriți să le salvați sau să le aruncați?",

@@ -1,7 +1,7 @@
 // /src/modal/AddColumnModal.ts
 
-import { randomInt } from "crypto";
 import { App, Modal } from "obsidian";
+import { columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
 import { t } from "src/utils/lang/helper";
@@ -16,9 +16,7 @@ export type columnDataProp = {
 	taskStatus?: string;
 	taskPriority?: number;
 	limit?: number;
-	path?: string;
-	frontmatterKey?: string;
-	frontmatterValue?: any;
+	filePaths?: string;
 };
 
 interface AddColumnModalProps {
@@ -38,7 +36,7 @@ export class AddColumnModal extends Modal {
 		taskStatus?: string;
 		taskPriority?: number;
 		limit?: number;
-		path?: string;
+		filePaths?: string;
 	}) => void;
 	private onCancel: () => void;
 	private colType: string;
@@ -78,14 +76,17 @@ export class AddColumnModal extends Modal {
 		});
 
 		[
-			{ value: "undated", text: t("undated") },
-			{ value: "dated", text: t("dated") },
-			{ value: "namedTag", text: t("tagged") },
-			{ value: "untagged", text: t("untagged") },
-			{ value: "otherTags", text: t("other-tags") },
-			{ value: "taskStatus", text: t("status") },
-			{ value: "taskPriority", text: t("priority") },
-			{ value: "completed", text: t("completed") },
+			{ value: "undated", text: columnTypeAndNameMapping.undated },
+			{ value: "dated", text: columnTypeAndNameMapping.dated },
+			{ value: "namedTag", text: columnTypeAndNameMapping.namedTag },
+			{ value: "untagged", text: columnTypeAndNameMapping.untagged },
+			{ value: "otherTags", text: columnTypeAndNameMapping.otherTags },
+			{ value: "taskStatus", text: columnTypeAndNameMapping.taskStatus },
+			{
+				value: "taskPriority",
+				text: columnTypeAndNameMapping.taskPriority,
+			},
+			{ value: "completed", text: columnTypeAndNameMapping.completed },
 			{ value: "pathFiltered", text: t("path-filtered") },
 			{ value: "frontmatter", text: "Frontmatter" },
 		].forEach((option) => {
@@ -128,7 +129,7 @@ export class AddColumnModal extends Modal {
 		submitButton.addEventListener("click", () => {
 			if (this.colType === "dated") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0], // Generate a random ID
 					colType: this.colType,
 					name: this.name,
 					datedBasedColumn: {
@@ -139,42 +140,42 @@ export class AddColumnModal extends Modal {
 				}); // Add range data
 			} else if (this.colType === "namedTag") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					coltag: "",
 				});
 			} else if (this.colType === "taskStatus") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					taskStatus: "",
 				});
 			} else if (this.colType === "taskPriority") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					taskPriority: 1,
 				});
 			} else if (this.colType === "completed") {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					limit: 20,
 				}); // Add limit
 			} else if (this.colType === "pathFiltered") {
 				this.onSubmit({
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
-					active,
-					path: "",
+					filePaths: "",
 				}); // Add path filter
 			} else {
 				this.onSubmit({
-					id: randomInt(1000, 9999),
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 				});
@@ -184,7 +185,7 @@ export class AddColumnModal extends Modal {
 
 		const cancelButton = actions.createEl("button", { text: t("cancel") });
 		cancelButton.addEventListener("click", () => {
-			this.onCancel(); // Renamed from onClose to onCancel
+			this.onCancel();
 			this.close();
 		});
 	}
@@ -192,5 +193,7 @@ export class AddColumnModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+		this.onCancel();
+		// this.close();
 	}
 }

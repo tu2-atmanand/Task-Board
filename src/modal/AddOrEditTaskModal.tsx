@@ -1,6 +1,6 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
+import { App, Component, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -11,13 +11,15 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { getUniversalDate, taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { cleanTaskTitle, getUniversalDate, taskContentFormatter } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
 import { FileInput, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { bugReporter } from "src/services/OpenModals";
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 
 const taskItemEmpty = {
 	id: 0,
@@ -361,11 +363,11 @@ const EditTaskContent: React.FC<{
 
 			const leaf = app.workspace.getLeaf(Keymap.isModEvent(evt));
 			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-			console.log("File to open:", file, " | Line Number : ", task.lineNumber);
+
 			if (file && file instanceof TFile) {
 				await leaf.openFile(file, { eState: { line: task.lineNumber - 1 } });
 			} else {
-				new Notice(t("file-not-found"));
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 			}
 		}
 		onClose();
@@ -376,12 +378,13 @@ const EditTaskContent: React.FC<{
 		let newDue = due;
 		let newStartDate = startDate;
 		let newScheduledDate = scheduledDate;
-		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists && task[plugin.settings.data.globalSettings.universalDate] === "") {
-			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate) {
+		console.log("Value of task.universalDate:", task[plugin.settings.data.globalSettings.universalDate]);
+		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists) {
+			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate && !due) {
 				newDue = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate) {
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate && !startDate) {
 				newStartDate = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate) {
+			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate && !scheduledDate) {
 				newScheduledDate = new Date().toISOString().split('T')[0];
 			}
 		}
@@ -408,6 +411,7 @@ const EditTaskContent: React.FC<{
 			cancelledDate: task.cancelledDate || '',
 			status,
 		};
+		console.log("Updated Task:", updatedTask);
 		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	};
@@ -431,39 +435,35 @@ const EditTaskContent: React.FC<{
 		lineNumber: task.lineNumber,
 		status,
 	};
+
 	// Reference to the HTML element where markdown will be rendered
+	const componentRef = useRef<Component | null>(null);
+	useEffect(() => {
+		// Initialize Obsidian Component on mount
+		componentRef.current = plugin.view;
+	}, []);
 
-	// const componentRef = useRef<Component | null>(null);
-	// useEffect(() => {
-	// 	// Initialize Obsidian Component on mount
-	// 	componentRef.current = plugin.view;
-	// }, []);
+	const titleComponentRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const formatedContent = cleanTaskTitle(plugin, modifiedTask);
+		setFormattedTaskContent(formatedContent);
+		if (titleComponentRef.current && formatedContent !== "") {
+			// Clear previous content before rendering new markdown
+			titleComponentRef.current.empty();
 
-	// const previewContainerRef = useRef<HTMLDivElement>(null);
-	// useEffect(() => {
-	// 	const formatedContent = taskContentFormatter(plugin, modifiedTask);
-	// 	setFormattedTaskContent(formatedContent);
-	// 	if (previewContainerRef.current && formatedContent !== "") {
-	// 		// Clear previous content before rendering new markdown
-	// 		previewContainerRef.current.empty();
-
-	// 		MarkdownUIRenderer.renderTaskDisc(
-	// 			app,
-	// 			formatedContent,
-	// 			previewContainerRef.current,
-	// 			filePath,
-	// 			componentRef.current
-	// 		);
-
-	// 		hookMarkdownLinkMouseEventHandlers(app, plugin, previewContainerRef.current, filePath, filePath);
-	// 	}
-	// }, [modifiedTask]); // Re-render when modifiedTask changes
+			MarkdownUIRenderer.renderTaskDisc(
+				app,
+				formatedContent,
+				titleComponentRef.current,
+				filePath,
+				componentRef.current
+			);
+		}
+	}, [title]); // Re-render when modifiedTask changes
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
-		console.log("handleTaskEditedThroughEditors called with value:", value);
 		const updatedTask = buildTaskFromRawContent(value);
-		console.log("Updated Task:", updatedTask);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
@@ -492,91 +492,86 @@ const EditTaskContent: React.FC<{
 	const markdownEditorEmbeddedContainer = useRef<HTMLElement>(null);
 	useEffect(() => {
 		if (markdownEditorEmbeddedContainer.current) {
-			if (markdownEditor) {
-				markdownEditor.destroy();
-			}
-			setTimeout(() => {
-				if (markdownEditorEmbeddedContainer.current) {
-					markdownEditorEmbeddedContainer.current.empty();
 
-					const formattedTaskContent = taskContentFormatter(plugin, modifiedTask);
-					setFormattedTaskContent(formattedTaskContent);
-					console.log("formattedTaskContent : ", formattedTaskContent);
+			const formattedTaskContent = taskContentFormatter(plugin, modifiedTask);
+			setFormattedTaskContent(formattedTaskContent);
 
-					const fullMarkdownEditor = createEmbeddableMarkdownEditor(
-						app,
-						markdownEditorEmbeddedContainer.current,
-						{
-							placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
-							value: formattedTaskContent,
-							cls: "addOrEditTaskModal-markdown-editor-embed",
-							cursorLocation: {
-								anchor: formattedTaskContent.split("\n")[0].length,
-								head: formattedTaskContent.split("\n")[0].length,
-							},
+			if (!markdownEditor) {
+				markdownEditorEmbeddedContainer.current.empty();
+				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
+					app,
+					markdownEditorEmbeddedContainer.current,
+					{
+						placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
+						value: formattedTaskContent,
+						cls: "addOrEditTaskModal-markdown-editor-embed",
+						cursorLocation: {
+							anchor: formattedTaskContent.split("\n")[0].length,
+							head: formattedTaskContent.split("\n")[0].length,
+						},
 
-							onEnter: (editor, mod, shift) => {
-								// if (mod) {
-								// 	// Submit on Cmd/Ctrl+Enter
-								// 	handleSave();
-								// }
-								// // Allow normal Enter key behavior
-								return false;
-							},
+						onEnter: (editor, mod, shift) => {
+							// if (mod) {
+							// 	// Submit on Cmd/Ctrl+Enter
+							// 	handleSave();
+							// }
+							// // Allow normal Enter key behavior
+							return false;
+						},
 
-							onEscape: (editor) => {
-								onClose();
-							},
+						onEscape: (editor) => {
+							onClose();
+						},
 
-							onSubmit: (editor) => {
-								handleSave();
-							},
+						onSubmit: (editor) => {
+							handleSave();
+						},
 
-							onChange: (update) => {
-								// Handle changes if needed
-								setIsEdited(true);
-								const capturedContent = fullMarkdownEditor?.value || "";
-								handleTaskEditedThroughEditors(capturedContent);
-							},
-						}
-					)
-					setMarkdownEditor(fullMarkdownEditor);
-
-					fullMarkdownEditor?.scope.register(
-						["Alt"],
-						"c",
-						(e: KeyboardEvent) => {
-							e.preventDefault();
-							if (!fullMarkdownEditor) return false;
-							if (fullMarkdownEditor.value.trim() === "") {
-								// this.close();
-								onClose();
-								return true;
-							} else {
-								// this.handleSubmit();
-								handleSave();
-							}
+						onChange: (update) => {
+							// Handle changes if needed
+							setIsEdited(true);
+							const capturedContent = fullMarkdownEditor?.value || "";
+							handleTaskEditedThroughEditors(capturedContent);
+						},
+					}
+				)
+				setMarkdownEditor(fullMarkdownEditor);
+				fullMarkdownEditor?.scope.register(
+					["Alt"],
+					"c",
+					(e: KeyboardEvent) => {
+						e.preventDefault();
+						if (!fullMarkdownEditor) return false;
+						if (fullMarkdownEditor.value.trim() === "") {
+							// this.close();
+							onClose();
 							return true;
+						} else {
+							// this.handleSubmit();
+							handleSave();
 						}
-					);
+						return true;
+					}
+				);
 
-					// if (targetFileEl) {
-					// 	markdownEditor?.scope.register(
-					// 		["Alt"],
-					// 		"x",
-					// 		(e: KeyboardEvent) => {
-					// 			e.preventDefault();
-					// 			targetFileEl.focus();
-					// 			return true;
-					// 		}
-					// 	);
-					// }
+				// if (targetFileEl) {
+				// 	fullMarkdownEditor?.scope.register(
+				// 		["Alt"],
+				// 		"x",
+				// 		(e: KeyboardEvent) => {
+				// 			e.preventDefault();
+				// 			targetFileEl.focus();
+				// 			return true;
+				// 		}
+				// 	);
+				// }
 
-					// Focus the editor when it's created
-					// markdownEditor?.editor?.focus();
-					console.log("Markdown editor initialized");
-				}
-			}, 50);
+				// Focus the editor when it's created
+				// fullMarkdownEditor?.editor?.focus();
+			} else {
+				// If the editor already exists, just update its content
+				markdownEditor.set(formattedTaskContent, false);
+			}
 		}
 		setUpdateEditorContent(false);
 	}, [updateEditorContent]);
@@ -643,7 +638,6 @@ const EditTaskContent: React.FC<{
 		if (!tagsInputFieldRef.current) return;
 
 		const suggestionContent = getTagSuggestions(app);
-		console.log("Tag Suggestions: ", suggestionContent);
 		const onSelectCallback = (choice: string) => {
 			handleTagInput({
 				key: 'Enter',
@@ -657,13 +651,10 @@ const EditTaskContent: React.FC<{
 	return (
 		<>
 			<div className="EditTaskModalHome">
-				<div className="EditTaskModalHomeTitle">
-					{taskExists ? t("edit-task") : t("add-new-task")}
-				</div>
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
 						<div className="EditTaskModalHomeLeftSecScrollable">
-							<label className="EditTaskModalHomeModalTitle">{title || "Task title"}</label>
+							<div className="EditTaskModalHomeModalTitle" ref={titleComponentRef}></div>
 
 							{/* Editor tab switcher */}
 							<div className="EditTaskModalTabHeader">
@@ -671,7 +662,7 @@ const EditTaskContent: React.FC<{
 								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file-path")}:
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? t("quickadd-choice") : t("file")}:
 									<input
 										type="text"
 										ref={filePathRef}
@@ -892,7 +883,6 @@ export class AddOrEditTaskModal extends Modal {
 		this.waitForClose = new Promise<string>((resolve, reject) => {
 			this.resolvePromise = resolve;
 			this.rejectPromise = reject;
-			console.log("Promise will return : \n", this.resolvePromise, "\n", this.rejectPromise);
 		});
 	}
 
@@ -904,6 +894,8 @@ export class AddOrEditTaskModal extends Modal {
 		contentEl.setAttribute('data-type', 'task-board-view');
 
 		const root = ReactDOM.createRoot(this.contentEl);
+
+		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
 		root.render(<EditTaskContent
 			app={this.app}

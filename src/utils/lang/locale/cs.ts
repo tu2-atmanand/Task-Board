@@ -143,7 +143,7 @@ const cs = {
   "show-description": "Zobrazit popis",
   "open-board-on-obsidian-startup": "Otevřená deska na startupu Obsidian",
   "open-board-on-obsidian-startup-info": "Povolte tuto možnost, pokud chcete, aby byla viditelná úloh, když zavřete a otevřete obsidian.",
-  "file-path": "Cesta souboru",
+  "file": "Cesta souboru",
   "discard": "Vyřadit",
   "go-back": "Vraťte se a uložte",
   "edit-task-modal-close-confirm-mssg": "Máte neuzavřené změny. Chcete je uložit nebo zahodit?",

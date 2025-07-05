@@ -31,7 +31,6 @@ export class TaskBoardApi {
 			);
 			AddTaskModal.open();
 			// return await AddTaskModal.returnTask();
-			console.log("WaitForClose : ", AddTaskModal.waitForClose);
 			return await AddTaskModal.waitForClose;
 		} catch {
 			return undefined;

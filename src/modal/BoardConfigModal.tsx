@@ -2,13 +2,13 @@
 
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
 import { App, Modal, Notice } from "obsidian";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import React, { ComponentPropsWithRef, useCallback, useEffect, useRef, useState } from "react";
 
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
-import { FaTrash } from 'react-icons/fa';
+import { FaAlignCenter, FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
@@ -16,9 +16,12 @@ import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { bugReporter } from "src/services/OpenModals";
+import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
+import { priorityOptions } from "src/interfaces/TaskItem";
 
 interface ConfigModalProps {
-	app: App;
+	plugin: TaskBoard;
 	settingManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
@@ -28,7 +31,7 @@ interface ConfigModalProps {
 }
 
 const ConfigModalContent: React.FC<ConfigModalProps> = ({
-	app,
+	plugin,
 	settingManager,
 	boards,
 	activeBoardIndex,
@@ -40,17 +43,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		try {
 			return boards ? JSON.parse(JSON.stringify(boards)) : [];
 		} catch (e) {
-			console.error("Failed to parse boards:", e);
+			bugReporter(plugin, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
 			return [];
 		}
 	});	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
 	const [forceRender, setForceRender] = useState(0);
 	const sortableRef = useRef<Sortable | null>(null);
 
+	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
-	const boardListRef = useRef<HTMLDivElement | null>(null); // Add a ref for the board list
-	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);useEffect(() => {
+	const boardListRef = useRef<HTMLDivElement | null>(null);useEffect(() => {
 		if (
 			selectedBoardIndex === -1 ||
 			!columnListRef.current ||
@@ -210,9 +214,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			taskStatus: columnData.taskStatus,
 			taskPriority: columnData.taskPriority,
 			limit: columnData.limit,
-			path: columnData.path,			
-			frontmatterKey: columnData.frontmatterKey,
-			frontmatterValue: columnData.frontmatterValue,
+			filePaths: columnData.filePaths,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -284,6 +286,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// onClose();
 	};
 
+	const renderGlobalSettingsTab = (boardIndex: number) => {
+		return (
+			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
+		);
+	}
 
 	useEffect(() => {
 		if (selectedBoardIndex !== -1) return;
@@ -296,15 +303,30 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		}
 	}, [selectedBoardIndex]);
 
-	const renderGlobalSettingsTab = (boardIndex: number) => {
-		return (
-			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
-		);
-	}
+	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+	useEffect(() => {
+		localBoards[selectedBoardIndex]?.columns.forEach((column, index) => {
+			const fileInputElement = filePathInputRefs.current[column.id];
+			if (!fileInputElement) return;
 
-	const columnListRef = useRef<HTMLDivElement | null>(null);
-
-	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
+			if (filePathInputRefs.current[column.id] !== null && column.colType === "pathFiltered") {
+				const suggestionContent = getFileSuggestions(plugin.app);
+				const onSelectCallback = (selectedPath: string) => {
+					// setNewFilePath(selectedPath);
+					console.log(`Selected file path: ${selectedPath}`);
+					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
+				};
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			} else if (filePathInputRefs.current[column.id] !== null && column.colType === "namedTag") {
+				const suggestionContent = getTagSuggestions(plugin.app);
+				const onSelectCallback = (selectedTag: string) => {
+					console.log(`Selected tag: ${selectedTag}`);
+					handleColumnChange(selectedBoardIndex, index, "coltag", selectedTag);
+				};
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			}
+		});
+	}, [plugin.app, selectedBoardIndex, localBoards]);
 
 	// Function to handle column change
 	const handleColumnChange = (
@@ -315,16 +337,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	) => {
 		// evt?.preventDefault();
 		// evt?.stopPropagation();
-		console.log(`Updating column at boardIndex: ${boardIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
+		// console.log(`Updating column at boardIndex: ${boardIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
 		const updatedBoards = [...localBoards];
 		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
 			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
 		}
-		console.log("Updated Boards after column change:", updatedBoards);
 		setLocalBoards(updatedBoards);
 		setIsEdited(true);
 	};
-
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
@@ -368,72 +388,62 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
+	useEffect(() => {
+		if (
+			selectedBoardIndex === -1 ||
+			!columnListRef.current ||
+			!localBoards[selectedBoardIndex]
+		)
+			return;
+
+		setFiltersData(localBoards[selectedBoardIndex].filters?.join(", ") || "");
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: (evt) => {
+				try {
+					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+					const updatedBoards = [...localBoards];
+					const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+					updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+					updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
+						col.index = idx + 1;
+					});
+
+					setLocalBoards(updatedBoards);
+					setIsEdited(true);
+
+					// I need to re-render the columnListRef section here
+					// if (columnListRef.current) {
+					// 	// Force re-render by updating the ref
+					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
+					// }
+				} catch (error) {
+					bugReporter(plugin, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
+				}
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedBoardIndex, localBoards]);
+
 	// Function to render board settings
 	const renderBoardSettings = (boardIndex: number) => {
 		if (globalSettingsHTMLSection.current) {
 			settingManager.cleanUp();
 			globalSettingsHTMLSection.current.empty();
 		}
-
-		useEffect(() => {
-			console.warn("This is just to check whether this section of code runs whenever I make any input inside the input fields of the board settings section.");
-			if (
-				selectedBoardIndex === -1 ||
-				!columnListRef.current ||
-				!localBoards[selectedBoardIndex]
-			)
-				return;
-
-			setFiltersData(localBoards[boardIndex].filters?.join(", ") || "");
-
-			const sortable = Sortable.create(columnListRef.current, {
-				animation: 150,
-				handle: ".boardConfigModalColumnRowDragButton",
-				ghostClass: "task-board-sortable-ghost",
-				chosenClass: "task-board-sortable-chosen",
-				dragClass: "task-board-sortable-drag",
-				dragoverBubble: true,
-				forceFallback: true,
-				fallbackClass: "task-board-sortable-fallback",
-				easing: "cubic-bezier(1, 0, 0, 1)",
-				onSort: (evt) => {
-					try {
-						if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
-						console.log("Old Index : ", evt.oldIndex, " | New Index : ", evt.newIndex);
-
-						const updatedBoards = [...localBoards];
-						console.log(
-							"Updated Columns BEFORE sorting: ",
-							updatedBoards[selectedBoardIndex].columns
-						)
-						const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-						updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-						updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
-							col.index = idx + 1;
-						});
-						console.log(
-							"Updated Columns AFTER sorting: ",
-							updatedBoards[selectedBoardIndex].columns
-						)
-
-						setLocalBoards(updatedBoards);
-						setIsEdited(true);
-
-						// I need to re-render the columnListRef section here
-						// if (columnListRef.current) {
-						// 	// Force re-render by updating the ref
-						// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
-						// }
-					} catch (error) {
-						console.error("Error during column sorting:", error);
-					}
-				},
-			});
-
-			return () => {
-				sortable.destroy();
-			};
-		}, [selectedBoardIndex, localBoards]);
 
 		const board = localBoards[boardIndex];
 
@@ -537,7 +547,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										/>
 									)}
 									<div className="boardConfigModalColumnRowContent">
-										<button className="boardConfigModalColumnRowContentColumnType">{column.colType}</button>
+										<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
 										<input
 											type="text"
 											value={column.name || ""}
@@ -554,6 +564,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "namedTag" && (
 											<input
 												type="text"
+												ref={(el) => (filePathInputRefs.current[column.id] = el)}
 												placeholder={t("enter-tag")}
 												value={column.coltag || ""}
 												onChange={(e) =>
@@ -584,10 +595,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											/>
 										)}
 										{column.colType === "taskPriority" && (
-											<input
-												type="number"
-												placeholder={t("enter-tag-placeholder")}
-												value={column.taskPriority || 1}
+											<select
+												aria-label="Select priority"
+												value={column.taskPriority || priorityOptions[0].value}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
@@ -596,8 +606,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														e.target.value
 													)
 												}
-												className="boardConfigModalColumnRowContentColName"
-											/>
+												className="boardConfigModalColumnRowContentColDatedVal"
+											>
+												{priorityOptions.map((option) => (
+													<option key={option.value} value={option.value}>{option.text}</option>
+												))}
+											</select>
 										)}
 										{column.colType === "completed" && (
 											<input
@@ -618,17 +632,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "pathFiltered" && (
 											<input
 												type="text"
-												placeholder={t("enter-path-pattern")}
-												value={column.path || ""}
+												ref={(el) => (filePathInputRefs.current[column.id] = el)}
+												className="boardConfigModalColumnRowContentColName"
+												value={column.filePaths || ""}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
-														"path",
+														"filePaths",
 														e.target.value
 													)
 												}
-												className="boardConfigModalColumnRowContentColName"
+												placeholder={t("enter-path-pattern")}
 											/>
 										)}
 										{column.colType === "dated" && (
@@ -786,16 +801,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (isSidebarVisible) {
 			document.addEventListener("mousedown", handleClickOutside);
 		} else {
+			console.log("Cleanup: Removing event listener for click outside");
 			document.removeEventListener("mousedown", handleClickOutside);
 		}
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		return () => {
+			if (isSidebarVisible) {
+				console.log("Cleanup: Removing event listener for click outside");
+				// Cleanup event listener when the component unmounts or sidebar visibility changes
+				document.removeEventListener("mousedown", handleClickOutside);
+			}
+		}
 	}, [isSidebarVisible]);
 
 	return (
 		<>
 			{renderAddColumnModal()}
 			<button className="boardConfigModalSidebarToggleBtn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
-				☰ {/* Replace with an icon later */}
+				<FaAlignJustify className="boardConfigModalSidebarToggleBtnIcon" size={15} enableBackground={0} />
 			</button>
 			<div className="boardConfigModalHome">
 				<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
@@ -808,19 +830,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<hr className="boardConfigModalHr-100" />
 
 						<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-						<div className="boardConfigModalSidebarBtnArea" ref={boardListRef}> {/* Add ref to the div wrapping board items */}
+						<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
 							{localBoards.map((board, index) => (
 								<div
 									key={board.name} // Changed key from index to board.name
 									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
 								>
-									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
 									<span onClick={() => {
 										setSelectedBoardIndex(index);
 										toggleSidebar();
 									}}>
 										{board.name}
 									</span>
+									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
 								</div>
 							))}
 						</div>
@@ -837,7 +859,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				</div>
 				<div className="boardConfigModalMainContent">
 					{selectedBoardIndex === -1
-						? renderGlobalSettingsTab(selectedBoardIndex)
+						? <>{renderGlobalSettingsTab(selectedBoardIndex)}</>
 						: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
 					}
 				</div>
@@ -857,30 +879,32 @@ export class BoardConfigureModal extends Modal {
 	activeBoardIndex: number;
 	isEdited: boolean;
 	onSave: (updatedBoards: Board[]) => void;
+	plugin: TaskBoard;
 
 	constructor(
-		app: App,
 		plugin: TaskBoard,
 		boards: Board[],
 		activeBoardIndex: number,
 		onSave: (updatedBoards: Board[]) => void
 	) {
-		super(app);
+		super(plugin.app);
+		this.plugin = plugin;
 		this.boards = boards;
 		this.activeBoardIndex = activeBoardIndex;
 		this.isEdited = false;
 		this.onSave = onSave;
-		this.settingsManager = new SettingsManager(app, plugin);
+		this.settingsManager = new SettingsManager(plugin);
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
 		this.modalEl.setAttribute('data-type', 'task-board-view');
 		contentEl.setAttribute('data-type', 'task-board-view');
+		this.modalEl.setAttribute('modal-type', 'task-board-board-config');
 	}
 
 	onOpen() {
 		this.root.render(
 			<ConfigModalContent
-				app={this.app}
+				plugin={this.plugin}
 				settingManager={this.settingsManager}
 				boards={this.boards}
 				activeBoardIndex={this.activeBoardIndex}

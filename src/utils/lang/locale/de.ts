@@ -143,7 +143,7 @@ const de = {
   "show-description": "Beschreibung anzeigen",
   "open-board-on-obsidian-startup": "Offenes Board beim Obsidian -Startup",
   "open-board-on-obsidian-startup-info": "Aktivieren Sie diese Option, wenn Sie sehen möchten, dass das Task -Board sichtbar ist, wenn Sie Obsidian schließen und öffnen.",
-  "file-path": "Dateipfad",
+  "file": "Dateipfad",
   "discard": "Verwerfen",
   "go-back": "Zurückgehen und speichern",
   "edit-task-modal-close-confirm-mssg": "Sie haben nicht gerettete Änderungen. Möchten Sie sie retten oder wegwerfen?",

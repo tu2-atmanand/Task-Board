@@ -143,7 +143,7 @@ const it = {
   "show-description": "Mostra descrizione",
   "open-board-on-obsidian-startup": "Open Board sulla startup Obsidian",
   "open-board-on-obsidian-startup-info": "Abilita questa opzione se si desidera vedere la task board per essere visibile, quando si chiude e apri l'ossidiana.",
-  "file-path": "Percorso del file",
+  "file": "Percorso del file",
   "discard": "Scartare",
   "go-back": "Torna indietro e salva",
   "edit-task-modal-close-confirm-mssg": "Hai cambiati cambiamenti. Vuoi salvarli o scartarli?",

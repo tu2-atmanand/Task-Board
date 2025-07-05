@@ -7,7 +7,7 @@ export type ColumnData = {
 	collapsed?: boolean;
 	name: string;
 	coltag?: string;
-	path?: string;
+	filePaths?: string;
 	datedBasedColumn?: {
 		dateType: string; // e.g., "due", "created", "scheduled"
 		from: number;
@@ -37,3 +37,15 @@ export type Board = {
 };
 
 export type BoardConfigs = Board[];
+
+export const columnTypeAndNameMapping: { [key: string]: string } = {
+	undated: "Undated",
+	dated: "Dated",
+	namedTag: "Tagged",
+	untagged: "Untagged",
+	otherTags: "Other Tags",
+	taskStatus: "Status",
+	taskPriority: "Priority",
+	pathFiltered: "Path filtered",
+	completed: "Completed",
+};

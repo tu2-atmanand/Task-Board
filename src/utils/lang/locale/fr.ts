@@ -143,7 +143,7 @@ const fr = {
   "show-description": "Description de la démonstration",
   "open-board-on-obsidian-startup": "Board ouvert sur le startup d'obsidienne",
   "open-board-on-obsidian-startup-info": "Activez cette option si vous souhaitez voir le tableau des tâches pour être visible, lorsque vous fermez et ouvrez l'obsidienne.",
-  "file-path": "Chemin de fichier",
+  "file": "Chemin de fichier",
   "discard": "Jeter",
   "go-back": "Revenir en arrière et économiser",
   "edit-task-modal-close-confirm-mssg": "Vous avez des changements non sauvés. Voulez-vous les sauver ou les jeter?",

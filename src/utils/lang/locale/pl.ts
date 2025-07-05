@@ -143,7 +143,7 @@ const pl = {
   "show-description": "Pokaż opis",
   "open-board-on-obsidian-startup": "Otwórz planszy na obsydian startup",
   "open-board-on-obsidian-startup-info": "Włącz tę opcję, jeśli chcesz zobaczyć, jak płyta zadań była widoczna, kiedy zamkniesz i otwierasz obsydian.",
-  "file-path": "Ścieżka pliku",
+  "file": "Ścieżka pliku",
   "discard": "Wyrzucać",
   "go-back": "Wróć i zapisz",
   "edit-task-modal-close-confirm-mssg": "Masz niezbawione zmiany. Chcesz je uratować lub odrzucić?",

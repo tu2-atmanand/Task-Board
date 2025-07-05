@@ -16,17 +16,16 @@ import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
 import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { t } from "src/utils/lang/helper";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
-	app: App,
 	plugin: TaskBoard,
 	boards: Board[],
 	activeBoardIndex: number,
 	onSave: (updatedBoards: Board[]) => void
 ) => {
 	new BoardConfigureModal(
-		app,
 		plugin,
 		boards,
 		activeBoardIndex,
@@ -160,10 +159,10 @@ export const bugReporter = (
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
 				el.createEl("p", {
-					text: "Task board encountered an issue while completing the bug. Please click on this message and report the bug. Right-click to dismiss.",
+					text: t("bug-report-notice-message"),
 				});
 				el.createEl("button", {
-					text: "Report Bug",
+					text: t("show-error"),
 					cls: "reportBugButton",
 					onclick: () => {
 						const bugReportModal = new BugReporterModal(
@@ -177,7 +176,7 @@ export const bugReporter = (
 					},
 				});
 				el.createEl("button", {
-					text: "Ignore this bug",
+					text: t("ignore-this-bug"),
 					cls: "ignoreBugButton",
 					onclick: () => {
 						el.hide();
