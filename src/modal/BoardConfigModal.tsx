@@ -678,9 +678,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (isSidebarVisible) {
 			document.addEventListener("mousedown", handleClickOutside);
 		} else {
+			console.log("Cleanup: Removing event listener for click outside");
 			document.removeEventListener("mousedown", handleClickOutside);
 		}
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		return () => {
+			if (isSidebarVisible) {
+				console.log("Cleanup: Removing event listener for click outside");
+				// Cleanup event listener when the component unmounts or sidebar visibility changes
+				document.removeEventListener("mousedown", handleClickOutside);
+			}
+		}
 	}, [isSidebarVisible]);
 
 	return (
@@ -700,19 +707,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<hr className="boardConfigModalHr-100" />
 
 						<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-						<div ref={boardListRef}> {/* Add ref to the div wrapping board items */}
+						<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
 							{localBoards.map((board, index) => (
 								<div
 									key={board.name} // Changed key from index to board.name
 									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
 								>
-									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
 									<span onClick={() => {
 										setSelectedBoardIndex(index);
 										toggleSidebar();
 									}}>
 										{board.name}
 									</span>
+									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
 								</div>
 							))}
 						</div>

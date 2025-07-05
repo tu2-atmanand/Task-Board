@@ -1073,11 +1073,23 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	cursor: pointer;
 }
 
+.boardConfigModalSidebarBtnAreaBoardBtnsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	width: 100%;
+}
+
 .boardConfigModalSidebarBtnArea-btn {
 	border-radius: var(--button-radius);
 	border: var(--border-width) solid var(--table-header-border-color);
 	padding: 8px;
 	cursor: pointer;
+	display: flex;
+	align-content: center;
+	justify-content: space-between;
+	flex-direction: row;
+	gap: 0.5rem;
 }
 
 .boardConfigModalSidebarBtnArea-btn-active {
@@ -1087,6 +1099,16 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border: var(--border-width) solid var(--interactive-accent);
 	padding: 8px;
 	cursor: pointer;
+	display: flex;
+	align-content: center;
+	justify-content: space-between;
+	flex-direction: row;
+	gap: 0.5rem;
+}
+
+.boardConfigModalSidebarBtnArea-btn-drag-handle {
+	cursor: grab;
+	align-self: center;
 }
 
 .boardConfigModalSidebarSaveBtn {
