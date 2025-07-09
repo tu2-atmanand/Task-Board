@@ -2,10 +2,14 @@
 
 import { cleanTaskTitle, taskContentFormatter } from "./TaskContentFormatter";
 import {
-	loadTasksJsonFromDisk,
-	writeTasksJsonToDisk,
+	loadJsonCacheDataFromDisk,
+	writeJsonCacheDataFromDisk,
 } from "./JsonFileOperations";
-import { taskItem, tasksJson } from "src/interfaces/TaskItem";
+import {
+	jsonCacheData,
+	taskItem,
+	tasksJsonData,
+} from "src/interfaces/TaskItem";
 import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
@@ -25,7 +29,7 @@ export const moveFromPendingToCompleted = async (
 	task: taskItem
 ) => {
 	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
+		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Move task from Pending to Completed
 		if (allTasks.Pending[task.filePath]) {
@@ -40,7 +44,7 @@ export const moveFromPendingToCompleted = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeTasksJsonToDisk(plugin, allTasks);
+		await writeJsonCacheDataFromDisk(plugin, allTasks);
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -58,7 +62,7 @@ export const moveFromCompletedToPending = async (
 	task: taskItem
 ) => {
 	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
+		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Move task from Completed to Pending
 		if (allTasks.Completed[task.filePath]) {
@@ -73,7 +77,7 @@ export const moveFromCompletedToPending = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeTasksJsonToDisk(plugin, allTasks);
+		await writeJsonCacheDataFromDisk(plugin, allTasks);
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -144,7 +148,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 	} catch (error) {
 		bugReporter(
 			plugin,
-			"Error deleting task from file. Following the error message might help you to find the issue.",
+			"Error deleting task from file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/deleteTaskFromFile"
 		);
@@ -153,7 +157,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 
 export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
+		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Remove task from Pending or Completed in tasks.json
 		if (allTasks.Pending[task.filePath]) {
@@ -167,7 +171,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 			].filter((t: any) => t.id !== task.id);
 		}
 
-		await writeTasksJsonToDisk(plugin, allTasks);
+		await writeJsonCacheDataFromDisk(plugin, allTasks);
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
@@ -327,7 +331,7 @@ export const updateTaskInFile = async (
 	} catch (error) {
 		bugReporter(
 			plugin,
-			"Error updating task in file. Following the error message might help you to find the issue.",
+			"Error while updating the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/updateTaskInFile"
 		);
@@ -394,7 +398,7 @@ export const updateTaskInJson = async (
 	updatedTask: taskItem
 ) => {
 	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
+		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Function to update a task in a given task category (Pending or Completed)
 		const updateTasksInCategory = (taskCategory: {
@@ -419,12 +423,15 @@ export const updateTaskInJson = async (
 		const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
 
 		// Create the updated data object with both updated Pending and Completed tasks
-		const updatedData: tasksJson = {
+		const updatedData: jsonCacheData = {
+			VaultName: plugin.app.vault.getName(),
+			Modified_at: new Date().toISOString(),
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
+			Notes: allTasks.Notes,
 		};
 		// Write the updated data back to the JSON file using the new function
-		await writeTasksJsonToDisk(plugin, updatedData);
+		await writeJsonCacheDataFromDisk(plugin, updatedData);
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
@@ -537,7 +544,7 @@ export const updateRecurringTaskInFile = async (
 				const scannVault = new ScanningVault(plugin.app, plugin);
 				const file = plugin.app.vault.getAbstractFileByPath(filePath);
 				if (file && file instanceof TFile)
-					scannVault.updateTasksFromFiles([file]);
+					scannVault.refreshTasksFromFiles([file]);
 				eventEmitter.emit("REFRESH_COLUMN");
 			} else {
 				//fallback to normal function
@@ -554,7 +561,7 @@ export const updateRecurringTaskInFile = async (
 	} catch (error) {
 		bugReporter(
 			plugin,
-			"Error updating recurring task in file. Following the error message might help you to find the issue.",
+			"Error while updating the recurring task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/updateRecurringTaskInFile"
 		);
@@ -571,7 +578,7 @@ export const generateTaskId = (): number => {
 };
 
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
-	const allTasks = await loadTasksJsonFromDisk(plugin);
+	const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 	const file = plugin.app.vault.getFileByPath(newTask.filePath);
 	const frontmatter = file ? extractFrontmatter(plugin, file) : {};
@@ -592,13 +599,12 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	allTasks.Pending[newTask.filePath].push(newTaskWithId);
 
-	await writeTasksJsonToDisk(plugin, allTasks);
+	await writeJsonCacheDataFromDisk(plugin, allTasks);
 
 	eventEmitter.emit("REFRESH_COLUMN");
 };
 
 export const addTaskInNote = async (
-	app: App,
 	plugin: TaskBoard,
 	newTask: taskItem,
 	editorActive: boolean,
@@ -651,7 +657,7 @@ export const addTaskInNote = async (
 	} catch (error) {
 		bugReporter(
 			plugin,
-			"Error adding task in note. Following the error message might help you to find the issue.",
+			"Error while adding the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/addTaskInNote"
 		);

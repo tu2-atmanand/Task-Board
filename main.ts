@@ -44,7 +44,7 @@ export default class TaskBoard extends Plugin {
 	editorModified: boolean;
 	currentModifiedFile: TFile | null;
 	fileUpdatedUsingModal: string;
-	IsTasksJsonChanged: boolean;
+	IstasksJsonDataChanged: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
@@ -59,7 +59,7 @@ export default class TaskBoard extends Plugin {
 		this.editorModified = false;
 		this.currentModifiedFile = null;
 		this.fileUpdatedUsingModal = "";
-		this.IsTasksJsonChanged = false;
+		this.IstasksJsonDataChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
 	}
@@ -314,7 +314,7 @@ export default class TaskBoard extends Plugin {
 		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
-		// 		writeTasksJsonToDisk(this.plugin);
+		// 		writeJsonCacheDataFromDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
@@ -360,6 +360,7 @@ export default class TaskBoard extends Plugin {
 			)
 		);
 		this.registerDomEvent(window, "blur", () => {
+			console.log("Window lost focus, checking for modified files...");
 			this.onFileModifiedAndLostFocus();
 		});
 
@@ -419,7 +420,9 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.scanningVault.updateTasksFromFiles([file]);
+								this.scanningVault.refreshTasksFromFiles([
+									file,
+								]);
 								this.scanningVault.saveTasksToFile();
 							});
 					});
@@ -570,8 +573,7 @@ export default class TaskBoard extends Plugin {
 			if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
 				await this.realTimeScanning.onFileChange(
 					this.currentModifiedFile,
-					this.settings.data.globalSettings.realTimeScanning,
-					this.settings.data.globalSettings.scanFilters
+					this.settings.data.globalSettings.realTimeScanning
 				);
 			} else {
 				this.fileUpdatedUsingModal = "";

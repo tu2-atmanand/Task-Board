@@ -2,7 +2,7 @@
 
 import { App, Component, Modal, Notice } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
-import { taskItem, tasksJson } from "src/interfaces/TaskItem";
+import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
@@ -22,6 +22,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 	const [collectedTasks, setCollectedTasks] = useState<tasksJson>({
 		Pending: {},
 		Completed: {},
+		Notes: [],
 	});
 
 	const runScan = async () => {

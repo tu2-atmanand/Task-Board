@@ -1,15 +1,4 @@
-import { Board } from "./BoardConfigs";
-import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
-
-export interface TaskProps {
-	key: number;
-	plugin: TaskBoard;
-	taskKey: number;
-	task: taskItem;
-	columnIndex: number;
-	activeBoardSettings: Board;
-}
 
 export interface taskItem {
 	id: number;
@@ -26,26 +15,41 @@ export interface taskItem {
 	status: string;
 	filePath: string;
 	lineNumber: number;
+	reminder?: string; // A date-time value.
 	completion?: string;
 	cancelledDate?: string;
 }
 
-export interface tasksInFile {
-	taskItem: taskItem;
+export interface noteItem {
+	filePath: string;
+	frontmatter: any; // The frontmatter of the note
+	reminder: string; // A date-time value.
 }
 
-export interface taskJsonMerged {
-	Pending: taskItem[];
-	Completed: taskItem[];
-}
-
-export interface tasksJson {
+export interface jsonCacheData {
+	VaultName: string; // Name of the vault
+	Modified_at: string; // Last modified date of the JSON file
 	Pending: {
 		[filePath: string]: taskItem[]; // Maps file paths to arrays of pending tasks
 	};
 	Completed: {
 		[filePath: string]: taskItem[]; // Maps file paths to arrays of completed tasks
 	};
+	Notes: noteItem[];
+}
+
+export interface tasksJsonData {
+	Pending: {
+		[filePath: string]: taskItem[]; // Maps file paths to arrays of pending tasks
+	};
+	Completed: {
+		[filePath: string]: taskItem[]; // Maps file paths to arrays of completed tasks
+	};
+}
+
+export interface taskJsonMerged {
+	Pending: taskItem[];
+	Completed: taskItem[];
 }
 
 export const priorityEmojis: { [key: number]: string } = {
