@@ -135,6 +135,60 @@ export const writeTasksJsonToDisk = async (
 	}
 };
 
+// Function to move the file from old path to new path
+export const moveTasksCacheFileToNewPath = (
+	plugin: TaskBoard,
+	oldPath: string,
+	newPath: string
+) => {
+	return new Promise<void>((resolve, reject) => {
+		console.log(
+			"Inside moveTasksCacheFileToNewPath with oldPath:",
+			oldPath,
+			"and newPath:",
+			newPath
+		);
+		if (
+			oldPath === newPath ||
+			(newPath !== "" && newPath.endsWith(".json") === false) ||
+			(oldPath !== "" && oldPath.endsWith(".json") === false)
+		) {
+			resolve();
+			return;
+		}
+
+		if (newPath === "")
+			newPath = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+		if (oldPath === "")
+			oldPath = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+		plugin.app.vault.adapter
+			.rename(oldPath, newPath)
+			// .then(() => {
+			// 	// Update the tasksCacheFilePath in globalSettings
+			// 	plugin.settings.data.globalSettings.tasksCacheFilePath =
+			// 		newPath;
+			// 	// Save the updated settings
+			// 	return plugin.saveSettings();
+			// })
+			.then(() => resolve())
+			.catch((error) => {
+				bugReporter(
+					plugin,
+					"Failed to move tasks.json file to new path",
+					String(error),
+					"JsonFileOperations.ts/moveTasksCacheFileToNewPath"
+				);
+				reject(error);
+			});
+		console.log(
+			"moveTasksCacheFileToNewPath called with oldPath:",
+			oldPath,
+			"and newPath:",
+			newPath
+		);
+	});
+};
+
 // Helper function to load tasks from tasks.json and merge them
 export const loadTasksAndMerge = async (
 	plugin: TaskBoard
