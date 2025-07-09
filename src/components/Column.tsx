@@ -3,14 +3,27 @@
 import React, { memo, useMemo } from 'react';
 
 import { CSSProperties } from 'react';
-import { ColumnProps } from '../interfaces/ColumnProps';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import { getAllTaskTags } from 'src/utils/TaskItemUtils';
+import TaskBoard from 'main';
+import { ColumnData } from 'src/interfaces/BoardConfigs';
+import { taskItem } from 'src/interfaces/TaskItem';
 
 type CustomCSSProperties = CSSProperties & {
 	'--column-width': string;
 };
+
+export interface ColumnProps {
+	key: number;
+	plugin: TaskBoard;
+	columnIndex: number;
+	activeBoardIndex: number;
+	collapsed?: boolean;
+	columnData: ColumnData;
+	tasksForThisColumn: taskItem[];
+}
+
 
 const Column: React.FC<ColumnProps> = ({
 	plugin,
@@ -56,7 +69,8 @@ const Column: React.FC<ColumnProps> = ({
 				</div>
 				{/* <RxDotsVertical /> */}
 			</div>
-			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>				{tasks.length > 0 ? (
+			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
+				{tasks.length > 0 ? (
 					tasks.map((task, index = task.id) => {
 						const allTaskTags = getAllTaskTags(task);
 						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
