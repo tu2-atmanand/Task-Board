@@ -17,7 +17,7 @@ import { buildTaskFromRawContent } from "src/utils/ScanningVault";
 import { FileInput, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 
@@ -33,6 +33,7 @@ const taskItemEmpty = {
 	frontmatterTags: [],
 	time: "",
 	priority: 0,
+	reminder: "",
 	completion: "",
 	cancelledDate: "",
 	filePath: "",
@@ -141,7 +142,7 @@ const EditTaskContent: React.FC<{
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [status, setStatus] = useState(task.status || '');
-	const [reminder, setReminder] = useState(task.title.contains("(@") || false);
+	const [reminder, setReminder] = useState(task?.reminder || "");
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>('');
 	const [newFilePath, setNewFilePath] = useState<string>(filePath);
@@ -246,14 +247,14 @@ const EditTaskContent: React.FC<{
 		setUpdateEditorContent(true);
 	}
 
-	const handleReminderChange = (value: boolean) => {
+	const handleReminderChange = (value: string) => {
 		setReminder(value);
-		if (value) {
-			setTitle(`${title} (@${due} ${startTime})`);
-		} else {
-			const reminderRegex = /(\(@\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?\))/;
-			setTitle(title.replace(reminderRegex, ""));
-		}
+		// if (value) {
+		// 	setTitle(`${title} (@${due} ${startTime})`);
+		// } else {
+		// 	const reminderRegex = /(\(@\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?\))/;
+		// 	setTitle(title.replace(reminderRegex, ""));
+		// }
 		setIsEdited(true);
 		setUpdateEditorContent(true);
 	}
@@ -410,6 +411,7 @@ const EditTaskContent: React.FC<{
 			lineNumber: task.lineNumber,
 			cancelledDate: task.cancelledDate || '',
 			status,
+			reminder,
 		};
 		console.log("Updated Task:", updatedTask);
 		onSave(updatedTask, quickAddPluginChoice);
@@ -434,6 +436,7 @@ const EditTaskContent: React.FC<{
 		filePath: newFilePath,
 		lineNumber: task.lineNumber,
 		status,
+		reminder,
 	};
 
 	// Reference to the HTML element where markdown will be rendered
@@ -477,6 +480,8 @@ const EditTaskContent: React.FC<{
 		setNewTime(updatedTask.time ? updatedTask.time : "");
 		setPriority(updatedTask.priority || 0);
 		setStatus(updatedTask.status || '');
+		setReminder(updatedTask.reminder || '');
+
 		setIsEdited(true);
 	}, 50);
 
@@ -785,11 +790,28 @@ const EditTaskContent: React.FC<{
 							<input className="EditTaskModalHomeDueInput" type="date" value={due} onChange={(e) => handleDueDateChange(e.target.value)} />
 						</div>
 
-						{/* Task reminder checkbox */}
-						{plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin && (
+						{/* Task reminder date-time selector */}
+						{plugin.settings.data.globalSettings.notificationService !== NotificationService.None && (
 							<div className="EditTaskModalHomeField">
 								<label className="EditTaskModalHomeFieldTitle">{t("reminder-label")}</label>
-								<input className="EditTaskModalHomeReminderInput" type="checkbox" checked={reminder} disabled={due === ""} onChange={(e) => handleReminderChange(e.target.checked)} />
+								<input
+									className="EditTaskModalHomeReminderInput"
+									type="datetime-local"
+									value={reminder}
+									onFocus={() => {
+										console.log("On focusing the date-time selector...\nreminder : ", reminder);
+										if (!reminder || reminder === "") {
+											const dateToUse = startDate || scheduledDate || due;
+											const timeToUse = startTime || "09:00";
+											if (dateToUse) {
+												setReminder(`${dateToUse}T${timeToUse}`);
+												setIsEdited(true);
+												setUpdateEditorContent(true);
+											}
+										}
+									}}
+									onChange={(e) => handleReminderChange(e.target.value)}
+								/>
 							</div>
 						)}
 
@@ -803,7 +825,7 @@ const EditTaskContent: React.FC<{
 							</select>
 						</div>
 
-						{/* Task Tag */}
+						{/* Task Body */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("tag")}</label>
 							<input

@@ -658,6 +658,66 @@ const sanitizeTags = (title: string, newTags: string[]): string => {
 	return updatedTitle.trim();
 };
 
+const sanitizeReminder = (
+	globalSettings: globalSettingsData,
+	title: string,
+	newReminder?: string
+): string => {
+	const formatReminder = (reminder: string) => {
+		const date = new Date(reminder);
+		if (
+			globalSettings.notificationService ===
+				NotificationService.ReminderPlugin ||
+			globalSettings.notificationService ===
+				NotificationService.NotifianApp
+		) {
+			return `(@${date.getFullYear().toString().padStart(4, "0")}-${(
+				date.getMonth() + 1
+			)
+				.toString()
+				.padStart(2, "0")}-${date
+				.getDate()
+				.toString()
+				.padStart(2, "0")} ${date
+				.getHours()
+				.toString()
+				.padStart(2, "0")}:${date
+				.getMinutes()
+				.toString()
+				.padStart(2, "0")})`;
+		} else if (
+			globalSettings.notificationService === NotificationService.ObsidApp
+		) {
+			return `(@${date.getHours().toString().padStart(2, "0")}:${date
+				.getMinutes()
+				.toString()
+				.padStart(2, "0")})`;
+		}
+		return "";
+	};
+
+	const reminderRegex =
+		globalSettings.notificationService === NotificationService.ObsidApp
+			? /\(\@\d{2}:\d{2}\)/
+			: /\(\@\d{4}-\d{2}-\d{2} \d{2}:\d{2}\)/;
+
+	if (!newReminder) {
+		return title.replace(reminderRegex, "").trim();
+	}
+
+	const formattedReminder = formatReminder(newReminder);
+	if (title.includes(formattedReminder)) {
+		return title;
+	}
+
+	const existingReminderMatch = title.match(reminderRegex);
+	if (existingReminderMatch) {
+		return title.replace(reminderRegex, formattedReminder);
+	}
+
+	return `${title} ${formattedReminder}`;
+};
+
 // export const taskContentFormatter = (
 // 	plugin: TaskBoard,
 // 	updatedTask: taskItem
@@ -856,10 +916,11 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	}
 
 	// Remove reminder if it exists
-	const reminderRegex = /(\(@\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?\))/;
+	const reminderRegex =
+		/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
 	const reminderMatch = cleanedTitle.match(reminderRegex);
 	if (reminderMatch) {
-		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "");
+		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
 	}
 
 	// console.log("cleanedTitle", cleanedTitle.trim());
