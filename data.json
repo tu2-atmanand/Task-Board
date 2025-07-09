@@ -37,28 +37,28 @@
             }
           },
           {
-            "id": 3495,
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "name": "Future",
-            "index": 4,
-            "datedBasedColumn": {
-              "from": 2,
-              "to": 300,
-              "dateType": "due"
-            }
-          },
-          {
             "id": 3493,
             "colType": "dated",
             "active": true,
             "collapsed": false,
             "name": "Tomorrow",
-            "index": 5,
+            "index": 4,
             "datedBasedColumn": {
               "from": 1,
               "to": 1,
+              "dateType": "due"
+            }
+          },
+          {
+            "id": 3495,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Future",
+            "index": 5,
+            "datedBasedColumn": {
+              "from": 2,
+              "to": 300,
               "dateType": "due"
             }
           },
@@ -69,7 +69,7 @@
             "collapsed": false,
             "limit": 20,
             "name": "Completed, updated",
-            "index": 9
+            "index": 6
           },
           {
             "id": 4257554450,
@@ -633,7 +633,7 @@
         "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": false,
-        "quickAddPlugin": true
+        "quickAddPlugin": false
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "DocsForPlugin/ArchivedTasks.md",
@@ -642,7 +642,10 @@
       "universalDate": "due",
       "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md",
       "showFileNameInCard": false,
-      "showFrontmatterTagsOnCards": true
+      "showFrontmatterTagsOnCards": true,
+      "tasksCacheFilePath": "",
+      "notificationService": "notifianApp",
+      "frontmatterPropertyForReminder": "remind at"
     }
   }
 }
