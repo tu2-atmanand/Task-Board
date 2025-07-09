@@ -3,6 +3,7 @@ import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import { extractPriority } from "./ScanningVault";
 import {
+	NotificationService,
 	UniversalDateOptions,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
@@ -11,9 +12,9 @@ export const taskContentFormatter = (
 	plugin: TaskBoard,
 	updatedTask: taskItem
 ): string => {
-	if (updatedTask.title === "") {
-		return "";
-	}
+	// if (updatedTask.title === "") {
+	// 	return "";
+	// }
 
 	const globalSettings = plugin.settings.data.globalSettings;
 	const checkBoxStat = `- [${updatedTask.status}]`;
@@ -47,6 +48,8 @@ export const taskContentFormatter = (
 	updatedTitle = sanitizeDueDate(globalSettings, updatedTitle, updatedTask);
 
 	updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
+
+	updatedTitle = sanitizeReminder(globalSettings, updatedTitle, updatedTask?.reminder);
 
 	updatedTitle = sanitizeCompletionDate(
 		globalSettings,

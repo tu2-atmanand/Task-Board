@@ -49,7 +49,7 @@ export const openAddNewTaskInCurrentFileModal = (
 		app,
 		plugin,
 		(newTask, quickAddPluginChoice) => {
-			addTaskInNote(app, plugin, newTask, true, cursorPosition);
+			addTaskInNote(plugin, newTask, true, cursorPosition);
 			if (
 				activeFile &&
 				scanFilterForFilesNFolders(activeFile, scanFilters) &&
@@ -96,7 +96,7 @@ export const openAddNewTaskModal = (
 					}
 				);
 			} else {
-				addTaskInNote(app, plugin, newTask, false);
+				await addTaskInNote(plugin, newTask, false);
 			}
 			if (
 				activeTFile instanceof TFile &&
