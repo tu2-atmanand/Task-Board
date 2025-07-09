@@ -1204,7 +1204,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .boardConfigModalColumnRowDragButton {
 	cursor: grab;
-	align-self: center
+	align-self: center;
+	min-width: 25px;
 }
 
 .boardConfigModalColumnRowEyeButton,
