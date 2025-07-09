@@ -319,8 +319,8 @@ const EditTaskContent: React.FC<{
 	// Function to handle textarea changes
 	const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		// setBodyContent(e.target.value);
+		setFormattedTaskContent(e.target.value);
 		handleTaskEditedThroughEditors(e.target.value);
-		// setIsEdited(true);
 	};
 
 	// Tags input
@@ -536,6 +536,7 @@ const EditTaskContent: React.FC<{
 							// Handle changes if needed
 							setIsEdited(true);
 							const capturedContent = fullMarkdownEditor?.value || "";
+							setFormattedTaskContent(capturedContent);
 							handleTaskEditedThroughEditors(capturedContent);
 						},
 					}
@@ -720,6 +721,10 @@ const EditTaskContent: React.FC<{
 									className="EditTaskModalBodyDescription"
 									value={formattedTaskContent}
 									onChange={handleTextareaChange}
+									onBlur={() => {
+										setUpdateEditorContent(true);
+										console.log("On focus lost from the text area");
+									}}
 									placeholder={t("body-content")}
 									style={{ display: activeTab === 'rawEditor' ? 'block' : 'none', width: '100%' }}
 								/>
