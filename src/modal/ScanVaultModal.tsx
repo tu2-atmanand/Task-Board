@@ -19,7 +19,9 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
 	const [progress, setProgress] = useState(0);
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
-	const [collectedTasks, setCollectedTasks] = useState<tasksJson>({
+	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
+		VaultName: plugin.app.vault.getName(),
+		Modified_at: new Date().toISOString(),
 		Pending: {},
 		Completed: {},
 		Notes: [],
