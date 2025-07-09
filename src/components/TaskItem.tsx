@@ -2,7 +2,7 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TaskProps, taskItem, taskStatuses } from '../interfaces/TaskItem';
+import { taskItem, taskStatuses } from '../interfaces/TaskItem';
 import { checkboxStateSwitcher, extractCheckboxSymbol } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
@@ -16,6 +16,17 @@ import { parseDueDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItem';
 import { t } from 'src/utils/lang/helper';
 import { bugReporter } from 'src/services/OpenModals';
+import TaskBoard from 'main';
+import { Board } from 'src/interfaces/BoardConfigs';
+
+export interface TaskProps {
+	key: number;
+	plugin: TaskBoard;
+	taskKey: number;
+	task: taskItem;
+	columnIndex: number;
+	activeBoardSettings: Board;
+}
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
@@ -317,7 +328,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 											</div>
 										);
 									})}
-									
+
 									{/* Render frontmatter tags (read-only) */}
 									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
 										const tagKey = `${task.id}-fm-${tag}`;
