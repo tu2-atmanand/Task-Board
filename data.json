@@ -633,14 +633,14 @@
         "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": false,
-        "quickAddPlugin": false
+        "quickAddPlugin": true
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
-      "quickAddPluginDefaultChoice": "DocsForPlugin/ArchivedTasks.md",
+      "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
       "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
       "universalDate": "due",
-      "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md",
+      "archivedTasksFilePath": "",
       "showFileNameInCard": false,
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": "",
