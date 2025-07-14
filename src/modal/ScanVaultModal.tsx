@@ -2,7 +2,7 @@
 
 import { App, Component, Modal, Notice } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
-import { taskItem, tasksJson } from "src/interfaces/TaskItem";
+import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
@@ -10,7 +10,7 @@ import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
-import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
@@ -19,9 +19,12 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
 	const [progress, setProgress] = useState(0);
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
-	const [collectedTasks, setCollectedTasks] = useState<tasksJson>({
+	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
+		VaultName: plugin.app.vault.getName(),
+		Modified_at: new Date().toISOString(),
 		Pending: {},
 		Completed: {},
+		Notes: [],
 	});
 
 	const runScan = async () => {
@@ -44,7 +47,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 		setCollectedTasks(scanningVault.tasks);
 		// setIsRunning(false);
 		new Notice(t("vault-scanning-complete"));
-		scanningVault.saveTasksToFile();
+		scanningVault.saveTasksToJsonCache();
 
 		if (localStorage.getItem("manadatoryScan") === "true") {
 			localStorage.setItem("manadatoryScan", "false");
@@ -82,22 +85,23 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 						priority: task.priority,
 					};
 
-					const formatedContent = taskContentFormatter(plugin, newTaskContent);
+					getFormattedTaskContent(newTaskContent).then((formatedContent) => {
 
-					const uniqueKey = `${filePath}-task-${taskIndex}`;
-					const descElement = taskRendererRef.current[uniqueKey];
+						const uniqueKey = `${filePath}-task-${taskIndex}`;
+						const descElement = taskRendererRef.current[uniqueKey];
 
-					if (descElement && formatedContent !== "") {
-						descElement.empty();
-						// Render task description using MarkdownUIRenderer
-						MarkdownUIRenderer.renderTaskDisc(
-							app,
-							formatedContent,
-							descElement,
-							task.filePath,
-							componentRef.current
-						);
-					}
+						if (descElement && formatedContent !== "") {
+							descElement.empty();
+							// Render task description using MarkdownUIRenderer
+							MarkdownUIRenderer.renderTaskDisc(
+								app,
+								formatedContent,
+								descElement,
+								task.filePath,
+								componentRef.current
+							);
+						}
+					});
 				});
 			});
 		}

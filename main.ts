@@ -42,9 +42,9 @@ export default class TaskBoard extends Plugin {
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
-	currentModifiedFile: TFile | null;
-	fileUpdatedUsingModal: string;
-	IsTasksJsonChanged: boolean;
+	// currentModifiedFile: TFile | null;
+	// fileUpdatedUsingModal: string;
+	IstasksJsonDataChanged: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
@@ -57,9 +57,9 @@ export default class TaskBoard extends Plugin {
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.editorModified = false;
-		this.currentModifiedFile = null;
-		this.fileUpdatedUsingModal = "";
-		this.IsTasksJsonChanged = false;
+		// this.currentModifiedFile = null;
+		// this.fileUpdatedUsingModal = "";
+		this.IstasksJsonDataChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
 	}
@@ -225,11 +225,9 @@ export default class TaskBoard extends Plugin {
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning setting is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
-		this.realTimeScanning.initializeStack(
-			this.settings.data.globalSettings.realTimeScanning
-		);
-		this.realTimeScanning.processStack();
+		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
+		this.realTimeScanning.initializeStack();
+		this.realTimeScanning.processAllUpdatedFiles();
 	}
 
 	scanVaultAtStartup() {
@@ -314,7 +312,7 @@ export default class TaskBoard extends Plugin {
 		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
-		// 		writeTasksJsonToDisk(this.plugin);
+		// 		writeJsonCacheDataFromDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
@@ -338,15 +336,17 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				if (
 					file.path ===
-					this.settings.data.globalSettings.archivedTasksFilePath
+						this.settings.data.globalSettings
+							.archivedTasksFilePath ||
+					file.path.endsWith(".excalidraw.md")
 				) {
 					return false;
 				}
-				this.editorModified = true;
+
 				if (file instanceof TFile) {
-					if (!file.path.endsWith(".excalidraw.md")) {
-						this.currentModifiedFile = file;
-					}
+					// 	this.taskBoardFileStack.push(file.path);
+					this.realTimeScanning.onFileModified(file);
+					this.editorModified = true;
 				}
 			})
 		);
@@ -419,8 +419,10 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.scanningVault.updateTasksFromFiles([file]);
-								this.scanningVault.saveTasksToFile();
+								this.scanningVault.refreshTasksFromFiles([
+									file,
+								]);
+								this.scanningVault.saveTasksToJsonCache();
 							});
 					});
 					if (
@@ -566,16 +568,23 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onFileModifiedAndLostFocus() {
-		if (this.editorModified && this.currentModifiedFile) {
-			if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
-				await this.realTimeScanning.onFileChange(
-					this.currentModifiedFile,
-					this.settings.data.globalSettings.realTimeScanning,
-					this.settings.data.globalSettings.scanFilters
-				);
-			} else {
-				this.fileUpdatedUsingModal = "";
-			}
+		console.log(
+			"onFileModifiedAndLostFocus called\n",
+			this.editorModified,
+			this.taskBoardFileStack.length
+		);
+		if (this.editorModified) {
+			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
+			// 	await this.realTimeScanning.onFileModified(
+			// 		this.currentModifiedFile,
+			// 		this.settings.data.globalSettings.realTimeScanning
+			// 	);
+			// } else {
+			// 	this.fileUpdatedUsingModal = "";
+			// }
+
+			console.log("Window lost focus, scanning the modified files...");
+			await this.realTimeScanning.processAllUpdatedFiles();
 
 			// Reset the editorModified flag after the scan.
 			this.editorModified = false;

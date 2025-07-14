@@ -1,7 +1,6 @@
 import TaskBoard from "main";
 import { App } from "obsidian";
 import { AddOrEditTaskModal } from "./modal/AddOrEditTaskModal";
-import { taskContentFormatter } from "./utils/TaskContentFormatter";
 
 export class TaskBoardApi {
 	public static GetApi(app: App, plugin: TaskBoard) {
@@ -22,7 +21,7 @@ export class TaskBoardApi {
 				app,
 				plugin,
 				(newTask, quickAddPluginChoice) => {
-					// return taskContentFormatter(plugin, newTask);
+					// return getSanitizedTaskContent(plugin, newTask);
 				},
 				true,
 				false,
