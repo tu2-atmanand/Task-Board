@@ -37,7 +37,12 @@ const taskItemEmpty: taskItem = {
 	completion: "",
 	cancelledDate: "",
 	filePath: "",
-	lineNumber: 0,
+	taskLocation: {
+		startLine: 0,
+		startCharIndex: 0,
+		endLine: 0,
+		endCharIndex: 0,
+	},
 	status: taskStatuses.unchecked,
 };
 
@@ -151,6 +156,7 @@ const EditTaskContent: React.FC<{
 	const [isRightSecVisible, setIsRightSecVisible] = useState(false);
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
 	const [updateEditorContent, setUpdateEditorContent] = useState<Boolean>(false);
+	const cursorLocationRef = useRef<cursorLocation | null>(null);
 
 	const rightSecRef = useRef<HTMLDivElement>(null);
 	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);

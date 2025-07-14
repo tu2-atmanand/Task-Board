@@ -1,5 +1,12 @@
 import { t } from "src/utils/lang/helper";
 
+export interface taskLocation {
+	startLine: number; // The line number where the task starts
+	startCharIndex: number; // The character position where the task starts
+	endLine: number; // The line number where the task ends
+	endCharIndex: number; // The character position where the task ends
+}
+
 export interface taskItem {
 	id: number;
 	title: string;
@@ -14,7 +21,7 @@ export interface taskItem {
 	priority: number;
 	status: string;
 	filePath: string;
-	lineNumber: number;
+	taskLocation: taskLocation;
 	reminder?: string; // A date-time value.
 	completion?: string;
 	cancelledDate?: string;

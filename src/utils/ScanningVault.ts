@@ -320,11 +320,21 @@ export class ScanningVault {
 						frontmatterTags: frontmatterTags,
 						priority: priority,
 						filePath: fileNameWithPath,
-						lineNumber: i + 1,
+						taskLocation: {
+							startLine: lineIndex + 1,
+							startCharIndex: 0,
+							endLine: lineIndex + 1 + bodyLines.length,
+							endCharIndex:
+								bodyLines.length > 0
+									? bodyLines[bodyLines.length - 1].length
+									: line.length,
+						},
 						completion: completionDate,
 						cancelledDate: cancelledDate,
 						reminder: reminder,
 					};
+
+					console.log("extractTasksFromFile : Task extracted:", task);
 
 					if (isTaskCompleted) {
 						tasks.Completed[fileNameWithPath].push(task);
