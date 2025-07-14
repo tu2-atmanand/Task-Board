@@ -138,14 +138,14 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	}, []);
 
 	// Memoized refreshBoardButton to avoid re-creating the function on every render
-	const refreshBoardButton = useCallback(() => {
+	const refreshBoardButton = useCallback(async () => {
 		if (plugin.settings.data.globalSettings.realTimeScanning) {
 			eventEmitter.emit("REFRESH_BOARD");
 		} else {
 			if (
 				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
 			) {
-				plugin.realTimeScanning.processStack();
+				await plugin.realTimeScanning.processAllUpdatedFiles();
 			}
 			eventEmitter.emit("REFRESH_BOARD");
 		}

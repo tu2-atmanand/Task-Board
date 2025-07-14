@@ -2,10 +2,9 @@ import { checkboxStateSwitcher, isCompleted } from "./CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
-	deleteTaskFromJson,
 	moveFromCompletedToPending,
 	moveFromPendingToCompleted,
-	updateRecurringTaskInFile,
+	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
 	updateTaskInJson,
 } from "./TaskItemUtils";
@@ -18,54 +17,143 @@ import { moment as _moment } from "obsidian";
 import { t } from "./lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
+import { bugReporter } from "src/services/OpenModals";
+import { TasksApi } from "src/services/tasks-plugin/api";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
+	const tasksPlugin = new TasksApi(plugin);
+	console.log("tasksPlugin is enabled: ", tasksPlugin);
 
-	// Check if the task is completed
-	const newStatus = checkboxStateSwitcher(plugin, task.status);
-	if (isCompleted(`- [${task.status}]`)) {
-		const taskWithUpdatedStatus = {
-			...task,
-			completion: "",
-			status: newStatus,
-		};
-		// Move from Completed to Pending
-		moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
-		updateTaskInFile(plugin, taskWithUpdatedStatus, taskWithUpdatedStatus);
-	} else {
-		const globalSettings = plugin.settings.data.globalSettings;
-		const moment = _moment as unknown as typeof _moment.default;
-		const taskWithUpdatedStatus = {
-			...task,
-			completion: moment().format(
-				globalSettings?.taskCompletionDateTimePattern
-			),
-			status: newStatus,
-		};
-		// Move from Pending to Completed
-		moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+	if (!tasksPlugin.isTasksPluginEnabled()) {
+		// Check if the task is completed
+		const newStatus = checkboxStateSwitcher(plugin, task.status);
+		if (isCompleted(`- [${task.status}]`)) {
+			const taskWithUpdatedStatus = {
+				...task,
+				completion: "",
+				status: newStatus,
+			};
+			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(() => {
+				const currentFile = plugin.app.vault.getFileByPath(
+					task.filePath
+				);
+				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 
-		if (!isTaskRecurring(task.title)) {
-			updateTaskInFile(
-				plugin,
-				taskWithUpdatedStatus,
-				taskWithUpdatedStatus
-			);
+				// // Move from Completed to Pending
+				// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+			});
 		} else {
-			updateRecurringTaskInFile(plugin, taskWithUpdatedStatus, task);
+			const globalSettings = plugin.settings.data.globalSettings;
+			const moment = _moment as unknown as typeof _moment.default;
+			const taskWithUpdatedStatus = {
+				...task,
+				completion: moment().format(
+					globalSettings?.taskCompletionDateTimePattern
+				),
+				status: newStatus,
+			};
+
+			if (!isTaskRecurring(task.title)) {
+				updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+					() => {
+						const currentFile = plugin.app.vault.getFileByPath(
+							task.filePath
+						);
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							currentFile
+						);
+
+						// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
+						// Move from Pending to Completed
+						// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+					}
+				);
+			} else {
+				bugReporter(
+					plugin,
+					"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
+					`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
+					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+				);
+
+				// useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
+				// 	.then(() => {
+				// 		const currentFile = plugin.app.vault.getFileByPath(
+				// 			task.filePath
+				// 		);
+				// 		plugin.realTimeScanning.processAllUpdatedFiles(
+				// 			currentFile
+				// 		);
+				// 	})
+				// 	.catch((error) => {
+				// 		console.error(
+				// 			"TaskItemEventHandlers.ts : Error updating recurring task in file",
+				// 			error
+				// 		);
+				// 	});
+			}
+
+			// // Move from Pending to Completed
+			// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
 		}
+	} else {
+		useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
+			.then(() => {
+				const currentFile = plugin.app.vault.getFileByPath(
+					task.filePath
+				);
+				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+
+				// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
+				// 	// Move from Pending to Completed
+				// 	moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+			})
+			.catch((error) => {
+				// bugReporter(
+				// 	plugin,
+				// 	"Error updating recurring task in file",
+				// 	error as string,
+				// 	"TaskItemEventHandlers.ts/handleCheckboxChange"
+				// );
+				console.error(
+					"TaskItemEventHandlers.ts : Error updating recurring task in file",
+					error
+				);
+			});
 	}
 	// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 };
 
 export const handleSubTasksChange = (
 	plugin: TaskBoard,
+	oldTask: taskItem,
 	updatedTask: taskItem
 ) => {
-	updateTaskInJson(plugin, updatedTask);
-	updateTaskInFile(plugin, updatedTask, updatedTask);
+	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated.
+	updateTaskInFile(plugin, updatedTask, oldTask)
+		.then(() => {
+			console.log(
+				"TaskItemEventHandlers.ts : This is will run only once the task is updated in the file."
+			);
+			const currentFile = plugin.app.vault.getFileByPath(
+				updatedTask.filePath
+			);
+			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+		})
+		.catch((error) => {
+			// bugReporter(
+			// 	plugin,
+			// 	"Error updating task in file",
+			// 	error as string,
+			// 	"TaskItemEventHandlers.ts/handleEditTask"
+			// );
+			console.log(
+				"TaskItemEventHandlers.ts : Error updating task in file",
+				error
+			);
+		});
 };
 
 export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
@@ -75,8 +163,14 @@ export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
 		app,
 		mssg,
 		onConfirm: () => {
-			deleteTaskFromFile(plugin, task);
-			deleteTaskFromJson(plugin, task);
+			deleteTaskFromFile(plugin, task).then(() => {
+				const currentFile = plugin.app.vault.getFileByPath(
+					task.filePath
+				);
+				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+			});
+
+			// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
 			// Remove the task from state after deletion
 			// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
 		},
@@ -101,8 +195,32 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 			(updatedTask, quickAddPluginChoice) => {
 				updatedTask.filePath = task.filePath;
 				// Update the task in the file and JSON
-				updateTaskInFile(plugin, updatedTask, task);
-				updateTaskInJson(plugin, updatedTask);
+				updateTaskInFile(plugin, updatedTask, task)
+					.then(() => {
+						console.log(
+							"TaskItemEventHandlers.ts : This is will run only once the task is updated in the file."
+						);
+						const currentFile = plugin.app.vault.getFileByPath(
+							task.filePath
+						);
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							currentFile
+						);
+					})
+					.catch((error) => {
+						// bugReporter(
+						// 	plugin,
+						// 	"Error updating task in file",
+						// 	error as string,
+						// 	"TaskItemEventHandlers.ts/handleEditTask"
+						// );
+						console.log(
+							"TaskItemEventHandlers.ts : Error updating task in file",
+							error
+						);
+					});
+
+				// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 
 				// setTasks((prevTasks) =>
 				// 	prevTasks.map((task) =>

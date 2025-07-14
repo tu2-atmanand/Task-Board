@@ -1204,7 +1204,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .boardConfigModalColumnRowDragButton {
 	cursor: grab;
-	align-self: center
+	align-self: center;
+	min-width: 25px;
 }
 
 .boardConfigModalColumnRowEyeButton,
@@ -1774,6 +1775,82 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .scanVaultModalHomeToggleButton {
 	margin-top: 20px;
+}
+
+
+/* /src/modal/DiffContentCompareModal.ts */
+
+.modal[data-type="task-board-diff-content-compare"] {
+	min-width: 100vw !important;
+}
+
+.taskboard-diff-content-compare-modal {
+	min-width: 90vw;
+}
+
+.taskboard-diff-content-compare-modal-container {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+}
+
+.taskboard-diff-content-compare-modal-side {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	overflow-y: auto;
+	max-height: calc(var(--dialog-max-height) - 6vh);
+	padding: 1em;
+	border-radius: 4px;
+	background-color: var(--background-primary-alt);
+}
+
+.taskboard-diff-content-compare-modal-content {
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	font-family: monospace;
+	padding: 0.5em;
+	border-radius: 4px;
+	background-color: var(--background-secondary);
+	max-height: calc(var(--dialog-max-height) - 10vh);
+	overflow: auto;
+}
+
+.taskboard-diff-content-compare-modal-old-content-button {
+	background-color: #68671569 !important;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: none;
+}
+
+.taskboard-diff-content-compare-modal-new-content-button {
+	background-color: #30639c6b !important;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: none;
+}
+
+.taskboard-diff-content-compare-modal-info {
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	margin-bottom: 1em;
+}
+
+.taskboard-diff-content-compare-modal-abort-button {
+	background-color: #78141469 !important;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: none;
+}
+
+@media (max-width: 650px) {
+	.taskboard-diff-content-compare-modal-container{
+		flex-direction: column;
+	}
 }
 
 
