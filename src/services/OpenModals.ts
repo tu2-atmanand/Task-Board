@@ -1,7 +1,7 @@
 // src/services/OpenModals.ts
 
 import { App, Notice, TFile } from "obsidian";
-import { addTaskInNote, addTaskInJson } from "src/utils/TaskItemUtils";
+import { addTaskInNote } from "src/utils/TaskItemUtils";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -17,6 +17,7 @@ import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
+import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -224,4 +225,19 @@ export const bugReporter = (
 	// bugReportNotice.messageEl.onclick = () => {
 	// 	bugReportNotice.hide();
 	// };
+};
+
+export const openDiffContentCompareModal = (
+	plugin: TaskBoard,
+	oldContent: string,
+	newContent: string,
+	onSelect: (which: "old" | "new") => void
+) => {
+	const modal = new DiffContentCompareModal(
+		plugin,
+		oldContent,
+		newContent,
+		onSelect
+	);
+	modal.open();
 };
