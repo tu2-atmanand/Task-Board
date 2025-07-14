@@ -10,7 +10,7 @@ import { ScanningVault } from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
-import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
@@ -85,22 +85,23 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 						priority: task.priority,
 					};
 
-					const formatedContent = taskContentFormatter(plugin, newTaskContent);
+					getFormattedTaskContent(newTaskContent).then((formatedContent) => {
 
-					const uniqueKey = `${filePath}-task-${taskIndex}`;
-					const descElement = taskRendererRef.current[uniqueKey];
+						const uniqueKey = `${filePath}-task-${taskIndex}`;
+						const descElement = taskRendererRef.current[uniqueKey];
 
-					if (descElement && formatedContent !== "") {
-						descElement.empty();
-						// Render task description using MarkdownUIRenderer
-						MarkdownUIRenderer.renderTaskDisc(
-							app,
-							formatedContent,
-							descElement,
-							task.filePath,
-							componentRef.current
-						);
-					}
+						if (descElement && formatedContent !== "") {
+							descElement.empty();
+							// Render task description using MarkdownUIRenderer
+							MarkdownUIRenderer.renderTaskDisc(
+								app,
+								formatedContent,
+								descElement,
+								task.filePath,
+								componentRef.current
+							);
+						}
+					});
 				});
 			});
 		}

@@ -147,7 +147,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 			if (
 				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
 			) {
-				plugin.realTimeScanning.processStack();
+				await plugin.realTimeScanning.processAllUpdatedFiles();
 			}
 			eventEmitter.emit("REFRESH_BOARD");
 		}

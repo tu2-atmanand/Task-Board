@@ -8,7 +8,58 @@ import {
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 
-export const taskContentFormatter = (
+export interface cursorLocation {
+	lineNumber: number;
+	charIndex: number;
+}
+
+/**
+ * Function to get the formatted task content. The content will look similar to how it goes into your notes.
+ * @param task - The task item to format.
+ * @returns The formatted task content as a string.
+ */
+export const getFormattedTaskContent = async (
+	task: taskItem
+): Promise<string> => {
+	if (!task) {
+		return "";
+	}
+
+	if (task.title === "") {
+		return "";
+	}
+
+	const checkBoxStat = `- [${task.status}]`;
+	let taskLine = `${checkBoxStat} ${task.title}`;
+
+	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+	const bodyLines = task.body
+		.map((line: string) => {
+			if (line.startsWith("\t")) {
+				return line;
+			} else {
+				return `\t${line}`;
+			}
+		})
+		.join("\n");
+
+	const completeTask = `${taskLine}${
+		bodyLines.trim() ? `\n${bodyLines}` : ""
+	}`;
+
+	return completeTask;
+};
+
+/**
+ * Function to get the sanitized task content.
+ * This function will format the task content based on the latest properties of the task.
+ * It will also ensure that the task content is in the correct format and does not contain any old or invalid properties.
+ * Do not use this function in batches. It does a lot of regex operations and can be slow for large number of tasks at once.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param updatedTask - The updated task item.
+ * @return The sanitized task content as a string.
+ */
+export const getSanitizedTaskContent = (
 	plugin: TaskBoard,
 	updatedTask: taskItem
 ): string => {

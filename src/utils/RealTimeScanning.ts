@@ -49,19 +49,31 @@ export class RealTimeScanning {
 		}
 	}
 
-	async processStack() {
+	async processAllUpdatedFiles(currentFile?: TFile | null) {
+		console.log(
+			"RealTimeScanning.ts : processAllUpdatedFiles called with currentFile:",
+			currentFile?.path
+		);
 		const filesToProcess = this.taskBoardFileStack.slice();
 		this.taskBoardFileStack = [];
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
 			.filter((file) => !!file);
 
-		if (files.length > 0) {
+		if (currentFile) {
+			// If a current file is provided, ensure it's included in the processing
+			const currentFilePath = currentFile.path;
+			if (!filesToProcess.includes(currentFilePath)) {
+				filesToProcess.push(currentFilePath);
+				files.push(currentFile);
+			}
+		}
+		if (filesToProcess.length > 0) {
 			// Send all files for scanning and updating tasks
 			await this.scanningVault.refreshTasksFromFiles(files);
 		}
 		// Save updated stack (which should now be empty)
-		await this.saveStack();
+		this.saveStack();
 	}
 
 	getFileFromPath(filePath: string): TFile | null {

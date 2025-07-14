@@ -15,7 +15,7 @@ import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
-import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
 
 // Function to open the BoardConfigModal
@@ -49,14 +49,21 @@ export const openAddNewTaskInCurrentFileModal = (
 		app,
 		plugin,
 		(newTask, quickAddPluginChoice) => {
-			addTaskInNote(plugin, newTask, true, cursorPosition);
-			if (
-				activeFile &&
-				scanFilterForFilesNFolders(activeFile, scanFilters) &&
-				scanFilterForTags(newTask.tags, scanFilters)
-			) {
-				addTaskInJson(plugin, newTask);
-			}
+			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
+				const currentFile = plugin.app.vault.getFileByPath(
+					newTask.filePath
+				);
+				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+			});
+
+			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
+			// if (
+			// 	activeFile &&
+			// 	scanFilterForFilesNFolders(activeFile, scanFilters) &&
+			// 	scanFilterForTags(newTask.tags, scanFilters)
+			// ) {
+			// 	addTaskInJson(plugin, newTask);
+			// }
 
 			eventEmitter.emit("REFRESH_COLUMN");
 			cursorPosition = undefined;
@@ -88,7 +95,7 @@ export const openAddNewTaskModal = (
 		async (newTask, quickAddPluginChoice) => {
 			if (communityPlugins.isQuickAddPluginEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
-				const completeTask = taskContentFormatter(plugin, newTask);
+				const completeTask = await getFormattedTaskContent(newTask);
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
 					quickAddPluginChoice,
 					{
@@ -96,15 +103,22 @@ export const openAddNewTaskModal = (
 					}
 				);
 			} else {
-				await addTaskInNote(plugin, newTask, false);
+				await addTaskInNote(plugin, newTask, false).then(() => {
+					const currentFile = plugin.app.vault.getFileByPath(
+						newTask.filePath
+					);
+					plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				});
 			}
-			if (
-				activeTFile instanceof TFile &&
-				scanFilterForFilesNFolders(activeTFile, scanFilters) &&
-				scanFilterForTags(newTask.tags, scanFilters)
-			) {
-				addTaskInJson(plugin, newTask);
-			}
+
+			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
+			// if (
+			// 	activeTFile instanceof TFile &&
+			// 	scanFilterForFilesNFolders(activeTFile, scanFilters) &&
+			// 	scanFilterForTags(newTask.tags, scanFilters)
+			// ) {
+			// 	addTaskInJson(plugin, newTask);
+			// }
 
 			eventEmitter.emit("REFRESH_COLUMN");
 		},

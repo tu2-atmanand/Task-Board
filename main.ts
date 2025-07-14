@@ -225,11 +225,9 @@ export default class TaskBoard extends Plugin {
 	}
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning setting is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
-		this.realTimeScanning.initializeStack(
-			this.settings.data.globalSettings.realTimeScanning
-		);
-		this.realTimeScanning.processStack();
+		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
+		this.realTimeScanning.initializeStack();
+		this.realTimeScanning.processAllUpdatedFiles();
 	}
 
 	scanVaultAtStartup() {

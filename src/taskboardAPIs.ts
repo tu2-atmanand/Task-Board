@@ -21,7 +21,7 @@ export class TaskBoardApi {
 				app,
 				plugin,
 				(newTask, quickAddPluginChoice) => {
-					// return taskContentFormatter(plugin, newTask);
+					// return getSanitizedTaskContent(plugin, newTask);
 				},
 				true,
 				false,
