@@ -233,11 +233,36 @@ export const openDiffContentCompareModal = (
 	newContent: string,
 	onSelect: (which: "old" | "new") => void
 ) => {
-	const modal = new DiffContentCompareModal(
-		plugin,
-		oldContent,
-		newContent,
-		onSelect
+	const contentMismatchNotice = new Notice(
+		createFragment((f) => {
+			f.createDiv("bugReportNotice", (el) => {
+				el.createEl("p", {
+					text: `${t("safe-guard")} : ${t("content-mismatch-notice-message")}`,
+				});
+				el.createEl("button", {
+					text: t("show-conflicts"),
+					cls: "reportBugButton",
+					onclick: () => {
+						const modal = new DiffContentCompareModal(
+							plugin,
+							oldContent,
+							newContent,
+							onSelect
+						);
+						modal.open();
+						el.hide();
+					},
+				});
+			});
+		}),
+		0
 	);
-	modal.open();
+
+	contentMismatchNotice.messageEl.onClickEvent((e) => {
+		if (!(e.target instanceof HTMLButtonElement)) {
+			e.stopPropagation();
+			e.preventDefault();
+			e.stopImmediatePropagation();
+		}
+	});
 };

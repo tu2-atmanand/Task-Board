@@ -94,7 +94,7 @@ export class DiffContentCompareModal extends Modal {
 				text: "Select the version of content you want Task Board to use, to update it as per your new action.",
 			});
 			ul.createEl("li", {
-				text: "If the content shown in right-side is completely different than the content you are trying to edit. This probably means, that Task Board couldnt able to find the task you are looking for inside the current file at line number 27. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below or close this modal, to avoid any data updation.",
+				text: "If the content shown in right-side is completely different than the content you are trying to edit. This probably means, that Task Board couldnt able to find the task you are looking for inside the current file at stored line. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below or close this modal, to avoid any data updation. And manually scan the file or update the task.",
 			});
 		});
 

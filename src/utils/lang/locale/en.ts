@@ -237,6 +237,9 @@ const en: Lang = {
 	"tasks-cache-file-path": "Tasks cache file path",
 	"tasks-cache-file-path-description": "Enter the path of the file where you want to store the tasks.json file, which hold all the scanned tasks. This is very useful, if you sync your vault with other devices and want to keep the tasks.json file in sync as well.",
 	"tasks-cache-file-path-description-2": "If you sync the plugin setting as well, then there is no need to change the default path. Leave this setting empty.",
+	"safe-guard": "Safe guard",
+	"content-mismatch-notice-message": "Content mismatch detected. Please resolve the conflicts.",
+	"show-conflicts": "Show conflicts",
 };
 
 export default en;
