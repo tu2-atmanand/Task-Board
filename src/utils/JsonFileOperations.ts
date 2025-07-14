@@ -93,7 +93,6 @@ export const loadJsonCacheDataFromDisk = async (
 		// 	Completed: cacheData.Completed,
 		// 	Notes: cacheData.Notes || [], // Ensure Notes is always an array
 		// };
-		console.log("Loaded tasks from disk:", cacheData);
 		return cacheData;
 	} catch (error) {
 		console.error("Error reading tasks.json from disk:", error); // This error will be shown for a fresh install hence dont use the bugReporter here.

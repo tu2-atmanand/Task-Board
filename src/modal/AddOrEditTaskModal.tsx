@@ -21,7 +21,7 @@ import { NotificationService, UniversalDateOptions } from "src/interfaces/Global
 import { bugReporter } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 
-const taskItemEmpty = {
+const taskItemEmpty: taskItem = {
 	id: 0,
 	title: "",
 	body: [],

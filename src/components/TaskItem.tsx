@@ -264,7 +264,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 		// onSubTasksChange(updatedTask); // Notify parent of the change
-		handleSubTasksChange(plugin, updatedTask)
+		handleSubTasksChange(plugin, task, updatedTask)
 	};
 
 	const handleMouseEnter = (event: React.MouseEvent) => {

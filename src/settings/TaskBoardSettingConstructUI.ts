@@ -1016,12 +1016,14 @@ export class SettingsManager {
 							communityPlugins.isQuickAddPluginEnabled()
 					)
 					.onChange(async (value) => {
+						if(this.globalSettings === null) return;
+
 						if (!communityPlugins.isQuickAddPluginEnabled()) {
 							new Notice(t("quickadd-plugin-not-enabled"));
-							this.globalSettings!.compatiblePlugins.quickAddPlugin =
+							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								false;
 						} else {
-							this.globalSettings!.compatiblePlugins.quickAddPlugin =
+							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								value;
 						}
 						await this.saveSettings();
@@ -1044,12 +1046,12 @@ export class SettingsManager {
 					this.app,
 					communityPlugins.quickAddPlugin
 				);
-				const onSelectCallback = async (selectedPath: string) => {
+				const onSelectCallback = async (selectedChoiceName: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.quickAddPluginDefaultChoice =
-							selectedPath;
+							selectedChoiceName;
 					}
-					text.setValue(selectedPath);
+					text.setValue(selectedChoiceName);
 					await this.saveSettings();
 				};
 

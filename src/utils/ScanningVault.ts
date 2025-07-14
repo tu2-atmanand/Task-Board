@@ -232,8 +232,8 @@ export class ScanningVault {
 			this.tasks = tasks; // Update the tasks object
 		}
 
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
+		for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+			const line = lines[lineIndex];
 			if (isTaskLine(line)) {
 				const tags = extractTags(line);
 				if (scanFilterForTags(tags, scanFilters)) {
@@ -255,7 +255,7 @@ export class ScanningVault {
 					);
 					const completionDate = extractCompletionDate(line);
 					const cancelledDate = extractCancelledDate(line);
-					const body = extractBody(lines, i + 1);
+					const bodyLines = extractBody(lines, lineIndex + 1);
 
 					if (
 						this.plugin.settings.data.globalSettings
@@ -311,7 +311,7 @@ export class ScanningVault {
 						id: this.generateTaskId(),
 						status: taskStatus,
 						title: title,
-						body: body,
+						body: bodyLines,
 						time: time,
 						createdDate: createdDate,
 						startDate: startDate,
@@ -343,6 +343,10 @@ export class ScanningVault {
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async refreshTasksFromFiles(files: (TFile | null)[]) {
+		console.log(
+			"ScanningVault.ts : refreshTasksFromFiles called with files:",
+			files
+		);
 		if (!files || files.length === 0) {
 			console.warn("No files provided for task update.");
 			return;
@@ -549,14 +553,15 @@ export function buildTaskFromRawContent(
 
 // Extract title from task line
 export function extractTitle(text: string): string {
-	return text.replace(/^- \[.\]\s*/, "").trim();
+	return text.replace(/^- \[.\]\s*/, "");
 }
 
 // New function to extract task body
 export function extractBody(lines: string[], startLineIndex: number): string[] {
 	const bodyLines = [];
-	for (let i = startLineIndex; i < lines.length; i++) {
-		const line = lines[i];
+	let bodyStartIndex = startLineIndex;
+	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
+		const line = lines[bodyStartIndex];
 
 		if (line.trim() === "") {
 			break;

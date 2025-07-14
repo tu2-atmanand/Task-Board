@@ -42,8 +42,8 @@ export default class TaskBoard extends Plugin {
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
-	currentModifiedFile: TFile | null;
-	fileUpdatedUsingModal: string;
+	// currentModifiedFile: TFile | null;
+	// fileUpdatedUsingModal: string;
 	IstasksJsonDataChanged: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
@@ -57,8 +57,8 @@ export default class TaskBoard extends Plugin {
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
 		this.editorModified = false;
-		this.currentModifiedFile = null;
-		this.fileUpdatedUsingModal = "";
+		// this.currentModifiedFile = null;
+		// this.fileUpdatedUsingModal = "";
 		this.IstasksJsonDataChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
@@ -358,7 +358,6 @@ export default class TaskBoard extends Plugin {
 			)
 		);
 		this.registerDomEvent(window, "blur", () => {
-			console.log("Window lost focus, checking for modified files...");
 			this.onFileModifiedAndLostFocus();
 		});
 
@@ -567,15 +566,23 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onFileModifiedAndLostFocus() {
-		if (this.editorModified && this.currentModifiedFile) {
-			if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
-				await this.realTimeScanning.onFileChange(
-					this.currentModifiedFile,
-					this.settings.data.globalSettings.realTimeScanning
-				);
-			} else {
-				this.fileUpdatedUsingModal = "";
-			}
+		console.log(
+			"onFileModifiedAndLostFocus called\n",
+			this.editorModified,
+			this.taskBoardFileStack.length
+		);
+		if (this.editorModified) {
+			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
+			// 	await this.realTimeScanning.onFileModified(
+			// 		this.currentModifiedFile,
+			// 		this.settings.data.globalSettings.realTimeScanning
+			// 	);
+			// } else {
+			// 	this.fileUpdatedUsingModal = "";
+			// }
+
+			console.log("Window lost focus, scanning the modified files...");
+			await this.realTimeScanning.processAllUpdatedFiles();
 
 			// Reset the editorModified flag after the scan.
 			this.editorModified = false;

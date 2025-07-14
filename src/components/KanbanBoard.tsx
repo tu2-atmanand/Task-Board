@@ -26,7 +26,6 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	const [freshInstall, setFreshInstall] = useState(false);
 
 	useEffect(() => {
-		console.log("KanbanBoard.tsx : Is this running on the first load?\nrefreshCount:", refreshCount);
 		const fetchData = async () => {
 			try {
 				const data = await loadBoardsData(plugin);
@@ -96,7 +95,6 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 
 	const debouncedRefreshColumn = useCallback(debounce(async () => {
 		try {
-			console.log("KanbanBoard.tsx : Is this running on the first load?");
 			const allTasks = await loadTasksAndMerge(plugin);
 			setAllTasks(allTasks);
 		} catch (error) {
@@ -140,7 +138,7 @@ const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[]
 	}, []);
 
 	// Memoized refreshBoardButton to avoid re-creating the function on every render
-	const refreshBoardButton = useCallback(() => {
+	const refreshBoardButton = useCallback(async () => {
 		if (plugin.settings.data.globalSettings.realTimeScanning) {
 			eventEmitter.emit("REFRESH_BOARD");
 		} else {

@@ -1,5 +1,6 @@
 import {
 	App,
+	Editor,
 	MarkdownScrollableEditView,
 	Scope,
 	TFile,
@@ -67,7 +68,7 @@ interface MarkdownEditorProps {
 		mod: boolean,
 		shift: boolean
 	) => boolean;
-	onEscape: (editor: EmbeddableMarkdownEditor) => void;
+	// onEscape: (editor: EmbeddableMarkdownEditor) => void;
 	onSubmit: (editor: EmbeddableMarkdownEditor) => void;
 	onBlur: (editor: EmbeddableMarkdownEditor) => void;
 	onPaste: (e: ClipboardEvent, editor: EmbeddableMarkdownEditor) => void;
@@ -81,7 +82,7 @@ const defaultProperties: MarkdownEditorProps = {
 	placeholder: "",
 
 	onEnter: () => false,
-	onEscape: () => {},
+	// onEscape: () => {},
 	onSubmit: () => {},
 	// NOTE: Blur takes precedence over Escape (this can be changed)
 	onBlur: () => {},
@@ -101,6 +102,9 @@ export class EmbeddableMarkdownEditor {
 	// Expose commonly accessed properties
 	get editorEl(): HTMLElement {
 		return this.editor.editorEl;
+	}
+	get obsidianEditor(): Editor | undefined {
+		return this.editor.editor;
 	}
 	get containerEl(): HTMLElement {
 		return this.editor.containerEl;
@@ -238,14 +242,14 @@ export class EmbeddableMarkdownEditor {
 							run: () => this.options.onEnter(this, true, false),
 							shift: () => this.options.onEnter(this, true, true),
 						},
-						{
-							key: "Escape",
-							run: () => {
-								this.options.onEscape(this);
-								return true;
-							},
-							preventDefault: true,
-						},
+						// {
+						// 	key: "Escape",
+						// 	run: () => {
+						// 		this.options.onEscape(this);
+						// 		return true;
+						// 	},
+						// 	preventDefault: true,
+						// },
 					])
 				)
 			);
@@ -287,6 +291,13 @@ export class EmbeddableMarkdownEditor {
 		this.containerEl.empty();
 
 		this.editor.destroy();
+	}
+
+	onBlur(): void {
+		console.log("Editor blurred");
+		if (typeof this.options.onBlur === "function") {
+			this.options.onBlur(this);
+		}
 	}
 
 	// Unload handler
