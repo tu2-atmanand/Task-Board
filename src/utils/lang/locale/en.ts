@@ -223,6 +223,7 @@ const en: Lang = {
 	"default-quickadd-choice-description": "Select which of your choice from your quickadd plugin configuration should be used as the default choice in the 'add new task modal'. Please install the quickadd plugin first and create a choice in the quickadd plugin.",
 	"quickadd-plugin-not-enabled": "Quickadd plugin is not enabled. Please install the plugin and enable it.",
 	"quickadd-plugin-compatibility-description": "If you have installed the quickadd plugin, you can now use its 'choices' from the 'add new task modal' to directly add the task wherever you want.",
+	"quickadd-plugin-choice": "Quickadd choice",
 	"created-date": "Created date",
 	"start-date": "Start date",
 	"scheduled-date": "Scheduled date",
