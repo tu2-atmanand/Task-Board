@@ -8,10 +8,16 @@ import {
 	isTaskLine,
 } from "./CheckBoxUtils";
 import {
-	loadTasksJsonFromDisk,
-	writeTasksJsonToDisk,
+	loadJsonCacheDataFromDisk,
+	writeJsonCacheDataFromDisk,
 } from "./JsonFileOperations";
-import { priorityEmojis, taskItem, tasksJson } from "src/interfaces/TaskItem";
+import {
+	jsonCacheData,
+	noteItem,
+	priorityEmojis,
+	taskItem,
+	tasksJsonData,
+} from "src/interfaces/TaskItem";
 import {
 	scanFilterForFilesNFolders,
 	scanFilterForTags,
@@ -20,7 +26,10 @@ import {
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { readDataOfVaultFiles } from "./MarkdownFileOperations";
-import { scanFilters } from "src/interfaces/GlobalSettings";
+import {
+	UniversalDateOptions,
+	scanFilters,
+} from "src/interfaces/GlobalSettings";
 
 // Function to extract frontmatter from file content
 export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
@@ -58,7 +67,6 @@ export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
 		// API-2 : Get frontmatter as an object
 		const frontmatterAsObject =
 			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-		console.log("Frontmatter extracted as an object:", frontmatterAsObject);
 
 		return frontmatterAsObject;
 	} catch (error) {
@@ -102,7 +110,13 @@ export function extractFrontmatterTags(frontmatter: any): string[] {
 export class ScanningVault {
 	app: App;
 	plugin: TaskBoard;
-	tasks: any = { Pending: {}, Completed: {} };
+	tasks: jsonCacheData = {
+		VaultName: "",
+		Modified_at: new Date().toISOString(),
+		Pending: {},
+		Completed: {},
+		Notes: [],
+	};
 	TaskDetected: boolean;
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -120,7 +134,13 @@ export class ScanningVault {
 
 	async scanVaultForTasks() {
 		const files = this.app.vault.getMarkdownFiles();
-		this.tasks = { Pending: {}, Completed: {} }; // Reset task structure
+		this.tasks = {
+			VaultName: this.plugin.app.vault.getName(),
+			Modified_at: new Date().toISOString(),
+			Pending: {},
+			Completed: {},
+			Notes: [],
+		}; // Reset task structure
 
 		for (const file of files) {
 			const scanFilters =
@@ -130,7 +150,7 @@ export class ScanningVault {
 			}
 		}
 
-		this.saveTasksToFile();
+		this.saveTasksToJsonCache();
 		// Emit the event
 		eventEmitter.emit("REFRESH_BOARD");
 	}
@@ -138,7 +158,7 @@ export class ScanningVault {
 	// Extract tasks from a specific file
 	async extractTasksFromFile(
 		file: TFile,
-		tasks: tasksJson,
+		tasks: jsonCacheData,
 		scanFilters: scanFilters
 	) {
 		const fileNameWithPath = file.path;
@@ -151,8 +171,68 @@ export class ScanningVault {
 		tasks.Pending[fileNameWithPath] = [];
 		tasks.Completed[fileNameWithPath] = [];
 
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
+		// First checking if the file contains the reminder property as entered by using in the settings.frontmatterPropertyForReminder. If it contains, then this file needs to be appended in the tasks.Notes list.
+		// Extract frontmatter from the file
+		const frontmatter = extractFrontmatter(this.plugin, file);
+		// console.log(
+		// 	"Frontmatter extracted:",
+		// 	frontmatter,
+		// 	"\nfile:",
+		// 	fileNameWithPath,
+		// 	"\nvalue of frontmatterPropertyForReminder:",
+		// 	this.plugin.settings.data.globalSettings
+		// 		.frontmatterPropertyForReminder,
+		// 	"\nvalue of frontmatter for the key:",
+		// 	frontmatter[
+		// 		this.plugin.settings.data.globalSettings
+		// 			.frontmatterPropertyForReminder
+		// 	],
+		// 	"Condition : ",
+		// 	this.plugin.settings.data.globalSettings
+		// 		.frontmatterPropertyForReminder &&
+		// 		frontmatter &&
+		// 		frontmatter[
+		// 			this.plugin.settings.data.globalSettings
+		// 				.frontmatterPropertyForReminder
+		// 		]
+		// );
+		if (
+			this.plugin.settings.data.globalSettings
+				.frontmatterPropertyForReminder &&
+			frontmatter &&
+			frontmatter[
+				this.plugin.settings.data.globalSettings
+					.frontmatterPropertyForReminder
+			]
+		) {
+			const note: noteItem = {
+				filePath: fileNameWithPath,
+				frontmatter: frontmatter,
+				reminder:
+					frontmatter[
+						this.plugin.settings.data.globalSettings
+							.frontmatterPropertyForReminder
+					],
+			};
+
+			// Check if the note already exists
+			const existingNoteIndex = tasks.Notes.findIndex(
+				(n) => n.filePath === fileNameWithPath
+			);
+			if (existingNoteIndex !== -1) {
+				// Replace the existing note
+				tasks.Notes[existingNoteIndex] = note;
+				console.log("Note replaced in tasks.Notes:", note);
+			} else {
+				// Add the new note
+				tasks.Notes.push(note);
+				console.log("Note added to tasks.Notes:", note);
+			}
+			this.tasks = tasks; // Update the tasks object
+		}
+
+		for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+			const line = lines[lineIndex];
 			if (isTaskLine(line)) {
 				const tags = extractTags(line);
 				if (scanFilterForTags(tags, scanFilters)) {
@@ -162,24 +242,66 @@ export class ScanningVault {
 					const title = extractTitle(line);
 					const time = extractTime(line);
 					const createdDate = extractCreatedDate(line);
-					const startDate = extractStartDate(line);
-					const scheduledDate = extractScheduledDate(line);
-					const due = extractDueDate(line);
+					let startDate = extractStartDate(line);
+					let scheduledDate = extractScheduledDate(line);
+					let dueDate = extractDueDate(line);
 					const priority = extractPriority(line);
+					const reminder = extractReminder(
+						line,
+						startDate,
+						scheduledDate,
+						dueDate
+					);
 					const completionDate = extractCompletionDate(line);
 					const cancelledDate = extractCancelledDate(line);
-					const body = extractBody(lines, i + 1);
+					const bodyLines = extractBody(lines, lineIndex + 1);
+
+					if (
+						this.plugin.settings.data.globalSettings
+							.dailyNotesPluginComp
+					) {
+						const universalDateFormat =
+							this.plugin.settings.data.globalSettings
+								.universalDateFormat;
+						const basename = file.basename;
+
+						// Check if the basename matches the dueFormat using moment
+						const moment =
+							_moment as unknown as typeof _moment.default;
+						if (
+							moment(
+								basename,
+								universalDateFormat,
+								true
+							).isValid()
+						) {
+							if (
+								this.plugin.settings.data.globalSettings
+									.universalDate ===
+								UniversalDateOptions.dueDate
+							) {
+								dueDate = basename; // If the basename matches the dueFormat, assign it to due
+							} else if (
+								this.plugin.settings.data.globalSettings
+									.universalDate ===
+								UniversalDateOptions.startDate
+							) {
+								startDate = basename; // If the basename matches the dueFormat, assign it to startDate
+							} else if (
+								this.plugin.settings.data.globalSettings
+									.universalDate ===
+								UniversalDateOptions.scheduledDate
+							) {
+								scheduledDate = basename; // If the basename matches the dueFormat, assign it to scheduledDate
+							}
+						}
+					}
 
 					let frontmatterTags: string[] = []; // Initialize frontmatterTags
 					if (
 						this.plugin.settings.data.globalSettings
 							.showFrontmatterTagsOnCards
 					) {
-						// Extract frontmatter from the file
-						const frontmatter = extractFrontmatter(
-							this.plugin,
-							file
-						);
 						// Extract frontmatter tags
 						frontmatterTags = extractFrontmatterTags(frontmatter);
 					}
@@ -187,26 +309,39 @@ export class ScanningVault {
 					const task: taskItem = {
 						id: this.generateTaskId(),
 						status: taskStatus,
-						title,
-						body,
-						time,
-						createdDate,
-						startDate,
-						scheduledDate,
-						due,
-						tags,
-						frontmatterTags,
-						priority,
+						title: title,
+						body: bodyLines,
+						time: time,
+						createdDate: createdDate,
+						startDate: startDate,
+						scheduledDate: scheduledDate,
+						due: dueDate,
+						tags: tags,
+						frontmatterTags: frontmatterTags,
+						priority: priority,
 						filePath: fileNameWithPath,
-						lineNumber: i + 1,
+						taskLocation: {
+							startLine: lineIndex + 1,
+							startCharIndex: 0,
+							endLine: lineIndex + 1 + bodyLines.length,
+							endCharIndex:
+								bodyLines.length > 0
+									? bodyLines[bodyLines.length - 1].length
+									: line.length,
+						},
 						completion: completionDate,
 						cancelledDate: cancelledDate,
+						reminder: reminder,
 					};
+
+					console.log("extractTasksFromFile : Task extracted:", task);
 
 					if (isTaskCompleted) {
 						tasks.Completed[fileNameWithPath].push(task);
+						this.tasks = tasks;
 					} else {
 						tasks.Pending[fileNameWithPath].push(task);
+						this.tasks = tasks;
 					}
 				} else {
 					// console.log("The tasks is not allowed...");
@@ -216,125 +351,143 @@ export class ScanningVault {
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
-	async updateTasksFromFiles(files: (TFile | null)[]) {
+	async refreshTasksFromFiles(files: (TFile | null)[]) {
+		console.log(
+			"ScanningVault.ts : refreshTasksFromFiles called with files:",
+			files
+		);
+		if (!files || files.length === 0) {
+			console.warn("No files provided for task update.");
+			return;
+		}
 		// Load the existing tasks from tasks.json once
-		const oldTasks = await loadTasksJsonFromDisk(this.plugin);
+		const oldTasks = await loadJsonCacheDataFromDisk(this.plugin);
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
 		for (const file of files) {
-			if (file !== null) {
-				const fileNameWithPath = file.path;
-				const fileContent = await this.app.vault.cachedRead(file);
-				const lines = fileContent.split("\n");
-				const newPendingTasks: taskItem[] = [];
-				const newCompletedTasks: taskItem[] = [];
+			if (
+				file !== null &&
+				scanFilterForFilesNFolders(file, scanFilters)
+			) {
+				// TODO : Try testing if removing the await from the below line will going to speed up the process.
+				await this.extractTasksFromFile(
+					file,
+					oldTasks,
+					scanFilters
+				).then(() => {
+					this.saveTasksToJsonCache();
+				});
 
-				for (let i = 0; i < lines.length; i++) {
-					const line = lines[i];
-					if (isTaskLine(line)) {
-						const tags = extractTags(line);
-						if (scanFilterForTags(tags, scanFilters)) {
-							this.TaskDetected = true;
-							const taskStatus = extractCheckboxSymbol(line);
-							const isTaskCompleted = isCompleted(line);
-							const title = extractTitle(line);
-							const time = extractTime(line);
-							const createdDate = extractCreatedDate(line);
-							const startDate = extractStartDate(line);
-							const scheduledDate = extractScheduledDate(line);
-							const priority = extractPriority(line);
-							const completionDate = extractCompletionDate(line);
-							const cancelledDate = extractCancelledDate(line);
-							const body = extractBody(lines, i + 1);
-							let due = extractDueDate(line);
-							if (
-								!due &&
-								this.plugin.settings.data.globalSettings
-									.dailyNotesPluginComp
-							) {
-								const dueFormat =
-									this.plugin.settings.data.globalSettings
-										.universalDateFormat;
-								const basename = file.basename;
+				// const fileNameWithPath = file.path;
+				// const fileContent = await this.app.vault.cachedRead(file);
+				// const lines = fileContent.split("\n");
+				// const newPendingTasks: taskItem[] = [];
+				// const newCompletedTasks: taskItem[] = [];
 
-								// Check if the basename matches the dueFormat using moment
-								const moment =
-									_moment as unknown as typeof _moment.default;
-								if (
-									moment(basename, dueFormat, true).isValid()
-								) {
-									due = basename; // If the basename matches the dueFormat, assign it to due
-								} else {
-									due = ""; // If not, assign an empty string
-								}
-							}
+				// for (let i = 0; i < lines.length; i++) {
+				// 	const line = lines[i];
+				// 	if (isTaskLine(line)) {
+				// 		const tags = extractTags(line);
+				// 		if (scanFilterForTags(tags, scanFilters)) {
+				// 			this.TaskDetected = true;
+				// 			const taskStatus = extractCheckboxSymbol(line);
+				// 			const isTaskCompleted = isCompleted(line);
+				// 			const title = extractTitle(line);
+				// 			const time = extractTime(line);
+				// 			const createdDate = extractCreatedDate(line);
+				// 			const startDate = extractStartDate(line);
+				// 			const scheduledDate = extractScheduledDate(line);
+				// 			const priority = extractPriority(line);
+				// 			const completionDate = extractCompletionDate(line);
+				// 			const cancelledDate = extractCancelledDate(line);
+				// 			const body = extractBody(lines, i + 1);
+				// 			let due = extractDueDate(line);
+				// 			if (
+				// 				!due &&
+				// 				this.plugin.settings.data.globalSettings
+				// 					.dailyNotesPluginComp
+				// 			) {
+				// 				const dueFormat =
+				// 					this.plugin.settings.data.globalSettings
+				// 						.universalDateFormat;
+				// 				const basename = file.basename;
 
-							let frontmatterTags: string[] = []; // Initialize frontmatterTags
-							if (
-								this.plugin.settings.data.globalSettings
-									.showFrontmatterTagsOnCards
-							) {
-								// Extract frontmatter from the file
-								const frontmatter = extractFrontmatter(
-									this.plugin,
-									file
-								);
-								// Extract frontmatter tags
-								frontmatterTags =
-									extractFrontmatterTags(frontmatter);
-							}
+				// 				// Check if the basename matches the dueFormat using moment
+				// 				const moment =
+				// 					_moment as unknown as typeof _moment.default;
+				// 				if (
+				// 					moment(basename, dueFormat, true).isValid()
+				// 				) {
+				// 					due = basename; // If the basename matches the dueFormat, assign it to due
+				// 				} else {
+				// 					due = ""; // If not, assign an empty string
+				// 				}
+				// 			}
 
-							const task: taskItem = {
-								id: this.generateTaskId(),
-								status: taskStatus,
-								title,
-								body,
-								time,
-								createdDate,
-								startDate,
-								scheduledDate,
-								due,
-								tags,
-								frontmatterTags,
-								priority,
-								filePath: fileNameWithPath,
-								lineNumber: i + 1,
-								completion: completionDate,
-								cancelledDate: cancelledDate,
-							};
+				// 			let frontmatterTags: string[] = []; // Initialize frontmatterTags
+				// 			if (
+				// 				this.plugin.settings.data.globalSettings
+				// 					.showFrontmatterTagsOnCards
+				// 			) {
+				// 				// Extract frontmatter from the file
+				// 				const frontmatter = extractFrontmatter(
+				// 					this.plugin,
+				// 					file
+				// 				);
+				// 				// Extract frontmatter tags
+				// 				frontmatterTags =
+				// 					extractFrontmatterTags(frontmatter);
+				// 			}
 
-							if (isTaskCompleted) {
-								newCompletedTasks.push(task);
-							} else {
-								newPendingTasks.push(task);
-							}
-						} else {
-							// console.log("The tasks is not allowed...");
-						}
-					}
-				}
+				// 			const task: taskItem = {
+				// 				id: this.generateTaskId(),
+				// 				status: taskStatus,
+				// 				title,
+				// 				body,
+				// 				time,
+				// 				createdDate,
+				// 				startDate,
+				// 				scheduledDate,
+				// 				due,
+				// 				tags,
+				// 				frontmatterTags,
+				// 				priority,
+				// 				filePath: fileNameWithPath,
+				// 				lineNumber: i + 1,
+				// 				completion: completionDate,
+				// 				cancelledDate: cancelledDate,
+				// 			};
 
-				// Only replace the tasks for the specific file
-				this.tasks.Pending = {
-					...oldTasks.Pending, // Keep the existing tasks for other files
-					[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
-				};
+				// 			if (isTaskCompleted) {
+				// 				newCompletedTasks.push(task);
+				// 			} else {
+				// 				newPendingTasks.push(task);
+				// 			}
+				// 		} else {
+				// 			// console.log("The tasks is not allowed...");
+				// 		}
+				// 	}
+				// }
 
-				this.tasks.Completed = {
-					...oldTasks.Completed, // Keep the existing tasks for other files
-					[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
-				};
+				// // Only replace the tasks for the specific file
+				// this.tasks.Pending = {
+				// 	...oldTasks.Pending, // Keep the existing tasks for other files
+				// 	[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
+				// };
+
+				// this.tasks.Completed = {
+				// 	...oldTasks.Completed, // Keep the existing tasks for other files
+				// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
+				// };
 			} else {
 				console.warn("File is not valid...");
 			}
 		}
-
-		this.saveTasksToFile();
 	}
 
 	// Save tasks to JSON file
-	async saveTasksToFile() {
-		await writeTasksJsonToDisk(this.plugin, this.tasks);
+	async saveTasksToJsonCache() {
+		await writeJsonCacheDataFromDisk(this.plugin, this.tasks);
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
@@ -413,14 +566,15 @@ export function buildTaskFromRawContent(
 
 // Extract title from task line
 export function extractTitle(text: string): string {
-	return text.replace(/^- \[.\]\s*/, "").trim();
+	return text.replace(/^- \[.\]\s*/, "");
 }
 
 // New function to extract task body
 export function extractBody(lines: string[], startLineIndex: number): string[] {
 	const bodyLines = [];
-	for (let i = startLineIndex; i < lines.length; i++) {
-		const line = lines[i];
+	let bodyStartIndex = startLineIndex;
+	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
+		const line = lines[bodyStartIndex];
 
 		if (line.trim() === "") {
 			break;
@@ -594,6 +748,50 @@ export function extractTags(text: string): string[] {
 		/\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g
 	);
 	return matches ? matches.map((tag) => tag.trim()) : [];
+}
+
+export function extractReminder(
+	text: string,
+	startDate?: string,
+	scheduledDate?: string,
+	dueDate?: string
+): string {
+	let match = text.match(/\[reminder::\s*(.*?)\]/);
+	if (match) {
+		return match[1].replace(` `, "T").trim();
+	}
+
+	match = text.match(/@reminder\(\s*(.*?)\s*\)/);
+	if (match) {
+		return match[1].replace(` `, "T").trim();
+	}
+
+	// match = text.match(/🔔\s*(.*?)(?=\s|$)/);
+	// if (match) {
+	// 	return match[0].replace("🔔", "").trim();
+	// }
+
+	// New patterns
+	match = text.match(/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/);
+	if (match) {
+		const dateStr = match[1];
+		if (dateStr.includes(" ")) {
+			const [date, time] = dateStr.split(" ");
+			return `${date}T${time}`;
+		} else {
+			return `${dateStr}T09:00`;
+		}
+	}
+
+	match = text.match(/\(\@(\d{2}:\d{2})\)/);
+	if (match) {
+		const baseDate = startDate || scheduledDate || dueDate;
+		if (baseDate) {
+			return `${baseDate}T${match[1]}`;
+		}
+	}
+
+	return "";
 }
 
 // Extract completion date-time value

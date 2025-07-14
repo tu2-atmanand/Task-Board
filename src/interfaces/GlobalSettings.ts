@@ -40,6 +40,13 @@ export enum TagColorType {
 	Background = "background",
 }
 
+export enum NotificationService {
+	None = "none",
+	ReminderPlugin = "reminderPlugin",
+	NotifianApp = "notifianApp",
+	ObsidApp = "obsiApp",
+}
+
 interface CustomStatus {
 	symbol: string; // The symbol representing the status (e.g., "/", "-")
 	name: string; // The human-readable name of the status (e.g., "In Progress")
@@ -87,6 +94,9 @@ export interface globalSettingsData {
 	archivedTasksFilePath: string;
 	showFileNameInCard: boolean;
 	showFrontmatterTagsOnCards: boolean;
+	tasksCacheFilePath: string;
+	notificationService: string;
+	frontmatterPropertyForReminder: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -344,6 +354,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			archivedTasksFilePath: "",
 			showFileNameInCard: false,
 			showFrontmatterTagsOnCards: false,
+			tasksCacheFilePath: "",
+			notificationService: NotificationService.None,
+			frontmatterPropertyForReminder: "reminder",
 		},
 	},
 };

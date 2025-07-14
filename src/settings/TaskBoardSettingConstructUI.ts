@@ -9,6 +9,7 @@ import {
 } from "obsidian";
 import {
 	EditButtonMode,
+	NotificationService,
 	TagColorType,
 	UniversalDateOptions,
 	globalSettingsData,
@@ -21,10 +22,13 @@ import { t } from "src/utils/lang/helper";
 import {
 	MultiSuggest,
 	getFileSuggestions,
+	getFolderSuggestions,
+	getFrontmatterPropertyNames,
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { bugReporter } from "src/services/OpenModals";
+import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 
 export class SettingsManager {
 	win: Window;
@@ -455,7 +459,7 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.tagColorsType =
 							value as TagColorType;
-						await this.plugin.saveSettings();
+						await this.saveSettings();
 						renderTagColors();
 					})
 			);
@@ -721,6 +725,9 @@ export class SettingsManager {
 			preDefinedNote,
 			quickAddPluginDefaultChoice,
 			archivedTasksFilePath,
+			notificationService,
+			frontmatterPropertyForReminder,
+			tasksCacheFilePath,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -747,12 +754,12 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.editButtonAction =
 							value as EditButtonMode;
-						await this.plugin.saveSettings();
+						await this.saveSettings();
 					})
 			);
 
 		new Setting(contentEl)
-			.setName(t("default-note-for-new-tasks"))
+			.setName(t("default-note-for-adding-new-tasks"))
 			.setDesc(t("default-note-for-new-tasks-description"))
 			.addText((text) => {
 				text.setValue(preDefinedNote).onChange((value) => {
@@ -767,7 +774,7 @@ export class SettingsManager {
 						this.globalSettings.preDefinedNote = selectedPath;
 					}
 					text.setValue(selectedPath);
-					await this.plugin.saveSettings();
+					await this.saveSettings();
 				};
 
 				new MultiSuggest(
@@ -804,7 +811,7 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.universalDate =
 							value as UniversalDateOptions;
-						await this.plugin.saveSettings();
+						await this.saveSettings();
 					})
 			);
 
@@ -867,7 +874,69 @@ export class SettingsManager {
 							selectedPath;
 					}
 					text.setValue(selectedPath);
-					await this.plugin.saveSettings();
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
+
+		new Setting(contentEl)
+			.setName(t("tasks-cache-file-path"))
+			.setDesc(
+				t("tasks-cache-file-path-description") +
+					"\n" +
+					t("tasks-cache-file-path-description-2")
+			)
+			.addText((text) => {
+				text.setValue(tasksCacheFilePath).onChange((value) => {
+					if (this.globalSettings) {
+						console.log("value", value);
+						moveTasksCacheFileToNewPath(
+							this.plugin,
+							tasksCacheFilePath,
+							value
+						);
+
+						if (this.globalSettings) {
+							this.globalSettings.tasksCacheFilePath = value;
+							this.saveSettings();
+						}
+					}
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFolderSuggestions(this.app);
+				// to evevery element of suggestionContent, append "/tasks.json"
+				suggestionContent.forEach((item, index) => {
+					suggestionContent[index] = normalizePath(
+						`${item}/tasks.json`
+					);
+				});
+				const onSelectCallback = async (selectedPath: string) => {
+					console.log(
+						"selectedPath",
+						selectedPath,
+						"old path",
+						tasksCacheFilePath
+					);
+					moveTasksCacheFileToNewPath(
+						this.plugin,
+						tasksCacheFilePath,
+						selectedPath
+					);
+
+					if (this.globalSettings) {
+						this.globalSettings.tasksCacheFilePath = selectedPath;
+						await this.saveSettings();
+					}
+					// inputEl.textContent = `${selectedPath}/tasks.json`;
+					// inputEl.setText(`${selectedPath}/tasks.json`);
+					// text.setValue(`${selectedPath}/tasks.json`);
 				};
 
 				new MultiSuggest(
@@ -930,6 +999,10 @@ export class SettingsManager {
 
 		// Setting for choosing the default QuickAdd plugin run command
 		const communityPlugins = new CommunityPlugins(this.plugin);
+		if (!communityPlugins.isQuickAddPluginEnabled()) {
+			this.globalSettings!.compatiblePlugins.quickAddPlugin = false;
+			this.saveSettings();
+		}
 		new Setting(contentEl)
 			.setName("QuickAdd " + t("plugin-compatibility"))
 			.setDesc(t("quickadd-plugin-compatibility-description"))
@@ -938,14 +1011,19 @@ export class SettingsManager {
 			)
 			.addToggle((toggle) =>
 				toggle
-					.setValue(compatiblePlugins.quickAddPlugin)
+					.setValue(
+						compatiblePlugins.quickAddPlugin &&
+							communityPlugins.isQuickAddPluginEnabled()
+					)
 					.onChange(async (value) => {
+						if(this.globalSettings === null) return;
+
 						if (!communityPlugins.isQuickAddPluginEnabled()) {
 							new Notice(t("quickadd-plugin-not-enabled"));
-							this.globalSettings!.compatiblePlugins.quickAddPlugin =
+							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								false;
 						} else {
-							this.globalSettings!.compatiblePlugins.quickAddPlugin =
+							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								value;
 						}
 						await this.saveSettings();
@@ -968,13 +1046,13 @@ export class SettingsManager {
 					this.app,
 					communityPlugins.quickAddPlugin
 				);
-				const onSelectCallback = async (selectedPath: string) => {
+				const onSelectCallback = async (selectedChoiceName: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.quickAddPluginDefaultChoice =
-							selectedPath;
+							selectedChoiceName;
 					}
-					text.setValue(selectedPath);
-					await this.plugin.saveSettings();
+					text.setValue(selectedChoiceName);
+					await this.saveSettings();
 				};
 
 				new MultiSuggest(
@@ -987,6 +1065,65 @@ export class SettingsManager {
 			.setDisabled(
 				!this.globalSettings!.compatiblePlugins.quickAddPlugin
 			);
+
+		new Setting(contentEl)
+			.setName(t("push-notification-compatibility"))
+			.setDesc(t("push-notification-compatibility-description"))
+			.addDropdown((dropdown) => {
+				dropdown.addOption(NotificationService.None, t("none"));
+				dropdown.addOption(
+					NotificationService.ReminderPlugin,
+					"Reminder " + t("plugin")
+				);
+				dropdown.addOption(
+					NotificationService.NotifianApp,
+					"Notifian " + t("app")
+				);
+				dropdown.addOption(
+					NotificationService.ObsidApp,
+					"Obsi " + t("app")
+				);
+
+				dropdown.setValue(notificationService as string);
+				dropdown.onChange(async (value) => {
+					this.globalSettings!.notificationService = value;
+					await this.saveSettings();
+				});
+			});
+
+		new Setting(contentEl)
+			.setName(t("frontmatter-property-for-reminder"))
+			.setDesc(t("frontmatter-property-for-reminder-description"))
+			.addText((text) => {
+				text.setValue(frontmatterPropertyForReminder)
+					.onChange((value) => {
+						if (this.globalSettings)
+							this.globalSettings.frontmatterPropertyForReminder =
+								value;
+						this.saveSettings();
+					})
+					.setPlaceholder("eg.: reminder");
+
+				// const inputEl = text.inputEl;
+				// const suggestionContent = getFrontmatterPropertyNames(
+				// 	this.plugin
+				// );
+				// const onSelectCallback = async (selectedPath: string) => {
+				// 	if (this.globalSettings) {
+				// 		this.globalSettings.quickAddPluginDefaultChoice =
+				// 			selectedPath;
+				// 	}
+				// 	text.setValue(selectedPath);
+				// 	await this.saveSettings();
+				// };
+
+				// new MultiSuggest(
+				// 	inputEl,
+				// 	new Set(suggestionContent),
+				// 	onSelectCallback,
+				// 	this.app
+				// );
+			});
 	}
 
 	// Function to render "Task formats" tab content
