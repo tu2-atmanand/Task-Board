@@ -47,7 +47,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 		setCollectedTasks(scanningVault.tasks);
 		// setIsRunning(false);
 		new Notice(t("vault-scanning-complete"));
-		scanningVault.saveTasksToFile();
+		scanningVault.saveTasksToJsonCache();
 
 		if (localStorage.getItem("manadatoryScan") === "true") {
 			localStorage.setItem("manadatoryScan", "false");

@@ -67,7 +67,6 @@ export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
 		// API-2 : Get frontmatter as an object
 		const frontmatterAsObject =
 			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-		console.log("Frontmatter extracted as an object:", frontmatterAsObject);
 
 		return frontmatterAsObject;
 	} catch (error) {
@@ -151,7 +150,7 @@ export class ScanningVault {
 			}
 		}
 
-		this.saveTasksToFile();
+		this.saveTasksToJsonCache();
 		// Emit the event
 		eventEmitter.emit("REFRESH_BOARD");
 	}
@@ -361,7 +360,13 @@ export class ScanningVault {
 				scanFilterForFilesNFolders(file, scanFilters)
 			) {
 				// TODO : Try testing if removing the await from the below line will going to speed up the process.
-				await this.extractTasksFromFile(file, oldTasks, scanFilters);
+				await this.extractTasksFromFile(
+					file,
+					oldTasks,
+					scanFilters
+				).then(() => {
+					this.saveTasksToJsonCache();
+				});
 
 				// const fileNameWithPath = file.path;
 				// const fileContent = await this.app.vault.cachedRead(file);
@@ -468,12 +473,10 @@ export class ScanningVault {
 				console.warn("File is not valid...");
 			}
 		}
-
-		this.saveTasksToFile();
 	}
 
 	// Save tasks to JSON file
-	async saveTasksToFile() {
+	async saveTasksToJsonCache() {
 		await writeJsonCacheDataFromDisk(this.plugin, this.tasks);
 
 		// Refresh the board only if any task has be extracted from the updated file.

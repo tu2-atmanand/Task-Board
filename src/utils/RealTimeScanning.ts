@@ -19,13 +19,11 @@ export class RealTimeScanning {
 		this.scanningVault = new ScanningVault(app, plugin);
 	}
 
-	async initializeStack(realTimeScanning: boolean) {
-		if (realTimeScanning) return;
+	async initializeStack() {
 		try {
 			const storedStack = localStorage.getItem("taskBoardFileStack");
 			if (storedStack) {
 				this.taskBoardFileStack = JSON.parse(storedStack);
-			} else {
 			}
 			// this.startScanTimer();
 		} catch (error) {
@@ -33,7 +31,7 @@ export class RealTimeScanning {
 		}
 	}
 
-	async saveStack() {
+	saveStack() {
 		try {
 			localStorage.setItem(
 				"taskBoardFileStack",
@@ -80,27 +78,17 @@ export class RealTimeScanning {
 		return this.plugin.app.vault.getFileByPath(filePath);
 	}
 
-	async onFileChange(
-		file: TFile,
-		realTimeScanning: boolean
-	) {
-		// If real-time scanning is enabled, scan the file immediately
-		if (realTimeScanning) {
-			this.scanningVault.refreshTasksFromFiles([file]);
-		} else {
-			// If the file is already in the stack, ignore it
-			if (this.taskBoardFileStack.at(0) === undefined) {
-				this.taskBoardFileStack.push(file.path); // Add the file to the stack
-				await this.saveStack(); // Save the updated stack
-			} else if (!this.taskBoardFileStack.includes(file.path)) {
-				this.taskBoardFileStack.push(file.path);
-				await this.saveStack(); // Save the updated stack
-			} else {
-				// console.log(
-				// 	"The file already exists in taskBoardFileStack:",
-				// 	file.path
-				// );
-			}
+	onFileModified(file: TFile) {
+		console.log(
+			"RealTimeScanning.ts : onFileModified called for the updated file:",
+			file.path
+		);
+		if (
+			this.taskBoardFileStack.at(0) === undefined ||
+			!this.taskBoardFileStack.includes(file.path)
+		) {
+			this.taskBoardFileStack.push(file.path); // Add the file to the stack
+			this.saveStack(); // Save the updated stack
 		}
 	}
 }

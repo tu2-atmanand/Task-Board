@@ -336,15 +336,17 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				if (
 					file.path ===
-					this.settings.data.globalSettings.archivedTasksFilePath
+						this.settings.data.globalSettings
+							.archivedTasksFilePath ||
+					file.path.endsWith(".excalidraw.md")
 				) {
 					return false;
 				}
-				this.editorModified = true;
+
 				if (file instanceof TFile) {
-					if (!file.path.endsWith(".excalidraw.md")) {
-						this.currentModifiedFile = file;
-					}
+					// 	this.taskBoardFileStack.push(file.path);
+					this.realTimeScanning.onFileModified(file);
+					this.editorModified = true;
 				}
 			})
 		);
@@ -420,7 +422,7 @@ export default class TaskBoard extends Plugin {
 								this.scanningVault.refreshTasksFromFiles([
 									file,
 								]);
-								this.scanningVault.saveTasksToFile();
+								this.scanningVault.saveTasksToJsonCache();
 							});
 					});
 					if (
