@@ -26,7 +26,7 @@
 	max-height: 80vh;
 }
 
-/* src/KanbanView.tsx */
+/* src/TaskBoardView.tsx */
 
 .task-board-ribbon-class {
 	color: var(--color-orange);
@@ -38,14 +38,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	cursor: pointer;
 }
 
-/* src/KanbanBoard.tsx */
-.kanbanBoard {
+/* // src/components/TaskBoardViewContent.tsx*/
+.taskBoardView {
 	display: flex;
 	flex-direction: column;
 	height: 99%;
 }
 
-.kanbanHeader {
+.taskBoardHeader {
 	display: flex;
 	justify-content: space-between;
 	padding: 4px;
@@ -74,7 +74,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border: var(--border-width) solid var(--interactive-accent);
 }
 
-.kanbanHeaderBtns {
+.taskBoardHeaderBtns {
 	display: flex;
 	flex-direction: row;
 }
@@ -102,6 +102,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .RefreshBtn:hover {
 	border: var(--border-width) solid olive;
 }
+
+.taskBoardViewSection {}
+
+/* // src/components/KanbanBoard.tsx */
+
+.kanbanBoard {}
 
 .columnsContainer {
 	display: flex;
@@ -209,6 +215,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 7px;
 	display: flex;
 	flex-direction: column;
+	max-height: 80vh;
 
 	/* Firefox */
 	scrollbar-width: none;
@@ -1848,7 +1855,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 @media (max-width: 650px) {
-	.taskboard-diff-content-compare-modal-container{
+	.taskboard-diff-content-compare-modal-container {
 		flex-direction: column;
 	}
 }

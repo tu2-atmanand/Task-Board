@@ -48,7 +48,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
-		// Initialize KanbanView Component on mount
+		// Initialize TaskBoardView Component on mount
 		componentRef.current = plugin.view;
 	}, []);
 

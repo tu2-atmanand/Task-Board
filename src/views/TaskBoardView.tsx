@@ -1,4 +1,4 @@
-// src/views/KanbanView.tsx
+// src/views/TaskBoardView.tsx
 
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
@@ -6,14 +6,14 @@ import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
 import { StrictMode, useMemo } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
-import KanbanBoard from "src/components/KanbanBoard";
+import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
 import { bugReporter, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 
-export class KanbanView extends ItemView {
+export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
 	boards: Board[];
 	root: Root | null = null;
@@ -69,7 +69,7 @@ export class KanbanView extends ItemView {
 				this.plugin,
 				"Failed to load board configurations from data.json",
 				String(err),
-				"KanbanView.tsx/loadBoards"
+				"TaskBoardView.tsx/loadBoards"
 			);
 		}
 	}
@@ -78,7 +78,7 @@ export class KanbanView extends ItemView {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
-				<KanbanBoard
+				<TaskBoardViewContent
 					app={this.app}
 					plugin={this.plugin}
 					boardConfigs={this.boards}

@@ -22,7 +22,7 @@ import {
 	openScanVaultModal,
 } from "src/services/OpenModals";
 
-import { KanbanView } from "./src/views/KanbanView";
+import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import { ScanningVault } from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
@@ -36,7 +36,7 @@ import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
-	view: KanbanView | null;
+	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
@@ -238,7 +238,7 @@ export default class TaskBoard extends Plugin {
 
 	registerTaskBoardView() {
 		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
-			this.view = new KanbanView(this, leaf);
+			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
 	}
@@ -399,7 +399,7 @@ export default class TaskBoard extends Plugin {
 				const fileIsFile = file instanceof TFile;
 				const fileIsFolder = file instanceof TFolder;
 				// const leafIsMarkdown = leaf?.view instanceof MarkdownView;
-				// const leafIsKanban = leaf?.view instanceof KanbanView;
+				// const leafIsKanban = leaf?.view instanceof TaskBoardView;
 
 				// if (leafIsKanban || source === "pane-more-options") {
 				// 	console.log("MENU : If the fileIsFile ");
@@ -550,7 +550,7 @@ export default class TaskBoard extends Plugin {
 		// this.registerEvent(
 		// 	this.app.workspace.on("editor-menu", (menu, editor, view) => {
 		// 		// const leafIsMarkdown = view instanceof MarkdownView;
-		// 		const leafIsKanban = view instanceof KanbanView;
+		// 		const leafIsKanban = view instanceof TaskBoardView;
 
 		// 		if (leafIsKanban) {
 		// 			console.log("MENU : If the fileIsFile ");
