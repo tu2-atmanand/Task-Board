@@ -15,6 +15,7 @@ import { bugReporter, openAddNewTaskModal, openBoardConfigModal } from "../servi
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanBoard";
+import CanvasView from "./CanvasView";
 
 type ViewType = "kanban" | "list" | "table" | "canvas";
 
@@ -157,6 +158,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						tasksPerColumn={allTasksArrangedPerColumn}
 						loading={loading}
 						freshInstall={freshInstall}
+					/>
+				)}
+
+				{viewType === 'canvas' && (
+					<CanvasView
+						plugin={plugin}
+						boards={boards}
+						activeBoardIndex={activeBoardIndex}
+						allTasksArranged={allTasksArrangedPerColumn}
 					/>
 				)}
 

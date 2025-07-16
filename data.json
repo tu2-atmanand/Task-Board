@@ -236,8 +236,10 @@
       "lang": "zh-TW",
       "scanFilters": {
         "files": {
-          "polarity": 3,
-          "values": []
+          "polarity": 1,
+          "values": [
+            "TODO.md"
+          ]
         },
         "folders": {
           "polarity": 3,
