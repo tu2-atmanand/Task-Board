@@ -23,7 +23,6 @@
 		"@types/sortablejs": "^1.15.8",
 		"@typescript-eslint/eslint-plugin": "8.37.0",
 		"@typescript-eslint/parser": "8.37.0",
-		"@xyflow/react": "^12.8.2",
 		"builtin-modules": "5.0.0",
 		"codemirror": "^6.0.0",
 		"esbuild": "0.25.6",
@@ -34,6 +33,7 @@
 	},
 	"dependencies": {
 		"@simonwep/pickr": "^1.8.2",
+		"@xyflow/react": "^12.8.2",
 		"debounce": "^2.2.0",
 		"lucide-react": "^0.525.0",
 		"monkey-around": "^3.0.0",
