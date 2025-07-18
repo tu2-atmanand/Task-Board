@@ -1,74 +1,2215 @@
 {
     "VaultName": "",
-    "Modified_at": "2025-07-16T17:41:02.601Z",
+    "Modified_at": "2025-07-16T18:55:30.412Z",
     "Pending": {
-        "TODO.md": [
+        "Daily_Notes/30-09-2024.md": [
             {
-                "id": 623274821,
+                "id": 1231299021,
                 "status": " ",
-                "title": "#Test New temp task, lets see if this comes after 5 minutes, 🛫 2025-07-14 lets update this. ⏫ ⏳ 2025-07-15 ⏰ [13:49 - 14:49] 📅 2025-07-14 #New #working",
-                "body": [
-                    "\t- [ ] Lets add another sub-Task, updating.",
-                    "\t- [x] Also adding this new Subtask, first",
-                    "\t- [x] And adding second subtask. Now editing will make any difference.",
-                    "\t- [x] Another sub-task through the embedded editor.",
-                    "\tUpdating the body line. Adding a link into this body content now : [tu2-atmanand/Task-Board](https://github.com/tu2-atmanand/Task-Board).",
-                    "\tAnother thing i will put is link to a markdown file from my Vault : [[0-ImportantData]]",
-                    "\tSimply adding another line in the description. Updating...",
-                    "\tA simple line added from the modal editor, using spaces."
-                ],
-                "time": "13:49 - 14:49",
+                "title": "This is a task, and this is very bad way since the board is getting refreshed but it is refreshing the whole shit.  📅 2024-09-30  #RealTime 🔼",
+                "body": [],
+                "time": "",
                 "createdDate": "",
-                "startDate": "2025-07-14",
-                "scheduledDate": "2025-07-15",
-                "due": "2025-07-14",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-30",
                 "tags": [
-                    "#Test",
-                    "#New",
-                    "#working"
+                    "#RealTime"
                 ],
-                "frontmatterTags": [
-                    "#Bug"
-                ],
-                "priority": 2,
-                "filePath": "TODO.md",
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/30-09-2024.md",
                 "taskLocation": {
-                    "startLine": 16,
+                    "startLine": 14,
                     "startCharIndex": 0,
-                    "endLine": 24,
-                    "endCharIndex": 57
+                    "endLine": 14,
+                    "endCharIndex": 149
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3782238723,
+                "id": 3274064442,
                 "status": " ",
-                "title": "something 📅 2025-07-11, updating few more things. #bug",
+                "title": "1. Now after this board is updated only the file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version. 📅 2025-05-07 #bug",
                 "body": [
-                    "\t- [ ] something sub",
-                    "\t\t- [x] something sub sub",
-                    "\t- [ ] This is another sub-task adding at the bottom of other sub-tasks"
+                    "\tAdding a body line, updating. more updating.",
+                    "\tAnd for those who dont want their cpu to keep running at 20% all the time when i am doing the simplest thing that is typing then they can directly disable this feature, the best way .",
+                    "\t- [x] Alright now the refreshing should look faster, since removed the sleep, but no, still seeing equal amount of delay."
                 ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "",
-                "due": "2025-07-11",
+                "due": "2025-05-07",
                 "tags": [
                     "#bug"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/30-09-2024.md",
+                "taskLocation": {
+                    "startLine": 18,
+                    "startCharIndex": 0,
+                    "endLine": 21,
+                    "endCharIndex": 122
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/28-09-2024.md": [
+            {
+                "id": 1519648358,
+                "status": " ",
+                "title": "This is a new task with due date with the format of dataview. Updating | 📅2024-09-28 🔽 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-28",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 4,
+                "filePath": "Daily_Notes/28-09-2024.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 100
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/25-08-2024.md": [
+            {
+                "id": 3693618499,
+                "status": " ",
+                "title": "10:00 - 11:00 Cut Nails🔺 ",
+                "body": [],
+                "time": "10:00 - 11:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Daily_Notes/25-08-2024.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 32
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/24-09-2024.md": [
+            {
+                "id": 3758476395,
+                "status": " ",
+                "title": "17:08 - 18:08 This is a simple task with random note, but this doesnt have either a body nor subtasks. But the problem is this has a tab on the immediate next line. | 📅2024-10-04  #Testing",
+                "body": [
+                    "\tNo tab doesnt come on the next line now anymore."
+                ],
+                "time": "17:08 - 18:08",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-04",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/24-09-2024.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 49
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2096209460,
+                "status": " ",
+                "title": "Adding a Task to see if this task dont have body and only have the subtasks, then there shouldnt be any empty line between Main task and SubTasks. [due:: 2025-04-02]  #Error [time:: 17:51 - 18:51]",
+                "body": [],
+                "time": "17:51 - 18:51",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-02",
+                "tags": [
+                    "#Error"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/24-09-2024.md",
+                "taskLocation": {
+                    "startLine": 24,
+                    "startCharIndex": 0,
+                    "endLine": 24,
+                    "endCharIndex": 202
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3182233835,
+                "status": " ",
+                "title": "Now please dont come empty line between title and subtasks, removing body 📅 2025-04-27  #Working ⏰ [23:00 - 23:50] #New",
+                "body": [
+                    "\tFirst adding a body so i can delete this complete task to test delete functionality",
+                    "\t- [ ] First sub task",
+                    "\t- [ ] Second tasks"
+                ],
+                "time": "23:00 - 23:50",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-27",
+                "tags": [
+                    "#Working",
+                    "#New"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/24-09-2024.md",
+                "taskLocation": {
+                    "startLine": 39,
+                    "startCharIndex": 0,
+                    "endLine": 42,
+                    "endCharIndex": 19
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/24-08-2024.md": [
+            {
+                "id": 1851978773,
+                "status": " ",
+                "title": "Completed Three Hand-on Courses. ⏰ [11:00 - 12:00]",
+                "body": [],
+                "time": "11:00 - 12:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/24-08-2024.md",
+                "taskLocation": {
+                    "startLine": 15,
+                    "startCharIndex": 0,
+                    "endLine": 15,
+                    "endCharIndex": 56
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/23-09-2024.md": [
+            {
+                "id": 372766962,
+                "status": " ",
+                "title": "Now for sure there wont be any empty line between title and subtasks. [due:: 2025-04-20][time:: 13:37 - 15:19]",
+                "body": [
+                    "\t- [ ] This is first subtask"
+                ],
+                "time": "13:37 - 15:19",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-20",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-09-2024.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 28
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/23-08-2024.md": [
+            {
+                "id": 1991785902,
+                "status": " ",
+                "title": "Learn the questions that will come for tomorrows Hackathon ⏳ 2024-08-24 📅 2024-10-31 ⏰ [11:00 - 12:00]",
+                "body": [],
+                "time": "11:00 - 12:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2024-08-24",
+                "due": "2024-10-31",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 109
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/22-09-2024.md": [
+            {
+                "id": 3641531711,
+                "status": " ",
+                "title": "Adding task from command to see if the taskboard refreshes now. ⏰ [16:17 - 17:17] 📅 2025-01-10 #Testing",
+                "body": [],
+                "time": "16:17 - 17:17",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-01-10",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/22-09-2024.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 110
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1098935209,
+                "status": " ",
+                "title": "A tempararory new task. 📅 2024-10-18  #Test ⏰ [20:45 - 21:45]",
+                "body": [
+                    "\tJust updating the body.",
+                    "\t- Adding one bullete line in body.",
+                    "\t- [ ] Just adding a simple new subTask to see if first all the boards are getting empty."
+                ],
+                "time": "20:45 - 21:45",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-18",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/22-09-2024.md",
+                "taskLocation": {
+                    "startLine": 14,
+                    "startCharIndex": 0,
+                    "endLine": 17,
+                    "endCharIndex": 89
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 587217481,
+                "status": " ",
+                "title": "This is a main Task, updating, Updating more. 📅 2024-10-18  #Tested ⏰ [20:00 - 21:00]",
+                "body": [
+                    "\tThis is a body i am going to replace all the three bullete lines with this one sentence, because i think usually people will going to simply add a one sentence for the body or maybe bullete points also.",
+                    "\t- How this will look like in the TaskItem Card on board.",
+                    "\t- [ ] This is a second sub-task of the main task and so on other tasks.",
+                    "\t- [ ] Adding a third sub task",
+                    "\t- [ ] Forth task, ill add more",
+                    "\t- [ ] Fifth task"
+                ],
+                "time": "20:00 - 21:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-18",
+                "tags": [
+                    "#Tested"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/22-09-2024.md",
+                "taskLocation": {
+                    "startLine": 34,
+                    "startCharIndex": 0,
+                    "endLine": 40,
+                    "endCharIndex": 17
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/22-08-2024.md": [
+            {
+                "id": 2881508919,
+                "status": " ",
+                "title": "Give a shot to Java Hackathon ➕ 2024-08-22 📅 2024-10-17 ⏰ [17:00 - 18:00]",
+                "body": [],
+                "time": "17:00 - 18:00",
+                "createdDate": "2024-08-22",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-17",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/22-08-2024.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 80
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/21-09-2024.md": [
+            {
+                "id": 452670912,
+                "status": " ",
+                "title": "Adding random task for today to see how the board updates. 📅 2024-09-29 ⏫ #Testing ⏰ [12:02 - 13:02]",
+                "body": [
+                    "\tAdding body to this task from file itself not using any Modal. So, now when this file will be scanned, it will first get detected as well as, the whole board should re-render. updating more...",
+                    "\t- [ ] Changing the complete content of the subTask, updating",
+                    "\t- [ ] Adding another subTask, Second"
+                ],
+                "time": "12:02 - 13:02",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-29",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/21-09-2024.md",
+                "taskLocation": {
+                    "startLine": 10,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 37
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-06-11.md": [
+            {
+                "id": 582844777,
+                "status": " ",
+                "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task. ⏫ 📅 2024-10-30 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-06-11",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [
+                    "#Bug"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/2025-06-11.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 195
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3721102761,
+                "status": "?",
+                "title": "This is a first task added directly from the modal with the new file **suggester**. 📅 2025-05-23 #test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-06-11",
+                "tags": [
+                    "#test"
                 ],
                 "frontmatterTags": [
                     "#Bug"
                 ],
                 "priority": 0,
-                "filePath": "TODO.md",
+                "filePath": "Daily_Notes/2025-06-11.md",
                 "taskLocation": {
-                    "startLine": 85,
+                    "startLine": 13,
                     "startCharIndex": 0,
-                    "endLine": 88,
-                    "endCharIndex": 71
+                    "endLine": 13,
+                    "endCharIndex": 109
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-05-26.md": [
+            {
+                "id": 746228923,
+                "status": " ",
+                "title": "New task, just checking if the start date automatically comes or not. #test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-26",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [
+                    "#Bug"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-05-26.md",
+                "taskLocation": {
+                    "startLine": 8,
+                    "startCharIndex": 0,
+                    "endLine": 8,
+                    "endCharIndex": 81
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-05-24.md": [
+            {
+                "id": 2759613915,
+                "status": " ",
+                "title": "Adding a new task here, but the twist is, i am not giving due date to this. And also since the file name is not in the dateFormat, so due date wont come for this task. ⏫ 📅 2024-10-30 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-24",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [
+                    "#Bug"
+                ],
+                "priority": 2,
+                "filePath": "Daily_Notes/2025-05-24.md",
+                "taskLocation": {
+                    "startLine": 8,
+                    "startCharIndex": 0,
+                    "endLine": 8,
+                    "endCharIndex": 195
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3552996858,
+                "status": "?",
+                "title": "This is a first task added directly from the modal with the new file **suggester**. 📅 2025-05-23 #test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-24",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [
+                    "#Bug"
+                ],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-05-24.md",
+                "taskLocation": {
+                    "startLine": 9,
+                    "startCharIndex": 0,
+                    "endLine": 9,
+                    "endCharIndex": 109
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-05-10.md": [
+            {
+                "id": 872313222,
+                "status": " ",
+                "title": "Task 1 no tag",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-10",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-05-10.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 19
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 677645955,
+                "status": " ",
+                "title": "Task 2 tag A #A",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-10",
+                "tags": [
+                    "#A"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-05-10.md",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2945811122,
+                "status": " ",
+                "title": "Task 3 tag B #B",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-10",
+                "tags": [
+                    "#B"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-05-10.md",
+                "taskLocation": {
+                    "startLine": 6,
+                    "startCharIndex": 0,
+                    "endLine": 6,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1678605277,
+                "status": " ",
+                "title": "Task 4 tag C #C",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-10",
+                "tags": [
+                    "#C"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-05-10.md",
+                "taskLocation": {
+                    "startLine": 7,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-05-08.md": [
+            {
+                "id": 3518234848,
+                "status": "r",
+                "title": "This 🔺⏰ [22:54 - 13:54] 📅 2025-05-18 #bug",
+                "body": [
+                    "\t- [ ] This is a sub-task."
+                ],
+                "time": "22:54 - 13:54",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-08",
+                "tags": [
+                    "#bug"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Daily_Notes/2025-05-08.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 26
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 647360162,
+                "status": "r",
+                "title": "This is a first task, successfully able to add through the new editor in modal.⏰ [23:00 - 24:00] 🔼 📅 2025-05-18 #new",
+                "body": [
+                    "\t- [ ] This is a sub-task.",
+                    "\t- The properties are getting added perfectly as well.",
+                    "\t- ![[Pasted image 20250518225025.png|425]]"
+                ],
+                "time": "23:00 - 24:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-08",
+                "tags": [
+                    "#new"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/2025-05-08.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 43
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-04-26.md": [
+            {
+                "id": 1707213757,
+                "status": " ",
+                "title": "Test 1 🔼 ⏰ [10:00 - 11:00]",
+                "body": [
+                    "\t- [ ] This is a subTask for this first test 1.",
+                    "\t-This is a description line."
+                ],
+                "time": "10:00 - 11:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-26",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/2025-04-26.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 29
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-02-20.md": [
+            {
+                "id": 593980066,
+                "status": " ",
+                "title": "From **v1.3.0** user should be free to use any kind of format. #pending   📅 2025-02-18 🔺⏰ [15:00 - 16:00]",
+                "body": [
+                    "\t- [ ] No restriction to use pipe symbol for separating metadata.",
+                    "\t**Description :** After you finished writting this task in this file switch to other tab or *Task Board* View to see you task automatically get added in the board.",
+                    "\t- [ ] Properties placed in any order should be scanned properly.",
+                    "\t- [ ] Divide and rule is a great approach."
+                ],
+                "time": "15:00 - 16:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-02-20",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Daily_Notes/2025-02-20.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 43
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-03-01.md": [
+            {
+                "id": 3998983675,
+                "status": " ",
+                "title": "This is a first test. 🔁 every day ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-03-01",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-03-01.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 41
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1857051649,
+                "status": " ",
+                "title": "07:30 - 08:00 Temp task for testing",
+                "body": [],
+                "time": "07:30 - 08:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-03-01",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-03-01.md",
+                "taskLocation": {
+                    "startLine": 13,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 41
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-02-28.md": [
+            {
+                "id": 3891983572,
+                "status": " ",
+                "title": "This is a first test in order to understand how to integrate **recurring tasks** in Task board. 🔁 every day ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-02-28",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-02-28.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 115
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-02-18.md": [
+            {
+                "id": 2913229349,
+                "status": " ",
+                "title": "This is a temp task added directly from the day planner plugin timeline #test 📅 2025-04-28 ⏫ ⏰ [15:00 - 16:10]",
+                "body": [],
+                "time": "15:00 - 16:10",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-02-18",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/2025-02-18.md",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 117
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-12-31.md": [
+            {
+                "id": 524467721,
+                "status": " ",
+                "title": "This is a first task created from a daily note ⏫ #Test",
+                "body": [
+                    "\tThis task has not been given any due date, but it will auto considered based on the file name.",
+                    "\tThis is a first task created after the **animation library integration**. This will give a smoother animation to Task Card.",
+                    "\t- [ ] This is a first task created after the *animation library* integration.",
+                    "\t- [ ] Also this is a first task created after the smooth animation for the `description expanding` feature."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-12-31",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-12-31.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 108
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-12-18.md": [
+            {
+                "id": 2347258692,
+                "status": " ",
+                "title": "Adding a new task for testing the following. ⏫ 📅 2025-01-11 #Test",
+                "body": [
+                    "\t- If I read using `cachedRead()` and then write using `vault.modify()`. Will this be same as that of reading using `read()` and writing using  `vault.modify()`.",
+                    "\t- Lets see if this will work.",
+                    "\t- I have made some changes into the file using editor, so in the `cachedRead()` should have the latest changes.",
+                    "\t- Now the file has been closed, so this things should be written to the file in background."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-12-18",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-12-18.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 92
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-12-17.md": [
+            {
+                "id": 1774892539,
+                "status": " ",
+                "title": "Adding a task to see `cachedRead()` will surely work similar to `read()` 📅 2024-12-17 #Test",
+                "body": [
+                    "\tAdding a new line in body for testing.",
+                    "\t- Yes! its working. Will go with cachedRead then.",
+                    "\t- Let see if the new `vault.process()` works similar to the `vault.modify()`.",
+                    "\tAdding another line at the end of the body."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-12-17",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-12-17.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 44
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-11-30.md": [
+            {
+                "id": 3372318916,
+                "status": " ",
+                "title": "New task to see if it auto add the due date based on file name 🔼 📅 2024-11-30 🔼 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-11-30",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/2024-11-30.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 94
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-11-28.md": [
+            {
+                "id": 2715791889,
+                "status": " ",
+                "title": "This is a simple task with only priority 🔼 #New",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-11-28",
+                "tags": [
+                    "#New"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/2024-11-28.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 54
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-11-06.md": [
+            {
+                "id": 1001169205,
+                "status": " ",
+                "title": "Need to complete all the Documents work  and submit to company. ⏫⏰ [13:00 - 14:00] #feat #working 📅 2025-04-28",
+                "body": [
+                    "\tJust adding a normal line for this task as a body.",
+                    "\tThis is an image in the body : [[1721576562712.jpg|Image]]",
+                    "\t- [ ] Adding a simple New SubTask",
+                    "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work.",
+                    "\t- [x] Adding a first subtask, with **checked** state true."
+                ],
+                "time": "13:00 - 14:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-11-06",
+                "tags": [
+                    "#feat",
+                    "#working"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-11-06.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 8,
+                    "endCharIndex": 59
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1903338895,
+                "status": " ",
+                "title": "This is a simple task with separated metadata. 🔼 ⏰[13:00 - 14:00] 📅 2024-11-06 #home #Test ",
+                "body": [
+                    "\tThis is a line inside the task description.",
+                    "\t- [ ] This is a single sub-task"
+                ],
+                "time": "13:00 - 14:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-11-06",
+                "tags": [
+                    "#home",
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/2024-11-06.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 32
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-11-04.md": [
+            {
+                "id": 291627017,
+                "status": " ",
+                "title": "New Task to this file. 🔺",
+                "body": [
+                    "\t- [ ] New Sub Task"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-11-04",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Daily_Notes/2024-11-04.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 19
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-10-27.md": [
+            {
+                "id": 1498339661,
+                "status": " ",
+                "title": "Adding a new task. #Test [time:: 14:30 - 17:30]",
+                "body": [],
+                "time": "14:30 - 17:30",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-27",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-10-27.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 53
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-10-10.md": [
+            {
+                "id": 4046914179,
+                "status": " ",
+                "title": "1. **Adding** a \"new task\", to see if everything works fine⏰ [22:28 - 23:28]  📅 2025-06-04 🔽 #Test",
+                "body": [
+                    "\tJust a simple line in body",
+                    "\t- [ ] Adding a simple SubTask"
+                ],
+                "time": "22:28 - 23:28",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-10",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 4,
+                "filePath": "Daily_Notes/2024-10-10.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 30
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2006356536,
+                "status": " ",
+                "title": "20:10 - 21:10 This is a new Task I am adding from the Combined Modal. @due(2024-10-14) 🔼 #Test",
+                "body": [
+                    "\tI will be adding all the fields.",
+                    "\t- This is a bullete point in the Description.",
+                    "\t\t- [ ] Just first SubTask",
+                    "\t\t- [ ] Another SubTask, second One"
+                ],
+                "time": "20:10 - 21:10",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-10",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/2024-10-10.md",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 9,
+                    "endCharIndex": 35
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2084690742,
+                "status": " ",
+                "title": "Adding a simple Task, to see if everything works correctly. 📅 2024-10-10 ⏫ #Test ⏰ [22:29 - 23:29]",
+                "body": [
+                    "\tAdding a simple line",
+                    "\t- [ ] SubTask"
+                ],
+                "time": "22:29 - 23:29",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-10",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-10-10.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 14
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 631309316,
+                "status": " ",
+                "title": "Adding a simple task",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-10",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-10-10.md",
+                "taskLocation": {
+                    "startLine": 15,
+                    "startCharIndex": 0,
+                    "endLine": 15,
+                    "endCharIndex": 26
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-09-15.md": [
+            {
+                "id": 1955646715,
+                "status": " ",
+                "title": "Time and Tag and Priority  #Test ⏰ [22:01 - 23:01]",
+                "body": [],
+                "time": "22:01 - 23:01",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-15",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-09-15.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 56
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2225361925,
+                "status": " ",
+                "title": "New task adding to see if the task directly shows up in the board, after adding through the modal. 📅 2024-10-10  #Test ⏰ [15:50 - 16:50]",
+                "body": [],
+                "time": "15:50 - 16:50",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-15",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-09-15.md",
+                "taskLocation": {
+                    "startLine": 14,
+                    "startCharIndex": 0,
+                    "endLine": 14,
+                    "endCharIndex": 143
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3610957889,
+                "status": " ",
+                "title": "A fresh new task, after rectifying the errors, only adding time, due will come automatically. ⏰ [21:01 - 22:01] 📅 2025-04-30 #Test",
+                "body": [],
+                "time": "21:01 - 22:01",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-15",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-09-15.md",
+                "taskLocation": {
+                    "startLine": 20,
+                    "startCharIndex": 0,
+                    "endLine": 20,
+                    "endCharIndex": 137
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3098440172,
+                "status": " ",
+                "title": "21:45 - 22:45 Now i have disabled auto adding due date, so now the due date wont come for thi task. Also adding priority.   [due:: 2025-02-20] #Test",
+                "body": [
+                    "\tSimple Body Content, Which will go inside the markdown.",
+                    "\t- [ ] A subTask"
+                ],
+                "time": "21:45 - 22:45",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-15",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-09-15.md",
+                "taskLocation": {
+                    "startLine": 29,
+                    "startCharIndex": 0,
+                    "endLine": 31,
+                    "endCharIndex": 16
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 827285203,
+                "status": " ",
+                "title": "file this new task. #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-15",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-09-15.md",
+                "taskLocation": {
+                    "startLine": 39,
+                    "startCharIndex": 0,
+                    "endLine": 39,
+                    "endCharIndex": 31
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/18-09-2024.md": [
+            {
+                "id": 691975186,
+                "status": " ",
+                "title": "Adding a new task, i think now everything is working. Adding all the fields now. 📅 2024-11-08  #Complete ⏰ [12:09 - 13:09]",
+                "body": [],
+                "time": "12:09 - 13:09",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-11-08",
+                "tags": [
+                    "#Complete"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/18-09-2024.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 129
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3177418415,
+                "status": " ",
+                "title": "ading simple task to see if the time afterwards will come or not. 📅 2024-10-02 🔺 #Testing",
+                "body": [
+                    "\tThis function dont have any body, hence adding one line.",
+                    "\t- [x] One subtask also, for fun"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-02",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Daily_Notes/18-09-2024.md",
+                "taskLocation": {
+                    "startLine": 18,
+                    "startCharIndex": 0,
+                    "endLine": 20,
+                    "endCharIndex": 32
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2365722811,
+                "status": " ",
+                "title": "18:21 - 19:21 ⏫ Adding task to see if time comes properly, because while editing tasks, the time sucks, end time doesnt comes properly. [due:: 2024-10-04] #Testing",
+                "body": [],
+                "time": "18:21 - 19:21",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-04",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/18-09-2024.md",
+                "taskLocation": {
+                    "startLine": 30,
+                    "startCharIndex": 0,
+                    "endLine": 30,
+                    "endCharIndex": 169
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/17-09-2024.md": [
+            {
+                "id": 3362241598,
+                "status": " ",
+                "title": "If i add any other due it should work, autoAddDue is off. 📅 2024-09-30 🔼 #Testing",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-30",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/17-09-2024.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 89
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1061243687,
+                "status": " ",
+                "title": "This task will be updated in the json file after 10 seconds 📅2024-09-27  #Testing",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-27",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/17-09-2024.md",
+                "taskLocation": {
+                    "startLine": 18,
+                    "startCharIndex": 0,
+                    "endLine": 18,
+                    "endCharIndex": 88
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1292574182,
+                "status": " ",
+                "title": "Adding new task, this will update in the file after 5 minutes ⏫ #Testing ⏰ [12:45 - 13:45]",
+                "body": [],
+                "time": "12:45 - 13:45",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/17-09-2024.md",
+                "taskLocation": {
+                    "startLine": 22,
+                    "startCharIndex": 0,
+                    "endLine": 22,
+                    "endCharIndex": 96
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1889926083,
+                "status": " ",
+                "title": "Now auto add due option is false, so the due date shouldnt be added  #Test",
+                "body": [
+                    "\t- [ ] This is a sub-task.",
+                    "\tThis is a body line one",
+                    "\tThis is a body line two.",
+                    "\t![[Pasted image 20250718224309.png]]"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/17-09-2024.md",
+                "taskLocation": {
+                    "startLine": 28,
+                    "startCharIndex": 0,
+                    "endLine": 32,
+                    "endCharIndex": 37
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1834108871,
+                "status": " ",
+                "title": "Adding tomorrow date, it should come even autoAddDue is ON [due:: 2024-09-27]  #Testing",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-27",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/17-09-2024.md",
+                "taskLocation": {
+                    "startLine": 42,
+                    "startCharIndex": 0,
+                    "endLine": 42,
+                    "endCharIndex": 93
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/14-09-2024.md": [
+            {
+                "id": 3527945949,
+                "status": " ",
+                "title": "Final testing if all fields come correctly, now the time will come front instead of back. [due:: 2024-09-17]  #Testing [time:: 13:21 - 14:21]",
+                "body": [],
+                "time": "13:21 - 14:21",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-17",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/14-09-2024.md",
+                "taskLocation": {
+                    "startLine": 15,
+                    "startCharIndex": 0,
+                    "endLine": 15,
+                    "endCharIndex": 147
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4211867518,
+                "status": " ",
+                "title": "Creating an Untagged future task [due:: 2024-09-21] [time:: 18:42 - 19:42]",
+                "body": [],
+                "time": "18:42 - 19:42",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-21",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/14-09-2024.md",
+                "taskLocation": {
+                    "startLine": 20,
+                    "startCharIndex": 0,
+                    "endLine": 20,
+                    "endCharIndex": 80
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/09-09-2024.md": [
+            {
+                "id": 1606466252,
+                "status": " ",
+                "title": "New logic added to edit the task and replace in line.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/09-09-2024.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 59
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1432958787,
+                "status": " ",
+                "title": "Adding testing task, time will come first, thats it. 📅 2024-09-29 ⏫ #Testing ⏰ [23:18 - 24:18]",
+                "body": [],
+                "time": "23:18 - 24:18",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-29",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/09-09-2024.md",
+                "taskLocation": {
+                    "startLine": 19,
+                    "startCharIndex": 0,
+                    "endLine": 19,
+                    "endCharIndex": 101
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/08-09-2024.md": [
+            {
+                "id": 2285196367,
+                "status": " ",
+                "title": "This is a task for tomorrow, updating. 📅 2024-10-05  #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-05",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/08-09-2024.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 65
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/07-09-2024.md": [
+            {
+                "id": 2230567394,
+                "status": " ",
+                "title": "ChatGPT sometimes do things amazing [due:: 2024-10-03]  #GPT [time:: 14:11 - 15:11]",
+                "body": [],
+                "time": "14:11 - 15:11",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-03",
+                "tags": [
+                    "#GPT"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/07-09-2024.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 89
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/04-10-2024.md": [
+            {
+                "id": 1201340651,
+                "status": " ",
+                "title": "Task with Tag #First",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#First"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/04-10-2024.md",
+                "taskLocation": {
+                    "startLine": 29,
+                    "startCharIndex": 0,
+                    "endLine": 29,
+                    "endCharIndex": 26
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1520955283,
+                "status": " ",
+                "title": "Task without tag",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/04-10-2024.md",
+                "taskLocation": {
+                    "startLine": 30,
+                    "startCharIndex": 0,
+                    "endLine": 30,
+                    "endCharIndex": 22
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 575260564,
+                "status": " ",
+                "title": "Task with other tag #Second",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#Second"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/04-10-2024.md",
+                "taskLocation": {
+                    "startLine": 31,
+                    "startCharIndex": 0,
+                    "endLine": 31,
+                    "endCharIndex": 33
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/03-10-2024.md": [
+            {
+                "id": 2678147113,
+                "status": " ",
+                "title": "Task with Tag #First",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#First"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/03-10-2024.md",
+                "taskLocation": {
+                    "startLine": 16,
+                    "startCharIndex": 0,
+                    "endLine": 16,
+                    "endCharIndex": 26
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1252271885,
+                "status": " ",
+                "title": "Task without tag",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/03-10-2024.md",
+                "taskLocation": {
+                    "startLine": 17,
+                    "startCharIndex": 0,
+                    "endLine": 17,
+                    "endCharIndex": 22
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 225528032,
+                "status": " ",
+                "title": "Task with other tag #Second #feat ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#Second",
+                    "#feat"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/03-10-2024.md",
+                "taskLocation": {
+                    "startLine": 18,
+                    "startCharIndex": 0,
+                    "endLine": 18,
+                    "endCharIndex": 40
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/03-09-2024.md": [
+            {
+                "id": 2196009742,
+                "status": " ",
+                "title": "Finish all the Courses ASAP. updating [due:: 2024-10-01] 🔺 #Course",
+                "body": [
+                    "\t- [ ] Adding subTask"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-01",
+                "tags": [
+                    "#Course"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Daily_Notes/03-09-2024.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3488901354,
+                "status": " ",
+                "title": "Completely Updating the content of this task [due:: 2024-10-03]  #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-03",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/03-09-2024.md",
+                "taskLocation": {
+                    "startLine": 38,
+                    "startCharIndex": 0,
+                    "endLine": 38,
+                    "endCharIndex": 76
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/02-10-2024.md": [
+            {
+                "id": 2377063844,
+                "status": " ",
+                "title": "New task title. 📅 2024-10-03  #Working ⏰ [16:45 - 17:45]",
+                "body": [
+                    "\tPutting something nice instead of just the body body. This is good, i think now it is working.",
+                    "\t- [ ] New sub task only one.",
+                    "\t- [x] Another second sub task.",
+                    "\t- [x] Adding a third task."
+                ],
+                "time": "16:45 - 17:45",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-03",
+                "tags": [
+                    "#Working"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/02-10-2024.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 27
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/02-09-2024.md": [
+            {
+                "id": 2231620855,
+                "status": " ",
+                "title": "adding a task. 📅 2024-10-06  #testing",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-06",
+                "tags": [
+                    "#testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/02-09-2024.md",
+                "taskLocation": {
+                    "startLine": 14,
+                    "startCharIndex": 0,
+                    "endLine": 14,
+                    "endCharIndex": 44
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/01-10-2024.md": [
+            {
+                "id": 2542666414,
+                "status": " ",
+                "title": "Lets see after 2 min if this is getting updated on the board. UPDATE THIS IN THE BOARD. 📅 2024-10-23 🔼 #Testing",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-23",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 119
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3860597785,
+                "status": " ",
+                "title": "Now you will see something, updating more, even more, will it update, so say a user is updating a task, he will be able to see it live now, issue resolved, but the problem is, my cpu is running at more than 30%, when a user will be typing very fast. 📅 2024-10-25 🔼",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-25",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "taskLocation": {
+                    "startLine": 9,
+                    "startCharIndex": 0,
+                    "endLine": 9,
+                    "endCharIndex": 272
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2769889033,
+                "status": " ",
+                "title": "UPdating,  this will refresh New task has been added, lets see REFRESH_BOARD, mssg works. Also updating this. 📅 2024-10-01",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-01",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "taskLocation": {
+                    "startLine": 15,
+                    "startCharIndex": 0,
+                    "endLine": 15,
+                    "endCharIndex": 129
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2773872372,
+                "status": " ",
+                "title": "Task for tomorrow, will be updated on the board auto after 2 min 📅 2024-10-02 🔽",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-02",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 4,
+                "filePath": "Daily_Notes/01-10-2024.md",
+                "taskLocation": {
+                    "startLine": 16,
+                    "startCharIndex": 0,
+                    "endLine": 16,
+                    "endCharIndex": 87
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/01-08-2024.md": [
+            {
+                "id": 399193644,
+                "status": " ",
+                "title": "Watch the following Unix Sessions, Pending. 🔼 #OfflineVideo",
+                "body": [
+                    "\t- [x] I think I havent done this yet. Do it."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#OfflineVideo"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Daily_Notes/01-08-2024.md",
+                "taskLocation": {
+                    "startLine": 9,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 45
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -77,38 +2218,424 @@
         ]
     },
     "Completed": {
-        "TODO.md": [
+        "Daily_Notes/26-09-2024.md": [
             {
-                "id": 624459153,
+                "id": 1299817719,
                 "status": "x",
-                "title": "Upload this image to the new release of task board.🔺  📅 2024-12-24 #Image ✅ 2025-01-27/12:46 ",
+                "title": "Just creating an undated task but will have time. | ⏰[18:24 - 19:24] 📅 2024-09-26  ✅ 2024-10-02T21 ",
                 "body": [
-                    "\t- [ ] This is a simple sub-task, I have added using hover editor. And now only specific tasks will re-render.",
-                    "\t- Let me add a new point in description.",
-                    "\t ![[Pasted image 20241203231257.png|300]]",
-                    "\t Adding another line in body.",
-                    "\t - Just adding a new point for this task. Updating."
+                    "\t- [x] This is a first sub task."
+                ],
+                "time": "18:24 - 19:24",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-26",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/26-09-2024.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 32
+                },
+                "completion": "2024-10-02T21",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/25-08-2024.md": [
+            {
+                "id": 3514391613,
+                "status": "x",
+                "title": "17:30 - 18:30 Tata Crucible Quiz | 📅2024-09-27   ✅2024-09-27T18:49",
+                "body": [],
+                "time": "17:30 - 18:30",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-27",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/25-08-2024.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 73
+                },
+                "completion": "2024-09-27T18:49",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/24-08-2024.md": [
+            {
+                "id": 2350975360,
+                "status": "x",
+                "title": "16:00 - 18:00 Fantastic Four 2 watched |   ✅2024-09-28T13:13",
+                "body": [],
+                "time": "16:00 - 18:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/24-08-2024.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 66
+                },
+                "completion": "2024-09-28T13:13",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/23-08-2024.md": [
+            {
+                "id": 1538478060,
+                "status": "x",
+                "title": "Dinner. 📅 2024-08-23 ✅ 2024-09-28  ⏰ [21:30 - 22:30]",
+                "body": [],
+                "time": "21:30 - 22:30",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-08-23",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 59
+                },
+                "completion": "2024-09-28",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4280363149,
+                "status": "x",
+                "title": "Did same thing of updating the Obsidian Theme, found some good  extension. ⏰ [10:00 - 11:00]  ✅ 2024-09-28 ",
+                "body": [],
+                "time": "10:00 - 11:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "taskLocation": {
+                    "startLine": 6,
+                    "startCharIndex": 0,
+                    "endLine": 6,
+                    "endCharIndex": 113
+                },
+                "completion": "2024-09-28",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4125658022,
+                "status": "x",
+                "title": "Watched Fantastic 4 movie. ✅ 2024-08-23  ⏰ [15:30 - 16:30]",
+                "body": [],
+                "time": "15:30 - 16:30",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/23-08-2024.md",
+                "taskLocation": {
+                    "startLine": 8,
+                    "startCharIndex": 0,
+                    "endLine": 8,
+                    "endCharIndex": 64
+                },
+                "completion": "2024-08-23",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/21-08-2024.md": [
+            {
+                "id": 120711635,
+                "status": "x",
+                "title": "This is a new task with completion date even with millisecond. @completion(2024-08-23T14:21:05)",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/21-08-2024.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 2,
+                    "endCharIndex": 101
+                },
+                "completion": "2024-08-23T14:21:05",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1218108136,
+                "status": "x",
+                "title": "I missed lot of Slides before this, get them from the Recording Video afterwards. @completion(2024-08-23T14:21:05+05:30) ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/21-08-2024.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 127
+                },
+                "completion": "2024-08-23T14:21:05+05:30",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-04-26.md": [
+            {
+                "id": 1180650202,
+                "status": "x",
+                "title": "<mark style=\"background: #ABF7F7A6;\">Test 2 </mark>⏰ [20:10 - 21:00]    📅 2025-04-26 (@2025-04-26 20:10)",
+                "body": [],
+                "time": "20:10 - 21:00",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-26",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-04-26.md",
+                "taskLocation": {
+                    "startLine": 7,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 111
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": "2025-04-26T20:10"
+            },
+            {
+                "id": 3417652725,
+                "status": "x",
+                "title": "This is a task with a reminder notification (@2025-04-26 20:36)",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-26",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-04-26.md",
+                "taskLocation": {
+                    "startLine": 10,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 69
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": "2025-04-26T20:36"
+            },
+            {
+                "id": 3836478722,
+                "status": "x",
+                "title": "Another simple task 📅 2025-04-26 ✅ 2025-04-26",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-26",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2025-04-26.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 52
+                },
+                "completion": "2025-04-26",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-12-20.md": [
+            {
+                "id": 752831063,
+                "status": "-",
+                "title": "This is a new task to test. Updating |⏫ [due:: 2025-03-30] #memo",
+                "body": [
+                    "\t- [ ] Lets add another sub-task.",
+                    "\t- [ ] I actually added a subtask earlier here.",
+                    "\tI want to add a new line in the body of this task. To test memo.",
+                    "\t- Lets also add a bullete point for this task's description. Updating line from file.",
+                    "\t- This is a test, after making some changes for description not updating issue."
                 ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "",
-                "due": "2024-12-24",
+                "due": "2024-12-20",
                 "tags": [
-                    "#Image"
+                    "#memo"
                 ],
-                "frontmatterTags": [
-                    "#Bug"
-                ],
-                "priority": 1,
-                "filePath": "TODO.md",
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Daily_Notes/2024-12-20.md",
                 "taskLocation": {
-                    "startLine": 6,
+                    "startLine": 3,
                     "startCharIndex": 0,
-                    "endLine": 11,
-                    "endCharIndex": 52
+                    "endLine": 8,
+                    "endCharIndex": 80
                 },
-                "completion": "2025-01-27/12:46",
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-09-15.md": [
+            {
+                "id": 2500062086,
+                "status": "x",
+                "title": "Not time, no tag, no due, no priority, ITS WORKING.  #Test @completion(2024-10-04/18:44) 📅 2024-09-15 ✅ 2024-10-04/18:44 ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-15",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/2024-09-15.md",
+                "taskLocation": {
+                    "startLine": 36,
+                    "startCharIndex": 0,
+                    "endLine": 36,
+                    "endCharIndex": 128
+                },
+                "completion": "2024-10-04/18:44",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/14-09-2024.md": [
+            {
+                "id": 269090239,
+                "status": "x",
+                "title": "Let me see if due comes of today, it shouldnt come. #Test 📅 2024-10-05 ✅ 2024-10-05 ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-10-05",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/14-09-2024.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 91
+                },
+                "completion": "2024-10-05",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/07-08-2024.md": [
+            {
+                "id": 1673261898,
+                "status": "X",
+                "title": "Watch the following Javascript Course.  #OfflineVideo ✅ 2024-08-24T11:30",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#OfflineVideo"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/07-08-2024.md",
+                "taskLocation": {
+                    "startLine": 19,
+                    "startCharIndex": 0,
+                    "endLine": 19,
+                    "endCharIndex": 78
+                },
+                "completion": "2024-08-24T11:30",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/03-09-2024.md": [
+            {
+                "id": 1643779664,
+                "status": "x",
+                "title": "This  is a third task | 📅2024-09-26   ✅2024-09-26T11:15",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2024-09-26",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Daily_Notes/03-09-2024.md",
+                "taskLocation": {
+                    "startLine": 34,
+                    "startCharIndex": 0,
+                    "endLine": 34,
+                    "endCharIndex": 62
+                },
+                "completion": "2024-09-26T11:15",
                 "cancelledDate": "",
                 "reminder": ""
             }

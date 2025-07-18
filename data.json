@@ -236,15 +236,15 @@
       "lang": "zh-TW",
       "scanFilters": {
         "files": {
-          "polarity": 1,
+          "polarity": 3,
           "values": [
             "TODO.md"
           ]
         },
         "folders": {
-          "polarity": 3,
+          "polarity": 1,
           "values": [
-            "/"
+            "Daily_Notes"
           ]
         },
         "tags": {
@@ -629,7 +629,7 @@
         }
       ],
       "showTaskWithoutMetadata": true,
-      "tagColorsType": "text",
+      "tagColorsType": "background",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
