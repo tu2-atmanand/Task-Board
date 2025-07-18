@@ -58,7 +58,8 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
 					activeBoardSettings={activeBoardSettings}
 				/>
 			},
-			position: { x: saved.x ?? (idx % 5) * 250, y: saved.y ?? Math.floor(idx / 5) * 200 }
+			position: { x: saved.x ?? (idx % 5) * 250, y: saved.y ?? Math.floor(idx / 5) * 200 },
+			width: 300,
 		};
 	});
 
