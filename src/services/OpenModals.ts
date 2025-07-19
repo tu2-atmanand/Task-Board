@@ -18,6 +18,7 @@ import { CommunityPlugins } from "./CommunityPlugins";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
 import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
+import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -237,7 +238,9 @@ export const openDiffContentCompareModal = (
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
 				el.createEl("p", {
-					text: `${t("safe-guard")} : ${t("content-mismatch-notice-message")}`,
+					text: `${t("safe-guard")} : ${t(
+						"content-mismatch-notice-message"
+					)}`,
 				});
 				el.createEl("button", {
 					text: t("show-conflicts"),
@@ -267,27 +270,13 @@ export const openDiffContentCompareModal = (
 	});
 };
 
-
 export const openTaskBoardActionsModal = (
 	plugin: TaskBoard,
-	onAction: (action: string) => void
+	activeBoardIndex: number
 ) => {
-	const actions = [
-		{ label: t("add-new-task"), value: "add-new-task" },
-		{ label: t("scan-vault"), value: "scan-vault" },
-		{ label: t("configure-boards"), value: "configure-boards" },
-	];
-
-	const actionModal = new AddOrEditTaskModal(
-		plugin.app,
+	const actionModal = new TaskBoardActionsModal(
 		plugin,
-		async (selectedAction) => {
-			onAction(selectedAction);
-			actionModal.close();
-		},
-		false,
-		false,
-		actions
+		plugin.settings.data.boardConfigs[activeBoardIndex].columns
 	);
 	actionModal.open();
-}
+};

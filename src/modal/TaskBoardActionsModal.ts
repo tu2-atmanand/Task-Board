@@ -1,36 +1,36 @@
+// /src/components/KanbanBoard.tsx
+
+import TaskBoard from "main";
 import {
 	App,
 	Modal,
 	Setting,
 	ToggleComponent,
 	DropdownComponent,
+	ButtonComponent,
 } from "obsidian";
-
-interface TaskBoardAction {
-	enabled: boolean;
-	trigger: "Complete" | "Incomplete";
-	type: "move" | "copy";
-	targetColumn: string;
-}
+import { ColumnData } from "src/interfaces/BoardConfigs";
+import { TaskBoardAction } from "src/interfaces/GlobalSettings";
 
 export class TaskBoardActionsModal extends Modal {
-	actions: TaskBoardAction[];
-	columns: string[];
+	plugin: TaskBoard;
+	columns: ColumnData[];
 
-	constructor(app: App, columns: string[], actions: TaskBoardAction[]) {
-		super(app);
+	constructor(plugin: TaskBoard, columns: ColumnData[]) {
+		super(plugin.app);
+		this.plugin = plugin;
 		this.columns = columns;
-		this.actions = actions;
+		this.setTitle("Task Board Actions");
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		// Modal title
-		contentEl.createEl("h1", { text: "Task Board Actions" });
+		this.modalEl.setAttribute("data-type", "task-board-actions-modal");
+		contentEl.setAttribute("data-type", "task-board-actions-modal");
 
-		// Header with Add Button
+		// Header
 		const header = contentEl.createDiv({ cls: "taskboard-actions-header" });
 		header.createEl("h2", { text: "Active Actions" });
 
@@ -39,28 +39,36 @@ export class TaskBoardActionsModal extends Modal {
 			cls: "taskboard-actions-add-button",
 		});
 		addBtn.onclick = () => {
-			this.actions.push({
+			const newAction: TaskBoardAction = {
 				enabled: true,
 				trigger: "Complete",
 				type: "move",
-				targetColumn: this.columns[0] || "",
-			});
+				targetColumn: this.columns[0].name || "",
+			};
+			this.plugin.settings.data.globalSettings.actions.push(newAction);
+			this.plugin.saveSettings();
 			this.refresh();
 		};
 
-		// Sections for Active & Inactive Actions
+		// Sections
 		const activeSection = contentEl.createDiv({
-			cls: "taskboard-actions-section",
+			cls: "taskboard-active-actions-section",
 		});
 		const inactiveSection = contentEl.createDiv();
-		inactiveSection.createEl("h2", { text: "Inactive Actions" });
-
-		const inactiveList = inactiveSection.createDiv({
-			cls: "taskboard-actions-section",
+		inactiveSection.createEl("h2", {
+			text: "Inactive Actions",
+			cls: "taskboard-inactive-actions-section",
 		});
 
-		for (let i = 0; i < this.actions.length; i++) {
-			const action = this.actions[i];
+		const inactiveList = inactiveSection.createDiv({
+			cls: "taskboard-actions-modal-list",
+		});
+
+		const actions: TaskBoardAction[] =
+			this.plugin.settings.data.globalSettings.actions;
+
+		for (let i = 0; i < actions.length; i++) {
+			const action = actions[i];
 
 			const container = (
 				action.enabled ? activeSection : inactiveList
@@ -73,32 +81,53 @@ export class TaskBoardActionsModal extends Modal {
 			toggle.setValue(action.enabled);
 			toggle.onChange((val) => {
 				action.enabled = val;
+				this.plugin.saveSettings();
 				this.refresh();
 			});
 
 			container.createSpan({ text: "When the card is marked as" });
 
-			// Trigger dropdown
 			new DropdownComponent(container)
 				.addOptions({ Complete: "Complete", Incomplete: "Incomplete" })
 				.setValue(action.trigger)
-				.onChange(
-					(val) => (action.trigger = val as "Complete" | "Incomplete")
-				);
+				.onChange((val) => {
+					action.trigger = val as "Complete" | "Incomplete";
+					this.plugin.saveSettings();
+				});
 
-			// Type dropdown
 			new DropdownComponent(container)
 				.addOptions({ move: "move", copy: "copy" })
 				.setValue(action.type)
-				.onChange((val) => (action.type = val as "move" | "copy"));
+				.onChange((val) => {
+					action.type = val as "move" | "copy";
+					this.plugin.saveSettings();
+				});
 
 			container.createSpan({ text: "the card to" });
 
-			// Target column dropdown
 			new DropdownComponent(container)
-				.addOptions(Object.fromEntries(this.columns.map((c) => [c, c])))
+				.addOptions(
+					Object.fromEntries(
+						this.columns.map((c) => [c.index, c.name || ""])
+					)
+				)
 				.setValue(action.targetColumn)
-				.onChange((val) => (action.targetColumn = val));
+				.onChange((val) => {
+					action.targetColumn = val;
+					this.plugin.saveSettings();
+				});
+
+			new ButtonComponent(container)
+				.setIcon("trash")
+				.setTooltip("Delete Action")
+				.onClick(() => {
+					this.plugin.settings.data.globalSettings.actions.splice(
+						i,
+						1
+					);
+					this.plugin.saveSettings();
+					this.refresh();
+				});
 		}
 	}
 
@@ -107,7 +136,6 @@ export class TaskBoardActionsModal extends Modal {
 	}
 
 	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
+		this.contentEl.empty();
 	}
 }

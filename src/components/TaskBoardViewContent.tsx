@@ -11,7 +11,7 @@ import type TaskBoard from "main";
 import debounce from "debounce";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
-import { bugReporter, openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
+import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanBoard";
@@ -102,6 +102,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		openAddNewTaskModal(app, plugin);
 	}
 
+	function handleOpenTaskBoardActionsModal() {
+		console.log("Opening Task Board Actions Modal");
+		openTaskBoardActionsModal(plugin, activeBoardIndex);
+	}
+
 	return (
 		<div className="taskBoardView">
 			<div className="taskBoardHeader">
@@ -117,17 +122,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					))}
 				</div>
 				<div className="taskBoardHeaderBtns">
-					<select
-						className="taskBoardViewDropdown"
-						value={viewType}
-						onChange={(e) => setViewType(e.target.value as ViewType)}
-					>
-						<option value="kanban">Kanban</option>
-						<option value="list">List</option>
-						<option value="table">Table</option>
-						<option value="canvas">Canvas</option>
-					</select>
-
 					<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={handleOpenAddNewTaskModal}>
 						<CirclePlus size={18} />
 					</button>
@@ -142,9 +136,19 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					>
 						<Bolt size={18} />
 					</button>
-					<button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={openTaskBoardActionsModal}>
-						<Bot size={18} />
+					<button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
+						<Bot size={20} />
 					</button>
+					<select
+						className="taskBoardViewDropdown"
+						value={viewType}
+						onChange={(e) => setViewType(e.target.value as ViewType)}
+					>
+						<option value="kanban">Kanban</option>
+						{/* <option value="list">List</option>
+						<option value="table">Table</option> */}
+						<option value="canvas">Canvas</option>
+					</select>
 					<button className="RefreshBtn" aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
