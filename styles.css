@@ -85,6 +85,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .AddNewTaskBtn,
 .ConfigureBtn,
+.taskboardActionshBtn,
 .RefreshBtn {
 	background-color: transparent !important;
 	background: none;
@@ -99,7 +100,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
-.RefreshBtn:hover {
+.RefreshBtn:hover,
+.taskboardActionshBtn:hover {
 	border: var(--border-width) solid olive;
 }
 
@@ -1858,6 +1860,61 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	.taskboard-diff-content-compare-modal-container {
 		flex-direction: column;
 	}
+}
+
+/* /src/components/KanbanBoard.tsx */
+
+.modal[data-type="task-board-actions-modal"] {
+	min-width: 80vw !important;
+	min-height: 80vh !important;
+}
+
+.modal-content[data-type="task-board-actions-modal"] {
+	/* min-width: 80vw;
+	min-height: 80vh; */
+}
+
+.taskboard-actions-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.taskboard-actions-add-button {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	padding: 4px 10px;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.taskboard-actions-add-button:hover {
+	background-color: var(--interactive-accent-hover);
+}
+
+.taskboard-active-actions-section,
+.taskboard-inactive-actions-section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.taskboard-inactive-actions-section {
+	margin-top: 10rem;
+}
+
+.taskboard-action-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	background-color: var(--background-secondary-alt);
+	padding: 8px 12px;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 

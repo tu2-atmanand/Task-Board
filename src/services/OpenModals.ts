@@ -18,6 +18,7 @@ import { CommunityPlugins } from "./CommunityPlugins";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
 import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
+import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -237,7 +238,9 @@ export const openDiffContentCompareModal = (
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
 				el.createEl("p", {
-					text: `${t("safe-guard")} : ${t("content-mismatch-notice-message")}`,
+					text: `${t("safe-guard")} : ${t(
+						"content-mismatch-notice-message"
+					)}`,
 				});
 				el.createEl("button", {
 					text: t("show-conflicts"),
@@ -265,4 +268,15 @@ export const openDiffContentCompareModal = (
 			e.stopImmediatePropagation();
 		}
 	});
+};
+
+export const openTaskBoardActionsModal = (
+	plugin: TaskBoard,
+	activeBoardIndex: number
+) => {
+	const actionModal = new TaskBoardActionsModal(
+		plugin,
+		plugin.settings.data.boardConfigs[activeBoardIndex].columns
+	);
+	actionModal.open();
 };

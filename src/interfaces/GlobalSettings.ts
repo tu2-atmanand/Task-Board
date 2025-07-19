@@ -47,12 +47,19 @@ export enum NotificationService {
 	ObsidApp = "obsiApp",
 }
 
-interface CustomStatus {
+export interface CustomStatus {
 	symbol: string; // The symbol representing the status (e.g., "/", "-")
 	name: string; // The human-readable name of the status (e.g., "In Progress")
 	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
 	type: string; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+}
+
+export interface TaskBoardAction {
+	enabled: boolean;
+	trigger: "Complete" | "Incomplete";
+	type: "move" | "copy";
+	targetColumn: string;
 }
 
 export interface globalSettingsData {
@@ -97,6 +104,7 @@ export interface globalSettingsData {
 	tasksCacheFilePath: string;
 	notificationService: string;
 	frontmatterPropertyForReminder: string;
+	actions: TaskBoardAction[];
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -357,6 +365,14 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			tasksCacheFilePath: "",
 			notificationService: NotificationService.None,
 			frontmatterPropertyForReminder: "reminder",
+			actions: [
+				{
+					enabled: true,
+					trigger: "Complete",
+					type: "move",
+					targetColumn: "Completed",
+				},
+			],
 		},
 	},
 };
