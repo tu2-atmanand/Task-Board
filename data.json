@@ -647,7 +647,15 @@
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": "",
       "notificationService": "notifianApp",
-      "frontmatterPropertyForReminder": "remind at"
+      "frontmatterPropertyForReminder": "remind at",
+      "actions": [
+        {
+          "enabled": true,
+          "trigger": "Complete",
+          "type": "move",
+          "targetColumn": "6"
+        }
+      ]
     }
   }
 }

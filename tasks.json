@@ -62,9 +62,9 @@
         ],
         "Daily_Notes/28-09-2024.md": [
             {
-                "id": 1519648358,
+                "id": 3823783909,
                 "status": " ",
-                "title": "This is a new task with due date with the format of dataview. Updating | 📅2024-09-28 🔽 #Test",
+                "title": "This is a new task with due date with the format of dataview. Updating 📅2024-09-28 🔽 #Test",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -81,7 +81,7 @@
                     "startLine": 3,
                     "startCharIndex": 0,
                     "endLine": 3,
-                    "endCharIndex": 100
+                    "endCharIndex": 98
                 },
                 "completion": "",
                 "cancelledDate": "",
