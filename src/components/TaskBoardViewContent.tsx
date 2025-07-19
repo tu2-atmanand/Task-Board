@@ -136,9 +136,9 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					>
 						<Bolt size={18} />
 					</button>
-					<button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
+					{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
 						<Bot size={20} />
-					</button>
+					</button> */}
 					<select
 						className="taskBoardViewDropdown"
 						value={viewType}
