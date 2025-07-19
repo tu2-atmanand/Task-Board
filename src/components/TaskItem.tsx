@@ -24,8 +24,8 @@ export interface TaskProps {
 	plugin: TaskBoard;
 	taskKey: number;
 	task: taskItem;
-	columnIndex: number;
 	activeBoardSettings: Board;
+	columnIndex?: number;
 }
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
@@ -301,8 +301,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
-										// If showColumnTags is false and column type is namedTag, skip the column's tag
-										const column = activeBoardSettings.columns[columnIndex - 1];
+										// If columnIndex is defined, proceed to get the column
+										const column = columnIndex !== undefined ? activeBoardSettings.columns[columnIndex - 1] : undefined;
 										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
 											return null;
 										}

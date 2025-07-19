@@ -237,12 +237,14 @@
       "scanFilters": {
         "files": {
           "polarity": 3,
-          "values": []
+          "values": [
+            "TODO.md"
+          ]
         },
         "folders": {
-          "polarity": 3,
+          "polarity": 1,
           "values": [
-            "/"
+            "Daily_Notes"
           ]
         },
         "tags": {
@@ -627,7 +629,7 @@
         }
       ],
       "showTaskWithoutMetadata": true,
-      "tagColorsType": "text",
+      "tagColorsType": "background",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
