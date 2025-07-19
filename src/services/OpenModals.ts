@@ -266,3 +266,28 @@ export const openDiffContentCompareModal = (
 		}
 	});
 };
+
+
+export const openTaskBoardActionsModal = (
+	plugin: TaskBoard,
+	onAction: (action: string) => void
+) => {
+	const actions = [
+		{ label: t("add-new-task"), value: "add-new-task" },
+		{ label: t("scan-vault"), value: "scan-vault" },
+		{ label: t("configure-boards"), value: "configure-boards" },
+	];
+
+	const actionModal = new AddOrEditTaskModal(
+		plugin.app,
+		plugin,
+		async (selectedAction) => {
+			onAction(selectedAction);
+			actionModal.close();
+		},
+		false,
+		false,
+		actions
+	);
+	actionModal.open();
+}

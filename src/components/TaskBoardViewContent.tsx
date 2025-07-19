@@ -1,7 +1,7 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
+import { Bolt, Bot, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
@@ -141,6 +141,9 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						}
 					>
 						<Bolt size={18} />
+					</button>
+					<button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={openTaskBoardActionsModal}>
+						<Bot size={18} />
 					</button>
 					<button className="RefreshBtn" aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
