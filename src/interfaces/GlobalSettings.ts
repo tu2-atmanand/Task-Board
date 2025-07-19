@@ -105,6 +105,7 @@ export interface globalSettingsData {
 	notificationService: string;
 	frontmatterPropertyForReminder: string;
 	actions: TaskBoardAction[];
+	searchQuery?: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure

@@ -83,6 +83,17 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding-inline: 0;
 }
 
+.taskBoardSearchInput {
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	margin-right: 8px;
+	font-size: 14px;
+}
+
+.searchTaskBtn,
 .AddNewTaskBtn,
 .ConfigureBtn,
 .taskboardActionshBtn,
@@ -98,6 +109,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	/* font-size: 14px; */
 }
 
+.searchTaskBtn:hover,
 .AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
 .RefreshBtn:hover,

@@ -59,7 +59,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement && task.title !== "") {
-				const cleanedTitle = cleanTaskTitle(plugin, task);
+				let cleanedTitle = cleanTaskTitle(plugin, task);
+				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				if (searchQuery) {
+					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+					const regex = new RegExp(`(${escapedQuery})`, "gi");
+					cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
+				}
+
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
@@ -81,11 +88,18 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		task.body.forEach((subtaskText, index) => {
 			const uniqueKey = `${task.id}-${index}`;
 			const element = subtaskTextRefs.current[uniqueKey];
-			const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+			let strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
 			if (element && strippedSubtaskText !== "") {
 				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 				element.empty(); // Clear previous content
+
+				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				if (searchQuery) {
+					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+					const regex = new RegExp(`(${escapedQuery})`, "gi");
+					strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
+				}
 
 				MarkdownUIRenderer.renderSubtaskText(
 					plugin.app,
@@ -106,12 +120,19 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const renderTaskDescriptionWithObsidianAPI = async () => {
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		const descriptionContent = task.body
+		let descriptionContent = task.body
 			.filter((line) => !line.trim().startsWith("- [ ]") && !line.trim().startsWith("- [x]"))
 			.join("\n")
 			.trim();
 
 		if (descElement && descriptionContent !== "") {
+			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			if (searchQuery) {
+				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				const regex = new RegExp(`(${escapedQuery})`, "gi");
+				descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
+			}
+			
 			// Clear existing content
 			descElement.empty();
 			// Use Obsidian's rendering API
@@ -394,7 +415,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 									{/* Render each subtask separately */}
 									<div
 										className={isCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
-										ref={(el) => (subtaskTextRefs.current[uniqueKey] = el)} // Assign unique ref to each subtask
+										ref={(el) => { subtaskTextRefs.current[uniqueKey] = el; }} // Assign unique ref to each subtask
 									/>
 								</div>
 							) : null;
@@ -488,7 +509,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							onChange={handleMainCheckBoxClick}
 						/>
 						<div className="taskItemBodyContent">
-							<div className="taskItemTitle" ref={(titleEL) => taskTitleRendererRef.current[taskIdKey] = titleEL} />
+							<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
 							<div className="taskItemBody">
 								{memoizedRenderSubTasks}
 							</div>

@@ -1,7 +1,7 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, Bot, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
+import { Bolt, Bot, CirclePlus, RefreshCcw, Search, SearchX, Tally1 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
@@ -16,6 +16,7 @@ import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanBoard";
 import CanvasView from "./CanvasView";
+import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 
 type ViewType = "kanban" | "list" | "table" | "canvas";
 
@@ -27,6 +28,9 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
 	const [viewType, setViewType] = useState<ViewType>("kanban");
+	const [showSearchInput, setShowSearchInput] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -107,6 +111,60 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		openTaskBoardActionsModal(plugin, activeBoardIndex);
 	}
 
+	function handleSearchButtonClick() {
+		setShowSearchInput((prev) => !prev);
+		if (showSearchInput) {
+			setSearchQuery("");
+			setFilteredTasksPerColumn([]);
+			plugin.settings.data.globalSettings.searchQuery = "";
+		} else {
+			setSearchQuery(plugin.settings.data.globalSettings.searchQuery || "");
+			handleSearchSubmit();
+		}
+	}
+
+	// function highlightMatch(text: string, query: string): string {
+	// 	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+	// 	return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
+	// }
+
+	function handleSearchSubmit() {
+		console.log("Search Query:", searchQuery);
+		if (!searchQuery.trim()) {
+			setFilteredTasksPerColumn([]);
+			return;
+		}
+
+		plugin.settings.data.globalSettings.searchQuery = searchQuery;
+
+		const lowerQuery = searchQuery.toLowerCase();
+
+		const filtered = allTasksArrangedPerColumn.map((column) => {
+			const filteredTasks = column
+				.filter((task) => {
+					const titleMatch = task.title.toLowerCase().includes(lowerQuery);
+					const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+					return titleMatch || bodyMatch;
+				});
+			// .map((task) => {
+			// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
+			// 	const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
+
+			// 	return {
+			// 		...task,
+			// 		title: highlightedTitle,
+			// 		body: highlightedBody.split("\n"),
+			// 	};
+			// });
+			return filteredTasks;
+		});
+
+		console.log("Filtered Tasks Per Column:", filtered);
+		setFilteredTasksPerColumn(filtered);
+	}
+
+
 	return (
 		<div className="taskBoardView">
 			<div className="taskBoardHeader">
@@ -122,6 +180,28 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					))}
 				</div>
 				<div className="taskBoardHeaderBtns">
+					{showSearchInput && (
+						<input
+							type="text"
+							className="taskBoardSearchInput"
+							placeholder="Search tasks..."
+							aria-label={t("enter-task-content-to-search")}
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									handleSearchSubmit();
+								}
+							}}
+						/>
+					)}
+					<button
+						className="searchTaskBtn"
+						onClick={() => handleSearchButtonClick()}
+					>
+						{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
+					</button>
+
 					<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={handleOpenAddNewTaskModal}>
 						<CirclePlus size={18} />
 					</button>
@@ -162,7 +242,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						plugin={plugin}
 						board={boards[activeBoardIndex]}
 						allTasks={allTasks}
-						tasksPerColumn={allTasksArrangedPerColumn}
+						tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
 						loading={loading}
 						freshInstall={freshInstall}
 					/>
