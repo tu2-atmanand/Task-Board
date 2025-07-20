@@ -240,6 +240,13 @@ const en: Lang = {
 	"safe-guard": "Safe guard",
 	"content-mismatch-notice-message": "Content mismatch detected. Please resolve the conflicts.",
 	"show-conflicts": "Show conflicts",
+	"customize-card-sections": "Customize card sections",
+	"customize-card-sections-info": "Select which sections you want to see in the task item card.",
+	"show-description-only": "Show description only",
+	"show-subtasks-only": "Show subtasks only",
+	"show-both": "Show both",
+	"hide-both": "Hide both",
+	"archive-instead": "Archive instead",
 };
 
 export default en;
