@@ -655,7 +655,8 @@
           "type": "move",
           "targetColumn": "6"
         }
-      ]
+      ],
+      "cardSectionsVisibility": "hideBoth"
     }
   }
 }

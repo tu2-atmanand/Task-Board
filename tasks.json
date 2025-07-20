@@ -400,12 +400,12 @@
         ],
         "Daily_Notes/21-09-2024.md": [
             {
-                "id": 452670912,
+                "id": 1899318852,
                 "status": " ",
                 "title": "Adding random task for today to see how the board updates. 📅 2024-09-29 ⏫ #Testing ⏰ [12:02 - 13:02]",
                 "body": [
                     "\tAdding body to this task from file itself not using any Modal. So, now when this file will be scanned, it will first get detected as well as, the whole board should re-render. updating more...",
-                    "\t- [ ] Changing the complete content of the subTask, updating",
+                    "\t- [x] Changing the complete content of the subTask, updating",
                     "\t- [ ] Adding another subTask, Second"
                 ],
                 "time": "12:02 - 13:02",
@@ -682,7 +682,7 @@
         ],
         "Daily_Notes/2025-05-08.md": [
             {
-                "id": 3518234848,
+                "id": 978627179,
                 "status": "r",
                 "title": "This 🔺⏰ [22:54 - 13:54] 📅 2025-05-18 #bug",
                 "body": [
@@ -710,7 +710,7 @@
                 "reminder": ""
             },
             {
-                "id": 647360162,
+                "id": 1701509014,
                 "status": "r",
                 "title": "This is a first task, successfully able to add through the new editor in modal.⏰ [23:00 - 24:00] 🔼 📅 2025-05-18 #new",
                 "body": [
@@ -1184,7 +1184,7 @@
         ],
         "Daily_Notes/2024-10-10.md": [
             {
-                "id": 4046914179,
+                "id": 599866827,
                 "status": " ",
                 "title": "1. **Adding** a \"new task\", to see if everything works fine⏰ [22:28 - 23:28]  📅 2025-06-04 🔽 #Test",
                 "body": [
@@ -1213,7 +1213,7 @@
                 "reminder": ""
             },
             {
-                "id": 2006356536,
+                "id": 3666623806,
                 "status": " ",
                 "title": "20:10 - 21:10 This is a new Task I am adding from the Combined Modal. @due(2024-10-14) 🔼 #Test",
                 "body": [
@@ -1244,7 +1244,7 @@
                 "reminder": ""
             },
             {
-                "id": 2084690742,
+                "id": 2691358050,
                 "status": " ",
                 "title": "Adding a simple Task, to see if everything works correctly. 📅 2024-10-10 ⏫ #Test ⏰ [22:29 - 23:29]",
                 "body": [
@@ -1263,9 +1263,9 @@
                 "priority": 2,
                 "filePath": "Daily_Notes/2024-10-10.md",
                 "taskLocation": {
-                    "startLine": 11,
+                    "startLine": 14,
                     "startCharIndex": 0,
-                    "endLine": 13,
+                    "endLine": 16,
                     "endCharIndex": 14
                 },
                 "completion": "",
@@ -1273,7 +1273,7 @@
                 "reminder": ""
             },
             {
-                "id": 631309316,
+                "id": 3168330996,
                 "status": " ",
                 "title": "Adding a simple task",
                 "body": [],
@@ -1287,9 +1287,9 @@
                 "priority": 0,
                 "filePath": "Daily_Notes/2024-10-10.md",
                 "taskLocation": {
-                    "startLine": 15,
+                    "startLine": 18,
                     "startCharIndex": 0,
-                    "endLine": 15,
+                    "endLine": 18,
                     "endCharIndex": 26
                 },
                 "completion": "",
