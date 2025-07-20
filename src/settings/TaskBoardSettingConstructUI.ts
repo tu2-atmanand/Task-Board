@@ -12,6 +12,7 @@ import {
 	NotificationService,
 	TagColorType,
 	UniversalDateOptions,
+	cardSectionsVisibilityOptions,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
@@ -367,6 +368,7 @@ export class SettingsManager {
 			tagColorsType,
 			showTaskWithoutMetadata,
 			showFileNameInCard,
+			cardSectionsVisibility,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -389,6 +391,29 @@ export class SettingsManager {
 					this.globalSettings!.showFooter = value;
 					await this.saveSettings();
 				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("customize-card-sections"))
+			.setDesc(t("customize-card-sections-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[cardSectionsVisibilityOptions.showDescriptionOnly]: t(
+							"show-description-only"
+						),
+						[cardSectionsVisibilityOptions.showSubTasksOnly]:
+							t("show-subtasks-only"),
+						[cardSectionsVisibilityOptions.showBoth]:
+							t("show-both"),
+						[cardSectionsVisibilityOptions.hideBoth]:
+							t("hide-both"),
+					})
+					.setValue(cardSectionsVisibility)
+					.onChange(async (value) => {
+						this.globalSettings!.cardSectionsVisibility = value;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting to show/Hide the Footer of the task card
@@ -1016,7 +1041,7 @@ export class SettingsManager {
 							communityPlugins.isQuickAddPluginEnabled()
 					)
 					.onChange(async (value) => {
-						if(this.globalSettings === null) return;
+						if (this.globalSettings === null) return;
 
 						if (!communityPlugins.isQuickAddPluginEnabled()) {
 							new Notice(t("quickadd-plugin-not-enabled"));
