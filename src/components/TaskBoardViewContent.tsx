@@ -180,6 +180,19 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					))}
 				</div>
 				<div className="taskBoardHeaderBtns">
+					<div className="taskCountContainer">
+						<div className="taskCountContainerProgressBar">
+							<div
+								className="taskCountContainerProgressBarProgress"
+								style={{
+									width: `${((allTasks ? allTasks?.Completed.length : 0) / (allTasks ? allTasks?.Pending.length + allTasks?.Completed.length : 1)) * 100}%`,
+								}}
+							/>
+						</div>
+						<span className="taskCountContainerTaskCount">
+							{allTasks?.Pending.length} / {allTasks ? allTasks?.Pending.length + allTasks?.Completed.length : 0}
+						</span>
+					</div>
 					{showSearchInput && (
 						<input
 							type="text"
