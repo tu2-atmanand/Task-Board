@@ -19,7 +19,7 @@ import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
 import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
+import { downloadAndApplyLanguageFile, t } from "src/utils/lang/helper";
 import {
 	MultiSuggest,
 	getFileSuggestions,
@@ -455,88 +455,93 @@ export class SettingsManager {
 				})
 			);
 
-		// Setting to show/Hide the Header of the task card
+		// New setting for updating language file
 		new Setting(contentEl)
-			.setName(t("filters-for-scanning"))
-			.setDesc(t("name-of-the-file-folder-tag-for-filter-info"));
-
-		// Helper to add filter rows
-		const addFilterRow = (
-			label: string,
-			filterType: keyof typeof scanFilters,
-			polarity: number,
-			values: string[],
-			placeholder: string
-		) => {
-			const row = contentEl.createDiv({
-				cls: "taskBoard-filter-row",
-			});
-
-			// Label
-			row.createEl("span", {
-				text: label,
-				cls: "taskBoard-filter-label",
-			});
-
-			// Input for values
-			const input = row.createEl("input", {
-				type: "text",
-				cls: "taskBoard-filter-input",
-			});
-			input.value = values.join(", ");
-			input.addEventListener("change", async () => {
-				this.globalSettings!.scanFilters[filterType].values =
-					input.value.split(",").map((v) => normalizePath(v.trim()));
-				await this.saveSettings();
-			});
-			input.placeholder = placeholder;
-
-			// Dropdown for polarity
-			const dropdown = row.createEl("select", {
-				cls: "taskBoard-filter-dropdown",
-			});
-			[t("only-scan-this"), t("dont-scan-this"), t("disable")].forEach(
-				(optionText, idx) => {
-					const option = dropdown.createEl("option", {
-						text: optionText,
-					});
-					option.value = (idx + 1).toString();
-					if (idx + 1 === polarity) option.selected = true;
-				}
+			.setName(t("update-language-translations"))
+			.setDesc(t("update-language-translations-info"))
+			.addButton((button) =>
+				button.setButtonText("Update").onClick(async () => {
+					await downloadAndApplyLanguageFile(this.plugin);
+				})
 			);
-			dropdown.addEventListener("change", async () => {
-				this.globalSettings!.scanFilters[filterType].polarity =
-					parseInt(dropdown.value, 10);
-				await this.saveSettings();
-			});
-		};
 
-		// Files Row
-		addFilterRow(
-			t("files"),
-			"files",
-			scanFilters.files.polarity,
-			scanFilters.files.values,
-			"Personal.md, FolderName/New_file.md"
-		);
+		// // Helper to add filter rows
+		// const addFilterRow = (
+		// 	label: string,
+		// 	filterType: keyof typeof scanFilters,
+		// 	polarity: number,
+		// 	values: string[],
+		// 	placeholder: string
+		// ) => {
+		// 	const row = contentEl.createDiv({
+		// 		cls: "taskBoard-filter-row",
+		// 	});
 
-		// Folders Row
-		addFilterRow(
-			t("folders"),
-			"folders",
-			scanFilters.folders.polarity,
-			scanFilters.folders.values,
-			"Folder_Name 1, Folder_Name 2, Parent_Folder/child_folder/New_folder"
-		);
+		// 	// Label
+		// 	row.createEl("span", {
+		// 		text: label,
+		// 		cls: "taskBoard-filter-label",
+		// 	});
 
-		// Tags Row
-		addFilterRow(
-			t("tags"),
-			"tags",
-			scanFilters.tags.polarity,
-			scanFilters.tags.values,
-			"#Bug, #docs/🔥bug, #feature"
-		);
+		// 	// Input for values
+		// 	const input = row.createEl("input", {
+		// 		type: "text",
+		// 		cls: "taskBoard-filter-input",
+		// 	});
+		// 	input.value = values.join(", ");
+		// 	input.addEventListener("change", async () => {
+		// 		this.globalSettings!.scanFilters[filterType].values =
+		// 			input.value.split(",").map((v) => normalizePath(v.trim()));
+		// 		await this.saveSettings();
+		// 	});
+		// 	input.placeholder = placeholder;
+
+		// 	// Dropdown for polarity
+		// 	const dropdown = row.createEl("select", {
+		// 		cls: "taskBoard-filter-dropdown",
+		// 	});
+		// 	[t("only-scan-this"), t("dont-scan-this"), t("disable")].forEach(
+		// 		(optionText, idx) => {
+		// 			const option = dropdown.createEl("option", {
+		// 				text: optionText,
+		// 			});
+		// 			option.value = (idx + 1).toString();
+		// 			if (idx + 1 === polarity) option.selected = true;
+		// 		}
+		// 	);
+		// 	dropdown.addEventListener("change", async () => {
+		// 		this.globalSettings!.scanFilters[filterType].polarity =
+		// 			parseInt(dropdown.value, 10);
+		// 		await this.saveSettings();
+		// 	});
+		// };
+
+		// // Files Row
+		// addFilterRow(
+		// 	t("files"),
+		// 	"files",
+		// 	scanFilters.files.polarity,
+		// 	scanFilters.files.values,
+		// 	"Personal.md, FolderName/New_file.md"
+		// );
+
+		// // Folders Row
+		// addFilterRow(
+		// 	t("folders"),
+		// 	"folders",
+		// 	scanFilters.folders.polarity,
+		// 	scanFilters.folders.values,
+		// 	"Folder_Name 1, Folder_Name 2, Parent_Folder/child_folder/New_folder"
+		// );
+
+		// // Tags Row
+		// addFilterRow(
+		// 	t("tags"),
+		// 	"tags",
+		// 	scanFilters.tags.polarity,
+		// 	scanFilters.tags.values,
+		// 	"#Bug, #docs/🔥bug, #feature"
+		// );
 
 		contentEl.createEl("hr");
 

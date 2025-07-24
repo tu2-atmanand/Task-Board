@@ -29,7 +29,11 @@ import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
-import { t } from "src/utils/lang/helper";
+import {
+	clearCachedTranslations,
+	loadTranslationsOnStartup,
+	t,
+} from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
 
@@ -79,7 +83,9 @@ export default class TaskBoard extends Plugin {
 		this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
-		this.getLanguage();
+		// this.getLanguage();
+
+		await loadTranslationsOnStartup(this);
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -109,6 +115,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
+		clearCachedTranslations();
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
@@ -208,21 +215,21 @@ export default class TaskBoard extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	getLanguage() {
-		const obsidianLang = window.localStorage.getItem("language");
+	// getLanguage() {
+	// 	const obsidianLang = window.localStorage.getItem("language");
 
-		if (obsidianLang && obsidianLang in langCodes) {
-			localStorage.setItem("taskBoardLang", obsidianLang);
-			this.settings.data.globalSettings.lang = obsidianLang;
-			this.saveSettings();
-		} else {
-			localStorage.setItem(
-				"taskBoardLang",
-				// this.settings.data.globalSettings.lang
-				"en"
-			);
-		}
-	}
+	// 	if (obsidianLang && obsidianLang in langCodes) {
+	// 		localStorage.setItem("taskBoardLang", obsidianLang);
+	// 		this.settings.data.globalSettings.lang = obsidianLang;
+	// 		this.saveSettings();
+	// 	} else {
+	// 		localStorage.setItem(
+	// 			"taskBoardLang",
+	// 			// this.settings.data.globalSettings.lang
+	// 			"en"
+	// 		);
+	// 	}
+	// }
 
 	createLocalStorageAndScanModifiedFiles() {
 		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
