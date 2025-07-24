@@ -135,7 +135,7 @@ export async function downloadAndApplyLanguageFile(
 	const localesFolder = normalizePath(`${pluginFolder}/locales`);
 	const filePath = normalizePath(`${localesFolder}/${lang}.json`);
 	const tempPath = normalizePath(`${localesFolder}/${lang}.json.tmp`);
-	const url = `https://raw.githubusercontent.com/tu2-atmanand/task-board-translations/main/${lang}.json`;
+	const url = `https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/src/utils/lang/locale/${lang}.json`;
 
 	let progressNotice = new Notice(
 		`Downloading '${lang}' language file...`,
@@ -157,7 +157,10 @@ export async function downloadAndApplyLanguageFile(
 		// delete cachedTranslations[lang];
 
 		progressNotice.hide();
-		new Notice(`Language file '${lang}.json' downloaded successfully!`);
+		new Notice(
+			`Language file '${lang}.json' downloaded successfully!\nPlease reload Obsidian to apply changes.`,
+			0
+		);
 	} catch (err) {
 		progressNotice.hide();
 		console.error(`Failed to download language file for '${lang}'`, err);
