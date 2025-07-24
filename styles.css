@@ -1649,22 +1649,76 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskBoard-filter-row {
 	display: flex;
 	align-items: center;
-	margin-bottom: 10px;
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-content: center;
+	border: 1px solid var(--checkbox-border-color);
+	padding: 5px;
+	border-radius: 5px;
+	flex-direction: column;
+}
+
+.taskBoard-filter-row-heading {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.taskBoard-filter-row-body {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	gap: 0.75rem;
 }
 
 .taskBoard-filter-label {
-	width: 80px;
-	font-weight: bold;
-	color: var(--color-red);
+	width: 70px;
+	font-weight: 500;
+	color: var(--blockquote-border-color);
+	align-content: center;
 }
 
-.taskBoard-filter-input {
-	flex-grow: 1;
-	margin-right: 10px;
+.taskBoard-filter-values {
+	background-color: var(--background-modifier-form-field);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	min-width: 100px;
+	width: -webkit-fill-available;
+	padding: 7px;
+	border-radius: 5px;
+}
+
+.taskBoard-filter-tag {
+	background-color: var(--color-base-40);
+	padding: 2px 8px;
+	border-radius: 8px;
+	font-size: 0.875em;
+	border: 1px solid var(--text-highlight-bg);
+}
+
+.taskBoard-filter-configure-button {
+	padding: 3px 10px;
+	cursor: pointer;
+	font-size: 0.875em;
+	border: 1px solid var(--interactive-accent);
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border-radius: 6px;
+}
+
+.taskBoard-filter-configure-button:hover {
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
 }
 
 .taskBoard-filter-dropdown {
 	text-align: center;
+	max-width: fit-content;
 }
 
 .taskBoard-global-settings-tab-tag-color-preview {
@@ -2070,6 +2124,35 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding: 8px 12px;
 	border-radius: 8px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* /src/modal/ScanFilterModal.ts */
+
+.scan-filter-input {
+	width: 100% !important;
+}
+
+.scan-filter-list {
+	margin-top: 1em;
+	padding-left: 5px;
+}
+
+.scan-filter-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 10px;
+	margin-bottom: 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	font-weight: 500;
+	background-color: var(--background-primary-alt);
+}
+
+.scan-filter-remove-btn {
+	background-color: transparent !important;
+	color: var(--color-red) !important;
+	cursor: pointer;
 }
 
 
