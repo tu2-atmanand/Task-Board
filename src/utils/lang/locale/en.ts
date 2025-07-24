@@ -247,6 +247,8 @@ const en: Lang = {
 	"show-both": "Show both",
 	"hide-both": "Hide both",
 	"archive-instead": "Archive instead",
+	"update-language-translations": "Update language translations",
+	"update-language-translations-info": "Click on the update button to download the latest language translations.",
 };
 
 export default en;
