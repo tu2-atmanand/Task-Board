@@ -28,7 +28,7 @@ import {
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { bugReporter } from "src/services/OpenModals";
+import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 
 export class SettingsManager {
@@ -201,6 +201,99 @@ export class SettingsManager {
 			scanVaultAtStartup,
 			preDefinedNote,
 		} = this.globalSettings!;
+
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl)
+			.setName(t("filters-for-scanning"))
+			.setDesc(t("name-of-the-file-folder-tag-for-filter-info"));
+
+		["files", "folders", "tags"].forEach((type) => {
+			const filterType = type as keyof typeof scanFilters;
+			const filter =
+				this.plugin.settings.data.globalSettings.scanFilters[
+					filterType
+				];
+
+			const row = contentEl.createDiv({
+				cls: "taskBoard-filter-row",
+			});
+
+			const rowHeading = row.createDiv({
+				cls: "taskBoard-filter-row-heading",
+			});
+
+			const rowBody = row.createDiv({
+				cls: "taskBoard-filter-row-body",
+			});
+
+			// Filter label
+			rowHeading.createEl("span", {
+				text: type.charAt(0).toUpperCase() + type.slice(1),
+				cls: "taskBoard-filter-label",
+			});
+
+			// Configure button
+			const configureBtn = rowHeading.createEl("button", {
+				text: "Configure",
+				cls: "taskBoard-filter-configure-button",
+			});
+			configureBtn.addEventListener("click", () => {
+				openScanFiltersModal(this.plugin, filterType, (newValues) => {
+					this.plugin.settings.data.globalSettings.scanFilters[
+						filterType
+					].values = newValues;
+					this.plugin.saveSettings();
+					// this.display(); // Refresh the settings UI
+				});
+			});
+
+			// Visual tag list
+			const tagList = rowBody.createDiv({
+				cls: "taskBoard-filter-values",
+			});
+
+			if (filter.values.length === 0) {
+				tagList.createEl("em", {
+					text: "None",
+					attr: { style: "opacity: 0.5;" },
+				});
+			} else {
+				filter.values.forEach((val) => {
+					tagList.createEl("span", {
+						text: val,
+						cls: "taskBoard-filter-tag",
+					});
+				});
+			}
+
+			// Polarity dropdown
+			const polarityDropdown = rowBody.createEl("select", {
+				attr: { "aria-label": "Select Filter Polarity" },
+				cls: "taskBoard-filter-dropdown",
+			});
+			[
+				{ label: "Only scan this", value: 1 },
+				{ label: "Don't scan this", value: 2 },
+				{ label: "Disable", value: 3 },
+			].forEach((opt) => {
+				const option = polarityDropdown.createEl("option", {
+					text: opt.label,
+					value: String(opt.value),
+				});
+				if (filter.polarity === opt.value) {
+					option.selected = true;
+				}
+			});
+			polarityDropdown.addEventListener("change", (e) => {
+				const newPolarity = Number(
+					(e.target as HTMLSelectElement).value
+				);
+				this.plugin.settings.data.globalSettings.scanFilters[
+					filterType
+				].polarity = newPolarity;
+				this.plugin.saveSettings();
+			});
+		});
 
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
