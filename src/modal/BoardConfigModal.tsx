@@ -507,7 +507,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "namedTag" && (
 											<input
 												type="text"
-												ref={(el) => (filePathInputRefs.current[column.id] = el)}
+												ref={(el) => {
+													filePathInputRefs.current[column.id] = el;
+												}}
 												placeholder={t("enter-tag")}
 												value={column.coltag || ""}
 												onChange={(e) =>
@@ -575,7 +577,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "pathFiltered" && (
 											<input
 												type="text"
-												ref={(el) => (filePathInputRefs.current[column.id] = el)}
+												ref={(el) => {
+													filePathInputRefs.current[column.id] = el;
+												}}
 												className="boardConfigModalColumnRowContentColName"
 												value={column.filePaths || ""}
 												onChange={(e) =>
