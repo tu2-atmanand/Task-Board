@@ -249,6 +249,8 @@ const en: Lang = {
 	"archive-instead": "Archive instead",
 	"update-language-translations": "Update language translations",
 	"update-language-translations-info": "Click on the update button to download the latest language translations.",
+	"show-note-frontmatter-tags-in-the-card-header": "Show note frontmatter tags in the card header",
+	"show-note-frontmatter-tags-in-the-card-header-info": "Enable this feature to use the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks."
 };
 
 export default en;

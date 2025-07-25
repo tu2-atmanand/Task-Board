@@ -652,12 +652,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("Show note frontmatter tags in the card header"))
-			.setDesc(
-				t(
-					"Enable this feature to use see the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks."
-				)
-			)
+			.setName(t("show-note-frontmatter-tags-in-the-card-header"))
+			.setDesc(t("show-note-frontmatter-tags-in-the-card-header-info"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(showFrontmatterTagsOnCards)
