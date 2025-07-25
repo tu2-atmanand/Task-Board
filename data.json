@@ -639,7 +639,7 @@
         "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": false,
-        "quickAddPlugin": true
+        "quickAddPlugin": false
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",

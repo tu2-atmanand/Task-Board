@@ -4,7 +4,7 @@
     "Pending": {
         "Daily_Notes/30-09-2024.md": [
             {
-                "id": 1231299021,
+                "id": 2882228545,
                 "status": " ",
                 "title": "This is a task, and this is very bad way since the board is getting refreshed but it is refreshing the whole shit.  📅 2024-09-30  #RealTime 🔼",
                 "body": [],
@@ -30,9 +30,9 @@
                 "reminder": ""
             },
             {
-                "id": 3274064442,
+                "id": 4025328268,
                 "status": " ",
-                "title": "1. Now after this board is updated only the file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version. 📅 2025-05-07 #bug",
+                "title": "1. Now after this board is updated only the #Test file will be contineously scanned in the background and its tasks will be scanned. But user will have to refresh the board manually by himself for this version. 📅 2025-05-07 #bug",
                 "body": [
                     "\tAdding a body line, updating. more updating.",
                     "\tAnd for those who dont want their cpu to keep running at 20% all the time when i am doing the simplest thing that is typing then they can directly disable this feature, the best way .",
@@ -44,6 +44,7 @@
                 "scheduledDate": "",
                 "due": "2025-05-07",
                 "tags": [
+                    "#Test",
                     "#bug"
                 ],
                 "frontmatterTags": [],
@@ -2210,6 +2211,501 @@
                     "startCharIndex": 0,
                     "endLine": 10,
                     "endCharIndex": 45
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Task_Board_Temp_Tasks.md": [
+            {
+                "id": 46736827,
+                "status": " ",
+                "title": "This is not ➕ 2025-05-26 🛫 2025-05-26 #bug",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-05-26",
+                "startDate": "2025-05-26",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#bug"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 49
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 565029151,
+                "status": " ",
+                "title": "➕ 2025-05-26 🛫 2025-05-26",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-05-26",
+                "startDate": "2025-05-26",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 2,
+                    "endCharIndex": 32
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 809645310,
+                "status": " ",
+                "title": "This task will have the **created date** populated automatically, as well as the start date as todays date. ➕ 2025-05-26 #test",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-05-26",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 132
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2505907303,
+                "status": " ",
+                "title": "Adding a temp task, I think the start date should come automatically here. #test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 86
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1628123541,
+                "status": " ",
+                "title": "Adding a temp text ⏳ 2025-07-26 task. 📅 2025-08-01",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-07-26",
+                "due": "2025-08-01",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 6,
+                    "startCharIndex": 0,
+                    "endLine": 6,
+                    "endCharIndex": 57
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3625453054,
+                "status": " ",
+                "title": "This task is created through the **Add new task modal** and it will be entered right after the *Pending tasks* section. 🔼 ⏰ [10:00 - 11:00] ➕ 2025-07-10 📅 2025-07-11 #Testing",
+                "body": [],
+                "time": "10:00 - 11:00",
+                "createdDate": "2025-07-10",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-07-11",
+                "tags": [
+                    "#Testing"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 7,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 182
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2267885238,
+                "status": " ",
+                "title": "Here we go, another one. 🔺⏰ [10:00 - 11:30] #test 📅 2025-05-25",
+                "body": [],
+                "time": "10:00 - 11:30",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 8,
+                    "startCharIndex": 0,
+                    "endLine": 8,
+                    "endCharIndex": 70
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2413229010,
+                "status": " ",
+                "title": "Another a third task. ⏬ 📅 2025-05-26 #working",
+                "body": [
+                    "\tLets see, if this task correctly comes in the switched **QuickAdd** choice file."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-26",
+                "tags": [
+                    "#working"
+                ],
+                "frontmatterTags": [],
+                "priority": 5,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 9,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 81
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 69566683,
+                "status": " ",
+                "title": "Adding another task to the same **choice** directly from the `Add new task modal`. 0 #test 📅 2025-05-25",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 110
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3761800635,
+                "status": " ",
+                "title": "Now I should be able to switch between the **QuickAdd** choices directly from the `Add new task modal`. 🔼 📅 2025-05-25 #test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 132
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1370864480,
+                "status": "/",
+                "title": "This is a new task for tomorrow. 0 📅 2025-05-26 #New",
+                "body": [
+                    "\t- Adding it directly through the button from board header.",
+                    "\t- Lets see"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-26",
+                "tags": [
+                    "#New"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 16,
+                    "startCharIndex": 0,
+                    "endLine": 18,
+                    "endCharIndex": 11
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2661463899,
+                "status": " ",
+                "title": "Another quick task 🔺 📅 2025-05-25 #test",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-25",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 20,
+                    "startCharIndex": 0,
+                    "endLine": 20,
+                    "endCharIndex": 47
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2493254414,
+                "status": " ",
+                "title": "this #test ➕ 2025-05-26",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-05-26",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 25,
+                    "startCharIndex": 0,
+                    "endLine": 25,
+                    "endCharIndex": 29
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1623232698,
+                "status": " ",
+                "title": "This is a test 🔼 ➕ 2025-06-29 📅 2025-06-29 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-06-29",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-06-29",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 27,
+                    "startCharIndex": 0,
+                    "endLine": 27,
+                    "endCharIndex": 56
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3551121550,
+                "status": " ",
+                "title": "This is a test 2 ➕ 2025-06-29 📅 2025-06-29",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-06-29",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-06-29",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 29,
+                    "startCharIndex": 0,
+                    "endLine": 29,
+                    "endCharIndex": 49
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2786162549,
+                "status": " ",
+                "title": "This is test 3 ⏫ ➕ 2025-06-29 📅 2025-07-17 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-06-29",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-07-17",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 31,
+                    "startCharIndex": 0,
+                    "endLine": 31,
+                    "endCharIndex": 55
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3397475456,
+                "status": " ",
+                "title": "This is test 4 🔺 ➕ 2025-06-29 ⏳ 2025-07-04 📅 2025-06-29 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-06-29",
+                "startDate": "",
+                "scheduledDate": "2025-07-04",
+                "due": "2025-06-29",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 33,
+                    "startCharIndex": 0,
+                    "endLine": 33,
+                    "endCharIndex": 69
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2188640773,
+                "status": " ",
+                "title": "This is a task. updated ⏳ 2025-06-11 ➕ 2025-06-29 📅 2025-06-29 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-06-29",
+                "startDate": "",
+                "scheduledDate": "2025-06-11",
+                "due": "2025-06-29",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 35,
+                    "startCharIndex": 0,
+                    "endLine": 35,
+                    "endCharIndex": 75
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4142790401,
+                "status": " ",
+                "title": "A simple new task for today. ➕ 2025-07-10 📅 2025-07-10 #Test",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-07-10",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-07-10",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 38,
+                    "startCharIndex": 0,
+                    "endLine": 38,
+                    "endCharIndex": 67
                 },
                 "completion": "",
                 "cancelledDate": "",
