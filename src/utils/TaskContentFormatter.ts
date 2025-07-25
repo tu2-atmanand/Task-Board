@@ -777,36 +777,37 @@ export const sanitizeTags = (
 	console.log(
 		"sanitizeTags called with title:",
 		title,
+		"\nnewTag:",
+		newTag,
 		"\ncursorLocation:",
 		cursorLocation
 	);
 	// Remove the <mark> and <font> tags from the title first before processing
+	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 
 	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
 	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
 
 	// Create a set for quick lookup of newTags
-	const newTagsSet = new Set(oldTagsList);
+	const oldTagSet = new Set(oldTagsList);
 
-	if (newTagsSet.size === 0) {
+	if (oldTagSet.size === 0) {
 		// If no tags are present, remove all existing tags
 		extractedTagsMatch.forEach((tag) => {
-			title = title.replace(tag.trim(), "").trim();
+			updatedTitle = title.replace(tag.trim(), "").trim();
 		});
-		return title;
 	}
 
 	// Remove tags from the title that are not in newTags
-	let updatedTitle = title;
 	console.log(
 		"extractedTagsMatch",
 		extractedTagsMatch,
 		"\nnewTagsSet",
-		newTagsSet
+		oldTagSet
 	);
 	for (const tag of extractedTagsMatch) {
-		if (!newTagsSet.has(tag.trim())) {
+		if (!oldTagSet.has(tag.trim())) {
 			updatedTitle = updatedTitle.replace(tag, "").trim();
 		}
 	}
@@ -1032,7 +1033,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
 		const tagsMatch = cleanedTitle.match(tagRegex);
 		if (tagsMatch) {
-			cleanedTitle = cleanedTitle.replace(tagsMatch[0], "");
+			cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");
 		}
 	});
 
@@ -1113,7 +1114,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			// Replace the first valid priority emoji found
 			cleanedTitle = cleanedTitle.replace(priorityRegex, (match) => {
-				return match.trim() === priorityIcon ? "" : match;
+				return match.trim() === priorityIcon ? " " : match;
 			});
 		}
 	}
