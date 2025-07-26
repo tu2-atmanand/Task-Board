@@ -6,7 +6,7 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import { ScanningVault } from "src/utils/ScanningVault";
+import ScanningVault from "src/utils/ScanningVault";
 import TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
@@ -38,13 +38,12 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 			if (scanFilterForFilesNFolders(file, scanFilters)) {
 				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
-				await scanningVault.extractTasksFromFile(file, scanningVault.tasks, scanFilters);
+				await scanningVault.extractTasksFromFile(file, scanFilters);
 			}
 
 			setProgress(((i + 1) / files.length) * 100); // Update progress
 		}
 
-		setCollectedTasks(scanningVault.tasks);
 		// setIsRunning(false);
 		new Notice(t("vault-scanning-complete"));
 		scanningVault.saveTasksToJsonCache();

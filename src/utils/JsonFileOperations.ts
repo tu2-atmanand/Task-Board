@@ -106,6 +106,14 @@ export const dataCleanup = async (
 	// Function to remove keys with empty arrays from a specified section
 	const removeEmptyKeys = (section: any) => {
 		Object.keys(section).forEach((key) => {
+			console.log(
+				"Checking key:",
+				key,
+				"in section:",
+				section,
+				"\nSection[key]:",
+				section[key]
+			);
 			if (Array.isArray(section[key]) && section[key].length === 0) {
 				delete section[key];
 			}
@@ -130,7 +138,7 @@ export const writeJsonCacheDataFromDisk = async (
 			path = plugin.settings.data.globalSettings.tasksCacheFilePath;
 		}
 
-		const cleanedTasksData = await dataCleanup(tasksData);
+		const cleanedTasksData = tasksData; //await dataCleanup(tasksData);
 
 		if (cleanedTasksData) {
 			await plugin.app.vault.adapter.write(

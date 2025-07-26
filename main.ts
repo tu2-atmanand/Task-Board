@@ -22,7 +22,7 @@ import {
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
-import { ScanningVault } from "src/utils/ScanningVault";
+import ScanningVault from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
@@ -57,7 +57,11 @@ export default class TaskBoard extends Plugin {
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
+		this.realTimeScanning = new RealTimeScanning(
+			this.app,
+			this.plugin,
+			this.scanningVault
+		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -84,6 +88,8 @@ export default class TaskBoard extends Plugin {
 		// this.getLanguage();
 
 		await loadTranslationsOnStartup(this);
+
+		await this.scanningVault.initializeTasksCache();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -427,7 +433,6 @@ export default class TaskBoard extends Plugin {
 								this.scanningVault.refreshTasksFromFiles([
 									file,
 								]);
-								this.scanningVault.saveTasksToJsonCache();
 							});
 					});
 					if (

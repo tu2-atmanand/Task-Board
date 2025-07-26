@@ -2,7 +2,7 @@
 
 import { App, TFile, getFrontMatterInfo } from "obsidian";
 
-import { ScanningVault } from "src/utils/ScanningVault";
+import type ScanningVault from "src/utils/ScanningVault";
 import type TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "./FiltersVerifier";
 import { bugReporter } from "src/services/OpenModals";
@@ -13,10 +13,10 @@ export class RealTimeScanning {
 	taskBoardFileStack: string[] = [];
 	scanningVault: ScanningVault;
 
-	constructor(app: App, plugin: TaskBoard) {
+	constructor(app: App, plugin: TaskBoard, scanningVault: ScanningVault) {
 		this.app = app;
 		this.plugin = plugin;
-		this.scanningVault = new ScanningVault(app, plugin);
+		this.scanningVault = scanningVault;
 	}
 
 	async initializeStack() {
