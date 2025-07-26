@@ -98,7 +98,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskCountContainerProgressBar {
 	width: 100%;
 	height: 8px;
-	background-color: #f0f0f0ab;
+	background-color: #a3f998ab;
 	border-radius: 5px;
 	overflow: hidden;
 	/* margin-bottom: 10px;*/
@@ -340,7 +340,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	margin-inline-end: 0.3em;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
+	width: 95%;
 }
 
 .taskItemMainBody {
@@ -451,6 +451,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	width: 100%;
 	height: 6px;
 	background-color: #ddd;
+	border: 1px solid var(--interactive-accent);
 	border-radius: 4px;
 	overflow: hidden;
 }
@@ -573,6 +574,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItemBodyDescriptionRenderer img {
 	max-width: -webkit-fill-available !important;
+	padding-inline-end: 4px !important;
 }
 
 
