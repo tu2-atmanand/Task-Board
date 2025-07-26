@@ -172,7 +172,7 @@ export const renderColumns = (
 		const namedTags =
 			currentBoard?.columns
 				.filter((col) => col.colType === "namedTag" && col.coltag)
-				.map((col) => col.coltag?.toLowerCase()) || [];
+				.map((col) => col.coltag?.toLowerCase().replace(`#`, "")) || [];
 		// 3. Now filter tasks
 		tasksToDisplay = pendingTasks.filter((task) => {
 			const allTaskTags = getAllTaskTags(task);
