@@ -116,14 +116,14 @@
         ],
         "Testing 2.md": [
             {
-                "id": 3010228214,
+                "id": 1815814058,
                 "status": "/",
-                "title": "Give some time for Notes Explorer plugin. 🔼⏰ [19:34 - 20:34]    📅 2025-05-04  #done #bug",
+                "title": "#MOC Give some time for Notes Explorer plugin. 🔼⏰ [19:34 - 20:34]    📅 2025-05-04  #done  ",
                 "body": [
                     "\tNeed to update the thumbnail: ![[Thumbnail4.png]]",
                     "\t- [ ] Try to implement the **search** functionality ASAP.",
                     "\t- [ ] **Bug :** Fix the bug of checkboxes not aligned with the cards.",
-                    "\t\t- [ ] A sub-sub Task for the first time. updating."
+                    "\t\t- [ ] A sub-sub Task for the first time."
                 ],
                 "time": "19:34 - 20:34",
                 "createdDate": "",
@@ -131,8 +131,8 @@
                 "scheduledDate": "",
                 "due": "2025-05-04",
                 "tags": [
-                    "#done",
-                    "#bug"
+                    "#MOC",
+                    "#done"
                 ],
                 "frontmatterTags": [
                     "#New",
@@ -145,14 +145,14 @@
                     "startLine": 18,
                     "startCharIndex": 0,
                     "endLine": 22,
-                    "endCharIndex": 52
+                    "endCharIndex": 42
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3663478685,
+                "id": 819984813,
                 "status": " ",
                 "title": "This task has simple time in 4th format[time:: 12:30 AM - 13:30 AM] [due:: 2025-03-21]",
                 "body": [],
@@ -170,9 +170,9 @@
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "taskLocation": {
-                    "startLine": 48,
+                    "startLine": 50,
                     "startCharIndex": 0,
-                    "endLine": 48,
+                    "endLine": 50,
                     "endCharIndex": 92
                 },
                 "completion": "",
@@ -180,7 +180,7 @@
                 "reminder": ""
             },
             {
-                "id": 2035655930,
+                "id": 688841784,
                 "status": " ",
                 "title": "#📋 [[Nexus Book Project|Nexus]]: Determine next action 🔁 every month ⏳ 2024-12-20 📅 2024-12-20",
                 "body": [],
@@ -200,9 +200,9 @@
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "taskLocation": {
-                    "startLine": 52,
+                    "startLine": 54,
                     "startCharIndex": 0,
-                    "endLine": 52,
+                    "endLine": 54,
                     "endCharIndex": 103
                 },
                 "completion": "",
@@ -210,7 +210,7 @@
                 "reminder": ""
             },
             {
-                "id": 3854951396,
+                "id": 105025082,
                 "status": " ",
                 "title": "These are all **Gift List** tasks",
                 "body": [
@@ -232,9 +232,9 @@
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "taskLocation": {
-                    "startLine": 60,
+                    "startLine": 62,
                     "startCharIndex": 0,
-                    "endLine": 63,
+                    "endLine": 65,
                     "endCharIndex": 15
                 },
                 "completion": "",
@@ -5202,12 +5202,12 @@
         ],
         "Daily_Notes/2024-11-06.md": [
             {
-                "id": 2290454157,
+                "id": 1584680840,
                 "status": " ",
                 "title": "Need to complete all the Documents work  and submit to company. ⏫⏰ [13:00 - 14:00] #feat #working 📅 2025-04-28",
                 "body": [
                     "\tJust adding a normal line for this task as a body.",
-                    "\tThis is an image in the body : [[1721576562712.jpg|Image]]",
+                    "\tThis is an image in the body : ![[Pasted image 20250727000330.png]]",
                     "\t- [ ] Adding a simple New SubTask",
                     "\t- [ ] This is a second `SubtaskItem`. But twist is, now **bold**, *Italic*, etc. will work.",
                     "\t- [x] Adding a first subtask, with **checked** state true."
@@ -5235,7 +5235,7 @@
                 "reminder": ""
             },
             {
-                "id": 982841877,
+                "id": 575552888,
                 "status": " ",
                 "title": "This is a simple task with separated metadata. 🔼 ⏰[13:00 - 14:00] 📅 2024-11-06 #home #Test ",
                 "body": [
@@ -5255,9 +5255,9 @@
                 "priority": 3,
                 "filePath": "Daily_Notes/2024-11-06.md",
                 "taskLocation": {
-                    "startLine": 11,
+                    "startLine": 12,
                     "startCharIndex": 0,
-                    "endLine": 13,
+                    "endLine": 14,
                     "endCharIndex": 32
                 },
                 "completion": "",
@@ -6412,6 +6412,43 @@
                 "cancelledDate": "",
                 "reminder": ""
             }
+        ],
+        "Testing4.md": [
+            {
+                "id": 515592736,
+                "status": " ",
+                "title": "Just get rid of the pipe symbol from your task, no restriction anymore. #feat #test 🔺 📅 2025-05-03",
+                "body": [
+                    "\tAll the properties will still be scanned as usual.",
+                    "\tFollowing are the most important features, I have to achieve ASAP : ",
+                    "\t- [ ] **Drag and Drop** feature to update the task fields easily. ",
+                    "\t- [x] Sorting feature for each individual Column.",
+                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions. tt"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-05-03",
+                "tags": [
+                    "#feat",
+                    "#test"
+                ],
+                "frontmatterTags": [
+                    "#test"
+                ],
+                "priority": 1,
+                "filePath": "Testing4.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 17,
+                    "endCharIndex": 126
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
         ]
     },
     "Completed": {
@@ -6453,42 +6490,7 @@
         ],
         "Testing4.md": [
             {
-                "id": 1570501877,
-                "status": "x",
-                "title": "Just get rid of the pipe symbol from your task, no restriction anymore. #feat #test 🔺 📅 2025-05-03",
-                "body": [
-                    "\tAll the properties will still be scanned as usual.",
-                    "\tFollowing are the most important features, I have to achieve ASAP : ",
-                    "\t- [ ] **Drag and Drop** feature to update the task fields easily. ",
-                    "\t- [x] Sorting feature for each individual Column.",
-                    "\t- [ ] Adding *comments and activities* in the Edit Task Window to collect resources/solution for the task and discussions. tt"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "2025-05-03",
-                "tags": [
-                    "#feat",
-                    "#test"
-                ],
-                "frontmatterTags": [
-                    "#test"
-                ],
-                "priority": 1,
-                "filePath": "Testing4.md",
-                "taskLocation": {
-                    "startLine": 12,
-                    "startCharIndex": 0,
-                    "endLine": 17,
-                    "endCharIndex": 126
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 990597880,
+                "id": 1957544851,
                 "status": "x",
                 "title": "#📋 This is a recurring test 🔁 every day   📅 2025-06-06 ✅ 2025-05-27/11:24 ",
                 "body": [],
@@ -6506,9 +6508,9 @@
                 "priority": 0,
                 "filePath": "Testing4.md",
                 "taskLocation": {
-                    "startLine": 35,
+                    "startLine": 36,
                     "startCharIndex": 0,
-                    "endLine": 35,
+                    "endLine": 36,
                     "endCharIndex": 83
                 },
                 "completion": "2025-05-27/11:24",
@@ -6518,7 +6520,7 @@
         ],
         "Testing 2.md": [
             {
-                "id": 3818786257,
+                "id": 3238148630,
                 "status": "x",
                 "title": "This is a task for testing, ill add status using Tasks plugin. 🔼⏰ [19:34 - 20:34] 📅 2025-07-14 #bug/solver ✅ 2025-07-13/15:37 ",
                 "body": [
@@ -6544,9 +6546,9 @@
                 "priority": 3,
                 "filePath": "Testing 2.md",
                 "taskLocation": {
-                    "startLine": 28,
+                    "startLine": 30,
                     "startCharIndex": 0,
-                    "endLine": 33,
+                    "endLine": 35,
                     "endCharIndex": 52
                 },
                 "completion": "2025-07-13/15:37",
