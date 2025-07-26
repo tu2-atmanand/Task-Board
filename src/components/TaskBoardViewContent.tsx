@@ -94,7 +94,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		if (plugin.settings.data.globalSettings.realTimeScanning) {
 			eventEmitter.emit("REFRESH_BOARD");
 		} else {
-			if (localStorage.getItem("taskBoardFileStack")?.at(0)) {
+			const fileStackString = localStorage.getItem("taskBoardFileStack");
+			const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
+			console.log("fileStackString:", fileStackString, "\nfileStack:", fileStack);
+			if (fileStack && fileStack.length > 0) {
 				await plugin.realTimeScanning.processAllUpdatedFiles();
 			}
 			eventEmitter.emit("REFRESH_BOARD");

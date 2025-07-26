@@ -344,7 +344,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters?.at(0) != null && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
+										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters && activeBoardSettings.filters.length > 0 && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
 											return null;
 										}
 
