@@ -1,16 +1,11 @@
 // /src/utils/TaskItemUtils.ts
 
-import {
-	getFormattedTaskContent,
-} from "./TaskContentFormatter";
+import { getFormattedTaskContent } from "./TaskContentFormatter";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataFromDisk,
 } from "./JsonFileOperations";
-import {
-	jsonCacheData,
-	taskItem,
-} from "src/interfaces/TaskItem";
+import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
@@ -25,6 +20,7 @@ import {
 	bugReporter,
 	openDiffContentCompareModal,
 } from "src/services/OpenModals";
+import { isTheContentDiffAreOnlySpaces } from "src/modal/DiffContentCompareModal";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -738,7 +734,7 @@ export const addTaskInNote = async (
 };
 
 // Function to parse due date correctly
-export const parseDueDate = (dueStr: string): Date | null => {
+export const parseUniversalDate = (dueStr: string): Date | null => {
 	// Regular expression to check if dueStr starts with a two-digit day
 	const ddMmYyyyPattern = /^\d{2}-\d{2}-\d{4}$/;
 
@@ -823,6 +819,22 @@ export const replaceOldTaskWithNewTask = async (
 		// Step 4: Match with oldTaskContent
 		if (oldTaskContentFromFile === oldTaskContent) {
 			// Safe to replace directly
+			const before = linesBefore.join("\n");
+			const after = lines
+				.slice(endLine - 1)
+				.join("\n")
+				.slice(endCharIndex);
+			const newContent = `${before}\n${newTaskContent}${
+				after ? `\n${after}` : ""
+			}`;
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		} else if (
+			isTheContentDiffAreOnlySpaces(
+				oldTaskContent,
+				oldTaskContentFromFile
+			)
+		) {
+			// If the content is only spaces, we can safely replace it
 			const before = linesBefore.join("\n");
 			const after = lines
 				.slice(endLine - 1)
