@@ -28,7 +28,24 @@ export const renderColumns = (
 	const completedTasks = allTasks.Completed;
 
 	if (columnData.colType === "undated") {
-		tasksToDisplay = pendingTasks.filter((task) => !task.due);
+		tasksToDisplay = pendingTasks.filter((task) => {
+			if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.dueDate
+			) {
+				return !task.due;
+			} else if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.startDate
+			) {
+				return !task.startDate;
+			} else if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.scheduledDate
+			) {
+				return !task.scheduledDate;
+			}
+		});
 	} else if (columnData.colType === "dated") {
 		const { dateType, from, to } = columnData.datedBasedColumn || {
 			dateType: "due",

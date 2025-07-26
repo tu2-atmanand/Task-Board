@@ -15,7 +15,7 @@ import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { priorityOptions } from "src/interfaces/TaskItem";
@@ -636,7 +636,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													className="boardConfigModalColumnRowContentColDatedVal"
 												/>
 												<select
-													aria-label="Select Date Type"
+													aria-label="Select date type"
 													value={column.datedBasedColumn?.dateType || UniversalDateOptions.dueDate}
 													onChange={(e) =>
 														handleColumnChange(
@@ -651,9 +651,34 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{UniversalDateOptions.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{UniversalDateOptions.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{UniversalDateOptions.scheduledDate}</option>
+													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+												</select>
+											</>
+										)}
+										{column.colType === "undated" && (
+											<>
+												<select
+													aria-label="Select date type"
+													value={column.datedBasedColumn?.dateType || universalDateOptionsNames.dueDate}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"datedBasedColumn",
+															{
+																from: 0,
+																to: 0,
+																dateType: e.target.value,
+															}
+														)
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												>
+													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
 												</select>
 											</>
 										)}

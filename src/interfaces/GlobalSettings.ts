@@ -35,6 +35,12 @@ export enum UniversalDateOptions {
 	dueDate = "due",
 }
 
+export enum universalDateOptionsNames {
+	startDate = "Start Date",
+	scheduledDate = "Scheduled Date",
+	dueDate = "Due Date",
+}
+
 export enum TagColorType {
 	Text = "text",
 	Background = "background",
@@ -91,7 +97,7 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
-	universalDate: UniversalDateOptions;
+	universalDate: UniversalDateOptions.dueDate;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
@@ -138,6 +144,11 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "Undated Tasks",
 						index: 1,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
+						},
 					},
 					{
 						id: 2,
@@ -208,6 +219,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				index: 1,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
 			},
 			{
 				columns: [
@@ -272,6 +284,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				index: 2,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
 			},
 		],
 		globalSettings: {
