@@ -65,8 +65,9 @@ const Column: React.FC<ColumnProps> = ({
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
 					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
-					<div className="columnTitle">{columnData.name}</div>
+					<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 				</div>
+				<div className='taskBoardColumnSecHeaderTitleSecColumnCount'>{tasksForThisColumn.length}</div>
 				{/* <RxDotsVertical /> */}
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>

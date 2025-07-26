@@ -492,7 +492,9 @@ export class ScanningVault {
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
 			this.TaskDetected &&
-			this.plugin.settings.data.globalSettings.realTimeScanning
+			this.plugin.settings.data.globalSettings.realTimeScanning &&
+			(Object.values(this.tasks.Pending).flat().length > 0 ||
+				Object.values(this.tasks.Completed).flat().length > 0)
 		) {
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
@@ -525,16 +527,16 @@ export function buildTaskFromRawContent(
 	const body = extractBody(lines, 1);
 
 	return {
-		title,
+		title: title,
 		status: taskStatus,
-		body,
-		time,
-		createdDate,
-		startDate,
-		scheduledDate,
-		due,
-		tags,
-		priority,
+		body: body,
+		time: time,
+		createdDate: createdDate,
+		startDate: startDate,
+		scheduledDate: scheduledDate,
+		due: due,
+		tags: tags,
+		priority: priority,
 		completion: completionDate,
 		cancelledDate: cancelledDate,
 		filePath: filePath || "",

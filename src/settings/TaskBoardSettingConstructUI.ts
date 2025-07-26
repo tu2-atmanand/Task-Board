@@ -12,13 +12,14 @@ import {
 	NotificationService,
 	TagColorType,
 	UniversalDateOptions,
+	cardSectionsVisibilityOptions,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
 import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
+import { downloadAndApplyLanguageFile, t } from "src/utils/lang/helper";
 import {
 	MultiSuggest,
 	getFileSuggestions,
@@ -27,7 +28,7 @@ import {
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { bugReporter } from "src/services/OpenModals";
+import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 
 export class SettingsManager {
@@ -190,7 +191,238 @@ export class SettingsManager {
 		// 	cls: "taskBoard-tab-section-desc",
 		// });
 
-		const { scanFilters, showHeader, openOnStartup } = this.globalSettings!;
+		const {
+			scanFilters,
+			showHeader,
+			openOnStartup,
+			realTimeScanning,
+			archivedTasksFilePath,
+			tasksCacheFilePath,
+			scanVaultAtStartup,
+			preDefinedNote,
+		} = this.globalSettings!;
+
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl)
+			.setName(t("filters-for-scanning"))
+			.setDesc(t("name-of-the-file-folder-tag-for-filter-info"));
+
+		["files", "folders", "tags"].forEach((type) => {
+			const filterType = type as keyof typeof scanFilters;
+			const filter =
+				this.plugin.settings.data.globalSettings.scanFilters[
+					filterType
+				];
+
+			const row = contentEl.createDiv({
+				cls: "taskBoard-filter-row",
+			});
+
+			const rowHeading = row.createDiv({
+				cls: "taskBoard-filter-row-heading",
+			});
+
+			const rowBody = row.createDiv({
+				cls: "taskBoard-filter-row-body",
+			});
+
+			// Filter label
+			rowHeading.createEl("span", {
+				text: type.charAt(0).toUpperCase() + type.slice(1),
+				cls: "taskBoard-filter-label",
+			});
+
+			// Configure button
+			const configureBtn = rowHeading.createEl("button", {
+				text: "Configure",
+				cls: "taskBoard-filter-configure-button",
+			});
+			configureBtn.addEventListener("click", () => {
+				openScanFiltersModal(this.plugin, filterType, (newValues) => {
+					this.plugin.settings.data.globalSettings.scanFilters[
+						filterType
+					].values = newValues;
+					this.plugin.saveSettings();
+					// this.display(); // Refresh the settings UI
+				});
+			});
+
+			// Visual tag list
+			const tagList = rowBody.createDiv({
+				cls: "taskBoard-filter-values",
+			});
+
+			if (filter.values.length === 0) {
+				tagList.createEl("em", {
+					text: "None",
+					attr: { style: "opacity: 0.5;" },
+				});
+			} else {
+				filter.values.forEach((val) => {
+					tagList.createEl("span", {
+						text: val,
+						cls: "taskBoard-filter-tag",
+					});
+				});
+			}
+
+			// Polarity dropdown
+			const polarityDropdown = rowBody.createEl("select", {
+				attr: { "aria-label": "Select Filter Polarity" },
+				cls: "taskBoard-filter-dropdown",
+			});
+			[
+				{ label: "Only scan this", value: 1 },
+				{ label: "Don't scan this", value: 2 },
+				{ label: "Disable", value: 3 },
+			].forEach((opt) => {
+				const option = polarityDropdown.createEl("option", {
+					text: opt.label,
+					value: String(opt.value),
+				});
+				if (filter.polarity === opt.value) {
+					option.selected = true;
+				}
+			});
+			polarityDropdown.addEventListener("change", (e) => {
+				const newPolarity = Number(
+					(e.target as HTMLSelectElement).value
+				);
+				this.plugin.settings.data.globalSettings.scanFilters[
+					filterType
+				].polarity = newPolarity;
+				this.plugin.saveSettings();
+			});
+		});
+
+		// Setting to scan the modified file in realtime
+		new Setting(contentEl)
+			.setName(t("real-time-scanning"))
+			.setDesc(t("real-time-scanning-info"))
+			.addToggle((toggle) =>
+				toggle.setValue(realTimeScanning).onChange(async (value) => {
+					this.globalSettings!.realTimeScanning = value;
+					await this.saveSettings();
+				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("default-note-for-adding-new-tasks"))
+			.setDesc(t("default-note-for-new-tasks-description"))
+			.addText((text) => {
+				text.setValue(preDefinedNote).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.preDefinedNote = value;
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFileSuggestions(this.app);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.preDefinedNote = selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
+
+		// Setting for choosing the default file to archive tasks
+		new Setting(contentEl)
+			.setName(t("file-for-archived-tasks"))
+			.setDesc(t("file-for-archived-tasks-description"))
+			.addText((text) => {
+				text.setValue(archivedTasksFilePath).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.archivedTasksFilePath = value;
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFileSuggestions(app);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.archivedTasksFilePath =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
+
+		new Setting(contentEl)
+			.setName(t("tasks-cache-file-path"))
+			.setDesc(
+				t("tasks-cache-file-path-description") +
+					"\n" +
+					t("tasks-cache-file-path-description-2")
+			)
+			.addText((text) => {
+				text.setValue(tasksCacheFilePath).onChange((value) => {
+					if (this.globalSettings) {
+						console.log("value", value);
+						moveTasksCacheFileToNewPath(
+							this.plugin,
+							tasksCacheFilePath,
+							value
+						);
+
+						if (this.globalSettings) {
+							this.globalSettings.tasksCacheFilePath = value;
+							this.saveSettings();
+						}
+					}
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFolderSuggestions(this.app);
+				// to evevery element of suggestionContent, append "/tasks.json"
+				suggestionContent.forEach((item, index) => {
+					suggestionContent[index] = normalizePath(
+						`${item}/tasks.json`
+					);
+				});
+				const onSelectCallback = async (selectedPath: string) => {
+					console.log(
+						"selectedPath",
+						selectedPath,
+						"old path",
+						tasksCacheFilePath
+					);
+					moveTasksCacheFileToNewPath(
+						this.plugin,
+						tasksCacheFilePath,
+						selectedPath
+					);
+
+					if (this.globalSettings) {
+						this.globalSettings.tasksCacheFilePath = selectedPath;
+						await this.saveSettings();
+					}
+					// inputEl.textContent = `${selectedPath}/tasks.json`;
+					// inputEl.setText(`${selectedPath}/tasks.json`);
+					// text.setValue(`${selectedPath}/tasks.json`);
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -203,88 +435,113 @@ export class SettingsManager {
 				})
 			);
 
-		// Setting to show/Hide the Header of the task card
+		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
 		new Setting(contentEl)
-			.setName(t("filters-for-scanning"))
-			.setDesc(t("name-of-the-file-folder-tag-for-filter-info"));
-
-		// Helper to add filter rows
-		const addFilterRow = (
-			label: string,
-			filterType: keyof typeof scanFilters,
-			polarity: number,
-			values: string[],
-			placeholder: string
-		) => {
-			const row = contentEl.createDiv({
-				cls: "taskBoard-filter-row",
-			});
-
-			// Label
-			row.createEl("span", {
-				text: label,
-				cls: "taskBoard-filter-label",
-			});
-
-			// Input for values
-			const input = row.createEl("input", {
-				type: "text",
-				cls: "taskBoard-filter-input",
-			});
-			input.value = values.join(", ");
-			input.addEventListener("change", async () => {
-				this.globalSettings!.scanFilters[filterType].values =
-					input.value.split(",").map((v) => normalizePath(v.trim()));
-				await this.saveSettings();
-			});
-			input.placeholder = placeholder;
-
-			// Dropdown for polarity
-			const dropdown = row.createEl("select", {
-				cls: "taskBoard-filter-dropdown",
-			});
-			[t("only-scan-this"), t("dont-scan-this"), t("disable")].forEach(
-				(optionText, idx) => {
-					const option = dropdown.createEl("option", {
-						text: optionText,
-					});
-					option.value = (idx + 1).toString();
-					if (idx + 1 === polarity) option.selected = true;
-				}
+			.setName(t("auto-scan-the-vault-on-obsidian-startup"))
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					t("auto-scan-the-vault-on-obsidian-startup-info") +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b>" +
+						t("auto-scan-the-vault-on-obsidian-startup-info-2")
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
+					this.globalSettings!.scanVaultAtStartup = value;
+					await this.saveSettings();
+				})
 			);
-			dropdown.addEventListener("change", async () => {
-				this.globalSettings!.scanFilters[filterType].polarity =
-					parseInt(dropdown.value, 10);
-				await this.saveSettings();
-			});
-		};
 
-		// Files Row
-		addFilterRow(
-			t("files"),
-			"files",
-			scanFilters.files.polarity,
-			scanFilters.files.values,
-			"Personal.md, FolderName/New_file.md"
-		);
+		// New setting for updating language file
+		new Setting(contentEl)
+			.setName(t("update-language-translations"))
+			.setDesc(t("update-language-translations-info"))
+			.addButton((button) =>
+				button.setButtonText("Update").onClick(async () => {
+					await downloadAndApplyLanguageFile(this.plugin);
+				})
+			);
 
-		// Folders Row
-		addFilterRow(
-			t("folders"),
-			"folders",
-			scanFilters.folders.polarity,
-			scanFilters.folders.values,
-			"Folder_Name 1, Folder_Name 2, Parent_Folder/child_folder/New_folder"
-		);
+		// // Helper to add filter rows
+		// const addFilterRow = (
+		// 	label: string,
+		// 	filterType: keyof typeof scanFilters,
+		// 	polarity: number,
+		// 	values: string[],
+		// 	placeholder: string
+		// ) => {
+		// 	const row = contentEl.createDiv({
+		// 		cls: "taskBoard-filter-row",
+		// 	});
 
-		// Tags Row
-		addFilterRow(
-			t("tags"),
-			"tags",
-			scanFilters.tags.polarity,
-			scanFilters.tags.values,
-			"#Bug, #docs/🔥bug, #feature"
-		);
+		// 	// Label
+		// 	row.createEl("span", {
+		// 		text: label,
+		// 		cls: "taskBoard-filter-label",
+		// 	});
+
+		// 	// Input for values
+		// 	const input = row.createEl("input", {
+		// 		type: "text",
+		// 		cls: "taskBoard-filter-input",
+		// 	});
+		// 	input.value = values.join(", ");
+		// 	input.addEventListener("change", async () => {
+		// 		this.globalSettings!.scanFilters[filterType].values =
+		// 			input.value.split(",").map((v) => normalizePath(v.trim()));
+		// 		await this.saveSettings();
+		// 	});
+		// 	input.placeholder = placeholder;
+
+		// 	// Dropdown for polarity
+		// 	const dropdown = row.createEl("select", {
+		// 		cls: "taskBoard-filter-dropdown",
+		// 	});
+		// 	[t("only-scan-this"), t("dont-scan-this"), t("disable")].forEach(
+		// 		(optionText, idx) => {
+		// 			const option = dropdown.createEl("option", {
+		// 				text: optionText,
+		// 			});
+		// 			option.value = (idx + 1).toString();
+		// 			if (idx + 1 === polarity) option.selected = true;
+		// 		}
+		// 	);
+		// 	dropdown.addEventListener("change", async () => {
+		// 		this.globalSettings!.scanFilters[filterType].polarity =
+		// 			parseInt(dropdown.value, 10);
+		// 		await this.saveSettings();
+		// 	});
+		// };
+
+		// // Files Row
+		// addFilterRow(
+		// 	t("files"),
+		// 	"files",
+		// 	scanFilters.files.polarity,
+		// 	scanFilters.files.values,
+		// 	"Personal.md, FolderName/New_file.md"
+		// );
+
+		// // Folders Row
+		// addFilterRow(
+		// 	t("folders"),
+		// 	"folders",
+		// 	scanFilters.folders.polarity,
+		// 	scanFilters.folders.values,
+		// 	"Folder_Name 1, Folder_Name 2, Parent_Folder/child_folder/New_folder"
+		// );
+
+		// // Tags Row
+		// addFilterRow(
+		// 	t("tags"),
+		// 	"tags",
+		// 	scanFilters.tags.polarity,
+		// 	scanFilters.tags.values,
+		// 	"#Bug, #docs/🔥bug, #feature"
+		// );
 
 		contentEl.createEl("hr");
 
@@ -367,6 +624,8 @@ export class SettingsManager {
 			tagColorsType,
 			showTaskWithoutMetadata,
 			showFileNameInCard,
+			cardSectionsVisibility,
+			showFrontmatterTagsOnCards,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -389,6 +648,42 @@ export class SettingsManager {
 					this.globalSettings!.showFooter = value;
 					await this.saveSettings();
 				})
+			);
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("show-note-frontmatter-tags-in-the-card-header"))
+			.setDesc(t("show-note-frontmatter-tags-in-the-card-header-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(showFrontmatterTagsOnCards)
+					.onChange(async (value) => {
+						this.globalSettings!.showFrontmatterTagsOnCards = value;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("customize-card-sections"))
+			.setDesc(t("customize-card-sections-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[cardSectionsVisibilityOptions.showDescriptionOnly]: t(
+							"show-description-only"
+						),
+						[cardSectionsVisibilityOptions.showSubTasksOnly]:
+							t("show-subtasks-only"),
+						[cardSectionsVisibilityOptions.showBoth]:
+							t("show-both"),
+						[cardSectionsVisibilityOptions.hideBoth]:
+							t("hide-both"),
+					})
+					.setValue(cardSectionsVisibility)
+					.onChange(async (value) => {
+						this.globalSettings!.cardSectionsVisibility = value;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting to show/Hide the Footer of the task card
@@ -442,9 +737,11 @@ export class SettingsManager {
 
 		// Tag Colors settings
 		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl)
-			.setName(t("tag-colors"))
-			.setDesc(t("tag-colors-info"));
+		// new Setting(contentEl)
+		// 	.setName(t("tag-colors"))
+		// 	.setDesc(t("tag-colors-info"));
+
+		new Setting(contentEl).setName(t("tag-colors")).setHeading();
 
 		new Setting(contentEl)
 			.setName(t("tag-color-indicator-type"))
@@ -714,20 +1011,13 @@ export class SettingsManager {
 		// });
 
 		const {
-			realTimeScanning,
 			autoAddUniversalDate,
 			autoAddCreatedDate,
-			scanVaultAtStartup,
 			compatiblePlugins,
 			dailyNotesPluginComp,
-			editButtonAction,
-			showFrontmatterTagsOnCards,
-			preDefinedNote,
 			quickAddPluginDefaultChoice,
-			archivedTasksFilePath,
 			notificationService,
 			frontmatterPropertyForReminder,
-			tasksCacheFilePath,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -758,63 +1048,6 @@ export class SettingsManager {
 					})
 			);
 
-		new Setting(contentEl)
-			.setName(t("default-note-for-adding-new-tasks"))
-			.setDesc(t("default-note-for-new-tasks-description"))
-			.addText((text) => {
-				text.setValue(preDefinedNote).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.preDefinedNote = value;
-				});
-
-				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(this.app);
-				const onSelectCallback = async (selectedPath: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.preDefinedNote = selectedPath;
-					}
-					text.setValue(selectedPath);
-					await this.saveSettings();
-				};
-
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
-			});
-
-		// Setting to scan the modified file in realtime
-		new Setting(contentEl)
-			.setName(t("real-time-scanning"))
-			.setDesc(t("real-time-scanning-info"))
-			.addToggle((toggle) =>
-				toggle.setValue(realTimeScanning).onChange(async (value) => {
-					this.globalSettings!.realTimeScanning = value;
-					await this.saveSettings();
-				})
-			);
-
-		new Setting(contentEl)
-			.setName(t("universal-date"))
-			.setDesc(t("universal-date-description"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[UniversalDateOptions.startDate]: t("start-date"),
-						[UniversalDateOptions.scheduledDate]:
-							t("scheduled-date"),
-						[UniversalDateOptions.dueDate]: t("due-date"),
-					})
-					.setValue(this.globalSettings!.universalDate)
-					.onChange(async (value) => {
-						this.globalSettings!.universalDate =
-							value as UniversalDateOptions;
-						await this.saveSettings();
-					})
-			);
-
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
 			.setName(t("auto-add-universal-date-to-tasks"))
@@ -835,134 +1068,6 @@ export class SettingsManager {
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddCreatedDate).onChange(async (value) => {
 					this.globalSettings!.autoAddCreatedDate = value;
-					await this.saveSettings();
-				})
-			);
-
-		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
-		new Setting(contentEl)
-			.setName(t("Show note frontmatter tags in the card header"))
-			.setDesc(
-				t(
-					"Enable this feature to use see the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks."
-				)
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(showFrontmatterTagsOnCards)
-					.onChange(async (value) => {
-						this.globalSettings!.showFrontmatterTagsOnCards = value;
-						await this.saveSettings();
-					})
-			);
-
-		// Setting for choosing the default file to archive tasks
-		new Setting(contentEl)
-			.setName(t("file-for-archived-tasks"))
-			.setDesc(t("file-for-archived-tasks-description"))
-			.addText((text) => {
-				text.setValue(archivedTasksFilePath).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.archivedTasksFilePath = value;
-				});
-
-				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(app);
-				const onSelectCallback = async (selectedPath: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.archivedTasksFilePath =
-							selectedPath;
-					}
-					text.setValue(selectedPath);
-					await this.saveSettings();
-				};
-
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
-			});
-
-		new Setting(contentEl)
-			.setName(t("tasks-cache-file-path"))
-			.setDesc(
-				t("tasks-cache-file-path-description") +
-					"\n" +
-					t("tasks-cache-file-path-description-2")
-			)
-			.addText((text) => {
-				text.setValue(tasksCacheFilePath).onChange((value) => {
-					if (this.globalSettings) {
-						console.log("value", value);
-						moveTasksCacheFileToNewPath(
-							this.plugin,
-							tasksCacheFilePath,
-							value
-						);
-
-						if (this.globalSettings) {
-							this.globalSettings.tasksCacheFilePath = value;
-							this.saveSettings();
-						}
-					}
-				});
-
-				const inputEl = text.inputEl;
-				const suggestionContent = getFolderSuggestions(this.app);
-				// to evevery element of suggestionContent, append "/tasks.json"
-				suggestionContent.forEach((item, index) => {
-					suggestionContent[index] = normalizePath(
-						`${item}/tasks.json`
-					);
-				});
-				const onSelectCallback = async (selectedPath: string) => {
-					console.log(
-						"selectedPath",
-						selectedPath,
-						"old path",
-						tasksCacheFilePath
-					);
-					moveTasksCacheFileToNewPath(
-						this.plugin,
-						tasksCacheFilePath,
-						selectedPath
-					);
-
-					if (this.globalSettings) {
-						this.globalSettings.tasksCacheFilePath = selectedPath;
-						await this.saveSettings();
-					}
-					// inputEl.textContent = `${selectedPath}/tasks.json`;
-					// inputEl.setText(`${selectedPath}/tasks.json`);
-					// text.setValue(`${selectedPath}/tasks.json`);
-				};
-
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
-			});
-
-		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
-		new Setting(contentEl)
-			.setName(t("auto-scan-the-vault-on-obsidian-startup"))
-			.setDesc(
-				SettingsManager.createFragmentWithHTML(
-					t("auto-scan-the-vault-on-obsidian-startup-info") +
-						"<br/>" +
-						"<b>" +
-						t("note") +
-						" :</b>" +
-						t("auto-scan-the-vault-on-obsidian-startup-info-2")
-				)
-			)
-			.addToggle((toggle) =>
-				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
-					this.globalSettings!.scanVaultAtStartup = value;
 					await this.saveSettings();
 				})
 			);
@@ -1016,7 +1121,7 @@ export class SettingsManager {
 							communityPlugins.isQuickAddPluginEnabled()
 					)
 					.onChange(async (value) => {
-						if(this.globalSettings === null) return;
+						if (this.globalSettings === null) return;
 
 						if (!communityPlugins.isQuickAddPluginEnabled()) {
 							new Notice(t("quickadd-plugin-not-enabled"));
@@ -1233,6 +1338,26 @@ export class SettingsManager {
 					updatePreview();
 				});
 			});
+
+		new Setting(contentEl)
+			.setName(t("universal-date"))
+			.setDesc(t("universal-date-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[UniversalDateOptions.startDate]: t("start-date"),
+						[UniversalDateOptions.scheduledDate]:
+							t("scheduled-date"),
+						[UniversalDateOptions.dueDate]: t("due-date"),
+					})
+					.setValue(this.globalSettings!.universalDate)
+					.onChange(async (value) => {
+						this.globalSettings!.universalDate =
+							value as UniversalDateOptions;
+						await this.saveSettings();
+						updatePreview(); // Update the preview when the universal date changes
+					})
+			);
 
 		// Text input for the universalDateFormat
 		new Setting(contentEl)

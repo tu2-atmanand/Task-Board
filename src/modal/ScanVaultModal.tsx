@@ -151,7 +151,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 									return (
 										<div key={taskIndex}>
 											<div
-												ref={(descEl) => (taskRendererRef.current[uniqueKey] = descEl)}
+												ref={(descEl) => { taskRendererRef.current[uniqueKey] = descEl; }}
 												id={uniqueKey}
 											/>
 										</div>

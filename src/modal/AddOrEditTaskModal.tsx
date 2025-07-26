@@ -124,14 +124,15 @@ const EditTaskContent: React.FC<{
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
+		let newTime = '';
 		if (startTime && !endTime) {
 			const [hours, minutes] = startTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
-			const newTime = `${startTime} - ${newEndTime}`;
+			newTime = `${startTime} - ${newEndTime}`;
 			setNewTime(newTime);
 		} else if (startTime && endTime) {
-			const newTime = `${startTime} - ${endTime}`;
+			newTime = `${startTime} - ${endTime}`;
 			setNewTime(newTime);
 		}
 
@@ -284,14 +285,15 @@ const EditTaskContent: React.FC<{
 
 	// Tags input
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		console.log("e value :", e, "\nTitle :", title, "\nTags :", tags);
 		if (e.key === 'Enter') {
-			const input = e.currentTarget.value.trim();
+			const input = e.currentTarget.value.trim().startsWith("#") ? e.currentTarget.value.trim() : `#${e.currentTarget.value.trim()}`;
 			console.log("Cursor Location in handleTagInput:", cursorLocationRef.current);
 			const newTitle = sanitizeTags(title, tags, input, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 
 			if (!tags.includes(input)) {
-				setTags(prevTags => [...prevTags, input.startsWith("#") ? input : `#${input}`]);
+				setTags(prevTags => [...prevTags, input]);
 				e.currentTarget.value = '';
 				setIsEdited(true);
 				setUpdateEditorContent(true);
@@ -299,22 +301,47 @@ const EditTaskContent: React.FC<{
 		}
 	};
 	const tagsInputFieldRef = useRef<HTMLInputElement>(null);
+	// NEW refs to always track the latest value of title and tags
+	const titleRef = useRef(title);
+	const tagsRef = useRef(tags);
+
+	// Keep refs updated on each render
 	useEffect(() => {
+		titleRef.current = title;
+		tagsRef.current = tags;
+	}, [title, tags]);
+	useEffect(() => {
+		console.warn("App changed, initializing MultiSuggest for tags input field.");
 		if (!tagsInputFieldRef.current) return;
 
 		const suggestionContent = getTagSuggestions(app);
 		const onSelectCallback = (choice: string) => {
-			handleTagInput({
-				key: 'Enter',
-				currentTarget: { value: choice },
-			} as React.KeyboardEvent<HTMLInputElement>);
-			// setNewFilePath(selectedPath);
+			console.log("Selected tag choice:", choice);
+			const currentTitle = titleRef.current;
+			const currentTags = tagsRef.current;
+
+			const newTitle = sanitizeTags(currentTitle, currentTags, choice, cursorLocationRef.current ?? undefined);
+			console.log("New title after tag selection:", newTitle);
+			setTitle(newTitle);
+
+			if (!currentTags.includes(choice)) {
+				setTags(prevTags => [...prevTags, choice]);
+			}
+			setIsEdited(true);
+			setUpdateEditorContent(true);
+
+			tagsInputFieldRef.current?.setText('');
 		};
 		new MultiSuggest(tagsInputFieldRef.current, new Set(suggestionContent), onSelectCallback, app);
 	}, [app]);
 	// Function to remove a tag
 	const removeTag = (tagToRemove: string) => {
-		setTags(prevTags => prevTags.filter(tag => tag !== tagToRemove));
+		const newTags = tags.filter(tag => tag !== tagToRemove);
+		setTags(newTags);
+
+		const newTitle = sanitizeTags(title, newTags, '', cursorLocationRef.current ?? undefined);
+		setTitle(newTitle);
+
 		setIsEdited(true);
 		setUpdateEditorContent(true);
 	};
@@ -425,15 +452,15 @@ const EditTaskContent: React.FC<{
 		startDate: startDate,
 		scheduledDate: scheduledDate,
 		due: due,
-		completion: task.completion || '',
-		cancelledDate: task.cancelledDate || '',
 		tags: tags,
 		time: newTime,
 		priority: priority,
 		filePath: newFilePath,
+		status: status,
+		reminder: reminder,
 		taskLocation: task.taskLocation,
-		status,
-		reminder,
+		completion: task.completion || '',
+		cancelledDate: task.cancelledDate || '',
 	};
 
 	// Reference to the HTML element where markdown will be rendered
@@ -445,6 +472,7 @@ const EditTaskContent: React.FC<{
 
 	const titleComponentRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
+		console.warn("Title changed: ", title);
 		const cleanedTaskTitle = cleanTaskTitle(plugin, modifiedTask);
 		// setFormattedTaskContent(cleanedTaskTitle);
 		if (titleComponentRef.current && cleanedTaskTitle !== "") {
@@ -463,7 +491,9 @@ const EditTaskContent: React.FC<{
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
+		console.log("handleTaskEditedThroughEditors called with value:", value);
 		const updatedTask = buildTaskFromRawContent(value);
+		console.log("Updated Task from Editors:", updatedTask);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
