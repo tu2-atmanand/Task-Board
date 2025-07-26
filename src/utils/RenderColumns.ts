@@ -133,7 +133,11 @@ export const renderColumns = (
 		);
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) =>
-			getAllTaskTags(task).some((tag) => tag === `#${columnData.coltag}`)
+			getAllTaskTags(task).some(
+				(tag) =>
+					tag.replace(`#`, "") ===
+					columnData.coltag?.replace(`#`, "").toLowerCase()
+			)
 		);
 	} else if (columnData.colType === "pathFiltered") {
 		// Filter tasks based on their file path
