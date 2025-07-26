@@ -492,7 +492,9 @@ export class ScanningVault {
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
 			this.TaskDetected &&
-			this.plugin.settings.data.globalSettings.realTimeScanning
+			this.plugin.settings.data.globalSettings.realTimeScanning &&
+			(Object.values(this.tasks.Pending).flat().length > 0 ||
+				Object.values(this.tasks.Completed).flat().length > 0)
 		) {
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
