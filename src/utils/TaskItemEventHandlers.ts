@@ -2,11 +2,8 @@ import { checkboxStateSwitcher, isCompleted } from "./CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
-	moveFromCompletedToPending,
-	moveFromPendingToCompleted,
 	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
-	updateTaskInJson,
 } from "./TaskItemUtils";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";

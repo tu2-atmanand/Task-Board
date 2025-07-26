@@ -112,18 +112,16 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			<h2>{t("scan-tasks-from-the-vault")}</h2>
 			{localStorage.getItem("manadatoryScan") === "true" ?
 				(<>
-					<div className="scanVaultModalHomeMandatoryScan">Looks like you have recently updated this plugin.</div>
-					<div className="scanVaultModalHomeMandatoryScan">This new release has brought various new features, which requires you to re-scan the whole vault.</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} 1.6.0</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
 					<br />
-					<div className="scanVaultModalHomeMandatoryScan">Read the release notes for this new version here : <a href="https://github.com/tu2-atmanand/Task-Board/releases/tag/1.5.0">Task Board v1.5.0</a>.</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href="https://github.com/tu2-atmanand/Task-Board/releases/tag/1.6.0">Task Board v1.6.0</a>.</div>
 				</>
 				) :
 				(<>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</div>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</div>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</div>
+					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-1")}</div>
+					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-2")}</div>
 				</>
-
 				)}
 
 			<div className="scanVaultModalHomeSecondSection" >
@@ -166,6 +164,20 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			<button className="scanVaultModalHomeToggleButton" onClick={toggleView}>
 				{showCollectedTasks ? t("hide-collected-tasks") : t("show-collected-tasks")}
 			</button>
+
+			{localStorage.getItem("manadatoryScan") === "true" ?
+				(<>
+				</>
+				) :
+				(<>
+					<div>
+						<h4>{t("points-to-note")}</h4>
+						<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</li>
+						<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</li>
+						<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</li>
+					</div>
+				</>
+				)}
 		</div>
 	);
 }

@@ -1,19 +1,12 @@
 // src/components/KanbanBoard.tsx
 
-import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, CirclePlus, RefreshCcw, Tally1 } from 'lucide-react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
+import { Board } from "../interfaces/BoardConfigs";
+import React, { memo } from "react";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
 import Column from "./Column";
 import type TaskBoard from "main";
-import debounce from "debounce";
-import { eventEmitter } from "src/services/EventEmitter";
-import { handleUpdateBoards } from "../utils/BoardOperations";
-import { bugReporter, openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
-import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 
 interface KanbanBoardProps {

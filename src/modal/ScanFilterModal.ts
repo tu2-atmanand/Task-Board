@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { App, Modal, Setting, setIcon } from "obsidian";
+import { Modal, Setting, setIcon } from "obsidian";
 import {
 	MultiSuggest,
 	getFileSuggestions,

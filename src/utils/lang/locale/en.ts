@@ -59,9 +59,9 @@ const en: Lang = {
 	"yes": "Yes",
 	"no": "No",
 	"scan-tasks-from-the-vault": "Scan tasks from the vault",
-	"scan-tasks-from-the-vault-description-1":"Run this feature only if your tasks has not been properly detected/scanned or the board is acting weired.",
-	"scan-tasks-from-the-vault-description-2": "You dont have to run this feature often. The plugin will auto detect newly added/edited from tasks.",
-	"scan-tasks-from-the-vault-description-3": "NOTE : Please check your 'filters for scanning' from the plugin settings first to avoid any confusion.",
+	"scan-tasks-from-the-vault-description-1":"Run this feature only on the fresh install or if your tasks has not been properly detected/scanned or the board is acting weired.",
+	"scan-tasks-from-the-vault-description-2": "You dont have to run this feature often. The plugin will auto detect newly added/edited tasks from your notes.",
+	"scan-tasks-from-the-vault-description-3": "You might want to check the already scanning filters applied in setting to avoid any confusion.",
 	"vault-scanning-complete": "Vault scanning complete.",
 	"run": "Run",
 	"hide-collected-tasks": "Hide collected tasks",
@@ -250,7 +250,13 @@ const en: Lang = {
 	"update-language-translations": "Update language translations",
 	"update-language-translations-info": "Click on the update button to download the latest language translations.",
 	"show-note-frontmatter-tags-in-the-card-header": "Show note frontmatter tags in the card header",
-	"show-note-frontmatter-tags-in-the-card-header-info": "Enable this feature to use the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks."
+	"show-note-frontmatter-tags-in-the-card-header-info": "Enable this feature to use the tags from the note frontmatter applied to your tasks. You cannot actually change this tags through task board. These frontmatter tags will be only used for filtering tasks.",
+	"scan-tasks-from-the-vault-info-1": "Scan your whole vault at once.",
+	"scan-tasks-from-the-vault-info-2": "Use filters for scanning from setting if you want to exclude certain files and folders to be scanned.",
+	"points-to-note": "Points to note",
+	"scan-vault-from-the-vault-upgrade-message-1": "Task Board has been updated to version",
+	"scan-vault-from-the-vault-upgrade-message-2": "This new release has brought various new features, which requires you to re-scan the vault.",
+	"scan-vault-from-the-vault-upgrade-message-3": "Read the release notes for this new version here",
 };
 
 export default en;

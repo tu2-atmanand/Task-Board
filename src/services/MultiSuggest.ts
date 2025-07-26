@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { AbstractInputSuggest, App, Plugin, TFile, TFolder } from "obsidian";
+import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
 	content: Set<string>;

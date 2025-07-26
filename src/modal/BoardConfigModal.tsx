@@ -1,14 +1,14 @@
 // /src/modal/BoardConfigModal.tsx
 
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
-import { App, Modal, Notice } from "obsidian";
-import { Board, ColumnData, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
+import { Modal, Notice } from "obsidian";
+import { Board, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import React, { ComponentPropsWithRef, useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
-import { FaAlignCenter, FaAlignJustify, FaTrash } from 'react-icons/fa';
+import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";

@@ -1,7 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
 import {
-	cleanTaskTitle,
 	getFormattedTaskContent,
 } from "./TaskContentFormatter";
 import {
@@ -11,7 +10,6 @@ import {
 import {
 	jsonCacheData,
 	taskItem,
-	tasksJsonData,
 } from "src/interfaces/TaskItem";
 import {
 	readDataOfVaultFiles,
@@ -19,11 +17,9 @@ import {
 } from "./MarkdownFileOperations";
 import { extractFrontmatter, extractFrontmatterTags } from "./ScanningVault";
 
-import { App, Notice, TFile, Tasks } from "obsidian";
+import { Notice } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { ScanningVault } from "./ScanningVault";
 import { TasksApi } from "src/services/tasks-plugin/api";
 import {
 	bugReporter,

@@ -13,10 +13,8 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
-	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
-	bugReporter,
 	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openScanVaultModal,

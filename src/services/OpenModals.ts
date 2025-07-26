@@ -2,10 +2,6 @@
 
 import { App, Notice, TFile } from "obsidian";
 import { addTaskInNote } from "src/utils/TaskItemUtils";
-import {
-	scanFilterForFilesNFolders,
-	scanFilterForTags,
-} from "src/utils/FiltersVerifier";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { Board } from "../interfaces/BoardConfigs";

@@ -1,8 +1,8 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, Bot, CirclePlus, RefreshCcw, Search, SearchX, Tally1 } from 'lucide-react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { Bolt, CirclePlus, RefreshCcw, Search, SearchX } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
@@ -16,7 +16,6 @@ import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanBoard";
 import CanvasView from "./CanvasView";
-import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 
 type ViewType = "kanban" | "list" | "table" | "canvas";
 

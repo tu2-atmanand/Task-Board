@@ -1,9 +1,8 @@
 // /src/utils/MarkdownFileOperations.ts
 
-import { Notice, TFile } from "obsidian";
+import { TFile } from "obsidian";
 
 import TaskBoard from "main";
-import { t } from "./lang/helper";
 import { bugReporter } from "src/services/OpenModals";
 
 export const readDataOfVaultFiles = async (

@@ -1,9 +1,9 @@
 // src/views/TaskBoardView.tsx
 
-import { App, ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
-import { StrictMode, useMemo } from "react";
+import { StrictMode } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContent from "src/components/TaskBoardViewContent";

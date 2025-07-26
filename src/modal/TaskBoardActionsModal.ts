@@ -2,9 +2,7 @@
 
 import TaskBoard from "main";
 import {
-	App,
 	Modal,
-	Setting,
 	ToggleComponent,
 	DropdownComponent,
 	ButtonComponent,

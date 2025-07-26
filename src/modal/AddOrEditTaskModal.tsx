@@ -1,9 +1,8 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
+import { App, Component, Keymap, Modal, Notice, TFile, UserEvent, debounce } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItem";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";

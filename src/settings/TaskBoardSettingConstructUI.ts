@@ -24,7 +24,6 @@ import {
 	MultiSuggest,
 	getFileSuggestions,
 	getFolderSuggestions,
-	getFrontmatterPropertyNames,
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";

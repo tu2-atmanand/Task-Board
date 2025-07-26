@@ -1,7 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment, getFrontMatterInfo } from "obsidian";
-// import * as yaml from "js-yaml";
+import { App, TFile, moment as _moment } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	isCompleted,
@@ -16,7 +15,6 @@ import {
 	noteItem,
 	priorityEmojis,
 	taskItem,
-	tasksJsonData,
 } from "src/interfaces/TaskItem";
 import {
 	scanFilterForFilesNFolders,

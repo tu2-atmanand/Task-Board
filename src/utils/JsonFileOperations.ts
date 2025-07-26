@@ -4,7 +4,6 @@ import {
 	jsonCacheData,
 	taskItem,
 	taskJsonMerged,
-	tasksJsonData,
 } from "src/interfaces/TaskItem";
 
 import { Board } from "../interfaces/BoardConfigs";
