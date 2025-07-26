@@ -12,7 +12,7 @@ import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/Gl
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitle, getUniversalDate, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { parseDueDate } from 'src/utils/TaskItemUtils';
+import { parseUniversalDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItem';
 import { t } from 'src/utils/lang/helper';
 import { bugReporter } from 'src/services/OpenModals';
@@ -186,9 +186,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
-		const taskDueDate = parseDueDate(universalDate) || new Date(universalDate);
+		const taskUniversalDate = parseUniversalDate(universalDate) || new Date(universalDate);
 
-		if (taskDueDate.toDateString() === today.toDateString()) {
+		if (taskUniversalDate.toDateString() === today.toDateString()) {
 			if (task.time) {
 				const [startStr, endStr] = task.time.split(' - ');
 				const [startHours, startMinutes] = startStr.split(':').map(Number);
@@ -212,9 +212,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			} else {
 				return 'var(--color-yellow)'; // Due today but no time info
 			}
-		} else if (taskDueDate > today) {
+		} else if (taskUniversalDate > today) {
 			return 'green'; // Due in future
-		} else if (taskDueDate < today) {
+		} else if (taskUniversalDate < today) {
 			return 'var(--color-red)'; // Past due
 		} else {
 			return 'grey'; // No due date
@@ -395,10 +395,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
-	useEffect(() => {
-		console.log("State of showSubtasks:", showSubtasks);
-	}, [showSubtasks]);
-
 	// Render sub-tasks and remaining body separately
 	const renderSubTasks = () => {
 		try {
@@ -410,21 +406,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const total = allSubTasks.length;
 			const completed = allSubTasks.filter(line => /-\s\[(x|X)\]\s+/i.test(line)).length;
 
-			console.log("Conditions for rendering subtasks:", {
-				showSubtasks,
-				total,
-				completed,
-				allSubTasks
-			}, "task id:", task.id
-			)
-
 			const showSubTaskSummaryBar = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
-			// ⏬ Conditional rendering based on setting
-			// if (showSubTaskSummaryBar && total > 0) {
-			// 	return (
-
-			// 	);
-			// }
 
 			return (
 				<>
