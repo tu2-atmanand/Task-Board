@@ -179,6 +179,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			name: t("new-board"),
 			index: localBoards.length + 1,
 			columns: [],
+			hideEmptyColumns: false,
+			filters: [],
+			filterPolarity: "",
+			filterScope: "",
+			showColumnTags: true,
+			showFilteredTags: true
 		};
 		setLocalBoards([...oldBoards, newBoard]);
 		setSelectedBoardIndex(localBoards.length);

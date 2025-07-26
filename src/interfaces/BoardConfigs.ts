@@ -26,12 +26,12 @@ export type Board = {
 	name: string;
 	index: number;
 	columns: ColumnData[];
-	filters?: string[];
-	filterPolarity?: string;
-	filterScope?: string;
-	hideEmptyColumns?: boolean;
-	showColumnTags?: boolean;
-	showFilteredTags?: boolean;
+	hideEmptyColumns: boolean;
+	filters: string[];
+	filterPolarity: string;
+	filterScope: string;
+	showColumnTags: boolean;
+	showFilteredTags: boolean;
 };
 
 export type BoardConfigs = Board[];
