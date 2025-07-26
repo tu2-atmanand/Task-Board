@@ -19,6 +19,7 @@ import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
 import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
 import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
+import { ScanFilterModal } from "src/modal/ScanFilterModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -279,4 +280,14 @@ export const openTaskBoardActionsModal = (
 		plugin.settings.data.boardConfigs[activeBoardIndex].columns
 	);
 	actionModal.open();
+};
+
+export const openScanFiltersModal = (
+	plugin: TaskBoard,
+	filterType: "files" | "folders" | "tags",
+	onSave: (scanFilters: string[]) => void
+) => {
+	new ScanFilterModal(plugin, filterType, async (newValues) => {
+		onSave(newValues);
+	}).open();
 };

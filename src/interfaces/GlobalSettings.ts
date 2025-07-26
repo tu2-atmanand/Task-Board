@@ -62,6 +62,13 @@ export interface TaskBoardAction {
 	targetColumn: string;
 }
 
+export enum cardSectionsVisibilityOptions {
+	showSubTasksOnly = "showSubTasksOnly",
+	showDescriptionOnly = "showDescriptionOnly",
+	showBoth = "showBoth",
+	hideBoth = "hideBoth",
+}
+
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
@@ -105,6 +112,8 @@ export interface globalSettingsData {
 	notificationService: string;
 	frontmatterPropertyForReminder: string;
 	actions: TaskBoardAction[];
+	searchQuery?: string;
+	cardSectionsVisibility: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -373,6 +382,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					targetColumn: "Completed",
 				},
 			],
+			cardSectionsVisibility:
+				cardSectionsVisibilityOptions.showSubTasksOnly,
 		},
 	},
 };

@@ -79,10 +79,54 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	flex-direction: row;
 }
 
+.taskCountContainer {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	align-items: center;
+	/* border: 1px solid #ddd; */
+	border-radius: 5px;
+	min-width: 12rem;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.taskCountContainerProgressBar {
+	width: 100%;
+	height: 8px;
+	background-color: #f0f0f0ab;
+	border-radius: 5px;
+	overflow: hidden;
+	/* margin-bottom: 10px;*/
+}
+
+.taskCountContainerProgressBarProgress {
+	height: 100%;
+	background-color: #4CAF50;
+	transition: width 0.5s ease-in-out;
+}
+
+.taskCountContainerTaskCount {
+	font-size: 16px;
+	font-weight: bold;
+	color: var(--text-muted);
+	text-wrap: nowrap;
+}
+
 .kanbanHeaderBtnsSeparator {
 	padding-inline: 0;
 }
 
+.taskBoardSearchInput {
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	margin-right: 8px;
+	font-size: 14px;
+}
+
+.searchTaskBtn,
 .AddNewTaskBtn,
 .ConfigureBtn,
 .taskboardActionshBtn,
@@ -98,6 +142,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	/* font-size: 14px; */
 }
 
+.searchTaskBtn:hover,
 .AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
 .RefreshBtn:hover,
@@ -186,11 +231,22 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 0.5em;
 }
 
-.columnTitle {
+.taskBoardColumnSecHeaderTitleSecColumnTitle {
 	color: var(--foreground-primary);
 	text-align: center;
+	align-content: center;
 	font-size: 1.1em;
 	font-weight: 600;
+}
+
+.taskBoardColumnSecHeaderTitleSecColumnCount {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 5px;
+	padding-inline: 7px;
 }
 
 .columnDragIcon {
@@ -357,12 +413,96 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	opacity: 50% !important;
 }
 
+/* Subtask Summary */
+.subtask-summary-container {
+	margin-top: 8px;
+	padding: 0px 0px;
+	padding-inline-end: 7px;
+	/* background-color: var(--background-secondary-alt); */
+	border-radius: 6px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-left: -10px;
+}
+
+.subtask-progress-bar-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+}
+
+.subtask-progress-bar-bg {
+	position: relative;
+	width: 100%;
+	height: 6px;
+	background-color: #ddd;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.subtask-progress-bar-fill {
+	height: 100%;
+	background-color: var(--interactive-accent);
+	transition: width 0.3s ease-in-out;
+}
+
+/* Count display */
+.subtask-progress-count {
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+/* Expand button */
+.subtask-toggle-btn {
+	background: none;
+	border: none;
+	font-size: 1rem;
+	cursor: pointer;
+	color: var(--text-accent);
+	transition: transform 0.2s ease-in-out;
+}
+
+.subtask-toggle-btn:hover {
+	transform: scale(1.2);
+}
+
+/* Subtask expand/collapse animations */
+.taskItemBodySubtaskSection-show {
+	max-height: 1000px;
+	/* large max to accommodate many subtasks */
+	opacity: 1;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.taskItemBodySubtaskSection-hide {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.subtask-toggle-icon {
+	display: inline-block;
+	transition: transform 0.3s ease;
+}
+
+.subtask-toggle-icon.rotated {
+	transform: rotate(180deg);
+}
+
 .taskItemMainBodyDescription {
 	width: 100%;
 }
 
 .taskItemMainBodyDescriptionSection {
 	width: 100%;
+}
+
+.taskItemMainBodyDescriptionSectionVisible {
+	margin-top: 5px;
 }
 
 .taskItemMainBodyDescriptionSectionToggler {
@@ -397,7 +537,18 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItemBodyDescriptionRenderer ul {
 	margin-block: 4px !important;
-	padding-inline-start: 25px !important;
+	padding-inline-start: 5px !important;
+	overflow: auto;
+}
+
+.taskItemBodyDescriptionRenderer li {
+	overflow: auto;
+}
+
+.taskItemBodyDescriptionRenderer ul>li>ul {
+	margin-block: 0px !important;
+	padding-inline-start: 0px !important;
+	overflow: auto;
 }
 
 .taskItemBodyDescriptionRenderer blockquote {
@@ -405,6 +556,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	margin-block-start: 0.5em;
 	margin-block-end: 0.5em;
 	margin-inline-start: 15px;
+}
+
+.taskItemBodyDescriptionRenderer img {
+	max-width: -webkit-fill-available !important;
 }
 
 
@@ -1494,22 +1649,76 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskBoard-filter-row {
 	display: flex;
 	align-items: center;
-	margin-bottom: 10px;
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-content: center;
+	border: 1px solid var(--checkbox-border-color);
+	padding: 5px;
+	border-radius: 5px;
+	flex-direction: column;
+}
+
+.taskBoard-filter-row-heading {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.taskBoard-filter-row-body {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	gap: 0.75rem;
 }
 
 .taskBoard-filter-label {
-	width: 80px;
-	font-weight: bold;
-	color: var(--color-red);
+	width: 70px;
+	font-weight: 500;
+	color: var(--blockquote-border-color);
+	align-content: center;
 }
 
-.taskBoard-filter-input {
-	flex-grow: 1;
-	margin-right: 10px;
+.taskBoard-filter-values {
+	background-color: var(--background-modifier-form-field);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	min-width: 100px;
+	width: -webkit-fill-available;
+	padding: 7px;
+	border-radius: 5px;
+}
+
+.taskBoard-filter-tag {
+	background-color: var(--color-base-40);
+	padding: 2px 8px;
+	border-radius: 8px;
+	font-size: 0.875em;
+	border: 1px solid var(--text-highlight-bg);
+}
+
+.taskBoard-filter-configure-button {
+	padding: 3px 10px;
+	cursor: pointer;
+	font-size: 0.875em;
+	border: 1px solid var(--interactive-accent);
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border-radius: 6px;
+}
+
+.taskBoard-filter-configure-button:hover {
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
 }
 
 .taskBoard-filter-dropdown {
 	text-align: center;
+	max-width: fit-content;
 }
 
 .taskBoard-global-settings-tab-tag-color-preview {
@@ -1915,6 +2124,35 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding: 8px 12px;
 	border-radius: 8px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* /src/modal/ScanFilterModal.ts */
+
+.scan-filter-input {
+	width: 100% !important;
+}
+
+.scan-filter-list {
+	margin-top: 1em;
+	padding-left: 5px;
+}
+
+.scan-filter-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 10px;
+	margin-bottom: 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	font-weight: 500;
+	background-color: var(--background-primary-alt);
+}
+
+.scan-filter-remove-btn {
+	background-color: transparent !important;
+	color: var(--color-red) !important;
+	cursor: pointer;
 }
 
 

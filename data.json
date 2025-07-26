@@ -238,13 +238,17 @@
         "files": {
           "polarity": 3,
           "values": [
-            "TODO.md"
+            "TODO.md",
+            "0-ImportantData.md",
+            "2025-05-23.md"
           ]
         },
         "folders": {
-          "polarity": 1,
+          "polarity": 3,
           "values": [
-            "Daily_Notes"
+            "Daily_Notes",
+            "obsidian-hub-0.2.1/00 - Contribute to the Obsidian Hub",
+            "obsidian-hub-0.2.1/04 - Guides, Workflows, & Courses"
           ]
         },
         "tags": {
@@ -635,7 +639,7 @@
         "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": false,
-        "quickAddPlugin": true
+        "quickAddPlugin": false
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
@@ -655,7 +659,8 @@
           "type": "move",
           "targetColumn": "6"
         }
-      ]
+      ],
+      "cardSectionsVisibility": "hideBoth"
     }
   }
 }
