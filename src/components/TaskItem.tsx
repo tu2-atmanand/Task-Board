@@ -213,7 +213,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				return 'var(--color-yellow)'; // Due today but no time info
 			}
 		} else if (taskDueDate > today) {
-			return 'var(--color-green)'; // Due in future
+			return 'green'; // Due in future
 		} else if (taskDueDate < today) {
 			return 'var(--color-red)'; // Past due
 		} else {

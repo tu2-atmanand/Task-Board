@@ -77,6 +77,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskBoardHeaderBtns {
 	display: flex;
 	flex-direction: row;
+	margin-inline-start: 8px;
+}
+
+.taskBoardHeaderBtns .is-mobile input[type='text'] {
+	min-width: 14rem;
 }
 
 .taskCountContainer {
@@ -151,6 +156,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .taskBoardViewSection {}
+
+@media screen and (max-width: 768px) {
+
+	.taskCountContainer {
+		display: none !important;
+	}
+
+}
 
 /* // src/components/KanbanBoard.tsx */
 
@@ -1273,6 +1286,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalSidebarBtnArea-btn-drag-handle {
 	cursor: grab;
 	align-self: center;
+	min-width: 20px;
 }
 
 .boardConfigModalSidebarSaveBtn {
