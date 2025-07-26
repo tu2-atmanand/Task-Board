@@ -2219,7 +2219,7 @@
         ],
         "Task_Board_Temp_Tasks.md": [
             {
-                "id": 46736827,
+                "id": 2908579661,
                 "status": " ",
                 "title": "This is not ➕ 2025-05-26 🛫 2025-05-26 #bug",
                 "body": [],
@@ -2245,7 +2245,7 @@
                 "reminder": ""
             },
             {
-                "id": 565029151,
+                "id": 939197682,
                 "status": " ",
                 "title": "➕ 2025-05-26 🛫 2025-05-26",
                 "body": [],
@@ -2269,7 +2269,7 @@
                 "reminder": ""
             },
             {
-                "id": 809645310,
+                "id": 2214733682,
                 "status": " ",
                 "title": "This task will have the **created date** populated automatically, as well as the start date as todays date. ➕ 2025-05-26 #test",
                 "body": [],
@@ -2295,7 +2295,7 @@
                 "reminder": ""
             },
             {
-                "id": 2505907303,
+                "id": 562697138,
                 "status": " ",
                 "title": "Adding a temp task, I think the start date should come automatically here. #test",
                 "body": [],
@@ -2321,15 +2321,15 @@
                 "reminder": ""
             },
             {
-                "id": 1628123541,
+                "id": 4201864646,
                 "status": " ",
-                "title": "Adding a temp text ⏳ 2025-07-26 task. 📅 2025-08-01",
+                "title": "Adding a temp text ⏳ 2025-07-26 task. 📅 2025-07-27",
                 "body": [],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "2025-07-26",
-                "due": "2025-08-01",
+                "due": "2025-07-27",
                 "tags": [],
                 "frontmatterTags": [],
                 "priority": 0,
@@ -2345,7 +2345,7 @@
                 "reminder": ""
             },
             {
-                "id": 3625453054,
+                "id": 3545383015,
                 "status": " ",
                 "title": "This task is created through the **Add new task modal** and it will be entered right after the *Pending tasks* section. 🔼 ⏰ [10:00 - 11:00] ➕ 2025-07-10 📅 2025-07-11 #Testing",
                 "body": [],
@@ -2361,9 +2361,9 @@
                 "priority": 3,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 7,
+                    "startLine": 9,
                     "startCharIndex": 0,
-                    "endLine": 7,
+                    "endLine": 9,
                     "endCharIndex": 182
                 },
                 "completion": "",
@@ -2371,7 +2371,7 @@
                 "reminder": ""
             },
             {
-                "id": 2267885238,
+                "id": 532082725,
                 "status": " ",
                 "title": "Here we go, another one. 🔺⏰ [10:00 - 11:30] #test 📅 2025-05-25",
                 "body": [],
@@ -2387,9 +2387,9 @@
                 "priority": 1,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 8,
+                    "startLine": 10,
                     "startCharIndex": 0,
-                    "endLine": 8,
+                    "endLine": 10,
                     "endCharIndex": 70
                 },
                 "completion": "",
@@ -2397,7 +2397,7 @@
                 "reminder": ""
             },
             {
-                "id": 2413229010,
+                "id": 4012253465,
                 "status": " ",
                 "title": "Another a third task. ⏬ 📅 2025-05-26 #working",
                 "body": [
@@ -2415,9 +2415,9 @@
                 "priority": 5,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 9,
+                    "startLine": 11,
                     "startCharIndex": 0,
-                    "endLine": 10,
+                    "endLine": 12,
                     "endCharIndex": 81
                 },
                 "completion": "",
@@ -2425,7 +2425,7 @@
                 "reminder": ""
             },
             {
-                "id": 69566683,
+                "id": 973376992,
                 "status": " ",
                 "title": "Adding another task to the same **choice** directly from the `Add new task modal`. 0 #test 📅 2025-05-25",
                 "body": [],
@@ -2441,9 +2441,9 @@
                 "priority": 0,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 11,
+                    "startLine": 13,
                     "startCharIndex": 0,
-                    "endLine": 11,
+                    "endLine": 13,
                     "endCharIndex": 110
                 },
                 "completion": "",
@@ -2451,7 +2451,7 @@
                 "reminder": ""
             },
             {
-                "id": 3761800635,
+                "id": 1231761415,
                 "status": " ",
                 "title": "Now I should be able to switch between the **QuickAdd** choices directly from the `Add new task modal`. 🔼 📅 2025-05-25 #test",
                 "body": [],
@@ -2467,9 +2467,9 @@
                 "priority": 3,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 12,
+                    "startLine": 14,
                     "startCharIndex": 0,
-                    "endLine": 12,
+                    "endLine": 14,
                     "endCharIndex": 132
                 },
                 "completion": "",
@@ -2477,7 +2477,7 @@
                 "reminder": ""
             },
             {
-                "id": 1370864480,
+                "id": 377423457,
                 "status": "/",
                 "title": "This is a new task for tomorrow. 0 📅 2025-05-26 #New",
                 "body": [
@@ -2496,9 +2496,9 @@
                 "priority": 0,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 16,
+                    "startLine": 18,
                     "startCharIndex": 0,
-                    "endLine": 18,
+                    "endLine": 20,
                     "endCharIndex": 11
                 },
                 "completion": "",
@@ -2506,7 +2506,7 @@
                 "reminder": ""
             },
             {
-                "id": 2661463899,
+                "id": 4103537400,
                 "status": " ",
                 "title": "Another quick task 🔺 📅 2025-05-25 #test",
                 "body": [],
@@ -2522,9 +2522,9 @@
                 "priority": 1,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 20,
+                    "startLine": 22,
                     "startCharIndex": 0,
-                    "endLine": 20,
+                    "endLine": 22,
                     "endCharIndex": 47
                 },
                 "completion": "",
@@ -2532,7 +2532,7 @@
                 "reminder": ""
             },
             {
-                "id": 2493254414,
+                "id": 993939345,
                 "status": " ",
                 "title": "this #test ➕ 2025-05-26",
                 "body": [],
@@ -2548,9 +2548,9 @@
                 "priority": 0,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 25,
+                    "startLine": 27,
                     "startCharIndex": 0,
-                    "endLine": 25,
+                    "endLine": 27,
                     "endCharIndex": 29
                 },
                 "completion": "",
@@ -2558,7 +2558,7 @@
                 "reminder": ""
             },
             {
-                "id": 1623232698,
+                "id": 3986884237,
                 "status": " ",
                 "title": "This is a test 🔼 ➕ 2025-06-29 📅 2025-06-29 #Test",
                 "body": [],
@@ -2574,9 +2574,9 @@
                 "priority": 3,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 27,
+                    "startLine": 29,
                     "startCharIndex": 0,
-                    "endLine": 27,
+                    "endLine": 29,
                     "endCharIndex": 56
                 },
                 "completion": "",
@@ -2584,7 +2584,7 @@
                 "reminder": ""
             },
             {
-                "id": 3551121550,
+                "id": 2055244275,
                 "status": " ",
                 "title": "This is a test 2 ➕ 2025-06-29 📅 2025-06-29",
                 "body": [],
@@ -2598,9 +2598,9 @@
                 "priority": 0,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 29,
+                    "startLine": 31,
                     "startCharIndex": 0,
-                    "endLine": 29,
+                    "endLine": 31,
                     "endCharIndex": 49
                 },
                 "completion": "",
@@ -2608,7 +2608,7 @@
                 "reminder": ""
             },
             {
-                "id": 2786162549,
+                "id": 2288303056,
                 "status": " ",
                 "title": "This is test 3 ⏫ ➕ 2025-06-29 📅 2025-07-17 #Test",
                 "body": [],
@@ -2624,9 +2624,9 @@
                 "priority": 2,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 31,
+                    "startLine": 33,
                     "startCharIndex": 0,
-                    "endLine": 31,
+                    "endLine": 33,
                     "endCharIndex": 55
                 },
                 "completion": "",
@@ -2634,7 +2634,7 @@
                 "reminder": ""
             },
             {
-                "id": 3397475456,
+                "id": 1470267159,
                 "status": " ",
                 "title": "This is test 4 🔺 ➕ 2025-06-29 ⏳ 2025-07-04 📅 2025-06-29 #Test",
                 "body": [],
@@ -2650,9 +2650,9 @@
                 "priority": 1,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 33,
+                    "startLine": 35,
                     "startCharIndex": 0,
-                    "endLine": 33,
+                    "endLine": 35,
                     "endCharIndex": 69
                 },
                 "completion": "",
@@ -2660,7 +2660,7 @@
                 "reminder": ""
             },
             {
-                "id": 2188640773,
+                "id": 1264881734,
                 "status": " ",
                 "title": "This is a task. updated ⏳ 2025-06-11 ➕ 2025-06-29 📅 2025-06-29 #Test",
                 "body": [],
@@ -2676,9 +2676,9 @@
                 "priority": 0,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 35,
+                    "startLine": 37,
                     "startCharIndex": 0,
-                    "endLine": 35,
+                    "endLine": 37,
                     "endCharIndex": 75
                 },
                 "completion": "",
@@ -2686,7 +2686,7 @@
                 "reminder": ""
             },
             {
-                "id": 4142790401,
+                "id": 1680936868,
                 "status": " ",
                 "title": "A simple new task for today. ➕ 2025-07-10 📅 2025-07-10 #Test",
                 "body": [],
@@ -2702,9 +2702,9 @@
                 "priority": 0,
                 "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 38,
+                    "startLine": 40,
                     "startCharIndex": 0,
-                    "endLine": 38,
+                    "endLine": 40,
                     "endCharIndex": 67
                 },
                 "completion": "",
