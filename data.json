@@ -21,7 +21,8 @@
             "index": 2,
             "datedBasedColumn": {
               "from": 0,
-              "to": 0
+              "to": 0,
+              "dateType": "due"
             }
           },
           {
@@ -33,7 +34,8 @@
             "index": 3,
             "datedBasedColumn": {
               "from": -300,
-              "to": -1
+              "to": -1,
+              "dateType": "due"
             }
           },
           {
