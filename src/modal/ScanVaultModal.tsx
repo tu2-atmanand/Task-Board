@@ -165,19 +165,13 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 				{showCollectedTasks ? t("hide-collected-tasks") : t("show-collected-tasks")}
 			</button>
 
-			{localStorage.getItem("manadatoryScan") === "true" ?
-				(<>
-				</>
-				) :
-				(<>
-					<div>
-						<h4>{t("points-to-note")}</h4>
-						<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</li>
-						<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</li>
-						<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</li>
-					</div>
-				</>
-				)}
+
+			<div>
+				<h4>{t("points-to-note")}</h4>
+				<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</li>
+				<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</li>
+				<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</li>
+			</div>
 		</div>
 	);
 }
