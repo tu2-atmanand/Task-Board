@@ -1518,7 +1518,7 @@
         ],
         "Daily_Notes/17-09-2024.md": [
             {
-                "id": 3362241598,
+                "id": 2288826330,
                 "status": " ",
                 "title": "If i add any other due it should work, autoAddDue is off. 📅 2024-09-30 🔼 #Testing",
                 "body": [],
@@ -1544,7 +1544,7 @@
                 "reminder": ""
             },
             {
-                "id": 1061243687,
+                "id": 1712707890,
                 "status": " ",
                 "title": "This task will be updated in the json file after 10 seconds 📅2024-09-27  #Testing",
                 "body": [],
@@ -1570,7 +1570,7 @@
                 "reminder": ""
             },
             {
-                "id": 1292574182,
+                "id": 2907212245,
                 "status": " ",
                 "title": "Adding new task, this will update in the file after 5 minutes ⏫ #Testing ⏰ [12:45 - 13:45]",
                 "body": [],
@@ -1596,14 +1596,14 @@
                 "reminder": ""
             },
             {
-                "id": 1889926083,
+                "id": 2143154317,
                 "status": " ",
                 "title": "Now auto add due option is false, so the due date shouldnt be added  #Test",
                 "body": [
                     "\t- [ ] This is a sub-task.",
                     "\tThis is a body line one",
                     "\tThis is a body line two.",
-                    "\t![[Pasted image 20250718224309.png]]"
+                    "\t![[Pasted image 20250718224309.png|600]]"
                 ],
                 "time": "",
                 "createdDate": "",
@@ -1620,14 +1620,14 @@
                     "startLine": 28,
                     "startCharIndex": 0,
                     "endLine": 32,
-                    "endCharIndex": 37
+                    "endCharIndex": 41
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 1834108871,
+                "id": 4029623348,
                 "status": " ",
                 "title": "Adding tomorrow date, it should come even autoAddDue is ON [due:: 2024-09-27]  #Testing",
                 "body": [],
@@ -1643,9 +1643,9 @@
                 "priority": 0,
                 "filePath": "Daily_Notes/17-09-2024.md",
                 "taskLocation": {
-                    "startLine": 42,
+                    "startLine": 43,
                     "startCharIndex": 0,
-                    "endLine": 42,
+                    "endLine": 43,
                     "endCharIndex": 93
                 },
                 "completion": "",
