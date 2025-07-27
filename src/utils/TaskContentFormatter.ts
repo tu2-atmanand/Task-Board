@@ -1119,7 +1119,10 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	return cleanedTitle.trim();
 };
 
-export const getUniversalDate = (task: taskItem, plugin: TaskBoard): string => {
+export const getUniversalDateFromTask = (
+	task: taskItem,
+	plugin: TaskBoard
+): string => {
 	// Method 1 - Comparing
 	const universalDateChoice =
 		plugin.settings.data.globalSettings.universalDate;

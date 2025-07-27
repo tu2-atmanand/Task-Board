@@ -734,18 +734,18 @@ export const addTaskInNote = async (
 };
 
 // Function to parse due date correctly
-export const parseUniversalDate = (dueStr: string): Date | null => {
+export const parseUniversalDate = (dateStr: string): Date | null => {
 	// Regular expression to check if dueStr starts with a two-digit day
 	const ddMmYyyyPattern = /^\d{2}-\d{2}-\d{4}$/;
 
-	if (ddMmYyyyPattern.test(dueStr)) {
+	if (ddMmYyyyPattern.test(dateStr)) {
 		// Convert "DD-MM-YYYY" → "YYYY-MM-DD"
-		const [day, month, year] = dueStr.split("-");
-		dueStr = `${year}-${month}-${day}`;
+		const [day, month, year] = dateStr.split("-");
+		dateStr = `${year}-${month}-${day}`;
 	}
 
 	// Parse the date
-	const parsedDate = new Date(dueStr);
+	const parsedDate = new Date(dateStr);
 	return isNaN(parsedDate.getTime()) ? null : parsedDate;
 };
 
