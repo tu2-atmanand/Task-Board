@@ -635,7 +635,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												/>
 												<select
 													aria-label="Select date type"
-													value={column.datedBasedColumn?.dateType || UniversalDateOptions.dueDate}
+													value={column.datedBasedColumn?.dateType || plugin.settings.data.globalSettings.universalDate || UniversalDateOptions.dueDate}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -659,7 +659,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<>
 												<select
 													aria-label="Select date type"
-													value={column.datedBasedColumn?.dateType || universalDateOptionsNames.dueDate}
+													value={column.datedBasedColumn?.dateType || plugin.settings.data.globalSettings.universalDate || UniversalDateOptions.dueDate}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
