@@ -644,7 +644,7 @@ export default class TaskBoard extends Plugin {
 								from: 0,
 								to: 0,
 							};
-							// delete column.range;
+							delete column.range;
 						}
 					});
 

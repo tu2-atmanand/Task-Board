@@ -20,6 +20,13 @@ export type ColumnData = {
 		criteria: string;
 		order: boolean; // Ascending = 0 AND Descending = 1
 	};
+	range?: { // Keep it for few versions, this is required while settings migrations
+		tag: string;
+		rangedata: {
+			from: number;
+			to: number;
+		};
+	};
 };
 
 export type Board = {
