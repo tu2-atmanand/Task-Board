@@ -74,10 +74,10 @@ const Column: React.FC<ColumnProps> = ({
 				{tasks.length > 0 ? (
 					tasks.map((task, index = task.id) => {
 						const allTaskTags = getAllTaskTags(task);
-						const shouldRenderTask = parseInt(activeBoardSettings.filterPolarity || "0") === 1 &&
-							allTaskTags.some((tag: string) => activeBoardSettings.filters?.includes(tag));
+						const shouldRenderTask = parseInt(activeBoardSettings?.filterPolarity || "0") === 1 &&
+							allTaskTags.some((tag: string) => activeBoardSettings?.filters?.includes(tag));
 
-						if (shouldRenderTask || parseInt(activeBoardSettings.filterPolarity || "0") === 0) {
+						if (shouldRenderTask || parseInt(activeBoardSettings?.filterPolarity || "0") === 0) {
 							return (
 								<div key={index} className="taskItemFadeIn">
 									<TaskItem
