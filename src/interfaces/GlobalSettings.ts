@@ -97,7 +97,7 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
-	universalDate: UniversalDateOptions.dueDate;
+	universalDate: string;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;

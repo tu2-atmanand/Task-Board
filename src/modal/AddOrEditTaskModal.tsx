@@ -278,16 +278,14 @@ const EditTaskContent: React.FC<{
 		handleTaskEditedThroughEditors(e.target.value);
 	};
 
-	useEffect(() => {
-		console.log("Cursor Location in useEffect:", cursorLocationRef.current);
-	}, [cursorLocationRef.current]);
+	// useEffect(() => {
+	// 	console.log("Cursor Location in useEffect:", cursorLocationRef.current);
+	// }, [cursorLocationRef.current]);
 
 	// Tags input
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		console.log("e value :", e, "\nTitle :", title, "\nTags :", tags);
 		if (e.key === 'Enter') {
 			const input = e.currentTarget.value.trim().startsWith("#") ? e.currentTarget.value.trim() : `#${e.currentTarget.value.trim()}`;
-			console.log("Cursor Location in handleTagInput:", cursorLocationRef.current);
 			const newTitle = sanitizeTags(title, tags, input, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 
@@ -310,17 +308,14 @@ const EditTaskContent: React.FC<{
 		tagsRef.current = tags;
 	}, [title, tags]);
 	useEffect(() => {
-		console.warn("App changed, initializing MultiSuggest for tags input field.");
 		if (!tagsInputFieldRef.current) return;
 
 		const suggestionContent = getTagSuggestions(app);
 		const onSelectCallback = (choice: string) => {
-			console.log("Selected tag choice:", choice);
 			const currentTitle = titleRef.current;
 			const currentTags = tagsRef.current;
 
 			const newTitle = sanitizeTags(currentTitle, currentTags, choice, cursorLocationRef.current ?? undefined);
-			console.log("New title after tag selection:", newTitle);
 			setTitle(newTitle);
 
 			if (!currentTags.includes(choice)) {
@@ -404,11 +399,12 @@ const EditTaskContent: React.FC<{
 		let newScheduledDate = scheduledDate;
 
 		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists) {
-			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate && !due) {
+			const universalDateType = plugin.settings.data.globalSettings.universalDate;
+			if (universalDateType === UniversalDateOptions.dueDate && !due) {
 				newDue = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate && !startDate) {
+			} else if (universalDateType === UniversalDateOptions.startDate && !startDate) {
 				newStartDate = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate && !scheduledDate) {
+			} else if (universalDateType === UniversalDateOptions.scheduledDate && !scheduledDate) {
 				newScheduledDate = new Date().toISOString().split('T')[0];
 			}
 		}
@@ -436,7 +432,6 @@ const EditTaskContent: React.FC<{
 			status,
 			reminder,
 		};
-		console.log("Updated Task:", updatedTask);
 		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	};
@@ -471,7 +466,6 @@ const EditTaskContent: React.FC<{
 
 	const titleComponentRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		console.warn("Title changed: ", title);
 		const cleanedTaskTitle = cleanTaskTitle(plugin, modifiedTask);
 		// setFormattedTaskContent(cleanedTaskTitle);
 		if (titleComponentRef.current && cleanedTaskTitle !== "") {
@@ -490,9 +484,7 @@ const EditTaskContent: React.FC<{
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
-		console.log("handleTaskEditedThroughEditors called with value:", value);
 		const updatedTask = buildTaskFromRawContent(value);
-		console.log("Updated Task from Editors:", updatedTask);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
@@ -577,14 +569,8 @@ const EditTaskContent: React.FC<{
 								// 	lineNumber: 1,
 								// 	charIndex: editor?.obsidianEditor?.getCursor().ch || formattedTaskContent.split("\n")[0].length,
 								// });
-								console.log("Editor cursor location updated:",
-									"\nCursorLocation : ", fullMarkdownEditor.editor.editor?.getCursor()
-								);
 							},
 							onBlur: (editor) => {
-								console.log("onBlue inside Editor:",
-									"\nCursorLocation : ", fullMarkdownEditor.editor.editor?.getCursor()
-								);
 								// setCursorLocation({
 								// 	lineNumber: 1,
 								// 	charIndex: editor.options.cursorLocation?.head || formattedTaskContent.split("\n")[0].length,
@@ -630,15 +616,12 @@ const EditTaskContent: React.FC<{
 
 					// Only this one worked.
 					fullMarkdownEditor.activeCM.contentDOM.onblur = () => {
-						console.log("2. onBlur event triggered in the embedded markdown editor's content DOM.");
 						// setUpdateEditorContent(true);
 						const cursor = fullMarkdownEditor.editor.editor?.getCursor();
-						console.log("Cursor Location in activeCM.contentDOM.onblur:", cursor);
 						cursorLocationRef.current = {
 							lineNumber: (cursor ? cursor.line + 1 : 0),
 							charIndex: (cursor ? (cursor?.ch - 6 < 0 ? 0 : cursor?.ch - 6) : formattedTaskContent.split("\n")[0].length),
 						};
-						console.log("Updated cursorLocationRef:", cursorLocationRef.current);
 					}
 
 					// fullMarkdownEditor.containerEl.onblur = () => {
@@ -696,21 +679,19 @@ const EditTaskContent: React.FC<{
 					// If the editor already exists, just update its content
 					markdownEditor.set(formattedTaskContent, false);
 
-					if (markdownEditor && markdownEditor.editorEl) {
-						markdownEditor.editorEl.onblur = () => {
-							console.log("onBlur event triggered in the embedded markdown editor.");
-							// setUpdateEditorContent(true);
-							// setCursorLocation({
-							// 	lineNumber: 1,
-							// 	charIndex: markdownEditor?.editor?.getCursor().ch || formattedTaskContent.split("\n")[0].length,
-							// });
-						};
-					}
+					// if (markdownEditor && markdownEditor.editorEl) {
+					// 	markdownEditor.editorEl.onblur = () => {
+					// 		// setUpdateEditorContent(true);
+					// 		// setCursorLocation({
+					// 		// 	lineNumber: 1,
+					// 		// 	charIndex: markdownEditor?.editor?.getCursor().ch || formattedTaskContent.split("\n")[0].length,
+					// 		// });
+					// 	};
+					// }
 				}
 			}
 		});
 		setUpdateEditorContent(false);
-		console.log("I hope this useEffect is not going in loop, because I am setting the updateEditorContent to false at the end of this useEffect.");
 	}, [updateEditorContent]);
 
 	useEffect(() => {
@@ -817,7 +798,6 @@ const EditTaskContent: React.FC<{
 									onChange={handleTextareaChange}
 									onBlur={() => {
 										setUpdateEditorContent(true);
-										console.log("On focus lost from the text area");
 									}}
 									placeholder={t("body-content")}
 									style={{ display: activeTab === 'rawEditor' ? 'block' : 'none', width: '100%' }}
@@ -898,7 +878,6 @@ const EditTaskContent: React.FC<{
 									type="datetime-local"
 									value={reminder}
 									onFocus={() => {
-										console.log("On focusing the date-time selector...\nreminder : ", reminder);
 										if (!reminder || reminder === "") {
 											const dateToUse = startDate || scheduledDate || due;
 											const timeToUse = startTime || "09:00";

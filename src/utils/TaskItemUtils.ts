@@ -533,16 +533,16 @@ export const useTasksPluginToUpdateInFile = async (
 			}
 
 			const twoTaskTitles = tasksPluginApiOutput.split("\n");
-			console.log(
-				"useTasksPluginToUpdateInFile : tasksPluginApiOutput :\n",
-				tasksPluginApiOutput,
-				"\n| first line :",
-				twoTaskTitles[0],
-				"\n| second line :",
-				twoTaskTitles[1],
-				"\n| Old task :",
-				completeOldTaskContent
-			);
+			// console.log(
+			// 	"useTasksPluginToUpdateInFile : tasksPluginApiOutput :\n",
+			// 	tasksPluginApiOutput,
+			// 	"\n| first line :",
+			// 	twoTaskTitles[0],
+			// 	"\n| second line :",
+			// 	twoTaskTitles[1],
+			// 	"\n| Old task :",
+			// 	completeOldTaskContent
+			// );
 			let newContent = "";
 			if ((twoTaskTitles.length = 1)) {
 				newContent = `${tasksPluginApiOutput}${
@@ -766,14 +766,14 @@ export const replaceOldTaskWithNewTask = async (
 		? oldTask.filePath
 		: `${oldTask.filePath}.md`;
 
-	console.log(
-		"replaceOldTaskWithNewTask : filePath : ",
-		filePath,
-		"\n\n\nNew Task Content : ",
-		newTaskContent,
-		"\n\n\nOld Task Content : ",
-		oldTaskContent
-	);
+	// console.log(
+	// 	"replaceOldTaskWithNewTask : filePath : ",
+	// 	filePath,
+	// 	"\n\n\nNew Task Content : ",
+	// 	newTaskContent,
+	// 	"\n\n\nOld Task Content : ",
+	// 	oldTaskContent
+	// );
 
 	try {
 		// Step 1: Read the file content

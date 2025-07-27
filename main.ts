@@ -578,11 +578,6 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onFileModifiedAndLostFocus() {
-		console.log(
-			"onFileModifiedAndLostFocus called\n",
-			this.editorModified,
-			this.taskBoardFileStack.length
-		);
 		if (this.editorModified) {
 			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
 			// 	await this.realTimeScanning.onFileModified(
@@ -593,7 +588,6 @@ export default class TaskBoard extends Plugin {
 			// 	this.fileUpdatedUsingModal = "";
 			// }
 
-			console.log("Window lost focus, scanning the modified files...");
 			await this.realTimeScanning.processAllUpdatedFiles();
 
 			// Reset the editorModified flag after the scan.

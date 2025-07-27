@@ -118,9 +118,6 @@ export class MarkdownUIRenderer {
 		try {
 			// console.log("renderSubtaskText : Received following text : ", subtaskText);
 			if (!taskItemComponent) {
-				console.warn(
-					"taskItemComponent is null, cannot render subtask."
-				);
 				return;
 			}
 			// Call Obsidian's MarkdownRenderer to render the subtaskText as markdown

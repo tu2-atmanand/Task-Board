@@ -30,10 +30,6 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 			JSON.stringify(parsed)
 		);
 	} catch (err) {
-		console.warn(
-			`Failed to load translation for '${lang}', using fallback.`,
-			err
-		);
 		// localStorage.removeItem(LOCAL_STORAGE_KEY);
 		localStorage.removeItem(LOCAL_STORAGE_TRANSLATIONS);
 	}
@@ -164,10 +160,9 @@ export async function downloadAndApplyLanguageFile(
 		);
 	} catch (err) {
 		progressNotice.hide();
-		console.error(`Failed to download language file for '${lang}'`, err);
 		bugReporter(
 			plugin,
-			`You have selected the following language for Obsidian application : ${lang}.\nBased on the error message below, either your internet is OFF or the language translation file is not present at the following link : https://github.com/tu2-atmanand/Task-Board/main/src/utils/lang/locale/. \nIt would be really helpful if you can contribute for your native language translation by visiting the following link : https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/`,
+			`You have selected the following language for Obsidian application : ${langCodes[lang]} - ${lang}.\nBased on the error message below, either your internet is OFF or the language translation file is not present at the following link : https://github.com/tu2-atmanand/Task-Board/main/src/utils/lang/locale/. \nIt would be really helpful if you can contribute for your native language translation by visiting the following link : https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/`,
 			err as string,
 			"helper.ts/downloadAndApplyLanguageFile"
 		);

@@ -371,7 +371,6 @@ export class SettingsManager {
 			.addText((text) => {
 				text.setValue(tasksCacheFilePath).onChange((value) => {
 					if (this.globalSettings) {
-						console.log("value", value);
 						moveTasksCacheFileToNewPath(
 							this.plugin,
 							tasksCacheFilePath,
@@ -394,12 +393,6 @@ export class SettingsManager {
 					);
 				});
 				const onSelectCallback = async (selectedPath: string) => {
-					console.log(
-						"selectedPath",
-						selectedPath,
-						"old path",
-						tasksCacheFilePath
-					);
 					moveTasksCacheFileToNewPath(
 						this.plugin,
 						tasksCacheFilePath,

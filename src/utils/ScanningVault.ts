@@ -58,12 +58,7 @@ export default class ScanningVault {
 	async initializeTasksCache() {
 		// Load existing tasks from JSON cache
 		this.tasksCache = await loadJsonCacheDataFromDisk(this.plugin);
-		console.log(
-			"ScanningVault.ts : tasksCache initialized with data:",
-			this.tasksCache
-		);
 		if (!this.tasksCache) {
-			console.info("I HOPE THIS NEVER RUNS...............");
 			this.tasksCache = {
 				VaultName: this.plugin.app.vault.getName(),
 				Modified_at: new Date().toISOString(),
@@ -101,13 +96,6 @@ export default class ScanningVault {
 
 		this.tasksCache.Pending[fileNameWithPath] = [];
 		this.tasksCache.Completed[fileNameWithPath] = [];
-
-		console.log(
-			"ScanningVault.ts : extractTasksFromFile called for file:",
-			fileNameWithPath,
-			"\nAll tasks : ",
-			this.tasksCache
-		);
 
 		// First checking if the file contains the reminder property as entered by using in the settings.frontmatterPropertyForReminder. If it contains, then this file needs to be appended in the tasks.Notes list.
 		// Extract frontmatter from the file
@@ -160,11 +148,9 @@ export default class ScanningVault {
 			if (existingNoteIndex !== -1) {
 				// Replace the existing note
 				this.tasksCache.Notes[existingNoteIndex] = note;
-				console.log("Note replaced in tasks.Notes:", note);
 			} else {
 				// Add the new note
 				this.tasksCache.Notes.push(note);
-				console.log("Note added to tasks.Notes:", note);
 			}
 		}
 
@@ -271,8 +257,6 @@ export default class ScanningVault {
 						reminder: reminder,
 					};
 
-					console.log("extractTasksFromFile : Task extracted:", task);
-
 					if (isTaskCompleted) {
 						this.tasksCache.Completed[fileNameWithPath].push(task);
 					} else {
@@ -294,12 +278,7 @@ export default class ScanningVault {
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async refreshTasksFromFiles(files: (TFile | null)[]) {
-		console.log(
-			"ScanningVault.ts : refreshTasksFromFiles called with files:",
-			files
-		);
 		if (!files || files.length === 0) {
-			console.warn("No files provided for task update.");
 			return;
 		}
 

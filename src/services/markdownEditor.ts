@@ -294,7 +294,6 @@ export class EmbeddableMarkdownEditor {
 	}
 
 	onBlur(): void {
-		console.log("Editor blurred");
 		if (typeof this.options.onBlur === "function") {
 			this.options.onBlur(this);
 		}

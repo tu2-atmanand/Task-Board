@@ -48,10 +48,6 @@ export class RealTimeScanning {
 	}
 
 	async processAllUpdatedFiles(currentFile?: TFile | null) {
-		console.log(
-			"RealTimeScanning.ts : processAllUpdatedFiles called with currentFile:",
-			currentFile?.path
-		);
 		const filesToProcess = this.taskBoardFileStack.slice();
 		this.taskBoardFileStack = [];
 		const files = filesToProcess
@@ -79,10 +75,6 @@ export class RealTimeScanning {
 	}
 
 	onFileModified(file: TFile) {
-		console.log(
-			"RealTimeScanning.ts : onFileModified called for the updated file:",
-			file.path
-		);
 		if (
 			this.taskBoardFileStack.at(0) === undefined ||
 			!this.taskBoardFileStack.includes(file.path)

@@ -96,7 +96,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		} else {
 			const fileStackString = localStorage.getItem("taskBoardFileStack");
 			const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
-			console.log("fileStackString:", fileStackString, "\nfileStack:", fileStack);
+
 			if (fileStack && fileStack.length > 0) {
 				await plugin.realTimeScanning.processAllUpdatedFiles();
 			}
@@ -109,7 +109,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}
 
 	function handleOpenTaskBoardActionsModal() {
-		console.log("Opening Task Board Actions Modal");
 		openTaskBoardActionsModal(plugin, activeBoardIndex);
 	}
 
@@ -132,7 +131,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	// }
 
 	function handleSearchSubmit() {
-		console.log("Search Query:", searchQuery);
 		if (!searchQuery.trim()) {
 			setFilteredTasksPerColumn([]);
 			return;
@@ -162,7 +160,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			return filteredTasks;
 		});
 
-		console.log("Filtered Tasks Per Column:", filtered);
 		setFilteredTasksPerColumn(filtered);
 	}
 

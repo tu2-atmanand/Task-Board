@@ -774,14 +774,6 @@ export const sanitizeTags = (
 	newTag: string,
 	cursorLocation?: cursorLocation
 ): string => {
-	console.log(
-		"sanitizeTags called with title:",
-		title,
-		"\nnewTag:",
-		newTag,
-		"\ncursorLocation:",
-		cursorLocation
-	);
 	// Remove the <mark> and <font> tags from the title first before processing
 	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
@@ -800,12 +792,6 @@ export const sanitizeTags = (
 	}
 
 	// Remove tags from the title that are not in newTags
-	console.log(
-		"extractedTagsMatch",
-		extractedTagsMatch,
-		"\nnewTagsSet",
-		oldTagSet
-	);
 	for (const tag of extractedTagsMatch) {
 		if (!oldTagSet.has(tag.trim())) {
 			updatedTitle = updatedTitle.replace(tag, "").trim();
@@ -1135,30 +1121,30 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 export const getUniversalDate = (task: taskItem, plugin: TaskBoard): string => {
 	// Method 1 - Comparing
-	// const universalDateChoice =
-	// 	plugin.settings.data.globalSettings.universalDate;
-
-	// if (universalDateChoice === UniversalDateOptions.dueDate) {
-	// 	return task.due;
-	// } else if (universalDateChoice === UniversalDateOptions.startDate) {
-	// 	return task.startDate || "";
-	// } else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
-	// 	return task.scheduledDate || "";
-	// }
-	// return "";
-
-	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.globalSettings.universalDate
 	const universalDateChoice =
 		plugin.settings.data.globalSettings.universalDate;
-	if (
-		!universalDateChoice ||
-		!task[universalDateChoice] ||
-		task[universalDateChoice] === ""
-	) {
-		return "";
+
+	if (universalDateChoice === UniversalDateOptions.dueDate) {
+		return task.due;
+	} else if (universalDateChoice === UniversalDateOptions.startDate) {
+		return task.startDate || "";
+	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
+		return task.scheduledDate || "";
 	}
-	// Return the value of the universal date key from the task object
-	return task[universalDateChoice] || "";
+	return "";
+
+	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.globalSettings.universalDate
+	// const universalDateChoice =
+	// 	plugin.settings.data.globalSettings.universalDate;
+	// if (
+	// 	!universalDateChoice ||
+	// 	!task[universalDateChoice] ||
+	// 	task[universalDateChoice] === ""
+	// ) {
+	// 	return "";
+	// }
+	// // Return the value of the universal date key from the task object
+	// return task[universalDateChoice] || "";
 };
 
 export const getUniversalDateEmoji = (plugin: TaskBoard): string => {

@@ -100,32 +100,32 @@ export const loadJsonCacheDataFromDisk = async (
 };
 
 // Helper function to clean up the empty entries in tasks.json
-export const dataCleanup = async (
-	oldTaskData: jsonCacheData
-): Promise<jsonCacheData> => {
-	// Function to remove keys with empty arrays from a specified section
-	const removeEmptyKeys = (section: any) => {
-		Object.keys(section).forEach((key) => {
-			console.log(
-				"Checking key:",
-				key,
-				"in section:",
-				section,
-				"\nSection[key]:",
-				section[key]
-			);
-			if (Array.isArray(section[key]) && section[key].length === 0) {
-				delete section[key];
-			}
-		});
-	};
+// export const dataCleanup = async (
+// 	oldTaskData: jsonCacheData
+// ): Promise<jsonCacheData> => {
+// 	// Function to remove keys with empty arrays from a specified section
+// 	const removeEmptyKeys = (section: any) => {
+// 		Object.keys(section).forEach((key) => {
+// 			console.log(
+// 				"Checking key:",
+// 				key,
+// 				"in section:",
+// 				section,
+// 				"\nSection[key]:",
+// 				section[key]
+// 			);
+// 			if (Array.isArray(section[key]) && section[key].length === 0) {
+// 				delete section[key];
+// 			}
+// 		});
+// 	};
 
-	// Remove empty arrays from "Pending" and "Completed" sections
-	removeEmptyKeys(oldTaskData.Pending);
-	removeEmptyKeys(oldTaskData.Completed);
+// 	// Remove empty arrays from "Pending" and "Completed" sections
+// 	removeEmptyKeys(oldTaskData.Pending);
+// 	removeEmptyKeys(oldTaskData.Completed);
 
-	return oldTaskData;
-};
+// 	return oldTaskData;
+// };
 
 // Function to write tasks data to disk
 export const writeJsonCacheDataFromDisk = async (
@@ -138,16 +138,12 @@ export const writeJsonCacheDataFromDisk = async (
 			path = plugin.settings.data.globalSettings.tasksCacheFilePath;
 		}
 
-		const cleanedTasksData = tasksData; //await dataCleanup(tasksData);
+		// const cleanedTasksData = tasksData; //await dataCleanup(tasksData);
 
-		if (cleanedTasksData) {
-			await plugin.app.vault.adapter.write(
-				path,
-				JSON.stringify(cleanedTasksData, null, 4)
-			);
-		} else {
-			console.warn("Improper cleanedTasksData to write to disk.");
-		}
+		await plugin.app.vault.adapter.write(
+			path,
+			JSON.stringify(tasksData, null, 4)
+		);
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -165,12 +161,6 @@ export const moveTasksCacheFileToNewPath = (
 	newPath: string
 ) => {
 	return new Promise<void>((resolve, reject) => {
-		console.log(
-			"Inside moveTasksCacheFileToNewPath with oldPath:",
-			oldPath,
-			"and newPath:",
-			newPath
-		);
 		if (
 			oldPath === newPath ||
 			(newPath !== "" && newPath.endsWith(".json") === false) ||
@@ -203,12 +193,6 @@ export const moveTasksCacheFileToNewPath = (
 				);
 				reject(error);
 			});
-		console.log(
-			"moveTasksCacheFileToNewPath called with oldPath:",
-			oldPath,
-			"and newPath:",
-			newPath
-		);
 	});
 };
 

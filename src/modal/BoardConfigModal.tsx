@@ -260,14 +260,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				const suggestionContent = getFileSuggestions(plugin.app);
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
-					console.log(`Selected file path: ${selectedPath}`);
 					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
 			} else if (filePathInputRefs.current[column.id] !== null && column.colType === "namedTag") {
 				const suggestionContent = getTagSuggestions(plugin.app);
 				const onSelectCallback = (selectedTag: string) => {
-					console.log(`Selected tag: ${selectedTag}`);
 					handleColumnChange(selectedBoardIndex, index, "coltag", selectedTag);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
@@ -713,12 +711,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (isSidebarVisible) {
 			document.addEventListener("mousedown", handleClickOutside);
 		} else {
-			console.log("Cleanup: Removing event listener for click outside");
 			document.removeEventListener("mousedown", handleClickOutside);
 		}
 		return () => {
 			if (isSidebarVisible) {
-				console.log("Cleanup: Removing event listener for click outside");
 				// Cleanup event listener when the component unmounts or sidebar visibility changes
 				document.removeEventListener("mousedown", handleClickOutside);
 			}
