@@ -3,6 +3,31 @@
   "data": {
     "boardConfigs": [
       {
+        "name": "Path filtered",
+        "index": 0,
+        "columns": [
+          {
+            "id": 3061361157,
+            "index": 1,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "Daily Notes",
+            "filePaths": "Daily_Notes/"
+          },
+          {
+            "id": 1312742179,
+            "index": 2,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "Temp11.md",
+            "filePaths": "Temp11.md"
+          }
+        ],
+        "hideEmptyColumns": false
+      },
+      {
         "columns": [
           {
             "id": 3494,
@@ -73,45 +98,6 @@
             "collapsed": false,
             "name": "DailyNotes.md",
             "filePaths": "DailyNotes.md"
-          },
-          {
-            "id": 3915909247,
-            "index": 8,
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Scheduled date not present",
-            "datedBasedColumn": {
-              "from": 0,
-              "to": 0,
-              "dateType": "scheduledDate"
-            }
-          },
-          {
-            "id": 914859504,
-            "index": 8,
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Start date not present",
-            "datedBasedColumn": {
-              "from": 0,
-              "to": 0,
-              "dateType": "startDate"
-            }
-          },
-          {
-            "id": 316737073,
-            "index": 9,
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Due not present",
-            "datedBasedColumn": {
-              "from": 0,
-              "to": 0,
-              "dateType": "due"
-            }
           }
         ],
         "filters": [
@@ -122,7 +108,7 @@
         "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Time based workflow",
-        "index": 0,
+        "index": 1,
         "showColumnTags": true,
         "showFilteredTags": false,
         "hideEmptyColumns": false
@@ -181,77 +167,10 @@
         "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Tag based board",
-        "index": 1,
+        "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true,
         "hideEmptyColumns": false
-      },
-      {
-        "name": "Third board",
-        "index": 2,
-        "columns": [
-          {
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Un tracked",
-            "index": 1,
-            "id": 70513,
-            "datedBasedColumn": {
-              "dateType": "due",
-              "from": 0,
-              "to": 0
-            }
-          },
-          {
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "name": "For next seven days",
-            "index": 2,
-            "datedBasedColumn": {
-              "dateType": "due",
-              "from": 0,
-              "to": 6
-            },
-            "id": 923196
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "name": "Testing tasks",
-            "index": 3,
-            "coltag": "Test",
-            "id": 179607
-          },
-          {
-            "colType": "untagged",
-            "active": true,
-            "collapsed": false,
-            "name": "All untagged tasks",
-            "index": 4,
-            "id": 994868
-          },
-          {
-            "colType": "otherTags",
-            "active": true,
-            "collapsed": false,
-            "name": "All other tagged tasks",
-            "index": 5,
-            "id": 626251
-          },
-          {
-            "colType": "completed",
-            "active": true,
-            "collapsed": false,
-            "name": "All done tasks",
-            "index": 6,
-            "limit": 20,
-            "id": 815916
-          }
-        ],
-        "hideEmptyColumns": true
       }
     ],
     "globalSettings": {
@@ -268,9 +187,8 @@
         "folders": {
           "polarity": 3,
           "values": [
-            "Daily_Notes",
-            "obsidian-hub-0.2.1/00 - Contribute to the Obsidian Hub",
-            "obsidian-hub-0.2.1/04 - Guides, Workflows, & Courses"
+            "obsidian-hub-0.2.1/04 - Guides, Workflows, & Courses",
+            "Configs"
           ]
         },
         "tags": {
@@ -674,7 +592,7 @@
       "autoAddUniversalDate": true,
       "universalDate": "due",
       "archivedTasksFilePath": "",
-      "showFileNameInCard": false,
+      "showFileNameInCard": true,
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": "",
       "notificationService": "notifianApp",

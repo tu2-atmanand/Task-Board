@@ -6485,6 +6485,32 @@
                 "cancelledDate": "",
                 "reminder": ""
             }
+        ],
+        "Temp11.md": [
+            {
+                "id": 3972540372,
+                "status": " ",
+                "title": "This is a first task in the file `Temp11.md` 📅 2025-08-03 ⏫ ⏳ 2025-07-28 🆔 fpyvkz 🏁 delete 🛫 2025-07-28 ➕ 2025-07-27 ",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-07-27",
+                "startDate": "2025-07-28",
+                "scheduledDate": "2025-07-28",
+                "due": "2025-08-03",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 2,
+                "filePath": "Temp11.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 1,
+                    "endCharIndex": 127
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
         ]
     },
     "Completed": {
