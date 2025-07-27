@@ -2,24 +2,39 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TaskProps, taskItem, taskStatuses } from '../interfaces/TaskItem';
+import { taskItem, taskStatuses } from '../interfaces/TaskItem';
 import { checkboxStateSwitcher, extractCheckboxSymbol } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
-import { EditButtonMode } from 'src/interfaces/GlobalSettings';
+import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitle, getUniversalDate, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { parseDueDate } from 'src/utils/TaskItemUtils';
+import { parseUniversalDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItem';
 import { t } from 'src/utils/lang/helper';
 import { bugReporter } from 'src/services/OpenModals';
+import TaskBoard from 'main';
+import { Board } from 'src/interfaces/BoardConfigs';
+
+export interface TaskProps {
+	key: number;
+	plugin: TaskBoard;
+	taskKey: number;
+	task: taskItem;
+	activeBoardSettings: Board;
+	columnIndex?: number;
+}
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(false);
-	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // State to track description visibility
+	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
+
+	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false
+
 
 	let universalDate = getUniversalDate(task, plugin);
 	useEffect(() => {
@@ -37,7 +52,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
-		// Initialize KanbanView Component on mount
+		// Initialize TaskBoardView Component on mount
 		componentRef.current = plugin.view;
 	}, []);
 
@@ -48,7 +63,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement && task.title !== "") {
-				const cleanedTitle = cleanTaskTitle(plugin, task);
+				let cleanedTitle = cleanTaskTitle(plugin, task);
+				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				if (searchQuery) {
+					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+					const regex = new RegExp(`(${escapedQuery})`, "gi");
+					cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
+				}
+
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
 				MarkdownUIRenderer.renderTaskDisc(
@@ -66,15 +88,23 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
+		const allSubTasks = task.body.filter(line => /-\s\[.\s*\]/.test(line));
 		// Render subtasks after componentRef is initialized
-		task.body.forEach((subtaskText, index) => {
+		allSubTasks.forEach((subtaskText, index) => {
 			const uniqueKey = `${task.id}-${index}`;
 			const element = subtaskTextRefs.current[uniqueKey];
-			const strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+			let strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
 
 			if (element && strippedSubtaskText !== "") {
 				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 				element.empty(); // Clear previous content
+
+				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				if (searchQuery) {
+					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+					const regex = new RegExp(`(${escapedQuery})`, "gi");
+					strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
+				}
 
 				MarkdownUIRenderer.renderSubtaskText(
 					plugin.app,
@@ -95,12 +125,19 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const renderTaskDescriptionWithObsidianAPI = async () => {
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		const descriptionContent = task.body
+		let descriptionContent = task.body
 			.filter((line) => !line.trim().startsWith("- [ ]") && !line.trim().startsWith("- [x]"))
 			.join("\n")
 			.trim();
 
 		if (descElement && descriptionContent !== "") {
+			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			if (searchQuery) {
+				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				const regex = new RegExp(`(${escapedQuery})`, "gi");
+				descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
+			}
+
 			// Clear existing content
 			descElement.empty();
 			// Use Obsidian's rendering API
@@ -138,11 +175,20 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
+	const renderDescriptionByDefault = async () => {
+		if (showDescriptionSection) {
+			await renderTaskDescriptionWithObsidianAPI();
+			return true;
+		} else {
+			return false;
+		}
+	};
+
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
-		const taskDueDate = parseDueDate(universalDate) || new Date(universalDate);
+		const taskUniversalDate = parseUniversalDate(universalDate) || new Date(universalDate);
 
-		if (taskDueDate.toDateString() === today.toDateString()) {
+		if (taskUniversalDate.toDateString() === today.toDateString()) {
 			if (task.time) {
 				const [startStr, endStr] = task.time.split(' - ');
 				const [startHours, startMinutes] = startStr.split(':').map(Number);
@@ -166,9 +212,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			} else {
 				return 'var(--color-yellow)'; // Due today but no time info
 			}
-		} else if (taskDueDate > today) {
-			return 'var(--color-green)'; // Due in future
-		} else if (taskDueDate < today) {
+		} else if (taskUniversalDate > today) {
+			return 'green'; // Due in future
+		} else if (taskUniversalDate < today) {
 			return 'var(--color-red)'; // Past due
 		} else {
 			return 'grey'; // No due date
@@ -237,9 +283,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	}
 
 	// Function to handle the checkbox toggle inside the task body
-	const handleSubtaskCheckboxChange = (index: number, isCompleted: boolean) => {
+	const handleSubtaskCheckboxChange = (subTaskLine: string, isCompleted: boolean) => {
+		console.log("handleSubtaskCheckboxChange : subTaskLine :", subTaskLine);
 		const updatedBody = task.body.map((line, idx) => {
-			if (idx === index) {
+			if (line === subTaskLine) {
 				// Toggle the checkbox status only for the specific line
 
 				const symbol = extractCheckboxSymbol(line);
@@ -253,7 +300,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 		// onSubTasksChange(updatedTask); // Notify parent of the change
-		handleSubTasksChange(plugin, updatedTask)
+		handleSubTasksChange(plugin, task, updatedTask)
 	};
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
@@ -280,10 +327,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemHeader">
 							<div className="taskItemHeaderLeft">
-								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
-
-								{/* Render tags individually */}
+								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>								{/* Render tags individually */}
 								<div className="taskItemTags">
+									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
 										const tagName = tag.replace('#', '');
 										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
@@ -291,14 +337,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
-										// If showColumnTags is false and column type is namedTag, skip the column's tag
-										const column = activeBoardSettings.columns[columnIndex - 1];
+										// If columnIndex is defined, proceed to get the column
+										const column = columnIndex !== undefined ? activeBoardSettings.columns[columnIndex - 1] : undefined;
 										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
 											return null;
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters?.at(0) != null && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
+										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters && activeBoardSettings.filters.length > 0 && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
 											return null;
 										}
 
@@ -313,6 +359,21 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 													border: `1px solid ${borderColor}`,
 													backgroundColor: backgroundColor
 												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+
+									{/* Render frontmatter tags (read-only) */}
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+										const tagKey = `${task.id}-fm-${tag}`;
+										// Render frontmatter tags with different styling
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTagFrontmatter"
+												title="Tag from note frontmatter (read-only)"
 											>
 												{tag}
 											</div>
@@ -337,12 +398,46 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// Render sub-tasks and remaining body separately
 	const renderSubTasks = () => {
 		try {
-			if (task.body.length > 0) {
-				return (
-					<>
-						{task.body.map((line, index) => {
-							const isSubTask = line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]');
-							if (!isSubTask) return;
+			const body = task.body ?? [];
+			if (body.length === 0) return null;
+
+			const allSubTasks = body.filter(line => /-\s\[.\s*\]/.test(line));
+
+			const total = allSubTasks.length;
+			const completed = allSubTasks.filter(line => /-\s\[(x|X)\]\s+/i.test(line)).length;
+
+			const showSubTaskSummaryBar = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
+
+			return (
+				<>
+					{showSubTaskSummaryBar && total > 0 && (
+						<div className="subtask-summary-container">
+							{/* Progress bar */}
+							<div className="subtask-progress-bar-wrapper">
+								<div className="subtask-progress-bar-bg">
+									<div
+										className="subtask-progress-bar-fill"
+										style={{
+											width: `${(completed / total) * 100}%`,
+										}}
+									/>
+								</div>
+								<span className="subtask-progress-count">
+									[{completed}/{total}]
+								</span>
+
+								{/* Expand/collapse toggle */}
+								<span
+									className={`subtask-toggle-icon ${showSubtasks ? 'rotated' : ''}`}
+									onClick={() => setShowSubtasks((prev) => !prev)}
+								>
+									▼
+								</span>
+							</div>
+						</div>
+					)}
+					<div className={showSubtasks ? 'taskItemBodySubtaskSection-show' : 'taskItemBodySubtaskSection-hide'}>
+						{allSubTasks.map((line, index) => {
 							// console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
 							const isCompleted = line.trim().startsWith('- [x]') || line.trim().startsWith('- [X]');
 
@@ -353,7 +448,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							// Create a unique key for this subtask based on task.id and index
 							const uniqueKey = `${task.id}-${index}`;
 
-							return isSubTask ? (
+							return (
 								<div
 									className="taskItemBodySubtaskItem"
 									key={uniqueKey}
@@ -364,26 +459,77 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										type="checkbox"
 										className="taskItemBodySubtaskItemCheckbox"
 										checked={isCompleted}
-										onChange={() => handleSubtaskCheckboxChange(index, isCompleted)}
+										onChange={() => handleSubtaskCheckboxChange(line, isCompleted)}
 									/>
 									{/* Render each subtask separately */}
 									<div
 										className={isCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
-										ref={(el) => (subtaskTextRefs.current[uniqueKey] = el)} // Assign unique ref to each subtask
+										ref={(el) => { subtaskTextRefs.current[uniqueKey] = el; }}
 									/>
 								</div>
-							) : null;
+							);
 						})}
-					</>
-				);
-			} else {
-				return null;
-			}
+					</div>
+				</>
+			);
+
 		} catch (error) {
 			bugReporter(plugin, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
 			return null;
 		}
 	};
+
+	const renderDescriptionSection = useMemo(() => {
+		const uniqueKey = `${task.id}-desc`;
+		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+		let descriptionContent = task.body
+			.filter((line) => !line.trim().startsWith("- [ ]") && !line.trim().startsWith("- [x]"))
+			.join("\n")
+			.trim();
+
+		if (!descriptionContent) return null; // If no description content, return null
+
+		if (descElement) {
+			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			if (searchQuery) {
+				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				const regex = new RegExp(`(${escapedQuery})`, "gi");
+				descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
+			}
+
+			// Clear existing content
+			descElement.empty();
+			// Use Obsidian's rendering API
+			MarkdownUIRenderer.renderTaskDisc(
+				plugin.app,
+				descriptionContent,
+				descElement,
+				task.filePath,
+				componentRef.current
+			);
+			// Attach event handlers
+			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, descElement, task.filePath, task.filePath);
+		}
+
+		if (showDescriptionSection) {
+			return (
+				<div className="taskItemBodyDescriptionSection">
+					<div
+						className={`taskItemBodyDescription${isDescriptionExpanded ? '' : '-collapsed'}`}
+						ref={descriptionRef}
+					>
+						<div
+							className='taskItemBodyDescriptionRenderer'
+							ref={(el) => { taskItemBodyDescriptionRef.current[`${task.id}-desc`] = el; }}
+						/>
+					</div>
+				</div>
+			);
+		} else {
+			return null;
+		}
+	}, [showDescriptionSection, isDescriptionExpanded, task.body]);
+
 
 	// Render Footer based on the settings
 	const renderFooter = () => {
@@ -437,7 +583,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
-	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body, showSubtasks]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (
@@ -463,13 +609,18 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							onChange={handleMainCheckBoxClick}
 						/>
 						<div className="taskItemBodyContent">
-							<div className="taskItemTitle" ref={(titleEL) => taskTitleRendererRef.current[taskIdKey] = titleEL} />
+							<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
 							<div className="taskItemBody">
 								{memoizedRenderSubTasks}
 							</div>
 						</div>
 					</div>
-					<div className="taskItemMainBodyDescription">
+					{showDescriptionSection && (
+						<div className='taskItemMainBodyDescriptionSectionVisible'>
+							{renderDescriptionSection}
+						</div>
+					)}
+					{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
 						{task.body.at(0) !== "" && task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
 							<div
 								className='taskItemMainBodyDescriptionSectionToggler'
@@ -495,7 +646,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								></div>
 							</div>
 						</div>
-					</div>
+					</div>)}
 				</div>
 				{renderFooter()}
 			</div>

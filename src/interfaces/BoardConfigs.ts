@@ -7,6 +7,7 @@ export type ColumnData = {
 	collapsed?: boolean;
 	name: string;
 	coltag?: string;
+	filePaths?: string;
 	datedBasedColumn?: {
 		dateType: string; // e.g., "due", "created", "scheduled"
 		from: number;
@@ -25,12 +26,12 @@ export type Board = {
 	name: string;
 	index: number;
 	columns: ColumnData[];
-	filters?: string[];
-	filterPolarity?: string;
-	filterScope?: string;
-	hideEmptyColumns?: boolean;
-	showColumnTags?: boolean;
-	showFilteredTags?: boolean;
+	hideEmptyColumns: boolean;
+	filters: string[];
+	filterPolarity: string;
+	filterScope: string;
+	showColumnTags: boolean;
+	showFilteredTags: boolean;
 };
 
 export type BoardConfigs = Board[];
@@ -43,6 +44,6 @@ export const columnTypeAndNameMapping: { [key: string]: string } = {
 	otherTags: "Other Tags",
 	taskStatus: "Status",
 	taskPriority: "Priority",
-	notePath: "Folder",
+	pathFiltered: "Path filtered",
 	completed: "Completed",
 };

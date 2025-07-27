@@ -1,8 +1,8 @@
 // /src/utils/RealTimeScanning.ts
 
-import { App, TFile } from "obsidian";
+import { App, TFile, getFrontMatterInfo } from "obsidian";
 
-import { ScanningVault } from "src/utils/ScanningVault";
+import type ScanningVault from "src/utils/ScanningVault";
 import type TaskBoard from "main";
 import { scanFilterForFilesNFolders } from "./FiltersVerifier";
 import { bugReporter } from "src/services/OpenModals";
@@ -13,19 +13,17 @@ export class RealTimeScanning {
 	taskBoardFileStack: string[] = [];
 	scanningVault: ScanningVault;
 
-	constructor(app: App, plugin: TaskBoard) {
+	constructor(app: App, plugin: TaskBoard, scanningVault: ScanningVault) {
 		this.app = app;
 		this.plugin = plugin;
-		this.scanningVault = new ScanningVault(app, plugin);
+		this.scanningVault = scanningVault;
 	}
 
-	async initializeStack(realTimeScanning: boolean) {
-		if (realTimeScanning) return;
+	async initializeStack() {
 		try {
 			const storedStack = localStorage.getItem("taskBoardFileStack");
 			if (storedStack) {
 				this.taskBoardFileStack = JSON.parse(storedStack);
-			} else {
 			}
 			// this.startScanTimer();
 		} catch (error) {
@@ -33,7 +31,7 @@ export class RealTimeScanning {
 		}
 	}
 
-	async saveStack() {
+	saveStack() {
 		try {
 			localStorage.setItem(
 				"taskBoardFileStack",
@@ -49,55 +47,40 @@ export class RealTimeScanning {
 		}
 	}
 
-	async processStack() {
+	async processAllUpdatedFiles(currentFile?: TFile | null) {
 		const filesToProcess = this.taskBoardFileStack.slice();
 		this.taskBoardFileStack = [];
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
 			.filter((file) => !!file);
 
-		if (files.length > 0) {
+		if (currentFile) {
+			// If a current file is provided, ensure it's included in the processing
+			const currentFilePath = currentFile.path;
+			if (!filesToProcess.includes(currentFilePath)) {
+				filesToProcess.push(currentFilePath);
+				files.push(currentFile);
+			}
+		}
+		if (filesToProcess.length > 0) {
 			// Send all files for scanning and updating tasks
-			await this.scanningVault.updateTasksFromFiles(files);
+			await this.scanningVault.refreshTasksFromFiles(files);
 		}
 		// Save updated stack (which should now be empty)
-		await this.saveStack();
+		this.saveStack();
 	}
 
 	getFileFromPath(filePath: string): TFile | null {
 		return this.plugin.app.vault.getFileByPath(filePath);
 	}
 
-	async onFileChange(
-		file: TFile,
-		realTimeScanning: boolean,
-		scanFilters: any
-	) {
-		// If both checks pass, proceed with the scanning logic
-		if (scanFilterForFilesNFolders(file, scanFilters)) {
-			// If real-time scanning is enabled, scan the file immediately
-			if (realTimeScanning) {
-				this.scanningVault.updateTasksFromFiles([file]);
-			} else {
-				// If the file is already in the stack, ignore it
-				if (this.taskBoardFileStack.at(0) === undefined) {
-					this.taskBoardFileStack.push(file.path); // Add the file to the stack
-					await this.saveStack(); // Save the updated stack
-				} else if (!this.taskBoardFileStack.includes(file.path)) {
-					this.taskBoardFileStack.push(file.path);
-					await this.saveStack(); // Save the updated stack
-				} else {
-					// console.log(
-					// 	"The file already exists in taskBoardFileStack:",
-					// 	file.path
-					// );
-				}
-			}
-		} else {
-			// console.log(
-			// 	"The file is not allowed for Scanning : ",
-			// 	file.path
-			// );
+	onFileModified(file: TFile) {
+		if (
+			this.taskBoardFileStack.at(0) === undefined ||
+			!this.taskBoardFileStack.includes(file.path)
+		) {
+			this.taskBoardFileStack.push(file.path); // Add the file to the stack
+			this.saveStack(); // Save the updated stack
 		}
 	}
 }

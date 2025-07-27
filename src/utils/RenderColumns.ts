@@ -7,6 +7,13 @@ import { moment as _moment } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 
+// Function to get all tags from a task (both line tags and frontmatter tags)
+const getAllTaskTags = (task: taskItem): string[] => {
+	const lineTags = task.tags || [];
+	const frontmatterTags = task.frontmatterTags || [];
+	return [...lineTags, ...frontmatterTags];
+};
+
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
 	plugin: TaskBoard,
@@ -21,7 +28,24 @@ export const renderColumns = (
 	const completedTasks = allTasks.Completed;
 
 	if (columnData.colType === "undated") {
-		tasksToDisplay = pendingTasks.filter((task) => !task.due);
+		tasksToDisplay = pendingTasks.filter((task) => {
+			if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.dueDate
+			) {
+				return !task.due;
+			} else if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.startDate
+			) {
+				return !task.startDate;
+			} else if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.scheduledDate
+			) {
+				return !task.scheduledDate;
+			}
+		});
 	} else if (columnData.colType === "dated") {
 		const { dateType, from, to } = columnData.datedBasedColumn || {
 			dateType: "due",
@@ -121,11 +145,44 @@ export const renderColumns = (
 			return diffDays >= from && diffDays <= to;
 		});
 	} else if (columnData.colType === "untagged") {
-		tasksToDisplay = pendingTasks.filter((task) => !(task.tags.length > 0));
+		tasksToDisplay = pendingTasks.filter(
+			(task) => getAllTaskTags(task).length === 0
+		);
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) =>
-			task.tags.some((tag) => tag === `#${columnData.coltag}`)
+			getAllTaskTags(task).some(
+				(tag) =>
+					tag.replace(`#`, "") ===
+					columnData.coltag?.replace(`#`, "").toLowerCase()
+			)
 		);
+	} else if (columnData.colType === "pathFiltered") {
+		// Filter tasks based on their file path
+		if (columnData.filePaths) {
+			// Split the path patterns by comma and trim whitespace
+			const pathPatterns = columnData.filePaths
+				.split(",")
+				.map((pattern: string) => pattern.trim().toLowerCase())
+				.filter((pattern: string) => pattern.length > 0);
+
+			if (pathPatterns.length > 0) {
+				tasksToDisplay = pendingTasks.filter((task) => {
+					if (!task.filePath) {
+						return false;
+					}
+
+					const lowerCasePath = task.filePath.toLowerCase();
+					const matchedPattern = pathPatterns.some(
+						(pattern: string) => pattern === lowerCasePath
+					);
+					return matchedPattern;
+				});
+			} else {
+				tasksToDisplay = [];
+			}
+		} else {
+			tasksToDisplay = [];
+		}
 	} else if (columnData.colType === "otherTags") {
 		// 1. Get the current board based on activeBoard index
 		const currentBoard = plugin.settings.data.boardConfigs.find(
@@ -136,14 +193,14 @@ export const renderColumns = (
 		const namedTags =
 			currentBoard?.columns
 				.filter((col) => col.colType === "namedTag" && col.coltag)
-				.map((col) => col.coltag?.toLowerCase()) || [];
-
+				.map((col) => col.coltag?.toLowerCase().replace(`#`, "")) || [];
 		// 3. Now filter tasks
 		tasksToDisplay = pendingTasks.filter((task) => {
-			if (!task.tags || task.tags.length === 0) return false;
+			const allTaskTags = getAllTaskTags(task);
+			if (allTaskTags.length === 0) return false;
 
 			// Check if none of the task's tags are in the namedTags list
-			return task.tags.every(
+			return allTaskTags.every(
 				(tag) => !namedTags.includes(tag.replace("#", "").toLowerCase())
 			);
 		});
@@ -153,7 +210,7 @@ export const renderColumns = (
 			activeBoard
 		]?.columns.findIndex((column) => column.colType === "completed");
 		const tasksLimit =
-			boardConfigs[activeBoard]?.columns[completedColumnIndex].limit;
+			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
 
 		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
 			if (a.completion && b.completion) {

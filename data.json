@@ -5,14 +5,6 @@
       {
         "columns": [
           {
-            "id": 3491,
-            "colType": "undated",
-            "active": true,
-            "collapsed": false,
-            "name": "Undated Tasks",
-            "index": 1
-          },
-          {
             "id": 3494,
             "colType": "dated",
             "active": true,
@@ -21,7 +13,8 @@
             "index": 2,
             "datedBasedColumn": {
               "from": 0,
-              "to": 0
+              "to": 0,
+              "dateType": "due"
             }
           },
           {
@@ -33,19 +26,7 @@
             "index": 3,
             "datedBasedColumn": {
               "from": -300,
-              "to": -1
-            }
-          },
-          {
-            "id": 3495,
-            "colType": "dated",
-            "active": true,
-            "collapsed": false,
-            "name": "Future",
-            "index": 4,
-            "datedBasedColumn": {
-              "from": 2,
-              "to": 300,
+              "to": -1,
               "dateType": "due"
             }
           },
@@ -55,7 +36,7 @@
             "active": true,
             "collapsed": false,
             "name": "Tomorrow",
-            "index": 5,
+            "index": 4,
             "datedBasedColumn": {
               "from": 1,
               "to": 1,
@@ -63,31 +44,17 @@
             }
           },
           {
-            "id": 4988,
-            "colType": "namedTag",
+            "id": 3495,
+            "colType": "dated",
             "active": true,
             "collapsed": false,
-            "name": "Bug",
-            "index": 6,
-            "coltag": "bug"
-          },
-          {
-            "id": 5794,
-            "index": 7,
-            "colType": "taskStatus",
-            "active": true,
-            "collapsed": false,
-            "name": "In Progress",
-            "taskStatus": "/"
-          },
-          {
-            "id": 9075,
-            "index": 8,
-            "colType": "taskPriority",
-            "active": true,
-            "collapsed": false,
-            "name": "Highest Priority",
-            "taskPriority": 1
+            "name": "Future",
+            "index": 5,
+            "datedBasedColumn": {
+              "from": 2,
+              "to": 300,
+              "dateType": "due"
+            }
           },
           {
             "id": 3497,
@@ -96,7 +63,55 @@
             "collapsed": false,
             "limit": 20,
             "name": "Completed, updated",
-            "index": 9
+            "index": 6
+          },
+          {
+            "id": 4257554450,
+            "index": 7,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "DailyNotes.md",
+            "filePaths": "DailyNotes.md"
+          },
+          {
+            "id": 3915909247,
+            "index": 8,
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Scheduled date not present",
+            "datedBasedColumn": {
+              "from": 0,
+              "to": 0,
+              "dateType": "scheduledDate"
+            }
+          },
+          {
+            "id": 914859504,
+            "index": 8,
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Start date not present",
+            "datedBasedColumn": {
+              "from": 0,
+              "to": 0,
+              "dateType": "startDate"
+            }
+          },
+          {
+            "id": 316737073,
+            "index": 9,
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Due not present",
+            "datedBasedColumn": {
+              "from": 0,
+              "to": 0,
+              "dateType": "due"
+            }
           }
         ],
         "filters": [
@@ -107,7 +122,7 @@
         "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Time based workflow",
-        "index": 1,
+        "index": 0,
         "showColumnTags": true,
         "showFilteredTags": false,
         "hideEmptyColumns": false
@@ -115,12 +130,20 @@
       {
         "columns": [
           {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "index": 1,
+            "id": 226119
+          },
+          {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Can be implemented",
-            "index": 1,
-            "coltag": "pending",
+            "index": 2,
+            "coltag": "#pending",
             "id": 47626
           },
           {
@@ -128,17 +151,9 @@
             "active": true,
             "collapsed": false,
             "name": "In Progress",
-            "index": 2,
+            "index": 3,
             "coltag": "working",
             "id": 908753
-          },
-          {
-            "colType": "untagged",
-            "active": true,
-            "collapsed": false,
-            "name": "Backlogs",
-            "index": 3,
-            "id": 226119
           },
           {
             "colType": "namedTag",
@@ -157,23 +172,6 @@
             "index": 5,
             "coltag": "done",
             "id": 328227
-          },
-          {
-            "colType": "otherTags",
-            "active": true,
-            "collapsed": false,
-            "name": "All other tags",
-            "index": 6,
-            "id": 272793
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "name": "A Tasks, update",
-            "index": 7,
-            "coltag": "A",
-            "id": 710408
           }
         ],
         "filters": [
@@ -183,14 +181,14 @@
         "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Tag based board",
-        "index": 2,
+        "index": 1,
         "showColumnTags": true,
         "showFilteredTags": true,
         "hideEmptyColumns": false
       },
       {
         "name": "Third board",
-        "index": 3,
+        "index": 2,
         "columns": [
           {
             "colType": "undated",
@@ -255,12 +253,18 @@
       "scanFilters": {
         "files": {
           "polarity": 3,
-          "values": []
+          "values": [
+            "TODO.md",
+            "0-ImportantData.md",
+            "2025-05-23.md"
+          ]
         },
         "folders": {
           "polarity": 3,
           "values": [
-            "/"
+            "Daily_Notes",
+            "obsidian-hub-0.2.1/00 - Contribute to the Obsidian Hub",
+            "obsidian-hub-0.2.1/04 - Guides, Workflows, & Courses"
           ]
         },
         "tags": {
@@ -313,6 +317,11 @@
         {
           "name": "pending",
           "color": "#955cff",
+          "priority": 7
+        },
+        {
+          "name": "done",
+          "color": "rgba(6, 255, 173, 1)",
           "priority": 7
         }
       ],
@@ -645,21 +654,34 @@
         }
       ],
       "showTaskWithoutMetadata": true,
-      "tagColorsType": "text",
+      "tagColorsType": "background",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": false,
-        "quickAddPlugin": true
+        "quickAddPlugin": false
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
-      "quickAddPluginDefaultChoice": "DocsForPlugin/ArchivedTasks.md",
+      "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
       "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
       "universalDate": "due",
-      "archivedTasksFilePath": "DocsForPlugin/ArchivedTasks.md",
-      "showFileNameInCard": false
+      "archivedTasksFilePath": "",
+      "showFileNameInCard": false,
+      "showFrontmatterTagsOnCards": true,
+      "tasksCacheFilePath": "",
+      "notificationService": "notifianApp",
+      "frontmatterPropertyForReminder": "remind at",
+      "actions": [
+        {
+          "enabled": true,
+          "trigger": "Complete",
+          "type": "move",
+          "targetColumn": "6"
+        }
+      ],
+      "cardSectionsVisibility": "hideBoth"
     }
   }
 }

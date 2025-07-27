@@ -19,7 +19,7 @@ interface TasksApiV1 {
      * @returns {Promise<string>} A promise that contains the Markdown string for the task entered or
      * an empty string, if data entry was cancelled.
      */
-    createTaskLineModal(): Promise<string>;
+    createTaskLineModal(): Promise<string | null | undefined>;
 
     /**
      * Executes the 'Tasks: Toggle task done' command on the supplied line string
@@ -29,34 +29,32 @@ interface TasksApiV1 {
      * @returns The updated line string, which will contain two lines
      *          if a recurring task was completed.
      */
-    executeToggleTaskDoneCommand(line: string, path: string): string;
+    executeToggleTaskDoneCommand(line: string, path: string): string | undefined;
 }
 
 export class TasksApi implements TasksApiV1 {
-    private readonly apiV1: TasksApiV1;
+    private readonly apiV1: TasksApiV1 | null;
 
-    public constructor(plugin?: Plugin) {
-        // @ts-expect-error - official guidance for accessing the plugin, see:
-        // https://publish.obsidian.md/tasks/Advanced/Tasks+Api
-        const apiV1 = plugin?.app?.plugins?.plugins?.["obsidian-tasks-plugin"].apiV1 as TasksApiV1;
-        if (!apiV1) {
-            // throw new Error("obsidian-tasks-plugin must be installed");
-			console.log("obsidian-tasks-plugin must be installed");
-			new Notice("You are trying to use features for which Tasks plugin must be installed");
-        }
-        this.apiV1 = apiV1;
-    }
+	public constructor(plugin?: Plugin) {
+		// @ts-expect-error - official guidance for accessing the plugin, see:
+		// https://publish.obsidian.md/tasks/Advanced/Tasks+Api
+		const apiV1 = plugin?.app?.plugins?.plugins?.["obsidian-tasks-plugin"]?.apiV1 as TasksApiV1 | null;
+		if (!apiV1) {
+			// throw new Error("obsidian-tasks-plugin must be installed");
+		}
+		this.apiV1 = apiV1;
+	}
 
 	public isTasksPluginEnabled() {
 		return !!this.apiV1;
 	}
 
-    public async createTaskLineModal(): Promise<string> {
-        return this.apiV1.createTaskLineModal();
+    public async createTaskLineModal(): Promise<string | null | undefined> {
+        return this.apiV1?.createTaskLineModal();
     }
 
-    public executeToggleTaskDoneCommand(line: string, path: string): string {
-        return this.apiV1.executeToggleTaskDoneCommand(line, path);
+    public executeToggleTaskDoneCommand(line: string, path: string): string | undefined {
+        return this.apiV1?.executeToggleTaskDoneCommand(line, path);
     }
 }
 

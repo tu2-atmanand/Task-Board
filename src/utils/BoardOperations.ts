@@ -20,5 +20,5 @@ export const handleUpdateBoards = async (
 ) => {
 	setBoards(updatedBoards);
 	saveBoardsData(plugin, updatedBoards);
-	// await refreshBoardData(setBoards, () => {}); // this wont work anymore, use some different way to refresh the whole shit, maybe load the everything again from KanbanView.tsx.
+	// await refreshBoardData(setBoards, () => {}); // this wont work anymore, use some different way to refresh the whole shit, maybe load the everything again from TaskBoardView.tsx.
 };

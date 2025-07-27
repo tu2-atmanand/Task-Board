@@ -13,38 +13,40 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
-	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
-	bugReporter,
 	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openScanVaultModal,
 } from "src/services/OpenModals";
 
-import { KanbanView } from "./src/views/KanbanView";
+import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
-import { ScanningVault } from "src/utils/ScanningVault";
+import ScanningVault from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
-import { t } from "src/utils/lang/helper";
+import {
+	clearCachedTranslations,
+	loadTranslationsOnStartup,
+	t,
+} from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
 
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
-	view: KanbanView | null;
+	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
-	currentModifiedFile: TFile | null;
-	fileUpdatedUsingModal: string;
-	IsTasksJsonChanged: boolean;
+	// currentModifiedFile: TFile | null;
+	// fileUpdatedUsingModal: string;
+	IstasksJsonDataChanged: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
@@ -55,11 +57,15 @@ export default class TaskBoard extends Plugin {
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
+		this.realTimeScanning = new RealTimeScanning(
+			this.app,
+			this.plugin,
+			this.scanningVault
+		);
 		this.editorModified = false;
-		this.currentModifiedFile = null;
-		this.fileUpdatedUsingModal = "";
-		this.IsTasksJsonChanged = false;
+		// this.currentModifiedFile = null;
+		// this.fileUpdatedUsingModal = "";
+		this.IstasksJsonDataChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
 	}
@@ -79,7 +85,11 @@ export default class TaskBoard extends Plugin {
 		this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
-		this.getLanguage();
+		// this.getLanguage();
+
+		await loadTranslationsOnStartup(this);
+
+		await this.scanningVault.initializeTasksCache();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -109,6 +119,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
+		clearCachedTranslations();
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
@@ -208,28 +219,26 @@ export default class TaskBoard extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	getLanguage() {
-		const obsidianLang = window.localStorage.getItem("language");
+	// getLanguage() {
+	// 	const obsidianLang = window.localStorage.getItem("language");
 
-		if (obsidianLang && obsidianLang in langCodes) {
-			localStorage.setItem("taskBoardLang", obsidianLang);
-			this.settings.data.globalSettings.lang = obsidianLang;
-			this.saveSettings();
-		} else {
-			localStorage.setItem(
-				"taskBoardLang",
-				// this.settings.data.globalSettings.lang
-				"en"
-			);
-		}
-	}
+	// 	if (obsidianLang && obsidianLang in langCodes) {
+	// 		localStorage.setItem("taskBoardLang", obsidianLang);
+	// 		this.settings.data.globalSettings.lang = obsidianLang;
+	// 		this.saveSettings();
+	// 	} else {
+	// 		localStorage.setItem(
+	// 			"taskBoardLang",
+	// 			// this.settings.data.globalSettings.lang
+	// 			"en"
+	// 		);
+	// 	}
+	// }
 
 	createLocalStorageAndScanModifiedFiles() {
-		// Following line will create a localStorage if the realTimeScanning setting is FALSE. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
-		this.realTimeScanning.initializeStack(
-			this.settings.data.globalSettings.realTimeScanning
-		);
-		this.realTimeScanning.processStack();
+		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
+		this.realTimeScanning.initializeStack();
+		this.realTimeScanning.processAllUpdatedFiles();
 	}
 
 	scanVaultAtStartup() {
@@ -240,7 +249,7 @@ export default class TaskBoard extends Plugin {
 
 	registerTaskBoardView() {
 		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
-			this.view = new KanbanView(this, leaf);
+			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
 	}
@@ -314,7 +323,7 @@ export default class TaskBoard extends Plugin {
 		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
-		// 		writeTasksJsonToDisk(this.plugin);
+		// 		writeJsonCacheDataFromDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
@@ -338,15 +347,17 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				if (
 					file.path ===
-					this.settings.data.globalSettings.archivedTasksFilePath
+						this.settings.data.globalSettings
+							.archivedTasksFilePath ||
+					file.path.endsWith(".excalidraw.md")
 				) {
 					return false;
 				}
-				this.editorModified = true;
+
 				if (file instanceof TFile) {
-					if (!file.path.endsWith(".excalidraw.md")) {
-						this.currentModifiedFile = file;
-					}
+					// 	this.taskBoardFileStack.push(file.path);
+					this.realTimeScanning.onFileModified(file);
+					this.editorModified = true;
 				}
 			})
 		);
@@ -399,7 +410,7 @@ export default class TaskBoard extends Plugin {
 				const fileIsFile = file instanceof TFile;
 				const fileIsFolder = file instanceof TFolder;
 				// const leafIsMarkdown = leaf?.view instanceof MarkdownView;
-				// const leafIsKanban = leaf?.view instanceof KanbanView;
+				// const leafIsKanban = leaf?.view instanceof TaskBoardView;
 
 				// if (leafIsKanban || source === "pane-more-options") {
 				// 	console.log("MENU : If the fileIsFile ");
@@ -419,8 +430,9 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.scanningVault.updateTasksFromFiles([file]);
-								this.scanningVault.saveTasksToFile();
+								this.scanningVault.refreshTasksFromFiles([
+									file,
+								]);
 							});
 					});
 					if (
@@ -548,7 +560,7 @@ export default class TaskBoard extends Plugin {
 		// this.registerEvent(
 		// 	this.app.workspace.on("editor-menu", (menu, editor, view) => {
 		// 		// const leafIsMarkdown = view instanceof MarkdownView;
-		// 		const leafIsKanban = view instanceof KanbanView;
+		// 		const leafIsKanban = view instanceof TaskBoardView;
 
 		// 		if (leafIsKanban) {
 		// 			console.log("MENU : If the fileIsFile ");
@@ -566,16 +578,17 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onFileModifiedAndLostFocus() {
-		if (this.editorModified && this.currentModifiedFile) {
-			if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
-				await this.realTimeScanning.onFileChange(
-					this.currentModifiedFile,
-					this.settings.data.globalSettings.realTimeScanning,
-					this.settings.data.globalSettings.scanFilters
-				);
-			} else {
-				this.fileUpdatedUsingModal = "";
-			}
+		if (this.editorModified) {
+			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
+			// 	await this.realTimeScanning.onFileModified(
+			// 		this.currentModifiedFile,
+			// 		this.settings.data.globalSettings.realTimeScanning
+			// 	);
+			// } else {
+			// 	this.fileUpdatedUsingModal = "";
+			// }
+
+			await this.realTimeScanning.processAllUpdatedFiles();
 
 			// Reset the editorModified flag after the scan.
 			this.editorModified = false;

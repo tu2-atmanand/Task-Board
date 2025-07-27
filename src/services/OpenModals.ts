@@ -1,11 +1,7 @@
 // src/services/OpenModals.ts
 
 import { App, Notice, TFile } from "obsidian";
-import { addTaskInNote, addTaskInJson } from "src/utils/TaskItemUtils";
-import {
-	scanFilterForFilesNFolders,
-	scanFilterForTags,
-} from "src/utils/FiltersVerifier";
+import { addTaskInNote } from "src/utils/TaskItemUtils";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { Board } from "../interfaces/BoardConfigs";
@@ -15,8 +11,11 @@ import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
-import { taskContentFormatter } from "src/utils/TaskContentFormatter";
+import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
+import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
+import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
+import { ScanFilterModal } from "src/modal/ScanFilterModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -25,12 +24,7 @@ export const openBoardConfigModal = (
 	activeBoardIndex: number,
 	onSave: (updatedBoards: Board[]) => void
 ) => {
-	new BoardConfigureModal(
-		plugin,
-		boards,
-		activeBoardIndex,
-		onSave
-	).open();
+	new BoardConfigureModal(plugin, boards, activeBoardIndex, onSave).open();
 };
 
 // Function to open the BoardConfigModal
@@ -49,14 +43,21 @@ export const openAddNewTaskInCurrentFileModal = (
 		app,
 		plugin,
 		(newTask, quickAddPluginChoice) => {
-			addTaskInNote(app, plugin, newTask, true, cursorPosition);
-			if (
-				activeFile &&
-				scanFilterForFilesNFolders(activeFile, scanFilters) &&
-				scanFilterForTags(newTask.tags, scanFilters)
-			) {
-				addTaskInJson(plugin, newTask);
-			}
+			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
+				const currentFile = plugin.app.vault.getFileByPath(
+					newTask.filePath
+				);
+				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+			});
+
+			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
+			// if (
+			// 	activeFile &&
+			// 	scanFilterForFilesNFolders(activeFile, scanFilters) &&
+			// 	scanFilterForTags(newTask.tags, scanFilters)
+			// ) {
+			// 	addTaskInJson(plugin, newTask);
+			// }
 
 			eventEmitter.emit("REFRESH_COLUMN");
 			cursorPosition = undefined;
@@ -88,7 +89,7 @@ export const openAddNewTaskModal = (
 		async (newTask, quickAddPluginChoice) => {
 			if (communityPlugins.isQuickAddPluginEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
-				const completeTask = taskContentFormatter(plugin, newTask);
+				const completeTask = await getFormattedTaskContent(newTask);
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
 					quickAddPluginChoice,
 					{
@@ -96,15 +97,22 @@ export const openAddNewTaskModal = (
 					}
 				);
 			} else {
-				addTaskInNote(app, plugin, newTask, false);
+				await addTaskInNote(plugin, newTask, false).then(() => {
+					const currentFile = plugin.app.vault.getFileByPath(
+						newTask.filePath
+					);
+					plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				});
 			}
-			if (
-				activeTFile instanceof TFile &&
-				scanFilterForFilesNFolders(activeTFile, scanFilters) &&
-				scanFilterForTags(newTask.tags, scanFilters)
-			) {
-				addTaskInJson(plugin, newTask);
-			}
+
+			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
+			// if (
+			// 	activeTFile instanceof TFile &&
+			// 	scanFilterForFilesNFolders(activeTFile, scanFilters) &&
+			// 	scanFilterForTags(newTask.tags, scanFilters)
+			// ) {
+			// 	addTaskInJson(plugin, newTask);
+			// }
 
 			eventEmitter.emit("REFRESH_COLUMN");
 		},
@@ -215,4 +223,67 @@ export const bugReporter = (
 	// bugReportNotice.messageEl.onclick = () => {
 	// 	bugReportNotice.hide();
 	// };
+};
+
+export const openDiffContentCompareModal = (
+	plugin: TaskBoard,
+	oldContent: string,
+	newContent: string,
+	onSelect: (which: "old" | "new") => void
+) => {
+	const contentMismatchNotice = new Notice(
+		createFragment((f) => {
+			f.createDiv("bugReportNotice", (el) => {
+				el.createEl("p", {
+					text: `${t("safe-guard")} : ${t(
+						"content-mismatch-notice-message"
+					)}`,
+				});
+				el.createEl("button", {
+					text: t("show-conflicts"),
+					cls: "reportBugButton",
+					onclick: () => {
+						const modal = new DiffContentCompareModal(
+							plugin,
+							oldContent,
+							newContent,
+							onSelect
+						);
+						modal.open();
+						el.hide();
+					},
+				});
+			});
+		}),
+		0
+	);
+
+	contentMismatchNotice.messageEl.onClickEvent((e) => {
+		if (!(e.target instanceof HTMLButtonElement)) {
+			e.stopPropagation();
+			e.preventDefault();
+			e.stopImmediatePropagation();
+		}
+	});
+};
+
+export const openTaskBoardActionsModal = (
+	plugin: TaskBoard,
+	activeBoardIndex: number
+) => {
+	const actionModal = new TaskBoardActionsModal(
+		plugin,
+		plugin.settings.data.boardConfigs[activeBoardIndex].columns
+	);
+	actionModal.open();
+};
+
+export const openScanFiltersModal = (
+	plugin: TaskBoard,
+	filterType: "files" | "folders" | "tags",
+	onSave: (scanFilters: string[]) => void
+) => {
+	new ScanFilterModal(plugin, filterType, async (newValues) => {
+		onSave(newValues);
+	}).open();
 };

@@ -1,22 +1,24 @@
 // /src/modal/BoardConfigModal.tsx
 
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
-import { App, Modal, Notice } from "obsidian";
-import { Board, ColumnData, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
+import { Modal, Notice } from "obsidian";
+import { Board, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import React, { ComponentPropsWithRef, useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
-import { FaAlignCenter, FaAlignJustify, FaTrash } from 'react-icons/fa';
+import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
+import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
+import { priorityOptions } from "src/interfaces/TaskItem";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -51,6 +53,83 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
+	const boardListRef = useRef<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		if (
+			selectedBoardIndex === -1 ||
+			!columnListRef.current ||
+			!localBoards[selectedBoardIndex]
+		)
+			return;
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+				const updatedBoards = [...localBoards];
+				// const columns = updatedBoards[selectedBoardIndex].columns;
+				const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
+				updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
+				updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
+
+				setLocalBoards(updatedBoards);
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedBoardIndex, localBoards]);
+
+	// useEffect for board sorting
+	useEffect(() => {
+		if (!boardListRef.current) return;
+
+		const sortableBoards = Sortable.create(boardListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
+					return;
+				}
+
+				const currentBoards = [...localBoards];
+				const [movedBoard] = currentBoards.splice(evt.oldIndex, 1);
+				currentBoards.splice(evt.newIndex, 0, movedBoard);
+
+				// Update board.index to be the new 0-based array index
+				const finalBoards = currentBoards.map((board, idx) => ({
+					...board,
+					index: idx // 0-based index
+				}));
+
+				setLocalBoards(finalBoards);
+
+				// Update selectedBoardIndex (which is a 0-based array index)
+				if (selectedBoardIndex === evt.oldIndex) {
+					setSelectedBoardIndex(evt.newIndex);
+				} else {
+					// Adjust selectedBoardIndex if an item moved across it
+					if (evt.oldIndex < selectedBoardIndex && evt.newIndex >= selectedBoardIndex) {
+						// Item moved from before selected to at or after selected: selected moves left
+						setSelectedBoardIndex(prevIdx => prevIdx - 1);
+					} else if (evt.oldIndex > selectedBoardIndex && evt.newIndex <= selectedBoardIndex) {
+						// Item moved from after selected to at or before selected: selected moves right
+						setSelectedBoardIndex(prevIdx => prevIdx + 1);
+					}
+				}
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortableBoards.destroy();
+		};
+	}, [localBoards, selectedBoardIndex]);
 
 	// Function to add a new column to the selected board
 	const handleOpenAddColumnModal = () => {
@@ -76,6 +155,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			taskStatus: columnData.taskStatus,
 			taskPriority: columnData.taskPriority,
 			limit: columnData.limit,
+			filePaths: columnData.filePaths,
 		});
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
@@ -99,6 +179,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			name: t("new-board"),
 			index: localBoards.length + 1,
 			columns: [],
+			hideEmptyColumns: false,
+			filters: [],
+			filterPolarity: "",
+			filterScope: "",
+			showColumnTags: true,
+			showFilteredTags: true
 		};
 		setLocalBoards([...oldBoards, newBoard]);
 		setSelectedBoardIndex(localBoards.length);
@@ -164,6 +250,29 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		}
 	}, [selectedBoardIndex]);
 
+	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+	useEffect(() => {
+		localBoards[selectedBoardIndex]?.columns.forEach((column, index) => {
+			const fileInputElement = filePathInputRefs.current[column.id];
+			if (!fileInputElement) return;
+
+			if (filePathInputRefs.current[column.id] !== null && column.colType === "pathFiltered") {
+				const suggestionContent = getFileSuggestions(plugin.app);
+				const onSelectCallback = (selectedPath: string) => {
+					// setNewFilePath(selectedPath);
+					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
+				};
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			} else if (filePathInputRefs.current[column.id] !== null && column.colType === "namedTag") {
+				const suggestionContent = getTagSuggestions(plugin.app);
+				const onSelectCallback = (selectedTag: string) => {
+					handleColumnChange(selectedBoardIndex, index, "coltag", selectedTag);
+				};
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			}
+		});
+	}, [plugin.app, selectedBoardIndex, localBoards]);
+
 	// Function to handle column change
 	const handleColumnChange = (
 		boardIndex: number,
@@ -181,7 +290,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setLocalBoards(updatedBoards);
 		setIsEdited(true);
 	};
-
 
 	// Function to handle board name change
 	const handleBoardNameChange = (index: number, newName: string) => {
@@ -403,6 +511,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "namedTag" && (
 											<input
 												type="text"
+												ref={(el) => {
+													filePathInputRefs.current[column.id] = el;
+												}}
 												placeholder={t("enter-tag")}
 												value={column.coltag || ""}
 												onChange={(e) =>
@@ -433,20 +544,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											/>
 										)}
 										{column.colType === "taskPriority" && (
-											<input
-												type="number"
-												placeholder={t("enter-tag-placeholder")}
-												value={column.taskPriority || ""}
+											<select
+												aria-label="Select priority"
+												value={column.taskPriority || priorityOptions[0].value}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
 														"taskPriority",
-														Number(e.target.value)
+														e.target.value
 													)
 												}
-												className="boardConfigModalColumnRowContentColName"
-											/>
+												className="boardConfigModalColumnRowContentColDatedVal"
+											>
+												{priorityOptions.map((option) => (
+													<option key={option.value} value={option.value}>{option.text}</option>
+												))}
+											</select>
 										)}
 										{column.colType === "completed" && (
 											<input
@@ -462,6 +576,25 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													)
 												}
 												className="boardConfigModalColumnRowContentColDatedVal"
+											/>
+										)}
+										{column.colType === "pathFiltered" && (
+											<input
+												type="text"
+												ref={(el) => {
+													filePathInputRefs.current[column.id] = el;
+												}}
+												className="boardConfigModalColumnRowContentColName"
+												value={column.filePaths || ""}
+												onChange={(e) =>
+													handleColumnChange(
+														boardIndex,
+														columnIndex,
+														"filePaths",
+														e.target.value
+													)
+												}
+												placeholder={t("enter-path-pattern")}
 											/>
 										)}
 										{column.colType === "dated" && (
@@ -501,7 +634,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													className="boardConfigModalColumnRowContentColDatedVal"
 												/>
 												<select
-													aria-label="Select Date Type"
+													aria-label="Select date type"
 													value={column.datedBasedColumn?.dateType || UniversalDateOptions.dueDate}
 													onChange={(e) =>
 														handleColumnChange(
@@ -516,9 +649,34 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{UniversalDateOptions.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{UniversalDateOptions.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{UniversalDateOptions.scheduledDate}</option>
+													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+												</select>
+											</>
+										)}
+										{column.colType === "undated" && (
+											<>
+												<select
+													aria-label="Select date type"
+													value={column.datedBasedColumn?.dateType || universalDateOptionsNames.dueDate}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"datedBasedColumn",
+															{
+																from: 0,
+																to: 0,
+																dateType: e.target.value,
+															}
+														)
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												>
+													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
 												</select>
 											</>
 										)}
@@ -555,7 +713,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		} else {
 			document.removeEventListener("mousedown", handleClickOutside);
 		}
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		return () => {
+			if (isSidebarVisible) {
+				// Cleanup event listener when the component unmounts or sidebar visibility changes
+				document.removeEventListener("mousedown", handleClickOutside);
+			}
+		}
 	}, [isSidebarVisible]);
 
 	return (
@@ -575,19 +738,22 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<hr className="boardConfigModalHr-100" />
 
 						<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-						{localBoards.map((board, index) => (
-							<div
-								key={index}
-								onClick={() => {
-									setSelectedBoardIndex(index);
-									toggleSidebar();
-
-								}}
-								className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-							>
-								{board.name}
-							</div>
-						))}
+						<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
+							{localBoards.map((board, index) => (
+								<div
+									key={board.name} // Changed key from index to board.name
+									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
+								>
+									<span onClick={() => {
+										setSelectedBoardIndex(index);
+										toggleSidebar();
+									}}>
+										{board.name}
+									</span>
+									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+								</div>
+							))}
+						</div>
 					</div>
 					<div className="boardConfigModalSidebarBtnArea">
 						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>

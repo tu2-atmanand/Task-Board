@@ -16,6 +16,7 @@ export type columnDataProp = {
 	taskStatus?: string;
 	taskPriority?: number;
 	limit?: number;
+	filePaths?: string;
 };
 
 interface AddColumnModalProps {
@@ -35,6 +36,7 @@ export class AddColumnModal extends Modal {
 		taskStatus?: string;
 		taskPriority?: number;
 		limit?: number;
+		filePaths?: string;
 	}) => void;
 	private onCancel: () => void;
 	private colType: string;
@@ -85,6 +87,7 @@ export class AddColumnModal extends Modal {
 				text: columnTypeAndNameMapping.taskPriority,
 			},
 			{ value: "completed", text: columnTypeAndNameMapping.completed },
+			{ value: "pathFiltered", text: t("path-filtered") },
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },
@@ -162,6 +165,13 @@ export class AddColumnModal extends Modal {
 					name: this.name,
 					limit: 20,
 				}); // Add limit
+			} else if (this.colType === "pathFiltered") {
+				this.onSubmit({
+					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					colType: this.colType,
+					name: this.name,
+					filePaths: "",
+				}); // Add path filter
 			} else {
 				this.onSubmit({
 					id: crypto.getRandomValues(new Uint32Array(1))[0],

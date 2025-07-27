@@ -35,17 +35,44 @@ export enum UniversalDateOptions {
 	dueDate = "due",
 }
 
+export enum universalDateOptionsNames {
+	startDate = "Start Date",
+	scheduledDate = "Scheduled Date",
+	dueDate = "Due Date",
+}
+
 export enum TagColorType {
 	Text = "text",
 	Background = "background",
 }
 
-interface CustomStatus {
+export enum NotificationService {
+	None = "none",
+	ReminderPlugin = "reminderPlugin",
+	NotifianApp = "notifianApp",
+	ObsidApp = "obsiApp",
+}
+
+export interface CustomStatus {
 	symbol: string; // The symbol representing the status (e.g., "/", "-")
 	name: string; // The human-readable name of the status (e.g., "In Progress")
 	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
 	type: string; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+}
+
+export interface TaskBoardAction {
+	enabled: boolean;
+	trigger: "Complete" | "Incomplete";
+	type: "move" | "copy";
+	targetColumn: string;
+}
+
+export enum cardSectionsVisibilityOptions {
+	showSubTasksOnly = "showSubTasksOnly",
+	showDescriptionOnly = "showDescriptionOnly",
+	showBoth = "showBoth",
+	hideBoth = "hideBoth",
 }
 
 export interface globalSettingsData {
@@ -70,7 +97,7 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
-	universalDate: UniversalDateOptions;
+	universalDate: string;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
@@ -86,6 +113,13 @@ export interface globalSettingsData {
 	};
 	archivedTasksFilePath: string;
 	showFileNameInCard: boolean;
+	showFrontmatterTagsOnCards: boolean;
+	tasksCacheFilePath: string;
+	notificationService: string;
+	frontmatterPropertyForReminder: string;
+	actions: TaskBoardAction[];
+	searchQuery?: string;
+	cardSectionsVisibility: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -110,6 +144,11 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "Undated Tasks",
 						index: 1,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
+						},
 					},
 					{
 						id: 2,
@@ -180,6 +219,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				index: 1,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
 			},
 			{
 				columns: [
@@ -244,6 +284,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				index: 2,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
 			},
 		],
 		globalSettings: {
@@ -342,6 +383,20 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
 			showFileNameInCard: false,
+			showFrontmatterTagsOnCards: false,
+			tasksCacheFilePath: "",
+			notificationService: NotificationService.None,
+			frontmatterPropertyForReminder: "reminder",
+			actions: [
+				{
+					enabled: true,
+					trigger: "Complete",
+					type: "move",
+					targetColumn: "Completed",
+				},
+			],
+			cardSectionsVisibility:
+				cardSectionsVisibilityOptions.showSubTasksOnly,
 		},
 	},
 };

@@ -1,4 +1,5 @@
-import { AbstractInputSuggest, App, Plugin, TFile, TFolder } from "obsidian";
+import TaskBoard from "main";
+import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
 	content: Set<string>;
@@ -87,4 +88,23 @@ export function getQuickAddPluginChoices(
 	return Object.keys(choices)
 		.filter((key) => choices[key].type === "Capture")
 		.map((key) => choices[key].name);
+}
+
+export function getFrontmatterPropertyNames(plugin: TaskBoard): string[] {
+	//Here I should go through all the markdown files and fetch their frontmatter property names
+	const frontmatterProperties: { name: string }[] = [];
+	const allFiles = plugin.app.vault.getMarkdownFiles();
+	allFiles.forEach((file) => {
+		const frontmatter =
+			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+		if (frontmatter) {
+			Object.keys(frontmatter).forEach((key) => {
+				if (!frontmatterProperties.some((prop) => prop.name === key)) {
+					frontmatterProperties.push({ name: key });
+				}
+			});
+		}
+	});
+
+	return frontmatterProperties.map((property) => property.name);
 }

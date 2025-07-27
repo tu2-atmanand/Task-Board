@@ -4,6 +4,10 @@ export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 	const fileName = file.path; // Extract file name along with the path
 	const parentFolder = file.parent?.path;
 
+	if (file.extension !== "md") {
+		return false; // Only process markdown files
+	}
+
 	// Check folder filters
 	const folderFilters = scanFilters.folders.values;
 	let folderInFilters = folderFilters.includes(parentFolder);
@@ -12,7 +16,7 @@ export function scanFilterForFilesNFolders(file: TFile, scanFilters: any) {
 		folderInFilters = folderFilters.some((filter: string) =>
 			parentFolder.includes(filter)
 		);
-	} 
+	}
 
 	const folderCheckPass =
 		(folderInFilters && scanFilters.folders.polarity === 1) ||
