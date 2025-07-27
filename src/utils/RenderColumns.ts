@@ -162,7 +162,7 @@ export const renderColumns = (
 			// Split the path patterns by comma and trim whitespace
 			const pathPatterns = columnData.filePaths
 				.split(",")
-				.map((pattern: string) => pattern.trim().toLowerCase())
+				.map((pattern: string) => pattern.trim())
 				.filter((pattern: string) => pattern.length > 0);
 
 			if (pathPatterns.length > 0) {
@@ -171,9 +171,16 @@ export const renderColumns = (
 						return false;
 					}
 
-					const lowerCasePath = task.filePath.toLowerCase();
+					const lowerCasePath = task.filePath;
 					const matchedPattern = pathPatterns.some(
-						(pattern: string) => pattern === lowerCasePath
+						(pattern: string) => {
+							if (pattern.endsWith(".md")) {
+								pattern === lowerCasePath;
+							} else {
+								// Check if the task's file path contains the pattern
+								return lowerCasePath.includes(pattern);
+							}
+						}
 					);
 					return matchedPattern;
 				});
