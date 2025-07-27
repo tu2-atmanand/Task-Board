@@ -10,7 +10,7 @@ import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } f
 import { Component } from 'obsidian';
 import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { cleanTaskTitle, getUniversalDate, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
+import { cleanTaskTitle, getUniversalDateFromTask, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseUniversalDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItem';
@@ -36,9 +36,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false
 
 
-	let universalDate = getUniversalDate(task, plugin);
+	let universalDate = getUniversalDateFromTask(task, plugin);
 	useEffect(() => {
-		universalDate = getUniversalDate(task, plugin);
+		universalDate = getUniversalDateFromTask(task, plugin);
 	}, [task.due, task.startDate, task.scheduledDate]);
 
 	// const handleTaskInteraction = useCallback(
@@ -175,14 +175,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
-	const renderDescriptionByDefault = async () => {
-		if (showDescriptionSection) {
-			await renderTaskDescriptionWithObsidianAPI();
-			return true;
-		} else {
-			return false;
-		}
-	};
+	// const renderDescriptionByDefault = async () => {
+	// 	if (showDescriptionSection) {
+	// 		await renderTaskDescriptionWithObsidianAPI();
+	// 		return true;
+	// 	} else {
+	// 		return false;
+	// 	}
+	// };
 
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
@@ -338,15 +338,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
-										console.log("renderHeader : Data in columnIndex :", columnIndex);
 										const column = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
-										console.log("renderHeader : Data in column :", column);
-										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
+										if ((!activeBoardSettings?.showColumnTags) && column && column?.colType === "namedTag" && tagName.replace('#', '') === column?.coltag?.replace('#', '')) {
 											return null;
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings.filters.length > 0 && activeBoardSettings?.filters.includes(tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
+										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && activeBoardSettings?.filters.includes(tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
 											return null;
 										}
 
@@ -392,7 +390,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				return null;
 			}
 		} catch (error) {
-			bugReporter(plugin, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
+			// bugReporter(plugin, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
+			console.warn("TaskItem.tsx/renderHeader : Error while rendering task header", error);
 			return null;
 		}
 	};
