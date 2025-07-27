@@ -641,8 +641,8 @@ export default class TaskBoard extends Plugin {
 								dateType:
 									this.settings.data.globalSettings
 										.universalDate,
-								from: 0,
-								to: 0,
+								from: column.datedBasedColumn?.from || 0,
+								to: column.datedBasedColumn?.to || 0,
 							};
 							delete column.range;
 						}
