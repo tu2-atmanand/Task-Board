@@ -32,7 +32,7 @@ const Column: React.FC<ColumnProps> = ({
 	columnData,
 	tasksForThisColumn,
 }) => {
-	if (plugin.settings.data.boardConfigs[activeBoardIndex].hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
+	if (plugin.settings.data.boardConfigs[activeBoardIndex]?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 	// Local tasks state, initially set from external tasks
