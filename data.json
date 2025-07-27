@@ -1,5 +1,5 @@
 {
-  "version": "1.5.2",
+  "version": "1.6.3",
   "data": {
     "boardConfigs": [
       {
@@ -12,9 +12,9 @@
             "name": "Today, updated",
             "index": 2,
             "datedBasedColumn": {
+              "dateType": "due",
               "from": 0,
-              "to": 0,
-              "dateType": "due"
+              "to": 0
             }
           },
           {
@@ -25,9 +25,9 @@
             "name": "Over Due, updating",
             "index": 3,
             "datedBasedColumn": {
+              "dateType": "due",
               "from": -300,
-              "to": -1,
-              "dateType": "due"
+              "to": -1
             }
           },
           {
@@ -38,9 +38,9 @@
             "name": "Tomorrow",
             "index": 4,
             "datedBasedColumn": {
+              "dateType": "due",
               "from": 1,
-              "to": 1,
-              "dateType": "due"
+              "to": 1
             }
           },
           {
@@ -51,9 +51,9 @@
             "name": "Future",
             "index": 5,
             "datedBasedColumn": {
+              "dateType": "due",
               "from": 2,
-              "to": 300,
-              "dateType": "due"
+              "to": 300
             }
           },
           {
@@ -196,7 +196,12 @@
             "collapsed": false,
             "name": "Un tracked",
             "index": 1,
-            "id": 70513
+            "id": 70513,
+            "datedBasedColumn": {
+              "dateType": "due",
+              "from": 0,
+              "to": 0
+            }
           },
           {
             "colType": "dated",
@@ -205,6 +210,7 @@
             "name": "For next seven days",
             "index": 2,
             "datedBasedColumn": {
+              "dateType": "due",
               "from": 0,
               "to": 6
             },
