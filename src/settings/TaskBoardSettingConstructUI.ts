@@ -208,10 +208,7 @@ export class SettingsManager {
 
 		["files", "folders", "tags"].forEach((type) => {
 			const filterType = type as keyof typeof scanFilters;
-			const filter =
-				this.plugin.settings.data.globalSettings.scanFilters[
-					filterType
-				];
+			const filter = scanFilters[filterType];
 
 			const row = contentEl.createDiv({
 				cls: "taskBoard-filter-row",
@@ -242,7 +239,7 @@ export class SettingsManager {
 						filterType
 					].values = newValues;
 					this.plugin.saveSettings();
-					// this.display(); // Refresh the settings UI
+					refreshTagList(); // Refresh the tag list after updating values
 				});
 			});
 
@@ -251,19 +248,24 @@ export class SettingsManager {
 				cls: "taskBoard-filter-values",
 			});
 
-			if (filter.values.length === 0) {
-				tagList.createEl("em", {
-					text: "None",
-					attr: { style: "opacity: 0.5;" },
-				});
-			} else {
-				filter.values.forEach((val) => {
-					tagList.createEl("span", {
-						text: val,
-						cls: "taskBoard-filter-tag",
+			const refreshTagList = () => {
+				tagList.empty(); // Clear existing tags
+				if (filter.values.length === 0) {
+					tagList.createEl("em", {
+						text: "None",
+						attr: { style: "opacity: 0.5;" },
 					});
-				});
-			}
+				} else {
+					filter.values.forEach((val) => {
+						tagList.createEl("span", {
+							text: val,
+							cls: "taskBoard-filter-tag",
+						});
+					});
+				}
+			};
+
+			refreshTagList(); // Initial render of the tag list
 
 			// Polarity dropdown
 			const polarityDropdown = rowBody.createEl("select", {

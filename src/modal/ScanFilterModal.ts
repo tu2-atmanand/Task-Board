@@ -49,7 +49,7 @@ export class ScanFilterModal extends Modal {
 			this.suggestionContent = new Set(getTagSuggestions(this.app));
 		}
 
-		const multiSuggestInput = new MultiSuggest(
+		new MultiSuggest(
 			this.inputEl,
 			this.suggestionContent,
 			(value: string) => {
@@ -70,7 +70,7 @@ export class ScanFilterModal extends Modal {
 		new Setting(contentEl)
 			.addButton((btn) =>
 				btn
-					.setButtonText("Save")
+					.setButtonText(t("save"))
 					.setCta()
 					.onClick(() => {
 						this.onSave(Array.from(this.selectedValues));
@@ -80,7 +80,7 @@ export class ScanFilterModal extends Modal {
 			.addButton((btn) =>
 				btn
 					.setButtonText(t("cancel"))
-					.setTooltip("Cancel")
+					.setTooltip(t("cancel"))
 					.onClick(() => this.close())
 			);
 	}
