@@ -116,7 +116,7 @@
         ],
         "Testing 2.md": [
             {
-                "id": 1815814058,
+                "id": 621390564,
                 "status": "/",
                 "title": "#MOC Give some time for Notes Explorer plugin. 🔼⏰ [19:34 - 20:34]    📅 2025-05-04  #done  ",
                 "body": [
@@ -152,7 +152,43 @@
                 "reminder": ""
             },
             {
-                "id": 819984813,
+                "id": 3705557465,
+                "status": " ",
+                "title": "This is a test to show how the **Task Board Safe Guard** feature will ensure your local changes will never going to be overwritten by **Task Board**. 📅 2025-07-27 #Test ",
+                "body": [
+                    "\t- This is a normal line in description added by you in the current device through Obsidian.",
+                    "\t- This is a line which you have updated either from another device or another plugin silently added this line. Hence **Task Board** couldnt able to scan it and hence its not present in the *task-board-memory* when it last time scanned it.",
+                    "\t- Also, this feature will scan character by character.",
+                    "\t- ![[Pasted image 20250727115440.png]]",
+                    "\t- [ ] Incase you are **Synching** across devices, you should use the `Task cache file path` setting and change the Task Board cache file path to somewhere inside your vault, so it gets synched as well."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-07-27",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [
+                    "#New",
+                    "#book",
+                    "#memo"
+                ],
+                "priority": 0,
+                "filePath": "Testing 2.md",
+                "taskLocation": {
+                    "startLine": 40,
+                    "startCharIndex": 0,
+                    "endLine": 45,
+                    "endCharIndex": 202
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4240984186,
                 "status": " ",
                 "title": "This task has simple time in 4th format[time:: 12:30 AM - 13:30 AM] [due:: 2025-03-21]",
                 "body": [],
@@ -170,9 +206,9 @@
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "taskLocation": {
-                    "startLine": 50,
+                    "startLine": 62,
                     "startCharIndex": 0,
-                    "endLine": 50,
+                    "endLine": 62,
                     "endCharIndex": 92
                 },
                 "completion": "",
@@ -180,7 +216,7 @@
                 "reminder": ""
             },
             {
-                "id": 688841784,
+                "id": 2697001199,
                 "status": " ",
                 "title": "#📋 [[Nexus Book Project|Nexus]]: Determine next action 🔁 every month ⏳ 2024-12-20 📅 2024-12-20",
                 "body": [],
@@ -200,9 +236,9 @@
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "taskLocation": {
-                    "startLine": 54,
+                    "startLine": 66,
                     "startCharIndex": 0,
-                    "endLine": 54,
+                    "endLine": 66,
                     "endCharIndex": 103
                 },
                 "completion": "",
@@ -210,7 +246,7 @@
                 "reminder": ""
             },
             {
-                "id": 105025082,
+                "id": 1379705255,
                 "status": " ",
                 "title": "These are all **Gift List** tasks",
                 "body": [
@@ -232,9 +268,9 @@
                 "priority": 0,
                 "filePath": "Testing 2.md",
                 "taskLocation": {
-                    "startLine": 62,
+                    "startLine": 74,
                     "startCharIndex": 0,
-                    "endLine": 65,
+                    "endLine": 77,
                     "endCharIndex": 15
                 },
                 "completion": "",
@@ -6520,7 +6556,7 @@
         ],
         "Testing 2.md": [
             {
-                "id": 3238148630,
+                "id": 3947118637,
                 "status": "x",
                 "title": "This is a task for testing, ill add status using Tasks plugin. 🔼⏰ [19:34 - 20:34] 📅 2025-07-14 #bug/solver ✅ 2025-07-13/15:37 ",
                 "body": [
