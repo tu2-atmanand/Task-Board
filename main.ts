@@ -34,6 +34,7 @@ import {
 } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
+import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -626,22 +627,30 @@ export default class TaskBoard extends Plugin {
 				);
 			} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
 				// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
-				settings[key].forEach((boardConfig: any) => {
-					boardConfig.columns.forEach((column: any) => {
+				settings[key].forEach((boardConfig: Board) => {
+					boardConfig.columns.forEach((column: ColumnData) => {
 						if (!column.id) {
 							column.id = Math.floor(Math.random() * 1000000);
 						}
-						if (column.colType === "dated" && column.range) {
+						if (
+							column.colType === "dated" ||
+							(column.colType === "undated" &&
+								!column.datedBasedColumn)
+						) {
 							column.datedBasedColumn = {
 								dateType:
 									this.settings.data.globalSettings
 										.universalDate,
-								from: column.range.rangedata.from,
-								to: column.range.rangedata.to,
+								from: 0,
+								to: 0,
 							};
-							delete column.range;
+							// delete column.range;
 						}
 					});
+
+					if (!boardConfig.hideEmptyColumns) {
+						boardConfig.hideEmptyColumns = false;
+					}
 				});
 			} else if (
 				typeof defaults[key] === "object" &&
