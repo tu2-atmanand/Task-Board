@@ -71,7 +71,7 @@ export class RealTimeScanning {
 	}
 
 	getFileFromPath(filePath: string): TFile | null {
-		return this.plugin.app.vault.getFileByPath(filePath);
+		return this.plugin.app?.vault.getFileByPath(filePath);
 	}
 
 	onFileModified(file: TFile) {

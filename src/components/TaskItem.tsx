@@ -322,7 +322,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const renderHeader = () => {
 		try {
-			if (plugin.settings.data.globalSettings.showHeader) {
+			if (plugin.settings.data.globalSettings?.showHeader) {
 				return (
 					<>
 						<div className="taskItemHeader">
@@ -338,13 +338,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
-										const column = columnIndex !== undefined ? activeBoardSettings.columns[columnIndex - 1] : undefined;
+										console.log("renderHeader : Data in columnIndex :", columnIndex);
+										const column = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
+										console.log("renderHeader : Data in column :", column);
 										if ((!activeBoardSettings.showColumnTags) && column?.colType === "namedTag" && tagName === column?.coltag) {
 											return null;
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings.showFilteredTags && activeBoardSettings.filters && activeBoardSettings.filters.length > 0 && activeBoardSettings.filters.includes(tag) && parseInt(activeBoardSettings.filterPolarity || "0")) {
+										if (!activeBoardSettings.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings.filters.length > 0 && activeBoardSettings?.filters.includes(tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
 											return null;
 										}
 

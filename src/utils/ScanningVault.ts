@@ -39,7 +39,7 @@ export default class ScanningVault {
 		this.app = app;
 		this.plugin = plugin;
 		this.tasksCache = {
-			VaultName: this.plugin.app.vault.getName(),
+			VaultName: this.plugin.app?.vault.getName(),
 			Modified_at: new Date().toISOString(),
 			Pending: {},
 			Completed: {},
@@ -56,11 +56,16 @@ export default class ScanningVault {
 	}
 
 	async initializeTasksCache() {
-		// Load existing tasks from JSON cache
-		this.tasksCache = await loadJsonCacheDataFromDisk(this.plugin);
-		if (!this.tasksCache) {
+		try {
+			// Load existing tasks from JSON cache
+			this.tasksCache = await loadJsonCacheDataFromDisk(this.plugin);
+		} catch (error) {
+			console.error(
+				"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
+				error
+			);
 			this.tasksCache = {
-				VaultName: this.plugin.app.vault.getName(),
+				VaultName: this.plugin?.app.vault.getName(),
 				Modified_at: new Date().toISOString(),
 				Pending: {},
 				Completed: {},
