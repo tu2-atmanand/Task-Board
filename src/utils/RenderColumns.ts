@@ -175,7 +175,7 @@ export const renderColumns = (
 					const matchedPattern = pathPatterns.some(
 						(pattern: string) => {
 							if (pattern.endsWith(".md")) {
-								pattern === lowerCasePath;
+								return pattern === lowerCasePath;
 							} else {
 								// Check if the task's file path contains the pattern
 								return lowerCasePath.includes(pattern);
