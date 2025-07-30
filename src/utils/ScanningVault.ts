@@ -17,7 +17,7 @@ import {
 	taskItem,
 } from "src/interfaces/TaskItem";
 import {
-	scanFilterForFilesNFolders,
+	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,
 } from "./FiltersVerifier";
 
@@ -35,6 +35,12 @@ export default class ScanningVault {
 	tasksCache: jsonCacheData;
 	TaskDetected: boolean;
 
+	/**
+	 * Constructor for ScanningVault
+	 * @param app The Obsidian app instance
+	 * @param plugin The TaskBoard plugin instance
+	 * @description Initializes the ScanningVault with the app and plugin instances, and sets up the initial tasks cache.
+	 */
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
@@ -80,7 +86,7 @@ export default class ScanningVault {
 		for (const file of files) {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
-			if (scanFilterForFilesNFolders(file, scanFilters)) {
+			if (scanFilterForFilesNFoldersNFrontmatter(this.plugin, file, scanFilters)) {
 				await this.extractTasksFromFile(file, scanFilters);
 			}
 		}
@@ -292,7 +298,7 @@ export default class ScanningVault {
 		for (const file of files) {
 			if (
 				file !== null &&
-				scanFilterForFilesNFolders(file, scanFilters)
+				scanFilterForFilesNFoldersNFrontmatter(this.plugin, file, scanFilters)
 			) {
 				// TODO : Try testing if removing the await from the below line will going to speed up the process.
 				await this.extractTasksFromFile(file, scanFilters).then(

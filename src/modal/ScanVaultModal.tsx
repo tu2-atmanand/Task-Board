@@ -8,7 +8,7 @@ import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
 import ScanningVault from "src/utils/ScanningVault";
 import TaskBoard from "main";
-import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
+import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
@@ -36,7 +36,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			const file = files[i];
 
 			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
-			if (scanFilterForFilesNFolders(file, scanFilters)) {
+			if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 				await scanningVault.extractTasksFromFile(file, scanFilters);
 			}
