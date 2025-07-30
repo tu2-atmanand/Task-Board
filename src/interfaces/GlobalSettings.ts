@@ -9,6 +9,10 @@ export interface scanFilters {
 		polarity: number;
 		values: string[];
 	};
+	frontMatter: {
+		polarity: number;
+		values: string[];
+	};
 	tags: {
 		polarity: number;
 		values: string[];
@@ -296,6 +300,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					values: [],
 				},
 				folders: {
+					polarity: 3,
+					values: [],
+				},
+				frontMatter: {
 					polarity: 3,
 					values: [],
 				},

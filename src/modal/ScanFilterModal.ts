@@ -5,6 +5,7 @@ import {
 	getFileSuggestions,
 	getFolderSuggestions,
 	getTagSuggestions,
+	getYAMLPropertySuggestions,
 } from "src/services/MultiSuggest";
 import { trashIcon } from "src/types/Icons";
 import { t } from "src/utils/lang/helper";
@@ -16,7 +17,7 @@ export class ScanFilterModal extends Modal {
 
 	constructor(
 		private plugin: TaskBoard,
-		private filterType: "files" | "folders" | "tags",
+		private filterType: "files" | "folders" | "frontMatter" | "tags",
 		private onSave: (values: string[]) => void
 	) {
 		super(plugin.app);
@@ -43,6 +44,10 @@ export class ScanFilterModal extends Modal {
 		// Load suggestion content
 		if (this.filterType === "files") {
 			this.suggestionContent = new Set(getFileSuggestions(this.app));
+		} else if (this.filterType === "frontMatter") {
+			this.suggestionContent = new Set(
+				getYAMLPropertySuggestions(this.app)
+			);
 		} else if (this.filterType === "folders") {
 			this.suggestionContent = new Set(getFolderSuggestions(this.app));
 		} else if (this.filterType === "tags") {

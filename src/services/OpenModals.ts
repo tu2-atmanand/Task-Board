@@ -280,7 +280,7 @@ export const openTaskBoardActionsModal = (
 
 export const openScanFiltersModal = (
 	plugin: TaskBoard,
-	filterType: "files" | "folders" | "tags",
+	filterType: "files" | "frontMatter" | "folders" | "tags",
 	onSave: (scanFilters: string[]) => void
 ) => {
 	new ScanFilterModal(plugin, filterType, async (newValues) => {

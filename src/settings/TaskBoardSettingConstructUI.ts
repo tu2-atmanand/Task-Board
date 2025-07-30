@@ -206,7 +206,7 @@ export class SettingsManager {
 			.setName(t("filters-for-scanning"))
 			.setDesc(t("name-of-the-file-folder-tag-for-filter-info"));
 
-		["files", "folders", "tags"].forEach((type) => {
+		["files", "folders", "frontMatter", "tags"].forEach((type) => {
 			const filterType = type as keyof typeof scanFilters;
 			const filter = scanFilters[filterType];
 
