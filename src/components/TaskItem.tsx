@@ -190,9 +190,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 		if (taskUniversalDate.toDateString() === today.toDateString()) {
 			if (task.time) {
-				const [startStr, endStr] = task.time.split(' - ');
-				const [startHours, startMinutes] = startStr.split(':').map(Number);
-				const [endHours, endMinutes] = endStr.split(':').map(Number);
+				const [startStr, endStr] = task.time.contains('-') ? task.time.split('-') : [task.time, task.time];
+				const [startHours, startMinutes] = startStr.contains(':') ? startStr.trim().split(':').map(Number) : [startStr, 0].map(Number);
+				const [endHours, endMinutes] = endStr.contains(':') ? endStr.trim().split(':').map(Number) : [endStr, 0].map(Number);
 
 				const startTime = new Date(today);
 				startTime.setHours(startHours, startMinutes, 0, 0);
