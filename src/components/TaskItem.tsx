@@ -284,7 +284,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	// Function to handle the checkbox toggle inside the task body
 	const handleSubtaskCheckboxChange = (subTaskLine: string, isCompleted: boolean) => {
-		console.log("handleSubtaskCheckboxChange : subTaskLine :", subTaskLine);
 		const updatedBody = task.body.map((line, idx) => {
 			if (line === subTaskLine) {
 				// Toggle the checkbox status only for the specific line

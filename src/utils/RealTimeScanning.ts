@@ -1,10 +1,9 @@
 // /src/utils/RealTimeScanning.ts
 
-import { App, TFile, getFrontMatterInfo } from "obsidian";
+import { App, TFile } from "obsidian";
 
 import type ScanningVault from "src/utils/ScanningVault";
 import type TaskBoard from "main";
-import { scanFilterForFilesNFolders } from "./FiltersVerifier";
 import { bugReporter } from "src/services/OpenModals";
 
 export class RealTimeScanning {

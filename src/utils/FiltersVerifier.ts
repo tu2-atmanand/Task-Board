@@ -22,21 +22,8 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 	const fileName = file.path; // Extract file name along with the path
 	const parentFolder = file.parent?.path || "";
 
-	console.log(
-		"scanFilterForFilesNFoldersNFrontmatter: Checking file:",
-		fileName,
-		"with parent folder:",
-		parentFolder
-	);
-
 	if (scanFilters.files.polarity !== 3) {
 		const result = checkFileFilters(fileName, scanFilters);
-		console.log(
-			"scanFilterForFilesNFoldersNFrontmatter: File filter result for",
-			fileName,
-			":",
-			result
-		);
 		if (result !== undefined) {
 			return result;
 		}
@@ -44,12 +31,6 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 
 	if (scanFilters.frontMatter.polarity !== 3) {
 		const result = checkFrontMatterFilters(plugin, file, scanFilters);
-		console.log(
-			"scanFilterForFilesNFoldersNFrontmatter: Front matter filter result for",
-			fileName,
-			":",
-			result
-		);
 		if (result !== undefined) {
 			return result;
 		}
@@ -57,12 +38,6 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 
 	if (scanFilters.folders.polarity !== 3) {
 		const result = checkFolderFilters(parentFolder, scanFilters);
-		console.log(
-			"scanFilterForFilesNFoldersNFrontmatter: Folder filter result for",
-			parentFolder,
-			":",
-			result
-		);
 		if (result !== undefined) {
 			return result;
 		}
@@ -70,10 +45,6 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 		return true;
 	}
 
-	console.warn(
-		"scanFilterForFilesNFolders: No filters matched for file:",
-		fileName
-	);
 	return false;
 }
 
@@ -106,12 +77,11 @@ export function checkFrontMatterFilters(
 	scanFilters: scanFilters
 ): boolean | undefined {
 	const frontmatter = extractFrontmatter(plugin, file);
-	console.log("checkFrontMatterFilters: Extracted frontmatter:", frontmatter);
+
 	if (!frontmatter) {
 		return; // No front matter found
 	}
 	const frontMatterInFilters = Object.keys(frontmatter).some((key) => {
-		console.log("key:", key);
 		const filterString = scanFilters.frontMatter.values.find(
 			(filter: string) => filter.includes(`"${key}":`)
 		);
@@ -119,12 +89,6 @@ export function checkFrontMatterFilters(
 			const valueMatch = filterString.match(/"[^"]+":\s*([^,\]]+)/);
 			if (valueMatch) {
 				const filterValue = valueMatch[1].trim();
-				console.log(
-					"frontmatter value from the filter :",
-					filterValue,
-					"\nfrontmatter[key]:",
-					frontmatter[key]
-				);
 				const frontmatterValue = frontmatter[key];
 				if (Array.isArray(frontmatterValue)) {
 					return frontmatterValue.includes(filterValue); // Check if the filterValue is in the list

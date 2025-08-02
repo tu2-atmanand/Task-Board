@@ -407,7 +407,7 @@ export default class ScanningVault {
 				// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
 				// };
 			} else {
-				console.warn("File is not valid...");
+				// console.warn("File is not valid...");
 			}
 		}
 	}
