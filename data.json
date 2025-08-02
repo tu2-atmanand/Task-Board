@@ -194,6 +194,14 @@
         "tags": {
           "polarity": 3,
           "values": []
+        },
+        "frontMatter": {
+          "polarity": 3,
+          "values": [
+            "[\"created\": 2025-02-27]",
+            "[\"tags\": #TEST]",
+            "[\"background\": yellow]"
+          ]
         }
       },
       "firstDayOfWeek": "2",
