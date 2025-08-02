@@ -55,10 +55,10 @@ const EditTaskContent: React.FC<{
 	app: App,
 	plugin: TaskBoard,
 	root: HTMLElement,
-	task?: taskItem,
-	taskExists?: boolean,
 	activeNote: boolean,
 	filePath: string;
+	task?: taskItem,
+	taskExists?: boolean,
 	onSave: (updatedTask: taskItem, quickAddPluginChoice: string) => void;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;

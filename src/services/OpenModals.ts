@@ -38,7 +38,6 @@ export const openAddNewTaskInCurrentFileModal = (
 	activeFile: TFile,
 	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
-	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
 		plugin,
@@ -77,7 +76,6 @@ export const openAddNewTaskModal = (
 	plugin: TaskBoard,
 	activeFile?: TFile
 ) => {
-	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const preDefinedNoteFile = plugin.app.vault.getAbstractFileByPath(
 		plugin.settings.data.globalSettings.preDefinedNote
 	);
@@ -87,7 +85,7 @@ export const openAddNewTaskModal = (
 		app,
 		plugin,
 		async (newTask, quickAddPluginChoice) => {
-			if (communityPlugins.isQuickAddPluginEnabled()) {
+			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
 				const completeTask = await getFormattedTaskContent(newTask);
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
