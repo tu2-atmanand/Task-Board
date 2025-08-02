@@ -152,7 +152,7 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter((task) =>
 			getAllTaskTags(task).some(
 				(tag) =>
-					tag.replace(`#`, "") ===
+					tag.replace(`#`, "").toLocaleLowerCase() ===
 					columnData.coltag?.replace(`#`, "").toLowerCase()
 			)
 		);
