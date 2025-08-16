@@ -3,7 +3,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { taskItem, taskStatuses } from '../interfaces/TaskItem';
-import { checkboxStateSwitcher, extractCheckboxSymbol } from 'src/utils/CheckBoxUtils';
+import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
@@ -442,7 +442,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							const isCompleted = line.trim().startsWith('- [x]') || line.trim().startsWith('- [X]');
 
 							// Calculate padding based on the number of tabs
-							const numTabs = line.match(/^\t+/)?.[0].length || 0;
+							const tabString = getObsidianIndentationSetting(plugin);
+							const tabMatch = line.match(new RegExp(`^(${tabString})+`));
+							const numTabs = tabMatch && tabMatch[0] ? tabMatch[0].length / tabString.length : 0;
 							const paddingLeft = numTabs > 1 ? `${(numTabs - 1) * 15}px` : '0px';
 
 							// Create a unique key for this subtask based on task.id and index

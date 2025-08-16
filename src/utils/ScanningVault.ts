@@ -3,6 +3,7 @@
 import { App, TFile, moment as _moment } from "obsidian";
 import {
 	extractCheckboxSymbol,
+	getObsidianIndentationSetting,
 	isCompleted,
 	isTaskLine,
 } from "./CheckBoxUtils";
@@ -34,6 +35,7 @@ export default class ScanningVault {
 	plugin: TaskBoard;
 	tasksCache: jsonCacheData;
 	TaskDetected: boolean;
+	indentationString: string;
 
 	/**
 	 * Constructor for ScanningVault
@@ -52,6 +54,7 @@ export default class ScanningVault {
 			Notes: [],
 		}; // Reset task structure
 		this.TaskDetected = false;
+		this.indentationString = getObsidianIndentationSetting(plugin);
 	}
 
 	// Generate a unique ID for each task
@@ -86,7 +89,13 @@ export default class ScanningVault {
 		for (const file of files) {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
-			if (scanFilterForFilesNFoldersNFrontmatter(this.plugin, file, scanFilters)) {
+			if (
+				scanFilterForFilesNFoldersNFrontmatter(
+					this.plugin,
+					file,
+					scanFilters
+				)
+			) {
 				await this.extractTasksFromFile(file, scanFilters);
 			}
 		}
@@ -188,7 +197,11 @@ export default class ScanningVault {
 					);
 					const completionDate = extractCompletionDate(line);
 					const cancelledDate = extractCancelledDate(line);
-					const bodyLines = extractBody(lines, lineIndex + 1);
+					const bodyLines = extractBody(
+						lines,
+						lineIndex + 1,
+						this.indentationString
+					);
 
 					if (
 						this.plugin.settings.data.globalSettings
@@ -298,7 +311,11 @@ export default class ScanningVault {
 		for (const file of files) {
 			if (
 				file !== null &&
-				scanFilterForFilesNFoldersNFrontmatter(this.plugin, file, scanFilters)
+				scanFilterForFilesNFoldersNFrontmatter(
+					this.plugin,
+					file,
+					scanFilters
+				)
 			) {
 				// TODO : Try testing if removing the await from the below line will going to speed up the process.
 				await this.extractTasksFromFile(file, scanFilters).then(
@@ -437,6 +454,7 @@ export default class ScanningVault {
  */
 export function buildTaskFromRawContent(
 	rawTaskContent: string,
+	indentationString: string,
 	filePath?: string
 ): Partial<taskItem> {
 	const lines = rawTaskContent.split("\n");
@@ -451,7 +469,7 @@ export function buildTaskFromRawContent(
 	const tags = extractTags(lines[0]);
 	const completionDate = extractCompletionDate(lines[0]);
 	const cancelledDate = extractCancelledDate(lines[0]);
-	const body = extractBody(lines, 1);
+	const body = extractBody(lines, 1, indentationString);
 
 	return {
 		title: title,
@@ -499,7 +517,11 @@ export function extractTitle(text: string): string {
 }
 
 // New function to extract task body
-export function extractBody(lines: string[], startLineIndex: number): string[] {
+export function extractBody(
+	lines: string[],
+	startLineIndex: number,
+	indentationString: string
+): string[] {
 	const bodyLines = [];
 	let bodyStartIndex = startLineIndex;
 	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
@@ -510,8 +532,7 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 		}
 
 		// If the line has one level of indentation, consider it part of the body
-		if (line.startsWith("\t") || line.startsWith("    ")) {
-			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
+		if (line.startsWith(indentationString) || line.startsWith("\t")) {
 			bodyLines.push(line);
 		} else {
 			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
@@ -519,7 +540,7 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 			break;
 		}
 	}
-	return bodyLines.at(0) === "" ? [] : bodyLines;
+	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
 }
 
 // Extract time from task line

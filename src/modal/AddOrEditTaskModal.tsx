@@ -19,6 +19,7 @@ import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import { getObsidianIndentationSetting } from "src/utils/CheckBoxUtils";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -84,6 +85,8 @@ const EditTaskContent: React.FC<{
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
 	const [updateEditorContent, setUpdateEditorContent] = useState<Boolean>(false);
 	const cursorLocationRef = useRef<cursorLocation | null>(null);
+
+	const indentationString = getObsidianIndentationSetting(plugin);
 
 	const rightSecRef = useRef<HTMLDivElement>(null);
 	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);
@@ -484,7 +487,7 @@ const EditTaskContent: React.FC<{
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
-		const updatedTask = buildTaskFromRawContent(value);
+		const updatedTask = buildTaskFromRawContent(value, indentationString);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
