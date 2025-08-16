@@ -522,7 +522,7 @@ export const useTasksPluginToUpdateInFile = async (
 					oldTask.filePath
 				);
 
-			if (!tasksPluginApiOutput) {
+			if (tasksPluginApiOutput === undefined) {
 				bugReporter(
 					plugin,
 					"Tasks plugin API did not return any output.",
@@ -544,7 +544,14 @@ export const useTasksPluginToUpdateInFile = async (
 			// 	completeOldTaskContent
 			// );
 			let newContent = "";
-			if ((twoTaskTitles.length = 1)) {
+			if (tasksPluginApiOutput === "") {
+				await replaceOldTaskWithNewTask(
+					plugin,
+					oldTask,
+					completeOldTaskContent,
+					newContent
+				);
+			} else if ((twoTaskTitles.length = 1)) {
 				newContent = `${tasksPluginApiOutput}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`

@@ -46,7 +46,9 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 
 		// setIsRunning(false);
 		new Notice(t("vault-scanning-complete"));
-		scanningVault.saveTasksToJsonCache();
+		await scanningVault.saveTasksToJsonCache();
+
+		plugin.scanningVault.tasksCache = scanningVault.tasksCache;
 
 		if (localStorage.getItem("manadatoryScan") === "true") {
 			localStorage.setItem("manadatoryScan", "false");
@@ -182,7 +184,7 @@ export class ScanVaultModal extends Modal {
 	constructor(app: App, plugin: TaskBoard) {
 		super(app);
 		this.plugin = plugin;
-		this.scanningVault = new ScanningVault(app, plugin);
+		this.scanningVault = plugin.scanningVault;
 	}
 
 	onOpen() {
@@ -205,6 +207,7 @@ export class ScanVaultModal extends Modal {
 	}
 
 	onClose(): void {
+		console.log("TaskCache in plugin.scanningVault", this.plugin.scanningVault.tasksCache);
 		this.contentEl.empty();
 	}
 }

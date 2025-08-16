@@ -1,3 +1,5 @@
+import TaskBoard from "main";
+import { App } from "obsidian";
 import { taskStatuses } from "src/interfaces/TaskItem";
 
 /**
@@ -50,7 +52,7 @@ export function isCompleted(task: string): boolean {
  * @returns Returns "True" if the line matches the task pattern, otherwise "False".
  */
 export function isTaskLine(line: string): boolean {
-	return /^- \[[^\]]\]/.test(line) && /^- \[[^\]]\] [^\s]/.test(line);
+	return /^- \[[^\]]\]\s+.*\S/.test(line);
 }
 
 /**
@@ -63,4 +65,12 @@ export function extractCheckboxSymbol(task: string): string {
 	if (!match || match.length < 2) return " ";
 
 	return match[1];
+}
+
+export function getObsidianIndentationSetting(plugin: TaskBoard): string {
+	if (plugin.app.vault.config) {
+		const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
+		return plugin.app.vault.config.useTab ? `\t` : " ".repeat(tabSize);
+	}
+	return `\t`; // Default indentation value
 }

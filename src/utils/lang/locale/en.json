@@ -1,4 +1,4 @@
-const en: Lang = {
+{
 	"save": "Save",
 	"close": "Close",
 	"archive": "Archive",
@@ -59,7 +59,7 @@ const en: Lang = {
 	"yes": "Yes",
 	"no": "No",
 	"scan-tasks-from-the-vault": "Scan tasks from the vault",
-	"scan-tasks-from-the-vault-description-1":"Run this feature only on the fresh install or if your tasks has not been properly detected/scanned or the board is acting weired.",
+	"scan-tasks-from-the-vault-description-1": "Run this feature only on the fresh install or if your tasks has not been properly detected/scanned or the board is acting weired.",
 	"scan-tasks-from-the-vault-description-2": "You dont have to run this feature often. The plugin will auto detect newly added/edited tasks from your notes.",
 	"scan-tasks-from-the-vault-description-3": "You might want to check the already scanning filters applied in setting to avoid any confusion.",
 	"vault-scanning-complete": "Vault scanning complete.",
@@ -229,7 +229,7 @@ const en: Lang = {
 	"start-date": "Start date",
 	"scheduled-date": "Scheduled date",
 	"show-error": "Show error",
-	"bug-report-notice-message":"Task board encountered an issue while completing the operation. Click on the show error button to read more and report.",
+	"bug-report-notice-message": "Task board encountered an issue while completing the operation. Click on the show error button to read more and report.",
 	"push-notification-compatibility": "Push notification compatibility",
 	"push-notification-compatibility-description": "Select which plugin or external service you want to use for integrating the push notification feature and its format for your reminders.",
 	"frontmatter-property-for-reminder": "Frontmatter property for reminder",
@@ -257,10 +257,5 @@ const en: Lang = {
 	"points-to-note": "Points to note",
 	"scan-vault-from-the-vault-upgrade-message-1": "Task Board has been updated to version",
 	"scan-vault-from-the-vault-upgrade-message-2": "This new release has brought various new features, which requires you to re-scan the vault.",
-	"scan-vault-from-the-vault-upgrade-message-3": "Read the release notes for this new version here",
-};
-
-export default en;
-export interface Lang {
-	[key: string]: string;
+	"scan-vault-from-the-vault-upgrade-message-3": "Read the release notes for this new version here"
 }

@@ -35,11 +35,12 @@ export const getFormattedTaskContent = async (
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = task.body
 		.map((line: string) => {
-			if (line.startsWith("\t")) {
-				return line;
-			} else {
-				return `\t${line}`;
-			}
+			// if (line.startsWith("\t")) {
+			// 	return line;
+			// } else {
+			// 	return `\t${line}`;
+			// }
+			return line;
 		})
 		.join("\n");
 
@@ -136,11 +137,12 @@ export const getSanitizedTaskContent = (
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
 		.map((line: string) => {
-			if (line.startsWith("\t")) {
-				return line;
-			} else {
-				return `\t${line}`;
-			}
+			// if (line.startsWith("\t")) {
+			// 	return line;
+			// } else {
+			// 	return `\t${line}`;
+			// }
+			return line;
 		})
 		.join("\n");
 

@@ -204,7 +204,16 @@ export class SettingsManager {
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
 			.setName(t("filters-for-scanning"))
-			.setDesc(t("name-of-the-file-folder-tag-for-filter-info"));
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					t("name-of-the-file-folder-tag-for-filter-info") +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t("name-of-the-file-folder-tag-for-filter-info-2")
+				)
+			);
 
 		["files", "folders", "frontMatter", "tags"].forEach((type) => {
 			const filterType = type as keyof typeof scanFilters;
@@ -438,7 +447,7 @@ export class SettingsManager {
 						"<br/>" +
 						"<b>" +
 						t("note") +
-						" :</b>" +
+						" :</b> " +
 						t("auto-scan-the-vault-on-obsidian-startup-info-2")
 				)
 			)
