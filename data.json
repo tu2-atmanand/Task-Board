@@ -21,8 +21,26 @@
             "colType": "pathFiltered",
             "active": true,
             "collapsed": false,
-            "name": "Temp11.md",
-            "filePaths": "Temp11.md"
+            "name": "Indented Bug",
+            "filePaths": "Testing Indented Task Bug.md"
+          },
+          {
+            "id": 2025781698,
+            "index": 3,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "Today",
+            "filePaths": "2025-05-24.md"
+          },
+          {
+            "id": 1623496994,
+            "index": 4,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20
           }
         ],
         "hideEmptyColumns": false
@@ -37,7 +55,7 @@
             "name": "Today, updated",
             "index": 2,
             "datedBasedColumn": {
-              "dateType": "due",
+              "dateType": "scheduledDate",
               "from": 0,
               "to": 0
             }
@@ -50,7 +68,7 @@
             "name": "Over Due, updating",
             "index": 3,
             "datedBasedColumn": {
-              "dateType": "due",
+              "dateType": "scheduledDate",
               "from": -300,
               "to": -1
             }
@@ -63,7 +81,7 @@
             "name": "Tomorrow",
             "index": 4,
             "datedBasedColumn": {
-              "dateType": "due",
+              "dateType": "scheduledDate",
               "from": 1,
               "to": 1
             }
@@ -76,7 +94,7 @@
             "name": "Future",
             "index": 5,
             "datedBasedColumn": {
-              "dateType": "due",
+              "dateType": "scheduledDate",
               "from": 2,
               "to": 300
             }
@@ -185,10 +203,10 @@
           ]
         },
         "folders": {
-          "polarity": 3,
+          "polarity": 2,
           "values": [
-            "obsidian-hub-0.2.1/04 - Guides, Workflows, & Courses",
-            "Configs"
+            "obsidian-hub-0.2.1",
+            "Daily_Notes"
           ]
         },
         "tags": {
@@ -598,12 +616,12 @@
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
       "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
-      "universalDate": "due",
+      "universalDate": "scheduledDate",
       "archivedTasksFilePath": "",
       "showFileNameInCard": true,
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": "",
-      "notificationService": "notifianApp",
+      "notificationService": "obsiApp",
       "frontmatterPropertyForReminder": "remind at",
       "actions": [
         {
