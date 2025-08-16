@@ -52,7 +52,7 @@ export function isCompleted(task: string): boolean {
  * @returns Returns "True" if the line matches the task pattern, otherwise "False".
  */
 export function isTaskLine(line: string): boolean {
-	return /^- \[[^\]]\]/.test(line) && /^- \[[^\]]\] [^\s]/.test(line);
+	return /^- \[[^\]]\]\s+.*\S/.test(line);
 }
 
 /**
