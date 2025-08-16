@@ -11,7 +11,7 @@
 	},
 	"keywords": [],
 	"author": "Atmanand Gauns",
-	"license": "GNU",
+	"license": "GPL-3.0",
 	"devDependencies": {
 		"@codemirror/language": "https://github.com/lishid/cm-language",
 		"@codemirror/search": "^6.0.0",
