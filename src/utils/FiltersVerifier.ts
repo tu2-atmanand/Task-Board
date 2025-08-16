@@ -16,8 +16,9 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 		scanFilters.files.polarity === 3 &&
 		scanFilters.frontMatter.polarity === 3 &&
 		scanFilters.folders.polarity === 3
-	)
+	) {
 		return true;
+	}
 
 	const fileName = file.path; // Extract file name along with the path
 	const parentFolder = file.parent?.path || "";
@@ -26,6 +27,9 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 		const result = checkFileFilters(fileName, scanFilters);
 		if (result !== undefined) {
 			return result;
+		} else {
+			// console.log("This comment should not run");
+			return false; // If no specific filter matches, default to true
 		}
 	}
 
@@ -33,6 +37,9 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 		const result = checkFrontMatterFilters(plugin, file, scanFilters);
 		if (result !== undefined) {
 			return result;
+		} else {
+			// console.log("This comment should not run");
+			return false; // If no specific filter matches, default to true
 		}
 	}
 
@@ -40,9 +47,10 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 		const result = checkFolderFilters(parentFolder, scanFilters);
 		if (result !== undefined) {
 			return result;
+		} else {
+			// console.log("This comment should not run");
+			return false; // If no specific filter matches, default to true
 		}
-	} else {
-		return true;
 	}
 
 	return false;
