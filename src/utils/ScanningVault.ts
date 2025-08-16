@@ -205,7 +205,18 @@ export default class ScanningVault {
 
 					if (
 						this.plugin.settings.data.globalSettings
-							.dailyNotesPluginComp
+							.dailyNotesPluginComp &&
+						((this.plugin.settings.data.globalSettings
+							.universalDate === UniversalDateOptions.dueDate &&
+							dueDate === "") ||
+							(this.plugin.settings.data.globalSettings
+								.universalDate ===
+								UniversalDateOptions.startDate &&
+								startDate === "") ||
+							(this.plugin.settings.data.globalSettings
+								.universalDate ===
+								UniversalDateOptions.scheduledDate &&
+								scheduledDate === ""))
 					) {
 						const universalDateFormat =
 							this.plugin.settings.data.globalSettings
