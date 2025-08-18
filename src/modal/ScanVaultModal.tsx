@@ -29,6 +29,11 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 
 	const runScan = async () => {
 		setIsRunning(true);
+
+		// Reset terminal output and collected tasks
+		scanningVault.tasksCache.Pending = {};
+		scanningVault.tasksCache.Completed = {};
+
 		const files = app.vault.getMarkdownFiles();
 		setProgress(0); // Reset progress
 
@@ -45,6 +50,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 		}
 
 		// setIsRunning(false);
+		setCollectedTasks(scanningVault.tasksCache);
 		new Notice(t("vault-scanning-complete"));
 		await scanningVault.saveTasksToJsonCache();
 
