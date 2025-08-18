@@ -237,7 +237,7 @@
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,
-      "showVerticalScroll": false,
+      "showVerticalScroll": true,
       "tagColors": [
         {
           "name": "bug",
