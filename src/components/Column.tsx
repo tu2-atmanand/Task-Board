@@ -74,6 +74,7 @@ const Column: React.FC<ColumnProps> = ({
 				{tasks.length > 0 ? (
 					tasks.map((task, index = task.id) => {
 						const allTaskTags = getAllTaskTags(task);
+						console.log("Column.tsx : Task Tags :", allTaskTags, "\nTask:", task.title, "\nColumn Data:", columnData, "\nActive board data :", activeBoardSettings, "\nCondition:", allTaskTags.some((tag: string) => activeBoardSettings?.filters?.includes(tag)));
 						const shouldRenderTask = parseInt(activeBoardSettings?.filterPolarity || "0") === 1 &&
 							allTaskTags.some((tag: string) => activeBoardSettings?.filters?.includes(tag));
 

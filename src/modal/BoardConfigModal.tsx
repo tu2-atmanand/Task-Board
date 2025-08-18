@@ -49,7 +49,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
-	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
+	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex]?.filters?.join(", ") || "");
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -200,6 +200,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				if (selectedBoardIndex !== -1) {
 					const updatedBoards = [...localBoards];
 					updatedBoards.splice(selectedBoardIndex, 1);
+					// Update indexes of boards below the deleted one
+					for (let i = selectedBoardIndex; i < updatedBoards.length; i++) {
+						updatedBoards[i].index = i;
+					}
 					setLocalBoards(updatedBoards);
 					setIsEdited(true);
 					if (updatedBoards.length === 0) {
