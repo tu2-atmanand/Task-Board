@@ -1,6 +1,7 @@
 import TaskBoard from "main";
 import { App } from "obsidian";
 import { taskStatuses } from "src/interfaces/TaskItem";
+import { TaskRegularExpressions } from "./TaskRegularExpressions";
 
 /**
  * Switches the checkbox state based on the current symbol.
@@ -52,7 +53,14 @@ export function isCompleted(task: string): boolean {
  * @returns Returns "True" if the line matches the task pattern, otherwise "False".
  */
 export function isTaskLine(line: string): boolean {
-	return /^- \[[^\]]\]\s+.*\S/.test(line);
+	line = line.trim();
+	const regexMatch = line.match(TaskRegularExpressions.taskRegex);
+	// return /^- \[[^\]]\]\s+.*\S/.test(line);
+	return (
+		regexMatch !== null &&
+		regexMatch.length > 0 &&
+		regexMatch[0].trim().length > 0
+	);
 }
 
 /**

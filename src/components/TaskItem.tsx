@@ -62,7 +62,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		if (taskTitleRendererRef.current && componentRef.current) {
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
-			if (titleElement && task.title !== "") {
+			if (titleElement) {
 				let cleanedTitle = cleanTaskTitle(plugin, task);
 				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
 				if (searchQuery) {

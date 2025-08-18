@@ -518,7 +518,7 @@ export const useTasksPluginToUpdateInFile = async (
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
-					`- [${oldTask.status}] ${oldTask.title}`,
+					oldTask.title,
 					oldTask.filePath
 				);
 

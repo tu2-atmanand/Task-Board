@@ -182,7 +182,8 @@ export default class ScanningVault {
 					this.TaskDetected = true;
 					const taskStatus = extractCheckboxSymbol(line);
 					const isTaskCompleted = isCompleted(line);
-					const title = extractTitle(line);
+					// const title = extractTitle(line);
+					const title = line; // we will be storing the taskLine as it is inside the title property
 					const time = extractTime(line);
 					const createdDate = extractCreatedDate(line);
 					let startDate = extractStartDate(line);
@@ -537,13 +538,32 @@ export function extractBody(
 	let bodyStartIndex = startLineIndex;
 	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
 		const line = lines[bodyStartIndex];
+		// Using regex for faster matching/removal of leading '>' or '> '
+		const sanitizedLine = line.replace(/^>\s?/, "");
 
-		if (line.trim() === "") {
+		if (sanitizedLine.trim() === "") {
 			break;
 		}
 
+		const prevLine = lines[bodyStartIndex - 1];
+		let n = 0;
+		if (prevLine.startsWith(indentationString)) {
+			let tempLine = prevLine;
+			while (tempLine.startsWith(indentationString)) {
+				n++;
+				tempLine = tempLine.slice(indentationString.length);
+			}
+			const requiredIndent = indentationString.repeat(n + 1);
+			if (!sanitizedLine.startsWith(requiredIndent)) {
+				return [];
+			}
+		}
+
 		// If the line has one level of indentation, consider it part of the body
-		if (line.startsWith(indentationString) || line.startsWith("\t")) {
+		if (
+			sanitizedLine.startsWith(indentationString) ||
+			sanitizedLine.startsWith("\t")
+		) {
 			bodyLines.push(line);
 		} else {
 			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.

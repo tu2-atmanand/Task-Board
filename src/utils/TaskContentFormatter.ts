@@ -7,6 +7,7 @@ import {
 	UniversalDateOptions,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
+import { TaskRegularExpressions } from "./TaskRegularExpressions";
 
 export interface cursorLocation {
 	lineNumber: number;
@@ -21,16 +22,15 @@ export interface cursorLocation {
 export const getFormattedTaskContent = async (
 	task: taskItem
 ): Promise<string> => {
-	if (!task) {
+	if (!task || !task.title) {
 		return "";
 	}
 
-	if (task.title === "") {
-		return "";
-	}
+	// const checkBoxStat = `- [${task.status}]`;
+	// let taskLine = `${checkBoxStat} ${task.title}`;
 
-	const checkBoxStat = `- [${task.status}]`;
-	let taskLine = `${checkBoxStat} ${task.title}`;
+	// If the task has a status, format it accordingly
+	let taskLine = task.title.replace(/\[(.)\]/, `[${task.status}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = task.body
@@ -1016,6 +1016,14 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	let cleanedTitle = task.title;
 
+	// Remove the initial indentation and checkbox markdown
+	cleanedTitle = cleanedTitle
+		.replace(
+			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
+			""
+		)
+		.trim();
+
 	// Remove tags
 	task.tags.forEach((tag) => {
 		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
@@ -1167,8 +1175,8 @@ export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
 
 export const isTaskRecurring = (taskTitle: string): boolean => {
 	// This function will simly check if the task title contatins the recurring tag: 🔁
-	const recurringTag = "🔁";
-	if (taskTitle.includes(recurringTag)) {
+	const recurringTagRegex = /🔁/u;
+	if (recurringTagRegex.test(taskTitle)) {
 		return true;
 	}
 	// If the recurring tag is not found, return false
