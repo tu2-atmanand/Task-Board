@@ -277,6 +277,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 7px;
 	display: flex;
 	flex-direction: column;
+	height: auto;
+	max-height: 80vh;
 }
 
 .tasksContainer-SH {
@@ -286,13 +288,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 7px;
 	display: flex;
 	flex-direction: column;
+	height: auto;
 	max-height: 80vh;
 
 	/* Firefox */
 	scrollbar-width: none;
 
+	/* Chrome, Safari, Opera */
 	&::-webkit-scrollbar {
-		/* Chrome, Safari, Opera */
 		display: none;
 	}
 }
