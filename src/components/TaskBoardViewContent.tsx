@@ -251,28 +251,36 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			</div>
 
 			<div className="taskBoardViewSection">
-				{viewType === "kanban" && (
-					<KanbanBoard
-						app={app}
-						plugin={plugin}
-						board={boards[activeBoardIndex]}
-						allTasks={allTasks}
-						tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
-						loading={loading}
-						freshInstall={freshInstall}
-					/>
+				{boards[activeBoardIndex] ? (
+					viewType === "kanban" ? (
+						<KanbanBoard
+							app={app}
+							plugin={plugin}
+							board={boards[activeBoardIndex]}
+							allTasks={allTasks}
+							tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
+							loading={loading}
+							freshInstall={freshInstall}
+						/>
+					) : viewType === "canvas" ? (
+						<CanvasView
+							plugin={plugin}
+							boards={boards}
+							activeBoardIndex={activeBoardIndex}
+							allTasksArranged={allTasksArrangedPerColumn}
+						/>
+					) : (
+						<div className="emptyBoardMessage">
+							{/* Placeholder for other view types */}
+							{viewType === "list" && "List view coming soon."}
+							{viewType === "table" && "Table view coming soon."}
+						</div>
+					)
+				) : (
+					<div className="emptyBoardMessage">
+						Switch to different board.
+					</div>
 				)}
-
-				{viewType === 'canvas' && (
-					<CanvasView
-						plugin={plugin}
-						boards={boards}
-						activeBoardIndex={activeBoardIndex}
-						allTasksArranged={allTasksArrangedPerColumn}
-					/>
-				)}
-
-				{/* Placeholder: You can insert List, Table, Canvas view rendering here later */}
 			</div>
 		</div>
 	);
