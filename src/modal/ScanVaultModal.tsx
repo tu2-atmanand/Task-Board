@@ -213,7 +213,6 @@ export class ScanVaultModal extends Modal {
 	}
 
 	onClose(): void {
-		console.log("TaskCache in plugin.scanningVault", this.plugin.scanningVault.tasksCache);
 		this.contentEl.empty();
 	}
 }

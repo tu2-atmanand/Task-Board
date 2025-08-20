@@ -377,7 +377,6 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("rename", (file, oldPath) => {
-				console.log("File renamed from", oldPath, "to", file.path);
 				if (file instanceof TFile) {
 					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
 					this.realTimeScanning.onFileRenamed(file, oldPath);
@@ -386,7 +385,6 @@ export default class TaskBoard extends Plugin {
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
-				console.log("File deleted:", file.path);
 				if (file instanceof TFile) {
 					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
 					this.realTimeScanning.onFileDeleted(file);

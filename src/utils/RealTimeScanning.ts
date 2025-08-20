@@ -93,12 +93,6 @@ export class RealTimeScanning {
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
 				if (file instanceof TFile && cache.hasOwnProperty(oldPath)) {
-					console.log(
-						"Replacing the old cache[oldPath] with new file path\nOldCache:",
-						cache[oldPath],
-						"\nNew File Path:",
-						file.path
-					);
 					cache[file.path] = cache[oldPath];
 					cache[file.path].forEach((task) => {
 						if (task.filePath === oldPath) {
@@ -126,12 +120,6 @@ export class RealTimeScanning {
 						});
 						delete cache[oldKey];
 					});
-					console.log(
-						"Replacing the old cache[oldPath] with new file path\nOldCache:",
-						cache[oldPath],
-						"\nNew File Path:",
-						file.path
-					);
 					cache[file.path] = cache[oldPath];
 					delete cache[oldPath];
 				}
@@ -179,7 +167,6 @@ export class RealTimeScanning {
 
 	onFileDeleted(file: TAbstractFile) {
 		let foundFlag = false;
-		console.log("File deleted:", file);
 		// Remove the file from the stack if it exists
 		const index = this.taskBoardFileStack.indexOf(file.path);
 		if (index !== -1) {
