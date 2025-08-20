@@ -1,6 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment } from "obsidian";
+import { App, TFile, moment as _moment, debounce } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -29,6 +29,7 @@ import {
 	UniversalDateOptions,
 	scanFilters,
 } from "src/interfaces/GlobalSettings";
+import { TaskRegularExpressions } from "./TaskRegularExpressions";
 
 export default class ScanningVault {
 	app: App;
@@ -441,9 +442,10 @@ export default class ScanningVault {
 		}
 	}
 
-	// Save tasks to JSON file
-	async saveTasksToJsonCache() {
+	// Debounced saveTasksToJsonCache function
+	private saveTasksToJsonCacheDebounced = debounce(async () => {
 		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
+		console.warn("Tasks cache saved to disk");
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
@@ -455,6 +457,11 @@ export default class ScanningVault {
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
+	}, 500);
+
+	// Save tasks to JSON file
+	saveTasksToJsonCache() {
+		this.saveTasksToJsonCacheDebounced();
 	}
 }
 
@@ -725,9 +732,7 @@ export function extractPriority(text: string): number {
 // Extract tags from task title
 export function extractTags(text: string): string[] {
 	text = text.replace(/<(mark|font).*?>/g, "");
-	const matches = text.match(
-		/\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g
-	);
+	const matches = text.match(TaskRegularExpressions.hashTagsRegex);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
 

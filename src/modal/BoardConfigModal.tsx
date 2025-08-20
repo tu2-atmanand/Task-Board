@@ -49,7 +49,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
-	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
+	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex]?.filters?.join(", ") || "");
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -166,8 +166,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const renderAddColumnModal = () => {
 		if (!isAddColumnModalOpen) return null;
 		// TODO : THis wont work if you havent assigned a very high z-index to this specific modal.
-		const modal = new AddColumnModal(app, {
-			app,
+		const modal = new AddColumnModal(plugin.app, {
+			app: plugin.app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
 			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
 		});
@@ -177,7 +177,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleAddNewBoard = async (oldBoards: Board[]) => {
 		const newBoard: Board = {
 			name: t("new-board"),
-			index: localBoards.length + 1,
+			index: localBoards.length,
 			columns: [],
 			hideEmptyColumns: false,
 			filters: [],
@@ -200,6 +200,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				if (selectedBoardIndex !== -1) {
 					const updatedBoards = [...localBoards];
 					updatedBoards.splice(selectedBoardIndex, 1);
+					// Update indexes of boards below the deleted one
+					for (let i = selectedBoardIndex; i < updatedBoards.length; i++) {
+						updatedBoards[i].index = i;
+					}
 					setLocalBoards(updatedBoards);
 					setIsEdited(true);
 					if (updatedBoards.length === 0) {
@@ -743,11 +747,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								<div
 									key={board.name} // Changed key from index to board.name
 									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-								>
-									<span onClick={() => {
+									onClick={() => {
 										setSelectedBoardIndex(index);
 										toggleSidebar();
-									}}>
+									}}
+								>
+									<span>
 										{board.name}
 									</span>
 									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}

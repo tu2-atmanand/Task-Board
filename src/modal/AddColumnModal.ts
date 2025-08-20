@@ -126,7 +126,7 @@ export class AddColumnModal extends Modal {
 		});
 		const submitButton = actions.createEl("button", { text: t("submit") });
 		submitButton.addEventListener("click", () => {
-			if (this.colType === "dated") {
+			if (this.colType === "dated" || this.colType === "undated") {
 				this.onSubmit({
 					id: crypto.getRandomValues(new Uint32Array(1))[0], // Generate a random ID
 					colType: this.colType,

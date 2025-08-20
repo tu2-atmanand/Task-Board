@@ -6,9 +6,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App } from "obsidian";
+import { App, debounce } from "obsidian";
 import type TaskBoard from "main";
-import debounce from "debounce";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
@@ -37,7 +36,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				const data = await loadBoardsData(plugin);
 				setBoards(data);
 
-				const allTasks = await loadTasksAndMerge(plugin);
+				const allTasks = await loadTasksAndMerge(plugin, true);
 				if (allTasks) {
 					setAllTasks(allTasks);
 					setFreshInstall(false);
@@ -74,12 +73,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
 			try {
-				const allTasks = await loadTasksAndMerge(plugin);
+				const allTasks = await loadTasksAndMerge(plugin, false);
 				setAllTasks(allTasks);
 			} catch (error) {
 				bugReporter(plugin, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
 			}
-		}, 300),
+		}, 500),
 		[plugin]
 	);
 
@@ -252,28 +251,36 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			</div>
 
 			<div className="taskBoardViewSection">
-				{viewType === "kanban" && (
-					<KanbanBoard
-						app={app}
-						plugin={plugin}
-						board={boards[activeBoardIndex]}
-						allTasks={allTasks}
-						tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
-						loading={loading}
-						freshInstall={freshInstall}
-					/>
+				{boards[activeBoardIndex] ? (
+					viewType === "kanban" ? (
+						<KanbanBoard
+							app={app}
+							plugin={plugin}
+							board={boards[activeBoardIndex]}
+							allTasks={allTasks}
+							tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
+							loading={loading}
+							freshInstall={freshInstall}
+						/>
+					) : viewType === "canvas" ? (
+						<CanvasView
+							plugin={plugin}
+							boards={boards}
+							activeBoardIndex={activeBoardIndex}
+							allTasksArranged={allTasksArrangedPerColumn}
+						/>
+					) : (
+						<div className="emptyBoardMessage">
+							{/* Placeholder for other view types */}
+							{viewType === "list" && "List view coming soon."}
+							{viewType === "table" && "Table view coming soon."}
+						</div>
+					)
+				) : (
+					<div className="emptyBoardMessage">
+						Switch to different board.
+					</div>
 				)}
-
-				{viewType === 'canvas' && (
-					<CanvasView
-						plugin={plugin}
-						boards={boards}
-						activeBoardIndex={activeBoardIndex}
-						allTasksArranged={allTasksArrangedPerColumn}
-					/>
-				)}
-
-				{/* Placeholder: You can insert List, Table, Canvas view rendering here later */}
 			</div>
 		</div>
 	);

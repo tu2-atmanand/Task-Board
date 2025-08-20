@@ -165,6 +165,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 }
 
+.emptyBoardMessage {
+	padding: 2rem;
+	align-self: center;
+	text-align: center;
+	color: #888;
+}
+
 /* // src/components/KanbanBoard.tsx */
 
 .kanbanBoard {}

@@ -179,7 +179,7 @@
         ],
         "Testing Indented Task Bug.md": [
             {
-                "id": 2293263915,
+                "id": 3148290338,
                 "status": "/",
                 "title": "\t- [/] Nikon financial are available, look through them #me 📅 2025-08-14",
                 "body": [],
@@ -195,9 +195,9 @@
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 2,
+                    "startLine": 7,
                     "startCharIndex": 0,
-                    "endLine": 2,
+                    "endLine": 7,
                     "endCharIndex": 73
                 },
                 "completion": "",
@@ -205,7 +205,7 @@
                 "reminder": ""
             },
             {
-                "id": 1256372930,
+                "id": 3405447800,
                 "status": " ",
                 "title": "- [ ] Main task 1 #pending",
                 "body": [],
@@ -221,9 +221,9 @@
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 7,
+                    "startLine": 12,
                     "startCharIndex": 0,
-                    "endLine": 7,
+                    "endLine": 12,
                     "endCharIndex": 26
                 },
                 "completion": "",
@@ -231,7 +231,7 @@
                 "reminder": ""
             },
             {
-                "id": 184423943,
+                "id": 3924336132,
                 "status": " ",
                 "title": "    - [ ] Subtask 1",
                 "body": [],
@@ -245,9 +245,9 @@
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 9,
+                    "startLine": 14,
                     "startCharIndex": 0,
-                    "endLine": 9,
+                    "endLine": 14,
                     "endCharIndex": 19
                 },
                 "completion": "",
@@ -255,7 +255,7 @@
                 "reminder": ""
             },
             {
-                "id": 4011586344,
+                "id": 1869328878,
                 "status": " ",
                 "title": "    - [ ] Subtask 2",
                 "body": [],
@@ -269,9 +269,9 @@
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 11,
+                    "startLine": 16,
                     "startCharIndex": 0,
-                    "endLine": 11,
+                    "endLine": 16,
                     "endCharIndex": 19
                 },
                 "completion": "",
@@ -279,7 +279,7 @@
                 "reminder": ""
             },
             {
-                "id": 3767630303,
+                "id": 3728605377,
                 "status": " ",
                 "title": "        - [ ] Sub-subtask 1",
                 "body": [
@@ -295,9 +295,9 @@
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 13,
+                    "startLine": 18,
                     "startCharIndex": 0,
-                    "endLine": 14,
+                    "endLine": 19,
                     "endCharIndex": 37
                 },
                 "completion": "",
@@ -305,7 +305,7 @@
                 "reminder": ""
             },
             {
-                "id": 1327720614,
+                "id": 1544520281,
                 "status": " ",
                 "title": "- [ ]      some task 🏁 delete⏳ 2025-08-24",
                 "body": [],
@@ -319,9 +319,9 @@
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 17,
+                    "startLine": 22,
                     "startCharIndex": 0,
-                    "endLine": 17,
+                    "endLine": 22,
                     "endCharIndex": 42
                 },
                 "completion": "",
@@ -329,7 +329,7 @@
                 "reminder": ""
             },
             {
-                "id": 3863811301,
+                "id": 2114309151,
                 "status": " ",
                 "title": ">- [ ] This is a first task inside callout  [due:: 2025-04-20] #todo",
                 "body": [],
@@ -345,9 +345,9 @@
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 22,
+                    "startLine": 27,
                     "startCharIndex": 0,
-                    "endLine": 22,
+                    "endLine": 27,
                     "endCharIndex": 68
                 },
                 "completion": "",
@@ -355,81 +355,9 @@
                 "reminder": ""
             },
             {
-                "id": 3664170799,
+                "id": 368420145,
                 "status": " ",
                 "title": "    - [ ] This is a first indented task.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 24,
-                    "startCharIndex": 0,
-                    "endLine": 24,
-                    "endCharIndex": 40
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1281798429,
-                "status": " ",
-                "title": "    - [ ] This is a first indented task.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 27,
-                    "startCharIndex": 0,
-                    "endLine": 27,
-                    "endCharIndex": 40
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2746285510,
-                "status": " ",
-                "title": "    - [ ] This is second indented task which starts with `+ [ ]`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 28,
-                    "startCharIndex": 0,
-                    "endLine": 28,
-                    "endCharIndex": 64
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3416716180,
-                "status": " ",
-                "title": "    - [ ] This is second indented task which starts with `* [ ]`",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -444,40 +372,16 @@
                     "startLine": 29,
                     "startCharIndex": 0,
                     "endLine": 29,
-                    "endCharIndex": 64
+                    "endCharIndex": 40
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3227429553,
+                "id": 2886627750,
                 "status": " ",
-                "title": "1. [ ] This is a numbered task.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 31,
-                    "startCharIndex": 0,
-                    "endLine": 31,
-                    "endCharIndex": 31
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 4153403854,
-                "status": " ",
-                "title": "2. [ ] Second numbered task.",
+                "title": "    - [ ] This is a first indented task.",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -492,16 +396,40 @@
                     "startLine": 32,
                     "startCharIndex": 0,
                     "endLine": 32,
-                    "endCharIndex": 28
+                    "endCharIndex": 40
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 2488676560,
+                "id": 2243011381,
                 "status": " ",
-                "title": "3) [ ] Another numbered task which starts with pattern `1) [ ]`.",
+                "title": "    - [ ] This is second indented task which starts with `+ [ ]`",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 33,
+                    "startCharIndex": 0,
+                    "endLine": 33,
+                    "endCharIndex": 64
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2040879284,
+                "status": " ",
+                "title": "    - [ ] This is second indented task which starts with `* [ ]`",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -516,6 +444,78 @@
                     "startLine": 34,
                     "startCharIndex": 0,
                     "endLine": 34,
+                    "endCharIndex": 64
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 191238417,
+                "status": " ",
+                "title": "1. [ ] This is a numbered task.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 36,
+                    "startCharIndex": 0,
+                    "endLine": 36,
+                    "endCharIndex": 31
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1097477223,
+                "status": " ",
+                "title": "2. [ ] Second numbered task.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 37,
+                    "startCharIndex": 0,
+                    "endLine": 37,
+                    "endCharIndex": 28
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1627929,
+                "status": " ",
+                "title": "3) [ ] Another numbered task which starts with pattern `1) [ ]`.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 39,
+                    "startCharIndex": 0,
+                    "endLine": 39,
                     "endCharIndex": 64
                 },
                 "completion": "",

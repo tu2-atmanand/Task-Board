@@ -326,7 +326,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<>
 						<div className="taskItemHeader">
 							<div className="taskItemHeaderLeft">
-								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>								{/* Render tags individually */}
+								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
+								{/* Render tags individually */}
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {

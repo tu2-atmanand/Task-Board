@@ -1,6 +1,6 @@
 {
 	"name": "task-board",
-	"version": "1.6.7",
+	"version": "1.6.9",
 	"description": "An Obsidian plugin to see all your task in a much more efficient Kanban Board format. Easily manage your tasks throught your vault.",
 	"main": "main.js",
 	"type": "module",
@@ -34,7 +34,6 @@
 	"dependencies": {
 		"@simonwep/pickr": "^1.8.2",
 		"@xyflow/react": "^12.8.2",
-		"debounce": "^2.2.0",
 		"lucide-react": "^0.525.0",
 		"monkey-around": "^3.0.0",
 		"react": "^19.1.0",
