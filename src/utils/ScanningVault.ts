@@ -1,6 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment } from "obsidian";
+import { App, TFile, moment as _moment, debounce } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -441,9 +441,10 @@ export default class ScanningVault {
 		}
 	}
 
-	// Save tasks to JSON file
-	async saveTasksToJsonCache() {
+	// Debounced saveTasksToJsonCache function
+	private saveTasksToJsonCacheDebounced = debounce(async () => {
 		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
+		console.warn("Tasks cache saved to disk");
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
@@ -455,6 +456,11 @@ export default class ScanningVault {
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
+	}, 500);
+
+	// Save tasks to JSON file
+	saveTasksToJsonCache() {
+		this.saveTasksToJsonCacheDebounced();
 	}
 }
 
