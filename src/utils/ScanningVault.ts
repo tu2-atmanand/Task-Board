@@ -29,6 +29,7 @@ import {
 	UniversalDateOptions,
 	scanFilters,
 } from "src/interfaces/GlobalSettings";
+import { TaskRegularExpressions } from "./TaskRegularExpressions";
 
 export default class ScanningVault {
 	app: App;
@@ -705,9 +706,7 @@ export function extractPriority(text: string): number {
 // Extract tags from task title
 export function extractTags(text: string): string[] {
 	text = text.replace(/<(mark|font).*?>/g, "");
-	const matches = text.match(
-		/\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g
-	);
+	const matches = text.match(TaskRegularExpressions.hashTagsRegex);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
 
