@@ -7,7 +7,7 @@ import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 import TaskBoard from 'main';
-import { ColumnData } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 
 type CustomCSSProperties = CSSProperties & {
@@ -18,7 +18,7 @@ export interface ColumnProps {
 	key: number;
 	plugin: TaskBoard;
 	columnIndex: number;
-	activeBoardIndex: number;
+	activeBoardData: Board;
 	collapsed?: boolean;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
@@ -28,11 +28,11 @@ export interface ColumnProps {
 const Column: React.FC<ColumnProps> = ({
 	plugin,
 	columnIndex,
-	activeBoardIndex,
+	activeBoardData,
 	columnData,
 	tasksForThisColumn,
 }) => {
-	if (plugin.settings.data.boardConfigs[activeBoardIndex]?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
+	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 	// Local tasks state, initially set from external tasks
@@ -53,7 +53,7 @@ const Column: React.FC<ColumnProps> = ({
 	// }, [colType, columnData, allTasksExternal]);
 
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
-	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
+	// const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	// Extra code to provide special data-types for theme support.
 	const tagColors = plugin.settings.data.globalSettings.tagColors;
@@ -74,10 +74,12 @@ const Column: React.FC<ColumnProps> = ({
 				{tasks.length > 0 ? (
 					tasks.map((task, index = task.id) => {
 						const allTaskTags = getAllTaskTags(task);
-						const shouldRenderTask = parseInt(activeBoardSettings?.filterPolarity || "0") === 1 &&
-							allTaskTags.some((tag: string) => activeBoardSettings?.filters?.includes(tag));
+						const shouldRenderTask = parseInt(activeBoardData?.filterPolarity || "0") === 1 &&
+							activeBoardData.filters.length > 0 &&
+							allTaskTags.length > 0 &&
+							allTaskTags.some((tag: string) => activeBoardData?.filters?.includes(tag));
 
-						if (shouldRenderTask || parseInt(activeBoardSettings?.filterPolarity || "0") === 0) {
+						if (shouldRenderTask || parseInt(activeBoardData?.filterPolarity || "0") === 0) {
 							return (
 								<div key={index} className="taskItemFadeIn">
 									<TaskItem
@@ -86,7 +88,7 @@ const Column: React.FC<ColumnProps> = ({
 										taskKey={index}
 										task={task}
 										columnIndex={columnIndex}
-										activeBoardSettings={activeBoardSettings}
+										activeBoardSettings={activeBoardData}
 									/>
 								</div>
 							);

@@ -177,7 +177,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleAddNewBoard = async (oldBoards: Board[]) => {
 		const newBoard: Board = {
 			name: t("new-board"),
-			index: localBoards.length + 1,
+			index: localBoards.length,
 			columns: [],
 			hideEmptyColumns: false,
 			filters: [],
