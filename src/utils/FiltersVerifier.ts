@@ -23,37 +23,46 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 	const fileName = file.path; // Extract file name along with the path
 	const parentFolder = file.parent?.path || "";
 
-	if (scanFilters.files.polarity !== 3) {
+	if (
+		scanFilters.files.polarity !== 3 &&
+		scanFilters.files.values.length > 0
+	) {
 		const result = checkFileFilters(fileName, scanFilters);
 		if (result !== undefined) {
 			return result;
 		} else {
 			// console.log("This comment should not run");
-			return false; // If no specific filter matches, default to true
+			// return false; // If no specific filter matches, default to true
 		}
 	}
 
-	if (scanFilters.frontMatter.polarity !== 3) {
+	if (
+		scanFilters.frontMatter.polarity !== 3 &&
+		scanFilters.frontMatter.values.length > 0
+	) {
 		const result = checkFrontMatterFilters(plugin, file, scanFilters);
 		if (result !== undefined) {
 			return result;
 		} else {
 			// console.log("This comment should not run");
-			return false; // If no specific filter matches, default to true
+			// return false; // If no specific filter matches, default to true
 		}
 	}
 
-	if (scanFilters.folders.polarity !== 3) {
+	if (
+		scanFilters.folders.polarity !== 3 &&
+		scanFilters.folders.values.length > 0
+	) {
 		const result = checkFolderFilters(parentFolder, scanFilters);
 		if (result !== undefined) {
 			return result;
 		} else {
 			// console.log("This comment should not run");
-			return false; // If no specific filter matches, default to true
+			// return false; // If no specific filter matches, default to true
 		}
 	}
 
-	return false;
+	return true;
 }
 
 export function checkFileFilters(
@@ -138,7 +147,7 @@ export function checkFolderFilters(
 		} else {
 			return true;
 		}
-	} else {
+	} else {// This else body will never run because this function is only called if the scanFilters.folders.polarity !== 3.
 		if (
 			scanFilters.files.polarity === 1 &&
 			scanFilters.folders.polarity === 1 &&
