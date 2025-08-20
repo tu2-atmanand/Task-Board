@@ -6,9 +6,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App } from "obsidian";
+import { App, debounce } from "obsidian";
 import type TaskBoard from "main";
-import debounce from "debounce";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
