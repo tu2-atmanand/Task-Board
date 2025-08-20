@@ -747,11 +747,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								<div
 									key={board.name} // Changed key from index to board.name
 									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-								>
-									<span onClick={() => {
+									onClick={() => {
 										setSelectedBoardIndex(index);
 										toggleSidebar();
-									}}>
+									}}
+								>
+									<span>
 										{board.name}
 									</span>
 									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
