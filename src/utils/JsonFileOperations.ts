@@ -76,6 +76,29 @@ export const saveBoardsData = async (
 
 // ------------  Operations with tasks.json ----------------
 
+// load tasks from plugin.scanningVault.tasksCache
+export const loadJsonCacheData = async (
+	plugin: TaskBoard
+): Promise<jsonCacheData> => {
+	try {
+		return plugin.scanningVault.tasksCache;
+	} catch (error) {
+		bugReporter(
+			plugin,
+			"Failed to load tasks from tasks.json",
+			String(error),
+			"JsonFileOperations.ts/loadJsonCacheData"
+		);
+		return {
+			VaultName: plugin.app.vault.getName(),
+			Modified_at: "INVALID",
+			Pending: {},
+			Completed: {},
+			Notes: [],
+		};
+	}
+};
+
 // load tasks from disk.
 export const loadJsonCacheDataFromDisk = async (
 	plugin: TaskBoard
@@ -198,10 +221,16 @@ export const moveTasksCacheFileToNewPath = (
 
 // Helper function to load tasks from tasks.json and merge them
 export const loadTasksAndMerge = async (
-	plugin: TaskBoard
+	plugin: TaskBoard,
+	hardRefresh: boolean
 ): Promise<taskJsonMerged> => {
 	try {
-		const allTasks: jsonCacheData = await loadJsonCacheDataFromDisk(plugin);
+		let allTasks: jsonCacheData;
+		if (hardRefresh) {
+			allTasks = await loadJsonCacheDataFromDisk(plugin);
+		} else {
+			allTasks = await loadJsonCacheData(plugin);
+		}
 		const pendingTasks: taskItem[] = [];
 		const completedTasks: taskItem[] = [];
 

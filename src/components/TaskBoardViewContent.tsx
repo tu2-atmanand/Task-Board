@@ -37,7 +37,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				const data = await loadBoardsData(plugin);
 				setBoards(data);
 
-				const allTasks = await loadTasksAndMerge(plugin);
+				const allTasks = await loadTasksAndMerge(plugin, true);
 				if (allTasks) {
 					setAllTasks(allTasks);
 					setFreshInstall(false);
@@ -74,12 +74,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
 			try {
-				const allTasks = await loadTasksAndMerge(plugin);
+				const allTasks = await loadTasksAndMerge(plugin, false);
 				setAllTasks(allTasks);
 			} catch (error) {
 				bugReporter(plugin, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
 			}
-		}, 300),
+		}, 500),
 		[plugin]
 	);
 
