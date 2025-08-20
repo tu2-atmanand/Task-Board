@@ -832,7 +832,11 @@ export const replaceOldTaskWithNewTask = async (
 				.join("\n")
 				.slice(endCharIndex);
 			const newContent = `${before}\n${newTaskContent}${
-				after ? `\n${after}` : ""
+				after
+					? newTaskContent.endsWith("\n") || after.startsWith("\n")
+						? after
+						: `\n${after}`
+					: ""
 			}`;
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		} else if (
@@ -848,7 +852,11 @@ export const replaceOldTaskWithNewTask = async (
 				.join("\n")
 				.slice(endCharIndex);
 			const newContent = `${before}\n${newTaskContent}${
-				after ? `\n${after}` : ""
+				after
+					? newTaskContent.endsWith("\n") || after.startsWith("\n")
+						? after
+						: `\n${after}`
+					: ""
 			}`;
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		} else {
@@ -865,7 +873,12 @@ export const replaceOldTaskWithNewTask = async (
 							.join("\n")
 							.slice(endCharIndex);
 						const newContent = `${before}\n${newTaskContent}${
-							after ? `\n${after}` : ""
+							after
+								? newTaskContent.endsWith("\n") ||
+								  after.startsWith("\n")
+									? after
+									: `\n${after}`
+								: ""
 						}`;
 						await writeDataToVaultFiles(
 							plugin,
