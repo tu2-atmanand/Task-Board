@@ -64,7 +64,7 @@ export class RealTimeScanning {
 		}
 		if (filesToProcess.length > 0) {
 			// Send all files for scanning and updating tasks
-			await this.scanningVault.refreshTasksFromFiles(files);
+			await this.scanningVault.refreshTasksFromFiles(files, false);
 		}
 		// Save updated stack (which should now be empty)
 		this.saveStack();

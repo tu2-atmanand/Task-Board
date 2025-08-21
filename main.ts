@@ -436,7 +436,7 @@ export default class TaskBoard extends Plugin {
 							.onClick(() => {
 								this.scanningVault.refreshTasksFromFiles([
 									file,
-								]);
+								], true);
 							});
 					});
 					if (

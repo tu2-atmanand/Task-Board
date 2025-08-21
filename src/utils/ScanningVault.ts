@@ -1,6 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment, debounce } from "obsidian";
+import { App, Notice, TFile, moment as _moment, debounce } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -314,7 +314,7 @@ export default class ScanningVault {
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
-	async refreshTasksFromFiles(files: (TFile | null)[]) {
+	async refreshTasksFromFiles(files: (TFile | null)[], showNotice: boolean) {
 		if (!files || files.length === 0) {
 			return;
 		}
@@ -331,9 +331,11 @@ export default class ScanningVault {
 				)
 			) {
 				// TODO : Try testing if removing the await from the below line will going to speed up the process.
-				await this.extractTasksFromFile(file, scanFilters).then(
-					() => {}
-				);
+				await this.extractTasksFromFile(file, scanFilters).then(() => {
+					if (showNotice) {
+						new Notice("Tasks refreshed successfully.");
+					}
+				});
 
 				// const fileNameWithPath = file.path;
 				// const fileContent = await this.app.vault.cachedRead(file);
@@ -437,7 +439,14 @@ export default class ScanningVault {
 				// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
 				// };
 			} else {
-				// console.warn("File is not valid...");
+				if (showNotice) {
+					new Notice(
+						`The file "${
+							files[0] ? files[0].path : "Unknown"
+						}" does not satisfy the filters for scanning applied in setting. Hence it will not be scanned for tasks.`,
+						5000
+					);
+				}
 			}
 		}
 	}
