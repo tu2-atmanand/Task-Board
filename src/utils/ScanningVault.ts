@@ -455,7 +455,6 @@ export default class ScanningVault {
 	// Debounced saveTasksToJsonCache function
 	private saveTasksToJsonCacheDebounced = debounce(async () => {
 		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
-		console.warn("Tasks cache saved to disk");
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (

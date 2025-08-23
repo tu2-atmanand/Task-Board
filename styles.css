@@ -20,7 +20,8 @@
 }
 
 .is-phone .modal[data-type="task-board-view"] {
-	width: auto;
+	width: 100vw;
+	max-width: 100vw;
 	overflow: auto;
 	/* min-height: fit-content; */
 	max-height: 80vh;
@@ -42,7 +43,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskBoardView {
 	display: flex;
 	flex-direction: column;
-	height: 99%;
+	height: 100%;
 }
 
 .taskBoardHeader {
@@ -51,6 +52,25 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding: 4px;
 	padding-block-end: 8px;
 	border-bottom: 1px solid var(--text-normal);
+}
+
+.taskBoardViewSection {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 3.4rem;
+}
+
+.taskBoardViewSection-mobile {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 4.2rem;
+}
+
+.kanbanBoard {
+	height: 100%;
+	/* max-height: 90%; */
 }
 
 .boardTitles {
@@ -79,7 +99,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	flex-direction: row;
 	margin-inline-start: 8px;
 	align-content: center;
-		align-items: center;
+	align-items: center;
 }
 
 .taskBoardHeaderBtns .is-mobile input[type='text'] {
@@ -93,17 +113,22 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	align-items: center;
 	/* border: 1px solid #ddd; */
 	border-radius: 5px;
-	min-width: 12rem;
+	/* min-width: 12rem; */
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .taskCountContainerProgressBar {
 	width: 100%;
+	min-width: 9rem;
 	height: 8px;
 	background-color: #4f99467a;
 	border-radius: 5px;
 	overflow: hidden;
 	/* margin-bottom: 10px;*/
+}
+
+.taskCountContainerProgressBar-hidden {
+	width: 0 !important;
 }
 
 .taskCountContainerProgressBarProgress {
@@ -129,8 +154,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border-radius: 6px;
 	background-color: var(--background-secondary);
 	color: var(--text-normal);
-	margin-right: 8px;
+	margin-inline-start: 8px;
+	margin-inline-end: -8px !important;
 	font-size: 14px;
+	min-width: 12rem;
+	max-width: 20rem;
+	transition: width 0.3s ease-in-out;
 }
 
 .searchTaskBtn,
@@ -364,6 +393,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskItemMainBodyTitleNsubTasks {
 	display: flex;
 	flex-direction: row;
+	min-width: 100%;
+}
+
+.taskItemBodyContent {
+	display: flex;
+	flex-direction: column;
+	min-width: 95%;
 }
 
 .taskItemTitle {
@@ -1051,7 +1087,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		max-width: 84vw;
+		max-width: 100%;
 		min-width: 75vw;
 		flex-grow: 1;
 		max-height: 100%;

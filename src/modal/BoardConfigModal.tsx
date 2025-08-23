@@ -181,7 +181,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			columns: [],
 			hideEmptyColumns: false,
 			filters: [],
-			filterPolarity: "",
+			filterPolarity: "0",
 			filterScope: "",
 			showColumnTags: true,
 			showFilteredTags: true

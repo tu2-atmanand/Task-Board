@@ -160,7 +160,7 @@ export class RealTimeScanning {
 			this.plugin.scanningVault.tasksCache.Pending = Pending;
 			this.plugin.scanningVault.tasksCache.Completed = Completed;
 			this.plugin.scanningVault.tasksCache.Notes = Notes;
-			this.plugin.scanningVault.saveTasksToJsonCache(); // TODO : I might need to make this saveTasksToJsonCache() a debounced function. Because it will run too many times at a very fast rate, since this onFileRenamed function will run for each file inside the renamed folder.
+			this.plugin.scanningVault.saveTasksToJsonCache();
 			eventEmitter.emit("REFRESH_COLUMN");
 		}
 	}

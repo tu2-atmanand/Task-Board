@@ -214,6 +214,7 @@ export default class TaskBoard extends Plugin {
 			await this.loadData()
 		);
 		this.migrateSettings(DEFAULT_SETTINGS, this.settings);
+		this.saveSettings();
 	}
 
 	async saveSettings() {
@@ -670,11 +671,13 @@ export default class TaskBoard extends Plugin {
 				// 	settings[key]
 				// );
 				this.migrateSettings(defaults[key], settings[key]);
+			} else if (key === 'tasksCacheFilePath' && settings[key] === '') {
+				settings[key] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 			}
 		}
 
 		this.settings = settings;
-		this.saveSettings();
+		// this.saveSettings();
 	}
 
 	private runOnPluginUpdate() {
