@@ -6,7 +6,7 @@ import React, { use, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce } from "obsidian";
+import { App, debounce, Platform } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
@@ -300,7 +300,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				</div>
 			</div>
 
-			<div className="taskBoardViewSection">
+			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
 				{boards[activeBoardIndex] ? (
 					viewType === "kanban" ? (
 						<KanbanBoard

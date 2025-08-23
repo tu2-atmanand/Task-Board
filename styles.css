@@ -20,7 +20,8 @@
 }
 
 .is-phone .modal[data-type="task-board-view"] {
-	width: auto;
+	width: 100vw;
+	max-width: 100vw;
 	overflow: auto;
 	/* min-height: fit-content; */
 	max-height: 80vh;
@@ -42,7 +43,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskBoardView {
 	display: flex;
 	flex-direction: column;
-	height: 99%;
+	height: 100%;
 }
 
 .taskBoardHeader {
@@ -51,6 +52,25 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding: 4px;
 	padding-block-end: 8px;
 	border-bottom: 1px solid var(--text-normal);
+}
+
+.taskBoardViewSection {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 3.4rem;
+}
+
+.taskBoardViewSection-mobile {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 4.2rem;
+}
+
+.kanbanBoard {
+	height: 100%;
+	/* max-height: 90%; */
 }
 
 .boardTitles {
@@ -1067,7 +1087,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		max-width: 84vw;
+		max-width: 100%;
 		min-width: 75vw;
 		flex-grow: 1;
 		max-height: 100%;
