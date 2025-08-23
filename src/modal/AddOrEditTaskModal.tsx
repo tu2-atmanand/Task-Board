@@ -1,6 +1,6 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, Keymap, Modal, Notice, TFile, UserEvent, debounce } from "obsidian";
+import { App, Component, Keymap, Modal, Notice, Platform, TFile, UserEvent, debounce } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItem";
@@ -345,7 +345,9 @@ const EditTaskContent: React.FC<{
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 	useEffect(() => {
-		markdownEditor?.editor?.focus();
+		if (!Platform.isMobile) {
+			markdownEditor?.editor?.focus();
+		}
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.ctrlKey || e.metaKey) {
 				setIsCtrlPressed(true);
@@ -699,7 +701,9 @@ const EditTaskContent: React.FC<{
 
 	useEffect(() => {
 		if (markdownEditor) {
-			markdownEditor.editor.focus();
+			if (!Platform.isMobile) {
+				markdownEditor.editor.focus();
+			}
 		}
 	}, [markdownEditor]);
 	// markdownEditor?.editor?.focus();
