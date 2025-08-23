@@ -620,7 +620,7 @@
       "archivedTasksFilePath": "",
       "showFileNameInCard": true,
       "showFrontmatterTagsOnCards": true,
-      "tasksCacheFilePath": "",
+      "tasksCacheFilePath": ".obsidian/plugins/task-board/tasks.json",
       "notificationService": "obsiApp",
       "frontmatterPropertyForReminder": "remind at",
       "actions": [
