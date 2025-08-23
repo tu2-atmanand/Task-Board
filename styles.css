@@ -78,6 +78,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	display: flex;
 	flex-direction: row;
 	margin-inline-start: 8px;
+	align-content: center;
+	align-items: center;
 }
 
 .taskBoardHeaderBtns .is-mobile input[type='text'] {
@@ -91,17 +93,22 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	align-items: center;
 	/* border: 1px solid #ddd; */
 	border-radius: 5px;
-	min-width: 12rem;
+	/* min-width: 12rem; */
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .taskCountContainerProgressBar {
 	width: 100%;
+	min-width: 9rem;
 	height: 8px;
 	background-color: #4f99467a;
 	border-radius: 5px;
 	overflow: hidden;
 	/* margin-bottom: 10px;*/
+}
+
+.taskCountContainerProgressBar-hidden {
+	width: 0 !important;
 }
 
 .taskCountContainerProgressBarProgress {
@@ -127,8 +134,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border-radius: 6px;
 	background-color: var(--background-secondary);
 	color: var(--text-normal);
-	margin-right: 8px;
+	margin-inline-start: 8px;
+	margin-inline-end: -8px !important;
 	font-size: 14px;
+	min-width: 12rem;
+	max-width: 20rem;
+	transition: width 0.3s ease-in-out;
 }
 
 .searchTaskBtn,
@@ -362,6 +373,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskItemMainBodyTitleNsubTasks {
 	display: flex;
 	flex-direction: row;
+	min-width: 100%;
+}
+
+.taskItemBodyContent {
+	display: flex;
+	flex-direction: column;
+	min-width: 95%;
 }
 
 .taskItemTitle {
