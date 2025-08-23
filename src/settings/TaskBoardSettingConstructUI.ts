@@ -375,35 +375,32 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName(t("tasks-cache-file-path"))
 			.setDesc(
-				t("tasks-cache-file-path-description") +
-					"\n" +
-					t("tasks-cache-file-path-description-2")
+				SettingsManager.createFragmentWithHTML(
+					t("tasks-cache-file-path-description") +
+						"<br/>" +
+						t("tasks-cache-file-path-description-2")
+				)
 			)
-			.addText((text) => {
-				text.setValue(tasksCacheFilePath).onChange((value) => {
-					if (this.globalSettings) {
-						moveTasksCacheFileToNewPath(
-							this.plugin,
-							tasksCacheFilePath,
-							value
-						);
+			.addDropdown((dropdown) => {
+				const defaultPath = `${this.plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+				const suggestionContent = [
+					defaultPath,
+					...getFolderSuggestions(this.app).map((item) =>
+						normalizePath(`${item}/task-board-cache.json`)
+					),
+				];
+				// Add 'Default' option label for the default path
+				dropdown.addOption(defaultPath, "Default");
 
-						if (this.globalSettings) {
-							this.globalSettings.tasksCacheFilePath = value;
-							this.saveSettings();
-						}
-					}
+				// Add options to dropdown
+				suggestionContent.forEach((path) => {
+					dropdown.addOption(path, path);
 				});
 
-				const inputEl = text.inputEl;
-				const suggestionContent = getFolderSuggestions(this.app);
-				// to evevery element of suggestionContent, append "/tasks.json"
-				suggestionContent.forEach((item, index) => {
-					suggestionContent[index] = normalizePath(
-						`${item}/tasks.json`
-					);
-				});
-				const onSelectCallback = async (selectedPath: string) => {
+				// Set current value
+				dropdown.setValue(tasksCacheFilePath);
+
+				dropdown.onChange(async (selectedPath) => {
 					moveTasksCacheFileToNewPath(
 						this.plugin,
 						tasksCacheFilePath,
@@ -414,17 +411,7 @@ export class SettingsManager {
 						this.globalSettings.tasksCacheFilePath = selectedPath;
 						await this.saveSettings();
 					}
-					// inputEl.textContent = `${selectedPath}/tasks.json`;
-					// inputEl.setText(`${selectedPath}/tasks.json`);
-					// text.setValue(`${selectedPath}/tasks.json`);
-				};
-
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
+				});
 			});
 
 		// Setting to show/Hide the Header of the task card
