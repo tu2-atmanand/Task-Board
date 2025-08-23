@@ -55,11 +55,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	useEffect(() => {
 		const handleResize = () => {
 			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
-			console.log(
-				"Window resized",
-				"\nTaskBoardLeaf:",
-				taskBoardLeaf
-			);
 			if (taskBoardLeaf) {
 				setLeafWidth(taskBoardLeaf.width);
 			}
