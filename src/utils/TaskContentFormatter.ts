@@ -29,7 +29,7 @@ export const getFormattedTaskContent = async (
 	// const checkBoxStat = `- [${task.status}]`;
 	// let taskLine = `${checkBoxStat} ${task.title}`;
 
-	// If the task has a status, format it accordingly
+	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
 	let taskLine = task.title.replace(/\[(.)\]/, `[${task.status}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting

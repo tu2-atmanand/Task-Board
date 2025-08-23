@@ -78,6 +78,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	display: flex;
 	flex-direction: row;
 	margin-inline-start: 8px;
+	align-content: center;
+		align-items: center;
 }
 
 .taskBoardHeaderBtns .is-mobile input[type='text'] {

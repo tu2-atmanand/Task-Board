@@ -299,6 +299,7 @@ export default class ScanningVault {
 					} else {
 						this.tasksCache.Pending[fileNameWithPath].push(task);
 					}
+					lineIndex = lineIndex + bodyLines.length; // Move the lineIndex forward by the number of body lines
 				} else {
 					// console.log("The tasks is not allowed...");
 				}
@@ -552,6 +553,7 @@ export function extractBody(
 ): string[] {
 	const bodyLines = [];
 	let bodyStartIndex = startLineIndex;
+	const prevLine = lines[bodyStartIndex - 1];
 	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
 		const line = lines[bodyStartIndex];
 		// Using regex for faster matching/removal of leading '>' or '> '
@@ -561,9 +563,9 @@ export function extractBody(
 			break;
 		}
 
-		const prevLine = lines[bodyStartIndex - 1];
 		let n = 0;
 		if (prevLine.startsWith(indentationString)) {
+			console.log("Previous line has indentation\nLine:", prevLine);
 			let tempLine = prevLine;
 			while (tempLine.startsWith(indentationString)) {
 				n++;
@@ -575,6 +577,21 @@ export function extractBody(
 			}
 		}
 
+		console.log(
+			"Line:",
+			line,
+			"\nSanitized line:",
+			sanitizedLine,
+			"\nIndentation String:'",
+			indentationString,
+			"'",
+			"\nLenth of indentationString:",
+			indentationString.length,
+			"\nsanitizedLine starts with indentationString:",
+			sanitizedLine.startsWith(indentationString),
+			"\nSanitized line starts with tab:",
+			sanitizedLine.startsWith("\t")
+		);
 		// If the line has one level of indentation, consider it part of the body
 		if (
 			sanitizedLine.startsWith(indentationString) ||
@@ -587,6 +604,7 @@ export function extractBody(
 			break;
 		}
 	}
+	console.log("Extracted body lines:", bodyLines);
 	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
 }
 
