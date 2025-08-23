@@ -2,7 +2,7 @@
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
 import { Bolt, CirclePlus, RefreshCcw, Search, SearchX } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { use, useCallback, useEffect, useMemo, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
@@ -15,6 +15,7 @@ import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanBoard";
 import CanvasView from "./CanvasView";
+import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
 type ViewType = "kanban" | "list" | "table" | "canvas";
 
@@ -29,6 +30,49 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
+
+	const [showProgressBar, setShowProgressBar] = useState(true);
+	const [leafWidth, setLeafWidth] = useState<number>(1000);
+
+	// plugin.registerEvent(
+	// 	plugin.app.workspace.on("resize", () => {
+	// 		// Now I should find if the leaf of type taskboard-view is active or not. If its active then I should find its width. If its less than 400px then hide the progress bar.
+	// 		const taskBoardLeaf =
+	// 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
+	// 		console.log(
+	// 			"Window resized",
+	// 			"\nTaskBoardLeaf:",
+	// 			taskBoardLeaf
+	// 		);
+	// 		if (taskBoardLeaf) {
+	// 			const width = taskBoardLeaf.width;
+	// 			console.log("TaskBoardLeaf width:", width);
+	// 			setLeafWidth(width);
+	// 		}
+	// 	})
+	// );
+
+	useEffect(() => {
+		const handleResize = () => {
+			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
+			console.log(
+				"Window resized",
+				"\nTaskBoardLeaf:",
+				taskBoardLeaf
+			);
+			if (taskBoardLeaf) {
+				setLeafWidth(taskBoardLeaf.width);
+			}
+		};
+		plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
+		return () => {
+			// cleanup if needed
+		};
+	}, []);
+
+	useEffect(() => {
+		setShowProgressBar(leafWidth >= 1000);
+	}, [leafWidth]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -119,6 +163,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		setShowSearchInput((prev) => !prev);
 		if (showSearchInput) {
 			setSearchQuery("");
+			// el.currentTarget.focus();
 			setFilteredTasksPerColumn([]);
 			plugin.settings.data.globalSettings.searchQuery = "";
 		} else {
@@ -183,7 +228,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				</div>
 				<div className="taskBoardHeaderBtns">
 					<div className="taskCountContainer">
-						<div className="taskCountContainerProgressBar">
+						<div className={`taskCountContainerProgressBar${showProgressBar ? "" : "-hidden"}`}>
 							<div
 								className="taskCountContainerProgressBarProgress"
 								style={{
