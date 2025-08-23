@@ -210,8 +210,10 @@
           ]
         },
         "tags": {
-          "polarity": 3,
-          "values": []
+          "polarity": 2,
+          "values": [
+            "#CS"
+          ]
         },
         "frontMatter": {
           "polarity": 3,
@@ -237,7 +239,7 @@
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,
-      "showVerticalScroll": true,
+      "showVerticalScroll": false,
       "tagColors": [
         {
           "name": "bug",

@@ -179,9 +179,9 @@
         ],
         "Testing Indented Task Bug.md": [
             {
-                "id": 3148290338,
+                "id": 1031671563,
                 "status": "/",
-                "title": "\t- [/] Nikon financial are available, look through them #me 📅 2025-08-14",
+                "title": "\t- [/] Nikon financial are available, look through them #me  📅 2025-08-14",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -191,24 +191,34 @@
                 "tags": [
                     "#me"
                 ],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
                     "startLine": 7,
                     "startCharIndex": 0,
                     "endLine": 7,
-                    "endCharIndex": 73
+                    "endCharIndex": 74
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3405447800,
+                "id": 4229508677,
                 "status": " ",
                 "title": "- [ ] Main task 1 #pending",
-                "body": [],
+                "body": [
+                    "    Main task description",
+                    "    - [ ] Subtask 1",
+                    "        Subtask 1 description",
+                    "    - [ ] Subtask 2",
+                    "        Subtask 2 description",
+                    "        - [ ] Sub-subtask 1",
+                    "            Sub-subtask 1 description"
+                ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
@@ -217,85 +227,13 @@
                 "tags": [
                     "#pending"
                 ],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
                     "startLine": 12,
-                    "startCharIndex": 0,
-                    "endLine": 12,
-                    "endCharIndex": 26
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3924336132,
-                "status": " ",
-                "title": "    - [ ] Subtask 1",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 14,
-                    "startCharIndex": 0,
-                    "endLine": 14,
-                    "endCharIndex": 19
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1869328878,
-                "status": " ",
-                "title": "    - [ ] Subtask 2",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 16,
-                    "startCharIndex": 0,
-                    "endLine": 16,
-                    "endCharIndex": 19
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3728605377,
-                "status": " ",
-                "title": "        - [ ] Sub-subtask 1",
-                "body": [
-                    "            Sub-subtask 1 description"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 18,
                     "startCharIndex": 0,
                     "endLine": 19,
                     "endCharIndex": 37
@@ -305,7 +243,37 @@
                 "reminder": ""
             },
             {
-                "id": 1544520281,
+                "id": 1818575430,
+                "status": " ",
+                "title": "    - [ ] This is a first task with one level of indentation, very next to the paragraph line.",
+                "body": [
+                    "        - [ ] This is a sub-tasks of the one-level indented task.",
+                    "        - Thi is a bullet point.",
+                    "        This is a normal line in the one-level indented task."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 23,
+                    "startCharIndex": 0,
+                    "endLine": 26,
+                    "endCharIndex": 61
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3578605587,
                 "status": " ",
                 "title": "- [ ]      some task 🏁 delete⏳ 2025-08-24",
                 "body": [],
@@ -315,13 +283,15 @@
                 "scheduledDate": "2025-08-24",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 22,
+                    "startLine": 30,
                     "startCharIndex": 0,
-                    "endLine": 22,
+                    "endLine": 30,
                     "endCharIndex": 42
                 },
                 "completion": "",
@@ -329,7 +299,7 @@
                 "reminder": ""
             },
             {
-                "id": 2114309151,
+                "id": 2268899347,
                 "status": " ",
                 "title": ">- [ ] This is a first task inside callout  [due:: 2025-04-20] #todo",
                 "body": [],
@@ -341,13 +311,15 @@
                 "tags": [
                     "#todo"
                 ],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 27,
+                    "startLine": 35,
                     "startCharIndex": 0,
-                    "endLine": 27,
+                    "endLine": 35,
                     "endCharIndex": 68
                 },
                 "completion": "",
@@ -355,9 +327,9 @@
                 "reminder": ""
             },
             {
-                "id": 368420145,
+                "id": 137259494,
                 "status": " ",
-                "title": "    - [ ] This is a first indented task.",
+                "title": ">    - [ ] This is a sub-tasks of the main task inside a callout. (**Will not support this for now**)",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -365,117 +337,153 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 29,
-                    "startCharIndex": 0,
-                    "endLine": 29,
-                    "endCharIndex": 40
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2886627750,
-                "status": " ",
-                "title": "    - [ ] This is a first indented task.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 32,
-                    "startCharIndex": 0,
-                    "endLine": 32,
-                    "endCharIndex": 40
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2243011381,
-                "status": " ",
-                "title": "    - [ ] This is second indented task which starts with `+ [ ]`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 33,
-                    "startCharIndex": 0,
-                    "endLine": 33,
-                    "endCharIndex": 64
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2040879284,
-                "status": " ",
-                "title": "    - [ ] This is second indented task which starts with `* [ ]`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 34,
-                    "startCharIndex": 0,
-                    "endLine": 34,
-                    "endCharIndex": 64
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 191238417,
-                "status": " ",
-                "title": "1. [ ] This is a numbered task.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
                     "startLine": 36,
                     "startCharIndex": 0,
                     "endLine": 36,
-                    "endCharIndex": 31
+                    "endCharIndex": 101
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 1097477223,
+                "id": 2965371499,
+                "status": " ",
+                "title": "> + [ ] This is task inside callout with a space at the beginning.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 39,
+                    "startCharIndex": 0,
+                    "endLine": 39,
+                    "endCharIndex": 66
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 62733772,
+                "status": " ",
+                "title": "    - [ ] This is a first indented task right after a normal line.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 44,
+                    "startCharIndex": 0,
+                    "endLine": 44,
+                    "endCharIndex": 66
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 262121275,
+                "status": " ",
+                "title": "    + [ ] This is second indented task which starts with `+ [ ]`",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 45,
+                    "startCharIndex": 0,
+                    "endLine": 45,
+                    "endCharIndex": 64
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3652327634,
+                "status": " ",
+                "title": "    * [x] This is Third indented task which starts with `* [ ]` ✅ 2025-08-22",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 46,
+                    "startCharIndex": 0,
+                    "endLine": 46,
+                    "endCharIndex": 76
+                },
+                "completion": "2025-08-22",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 99499618,
+                "status": " ",
+                "title": "1. [x] This is a numbered task. ✅ 2025-08-22",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 48,
+                    "startCharIndex": 0,
+                    "endLine": 48,
+                    "endCharIndex": 44
+                },
+                "completion": "2025-08-22",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4093867929,
                 "status": " ",
                 "title": "2. [ ] Second numbered task.",
                 "body": [],
@@ -485,13 +493,15 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 37,
+                    "startLine": 49,
                     "startCharIndex": 0,
-                    "endLine": 37,
+                    "endLine": 49,
                     "endCharIndex": 28
                 },
                 "completion": "",
@@ -499,9 +509,38 @@
                 "reminder": ""
             },
             {
-                "id": 1627929,
+                "id": 1657928995,
                 "status": " ",
-                "title": "3) [ ] Another numbered task which starts with pattern `1) [ ]`.",
+                "title": "- [ ] All the below numbered tasks should be completed.",
+                "body": [
+                    "    1. [ ] This is a first numbered sub-task.",
+                    "    2. [ ]  This is a second numbered sub-task, with a little space at start."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 52,
+                    "startCharIndex": 0,
+                    "endLine": 54,
+                    "endCharIndex": 77
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 736559073,
+                "status": " ",
+                "title": "1) [ ] Another numbered task which starts with pattern `1) [ ]`.",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -509,13 +548,15 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 39,
+                    "startLine": 56,
                     "startCharIndex": 0,
-                    "endLine": 39,
+                    "endLine": 56,
                     "endCharIndex": 64
                 },
                 "completion": "",
@@ -3851,6 +3892,34 @@
                     "endCharIndex": 71
                 },
                 "completion": "2025-05-27",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Testing Indented Task Bug.md": [
+            {
+                "id": 3001748490,
+                "status": "x",
+                "title": "    - [x] This is a first indented task. ✅ 2025-08-22",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 41,
+                    "startCharIndex": 0,
+                    "endLine": 41,
+                    "endCharIndex": 53
+                },
+                "completion": "2025-08-22",
                 "cancelledDate": "",
                 "reminder": ""
             }
