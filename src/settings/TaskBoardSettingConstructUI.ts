@@ -1170,10 +1170,10 @@ export class SettingsManager {
 					NotificationService.ReminderPlugin,
 					"Reminder " + t("plugin")
 				);
-				// dropdown.addOption(
-				// 	NotificationService.NotifianApp,
-				// 	"Notifian " + t("app")
-				// );
+				dropdown.addOption(
+					NotificationService.NotifianApp,
+					"Notifian " + t("app")
+				);
 				dropdown.addOption(
 					NotificationService.ObsidApp,
 					"Obsi " + t("app")
