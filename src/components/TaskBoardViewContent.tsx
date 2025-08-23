@@ -208,6 +208,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 									handleSearchSubmit();
 								}
 							}}
+							ref={input => {
+								if (input && showSearchInput) {
+									input.focus();
+								}
+							}}
 						/>
 					)}
 					<button
