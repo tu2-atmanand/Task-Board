@@ -549,6 +549,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .subtask-toggle-icon {
 	display: inline-block;
 	transition: transform 0.3s ease;
+	cursor: pointer;
 }
 
 .subtask-toggle-icon.rotated {
@@ -671,7 +672,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .taskItemFileNameSection {
-	background-color: var(--color-base-35);
+	background-color: var(--background-modifier-box-shadow);
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -684,7 +685,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItemFileName {
 	font-weight: 500;
-	color: hsl(var(--interactive-accent-hsl))
+	font-size: 0.9rem;
+	opacity: 0.7;
+	color: var(--code-value);
 }
 
 .taskItemHeader {
