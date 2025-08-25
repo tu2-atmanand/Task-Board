@@ -14,7 +14,7 @@ export class TaskRegularExpressions {
 	// Matches the rest of the task after the checkbox.
 	public static readonly afterCheckboxRegex = / *(.*)/u;
 
-	// Matches the indentation, checkbox, and the rest of the task.
+	// Matches the indentation and checkbox only.
 	public static readonly indentationAndCheckboxRegex = new RegExp(
 		TaskRegularExpressions.indentationRegex.source +
 			TaskRegularExpressions.listMarkerRegex.source +
