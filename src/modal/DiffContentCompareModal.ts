@@ -194,3 +194,28 @@ export class DiffContentCompareModal extends Modal {
 			.replace(/'/g, "&#039;");
 	}
 }
+
+
+export function isTheContentDiffAreOnlySpaces(
+	oldContent: string,
+	newContent: string
+): boolean {
+	const normalizeSpaces = (content: string) => content.replace(/ +/g, " ");
+	const updatedOldContent = normalizeSpaces(oldContent);
+	const updatedNewContent = normalizeSpaces(newContent);
+
+	const maxLength = Math.max(
+		updatedOldContent.length,
+		updatedNewContent.length
+	);
+	for (let i = 0; i < maxLength; i++) {
+		const charOld = updatedOldContent[i] || "";
+		const charNew = updatedNewContent[i] || "";
+		if (charOld !== charNew) {
+			if (charOld !== " " && charNew !== " ") {
+				return false;
+			}
+		}
+	}
+	return true;
+}

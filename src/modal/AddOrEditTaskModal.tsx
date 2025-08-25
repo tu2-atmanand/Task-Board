@@ -1,9 +1,8 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
-import { App, Component, Keymap, MarkdownView, Modal, Notice, TFile, UserEvent, debounce, getAllTags } from "obsidian";
+import { App, Component, Keymap, Modal, Notice, Platform, TFile, UserEvent, debounce } from "obsidian";
 import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { checkboxStateSwitcher, extractCheckboxSymbol, isTaskLine } from "src/utils/CheckBoxUtils";
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItem";
 
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
@@ -20,6 +19,7 @@ import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import { getObsidianIndentationSetting } from "src/utils/CheckBoxUtils";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -56,10 +56,10 @@ const EditTaskContent: React.FC<{
 	app: App,
 	plugin: TaskBoard,
 	root: HTMLElement,
-	task?: taskItem,
-	taskExists?: boolean,
 	activeNote: boolean,
 	filePath: string;
+	task?: taskItem,
+	taskExists?: boolean,
 	onSave: (updatedTask: taskItem, quickAddPluginChoice: string) => void;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
@@ -85,6 +85,8 @@ const EditTaskContent: React.FC<{
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
 	const [updateEditorContent, setUpdateEditorContent] = useState<Boolean>(false);
 	const cursorLocationRef = useRef<cursorLocation | null>(null);
+
+	const indentationString = getObsidianIndentationSetting(plugin);
 
 	const rightSecRef = useRef<HTMLDivElement>(null);
 	const toggleRightSec = () => setIsRightSecVisible(!isRightSecVisible);
@@ -124,14 +126,15 @@ const EditTaskContent: React.FC<{
 
 	// Automatically update end time if only start time is provided
 	useEffect(() => {
+		let newTime = '';
 		if (startTime && !endTime) {
 			const [hours, minutes] = startTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
-			const newTime = `${startTime} - ${newEndTime}`;
+			newTime = `${startTime} - ${newEndTime}`;
 			setNewTime(newTime);
 		} else if (startTime && endTime) {
-			const newTime = `${startTime} - ${endTime}`;
+			newTime = `${startTime} - ${endTime}`;
 			setNewTime(newTime);
 		}
 
@@ -278,20 +281,19 @@ const EditTaskContent: React.FC<{
 		handleTaskEditedThroughEditors(e.target.value);
 	};
 
-	useEffect(() => {
-		console.log("Cursor Location in useEffect:", cursorLocationRef.current);
-	}, [cursorLocationRef.current]);
+	// useEffect(() => {
+	// 	console.log("Cursor Location in useEffect:", cursorLocationRef.current);
+	// }, [cursorLocationRef.current]);
 
 	// Tags input
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Enter') {
-			const input = e.currentTarget.value.trim();
-			console.log("Cursor Location in handleTagInput:", cursorLocationRef.current);
+			const input = e.currentTarget.value.trim().startsWith("#") ? e.currentTarget.value.trim() : `#${e.currentTarget.value.trim()}`;
 			const newTitle = sanitizeTags(title, tags, input, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 
 			if (!tags.includes(input)) {
-				setTags(prevTags => [...prevTags, input.startsWith("#") ? input : `#${input}`]);
+				setTags(prevTags => [...prevTags, input]);
 				e.currentTarget.value = '';
 				setIsEdited(true);
 				setUpdateEditorContent(true);
@@ -299,29 +301,53 @@ const EditTaskContent: React.FC<{
 		}
 	};
 	const tagsInputFieldRef = useRef<HTMLInputElement>(null);
+	// NEW refs to always track the latest value of title and tags
+	const titleRef = useRef(title);
+	const tagsRef = useRef(tags);
+
+	// Keep refs updated on each render
+	useEffect(() => {
+		titleRef.current = title;
+		tagsRef.current = tags;
+	}, [title, tags]);
 	useEffect(() => {
 		if (!tagsInputFieldRef.current) return;
 
 		const suggestionContent = getTagSuggestions(app);
 		const onSelectCallback = (choice: string) => {
-			handleTagInput({
-				key: 'Enter',
-				currentTarget: { value: choice },
-			} as React.KeyboardEvent<HTMLInputElement>);
-			// setNewFilePath(selectedPath);
+			const currentTitle = titleRef.current;
+			const currentTags = tagsRef.current;
+
+			const newTitle = sanitizeTags(currentTitle, currentTags, choice, cursorLocationRef.current ?? undefined);
+			setTitle(newTitle);
+
+			if (!currentTags.includes(choice)) {
+				setTags(prevTags => [...prevTags, choice]);
+			}
+			setIsEdited(true);
+			setUpdateEditorContent(true);
+
+			tagsInputFieldRef.current?.setText('');
 		};
 		new MultiSuggest(tagsInputFieldRef.current, new Set(suggestionContent), onSelectCallback, app);
 	}, [app]);
 	// Function to remove a tag
 	const removeTag = (tagToRemove: string) => {
-		setTags(prevTags => prevTags.filter(tag => tag !== tagToRemove));
+		const newTags = tags.filter(tag => tag !== tagToRemove);
+		setTags(newTags);
+
+		const newTitle = sanitizeTags(title, newTags, '', cursorLocationRef.current ?? undefined);
+		setTitle(newTitle);
+
 		setIsEdited(true);
 		setUpdateEditorContent(true);
 	};
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 	useEffect(() => {
-		markdownEditor?.editor?.focus();
+		if (!Platform.isMobile) {
+			markdownEditor?.editor?.focus();
+		}
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.ctrlKey || e.metaKey) {
 				setIsCtrlPressed(true);
@@ -378,11 +404,12 @@ const EditTaskContent: React.FC<{
 		let newScheduledDate = scheduledDate;
 
 		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists) {
-			if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.dueDate && !due) {
+			const universalDateType = plugin.settings.data.globalSettings.universalDate;
+			if (universalDateType === UniversalDateOptions.dueDate && !due) {
 				newDue = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.startDate && !startDate) {
+			} else if (universalDateType === UniversalDateOptions.startDate && !startDate) {
 				newStartDate = new Date().toISOString().split('T')[0];
-			} else if (plugin.settings.data.globalSettings.universalDate === UniversalDateOptions.scheduledDate && !scheduledDate) {
+			} else if (universalDateType === UniversalDateOptions.scheduledDate && !scheduledDate) {
 				newScheduledDate = new Date().toISOString().split('T')[0];
 			}
 		}
@@ -410,7 +437,6 @@ const EditTaskContent: React.FC<{
 			status,
 			reminder,
 		};
-		console.log("Updated Task:", updatedTask);
 		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	};
@@ -425,15 +451,15 @@ const EditTaskContent: React.FC<{
 		startDate: startDate,
 		scheduledDate: scheduledDate,
 		due: due,
-		completion: task.completion || '',
-		cancelledDate: task.cancelledDate || '',
 		tags: tags,
 		time: newTime,
 		priority: priority,
 		filePath: newFilePath,
+		status: status,
+		reminder: reminder,
 		taskLocation: task.taskLocation,
-		status,
-		reminder,
+		completion: task.completion || '',
+		cancelledDate: task.cancelledDate || '',
 	};
 
 	// Reference to the HTML element where markdown will be rendered
@@ -463,7 +489,7 @@ const EditTaskContent: React.FC<{
 
 
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
-		const updatedTask = buildTaskFromRawContent(value);
+		const updatedTask = buildTaskFromRawContent(value, indentationString);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
@@ -548,14 +574,8 @@ const EditTaskContent: React.FC<{
 								// 	lineNumber: 1,
 								// 	charIndex: editor?.obsidianEditor?.getCursor().ch || formattedTaskContent.split("\n")[0].length,
 								// });
-								console.log("Editor cursor location updated:",
-									"\nCursorLocation : ", fullMarkdownEditor.editor.editor?.getCursor()
-								);
 							},
 							onBlur: (editor) => {
-								console.log("onBlue inside Editor:",
-									"\nCursorLocation : ", fullMarkdownEditor.editor.editor?.getCursor()
-								);
 								// setCursorLocation({
 								// 	lineNumber: 1,
 								// 	charIndex: editor.options.cursorLocation?.head || formattedTaskContent.split("\n")[0].length,
@@ -601,15 +621,12 @@ const EditTaskContent: React.FC<{
 
 					// Only this one worked.
 					fullMarkdownEditor.activeCM.contentDOM.onblur = () => {
-						console.log("2. onBlur event triggered in the embedded markdown editor's content DOM.");
 						// setUpdateEditorContent(true);
 						const cursor = fullMarkdownEditor.editor.editor?.getCursor();
-						console.log("Cursor Location in activeCM.contentDOM.onblur:", cursor);
 						cursorLocationRef.current = {
 							lineNumber: (cursor ? cursor.line + 1 : 0),
 							charIndex: (cursor ? (cursor?.ch - 6 < 0 ? 0 : cursor?.ch - 6) : formattedTaskContent.split("\n")[0].length),
 						};
-						console.log("Updated cursorLocationRef:", cursorLocationRef.current);
 					}
 
 					// fullMarkdownEditor.containerEl.onblur = () => {
@@ -667,26 +684,26 @@ const EditTaskContent: React.FC<{
 					// If the editor already exists, just update its content
 					markdownEditor.set(formattedTaskContent, false);
 
-					if (markdownEditor && markdownEditor.editorEl) {
-						markdownEditor.editorEl.onblur = () => {
-							console.log("onBlur event triggered in the embedded markdown editor.");
-							// setUpdateEditorContent(true);
-							// setCursorLocation({
-							// 	lineNumber: 1,
-							// 	charIndex: markdownEditor?.editor?.getCursor().ch || formattedTaskContent.split("\n")[0].length,
-							// });
-						};
-					}
+					// if (markdownEditor && markdownEditor.editorEl) {
+					// 	markdownEditor.editorEl.onblur = () => {
+					// 		// setUpdateEditorContent(true);
+					// 		// setCursorLocation({
+					// 		// 	lineNumber: 1,
+					// 		// 	charIndex: markdownEditor?.editor?.getCursor().ch || formattedTaskContent.split("\n")[0].length,
+					// 		// });
+					// 	};
+					// }
 				}
 			}
 		});
 		setUpdateEditorContent(false);
-		console.log("I hope this useEffect is not going in loop, because I am setting the updateEditorContent to false at the end of this useEffect.");
 	}, [updateEditorContent]);
 
 	useEffect(() => {
 		if (markdownEditor) {
-			markdownEditor.editor.focus();
+			if (!Platform.isMobile) {
+				markdownEditor.editor.focus();
+			}
 		}
 	}, [markdownEditor]);
 	// markdownEditor?.editor?.focus();
@@ -788,7 +805,6 @@ const EditTaskContent: React.FC<{
 									onChange={handleTextareaChange}
 									onBlur={() => {
 										setUpdateEditorContent(true);
-										console.log("On focus lost from the text area");
 									}}
 									placeholder={t("body-content")}
 									style={{ display: activeTab === 'rawEditor' ? 'block' : 'none', width: '100%' }}
@@ -869,7 +885,6 @@ const EditTaskContent: React.FC<{
 									type="datetime-local"
 									value={reminder}
 									onFocus={() => {
-										console.log("On focusing the date-time selector...\nreminder : ", reminder);
 										if (!reminder || reminder === "") {
 											const dateToUse = startDate || scheduledDate || due;
 											const timeToUse = startTime || "09:00";

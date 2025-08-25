@@ -7,6 +7,7 @@ import {
 	UniversalDateOptions,
 	globalSettingsData,
 } from "src/interfaces/GlobalSettings";
+import { TaskRegularExpressions } from "./TaskRegularExpressions";
 
 export interface cursorLocation {
 	lineNumber: number;
@@ -21,25 +22,25 @@ export interface cursorLocation {
 export const getFormattedTaskContent = async (
 	task: taskItem
 ): Promise<string> => {
-	if (!task) {
+	if (!task || !task.title) {
 		return "";
 	}
 
-	if (task.title === "") {
-		return "";
-	}
+	// const checkBoxStat = `- [${task.status}]`;
+	// let taskLine = `${checkBoxStat} ${task.title}`;
 
-	const checkBoxStat = `- [${task.status}]`;
-	let taskLine = `${checkBoxStat} ${task.title}`;
+	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
+	let taskLine = task.title.replace(/\[(.)\]/, `[${task.status}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = task.body
 		.map((line: string) => {
-			if (line.startsWith("\t")) {
-				return line;
-			} else {
-				return `\t${line}`;
-			}
+			// if (line.startsWith("\t")) {
+			// 	return line;
+			// } else {
+			// 	return `\t${line}`;
+			// }
+			return line;
 		})
 		.join("\n");
 
@@ -136,11 +137,12 @@ export const getSanitizedTaskContent = (
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = updatedTask.body
 		.map((line: string) => {
-			if (line.startsWith("\t")) {
-				return line;
-			} else {
-				return `\t${line}`;
-			}
+			// if (line.startsWith("\t")) {
+			// 	return line;
+			// } else {
+			// 	return `\t${line}`;
+			// }
+			return line;
 		})
 		.join("\n");
 
@@ -774,39 +776,26 @@ export const sanitizeTags = (
 	newTag: string,
 	cursorLocation?: cursorLocation
 ): string => {
-	console.log(
-		"sanitizeTags called with title:",
-		title,
-		"\ncursorLocation:",
-		cursorLocation
-	);
 	// Remove the <mark> and <font> tags from the title first before processing
+	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 
 	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
 	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
 
 	// Create a set for quick lookup of newTags
-	const newTagsSet = new Set(oldTagsList);
+	const oldTagSet = new Set(oldTagsList);
 
-	if (newTagsSet.size === 0) {
+	if (oldTagSet.size === 0) {
 		// If no tags are present, remove all existing tags
 		extractedTagsMatch.forEach((tag) => {
-			title = title.replace(tag.trim(), "").trim();
+			updatedTitle = title.replace(tag.trim(), "").trim();
 		});
-		return title;
 	}
 
 	// Remove tags from the title that are not in newTags
-	let updatedTitle = title;
-	console.log(
-		"extractedTagsMatch",
-		extractedTagsMatch,
-		"\nnewTagsSet",
-		newTagsSet
-	);
 	for (const tag of extractedTagsMatch) {
-		if (!newTagsSet.has(tag.trim())) {
+		if (!oldTagSet.has(tag.trim())) {
 			updatedTitle = updatedTitle.replace(tag, "").trim();
 		}
 	}
@@ -1027,12 +1016,20 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	let cleanedTitle = task.title;
 
+	// Remove the initial indentation and checkbox markdown
+	cleanedTitle = cleanedTitle
+		.replace(
+			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
+			""
+		)
+		.trim();
+
 	// Remove tags
 	task.tags.forEach((tag) => {
 		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
 		const tagsMatch = cleanedTitle.match(tagRegex);
 		if (tagsMatch) {
-			cleanedTitle = cleanedTitle.replace(tagsMatch[0], "");
+			cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");
 		}
 	});
 
@@ -1113,7 +1110,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			// Replace the first valid priority emoji found
 			cleanedTitle = cleanedTitle.replace(priorityRegex, (match) => {
-				return match.trim() === priorityIcon ? "" : match;
+				return match.trim() === priorityIcon ? " " : match;
 			});
 		}
 	}
@@ -1132,32 +1129,35 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	return cleanedTitle.trim();
 };
 
-export const getUniversalDate = (task: taskItem, plugin: TaskBoard): string => {
+export const getUniversalDateFromTask = (
+	task: taskItem,
+	plugin: TaskBoard
+): string => {
 	// Method 1 - Comparing
-	// const universalDateChoice =
-	// 	plugin.settings.data.globalSettings.universalDate;
-
-	// if (universalDateChoice === UniversalDateOptions.dueDate) {
-	// 	return task.due;
-	// } else if (universalDateChoice === UniversalDateOptions.startDate) {
-	// 	return task.startDate || "";
-	// } else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
-	// 	return task.scheduledDate || "";
-	// }
-	// return "";
-
-	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.globalSettings.universalDate
 	const universalDateChoice =
 		plugin.settings.data.globalSettings.universalDate;
-	if (
-		!universalDateChoice ||
-		!task[universalDateChoice] ||
-		task[universalDateChoice] === ""
-	) {
-		return "";
+
+	if (universalDateChoice === UniversalDateOptions.dueDate) {
+		return task.due;
+	} else if (universalDateChoice === UniversalDateOptions.startDate) {
+		return task.startDate || "";
+	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
+		return task.scheduledDate || "";
 	}
-	// Return the value of the universal date key from the task object
-	return task[universalDateChoice] || "";
+	return "";
+
+	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.globalSettings.universalDate
+	// const universalDateChoice =
+	// 	plugin.settings.data.globalSettings.universalDate;
+	// if (
+	// 	!universalDateChoice ||
+	// 	!task[universalDateChoice] ||
+	// 	task[universalDateChoice] === ""
+	// ) {
+	// 	return "";
+	// }
+	// // Return the value of the universal date key from the task object
+	// return task[universalDateChoice] || "";
 };
 
 export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
@@ -1175,8 +1175,8 @@ export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
 
 export const isTaskRecurring = (taskTitle: string): boolean => {
 	// This function will simly check if the task title contatins the recurring tag: 🔁
-	const recurringTag = "🔁";
-	if (taskTitle.includes(recurringTag)) {
+	const recurringTagRegex = /🔁/u;
+	if (recurringTagRegex.test(taskTitle)) {
 		return true;
 	}
 	// If the recurring tag is not found, return false

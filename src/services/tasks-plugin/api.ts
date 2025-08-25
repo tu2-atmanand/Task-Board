@@ -81,7 +81,7 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			plugin.saveSettings();
 		}
 	} catch (error) {
-		console.error(
+		console.warn(
 			"Error fetching custom statuses from tasks plugin:",
 			error
 		);

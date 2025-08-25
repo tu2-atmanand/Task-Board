@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { AbstractInputSuggest, App, Plugin, TFile, TFolder } from "obsidian";
+import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
 	content: Set<string>;
@@ -90,13 +90,12 @@ export function getQuickAddPluginChoices(
 		.map((key) => choices[key].name);
 }
 
-export function getFrontmatterPropertyNames(plugin: TaskBoard): string[] {
+export function getFrontmatterPropertyNames(app: App): string[] {
 	//Here I should go through all the markdown files and fetch their frontmatter property names
 	const frontmatterProperties: { name: string }[] = [];
-	const allFiles = plugin.app.vault.getMarkdownFiles();
+	const allFiles = app.vault.getMarkdownFiles();
 	allFiles.forEach((file) => {
-		const frontmatter =
-			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+		const frontmatter = app.metadataCache.getFileCache(file)?.frontmatter;
 		if (frontmatter) {
 			Object.keys(frontmatter).forEach((key) => {
 				if (!frontmatterProperties.some((prop) => prop.name === key)) {
@@ -107,4 +106,35 @@ export function getFrontmatterPropertyNames(plugin: TaskBoard): string[] {
 	});
 
 	return frontmatterProperties.map((property) => property.name);
+}
+
+export function getYAMLPropertySuggestions(app: App): string[] {
+	// Get all YAML properties from the vault
+	const allFiles = app.vault
+		.getAllLoadedFiles()
+		.filter((f) => f instanceof TFile && f.extension === "md");
+	const yamlPropertiesSet = new Set<string>();
+
+	allFiles.forEach((file) => {
+		if (file instanceof TFile) {
+			const metadata = app.metadataCache.getFileCache(file);
+			if (metadata && metadata.frontmatter) {
+				// console.log("Frontmatter:", metadata.frontmatter, "\nFile:", file.path);
+				Object.keys(metadata.frontmatter).forEach((key) => {
+					const value = metadata.frontmatter
+						? metadata.frontmatter[key]
+						: null;
+					if (Array.isArray(value)) {
+						value.forEach((val) => {
+							yamlPropertiesSet.add(`["${key}": ${val}]`);
+						});
+					} else {
+						yamlPropertiesSet.add(`["${key}": ${value}]`);
+					}
+				});
+			}
+		}
+	});
+
+	return Array.from(yamlPropertiesSet);
 }

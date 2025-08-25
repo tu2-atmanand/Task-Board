@@ -1,9 +1,8 @@
 // /src/utils/MarkdownFileOperations.ts
 
-import { Notice, TFile } from "obsidian";
+import { TFile } from "obsidian";
 
 import TaskBoard from "main";
-import { t } from "./lang/helper";
 import { bugReporter } from "src/services/OpenModals";
 
 export const readDataOfVaultFiles = async (
@@ -17,7 +16,13 @@ export const readDataOfVaultFiles = async (
 			return fileData; // Return the raw content of the file
 		} else {
 			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
-			console.error(`File not found at path: ${filePath}`);
+			// console.error(`File not found at path: ${filePath}`);
+			bugReporter(
+				plugin,
+				"File not found in vault.",
+				`File not found at path: ${filePath}`,
+				"MarkdownFileOperations.ts/readDataOfVaultFiles"
+			);
 			throw `File not found at path: ${filePath}`;
 		}
 	} catch (error) {

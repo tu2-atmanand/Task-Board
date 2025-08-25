@@ -13,30 +13,33 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
-	langCodes,
 } from "src/interfaces/GlobalSettings";
 import {
-	bugReporter,
 	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openScanVaultModal,
 } from "src/services/OpenModals";
 
-import { KanbanView } from "./src/views/KanbanView";
+import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
-import { ScanningVault } from "src/utils/ScanningVault";
+import ScanningVault from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
-import { t } from "src/utils/lang/helper";
+import {
+	clearCachedTranslations,
+	loadTranslationsOnStartup,
+	t,
+} from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
+import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
-	view: KanbanView | null;
+	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	scanningVault: ScanningVault;
 	realTimeScanning: RealTimeScanning;
@@ -55,7 +58,11 @@ export default class TaskBoard extends Plugin {
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.scanningVault = new ScanningVault(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanning(this.app, this.plugin);
+		this.realTimeScanning = new RealTimeScanning(
+			this.app,
+			this.plugin,
+			this.scanningVault
+		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -79,7 +86,11 @@ export default class TaskBoard extends Plugin {
 		this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
-		this.getLanguage();
+		// this.getLanguage();
+
+		await loadTranslationsOnStartup(this);
+
+		await this.scanningVault.initializeTasksCache();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -109,6 +120,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
+		clearCachedTranslations();
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
@@ -202,27 +214,28 @@ export default class TaskBoard extends Plugin {
 			await this.loadData()
 		);
 		this.migrateSettings(DEFAULT_SETTINGS, this.settings);
+		this.saveSettings();
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
 
-	getLanguage() {
-		const obsidianLang = window.localStorage.getItem("language");
+	// getLanguage() {
+	// 	const obsidianLang = window.localStorage.getItem("language");
 
-		if (obsidianLang && obsidianLang in langCodes) {
-			localStorage.setItem("taskBoardLang", obsidianLang);
-			this.settings.data.globalSettings.lang = obsidianLang;
-			this.saveSettings();
-		} else {
-			localStorage.setItem(
-				"taskBoardLang",
-				// this.settings.data.globalSettings.lang
-				"en"
-			);
-		}
-	}
+	// 	if (obsidianLang && obsidianLang in langCodes) {
+	// 		localStorage.setItem("taskBoardLang", obsidianLang);
+	// 		this.settings.data.globalSettings.lang = obsidianLang;
+	// 		this.saveSettings();
+	// 	} else {
+	// 		localStorage.setItem(
+	// 			"taskBoardLang",
+	// 			// this.settings.data.globalSettings.lang
+	// 			"en"
+	// 		);
+	// 	}
+	// }
 
 	createLocalStorageAndScanModifiedFiles() {
 		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
@@ -238,7 +251,7 @@ export default class TaskBoard extends Plugin {
 
 	registerTaskBoardView() {
 		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
-			this.view = new KanbanView(this, leaf);
+			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
 	}
@@ -363,23 +376,26 @@ export default class TaskBoard extends Plugin {
 			this.onFileModifiedAndLostFocus();
 		});
 
+		this.registerEvent(
+			this.app.vault.on("rename", (file, oldPath) => {
+				if (file instanceof TFile) {
+					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
+					this.realTimeScanning.onFileRenamed(file, oldPath);
+				}
+			})
+		);
+		this.registerEvent(
+			this.app.vault.on("delete", (file) => {
+				if (file instanceof TFile) {
+					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
+					this.realTimeScanning.onFileDeleted(file);
+				}
+			})
+		);
+
 		// this.registerEvent(
 		// 	this.app.vault.on("create", (file) => {
 		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-		// 	})
-		// );
-		// this.registerEvent(
-		// 	this.app.vault.on("rename", (file) => {
-		// 		// console.log(
-		// 		// 	"TODO : A file has been renamed, immediately, change the corresponding data in Tasks.json file. That is find the old object under Pending and Completed part in tasks.json and either delete it or best way will be to replace the old name with new one."
-		// 		// );
-		// 	})
-		// );
-		// this.registerEvent(
-		// 	this.app.vault.on("delete", (file) => {
-		// 		// console.log(
-		// 		// 	"TODO : A file has been deleted, immediately remove the corresponding data in Tasks.json file."
-		// 		// );
 		// 	})
 		// );
 
@@ -399,7 +415,7 @@ export default class TaskBoard extends Plugin {
 				const fileIsFile = file instanceof TFile;
 				const fileIsFolder = file instanceof TFolder;
 				// const leafIsMarkdown = leaf?.view instanceof MarkdownView;
-				// const leafIsKanban = leaf?.view instanceof KanbanView;
+				// const leafIsKanban = leaf?.view instanceof TaskBoardView;
 
 				// if (leafIsKanban || source === "pane-more-options") {
 				// 	console.log("MENU : If the fileIsFile ");
@@ -421,8 +437,7 @@ export default class TaskBoard extends Plugin {
 							.onClick(() => {
 								this.scanningVault.refreshTasksFromFiles([
 									file,
-								]);
-								this.scanningVault.saveTasksToJsonCache();
+								], true);
 							});
 					});
 					if (
@@ -550,7 +565,7 @@ export default class TaskBoard extends Plugin {
 		// this.registerEvent(
 		// 	this.app.workspace.on("editor-menu", (menu, editor, view) => {
 		// 		// const leafIsMarkdown = view instanceof MarkdownView;
-		// 		const leafIsKanban = view instanceof KanbanView;
+		// 		const leafIsKanban = view instanceof TaskBoardView;
 
 		// 		if (leafIsKanban) {
 		// 			console.log("MENU : If the fileIsFile ");
@@ -568,11 +583,6 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onFileModifiedAndLostFocus() {
-		console.log(
-			"onFileModifiedAndLostFocus called\n",
-			this.editorModified,
-			this.taskBoardFileStack.length
-		);
 		if (this.editorModified) {
 			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
 			// 	await this.realTimeScanning.onFileModified(
@@ -583,7 +593,6 @@ export default class TaskBoard extends Plugin {
 			// 	this.fileUpdatedUsingModal = "";
 			// }
 
-			console.log("Window lost focus, scanning the modified files...");
 			await this.realTimeScanning.processAllUpdatedFiles();
 
 			// Reset the editorModified flag after the scan.
@@ -622,22 +631,30 @@ export default class TaskBoard extends Plugin {
 				);
 			} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
 				// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
-				settings[key].forEach((boardConfig: any) => {
-					boardConfig.columns.forEach((column: any) => {
+				settings[key].forEach((boardConfig: Board) => {
+					boardConfig.columns.forEach((column: ColumnData) => {
 						if (!column.id) {
 							column.id = Math.floor(Math.random() * 1000000);
 						}
-						if (column.colType === "dated" && column.range) {
+						if (
+							column.colType === "dated" ||
+							(column.colType === "undated" &&
+								!column.datedBasedColumn)
+						) {
 							column.datedBasedColumn = {
 								dateType:
 									this.settings.data.globalSettings
 										.universalDate,
-								from: column.range.rangedata.from,
-								to: column.range.rangedata.to,
+								from: column.datedBasedColumn?.from || 0,
+								to: column.datedBasedColumn?.to || 0,
 							};
 							delete column.range;
 						}
 					});
+
+					if (!boardConfig.hideEmptyColumns) {
+						boardConfig.hideEmptyColumns = false;
+					}
 				});
 			} else if (
 				typeof defaults[key] === "object" &&
@@ -654,11 +671,13 @@ export default class TaskBoard extends Plugin {
 				// 	settings[key]
 				// );
 				this.migrateSettings(defaults[key], settings[key]);
+			} else if (key === 'tasksCacheFilePath' && settings[key] === '') {
+				settings[key] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 			}
 		}
 
 		this.settings = settings;
-		this.saveSettings();
+		// this.saveSettings();
 	}
 
 	private runOnPluginUpdate() {

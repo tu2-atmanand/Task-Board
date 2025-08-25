@@ -4,6 +4,10 @@ export const RefreshIcon = "lucide-refresh";
 
 export const ScanVaultIcon = "lucide-scan-text";
 
+export const taskBoardActionsIcon = "bot";
+
+export const trashIcon = "trash-2";
+
 export const buyMeCoffeeSVGIcon = `
 <svg width="180" height="80" viewBox="0 0 545 153" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M0 24.48C0 10.9601 10.9601 0 24.48 0H520.2C533.72 0 544.68 10.9601 544.68 24.48V128.52C544.68 142.04 533.72 153 520.2 153H24.48C10.9601 153 0 142.04 0 128.52V24.48Z" fill="#FFDD00"/>

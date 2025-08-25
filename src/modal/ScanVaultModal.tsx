@@ -6,9 +6,9 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import { ScanningVault } from "src/utils/ScanningVault";
+import ScanningVault from "src/utils/ScanningVault";
 import TaskBoard from "main";
-import { scanFilterForFilesNFolders } from "src/utils/FiltersVerifier";
+import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
@@ -29,6 +29,11 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 
 	const runScan = async () => {
 		setIsRunning(true);
+
+		// Reset terminal output and collected tasks
+		scanningVault.tasksCache.Pending = {};
+		scanningVault.tasksCache.Completed = {};
+
 		const files = app.vault.getMarkdownFiles();
 		setProgress(0); // Reset progress
 
@@ -36,18 +41,20 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			const file = files[i];
 
 			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
-			if (scanFilterForFilesNFolders(file, scanFilters)) {
+			if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
-				await scanningVault.extractTasksFromFile(file, scanningVault.tasks, scanFilters);
+				await scanningVault.extractTasksFromFile(file, scanFilters);
 			}
 
 			setProgress(((i + 1) / files.length) * 100); // Update progress
 		}
 
-		setCollectedTasks(scanningVault.tasks);
 		// setIsRunning(false);
+		setCollectedTasks(scanningVault.tasksCache);
 		new Notice(t("vault-scanning-complete"));
-		scanningVault.saveTasksToJsonCache();
+		await scanningVault.saveTasksToJsonCache();
+
+		plugin.scanningVault.tasksCache = scanningVault.tasksCache;
 
 		if (localStorage.getItem("manadatoryScan") === "true") {
 			localStorage.setItem("manadatoryScan", "false");
@@ -112,18 +119,16 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			<h2>{t("scan-tasks-from-the-vault")}</h2>
 			{localStorage.getItem("manadatoryScan") === "true" ?
 				(<>
-					<div className="scanVaultModalHomeMandatoryScan">Looks like you have recently updated this plugin.</div>
-					<div className="scanVaultModalHomeMandatoryScan">This new release has brought various new features, which requires you to re-scan the whole vault.</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} 1.6.0</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
 					<br />
-					<div className="scanVaultModalHomeMandatoryScan">Read the release notes for this new version here : <a href="https://github.com/tu2-atmanand/Task-Board/releases/tag/1.5.0">Task Board v1.5.0</a>.</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href="https://github.com/tu2-atmanand/Task-Board/releases/tag/1.6.0">Task Board v1.6.0</a>.</div>
 				</>
 				) :
 				(<>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</div>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</div>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</div>
+					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-1")}</div>
+					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-2")}</div>
 				</>
-
 				)}
 
 			<div className="scanVaultModalHomeSecondSection" >
@@ -151,7 +156,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 									return (
 										<div key={taskIndex}>
 											<div
-												ref={(descEl) => (taskRendererRef.current[uniqueKey] = descEl)}
+												ref={(descEl) => { taskRendererRef.current[uniqueKey] = descEl; }}
 												id={uniqueKey}
 											/>
 										</div>
@@ -166,6 +171,14 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 			<button className="scanVaultModalHomeToggleButton" onClick={toggleView}>
 				{showCollectedTasks ? t("hide-collected-tasks") : t("show-collected-tasks")}
 			</button>
+
+
+			<div>
+				<h4>{t("points-to-note")}</h4>
+				<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-1")}</li>
+				<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-2")}</li>
+				<li className="setting-item-description">{t("scan-tasks-from-the-vault-description-3")}</li>
+			</div>
 		</div>
 	);
 }
@@ -177,7 +190,7 @@ export class ScanVaultModal extends Modal {
 	constructor(app: App, plugin: TaskBoard) {
 		super(app);
 		this.plugin = plugin;
-		this.scanningVault = new ScanningVault(app, plugin);
+		this.scanningVault = plugin.scanningVault;
 	}
 
 	onOpen() {

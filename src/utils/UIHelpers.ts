@@ -1,6 +1,5 @@
 import TaskBoard from "main";
-import { App, sanitizeHTMLToDom } from "obsidian";
-import { bugReporter } from "src/services/OpenModals";
+import { sanitizeHTMLToDom } from "obsidian";
 
 // Utility to convert hex to RGBA with specific opacity
 export function hexToRgba(hex: string, opacity: number): string {

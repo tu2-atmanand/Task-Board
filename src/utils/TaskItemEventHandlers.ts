@@ -2,11 +2,8 @@ import { checkboxStateSwitcher, isCompleted } from "./CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
-	moveFromCompletedToPending,
-	moveFromPendingToCompleted,
 	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
-	updateTaskInJson,
 } from "./TaskItemUtils";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
@@ -24,7 +21,6 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
 	const tasksPlugin = new TasksApi(plugin);
-	console.log("tasksPlugin is enabled: ", tasksPlugin);
 
 	if (!tasksPlugin.isTasksPluginEnabled()) {
 		// Check if the task is completed
@@ -134,9 +130,6 @@ export const handleSubTasksChange = (
 	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated.
 	updateTaskInFile(plugin, updatedTask, oldTask)
 		.then(() => {
-			console.log(
-				"TaskItemEventHandlers.ts : This is will run only once the task is updated in the file."
-			);
 			const currentFile = plugin.app.vault.getFileByPath(
 				updatedTask.filePath
 			);
@@ -149,7 +142,7 @@ export const handleSubTasksChange = (
 			// 	error as string,
 			// 	"TaskItemEventHandlers.ts/handleEditTask"
 			// );
-			console.log(
+			console.error(
 				"TaskItemEventHandlers.ts : Error updating task in file",
 				error
 			);
@@ -197,9 +190,6 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 				// Update the task in the file and JSON
 				updateTaskInFile(plugin, updatedTask, task)
 					.then(() => {
-						console.log(
-							"TaskItemEventHandlers.ts : This is will run only once the task is updated in the file."
-						);
 						const currentFile = plugin.app.vault.getFileByPath(
 							task.filePath
 						);
@@ -214,7 +204,7 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 						// 	error as string,
 						// 	"TaskItemEventHandlers.ts/handleEditTask"
 						// );
-						console.log(
+						console.error(
 							"TaskItemEventHandlers.ts : Error updating task in file",
 							error
 						);

@@ -19,7 +19,7 @@
 +--- styles.css                 # Global styles for the plugin
 +--- src                        # Source folder for TypeScript files
 |   +--- views                  # Folder for all custom views
-|   |   +--- KanbanView.ts      # Kanban view implementation
+|   |   +--- TaskBoardView.ts      # Kanban view implementation
 |   +--- components             # Reusable UI components
 |   |   +--- TaskItem.tsx       # Component for individual task items
 |   |   +--- Column.tsx         # Component for Kanban columns
@@ -39,7 +39,7 @@
 1. **`src` Folder**: This will contain all the TypeScript files related to the functionality of your plugin. Organizing your code into subfolders like `views`, `components`, `interfaces`, `services`, and `utils` helps keep your code modular and maintainable.
 
 2. **`views` Folder**: 
-   - Store all custom Obsidian views here, such as `KanbanView.ts`. 
+   - Store all custom Obsidian views here, such as `TaskBoardView.ts`. 
    - Each view can have its CSS file within the `styles` subfolder, ensuring the styles are specific to the view.
 
 3. **`components` Folder**: 

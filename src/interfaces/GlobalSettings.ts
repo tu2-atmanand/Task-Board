@@ -9,6 +9,10 @@ export interface scanFilters {
 		polarity: number;
 		values: string[];
 	};
+	frontMatter: {
+		polarity: number;
+		values: string[];
+	};
 	tags: {
 		polarity: number;
 		values: string[];
@@ -35,6 +39,12 @@ export enum UniversalDateOptions {
 	dueDate = "due",
 }
 
+export enum universalDateOptionsNames {
+	startDate = "Start Date",
+	scheduledDate = "Scheduled Date",
+	dueDate = "Due Date",
+}
+
 export enum TagColorType {
 	Text = "text",
 	Background = "background",
@@ -47,12 +57,26 @@ export enum NotificationService {
 	ObsidApp = "obsiApp",
 }
 
-interface CustomStatus {
+export interface CustomStatus {
 	symbol: string; // The symbol representing the status (e.g., "/", "-")
 	name: string; // The human-readable name of the status (e.g., "In Progress")
 	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
 	type: string; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+}
+
+export interface TaskBoardAction {
+	enabled: boolean;
+	trigger: "Complete" | "Incomplete";
+	type: "move" | "copy";
+	targetColumn: string;
+}
+
+export enum cardSectionsVisibilityOptions {
+	showSubTasksOnly = "showSubTasksOnly",
+	showDescriptionOnly = "showDescriptionOnly",
+	showBoth = "showBoth",
+	hideBoth = "hideBoth",
 }
 
 export interface globalSettingsData {
@@ -77,7 +101,7 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
-	universalDate: UniversalDateOptions;
+	universalDate: string;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
@@ -97,6 +121,9 @@ export interface globalSettingsData {
 	tasksCacheFilePath: string;
 	notificationService: string;
 	frontmatterPropertyForReminder: string;
+	actions: TaskBoardAction[];
+	searchQuery?: string;
+	cardSectionsVisibility: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -121,6 +148,11 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "Undated Tasks",
 						index: 1,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
+						},
 					},
 					{
 						id: 2,
@@ -188,9 +220,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				filterPolarity: "0",
 				filterScope: "Both",
 				name: "Time Based Workflow",
-				index: 1,
+				index: 0,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
 			},
 			{
 				columns: [
@@ -252,9 +285,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				filterPolarity: "0",
 				filterScope: "Both",
 				name: "Static Kanban",
-				index: 2,
+				index: 1,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
 			},
 		],
 		globalSettings: {
@@ -266,6 +300,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					values: [],
 				},
 				folders: {
+					polarity: 3,
+					values: [],
+				},
+				frontMatter: {
 					polarity: 3,
 					values: [],
 				},
@@ -357,6 +395,16 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			tasksCacheFilePath: "",
 			notificationService: NotificationService.None,
 			frontmatterPropertyForReminder: "reminder",
+			actions: [
+				{
+					enabled: true,
+					trigger: "Complete",
+					type: "move",
+					targetColumn: "Completed",
+				},
+			],
+			cardSectionsVisibility:
+				cardSectionsVisibilityOptions.showSubTasksOnly,
 		},
 	},
 };

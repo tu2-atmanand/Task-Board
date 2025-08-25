@@ -20,18 +20,25 @@ export type ColumnData = {
 		criteria: string;
 		order: boolean; // Ascending = 0 AND Descending = 1
 	};
+	range?: { // Keep it for few versions, this is required while settings migrations
+		tag: string;
+		rangedata: {
+			from: number;
+			to: number;
+		};
+	};
 };
 
 export type Board = {
 	name: string;
 	index: number;
 	columns: ColumnData[];
-	filters?: string[];
-	filterPolarity?: string;
-	filterScope?: string;
-	hideEmptyColumns?: boolean;
-	showColumnTags?: boolean;
-	showFilteredTags?: boolean;
+	hideEmptyColumns: boolean;
+	filters: string[];
+	filterPolarity: string;
+	filterScope: string;
+	showColumnTags: boolean;
+	showFilteredTags: boolean;
 };
 
 export type BoardConfigs = Board[];

@@ -1,34 +1,26 @@
 // /src/utils/TaskItemUtils.ts
 
-import {
-	cleanTaskTitle,
-	getFormattedTaskContent,
-} from "./TaskContentFormatter";
+import { getFormattedTaskContent } from "./TaskContentFormatter";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataFromDisk,
 } from "./JsonFileOperations";
-import {
-	jsonCacheData,
-	taskItem,
-	tasksJsonData,
-} from "src/interfaces/TaskItem";
+import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
 	readDataOfVaultFiles,
 	writeDataToVaultFiles,
 } from "./MarkdownFileOperations";
 import { extractFrontmatter, extractFrontmatterTags } from "./ScanningVault";
 
-import { App, Notice, TFile, Tasks } from "obsidian";
+import { Notice } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { ScanningVault } from "./ScanningVault";
 import { TasksApi } from "src/services/tasks-plugin/api";
 import {
 	bugReporter,
 	openDiffContentCompareModal,
 } from "src/services/OpenModals";
+import { isTheContentDiffAreOnlySpaces } from "src/modal/DiffContentCompareModal";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -526,11 +518,11 @@ export const useTasksPluginToUpdateInFile = async (
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
-					`- [${oldTask.status}] ${oldTask.title}`,
+					oldTask.title,
 					oldTask.filePath
 				);
 
-			if (!tasksPluginApiOutput) {
+			if (tasksPluginApiOutput === undefined) {
 				bugReporter(
 					plugin,
 					"Tasks plugin API did not return any output.",
@@ -541,18 +533,25 @@ export const useTasksPluginToUpdateInFile = async (
 			}
 
 			const twoTaskTitles = tasksPluginApiOutput.split("\n");
-			console.log(
-				"useTasksPluginToUpdateInFile : tasksPluginApiOutput :\n",
-				tasksPluginApiOutput,
-				"\n| first line :",
-				twoTaskTitles[0],
-				"\n| second line :",
-				twoTaskTitles[1],
-				"\n| Old task :",
-				completeOldTaskContent
-			);
+			// console.log(
+			// 	"useTasksPluginToUpdateInFile : tasksPluginApiOutput :\n",
+			// 	tasksPluginApiOutput,
+			// 	"\n| first line :",
+			// 	twoTaskTitles[0],
+			// 	"\n| second line :",
+			// 	twoTaskTitles[1],
+			// 	"\n| Old task :",
+			// 	completeOldTaskContent
+			// );
 			let newContent = "";
-			if ((twoTaskTitles.length = 1)) {
+			if (tasksPluginApiOutput === "") {
+				await replaceOldTaskWithNewTask(
+					plugin,
+					oldTask,
+					completeOldTaskContent,
+					newContent
+				);
+			} else if ((twoTaskTitles.length = 1)) {
 				newContent = `${tasksPluginApiOutput}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`
@@ -742,18 +741,18 @@ export const addTaskInNote = async (
 };
 
 // Function to parse due date correctly
-export const parseDueDate = (dueStr: string): Date | null => {
+export const parseUniversalDate = (dateStr: string): Date | null => {
 	// Regular expression to check if dueStr starts with a two-digit day
 	const ddMmYyyyPattern = /^\d{2}-\d{2}-\d{4}$/;
 
-	if (ddMmYyyyPattern.test(dueStr)) {
+	if (ddMmYyyyPattern.test(dateStr)) {
 		// Convert "DD-MM-YYYY" → "YYYY-MM-DD"
-		const [day, month, year] = dueStr.split("-");
-		dueStr = `${year}-${month}-${day}`;
+		const [day, month, year] = dateStr.split("-");
+		dateStr = `${year}-${month}-${day}`;
 	}
 
 	// Parse the date
-	const parsedDate = new Date(dueStr);
+	const parsedDate = new Date(dateStr);
 	return isNaN(parsedDate.getTime()) ? null : parsedDate;
 };
 
@@ -774,14 +773,14 @@ export const replaceOldTaskWithNewTask = async (
 		? oldTask.filePath
 		: `${oldTask.filePath}.md`;
 
-	console.log(
-		"replaceOldTaskWithNewTask : filePath : ",
-		filePath,
-		"\n\n\nNew Task Content : ",
-		newTaskContent,
-		"\n\n\nOld Task Content : ",
-		oldTaskContent
-	);
+	// console.log(
+	// 	"replaceOldTaskWithNewTask : filePath : ",
+	// 	filePath,
+	// 	"\n\n\nNew Task Content : ",
+	// 	newTaskContent,
+	// 	"\n\n\nOld Task Content : ",
+	// 	oldTaskContent
+	// );
 
 	try {
 		// Step 1: Read the file content
@@ -793,7 +792,11 @@ export const replaceOldTaskWithNewTask = async (
 
 		// Step 2: Check that the starting line is a task checkbox line
 		const startLineText = lines[startLine - 1];
-		if (!startLineText.match(/^- \[.{1}\]/)) {
+		if (
+			!startLineText
+				.trim()
+				.startsWith(oldTask.title.trim().substring(0, 5))
+		) {
 			// console.log(
 			// 	"\n\nOldTask location :",
 			// 	oldTask.taskLocation,
@@ -804,8 +807,12 @@ export const replaceOldTaskWithNewTask = async (
 			// );
 			bugReporter(
 				plugin,
-				`Task board couldnt able to find the task which you are trying to edit at the line : ${oldTask.taskLocation.startLine} . The task might have been edited in the absence of Task Board. Please scan the file again using the file menu option.`,
-				`\n\nOldTask location :${oldTask.taskLocation}\n\nLine in the file at the startLine: ${startLineText}`,
+				`Task board couldnt able to find the task which you are trying to edit at the line : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option.\n\nThis is a normal bug hence developer attention is not required. Just scan the file again. But if the issue persists, please report it.`,
+				`\n\nOldTask location :${JSON.stringify(
+					oldTask.taskLocation
+				)}\n\nAt present the line at line number ${
+					oldTask.taskLocation.startLine
+				} is: ${startLineText}`,
 				"TaskItemUtils.ts/replaceOldTaskWithNewTask"
 			);
 			return;
@@ -833,7 +840,31 @@ export const replaceOldTaskWithNewTask = async (
 				.join("\n")
 				.slice(endCharIndex);
 			const newContent = `${before}\n${newTaskContent}${
-				after ? `\n${after}` : ""
+				after
+					? newTaskContent.endsWith("\n") || after.startsWith("\n")
+						? after
+						: `\n${after}`
+					: ""
+			}`;
+			await writeDataToVaultFiles(plugin, filePath, newContent);
+		} else if (
+			isTheContentDiffAreOnlySpaces(
+				oldTaskContent,
+				oldTaskContentFromFile
+			)
+		) {
+			// If the content is only spaces, we can safely replace it
+			const before = linesBefore.join("\n");
+			const after = lines
+				.slice(endLine - 1)
+				.join("\n")
+				.slice(endCharIndex);
+			const newContent = `${before}\n${newTaskContent}${
+				after
+					? newTaskContent.endsWith("\n") || after.startsWith("\n")
+						? after
+						: `\n${after}`
+					: ""
 			}`;
 			await writeDataToVaultFiles(plugin, filePath, newContent);
 		} else {
@@ -850,7 +881,12 @@ export const replaceOldTaskWithNewTask = async (
 							.join("\n")
 							.slice(endCharIndex);
 						const newContent = `${before}\n${newTaskContent}${
-							after ? `\n${after}` : ""
+							after
+								? newTaskContent.endsWith("\n") ||
+								  after.startsWith("\n")
+									? after
+									: `\n${after}`
+								: ""
 						}`;
 						await writeDataToVaultFiles(
 							plugin,

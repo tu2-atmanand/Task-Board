@@ -20,13 +20,14 @@
 }
 
 .is-phone .modal[data-type="task-board-view"] {
-	width: auto;
+	width: 100vw;
+	max-width: 100vw;
 	overflow: auto;
 	/* min-height: fit-content; */
 	max-height: 80vh;
 }
 
-/* src/KanbanView.tsx */
+/* src/TaskBoardView.tsx */
 
 .task-board-ribbon-class {
 	color: var(--color-orange);
@@ -38,19 +39,38 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	cursor: pointer;
 }
 
-/* src/KanbanBoard.tsx */
-.kanbanBoard {
+/* // src/components/TaskBoardViewContent.tsx*/
+.taskBoardView {
 	display: flex;
 	flex-direction: column;
-	height: 99%;
+	height: 100%;
 }
 
-.kanbanHeader {
+.taskBoardHeader {
 	display: flex;
 	justify-content: space-between;
 	padding: 4px;
 	padding-block-end: 8px;
 	border-bottom: 1px solid var(--text-normal);
+}
+
+.taskBoardViewSection {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 3.4rem;
+}
+
+.taskBoardViewSection-mobile {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 4.2rem;
+}
+
+.kanbanBoard {
+	height: 100%;
+	/* max-height: 90%; */
 }
 
 .boardTitles {
@@ -74,17 +94,78 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border: var(--border-width) solid var(--interactive-accent);
 }
 
-.kanbanHeaderBtns {
+.taskBoardHeaderBtns {
 	display: flex;
 	flex-direction: row;
+	margin-inline-start: 8px;
+	align-content: center;
+	align-items: center;
+}
+
+.taskBoardHeaderBtns .is-mobile input[type='text'] {
+	min-width: 14rem;
+}
+
+.taskCountContainer {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	align-items: center;
+	/* border: 1px solid #ddd; */
+	border-radius: 5px;
+	/* min-width: 12rem; */
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.taskCountContainerProgressBar {
+	width: 100%;
+	min-width: 9rem;
+	height: 8px;
+	background-color: #4f99467a;
+	border-radius: 5px;
+	overflow: hidden;
+	/* margin-bottom: 10px;*/
+}
+
+.taskCountContainerProgressBar-hidden {
+	width: 0 !important;
+}
+
+.taskCountContainerProgressBarProgress {
+	height: 100%;
+	background-color: #4CAF50;
+	transition: width 0.5s ease-in-out;
+}
+
+.taskCountContainerTaskCount {
+	font-size: 16px;
+	font-weight: bold;
+	color: var(--text-muted);
+	text-wrap: nowrap;
 }
 
 .kanbanHeaderBtnsSeparator {
 	padding-inline: 0;
 }
 
+.taskBoardSearchInput {
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	margin-inline-start: 8px;
+	margin-inline-end: -8px !important;
+	font-size: 14px;
+	min-width: 12rem;
+	max-width: 20rem;
+	transition: width 0.3s ease-in-out;
+}
+
+.searchTaskBtn,
 .AddNewTaskBtn,
 .ConfigureBtn,
+.taskboardActionshBtn,
 .RefreshBtn {
 	background-color: transparent !important;
 	background: none;
@@ -97,11 +178,34 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	/* font-size: 14px; */
 }
 
+.searchTaskBtn:hover,
 .AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
-.RefreshBtn:hover {
+.RefreshBtn:hover,
+.taskboardActionshBtn:hover {
 	border: var(--border-width) solid olive;
 }
+
+.taskBoardViewSection {}
+
+@media screen and (max-width: 768px) {
+
+	.taskCountContainer {
+		display: none !important;
+	}
+
+}
+
+.emptyBoardMessage {
+	padding: 2rem;
+	align-self: center;
+	text-align: center;
+	color: #888;
+}
+
+/* // src/components/KanbanBoard.tsx */
+
+.kanbanBoard {}
 
 .columnsContainer {
 	display: flex;
@@ -178,11 +282,22 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 0.5em;
 }
 
-.columnTitle {
+.taskBoardColumnSecHeaderTitleSecColumnTitle {
 	color: var(--foreground-primary);
 	text-align: center;
+	align-content: center;
 	font-size: 1.1em;
 	font-weight: 600;
+}
+
+.taskBoardColumnSecHeaderTitleSecColumnCount {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 5px;
+	padding-inline: 7px;
 }
 
 .columnDragIcon {
@@ -200,6 +315,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 7px;
 	display: flex;
 	flex-direction: column;
+	height: auto;
+	max-height: 80vh;
 }
 
 .tasksContainer-SH {
@@ -209,12 +326,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 7px;
 	display: flex;
 	flex-direction: column;
+	height: auto;
+	max-height: 80vh;
 
 	/* Firefox */
 	scrollbar-width: none;
 
+	/* Chrome, Safari, Opera */
 	&::-webkit-scrollbar {
-		/* Chrome, Safari, Opera */
 		display: none;
 	}
 }
@@ -262,7 +381,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	margin-inline-end: 0.3em;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
+	width: 95%;
 }
 
 .taskItemMainBody {
@@ -274,6 +393,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskItemMainBodyTitleNsubTasks {
 	display: flex;
 	flex-direction: row;
+	min-width: 100%;
+}
+
+.taskItemBodyContent {
+	display: flex;
+	flex-direction: column;
+	min-width: 95%;
 }
 
 .taskItemTitle {
@@ -348,12 +474,97 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	opacity: 50% !important;
 }
 
+/* Subtask Summary */
+.subtask-summary-container {
+	margin-top: 8px;
+	padding: 0px 0px;
+	padding-inline-end: 7px;
+	/* background-color: var(--background-secondary-alt); */
+	border-radius: 6px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-left: -10px;
+}
+
+.subtask-progress-bar-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+}
+
+.subtask-progress-bar-bg {
+	position: relative;
+	width: 100%;
+	height: 6px;
+	background-color: #ddd;
+	border: 1px solid var(--interactive-accent);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.subtask-progress-bar-fill {
+	height: 100%;
+	background-color: var(--interactive-accent);
+	transition: width 0.3s ease-in-out;
+}
+
+/* Count display */
+.subtask-progress-count {
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+/* Expand button */
+.subtask-toggle-btn {
+	background: none;
+	border: none;
+	font-size: 1rem;
+	cursor: pointer;
+	color: var(--text-accent);
+	transition: transform 0.2s ease-in-out;
+}
+
+.subtask-toggle-btn:hover {
+	transform: scale(1.2);
+}
+
+/* Subtask expand/collapse animations */
+.taskItemBodySubtaskSection-show {
+	max-height: 1000px;
+	/* large max to accommodate many subtasks */
+	opacity: 1;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.taskItemBodySubtaskSection-hide {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.subtask-toggle-icon {
+	display: inline-block;
+	transition: transform 0.3s ease;
+}
+
+.subtask-toggle-icon.rotated {
+	transform: rotate(180deg);
+}
+
 .taskItemMainBodyDescription {
 	width: 100%;
 }
 
 .taskItemMainBodyDescriptionSection {
 	width: 100%;
+}
+
+.taskItemMainBodyDescriptionSectionVisible {
+	margin-top: 5px;
 }
 
 .taskItemMainBodyDescriptionSectionToggler {
@@ -388,7 +599,18 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItemBodyDescriptionRenderer ul {
 	margin-block: 4px !important;
-	padding-inline-start: 25px !important;
+	padding-inline-start: 5px !important;
+	overflow: auto;
+}
+
+.taskItemBodyDescriptionRenderer li {
+	overflow: auto;
+}
+
+.taskItemBodyDescriptionRenderer ul>li>ul {
+	margin-block: 0px !important;
+	padding-inline-start: 0px !important;
+	overflow: auto;
 }
 
 .taskItemBodyDescriptionRenderer blockquote {
@@ -396,6 +618,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	margin-block-start: 0.5em;
 	margin-block-end: 0.5em;
 	margin-inline-start: 15px;
+}
+
+.taskItemBodyDescriptionRenderer img {
+	max-width: -webkit-fill-available !important;
+	padding-inline-end: 4px !important;
 }
 
 
@@ -860,7 +1087,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		max-width: 84vw;
+		max-width: 100%;
 		min-width: 75vw;
 		flex-grow: 1;
 		max-height: 100%;
@@ -1109,6 +1336,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .boardConfigModalSidebarBtnArea-btn-drag-handle {
 	cursor: grab;
 	align-self: center;
+	min-width: 20px;
 }
 
 .boardConfigModalSidebarSaveBtn {
@@ -1485,22 +1713,76 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskBoard-filter-row {
 	display: flex;
 	align-items: center;
-	margin-bottom: 10px;
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-content: center;
+	border: 1px solid var(--checkbox-border-color);
+	padding: 5px;
+	border-radius: 5px;
+	flex-direction: column;
+}
+
+.taskBoard-filter-row-heading {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.taskBoard-filter-row-body {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	gap: 0.75rem;
 }
 
 .taskBoard-filter-label {
-	width: 80px;
-	font-weight: bold;
-	color: var(--color-red);
+	width: 70px;
+	font-weight: 500;
+	color: var(--blockquote-border-color);
+	align-content: center;
 }
 
-.taskBoard-filter-input {
-	flex-grow: 1;
-	margin-right: 10px;
+.taskBoard-filter-values {
+	background-color: var(--background-modifier-form-field);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	min-width: 100px;
+	width: -webkit-fill-available;
+	padding: 7px;
+	border-radius: 5px;
+}
+
+.taskBoard-filter-tag {
+	background-color: var(--color-base-40);
+	padding: 2px 8px;
+	border-radius: 8px;
+	font-size: 0.875em;
+	border: 1px solid var(--text-highlight-bg);
+}
+
+.taskBoard-filter-configure-button {
+	padding: 3px 10px;
+	cursor: pointer;
+	font-size: 0.875em;
+	border: 1px solid var(--interactive-accent);
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border-radius: 6px;
+}
+
+.taskBoard-filter-configure-button:hover {
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
 }
 
 .taskBoard-filter-dropdown {
 	text-align: center;
+	max-width: fit-content;
 }
 
 .taskBoard-global-settings-tab-tag-color-preview {
@@ -1848,9 +2130,93 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 @media (max-width: 650px) {
-	.taskboard-diff-content-compare-modal-container{
+	.taskboard-diff-content-compare-modal-container {
 		flex-direction: column;
 	}
+}
+
+/* /src/components/KanbanBoard.tsx */
+
+.modal[data-type="task-board-actions-modal"] {
+	min-width: 80vw !important;
+	min-height: 80vh !important;
+}
+
+.modal-content[data-type="task-board-actions-modal"] {
+	/* min-width: 80vw;
+	min-height: 80vh; */
+}
+
+.taskboard-actions-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.taskboard-actions-add-button {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	padding: 4px 10px;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.taskboard-actions-add-button:hover {
+	background-color: var(--interactive-accent-hover);
+}
+
+.taskboard-active-actions-section,
+.taskboard-inactive-actions-section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.taskboard-inactive-actions-section {
+	margin-top: 10rem;
+}
+
+.taskboard-action-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	background-color: var(--background-secondary-alt);
+	padding: 8px 12px;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* /src/modal/ScanFilterModal.ts */
+
+.scan-filter-input {
+	width: 100% !important;
+}
+
+.scan-filter-list {
+	margin-top: 1em;
+	padding-left: 5px;
+}
+
+.scan-filter-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 10px;
+	margin-bottom: 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	font-weight: 500;
+	background-color: var(--background-primary-alt);
+}
+
+.scan-filter-remove-btn {
+	background-color: transparent !important;
+	color: var(--color-red) !important;
+	cursor: pointer;
 }
 
 
@@ -3031,4 +3397,698 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 		url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
 
 	background-size: 100%, 0.25em;
+}
+
+/* ReactFlow necessary CSS from its bundle */
+.react-flow {
+	direction: ltr;
+
+	--xy-edge-stroke-default: #b1b1b7;
+	--xy-edge-stroke-width-default: 1;
+	--xy-edge-stroke-selected-default: #555;
+
+	--xy-connectionline-stroke-default: #b1b1b7;
+	--xy-connectionline-stroke-width-default: 1;
+
+	--xy-attribution-background-color-default: rgba(255, 255, 255, 0.5);
+
+	--xy-minimap-background-color-default: #fff;
+	--xy-minimap-mask-background-color-default: rgba(240, 240, 240, 0.6);
+	--xy-minimap-mask-stroke-color-default: transparent;
+	--xy-minimap-mask-stroke-width-default: 1;
+	--xy-minimap-node-background-color-default: #e2e2e2;
+	--xy-minimap-node-stroke-color-default: transparent;
+	--xy-minimap-node-stroke-width-default: 2;
+
+	--xy-background-color-default: transparent;
+	--xy-background-pattern-dots-color-default: #91919a;
+	--xy-background-pattern-lines-color-default: #eee;
+	--xy-background-pattern-cross-color-default: #e2e2e2;
+	background-color: var(--xy-background-color, var(--xy-background-color-default));
+	--xy-node-color-default: inherit;
+	--xy-node-border-default: 1px solid #1a192b;
+	--xy-node-background-color-default: #fff;
+	--xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);
+	--xy-node-boxshadow-hover-default: 0 1px 4px 1px rgba(0, 0, 0, 0.08);
+	--xy-node-boxshadow-selected-default: 0 0 0 0.5px #1a192b;
+	--xy-node-border-radius-default: 3px;
+
+	--xy-handle-background-color-default: #1a192b;
+	--xy-handle-border-color-default: #fff;
+
+	--xy-selection-background-color-default: rgba(0, 89, 220, 0.08);
+	--xy-selection-border-default: 1px dotted rgba(0, 89, 220, 0.8);
+
+	--xy-controls-button-background-color-default: #fefefe;
+	--xy-controls-button-background-color-hover-default: #f4f4f4;
+	--xy-controls-button-color-default: inherit;
+	--xy-controls-button-color-hover-default: inherit;
+	--xy-controls-button-border-color-default: #eee;
+	--xy-controls-box-shadow-default: 0 0 2px 1px rgba(0, 0, 0, 0.08);
+
+	--xy-edge-label-background-color-default: #ffffff;
+	--xy-edge-label-color-default: inherit;
+	--xy-resize-background-color-default: #3367d9;
+}
+
+.react-flow.dark {
+	--xy-edge-stroke-default: #3e3e3e;
+	--xy-edge-stroke-width-default: 1;
+	--xy-edge-stroke-selected-default: #727272;
+
+	--xy-connectionline-stroke-default: #b1b1b7;
+	--xy-connectionline-stroke-width-default: 1;
+
+	--xy-attribution-background-color-default: rgba(150, 150, 150, 0.25);
+
+	--xy-minimap-background-color-default: #141414;
+	--xy-minimap-mask-background-color-default: rgba(60, 60, 60, 0.6);
+	--xy-minimap-mask-stroke-color-default: transparent;
+	--xy-minimap-mask-stroke-width-default: 1;
+	--xy-minimap-node-background-color-default: #2b2b2b;
+	--xy-minimap-node-stroke-color-default: transparent;
+	--xy-minimap-node-stroke-width-default: 2;
+
+	--xy-background-color-default: #141414;
+	--xy-background-pattern-dots-color-default: #777;
+	--xy-background-pattern-lines-color-default: #777;
+	--xy-background-pattern-cross-color-default: #777;
+	--xy-node-color-default: #f8f8f8;
+	--xy-node-border-default: 1px solid #3c3c3c;
+	--xy-node-background-color-default: #1e1e1e;
+	--xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);
+	--xy-node-boxshadow-hover-default: 0 1px 4px 1px rgba(255, 255, 255, 0.08);
+	--xy-node-boxshadow-selected-default: 0 0 0 0.5px #999;
+
+	--xy-handle-background-color-default: #bebebe;
+	--xy-handle-border-color-default: #1e1e1e;
+
+	--xy-selection-background-color-default: rgba(200, 200, 220, 0.08);
+	--xy-selection-border-default: 1px dotted rgba(200, 200, 220, 0.8);
+
+	--xy-controls-button-background-color-default: #2b2b2b;
+	--xy-controls-button-background-color-hover-default: #3e3e3e;
+	--xy-controls-button-color-default: #f8f8f8;
+	--xy-controls-button-color-hover-default: #fff;
+	--xy-controls-button-border-color-default: #5b5b5b;
+	--xy-controls-box-shadow-default: 0 0 2px 1px rgba(0, 0, 0, 0.08);
+
+	--xy-edge-label-background-color-default: #141414;
+	--xy-edge-label-color-default: #f8f8f8;
+}
+
+.react-flow__background {
+	background-color: var(--xy-background-color-props, var(--xy-background-color, var(--xy-background-color-default)));
+	pointer-events: none;
+	z-index: -1;
+}
+
+.react-flow__container {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+
+.react-flow__pane {
+	z-index: 1;
+}
+
+.react-flow__pane.draggable {
+	cursor: grab;
+}
+
+.react-flow__pane.dragging {
+	cursor: grabbing;
+}
+
+.react-flow__pane.selection {
+	cursor: pointer;
+}
+
+.react-flow__viewport {
+	transform-origin: 0 0;
+	z-index: 2;
+	pointer-events: none;
+}
+
+.react-flow__renderer {
+	z-index: 4;
+}
+
+.react-flow__selection {
+	z-index: 6;
+}
+
+.react-flow__nodesselection-rect:focus,
+.react-flow__nodesselection-rect:focus-visible {
+	outline: none;
+}
+
+.react-flow__edge-path {
+	stroke: var(--xy-edge-stroke, var(--xy-edge-stroke-default));
+	stroke-width: var(--xy-edge-stroke-width, var(--xy-edge-stroke-width-default));
+	fill: none;
+}
+
+.react-flow__connection-path {
+	stroke: var(--xy-connectionline-stroke, var(--xy-connectionline-stroke-default));
+	stroke-width: var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default));
+	fill: none;
+}
+
+.react-flow .react-flow__edges {
+	position: absolute;
+}
+
+.react-flow .react-flow__edges svg {
+	overflow: visible;
+	position: absolute;
+	pointer-events: none;
+}
+
+.react-flow__edge {
+	pointer-events: visibleStroke;
+}
+
+.react-flow__edge.selectable {
+	cursor: pointer;
+}
+
+.react-flow__edge.animated path {
+	stroke-dasharray: 5;
+	animation: dashdraw 0.5s linear infinite;
+}
+
+.react-flow__edge.animated path.react-flow__edge-interaction {
+	stroke-dasharray: none;
+	animation: none;
+}
+
+.react-flow__edge.inactive {
+	pointer-events: none;
+}
+
+.react-flow__edge.selected,
+.react-flow__edge:focus,
+.react-flow__edge:focus-visible {
+	outline: none;
+}
+
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge.selectable:focus .react-flow__edge-path,
+.react-flow__edge.selectable:focus-visible .react-flow__edge-path {
+	stroke: var(--xy-edge-stroke-selected, var(--xy-edge-stroke-selected-default));
+}
+
+.react-flow__edge-textwrapper {
+	pointer-events: all;
+}
+
+.react-flow__edge .react-flow__edge-text {
+	pointer-events: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+.react-flow__connection {
+	pointer-events: none;
+}
+
+.react-flow__connection .animated {
+	stroke-dasharray: 5;
+	animation: dashdraw 0.5s linear infinite;
+}
+
+svg.react-flow__connectionline {
+	z-index: 1001;
+	overflow: visible;
+	position: absolute;
+}
+
+.react-flow__nodes {
+	pointer-events: none;
+	transform-origin: 0 0;
+}
+
+.react-flow__node {
+	position: absolute;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	pointer-events: all;
+	transform-origin: 0 0;
+	box-sizing: border-box;
+	cursor: default;
+}
+
+.react-flow__node.selectable {
+	cursor: pointer;
+}
+
+.react-flow__node.draggable {
+	cursor: grab;
+	pointer-events: all;
+}
+
+.react-flow__node.draggable.dragging {
+	cursor: grabbing;
+}
+
+.react-flow__nodesselection {
+	z-index: 3;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.react-flow__nodesselection-rect {
+	position: absolute;
+	pointer-events: all;
+	cursor: grab;
+}
+
+.react-flow__handle {
+	position: absolute;
+	pointer-events: none;
+	min-width: 5px;
+	min-height: 5px;
+	width: 6px;
+	height: 6px;
+	background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default));
+	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
+	border-radius: 100%;
+}
+
+.react-flow__handle.connectingfrom {
+	pointer-events: all;
+}
+
+.react-flow__handle.connectionindicator {
+	pointer-events: all;
+	cursor: crosshair;
+}
+
+.react-flow__handle-bottom {
+	top: auto;
+	left: 50%;
+	bottom: 0;
+	transform: translate(-50%, 50%);
+}
+
+.react-flow__handle-top {
+	top: 0;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.react-flow__handle-left {
+	top: 50%;
+	left: 0;
+	transform: translate(-50%, -50%);
+}
+
+.react-flow__handle-right {
+	top: 50%;
+	right: 0;
+	transform: translate(50%, -50%);
+}
+
+.react-flow__edgeupdater {
+	cursor: move;
+	pointer-events: all;
+}
+
+.react-flow__pane.selection .react-flow__panel {
+	pointer-events: none;
+}
+
+.react-flow__panel {
+	position: absolute;
+	z-index: 5;
+	margin: 15px;
+}
+
+.react-flow__panel.top {
+	top: 0;
+}
+
+.react-flow__panel.bottom {
+	bottom: 0;
+}
+
+.react-flow__panel.top.center,
+.react-flow__panel.bottom.center {
+	left: 50%;
+	transform: translateX(-15px) translateX(-50%);
+}
+
+.react-flow__panel.left {
+	left: 0;
+}
+
+.react-flow__panel.right {
+	right: 0;
+}
+
+.react-flow__panel.left.center,
+.react-flow__panel.right.center {
+	top: 50%;
+	transform: translateY(-15px) translateY(-50%);
+}
+
+.react-flow__attribution {
+	font-size: 10px;
+	background: var(--xy-attribution-background-color, var(--xy-attribution-background-color-default));
+	padding: 2px 3px;
+	margin: 0;
+}
+
+.react-flow__attribution a {
+	text-decoration: none;
+	color: #999;
+}
+
+@keyframes dashdraw {
+	from {
+		stroke-dashoffset: 10;
+	}
+}
+
+.react-flow__edgelabel-renderer {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	left: 0;
+	top: 0;
+}
+
+.react-flow__viewport-portal {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+.react-flow__minimap {
+	background: var(--xy-minimap-background-color-props,
+			var(--xy-minimap-background-color, var(--xy-minimap-background-color-default)));
+}
+
+.react-flow__minimap-svg {
+	display: block;
+}
+
+.react-flow__minimap-mask {
+	fill: var(--xy-minimap-mask-background-color-props,
+			var(--xy-minimap-mask-background-color, var(--xy-minimap-mask-background-color-default)));
+	stroke: var(--xy-minimap-mask-stroke-color-props,
+			var(--xy-minimap-mask-stroke-color, var(--xy-minimap-mask-stroke-color-default)));
+	stroke-width: var(--xy-minimap-mask-stroke-width-props,
+			var(--xy-minimap-mask-stroke-width, var(--xy-minimap-mask-stroke-width-default)));
+}
+
+.react-flow__minimap-node {
+	fill: var(--xy-minimap-node-background-color-props,
+			var(--xy-minimap-node-background-color, var(--xy-minimap-node-background-color-default)));
+	stroke: var(--xy-minimap-node-stroke-color-props,
+			var(--xy-minimap-node-stroke-color, var(--xy-minimap-node-stroke-color-default)));
+	stroke-width: var(--xy-minimap-node-stroke-width-props,
+			var(--xy-minimap-node-stroke-width, var(--xy-minimap-node-stroke-width-default)));
+}
+
+.react-flow__background-pattern.dots {
+	fill: var(--xy-background-pattern-color-props,
+			var(--xy-background-pattern-color, var(--xy-background-pattern-dots-color-default)));
+}
+
+.react-flow__background-pattern.lines {
+	stroke: var(--xy-background-pattern-color-props,
+			var(--xy-background-pattern-color, var(--xy-background-pattern-lines-color-default)));
+}
+
+.react-flow__background-pattern.cross {
+	stroke: var(--xy-background-pattern-color-props,
+			var(--xy-background-pattern-color, var(--xy-background-pattern-cross-color-default)));
+}
+
+.react-flow__controls {
+	display: flex;
+	flex-direction: column;
+	box-shadow: var(--xy-controls-box-shadow, var(--xy-controls-box-shadow-default));
+}
+
+.react-flow__controls.horizontal {
+	flex-direction: row;
+}
+
+.react-flow__controls-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 26px;
+	width: 26px;
+	padding: 4px;
+	border: none;
+	background: var(--xy-controls-button-background-color, var(--xy-controls-button-background-color-default));
+	border-bottom: 1px solid var(--xy-controls-button-border-color-props,
+			var(--xy-controls-button-border-color, var(--xy-controls-button-border-color-default)));
+	color: var(--xy-controls-button-color-props,
+			var(--xy-controls-button-color, var(--xy-controls-button-color-default)));
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+.react-flow__controls-button svg {
+	width: 100%;
+	max-width: 12px;
+	max-height: 12px;
+	fill: currentColor;
+}
+
+.react-flow__edge.updating .react-flow__edge-path {
+	stroke: #777;
+}
+
+.react-flow__edge-text {
+	font-size: 10px;
+}
+
+.react-flow__node.selectable:focus,
+.react-flow__node.selectable:focus-visible {
+	outline: none;
+}
+
+.react-flow__node-input,
+.react-flow__node-default,
+.react-flow__node-output,
+.react-flow__node-group {
+	padding: 10px;
+	border-radius: var(--xy-node-border-radius, var(--xy-node-border-radius-default));
+	width: 150px;
+	font-size: 12px;
+	color: var(--xy-node-color, var(--xy-node-color-default));
+	text-align: center;
+	border: var(--xy-node-border, var(--xy-node-border-default));
+	background-color: var(--xy-node-background-color, var(--xy-node-background-color-default));
+}
+
+.react-flow__node-input.selectable:hover,
+.react-flow__node-default.selectable:hover,
+.react-flow__node-output.selectable:hover,
+.react-flow__node-group.selectable:hover {
+	box-shadow: var(--xy-node-boxshadow-hover, var(--xy-node-boxshadow-hover-default));
+}
+
+.react-flow__node-input.selectable.selected,
+.react-flow__node-input.selectable:focus,
+.react-flow__node-input.selectable:focus-visible,
+.react-flow__node-default.selectable.selected,
+.react-flow__node-default.selectable:focus,
+.react-flow__node-default.selectable:focus-visible,
+.react-flow__node-output.selectable.selected,
+.react-flow__node-output.selectable:focus,
+.react-flow__node-output.selectable:focus-visible,
+.react-flow__node-group.selectable.selected,
+.react-flow__node-group.selectable:focus,
+.react-flow__node-group.selectable:focus-visible {
+	box-shadow: var(--xy-node-boxshadow-selected, var(--xy-node-boxshadow-selected-default));
+}
+
+.react-flow__node-group {
+	background-color: var(--xy-node-group-background-color, var(--xy-node-group-background-color-default));
+}
+
+.react-flow__nodesselection-rect,
+.react-flow__selection {
+	background: var(--xy-selection-background-color, var(--xy-selection-background-color-default));
+	border: var(--xy-selection-border, var(--xy-selection-border-default));
+}
+
+.react-flow__nodesselection-rect:focus,
+.react-flow__nodesselection-rect:focus-visible,
+.react-flow__selection:focus,
+.react-flow__selection:focus-visible {
+	outline: none;
+}
+
+.react-flow__controls-button:hover {
+	background: var(--xy-controls-button-background-color-hover-props,
+			var(--xy-controls-button-background-color-hover, var(--xy-controls-button-background-color-hover-default)));
+	color: var(--xy-controls-button-color-hover-props,
+			var(--xy-controls-button-color-hover, var(--xy-controls-button-color-hover-default)));
+}
+
+.react-flow__controls-button:disabled {
+	pointer-events: none;
+}
+
+.react-flow__controls-button:disabled svg {
+	fill-opacity: 0.4;
+}
+
+.react-flow__controls-button:last-child {
+	border-bottom: none;
+}
+
+.react-flow__controls.horizontal .react-flow__controls-button {
+	border-bottom: none;
+	border-right: 1px solid var(--xy-controls-button-border-color-props,
+			var(--xy-controls-button-border-color, var(--xy-controls-button-border-color-default)));
+}
+
+.react-flow__controls.horizontal .react-flow__controls-button:last-child {
+	border-right: none;
+}
+
+.react-flow__resize-control {
+	position: absolute;
+}
+
+.react-flow__resize-control.left,
+.react-flow__resize-control.right {
+	cursor: ew-resize;
+}
+
+.react-flow__resize-control.top,
+.react-flow__resize-control.bottom {
+	cursor: ns-resize;
+}
+
+.react-flow__resize-control.top.left,
+.react-flow__resize-control.bottom.right {
+	cursor: nwse-resize;
+}
+
+.react-flow__resize-control.bottom.left,
+.react-flow__resize-control.top.right {
+	cursor: nesw-resize;
+}
+
+/* handle styles */
+.react-flow__resize-control.handle {
+	width: 5px;
+	height: 5px;
+	border: 1px solid #fff;
+	border-radius: 1px;
+	background-color: var(--xy-resize-background-color, var(--xy-resize-background-color-default));
+	translate: -50% -50%;
+}
+
+.react-flow__resize-control.handle.left {
+	left: 0;
+	top: 50%;
+}
+
+.react-flow__resize-control.handle.right {
+	left: 100%;
+	top: 50%;
+}
+
+.react-flow__resize-control.handle.top {
+	left: 50%;
+	top: 0;
+}
+
+.react-flow__resize-control.handle.bottom {
+	left: 50%;
+	top: 100%;
+}
+
+.react-flow__resize-control.handle.top.left {
+	left: 0;
+}
+
+.react-flow__resize-control.handle.bottom.left {
+	left: 0;
+}
+
+.react-flow__resize-control.handle.top.right {
+	left: 100%;
+}
+
+.react-flow__resize-control.handle.bottom.right {
+	left: 100%;
+}
+
+/* line styles */
+.react-flow__resize-control.line {
+	border-color: var(--xy-resize-background-color, var(--xy-resize-background-color-default));
+	border-width: 0;
+	border-style: solid;
+}
+
+.react-flow__resize-control.line.left,
+.react-flow__resize-control.line.right {
+	width: 1px;
+	transform: translate(-50%, 0);
+	top: 0;
+	height: 100%;
+}
+
+.react-flow__resize-control.line.left {
+	left: 0;
+	border-left-width: 1px;
+}
+
+.react-flow__resize-control.line.right {
+	left: 100%;
+	border-right-width: 1px;
+}
+
+.react-flow__resize-control.line.top,
+.react-flow__resize-control.line.bottom {
+	height: 1px;
+	transform: translate(0, -50%);
+	left: 0;
+	width: 100%;
+}
+
+.react-flow__resize-control.line.top {
+	top: 0;
+	border-top-width: 1px;
+}
+
+.react-flow__resize-control.line.bottom {
+	border-bottom-width: 1px;
+	top: 100%;
+}
+
+.react-flow__edge-textbg {
+	fill: var(--xy-edge-label-background-color, var(--xy-edge-label-background-color-default));
+}
+
+.react-flow__edge-text {
+	fill: var(--xy-edge-label-color, var(--xy-edge-label-color-default));
 }

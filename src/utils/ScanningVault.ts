@@ -1,9 +1,9 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment, getFrontMatterInfo } from "obsidian";
-// import * as yaml from "js-yaml";
+import { App, Notice, TFile, moment as _moment, debounce } from "obsidian";
 import {
 	extractCheckboxSymbol,
+	getObsidianIndentationSetting,
 	isCompleted,
 	isTaskLine,
 } from "./CheckBoxUtils";
@@ -16,10 +16,9 @@ import {
 	noteItem,
 	priorityEmojis,
 	taskItem,
-	tasksJsonData,
 } from "src/interfaces/TaskItem";
 import {
-	scanFilterForFilesNFolders,
+	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,
 } from "./FiltersVerifier";
 
@@ -30,99 +29,33 @@ import {
 	UniversalDateOptions,
 	scanFilters,
 } from "src/interfaces/GlobalSettings";
+import { TaskRegularExpressions } from "./TaskRegularExpressions";
 
-// Function to extract frontmatter from file content
-export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
-	// Method 1 - Find the frontmatter using delimiters
-	// // Check if the file starts with frontmatter delimiter
-	// if (!fileContent.startsWith("---\n")) {
-	// 	return null;
-	// }
-
-	// // Find the end of frontmatter
-	// const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
-	// if (secondDelimiterIndex === -1) {
-	// 	return null;
-	// }
-
-	// // Extract the YAML content between delimiters
-	// const yamlContent = fileContent.substring(4, secondDelimiterIndex);
-
-	// try {
-	// 	// Parse the YAML content
-	// 	const frontmatter = yaml.load(yamlContent);
-	// 	return frontmatter;
-	// } catch (error) {
-	// 	console.warn("Failed to parse frontmatter:", error);
-	// 	return null;
-	// }
-
-	// Method 2 - Get frontmatter using Obsidian API
-	try {
-		// API-1 : Get fronmatter as a string
-		// const fileContent = await this.app.vault.cachedRead(file);
-		// const frontmatterAsString =
-		// 	getFrontMatterInfo(fileContent).frontmatter;
-
-		// API-2 : Get frontmatter as an object
-		const frontmatterAsObject =
-			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-
-		return frontmatterAsObject;
-	} catch (error) {
-		// console.warn("Failed to parse frontmatter:", error);
-		return null;
-	}
-}
-
-// Function to extract tags from frontmatter
-export function extractFrontmatterTags(frontmatter: any): string[] {
-	if (!frontmatter) {
-		return [];
-	}
-
-	let tags: string[] = [];
-
-	// Check if there's a 'tags' property in frontmatter
-	if (frontmatter.tags) {
-		if (Array.isArray(frontmatter.tags)) {
-			// If tags is an array, process each tag
-			tags = frontmatter.tags.map((tag: any) => {
-				const tagStr = String(tag).trim();
-				// Ensure tags start with # if they don't already
-				return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
-			});
-		} else if (typeof frontmatter.tags === "string") {
-			// If tags is a string, split by commas and process
-			tags = frontmatter.tags
-				.split(",")
-				.map((tag: string) => {
-					const tagStr = tag.trim();
-					return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
-				})
-				.filter((tag: string) => tag.length > 1); // Filter out empty tags
-		}
-	}
-
-	return tags;
-}
-
-export class ScanningVault {
+export default class ScanningVault {
 	app: App;
 	plugin: TaskBoard;
-	tasks: jsonCacheData = {
-		VaultName: "",
-		Modified_at: new Date().toISOString(),
-		Pending: {},
-		Completed: {},
-		Notes: [],
-	};
+	tasksCache: jsonCacheData;
 	TaskDetected: boolean;
+	indentationString: string;
 
+	/**
+	 * Constructor for ScanningVault
+	 * @param app The Obsidian app instance
+	 * @param plugin The TaskBoard plugin instance
+	 * @description Initializes the ScanningVault with the app and plugin instances, and sets up the initial tasks cache.
+	 */
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
+		this.tasksCache = {
+			VaultName: this.plugin.app?.vault.getName(),
+			Modified_at: new Date().toISOString(),
+			Pending: {},
+			Completed: {},
+			Notes: [],
+		}; // Reset task structure
 		this.TaskDetected = false;
+		this.indentationString = getObsidianIndentationSetting(plugin);
 	}
 
 	// Generate a unique ID for each task
@@ -132,21 +65,39 @@ export class ScanningVault {
 		return array[0];
 	}
 
+	async initializeTasksCache() {
+		try {
+			// Load existing tasks from JSON cache
+			this.tasksCache = await loadJsonCacheDataFromDisk(this.plugin);
+		} catch (error) {
+			console.error(
+				"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
+				error
+			);
+			this.tasksCache = {
+				VaultName: this.plugin?.app.vault.getName(),
+				Modified_at: new Date().toISOString(),
+				Pending: {},
+				Completed: {},
+				Notes: [],
+			};
+		}
+	}
+
 	async scanVaultForTasks() {
 		const files = this.app.vault.getMarkdownFiles();
-		this.tasks = {
-			VaultName: this.plugin.app.vault.getName(),
-			Modified_at: new Date().toISOString(),
-			Pending: {},
-			Completed: {},
-			Notes: [],
-		}; // Reset task structure
 
 		for (const file of files) {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
-			if (scanFilterForFilesNFolders(file, scanFilters)) {
-				await this.extractTasksFromFile(file, this.tasks, scanFilters);
+			if (
+				scanFilterForFilesNFoldersNFrontmatter(
+					this.plugin,
+					file,
+					scanFilters
+				)
+			) {
+				await this.extractTasksFromFile(file, scanFilters);
 			}
 		}
 
@@ -156,11 +107,7 @@ export class ScanningVault {
 	}
 
 	// Extract tasks from a specific file
-	async extractTasksFromFile(
-		file: TFile,
-		tasks: jsonCacheData,
-		scanFilters: scanFilters
-	) {
+	async extractTasksFromFile(file: TFile, scanFilters: scanFilters) {
 		const fileNameWithPath = file.path;
 		const fileContent = await readDataOfVaultFiles(
 			this.plugin,
@@ -168,8 +115,8 @@ export class ScanningVault {
 		);
 		const lines = fileContent.split("\n");
 
-		tasks.Pending[fileNameWithPath] = [];
-		tasks.Completed[fileNameWithPath] = [];
+		this.tasksCache.Pending[fileNameWithPath] = [];
+		this.tasksCache.Completed[fileNameWithPath] = [];
 
 		// First checking if the file contains the reminder property as entered by using in the settings.frontmatterPropertyForReminder. If it contains, then this file needs to be appended in the tasks.Notes list.
 		// Extract frontmatter from the file
@@ -216,19 +163,16 @@ export class ScanningVault {
 			};
 
 			// Check if the note already exists
-			const existingNoteIndex = tasks.Notes.findIndex(
+			const existingNoteIndex = this.tasksCache.Notes.findIndex(
 				(n) => n.filePath === fileNameWithPath
 			);
 			if (existingNoteIndex !== -1) {
 				// Replace the existing note
-				tasks.Notes[existingNoteIndex] = note;
-				console.log("Note replaced in tasks.Notes:", note);
+				this.tasksCache.Notes[existingNoteIndex] = note;
 			} else {
 				// Add the new note
-				tasks.Notes.push(note);
-				console.log("Note added to tasks.Notes:", note);
+				this.tasksCache.Notes.push(note);
 			}
-			this.tasks = tasks; // Update the tasks object
 		}
 
 		for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -239,7 +183,8 @@ export class ScanningVault {
 					this.TaskDetected = true;
 					const taskStatus = extractCheckboxSymbol(line);
 					const isTaskCompleted = isCompleted(line);
-					const title = extractTitle(line);
+					// const title = extractTitle(line);
+					const title = line; // we will be storing the taskLine as it is inside the title property
 					const time = extractTime(line);
 					const createdDate = extractCreatedDate(line);
 					let startDate = extractStartDate(line);
@@ -254,11 +199,26 @@ export class ScanningVault {
 					);
 					const completionDate = extractCompletionDate(line);
 					const cancelledDate = extractCancelledDate(line);
-					const bodyLines = extractBody(lines, lineIndex + 1);
+					const bodyLines = extractBody(
+						lines,
+						lineIndex + 1,
+						this.indentationString
+					);
 
 					if (
 						this.plugin.settings.data.globalSettings
-							.dailyNotesPluginComp
+							.dailyNotesPluginComp &&
+						((this.plugin.settings.data.globalSettings
+							.universalDate === UniversalDateOptions.dueDate &&
+							dueDate === "") ||
+							(this.plugin.settings.data.globalSettings
+								.universalDate ===
+								UniversalDateOptions.startDate &&
+								startDate === "") ||
+							(this.plugin.settings.data.globalSettings
+								.universalDate ===
+								UniversalDateOptions.scheduledDate &&
+								scheduledDate === ""))
 					) {
 						const universalDateFormat =
 							this.plugin.settings.data.globalSettings
@@ -334,48 +294,48 @@ export class ScanningVault {
 						reminder: reminder,
 					};
 
-					console.log("extractTasksFromFile : Task extracted:", task);
-
 					if (isTaskCompleted) {
-						tasks.Completed[fileNameWithPath].push(task);
-						this.tasks = tasks;
+						this.tasksCache.Completed[fileNameWithPath].push(task);
 					} else {
-						tasks.Pending[fileNameWithPath].push(task);
-						this.tasks = tasks;
+						this.tasksCache.Pending[fileNameWithPath].push(task);
 					}
+					lineIndex = lineIndex + bodyLines.length; // Move the lineIndex forward by the number of body lines
 				} else {
 					// console.log("The tasks is not allowed...");
 				}
 			}
 		}
+		if (this.tasksCache.Pending[fileNameWithPath]?.length === 0)
+			delete this.tasksCache.Pending[fileNameWithPath];
+
+		if (this.tasksCache.Completed[fileNameWithPath]?.length === 0)
+			delete this.tasksCache.Completed[fileNameWithPath];
+
+		this.saveTasksToJsonCache();
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
-	async refreshTasksFromFiles(files: (TFile | null)[]) {
-		console.log(
-			"ScanningVault.ts : refreshTasksFromFiles called with files:",
-			files
-		);
+	async refreshTasksFromFiles(files: (TFile | null)[], showNotice: boolean) {
 		if (!files || files.length === 0) {
-			console.warn("No files provided for task update.");
 			return;
 		}
-		// Load the existing tasks from tasks.json once
-		const oldTasks = await loadJsonCacheDataFromDisk(this.plugin);
+
 		const scanFilters =
 			this.plugin.settings.data.globalSettings.scanFilters;
 		for (const file of files) {
 			if (
 				file !== null &&
-				scanFilterForFilesNFolders(file, scanFilters)
+				scanFilterForFilesNFoldersNFrontmatter(
+					this.plugin,
+					file,
+					scanFilters
+				)
 			) {
 				// TODO : Try testing if removing the await from the below line will going to speed up the process.
-				await this.extractTasksFromFile(
-					file,
-					oldTasks,
-					scanFilters
-				).then(() => {
-					this.saveTasksToJsonCache();
+				await this.extractTasksFromFile(file, scanFilters).then(() => {
+					if (showNotice) {
+						new Notice("Tasks refreshed successfully.");
+					}
 				});
 
 				// const fileNameWithPath = file.path;
@@ -470,33 +430,47 @@ export class ScanningVault {
 				// }
 
 				// // Only replace the tasks for the specific file
-				// this.tasks.Pending = {
+				// this.tasksCache.Pending = {
 				// 	...oldTasks.Pending, // Keep the existing tasks for other files
 				// 	[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
 				// };
 
-				// this.tasks.Completed = {
+				// this.tasksCache.Completed = {
 				// 	...oldTasks.Completed, // Keep the existing tasks for other files
 				// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
 				// };
 			} else {
-				console.warn("File is not valid...");
+				if (showNotice) {
+					new Notice(
+						`The file "${
+							files[0] ? files[0].path : "Unknown"
+						}" does not satisfy the filters for scanning applied in setting. Hence it will not be scanned for tasks.`,
+						5000
+					);
+				}
 			}
 		}
 	}
 
-	// Save tasks to JSON file
-	async saveTasksToJsonCache() {
-		await writeJsonCacheDataFromDisk(this.plugin, this.tasks);
+	// Debounced saveTasksToJsonCache function
+	private saveTasksToJsonCacheDebounced = debounce(async () => {
+		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
 			this.TaskDetected &&
-			this.plugin.settings.data.globalSettings.realTimeScanning
+			this.plugin.settings.data.globalSettings.realTimeScanning &&
+			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
+				Object.values(this.tasksCache.Completed).flat().length > 0)
 		) {
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
+	}, 500);
+
+	// Save tasks to JSON file
+	saveTasksToJsonCache() {
+		this.saveTasksToJsonCacheDebounced();
 	}
 }
 
@@ -508,6 +482,7 @@ export class ScanningVault {
  */
 export function buildTaskFromRawContent(
 	rawTaskContent: string,
+	indentationString: string,
 	filePath?: string
 ): Partial<taskItem> {
 	const lines = rawTaskContent.split("\n");
@@ -522,19 +497,19 @@ export function buildTaskFromRawContent(
 	const tags = extractTags(lines[0]);
 	const completionDate = extractCompletionDate(lines[0]);
 	const cancelledDate = extractCancelledDate(lines[0]);
-	const body = extractBody(lines, 1);
+	const body = extractBody(lines, 1, indentationString);
 
 	return {
-		title,
+		title: title,
 		status: taskStatus,
-		body,
-		time,
-		createdDate,
-		startDate,
-		scheduledDate,
-		due,
-		tags,
-		priority,
+		body: body,
+		time: time,
+		createdDate: createdDate,
+		startDate: startDate,
+		scheduledDate: scheduledDate,
+		due: due,
+		tags: tags,
+		priority: priority,
 		completion: completionDate,
 		cancelledDate: cancelledDate,
 		filePath: filePath || "",
@@ -570,19 +545,57 @@ export function extractTitle(text: string): string {
 }
 
 // New function to extract task body
-export function extractBody(lines: string[], startLineIndex: number): string[] {
+export function extractBody(
+	lines: string[],
+	startLineIndex: number,
+	indentationString: string
+): string[] {
 	const bodyLines = [];
 	let bodyStartIndex = startLineIndex;
+	const prevLine = lines[bodyStartIndex - 1];
 	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
 		const line = lines[bodyStartIndex];
+		// Using regex for faster matching/removal of leading '>' or '> '
+		const sanitizedLine = line.replace(/^>\s?/, "");
 
-		if (line.trim() === "") {
+		if (sanitizedLine.trim() === "") {
 			break;
 		}
 
+		let n = 0;
+		if (prevLine.startsWith(indentationString)) {
+			console.log("Previous line has indentation\nLine:", prevLine);
+			let tempLine = prevLine;
+			while (tempLine.startsWith(indentationString)) {
+				n++;
+				tempLine = tempLine.slice(indentationString.length);
+			}
+			const requiredIndent = indentationString.repeat(n + 1);
+			if (!sanitizedLine.startsWith(requiredIndent)) {
+				return [];
+			}
+		}
+
+		console.log(
+			"Line:",
+			line,
+			"\nSanitized line:",
+			sanitizedLine,
+			"\nIndentation String:'",
+			indentationString,
+			"'",
+			"\nLenth of indentationString:",
+			indentationString.length,
+			"\nsanitizedLine starts with indentationString:",
+			sanitizedLine.startsWith(indentationString),
+			"\nSanitized line starts with tab:",
+			sanitizedLine.startsWith("\t")
+		);
 		// If the line has one level of indentation, consider it part of the body
-		if (line.startsWith("\t") || line.startsWith("    ")) {
-			//TODO : YOu cannot simply put hardcoded 4 spaces here for tab, it should be taken from the settings, how many spaces for one tab
+		if (
+			sanitizedLine.startsWith(indentationString) ||
+			sanitizedLine.startsWith("\t")
+		) {
 			bodyLines.push(line);
 		} else {
 			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
@@ -590,7 +603,8 @@ export function extractBody(lines: string[], startLineIndex: number): string[] {
 			break;
 		}
 	}
-	return bodyLines.at(0) === "" ? [] : bodyLines;
+	console.log("Extracted body lines:", bodyLines);
+	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
 }
 
 // Extract time from task line
@@ -744,9 +758,7 @@ export function extractPriority(text: string): number {
 // Extract tags from task title
 export function extractTags(text: string): string[] {
 	text = text.replace(/<(mark|font).*?>/g, "");
-	const matches = text.match(
-		/\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g
-	);
+	const matches = text.match(TaskRegularExpressions.hashTagsRegex);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
 
@@ -837,4 +849,80 @@ export function extractCancelledDate(text: string): string {
 	}
 	// Return the matched date or date-time, or an empty string if no match
 	return match ? match[0].trim() : "";
+}
+
+// Function to extract frontmatter from file content
+export function extractFrontmatter(plugin: TaskBoard, file: TFile): any {
+	// Method 1 - Find the frontmatter using delimiters
+	// // Check if the file starts with frontmatter delimiter
+	// if (!fileContent.startsWith("---\n")) {
+	// 	return null;
+	// }
+
+	// // Find the end of frontmatter
+	// const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
+	// if (secondDelimiterIndex === -1) {
+	// 	return null;
+	// }
+
+	// // Extract the YAML content between delimiters
+	// const yamlContent = fileContent.substring(4, secondDelimiterIndex);
+
+	// try {
+	// 	// Parse the YAML content
+	// 	const frontmatter = yaml.load(yamlContent);
+	// 	return frontmatter;
+	// } catch (error) {
+	// 	console.warn("Failed to parse frontmatter:", error);
+	// 	return null;
+	// }
+
+	// Method 2 - Get frontmatter using Obsidian API
+	try {
+		// API-1 : Get fronmatter as a string
+		// const fileContent = await this.app.vault.cachedRead(file);
+		// const frontmatterAsString =
+		// 	getFrontMatterInfo(fileContent).frontmatter;
+
+		// API-2 : Get frontmatter as an object
+		const frontmatterAsObject =
+			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+
+		return frontmatterAsObject;
+	} catch (error) {
+		// console.warn("Failed to parse frontmatter:", error);
+		return null;
+	}
+}
+
+// Function to extract tags from frontmatter
+export function extractFrontmatterTags(frontmatter: any): string[] {
+	if (!frontmatter) {
+		return [];
+	}
+
+	let tags: string[] = [];
+
+	// Check if there's a 'tags' property in frontmatter
+	if (frontmatter.tags) {
+		if (Array.isArray(frontmatter.tags)) {
+			// If tags is an array, process each tag
+			tags = frontmatter.tags.map((tag: any) => {
+				const tagStr = String(tag).trim();
+				// Ensure tags start with # if they don't already
+				return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+			});
+		} else if (typeof frontmatter.tags === "string") {
+			// If tags is a string, split by commas and process
+			tags = frontmatter.tags
+				.split(",")
+				.map((tag: string) => {
+					const tagStr = tag.trim();
+					return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+				})
+				.filter((tag: string) => tag.length > 1); // Filter out empty tags
+		}
+	}
+
+	return tags;
 }

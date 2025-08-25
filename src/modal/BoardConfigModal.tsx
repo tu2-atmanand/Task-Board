@@ -1,21 +1,21 @@
 // /src/modal/BoardConfigModal.tsx
 
 import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
-import { App, Modal, Notice } from "obsidian";
-import { Board, ColumnData, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
+import { Modal, Notice } from "obsidian";
+import { Board, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import React, { ComponentPropsWithRef, useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
-import { FaAlignCenter, FaAlignJustify, FaTrash } from 'react-icons/fa';
+import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { priorityOptions } from "src/interfaces/TaskItem";
@@ -49,7 +49,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
-	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex].filters?.join(", ") || "");
+	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex]?.filters?.join(", ") || "");
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -166,8 +166,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const renderAddColumnModal = () => {
 		if (!isAddColumnModalOpen) return null;
 		// TODO : THis wont work if you havent assigned a very high z-index to this specific modal.
-		const modal = new AddColumnModal(app, {
-			app,
+		const modal = new AddColumnModal(plugin.app, {
+			app: plugin.app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
 			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
 		});
@@ -177,8 +177,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleAddNewBoard = async (oldBoards: Board[]) => {
 		const newBoard: Board = {
 			name: t("new-board"),
-			index: localBoards.length + 1,
+			index: localBoards.length,
 			columns: [],
+			hideEmptyColumns: false,
+			filters: [],
+			filterPolarity: "0",
+			filterScope: "",
+			showColumnTags: true,
+			showFilteredTags: true
 		};
 		setLocalBoards([...oldBoards, newBoard]);
 		setSelectedBoardIndex(localBoards.length);
@@ -194,6 +200,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				if (selectedBoardIndex !== -1) {
 					const updatedBoards = [...localBoards];
 					updatedBoards.splice(selectedBoardIndex, 1);
+					// Update indexes of boards below the deleted one
+					for (let i = selectedBoardIndex; i < updatedBoards.length; i++) {
+						updatedBoards[i].index = i;
+					}
 					setLocalBoards(updatedBoards);
 					setIsEdited(true);
 					if (updatedBoards.length === 0) {
@@ -254,14 +264,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				const suggestionContent = getFileSuggestions(plugin.app);
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
-					console.log(`Selected file path: ${selectedPath}`);
 					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
 			} else if (filePathInputRefs.current[column.id] !== null && column.colType === "namedTag") {
 				const suggestionContent = getTagSuggestions(plugin.app);
 				const onSelectCallback = (selectedTag: string) => {
-					console.log(`Selected tag: ${selectedTag}`);
 					handleColumnChange(selectedBoardIndex, index, "coltag", selectedTag);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
@@ -507,7 +515,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "namedTag" && (
 											<input
 												type="text"
-												ref={(el) => (filePathInputRefs.current[column.id] = el)}
+												ref={(el) => {
+													filePathInputRefs.current[column.id] = el;
+												}}
 												placeholder={t("enter-tag")}
 												value={column.coltag || ""}
 												onChange={(e) =>
@@ -575,7 +585,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === "pathFiltered" && (
 											<input
 												type="text"
-												ref={(el) => (filePathInputRefs.current[column.id] = el)}
+												ref={(el) => {
+													filePathInputRefs.current[column.id] = el;
+												}}
 												className="boardConfigModalColumnRowContentColName"
 												value={column.filePaths || ""}
 												onChange={(e) =>
@@ -626,8 +638,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													className="boardConfigModalColumnRowContentColDatedVal"
 												/>
 												<select
-													aria-label="Select Date Type"
-													value={column.datedBasedColumn?.dateType || UniversalDateOptions.dueDate}
+													aria-label="Select date type"
+													value={column.datedBasedColumn?.dateType || plugin.settings.data.globalSettings.universalDate || UniversalDateOptions.dueDate}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -641,9 +653,34 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{UniversalDateOptions.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{UniversalDateOptions.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{UniversalDateOptions.scheduledDate}</option>
+													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+												</select>
+											</>
+										)}
+										{column.colType === "undated" && (
+											<>
+												<select
+													aria-label="Select date type"
+													value={column.datedBasedColumn?.dateType || plugin.settings.data.globalSettings.universalDate || UniversalDateOptions.dueDate}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"datedBasedColumn",
+															{
+																from: 0,
+																to: 0,
+																dateType: e.target.value,
+															}
+														)
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												>
+													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
+													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
 												</select>
 											</>
 										)}
@@ -678,12 +715,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (isSidebarVisible) {
 			document.addEventListener("mousedown", handleClickOutside);
 		} else {
-			console.log("Cleanup: Removing event listener for click outside");
 			document.removeEventListener("mousedown", handleClickOutside);
 		}
 		return () => {
 			if (isSidebarVisible) {
-				console.log("Cleanup: Removing event listener for click outside");
 				// Cleanup event listener when the component unmounts or sidebar visibility changes
 				document.removeEventListener("mousedown", handleClickOutside);
 			}
@@ -712,11 +747,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								<div
 									key={board.name} // Changed key from index to board.name
 									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-								>
-									<span onClick={() => {
+									onClick={() => {
 										setSelectedBoardIndex(index);
 										toggleSidebar();
-									}}>
+									}}
+								>
+									<span>
 										{board.name}
 									</span>
 									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}

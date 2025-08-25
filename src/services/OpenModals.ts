@@ -2,10 +2,6 @@
 
 import { App, Notice, TFile } from "obsidian";
 import { addTaskInNote } from "src/utils/TaskItemUtils";
-import {
-	scanFilterForFilesNFolders,
-	scanFilterForTags,
-} from "src/utils/FiltersVerifier";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { Board } from "../interfaces/BoardConfigs";
@@ -18,6 +14,8 @@ import { CommunityPlugins } from "./CommunityPlugins";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
 import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
+import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
+import { ScanFilterModal } from "src/modal/ScanFilterModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -40,7 +38,6 @@ export const openAddNewTaskInCurrentFileModal = (
 	activeFile: TFile,
 	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
-	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const AddTaskModal = new AddOrEditTaskModal(
 		app,
 		plugin,
@@ -79,7 +76,6 @@ export const openAddNewTaskModal = (
 	plugin: TaskBoard,
 	activeFile?: TFile
 ) => {
-	const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 	const preDefinedNoteFile = plugin.app.vault.getAbstractFileByPath(
 		plugin.settings.data.globalSettings.preDefinedNote
 	);
@@ -89,7 +85,7 @@ export const openAddNewTaskModal = (
 		app,
 		plugin,
 		async (newTask, quickAddPluginChoice) => {
-			if (communityPlugins.isQuickAddPluginEnabled()) {
+			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
 				const completeTask = await getFormattedTaskContent(newTask);
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
@@ -237,7 +233,9 @@ export const openDiffContentCompareModal = (
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
 				el.createEl("p", {
-					text: `${t("safe-guard")} : ${t("content-mismatch-notice-message")}`,
+					text: `${t("safe-guard")} : ${t(
+						"content-mismatch-notice-message"
+					)}`,
 				});
 				el.createEl("button", {
 					text: t("show-conflicts"),
@@ -265,4 +263,25 @@ export const openDiffContentCompareModal = (
 			e.stopImmediatePropagation();
 		}
 	});
+};
+
+export const openTaskBoardActionsModal = (
+	plugin: TaskBoard,
+	activeBoardIndex: number
+) => {
+	const actionModal = new TaskBoardActionsModal(
+		plugin,
+		plugin.settings.data.boardConfigs[activeBoardIndex].columns
+	);
+	actionModal.open();
+};
+
+export const openScanFiltersModal = (
+	plugin: TaskBoard,
+	filterType: "files" | "frontMatter" | "folders" | "tags",
+	onSave: (scanFilters: string[]) => void
+) => {
+	new ScanFilterModal(plugin, filterType, async (newValues) => {
+		onSave(newValues);
+	}).open();
 };

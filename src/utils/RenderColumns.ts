@@ -28,7 +28,24 @@ export const renderColumns = (
 	const completedTasks = allTasks.Completed;
 
 	if (columnData.colType === "undated") {
-		tasksToDisplay = pendingTasks.filter((task) => !task.due);
+		tasksToDisplay = pendingTasks.filter((task) => {
+			if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.dueDate
+			) {
+				return !task.due;
+			} else if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.startDate
+			) {
+				return !task.startDate;
+			} else if (
+				columnData.datedBasedColumn?.dateType ===
+				UniversalDateOptions.scheduledDate
+			) {
+				return !task.scheduledDate;
+			}
+		});
 	} else if (columnData.colType === "dated") {
 		const { dateType, from, to } = columnData.datedBasedColumn || {
 			dateType: "due",
@@ -133,7 +150,11 @@ export const renderColumns = (
 		);
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) =>
-			getAllTaskTags(task).some((tag) => tag === `#${columnData.coltag}`)
+			getAllTaskTags(task).some(
+				(tag) =>
+					tag.replace(`#`, "").toLocaleLowerCase() ===
+					columnData.coltag?.replace(`#`, "").toLowerCase()
+			)
 		);
 	} else if (columnData.colType === "pathFiltered") {
 		// Filter tasks based on their file path
@@ -141,7 +162,7 @@ export const renderColumns = (
 			// Split the path patterns by comma and trim whitespace
 			const pathPatterns = columnData.filePaths
 				.split(",")
-				.map((pattern: string) => pattern.trim().toLowerCase())
+				.map((pattern: string) => pattern.trim())
 				.filter((pattern: string) => pattern.length > 0);
 
 			if (pathPatterns.length > 0) {
@@ -150,9 +171,16 @@ export const renderColumns = (
 						return false;
 					}
 
-					const lowerCasePath = task.filePath.toLowerCase();
+					const lowerCasePath = task.filePath;
 					const matchedPattern = pathPatterns.some(
-						(pattern: string) => pattern === lowerCasePath
+						(pattern: string) => {
+							if (pattern.endsWith(".md")) {
+								return pattern === lowerCasePath;
+							} else {
+								// Check if the task's file path contains the pattern
+								return lowerCasePath.includes(pattern);
+							}
+						}
 					);
 					return matchedPattern;
 				});
@@ -172,7 +200,7 @@ export const renderColumns = (
 		const namedTags =
 			currentBoard?.columns
 				.filter((col) => col.colType === "namedTag" && col.coltag)
-				.map((col) => col.coltag?.toLowerCase()) || [];
+				.map((col) => col.coltag?.toLowerCase().replace(`#`, "")) || [];
 		// 3. Now filter tasks
 		tasksToDisplay = pendingTasks.filter((task) => {
 			const allTaskTags = getAllTaskTags(task);
