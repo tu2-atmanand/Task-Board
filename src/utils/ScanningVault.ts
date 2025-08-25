@@ -487,7 +487,7 @@ export function buildTaskFromRawContent(
 ): Partial<taskItem> {
 	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
-	const title = extractTitle(lines[0]);
+	const title = lines[0]; // extractTitle(lines[0]);
 	const time = extractTime(lines[0]);
 	const createdDate = extractCreatedDate(lines[0]);
 	const startDate = extractStartDate(lines[0]);

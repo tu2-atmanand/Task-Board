@@ -36,7 +36,8 @@ export function checkboxStateSwitcher(plugin: any, symbol: string): string {
  * @returns True if the symbol represents a completed state, otherwise false.
  */
 export function isCompleted(task: string): boolean {
-	const match = task.match(/-\s\[(.)\]/); // Extract the symbol inside [ ]
+	const match = task.match(/\s\[(.)\]/); // Extract the symbol inside [ ]
+	// console.log("CheckBoxUtils.ts : isCompleted : match :", match);
 	if (!match || match.length < 2) return false;
 
 	const symbol = match[1];
@@ -69,7 +70,7 @@ export function isTaskLine(line: string): boolean {
  * @returns The checkbox symbol.
  */
 export function extractCheckboxSymbol(task: string): string {
-	const match = task.match(/- \[(.)\]/); // Extract the symbol inside [ ]
+	const match = task.match(/\[(.)\]/); // Extract the symbol inside [ ]
 	if (!match || match.length < 2) return " ";
 
 	return match[1];
