@@ -24,6 +24,8 @@ Always reference these instructions first and fallback to search or bash command
 - **NEVER CANCEL**: The `npm run build` command takes approximately 5 seconds and runs `tsc -noEmit -skipLibCheck && node esbuild.config.mjs production`. NEVER CANCEL builds even though they're quick.
 - **TypeScript validation**: `npx tsc --noEmit --skipLibCheck` takes approximately 5 seconds.
 - **Build process**: TypeScript compilation check followed by esbuild bundling to produce `main.js`.
+  - Production build (`npm run build`): ~714KB optimized bundle
+  - Development build (`npm run dev`): ~8.8MB bundle with inline sourcemaps
 
 ### Validation and Code Quality
 - **CRITICAL**: Always run `npx tsc --noEmit --skipLibCheck` to validate TypeScript compilation before committing changes (takes ~5 seconds).
@@ -39,7 +41,7 @@ Always reference these instructions first and fallback to search or bash command
 - **VALIDATION REQUIREMENT**: Since this is an Obsidian plugin, you cannot test full functionality without Obsidian. Always validate:
   1. TypeScript compilation succeeds
   2. Build completes successfully  
-  3. Generated `main.js` file is created (~8.8MB indicates successful build with all dependencies)
+  3. Generated `main.js` file is created (production: ~714KB, development: ~8.8MB with sourcemaps)
   4. No TypeScript errors when importing Obsidian APIs
 - **Development testing**: Install the plugin in an Obsidian vault by copying `main.js`, `manifest.json`, and `styles.css` to a plugin folder.
 - **Key constraint**: The plugin extensively uses Obsidian's vault API (`this.app.vault.*`) which is not available outside Obsidian environment.
@@ -54,7 +56,7 @@ After making changes, perform these validation scenarios:
 rm -rf node_modules main.js
 npm install  # Should complete in 25-45 seconds
 npm run build  # Should complete in ~5 seconds
-ls -la main.js  # Should show ~8.8MB file
+ls -la main.js  # Should show ~714KB (production) or ~8.8MB (development)
 ```
 
 ### 2. TypeScript Validation  
