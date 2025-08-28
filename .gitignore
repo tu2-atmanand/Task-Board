@@ -15,6 +15,11 @@ main.js
 # Exclude sourcemaps
 *.map
 
+# Testing
+coverage/
+.nyc_output
+*.lcov
+
 # obsidian
 
 # Exclude macOS Finder (System Explorer) View States
