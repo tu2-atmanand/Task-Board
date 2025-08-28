@@ -150,6 +150,40 @@ export const loadJsonCacheDataFromDisk = async (
 // 	return oldTaskData;
 // };
 
+// Helper function to write file with retry logic for timeout scenarios
+const writeFileWithRetry = async (
+	plugin: TaskBoard,
+	path: string,
+	content: string,
+	maxRetries: number = 3,
+	baseDelay: number = 1000
+): Promise<void> => {
+	for (let attempt = 1; attempt <= maxRetries; attempt++) {
+		try {
+			await plugin.app.vault.adapter.write(path, content);
+			// Log successful recovery if it was a retry
+			if (attempt > 1) {
+				console.log(`Task Board: File write succeeded on attempt ${attempt}`);
+			}
+			return; // Success, exit the function
+		} catch (error) {
+			const errorMessage = String(error);
+			const isTimeoutError = errorMessage.toLowerCase().includes('timeout') || 
+				errorMessage.toLowerCase().includes('timed out');
+			
+			// If this is the last attempt or not a timeout error, throw the error
+			if (attempt === maxRetries || !isTimeoutError) {
+				throw error;
+			}
+			
+			// Wait with exponential backoff before retry
+			const delay = baseDelay * Math.pow(2, attempt - 1);
+			console.warn(`Task Board: File write timeout (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`);
+			await new Promise(resolve => setTimeout(resolve, delay));
+		}
+	}
+};
+
 // Function to write tasks data to disk
 export const writeJsonCacheDataFromDisk = async (
 	plugin: TaskBoard,
@@ -163,16 +197,26 @@ export const writeJsonCacheDataFromDisk = async (
 
 		// const cleanedTasksData = tasksData; //await dataCleanup(tasksData);
 
-		await plugin.app.vault.adapter.write(
+		await writeFileWithRetry(
+			plugin,
 			path,
 			JSON.stringify(tasksData, null, 4)
 		);
 	} catch (error) {
+		const errorMessage = String(error);
+		const isTimeoutError = errorMessage.toLowerCase().includes('timeout') || 
+			errorMessage.toLowerCase().includes('timed out');
+		
+		// Provide more specific error message for timeout scenarios
+		const userMessage = isTimeoutError
+			? "Failed to write tasks to tasks.json file due to file system timeout. This may occur when using external drives that go idle. The operation was retried but still failed."
+			: "Failed to write tasks to tasks.json file. Or failed to create the a new file. Maybe write permission is not granted.";
+		
 		bugReporter(
 			plugin,
-			"Failed to write tasks to tasks.json file. Or failed to create the a new file. Maybe write permission is not granted.",
-			String(error),
-			"JsonFileOperations.ts/writetasksJsonDataDataToDisk"
+			userMessage,
+			errorMessage,
+			"JsonFileOperations.ts/writeJsonCacheDataFromDisk"
 		);
 	}
 };
