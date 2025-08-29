@@ -263,6 +263,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerTaskBoardStatusBar() {
+		return;
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		// const statusBarItemEl = this.addStatusBarItem();
 		// statusBarItemEl.setText("Next task in # min");
@@ -435,9 +436,10 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.scanningVault.refreshTasksFromFiles([
-									file,
-								], true);
+								this.scanningVault.refreshTasksFromFiles(
+									[file],
+									true
+								);
 							});
 					});
 					if (
@@ -671,8 +673,10 @@ export default class TaskBoard extends Plugin {
 				// 	settings[key]
 				// );
 				this.migrateSettings(defaults[key], settings[key]);
-			} else if (key === 'tasksCacheFilePath' && settings[key] === '') {
-				settings[key] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+			} else if (key === "tasksCacheFilePath" && settings[key] === "") {
+				settings[
+					key
+				] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 			}
 		}
 
