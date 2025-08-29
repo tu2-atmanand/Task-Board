@@ -29,6 +29,10 @@ import {
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
+import {
+	exportConfigurations,
+	importConfigurations,
+} from "./SettingSynchronizer";
 
 export class SettingsManager {
 	win: Window;
@@ -390,7 +394,7 @@ export class SettingsManager {
 					),
 				];
 				// Add 'Default' option label for the default path
-				dropdown.addOption(defaultPath, "Default");
+				dropdown.addOption(defaultPath, `Default - ${defaultPath}`);
 
 				// Add options to dropdown
 				suggestionContent.forEach((path) => {
@@ -452,6 +456,20 @@ export class SettingsManager {
 			.addButton((button) =>
 				button.setButtonText("Update").onClick(async () => {
 					await downloadAndApplyLanguageFile(this.plugin);
+				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("import-export-configurations"))
+			.setDesc(t("import-export-configurations-info"))
+			.addButton((button) =>
+				button.setButtonText(t("import")).onClick(async () => {
+					await importConfigurations(this.plugin);
+				})
+			)
+			.addButton((button) =>
+				button.setButtonText(t("export")).onClick(async () => {
+					await exportConfigurations(this.plugin);
 				})
 			);
 
