@@ -1,11 +1,16 @@
-import { App, Notice, normalizePath } from "obsidian";
+import { Notice } from "obsidian";
 import TaskBoard from "main";
+import { fsPromises, NodePickedFile } from "src/utils/FileSystem";
+import {
+	DEFAULT_SETTINGS,
+	PluginDataJson,
+} from "src/interfaces/GlobalSettings";
 
 /**
  * Migrates settings from imported data to current settings, preserving new fields and syncing new ones.
  * This function is recursive for nested objects.
  */
-export function migrateSettings(defaults: any, settings: any) {
+export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 	for (const key in defaults) {
 		if (!(key in settings)) {
 			settings[key] = defaults[key];
@@ -68,54 +73,58 @@ export function migrateSettings(defaults: any, settings: any) {
  */
 export async function exportConfigurations(plugin: TaskBoard) {
 	try {
-		const data = plugin.settings.data;
+		const data = plugin.settings;
 		const exportFileName = "task-board-configs-export.json";
 		const fileContent = JSON.stringify(data, null, 2);
 
-		// Use Obsidian's file picker to select a folder
-		// Use system file picker to select a folder
-		let folder: string | undefined;
-		await new Promise<void>((resolve) => {
-			createEl("input", { type: "file" }, (input) => {
-				(input as HTMLInputElement).webkitdirectory = true;
-				const cleanup = () => {
-					input.remove();
-				};
-				input.addEventListener("change", () => {
-					const files = input.files;
-					if (files && files.length > 0) {
-						console.log("Selected files:", files);
-						// Get the folder path from the first file's relative path
-						const relativePath = (files[0] as any).webkitRelativePath as string;
-						const folderRelative = relativePath.substring(0, relativePath.lastIndexOf("/"));
-						// Resolve the absolute path using Obsidian's adapter
-						folder = plugin.app.vault.adapter.getFullPath
-							? plugin.app.vault.adapter.getFullPath(folderRelative)
-							: folderRelative;
-
-						console.log("Resolved folder path:", folder);
-					}
-					cleanup();
-					resolve();
-				});
-				input.addEventListener("blur", () => {
-					cleanup();
-				});
-				input.click();
+		// Desktop folder picker
+		if (
+			(window as any).electron &&
+			(window as any).electron.remote &&
+			(window as any).electron.remote.dialog
+		) {
+			let folderPaths: string[] = (
+				window as any
+			).electron.remote.dialog.showOpenDialogSync({
+				title: "Pick folder to export settings",
+				properties: ["openDirectory", "dontAddToRecent"],
 			});
-		});
-		if (!folder) {
-			new Notice("Export cancelled or folder not selected.");
-			return;
+			if (!folderPaths || folderPaths.length === 0) {
+				new Notice("Export cancelled or folder not selected.");
+				return;
+			}
+			const folderPath = folderPaths[0];
+			const exportPath =
+				folderPath.endsWith("/") || folderPath.endsWith("\\")
+					? folderPath + exportFileName
+					: folderPath +
+					  (folderPath.includes("/") ? "/" : "\\") +
+					  exportFileName;
+			console.log(
+				"Folder path :",
+				folderPath,
+				"\nExport path:",
+				exportPath
+			);
+			await fsPromises.writeFile(exportPath, fileContent, "utf8");
+			new Notice(`Settings exported to ${exportPath}`);
+		} else {
+			// Web: use file save dialog
+			let a = document.createElement("a");
+			a.href = URL.createObjectURL(
+				new Blob([fileContent], { type: "application/json" })
+			);
+			a.download = exportFileName;
+			document.body.appendChild(a);
+			a.click();
+			setTimeout(() => {
+				document.body.removeChild(a);
+				URL.revokeObjectURL(a.href);
+			}, 1000);
+			new Notice(
+				"Settings exported. Check the folder where you downloaded the file."
+			);
 		}
-		console.log("Selected folder:", folder);
-		const exportPath = normalizePath(`${folder}/${exportFileName}`);
-		// Ensure the folder exists before writing
-		// if (!(await plugin.app.vault.adapter.exists(folder))) {
-		// 	await plugin.app.vault.adapter.mkdir(folder);
-		// }
-		await plugin.app.vault.adapter.write(exportPath, fileContent);
-		new Notice(`Settings exported to ${exportPath}`);
 	} catch (err) {
 		new Notice("Failed to export settings.");
 		console.error(err);
@@ -123,52 +132,93 @@ export async function exportConfigurations(plugin: TaskBoard) {
 }
 
 /**
- * Imports settings from a file chosen by the user, merging them with current settings.
+ * Imports plugin settings from a file chosen by the user, merging with existing settings.
+ * Preserves new fields in both files.
  */
 export async function importConfigurations(plugin: TaskBoard) {
 	try {
-		let file: any;
-		await new Promise<void>((resolve) => {
-			const input = createEl("input", { type: "file" });
-			const cleanup = () => {
-				input.remove();
-			};
-			input.addEventListener("change", () => {
-				const files = (input as HTMLInputElement).files;
-				if (files && files.length > 0) {
-					console.log("Selected files:", files);
-					file = { path: files[0].name, file: files[0] };
-				}
-				cleanup();
-				resolve();
+		let importedContent: string | undefined = undefined;
+		let extensions = ["json"];
+		let name = "JSON Files";
+
+		// Desktop file picker
+		if (
+			(window as any).electron &&
+			(window as any).electron.remote &&
+			(window as any).electron.remote.dialog
+		) {
+			let filePaths: string[] = (
+				window as any
+			).electron.remote.dialog.showOpenDialogSync({
+				title: "Pick settings file to import",
+				properties: ["openFile", "dontAddToRecent"],
+				filters: [{ name, extensions }],
 			});
-			input.addEventListener("blur", () => {
-				cleanup();
+			if (!filePaths || filePaths.length === 0) {
+				new Notice("Import cancelled or file not selected.");
+				return;
+			}
+			const pickedFile = new NodePickedFile(filePaths[0]);
+			importedContent = await pickedFile.readText();
+			console.log(
+				"Imported content:",
+				importedContent,
+				"\nPicked File:",
+				pickedFile
+			);
+		} else {
+			// Web file picker
+			await new Promise<void>((resolve) => {
+				let inputEl = document.createElement("input");
+				inputEl.type = "file";
+				inputEl.accept = extensions
+					.map((e) => "." + e.toLowerCase())
+					.join(",");
+				inputEl.addEventListener("change", async () => {
+					if (!inputEl.files || inputEl.files.length === 0) {
+						new Notice("Import cancelled or file not selected.");
+						resolve();
+						return;
+					}
+					const file = inputEl.files[0];
+					importedContent = await file.text();
+					resolve();
+				});
+				inputEl.click();
 			});
-			input.click();
-		});
-		if (!file) {
-			new Notice("Import cancelled or file not selected.");
-			return;
+			if (!importedContent) {
+				new Notice("Import cancelled or file not selected.");
+				return;
+			}
 		}
 
-		const filePath = normalizePath(file.path);
-		const fileContent = await plugin.app.vault.adapter.read(filePath);
-		const importedData = JSON.parse(fileContent);
-		console.log("Imported Data:", importedData);
+		const importedData: PluginDataJson = JSON.parse(importedContent);
 
-		// // Migrate settings from imported data to current settings
-		// const defaults = plugin.settings.data;
-		// const newSettings = migrateSettings(
-		// 	importedData,
-		// 	JSON.parse(JSON.stringify(defaults))
-		// );
+		// Get current settings and defaults
+		const currentData = plugin.settings;
+		const defaultData = DEFAULT_SETTINGS;
 
-		// // Update the plugin settings with the new merged settings
-		// plugin.settings.data = newSettings;
-		await plugin.saveSettings();
+		console.log(
+			"Current Settings:",
+			defaultData,
+			"\nImported Settings:",
+			importedData
+		);
 
-		new Notice("Settings imported and applied successfully.");
+		// Merge imported settings with current settings and defaults
+		const mergedSettings = migrateSettings(defaultData, importedData);
+		console.log("Merged Settings:", mergedSettings);
+
+		// Protect new fields in current settings that are not present in imported file
+		// for (const key in currentData) {
+		//     if (!(key in mergedSettings)) {
+		//         mergedSettings[key] = currentData[key];
+		//     }
+		// }
+
+		// plugin.settings = mergedSettings;
+		// await plugin.saveSettings();
+		new Notice("Settings imported and merged successfully.");
 	} catch (err) {
 		new Notice("Failed to import settings.");
 		console.error(err);

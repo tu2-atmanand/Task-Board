@@ -247,6 +247,7 @@ const en: Lang = {
 	"show-subtasks-only": "Show subtasks only",
 	"show-both": "Show both",
 	"hide-both": "Hide both",
+	"update": "Update",
 	"archive-instead": "Archive instead",
 	"update-language-translations": "Update language translations",
 	"update-language-translations-info": "Click on the update button to download the latest language translations.",
@@ -258,6 +259,10 @@ const en: Lang = {
 	"scan-vault-from-the-vault-upgrade-message-1": "Task Board has been updated to version",
 	"scan-vault-from-the-vault-upgrade-message-2": "This new release has brought various new features, which requires you to re-scan the vault.",
 	"scan-vault-from-the-vault-upgrade-message-3": "Read the release notes for this new version here",
+	"import": "Import",
+	"export": "Export",
+	"import-export-configurations": "Import/Export configurations",
+	"import-export-configurations-info": "Use this feature to import or export your task board configurations. This is very useful for backing up your settings or transferring them to another device. Also in the case when you want to re-install the plugin."
 };
 
 export default en;
