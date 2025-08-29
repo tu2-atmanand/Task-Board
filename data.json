@@ -631,7 +631,18 @@
           "targetColumn": "6"
         }
       ],
-      "cardSectionsVisibility": "hideBoth"
+      "cardSectionsVisibility": "hideBoth",
+      "hiddenTaskProperties": [
+        "tags",
+        "startDate",
+        "createdDate",
+        "scheduledDate",
+        "dueDate",
+        "completionDate",
+        "priority",
+        "time",
+        "dependencies"
+      ]
     }
   }
 }
