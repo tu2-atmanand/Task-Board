@@ -1734,7 +1734,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 /* Hidden Properties in Live Editor and Reading Mode */
-.taskboard-hidden-property {
+/* .taskboard-hidden-property {
 	display: none !important;
 	opacity: 0.3;
 	font-size: 0.8em;
@@ -1743,7 +1743,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding: 1px 3px;
 	border-radius: 3px;
 	cursor: help;
-}
+} */
 
 /* Show hidden properties on line hover for easier editing */
 li:hover .taskboard-hidden-property {
@@ -1751,9 +1751,9 @@ li:hover .taskboard-hidden-property {
 }
 
 /* Alternative: show on focus for better accessibility */
-li:focus-within .taskboard-hidden-property {
+/* li:focus-within .taskboard-hidden-property {
 	display: inline !important;
-}
+} */
 
 .taskBoard-tab-section-desc {
 	text-align: center;

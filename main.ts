@@ -36,6 +36,8 @@ import {
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { isTaskLine } from "src/utils/CheckBoxUtils";
+import { priorityEmojis } from "src/interfaces/TaskItem";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -93,6 +95,9 @@ export default class TaskBoard extends Plugin {
 
 		await this.scanningVault.initializeTasksCache();
 
+		// Register markdown post processor for hiding task properties
+		this.registerReadingModePostProcessor();
+
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
 			// Creating Few Events
@@ -109,9 +114,6 @@ export default class TaskBoard extends Plugin {
 
 			// Register the Kanban view
 			this.registerTaskBoardView();
-
-			// Register markdown post processor for hiding task properties
-			this.registerTaskPropertyHider();
 
 			this.openAtStartup();
 
@@ -260,28 +262,34 @@ export default class TaskBoard extends Plugin {
 		});
 	}
 
-	registerTaskPropertyHider() {
+	registerReadingModePostProcessor() {
 		this.registerMarkdownPostProcessor((element, context) => {
+			// console.log("Element : ", element, "\nContent :", context);
 			// Only process if we have properties to hide
-			const hiddenProperties = this.settings.data.globalSettings.hiddenTaskProperties || [];
+			const hiddenProperties =
+				this.settings.data.globalSettings.hiddenTaskProperties || [];
 			if (hiddenProperties.length === 0) {
 				return;
 			}
 
 			// Find all list items that could be tasks
 			const listItems = element.querySelectorAll("li");
-			
+
 			listItems.forEach((listItem) => {
 				const textContent = listItem.textContent || "";
+				// console.log("Text Content :", textContent);
 				// Check if this is a task (starts with checkbox syntax)
-				if (textContent.match(/^\s*[\-\[\*]\s*\[[x\s\-\/]/)) {
+				if (element.querySelector(".contains-task-list")) {
 					this.hidePropertiesInElement(listItem, hiddenProperties);
 				}
 			});
 		});
 	}
 
-	private hidePropertiesInElement(element: HTMLElement, hiddenProperties: HideableTaskProperty[]) {
+	private hidePropertiesInElement(
+		element: HTMLElement,
+		hiddenProperties: HideableTaskProperty[]
+	) {
 		// Process text nodes to find and hide specific patterns
 		const walker = document.createTreeWalker(
 			element,
@@ -291,7 +299,7 @@ export default class TaskBoard extends Plugin {
 
 		const textNodes: Text[] = [];
 		let node;
-		while (node = walker.nextNode()) {
+		while ((node = walker.nextNode())) {
 			textNodes.push(node as Text);
 		}
 
@@ -305,20 +313,81 @@ export default class TaskBoard extends Plugin {
 					if (pattern.test(content)) {
 						content = content.replace(pattern, (match) => {
 							modified = true;
-							return `<span class="taskboard-hidden-property" style="display: none;" title="Hidden: ${match}">${match}</span>`;
+							return `<span class="taskboard-hidden-property" style="display: none;">${match}</span>`;
 						});
 					}
 				});
+
+				// Tasks plugin also makes use of these same element and adds its own postProcessing. Hence, I will manually need to remove the elements. For example, the created date property will be inside 'task-created' span, hence I will need to remove this span element, if its present. Similar all the other span elements if its prsent inside hiddenProperties.
+				switch (property) {
+					case HideableTaskProperty.CreatedDate:
+						const createdSpan =
+							element.querySelector(".task-created");
+						if (createdSpan) {
+							createdSpan.remove();
+						}
+						break;
+					case HideableTaskProperty.StartDate:
+						const startSpan = element.querySelector(".task-start");
+						if (startSpan) {
+							startSpan.remove();
+						}
+						break;
+					case HideableTaskProperty.ScheduledDate:
+						const scheduledSpan =
+							element.querySelector(".task-scheduled");
+						if (scheduledSpan) {
+							scheduledSpan.remove();
+						}
+						break;
+					case HideableTaskProperty.DueDate:
+						const dueSpan = element.querySelector(".task-due");
+						if (dueSpan) {
+							dueSpan.remove();
+						}
+						break;
+					case HideableTaskProperty.CompletionDate:
+						const completionSpan =
+							element.querySelector(".task-completion");
+						if (completionSpan) {
+							completionSpan.remove();
+						}
+						break;
+					case HideableTaskProperty.Priority:
+						const prioritySpan =
+							element.querySelector(".task-priority");
+						if (prioritySpan) {
+							prioritySpan.remove();
+						}
+						break;
+					case HideableTaskProperty.Time:
+						const timeSpan = element.querySelector(".task-time");
+						if (timeSpan) {
+							timeSpan.remove();
+						}
+						break;
+					case HideableTaskProperty.Dependencies:
+						const dependenciesSpan =
+							element.querySelector(".task-dependencies");
+						if (dependenciesSpan) {
+							dependenciesSpan.remove();
+						}
+						break;
+				}
 			});
 
 			if (modified && textNode.parentElement) {
+				console.log("Text node :", textNode.parentElement);
 				// Create a temporary element to hold the HTML
-				const tempDiv = document.createElement('div');
+				const tempDiv = document.createElement("div");
 				tempDiv.innerHTML = content;
-				
+
 				// Replace the text node with the new content
 				while (tempDiv.firstChild) {
-					textNode.parentNode?.insertBefore(tempDiv.firstChild, textNode);
+					textNode.parentNode?.insertBefore(
+						tempDiv.firstChild,
+						textNode
+					);
 				}
 				textNode.remove();
 			}
@@ -329,62 +398,65 @@ export default class TaskBoard extends Plugin {
 		switch (property) {
 			case HideableTaskProperty.Tags:
 				return [/#[\w\-_\/]+/g];
-			
+
 			case HideableTaskProperty.CreatedDate:
 				return [
 					/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
 					/\[created::.*?\]/g,
-					/@created\(.*?\)/g
+					/@created\(.*?\)/g,
 				];
-			
+
 			case HideableTaskProperty.StartDate:
 				return [
 					/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
 					/\[start::.*?\]/g,
-					/@start\(.*?\)/g
+					/@start\(.*?\)/g,
 				];
-			
+
 			case HideableTaskProperty.ScheduledDate:
 				return [
 					/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
 					/\[scheduled::.*?\]/g,
-					/@scheduled\(.*?\)/g
+					/@scheduled\(.*?\)/g,
 				];
-			
+
 			case HideableTaskProperty.DueDate:
 				return [
 					/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
 					/\[due::.*?\]/g,
-					/@due\(.*?\)/g
+					/@due\(.*?\)/g,
 				];
-			
+
 			case HideableTaskProperty.CompletionDate:
 				return [
 					/✅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
 					/\[completion::.*?\]/g,
-					/@completion\(.*?\)/g
+					/@completion\(.*?\)/g,
 				];
-			
+
 			case HideableTaskProperty.Priority:
 				return [
-					/[🔺⬆️🔼📶📈⚡🔥🟠🔴🟢🟡⭐⚠️❗❓]/g,
+					new RegExp(
+						`(${Object.values(priorityEmojis)
+							.map((emoji) => `\\s*${emoji}\\s*`)
+							.join("|")})`,
+						"g"
+					),
 					/\[priority::\s*\d+\]/g,
-					/@priority\(\s*\d+\s*\)/g
+					/@priority\(\s*\d+\s*\)/g,
 				];
-			
+
 			case HideableTaskProperty.Time:
 				return [
 					/⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]/g,
 					/\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b/g,
 					/\[time::.*?\]/g,
-					/@time\(.*?\)/g
+					/@time\(.*?\)/g,
 				];
-			
+
 			case HideableTaskProperty.Dependencies:
-				return [
-					/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/g
-				];
-			
+				return [/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/g];
+
 			default:
 				return [];
 		}
@@ -805,8 +877,10 @@ export default class TaskBoard extends Plugin {
 				// 	settings[key]
 				// );
 				this.migrateSettings(defaults[key], settings[key]);
-			} else if (key === 'tasksCacheFilePath' && settings[key] === '') {
-				settings[key] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+			} else if (key === "tasksCacheFilePath" && settings[key] === "") {
+				settings[
+					key
+				] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 			}
 		}
 
