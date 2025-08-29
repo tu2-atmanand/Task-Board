@@ -261,9 +261,133 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerTaskPropertyHider() {
-		// For now, we rely on the cleanTaskTitle function and the task board view rendering
-		// In the future, we could add CSS-based hiding or editor extensions here
-		console.log("Task property hiding is managed through cleanTaskTitle function");
+		this.registerMarkdownPostProcessor((element, context) => {
+			// Only process if we have properties to hide
+			const hiddenProperties = this.settings.data.globalSettings.hiddenTaskProperties || [];
+			if (hiddenProperties.length === 0) {
+				return;
+			}
+
+			// Find all list items that could be tasks
+			const listItems = element.querySelectorAll("li");
+			
+			listItems.forEach((listItem) => {
+				const textContent = listItem.textContent || "";
+				// Check if this is a task (starts with checkbox syntax)
+				if (textContent.match(/^\s*[\-\[\*]\s*\[[x\s\-\/]/)) {
+					this.hidePropertiesInElement(listItem, hiddenProperties);
+				}
+			});
+		});
+	}
+
+	private hidePropertiesInElement(element: HTMLElement, hiddenProperties: HideableTaskProperty[]) {
+		// Process text nodes to find and hide specific patterns
+		const walker = document.createTreeWalker(
+			element,
+			NodeFilter.SHOW_TEXT,
+			null
+		);
+
+		const textNodes: Text[] = [];
+		let node;
+		while (node = walker.nextNode()) {
+			textNodes.push(node as Text);
+		}
+
+		textNodes.forEach((textNode) => {
+			let content = textNode.textContent || "";
+			let modified = false;
+
+			hiddenProperties.forEach((property) => {
+				const patterns = this.getPropertyPatterns(property);
+				patterns.forEach((pattern) => {
+					if (pattern.test(content)) {
+						content = content.replace(pattern, (match) => {
+							modified = true;
+							return `<span class="taskboard-hidden-property" style="display: none;" title="Hidden: ${match}">${match}</span>`;
+						});
+					}
+				});
+			});
+
+			if (modified && textNode.parentElement) {
+				// Create a temporary element to hold the HTML
+				const tempDiv = document.createElement('div');
+				tempDiv.innerHTML = content;
+				
+				// Replace the text node with the new content
+				while (tempDiv.firstChild) {
+					textNode.parentNode?.insertBefore(tempDiv.firstChild, textNode);
+				}
+				textNode.remove();
+			}
+		});
+	}
+
+	private getPropertyPatterns(property: HideableTaskProperty): RegExp[] {
+		switch (property) {
+			case HideableTaskProperty.Tags:
+				return [/#[\w\-_\/]+/g];
+			
+			case HideableTaskProperty.CreatedDate:
+				return [
+					/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
+					/\[created::.*?\]/g,
+					/@created\(.*?\)/g
+				];
+			
+			case HideableTaskProperty.StartDate:
+				return [
+					/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
+					/\[start::.*?\]/g,
+					/@start\(.*?\)/g
+				];
+			
+			case HideableTaskProperty.ScheduledDate:
+				return [
+					/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
+					/\[scheduled::.*?\]/g,
+					/@scheduled\(.*?\)/g
+				];
+			
+			case HideableTaskProperty.DueDate:
+				return [
+					/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
+					/\[due::.*?\]/g,
+					/@due\(.*?\)/g
+				];
+			
+			case HideableTaskProperty.CompletionDate:
+				return [
+					/✅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
+					/\[completion::.*?\]/g,
+					/@completion\(.*?\)/g
+				];
+			
+			case HideableTaskProperty.Priority:
+				return [
+					/[🔺⬆️🔼📶📈⚡🔥🟠🔴🟢🟡⭐⚠️❗❓]/g,
+					/\[priority::\s*\d+\]/g,
+					/@priority\(\s*\d+\s*\)/g
+				];
+			
+			case HideableTaskProperty.Time:
+				return [
+					/⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]/g,
+					/\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b/g,
+					/\[time::.*?\]/g,
+					/@time\(.*?\)/g
+				];
+			
+			case HideableTaskProperty.Dependencies:
+				return [
+					/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/g
+				];
+			
+			default:
+				return [];
+		}
 	}
 
 	openAtStartup() {

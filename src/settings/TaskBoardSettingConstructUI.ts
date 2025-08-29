@@ -47,6 +47,21 @@ export class SettingsManager {
 	private static createFragmentWithHTML = (html: string) =>
 		sanitizeHTMLToDom(html);
 
+	private getPropertyDisplayName(property: HideableTaskProperty): string {
+		const displayNames: Record<HideableTaskProperty, string> = {
+			[HideableTaskProperty.Tags]: "Tags (#tag)",
+			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
+			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)", 
+			[HideableTaskProperty.ScheduledDate]: "Scheduled Date (⏳ 2024-01-01)",
+			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
+			[HideableTaskProperty.CompletionDate]: "Completion Date (✅ 2024-01-01)",
+			[HideableTaskProperty.Priority]: "Priority (🔺)",
+			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
+			[HideableTaskProperty.Dependencies]: "Dependencies & Reminders",
+		};
+		return displayNames[property] || property;
+	}
+
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
 		try {
@@ -705,36 +720,41 @@ export class SettingsManager {
 		// Setting for hiding specific task properties in Live Editor and Reading mode
 		new Setting(contentEl)
 			.setName("Hide Specific Properties in Notes")
-			.setDesc("Select which task properties should be hidden in Live Editor and Reading mode. Properties will still be preserved in the files but visually hidden. Choose from: Tags, Created date, Start date, Scheduled date, Due date, Completion date, Priority, Time, Dependencies.")
-			.addDropdown((dropdown) => {
-				// Create options for hideable properties
-				const propertyOptions: Record<string, string> = {};
-				Object.values(HideableTaskProperty).forEach((property) => {
-					const displayName = property.charAt(0).toUpperCase() + property.slice(1).replace(/([A-Z])/g, ' $1');
-					propertyOptions[property] = displayName;
-				});
+			.setDesc("Select which task properties should be hidden in Live Editor and Reading mode. Properties will still be preserved in the files but visually hidden.")
+			.setClass("taskboard-hidden-properties-setting");
 
-				// Add a "None" option
-				propertyOptions[""] = "None selected";
-				
-				dropdown.addOptions(propertyOptions);
-				
-				// Set current value - show first selected property or "None"
-				const currentValue = hiddenTaskProperties && hiddenTaskProperties.length > 0 
-					? hiddenTaskProperties[0] 
-					: "";
-				dropdown.setValue(currentValue);
-				
-				dropdown.onChange(async (value) => {
-					// For now, just store single selection. We'll enhance this later
-					if (value === "") {
-						this.globalSettings!.hiddenTaskProperties = [];
-					} else {
-						this.globalSettings!.hiddenTaskProperties = [value as HideableTaskProperty];
-					}
-					await this.saveSettings();
+		// Create a container for checkboxes
+		const checkboxContainer = contentEl.createDiv("taskboard-hidden-properties-container");
+		
+		// Create checkboxes for each hideable property
+		Object.values(HideableTaskProperty).forEach((property) => {
+			const displayName = this.getPropertyDisplayName(property);
+			
+			const checkboxSetting = new Setting(checkboxContainer)
+				.setName(displayName)
+				.setClass("taskboard-property-checkbox-setting")
+				.addToggle((toggle) => {
+					const isSelected = hiddenTaskProperties.includes(property);
+					toggle
+						.setValue(isSelected)
+						.onChange(async (value) => {
+							if (value) {
+								// Add property if not already included
+								if (!this.globalSettings!.hiddenTaskProperties.includes(property)) {
+									this.globalSettings!.hiddenTaskProperties.push(property);
+								}
+							} else {
+								// Remove property
+								this.globalSettings!.hiddenTaskProperties = 
+									this.globalSettings!.hiddenTaskProperties.filter(p => p !== property);
+							}
+							await this.saveSettings();
+						});
 				});
-			});
+			
+			// Style the checkbox setting to be more compact
+			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+		});
 
 		// Setting to take the width of each Column in px.
 		new Setting(contentEl)
