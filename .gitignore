@@ -25,3 +25,6 @@ docs/MyReadme.md
 data.json
 tasks.json
 locales/
+
+# Test files
+test-example.md
