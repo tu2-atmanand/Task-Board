@@ -13,6 +13,7 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
+	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
 import {
 	openAddNewTaskInCurrentFileModal,
@@ -108,6 +109,9 @@ export default class TaskBoard extends Plugin {
 
 			// Register the Kanban view
 			this.registerTaskBoardView();
+
+			// Register markdown post processor for hiding task properties
+			this.registerTaskPropertyHider();
 
 			this.openAtStartup();
 
@@ -254,6 +258,12 @@ export default class TaskBoard extends Plugin {
 			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
+	}
+
+	registerTaskPropertyHider() {
+		// For now, we rely on the cleanTaskTitle function and the task board view rendering
+		// In the future, we could add CSS-based hiding or editor extensions here
+		console.log("Task property hiding is managed through cleanTaskTitle function");
 	}
 
 	openAtStartup() {

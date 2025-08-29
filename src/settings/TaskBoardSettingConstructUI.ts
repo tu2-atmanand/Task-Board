@@ -14,6 +14,7 @@ import {
 	UniversalDateOptions,
 	cardSectionsVisibilityOptions,
 	globalSettingsData,
+	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import Pickr from "@simonwep/pickr";
@@ -616,6 +617,7 @@ export class SettingsManager {
 			showFileNameInCard,
 			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
+			hiddenTaskProperties,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -699,6 +701,40 @@ export class SettingsManager {
 						await this.saveSettings();
 					})
 			);
+
+		// Setting for hiding specific task properties in Live Editor and Reading mode
+		new Setting(contentEl)
+			.setName("Hide Specific Properties in Notes")
+			.setDesc("Select which task properties should be hidden in Live Editor and Reading mode. Properties will still be preserved in the files but visually hidden. Choose from: Tags, Created date, Start date, Scheduled date, Due date, Completion date, Priority, Time, Dependencies.")
+			.addDropdown((dropdown) => {
+				// Create options for hideable properties
+				const propertyOptions: Record<string, string> = {};
+				Object.values(HideableTaskProperty).forEach((property) => {
+					const displayName = property.charAt(0).toUpperCase() + property.slice(1).replace(/([A-Z])/g, ' $1');
+					propertyOptions[property] = displayName;
+				});
+
+				// Add a "None" option
+				propertyOptions[""] = "None selected";
+				
+				dropdown.addOptions(propertyOptions);
+				
+				// Set current value - show first selected property or "None"
+				const currentValue = hiddenTaskProperties && hiddenTaskProperties.length > 0 
+					? hiddenTaskProperties[0] 
+					: "";
+				dropdown.setValue(currentValue);
+				
+				dropdown.onChange(async (value) => {
+					// For now, just store single selection. We'll enhance this later
+					if (value === "") {
+						this.globalSettings!.hiddenTaskProperties = [];
+					} else {
+						this.globalSettings!.hiddenTaskProperties = [value as HideableTaskProperty];
+					}
+					await this.saveSettings();
+				});
+			});
 
 		// Setting to take the width of each Column in px.
 		new Setting(contentEl)
