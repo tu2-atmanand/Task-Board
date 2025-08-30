@@ -80,15 +80,19 @@ export enum cardSectionsVisibilityOptions {
 }
 
 export enum HideableTaskProperty {
+	ID = "id",
 	Tags = "tags",
-	CreatedDate = "createdDate", 
+	CreatedDate = "createdDate",
 	StartDate = "startDate",
 	ScheduledDate = "scheduledDate",
 	DueDate = "dueDate",
 	CompletionDate = "completionDate",
+	CancelledDate = "cancelledDate",
+	OnCompletion = "on-completion",
 	Priority = "priority",
 	Time = "time",
 	Dependencies = "dependencies",
+	Reminder = "reminder",
 }
 
 export interface globalSettingsData {
