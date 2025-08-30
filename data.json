@@ -632,7 +632,21 @@
         }
       ],
       "cardSectionsVisibility": "hideBoth",
-      "hiddenTaskProperties": []
+      "hiddenTaskProperties": [
+        "id",
+        "createdDate",
+        "startDate",
+        "scheduledDate",
+        "dueDate",
+        "completionDate",
+        "cancelledDate",
+        "on-completion",
+        "priority",
+        "recurring",
+        "time",
+        "dependencies",
+        "reminder"
+      ]
     }
   }
 }
