@@ -453,57 +453,10 @@ export default class TaskBoard extends Plugin {
 						css +=
 							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
 						break;
-				// TODO : Reminder is pending.
-					}
+					// TODO : Reminder is pending.
+				}
 			});
 			styleEl.textContent = css;
-			// case HideableTaskProperty.StartDate:
-			// 	const startSpan =
-			// 		element.querySelectorAll(".task-start");
-			// 	startSpan.forEach((span) =>
-			// 		span.classList.add("hidden")
-			// 	);
-			// 	break;
-			// case HideableTaskProperty.ScheduledDate:
-			// 	const scheduledSpan =
-			// 		element.querySelectorAll(".task-scheduled");
-			// 	scheduledSpan.forEach((span) =>
-			// 		span.classList.add("hidden")
-			// 	);
-			// 	break;
-			// case HideableTaskProperty.DueDate:
-			// 	const dueSpan = element.querySelectorAll(".task-due");
-			// 	dueSpan.forEach((span) => span.classList.add("hidden"));
-			// 	break;
-			// case HideableTaskProperty.CompletionDate:
-			// 	const completionSpan =
-			// 		element.querySelectorAll(".task-completion");
-			// 	completionSpan.forEach((span) =>
-			// 		span.classList.add("hidden")
-			// 	);
-			// 	break;
-			// case HideableTaskProperty.Priority:
-			// 	const prioritySpan =
-			// 		element.querySelectorAll(".task-priority");
-			// 	prioritySpan.forEach((span) =>
-			// 		span.classList.add("hidden")
-			// 	);
-			// 	break;
-			// case HideableTaskProperty.Time:
-			// 	const timeSpan = element.querySelectorAll(".task-time");
-			// 	timeSpan.forEach((span) =>
-			// 		span.classList.add("hidden")
-			// 	);
-			// 	break;
-			// case HideableTaskProperty.Dependencies:
-			// 	const dependenciesSpan =
-			// 		element.querySelectorAll(".task-dependencies");
-			// 	dependenciesSpan.forEach((span) =>
-			// 		span.classList.add("hidden")
-			// 	);
-			// 	break;
-			// }
-			// });
 		}
 	}
 
@@ -538,63 +491,6 @@ export default class TaskBoard extends Plugin {
 						});
 					}
 				});
-
-				// Tasks plugin also makes use of these same element and adds its own postProcessing. Hence, I will manually need to remove the elements. For example, the created date property will be inside 'task-created' span, hence I will need to remove this span element, if its present. Similar all the other span elements if its prsent inside hiddenProperties.
-				switch (property) {
-					case HideableTaskProperty.CreatedDate:
-						const createdSpan =
-							element.querySelector(".task-created");
-						if (createdSpan) {
-							createdSpan.remove();
-						}
-						break;
-					case HideableTaskProperty.StartDate:
-						const startSpan = element.querySelector(".task-start");
-						if (startSpan) {
-							startSpan.remove();
-						}
-						break;
-					case HideableTaskProperty.ScheduledDate:
-						const scheduledSpan =
-							element.querySelector(".task-scheduled");
-						if (scheduledSpan) {
-							scheduledSpan.remove();
-						}
-						break;
-					case HideableTaskProperty.DueDate:
-						const dueSpan = element.querySelector(".task-due");
-						if (dueSpan) {
-							dueSpan.remove();
-						}
-						break;
-					case HideableTaskProperty.CompletionDate:
-						const completionSpan =
-							element.querySelector(".task-completion");
-						if (completionSpan) {
-							completionSpan.remove();
-						}
-						break;
-					case HideableTaskProperty.Priority:
-						const prioritySpan =
-							element.querySelector(".task-priority");
-						if (prioritySpan) {
-							prioritySpan.remove();
-						}
-						break;
-					case HideableTaskProperty.Time:
-						const timeSpan = element.querySelector(".task-time");
-						if (timeSpan) {
-							timeSpan.remove();
-						}
-						break;
-					case HideableTaskProperty.Dependencies:
-						const dependenciesSpan =
-							element.querySelector(".task-dependencies");
-						if (dependenciesSpan) {
-							dependenciesSpan.remove();
-						}
-						break;
-				}
 			});
 
 			if (modified && textNode.parentElement) {
