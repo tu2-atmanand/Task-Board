@@ -41,6 +41,8 @@ import {
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { isTaskLine } from "src/utils/CheckBoxUtils";
 import { priorityEmojis } from "src/interfaces/TaskItem";
+import { taskGutterExtension } from "src/editor-extensions/task-operations/gutter-marker";
+import { taskPropertyHidingExtension } from "src/editor-extensions/task-operations/property-hiding";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -114,6 +116,9 @@ export default class TaskBoard extends Plugin {
 
 			// Register the Kanban view
 			this.registerTaskBoardView();
+
+			// Register editor extensions
+			this.registerEditorExtensions();
 
 			this.openAtStartup();
 
@@ -263,6 +268,14 @@ export default class TaskBoard extends Plugin {
 			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
+	}
+
+	registerEditorExtensions() {
+		// Register task gutter extension
+		this.registerEditorExtension(taskGutterExtension(this.app, this));
+		
+		// Register task property hiding extension 
+		this.registerEditorExtension(taskPropertyHidingExtension(this));
 	}
 
 	registerReadingModePostProcessor() {

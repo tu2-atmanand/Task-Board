@@ -4142,3 +4142,48 @@ svg.react-flow__connectionline {
 .react-flow__edge-text {
 	fill: var(--xy-edge-label-color, var(--xy-edge-label-color-default));
 }
+
+/* Task Board Editor Extensions Styles */
+
+/* Gutter marker styles */
+.task-gutter {
+	background: var(--background-secondary);
+	border-right: 1px solid var(--background-modifier-border);
+	width: 20px;
+}
+
+.task-gutter-marker {
+	opacity: 0.3;
+	transition: opacity 0.2s;
+	padding: 2px !important;
+	margin: 0 !important;
+	font-size: 12px !important;
+	line-height: 1 !important;
+	height: auto !important;
+	min-height: auto !important;
+	color: var(--text-accent) !important;
+}
+
+.task-gutter-marker:hover {
+	opacity: 1;
+	background-color: var(--background-modifier-hover) !important;
+}
+
+/* Task property hiding styles for Live Editor */
+.taskboard-hidden-property-editor {
+	opacity: 0 !important;
+	font-size: 0 !important;
+	display: none !important;
+}
+
+.taskboard-hidden-property-placeholder {
+	opacity: 0.3;
+	font-size: 0.8em;
+	font-style: italic;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.taskboard-hidden-property-placeholder:hover {
+	opacity: 0.6;
+}
