@@ -79,6 +79,23 @@ export enum cardSectionsVisibilityOptions {
 	hideBoth = "hideBoth",
 }
 
+export enum HideableTaskProperty {
+	ID = "id",
+	Tags = "tags",
+	CreatedDate = "createdDate",
+	StartDate = "startDate",
+	ScheduledDate = "scheduledDate",
+	DueDate = "dueDate",
+	CompletionDate = "completionDate",
+	CancelledDate = "cancelledDate",
+	OnCompletion = "on-completion",
+	Priority = "priority",
+	Recurring = "recurring",
+	Time = "time",
+	Dependencies = "dependencies",
+	Reminder = "reminder",
+}
+
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
@@ -124,6 +141,7 @@ export interface globalSettingsData {
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	cardSectionsVisibility: string;
+	hiddenTaskProperties: HideableTaskProperty[];
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -405,6 +423,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			],
 			cardSectionsVisibility:
 				cardSectionsVisibilityOptions.showSubTasksOnly,
+			hiddenTaskProperties: [],
 		},
 	},
 };
