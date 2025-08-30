@@ -281,10 +281,10 @@ export default class TaskBoard extends Plugin {
 				const listItems = element.querySelectorAll("li");
 
 				listItems.forEach((listItem) => {
-					const textContent = listItem.textContent || "";
+					// const textContent = listItem.textContent || "";
 					// console.log("Text Content :", textContent);
 					// Check if this is a task (starts with checkbox syntax)
-					if (element.querySelector(".contains-task-list")) {
+					if (listItem.querySelector(".contains-task-list")) {
 						this.hidePropertiesInElement(
 							listItem,
 							hiddenProperties
