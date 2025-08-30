@@ -49,15 +49,23 @@ export class SettingsManager {
 
 	private getPropertyDisplayName(property: HideableTaskProperty): string {
 		const displayNames: Record<HideableTaskProperty, string> = {
+			[HideableTaskProperty.ID]: "ID (🔖)",
 			[HideableTaskProperty.Tags]: "Tags (#tag)",
-			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
-			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)", 
-			[HideableTaskProperty.ScheduledDate]: "Scheduled Date (⏳ 2024-01-01)",
-			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
-			[HideableTaskProperty.CompletionDate]: "Completion Date (✅ 2024-01-01)",
 			[HideableTaskProperty.Priority]: "Priority (🔺)",
+			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
+			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)",
+			[HideableTaskProperty.ScheduledDate]:
+				"Scheduled Date (⏳ 2024-01-01)",
+			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
+			[HideableTaskProperty.CompletionDate]:
+				"Completion Date (✅ 2024-01-01)",
+			[HideableTaskProperty.CancelledDate]:
+				"Cancelled Date (❌ 2024-01-01)",
 			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
-			[HideableTaskProperty.Dependencies]: "Dependencies & Reminders",
+			[HideableTaskProperty.Reminder]: "Reminder ((@12:30))",
+			[HideableTaskProperty.Recurring]: "Recurring (🔁 every 2 weeks)",
+			[HideableTaskProperty.OnCompletion]: "On-completion (🏁 delete)",
+			[HideableTaskProperty.Dependencies]: "Dependens-on ⛔ fa4sm9",
 		};
 		return displayNames[property] || property;
 	}
@@ -720,38 +728,48 @@ export class SettingsManager {
 		// Setting for hiding specific task properties in Live Editor and Reading mode
 		new Setting(contentEl)
 			.setName("Hide Specific Properties in Notes")
-			.setDesc("Select which task properties should be hidden in Live Editor and Reading mode. Properties will still be preserved in the files but visually hidden.")
+			.setDesc(
+				"Select which task properties should be hidden in Live Editor and Reading mode. Properties will still be preserved in the files but visually hidden."
+			)
 			.setClass("taskboard-hidden-properties-setting");
 
 		// Create a container for checkboxes
-		const checkboxContainer = contentEl.createDiv("taskboard-hidden-properties-container");
-		
+		const checkboxContainer = contentEl.createDiv(
+			"taskboard-hidden-properties-container"
+		);
+
 		// Create checkboxes for each hideable property
 		Object.values(HideableTaskProperty).forEach((property) => {
 			const displayName = this.getPropertyDisplayName(property);
-			
+
 			const checkboxSetting = new Setting(checkboxContainer)
 				.setName(displayName)
 				.setClass("taskboard-property-checkbox-setting")
 				.addToggle((toggle) => {
 					const isSelected = hiddenTaskProperties.includes(property);
-					toggle
-						.setValue(isSelected)
-						.onChange(async (value) => {
-							if (value) {
-								// Add property if not already included
-								if (!this.globalSettings!.hiddenTaskProperties.includes(property)) {
-									this.globalSettings!.hiddenTaskProperties.push(property);
-								}
-							} else {
-								// Remove property
-								this.globalSettings!.hiddenTaskProperties = 
-									this.globalSettings!.hiddenTaskProperties.filter(p => p !== property);
+					toggle.setValue(isSelected).onChange(async (value) => {
+						if (value) {
+							// Add property if not already included
+							if (
+								!this.globalSettings!.hiddenTaskProperties.includes(
+									property
+								)
+							) {
+								this.globalSettings!.hiddenTaskProperties.push(
+									property
+								);
 							}
-							await this.saveSettings();
-						});
+						} else {
+							// Remove property
+							this.globalSettings!.hiddenTaskProperties =
+								this.globalSettings!.hiddenTaskProperties.filter(
+									(p) => p !== property
+								);
+						}
+						await this.saveSettings();
+					});
 				});
-			
+
 			// Style the checkbox setting to be more compact
 			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
 		});

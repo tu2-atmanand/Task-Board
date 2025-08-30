@@ -90,6 +90,7 @@ export enum HideableTaskProperty {
 	CancelledDate = "cancelledDate",
 	OnCompletion = "on-completion",
 	Priority = "priority",
+	Recurring = "recurring",
 	Time = "time",
 	Dependencies = "dependencies",
 	Reminder = "reminder",
