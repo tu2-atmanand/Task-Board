@@ -49,7 +49,7 @@ export class SettingsManager {
 
 	private getPropertyDisplayName(property: HideableTaskProperty): string {
 		const displayNames: Record<HideableTaskProperty, string> = {
-			[HideableTaskProperty.ID]: "ID (🔖)",
+			[HideableTaskProperty.ID]: "ID (🆔 fpyvkz)",
 			[HideableTaskProperty.Tags]: "Tags (#tag)",
 			[HideableTaskProperty.Priority]: "Priority (🔺)",
 			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
@@ -727,10 +727,8 @@ export class SettingsManager {
 
 		// Setting for hiding specific task properties in Live Editor and Reading mode
 		new Setting(contentEl)
-			.setName("Hide Specific Properties in Notes")
-			.setDesc(
-				"Select which task properties should be hidden in Live Editor and Reading mode. Properties will still be preserved in the files but visually hidden."
-			)
+			.setName(t("hide-specific-properties-in-notes"))
+			.setDesc("hide-specific-properties-in-notes-description")
 			.setClass("taskboard-hidden-properties-setting");
 
 		// Create a container for checkboxes

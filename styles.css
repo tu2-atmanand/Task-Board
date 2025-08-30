@@ -1713,7 +1713,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskboard-hidden-properties-container {
 	margin-left: 1em;
-	border-left: 2px solid var(--color-accent-2);
+	margin-block-end: 1em;
+	border-inline: 2px solid var(--color-accent-2);
 	padding-left: 1em;
 	background-color: var(--background-secondary);
 	border-radius: 5px;
