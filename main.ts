@@ -329,7 +329,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.ID:
 						css += ".task-id{ display: none !important; }";
 						css +=
-							"li:hover .task-id { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-id { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-id { animation: task-board-fade-out 0.5s ease-in-out 0.5s; }";
@@ -339,7 +339,7 @@ export default class TaskBoard extends Plugin {
 						css +=
 							".task-description>span>a.tag { display: none !important; }";
 						css +=
-							"li:hover .task-description>span>a.tag { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-description>span>a.tag { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 					// css +=
 					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -347,7 +347,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.CreatedDate:
 						css += ".task-created { display: none !important; }";
 						css +=
-							"li:hover .task-created { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-created { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -356,7 +356,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.StartDate:
 						css += ".task-start { display: none !important; }";
 						css +=
-							"li:hover .task-start { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-start { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -365,7 +365,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.ScheduledDate:
 						css += ".task-scheduled { display: none !important; }";
 						css +=
-							"li:hover .task-scheduled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-scheduled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -374,7 +374,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.DueDate:
 						css += ".task-due { display: none !important; }";
 						css +=
-							"li:hover .task-due { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-due { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -383,7 +383,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.CompletionDate:
 						css += ".task-completion { display: none !important; }";
 						css +=
-							"li:hover .task-completion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-completion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -392,7 +392,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.CancelledDate:
 						css += ".task-cancelled { display: none !important; }";
 						css +=
-							"li:hover .task-cancelled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-cancelled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -401,7 +401,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.Priority:
 						css += ".task-priority { display: none !important; }";
 						css +=
-							"li:hover .task-priority { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-priority { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -410,7 +410,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.Time:
 						css += ".task-time { display: none !important; }";
 						css +=
-							"li:hover .task-time { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-time { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -419,7 +419,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.Dependencies:
 						css += ".task-dependsOn { display: none !important; }";
 						css +=
-							"li:hover .task-dependsOn { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-dependsOn { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -429,7 +429,7 @@ export default class TaskBoard extends Plugin {
 						css +=
 							".task-onCompletion{ display: none !important; }";
 						css +=
-							"li:hover .task-onCompletion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-onCompletion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
@@ -438,7 +438,7 @@ export default class TaskBoard extends Plugin {
 					case HideableTaskProperty.Recurring:
 						css += ".task-recurring{ display: none !important; }";
 						css +=
-							"li:hover .task-recurring { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+							"span:hover .task-recurring { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
 						css += fadeInCSS;
 						// css +=
 						// 	"li:not(:hover) .task-recurring { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
