@@ -273,8 +273,8 @@ export default class TaskBoard extends Plugin {
 	registerEditorExtensions() {
 		// Register task gutter extension
 		this.registerEditorExtension(taskGutterExtension(this.app, this));
-		
-		// Register task property hiding extension 
+
+		// Register task property hiding extension
 		this.registerEditorExtension(taskPropertyHidingExtension(this));
 	}
 
@@ -320,151 +320,129 @@ export default class TaskBoard extends Plugin {
 				document.head.appendChild(styleEl);
 			}
 			let css = "";
+			const fadeInCSS =
+				"@keyframes task-board-fade-in { from { display: none !important; opacity: 0; transform: scaleX(0.8); } to { display: inline !important; opacity: 1; transform: scaleX(1); } }";
+			// const fadeOutCSS =
+			// 	"@keyframes task-board-fade-out { from { display: inline !important; opacity: 1; transform: scaleX(1); } to { display: none !important; opacity: 0; transform: scaleX(0.8); } }";
 			hiddenProperties.forEach((property) => {
 				switch (property) {
 					case HideableTaskProperty.ID:
 						css += ".task-id{ display: none !important; }";
 						css +=
-							"li:hover .task-id { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-id { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-id { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-id { animation: task-board-fade-out 0.5s ease-in-out 0.5s; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.Tags:
 						css +=
 							".task-description>span>a.tag { display: none !important; }";
 						css +=
-							"li:hover .task-description>span>a.tag { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-description>span>a.tag { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+					// css +=
+					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+					// css += fadeOutCSS;
 					case HideableTaskProperty.CreatedDate:
 						css += ".task-created { display: none !important; }";
 						css +=
-							"li:hover .task-created { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-created { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.StartDate:
 						css += ".task-start { display: none !important; }";
 						css +=
-							"li:hover .task-start { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-start { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.ScheduledDate:
 						css += ".task-scheduled { display: none !important; }";
 						css +=
-							"li:hover .task-scheduled { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-scheduled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.DueDate:
 						css += ".task-due { display: none !important; }";
 						css +=
-							"li:hover .task-due { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-due { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.CompletionDate:
 						css += ".task-completion { display: none !important; }";
 						css +=
-							"li:hover .task-completion { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-completion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.CancelledDate:
 						css += ".task-cancelled { display: none !important; }";
 						css +=
-							"li:hover .task-cancelled { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-cancelled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.Priority:
 						css += ".task-priority { display: none !important; }";
 						css +=
-							"li:hover .task-priority { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-priority { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.Time:
 						css += ".task-time { display: none !important; }";
 						css +=
-							"li:hover .task-time { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-time { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.Dependencies:
 						css += ".task-dependsOn { display: none !important; }";
 						css +=
-							"li:hover .task-dependsOn { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-dependsOn { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.OnCompletion:
 						css +=
 							".task-onCompletion{ display: none !important; }";
 						css +=
-							"li:hover .task-onCompletion { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-onCompletion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					case HideableTaskProperty.Recurring:
 						css += ".task-recurring{ display: none !important; }";
 						css +=
-							"li:hover .task-recurring { display: inline !important; animation: task-board-fade-in 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-in { from { opacity: 0; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1); } }";
-						css +=
-							"li:not(:hover) .task-recurring { display: none !important; animation: task-board-fade-out 0.3s ease; }";
-						css +=
-							"@keyframes task-board-fade-out { from { opacity: 1; transform: scaleX(1); } to { opacity: 0; transform: scaleX(0.8); } }";
+							"li:hover .task-recurring { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-recurring { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
 						break;
 					// TODO : Reminder is pending.
 				}
