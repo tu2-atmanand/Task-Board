@@ -42,7 +42,10 @@ import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { isTaskLine } from "src/utils/CheckBoxUtils";
 import { priorityEmojis } from "src/interfaces/TaskItem";
 import { taskGutterExtension } from "src/editor-extensions/task-operations/gutter-marker";
-import { taskPropertyHidingExtension } from "src/editor-extensions/task-operations/property-hiding";
+import {
+	getTaskPropertyRegexPatterns,
+	taskPropertyHidingExtension,
+} from "src/editor-extensions/task-operations/property-hiding";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -275,20 +278,24 @@ export default class TaskBoard extends Plugin {
 		this.registerEditorExtension(taskGutterExtension(this.app, this));
 
 		// Register task property hiding extension
-		this.registerEditorExtension(taskPropertyHidingExtension(this));
+		const hiddenProperties =
+			this.settings.data.globalSettings?.hiddenTaskProperties || [];
+		if (hiddenProperties.length > 0) {
+			this.registerEditorExtension(taskPropertyHidingExtension(this));
+		}
 	}
 
 	registerReadingModePostProcessor() {
 		const tasksPlugin = new TasksApi(this);
 		const hiddenProperties =
-			this.settings.data.globalSettings.hiddenTaskProperties || [];
+			this.settings.data.globalSettings?.hiddenTaskProperties || [];
+		if (hiddenProperties.length === 0) {
+			return;
+		}
 		if (!tasksPlugin.isTasksPluginEnabled()) {
 			this.registerMarkdownPostProcessor((element, context) => {
 				// console.log("Element : ", element, "\nContent :", context);
 				// Only process if we have properties to hide
-				if (hiddenProperties.length === 0) {
-					return;
-				}
 
 				// Find all list items that could be tasks
 				const listItems = element.querySelectorAll("li");
@@ -473,7 +480,7 @@ export default class TaskBoard extends Plugin {
 			let modified = false;
 
 			hiddenProperties.forEach((property) => {
-				const patterns = this.getPropertyPatterns(property);
+				const patterns = getTaskPropertyRegexPatterns(property);
 				patterns.forEach((pattern) => {
 					if (pattern.test(content)) {
 						content = content.replace(pattern, (match) => {
@@ -500,74 +507,6 @@ export default class TaskBoard extends Plugin {
 				textNode.remove();
 			}
 		});
-	}
-
-	private getPropertyPatterns(property: HideableTaskProperty): RegExp[] {
-		switch (property) {
-			case HideableTaskProperty.Tags:
-				return [/#[\w\-_\/]+/g];
-
-			case HideableTaskProperty.CreatedDate:
-				return [
-					/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
-					/\[created::.*?\]/g,
-					/@created\(.*?\)/g,
-				];
-
-			case HideableTaskProperty.StartDate:
-				return [
-					/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
-					/\[start::.*?\]/g,
-					/@start\(.*?\)/g,
-				];
-
-			case HideableTaskProperty.ScheduledDate:
-				return [
-					/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
-					/\[scheduled::.*?\]/g,
-					/@scheduled\(.*?\)/g,
-				];
-
-			case HideableTaskProperty.DueDate:
-				return [
-					/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
-					/\[due::.*?\]/g,
-					/@due\(.*?\)/g,
-				];
-
-			case HideableTaskProperty.CompletionDate:
-				return [
-					/✅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/g,
-					/\[completion::.*?\]/g,
-					/@completion\(.*?\)/g,
-				];
-
-			case HideableTaskProperty.Priority:
-				return [
-					new RegExp(
-						`(${Object.values(priorityEmojis)
-							.map((emoji) => `\\s*${emoji}\\s*`)
-							.join("|")})`,
-						"g"
-					),
-					/\[priority::\s*\d+\]/g,
-					/@priority\(\s*\d+\s*\)/g,
-				];
-
-			case HideableTaskProperty.Time:
-				return [
-					/⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]/g,
-					/\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b/g,
-					/\[time::.*?\]/g,
-					/@time\(.*?\)/g,
-				];
-
-			case HideableTaskProperty.Dependencies:
-				return [/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/g];
-
-			default:
-				return [];
-		}
 	}
 
 	openAtStartup() {
