@@ -14,6 +14,8 @@ import {
 	UniversalDateOptions,
 	cardSectionsVisibilityOptions,
 	globalSettingsData,
+	HideableTaskProperty,
+	taskPropertyFormatOptions,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import Pickr from "@simonwep/pickr";
@@ -49,6 +51,29 @@ export class SettingsManager {
 
 	private static createFragmentWithHTML = (html: string) =>
 		sanitizeHTMLToDom(html);
+
+	private getPropertyDisplayName(property: HideableTaskProperty): string {
+		const displayNames: Record<HideableTaskProperty, string> = {
+			[HideableTaskProperty.ID]: "ID (🆔 fpyvkz)",
+			[HideableTaskProperty.Tags]: "Tags (#tag)",
+			[HideableTaskProperty.Priority]: "Priority (🔺)",
+			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
+			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)",
+			[HideableTaskProperty.ScheduledDate]:
+				"Scheduled Date (⏳ 2024-01-01)",
+			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
+			[HideableTaskProperty.CompletionDate]:
+				"Completion Date (✅ 2024-01-01)",
+			[HideableTaskProperty.CancelledDate]:
+				"Cancelled Date (❌ 2024-01-01)",
+			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
+			[HideableTaskProperty.Reminder]: "Reminder ((@12:30))",
+			[HideableTaskProperty.Recurring]: "Recurring (🔁 every 2 weeks)",
+			[HideableTaskProperty.OnCompletion]: "On-completion (🏁 delete)",
+			[HideableTaskProperty.Dependencies]: "Dependens-on ⛔ fa4sm9",
+		};
+		return displayNames[property] || property;
+	}
 
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
@@ -634,6 +659,7 @@ export class SettingsManager {
 			showFileNameInCard,
 			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
+			hiddenTaskProperties,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -717,6 +743,53 @@ export class SettingsManager {
 						await this.saveSettings();
 					})
 			);
+
+		// Setting for hiding specific task properties in Live Editor and Reading mode
+		new Setting(contentEl)
+			.setName(t("hide-specific-properties-in-notes"))
+			.setDesc("hide-specific-properties-in-notes-description")
+			.setClass("taskboard-hidden-properties-setting");
+
+		// Create a container for checkboxes
+		const checkboxContainer = contentEl.createDiv(
+			"taskboard-hidden-properties-container"
+		);
+
+		// Create checkboxes for each hideable property
+		Object.values(HideableTaskProperty).forEach((property) => {
+			const displayName = this.getPropertyDisplayName(property);
+
+			const checkboxSetting = new Setting(checkboxContainer)
+				.setName(displayName)
+				.setClass("taskboard-property-checkbox-setting")
+				.addToggle((toggle) => {
+					const isSelected = hiddenTaskProperties.includes(property);
+					toggle.setValue(isSelected).onChange(async (value) => {
+						if (value) {
+							// Add property if not already included
+							if (
+								!this.globalSettings!.hiddenTaskProperties.includes(
+									property
+								)
+							) {
+								this.globalSettings!.hiddenTaskProperties.push(
+									property
+								);
+							}
+						} else {
+							// Remove property
+							this.globalSettings!.hiddenTaskProperties =
+								this.globalSettings!.hiddenTaskProperties.filter(
+									(p) => p !== property
+								);
+						}
+						await this.saveSettings();
+					});
+				});
+
+			// Style the checkbox setting to be more compact
+			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+		});
 
 		// Setting to take the width of each Column in px.
 		new Setting(contentEl)
@@ -1248,7 +1321,7 @@ export class SettingsManager {
 
 		const {
 			universalDateFormat,
-			taskCompletionFormat,
+			taskPropertyFormat,
 			// taskCompletionDateTimePattern,
 			firstDayOfWeek,
 			taskCompletionInLocalTime,
@@ -1276,7 +1349,7 @@ export class SettingsManager {
 			let completionDate = "2024-09-21/12:20:33";
 
 			let preview = "";
-			switch (this.globalSettings!.taskCompletionFormat) {
+			switch (this.globalSettings!.taskPropertyFormat) {
 				// Default
 				case "1": {
 					if (
@@ -1334,14 +1407,26 @@ export class SettingsManager {
 			.setName(t("supported-plugin-formats"))
 			.setDesc(t("supported-plugin-formats-info"))
 			.addDropdown((dropdown) => {
-				dropdown.addOption("1", t("default"));
-				dropdown.addOption("2", "Tasks " + t("plugin"));
-				dropdown.addOption("3", "Dataview " + t("plugin"));
-				dropdown.addOption("4", "Obsidian " + t("native"));
+				dropdown.addOption(
+					taskPropertyFormatOptions.default,
+					t("default")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.tasksPlugin,
+					"Tasks " + t("plugin")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.dataviewPlugin,
+					"Dataview " + t("plugin")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.obsidianNative,
+					"Obsidian " + t("native")
+				);
 
-				dropdown.setValue(taskCompletionFormat as string);
+				dropdown.setValue(taskPropertyFormat as string);
 				dropdown.onChange(async (value) => {
-					this.globalSettings!.taskCompletionFormat = value;
+					this.globalSettings!.taskPropertyFormat = value;
 					await this.saveSettings();
 					updatePreview();
 				});

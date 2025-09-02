@@ -29,7 +29,8 @@ import {
 	UniversalDateOptions,
 	scanFilters,
 } from "src/interfaces/GlobalSettings";
-import { TaskRegularExpressions } from "./TaskRegularExpressions";
+import { TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
 
 export default class ScanningVault {
 	app: App;
@@ -646,9 +647,7 @@ export function extractCreatedDate(text: string): string {
 	let match = text.match(/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(
-			/\[created::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
-		);
+		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.createdDateRegex);
 	}
 
 	if (!match) {
@@ -665,9 +664,7 @@ export function extractStartDate(text: string): string {
 	let match = text.match(/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(
-			/\[start::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
-		);
+		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.startDateRegex);
 	}
 
 	if (!match) {
@@ -684,9 +681,7 @@ export function extractScheduledDate(text: string): string {
 	let match = text.match(/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(
-			/\[scheduled::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
-		);
+		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.scheduledDateRegex);
 	}
 
 	if (!match) {
@@ -703,7 +698,7 @@ export function extractDueDate(text: string): string {
 	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(/\[due::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/);
+		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.dueDateRegex);
 	}
 
 	if (!match) {
@@ -715,7 +710,7 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
-	let match = text.match(/\[priority::\s*(\d{1,2})\]/);
+	let match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.priorityRegex);
 	if (match) {
 		return parseInt(match[1]);
 	}
@@ -778,6 +773,7 @@ export function extractReminder(
 		return match[1].replace(` `, "T").trim();
 	}
 
+	// This will be enabled, after Tasks plugin will support the reminder property.
 	// match = text.match(/🔔\s*(.*?)(?=\s|$)/);
 	// if (match) {
 	// 	return match[0].replace("🔔", "").trim();
@@ -812,7 +808,7 @@ export function extractCompletionDate(text: string): string {
 
 	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
-		match = text.match(/\[completion::\s*(.*?)\]/);
+		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.doneDateRegex);
 		if (match) {
 			return match
 				? match[0].replace("[completion::", "").replace("]", "").trim()
@@ -837,9 +833,7 @@ export function extractCancelledDate(text: string): string {
 
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {
-		match = text.match(
-			/\[cancelled::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
-		);
+		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.cancelledDateRegex);
 	}
 
 	if (!match) {

@@ -6,8 +6,9 @@ import {
 	NotificationService,
 	UniversalDateOptions,
 	globalSettingsData,
+	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
-import { TaskRegularExpressions } from "./TaskRegularExpressions";
+import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 export interface cursorLocation {
 	lineNumber: number;
@@ -182,11 +183,11 @@ export const sanitizeCreatedDate = (
 
 	let createdDateWithFormat: string = "";
 	if (createdDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			createdDateWithFormat = createdDate ? `➕${createdDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			createdDateWithFormat = createdDate ? `➕ ${createdDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			createdDateWithFormat = createdDate
 				? `[created:: ${createdDate}]`
 				: "";
@@ -250,11 +251,11 @@ export const sanitizeStartDate = (
 
 	let startDateWithFormat: string = "";
 	if (startDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			startDateWithFormat = startDate ? `🛫${startDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			startDateWithFormat = startDate ? `🛫 ${startDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			startDateWithFormat = startDate ? `[start:: ${startDate}]` : "";
 		} else {
 			startDateWithFormat = startDate ? `@start(${startDate})` : "";
@@ -314,13 +315,13 @@ export const sanitizeScheduledDate = (
 
 	let scheduledDateWithFormat: string = "";
 	if (scheduledDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			scheduledDateWithFormat = scheduledDate ? `⏳${scheduledDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			scheduledDateWithFormat = scheduledDate
 				? `⏳ ${scheduledDate}`
 				: "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			scheduledDateWithFormat = scheduledDate
 				? `[scheduled:: ${scheduledDate}]`
 				: "";
@@ -385,11 +386,11 @@ export const sanitizeDueDate = (
 
 	let dueDateWithFormat: string = "";
 	if (dueDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			dueDateWithFormat = dueDate ? `📅${dueDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			dueDateWithFormat = dueDate ? `📅 ${dueDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			dueDateWithFormat = dueDate ? `[due:: ${dueDate}]` : "";
 		} else {
 			dueDateWithFormat = dueDate ? `@due(${dueDate})` : "";
@@ -448,11 +449,11 @@ export const sanitizeCompletionDate = (
 
 	let completedWitFormat: string = "";
 	if (completionDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			completedWitFormat = completionDate ? `✅${completionDate} ` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			completedWitFormat = completionDate ? `✅ ${completionDate} ` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			completedWitFormat = completionDate
 				? `[completion:: ${completionDate}] `
 				: "";
@@ -515,11 +516,11 @@ export const sanitizeCancellationDate = (
 
 	let cancelledWithFormat: string = "";
 	if (cancelledDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			cancelledWithFormat = cancelledDate ? `❌${cancelledDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			cancelledWithFormat = cancelledDate ? `❌ ${cancelledDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			cancelledWithFormat = cancelledDate
 				? `[cancelled:: ${cancelledDate}]`
 				: "";
@@ -605,11 +606,11 @@ export const sanitizeTime = (
 		}
 
 		let newTimeWithFormat: string = "";
-		if (globalSettings.taskCompletionFormat === "1") {
+		if (globalSettings.taskPropertyFormat === "1") {
 			newTimeWithFormat = `⏰[${newTime}]`;
-		} else if (globalSettings.taskCompletionFormat === "2") {
+		} else if (globalSettings.taskPropertyFormat === "2") {
 			newTimeWithFormat = `⏰ [${newTime}]`;
-		} else if (globalSettings.taskCompletionFormat === "3") {
+		} else if (globalSettings.taskPropertyFormat === "3") {
 			newTimeWithFormat = `[time:: ${newTime}]`;
 		} else {
 			newTimeWithFormat = `@time(${newTime})`;
@@ -711,9 +712,9 @@ export const sanitizePriority = (
 	if (extractedPriorityMatch === 0) {
 		if (newPriority > 0) {
 			let priorityWithFormat: string = "";
-			if (globalSettings?.taskCompletionFormat === "3") {
+			if (globalSettings?.taskPropertyFormat === "3") {
 				priorityWithFormat = `[priority:: ${newPriority}]`;
-			} else if (globalSettings?.taskCompletionFormat === "4") {
+			} else if (globalSettings?.taskPropertyFormat === "4") {
 				priorityWithFormat = `@priority(${newPriority})`;
 			} else {
 				priorityWithFormat = priorityEmojis[newPriority];
@@ -919,17 +920,17 @@ export const sanitizeReminder = (
 // 	let dueDateWithFormat: string = "";
 // 	let completedWitFormat: string = "";
 // 	if (updatedTask.due || updatedTask.completion) {
-// 		if (globalSettings?.taskCompletionFormat === "1") {
+// 		if (globalSettings?.taskPropertyFormat === "1") {
 // 			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
 // 			completedWitFormat = updatedTask.completion
 // 				? ` ✅${updatedTask.completion} `
 // 				: "";
-// 		} else if (globalSettings?.taskCompletionFormat === "2") {
+// 		} else if (globalSettings?.taskPropertyFormat === "2") {
 // 			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
 // 			completedWitFormat = updatedTask.completion
 // 				? ` ✅ ${updatedTask.completion} `
 // 				: "";
-// 		} else if (globalSettings?.taskCompletionFormat === "3") {
+// 		} else if (globalSettings?.taskPropertyFormat === "3") {
 // 			dueDateWithFormat = updatedTask.due
 // 				? ` [due:: ${updatedTask.due}]`
 // 				: "";
@@ -1010,13 +1011,169 @@ export const sanitizeReminder = (
  * @returns The cleaned task title without metadata.
  */
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
-	if (!plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+	// Get the list of properties to hide
+	const hiddenProperties =
+		plugin.settings.data.globalSettings.hiddenTaskProperties || [];
+
+	// If no properties are configured to hide and the legacy setting is false, return original title
+	if (
+		hiddenProperties.length === 0 &&
+		!plugin.settings.data.globalSettings.showTaskWithoutMetadata
+	) {
 		return task.title;
 	}
 
 	let cleanedTitle = task.title;
 
 	// Remove the initial indentation and checkbox markdown
+	cleanedTitle = cleanedTitle
+		.replace(
+			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
+			""
+		)
+		.trim();
+
+	// If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
+	if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+		return cleanTaskTitleLegacy(plugin, task);
+	}
+
+	// Hide only selected properties
+	hiddenProperties.forEach((property) => {
+		switch (property) {
+			case HideableTaskProperty.Tags:
+				// Remove tags
+				task.tags.forEach((tag) => {
+					const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
+					const tagsMatch = cleanedTitle.match(tagRegex);
+					if (tagsMatch) {
+						cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");
+					}
+				});
+				break;
+
+			case HideableTaskProperty.Time:
+				// Remove time (handles both formats)
+				if (task.time) {
+					const timeRegex =
+						/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|\@time\(.*?\))/g;
+					const timeMatch = cleanedTitle.match(timeRegex);
+					if (timeMatch) {
+						cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
+					}
+				}
+				break;
+
+			case HideableTaskProperty.DueDate:
+				// Remove due date in various formats
+				if (task.due) {
+					const dueDateRegex =
+						/\s*(📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::.*?\]|@due\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.CreatedDate:
+				// Remove Created date in various formats
+				if (task.createdDate) {
+					const createdDateRegex =
+						/\s*(➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::.*?\]|@created\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(createdDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.StartDate:
+				// Remove start date in various formats
+				if (task.startDate) {
+					const startDateRegex =
+						/\s*(🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::.*?\]|@start\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(startDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.ScheduledDate:
+				// Remove scheduled date in various formats
+				if (task.scheduledDate) {
+					const scheduledDateRegex =
+						/\s*(⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::.*?\]|@scheduled\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(scheduledDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.CompletionDate:
+				// Remove completion date in various formats
+				if (task.completion) {
+					const completionRegex =
+						/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(completionRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.Priority:
+				// Remove priority in various formats
+				if (task.priority > 0) {
+					let match = cleanedTitle.match(
+						/\[priority::\s*(\d{1,2})\]/
+					);
+					if (match) {
+						cleanedTitle = cleanedTitle.replace(match[0], "");
+					}
+
+					match = cleanedTitle.match(/@priority\(\s*(\d{1,2})\s*\)/);
+					if (match) {
+						cleanedTitle = cleanedTitle.replace(match[0], "");
+					}
+
+					const priorityIcon = priorityEmojis[task.priority];
+
+					if (priorityIcon) {
+						// Create a regex pattern to match any priority emoji in text
+						const priorityRegex = new RegExp(
+							`(${Object.values(priorityEmojis)
+								.map((emoji) => `\\s*${emoji}\\s*`)
+								.join("|")})`,
+							"g"
+						);
+
+						// Replace the first valid priority emoji found
+						cleanedTitle = cleanedTitle.replace(
+							priorityRegex,
+							(match) => {
+								return match.trim() === priorityIcon
+									? " "
+									: match;
+							}
+						);
+					}
+				}
+				break;
+		}
+	});
+
+	// Remove reminder if it's in the hidden properties list
+	if (
+		hiddenProperties.includes(HideableTaskProperty.Dependencies) ||
+		plugin.settings.data.globalSettings.showTaskWithoutMetadata
+	) {
+		const reminderRegex =
+			/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
+		const reminderMatch = cleanedTitle.match(reminderRegex);
+		if (reminderMatch) {
+			cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
+		}
+	}
+
+	// Trim extra spaces and return the cleaned title
+	return cleanedTitle.trim();
+};
+
+// Legacy function for backward compatibility
+export const cleanTaskTitleLegacy = (
+	plugin: TaskBoard,
+	task: taskItem
+): string => {
+	let cleanedTitle = task.title;
+
 	cleanedTitle = cleanedTitle
 		.replace(
 			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
