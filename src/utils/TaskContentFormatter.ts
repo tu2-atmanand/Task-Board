@@ -1146,7 +1146,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 };
 
 // Legacy function for backward compatibility
-const cleanTaskTitleLegacy = (plugin: TaskBoard, task: taskItem): string => {
+export const cleanTaskTitleLegacy = (plugin: TaskBoard, task: taskItem): string => {
 	let cleanedTitle = task.title;
 
 	// Remove tags
