@@ -46,6 +46,7 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -480,15 +481,16 @@ export default class TaskBoard extends Plugin {
 			let modified = false;
 
 			hiddenProperties.forEach((property) => {
-				const patterns = getTaskPropertyRegexPatterns(property);
-				patterns.forEach((pattern) => {
-					if (pattern.test(content)) {
-						content = content.replace(pattern, (match) => {
-							modified = true;
-							return `<span class="taskboard-hidden-property" style="display: none;">${match}</span>`;
-						});
-					}
-				});
+				const pattern = getTaskPropertyRegexPatterns(
+					property,
+					this.settings.data.globalSettings?.taskPropertyFormat
+				);
+				if (pattern.test(content)) {
+					content = content.replace(pattern, (match) => {
+						modified = true;
+						return `<span class="taskboard-hidden-property" style="display: none;">${match}</span>`;
+					});
+				}
 			});
 
 			if (modified && textNode.parentElement) {

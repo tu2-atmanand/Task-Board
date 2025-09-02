@@ -118,13 +118,30 @@ export interface DefaultTaskSerializerSymbols {
 		idRegex: RegExp;
 		dependsOnRegex: RegExp;
 	};
+	readonly TaskFormatRegularExpWithGlobal: {
+		priorityRegex: RegExp;
+		startDateRegex: RegExp;
+		createdDateRegex: RegExp;
+		scheduledDateRegex: RegExp;
+		dueDateRegex: RegExp;
+		doneDateRegex: RegExp;
+		cancelledDateRegex: RegExp;
+		recurrenceRegex: RegExp;
+		onCompletionRegex: RegExp;
+		idRegex: RegExp;
+		dependsOnRegex: RegExp;
+	};
 }
 
-function dateFieldRegex(symbols: string) {
-	return fieldRegex(symbols, "(\\d{4}-\\d{2}-\\d{2}|\\d{2}-\\d{2}-\\d{4})");
+function dateFieldRegex(symbols: string, filter: string) {
+	return fieldRegex(
+		symbols,
+		"(\\d{4}-\\d{2}-\\d{2}|\\d{2}-\\d{2}-\\d{4})",
+		filter
+	);
 }
 
-function fieldRegex(symbols: string, valueRegexString: string) {
+function fieldRegex(symbols: string, valueRegexString: string, filter: string) {
 	// \uFE0F? allows an optional Variant Selector 16 on emojis.
 	let source = symbols + "\uFE0F?";
 	if (valueRegexString !== "") {
@@ -132,8 +149,8 @@ function fieldRegex(symbols: string, valueRegexString: string) {
 	}
 	// The regexes end with `$` because they will be matched and
 	// removed from the end until none are left.
-	source += "$";
-	return new RegExp(source); // Remove the 'u' flag, to fix parsing on iPadOS/iOS 18.6 and 26 Public Beta 2
+	// source += "$";
+	return filter ? new RegExp(source, filter) : new RegExp(source); // Remove the 'u' flag, to fix parsing on iPadOS/iOS 18.6 and 26 Public Beta 2
 }
 
 /**
@@ -161,22 +178,45 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 	dependsOnSymbol: "⛔",
 	idSymbol: "🆔",
 	TaskFormatRegularExpressions: {
-		priorityRegex: fieldRegex("(🔺|⏫|🔼|🔽|⏬)", ""),
-		startDateRegex: dateFieldRegex("🛫"),
-		createdDateRegex: dateFieldRegex("➕"),
-		scheduledDateRegex: dateFieldRegex("(?:⏳|⌛)"),
-		dueDateRegex: dateFieldRegex("(?:📅|📆|🗓)"),
-		doneDateRegex: dateFieldRegex("✅"),
-		cancelledDateRegex: dateFieldRegex("❌"),
-		recurrenceRegex: fieldRegex("🔁", "([a-zA-Z0-9, !]+)"),
-		onCompletionRegex: fieldRegex("🏁", "([a-zA-Z]+)"),
+		priorityRegex: fieldRegex("(🔺|⏫|🔼|🔽|⏬)", "", ""),
+		startDateRegex: dateFieldRegex("🛫", ""),
+		createdDateRegex: dateFieldRegex("➕", ""),
+		scheduledDateRegex: dateFieldRegex("(?:⏳|⌛)", ""),
+		dueDateRegex: dateFieldRegex("(?:📅|📆|🗓)", ""),
+		doneDateRegex: dateFieldRegex("✅", ""),
+		cancelledDateRegex: dateFieldRegex("❌", ""),
+		recurrenceRegex: fieldRegex("🔁", "([a-zA-Z0-9, !]+)", ""),
+		onCompletionRegex: fieldRegex("🏁", "([a-zA-Z]+)", ""),
 		dependsOnRegex: fieldRegex(
 			"⛔",
-			"(" + TaskRegularExpressions.taskIdSequenceRegex.source + ")"
+			"(" + TaskRegularExpressions.taskIdSequenceRegex.source + ")",
+			""
 		),
 		idRegex: fieldRegex(
 			"🆔",
-			"(" + TaskRegularExpressions.taskIdRegex.source + ")"
+			"(" + TaskRegularExpressions.taskIdRegex.source + ")",
+			""
+		),
+	},
+	TaskFormatRegularExpWithGlobal: {
+		priorityRegex: fieldRegex("(🔺|⏫|🔼|🔽|⏬)", "", "g"),
+		startDateRegex: dateFieldRegex("🛫", "g"),
+		createdDateRegex: dateFieldRegex("➕", "g"),
+		scheduledDateRegex: dateFieldRegex("(?:⏳|⌛)", "g"),
+		dueDateRegex: dateFieldRegex("(?:📅|📆|🗓)", "g"),
+		doneDateRegex: dateFieldRegex("✅", "g"),
+		cancelledDateRegex: dateFieldRegex("❌", "g"),
+		recurrenceRegex: fieldRegex("🔁", "([a-zA-Z0-9, !]+)", "g"),
+		onCompletionRegex: fieldRegex("🏁", "([a-zA-Z]+)", "g"),
+		dependsOnRegex: fieldRegex(
+			"⛔",
+			"(" + TaskRegularExpressions.taskIdSequenceRegex.source + ")",
+			"g"
+		),
+		idRegex: fieldRegex(
+			"🆔",
+			"(" + TaskRegularExpressions.taskIdRegex.source + ")",
+			"g"
 		),
 	},
 } as const;
