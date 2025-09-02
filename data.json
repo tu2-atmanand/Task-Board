@@ -645,8 +645,10 @@
         "recurring",
         "time",
         "dependencies",
-        "reminder"
-      ]
+        "reminder",
+        "tags"
+      ],
+      "taskPropertyFormat": "1"
     }
   }
 }
