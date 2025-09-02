@@ -183,11 +183,11 @@ export const sanitizeCreatedDate = (
 
 	let createdDateWithFormat: string = "";
 	if (createdDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			createdDateWithFormat = createdDate ? `➕${createdDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			createdDateWithFormat = createdDate ? `➕ ${createdDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			createdDateWithFormat = createdDate
 				? `[created:: ${createdDate}]`
 				: "";
@@ -251,11 +251,11 @@ export const sanitizeStartDate = (
 
 	let startDateWithFormat: string = "";
 	if (startDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			startDateWithFormat = startDate ? `🛫${startDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			startDateWithFormat = startDate ? `🛫 ${startDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			startDateWithFormat = startDate ? `[start:: ${startDate}]` : "";
 		} else {
 			startDateWithFormat = startDate ? `@start(${startDate})` : "";
@@ -315,13 +315,13 @@ export const sanitizeScheduledDate = (
 
 	let scheduledDateWithFormat: string = "";
 	if (scheduledDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			scheduledDateWithFormat = scheduledDate ? `⏳${scheduledDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			scheduledDateWithFormat = scheduledDate
 				? `⏳ ${scheduledDate}`
 				: "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			scheduledDateWithFormat = scheduledDate
 				? `[scheduled:: ${scheduledDate}]`
 				: "";
@@ -386,11 +386,11 @@ export const sanitizeDueDate = (
 
 	let dueDateWithFormat: string = "";
 	if (dueDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			dueDateWithFormat = dueDate ? `📅${dueDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			dueDateWithFormat = dueDate ? `📅 ${dueDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			dueDateWithFormat = dueDate ? `[due:: ${dueDate}]` : "";
 		} else {
 			dueDateWithFormat = dueDate ? `@due(${dueDate})` : "";
@@ -449,11 +449,11 @@ export const sanitizeCompletionDate = (
 
 	let completedWitFormat: string = "";
 	if (completionDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			completedWitFormat = completionDate ? `✅${completionDate} ` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			completedWitFormat = completionDate ? `✅ ${completionDate} ` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			completedWitFormat = completionDate
 				? `[completion:: ${completionDate}] `
 				: "";
@@ -516,11 +516,11 @@ export const sanitizeCancellationDate = (
 
 	let cancelledWithFormat: string = "";
 	if (cancelledDate) {
-		if (globalSettings?.taskCompletionFormat === "1") {
+		if (globalSettings?.taskPropertyFormat === "1") {
 			cancelledWithFormat = cancelledDate ? `❌${cancelledDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "2") {
+		} else if (globalSettings?.taskPropertyFormat === "2") {
 			cancelledWithFormat = cancelledDate ? `❌ ${cancelledDate}` : "";
-		} else if (globalSettings?.taskCompletionFormat === "3") {
+		} else if (globalSettings?.taskPropertyFormat === "3") {
 			cancelledWithFormat = cancelledDate
 				? `[cancelled:: ${cancelledDate}]`
 				: "";
@@ -606,11 +606,11 @@ export const sanitizeTime = (
 		}
 
 		let newTimeWithFormat: string = "";
-		if (globalSettings.taskCompletionFormat === "1") {
+		if (globalSettings.taskPropertyFormat === "1") {
 			newTimeWithFormat = `⏰[${newTime}]`;
-		} else if (globalSettings.taskCompletionFormat === "2") {
+		} else if (globalSettings.taskPropertyFormat === "2") {
 			newTimeWithFormat = `⏰ [${newTime}]`;
-		} else if (globalSettings.taskCompletionFormat === "3") {
+		} else if (globalSettings.taskPropertyFormat === "3") {
 			newTimeWithFormat = `[time:: ${newTime}]`;
 		} else {
 			newTimeWithFormat = `@time(${newTime})`;
@@ -712,9 +712,9 @@ export const sanitizePriority = (
 	if (extractedPriorityMatch === 0) {
 		if (newPriority > 0) {
 			let priorityWithFormat: string = "";
-			if (globalSettings?.taskCompletionFormat === "3") {
+			if (globalSettings?.taskPropertyFormat === "3") {
 				priorityWithFormat = `[priority:: ${newPriority}]`;
-			} else if (globalSettings?.taskCompletionFormat === "4") {
+			} else if (globalSettings?.taskPropertyFormat === "4") {
 				priorityWithFormat = `@priority(${newPriority})`;
 			} else {
 				priorityWithFormat = priorityEmojis[newPriority];
@@ -920,17 +920,17 @@ export const sanitizeReminder = (
 // 	let dueDateWithFormat: string = "";
 // 	let completedWitFormat: string = "";
 // 	if (updatedTask.due || updatedTask.completion) {
-// 		if (globalSettings?.taskCompletionFormat === "1") {
+// 		if (globalSettings?.taskPropertyFormat === "1") {
 // 			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
 // 			completedWitFormat = updatedTask.completion
 // 				? ` ✅${updatedTask.completion} `
 // 				: "";
-// 		} else if (globalSettings?.taskCompletionFormat === "2") {
+// 		} else if (globalSettings?.taskPropertyFormat === "2") {
 // 			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
 // 			completedWitFormat = updatedTask.completion
 // 				? ` ✅ ${updatedTask.completion} `
 // 				: "";
-// 		} else if (globalSettings?.taskCompletionFormat === "3") {
+// 		} else if (globalSettings?.taskPropertyFormat === "3") {
 // 			dueDateWithFormat = updatedTask.due
 // 				? ` [due:: ${updatedTask.due}]`
 // 				: "";

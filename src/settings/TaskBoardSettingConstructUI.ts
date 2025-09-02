@@ -15,6 +15,7 @@ import {
 	cardSectionsVisibilityOptions,
 	globalSettingsData,
 	HideableTaskProperty,
+	taskPropertyFormatOptions,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import Pickr from "@simonwep/pickr";
@@ -1302,7 +1303,7 @@ export class SettingsManager {
 
 		const {
 			universalDateFormat,
-			taskCompletionFormat,
+			taskPropertyFormat,
 			// taskCompletionDateTimePattern,
 			firstDayOfWeek,
 			taskCompletionInLocalTime,
@@ -1330,7 +1331,7 @@ export class SettingsManager {
 			let completionDate = "2024-09-21/12:20:33";
 
 			let preview = "";
-			switch (this.globalSettings!.taskCompletionFormat) {
+			switch (this.globalSettings!.taskPropertyFormat) {
 				// Default
 				case "1": {
 					if (
@@ -1388,14 +1389,26 @@ export class SettingsManager {
 			.setName(t("supported-plugin-formats"))
 			.setDesc(t("supported-plugin-formats-info"))
 			.addDropdown((dropdown) => {
-				dropdown.addOption("1", t("default"));
-				dropdown.addOption("2", "Tasks " + t("plugin"));
-				dropdown.addOption("3", "Dataview " + t("plugin"));
-				dropdown.addOption("4", "Obsidian " + t("native"));
+				dropdown.addOption(
+					taskPropertyFormatOptions.default,
+					t("default")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.tasksPlugin,
+					"Tasks " + t("plugin")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.dataviewPlugin,
+					"Dataview " + t("plugin")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.obsidianNative,
+					"Obsidian " + t("native")
+				);
 
-				dropdown.setValue(taskCompletionFormat as string);
+				dropdown.setValue(taskPropertyFormat as string);
 				dropdown.onChange(async (value) => {
-					this.globalSettings!.taskCompletionFormat = value;
+					this.globalSettings!.taskPropertyFormat = value;
 					await this.saveSettings();
 					updatePreview();
 				});

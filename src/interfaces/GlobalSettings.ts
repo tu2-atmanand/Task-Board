@@ -19,6 +19,13 @@ export interface scanFilters {
 	};
 }
 
+export enum taskPropertyFormatOptions {
+	default = "1",
+	tasksPlugin = "2",
+	dataviewPlugin = "3",
+	obsidianNative = "4",
+}
+
 export interface TagColor {
 	name: string;
 	color: string;
@@ -102,7 +109,7 @@ export interface globalSettingsData {
 	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
-	taskCompletionFormat: string;
+	taskPropertyFormat: string;
 	taskCompletionDateTimePattern: string;
 	dailyNotesPluginComp: boolean;
 	universalDateFormat: string;
@@ -333,7 +340,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			firstDayOfWeek: "Mon",
 			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
-			taskCompletionFormat: "1",
+			taskPropertyFormat: "1",
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
 			dailyNotesPluginComp: false,
 			universalDateFormat: "yyyy-MM-DD",
