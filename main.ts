@@ -275,8 +275,9 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerEditorExtensions() {
+		// TODO : The below editor extension will not going to be released in the upcoming version, will plan it for the next version.
 		// Register task gutter extension
-		this.registerEditorExtension(taskGutterExtension(this.app, this));
+		// this.registerEditorExtension(taskGutterExtension(this.app, this));
 
 		// Register task property hiding extension
 		const hiddenProperties =

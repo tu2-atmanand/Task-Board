@@ -16,32 +16,36 @@ class TaskGutterMarker extends GutterMarker {
 	text: string;
 	lineNum: number;
 	view: EditorView;
-	app: App;
 	plugin: TaskBoard;
 
 	constructor(
 		text: string,
 		lineNum: number,
 		view: EditorView,
-		app: App,
 		plugin: TaskBoard
 	) {
 		super();
 		this.text = text;
 		this.lineNum = lineNum;
 		this.view = view;
-		this.app = app;
 		this.plugin = plugin;
 	}
 
 	toDOM() {
+		// Remove the padding on left side of the editor.
+		// const scroller = this.view.dom.querySelector(
+		// 	".cm-scroller"
+		// ) as HTMLDivElement;
+		const scroller = this.view.scrollDOM;
+		if (scroller) scroller.style.paddingLeft = "0";
+
 		const markerEl = createEl("div");
 		const button = new ExtraButtonComponent(markerEl)
 			.setIcon("edit")
 			.setTooltip("Edit Task")
 			.onClick(() => {
 				const lineText = this.view.state.doc.line(this.lineNum).text;
-				const file = this.app.workspace.getActiveFile();
+				const file = this.plugin.app.workspace.getActiveFile();
 
 				if (!file || !isTaskLine(lineText)) return false;
 
@@ -63,7 +67,10 @@ class TaskGutterMarker extends GutterMarker {
 				}
 
 				// Create a save callback for the modal
-				const saveTask = (updatedTask: any, quickAddPluginChoice: string) => {
+				const saveTask = (
+					updatedTask: any,
+					quickAddPluginChoice: string
+				) => {
 					// This will be handled by the existing task saving logic
 					// The modal will update the file content automatically
 					console.log("Task updated via gutter marker:", updatedTask);
@@ -71,8 +78,8 @@ class TaskGutterMarker extends GutterMarker {
 
 				// Open the AddOrEditTaskModal
 				const modal = new AddOrEditTaskModal(
-					this.app, 
-					this.plugin, 
+					this.plugin.app,
+					this.plugin,
 					saveTask,
 					true, // activeNote
 					true, // taskExists (we're editing an existing task)
@@ -83,7 +90,7 @@ class TaskGutterMarker extends GutterMarker {
 				return true;
 			});
 
-		button.extraSettingsEl.addClass("task-gutter-marker");
+		button.extraSettingsEl.addClass("task-board-task-gutter-marker");
 		return button.extraSettingsEl;
 	}
 }
@@ -91,16 +98,16 @@ class TaskGutterMarker extends GutterMarker {
 /**
  * Task Gutter Extension
  */
-export function taskGutterExtension(
-	app: App,
-	plugin: TaskBoard
-): Extension {
+export function taskGutterExtension(app: App, plugin: TaskBoard): Extension {
 	return [
 		gutter({
-			class: "task-gutter",
+			class: "task-board-task-gutter",
 			lineMarker(view, line) {
+				// const file = plugin.app.workspace.getActiveFile();
+				// console.log("Active file in taskGutterExtension:", file);
 				const lineText = view.state.doc.lineAt(line.from).text;
 				const lineNumber = view.state.doc.lineAt(line.from).number;
+				// console.log("The view state:", view.state);
 
 				// Skip if not a task
 				if (!isTaskLine(lineText)) return null;
@@ -121,13 +128,7 @@ export function taskGutterExtension(
 					}
 				}
 
-				return new TaskGutterMarker(
-					lineText,
-					lineNumber,
-					view,
-					app,
-					plugin
-				);
+				return new TaskGutterMarker(lineText, lineNumber, view, plugin);
 			},
 		}),
 	];

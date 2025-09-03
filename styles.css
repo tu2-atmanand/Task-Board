@@ -4149,13 +4149,13 @@ svg.react-flow__connectionline {
 /* Task Board Editor Extensions Styles */
 
 /* Gutter marker styles */
-.task-gutter {
-	background: var(--background-secondary);
-	border-right: 1px solid var(--background-modifier-border);
+.task-board-task-gutter {
+	/* background: var(--background-secondary); */
+	/* border-right: 1px solid var(--background-modifier-border); */
 	width: 20px;
 }
 
-.task-gutter-marker {
+.task-board-task-gutter-marker {
 	opacity: 0.3;
 	transition: opacity 0.2s;
 	padding: 2px !important;
@@ -4167,7 +4167,7 @@ svg.react-flow__connectionline {
 	color: var(--text-accent) !important;
 }
 
-.task-gutter-marker:hover {
+.task-board-task-gutter-marker:hover {
 	opacity: 1;
 	background-color: var(--background-modifier-hover) !important;
 }
