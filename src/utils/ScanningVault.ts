@@ -647,7 +647,10 @@ export function extractCreatedDate(text: string): string {
 	let match = text.match(/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.createdDateRegex);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.createdDateRegex
+		);
 	}
 
 	if (!match) {
@@ -664,7 +667,9 @@ export function extractStartDate(text: string): string {
 	let match = text.match(/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.startDateRegex);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.startDateRegex
+		);
 	}
 
 	if (!match) {
@@ -681,7 +686,10 @@ export function extractScheduledDate(text: string): string {
 	let match = text.match(/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.scheduledDateRegex);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.scheduledDateRegex
+		);
 	}
 
 	if (!match) {
@@ -698,7 +706,9 @@ export function extractDueDate(text: string): string {
 	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.dueDateRegex);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex
+		);
 	}
 
 	if (!match) {
@@ -710,7 +720,9 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
-	let match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.priorityRegex);
+	let match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex
+	);
 	if (match) {
 		return parseInt(match[1]);
 	}
@@ -808,7 +820,9 @@ export function extractCompletionDate(text: string): string {
 
 	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
-		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.doneDateRegex);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex
+		);
 		if (match) {
 			return match
 				? match[0].replace("[completion::", "").replace("]", "").trim()
@@ -833,7 +847,10 @@ export function extractCancelledDate(text: string): string {
 
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {
-		match = text.match(DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.cancelledDateRegex);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.cancelledDateRegex
+		);
 	}
 
 	if (!match) {
