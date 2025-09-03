@@ -1,7 +1,7 @@
 import TaskBoard from "main";
 import { App } from "obsidian";
 import { taskStatuses } from "src/interfaces/TaskItem";
-import { TaskRegularExpressions } from "./TaskRegularExpressions";
+import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**
  * Switches the checkbox state based on the current symbol.

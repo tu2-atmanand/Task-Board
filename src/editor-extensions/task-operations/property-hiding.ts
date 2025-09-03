@@ -16,7 +16,6 @@ import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "main";
 import { HideableTaskProperty } from "src/interfaces/GlobalSettings";
 import { isTaskLine } from "src/utils/CheckBoxUtils";
-import { priorityEmojis } from "src/interfaces/TaskItem";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
@@ -298,14 +297,14 @@ function createPropertyDecorations(
 				const matchStart = line.from + match.index;
 				const matchEnd = matchStart + match[0].length;
 
-				console.log(
-					"CursorPos:",
-					cursorPos,
-					"MatchStart:",
-					matchStart,
-					"MatchEnd:",
-					matchEnd
-				);
+				// console.log(
+				// 	"CursorPos:",
+				// 	cursorPos,
+				// 	"MatchStart:",
+				// 	matchStart,
+				// 	"MatchEnd:",
+				// 	matchEnd
+				// );
 
 				// Check if cursor is within or near the match
 				const cursorNearMatch =
