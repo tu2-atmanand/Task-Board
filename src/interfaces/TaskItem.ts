@@ -25,6 +25,8 @@ export interface taskItem {
 	reminder?: string; // A date-time value.
 	completion?: string;
 	cancelledDate?: string;
+	isTaskNote?: boolean; // Flag to identify if this is a task note
+	description?: string; // Description for task notes from frontmatter
 }
 
 export interface noteItem {

@@ -21,6 +21,7 @@ import {
 	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,
 } from "./FiltersVerifier";
+import { isTaskNote, extractTaskNoteProperties } from "./TaskNoteUtils";
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -173,6 +174,68 @@ export default class ScanningVault {
 				// Add the new note
 				this.tasksCache.Notes.push(note);
 			}
+		}
+
+		// Task Note Detection: Check if this note is marked as a task note
+		if (frontmatter && isTaskNote(frontmatter)) {
+			this.TaskDetected = true;
+
+			// Extract properties from frontmatter
+			const taskNoteProperties = extractTaskNoteProperties(frontmatter, fileNameWithPath);
+			
+			// Extract sub-tasks from the note content (excluding frontmatter)
+			const contentWithoutFrontmatter = fileContent.replace(/^---[\s\S]*?---\n?/, '');
+			const contentLines = contentWithoutFrontmatter.split("\n");
+			const subTasks: string[] = [];
+			
+			// Find tasks within the note content to use as sub-tasks
+			for (let lineIndex = 0; lineIndex < contentLines.length; lineIndex++) {
+				const line = contentLines[lineIndex];
+				if (isTaskLine(line)) {
+					// Add this task line as a sub-task
+					subTasks.push(line.replace(/^- \[.\]\s*/, "").trim());
+				}
+			}
+
+			// Create task item for the task note
+			const taskNoteItem: taskItem = {
+				id: this.generateTaskId(),
+				title: taskNoteProperties.title || file.basename,
+				body: subTasks, // Store sub-tasks in body
+				createdDate: taskNoteProperties.createdDate || "",
+				startDate: taskNoteProperties.startDate || "",
+				scheduledDate: taskNoteProperties.scheduledDate || "",
+				due: taskNoteProperties.due || "",
+				tags: extractFrontmatterTags(frontmatter), // Use frontmatter tags
+				frontmatterTags: extractFrontmatterTags(frontmatter),
+				time: "", // Task notes don't have time ranges
+				priority: taskNoteProperties.priority || 0,
+				status: taskNoteProperties.status || " ", // Default to unchecked
+				filePath: fileNameWithPath,
+				taskLocation: {
+					startLine: 1,
+					startCharIndex: 0,
+					endLine: lines.length,
+					endCharIndex: lines[lines.length - 1]?.length || 0,
+				},
+				completion: taskNoteProperties.completion || "",
+				cancelledDate: taskNoteProperties.cancelledDate || "",
+				reminder: taskNoteProperties.reminder || "",
+				isTaskNote: true,
+				description: taskNoteProperties.description || "",
+			};
+
+			// Add to appropriate cache based on completion status
+			const isTaskNoteCompleted = taskNoteItem.status === "x" || taskNoteItem.status === "X";
+			if (isTaskNoteCompleted) {
+				this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
+			} else {
+				this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
+			}
+
+			// Don't process individual tasks in this file since it's a task note
+			// The sub-tasks are already captured in the body
+			return;
 		}
 
 		for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {

@@ -77,6 +77,7 @@ const EditTaskContent: React.FC<{
 	const [status, setStatus] = useState(task.status || '');
 	const [reminder, setReminder] = useState(task?.reminder || "");
 	const [bodyContent, setBodyContent] = useState(task.body?.join('\n') || '');
+	const [description, setDescription] = useState(task.description || '');
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>('');
 	const [newFilePath, setNewFilePath] = useState<string>(filePath);
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
@@ -436,9 +437,111 @@ const EditTaskContent: React.FC<{
 			cancelledDate: task.cancelledDate || '',
 			status,
 			reminder,
+			description: description || '',
 		};
 		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
+	};
+
+	// Function to handle saving as task note
+	const handleSaveAsNote = async () => {
+		let newDue = due;
+		let newStartDate = startDate;
+		let newScheduledDate = scheduledDate;
+
+		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists) {
+			const universalDateType = plugin.settings.data.globalSettings.universalDate;
+			if (universalDateType === UniversalDateOptions.dueDate && !due) {
+				newDue = new Date().toISOString().split('T')[0];
+			} else if (universalDateType === UniversalDateOptions.startDate && !startDate) {
+				newStartDate = new Date().toISOString().split('T')[0];
+			} else if (universalDateType === UniversalDateOptions.scheduledDate && !scheduledDate) {
+				newScheduledDate = new Date().toISOString().split('T')[0];
+			}
+		}
+
+		let newCreatedDate = createdDate;
+		if (plugin.settings.data.globalSettings.autoAddCreatedDate && !taskExists) {
+			newCreatedDate = new Date().toISOString().split('T')[0];
+		}
+
+		// Determine file path for task note
+		let taskNoteFilePath: string;
+		if (newFilePath && newFilePath.trim() !== '') {
+			taskNoteFilePath = newFilePath.endsWith('.md') ? newFilePath : `${newFilePath}.md`;
+		} else {
+			// Use default task note location from settings
+			const defaultLocation = plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'TaskNotes';
+			const noteName = title.trim() || 'New Task Note';
+			// Sanitize filename
+			const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '-');
+			taskNoteFilePath = `${defaultLocation}/${sanitizedName}.md`;
+		}
+
+		const taskNoteItem = {
+			...task,
+			title,
+			body: bodyContent ? bodyContent.split('\n').filter(line => line.trim()) : [],
+			createdDate: newCreatedDate,
+			startDate: newStartDate,
+			scheduledDate: newScheduledDate,
+			due: newDue,
+			tags: [...tags, 'taskNote'], // Add taskNote tag
+			time: '', // Task notes don't have time
+			priority,
+			filePath: taskNoteFilePath,
+			taskLocation: task.taskLocation,
+			cancelledDate: task.cancelledDate || '',
+			status,
+			reminder,
+			description: description || '',
+			isTaskNote: true,
+		};
+
+		// Create the note content with frontmatter
+		const frontmatter = `---
+tags: [taskNote]${title ? `\ntitle: "${title}"` : ''}${description ? `\ndescription: "${description}"` : ''}${newCreatedDate ? `\ncreated-date: ${newCreatedDate}` : ''}${newStartDate ? `\nstart-date: ${newStartDate}` : ''}${newScheduledDate ? `\nschedule-date: ${newScheduledDate}` : ''}${newDue ? `\ndue-date: ${newDue}` : ''}${priority > 0 ? `\npriority: ${getPriorityEmoji(priority)}` : ''}${status !== ' ' ? `\nstatus: ${status}` : ''}${reminder ? `\nreminder: ${reminder}` : ''}
+---`;
+
+		const noteContent = `${frontmatter}\n\n${bodyContent || ''}`;
+
+		try {
+			// Check if the directory exists, create if not
+			const parts = taskNoteFilePath.split('/');
+			if (parts.length > 1) {
+				const dirPath = parts.slice(0, -1).join('/');
+				if (!await plugin.app.vault.adapter.exists(dirPath)) {
+					await plugin.app.vault.createFolder(dirPath);
+				}
+			}
+
+			// Create or update the file
+			const existingFile = plugin.app.vault.getFileByPath(taskNoteFilePath);
+			if (existingFile) {
+				await plugin.app.vault.modify(existingFile, noteContent);
+			} else {
+				await plugin.app.vault.create(taskNoteFilePath, noteContent);
+			}
+
+			// Call onSave with the task note item
+			onSave(taskNoteItem, quickAddPluginChoice);
+		} catch (error) {
+			console.error('Error creating task note:', error);
+			// Fallback to regular task creation
+			onSave(taskNoteItem, quickAddPluginChoice);
+		}
+	};
+
+	// Helper function to get priority emoji
+	const getPriorityEmoji = (priority: number): string => {
+		const priorityEmojis: { [key: number]: string } = {
+			1: "🔺", // Highest
+			2: "⏫", // High  
+			3: "🔼", // Medium
+			4: "🔽", // Low
+			5: "⏬", // Lowest
+		};
+		return priorityEmojis[priority] || "";
 	};
 
 	const modifiedTask: taskItem = {
@@ -821,6 +924,16 @@ const EditTaskContent: React.FC<{
 
 						<div className="EditTaskModalHomeFooterBtnSec">
 							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
+							{!taskExists && (
+								<button 
+									className="EditTaskModalHomeSaveBtn" 
+									onClick={handleSaveAsNote}
+									style={{ marginLeft: '8px', backgroundColor: '#4a90e2' }}
+									title="Save as task note with frontmatter properties"
+								>
+									Save as Note
+								</button>
+							)}
 							<button className="EditTaskModalHomeToggleBtn" onClick={toggleRightSec} aria-label="Toggle Details">
 								☰
 							</button>
@@ -838,6 +951,21 @@ const EditTaskContent: React.FC<{
 									<option key={`${option.value}-${Math.floor(1000 + Math.random() * 9000)}`} value={option.value}>{option.text}</option>
 								))}
 							</select>
+						</div>
+
+						{/* Task Description */}
+						<div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">Description</label>
+							<textarea 
+								className="EditTaskModalHome-descriptionValue" 
+								value={description} 
+								onChange={(e) => {
+									setDescription(e.target.value);
+									setIsEdited(true);
+								}}
+								placeholder="Task description (for task notes)"
+								rows={3}
+							/>
 						</div>
 
 						{/* Task Time Input */}

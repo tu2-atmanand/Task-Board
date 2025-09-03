@@ -5,6 +5,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { taskItem, taskStatuses } from '../interfaces/TaskItem';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
+import { handleTaskNoteEdit, handleTaskNoteStatusChange, handleTaskNotePropertyUpdate } from 'src/utils/TaskNoteEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
@@ -272,8 +273,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const handleMainCheckBoxClick = () => {
 		setIsChecked(true); // Trigger animation
 		setTimeout(() => {
-			// onCheckboxChange(task); // Call parent function after 1 second
-			handleCheckboxChange(plugin, task);
+			// Route to appropriate handler based on task type
+			if (task.isTaskNote) {
+				// For task notes, toggle between " " and "x"
+				const newStatus = task.status === " " ? "x" : " ";
+				handleTaskNoteStatusChange(plugin, task, newStatus);
+			} else {
+				handleCheckboxChange(plugin, task);
+			}
 			setIsChecked(false); // Reset checkbox state
 		}, 500); // 1-second delay for animation
 	};
@@ -311,7 +318,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
 		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
-			handleEditTask(plugin, task);
+			// Route to appropriate handler based on task type
+			if (task.isTaskNote) {
+				handleTaskNoteEdit(plugin, plugin.app, task);
+			} else {
+				handleEditTask(plugin, task);
+			}
 		} else {
 			event.ctrlKey = true;
 			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
@@ -613,6 +625,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						/>
 						<div className="taskItemBodyContent">
 							<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
+							{/* Task Note Description */}
+							{task.isTaskNote && task.description && (
+								<div className="taskItemTaskNoteDescription">
+									{task.description}
+								</div>
+							)}
 							<div className="taskItemBody">
 								{memoizedRenderSubTasks}
 							</div>

@@ -107,6 +107,7 @@ export interface globalSettingsData {
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
 	preDefinedNote: string;
+	taskNoteDefaultLocation: string;
 	quickAddPluginDefaultChoice: string;
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
@@ -388,6 +389,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				quickAddPlugin: false,
 			},
 			preDefinedNote: "Task_board_note.md",
+			taskNoteDefaultLocation: "TaskNotes",
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
 			showFileNameInCard: false,
