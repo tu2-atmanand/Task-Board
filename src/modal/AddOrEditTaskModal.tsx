@@ -10,7 +10,7 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitle, cursorLocation, getFormattedTaskContent, sanitizeCreatedDate, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
+import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, sanitizeCreatedDate, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
 import { buildTaskFromRawContent } from "src/utils/ScanningVault";
 import { FileInput, RefreshCcw } from "lucide-react";
@@ -471,7 +471,7 @@ const EditTaskContent: React.FC<{
 
 	const titleComponentRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		const cleanedTaskTitle = cleanTaskTitle(plugin, modifiedTask);
+		const cleanedTaskTitle = cleanTaskTitleLegacy(plugin, modifiedTask);
 		// setFormattedTaskContent(cleanedTaskTitle);
 		if (titleComponentRef.current && cleanedTaskTitle !== "") {
 			// Clear previous content before rendering new markdown

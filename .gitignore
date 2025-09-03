@@ -26,3 +26,6 @@ data.json
 tasks.json
 locales/
 main.css
+
+# Test files
+test-example.md

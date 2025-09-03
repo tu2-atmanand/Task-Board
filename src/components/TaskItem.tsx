@@ -10,14 +10,14 @@ import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } f
 import { Component } from 'obsidian';
 import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { cleanTaskTitle, getUniversalDateFromTask, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
+import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseUniversalDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
-import { TaskRegularExpressions } from 'src/utils/TaskRegularExpressions';
+import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegularExpr';
 
 export interface TaskProps {
 	key: number;
@@ -62,8 +62,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		if (taskTitleRendererRef.current && componentRef.current) {
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
-			if (titleElement) {
-				let cleanedTitle = cleanTaskTitle(plugin, task);
+			if (titleElement && task.title !== "") {
+				let cleanedTitle = cleanTaskTitleLegacy(plugin, task);
 				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
 				if (searchQuery) {
 					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

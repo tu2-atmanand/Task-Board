@@ -13,6 +13,7 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
+	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
 import {
 	openAddNewTaskInCurrentFileModal,
@@ -33,8 +34,19 @@ import {
 	t,
 } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
-import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/api";
+import {
+	fetchTasksPluginCustomStatuses,
+	TasksApi,
+} from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { isTaskLine } from "src/utils/CheckBoxUtils";
+import { priorityEmojis } from "src/interfaces/TaskItem";
+import { taskGutterExtension } from "src/editor-extensions/task-operations/gutter-marker";
+import {
+	getTaskPropertyRegexPatterns,
+	taskPropertyHidingExtension,
+} from "src/editor-extensions/task-operations/property-hiding";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -109,12 +121,18 @@ export default class TaskBoard extends Plugin {
 			// Register the Kanban view
 			this.registerTaskBoardView();
 
+			// Register editor extensions
+			this.registerEditorExtensions();
+
 			this.openAtStartup();
 
 			// Register status bar element
 			this.registerTaskBoardStatusBar();
 
 			this.compatiblePluginsAvailabilityCheck();
+
+			// Register markdown post processor for hiding task properties
+			this.registerReadingModePostProcessor();
 		});
 	}
 
@@ -253,6 +271,244 @@ export default class TaskBoard extends Plugin {
 		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
 			this.view = new TaskBoardView(this, leaf);
 			return this.view;
+		});
+	}
+
+	registerEditorExtensions() {
+		// TODO : The below editor extension will not going to be released in the upcoming version, will plan it for the next version.
+		// Register task gutter extension
+		// this.registerEditorExtension(taskGutterExtension(this.app, this));
+
+		// Register task property hiding extension
+		const hiddenProperties =
+			this.settings.data.globalSettings?.hiddenTaskProperties || [];
+		if (hiddenProperties.length > 0) {
+			this.registerEditorExtension(taskPropertyHidingExtension(this));
+		}
+	}
+
+	registerReadingModePostProcessor() {
+		const tasksPlugin = new TasksApi(this);
+		const hiddenProperties =
+			this.settings.data.globalSettings?.hiddenTaskProperties || [];
+		if (hiddenProperties.length === 0) {
+			return;
+		}
+		if (!tasksPlugin.isTasksPluginEnabled()) {
+			this.registerMarkdownPostProcessor((element, context) => {
+				// console.log("Element : ", element, "\nContent :", context);
+				// Only process if we have properties to hide
+
+				// Find all list items that could be tasks
+				const listItems = element.querySelectorAll("li");
+
+				listItems.forEach((listItem) => {
+					// const textContent = listItem.textContent || "";
+					// console.log("Text Content :", textContent);
+					// Check if this is a task (starts with checkbox syntax)
+					if (listItem.querySelector(".contains-task-list")) {
+						this.hidePropertiesInElement(
+							listItem,
+							hiddenProperties
+						);
+					}
+				});
+			});
+		} else {
+			console.log("Tasks plugin is enabled");
+			// Else body will mean that Tasks plugin has been enabled, so here, I can basically directly make use of the CSS classes added to the span elements by Tasks plugin from the following link and add hide CSS style to the specific span elements, based on the hiddenTaskProperties setting. Link to refer : https://publish.obsidian.md/tasks/Advanced/Styling#Sample+HTML+Full+mode.
+
+			// Dynamically inject CSS to hide spans with the specified class names
+			const styleId = "task-board-hide-task-properties-style";
+			let styleEl = document.getElementById(
+				styleId
+			) as HTMLStyleElement | null;
+			if (!styleEl) {
+				styleEl = document.createElement("style");
+				styleEl.id = styleId;
+				document.head.appendChild(styleEl);
+			}
+			let css = "";
+			const fadeInCSS =
+				"@keyframes task-board-fade-in { from { display: none !important; opacity: 0; transform: scaleX(0.8); } to { display: inline !important; opacity: 1; transform: scaleX(1); } }";
+			// const fadeOutCSS =
+			// 	"@keyframes task-board-fade-out { from { display: inline !important; opacity: 1; transform: scaleX(1); } to { display: none !important; opacity: 0; transform: scaleX(0.8); } }";
+			hiddenProperties.forEach((property) => {
+				switch (property) {
+					case HideableTaskProperty.ID:
+						css += ".task-id{ display: none !important; }";
+						css +=
+							"span:hover .task-id { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-id { animation: task-board-fade-out 0.5s ease-in-out 0.5s; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.Tags:
+						css +=
+							".task-description>span>a.tag { display: none !important; }";
+						css +=
+							"span:hover .task-description>span>a.tag { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+					// css +=
+					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+					// css += fadeOutCSS;
+					case HideableTaskProperty.CreatedDate:
+						css += ".task-created { display: none !important; }";
+						css +=
+							"span:hover .task-created { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.StartDate:
+						css += ".task-start { display: none !important; }";
+						css +=
+							"span:hover .task-start { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.ScheduledDate:
+						css += ".task-scheduled { display: none !important; }";
+						css +=
+							"span:hover .task-scheduled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.DueDate:
+						css += ".task-due { display: none !important; }";
+						css +=
+							"span:hover .task-due { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.CompletionDate:
+						css += ".task-completion { display: none !important; }";
+						css +=
+							"span:hover .task-completion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.CancelledDate:
+						css += ".task-cancelled { display: none !important; }";
+						css +=
+							"span:hover .task-cancelled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.Priority:
+						css += ".task-priority { display: none !important; }";
+						css +=
+							"span:hover .task-priority { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.Time:
+						css += ".task-time { display: none !important; }";
+						css +=
+							"span:hover .task-time { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.Dependencies:
+						css += ".task-dependsOn { display: none !important; }";
+						css +=
+							"span:hover .task-dependsOn { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.OnCompletion:
+						css +=
+							".task-onCompletion{ display: none !important; }";
+						css +=
+							"span:hover .task-onCompletion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case HideableTaskProperty.Recurring:
+						css += ".task-recurring{ display: none !important; }";
+						css +=
+							"span:hover .task-recurring { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-recurring { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					// TODO : Reminder is pending.
+				}
+			});
+			styleEl.textContent = css;
+		}
+	}
+
+	private hidePropertiesInElement(
+		element: HTMLElement,
+		hiddenProperties: HideableTaskProperty[]
+	) {
+		// Process text nodes to find and hide specific patterns
+		const walker = document.createTreeWalker(
+			element,
+			NodeFilter.SHOW_TEXT,
+			null
+		);
+
+		const textNodes: Text[] = [];
+		let node;
+		while ((node = walker.nextNode())) {
+			textNodes.push(node as Text);
+		}
+
+		textNodes.forEach((textNode) => {
+			let content = textNode.textContent || "";
+			let modified = false;
+
+			hiddenProperties.forEach((property) => {
+				const pattern = getTaskPropertyRegexPatterns(
+					property,
+					this.settings.data.globalSettings?.taskPropertyFormat
+				);
+				if (pattern.test(content)) {
+					content = content.replace(pattern, (match) => {
+						modified = true;
+						return `<span class="taskboard-hidden-property" style="display: none;">${match}</span>`;
+					});
+				}
+			});
+
+			if (modified && textNode.parentElement) {
+				console.log("Text node :", textNode.parentElement);
+				// Create a temporary element to hold the HTML
+				const tempDiv = document.createElement("div");
+				tempDiv.innerHTML = content;
+
+				// Replace the text node with the new content
+				while (tempDiv.firstChild) {
+					textNode.parentNode?.insertBefore(
+						tempDiv.firstChild,
+						textNode
+					);
+				}
+				textNode.remove();
+			}
 		});
 	}
 
