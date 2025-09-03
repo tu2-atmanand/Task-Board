@@ -199,6 +199,7 @@ export class SettingsManager {
 			tasksCacheFilePath,
 			scanVaultAtStartup,
 			preDefinedNote,
+			taskNoteDefaultLocation,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -341,6 +342,22 @@ export class SettingsManager {
 					onSelectCallback,
 					this.app
 				);
+			});
+
+		// Setting for choosing the default location for task notes
+		new Setting(contentEl)
+			.setName("Default location for Task Notes")
+			.setDesc("Default folder where new task notes will be saved when using 'Save as note' button")
+			.addText((text) => {
+				text.setValue(taskNoteDefaultLocation).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteDefaultLocation = value;
+				});
+
+				const inputEl = text.inputEl;
+				// For folders, we could use folder suggestions or just allow text input
+				// For now, let's keep it simple with text input
+				inputEl.placeholder = "e.g., TaskNotes or Notes/Tasks";
 			});
 
 		// Setting for choosing the default file to archive tasks

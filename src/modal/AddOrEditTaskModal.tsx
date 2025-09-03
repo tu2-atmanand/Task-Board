@@ -44,6 +44,8 @@ const taskItemEmpty: taskItem = {
 		endCharIndex: 0,
 	},
 	status: taskStatuses.unchecked,
+	isTaskNote: false,
+	description: "",
 };
 
 export interface filterOptions {
