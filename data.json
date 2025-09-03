@@ -210,8 +210,10 @@
           ]
         },
         "tags": {
-          "polarity": 3,
-          "values": []
+          "polarity": 2,
+          "values": [
+            "#CS"
+          ]
         },
         "frontMatter": {
           "polarity": 3,
@@ -631,7 +633,24 @@
           "targetColumn": "6"
         }
       ],
-      "cardSectionsVisibility": "hideBoth"
+      "cardSectionsVisibility": "hideBoth",
+      "hiddenTaskProperties": [
+        "id",
+        "createdDate",
+        "startDate",
+        "scheduledDate",
+        "dueDate",
+        "completionDate",
+        "cancelledDate",
+        "on-completion",
+        "priority",
+        "recurring",
+        "time",
+        "dependencies",
+        "reminder",
+        "tags"
+      ],
+      "taskPropertyFormat": "1"
     }
   }
 }

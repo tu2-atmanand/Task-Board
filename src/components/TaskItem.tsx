@@ -3,7 +3,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { taskItem, taskStatuses } from '../interfaces/TaskItem';
-import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting } from 'src/utils/CheckBoxUtils';
+import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
 import { handleTaskNoteEdit, handleTaskNoteStatusChange, handleTaskNotePropertyUpdate } from 'src/utils/TaskNoteEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
@@ -11,14 +11,14 @@ import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } f
 import { Component } from 'obsidian';
 import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { cleanTaskTitle, getUniversalDateFromTask, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
+import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { parseUniversalDate } from 'src/utils/TaskItemUtils';
 import { priorityEmojis } from '../interfaces/TaskItem';
 import { t } from 'src/utils/lang/helper';
-import { bugReporter } from 'src/services/OpenModals';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
+import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegularExpr';
 
 export interface TaskProps {
 	key: number;
@@ -64,7 +64,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement && task.title !== "") {
-				let cleanedTitle = cleanTaskTitle(plugin, task);
+				let cleanedTitle = cleanTaskTitleLegacy(plugin, task);
 				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
 				if (searchQuery) {
 					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -89,12 +89,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
-		const allSubTasks = task.body.filter(line => /-\s\[.\s*\]/.test(line));
+		const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
 		// Render subtasks after componentRef is initialized
 		allSubTasks.forEach((subtaskText, index) => {
 			const uniqueKey = `${task.id}-${index}`;
 			const element = subtaskTextRefs.current[uniqueKey];
-			let strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+			const match = subtaskText.match(TaskRegularExpressions.taskRegex);
+			console.log("Subtask Match:", match);
+			let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
 
 			if (element && strippedSubtaskText !== "") {
 				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
@@ -118,7 +120,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
 			}
 		});
-	}, [task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))), task.filePath]);
+	}, [task.body, task.filePath]);
 
 	// Render the task description only when the description section is expanded
 	const descriptionRef = useRef<HTMLDivElement | null>(null);
@@ -127,7 +129,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
 		let descriptionContent = task.body
-			.filter((line) => !line.trim().startsWith("- [ ]") && !line.trim().startsWith("- [x]"))
+			.filter((line) => !isTaskLine(line.trim()))
 			.join("\n")
 			.trim();
 
@@ -291,6 +293,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	// Function to handle the checkbox toggle inside the task body
 	const handleSubtaskCheckboxChange = (subTaskLine: string, isCompleted: boolean) => {
+		console.log("handleSubtaskCheckboxChange : subTaskLine :", subTaskLine, " | isCompleted :", isCompleted);
 		const updatedBody = task.body.map((line, idx) => {
 			if (line === subTaskLine) {
 				// Toggle the checkbox status only for the specific line
@@ -298,7 +301,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				const symbol = extractCheckboxSymbol(line);
 				const nextSymbol = checkboxStateSwitcher(plugin, symbol);
 
-				return line.replace(`- [${symbol}]`, `- [${nextSymbol}]`);
+				return line.replace(`[${symbol}]`, `[${nextSymbol}]`);
 			}
 			return line;
 		});
@@ -414,10 +417,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const body = task.body ?? [];
 			if (body.length === 0) return null;
 
-			const allSubTasks = body.filter(line => /-\s\[.\s*\]/.test(line));
+			const allSubTasks = body.filter(line => TaskRegularExpressions.taskRegex.test(line));
+			// console.log("renderSubTasks : allSubTasks :", allSubTasks);
+			// if (allSubTasks.length === 0) return null;
 
 			const total = allSubTasks.length;
-			const completed = allSubTasks.filter(line => /-\s\[(x|X)\]\s+/i.test(line)).length;
+			const completed = allSubTasks.filter(line => isCompleted(line)).length;
 
 			const showSubTaskSummaryBar = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
 
@@ -452,13 +457,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<div className={showSubtasks ? 'taskItemBodySubtaskSection-show' : 'taskItemBodySubtaskSection-hide'}>
 						{allSubTasks.map((line, index) => {
 							// console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
-							const isCompleted = line.trim().startsWith('- [x]') || line.trim().startsWith('- [X]');
+							const isSubTaskCompleted = isCompleted(line);
 
 							// Calculate padding based on the number of tabs
 							const tabString = getObsidianIndentationSetting(plugin);
 							const tabMatch = line.match(new RegExp(`^(${tabString})+`));
+							const tabMatchInTitle = task.title.match(new RegExp(`^(${tabString})+`));
+							const titleTabs = tabMatchInTitle && tabMatchInTitle[0] ? tabMatchInTitle[0].length / tabString.length : 0;
 							const numTabs = tabMatch && tabMatch[0] ? tabMatch[0].length / tabString.length : 0;
-							const paddingLeft = numTabs > 1 ? `${(numTabs - 1) * 15}px` : '0px';
+							const paddingLeft = numTabs > 1 ? `${(numTabs - titleTabs - 1) * 15}px` : '0px';
 
 							// Create a unique key for this subtask based on task.id and index
 							const uniqueKey = `${task.id}-${index}`;
@@ -473,12 +480,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 									<input
 										type="checkbox"
 										className="taskItemBodySubtaskItemCheckbox"
-										checked={isCompleted}
-										onChange={() => handleSubtaskCheckboxChange(line, isCompleted)}
+										checked={isSubTaskCompleted}
+										onChange={() => handleSubtaskCheckboxChange(line, isSubTaskCompleted)}
 									/>
 									{/* Render each subtask separately */}
 									<div
-										className={isCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
+										className={isSubTaskCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
 										ref={(el) => { subtaskTextRefs.current[uniqueKey] = el; }}
 									/>
 								</div>
@@ -489,7 +496,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			);
 
 		} catch (error) {
-			bugReporter(plugin, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
+			// bugReporter(plugin, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
+			console.warn("TaskItem.tsx/renderSubTasks : Error while rendering sub-tasks", error);
 			return null;
 		}
 	};
@@ -498,7 +506,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
 		let descriptionContent = task.body
-			.filter((line) => !line.trim().startsWith("- [ ]") && !line.trim().startsWith("- [x]"))
+			.filter((line) => !isTaskLine(line))
 			.join("\n")
 			.trim();
 
@@ -592,7 +600,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				);
 			}
 		} catch (error) {
-			bugReporter(plugin, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
+			// bugReporter(plugin, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
+			console.warn("TaskItem.tsx/renderFooter : Error while rendering task footer", error);
 			return null;
 		}
 	};
@@ -642,7 +651,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						</div>
 					)}
 					{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
-						{task.body.at(0) !== "" && task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
+						{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
 							<div
 								className='taskItemMainBodyDescriptionSectionToggler'
 								onClick={toggleDescription}

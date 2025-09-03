@@ -89,7 +89,7 @@ const en: Lang = {
 	"tag-name": "Tag name",
 	"automation": "Automation",
 	"real-time-scanning": "Real-time scanning",
-	"real-time-scanning-info": "After you loose focus from the file you have edited, the task will be immediately refreshed on the task boad.\nIf you disable this feature, you will be required to manually run the refresh button on task board to get your latest changes.",
+	"real-time-scanning-info": "After you loose focus from the file you have edited, the task will be immediately refreshed on the task boad.\nIf you disable this feature, you will be required to manually click on the refresh button to get your latest changes.",
 	"auto-add-universal-date-to-tasks": "Auto add the selected universal date",
 	"auto-add-universal-date-to-tasks-info": "When enabled, when you will create a new task using the 'add new task' modal, then today's date will be added as the universal date you have selected.",
 	"auto-scan-the-vault-on-obsidian-startup": "Auto scan the vault on Obsidian startup",
@@ -247,6 +247,7 @@ const en: Lang = {
 	"show-subtasks-only": "Show subtasks only",
 	"show-both": "Show both",
 	"hide-both": "Hide both",
+	"update": "Update",
 	"archive-instead": "Archive instead",
 	"update-language-translations": "Update language translations",
 	"update-language-translations-info": "Click on the update button to download the latest language translations.",
@@ -258,6 +259,12 @@ const en: Lang = {
 	"scan-vault-from-the-vault-upgrade-message-1": "Task Board has been updated to version",
 	"scan-vault-from-the-vault-upgrade-message-2": "This new release has brought various new features, which requires you to re-scan the vault.",
 	"scan-vault-from-the-vault-upgrade-message-3": "Read the release notes for this new version here",
+	"import": "Import",
+	"export": "Export",
+	"import-export-configurations": "Import/Export configurations",
+	"import-export-configurations-info": "Use this feature to import or export your task board configurations. This is very useful for backing up your settings or transferring them to another device. Also in the case when you want to re-install the plugin.",
+	"hide-specific-properties-in-notes": "Hide specific properties in notes",
+	"hide-specific-properties-in-notes-description": "Select which task properties should be hidden in live-editor and in reading mode. These properties will be present in the notes, reveal them by hovering over the task or moving the cursor within the task line."
 };
 
 export default en;

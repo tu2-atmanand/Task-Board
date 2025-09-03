@@ -518,7 +518,7 @@ export const useTasksPluginToUpdateInFile = async (
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
-					`- [${oldTask.status}] ${oldTask.title}`,
+					oldTask.title,
 					oldTask.filePath
 				);
 
@@ -792,7 +792,11 @@ export const replaceOldTaskWithNewTask = async (
 
 		// Step 2: Check that the starting line is a task checkbox line
 		const startLineText = lines[startLine - 1];
-		if (!startLineText.match(/^- \[.{1}\]/)) {
+		if (
+			!startLineText
+				.trim()
+				.startsWith(oldTask.title.trim().substring(0, 5))
+		) {
 			// console.log(
 			// 	"\n\nOldTask location :",
 			// 	oldTask.taskLocation,
@@ -803,8 +807,12 @@ export const replaceOldTaskWithNewTask = async (
 			// );
 			bugReporter(
 				plugin,
-				`Task board couldnt able to find the task which you are trying to edit at the line : ${oldTask.taskLocation.startLine} . The task might have been edited in the absence of Task Board. Please scan the file again using the file menu option.`,
-				`\n\nOldTask location :${oldTask.taskLocation}\n\nLine in the file at the startLine: ${startLineText}`,
+				`Task board couldnt able to find the task which you are trying to edit at the line : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option.\n\nThis is a normal bug hence developer attention is not required. Just scan the file again. But if the issue persists, please report it.`,
+				`\n\nOldTask location :${JSON.stringify(
+					oldTask.taskLocation
+				)}\n\nAt present the line at line number ${
+					oldTask.taskLocation.startLine
+				} is: ${startLineText}`,
 				"TaskItemUtils.ts/replaceOldTaskWithNewTask"
 			);
 			return;

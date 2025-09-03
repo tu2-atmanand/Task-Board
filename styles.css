@@ -549,6 +549,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .subtask-toggle-icon {
 	display: inline-block;
 	transition: transform 0.3s ease;
+	cursor: pointer;
 }
 
 .subtask-toggle-icon.rotated {
@@ -671,7 +672,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .taskItemFileNameSection {
-	background-color: var(--color-base-35);
+	background-color: var(--background-modifier-box-shadow);
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -684,7 +685,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItemFileName {
 	font-weight: 500;
-	color: hsl(var(--interactive-accent-hsl))
+	font-size: 0.9rem;
+	opacity: 0.7;
+	color: var(--code-value);
 }
 
 .taskItemHeader {
@@ -1705,6 +1708,56 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .taskBoard-settings-tab-content {
 	margin-top: 1.2em;
 }
+
+/* Hidden Properties Settings */
+.taskboard-hidden-properties-setting .setting-item-description {
+	margin-bottom: 0.75em;
+}
+
+.taskboard-hidden-properties-container {
+	margin-left: 1em;
+	margin-block-end: 1em;
+	border-inline: 2px solid var(--color-accent-2);
+	padding-left: 1em;
+	background-color: var(--background-secondary);
+	border-radius: 5px;
+	padding: 0.75em;
+}
+
+.taskboard-compact-setting {
+	padding: 0.25em 0 !important;
+	border-bottom: none !important;
+}
+
+.taskboard-compact-setting .setting-item-name {
+	font-size: 0.9em;
+}
+
+.taskboard-compact-setting .setting-item-control {
+	min-width: auto;
+}
+
+/* Hidden Properties in Live Editor and Reading Mode */
+/* .taskboard-hidden-property {
+	display: none !important;
+	opacity: 0.3;
+	font-size: 0.8em;
+	color: var(--text-muted);
+	background-color: var(--background-modifier-hover);
+	padding: 1px 3px;
+	border-radius: 3px;
+	cursor: help;
+} */
+
+/* Show hidden properties on line hover for easier editing */
+li:hover .taskboard-hidden-property {
+	display: inline !important;
+}
+
+/* Alternative: show on focus for better accessibility */
+/* li:focus-within .taskboard-hidden-property {
+	display: inline !important;
+} */
 
 .taskBoard-tab-section-desc {
 	text-align: center;
@@ -4091,4 +4144,49 @@ svg.react-flow__connectionline {
 
 .react-flow__edge-text {
 	fill: var(--xy-edge-label-color, var(--xy-edge-label-color-default));
+}
+
+/* Task Board Editor Extensions Styles */
+
+/* Gutter marker styles */
+.task-board-task-gutter {
+	/* background: var(--background-secondary); */
+	/* border-right: 1px solid var(--background-modifier-border); */
+	width: 20px;
+}
+
+.task-board-task-gutter-marker {
+	opacity: 0.3;
+	transition: opacity 0.2s;
+	padding: 2px !important;
+	margin: 0 !important;
+	font-size: 12px !important;
+	line-height: 1 !important;
+	height: auto !important;
+	min-height: auto !important;
+	color: var(--text-accent) !important;
+}
+
+.task-board-task-gutter-marker:hover {
+	opacity: 1;
+	background-color: var(--background-modifier-hover) !important;
+}
+
+/* Task property hiding styles for Live Editor */
+.taskboard-hidden-property-editor {
+	opacity: 0 !important;
+	font-size: 0 !important;
+	display: none !important;
+}
+
+.taskboard-hidden-property-placeholder {
+	opacity: 0.3;
+	font-size: 0.8em;
+	font-style: italic;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.taskboard-hidden-property-placeholder:hover {
+	opacity: 0.6;
 }

@@ -1,6 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, TFile, moment as _moment, debounce } from "obsidian";
+import { App, Notice, TFile, moment as _moment, debounce } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -30,7 +30,8 @@ import {
 	UniversalDateOptions,
 	scanFilters,
 } from "src/interfaces/GlobalSettings";
-import { TaskRegularExpressions } from "./TaskRegularExpressions";
+import { TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
 
 export default class ScanningVault {
 	app: App;
@@ -246,7 +247,8 @@ export default class ScanningVault {
 					this.TaskDetected = true;
 					const taskStatus = extractCheckboxSymbol(line);
 					const isTaskCompleted = isCompleted(line);
-					const title = extractTitle(line);
+					// const title = extractTitle(line);
+					const title = line; // we will be storing the taskLine as it is inside the title property
 					const time = extractTime(line);
 					const createdDate = extractCreatedDate(line);
 					let startDate = extractStartDate(line);
@@ -361,6 +363,7 @@ export default class ScanningVault {
 					} else {
 						this.tasksCache.Pending[fileNameWithPath].push(task);
 					}
+					lineIndex = lineIndex + bodyLines.length; // Move the lineIndex forward by the number of body lines
 				} else {
 					// console.log("The tasks is not allowed...");
 				}
@@ -376,7 +379,7 @@ export default class ScanningVault {
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
-	async refreshTasksFromFiles(files: (TFile | null)[]) {
+	async refreshTasksFromFiles(files: (TFile | null)[], showNotice: boolean) {
 		if (!files || files.length === 0) {
 			return;
 		}
@@ -393,9 +396,11 @@ export default class ScanningVault {
 				)
 			) {
 				// TODO : Try testing if removing the await from the below line will going to speed up the process.
-				await this.extractTasksFromFile(file, scanFilters).then(
-					() => {}
-				);
+				await this.extractTasksFromFile(file, scanFilters).then(() => {
+					if (showNotice) {
+						new Notice("Tasks refreshed successfully.");
+					}
+				});
 
 				// const fileNameWithPath = file.path;
 				// const fileContent = await this.app.vault.cachedRead(file);
@@ -499,7 +504,14 @@ export default class ScanningVault {
 				// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
 				// };
 			} else {
-				// console.warn("File is not valid...");
+				if (showNotice) {
+					new Notice(
+						`The file "${
+							files[0] ? files[0].path : "Unknown"
+						}" does not satisfy the filters for scanning applied in setting. Hence it will not be scanned for tasks.`,
+						5000
+					);
+				}
 			}
 		}
 	}
@@ -507,7 +519,6 @@ export default class ScanningVault {
 	// Debounced saveTasksToJsonCache function
 	private saveTasksToJsonCacheDebounced = debounce(async () => {
 		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
-		console.warn("Tasks cache saved to disk");
 
 		// Refresh the board only if any task has be extracted from the updated file.
 		if (
@@ -540,7 +551,7 @@ export function buildTaskFromRawContent(
 ): Partial<taskItem> {
 	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
-	const title = extractTitle(lines[0]);
+	const title = lines[0]; // extractTitle(lines[0]);
 	const time = extractTime(lines[0]);
 	const createdDate = extractCreatedDate(lines[0]);
 	const startDate = extractStartDate(lines[0]);
@@ -605,15 +616,50 @@ export function extractBody(
 ): string[] {
 	const bodyLines = [];
 	let bodyStartIndex = startLineIndex;
+	const prevLine = lines[bodyStartIndex - 1];
 	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
 		const line = lines[bodyStartIndex];
+		// Using regex for faster matching/removal of leading '>' or '> '
+		const sanitizedLine = line.replace(/^>\s?/, "");
 
-		if (line.trim() === "") {
+		if (sanitizedLine.trim() === "") {
 			break;
 		}
 
+		let n = 0;
+		if (prevLine.startsWith(indentationString)) {
+			console.log("Previous line has indentation\nLine:", prevLine);
+			let tempLine = prevLine;
+			while (tempLine.startsWith(indentationString)) {
+				n++;
+				tempLine = tempLine.slice(indentationString.length);
+			}
+			const requiredIndent = indentationString.repeat(n + 1);
+			if (!sanitizedLine.startsWith(requiredIndent)) {
+				return [];
+			}
+		}
+
+		console.log(
+			"Line:",
+			line,
+			"\nSanitized line:",
+			sanitizedLine,
+			"\nIndentation String:'",
+			indentationString,
+			"'",
+			"\nLenth of indentationString:",
+			indentationString.length,
+			"\nsanitizedLine starts with indentationString:",
+			sanitizedLine.startsWith(indentationString),
+			"\nSanitized line starts with tab:",
+			sanitizedLine.startsWith("\t")
+		);
 		// If the line has one level of indentation, consider it part of the body
-		if (line.startsWith(indentationString) || line.startsWith("\t")) {
+		if (
+			sanitizedLine.startsWith(indentationString) ||
+			sanitizedLine.startsWith("\t")
+		) {
 			bodyLines.push(line);
 		} else {
 			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
@@ -621,6 +667,7 @@ export function extractBody(
 			break;
 		}
 	}
+	console.log("Extracted body lines:", bodyLines);
 	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
 }
 
@@ -664,7 +711,8 @@ export function extractCreatedDate(text: string): string {
 
 	if (!match) {
 		match = text.match(
-			/\[created::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.createdDateRegex
 		);
 	}
 
@@ -683,7 +731,7 @@ export function extractStartDate(text: string): string {
 
 	if (!match) {
 		match = text.match(
-			/\[start::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.startDateRegex
 		);
 	}
 
@@ -702,7 +750,8 @@ export function extractScheduledDate(text: string): string {
 
 	if (!match) {
 		match = text.match(
-			/\[scheduled::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.scheduledDateRegex
 		);
 	}
 
@@ -720,7 +769,9 @@ export function extractDueDate(text: string): string {
 	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
 
 	if (!match) {
-		match = text.match(/\[due::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex
+		);
 	}
 
 	if (!match) {
@@ -732,7 +783,9 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
-	let match = text.match(/\[priority::\s*(\d{1,2})\]/);
+	let match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex
+	);
 	if (match) {
 		return parseInt(match[1]);
 	}
@@ -795,6 +848,7 @@ export function extractReminder(
 		return match[1].replace(` `, "T").trim();
 	}
 
+	// This will be enabled, after Tasks plugin will support the reminder property.
 	// match = text.match(/🔔\s*(.*?)(?=\s|$)/);
 	// if (match) {
 	// 	return match[0].replace("🔔", "").trim();
@@ -829,7 +883,9 @@ export function extractCompletionDate(text: string): string {
 
 	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
-		match = text.match(/\[completion::\s*(.*?)\]/);
+		match = text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex
+		);
 		if (match) {
 			return match
 				? match[0].replace("[completion::", "").replace("]", "").trim()
@@ -855,7 +911,8 @@ export function extractCancelledDate(text: string): string {
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {
 		match = text.match(
-			/\[cancelled::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.cancelledDateRegex
 		);
 	}
 
