@@ -25,8 +25,6 @@ export interface taskItem {
 	reminder?: string; // A date-time value.
 	completion?: string;
 	cancelledDate?: string;
-	isTaskNote?: boolean; // Flag to identify if this is a task note
-	description?: string; // Description for task notes from frontmatter
 }
 
 export interface noteItem {
@@ -68,6 +66,18 @@ export const priorityEmojis: { [key: number]: string } = {
 	3: "🔼",
 	4: "🔽",
 	5: "⏬",
+};
+
+// Helper function to get priority emoji
+export const getPriorityEmoji = (priority: number): string => {
+	const priorityEmojis: { [key: number]: string } = {
+		1: "🔺", // Highest
+		2: "⏫", // High
+		3: "🔼", // Medium
+		4: "🔽", // Low
+		5: "⏬", // Lowest
+	};
+	return priorityEmojis[priority] || "";
 };
 
 // Priority Options
