@@ -1087,7 +1087,6 @@ tags: [taskNote]${title ? `\ntitle: "${title}"` : ''}${description ? `\ndescript
 
 // Class component extending Modal for Obsidian
 export class AddOrEditTaskModal extends Modal {
-	app: App;
 	plugin: TaskBoard;
 	task: taskItem = taskItemEmpty;
 	filePath: string;
@@ -1104,9 +1103,8 @@ export class AddOrEditTaskModal extends Modal {
 	private resolvePromise: (input: string) => void = (input: string) => { };
 	private rejectPromise: (reason?: unknown) => void = (reason?: unknown) => { };
 
-	constructor(app: App, plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string) => void, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
-		super(app);
-		this.app = app;
+	constructor(plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, noteContent?: string) => void, isTaskNote: boolean, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
+		super(plugin.app);
 		this.plugin = plugin;
 		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;

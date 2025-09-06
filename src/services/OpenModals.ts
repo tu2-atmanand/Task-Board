@@ -39,7 +39,6 @@ export const openAddNewTaskInCurrentFileModal = (
 	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
 	const AddTaskModal = new AddOrEditTaskModal(
-		app,
 		plugin,
 		(newTask, quickAddPluginChoice) => {
 			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
@@ -82,7 +81,6 @@ export const openAddNewTaskModal = (
 	const activeTFile = activeFile ? activeFile : preDefinedNoteFile;
 	const communityPlugins = new CommunityPlugins(plugin);
 	const AddTaskModal = new AddOrEditTaskModal(
-		app,
 		plugin,
 		async (newTask, quickAddPluginChoice) => {
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {

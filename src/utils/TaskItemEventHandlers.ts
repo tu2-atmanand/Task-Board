@@ -183,7 +183,6 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 		EditButtonMode.PopUp
 	) {
 		const editTaskModal = new AddOrEditTaskModal(
-			plugin.app,
 			plugin,
 			(updatedTask, quickAddPluginChoice) => {
 				updatedTask.filePath = task.filePath;
