@@ -5,7 +5,13 @@ import { TFile } from "obsidian";
 import TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 
-export const readDataOfVaultFiles = async (
+/**
+ * Read data from a file in the vault
+ * @param plugin - TaskBoard plugin instance
+ * @param filePath - Path of the file to read from
+ * @returns Promise<string> - Raw content of the file
+ */
+export const readDataOfVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string
 ): Promise<string> => {
@@ -21,7 +27,7 @@ export const readDataOfVaultFiles = async (
 				plugin,
 				"File not found in vault.",
 				`File not found at path: ${filePath}`,
-				"MarkdownFileOperations.ts/readDataOfVaultFiles"
+				"MarkdownFileOperations.ts/readDataOfVaultFile"
 			);
 			throw `File not found at path: ${filePath}`;
 		}
@@ -30,13 +36,20 @@ export const readDataOfVaultFiles = async (
 			plugin,
 			"Error reading data from vault files.",
 			String(error),
-			"MarkdownFileOperations.ts/readDataOfVaultFiles"
+			"MarkdownFileOperations.ts/readDataOfVaultFile"
 		);
 		throw error;
 	}
 };
 
-export const writeDataToVaultFiles = async (
+/**
+ * Write data to a file in the vault
+ * @param plugin - TaskBoard plugin instance
+ * @param filePath - Path of the file to write to
+ * @param newContent - New content to write to the file
+ * @returns Promise<void>
+ */
+export const writeDataToVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string,
 	newContent: string
@@ -56,13 +69,13 @@ export const writeDataToVaultFiles = async (
 			plugin,
 			"Error writing to file in vault.",
 			String(error),
-			"MarkdownFileOperations.ts/writeDataToVaultFiles"
+			"MarkdownFileOperations.ts/writeDataToVaultFile"
 		);
 		// throw error;
 	}
 };
 
-// export const writeDataToVaultFiles = async (
+// export const writeDataToVaultFile = async (
 // 	plugin: TaskBoard,
 // 	filePath: string,
 // 	newContent: string
