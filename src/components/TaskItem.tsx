@@ -5,7 +5,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { taskItem, taskStatuses } from '../interfaces/TaskItem';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
-import { handleTaskNoteEdit, handleTaskNoteStatusChange, handleTaskNotePropertyUpdate } from 'src/utils/TaskNoteEventHandlers';
+import { handleTaskNoteEdit, handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
@@ -19,6 +19,7 @@ import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegularExpr';
+import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
 
 export interface TaskProps {
 	key: number;
@@ -95,7 +96,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const uniqueKey = `${task.id}-${index}`;
 			const element = subtaskTextRefs.current[uniqueKey];
 			const match = subtaskText.match(TaskRegularExpressions.taskRegex);
-			console.log("Subtask Match:", match);
 			let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
 
 			if (element && strippedSubtaskText !== "") {
@@ -276,10 +276,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		setIsChecked(true); // Trigger animation
 		setTimeout(() => {
 			// Route to appropriate handler based on task type
-			if (task.isTaskNote) {
-				// For task notes, toggle between " " and "x"
-				const newStatus = task.status === " " ? "x" : " ";
-				handleTaskNoteStatusChange(plugin, task, newStatus);
+			if (isTaskNotePresentInTags(task.tags)) {
+				handleTaskNoteStatusChange(plugin, task);
 			} else {
 				handleCheckboxChange(plugin, task);
 			}
@@ -308,8 +306,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
-		// onSubTasksChange(updatedTask); // Notify parent of the change
-		handleSubTasksChange(plugin, task, updatedTask)
+
+		if (!isTaskNotePresentInTags(task.tags)) {
+			// onSubTasksChange(updatedTask); // Notify parent of the change
+			handleSubTasksChange(plugin, task, updatedTask);
+		} else {
+			// If it's a task note, open the note for editing
+			handleTaskNoteBodyChange(plugin, task, updatedTask);
+		}
 	};
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
@@ -322,8 +326,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const onEditButtonClicked = (event: React.MouseEvent) => {
 		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
 			// Route to appropriate handler based on task type
-			if (task.isTaskNote) {
-				handleTaskNoteEdit(plugin, plugin.app, task);
+			if (isTaskNotePresentInTags(task.tags)) {
+				handleTaskNoteEdit(plugin, task);
 			} else {
 				handleEditTask(plugin, task);
 			}
@@ -634,12 +638,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						/>
 						<div className="taskItemBodyContent">
 							<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
-							{/* Task Note Description */}
-							{task.isTaskNote && task.description && (
-								<div className="taskItemTaskNoteDescription">
-									{task.description}
-								</div>
-							)}
 							<div className="taskItemBody">
 								{memoizedRenderSubTasks}
 							</div>
