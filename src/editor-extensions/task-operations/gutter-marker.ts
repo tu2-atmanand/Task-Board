@@ -78,9 +78,9 @@ class TaskGutterMarker extends GutterMarker {
 
 				// Open the AddOrEditTaskModal
 				const modal = new AddOrEditTaskModal(
-					this.plugin.app,
 					this.plugin,
 					saveTask,
+					false,
 					true, // activeNote
 					true, // taskExists (we're editing an existing task)
 					undefined, // task - let the modal parse it from the line

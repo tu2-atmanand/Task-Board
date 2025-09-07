@@ -49,6 +49,41 @@ export const getFormattedTaskContent = async (
 		bodyLines.trim() ? `\n${bodyLines}` : ""
 	}`;
 
+	console.log("getFormattedTaskContent : completeTask :", completeTask);
+
+	return completeTask;
+};
+
+export const getFormattedTaskContentSync = (task: taskItem): string => {
+	console.log("getFormattedTaskContent : task :", task);
+	if (!task || !task.title) {
+		return "";
+	}
+
+	// const checkBoxStat = `- [${task.status}]`;
+	// let taskLine = `${checkBoxStat} ${task.title}`;
+
+	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
+	let taskLine = task.title.replace(/\[(.)\]/, `[${task.status}]`);
+
+	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+	const bodyLines = task.body
+		.map((line: string) => {
+			// if (line.startsWith("\t")) {
+			// 	return line;
+			// } else {
+			// 	return `\t${line}`;
+			// }
+			return line;
+		})
+		.join("\n");
+
+	const completeTask = `${taskLine}${
+		bodyLines.trim() ? `\n${bodyLines}` : ""
+	}`;
+
+	console.log("getFormattedTaskContent : completeTask :", completeTask);
+
 	return completeTask;
 };
 

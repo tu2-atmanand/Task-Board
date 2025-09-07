@@ -7,10 +7,9 @@ import {
 } from "./JsonFileOperations";
 import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
-	readDataOfVaultFiles,
-	writeDataToVaultFiles,
+	readDataOfVaultFile,
+	writeDataToVaultFile,
 } from "./MarkdownFileOperations";
-import { extractFrontmatter, extractFrontmatterTags } from "./ScanningVault";
 
 import { Notice } from "obsidian";
 import TaskBoard from "main";
@@ -21,6 +20,10 @@ import {
 	openDiffContentCompareModal,
 } from "src/services/OpenModals";
 import { isTheContentDiffAreOnlySpaces } from "src/modal/DiffContentCompareModal";
+import {
+	extractFrontmatter,
+	extractFrontmatterTags,
+} from "./FrontmatterOperations";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -109,7 +112,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 		);
 
 		// // Step 1: Read the file content
-		// const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		// const fileContent = await readDataOfVaultFile(plugin, filePath);
 
 		// // Step 3: Split the file content into lines
 		// const lines = fileContent.split("\n");
@@ -148,7 +151,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 		// 	const newContent = fileContent.replace(taskBlock, "");
 
 		// 	// Step 6: Write the updated content back to the file
-		// 	await writeDataToVaultFiles(plugin, filePath, newContent);
+		// 	await writeDataToVaultFile(plugin, filePath, newContent);
 		// } else {
 		// 	bugReporter(
 		// 		plugin,
@@ -224,7 +227,7 @@ export const archiveTask = async (
 	if (archivedFilePath) {
 		try {
 			// Read the content of the file where archived tasks will be stored
-			const archivedFileContent = await readDataOfVaultFiles(
+			const archivedFileContent = await readDataOfVaultFile(
 				plugin,
 				archivedFilePath
 			);
@@ -233,7 +236,7 @@ export const archiveTask = async (
 			const newArchivedContent = `> Archived at ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
 
 			// Write the updated content back to the archived file
-			await writeDataToVaultFiles(
+			await writeDataToVaultFile(
 				plugin,
 				archivedFilePath,
 				newArchivedContent
@@ -273,7 +276,7 @@ export const archiveTask = async (
 			// );
 
 			// // Write the updated content back to the file
-			// await writeDataToVaultFiles(plugin, filePath, newContet).then(
+			// await writeDataToVaultFile(plugin, filePath, newContet).then(
 			// 	() => {
 			// 		const currentFile = plugin.app.vault.getFileByPath(
 			// 			task.filePath
@@ -337,7 +340,7 @@ export const updateTaskInFile = async (
 		);
 
 		// // Step 1: Read the file content
-		// const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		// const fileContent = await readDataOfVaultFile(plugin, filePath);
 		// // Step 3: Split the file content into lines
 		// const lines = fileContent.split("\n");
 		// const taskLines: string[] = [];
@@ -378,7 +381,7 @@ export const updateTaskInFile = async (
 		// 	const newContent = fileContent.replace(taskBlock, completeTask);
 
 		// 	// Step 6: Write the updated content back to the file
-		// 	await writeDataToVaultFiles(plugin, filePath, newContent);
+		// 	await writeDataToVaultFile(plugin, filePath, newContent);
 		// } else {
 		// 	bugReporter(
 		// 		plugin,
@@ -407,7 +410,7 @@ export const updateTaskInFile = async (
 
 // 	try {
 // 		// Read the file content using Obsidian's API
-// 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+// 		const fileContent = await readDataOfVaultFile(plugin, filePath);
 // 		console.log("updateTaskInFile : Old file content :\n", fileContent);
 
 // 		console.log("updateTaskInFile : updatedTask :\n", updatedTask);
@@ -446,7 +449,7 @@ export const updateTaskInFile = async (
 // 			const newContent = fileContent.replace(taskRegex, completeTask);
 
 // 			// Write the updated content back to the file using Obsidian's API
-// 			await writeDataToVaultFiles(plugin, filePath, newContent);
+// 			await writeDataToVaultFile(plugin, filePath, newContent);
 // 		}
 // 	} catch (error) {
 // 		console.error("Error updating task in file:", error);
@@ -613,7 +616,7 @@ export const useTasksPluginToUpdateInFile = async (
 			// 	newContent
 			// );
 
-			// await writeDataToVaultFiles(plugin, filePath, newFileContent);
+			// await writeDataToVaultFile(plugin, filePath, newFileContent);
 
 			// Just to scan the file after updating.
 			// plugin.fileUpdatedUsingModal = "";
@@ -706,7 +709,7 @@ export const addTaskInNote = async (
 			throw "getSanitizedTaskContent returned empty string";
 
 		// Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath);
 		let newContent = fileContent;
 
 		if (editorActive) {
@@ -722,11 +725,11 @@ export const addTaskInNote = async (
 			}
 
 			// Write the updated content back to the file
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else {
 			// Join the lines back into a single string
 			newContent = fileContent.concat("\n\n", completeTask);
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		}
 		cursorPosition = undefined;
 		return true;
@@ -784,7 +787,7 @@ export const replaceOldTaskWithNewTask = async (
 
 	try {
 		// Step 1: Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath);
 		const lines = fileContent.split("\n");
 
 		const { startLine, startCharIndex, endLine, endCharIndex } =
@@ -846,7 +849,7 @@ export const replaceOldTaskWithNewTask = async (
 						: `\n${after}`
 					: ""
 			}`;
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else if (
 			isTheContentDiffAreOnlySpaces(
 				oldTaskContent,
@@ -866,7 +869,7 @@ export const replaceOldTaskWithNewTask = async (
 						: `\n${after}`
 					: ""
 			}`;
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else {
 			// Ask user to choose between old and new content
 			openDiffContentCompareModal(
@@ -888,7 +891,7 @@ export const replaceOldTaskWithNewTask = async (
 									: `\n${after}`
 								: ""
 						}`;
-						await writeDataToVaultFiles(
+						await writeDataToVaultFile(
 							plugin,
 							filePath,
 							newContent

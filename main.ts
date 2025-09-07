@@ -18,6 +18,7 @@ import {
 import {
 	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
+	openAddNewTaskNoteModal,
 	openScanVaultModal,
 } from "src/services/OpenModals";
 
@@ -534,6 +535,13 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
+			id: "add-new-task-note",
+			name: t("add-new-task-note"),
+			callback: () => {
+				openAddNewTaskNoteModal(this.app, this.plugin);
+			},
+		});
+		this.addCommand({
 			id: "add-new-task-current-file",
 			name: t("add-new-task-in-current-file"),
 			callback: () => {
@@ -604,6 +612,7 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
+				console.log("File modified event :", file);
 				if (
 					file.path ===
 						this.settings.data.globalSettings

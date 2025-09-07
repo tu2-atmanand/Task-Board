@@ -29,3 +29,6 @@ main.css
 
 # Test files
 test-example.md
+TASK_NOTES_IMPLEMENTATION.md
+example-task-note.md
+validate-task-notes.js

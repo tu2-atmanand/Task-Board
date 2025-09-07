@@ -12,8 +12,8 @@
             "colType": "pathFiltered",
             "active": true,
             "collapsed": false,
-            "name": "Daily Notes",
-            "filePaths": "Daily_Notes/"
+            "name": "TaskNotes",
+            "filePaths": "TaskNotes/"
           },
           {
             "id": 1312742179,
@@ -634,23 +634,9 @@
         }
       ],
       "cardSectionsVisibility": "hideBoth",
-      "hiddenTaskProperties": [
-        "id",
-        "createdDate",
-        "startDate",
-        "scheduledDate",
-        "dueDate",
-        "completionDate",
-        "cancelledDate",
-        "on-completion",
-        "priority",
-        "recurring",
-        "time",
-        "dependencies",
-        "reminder",
-        "tags"
-      ],
-      "taskPropertyFormat": "1"
+      "hiddenTaskProperties": [],
+      "taskPropertyFormat": "1",
+      "taskNoteDefaultLocation": "TaskNotes"
     }
   }
 }

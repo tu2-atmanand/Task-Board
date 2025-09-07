@@ -1,7 +1,7 @@
 import { TFile } from "obsidian";
 import { scanFilters } from "src/interfaces/GlobalSettings";
-import { extractFrontmatter } from "./ScanningVault";
 import TaskBoard from "main";
+import { extractFrontmatter } from "./FrontmatterOperations";
 
 export function scanFilterForFilesNFoldersNFrontmatter(
 	plugin: TaskBoard,
