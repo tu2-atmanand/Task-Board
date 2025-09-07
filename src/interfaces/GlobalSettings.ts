@@ -150,6 +150,7 @@ export interface globalSettingsData {
 	searchQuery?: string;
 	cardSectionsVisibility: string;
 	hiddenTaskProperties: HideableTaskProperty[];
+	autoAddUniqueID: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -433,6 +434,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			cardSectionsVisibility:
 				cardSectionsVisibilityOptions.showSubTasksOnly,
 			hiddenTaskProperties: [],
+			autoAddUniqueID: false,
 		},
 	},
 };

@@ -264,7 +264,13 @@ const en: Lang = {
 	"import-export-configurations": "Import/Export configurations",
 	"import-export-configurations-info": "Use this feature to import or export your task board configurations. This is very useful for backing up your settings or transferring them to another device. Also in the case when you want to re-install the plugin.",
 	"hide-specific-properties-in-notes": "Hide specific properties in notes",
-	"hide-specific-properties-in-notes-description": "Select which task properties should be hidden in live-editor and in reading mode. These properties will be present in the notes, reveal them by hovering over the task or moving the cursor within the task line."
+	"hide-specific-properties-in-notes-description": "Select which task properties should be hidden in live-editor and in reading mode. These properties will be present in the notes, reveal them by hovering over the task or moving the cursor within the task line.",
+	"auto-add-unique-id": "Auto add unique id",
+	"auto-add-unique-id-description": "When enabled, a unique id will be automatically whenever you will add a new task or interact with an existing task. This setting is compulsory to enable, if you want to use the below features :",
+	"link-parent-child-tasks": "Link parent-child tasks",
+	"pin-tasks-on-top-in-each-column-upcoming": "Pin tasks on top in each column (upcoming)",
+	"manual-sorting-inside-each-column-upcoming": "Manual sorting inside each column (upcoming)",
+	"canvas-view-upcoming": "Canvas view (upcoming)",
 };
 
 export default en;

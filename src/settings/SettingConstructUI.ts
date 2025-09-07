@@ -229,6 +229,7 @@ export class SettingsManager {
 			scanVaultAtStartup,
 			preDefinedNote,
 			taskNoteDefaultLocation,
+			autoAddUniqueID,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -346,6 +347,36 @@ export class SettingsManager {
 				})
 			);
 
+		// Setting to scan the modified file in realtime
+		new Setting(contentEl)
+			.setName(t("auto-add-unique-id"))
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					t("auto-add-unique-id-description") +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						t("link-parent-child-tasks") +
+						"</li>" +
+						"<li>" +
+						t("pin-tasks-on-top-in-each-column-upcoming") +
+						"</li>" +
+						"<li>" +
+						t("manual-sorting-inside-each-column-upcoming") +
+						"</li>" +
+						"<li>" +
+						t("canvas-view-upcoming") +
+						"</li>" +
+						"</ul>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(autoAddUniqueID).onChange(async (value) => {
+					this.globalSettings!.autoAddUniqueID = value;
+					await this.saveSettings();
+				})
+			);
+
 		new Setting(contentEl)
 			.setName(t("default-note-for-adding-new-tasks"))
 			.setDesc(t("default-note-for-new-tasks-description"))
@@ -376,7 +407,9 @@ export class SettingsManager {
 		// Setting for choosing the default location for task notes
 		new Setting(contentEl)
 			.setName("Default location for Task Notes")
-			.setDesc("Default folder where new task notes will be saved when using 'Save as note' button")
+			.setDesc(
+				"Default folder where new task notes will be saved when using 'Save as note' button"
+			)
 			.addText((text) => {
 				text.setValue(taskNoteDefaultLocation).onChange((value) => {
 					if (this.globalSettings)
