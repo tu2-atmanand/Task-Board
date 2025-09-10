@@ -11,7 +11,10 @@ import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
-import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
+import {
+	addIdIfDoesntExist,
+	getFormattedTaskContent,
+} from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
 import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
 import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
@@ -87,7 +90,9 @@ export const openAddNewTaskModal = (
 		async (newTask: taskItem, quickAddPluginChoice: string) => {
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
-				const completeTask = await getFormattedTaskContent(newTask);
+				let completeTask = await getFormattedTaskContent(newTask);
+				completeTask = addIdIfDoesntExist(plugin, completeTask);
+
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
 					quickAddPluginChoice,
 					{

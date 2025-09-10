@@ -1,6 +1,9 @@
 // /src/utils/TaskItemUtils.ts
 
-import { getFormattedTaskContent } from "./TaskContentFormatter";
+import {
+	addIdIfDoesntExist,
+	getFormattedTaskContent,
+} from "./TaskContentFormatter";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataFromDisk,
@@ -24,6 +27,7 @@ import {
 	extractFrontmatter,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
+import { generateTaskId } from "./ScanningVault";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -314,6 +318,7 @@ export const updateTaskInFile = async (
 	oldTask: taskItem
 ): Promise<void> => {
 	try {
+		console.log("updateTaskInFile : updatedTask :\n", updatedTask, oldTask);
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
 		if (oldTaskContent === "")
 			bugReporter(
@@ -323,7 +328,8 @@ export const updateTaskInFile = async (
 				"TaskItemUtils.ts/updateTaskInFile"
 			);
 
-		const updatedTaskContent = await getFormattedTaskContent(updatedTask);
+		let updatedTaskContent = await getFormattedTaskContent(updatedTask);
+		updatedTaskContent = addIdIfDoesntExist(plugin, updatedTaskContent);
 		if (updatedTaskContent === "")
 			bugReporter(
 				plugin,
@@ -519,9 +525,13 @@ export const useTasksPluginToUpdateInFile = async (
 			throw "getSanitizedTaskContent returned empty string";
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
+			const oldTaskTitleWithId = addIdIfDoesntExist(
+				plugin,
+				oldTask.title
+			);
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
-					oldTask.title,
+					oldTaskTitleWithId,
 					oldTask.filePath
 				);
 
@@ -555,7 +565,11 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 1)) {
-				newContent = `${tasksPluginApiOutput}${
+				const tasksPluginApiOutputWithId = addIdIfDoesntExist(
+					plugin,
+					tasksPluginApiOutput
+				);
+				newContent = `${tasksPluginApiOutputWithId}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`
 						: ""
@@ -567,41 +581,41 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 2)) {
-				if (twoTaskTitles[1].trim().startsWith("- [x]")) {
-					newContent = `${twoTaskTitles[0]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}\n${twoTaskTitles[1]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}`;
+				// if (twoTaskTitles[1].trim().startsWith("- [x]")) {
+				newContent = `${twoTaskTitles[0]}${
+					oldTask.body.length > 0
+						? `\n${oldTask.body.join("\n")}`
+						: ""
+				}\n${twoTaskTitles[1]}${
+					oldTask.body.length > 0
+						? `\n${oldTask.body.join("\n")}`
+						: ""
+				}`;
 
-					await replaceOldTaskWithNewTask(
-						plugin,
-						oldTask,
-						completeOldTaskContent,
-						newContent
-					);
-				} else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
-					newContent = `${twoTaskTitles[0]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}\n${twoTaskTitles[1]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}`;
+				await replaceOldTaskWithNewTask(
+					plugin,
+					oldTask,
+					completeOldTaskContent,
+					newContent
+				);
+				// } else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
+				// 	newContent = `${twoTaskTitles[0]}${
+				// 		oldTask.body.length > 0
+				// 			? `\n${oldTask.body.join("\n")}`
+				// 			: ""
+				// 	}\n${twoTaskTitles[1]}${
+				// 		oldTask.body.length > 0
+				// 			? `\n${oldTask.body.join("\n")}`
+				// 			: ""
+				// 	}`;
 
-					await replaceOldTaskWithNewTask(
-						plugin,
-						oldTask,
-						completeOldTaskContent,
-						newContent
-					);
-				}
+				// 	await replaceOldTaskWithNewTask(
+				// 		plugin,
+				// 		oldTask,
+				// 		completeOldTaskContent,
+				// 		newContent
+				// 	);
+				// }
 			} else {
 				bugReporter(
 					plugin,
@@ -671,12 +685,12 @@ export const applyIdToTaskInNote = async (
 
 // For Adding New Task from Modal
 
-// Generate a unique ID for each task
-export const generateTaskId = (): number => {
-	const array = new Uint32Array(1);
-	crypto.getRandomValues(array);
-	return array[0];
-};
+// // Generate a unique ID for each task
+// export const generateTaskId = (): number => {
+// 	const array = new Uint32Array(1);
+// 	crypto.getRandomValues(array);
+// 	return array[0];
+// };
 
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -687,7 +701,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	const newTaskWithId = {
 		...newTask,
-		id: generateTaskId(),
+		id: generateTaskId(plugin),
 		filePath: newTask.filePath,
 		completed: "",
 		frontmatterTags: frontmatterTags,
@@ -726,7 +740,8 @@ export const addTaskInNote = async (
 	}
 
 	try {
-		const completeTask = await getFormattedTaskContent(newTask);
+		let completeTask = await getFormattedTaskContent(newTask);
+		completeTask = addIdIfDoesntExist(plugin, completeTask);
 		if (completeTask === "")
 			throw "getSanitizedTaskContent returned empty string";
 
