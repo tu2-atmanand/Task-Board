@@ -12,8 +12,8 @@
             "colType": "pathFiltered",
             "active": true,
             "collapsed": false,
-            "name": "Daily Notes",
-            "filePaths": "Daily_Notes/"
+            "name": "TaskNotes",
+            "filePaths": "TaskNotes/"
           },
           {
             "id": 1312742179,
@@ -633,7 +633,10 @@
           "targetColumn": "6"
         }
       ],
-      "cardSectionsVisibility": "hideBoth"
+      "cardSectionsVisibility": "hideBoth",
+      "hiddenTaskProperties": [],
+      "taskPropertyFormat": "1",
+      "taskNoteDefaultLocation": "TaskNotes"
     }
   }
 }

@@ -16,10 +16,11 @@ import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
 import { bugReporter } from "src/services/OpenModals";
 import { TasksApi } from "src/services/tasks-plugin/api";
+import { isTaskNotePresentInTags } from "./TaskNoteUtils";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
-	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
+	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
 	const tasksPlugin = new TasksApi(plugin);
 
 	if (!tasksPlugin.isTasksPluginEnabled()) {
@@ -165,7 +166,7 @@ export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
 
 			// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
 			// Remove the task from state after deletion
-			// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFiles` is running and sending and refresh emit signal.
+			// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
 		},
 		onCancel: () => {
 			// console.log('Task deletion canceled');
@@ -182,8 +183,8 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 		plugin.settings.data.globalSettings.editButtonAction ===
 		EditButtonMode.PopUp
 	) {
+		const isTaskNote = isTaskNotePresentInTags(task.tags);
 		const editTaskModal = new AddOrEditTaskModal(
-			plugin.app,
 			plugin,
 			(updatedTask, quickAddPluginChoice) => {
 				updatedTask.filePath = task.filePath;
@@ -219,6 +220,7 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 				// );
 				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 			},
+			isTaskNote,
 			false,
 			true,
 			task,

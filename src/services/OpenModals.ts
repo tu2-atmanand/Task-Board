@@ -16,6 +16,7 @@ import { t } from "src/utils/lang/helper";
 import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
 import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
 import { ScanFilterModal } from "src/modal/ScanFilterModal";
+import { taskItem } from "src/interfaces/TaskItem";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -39,9 +40,8 @@ export const openAddNewTaskInCurrentFileModal = (
 	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
 	const AddTaskModal = new AddOrEditTaskModal(
-		app,
 		plugin,
-		(newTask, quickAddPluginChoice) => {
+		(newTask: taskItem, quickAddPluginChoice: string) => {
 			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
 				const currentFile = plugin.app.vault.getFileByPath(
 					newTask.filePath
@@ -62,6 +62,7 @@ export const openAddNewTaskInCurrentFileModal = (
 			cursorPosition = undefined;
 			return true;
 		},
+		false,
 		true,
 		false,
 		undefined,
@@ -82,9 +83,8 @@ export const openAddNewTaskModal = (
 	const activeTFile = activeFile ? activeFile : preDefinedNoteFile;
 	const communityPlugins = new CommunityPlugins(plugin);
 	const AddTaskModal = new AddOrEditTaskModal(
-		app,
 		plugin,
-		async (newTask, quickAddPluginChoice) => {
+		async (newTask: taskItem, quickAddPluginChoice: string) => {
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
 				const completeTask = await getFormattedTaskContent(newTask);
@@ -116,10 +116,82 @@ export const openAddNewTaskModal = (
 		},
 		false,
 		false,
+		false,
 		undefined,
 		activeTFile
 			? activeTFile.path
 			: plugin.settings.data.globalSettings.preDefinedNote
+	);
+	AddTaskModal.open();
+};
+
+export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
+	const AddTaskModal = new AddOrEditTaskModal(
+		plugin,
+		async (
+			newTask: taskItem,
+			quickAddPluginChoice: string,
+			noteContent: string | undefined
+		) => {
+			if (!noteContent) {
+				console.warn("This code should not run...");
+			} else {
+				// If noteContent is provided, it means user wants to save this task as a TaskNote.
+				// Create the note content with frontmatter
+
+				console.log(
+					"The newTask received : ",
+					newTask,
+					"\nThe noteContent received :\n",
+					noteContent
+				);
+
+				try {
+					// Check if the directory exists, create if not
+					const parts = newTask.filePath.split("/");
+					if (parts.length > 1) {
+						const dirPath = parts.slice(0, -1).join("/");
+						console.log("Directory Path:", dirPath);
+						if (!(await plugin.app.vault.adapter.exists(dirPath))) {
+							await plugin.app.vault.createFolder(dirPath);
+						}
+					}
+
+					// Create or update the file
+					const existingFile = plugin.app.vault.getFileByPath(
+						newTask.filePath
+					);
+					if (!existingFile) {
+						await plugin.app.vault
+							.create(newTask.filePath, noteContent)
+							.then(() => {
+								// This is required to rescan the updated file and refresh the board.
+								const currentFile =
+									plugin.app.vault.getFileByPath(
+										newTask.filePath
+									);
+								plugin.realTimeScanning.processAllUpdatedFiles(
+									currentFile
+								);
+							});
+					}
+				} catch (error) {
+					console.error(
+						"Error creating or updating task note:",
+						error
+					);
+					new Notice(t("error-creating-task-note"), 5000);
+					return false;
+				}
+			}
+
+			eventEmitter.emit("REFRESH_COLUMN");
+		},
+		true,
+		false,
+		false,
+		undefined,
+		""
 	);
 	AddTaskModal.open();
 };

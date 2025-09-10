@@ -19,6 +19,13 @@ export interface scanFilters {
 	};
 }
 
+export enum taskPropertyFormatOptions {
+	default = "1",
+	tasksPlugin = "2",
+	dataviewPlugin = "3",
+	obsidianNative = "4",
+}
+
 export interface TagColor {
 	name: string;
 	color: string;
@@ -79,13 +86,30 @@ export enum cardSectionsVisibilityOptions {
 	hideBoth = "hideBoth",
 }
 
+export enum HideableTaskProperty {
+	ID = "id",
+	Tags = "tags",
+	CreatedDate = "createdDate",
+	StartDate = "startDate",
+	ScheduledDate = "scheduledDate",
+	DueDate = "dueDate",
+	CompletionDate = "completionDate",
+	CancelledDate = "cancelledDate",
+	OnCompletion = "on-completion",
+	Priority = "priority",
+	Recurring = "recurring",
+	Time = "time",
+	Dependencies = "dependencies",
+	Reminder = "reminder",
+}
+
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
 	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
-	taskCompletionFormat: string;
+	taskPropertyFormat: string;
 	taskCompletionDateTimePattern: string;
 	dailyNotesPluginComp: boolean;
 	universalDateFormat: string;
@@ -107,6 +131,7 @@ export interface globalSettingsData {
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
 	preDefinedNote: string;
+	taskNoteDefaultLocation: string;
 	quickAddPluginDefaultChoice: string;
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
@@ -124,6 +149,7 @@ export interface globalSettingsData {
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	cardSectionsVisibility: string;
+	hiddenTaskProperties: HideableTaskProperty[];
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -315,7 +341,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			firstDayOfWeek: "Mon",
 			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
-			taskCompletionFormat: "1",
+			taskPropertyFormat: "1",
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
 			dailyNotesPluginComp: false,
 			universalDateFormat: "yyyy-MM-DD",
@@ -388,6 +414,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				quickAddPlugin: false,
 			},
 			preDefinedNote: "Task_board_note.md",
+			taskNoteDefaultLocation: "TaskNotes",
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
 			showFileNameInCard: false,
@@ -405,6 +432,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			],
 			cardSectionsVisibility:
 				cardSectionsVisibilityOptions.showSubTasksOnly,
+			hiddenTaskProperties: [],
 		},
 	},
 };

@@ -1214,9 +1214,9 @@
         ],
         "Teno44.md": [
             {
-                "id": 47556770,
+                "id": 143240160,
                 "status": " ",
-                "title": "1. Temp 44 📅 2025-05-25 ➕ 2025-05-26 🛫 2025-05-27 ⏳ 2025-05-27 ",
+                "title": "1. Temp 44 ➕ 2025-05-26 🛫 2025-05-27 ⏳ 2025-05-27 📅 2025-05-25  ⏫  ",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-05-26",
@@ -1225,13 +1225,37 @@
                 "due": "2025-05-25",
                 "tags": [],
                 "frontmatterTags": [],
-                "priority": 0,
+                "priority": null,
                 "filePath": "Teno44.md",
                 "taskLocation": {
                     "startLine": 1,
                     "startCharIndex": 0,
                     "endLine": 1,
-                    "endCharIndex": 71
+                    "endCharIndex": 75
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1833907858,
+                "status": " ",
+                "title": "This is a first task in the file `Temp11.md` ⛔ fa4sm9 ⏫ 🔁 every week 🏁 delete ➕ 2025-07-27 🛫 2025-07-28 ⏳ 2025-07-28 📅 2025-09-03 🆔 1gxcpe ",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-07-27",
+                "startDate": "2025-07-28",
+                "scheduledDate": "2025-07-28",
+                "due": "2025-09-03",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": null,
+                "filePath": "Teno44.md",
+                "taskLocation": {
+                    "startLine": 7,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 150
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1296,84 +1320,70 @@
         ],
         "Temp 11.md": [
             {
-                "id": 3731867027,
+                "id": 3857624173,
                 "status": " ",
-                "title": "This is a first task in the file `Temp11.md` 🆔 fpyvkz ⏫ 🏁 delete ➕ 2025-07-27 🛫 2025-07-28 ⏳ 2025-07-28 📅 2025-08-03",
+                "title": "New Simple #Test #new 🆔 fa4sm9 ⏳ 2025-08-03 ",
+                "body": [],
+                "time": "",
+                "scheduledDate": "2025-08-03",
+                "tags": [
+                    "#Test",
+                    "#new"
+                ],
+                "frontmatterTags": [],
+                "priority": null,
+                "filePath": "Temp 11.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 51
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 45975756,
+                "status": " ",
+                "title": "Main task 1 #pending  ⏫  ",
+                "body": [],
+                "time": "",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": null,
+                "filePath": "Temp 11.md",
+                "taskLocation": {
+                    "startLine": 14,
+                    "startCharIndex": 0,
+                    "endLine": 14,
+                    "endCharIndex": 31
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4145512190,
+                "status": " ",
+                "title": "🆔 1gxcpe This is a first task in the file `Temp11.md` ⛔ fa4sm9 ⏫ 🔁 every week 🏁 delete ➕ 2025-07-27 🛫 2025-07-28 ⏳ 2025-07-28 📅 2025-09-03 ",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-07-27",
                 "startDate": "2025-07-28",
                 "scheduledDate": "2025-07-28",
-                "due": "2025-08-03",
+                "due": "2025-09-03",
                 "tags": [],
                 "frontmatterTags": [],
-                "priority": 2,
+                "priority": null,
                 "filePath": "Temp 11.md",
                 "taskLocation": {
-                    "startLine": 1,
+                    "startLine": 24,
                     "startCharIndex": 0,
-                    "endLine": 1,
-                    "endCharIndex": 126
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 798209387,
-                "status": " ",
-                "title": "New Simple ⏳ #Test 2025-08-03 @",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#Test"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Temp 11.md",
-                "taskLocation": {
-                    "startLine": 8,
-                    "startCharIndex": 0,
-                    "endLine": 8,
-                    "endCharIndex": 37
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2120933234,
-                "status": " ",
-                "title": "Main task 1 #pending ",
-                "body": [
-                    "    Main task description",
-                    "    - [ ] Subtask 1",
-                    "        Subtask 1 description",
-                    "    - [ ] Subtask 2",
-                    "        Subtask 2 description",
-                    "        - [ ] Sub-subtask 1",
-                    "            Sub-subtask 1 description"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "filePath": "Temp 11.md",
-                "taskLocation": {
-                    "startLine": 11,
-                    "startCharIndex": 0,
-                    "endLine": 18,
-                    "endCharIndex": 37
+                    "endLine": 24,
+                    "endCharIndex": 150
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1382,9 +1392,9 @@
         ],
         "Task_Board_Temp_Tasks.md": [
             {
-                "id": 2402695500,
+                "id": 2147689210,
                 "status": " ",
-                "title": "This is not ➕ 2025-05-26 🛫 2025-05-26 #bug",
+                "title": "- [ ] This is not ➕ 2025-05-26 🛫 2025-05-26 #bug",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-05-26",
@@ -1408,9 +1418,9 @@
                 "reminder": ""
             },
             {
-                "id": 1593443272,
+                "id": 2964982417,
                 "status": " ",
-                "title": "➕ 2025-05-26 🛫 2025-05-26",
+                "title": "- [ ] ➕ 2025-05-26 🛫 2025-05-26",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-05-26",
@@ -1432,9 +1442,9 @@
                 "reminder": ""
             },
             {
-                "id": 1909142451,
+                "id": 76111402,
                 "status": " ",
-                "title": "This task will have the **created date** populated automatically, as well as the start date as todays date. ➕ 2025-05-26 #test",
+                "title": "- [ ] This task will have the **created date** populated automatically, as well as the start date as todays date. ➕ 2025-05-26 #test",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-05-26",
@@ -1458,9 +1468,9 @@
                 "reminder": ""
             },
             {
-                "id": 1329730170,
+                "id": 270002110,
                 "status": " ",
-                "title": "Adding a temp task, I think the start date should come automatically here. #test",
+                "title": "- [ ] Adding a temp task, I think the start date should come automatically here. #test",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1484,9 +1494,9 @@
                 "reminder": ""
             },
             {
-                "id": 3511883166,
+                "id": 3300592016,
                 "status": " ",
-                "title": "New simple ⏳ 2025-08-02 ",
+                "title": "- [ ] New simple ⏳ 2025-08-02 ",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1508,9 +1518,9 @@
                 "reminder": ""
             },
             {
-                "id": 1012454310,
+                "id": 4144859833,
                 "status": " ",
-                "title": "Simple 📅 2025-08-02 ⏳ 2025-08-03 🛫 2025-08-02 ",
+                "title": "- [ ] Simple 📅 2025-08-02 ⏳ 2025-08-03 🛫 2025-08-02 ",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1532,9 +1542,9 @@
                 "reminder": ""
             },
             {
-                "id": 2170335130,
+                "id": 3190333934,
                 "status": " ",
-                "title": "This is simple task with a reminder in **Obsi App** format. ⏳ 2025-08-03 📅 2025-08-04 🛫 2025-08-02 #Test (@16:00) ",
+                "title": "- [ ] This is simple task with a reminder in **Obsi App** format. ⏳ 2025-08-03 📅 2025-08-04 🛫 2025-08-02 #Test (@16:00) ",
                 "body": [
                     "\t- Even if you dont select any date for the task, the scheduled date will be automatically added while selecting the reminder date-time property."
                 ],
@@ -1560,9 +1570,9 @@
                 "reminder": "2025-08-02T16:00"
             },
             {
-                "id": 3168102536,
+                "id": 2762587379,
                 "status": " ",
-                "title": "Adding a temp text ⏳ 2025-07-26 task. 📅 2025-07-27",
+                "title": "- [ ] Adding a temp text ⏳ 2025-07-26 task. 📅 2025-07-27",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1584,9 +1594,9 @@
                 "reminder": ""
             },
             {
-                "id": 2258037262,
+                "id": 3652303150,
                 "status": " ",
-                "title": "This task is created through the **Add new task modal** and it will be entered right after the *Pending tasks* section. 🔼 ⏰ [10:00 - 11:00] ➕ 2025-07-10 📅 2025-07-11 #Testing",
+                "title": "- [ ] This task is created through the **Add new task modal** and it will be entered right after the *Pending tasks* section. 🔼 ⏰ [10:00 - 11:00] ➕ 2025-07-10 📅 2025-07-11 #Testing",
                 "body": [],
                 "time": "10:00 - 11:00",
                 "createdDate": "2025-07-10",
@@ -1610,9 +1620,9 @@
                 "reminder": ""
             },
             {
-                "id": 2038150494,
+                "id": 3156995935,
                 "status": " ",
-                "title": "Here we go, another one. 🔺⏰ [10:00 - 11:30] #test 📅 2025-05-25",
+                "title": "- [ ] Here we go, another one. 🔺⏰ [10:00 - 11:30] #test 📅 2025-05-25",
                 "body": [],
                 "time": "10:00 - 11:30",
                 "createdDate": "",
@@ -1636,9 +1646,9 @@
                 "reminder": ""
             },
             {
-                "id": 2020274564,
+                "id": 1147055117,
                 "status": " ",
-                "title": "Another a third task. ⏬ 📅 2025-05-26 #working",
+                "title": "- [ ] Another a third task. ⏬ 📅 2025-05-26 #working",
                 "body": [
                     "\tLets see, if this task correctly comes in the switched **QuickAdd** choice file."
                 ],
@@ -1664,9 +1674,9 @@
                 "reminder": ""
             },
             {
-                "id": 2925258843,
+                "id": 1262184266,
                 "status": " ",
-                "title": "Adding another task to the same **choice** directly from the `Add new task modal`. 0 #test 📅 2025-05-25",
+                "title": "- [ ] Adding another task to the same **choice** directly from the `Add new task modal`. 0 #test 📅 2025-05-25",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1690,9 +1700,9 @@
                 "reminder": ""
             },
             {
-                "id": 2882912915,
+                "id": 2156272922,
                 "status": " ",
-                "title": "Now I should be able to switch between the **QuickAdd** choices directly from the `Add new task modal`. 🔼 📅 2025-05-25 #test",
+                "title": "- [ ] Now I should be able to switch between the **QuickAdd** choices directly from the `Add new task modal`. 🔼 📅 2025-05-25 #test",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1716,9 +1726,9 @@
                 "reminder": ""
             },
             {
-                "id": 1636202092,
+                "id": 2401989591,
                 "status": "/",
-                "title": "This is a new task for tomorrow. 0 📅 2025-05-26 #New",
+                "title": "- [/] This is a new task for tomorrow. 0 📅 2025-05-26 #New",
                 "body": [
                     "\t- Adding it directly through the button from board header.",
                     "\t- Lets see"
@@ -1745,9 +1755,9 @@
                 "reminder": ""
             },
             {
-                "id": 2550342505,
+                "id": 162623729,
                 "status": " ",
-                "title": "Another quick task 🔺 📅 2025-05-25 #test",
+                "title": "- [ ] Another quick task 🔺 📅 2025-05-25 #test",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1771,9 +1781,9 @@
                 "reminder": ""
             },
             {
-                "id": 1251406186,
+                "id": 40570114,
                 "status": " ",
-                "title": "this #test ➕ 2025-05-26",
+                "title": "- [ ] this #test ➕ 2025-05-26",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-05-26",
@@ -1797,9 +1807,9 @@
                 "reminder": ""
             },
             {
-                "id": 1654035845,
+                "id": 1728748778,
                 "status": " ",
-                "title": "This is a test 🔼 ➕ 2025-06-29 📅 2025-06-29 #Test",
+                "title": "- [ ] This is a test 🔼 ➕ 2025-06-29 📅 2025-06-29 #Test",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-06-29",
@@ -1823,9 +1833,9 @@
                 "reminder": ""
             },
             {
-                "id": 1206822459,
+                "id": 728803924,
                 "status": " ",
-                "title": "This is a test 2 ➕ 2025-06-29 📅 2025-06-29",
+                "title": "- [ ] This is a test 2 ➕ 2025-06-29 📅 2025-06-29",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-06-29",
@@ -1847,9 +1857,9 @@
                 "reminder": ""
             },
             {
-                "id": 2325171978,
+                "id": 3815003291,
                 "status": " ",
-                "title": "This is test 3 ⏫ ➕ 2025-06-29 📅 2025-07-17 #Test",
+                "title": "- [ ] This is test 3 ⏫ ➕ 2025-06-29 📅 2025-07-17 #Test",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-06-29",
@@ -1873,9 +1883,9 @@
                 "reminder": ""
             },
             {
-                "id": 3512002473,
+                "id": 849722707,
                 "status": " ",
-                "title": "This is test 4 🔺 ➕ 2025-06-29 ⏳ 2025-07-04 📅 2025-06-29 #Test",
+                "title": "- [ ] This is test 4 🔺 ➕ 2025-06-29 ⏳ 2025-07-04 📅 2025-06-29 #Test",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-06-29",
@@ -1899,9 +1909,9 @@
                 "reminder": ""
             },
             {
-                "id": 11181332,
+                "id": 2410167591,
                 "status": " ",
-                "title": "This is a task. updated ⏳ 2025-06-11 ➕ 2025-06-29 📅 2025-06-29 #Test",
+                "title": "- [ ] This is a task. updated ⏳ 2025-06-11 ➕ 2025-06-29 📅 2025-06-29 #Test",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-06-29",
@@ -1925,9 +1935,9 @@
                 "reminder": ""
             },
             {
-                "id": 10956839,
+                "id": 2408316950,
                 "status": " ",
-                "title": "A simple new task for today. ➕ 2025-07-10 📅 2025-07-10 #Test",
+                "title": "- [ ] A simple new task for today. ➕ 2025-07-10 📅 2025-07-10 #Test",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-07-10",
@@ -3343,6 +3353,126 @@
                 "cancelledDate": "",
                 "reminder": ""
             }
+        ],
+        "TaskNotes/2025-09-05T18-55.md": [
+            {
+                "id": 1364984515,
+                "status": " ",
+                "title": "- [ ] A subtask for this main Task Note.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#null"
+                ],
+                "priority": 0,
+                "filePath": "TaskNotes/2025-09-05T18-55.md",
+                "taskLocation": {
+                    "startLine": 10,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 40
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "TaskNotes/2025-09-06T06-41.md": [
+            {
+                "id": 3632526724,
+                "status": " ",
+                "title": "- [ ] First sub-task.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#book"
+                ],
+                "priority": 0,
+                "filePath": "TaskNotes/2025-09-06T06-41.md",
+                "taskLocation": {
+                    "startLine": 21,
+                    "startCharIndex": 0,
+                    "endLine": 21,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "TaskNotes/2025-09-06T19-45.md": [
+            {
+                "id": 677134986,
+                "title": "Updating the title of this **Task Note**.",
+                "body": [
+                    "- [ ] This should act as a sub-task of this main Task Note."
+                ],
+                "createdDate": "",
+                "startDate": "2025-09-06",
+                "scheduledDate": "2025-09-07",
+                "due": "2025-09-08",
+                "tags": [
+                    "#taskNote",
+                    "#MOC"
+                ],
+                "frontmatterTags": [],
+                "time": "",
+                "priority": 1,
+                "status": " ",
+                "filePath": "TaskNotes/2025-09-06T19-45.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 25,
+                    "endCharIndex": 0
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": "2025-09-06T19:00"
+            }
+        ],
+        "TaskNotes/2025-09-07T01-05.md": [
+            {
+                "id": 2994304669,
+                "title": "This is a last Task Note for today. Will create rest tomorrow.",
+                "body": [
+                    "- [ ] Sub-task 1",
+                    "- [ ] Sub-task 2",
+                    "\t- [ ] Sub-sub-task 1."
+                ],
+                "createdDate": "",
+                "startDate": "2025-09-07",
+                "scheduledDate": "2025-09-08",
+                "due": "2025-09-10",
+                "tags": [
+                    "#taskNote",
+                    "#MOC"
+                ],
+                "frontmatterTags": [],
+                "time": "",
+                "priority": 2,
+                "status": " ",
+                "filePath": "TaskNotes/2025-09-07T01-05.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 22,
+                    "endCharIndex": 25
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": "2025-09-07T09:00"
+            }
         ]
     },
     "Completed": {
@@ -4075,7 +4205,9 @@
                 "cancelledDate": "",
                 "reminder": ""
             }
-        ]
+        ],
+        "TaskNotes/2025-09-06T19-45.md": [],
+        "TaskNotes/2025-09-07T01-05.md": []
     },
     "Notes": [
         {

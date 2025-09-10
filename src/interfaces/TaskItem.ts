@@ -68,6 +68,18 @@ export const priorityEmojis: { [key: number]: string } = {
 	5: "⏬",
 };
 
+// Helper function to get priority emoji
+export const getPriorityEmoji = (priority: number): string => {
+	const priorityEmojis: { [key: number]: string } = {
+		1: "🔺", // Highest
+		2: "⏫", // High
+		3: "🔼", // Medium
+		4: "🔽", // Low
+		5: "⏬", // Lowest
+	};
+	return priorityEmojis[priority] || "";
+};
+
 // Priority Options
 export const priorityOptions = [
 	{ value: 0, text: t("none") },
