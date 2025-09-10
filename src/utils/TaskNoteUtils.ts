@@ -64,7 +64,9 @@ export function extractTaskNoteProperties(
 	}
 
 	return {
+		id: frontmatter.id || "",
 		title: frontmatter.title || "",
+		tags: frontmatter?.tags || [],
 		createdDate: frontmatter["created-date"] || frontmatter?.created || "",
 		startDate: frontmatter["start-date"] || frontmatter?.start || "",
 		scheduledDate:
@@ -76,6 +78,7 @@ export function extractTaskNoteProperties(
 			frontmatter["completion-date"] || frontmatter?.completed || "",
 		priority: mapPriorityFromFrontmatter(frontmatter?.priority),
 		status: mapStatusFromFrontmatter(frontmatter?.status),
+		dependsOn: frontmatter?.dependsOn || frontmatter?.depends_on || [],
 		reminder: frontmatter?.reminder || "",
 		filePath: filePath,
 	};
