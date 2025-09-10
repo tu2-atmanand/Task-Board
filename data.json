@@ -635,9 +635,10 @@
       ],
       "cardSectionsVisibility": "hideBoth",
       "hiddenTaskProperties": [],
-      "taskPropertyFormat": "1",
+      "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
-      "autoAddUniqueID": false
+      "autoAddUniqueID": false,
+      "uniqueIdCounter": 31
     }
   }
 }
