@@ -647,6 +647,28 @@ export const useTasksPluginToUpdateInFile = async (
 	}
 };
 
+export const applyIdToTaskInNote = async (
+	plugin: TaskBoard,
+	task: taskItem
+): Promise<void> => {
+	if (task.legacyId) {
+		return;
+	} else {
+		await updateTaskInFile(plugin, task, task)
+			.then(() => {
+				return;
+			})
+			.catch((error) => {
+				bugReporter(
+					plugin,
+					"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
+					String(error),
+					"TaskItemUtils.ts/applyIdToTaskInNote"
+				);
+			});
+	}
+};
+
 // For Adding New Task from Modal
 
 // Generate a unique ID for each task

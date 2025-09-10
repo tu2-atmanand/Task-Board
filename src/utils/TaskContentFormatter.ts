@@ -54,6 +54,21 @@ export const getFormattedTaskContent = async (
 	return completeTask;
 };
 
+export const addIdIfDoesntExist = (
+	Plugin: TaskBoard,
+	formattedTaskContent: string
+): string => {
+	const taskId = extractTaskId(formattedTaskContent);
+	if (!taskId) {
+		const newId = generateTaskId(Plugin);
+		formattedTaskContent = formattedTaskContent.replace(
+			/^(.*?)(\n|$)/,
+			`$1 🆔 ${newId}$2`
+		);
+	}
+	return formattedTaskContent;
+};
+
 export const getFormattedTaskContentSync = (task: taskItem): string => {
 	console.log("getFormattedTaskContent : task :", task);
 	if (!task || !task.title) {
