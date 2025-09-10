@@ -33,7 +33,10 @@ import {
 	UniversalDateOptions,
 	scanFilters,
 } from "src/interfaces/GlobalSettings";
-import { TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr";
+import {
+	TaskRegularExpressions,
+	TASKS_PLUGIN_DEFAULT_SYMBOLS,
+} from "../regularExpressions/TasksPluginRegularExpr";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
 import {
 	extractFrontmatter,
@@ -65,13 +68,6 @@ export default class ScanningVault {
 		}; // Reset task structure
 		this.TaskDetected = false;
 		this.indentationString = getObsidianIndentationSetting(plugin);
-	}
-
-	// Generate a unique ID for each task
-	generateTaskId(): number {
-		const array = new Uint32Array(1);
-		crypto.getRandomValues(array);
-		return array[0];
 	}
 
 	async initializeTasksCache() {
@@ -227,7 +223,12 @@ export default class ScanningVault {
 
 			// Create task item for the task note
 			const taskNoteItem: taskItem = {
-				id: this.generateTaskId(),
+				id: Number(taskNoteProperties.id)
+					? Number(taskNoteProperties.id)
+					: generateRandomTempTaskId(),
+				legacyId: taskNoteProperties.id
+					? String(taskNoteProperties.id)
+					: "", // Storing the legacyId for backward compatibility
 				title: taskNoteProperties.title || file.basename,
 				body: subTasks, // Store sub-tasks in body
 				createdDate: taskNoteProperties.createdDate || "",
@@ -238,6 +239,7 @@ export default class ScanningVault {
 				frontmatterTags: [],
 				time: "", // Task notes don't have time ranges
 				priority: taskNoteProperties.priority || 0,
+				dependsOn: taskNoteProperties.dependsOn || [],
 				status: taskNoteProperties.status || " ", // Default to unchecked
 				filePath: fileNameWithPath,
 				taskLocation: {
@@ -268,6 +270,7 @@ export default class ScanningVault {
 					const tags = extractTags(line);
 					if (scanFilterForTags(tags, scanFilters)) {
 						this.TaskDetected = true;
+						const legacyId = extractTaskId(line);
 						const taskStatus = extractCheckboxSymbol(line);
 						const isTaskCompleted = isCompleted(line);
 						// const title = extractTitle(line);
@@ -278,6 +281,7 @@ export default class ScanningVault {
 						let scheduledDate = extractScheduledDate(line);
 						let dueDate = extractDueDate(line);
 						const priority = extractPriority(line);
+						const dependsOn = extractDependsOn(line)[1];
 						const reminder = extractReminder(
 							line,
 							startDate,
@@ -356,7 +360,10 @@ export default class ScanningVault {
 						}
 
 						const task: taskItem = {
-							id: this.generateTaskId(),
+							id: Number(legacyId)
+								? Number(legacyId)
+								: generateRandomTempTaskId(),
+							legacyId: legacyId, // Storing the legacyId for backward compatibility
 							status: taskStatus,
 							title: title,
 							body: bodyLines,
@@ -368,6 +375,9 @@ export default class ScanningVault {
 							tags: tags,
 							frontmatterTags: frontmatterTags,
 							priority: priority,
+							dependsOn: dependsOn
+								? dependsOn.split(",").map((d) => d.trim())
+								: [],
 							filePath: fileNameWithPath,
 							taskLocation: {
 								startLine: lineIndex + 1,
@@ -382,6 +392,8 @@ export default class ScanningVault {
 							cancelledDate: cancelledDate,
 							reminder: reminder,
 						};
+
+						console.log("Task Item Created:", task);
 
 						if (isTaskCompleted) {
 							this.tasksCache.Completed[fileNameWithPath].push(
@@ -538,7 +550,7 @@ export default class ScanningVault {
 					new Notice(
 						`The file "${
 							files[0] ? files[0].path : "Unknown"
-						}" does not satisfy the filters for scanning applied in setting. Hence it will not be scanned for tasks.`,
+						}" does not satisfy the 'filters for scanning' applied in setting. Hence it will not be scanned for tasks.`,
 						5000
 					);
 				}
@@ -548,11 +560,12 @@ export default class ScanningVault {
 
 	// Debounced saveTasksToJsonCache function
 	private saveTasksToJsonCacheDebounced = debounce(async () => {
-		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
+		if (!this.TaskDetected) return;
 
-		// Refresh the board only if any task has be extracted from the updated file.
+		this.tasksCache.Modified_at = new Date().toISOString();
+		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
+		this.plugin.saveSettings();
 		if (
-			this.TaskDetected &&
 			this.plugin.settings.data.globalSettings.realTimeScanning &&
 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 				Object.values(this.tasksCache.Completed).flat().length > 0)
@@ -716,21 +729,21 @@ export function extractBody(
 			}
 		}
 
-		console.log(
-			"Line:",
-			line,
-			"\nSanitized line:",
-			sanitizedLine,
-			"\nIndentation String:'",
-			indentationString,
-			"'",
-			"\nLenth of indentationString:",
-			indentationString.length,
-			"\nsanitizedLine starts with indentationString:",
-			sanitizedLine.startsWith(indentationString),
-			"\nSanitized line starts with tab:",
-			sanitizedLine.startsWith("\t")
-		);
+		// console.log(
+		// 	"Line:",
+		// 	line,
+		// 	"\nSanitized line:",
+		// 	sanitizedLine,
+		// 	"\nIndentation String:'",
+		// 	indentationString,
+		// 	"'",
+		// 	"\nLenth of indentationString:",
+		// 	indentationString.length,
+		// 	"\nsanitizedLine starts with indentationString:",
+		// 	sanitizedLine.startsWith(indentationString),
+		// 	"\nSanitized line starts with tab:",
+		// 	sanitizedLine.startsWith("\t")
+		// );
 		// If the line has one level of indentation, consider it part of the body
 		if (
 			sanitizedLine.startsWith(indentationString) ||
