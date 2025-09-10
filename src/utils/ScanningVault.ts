@@ -568,6 +568,28 @@ export default class ScanningVault {
 	}
 }
 
+// Generate a unique ID for each task
+export function generateRandomTempTaskId(): number {
+	const array = new Uint32Array(1);
+	crypto.getRandomValues(array);
+	return array[0];
+}
+
+// Generate a unique ID for each task
+export function generateTaskId(plugin: TaskBoard): number {
+	plugin.settings.data.globalSettings.uniqueIdCounter =
+		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
+
+	console.log(
+		"Generated unique ID:",
+		plugin.settings.data.globalSettings.uniqueIdCounter
+	);
+	// Save the updated uniqueIdCounter back to settings
+	// plugin.saveSettings();
+	// Return the current counter value and then increment it for the next ID
+	return plugin.settings.data.globalSettings.uniqueIdCounter;
+}
+
 /**
  * Function to build a task from raw content
  * @param rawTaskContent - The raw content of the task ONLY.
