@@ -141,6 +141,8 @@ export function createFrontmatterFromTask(task: taskItem): string {
 	if (task.due) frontmatterObj["due-date"] = task.due;
 	if (task.time) frontmatterObj["time"] = task.time;
 	if (task.reminder) frontmatterObj.reminder = task.reminder;
+	if (task.dependsOn && task.dependsOn.length > 0)
+		frontmatterObj["depends-on"] = task.dependsOn.join(", ");
 
 	if (task.cancelledDate)
 		frontmatterObj["cancelled-date"] = task.cancelledDate;
