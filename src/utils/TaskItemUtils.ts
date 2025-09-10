@@ -932,3 +932,45 @@ export const replaceOldTaskWithNewTask = async (
 		);
 	}
 };
+
+export const getTaskFromId = async (
+	plugin: TaskBoard,
+	id: string | number
+): Promise<taskItem | null> => {
+	try {
+		let foundTask: taskItem | undefined;
+
+		// Search in Pending tasks
+		const pendingTasksObj = plugin.scanningVault.tasksCache?.Pending ?? {};
+		for (const tasks of Object.values(pendingTasksObj)) {
+			if (typeof id === "string") {
+				foundTask = tasks.find((task) => task.legacyId === id);
+			} else if (typeof id === "number") {
+				foundTask = tasks.find((task) => task.id === id);
+			}
+			if (foundTask) return foundTask;
+		}
+
+		// Search in Completed tasks
+		const completedTasksObj =
+			plugin.scanningVault.tasksCache?.Completed ?? {};
+		for (const tasks of Object.values(completedTasksObj)) {
+			if (typeof id === "string") {
+				foundTask = tasks.find((task) => task.legacyId === id);
+			} else if (typeof id === "number") {
+				foundTask = tasks.find((task) => task.id === id);
+			}
+			if (foundTask) return foundTask;
+		}
+
+		return null; // Return null if the task is not found
+	} catch (error) {
+		bugReporter(
+			plugin,
+			"Error retrieving task from tasksCache using ID",
+			String(error),
+			"TaskItemUtils.ts/getTaskFromId"
+		);
+		return null;
+	}
+};
