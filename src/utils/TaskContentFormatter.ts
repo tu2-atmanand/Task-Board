@@ -1,7 +1,12 @@
 import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
-import { extractPriority } from "./ScanningVault";
+import {
+	extractDependsOn,
+	extractPriority,
+	extractTaskId,
+	generateTaskId,
+} from "./ScanningVault";
 import {
 	NotificationService,
 	UniversalDateOptions,
@@ -23,6 +28,7 @@ export interface cursorLocation {
 export const getFormattedTaskContent = async (
 	task: taskItem
 ): Promise<string> => {
+	console.log("getFormattedTaskContent\ntask :", task);
 	if (!task || !task.title) {
 		return "";
 	}
@@ -48,8 +54,6 @@ export const getFormattedTaskContent = async (
 	const completeTask = `${taskLine}${
 		bodyLines.trim() ? `\n${bodyLines}` : ""
 	}`;
-
-	console.log("getFormattedTaskContent : completeTask :", completeTask);
 
 	return completeTask;
 };
@@ -70,7 +74,7 @@ export const addIdIfDoesntExist = (
 };
 
 export const getFormattedTaskContentSync = (task: taskItem): string => {
-	console.log("getFormattedTaskContent : task :", task);
+	console.log("getFormattedTaskContentSync\ntask :", task);
 	if (!task || !task.title) {
 		return "";
 	}
@@ -96,8 +100,6 @@ export const getFormattedTaskContentSync = (task: taskItem): string => {
 	const completeTask = `${taskLine}${
 		bodyLines.trim() ? `\n${bodyLines}` : ""
 	}`;
-
-	console.log("getFormattedTaskContent : completeTask :", completeTask);
 
 	return completeTask;
 };
@@ -953,6 +955,67 @@ export const sanitizeReminder = (
 	}
 	// If no existing reminder found, append new one at the end
 	return `${title} ${formattedReminder}`;
+};
+
+export const sanitizeDependsOn = (
+	globalSettings: globalSettingsData,
+	title: string,
+	dependesOnIds: string[],
+	cursorLocation?: cursorLocation
+): string => {
+	const extractedDependsOnMatch = extractDependsOn(title);
+
+	console.log(
+		"sanitizeDependsOn : title",
+		title,
+		"\ndependsOnIds",
+		dependesOnIds,
+		"\ncursorLocation",
+		cursorLocation,
+		"\nextractedDependsOnMatch",
+		extractedDependsOnMatch
+	);
+
+	if (!dependesOnIds || dependesOnIds.length === 0) {
+		if (extractedDependsOnMatch) {
+			// If dependsOnIds is empty, remove any existing dependsOn
+			return title.replace(extractedDependsOnMatch[0], "").trim();
+		}
+		return title;
+	}
+
+	let dependsOnFormat: string = "";
+	if (globalSettings?.taskPropertyFormat === "1") {
+		dependsOnFormat =
+			dependesOnIds.length > 0 ? `⛔${dependesOnIds.join(", ")}` : "";
+	} else if (globalSettings?.taskPropertyFormat === "2") {
+		dependsOnFormat =
+			dependesOnIds.length > 0 ? `⛔ ${dependesOnIds.join(", ")}` : "";
+	} else if (globalSettings?.taskPropertyFormat === "3") {
+		dependsOnFormat =
+			dependesOnIds.length > 0
+				? `[cancelled:: ${dependesOnIds.join(", ")}]`
+				: "";
+	} else {
+		dependsOnFormat =
+			dependesOnIds.length > 0
+				? `@cancelled(${dependesOnIds.join(", ")})`
+				: "";
+	}
+
+	if (extractedDependsOnMatch.length > 0) {
+		return title.replace(extractedDependsOnMatch[0], dependsOnFormat);
+	}
+
+	if (cursorLocation?.lineNumber === 1) {
+		// Insert newDependsOn at the specified charIndex with spaces
+		const spaceBefore =
+			title.slice(0, cursorLocation.charIndex).trim() + " ";
+		const spaceAfter = " " + title.slice(cursorLocation.charIndex).trim();
+		return `${spaceBefore}${dependsOnFormat}${spaceAfter}`;
+	}
+	// If no existing dependsOn found, append new one at the end
+	return `${title} ${dependsOnFormat}`;
 };
 
 // export const getSanitizedTaskContent = (
