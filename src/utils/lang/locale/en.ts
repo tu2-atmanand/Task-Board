@@ -194,7 +194,7 @@ const en: Lang = {
 	"background-of-the-card": "Background of the card",
 	"liveEditor": "Live Editor",
 	"rawEditor": "Raw Editor",
-	"child-tasks": "Child tasks",
+	"child-tasks-depends-on": "Child tasks (Depends on)",
 	"task-board-bug-reporter": "Task Board bug reporter",
 	"report": "Report",
 	"ignore-this-bug": "Ignore this bug",
@@ -271,6 +271,7 @@ const en: Lang = {
 	"pin-tasks-on-top-in-each-column-upcoming": "Pin tasks on top in each column (upcoming)",
 	"manual-sorting-inside-each-column-upcoming": "Manual sorting inside each column (upcoming)",
 	"canvas-view-upcoming": "Canvas view (upcoming)",
+	"open-in-canvas-view": "Open in canvas view",
 };
 
 export default en;

@@ -151,6 +151,7 @@ export interface globalSettingsData {
 	cardSectionsVisibility: string;
 	hiddenTaskProperties: HideableTaskProperty[];
 	autoAddUniqueID: boolean;
+	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -435,6 +436,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				cardSectionsVisibilityOptions.showSubTasksOnly,
 			hiddenTaskProperties: [],
 			autoAddUniqueID: false,
+			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 		},
 	},
 };

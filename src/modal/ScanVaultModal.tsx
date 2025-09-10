@@ -13,6 +13,34 @@ import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
+export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
+	let maxId = 0;
+
+	// Check Pending tasks
+	Object.values(plugin.scanningVault.tasksCache.Pending).forEach((tasks) => {
+		tasks.forEach((task) => {
+			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
+			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
+				maxId = taskIdNum;
+			}
+		});
+	});
+
+	// Check Completed tasks
+	Object.values(plugin.scanningVault.tasksCache.Completed).forEach((tasks) => {
+		tasks.forEach((task) => {
+			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
+			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
+				maxId = taskIdNum;
+			}
+		});
+	});
+
+	// Update the uniqueIdCounter in settings to be one more than the max found ID
+	plugin.settings.data.globalSettings.uniqueIdCounter = maxId + 1;
+	plugin.saveSettings();
+}
+
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
 
 	const [isRunning, setIsRunning] = useState(false);
@@ -52,9 +80,11 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 		// setIsRunning(false);
 		setCollectedTasks(scanningVault.tasksCache);
 		new Notice(t("vault-scanning-complete"));
-		await scanningVault.saveTasksToJsonCache();
 
 		plugin.scanningVault.tasksCache = scanningVault.tasksCache;
+		scanningVault.saveTasksToJsonCache();
+
+		findMaxIdCounterAndUpdateSettings(plugin);
 
 		if (localStorage.getItem("manadatoryScan") === "true") {
 			localStorage.setItem("manadatoryScan", "false");

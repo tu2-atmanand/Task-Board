@@ -1,6 +1,9 @@
 // /src/utils/TaskItemUtils.ts
 
-import { getFormattedTaskContent } from "./TaskContentFormatter";
+import {
+	addIdToTaskContent,
+	getFormattedTaskContent,
+} from "./TaskContentFormatter";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataFromDisk,
@@ -24,6 +27,7 @@ import {
 	extractFrontmatter,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
+import { generateTaskId } from "./ScanningVault";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -314,6 +318,7 @@ export const updateTaskInFile = async (
 	oldTask: taskItem
 ): Promise<void> => {
 	try {
+		console.log("updateTaskInFile : updatedTask :\n", updatedTask, oldTask);
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
 		if (oldTaskContent === "")
 			bugReporter(
@@ -323,7 +328,8 @@ export const updateTaskInFile = async (
 				"TaskItemUtils.ts/updateTaskInFile"
 			);
 
-		const updatedTaskContent = await getFormattedTaskContent(updatedTask);
+		let updatedTaskContent = await getFormattedTaskContent(updatedTask);
+		updatedTaskContent = addIdToTaskContent(plugin, updatedTaskContent);
 		if (updatedTaskContent === "")
 			bugReporter(
 				plugin,
@@ -519,9 +525,13 @@ export const useTasksPluginToUpdateInFile = async (
 			throw "getSanitizedTaskContent returned empty string";
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
+			const oldTaskTitleWithId = addIdToTaskContent(
+				plugin,
+				oldTask.title
+			);
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
-					oldTask.title,
+					oldTaskTitleWithId,
 					oldTask.filePath
 				);
 
@@ -555,7 +565,11 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 1)) {
-				newContent = `${tasksPluginApiOutput}${
+				const tasksPluginApiOutputWithId = addIdToTaskContent(
+					plugin,
+					tasksPluginApiOutput
+				);
+				newContent = `${tasksPluginApiOutputWithId}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`
 						: ""
@@ -567,41 +581,41 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 2)) {
-				if (twoTaskTitles[1].trim().startsWith("- [x]")) {
-					newContent = `${twoTaskTitles[0]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}\n${twoTaskTitles[1]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}`;
+				// if (twoTaskTitles[1].trim().startsWith("- [x]")) {
+				newContent = `${twoTaskTitles[0]}${
+					oldTask.body.length > 0
+						? `\n${oldTask.body.join("\n")}`
+						: ""
+				}\n${twoTaskTitles[1]}${
+					oldTask.body.length > 0
+						? `\n${oldTask.body.join("\n")}`
+						: ""
+				}`;
 
-					await replaceOldTaskWithNewTask(
-						plugin,
-						oldTask,
-						completeOldTaskContent,
-						newContent
-					);
-				} else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
-					newContent = `${twoTaskTitles[0]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}\n${twoTaskTitles[1]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}`;
+				await replaceOldTaskWithNewTask(
+					plugin,
+					oldTask,
+					completeOldTaskContent,
+					newContent
+				);
+				// } else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
+				// 	newContent = `${twoTaskTitles[0]}${
+				// 		oldTask.body.length > 0
+				// 			? `\n${oldTask.body.join("\n")}`
+				// 			: ""
+				// 	}\n${twoTaskTitles[1]}${
+				// 		oldTask.body.length > 0
+				// 			? `\n${oldTask.body.join("\n")}`
+				// 			: ""
+				// 	}`;
 
-					await replaceOldTaskWithNewTask(
-						plugin,
-						oldTask,
-						completeOldTaskContent,
-						newContent
-					);
-				}
+				// 	await replaceOldTaskWithNewTask(
+				// 		plugin,
+				// 		oldTask,
+				// 		completeOldTaskContent,
+				// 		newContent
+				// 	);
+				// }
 			} else {
 				bugReporter(
 					plugin,
@@ -647,14 +661,36 @@ export const useTasksPluginToUpdateInFile = async (
 	}
 };
 
+export const applyIdToTaskInNote = async (
+	plugin: TaskBoard,
+	task: taskItem
+): Promise<void> => {
+	if (task.legacyId) {
+		return;
+	} else {
+		await updateTaskInFile(plugin, task, task)
+			.then(() => {
+				return;
+			})
+			.catch((error) => {
+				bugReporter(
+					plugin,
+					"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
+					String(error),
+					"TaskItemUtils.ts/applyIdToTaskInNote"
+				);
+			});
+	}
+};
+
 // For Adding New Task from Modal
 
-// Generate a unique ID for each task
-export const generateTaskId = (): number => {
-	const array = new Uint32Array(1);
-	crypto.getRandomValues(array);
-	return array[0];
-};
+// // Generate a unique ID for each task
+// export const generateTaskId = (): number => {
+// 	const array = new Uint32Array(1);
+// 	crypto.getRandomValues(array);
+// 	return array[0];
+// };
 
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -665,7 +701,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	const newTaskWithId = {
 		...newTask,
-		id: generateTaskId(),
+		id: generateTaskId(plugin),
 		filePath: newTask.filePath,
 		completed: "",
 		frontmatterTags: frontmatterTags,
@@ -704,7 +740,8 @@ export const addTaskInNote = async (
 	}
 
 	try {
-		const completeTask = await getFormattedTaskContent(newTask);
+		let completeTask = await getFormattedTaskContent(newTask);
+		completeTask = addIdToTaskContent(plugin, completeTask);
 		if (completeTask === "")
 			throw "getSanitizedTaskContent returned empty string";
 
@@ -908,5 +945,47 @@ export const replaceOldTaskWithNewTask = async (
 			String(error),
 			"TaskItemUtils.ts/replaceOldTaskWithNewTask"
 		);
+	}
+};
+
+export const getTaskFromId = async (
+	plugin: TaskBoard,
+	id: string | number
+): Promise<taskItem | null> => {
+	try {
+		let foundTask: taskItem | undefined;
+
+		// Search in Pending tasks
+		const pendingTasksObj = plugin.scanningVault.tasksCache?.Pending ?? {};
+		for (const tasks of Object.values(pendingTasksObj)) {
+			if (typeof id === "string") {
+				foundTask = tasks.find((task) => task.legacyId === id);
+			} else if (typeof id === "number") {
+				foundTask = tasks.find((task) => task.id === id);
+			}
+			if (foundTask) return foundTask;
+		}
+
+		// Search in Completed tasks
+		const completedTasksObj =
+			plugin.scanningVault.tasksCache?.Completed ?? {};
+		for (const tasks of Object.values(completedTasksObj)) {
+			if (typeof id === "string") {
+				foundTask = tasks.find((task) => task.legacyId === id);
+			} else if (typeof id === "number") {
+				foundTask = tasks.find((task) => task.id === id);
+			}
+			if (foundTask) return foundTask;
+		}
+
+		return null; // Return null if the task is not found
+	} catch (error) {
+		bugReporter(
+			plugin,
+			"Error retrieving task from tasksCache using ID",
+			String(error),
+			"TaskItemUtils.ts/getTaskFromId"
+		);
+		return null;
 	}
 };

@@ -1,5 +1,6 @@
 import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
+import { taskItem } from "src/interfaces/TaskItem";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
 	content: Set<string>;
@@ -137,4 +138,15 @@ export function getYAMLPropertySuggestions(app: App): string[] {
 	});
 
 	return Array.from(yamlPropertiesSet);
+}
+
+export function getPendingTasksSuggestions(plugin: TaskBoard): taskItem[] {
+	const pendingObj = plugin.scanningVault.tasksCache?.Pending ?? {};
+	const taskSet = new Set<taskItem>();
+	Object.values(pendingObj).forEach((tasksArr) => {
+		tasksArr.forEach((task) => {
+			taskSet.add(task);
+		});
+	});
+	return Array.from(taskSet);
 }

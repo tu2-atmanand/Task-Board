@@ -847,6 +847,105 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	gap: 1em;
 }
 
+.EditTaskModalChildTaskInput {
+	width: 100%;
+}
+
+.EditTaskModalChildTasksList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	overflow-y: auto;
+	margin-top: 0.5em;
+	margin-bottom: 1rem;
+	padding-right: 5px;
+}
+
+.EditTaskModalChildTasksListItem {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: space-between;
+	background: var(--background-secondary);
+	/* padding: 2px 10px; */
+	border-radius: 5px;
+	border: 1px solid var(--background-modifier-border-focus);
+}
+
+.EditTaskModalChildTasksListItemTitle {
+	font-weight: 500;
+	overflow-wrap: anywhere;
+	flex: 1;
+	padding-inline-end: 0.8rem;
+	/* padding-block: 14px;
+	margin-inline: 1rem; */
+}
+
+.EditTaskModalChildTasksListItemFooter {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5em;
+	background-color: var(--bases-embed-border-color);
+	padding-inline: 5px;
+}
+
+.EditTaskModalChildTasksListItemIdSec {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding-inline: 5px;
+	padding-block: 2px;
+	gap: 2px;
+}
+
+.EditTaskModalChildTasksListItemIdLabel {
+	font-size: 0.8em;
+	opacity: 70%;
+}
+
+.EditTaskModalChildTasksListItemIdValue {
+	padding-inline: 5px;
+	padding-block: 0px;
+	width: 2.5rem;
+	text-wrap: auto;
+	text-align: center;
+	align-content: center;
+	font-weight: 600;
+	/* background-color: var(--background-modifier-border-focus); */
+}
+
+.EditTaskModalChildTasksListItemFooterBtns {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5em;
+}
+
+.EditTaskModalChildTasksListItemEditBtn,
+.EditTaskModalChildTasksListItemDeleteBtn {
+	/* color: var(--background-modifier-error) !important; */
+	background: none !important;
+	background-color: none !important;
+	border: none;
+	cursor: pointer;
+	color: var(--text-danger);
+	font-size: 1.2em;
+	padding: 2px;
+	display: flex;
+	align-items: stretch;
+	height: 100%;
+	justify-content: center;
+	align-self: anchor-center;
+}
+
+.EditTaskModalChildTasksListItemDeleteBtn {
+	color: var(--background-modifier-error) !important;
+}
+
 .EditTaskModalsubTaskItem {
 	display: flex;
 	flex-direction: row;
@@ -866,9 +965,17 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .EditTaskModalTabHeader {
 	display: flex;
 	gap: 5px;
-	width: fit-content;
+	width: 100%;
 	flex-direction: row;
 	/* background: var(--background-modifier-message); */
+	justify-content: space-between;
+	align-items: center;
+}
+
+.EditTaskModalTabHeaderLeftBtnSec {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
 .EditTaskModalTabHeaderBtn {
@@ -882,6 +989,22 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding-inline: 15px;
 	font-weight: 500;
 	border-radius: 10px 10px 0 0;
+	background: var(--table-header-border-color);
+}
+
+.EditTaskModalTabHeaderRightBtnSec {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5em;
+}
+
+.EditTaskModalTabHeaderOpenCanvasBtn {
+	padding-block: 5px;
+	padding-inline: 15px;
+	font-weight: 500;
+	border-radius: 10px 10px 0 0;
+	cursor: pointer;
 	background: var(--table-header-border-color);
 }
 
