@@ -58,7 +58,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		componentRef.current = plugin.view;
 	}, []);
 
-	const taskIdKey = `${task.id}`; // for rendering unique title
+	const taskIdKey = task.id; // for rendering unique title
 	const taskTitleRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
 		if (taskTitleRendererRef.current && componentRef.current) {

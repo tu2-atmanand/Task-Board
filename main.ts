@@ -289,12 +289,12 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerReadingModePostProcessor() {
-		const tasksPlugin = new TasksApi(this);
 		const hiddenProperties =
 			this.settings.data.globalSettings?.hiddenTaskProperties || [];
 		if (hiddenProperties.length === 0) {
 			return;
 		}
+		const tasksPlugin = new TasksApi(this);
 		if (!tasksPlugin.isTasksPluginEnabled()) {
 			this.registerMarkdownPostProcessor((element, context) => {
 				// console.log("Element : ", element, "\nContent :", context);
