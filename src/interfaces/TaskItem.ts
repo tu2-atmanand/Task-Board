@@ -9,6 +9,7 @@ export interface taskLocation {
 
 export interface taskItem {
 	id: number;
+	legacyId: string; // Legacy ID to support Tasks plugin id property
 	title: string;
 	body: string[];
 	createdDate: string;
@@ -22,6 +23,7 @@ export interface taskItem {
 	status: string;
 	filePath: string;
 	taskLocation: taskLocation;
+	dependsOn?: string[]; // Array of task IDs that this task depends on
 	reminder?: string; // A date-time value.
 	completion?: string;
 	cancelledDate?: string;
