@@ -58,12 +58,12 @@ export const getFormattedTaskContent = async (
 	return completeTask;
 };
 
-export const addIdIfDoesntExist = (
+export const addIdToTaskContent = (
 	Plugin: TaskBoard,
 	formattedTaskContent: string
 ): string => {
 	const taskId = extractTaskId(formattedTaskContent);
-	if (!taskId) {
+	if (!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) {
 		const newId = generateTaskId(Plugin);
 		formattedTaskContent = formattedTaskContent.replace(
 			/^(.*?)(\n|$)/,

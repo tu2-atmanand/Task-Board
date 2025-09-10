@@ -828,7 +828,7 @@ const EditTaskContent: React.FC<{
 	useEffect(() => {
 		console.log("Task.Body :", task.body);
 		if (isTaskNote) {
-			const newFormattedTaskNoteContent = formatTaskNoteContent(modifiedTask, formattedTaskContent);
+			const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
 			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 			setIsEditorContentChanged(false);
 		}

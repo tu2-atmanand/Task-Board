@@ -1,7 +1,7 @@
 // /src/utils/TaskItemUtils.ts
 
 import {
-	addIdIfDoesntExist,
+	addIdToTaskContent,
 	getFormattedTaskContent,
 } from "./TaskContentFormatter";
 import {
@@ -329,7 +329,7 @@ export const updateTaskInFile = async (
 			);
 
 		let updatedTaskContent = await getFormattedTaskContent(updatedTask);
-		updatedTaskContent = addIdIfDoesntExist(plugin, updatedTaskContent);
+		updatedTaskContent = addIdToTaskContent(plugin, updatedTaskContent);
 		if (updatedTaskContent === "")
 			bugReporter(
 				plugin,
@@ -525,7 +525,7 @@ export const useTasksPluginToUpdateInFile = async (
 			throw "getSanitizedTaskContent returned empty string";
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
-			const oldTaskTitleWithId = addIdIfDoesntExist(
+			const oldTaskTitleWithId = addIdToTaskContent(
 				plugin,
 				oldTask.title
 			);
@@ -565,7 +565,7 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 1)) {
-				const tasksPluginApiOutputWithId = addIdIfDoesntExist(
+				const tasksPluginApiOutputWithId = addIdToTaskContent(
 					plugin,
 					tasksPluginApiOutput
 				);
@@ -741,7 +741,7 @@ export const addTaskInNote = async (
 
 	try {
 		let completeTask = await getFormattedTaskContent(newTask);
-		completeTask = addIdIfDoesntExist(plugin, completeTask);
+		completeTask = addIdToTaskContent(plugin, completeTask);
 		if (completeTask === "")
 			throw "getSanitizedTaskContent returned empty string";
 

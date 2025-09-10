@@ -12,7 +12,6 @@ import {
 	createYamlFromObject,
 	customFrontmatterCache,
 } from "./FrontmatterOperations";
-import { FrontMatterCache } from "obsidian";
 
 /**
  * Check if a note is a Task Note by looking for #taskNote tag in frontmatter
@@ -138,6 +137,7 @@ export function mapStatusFromFrontmatter(
 }
 
 export function formatTaskNoteContent(
+	plugin: TaskBoard,
 	task: taskItem,
 	bodyContent: string
 ): string {
@@ -145,7 +145,7 @@ export function formatTaskNoteContent(
 	try {
 		const frontmatterMatch = bodyContent.match(/^---\n([\s\S]*?)\n---/);
 		// No frontmatter exists, create new one
-		const newFrontmatter = createFrontmatterFromTask(task);
+		const newFrontmatter = createFrontmatterFromTask(plugin, task);
 		const contentWithoutFrontmatter = frontmatterMatch
 			? bodyContent.replace(frontmatterMatch[0], "")
 			: bodyContent;
@@ -182,7 +182,7 @@ export async function updateTaskNoteFrontmatter(
 
 		if (!existingFrontmatter) {
 			// No frontmatter exists, create new one
-			const newFrontmatter = createFrontmatterFromTask(task);
+			const newFrontmatter = createFrontmatterFromTask(plugin, task);
 			const newContent = `---\n${newFrontmatter}\n---\n${fileContent}`;
 			await writeDataToVaultFile(plugin, task.filePath, newContent);
 			return;
@@ -190,6 +190,7 @@ export async function updateTaskNoteFrontmatter(
 
 		// Parse existing frontmatter and update properties
 		const updatedFrontmatter = updateFrontmatterProperties(
+			plugin,
 			existingFrontmatter,
 			task
 		);

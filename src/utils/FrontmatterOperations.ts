@@ -116,7 +116,10 @@ export function extractFrontmatterTags(
  * @param task - Task item
  * @returns string - YAML frontmatter content
  */
-export function createFrontmatterFromTask(task: taskItem): string {
+export function createFrontmatterFromTask(
+	plugin: TaskBoard,
+	task: taskItem
+): string {
 	const statusKey = Object.keys(taskStatuses).find(
 		(key) => taskStatuses[key as keyof typeof taskStatuses] === task.status
 	);
@@ -130,7 +133,8 @@ export function createFrontmatterFromTask(task: taskItem): string {
 		],
 	};
 
-	if (task.id) frontmatterObj.id = task.id;
+	if (task.id && plugin.settings.data.globalSettings.autoAddUniqueID)
+		frontmatterObj.id = task.legacyId ? task.legacyId : task.id;
 	if (task.priority && task.priority > 0) {
 		frontmatterObj.priority = priorityEmojis[task.priority || 0];
 	}
@@ -158,6 +162,7 @@ export function createFrontmatterFromTask(task: taskItem): string {
  * @returns object - Updated frontmatter object
  */
 export function updateFrontmatterProperties(
+	plugin: TaskBoard,
 	existingFrontmatter: customFrontmatterCache | undefined,
 	task: taskItem
 ): Partial<customFrontmatterCache> {
@@ -186,6 +191,10 @@ export function updateFrontmatterProperties(
 		) {
 			updated.tags.push("#taskNote");
 		}
+	}
+
+	if (updated.id && plugin.settings.data.globalSettings.autoAddUniqueID) {
+		updated.legacyId = task.legacyId ? task.legacyId : updated.id;
 	}
 
 	// Update properties
