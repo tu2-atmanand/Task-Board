@@ -1,7 +1,7 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
 import { App, Component, Keymap, Modal, Notice, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
-import { FaTimes } from 'react-icons/fa';
+import { FaLinkedin, FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItem";
 
@@ -10,11 +10,11 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
+import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
-import { buildTaskFromRawContent } from "src/utils/ScanningVault";
-import { FileInput, RefreshCcw } from "lucide-react";
-import { MultiSuggest, getFileSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
+import { buildTaskFromRawContent, generateTaskId } from "src/utils/ScanningVault";
+import { DeleteIcon, EditIcon, FileInput, Network, RefreshCcw } from "lucide-react";
+import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
@@ -23,9 +23,11 @@ import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUti
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNoteUtils";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
+import { applyIdToTaskInNote, getTaskFromId, updateTaskInFile } from "src/utils/TaskItemUtils";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
+	legacyId: "",
 	title: "",
 	body: [],
 	createdDate: "",
@@ -69,7 +71,7 @@ const EditTaskContent: React.FC<{
 	setIsEdited: (value: boolean) => void;
 }> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(
-		task.title !== undefined && task.title !== null
+		task.title
 			? task.title
 			: isTaskNote ? "" : "- [ ] "
 	);
@@ -85,8 +87,10 @@ const EditTaskContent: React.FC<{
 	const [priority, setPriority] = useState(task.priority || 0);
 	const [status, setStatus] = useState(task.status || '');
 	const [reminder, setReminder] = useState(task?.reminder || "");
+	const [dependsOn, setDependsOn] = useState<string[]>(task?.dependsOn || []);
+	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
 
-	const [formattedTaskContent, setFormattedTaskContent] = useState<string>(isTaskNote ? noteContent : "");
+	const [formattedTaskContent, setFormattedTaskContent] = useState<string>(isTaskNote ? noteContent : getFormattedTaskContentSync(task));
 	const [newFilePath, setNewFilePath] = useState<string>(filePath);
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
@@ -403,6 +407,18 @@ const EditTaskContent: React.FC<{
 		setIsEditorContentChanged(true);
 	};
 
+	const handleRemoveChildTask = (taskId: string) => {
+		console.log("Removing child task with ID:", taskId);
+		const newDependsOn = dependsOn.filter(id => id !== taskId);
+		setDependsOn(newDependsOn);
+		if (!isTaskNote) {
+			const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, newDependsOn, cursorLocationRef.current ?? undefined);
+			setTitle(newTitle);
+		}
+		setIsEdited(true);
+		setIsEditorContentChanged(true);
+	};
+
 	// ------------ Handle save task, open file and close actions ------------
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
@@ -507,6 +523,11 @@ const EditTaskContent: React.FC<{
 			status,
 			reminder,
 		};
+
+		if (plugin.settings.data.globalSettings.autoAddUniqueID && !taskExists) {
+			updatedTask.id = generateTaskId(plugin);
+		}
+
 		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	}
@@ -539,7 +560,7 @@ const EditTaskContent: React.FC<{
 
 		const taskNoteItem: taskItem = {
 			...modifiedTask,
-			title,
+			title: title,
 			body: formattedTaskContent ? formattedTaskContent.split('\n').filter(line => isTaskLine(line)) : [],
 			createdDate: newCreatedDate,
 			startDate: newStartDate,
@@ -554,6 +575,10 @@ const EditTaskContent: React.FC<{
 			status: modifiedTask.status,
 			reminder: modifiedTask.reminder,
 		};
+
+		if (plugin.settings.data.globalSettings.autoAddUniqueID && !taskExists) {
+			taskNoteItem.id = generateTaskId(plugin);
+		}
 
 		console.log("Task Note Item to be saved:", taskNoteItem);
 
@@ -729,7 +754,7 @@ const EditTaskContent: React.FC<{
 					const cursor = fullMarkdownEditor.editor.editor?.getCursor();
 					cursorLocationRef.current = {
 						lineNumber: (cursor ? cursor.line + 1 : 0),
-						charIndex: (cursor ? (cursor?.ch - 6 < 0 ? 0 : cursor?.ch - 6) : formattedTaskContent.split("\n")[0].length),
+						charIndex: (cursor ? (cursor?.ch < 0 ? 0 : cursor?.ch) : formattedTaskContent.split("\n")[0].length),
 					};
 				}
 
@@ -851,6 +876,124 @@ const EditTaskContent: React.FC<{
 		}
 	}, [plugin.app]);
 
+	const childTaskInputRef = useRef<HTMLInputElement>(null);
+	useEffect(() => {
+		if (!childTaskInputRef.current) return;
+
+		const pendingTaskItems = getPendingTasksSuggestions(
+			plugin
+		);
+		const suggestionContent = pendingTaskItems.filter(t => t.title !== title).map(t => t.title && t.title !== undefined ? t.title : ""); // Exclude self from suggestions
+		const onSelectCallback = (choice: string) => {
+			console.log("Selected child task:", choice);
+			let selectedTask = pendingTaskItems.find(t => t.title === choice);
+			if (!selectedTask) {
+				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
+				return;
+			}
+			applyIdToTaskInNote(plugin, selectedTask).then(() => {
+
+				const getUpdatedDependsOnIds = (prev: string[]) => {
+					console.log("Previous depends on values :", prev);
+					if (!prev.includes(task.legacyId ? task.legacyId : String(task.id))) {
+						if (selectedTask?.legacyId) {
+							return [...prev, selectedTask.legacyId];
+						} else {
+							const idOfSelectedTask = plugin.settings.data.globalSettings.uniqueIdCounter;
+							if (idOfSelectedTask) {
+								return [...prev, String(idOfSelectedTask)];
+							}
+						}
+					}
+					return prev;
+				};
+				// const updatedDependsOnIds = getUpdatedDependsOnIds(dependsOn);
+				// console.log("Updated dependsOn IDs:", updatedDependsOnIds);
+				setDependsOn(prev => {
+					const updated = getUpdatedDependsOnIds(prev);
+					if (!isTaskNote) {
+						const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, updated, cursorLocationRef.current ?? undefined);
+						console.log("New Title:", newTitle);
+						setTitle(newTitle);
+					}
+
+					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter);
+					setChildTasks(prevChildTasks => {
+						// Avoid adding duplicates
+						if (!prevChildTasks.find(t => t.id === selectedTask.id)) {
+							return [...prevChildTasks, selectedTask];
+						}
+						return prevChildTasks;
+					});
+
+					setIsEdited(true);
+					setIsEditorContentChanged(true);
+					return updated;
+				});
+			}).catch(err => {
+				bugReporter(plugin, "Error updating task in file", `An error occurred while updating the task in file: ${err.message}`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
+			});
+		};
+		new MultiSuggest(childTaskInputRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
+
+	}, [plugin.app]);
+
+	const childTaskTitleRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+	console.log("Is childTaskTitleRefs getting initialized to empty object after a new child task has been added :", childTaskTitleRefs.current, "\ndependsOn: ", dependsOn);
+	// Fetch child tasks when dependsOn changes
+	useEffect(() => {
+		if (childTasks.length === 0 && dependsOn.length > 0) {
+			Promise.all(dependsOn.map(id => getTaskFromId(plugin, id)))
+				.then(tasks => {
+					const validTasks = tasks.filter(Boolean) as taskItem[];
+					setChildTasks(validTasks);
+				})
+				.catch(err => {
+					console.error("Error fetching child tasks:", err);
+				});
+		}
+	}, []);
+
+	// Render child task titles when childTasks changes
+	useEffect(() => {
+		childTasks.forEach((childTask, index) => {
+			const element = childTaskTitleRefs.current[childTask.legacyId ? childTask.legacyId : String(childTask.id)];
+			if (!element) return;
+
+			// Clear previous content before rendering
+			if (element.empty) element.empty();
+			else element.innerHTML = "";
+
+			const childTaskTitle = childTask.title;
+			MarkdownUIRenderer.renderSubtaskText(
+				plugin.app,
+				childTaskTitle,
+				element,
+				task.filePath,
+				componentRef.current
+			);
+		});
+	}, [childTasks]);
+
+	const handleOpenChildTaskModal = (taskId: string) => {
+		const childTask = childTasks.find(t => String(t.id) === taskId);
+		if (!childTask) {
+			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
+			return;
+		}
+	}
+
+	const handleOpenTaskInCanvasView = () => {
+		console.log("Opening task in canvas view:", newFilePath);
+		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+		// if (file && file instanceof TFile) {
+		// 	plugin.app.workspace.openLinkText('', newFilePath, 'canvas');
+		// } else {
+		// 	new Notice(t("file-not-found"));
+		// }
+		// onClose();
+	}
+
 	// ------------------ Rendering the component ------------------
 
 	return (
@@ -873,8 +1016,15 @@ const EditTaskContent: React.FC<{
 
 							{/* Editor tab switcher */}
 							<div className="EditTaskModalTabHeader">
-								<div onClick={() => handleTabSwitch('liveEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'liveEditor' ? '-active' : ''}`}>{t("liveEditor")}</div>
-								<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
+								<div className="EditTaskModalTabHeaderLeftBtnSec">
+									<div onClick={() => handleTabSwitch('liveEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'liveEditor' ? '-active' : ''}`}>{t("liveEditor")}</div>
+									<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
+								</div>
+								<div className="EditTaskModalTabHeaderRightBtnSec">
+									<div className="EditTaskModalTabHeaderOpenCanvasBtn" onClick={handleOpenTaskInCanvasView} aria-placeholder={t("open-in-canvas-view")}>
+										<Network height={16} />
+									</div>
+								</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
 								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !isTaskNote && !activeNote) ? t("quickadd-plugin-choice") : t("file")}:
@@ -952,12 +1102,36 @@ const EditTaskContent: React.FC<{
 							</div>
 
 							{/* Child Tasks */}
-							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
+							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks-depends-on")}</label>
 							<div className="EditTaskModalChildTasksContainer">
-								Coming soon...
+								<input
+									type="text"
+									ref={childTaskInputRef}
+									className="EditTaskModalChildTaskInput"
+									placeholder={t("search-for-task")}
+									value={''}
+									onChange={(e) => { e.preventDefault(); }}
+								/>
+								{/* Here I want to show all the depends on tasks */}
+								<div className="EditTaskModalChildTasksList">
+									{dependsOn.map((taskId) => (
+										<div key={taskId} className="EditTaskModalChildTasksListItem">
+											<div className="EditTaskModalChildTasksListItemFooter">
+												<div className="EditTaskModalChildTasksListItemIdSec">
+													<div className="EditTaskModalChildTasksListItemIdLabel">Task Id : </div>
+													<span className="EditTaskModalChildTasksListItemIdValue">{taskId}</span>
+												</div>
+												<div className="EditTaskModalChildTasksListItemFooterBtns">
+													<button className="EditTaskModalChildTasksListItemEditBtn" onClick={() => handleOpenChildTaskModal(taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
+													<button className="EditTaskModalChildTasksListItemDeleteBtn" onClick={() => handleRemoveChildTask(taskId)}><DeleteIcon size={20} /></button>
+												</div>
+											</div>
+											<div className="EditTaskModalChildTasksListItemTitle" ref={(el) => { childTaskTitleRefs.current[taskId] = el; }}></div>
+										</div>
+									))}
+								</div>
 							</div>
 						</div>
-
 
 						<div className="EditTaskModalHomeFooterBtnSec">
 							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
@@ -1148,7 +1322,6 @@ export class AddOrEditTaskModal extends Modal {
 
 		// Some processing, if this is a Task-Note
 		let noteContent: string = "";
-		console.log("isTaskNote: ", this.isTaskNote, " | filePath: ", this.filePath);
 		if (this.isTaskNote && this.filePath && this.filePath.trim() !== "") {
 			noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
 		} else {
