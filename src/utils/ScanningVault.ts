@@ -660,6 +660,30 @@ export function extractTitle(text: string): string {
 	return text.replace(/^- \[.\]\s*/, "");
 }
 
+export function extractTaskId(text: string): string {
+	let idMatch = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
+	);
+	console.log("ID Match using emoji regex:", idMatch);
+	if (idMatch && idMatch[1]) {
+		return idMatch[1].trim();
+	}
+
+	idMatch = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex
+	);
+	if (idMatch && idMatch[1]) {
+		return idMatch[1].trim();
+	}
+
+	idMatch = text.match(/\@id\(\s*(.*?)\)/);
+	if (idMatch && idMatch[1]) {
+		return idMatch[1].trim();
+	}
+
+	return "";
+}
+
 // New function to extract task body
 export function extractBody(
 	lines: string[],
@@ -927,6 +951,33 @@ export function extractReminder(
 	}
 
 	return "";
+}
+
+export function extractDependsOn(text: string): string[] {
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex
+	);
+	if (match && match[1]) {
+		return match;
+	}
+
+	match = text.match(/\[depends on::\s*(.*?)\]/);
+	if (match && match[1]) {
+		return match[1]
+			.split(",")
+			.map((id) => id.trim())
+			.filter((id) => id.length > 0);
+	}
+
+	match = text.match(/\@dependsOn\(\s*(.*?)\s*\)/);
+	if (match && match[1]) {
+		return match[1]
+			.split(",")
+			.map((id) => id.trim())
+			.filter((id) => id.length > 0);
+	}
+
+	return [];
 }
 
 // Extract completion date-time value
