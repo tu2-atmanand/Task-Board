@@ -1,4 +1,4 @@
-import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
+// /src/utils/TaskContentFormatter.ts
 
 import TaskBoard from "main";
 import {
@@ -14,6 +14,7 @@ import {
 	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
+import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
 
 export interface cursorLocation {
 	lineNumber: number;

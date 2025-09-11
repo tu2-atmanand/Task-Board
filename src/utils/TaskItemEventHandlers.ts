@@ -14,7 +14,7 @@ import { moment as _moment } from "obsidian";
 import { t } from "./lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
-import { bugReporter } from "src/services/OpenModals";
+import { bugReporter, openEditTaskModal } from "src/services/OpenModals";
 import { TasksApi } from "src/services/tasks-plugin/api";
 import { isTaskNotePresentInTags } from "./TaskNoteUtils";
 
@@ -184,49 +184,50 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 		EditButtonMode.PopUp
 	) {
 		const isTaskNote = isTaskNotePresentInTags(task.tags);
-		const editTaskModal = new AddOrEditTaskModal(
-			plugin,
-			(updatedTask, quickAddPluginChoice) => {
-				updatedTask.filePath = task.filePath;
-				// Update the task in the file and JSON
-				updateTaskInFile(plugin, updatedTask, task)
-					.then(() => {
-						const currentFile = plugin.app.vault.getFileByPath(
-							task.filePath
-						);
-						plugin.realTimeScanning.processAllUpdatedFiles(
-							currentFile
-						);
-					})
-					.catch((error) => {
-						// bugReporter(
-						// 	plugin,
-						// 	"Error updating task in file",
-						// 	error as string,
-						// 	"TaskItemEventHandlers.ts/handleEditTask"
-						// );
-						console.error(
-							"TaskItemEventHandlers.ts : Error updating task in file",
-							error
-						);
-					});
+		openEditTaskModal(plugin, task, isTaskNote);
+		// const editTaskModal = new AddOrEditTaskModal(
+		// 	plugin,
+		// 	(updatedTask, quickAddPluginChoice) => {
+		// 		updatedTask.filePath = task.filePath;
+		// 		// Update the task in the file and JSON
+		// 		updateTaskInFile(plugin, updatedTask, task)
+		// 			.then(() => {
+		// 				const currentFile = plugin.app.vault.getFileByPath(
+		// 					task.filePath
+		// 				);
+		// 				plugin.realTimeScanning.processAllUpdatedFiles(
+		// 					currentFile
+		// 				);
+		// 			})
+		// 			.catch((error) => {
+		// 				// bugReporter(
+		// 				// 	plugin,
+		// 				// 	"Error updating task in file",
+		// 				// 	error as string,
+		// 				// 	"TaskItemEventHandlers.ts/handleEditTask"
+		// 				// );
+		// 				console.error(
+		// 					"TaskItemEventHandlers.ts : Error updating task in file",
+		// 					error
+		// 				);
+		// 			});
 
-				// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
+		// 		// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 
-				// setTasks((prevTasks) =>
-				// 	prevTasks.map((task) =>
-				// 		task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-				// 	)
-				// );
-				// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
-			},
-			isTaskNote,
-			false,
-			true,
-			task,
-			task.filePath
-		);
-		editTaskModal.open();
+		// 		// setTasks((prevTasks) =>
+		// 		// 	prevTasks.map((task) =>
+		// 		// 		task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+		// 		// 	)
+		// 		// );
+		// 		// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
+		// 	},
+		// 	isTaskNote,
+		// 	false,
+		// 	true,
+		// 	task,
+		// 	task.filePath
+		// );
+		// editTaskModal.open();
 	} else if (
 		plugin.settings.data.globalSettings.editButtonAction ===
 		EditButtonMode.NoteInTab
