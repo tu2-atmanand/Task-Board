@@ -279,16 +279,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
 						<Bot size={20} />
 					</button> */}
-					{/* <select
-						className="taskBoardViewDropdown"
-						value={viewType}
-						onChange={(e) => setViewType(e.target.value as ViewType)}
-					>
-						<option value="kanban">Kanban</option>
-						<option value="list">List</option>
-						<option value="table">Table</option>
-						<option value="canvas">Canvas</option>
-					</select> */}
+					{plugin.settings.data.globalSettings.experimentalFeatures && (
+						<select
+							className="taskBoardViewDropdown"
+							value={viewType}
+							onChange={(e) => setViewType(e.target.value as ViewType)}
+						>
+							<option value="kanban">Kanban</option>
+							<option value="list">List</option>
+							<option value="table">Table</option>
+							<option value="canvas">Canvas</option>
+						</select>
+					)}
 					<button className="RefreshBtn" aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>

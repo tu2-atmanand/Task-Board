@@ -1002,7 +1002,7 @@ const EditTaskContent: React.FC<{
 
 	const handleOpenTaskInCanvasView = () => {
 		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
-			new Notice(t("enable-experimental-features"));
+			new Notice(t("enable-experimental-features-message"));
 			return;
 		}
 
