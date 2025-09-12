@@ -270,13 +270,13 @@ const en: Lang = {
 	"link-parent-child-tasks": "Link parent-child tasks",
 	"pin-tasks-on-top-in-each-column-upcoming": "Pin tasks on top in each column (upcoming)",
 	"manual-sorting-inside-each-column-upcoming": "Manual sorting inside each column (upcoming)",
-	"canvas-view-upcoming": "Canvas view (upcoming)",
-	"open-in-canvas-view": "Open in canvas view",
+	"map-view-upcoming": "Map view (upcoming)",
+	"open-in-map-view": "Open in map view",
 	"enable-experimental-features-message": "This is an experimental feature released in this version. Please enable experimental feature from setting if you want to test it out.",
 	"enable-experimental-features": "Enable experimental features",
 	"enable-experimental-features-info-1": "Enable this setting to test out the experimental features.",
 	"enable-experimental-features-info-2": "Although these features have been completely developed, I need to make sure that they are working fine in different environments and setups. Hence, if you are willing to help in testing, enable this setting and test out the features released as experimental features with this release. Share whatever bugs you find or any suggestions you have in mind. After thorough testing, these features will be released for production use in the next version release.",
-	"canvas-view": "Canvas view",
+	"map-view": "Map view",
 };
 
 export default en;

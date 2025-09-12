@@ -14,10 +14,10 @@ import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardAc
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanBoard";
-import CanvasView from "./CanvasView";
+import MapView from "./MapView";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
-type ViewType = "kanban" | "list" | "table" | "canvas";
+type ViewType = "kanban" | "list" | "table" | "map";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -288,7 +288,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							<option value="kanban">Kanban</option>
 							<option value="list">List</option>
 							<option value="table">Table</option>
-							<option value="canvas">Canvas</option>
+							<option value="map">Map</option>
 						</select>
 					)}
 					<button className="RefreshBtn" aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
@@ -309,8 +309,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							loading={loading}
 							freshInstall={freshInstall}
 						/>
-					) : viewType === "canvas" ? (
-						<CanvasView
+					) : viewType === "map" ? (
+						<MapView
 							plugin={plugin}
 							boards={boards}
 							activeBoardIndex={activeBoardIndex}

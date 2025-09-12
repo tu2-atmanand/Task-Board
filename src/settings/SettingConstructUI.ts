@@ -366,7 +366,7 @@ export class SettingsManager {
 						t("manual-sorting-inside-each-column-upcoming") +
 						"</li>" +
 						"<li>" +
-						t("canvas-view-upcoming") +
+						t("map-view-upcoming") +
 						"</li>" +
 						"</ul>"
 				)

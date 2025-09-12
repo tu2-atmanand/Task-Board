@@ -18,16 +18,16 @@ import TaskItem from './TaskItem';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 
-type CanvasViewProps = {
+type MapViewProps = {
 	plugin: TaskBoard;
 	boards: Board[];
 	activeBoardIndex: number;
 	allTasksArranged: taskItem[][];
 };
 
-const STORAGE_KEY = 'taskboard_canvas_positions';
+const STORAGE_KEY = 'taskboard_map_positions';
 
-export const CanvasView: React.FC<CanvasViewProps> = ({
+export const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged
 }) => {
 	// Load positions from localStorage
@@ -78,9 +78,9 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
 	}, [nodes]);
 
 	return (
-		<div className="canvasView">
+		<div className="mapView">
 			<ReactFlowProvider>
-				<div className="canvasViewContainer" style={{ width: '100%', height: '80vh' }}>
+				<div className="mapViewContainer" style={{ width: '100%', height: '80vh' }}>
 					<ReactFlow
 						nodes={nodes}
 						edges={[]} // No linking initially
@@ -101,4 +101,4 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
 	);
 };
 
-export default CanvasView;
+export default MapView;

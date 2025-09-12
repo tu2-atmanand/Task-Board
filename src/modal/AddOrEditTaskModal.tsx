@@ -1000,16 +1000,16 @@ const EditTaskContent: React.FC<{
 		}
 	}
 
-	const handleOpenTaskInCanvasView = () => {
+	const handleOpenTaskInMapView = () => {
 		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
 			new Notice(t("enable-experimental-features-message"));
 			return;
 		}
 
-		console.log("Opening task in canvas view:", newFilePath);
+		console.log("Opening task in map view:", newFilePath);
 		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
 		// if (file && file instanceof TFile) {
-		// 	plugin.app.workspace.openLinkText('', newFilePath, 'canvas');
+		// 	plugin.app.workspace.openLinkText('', newFilePath, 'map');
 		// } else {
 		// 	new Notice(t("file-not-found"));
 		// }
@@ -1043,7 +1043,7 @@ const EditTaskContent: React.FC<{
 									<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 								</div>
 								<div className="EditTaskModalTabHeaderRightBtnSec">
-									<div className="EditTaskModalTabHeaderOpenCanvasBtn" onClick={handleOpenTaskInCanvasView} aria-placeholder={t("open-in-canvas-view")}>
+									<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
 										<Network height={16} />
 									</div>
 								</div>
