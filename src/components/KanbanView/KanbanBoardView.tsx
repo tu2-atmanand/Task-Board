@@ -1,6 +1,6 @@
 // src/components/KanbanBoard.tsx
 
-import { Board } from "../interfaces/BoardConfigs";
+import { Board } from "../../interfaces/BoardConfigs";
 import React, { memo } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
