@@ -17,8 +17,6 @@ import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
-type ViewType = "kanban" | "list" | "table" | "map";
-
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
@@ -26,7 +24,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
-	const [viewType, setViewType] = useState<ViewType>("kanban");
+	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewedType || "kanban"); // BUG : I cannot able to use `plugin.settings.data.globalSettings.lastViewedType` value here, because, when the MapView component loads first time, it doesnt show any taskItems.
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
@@ -206,6 +204,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		setFilteredTasksPerColumn(filtered);
 	}
 
+	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+		const newViewType = e.target.value;
+		setViewType(newViewType);
+		plugin.settings.data.globalSettings.lastViewedType = newViewType;
+		plugin.saveSettings();
+	}
+
 
 	return (
 		<div className="taskBoardView">
@@ -283,7 +288,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<select
 							className="taskBoardViewDropdown"
 							value={viewType}
-							onChange={(e) => setViewType(e.target.value as ViewType)}
+							onChange={(e) => { handleViewTypeChange(e); }}
 						>
 							<option value="kanban">Kanban</option>
 							<option value="list">List</option>

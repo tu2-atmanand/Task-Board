@@ -153,6 +153,7 @@ export interface globalSettingsData {
 	autoAddUniqueID: boolean;
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
+	lastViewedType: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -439,6 +440,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			autoAddUniqueID: false,
 			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 			experimentalFeatures: false,
+			lastViewedType: "kanban",
 		},
 	},
 };
