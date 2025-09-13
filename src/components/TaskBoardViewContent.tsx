@@ -13,8 +13,8 @@ import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
-import KanbanBoard from "./KanbanBoard";
-import MapView from "./MapView";
+import KanbanBoard from "./KanbanView/KanbanBoardView";
+import MapView from "./MapView/MapView";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
 type ViewType = "kanban" | "list" | "table" | "map";

@@ -11,7 +11,7 @@ import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
 import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
-import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
+import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { buildTaskFromRawContent, generateTaskId } from "src/utils/ScanningVault";
 import { DeleteIcon, EditIcon, FileInput, Network, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
@@ -23,7 +23,7 @@ import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUti
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNoteUtils";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
-import { applyIdToTaskInNote, getTaskFromId, updateTaskInFile } from "src/utils/TaskItemUtils";
+import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
