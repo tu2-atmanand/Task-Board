@@ -218,7 +218,7 @@ export const openEditTaskModal = async (
 		(updatedTask: taskItem) => {
 			updatedTask.filePath = existingTask.filePath;
 			// Update the task in the file and JSON
-			updateTaskInFile(plugin, updatedTask, updatedTask)
+			updateTaskInFile(plugin, updatedTask, existingTask)
 				.then(() => {
 					const currentFile = plugin.app.vault.getFileByPath(
 						updatedTask.filePath
