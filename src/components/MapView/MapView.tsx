@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
 	ReactFlow,
 	ReactFlowProvider,
@@ -11,8 +11,6 @@ import {
 	Node,
 	Edge,
 	MiniMap,
-	applyEdgeChanges,
-	applyNodeChanges,
 	Connection
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -22,17 +20,28 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
 import CustomNodeResizer from './CustomNodeResizer';
+import { updateTaskInFile } from 'src/utils/TaskItemUtils';
+import { debounce } from 'obsidian';
 
 type MapViewProps = {
 	plugin: TaskBoard;
 	boards: Board[];
 	activeBoardIndex: number;
 	allTasksArranged: taskItem[][];
+	// loading: boolean;
+	// freshInstall: boolean;
+	focusOnTaskId?: string;
 };
 
-const STORAGE_KEY = 'taskboard_map_positions';
-const EDGE_STORAGE_KEY = 'taskboard_map_edges';
+type viewPort = {
+	x: number;
+	y: number;
+	zoom: number;
+}
+
+const NODE_POSITIONS_STORAGE_KEY = 'taskboard_map_positions'; // now stores board-wise
 const NODE_SIZE_STORAGE_KEY = 'taskboard_map_node_sizes';
+const VIEWPORT_STORAGE_KEY = 'taskboard_map_viewport';
 
 const nodeTypes = {
 	CustomNodeResizer,
@@ -40,22 +49,16 @@ const nodeTypes = {
 };
 
 export const MapView: React.FC<MapViewProps> = ({
-	plugin, boards, activeBoardIndex, allTasksArranged
+	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
-	// Load positions from localStorage
+	console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
+	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
 		try {
-			return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') as Record<string, { x: number; y: number; }>;
+			const allBoardPositions = JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}') as Record<string, Record<string, { x: number; y: number; }>>;
+			return allBoardPositions[String(activeBoardIndex)] || {};
 		} catch {
 			return {};
-		}
-	};
-	// Load edges from localStorage
-	const loadEdges = () => {
-		try {
-			return JSON.parse(localStorage.getItem(EDGE_STORAGE_KEY) || '[]') as Edge[];
-		} catch {
-			return [];
 		}
 	};
 	// Load node sizes from localStorage
@@ -66,9 +69,18 @@ export const MapView: React.FC<MapViewProps> = ({
 			return {};
 		}
 	};
+	// Viewport state
+	const loadViewport = (): viewPort => {
+		try {
+			return JSON.parse(localStorage.getItem(VIEWPORT_STORAGE_KEY) || '{}') as viewPort;
+		} catch {
+			return { x: 10, y: 10, zoom: 1.5 };
+		}
+	};
 
 	const [positions, setPositions] = useState(loadPositions);
 	const [nodeSizes, setNodeSizes] = useState(loadNodeSizes());
+	const [viewport, setViewport] = useState(loadViewport);
 	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	// const reactFlowInstance = useReactFlow();
@@ -149,12 +161,23 @@ export const MapView: React.FC<MapViewProps> = ({
 
 	// Persist updated positions and sizes
 	useEffect(() => {
+
+		// Load all board positions from storage
+		let allBoardPositions: Record<string, Record<string, { x: number; y: number; }>> = {};
+		try {
+			allBoardPositions = JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}');
+		} catch {
+			allBoardPositions = {};
+		}
+
+		// Update positions for current board
 		const posMap = nodes.reduce((acc, n) => {
 			acc[n.id] = { x: n.position?.x || 0, y: n.position?.y || 0 };
 			return acc;
 		}, {} as Record<string, { x: number; y: number; }>);
 		setPositions(posMap);
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(posMap));
+		allBoardPositions[String(activeBoardIndex)] = posMap;
+		localStorage.setItem(NODE_POSITIONS_STORAGE_KEY, JSON.stringify(allBoardPositions));
 
 		const sizeMap = nodes.reduce((acc, n) => {
 			acc[n.id] = { width: n.width ?? 300, height: n.height ?? 80 };
@@ -176,44 +199,122 @@ export const MapView: React.FC<MapViewProps> = ({
 		console.log('Connecting', sourceNodeId, 'to', targetNodeId);
 		console.log('Source Task:', allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId));
 		console.log('Target Task:', allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId));
-		// Implement your logic here to add dependency to the source task
-		// For example:
-		// plugin.addDependencyToTask(sourceNodeId, targetNodeId);
-		// Or update the dependsOn property of the source task
-		// console.log('Connecting', sourceNodeId, 'to', targetNodeId);
+
+		const sourceTask = allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId);
+		if (!sourceTask) return;
+		const targetTask = allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId);
+		if (!targetTask) return;
+
+		const updatedSourceTask = { ...sourceTask };
+
+		const targetLegacyId = targetTask.legacyId ? targetTask.legacyId : String(targetTask.id);
+		if (!Array.isArray(updatedSourceTask.dependsOn)) {
+			updatedSourceTask.dependsOn = [];
+		}
+		if (!updatedSourceTask.dependsOn.includes(targetLegacyId)) {
+			updatedSourceTask.dependsOn.push(targetLegacyId);
+			updateTaskInFile(plugin, updatedSourceTask, sourceTask);
+		}
 	}
 
-	// Optionally, handle node resize events if your node type supports it
-	// You may need to implement a custom node type with resize handles
+	// Debounce utility
+	// function debounce<T extends (...args: any[]) => void>(fn: T, delay: number): T {
+	//   let timer: ReturnType<typeof setTimeout> | null = null;
+	//   return ((...args: any[]) => {
+	//     if (timer) clearTimeout(timer);
+	//     timer = setTimeout(() => fn(...args), delay);
+	//   }) as T;
+	// }
+
+	// function throttle<T extends (...args: any[]) => void>(fn: T, delay: number): T {
+	// 	let lastCall = 0;
+	// 	let timer: ReturnType<typeof setTimeout> | null = null;
+	// 	let lastArgs: any[] | null = null;
+
+	// 	return ((...args: any[]) => {
+	// 		const now = Date.now();
+	// 		if (now - lastCall >= delay) {
+	// 			lastCall = now;
+	// 			fn(...args);
+	// 		} else {
+	// 			lastArgs = args;
+	// 			if (!timer) {
+	// 				timer = setTimeout(() => {
+	// 					lastCall = Date.now();
+	// 					fn(...(lastArgs as any[]));
+	// 					timer = null;
+	// 					lastArgs = null;
+	// 				}, delay - (now - lastCall));
+	// 			}
+	// 		}
+	// 	}) as T;
+	// }
+
+	// const throttledSetViewportStorage = throttle((vp: viewPort) => {
+	// 	console.log('Saving viewport:', vp);
+	// 	localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(vp));
+	// }, 20000);
+
+	const lastViewportSaveTime = useRef(0);
+	const debouncedSetViewportStorage = debounce((vp: viewPort) => {
+		const now = Date.now();
+		if (now - lastViewportSaveTime.current > 2000) {
+			console.log('Saving viewport:', vp);
+			localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(vp));
+			lastViewportSaveTime.current = now;
+		}
+	}, 2000);
 
 	return (
-		<div className="mapView">
-			<ReactFlowProvider>
-				<div className="mapViewContainer" style={{ width: '100%', height: '80vh' }}>
-					<ReactFlow
-						nodes={nodes}
-						edges={edges}
-						nodeTypes={nodeTypes}
-						onNodesChange={onNodesChange}
-						// onEdgesChange={onEdgesChange}
-						onConnect={onConnect}
-						fitView={true}
-						panOnScroll={false}
-						zoomOnPinch={true}
-						zoomOnScroll={true}
-						onlyRenderVisibleElements={true}
-						onInit={(instance) => {
-							// Set initial viewport here
-							// instance.setViewport({ x: positions[0].x, y: positions[0].y, zoom: 2 });
-							instance.setViewport({ x: 10, y: 10, zoom: 1.5 });
-						}}
-					>
-						<Controls />
-						<MiniMap />
-						<Background gap={12} size={1} color='transparent' />
-					</ReactFlow>
-				</div>
-			</ReactFlowProvider>
+		<div className='mapViewWrapper'>
+			<div className="mapView">
+				<ReactFlowProvider>
+					<div className="mapViewContainer" style={{ width: '100%', height: '80vh' }}>
+						<ReactFlow
+							nodes={nodes}
+							edges={edges}
+							nodeTypes={nodeTypes}
+							onNodesChange={onNodesChange}
+							// onEdgesChange={onEdgesChange}
+							onConnect={onConnect}
+							// fitView={true}
+							panOnScroll={false}
+							zoomOnPinch={true}
+							zoomOnScroll={true}
+							onlyRenderVisibleElements={true}
+							defaultViewport={viewport}
+							onMoveEnd={(_, vp) => {
+								setViewport(vp);
+								debouncedSetViewportStorage(vp);
+								// throttledSetViewportStorage(vp);
+							}}
+							onInit={(instance) => {
+								if (focusOnTaskId) {
+									const node = nodes.find(n => n.id === focusOnTaskId);
+									if (node) {
+										const newVp: viewPort = {
+											x: node.position.x - 100,
+											y: node.position.y - 100,
+											zoom: 1.5
+										};
+										instance.setViewport(newVp);
+										setViewport(newVp);
+										// localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(newVp));
+										debouncedSetViewportStorage(newVp);
+										// throttledSetViewportStorage(newVp);
+										return;
+									}
+								}
+								instance.setViewport(viewport);
+							}}
+						>
+							<Controls />
+							<MiniMap />
+							<Background gap={12} size={1} color='transparent' />
+						</ReactFlow>
+					</div>
+				</ReactFlowProvider>
+			</div>
 		</div>
 	);
 };
