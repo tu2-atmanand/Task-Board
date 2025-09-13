@@ -291,8 +291,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							onChange={(e) => { handleViewTypeChange(e); }}
 						>
 							<option value="kanban">Kanban</option>
-							<option value="list">List</option>
-							<option value="table">Table</option>
+							{/* <option value="list">List</option>
+							<option value="table">Table</option> */}
 							<option value="map">Map</option>
 						</select>
 					)}
@@ -315,12 +315,33 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							freshInstall={freshInstall}
 						/>
 					) : viewType === "map" ? (
-						<MapView
-							plugin={plugin}
-							boards={boards}
-							activeBoardIndex={activeBoardIndex}
-							allTasksArranged={allTasksArrangedPerColumn}
-						/>
+						loading ? (
+							<div className="loadingContainer" >
+								{freshInstall ? (
+									<h2 className="initializationMessage" >
+										{t("fresh-install-1")}
+										<br />
+										<br />
+										{t("fresh-install-2")}
+										<br />
+										<br />
+										{t("fresh-install-3")}
+									</h2>
+								) : (
+									<>
+										<div className="spinner"></div>
+										<p>{t("loading-tasks")}</p>
+									</>
+								)}
+							</div>
+						) : (
+							<MapView
+								plugin={plugin}
+								boards={boards}
+								activeBoardIndex={activeBoardIndex}
+								allTasksArranged={allTasksArrangedPerColumn}
+							/>
+						)
 					) : (
 						<div className="emptyBoardMessage">
 							{/* Placeholder for other view types */}
