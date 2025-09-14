@@ -4077,7 +4077,7 @@ svg.react-flow__connectionline {
 	color: var(--xy-node-color, var(--xy-node-color-default));
 	text-align: center;
 	border: var(--xy-node-border, var(--xy-node-border-default));
-	background-color: var(--xy-node-background-color, var(--xy-node-background-color-default));
+	/* background-color: var(--xy-node-background-color, var(--xy-node-background-color-default)); */
 }
 
 .react-flow__node-input.selectable:hover,
