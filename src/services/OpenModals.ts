@@ -48,10 +48,9 @@ export const openAddNewTaskInCurrentFileModal = (
 		plugin,
 		(newTask: taskItem, quickAddPluginChoice: string) => {
 			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
+				plugin.realTimeScanning.processAllUpdatedFiles(
 					newTask.filePath
 				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 			});
 
 			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
@@ -103,10 +102,9 @@ export const openAddNewTaskModal = (
 				);
 			} else {
 				await addTaskInNote(plugin, newTask, false).then(() => {
-					const currentFile = plugin.app.vault.getFileByPath(
+					plugin.realTimeScanning.processAllUpdatedFiles(
 						newTask.filePath
 					);
-					plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 				});
 			}
 
@@ -178,12 +176,8 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							.create(newTask.filePath, noteContent)
 							.then(() => {
 								// This is required to rescan the updated file and refresh the board.
-								const currentFile =
-									plugin.app.vault.getFileByPath(
-										newTask.filePath
-									);
 								plugin.realTimeScanning.processAllUpdatedFiles(
-									currentFile
+									newTask.filePath
 								);
 							});
 					}
@@ -220,10 +214,9 @@ export const openEditTaskModal = async (
 			// Update the task in the file and JSON
 			updateTaskInFile(plugin, updatedTask, existingTask)
 				.then(() => {
-					const currentFile = plugin.app.vault.getFileByPath(
+					plugin.realTimeScanning.processAllUpdatedFiles(
 						updatedTask.filePath
 					);
-					plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 				})
 				.catch((error) => {
 					// bugReporter(
@@ -273,11 +266,8 @@ export const openEditTaskNoteModal = (
 					await updateTaskNoteFrontmatter(plugin, updatedTask).then(
 						() => {
 							// This is required to rescan the updated file and refresh the board.
-							const currentFile = plugin.app.vault.getFileByPath(
-								updatedTask.filePath
-							);
 							plugin.realTimeScanning.processAllUpdatedFiles(
-								currentFile
+								updatedTask.filePath
 							);
 						}
 					);
@@ -288,11 +278,8 @@ export const openEditTaskNoteModal = (
 						newTaskContent
 					).then(() => {
 						// This is required to rescan the updated file and refresh the board.
-						const currentFile = plugin.app.vault.getFileByPath(
-							updatedTask.filePath
-						);
 						plugin.realTimeScanning.processAllUpdatedFiles(
-							currentFile
+							updatedTask.filePath
 						);
 					});
 				}

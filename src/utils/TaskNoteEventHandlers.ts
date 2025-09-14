@@ -41,11 +41,8 @@ export const handleTaskNoteEdit = (plugin: TaskBoard, task: taskItem) => {
 		// 					updatedTask
 		// 				).then(() => {
 		// 					// This is required to rescan the updated file and refresh the board.
-		// 					const currentFile = plugin.app.vault.getFileByPath(
-		// 						updatedTask.filePath
-		// 					);
 		// 					plugin.realTimeScanning.processAllUpdatedFiles(
-		// 						currentFile
+		// 						updatedTask.filePath
 		// 					);
 		// 				});
 		// 			} else {
@@ -55,11 +52,8 @@ export const handleTaskNoteEdit = (plugin: TaskBoard, task: taskItem) => {
 		// 					newTaskContent
 		// 				).then(() => {
 		// 					// This is required to rescan the updated file and refresh the board.
-		// 					const currentFile = plugin.app.vault.getFileByPath(
-		// 						updatedTask.filePath
-		// 					);
 		// 					plugin.realTimeScanning.processAllUpdatedFiles(
-		// 						currentFile
+		// 						updatedTask.filePath
 		// 					);
 		// 				});
 		// 			}
@@ -117,10 +111,9 @@ export const handleTaskNoteStatusChange = async (
 		// Update frontmatter with new status
 		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			const currentFile = plugin.app.vault.getFileByPath(
+			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
 			);
-			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 		});
 
 		new Notice(`Task note status updated to ${newStatus}`);
@@ -145,10 +138,9 @@ export const handleTaskNotePropertyUpdate = async (
 		// Update frontmatter with all updated properties
 		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			const currentFile = plugin.app.vault.getFileByPath(
+			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
 			);
-			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 		});
 
 		new Notice("Task note properties updated");
@@ -248,10 +240,9 @@ export const handleTaskNoteBodyChange = async (
 			updatedLines.join("\n")
 		).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			const currentFile = plugin.app.vault.getFileByPath(
+			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
 			);
-			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 		});
 	} catch (error) {
 		console.error(

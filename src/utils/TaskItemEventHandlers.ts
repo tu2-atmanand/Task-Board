@@ -33,10 +33,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				status: newStatus,
 			};
 			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
-					task.filePath
-				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 
 				// // Move from Completed to Pending
 				// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
@@ -55,11 +52,8 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			if (!isTaskRecurring(task.title)) {
 				updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 					() => {
-						const currentFile = plugin.app.vault.getFileByPath(
-							task.filePath
-						);
 						plugin.realTimeScanning.processAllUpdatedFiles(
-							currentFile
+							taskWithUpdatedStatus.filePath
 						);
 
 						// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
@@ -77,11 +71,8 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 				// useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 				// 	.then(() => {
-				// 		const currentFile = plugin.app.vault.getFileByPath(
-				// 			task.filePath
-				// 		);
 				// 		plugin.realTimeScanning.processAllUpdatedFiles(
-				// 			currentFile
+				// 			task.filePath
 				// 		);
 				// 	})
 				// 	.catch((error) => {
@@ -98,10 +89,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	} else {
 		useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 			.then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
-					task.filePath
-				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 
 				// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 				// 	// Move from Pending to Completed
@@ -131,10 +119,9 @@ export const handleSubTasksChange = (
 	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated.
 	updateTaskInFile(plugin, updatedTask, oldTask)
 		.then(() => {
-			const currentFile = plugin.app.vault.getFileByPath(
+			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
 			);
-			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 		})
 		.catch((error) => {
 			// bugReporter(
@@ -158,10 +145,7 @@ export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
 		mssg,
 		onConfirm: () => {
 			deleteTaskFromFile(plugin, task).then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
-					task.filePath
-				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 			});
 
 			// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
@@ -192,11 +176,8 @@ export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
 		// 		// Update the task in the file and JSON
 		// 		updateTaskInFile(plugin, updatedTask, task)
 		// 			.then(() => {
-		// 				const currentFile = plugin.app.vault.getFileByPath(
-		// 					task.filePath
-		// 				);
 		// 				plugin.realTimeScanning.processAllUpdatedFiles(
-		// 					currentFile
+		// 					updatedTask.filePath
 		// 				);
 		// 			})
 		// 			.catch((error) => {

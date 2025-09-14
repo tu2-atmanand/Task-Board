@@ -248,10 +248,7 @@ export const archiveTask = async (
 
 			// Now delete the task from its original file
 			await deleteTaskFromFile(plugin, task).then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
-					task.filePath
-				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 			});
 
 			// await deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
