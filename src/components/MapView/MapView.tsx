@@ -138,43 +138,44 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
+		console.log("Are all the nodes re-calculating when the allTasksArranged changes or only specific ones?\nAllTasksArranged:", allTasksArranged, "\nPositions:", positions, "\nNodeSizes:", nodeSizes);
 		const nodes: Node[] = [];
 		// const allTasksFlat: taskItem[] = allTasksArranged.flat();
-	let xOffset = 0;
-	const columnSpacing = 350;
-	const rowSpacing = 120;
-	allTasksArranged.forEach((columnTasks, colIdx) => {
-		let yOffset = 0;
-		columnTasks.forEach((task, rowIdx) => {
+		let xOffset = 0;
+		const columnSpacing = 350;
+		const rowSpacing = 120;
+		allTasksArranged.forEach((columnTasks, colIdx) => {
+			let yOffset = 0;
+			columnTasks.forEach((task, rowIdx) => {
 				if (task.legacyId) {
-			const id = task.legacyId ? task.legacyId : String(task.id);
-			const savedPos = positions[id] || {};
-			const savedSize = nodeSizes[id] || {};
+					const id = task.legacyId ? task.legacyId : String(task.id);
+					const savedPos = positions[id] || {};
+					const savedSize = nodeSizes[id] || {};
 					nodes.push({
-				id,
-				type: 'ResizableNodeSelected',
-				data: {
-					label: <TaskItem
-						key={task.id}
-						plugin={plugin}
-						taskKey={task.id}
-						task={task}
-						activeBoardSettings={activeBoardSettings}
-					/>
-				},
-				position: {
-					x: savedPos.x ?? xOffset,
-					y: savedPos.y ?? yOffset
-				},
-				width: savedSize.width ?? 300,
-				height: savedSize.height ?? 80,
-			});
-			yOffset += rowSpacing;
+						id,
+						type: 'ResizableNodeSelected',
+						data: {
+							label: <TaskItem
+								key={task.id}
+								plugin={plugin}
+								taskKey={task.id}
+								task={task}
+								activeBoardSettings={activeBoardSettings}
+							/>
+						},
+						position: {
+							x: savedPos.x ?? xOffset,
+							y: savedPos.y ?? yOffset
+						},
+						width: savedSize.width ?? 300,
+						height: savedSize.height ?? 80,
+					});
+					yOffset += rowSpacing;
 				}
 
+			});
+			xOffset += columnSpacing;
 		});
-		xOffset += columnSpacing;
-	});
 		return nodes;
 	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, positions]);
 
@@ -261,21 +262,25 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 
 		if (changed) {
-		setNodeSizes(sizeMap);
-		localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeMap));
+			setNodeSizes(sizeMap);
+			localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeMap));
 			prevNodeSizesRef.current = sizeMap;
 		}
 	}, [nodes]);
 
 	// Handle edge creation (connecting nodes)
-	const onConnect = useCallback((params: Connection) => {
-		connectParentToChild(params.source, params.target);
-		// You may want to update the dependsOn property of the source task and trigger a re-render
-	}, []);
+	const onConnect = useMemo<((params: Connection) => void)>(() => {
+		const flattenedTasks = allTasksArranged.flat();
+		return (params: Connection) => {
+			connectParentToChild(params.source, params.target, flattenedTasks);
+			// You may want to update the dependsOn property of the source task and trigger a re-render
+		};
+	}, [allTasksArranged]);
 
 	// Dummy function for connecting parent to child
-	function connectParentToChild(sourceNodeId: string, targetNodeId: string) {
-		const allTasks = allTasksArranged.flat();
+	function connectParentToChild(sourceNodeId: string, targetNodeId: string, allTasks: taskItem[]) {
+		// const allTasks = allTasksArranged.flat();
+		console.log("AllTasksArranged:", allTasksArranged);
 		console.log('Connecting', sourceNodeId, 'to', targetNodeId);
 		console.log('Source Task:', allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId));
 		console.log('Target Task:', allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId));
@@ -298,7 +303,9 @@ const MapView: React.FC<MapViewProps> = ({
 			updatedSourceTask.title = updatedSourceTaskTitle;
 
 			console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-			updateTaskInFile(plugin, updatedSourceTask, sourceTask);
+			updateTaskInFile(plugin, updatedSourceTask, sourceTask).finally(() => {
+				plugin.realTimeScanning.processAllUpdatedFiles(updatedSourceTask.filePath);
+			});
 		}
 	}
 
