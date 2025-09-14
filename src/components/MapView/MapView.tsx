@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import {
 	ReactFlow,
 	ReactFlowProvider,
@@ -56,7 +56,7 @@ const nodeTypes = {
 	ResizableNodeSelected,
 };
 
-export const MapView: React.FC<MapViewProps> = ({
+const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
 	console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
@@ -366,4 +366,4 @@ export const MapView: React.FC<MapViewProps> = ({
 	);
 };
 
-export default MapView;
+export default memo(MapView);
