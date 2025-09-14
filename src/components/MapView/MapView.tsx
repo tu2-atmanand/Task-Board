@@ -22,6 +22,8 @@ import TaskItem from '../KanbanView/TaskItem';
 import CustomNodeResizer from './CustomNodeResizer';
 import { updateTaskInFile } from 'src/utils/TaskItemUtils';
 import { debounce } from 'obsidian';
+import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/types/GlobalVariables';
+import { sanitizeDependsOn } from 'src/utils/TaskContentFormatter';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -33,15 +35,21 @@ type MapViewProps = {
 	focusOnTaskId?: string;
 };
 
-type viewPort = {
+export type viewPort = {
 	x: number;
 	y: number;
 	zoom: number;
 }
 
-const NODE_POSITIONS_STORAGE_KEY = 'taskboard_map_positions'; // now stores board-wise
-const NODE_SIZE_STORAGE_KEY = 'taskboard_map_node_sizes';
-const VIEWPORT_STORAGE_KEY = 'taskboard_map_viewport';
+export type nodeSize = {
+	width: number;
+	height: number;
+}
+
+export type nodePosition = {
+	x: number;
+	y: number;
+}
 
 const nodeTypes = {
 	CustomNodeResizer,
@@ -89,21 +97,22 @@ export const MapView: React.FC<MapViewProps> = ({
 	// 	reactFlowInstance.setViewport({ x: positions[0].x, y: positions[0].y, zoom: 1 }); // TODO : Later store this value and then apply it. Also, a new feature can be added, where user will open this MapView with the position of a selected task. In this case, directly set the viewport to that position, with adequate zoom level.
 	// }, []);
 
-	// Kanban-style initial layout
-	const initialNodes: Node[] = [];
-	const allTasksFlat: taskItem[] = allTasksArranged.flat();
+
+	// Kanban-style initial layout, memoized
+	const initialNodes: Node[] = useMemo(() => {
+		const nodes: Node[] = [];
+		// const allTasksFlat: taskItem[] = allTasksArranged.flat();
 	let xOffset = 0;
 	const columnSpacing = 350;
 	const rowSpacing = 120;
 	allTasksArranged.forEach((columnTasks, colIdx) => {
 		let yOffset = 0;
 		columnTasks.forEach((task, rowIdx) => {
-			if (!task.legacyId) return;
-
+				if (task.legacyId) {
 			const id = task.legacyId ? task.legacyId : String(task.id);
 			const savedPos = positions[id] || {};
 			const savedSize = nodeSizes[id] || {};
-			initialNodes.push({
+					nodes.push({
 				id,
 				type: 'ResizableNodeSelected',
 				data: {
@@ -123,15 +132,25 @@ export const MapView: React.FC<MapViewProps> = ({
 				height: savedSize.height ?? 80,
 			});
 			yOffset += rowSpacing;
+				}
+
 		});
 		xOffset += columnSpacing;
 	});
+		return nodes;
+	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, positions]);
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
+	// Reset nodes when initialNodes changes
+	useEffect(() => {
+		setNodes(initialNodes);
+	}, [initialNodes, setNodes]);
+
 	// Calculate edges from dependsOn property
-	function getEdgesFromTasks(tasks: taskItem[]): Edge[] {
+	function getEdgesFromTasks(): Edge[] {
+		const tasks: taskItem[] = allTasksArranged.flat();
 		const edges: Edge[] = [];
 		const idToTask = new Map<string, taskItem>();
 		tasks.forEach(task => {
@@ -157,13 +176,10 @@ export const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = getEdgesFromTasks(allTasksFlat);
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged]);
 
-	// Persist updated positions and sizes
-	useEffect(() => {
-
-		// Load all board positions from storage
-		let allBoardPositions: Record<string, Record<string, { x: number; y: number; }>> = {};
+	const handleNodePositionChange = () => {
+		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
 		try {
 			allBoardPositions = JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}');
 		} catch {
@@ -174,17 +190,43 @@ export const MapView: React.FC<MapViewProps> = ({
 		const posMap = nodes.reduce((acc, n) => {
 			acc[n.id] = { x: n.position?.x || 0, y: n.position?.y || 0 };
 			return acc;
-		}, {} as Record<string, { x: number; y: number; }>);
+		}, {} as Record<string, nodePosition>);
 		setPositions(posMap);
+		// console.log('Updated positions map:', posMap);
 		allBoardPositions[String(activeBoardIndex)] = posMap;
 		localStorage.setItem(NODE_POSITIONS_STORAGE_KEY, JSON.stringify(allBoardPositions));
+		// console.log('Saved all board positions inside localStorage:', JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}'));
+	};
 
+	// Persist updated positions and sizes
+	const prevNodeSizesRef = useRef<Record<string, { width: number; height: number }>>({});
+
+	// Only save sizes if they have changed
+	useEffect(() => {
 		const sizeMap = nodes.reduce((acc, n) => {
 			acc[n.id] = { width: n.width ?? 300, height: n.height ?? 80 };
 			return acc;
-		}, {} as Record<string, { width: number; height: number; }>);
+		}, {} as Record<string, { width: number; height: number }>);
+
+		// Compare with previous sizes
+		const prevSizes = prevNodeSizesRef.current;
+		let changed = false;
+		for (const id in sizeMap) {
+			if (
+				!prevSizes[id] ||
+				prevSizes[id].width !== sizeMap[id].width ||
+				prevSizes[id].height !== sizeMap[id].height
+			) {
+				changed = true;
+				break;
+			}
+		}
+
+		if (changed) {
 		setNodeSizes(sizeMap);
 		localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeMap));
+			prevNodeSizesRef.current = sizeMap;
+		}
 	}, [nodes]);
 
 	// Handle edge creation (connecting nodes)
@@ -205,14 +247,19 @@ export const MapView: React.FC<MapViewProps> = ({
 		const targetTask = allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId);
 		if (!targetTask) return;
 
-		const updatedSourceTask = { ...sourceTask };
+		const updatedSourceTask = {
+			...sourceTask,
+			dependsOn: Array.isArray(sourceTask.dependsOn) ? [...sourceTask.dependsOn] : []
+		};
 
 		const targetLegacyId = targetTask.legacyId ? targetTask.legacyId : String(targetTask.id);
-		if (!Array.isArray(updatedSourceTask.dependsOn)) {
-			updatedSourceTask.dependsOn = [];
-		}
+		console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedSourceTask.dependsOn.includes(targetLegacyId)) {
 			updatedSourceTask.dependsOn.push(targetLegacyId);
+			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedSourceTask.title, updatedSourceTask.dependsOn);
+			updatedSourceTask.title = updatedSourceTaskTitle;
+
+			console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
 			updateTaskInFile(plugin, updatedSourceTask, sourceTask);
 		}
 	}
