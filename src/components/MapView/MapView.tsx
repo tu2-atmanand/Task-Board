@@ -11,7 +11,8 @@ import {
 	Node,
 	Edge,
 	MiniMap,
-	Connection
+	Connection,
+	MarkerType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -151,6 +152,7 @@ const MapView: React.FC<MapViewProps> = ({
 					const id = task.legacyId ? task.legacyId : String(task.id);
 					const savedPos = positions[id] || {};
 					const savedSize = nodeSizes[id] || {};
+					console.log('Rendering node for task with id:', id, '\nsavedPos:', savedPos, '\nsavedSize:', savedSize);
 					nodes.push({
 						id,
 						type: 'ResizableNodeSelected',
@@ -207,7 +209,13 @@ const MapView: React.FC<MapViewProps> = ({
 							target: depId,
 							type: 'default',
 							animated: false,
-							markerEnd: 'arrowclosed'
+							markerEnd: {
+								type: MarkerType.ArrowClosed, // required property
+								// optional properties
+								color: 'white',
+								height: 30,
+								width: 30,
+							},
 						});
 					}
 				});
