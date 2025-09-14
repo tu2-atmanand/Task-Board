@@ -40,14 +40,10 @@ import {
 	TasksApi,
 } from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
-import { isTaskLine } from "src/utils/CheckBoxUtils";
-import { priorityEmojis } from "src/interfaces/TaskItem";
-import { taskGutterExtension } from "src/editor-extensions/task-operations/gutter-marker";
 import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
-import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -139,7 +135,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
-		deleteAllLocalStorageKeys();
+		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}

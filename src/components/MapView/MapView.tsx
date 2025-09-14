@@ -169,8 +169,10 @@ const MapView: React.FC<MapViewProps> = ({
 							x: savedPos.x ?? xOffset,
 							y: savedPos.y ?? yOffset
 						},
-						width: savedSize.width ?? 300,
-						height: savedSize.height ?? 80,
+						style: {
+							width: savedSize.width ?? 300,
+							height: savedSize.height ?? 80,
+						}
 					});
 					yOffset += rowSpacing;
 				}
