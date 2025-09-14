@@ -59,7 +59,7 @@ const nodeTypes = {
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
-	console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
+	// console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
 		try {
@@ -72,7 +72,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// Load node sizes from localStorage
 	const loadNodeSizes = () => {
 		try {
-			return JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}') as Record<string, { width: number; height: number; }>;
+			return JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}') as Record<string, nodeSize>;
 		} catch {
 			return {};
 		}
@@ -322,6 +322,10 @@ const MapView: React.FC<MapViewProps> = ({
 							edges={edges}
 							nodeTypes={nodeTypes}
 							onNodesChange={onNodesChange}
+							onNodeDragStop={() => {
+								console.log('Node drag stopped');
+								handleNodePositionChange();
+							}}
 							// onEdgesChange={onEdgesChange}
 							onConnect={onConnect}
 							// fitView={true}
