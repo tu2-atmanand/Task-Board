@@ -60,10 +60,17 @@ const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
 	// console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
+
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
+		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
 		try {
-			const allBoardPositions = JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}') as Record<string, Record<string, { x: number; y: number; }>>;
+			allBoardPositions = JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}');
+		} catch {
+			allBoardPositions = {};
+		}
+
+		try {
 			return allBoardPositions[String(activeBoardIndex)] || {};
 		} catch {
 			return {};
@@ -86,9 +93,40 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	};
 
-	const [positions, setPositions] = useState(loadPositions);
-	const [nodeSizes, setNodeSizes] = useState(loadNodeSizes());
-	const [viewport, setViewport] = useState(loadViewport);
+
+	// Loading state for localStorage data
+	const [storageLoaded, setStorageLoaded] = useState(false);
+	const [positions, setPositions] = useState<Record<string, nodePosition>>({});
+	const [nodeSizes, setNodeSizes] = useState<Record<string, nodeSize>>({});
+	const [viewport, setViewport] = useState<viewPort>({ x: 10, y: 10, zoom: 1.5 });
+
+	// Load all storage data on mount and when activeBoardIndex changes
+	useEffect(() => {
+		// Load and sanitize positions
+		const pos = loadPositions();
+		Object.keys(pos).forEach(id => {
+			if (!Number.isFinite(pos[id].x)) pos[id].x = 0;
+			if (!Number.isFinite(pos[id].y)) pos[id].y = 0;
+		});
+		setPositions(pos);
+
+		// Load and sanitize node sizes
+		const sizes = loadNodeSizes();
+		Object.keys(sizes).forEach(id => {
+			if (!Number.isFinite(sizes[id].width)) sizes[id].width = 300;
+			if (!Number.isFinite(sizes[id].height)) sizes[id].height = 80;
+		});
+		setNodeSizes(sizes);
+
+		// Load and sanitize viewport
+		const vp = loadViewport();
+		if (!Number.isFinite(vp.x)) vp.x = 10;
+		if (!Number.isFinite(vp.y)) vp.y = 10;
+		if (!Number.isFinite(vp.zoom)) vp.zoom = 1.5;
+		setViewport(vp);
+
+		setStorageLoaded(true);
+	}, [activeBoardIndex]);
 	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	// const reactFlowInstance = useReactFlow();
@@ -312,6 +350,19 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	}, 2000);
 
+
+	if (!storageLoaded) {
+		return (
+			<div className='mapViewWrapper'>
+				<div className="mapView">
+					<div className="mapViewContainer" style={{ width: '100%', height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+						<div className="spinner"></div>
+						<span>Loading map data...</span>
+					</div>
+				</div>
+			</div>
+		);
+	}
 	return (
 		<div className='mapViewWrapper'>
 			<div className="mapView">
