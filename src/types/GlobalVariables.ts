@@ -1,19 +1,9 @@
-
+// Plugin view type identifier
 export const VIEW_TYPE_TASKBOARD = "task-board-view";
 
-// const basePath = (window as any).app.vault.adapter.basePath;
-// export const tasksPath = path.join(
-// 	basePath,
-// 	".obsidian",
-// 	"plugins",
-// 	"task-board",
-// 	"tasks.json"
-// );
-
-// export const dataFilePath = path.join(
-// 	basePath,
-// 	".obsidian",
-// 	"plugins",
-// 	"task-board",
-// 	"data.json"
-// );
+// Local storage keys
+// const LOCAL_STORAGE_KEY = "taskBoardCachedLang";
+export const LOCAL_STORAGE_TRANSLATIONS = "taskboard_cached_translations";
+export const NODE_POSITIONS_STORAGE_KEY = "taskboard_map_node_positions"; // now stores board-wise
+export const NODE_SIZE_STORAGE_KEY = "taskboard_map_node_sizes";
+export const VIEWPORT_STORAGE_KEY = "taskboard_map_viewport";

@@ -30,7 +30,7 @@ import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import {
-	clearCachedTranslations,
+	deleteAllLocalStorageKeys,
 	loadTranslationsOnStartup,
 	t,
 } from "src/utils/lang/helper";
@@ -139,7 +139,7 @@ export default class TaskBoard extends Plugin {
 
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
-		clearCachedTranslations();
+		deleteAllLocalStorageKeys();
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
@@ -861,9 +861,6 @@ export default class TaskBoard extends Plugin {
 			// }
 
 			await this.realTimeScanning.processAllUpdatedFiles();
-
-			// Reset the editorModified flag after the scan.
-			this.editorModified = false;
 		}
 	}
 
