@@ -19,12 +19,12 @@ import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
-	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
+	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
-	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewedType || "kanban"); // BUG : I cannot able to use `plugin.settings.data.globalSettings.lastViewedType` value here, because, when the MapView component loads first time, it doesnt show any taskItems.
+	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || "kanban");
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
@@ -207,7 +207,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
 		const newViewType = e.target.value;
 		setViewType(newViewType);
-		plugin.settings.data.globalSettings.lastViewedType = newViewType;
+		plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
 		plugin.saveSettings();
 	}
 
@@ -220,7 +220,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<button
 							key={index}
 							className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
-							onClick={() => setActiveBoardIndex(index)}
+							onClick={() => { setActiveBoardIndex(index); plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index; plugin.saveSettings(); }}
 						>
 							{board.name}
 						</button>
