@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-09-09T19:28:22.268Z",
+    "Modified_at": "2025-09-15T04:28:41.129Z",
     "Pending": {
         "Web Clippings/useMemo – React.md": [
             {
@@ -243,7 +243,7 @@
         ],
         "Testing Indented Task Bug.md": [
             {
-                "id": 3623558698,
+                "id": 1167286261,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Main task 1 #pending",
@@ -263,9 +263,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 17,
+                    "startLine": 18,
                     "startCharIndex": 0,
-                    "endLine": 17,
+                    "endLine": 18,
                     "endCharIndex": 26
                 },
                 "completion": "",
@@ -273,7 +273,7 @@
                 "reminder": ""
             },
             {
-                "id": 3086339618,
+                "id": 1931527862,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] Subtask 1",
@@ -291,9 +291,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 19,
+                    "startLine": 20,
                     "startCharIndex": 0,
-                    "endLine": 19,
+                    "endLine": 20,
                     "endCharIndex": 16
                 },
                 "completion": "",
@@ -301,7 +301,7 @@
                 "reminder": ""
             },
             {
-                "id": 3731535439,
+                "id": 1641903663,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] Subtask 2",
@@ -319,9 +319,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 21,
+                    "startLine": 22,
                     "startCharIndex": 0,
-                    "endLine": 21,
+                    "endLine": 22,
                     "endCharIndex": 16
                 },
                 "completion": "",
@@ -329,7 +329,7 @@
                 "reminder": ""
             },
             {
-                "id": 2872895811,
+                "id": 1106812366,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t\t- [ ] Sub-subtask 1",
@@ -347,9 +347,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 23,
+                    "startLine": 24,
                     "startCharIndex": 0,
-                    "endLine": 23,
+                    "endLine": 24,
                     "endCharIndex": 21
                 },
                 "completion": "",
@@ -357,7 +357,7 @@
                 "reminder": ""
             },
             {
-                "id": 123444476,
+                "id": 2591891497,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] This is a first task with one level of indentation, very next to the paragraph line.",
@@ -379,9 +379,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 28,
+                    "startLine": 29,
                     "startCharIndex": 0,
-                    "endLine": 31,
+                    "endLine": 32,
                     "endCharIndex": 55
                 },
                 "completion": "",
@@ -393,7 +393,10 @@
                 "legacyId": "27",
                 "status": " ",
                 "title": "- [ ] some task, but this task starts with a lot of spaces after the checkbox. 🏁 delete ⏳ 2025-08-24 🆔 27",
-                "body": [],
+                "body": [
+                    "\t- [ ] This is a sub-task.",
+                    "\t- Line in description."
+                ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
@@ -407,17 +410,17 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 34,
+                    "startLine": 35,
                     "startCharIndex": 0,
-                    "endLine": 34,
-                    "endCharIndex": 107
+                    "endLine": 37,
+                    "endCharIndex": 23
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 324139927,
+                "id": 3209288935,
                 "legacyId": "",
                 "status": " ",
                 "title": ">- [ ] This is a first task inside callout  [due:: 2025-04-20] #todo",
@@ -437,9 +440,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 39,
+                    "startLine": 42,
                     "startCharIndex": 0,
-                    "endLine": 39,
+                    "endLine": 42,
                     "endCharIndex": 68
                 },
                 "completion": "",
@@ -447,7 +450,7 @@
                 "reminder": ""
             },
             {
-                "id": 4245591751,
+                "id": 3142672168,
                 "legacyId": "",
                 "status": " ",
                 "title": "> + [ ] This is task inside callout with a space at the beginning. And it starts with `+ [ ]`",
@@ -465,9 +468,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 40,
+                    "startLine": 43,
                     "startCharIndex": 0,
-                    "endLine": 40,
+                    "endLine": 43,
                     "endCharIndex": 93
                 },
                 "completion": "",
@@ -475,7 +478,7 @@
                 "reminder": ""
             },
             {
-                "id": 199036962,
+                "id": 2806112084,
                 "legacyId": "",
                 "status": " ",
                 "title": ">1. [ ] This is a task inside callout and it starts with `1.`",
@@ -493,9 +496,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 41,
+                    "startLine": 44,
                     "startCharIndex": 0,
-                    "endLine": 41,
+                    "endLine": 44,
                     "endCharIndex": 61
                 },
                 "completion": "",
@@ -503,7 +506,7 @@
                 "reminder": ""
             },
             {
-                "id": 2524543069,
+                "id": 1301830623,
                 "legacyId": "",
                 "status": " ",
                 "title": ">\t1. [ ] This is a task inside callout, but its indented. **Please note this is not a sub-task.**",
@@ -521,9 +524,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 42,
+                    "startLine": 45,
                     "startCharIndex": 0,
-                    "endLine": 42,
+                    "endLine": 45,
                     "endCharIndex": 97
                 },
                 "completion": "",
@@ -531,7 +534,7 @@
                 "reminder": ""
             },
             {
-                "id": 1784417422,
+                "id": 3994912765,
                 "legacyId": "",
                 "status": " ",
                 "title": ">- [ ] **Task Board** will be able to detect this task.   [due:: 2025-04-20] #todo",
@@ -551,9 +554,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 45,
+                    "startLine": 48,
                     "startCharIndex": 0,
-                    "endLine": 45,
+                    "endLine": 48,
                     "endCharIndex": 82
                 },
                 "completion": "",
@@ -561,7 +564,7 @@
                 "reminder": ""
             },
             {
-                "id": 3796933319,
+                "id": 1997288431,
                 "legacyId": "",
                 "status": " ",
                 "title": ">    - [ ] Even though this task is right after the main task and also since its been indented, still its not possible to detect this is as a sub-task of the main task. Hence this will be considered as a separate task.",
@@ -579,9 +582,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 46,
+                    "startLine": 49,
                     "startCharIndex": 0,
-                    "endLine": 46,
+                    "endLine": 49,
                     "endCharIndex": 218
                 },
                 "completion": "",
@@ -589,7 +592,7 @@
                 "reminder": ""
             },
             {
-                "id": 3600571187,
+                "id": 2377027620,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] This is an lonely indented task. Not sure why this theme is not giving it a proper task styling.",
@@ -611,9 +614,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 60,
+                    "startLine": 63,
                     "startCharIndex": 0,
-                    "endLine": 63,
+                    "endLine": 66,
                     "endCharIndex": 71
                 },
                 "completion": "",
@@ -621,7 +624,7 @@
                 "reminder": ""
             },
             {
-                "id": 3026980078,
+                "id": 4066046042,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] This is a first indented task right after a normal line. (old one)",
@@ -639,9 +642,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 68,
+                    "startLine": 71,
                     "startCharIndex": 0,
-                    "endLine": 68,
+                    "endLine": 71,
                     "endCharIndex": 76
                 },
                 "completion": "",
@@ -649,7 +652,7 @@
                 "reminder": ""
             },
             {
-                "id": 1973181871,
+                "id": 3556055047,
                 "legacyId": "",
                 "status": " ",
                 "title": "    + [ ] This is second indented task which starts with `+ [ ]`",
@@ -667,9 +670,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 69,
+                    "startLine": 72,
                     "startCharIndex": 0,
-                    "endLine": 69,
+                    "endLine": 72,
                     "endCharIndex": 64
                 },
                 "completion": "",
@@ -677,7 +680,7 @@
                 "reminder": ""
             },
             {
-                "id": 2637723143,
+                "id": 2890201902,
                 "legacyId": "",
                 "status": " ",
                 "title": "2. [ ] Second numbered task.",
@@ -695,9 +698,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 75,
+                    "startLine": 78,
                     "startCharIndex": 0,
-                    "endLine": 75,
+                    "endLine": 78,
                     "endCharIndex": 28
                 },
                 "completion": "",
@@ -705,7 +708,7 @@
                 "reminder": ""
             },
             {
-                "id": 2986552817,
+                "id": 1064260556,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] All the below numbered tasks should be completed.",
@@ -726,9 +729,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 78,
+                    "startLine": 81,
                     "startCharIndex": 0,
-                    "endLine": 80,
+                    "endLine": 83,
                     "endCharIndex": 73
                 },
                 "completion": "",
@@ -736,7 +739,7 @@
                 "reminder": ""
             },
             {
-                "id": 516097485,
+                "id": 2149597479,
                 "legacyId": "",
                 "status": " ",
                 "title": "1) [ ] Another numbered task which starts with pattern `1) [ ]`.",
@@ -754,9 +757,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 82,
+                    "startLine": 85,
                     "startCharIndex": 0,
-                    "endLine": 82,
+                    "endLine": 85,
                     "endCharIndex": 64
                 },
                 "completion": "",
@@ -11054,26 +11057,30 @@
         ],
         "2025-05-24.md": [
             {
-                "id": 1638972839,
-                "legacyId": "",
+                "id": 32,
+                "legacyId": "32",
                 "status": " ",
-                "title": "- [ ] This is a task for this note day. Edited. ⏳ 2025-05-26 ",
+                "title": "- [ ] This is a task for this note day. ⏳ 2025-05-26 #Test  🆔 32 ⛔ mgqx2p",
                 "body": [],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "2025-05-26",
                 "due": "",
-                "tags": [],
+                "tags": [
+                    "#Test"
+                ],
                 "frontmatterTags": [],
                 "priority": 0,
-                "dependsOn": [],
+                "dependsOn": [
+                    "mgqx2p"
+                ],
                 "filePath": "2025-05-24.md",
                 "taskLocation": {
                     "startLine": 7,
                     "startCharIndex": 0,
                     "endLine": 7,
-                    "endCharIndex": 61
+                    "endCharIndex": 74
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -11083,7 +11090,7 @@
                 "id": 3,
                 "legacyId": "3",
                 "status": " ",
-                "title": "- [ ] This is another task. Simply updating more. 🔽  📅 202-08-18  ➕ 2025-08-16 🛫 2025-08-19  ⏳ 2025-08-17 🆔 3 ⛔ 25, 31, 27",
+                "title": "- [ ] This is another task. Simply updating more. Edited. 🔽  📅 202-08-18  ➕ 2025-08-16 🛫 2025-08-19  ⏳ 2025-08-17 🆔 3 ⛔ 25, 31, 27",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-08-16",
@@ -11103,14 +11110,14 @@
                     "startLine": 8,
                     "startCharIndex": 0,
                     "endLine": 8,
-                    "endCharIndex": 126
+                    "endCharIndex": 134
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 2267638768,
+                "id": 966420931,
                 "legacyId": "mgqx2p",
                 "status": " ",
                 "title": "- [ ] This is a parent task. 🆔 mgqx2p ⛔ ullkbp",
@@ -11132,6 +11139,62 @@
                     "startCharIndex": 0,
                     "endLine": 10,
                     "endCharIndex": 47
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 33,
+                "legacyId": "33",
+                "status": " ",
+                "title": "- [ ] This is a new task added to see how its size appears on the map view. #Test  🆔 33",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-05-24",
+                "due": "",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "2025-05-24.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 88
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 34,
+                "legacyId": "34",
+                "status": " ",
+                "title": "- [ ] This is a second test to see if the size comes properly to the `ResizableNodeSelected`. #Test  🆔 34",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-05-24",
+                "due": "",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "2025-05-24.md",
+                "taskLocation": {
+                    "startLine": 13,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 106
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -11296,7 +11359,7 @@
         ],
         "Testing Indented Task Bug.md": [
             {
-                "id": 1649077035,
+                "id": 770894138,
                 "legacyId": "",
                 "status": "x",
                 "title": "    - [x] This is a first indented task, just by itself, no content before this taskLine, no content after this taskLine. ✅ 2025-08-22",
@@ -11314,9 +11377,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 57,
+                    "startLine": 60,
                     "startCharIndex": 0,
-                    "endLine": 57,
+                    "endLine": 60,
                     "endCharIndex": 134
                 },
                 "completion": "2025-08-22",
@@ -11324,7 +11387,7 @@
                 "reminder": ""
             },
             {
-                "id": 3407897067,
+                "id": 3843078377,
                 "legacyId": "",
                 "status": "x",
                 "title": "    * [x] This is Third indented task which starts with `* [ ]` ✅ 2025-08-22",
@@ -11342,9 +11405,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 70,
+                    "startLine": 73,
                     "startCharIndex": 0,
-                    "endLine": 70,
+                    "endLine": 73,
                     "endCharIndex": 76
                 },
                 "completion": "2025-08-22",
@@ -11352,7 +11415,7 @@
                 "reminder": ""
             },
             {
-                "id": 2650699812,
+                "id": 2690431779,
                 "legacyId": "",
                 "status": "x",
                 "title": "1. [x] This is a numbered task. ✅ 2025-08-22",
@@ -11370,9 +11433,9 @@
                 "dependsOn": [],
                 "filePath": "Testing Indented Task Bug.md",
                 "taskLocation": {
-                    "startLine": 74,
+                    "startLine": 77,
                     "startCharIndex": 0,
-                    "endLine": 74,
+                    "endLine": 77,
                     "endCharIndex": 44
                 },
                 "completion": "2025-08-22",
@@ -12255,7 +12318,7 @@
         ],
         "2025-05-24.md": [
             {
-                "id": 2097095048,
+                "id": 1905170909,
                 "legacyId": "ullkbp",
                 "status": "x",
                 "title": "- [x] This is a child task. So this has to be completed first to mark the parent task as complete. 🆔 ullkbp ✅ 2025-09-10",

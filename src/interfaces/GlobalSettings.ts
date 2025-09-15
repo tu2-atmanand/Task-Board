@@ -152,6 +152,11 @@ export interface globalSettingsData {
 	hiddenTaskProperties: HideableTaskProperty[];
 	autoAddUniqueID: boolean;
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
+	experimentalFeatures: boolean;
+	lastViewHistory: {
+		viewedType: string;
+		boardIndex: number;
+	};
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -437,6 +442,11 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			hiddenTaskProperties: [],
 			autoAddUniqueID: false,
 			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
+			experimentalFeatures: false,
+			lastViewHistory: {
+				viewedType: "kanban",
+				boardIndex: 0,
+			},
 		},
 	},
 };

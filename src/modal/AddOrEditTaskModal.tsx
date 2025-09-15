@@ -11,19 +11,19 @@ import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
 import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
-import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/markdownEditor";
+import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { buildTaskFromRawContent, generateTaskId } from "src/utils/ScanningVault";
 import { DeleteIcon, EditIcon, FileInput, Network, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
-import { bugReporter } from "src/services/OpenModals";
+import { bugReporter, openEditTaskModal, openEditTaskNoteModal } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNoteUtils";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
-import { applyIdToTaskInNote, getTaskFromId, updateTaskInFile } from "src/utils/TaskItemUtils";
+import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -452,7 +452,7 @@ const EditTaskContent: React.FC<{
 			if (file && file instanceof TFile) {
 				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
 			} else {
-				new Notice(t("file-not-found"));
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 			}
 		} else {
 			// await plugin.app.workspace.openLinkText('', newFilePath, false);
@@ -940,7 +940,7 @@ const EditTaskContent: React.FC<{
 
 	const childTaskTitleRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	console.log("Is childTaskTitleRefs getting initialized to empty object after a new child task has been added :", childTaskTitleRefs.current, "\ndependsOn: ", dependsOn);
-	// Fetch child tasks when dependsOn changes
+	// This should run only on the first render to fetch child tasks based on dependsOn IDs
 	useEffect(() => {
 		if (childTasks.length === 0 && dependsOn.length > 0) {
 			Promise.all(dependsOn.map(id => getTaskFromId(plugin, id)))
@@ -975,19 +975,41 @@ const EditTaskContent: React.FC<{
 		});
 	}, [childTasks]);
 
-	const handleOpenChildTaskModal = (taskId: string) => {
+	const handleOpenChildTaskModal = async (taskId: string) => {
 		const childTask = childTasks.find(t => String(t.id) === taskId);
 		if (!childTask) {
 			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
 			return;
 		}
+
+		// Will need to open the AddOrEditTaskModal modal for child task in a new window, until i come up with a better solution.
+		// const leaf = plugin.app.workspace.getLeaf('window');
+		// await leaf.setViewState({ type: 'empty', active: true });
+		// // Clear existing children in the leaf
+		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
+
+		//For now will simply open it in a new modal.
+		if (isTaskNotePresentInTags(childTask.tags)) {
+			plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
+			await sleep(50);
+			openEditTaskNoteModal(plugin, childTask);
+		} else {
+			plugin.app.workspace.openPopoutLeaf();
+			await sleep(50);
+			openEditTaskModal(plugin, childTask, false);
+		}
 	}
 
-	const handleOpenTaskInCanvasView = () => {
-		console.log("Opening task in canvas view:", newFilePath);
+	const handleOpenTaskInMapView = () => {
+		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
+			new Notice(t("enable-experimental-features-message"));
+			return;
+		}
+
+		console.log("Opening task in map view:", newFilePath);
 		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
 		// if (file && file instanceof TFile) {
-		// 	plugin.app.workspace.openLinkText('', newFilePath, 'canvas');
+		// 	plugin.app.workspace.openLinkText('', newFilePath, 'map');
 		// } else {
 		// 	new Notice(t("file-not-found"));
 		// }
@@ -1021,7 +1043,7 @@ const EditTaskContent: React.FC<{
 									<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 								</div>
 								<div className="EditTaskModalTabHeaderRightBtnSec">
-									<div className="EditTaskModalTabHeaderOpenCanvasBtn" onClick={handleOpenTaskInCanvasView} aria-placeholder={t("open-in-canvas-view")}>
+									<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
 										<Network height={16} />
 									</div>
 								</div>

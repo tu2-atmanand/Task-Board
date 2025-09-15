@@ -47,19 +47,26 @@ export class RealTimeScanning {
 		}
 	}
 
-	async processAllUpdatedFiles(currentFile?: TFile | null) {
+	async processAllUpdatedFiles(currentFile?: TFile | string | undefined) {
+		let newFile: TFile | null | undefined = null;
+		if (currentFile && typeof currentFile === "string") {
+			newFile = this.plugin.app.vault.getFileByPath(currentFile);
+		} else {
+			newFile = currentFile as TFile | undefined;
+		}
+
 		const filesToProcess = this.taskBoardFileStack.slice();
 		this.taskBoardFileStack = [];
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
 			.filter((file) => !!file);
 
-		if (currentFile) {
+		if (newFile) {
 			// If a current file is provided, ensure it's included in the processing
-			const currentFilePath = currentFile.path;
+			const currentFilePath = newFile.path;
 			if (!filesToProcess.includes(currentFilePath)) {
 				filesToProcess.push(currentFilePath);
-				files.push(currentFile);
+				files.push(newFile);
 			}
 		}
 		if (filesToProcess.length > 0) {
@@ -68,6 +75,9 @@ export class RealTimeScanning {
 		}
 		// Save updated stack (which should now be empty)
 		this.saveStack();
+
+		// Reset the editorModified flag after the scan.
+		this.plugin.editorModified = false;
 	}
 
 	getFileFromPath(filePath: string): TFile | null {

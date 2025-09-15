@@ -248,10 +248,7 @@ export const archiveTask = async (
 
 			// Now delete the task from its original file
 			await deleteTaskFromFile(plugin, task).then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
-					task.filePath
-				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 			});
 
 			// await deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
@@ -312,6 +309,18 @@ export const archiveTask = async (
 
 // For handleEditTask and for handleSubTasksChange, when task is edited from Modal
 
+/*
+ * Replaces an old task in a file with new task content.
+ * If the new task content is an empty string, it deletes the old task from the file.
+ * If there are differences in whitespace only, it prompts the user for confirmation before proceeding.
+ *
+ * @param plugin - The TaskBoard plugin instance used to access settings and perform file operations.
+ * @param task - The taskItem object representing the task to be replaced.
+ * @param oldTaskContent - The original content of the task to be replaced.
+ * @param newTaskContent - The new content to replace the old task with. If empty, the old task will be deleted.
+ *
+ * @throws Will throw an error if there are issues reading or writing to the file.
+ */
 export const updateTaskInFile = async (
 	plugin: TaskBoard,
 	updatedTask: taskItem,
@@ -809,6 +818,14 @@ export const replaceOldTaskWithNewTask = async (
 	oldTaskContent: string,
 	newTaskContent: string
 ) => {
+	console.log(
+		"replaceOldTaskWithNewTask : oldTask : ",
+		oldTask,
+		"\noldTaskContent : ",
+		oldTaskContent,
+		"\nnewTaskContent : ",
+		newTaskContent
+	);
 	const filePath = oldTask.filePath.endsWith(".md")
 		? oldTask.filePath
 		: `${oldTask.filePath}.md`;

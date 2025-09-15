@@ -637,8 +637,15 @@
       "hiddenTaskProperties": [],
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
-      "autoAddUniqueID": false,
-      "uniqueIdCounter": 31
+      "autoAddUniqueID": true,
+      "uniqueIdCounter": 34,
+      "experimentalFeatures": true,
+      "searchQuery": "",
+      "lastViewedType": "map",
+      "lastViewHistory": {
+        "viewedType": "map",
+        "boardIndex": 0
+      }
     }
   }
 }

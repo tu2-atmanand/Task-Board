@@ -11,6 +11,7 @@ import {
 	writeDataToVaultFile,
 } from "./MarkdownFileOperations";
 import { checkboxStateSwitcher } from "./CheckBoxUtils";
+import { bugReporter, openEditTaskNoteModal } from "src/services/OpenModals";
 
 /**
  * Handle editing a task note
@@ -23,57 +24,55 @@ export const handleTaskNoteEdit = (plugin: TaskBoard, task: taskItem) => {
 		plugin.settings.data.globalSettings.editButtonAction;
 
 	if (editButtonAction === EditButtonMode.PopUp) {
+		openEditTaskNoteModal(plugin, task);
 		// Open task note in edit modal
-		const editTaskModal = new AddOrEditTaskModal(
-			plugin,
-			async (
-				updatedTask: taskItem,
-				quickAddPluginChoice: string,
-				newTaskContent: string | undefined
-			) => {
-				try {
-					if (!newTaskContent) {
-						// Update frontmatter with task properties
-						await updateTaskNoteFrontmatter(
-							plugin,
-							updatedTask
-						).then(() => {
-							// This is required to rescan the updated file and refresh the board.
-							const currentFile = plugin.app.vault.getFileByPath(
-								updatedTask.filePath
-							);
-							plugin.realTimeScanning.processAllUpdatedFiles(
-								currentFile
-							);
-						});
-					} else {
-						writeDataToVaultFile(
-							plugin,
-							updatedTask.filePath,
-							newTaskContent
-						).then(() => {
-							// This is required to rescan the updated file and refresh the board.
-							const currentFile = plugin.app.vault.getFileByPath(
-								updatedTask.filePath
-							);
-							plugin.realTimeScanning.processAllUpdatedFiles(
-								currentFile
-							);
-						});
-					}
-					new Notice("Task note updated successfully");
-				} catch (error) {
-					console.error("Error updating task note:", error);
-					new Notice("Error updating task note: " + String(error));
-				}
-			},
-			true,
-			false, // activeNote
-			true, // taskExists
-			task, // task
-			task.filePath
-		);
-		editTaskModal.open();
+		// const editTaskModal = new AddOrEditTaskModal(
+		// 	plugin,
+		// 	async (
+		// 		updatedTask: taskItem,
+		// 		quickAddPluginChoice: string,
+		// 		newTaskContent: string | undefined
+		// 	) => {
+		// 		try {
+		// 			if (!newTaskContent) {
+		// 				// Update frontmatter with task properties
+		// 				await updateTaskNoteFrontmatter(
+		// 					plugin,
+		// 					updatedTask
+		// 				).then(() => {
+		// 					// This is required to rescan the updated file and refresh the board.
+		// 					plugin.realTimeScanning.processAllUpdatedFiles(
+		// 						updatedTask.filePath
+		// 					);
+		// 				});
+		// 			} else {
+		// 				writeDataToVaultFile(
+		// 					plugin,
+		// 					updatedTask.filePath,
+		// 					newTaskContent
+		// 				).then(() => {
+		// 					// This is required to rescan the updated file and refresh the board.
+		// 					plugin.realTimeScanning.processAllUpdatedFiles(
+		// 						updatedTask.filePath
+		// 					);
+		// 				});
+		// 			}
+		// 		} catch (error) {
+		// 			bugReporter(
+		// 				plugin,
+		// 				"Error updating task note",
+		// 				error as string,
+		// 				"TaskNoteEventHandlers.ts/handleTaskNoteEdit"
+		// 			);
+		// 		}
+		// 	},
+		// 	true,
+		// 	false, // activeNote
+		// 	true, // taskExists
+		// 	task, // task
+		// 	task.filePath
+		// );
+		// editTaskModal.open();
 	} else if (editButtonAction === EditButtonMode.NoteInTab) {
 		const getFile = plugin.app.vault.getFileByPath(task.filePath);
 		if (getFile) {
@@ -112,10 +111,9 @@ export const handleTaskNoteStatusChange = async (
 		// Update frontmatter with new status
 		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			const currentFile = plugin.app.vault.getFileByPath(
+			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
 			);
-			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 		});
 
 		new Notice(`Task note status updated to ${newStatus}`);
@@ -140,10 +138,9 @@ export const handleTaskNotePropertyUpdate = async (
 		// Update frontmatter with all updated properties
 		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			const currentFile = plugin.app.vault.getFileByPath(
+			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
 			);
-			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 		});
 
 		new Notice("Task note properties updated");
@@ -243,10 +240,9 @@ export const handleTaskNoteBodyChange = async (
 			updatedLines.join("\n")
 		).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			const currentFile = plugin.app.vault.getFileByPath(
+			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
 			);
-			plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 		});
 	} catch (error) {
 		console.error(

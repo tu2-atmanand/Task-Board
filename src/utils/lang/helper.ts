@@ -5,10 +5,14 @@ import en, { Lang } from "./locale/en";
 import TaskBoard from "main";
 import { langCodes } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
+import {
+	LOCAL_STORAGE_TRANSLATIONS,
+	NODE_POSITIONS_STORAGE_KEY,
+	NODE_SIZE_STORAGE_KEY,
+	VIEWPORT_STORAGE_KEY,
+} from "src/types/GlobalVariables";
 
 let currentLang = "en";
-// const LOCAL_STORAGE_KEY = "taskBoardCachedLang";
-const LOCAL_STORAGE_TRANSLATIONS = "taskBoardCachedTranslations";
 
 // --- Called Once On Plugin Load ---
 export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
@@ -24,6 +28,7 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 		const file = await plugin.app.vault.adapter.read(filePath);
 		const parsed = JSON.parse(file);
 
+		// TODO : Right now I am loading the entire translations file into localStorage. And everytime the t() function is called, I am parsing the entire file again from localStorage. This can be optimized by storing this data into a sessionStorage instead of localStorage. Because, I anyways have this data in my disk and loads the data at startup and its only required as long as the Obsidian is open, that is the session. So in this situation, sessionStorage is more appropriate than localStorage. As sessionStorage is stored in RAM and localStorage is stored in disk. And sessionStorage is cleared when the browser (or Obsidian in this case) is closed. So this will save some disk read write cycles and improve performance a bit.
 		// localStorage.setItem(LOCAL_STORAGE_KEY, lang);
 		localStorage.setItem(
 			LOCAL_STORAGE_TRANSLATIONS,
@@ -169,7 +174,10 @@ export async function downloadAndApplyLanguageFile(
 	}
 }
 
-export const clearCachedTranslations = () => {
+export const deleteAllLocalStorageKeys = () => {
 	// localStorage.removeItem(LOCAL_STORAGE_KEY);
 	localStorage.removeItem(LOCAL_STORAGE_TRANSLATIONS);
+	localStorage.removeItem(NODE_POSITIONS_STORAGE_KEY);
+	localStorage.removeItem(NODE_SIZE_STORAGE_KEY);
+	localStorage.removeItem(VIEWPORT_STORAGE_KEY);
 };

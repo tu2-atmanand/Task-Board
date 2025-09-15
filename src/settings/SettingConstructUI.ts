@@ -230,6 +230,7 @@ export class SettingsManager {
 			preDefinedNote,
 			taskNoteDefaultLocation,
 			autoAddUniqueID,
+			experimentalFeatures,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -365,7 +366,7 @@ export class SettingsManager {
 						t("manual-sorting-inside-each-column-upcoming") +
 						"</li>" +
 						"<li>" +
-						t("canvas-view-upcoming") +
+						t("map-view-upcoming") +
 						"</li>" +
 						"</ul>"
 				)
@@ -546,6 +547,24 @@ export class SettingsManager {
 				button.setButtonText(t("export")).onClick(async () => {
 					await exportConfigurations(this.plugin);
 				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						t("enable-experimental-features-info-2")
+				)
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(experimentalFeatures)
+					.onChange(async (value) => {
+						this.globalSettings!.experimentalFeatures = value;
+						await this.saveSettings();
+					})
 			);
 
 		// // Helper to add filter rows

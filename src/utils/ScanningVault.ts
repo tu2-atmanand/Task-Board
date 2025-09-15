@@ -43,6 +43,12 @@ import {
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
 
+/**
+ * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
+ * @param app The Obsidian app instance
+ * @param plugin The TaskBoard plugin instance
+ * @description Initializes the ScanningVault with the app and plugin instances, and sets up the initial tasks cache.
+ */
 export default class ScanningVault {
 	app: App;
 	plugin: TaskBoard;
@@ -50,12 +56,6 @@ export default class ScanningVault {
 	TaskDetected: boolean;
 	indentationString: string;
 
-	/**
-	 * Constructor for ScanningVault
-	 * @param app The Obsidian app instance
-	 * @param plugin The TaskBoard plugin instance
-	 * @description Initializes the ScanningVault with the app and plugin instances, and sets up the initial tasks cache.
-	 */
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
 		this.plugin = plugin;
@@ -123,7 +123,6 @@ export default class ScanningVault {
 		this.tasksCache.Pending[fileNameWithPath] = [];
 		this.tasksCache.Completed[fileNameWithPath] = [];
 
-		// First checking if the file contains the reminder property as entered by using in the settings.frontmatterPropertyForReminder. If it contains, then this file needs to be appended in the tasks.Notes list.
 		// Extract frontmatter from the file
 		const frontmatter = extractFrontmatter(this.plugin, file);
 		console.log(
@@ -157,7 +156,7 @@ export default class ScanningVault {
 		// 		]
 		// );
 
-		// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration.
+		// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
 		if (
 			this.plugin.settings.data.globalSettings
 				.frontmatterPropertyForReminder &&
@@ -191,7 +190,11 @@ export default class ScanningVault {
 		}
 
 		// Task Note Detection: Check if this note is marked as a task note
-		if (frontmatter && isTaskNotePresentInFrontmatter(frontmatter)) {
+		if (
+			this.plugin.settings.data.globalSettings.experimentalFeatures &&
+			frontmatter &&
+			isTaskNotePresentInFrontmatter(frontmatter)
+		) {
 			this.TaskDetected = true;
 
 			// Extract properties from frontmatter
@@ -264,6 +267,7 @@ export default class ScanningVault {
 				this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
 			}
 		} else {
+			// Else, proceed with normal task line detection inside the file content.
 			for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
 				const line = lines[lineIndex];
 				if (isTaskLine(line)) {
@@ -417,7 +421,7 @@ export default class ScanningVault {
 				delete this.tasksCache.Completed[fileNameWithPath];
 		}
 
-		this.saveTasksToJsonCache();
+		this.saveTasksToJsonCache(); // TODO : This function call can be moved to the place where I am calling extractTasksFromFile for each file. No need to call this function after each file scan.
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
