@@ -25,7 +25,6 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 						const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
 						sizeData[id] = { width: params.width ?? 100, height: params.height ?? 30 };
 						localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));
-						console.log('Updated node size in localStorage for node:', id, sizeData[id]);
 					} catch (e) {
 						console.error('Failed to update node size in localStorage:', e);
 					}

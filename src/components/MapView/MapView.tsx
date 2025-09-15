@@ -139,7 +139,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
-		console.log("Are all the nodes re-calculating when the allTasksArranged changes or only specific ones?\nAllTasksArranged:", allTasksArranged, "\nPositions:", positions, "\nNodeSizes:", nodeSizes);
+		// console.log("Are all the nodes re-calculating when the allTasksArranged changes or only specific ones?\nAllTasksArranged:", allTasksArranged, "\nPositions:", positions, "\nNodeSizes:", nodeSizes);
 		const nodes: Node[] = [];
 		// const allTasksFlat: taskItem[] = allTasksArranged.flat();
 		let xOffset = 0;
@@ -152,7 +152,6 @@ const MapView: React.FC<MapViewProps> = ({
 					const id = task.legacyId ? task.legacyId : String(task.id);
 					const savedPos = positions[id] || {};
 					const savedSize = nodeSizes[id] || {};
-					console.log('Rendering node for task with id:', id, '\nsavedPos:', savedPos, '\nsavedSize:', savedSize);
 					nodes.push({
 						id,
 						type: 'ResizableNodeSelected',
@@ -292,10 +291,10 @@ const MapView: React.FC<MapViewProps> = ({
 	// Dummy function for connecting parent to child
 	function connectParentToChild(sourceNodeId: string, targetNodeId: string, allTasks: taskItem[]) {
 		// const allTasks = allTasksArranged.flat();
-		console.log("AllTasksArranged:", allTasksArranged);
-		console.log('Connecting', sourceNodeId, 'to', targetNodeId);
-		console.log('Source Task:', allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId));
-		console.log('Target Task:', allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId));
+		// console.log("AllTasksArranged:", allTasksArranged);
+		// console.log('Connecting', sourceNodeId, 'to', targetNodeId);
+		// console.log('Source Task:', allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId));
+		// console.log('Target Task:', allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId));
 
 		const sourceTask = allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId);
 		if (!sourceTask) return;
@@ -308,13 +307,13 @@ const MapView: React.FC<MapViewProps> = ({
 		};
 
 		const targetLegacyId = targetTask.legacyId ? targetTask.legacyId : String(targetTask.id);
-		console.log('Adding dependency on targetLegacyId:', targetLegacyId);
+		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedSourceTask.dependsOn.includes(targetLegacyId)) {
 			updatedSourceTask.dependsOn.push(targetLegacyId);
 			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedSourceTask.title, updatedSourceTask.dependsOn);
 			updatedSourceTask.title = updatedSourceTaskTitle;
 
-			console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
+			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
 			updateTaskInFile(plugin, updatedSourceTask, sourceTask).finally(() => {
 				plugin.realTimeScanning.processAllUpdatedFiles(updatedSourceTask.filePath);
 			});
