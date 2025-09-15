@@ -173,8 +173,8 @@ const MapView: React.FC<MapViewProps> = ({
 						// 	width: savedSize.width ?? 300,
 						// 	height: savedSize.height ?? 80,
 						// },
-						width: savedSize.width ?? 300,
-						height: savedSize.height ?? 80,
+						width: savedSize.width ?? plugin.settings.data.globalSettings.columnWidth,
+						height: savedSize.height ?? undefined,
 					});
 					yOffset += rowSpacing;
 				}
