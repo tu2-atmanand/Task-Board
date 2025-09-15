@@ -1,5 +1,5 @@
-import { memo, ReactNode } from 'react';
-import { Handle, Position, NodeResizer } from '@xyflow/react';
+import { memo, ReactNode, FC } from 'react';
+import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
 import { nodeSize } from './MapView';
 
 interface ResizableNodeSelectedProps {
@@ -7,21 +7,8 @@ interface ResizableNodeSelectedProps {
 	selected: boolean;
 }
 
-const ResizableNodeSelected = ({ data, selected }: ResizableNodeSelectedProps) => {
-	// let width: number | undefined = undefined;
-	// let height: number | undefined = undefined;
-	// const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem('NODE_SIZE_STORAGE_KEY') || '{}');
-	// if (sizeData && data.label && typeof (data.label as any).key === 'string') {
-	// 	try {
-	// 		const parsed = sizeData[(data.label as any).key as string];
-	// 		width = parsed?.width ?? undefined;
-	// 		height = parsed?.height ?? undefined;
-	// 	} catch {
-	// 		// ignore parse errors
-	// 	}
-	// }
-
-	// console.log('Node size from localStorage:', { width, height });
+const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id, data, selected, width, height }) => {
+	console.log('Rendering ResizableNodeSelected for node:', id, { width, height, data });
 
 	return (
 		<>
@@ -29,15 +16,16 @@ const ResizableNodeSelected = ({ data, selected }: ResizableNodeSelectedProps) =
 				color="#ff0071"
 				isVisible={selected}
 				autoScale={true}
-				// minWidth={width ?? 100}
-				// minHeight={height ?? 30}
+				minWidth={width ?? 100}
+				minHeight={height ?? 30}
 				onResizeEnd={(newSize) => {
-					console.log('Node resized to:', newSize);
-
-					// if (data.label && typeof (data.label as any).key === 'string') {
+					console.log('Node resized to:', newSize, "\nNode ID:", id);
+					// try {
 					// 	const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem('NODE_SIZE_STORAGE_KEY') || '{}');
-					// 	sizeData[(data.label as any).key as string] = newSize;
+					// 	sizeData[id] = { width: newSize.width, height: newSize.height };
 					// 	localStorage.setItem('NODE_SIZE_STORAGE_KEY', JSON.stringify(sizeData));
+					// } catch (e) {
+					// 	console.error('Failed to update node size in localStorage:', e);
 					// }
 				}}
 			/>

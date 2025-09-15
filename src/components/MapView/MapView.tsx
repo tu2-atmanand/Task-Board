@@ -169,10 +169,12 @@ const MapView: React.FC<MapViewProps> = ({
 							x: savedPos.x ?? xOffset,
 							y: savedPos.y ?? yOffset
 						},
-						style: {
-							width: savedSize.width ?? 300,
-							height: savedSize.height ?? 80,
-						}
+						// style: {
+						// 	width: savedSize.width ?? 300,
+						// 	height: savedSize.height ?? 80,
+						// },
+						width: savedSize.width ?? 300,
+						height: savedSize.height ?? 80,
 					});
 					yOffset += rowSpacing;
 				}
@@ -248,35 +250,35 @@ const MapView: React.FC<MapViewProps> = ({
 	};
 
 	// Persist updated positions and sizes
-	const prevNodeSizesRef = useRef<Record<string, { width: number; height: number }>>({});
+	// const prevNodeSizesRef = useRef<Record<string, { width: number; height: number }>>({});
 
 	// Only save sizes if they have changed
-	useEffect(() => {
-		const sizeMap = nodes.reduce((acc, n) => {
-			acc[n.id] = { width: n.width ?? 300, height: n.height ?? 80 };
-			return acc;
-		}, {} as Record<string, { width: number; height: number }>);
+	// useEffect(() => {
+	// 	const sizeMap = nodes.reduce((acc, n) => {
+	// 		acc[n.id] = { width: n.width ?? 300, height: n.height ?? 80 };
+	// 		return acc;
+	// 	}, {} as Record<string, { width: number; height: number }>);
 
-		// Compare with previous sizes
-		const prevSizes = prevNodeSizesRef.current;
-		let changed = false;
-		for (const id in sizeMap) {
-			if (
-				!prevSizes[id] ||
-				prevSizes[id].width !== sizeMap[id].width ||
-				prevSizes[id].height !== sizeMap[id].height
-			) {
-				changed = true;
-				break;
-			}
-		}
+	// 	// Compare with previous sizes
+	// 	const prevSizes = prevNodeSizesRef.current;
+	// 	let changed = false;
+	// 	for (const id in sizeMap) {
+	// 		if (
+	// 			!prevSizes[id] ||
+	// 			prevSizes[id].width !== sizeMap[id].width ||
+	// 			prevSizes[id].height !== sizeMap[id].height
+	// 		) {
+	// 			changed = true;
+	// 			break;
+	// 		}
+	// 	}
 
-		if (changed) {
-			setNodeSizes(sizeMap);
-			localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeMap));
-			prevNodeSizesRef.current = sizeMap;
-		}
-	}, [nodes]);
+	// 	if (changed) {
+	// 		setNodeSizes(sizeMap);
+	// 		localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeMap));
+	// 		prevNodeSizesRef.current = sizeMap;
+	// 	}
+	// }, [nodes]);
 
 	// Handle edge creation (connecting nodes)
 	const onConnect = useMemo<((params: Connection) => void)>(() => {
