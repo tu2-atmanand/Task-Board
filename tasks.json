@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-09-14T05:59:34.119Z",
+    "Modified_at": "2025-09-15T04:28:41.129Z",
     "Pending": {
         "Web Clippings/useMemo – React.md": [
             {
@@ -11117,7 +11117,7 @@
                 "reminder": ""
             },
             {
-                "id": 752585848,
+                "id": 966420931,
                 "legacyId": "mgqx2p",
                 "status": " ",
                 "title": "- [ ] This is a parent task. 🆔 mgqx2p ⛔ ullkbp",
@@ -11139,6 +11139,62 @@
                     "startCharIndex": 0,
                     "endLine": 10,
                     "endCharIndex": 47
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 33,
+                "legacyId": "33",
+                "status": " ",
+                "title": "- [ ] This is a new task added to see how its size appears on the map view. #Test  🆔 33",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-05-24",
+                "due": "",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "2025-05-24.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 88
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 34,
+                "legacyId": "34",
+                "status": " ",
+                "title": "- [ ] This is a second test to see if the size comes properly to the `ResizableNodeSelected`. #Test  🆔 34",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-05-24",
+                "due": "",
+                "tags": [
+                    "#Test"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "2025-05-24.md",
+                "taskLocation": {
+                    "startLine": 13,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 106
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -12262,7 +12318,7 @@
         ],
         "2025-05-24.md": [
             {
-                "id": 393442517,
+                "id": 1905170909,
                 "legacyId": "ullkbp",
                 "status": "x",
                 "title": "- [x] This is a child task. So this has to be completed first to mark the parent task as complete. 🆔 ullkbp ✅ 2025-09-10",
