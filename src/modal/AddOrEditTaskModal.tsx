@@ -66,7 +66,7 @@ const EditTaskContent: React.FC<{
 	noteContent: string;
 	task?: taskItem,
 	taskExists?: boolean,
-	onSave: (updatedTask: taskItem, quickAddPluginChoice: string, noteContent?: string) => void;
+	onSave: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
 }> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
@@ -165,6 +165,9 @@ const EditTaskContent: React.FC<{
 		const newFormattedTaskNoteContent = formattedTaskContent.replace(/title: .*/, `title: ${value}`);
 		console.log("Updated formattedTaskContent after title change:", newFormattedTaskNoteContent);
 		updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
+		setFormattedTaskContent(newFormattedTaskNoteContent);
+
+		// setNewFilePath(normalizePath(value.trim() === "" ? filePath : value.endsWith(".md") ? value : `${value}.md`));
 	}
 
 	// // Function to toggle subtask completion
@@ -524,10 +527,6 @@ const EditTaskContent: React.FC<{
 			reminder,
 		};
 
-		if (plugin.settings.data.globalSettings.autoAddUniqueID && !taskExists) {
-			updatedTask.id = generateTaskId(plugin);
-		}
-
 		onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	}
@@ -575,10 +574,6 @@ const EditTaskContent: React.FC<{
 			status: modifiedTask.status,
 			reminder: modifiedTask.reminder,
 		};
-
-		if (plugin.settings.data.globalSettings.autoAddUniqueID && !taskExists) {
-			taskNoteItem.id = generateTaskId(plugin);
-		}
 
 		console.log("Task Note Item to be saved:", taskNoteItem);
 
@@ -829,12 +824,15 @@ const EditTaskContent: React.FC<{
 		console.log("Task.Body :", task.body);
 		if (isTaskNote) {
 			const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+			console.log("Formatted Task Note Content:", newFormattedTaskNoteContent);
 			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
+			setFormattedTaskContent(newFormattedTaskNoteContent);
 			setIsEditorContentChanged(false);
 		}
 		else {
 			const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
 			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
+			setFormattedTaskContent(newFormattedTaskNoteContent);
 			setIsEditorContentChanged(false);
 		}
 	}, [isEditorContentChanged]);
@@ -1095,7 +1093,6 @@ const EditTaskContent: React.FC<{
 											className="EditTaskModalLiveEditor"
 											ref={markdownEditorEmbeddedContainer}
 											onClick={() => {
-												console.log("Formatted taskNoteContent")
 												if (markdownEditor) {
 													cursorLocationRef.current = {
 														lineNumber: formattedTaskContent.length - 1,
@@ -1300,7 +1297,7 @@ export class AddOrEditTaskModal extends Modal {
 	isEdited: boolean;
 	isTaskNote: boolean;
 	activeNote: boolean;
-	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, noteContent?: string) => void;
+	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void;
 
 	// public waitForClose: Promise<string>;
 	// private resolvePromise: (input: string) => void;
@@ -1310,7 +1307,7 @@ export class AddOrEditTaskModal extends Modal {
 	private resolvePromise: (input: string) => void = (input: string) => { };
 	private rejectPromise: (reason?: unknown) => void = (reason?: unknown) => { };
 
-	constructor(plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, noteContent?: string) => void, isTaskNote: boolean, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
+	constructor(plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void, isTaskNote: boolean, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.filePath = filePath ? filePath : "";
@@ -1342,19 +1339,31 @@ export class AddOrEditTaskModal extends Modal {
 
 		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
+		if (!this.isTaskNote && this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
+			this.task.id = generateTaskId(this.plugin);
+			this.task.legacyId = String(this.task.id);
+		}
+
 		// Some processing, if this is a Task-Note
 		let noteContent: string = "";
-		if (this.isTaskNote && this.filePath && this.filePath.trim() !== "") {
-			noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
-		} else {
-			noteContent = "---\ntitle: \n---\n";
-		}
-		if (this.isTaskNote && !this.filePath) {
-			const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'TaskNotes';
-			const noteName = this.task.title || getLocalDateTimeString();
-			// Sanitize filename
-			const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
-			this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
+		if (this.isTaskNote) {
+			if (this.filePath) {
+				noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
+			} else {
+				noteContent = "---\ntitle: \n---\n";
+
+				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'TaskNotes';
+				const noteName = this.task.title || getLocalDateTimeString();
+				// Sanitize filename
+				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
+				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
+			}
+
+			if (!this.task.title) this.task.title = this.filePath.split('/')[-1].replace('.md', "");
+
+			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
+				this.task.id = generateTaskId(this.plugin);
+			}
 		}
 
 		root.render(<EditTaskContent
@@ -1366,11 +1375,12 @@ export class AddOrEditTaskModal extends Modal {
 			taskExists={this.taskExists}
 			activeNote={this.activeNote}
 			filePath={this.filePath}
-			onSave={async (updatedTask: taskItem, quickAddPluginChoice: string, noteContent?: string) => {
+			onSave={async (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => {
+				console.log("AddOrEditTaskModal | onSave called with updatedTask:", updatedTask, " | quickAddPluginChoice:", quickAddPluginChoice, " | updatedNoteContent:", updatedNoteContent);
 				this.isEdited = false;
 				const formattedContent = await getFormattedTaskContent(updatedTask);
 				this.resolvePromise(formattedContent);
-				this.saveTask(updatedTask, quickAddPluginChoice, noteContent);
+				this.saveTask(updatedTask, quickAddPluginChoice, updatedNoteContent);
 				this.close();
 			}}
 			onClose={() => this.close()}
@@ -1396,12 +1406,12 @@ export class AddOrEditTaskModal extends Modal {
 		closeConfirmModal.open();
 	}
 
-	handleSave() {
-		// Trigger save functionality if required before closing
-		this.saveTask(this.task, 'temp choice');
-		this.isEdited = false;
-		this.close();
-	}
+	// handleSave() {
+	// 	// Trigger save functionality if required before closing
+	// 	this.saveTask(this.task, 'temp choice');
+	// 	this.isEdited = false;
+	// 	this.close();
+	// }
 
 	// onCloseRequested(event: Event) {
 	// 	event.stopImmediatePropagation();
