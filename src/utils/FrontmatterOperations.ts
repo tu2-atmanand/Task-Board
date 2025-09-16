@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { FrontMatterCache, TFile } from "obsidian";
+import { FrontMatterCache, stringifyYaml, TFile } from "obsidian";
 import {
 	priorityEmojis,
 	taskItem,
@@ -268,27 +268,38 @@ export function createYamlFromObject(
 	obj: Partial<customFrontmatterCache>
 ): string {
 	console.log("createYamlFromObject called with:", obj);
+
+	// METHOD 1 - Using Obsidian's API
+	const YAMLstringUsingAPI = stringifyYaml(obj);
+	console.log(
+		"TESTING : YAML string using obsidian API : ",
+		YAMLstringUsingAPI
+	);
+
+	return YAMLstringUsingAPI;
+
+	// METHOD 2 - Using manual string building
 	// Simple YAML serialization (handles strings, numbers, arrays)
-	const lines: string[] = [];
+	// const lines: string[] = [];
 
-	for (const [key, value] of Object.entries(obj)) {
-		if (Array.isArray(value)) {
-			lines.push(`${key}:`);
-			for (const item of value) {
-				const newItem = item.startsWith('"') ? item : `"${item}"`;
-				lines.push(`  - ${newItem}`);
-			}
-		} else if (typeof value === "string") {
-			// Escape quotes and handle multiline
-			const escapedValue =
-				value.includes("\n") || value.includes('"')
-					? `"${value.replace(/"/g, '\\"')}"`
-					: value;
-			lines.push(`${key}: ${escapedValue}`);
-		} else {
-			lines.push(`${key}: ${value}`);
-		}
-	}
+	// for (const [key, value] of Object.entries(obj)) {
+	// 	if (Array.isArray(value)) {
+	// 		lines.push(`${key}:`);
+	// 		for (const item of value) {
+	// 			const newItem = item.startsWith('"') ? item : `"${item}"`;
+	// 			lines.push(`  - ${newItem}`);
+	// 		}
+	// 	} else if (typeof value === "string") {
+	// 		// Escape quotes and handle multiline
+	// 		const escapedValue =
+	// 			value.includes("\n") || value.includes('"')
+	// 				? `"${value.replace(/"/g, '\\"')}"`
+	// 				: value;
+	// 		lines.push(`${key}: ${escapedValue}`);
+	// 	} else {
+	// 		lines.push(`${key}: ${value}`);
+	// 	}
+	// }
 
-	return lines.join("\n");
+	// return lines.join("\n");
 }

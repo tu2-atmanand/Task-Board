@@ -9,9 +9,9 @@ import {
 import {
 	createFrontmatterFromTask,
 	updateFrontmatterProperties,
-	createYamlFromObject,
 	customFrontmatterCache,
 } from "./FrontmatterOperations";
+import { resolve } from "path";
 
 /**
  * Check if a note is a Task Note by looking for #taskNote tag in frontmatter
@@ -149,9 +149,9 @@ export function formatTaskNoteContent(
 		const contentWithoutFrontmatter = frontmatterMatch
 			? bodyContent.replace(frontmatterMatch[0], "")
 			: bodyContent;
-		const newContent = `---\n${newFrontmatter}\n---${
+		const newContent = `---\n${newFrontmatter}---${
 			contentWithoutFrontmatter || ""
-		}`;
+		}`; // I hope the content returned from the stringifyYaml API will always have a newline at the end.
 		return newContent;
 	} catch (error) {
 		console.error("Error updating task note frontmatter:", error);
@@ -175,35 +175,47 @@ export async function updateTaskNoteFrontmatter(
 			throw new Error(`File not found: ${task.filePath}`);
 		}
 
-		const fileContent = await readDataOfVaultFile(plugin, task.filePath);
-		const existingFrontmatter =
-			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-		// const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---/);
+		// Method 1 - Using Obsidian's filemanager API.
+		await plugin.app.fileManager.processFrontMatter(file, (existing) => {
+			const updated = updateFrontmatterProperties(plugin, existing, task);
+			for (const key of Object.keys(updated)) {
+				existing[key] = updated[key];
+			}
+		});
 
-		if (!existingFrontmatter) {
-			// No frontmatter exists, create new one
-			const newFrontmatter = createFrontmatterFromTask(plugin, task);
-			const newContent = `---\n${newFrontmatter}\n---\n${fileContent}`;
-			await writeDataToVaultFile(plugin, task.filePath, newContent);
-			return;
-		}
+		return;
 
-		// Parse existing frontmatter and update properties
-		const updatedFrontmatter = updateFrontmatterProperties(
-			plugin,
-			existingFrontmatter,
-			task
-		);
+		// METHOD 2 - Using custom logic
 
-		// Reconstruct the file content with updated frontmatter
-		const frontmatterYaml = createYamlFromObject(updatedFrontmatter);
-		const contentAfterFrontmatter = fileContent.replace(
-			/^---\n[\s\S]*?\n---\n/,
-			""
-		);
-		const newContent = `---\n${frontmatterYaml}\n---\n${contentAfterFrontmatter}`;
+		// const fileContent = await readDataOfVaultFile(plugin, task.filePath);
+		// const existingFrontmatter =
+		// 	plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+		// // const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---/);
 
-		await writeDataToVaultFile(plugin, task.filePath, newContent);
+		// if (!existingFrontmatter) {
+		// 	// No frontmatter exists, create new one
+		// 	const newFrontmatter = createFrontmatterFromTask(plugin, task);
+		// 	const newContent = `---\n${newFrontmatter}\n---\n${fileContent}`;
+		// 	await writeDataToVaultFile(plugin, task.filePath, newContent);
+		// 	return;
+		// }
+
+		// // Parse existing frontmatter and update properties
+		// const updatedFrontmatter = updateFrontmatterProperties(
+		// 	plugin,
+		// 	existingFrontmatter,
+		// 	task
+		// );
+
+		// // Reconstruct the file content with updated frontmatter
+		// const frontmatterYaml = createYamlFromObject(updatedFrontmatter);
+		// const contentAfterFrontmatter = fileContent.replace(
+		// 	/^---\n[\s\S]*?\n---\n/,
+		// 	""
+		// );
+		// const newContent = `---\n${frontmatterYaml}\n---\n${contentAfterFrontmatter}`;
+
+		// await writeDataToVaultFile(plugin, task.filePath, newContent);
 	} catch (error) {
 		console.error("Error updating task note frontmatter:", error);
 		throw error;
