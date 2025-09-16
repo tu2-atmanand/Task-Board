@@ -56,6 +56,8 @@ export class RealTimeScanning {
 		}
 
 		const filesToProcess = this.taskBoardFileStack.slice();
+		console.log("Processing files from stack:", filesToProcess);
+		// Clear the stack to avoid re-processing during this run.
 		this.taskBoardFileStack = [];
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
@@ -84,12 +86,16 @@ export class RealTimeScanning {
 		return this.plugin.app?.vault.getFileByPath(filePath);
 	}
 
-	onFileModified(file: TFile) {
+	onFileModified(file: TFile | string) {
 		if (
 			this.taskBoardFileStack.at(0) === undefined ||
-			!this.taskBoardFileStack.includes(file.path)
+			!this.taskBoardFileStack.includes(
+				file instanceof TFile ? file.path : file
+			)
 		) {
-			this.taskBoardFileStack.push(file.path); // Add the file to the stack
+			this.taskBoardFileStack.push(
+				file instanceof TFile ? file.path : file
+			); // Add the file to the stack
 			this.saveStack(); // Save the updated stack
 		}
 	}
