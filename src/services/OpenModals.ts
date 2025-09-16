@@ -176,9 +176,36 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							.create(newTask.filePath, noteContent)
 							.then(() => {
 								// This is required to rescan the updated file and refresh the board.
-								plugin.realTimeScanning.processAllUpdatedFiles(
+								plugin.realTimeScanning.onFileModified(
 									newTask.filePath
 								);
+								sleep(2000).then(() => {
+									console.log(
+										"New file is scanning after 1000 milliseconds : ",
+										newTask.filePath
+									);
+									plugin.realTimeScanning.processAllUpdatedFiles();
+								});
+							});
+					} else {
+						new Notice(
+							t("file-note-already-exists") +
+								t(
+									"creating a new file with the following name :"
+								) +
+								` Copy-${newTask.filePath}`,
+							10000
+						);
+						await plugin.app.vault
+							.create(`Copy-${newTask.filePath}`, noteContent)
+							.then(() => {
+								// This is required to rescan the updated file and refresh the board.
+								plugin.realTimeScanning.onFileModified(
+									`Copy-${newTask.filePath}`
+								);
+								sleep(2000).then(() => {
+									plugin.realTimeScanning.processAllUpdatedFiles();
+								});
 							});
 					}
 				} catch (error) {
@@ -277,10 +304,15 @@ export const openEditTaskNoteModal = (
 						updatedTask.filePath,
 						newTaskContent
 					).then(() => {
-						// This is required to rescan the updated file and refresh the board.
-						plugin.realTimeScanning.processAllUpdatedFiles(
-							updatedTask.filePath
-						);
+						sleep(2000).then(() => {
+							console.log(
+								"This will run after updateTaskNoteFrontmatter has successfully run."
+							);
+							// This is required to rescan the updated file and refresh the board.
+							plugin.realTimeScanning.processAllUpdatedFiles(
+								updatedTask.filePath
+							);
+						});
 					});
 				}
 			} catch (error) {
