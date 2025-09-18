@@ -24,6 +24,7 @@ import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNo
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
+import { eventEmitter } from "src/services/EventEmitter";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -889,7 +890,12 @@ const EditTaskContent: React.FC<{
 				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
 				return;
 			}
-			applyIdToTaskInNote(plugin, selectedTask).then(() => {
+			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
+				console.log("Selected Task after applying ID:", selectedTask);
+				if (!newId) {
+					bugReporter(plugin, "Failed to apply ID", `Failed to apply ID to the selected task with title ${choice}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
+					return;
+				}
 
 				const getUpdatedDependsOnIds = (prev: string[]) => {
 					console.log("Previous depends on values :", prev);
@@ -897,9 +903,9 @@ const EditTaskContent: React.FC<{
 						if (selectedTask?.legacyId) {
 							return [...prev, selectedTask.legacyId];
 						} else {
-							const idOfSelectedTask = plugin.settings.data.globalSettings.uniqueIdCounter;
-							if (idOfSelectedTask) {
-								return [...prev, String(idOfSelectedTask)];
+							// const idOfSelectedTask = plugin.settings.data.globalSettings.uniqueIdCounter;
+							if (newId) {
+								return [...prev, String(newId)];
 							}
 						}
 					}
@@ -1004,7 +1010,25 @@ const EditTaskContent: React.FC<{
 			return;
 		}
 
-		console.log("Opening task in map view:", newFilePath);
+		applyIdToTaskInNote(plugin, task).then((newId) => { // Somehow the newId is not passed by the async functions. I always get undefined here. Need to check.
+			console.log("Task after ensuring it has an ID:", newId);
+
+			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
+			plugin.settings.data.globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter));
+
+			console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
+
+			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
+				onClose();
+				sleep(2000).then(() => {
+					console.log("Emitting SWITCH_VIEW event for map view, 2000ms after closing the modal.");
+					eventEmitter.emit("SWITCH_VIEW", 'map');
+				});
+			});
+
+			console.log("Opening task in map view:", newFilePath);
+		});
+
 		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
 		// if (file && file instanceof TFile) {
 		// 	plugin.app.workspace.openLinkText('', newFilePath, 'map');

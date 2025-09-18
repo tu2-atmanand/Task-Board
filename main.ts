@@ -136,6 +136,7 @@ export default class TaskBoard extends Plugin {
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
+
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}

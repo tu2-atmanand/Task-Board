@@ -325,7 +325,7 @@ export const updateTaskInFile = async (
 	plugin: TaskBoard,
 	updatedTask: taskItem,
 	oldTask: taskItem
-): Promise<void> => {
+): Promise<number | undefined> => {
 	try {
 		console.log("updateTaskInFile : updatedTask :\n", updatedTask, oldTask);
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
@@ -338,7 +338,11 @@ export const updateTaskInFile = async (
 			);
 
 		let updatedTaskContent = await getFormattedTaskContent(updatedTask);
-		updatedTaskContent = addIdToTaskContent(plugin, updatedTaskContent);
+		const { formattedTaskContent, newId } = await addIdToTaskContent(
+			plugin,
+			updatedTaskContent
+		);
+		updatedTaskContent = formattedTaskContent;
 		if (updatedTaskContent === "")
 			bugReporter(
 				plugin,
@@ -347,12 +351,21 @@ export const updateTaskInFile = async (
 				"TaskItemUtils.ts/updateTaskInFile"
 			);
 
-		await replaceOldTaskWithNewTask(
+		const result = await replaceOldTaskWithNewTask(
 			plugin,
 			oldTask,
 			oldTaskContent,
 			updatedTaskContent
 		);
+
+		if (result) {
+			console.log(
+				"updateTaskInFile : Just now finished updating the file"
+			);
+			return newId;
+		} else {
+			return undefined;
+		}
 
 		// // Step 1: Read the file content
 		// const fileContent = await readDataOfVaultFile(plugin, filePath);
@@ -412,7 +425,7 @@ export const updateTaskInFile = async (
 			String(error),
 			"TaskItemUtils.ts/updateTaskInFile"
 		);
-		throw error;
+		return undefined;
 	}
 };
 
@@ -534,10 +547,11 @@ export const useTasksPluginToUpdateInFile = async (
 			throw "getSanitizedTaskContent returned empty string";
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
-			const oldTaskTitleWithId = addIdToTaskContent(
+			const { formattedTaskContent, newId } = await addIdToTaskContent(
 				plugin,
 				oldTask.title
 			);
+			const oldTaskTitleWithId = formattedTaskContent;
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
 					oldTaskTitleWithId,
@@ -574,10 +588,9 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 1)) {
-				const tasksPluginApiOutputWithId = addIdToTaskContent(
-					plugin,
-					tasksPluginApiOutput
-				);
+				const { formattedTaskContent, newId } =
+					await addIdToTaskContent(plugin, tasksPluginApiOutput);
+				const tasksPluginApiOutputWithId = formattedTaskContent;
 				newContent = `${tasksPluginApiOutputWithId}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`
@@ -673,13 +686,13 @@ export const useTasksPluginToUpdateInFile = async (
 export const applyIdToTaskInNote = async (
 	plugin: TaskBoard,
 	task: taskItem
-): Promise<void> => {
+): Promise<number | undefined> => {
 	if (task.legacyId) {
 		return;
 	} else {
 		await updateTaskInFile(plugin, task, task)
-			.then(() => {
-				return;
+			.then((newId) => {
+				return newId;
 			})
 			.catch((error) => {
 				bugReporter(
@@ -688,6 +701,7 @@ export const applyIdToTaskInNote = async (
 					String(error),
 					"TaskItemUtils.ts/applyIdToTaskInNote"
 				);
+				return undefined;
 			});
 	}
 };
@@ -733,7 +747,7 @@ export const addTaskInNote = async (
 	newTask: taskItem,
 	editorActive: boolean,
 	cursorPosition?: { line: number; ch: number } | undefined
-) => {
+): Promise<number | undefined> => {
 	const filePath = newTask.filePath.endsWith(".md")
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
@@ -750,7 +764,11 @@ export const addTaskInNote = async (
 
 	try {
 		let completeTask = await getFormattedTaskContent(newTask);
-		completeTask = addIdToTaskContent(plugin, completeTask);
+		const { formattedTaskContent, newId } = await addIdToTaskContent(
+			plugin,
+			completeTask
+		);
+		completeTask = formattedTaskContent;
 		if (completeTask === "")
 			throw "getSanitizedTaskContent returned empty string";
 
@@ -778,7 +796,7 @@ export const addTaskInNote = async (
 			await writeDataToVaultFile(plugin, filePath, newContent);
 		}
 		cursorPosition = undefined;
-		return true;
+		return newId;
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -817,15 +835,7 @@ export const replaceOldTaskWithNewTask = async (
 	oldTask: taskItem,
 	oldTaskContent: string,
 	newTaskContent: string
-) => {
-	console.log(
-		"replaceOldTaskWithNewTask : oldTask : ",
-		oldTask,
-		"\noldTaskContent : ",
-		oldTaskContent,
-		"\nnewTaskContent : ",
-		newTaskContent
-	);
+): Promise<boolean> => {
 	const filePath = oldTask.filePath.endsWith(".md")
 		? oldTask.filePath
 		: `${oldTask.filePath}.md`;
@@ -872,7 +882,7 @@ export const replaceOldTaskWithNewTask = async (
 				} is: ${startLineText}`,
 				"TaskItemUtils.ts/replaceOldTaskWithNewTask"
 			);
-			return;
+			return false;
 		}
 
 		// Step 3: Extract the old task content from file using char indexes
@@ -955,6 +965,9 @@ export const replaceOldTaskWithNewTask = async (
 				}
 			);
 		}
+
+		console.log("Just now finished updating the file");
+		return true; // Indicate success
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -962,6 +975,7 @@ export const replaceOldTaskWithNewTask = async (
 			String(error),
 			"TaskItemUtils.ts/replaceOldTaskWithNewTask"
 		);
+		return false;
 	}
 };
 

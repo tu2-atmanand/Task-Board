@@ -156,6 +156,7 @@ export interface globalSettingsData {
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
+		taskId?: string;
 	};
 }
 

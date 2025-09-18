@@ -60,6 +60,7 @@ const nodeTypes = {
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
+	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	// console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
 
 	// Load positions from localStorage, board-wise
@@ -142,9 +143,10 @@ const MapView: React.FC<MapViewProps> = ({
 		// console.log("Are all the nodes re-calculating when the allTasksArranged changes or only specific ones?\nAllTasksArranged:", allTasksArranged, "\nPositions:", positions, "\nNodeSizes:", nodeSizes);
 		const nodes: Node[] = [];
 		// const allTasksFlat: taskItem[] = allTasksArranged.flat();
-		let xOffset = 0;
 		const columnSpacing = 350;
-		const rowSpacing = 120;
+		const rowSpacing = 170;
+
+		let xOffset = 0;
 		allTasksArranged.forEach((columnTasks, colIdx) => {
 			let yOffset = 0;
 			columnTasks.forEach((task, rowIdx) => {
@@ -288,7 +290,7 @@ const MapView: React.FC<MapViewProps> = ({
 		};
 	}, [allTasksArranged]);
 
-	// Dummy function for connecting parent to child
+	// Function for connecting parent to child
 	function connectParentToChild(sourceNodeId: string, targetNodeId: string, allTasks: taskItem[]) {
 		// const allTasks = allTasksArranged.flat();
 		// console.log("AllTasksArranged:", allTasksArranged);
@@ -314,7 +316,7 @@ const MapView: React.FC<MapViewProps> = ({
 			updatedSourceTask.title = updatedSourceTaskTitle;
 
 			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-			updateTaskInFile(plugin, updatedSourceTask, sourceTask).finally(() => {
+			updateTaskInFile(plugin, updatedSourceTask, sourceTask).then((newId) => {
 				plugin.realTimeScanning.processAllUpdatedFiles(updatedSourceTask.filePath);
 			});
 		}
@@ -402,19 +404,15 @@ const MapView: React.FC<MapViewProps> = ({
 							zoomOnPinch={true}
 							zoomOnScroll={true}
 							onlyRenderVisibleElements={true}
-							defaultViewport={viewport}
-							onMoveEnd={(_, vp) => {
-								setViewport(vp);
-								debouncedSetViewportStorage(vp);
-								// throttledSetViewportStorage(vp);
-							}}
 							onInit={(instance) => {
+								console.log("focusOnTaskId:", focusOnTaskId, "Viewport:", viewport);
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
+									console.log("Focusing on node:", node);
 									if (node) {
 										const newVp: viewPort = {
-											x: node.position.x - 100,
-											y: node.position.y - 100,
+											x: - (node.position.x - 200),
+											y: - (node.position.y),
 											zoom: 1.5
 										};
 										instance.setViewport(newVp);
@@ -425,7 +423,16 @@ const MapView: React.FC<MapViewProps> = ({
 										return;
 									}
 								}
-								instance.setViewport(viewport);
+								else {
+									instance.setViewport(viewport);
+								}
+							}}
+							defaultViewport={viewport}
+							onMoveEnd={(_, vp) => {
+								console.log("Current viewport : ", vp);
+								setViewport(vp);
+								debouncedSetViewportStorage(vp);
+								// throttledSetViewportStorage(vp);
 							}}
 						>
 							<Controls />

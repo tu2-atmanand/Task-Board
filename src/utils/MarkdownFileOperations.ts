@@ -64,6 +64,7 @@ export const writeDataToVaultFile = async (
 			console.error(`File not found at path: ${filePath}`);
 			throw `File not found at path: ${filePath}`;
 		}
+		return;
 	} catch (error) {
 		bugReporter(
 			plugin,

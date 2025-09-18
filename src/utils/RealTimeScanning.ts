@@ -48,6 +48,11 @@ export class RealTimeScanning {
 	}
 
 	async processAllUpdatedFiles(currentFile?: TFile | string | undefined) {
+		console.log(
+			"Starting to process all updated files...\ncurrentFile:",
+			currentFile
+		);
+		// If a current file is provided, ensure it's included in the processing
 		let newFile: TFile | null | undefined = null;
 		if (currentFile && typeof currentFile === "string") {
 			newFile = this.plugin.app.vault.getFileByPath(currentFile);

@@ -47,11 +47,13 @@ export const openAddNewTaskInCurrentFileModal = (
 	const AddTaskModal = new AddOrEditTaskModal(
 		plugin,
 		(newTask: taskItem, quickAddPluginChoice: string) => {
-			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
-					newTask.filePath
-				);
-			});
+			addTaskInNote(plugin, newTask, true, cursorPosition).then(
+				(newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						newTask.filePath
+					);
+				}
+			);
 
 			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
 			// if (
@@ -92,7 +94,9 @@ export const openAddNewTaskModal = (
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
 				let completeTask = await getFormattedTaskContent(newTask);
-				completeTask = addIdToTaskContent(plugin, completeTask);
+				const { formattedTaskContent, newId } =
+					await addIdToTaskContent(plugin, completeTask);
+				completeTask = formattedTaskContent;
 
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
 					quickAddPluginChoice,
@@ -101,7 +105,7 @@ export const openAddNewTaskModal = (
 					}
 				);
 			} else {
-				await addTaskInNote(plugin, newTask, false).then(() => {
+				await addTaskInNote(plugin, newTask, false).then((newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
 						newTask.filePath
 					);
@@ -239,24 +243,13 @@ export const openEditTaskModal = async (
 		(updatedTask: taskItem) => {
 			updatedTask.filePath = existingTask.filePath;
 			// Update the task in the file and JSON
-			updateTaskInFile(plugin, updatedTask, existingTask)
-				.then(() => {
+			updateTaskInFile(plugin, updatedTask, existingTask).then(
+				(newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
 						updatedTask.filePath
 					);
-				})
-				.catch((error) => {
-					// bugReporter(
-					// 	plugin,
-					// 	"Error updating task in file",
-					// 	error as string,
-					// 	"TaskItemEventHandlers.ts/handleEditTask"
-					// );
-					console.error(
-						"TaskItemEventHandlers.ts : Error updating task in file",
-						error
-					);
-				});
+				}
+			);
 
 			// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 

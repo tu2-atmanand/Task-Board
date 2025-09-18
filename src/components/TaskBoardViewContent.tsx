@@ -130,6 +130,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		return () => eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
 	}, []);
 
+	useEffect(() => {
+		const refreshView = (viewType: string) => {
+			console.log("SWITCH_VIEW event called. Switching view to:", viewType);
+			setViewType(viewType);
+		};
+		eventEmitter.on("SWITCH_VIEW", refreshView);
+		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
+	}, []);
+
 	const refreshBoardButton = useCallback(async () => {
 		if (plugin.settings.data.globalSettings.realTimeScanning) {
 			eventEmitter.emit("REFRESH_BOARD");
@@ -340,6 +349,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 								boards={boards}
 								activeBoardIndex={activeBoardIndex}
 								allTasksArranged={allTasksArrangedPerColumn}
+								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
 							/>
 						)
 					) : (

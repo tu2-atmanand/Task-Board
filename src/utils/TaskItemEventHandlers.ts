@@ -32,12 +32,16 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				completion: "",
 				status: newStatus,
 			};
-			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+				(newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						task.filePath
+					);
 
-				// // Move from Completed to Pending
-				// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
-			});
+					// // Move from Completed to Pending
+					// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+				}
+			);
 		} else {
 			const globalSettings = plugin.settings.data.globalSettings;
 			const moment = _moment as unknown as typeof _moment.default;
@@ -51,7 +55,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 			if (!isTaskRecurring(task.title)) {
 				updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
-					() => {
+					(newId) => {
 						plugin.realTimeScanning.processAllUpdatedFiles(
 							taskWithUpdatedStatus.filePath
 						);
@@ -118,21 +122,9 @@ export const handleSubTasksChange = (
 ) => {
 	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated.
 	updateTaskInFile(plugin, updatedTask, oldTask)
-		.then(() => {
+		.then((newId) => {
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
-			);
-		})
-		.catch((error) => {
-			// bugReporter(
-			// 	plugin,
-			// 	"Error updating task in file",
-			// 	error as string,
-			// 	"TaskItemEventHandlers.ts/handleEditTask"
-			// );
-			console.error(
-				"TaskItemEventHandlers.ts : Error updating task in file",
-				error
 			);
 		});
 };
