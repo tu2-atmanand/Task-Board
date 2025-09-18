@@ -342,10 +342,6 @@ const EditTaskContent: React.FC<{
 		handleTaskEditedThroughEditors(e.target.value);
 	};
 
-	// useEffect(() => {
-	// 	console.log("Cursor Location in useEffect:", cursorLocationRef.current);
-	// }, [cursorLocationRef.current]);
-
 	// Tags input
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Enter') {
@@ -411,73 +407,8 @@ const EditTaskContent: React.FC<{
 		setIsEditorContentChanged(true);
 	};
 
-	const handleRemoveChildTask = (taskId: string) => {
-		console.log("Removing child task with ID:", taskId);
-		const newDependsOn = dependsOn.filter(id => id !== taskId);
-		setDependsOn(newDependsOn);
-		if (!isTaskNote) {
-			const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, newDependsOn, cursorLocationRef.current ?? undefined);
-			setTitle(newTitle);
-		}
-		setIsEdited(true);
-		setIsEditorContentChanged(true);
-	};
 
-	// ------------ Handle save task, open file and close actions ------------
-
-	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
-	useEffect(() => {
-		if (!Platform.isMobile) {
-			markdownEditor?.editor?.focus();
-		}
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.ctrlKey || e.metaKey) {
-				setIsCtrlPressed(true);
-			}
-		};
-
-		const handleKeyUp = () => {
-			setIsCtrlPressed(false);
-		};
-
-		root.addEventListener('keydown', handleKeyDown);
-		root.addEventListener('keyup', handleKeyUp);
-
-		return () => {
-			root.removeEventListener('keydown', handleKeyDown);
-			root.removeEventListener('keyup', handleKeyUp);
-		};
-	}, []);
-	const onOpenFilBtnClicked = async (evt: UserEvent, newWindow: boolean) => {
-		if (newWindow) {
-			// plugin.app.workspace.openLinkText('', newFilePath, 'window')
-			const leaf = plugin.app.workspace.getLeaf('window');
-			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
-			} else {
-				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
-			}
-		} else {
-			// await plugin.app.workspace.openLinkText('', newFilePath, false);
-			// const activeEditor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
-			// console.log("Note View:", activeEditor);
-			// activeEditor?.scrollIntoView({
-			// 	from: { line: 5, ch: 0 },
-			// 	to: { line: 5, ch: 5 },
-			// }, true);
-
-			const leaf = plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
-			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-
-			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
-			} else {
-				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
-			}
-		}
-		onClose();
-	}
+	// ------------ Handle save task ------------
 
 	// Function to handle saving the updated task
 	const handleSave = () => {
@@ -602,6 +533,124 @@ const EditTaskContent: React.FC<{
 		completion: task.completion || '',
 		cancelledDate: task.cancelledDate || '',
 	};
+
+
+	// ------------------ Tab Switching and other components ------------------
+	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
+	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
+
+	const filePathRef = useRef<HTMLInputElement>(null);
+	const communityPlugins = new CommunityPlugins(plugin);
+	useEffect(() => {
+		if (!filePathRef.current) return;
+
+		if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists) {
+			const suggestionContent = getQuickAddPluginChoices(
+				plugin.app,
+				communityPlugins.quickAddPlugin
+			);
+			const onSelectCallback = (choice: string) => {
+				setQuickAddPluginChoice(choice);
+				// setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
+		} else {
+			const suggestionContent = getFileSuggestions(plugin.app);
+			const onSelectCallback = (selectedPath: string) => {
+				setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
+		}
+	}, [plugin.app]);
+
+	const handleOpenTaskInMapView = () => {
+		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
+			new Notice(t("enable-experimental-features-message"));
+			return;
+		}
+
+		applyIdToTaskInNote(plugin, task).then((newId) => { // Somehow the newId is not passed by the async functions. I always get undefined here. Need to check.
+			console.log("Task after ensuring it has an ID:", newId);
+
+			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
+			plugin.settings.data.globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter));
+
+			console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
+
+			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
+				onClose();
+				sleep(2000).then(() => {
+					console.log("Emitting SWITCH_VIEW event for map view, 2000ms after closing the modal.");
+					eventEmitter.emit("SWITCH_VIEW", 'map');
+				});
+			});
+
+			console.log("Opening task in map view:", newFilePath);
+		});
+
+		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+		// if (file && file instanceof TFile) {
+		// 	plugin.app.workspace.openLinkText('', newFilePath, 'map');
+		// } else {
+		// 	new Notice(t("file-not-found"));
+		// }
+		// onClose();
+	};
+
+	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+	useEffect(() => {
+		if (!Platform.isMobile) {
+			markdownEditor?.editor?.focus();
+		}
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey || e.metaKey) {
+				setIsCtrlPressed(true);
+			}
+		};
+
+		const handleKeyUp = () => {
+			setIsCtrlPressed(false);
+		};
+
+		root.addEventListener('keydown', handleKeyDown);
+		root.addEventListener('keyup', handleKeyUp);
+
+		return () => {
+			root.removeEventListener('keydown', handleKeyDown);
+			root.removeEventListener('keyup', handleKeyUp);
+		};
+	}, []);
+	const onOpenFilBtnClicked = async (evt: UserEvent, newWindow: boolean) => {
+		if (newWindow) {
+			// plugin.app.workspace.openLinkText('', newFilePath, 'window')
+			const leaf = plugin.app.workspace.getLeaf('window');
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
+			} else {
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+			}
+		} else {
+			// await plugin.app.workspace.openLinkText('', newFilePath, false);
+			// const activeEditor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+			// console.log("Note View:", activeEditor);
+			// activeEditor?.scrollIntoView({
+			// 	from: { line: 5, ch: 0 },
+			// 	to: { line: 5, ch: 5 },
+			// }, true);
+
+			const leaf = plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
+			} else {
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+			}
+		}
+		onClose();
+	}
+	// const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 
 	// ------------- Handle Live markdown editor integration ------------
@@ -839,41 +888,17 @@ const EditTaskContent: React.FC<{
 	}, [isEditorContentChanged]);
 
 	// Not focusing on mobile as it brings up the keyboard everytime this modal is opened. Which is a little distrubing.
+	// Also if its a TaskNote, then dont focus inside the Live editor, instead focus on the title input field.
 	useEffect(() => {
 		if (markdownEditor) {
-			if (!Platform.isMobile) {
+			if (!Platform.isMobile && !isTaskNote) {
 				markdownEditor?.editor.focus();
 			}
 		}
 	}, [markdownEditor]);
 
-	// ------------------ Tab Switching and other components ------------------
-	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
-	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
 
-	const filePathRef = useRef<HTMLInputElement>(null);
-	const communityPlugins = new CommunityPlugins(plugin);
-	useEffect(() => {
-		if (!filePathRef.current) return;
-
-		if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists) {
-			const suggestionContent = getQuickAddPluginChoices(
-				plugin.app,
-				communityPlugins.quickAddPlugin
-			);
-			const onSelectCallback = (choice: string) => {
-				setQuickAddPluginChoice(choice);
-				// setNewFilePath(selectedPath);
-			};
-			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
-		} else {
-			const suggestionContent = getFileSuggestions(plugin.app);
-			const onSelectCallback = (selectedPath: string) => {
-				setNewFilePath(selectedPath);
-			};
-			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
-		}
-	}, [plugin.app]);
+	// ------------------ Child Tasks Management -----------------
 
 	const childTaskInputRef = useRef<HTMLInputElement>(null);
 	useEffect(() => {
@@ -1004,39 +1029,17 @@ const EditTaskContent: React.FC<{
 		}
 	}
 
-	const handleOpenTaskInMapView = () => {
-		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
-			new Notice(t("enable-experimental-features-message"));
-			return;
+	const handleRemoveChildTask = (taskId: string) => {
+		console.log("Removing child task with ID:", taskId);
+		const newDependsOn = dependsOn.filter(id => id !== taskId);
+		setDependsOn(newDependsOn);
+		if (!isTaskNote) {
+			const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, newDependsOn, cursorLocationRef.current ?? undefined);
+			setTitle(newTitle);
 		}
-
-		applyIdToTaskInNote(plugin, task).then((newId) => { // Somehow the newId is not passed by the async functions. I always get undefined here. Need to check.
-			console.log("Task after ensuring it has an ID:", newId);
-
-			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
-			plugin.settings.data.globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter));
-
-			console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
-
-			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
-				onClose();
-				sleep(2000).then(() => {
-					console.log("Emitting SWITCH_VIEW event for map view, 2000ms after closing the modal.");
-					eventEmitter.emit("SWITCH_VIEW", 'map');
-				});
-			});
-
-			console.log("Opening task in map view:", newFilePath);
-		});
-
-		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-		// if (file && file instanceof TFile) {
-		// 	plugin.app.workspace.openLinkText('', newFilePath, 'map');
-		// } else {
-		// 	new Notice(t("file-not-found"));
-		// }
-		// onClose();
-	}
+		setIsEdited(true);
+		setIsEditorContentChanged(true);
+	};
 
 	// ------------------ Rendering the component ------------------
 
