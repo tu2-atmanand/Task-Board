@@ -1065,9 +1065,11 @@ const EditTaskContent: React.FC<{
 									<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 								</div>
 								<div className="EditTaskModalTabHeaderRightBtnSec">
-									<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
-										<Network height={16} />
-									</div>
+									{taskExists && (
+										<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
+											<Network height={16} />
+										</div>
+									)}
 								</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
