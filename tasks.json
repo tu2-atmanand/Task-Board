@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-09-16T17:48:55.745Z",
+    "Modified_at": "2025-09-17T17:52:04.050Z",
     "Pending": {
         "Web Clippings/useMemo – React.md": [
             {
@@ -1467,7 +1467,7 @@
         ],
         "Temp 11.md": [
             {
-                "id": 2571381103,
+                "id": 683416857,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] ",
@@ -1493,10 +1493,10 @@
                 "reminder": ""
             },
             {
-                "id": 727286515,
+                "id": 2073088126,
                 "legacyId": "fa4sm9",
                 "status": " ",
-                "title": "- [ ] New Simple #Test #new 🆔 fa4sm9 ⏳ 2025-08-03 ",
+                "title": "- [ ] New Simple task with Tasks plugin format ID. #Test #new 🆔 fa4sm9 ⏳ 2025-08-03 ",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1515,14 +1515,14 @@
                     "startLine": 11,
                     "startCharIndex": 0,
                     "endLine": 11,
-                    "endCharIndex": 51
+                    "endCharIndex": 85
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 2603548867,
+                "id": 3452283854,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Main task 1 #pending  ⏫  ",
@@ -1550,7 +1550,7 @@
                 "reminder": ""
             },
             {
-                "id": 436151488,
+                "id": 1177009843,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] Subtask 1",
@@ -1576,7 +1576,7 @@
                 "reminder": ""
             },
             {
-                "id": 4043159174,
+                "id": 3100141052,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] Subtask 2",
@@ -1602,7 +1602,7 @@
                 "reminder": ""
             },
             {
-                "id": 984262784,
+                "id": 4008272371,
                 "legacyId": "",
                 "status": " ",
                 "title": "        - [ ] Sub-subtask 1",
@@ -1628,7 +1628,7 @@
                 "reminder": ""
             },
             {
-                "id": 722541448,
+                "id": 911519663,
                 "legacyId": "1gxcpe",
                 "status": " ",
                 "title": "- [ ] 🆔 1gxcpe This is a first task in the file `Temp11.md` ⛔ fa4sm9 ⏫ 🔁 every week 🏁 delete ➕ 2025-07-27 🛫 2025-07-28 ⏳ 2025-07-28 📅 2025-09-03 ",
@@ -1642,9 +1642,7 @@
                 "frontmatterTags": [],
                 "priority": 2,
                 "dependsOn": [
-                    "⛔ fa4sm9",
-                    "fa4sm9",
-                    null
+                    "fa4sm9"
                 ],
                 "filePath": "Temp 11.md",
                 "taskLocation": {
@@ -1658,7 +1656,7 @@
                 "reminder": ""
             },
             {
-                "id": 2032537713,
+                "id": 3857922664,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] **IMPORTANT :** Create a issue on Tasks plugin GitHub repo, reporting that, if the properties are present at the start of the task, they dont get the wrapping inside span in reading mode.",
@@ -1686,7 +1684,7 @@
                 "reminder": ""
             },
             {
-                "id": 2492653749,
+                "id": 1725379243,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is to check what Id is assigned to this task, when added through the modal. #test ",
@@ -1716,7 +1714,7 @@
         ],
         "Task_Board_Temp_Tasks.md": [
             {
-                "id": 2721687117,
+                "id": 333703011,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is not ➕ 2025-05-26 🛫 2025-05-26 #bug",
@@ -1744,7 +1742,7 @@
                 "reminder": ""
             },
             {
-                "id": 2013678328,
+                "id": 4271548863,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] ➕ 2025-05-26 🛫 2025-05-26",
@@ -1770,7 +1768,7 @@
                 "reminder": ""
             },
             {
-                "id": 2532134200,
+                "id": 4075339927,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This task will have the **created date** populated automatically, as well as the start date as todays date. ➕ 2025-05-26 #test",
@@ -1798,7 +1796,7 @@
                 "reminder": ""
             },
             {
-                "id": 4140714706,
+                "id": 1770126734,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Adding a temp task, I think the start date should come automatically here. #test",
@@ -1826,10 +1824,10 @@
                 "reminder": ""
             },
             {
-                "id": 2147905632,
-                "legacyId": "",
+                "id": 44,
+                "legacyId": "44",
                 "status": " ",
-                "title": "- [ ] New simple ⏳ 2025-08-02 ",
+                "title": "- [ ] New simple ⏳ 2025-08-02 🆔 44",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1845,14 +1843,14 @@
                     "startLine": 7,
                     "startCharIndex": 0,
                     "endLine": 7,
-                    "endCharIndex": 30
+                    "endCharIndex": 35
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3557091129,
+                "id": 3239931589,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Simple 📅 2025-08-02 ⏳ 2025-08-03 🛫 2025-08-02 ",
@@ -1878,7 +1876,7 @@
                 "reminder": ""
             },
             {
-                "id": 572949117,
+                "id": 2879597949,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is simple task with a reminder in **Obsi App** format. ⏳ 2025-08-03 📅 2025-08-04 🛫 2025-08-02 #Test (@16:00) ",
@@ -1908,7 +1906,7 @@
                 "reminder": "2025-08-02T16:00"
             },
             {
-                "id": 123650583,
+                "id": 3127673872,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Adding a temp text ⏳ 2025-07-26 task. 📅 2025-07-27",
@@ -1934,7 +1932,7 @@
                 "reminder": ""
             },
             {
-                "id": 1796024983,
+                "id": 708804756,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This task is created through the **Add new task modal** and it will be entered right after the *Pending tasks* section. 🔼 ⏰ [10:00 - 11:00] ➕ 2025-07-10 📅 2025-07-11 #Testing",
@@ -1962,7 +1960,7 @@
                 "reminder": ""
             },
             {
-                "id": 2455010041,
+                "id": 811570277,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Here we go, another one. 🔺⏰ [10:00 - 11:30] #test 📅 2025-05-25",
@@ -1990,7 +1988,7 @@
                 "reminder": ""
             },
             {
-                "id": 2311856270,
+                "id": 1684145886,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Another a third task. ⏬ 📅 2025-05-26 #working",
@@ -2020,7 +2018,7 @@
                 "reminder": ""
             },
             {
-                "id": 1607722744,
+                "id": 1188172236,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Adding another task to the same **choice** directly from the `Add new task modal`. 0 #test 📅 2025-05-25",
@@ -2048,7 +2046,7 @@
                 "reminder": ""
             },
             {
-                "id": 2680499603,
+                "id": 2276574456,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Now I should be able to switch between the **QuickAdd** choices directly from the `Add new task modal`. 🔼 📅 2025-05-25 #test",
@@ -2076,7 +2074,7 @@
                 "reminder": ""
             },
             {
-                "id": 2471970538,
+                "id": 2968465327,
                 "legacyId": "",
                 "status": "/",
                 "title": "- [/] This is a new task for tomorrow. 0 📅 2025-05-26 #New",
@@ -2107,7 +2105,7 @@
                 "reminder": ""
             },
             {
-                "id": 2342829343,
+                "id": 1350623584,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Another quick task 🔺 📅 2025-05-25 #test",
@@ -2135,7 +2133,7 @@
                 "reminder": ""
             },
             {
-                "id": 1855145943,
+                "id": 3776623105,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] this #test ➕ 2025-05-26",
@@ -2163,7 +2161,7 @@
                 "reminder": ""
             },
             {
-                "id": 4270447835,
+                "id": 3197096892,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is a test 🔼 ➕ 2025-06-29 📅 2025-06-29 #Test",
@@ -2191,7 +2189,7 @@
                 "reminder": ""
             },
             {
-                "id": 1535712130,
+                "id": 4012957088,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is a test 2 ➕ 2025-06-29 📅 2025-06-29",
@@ -2217,7 +2215,7 @@
                 "reminder": ""
             },
             {
-                "id": 3892433806,
+                "id": 232275652,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is test 3 ⏫ ➕ 2025-06-29 📅 2025-07-17 #Test",
@@ -2245,7 +2243,7 @@
                 "reminder": ""
             },
             {
-                "id": 3855908905,
+                "id": 2411226464,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is test 4 🔺 ➕ 2025-06-29 ⏳ 2025-07-04 📅 2025-06-29 #Test",
@@ -2273,7 +2271,7 @@
                 "reminder": ""
             },
             {
-                "id": 1114473563,
+                "id": 454371914,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] This is a task. updated ⏳ 2025-06-11 ➕ 2025-06-29 📅 2025-06-29 #Test",
@@ -2301,7 +2299,7 @@
                 "reminder": ""
             },
             {
-                "id": 3239551594,
+                "id": 3050511786,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] A simple new task for today. ➕ 2025-07-10 📅 2025-07-10 #Test",
@@ -11122,7 +11120,7 @@
                 "reminder": ""
             },
             {
-                "id": 966420931,
+                "id": 151133262,
                 "legacyId": "mgqx2p",
                 "status": " ",
                 "title": "- [ ] This is a parent task. 🆔 mgqx2p ⛔ ullkbp",
@@ -12478,7 +12476,7 @@
         ],
         "2025-05-24.md": [
             {
-                "id": 1905170909,
+                "id": 414545720,
                 "legacyId": "ullkbp",
                 "status": "x",
                 "title": "- [x] This is a child task. So this has to be completed first to mark the parent task as complete. 🆔 ullkbp ✅ 2025-09-10",

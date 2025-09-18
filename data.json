@@ -638,13 +638,14 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 37,
+      "uniqueIdCounter": 44,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 0
+        "boardIndex": 1,
+        "taskId": ""
       }
     }
   }
