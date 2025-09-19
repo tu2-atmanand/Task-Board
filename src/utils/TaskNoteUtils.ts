@@ -69,7 +69,7 @@ export function isTaskNotePresentInTags(
  * @returns Partial taskItem with properties mapped from frontmatter
  */
 export function extractTaskNoteProperties(
-	frontmatter: any,
+	frontmatter: Partial<customFrontmatterCache> | undefined,
 	filePath: string
 ): Partial<taskItem> {
 	if (!frontmatter) {
@@ -77,22 +77,47 @@ export function extractTaskNoteProperties(
 	}
 
 	return {
-		id: frontmatter.id || "",
-		title: frontmatter.title || "",
-		tags: frontmatter?.tags || [],
-		createdDate: frontmatter["created-date"] || frontmatter?.created || "",
-		startDate: frontmatter["start-date"] || frontmatter?.start || "",
+		id: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.id] || "",
+		title: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.title] || "",
+		tags: Array.isArray(frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags])
+			? frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags]
+			: typeof frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags] === "string"
+			? frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags]
+					.split(",")
+					.map((tag: string) => tag.trim())
+			: [],
+		createdDate:
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.createdDate] ||
+			frontmatter?.created ||
+			"",
+		startDate:
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.startDate] ||
+			frontmatter?.start ||
+			"",
 		scheduledDate:
-			frontmatter["schedule-date"] || frontmatter?.scheduled || "",
-		due: frontmatter["due-date"] || frontmatter?.due || "",
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.scheduledDate] ||
+			frontmatter?.scheduled ||
+			"",
+		due:
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.dueDate] ||
+			frontmatter?.due ||
+			"",
 		cancelledDate:
-			frontmatter["cancelled-date"] || frontmatter?.cancelled || "",
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.cancelledDate] ||
+			frontmatter?.cancelled ||
+			"",
 		completion:
-			frontmatter["completion-date"] || frontmatter?.completed || "",
-		priority: mapPriorityFromFrontmatter(frontmatter?.priority),
-		status: mapStatusFromFrontmatter(frontmatter?.status),
-		dependsOn: frontmatter?.dependsOn || frontmatter?.depends_on || [],
-		reminder: frontmatter?.reminder || "",
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.completionDate] ||
+			frontmatter?.completed ||
+			"",
+		priority: mapPriorityFromFrontmatter(
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.priority]
+		),
+		status: mapStatusFromFrontmatter(
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.status]
+		),
+		dependsOn: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.dependsOn] || [],
+		reminder: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.reminder] || "",
 		filePath: filePath,
 	};
 }
