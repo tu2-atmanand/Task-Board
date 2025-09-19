@@ -242,7 +242,7 @@
       "showVerticalScroll": false,
       "tagColors": [
         {
-          "name": "bug",
+          "name": "Bug",
           "color": "rgba(253, 17, 33, 0.75)",
           "priority": 1
         },
@@ -644,9 +644,10 @@
       "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 0,
         "taskId": ""
-      }
+      },
+      "taskNoteIdentifierTag": "taskNote"
     }
   }
 }

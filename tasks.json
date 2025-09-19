@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-09-17T17:52:04.050Z",
+    "Modified_at": "2025-09-19T17:01:48.866Z",
     "Pending": {
         "Web Clippings/useMemo – React.md": [
             {
@@ -22,9 +22,9 @@
                 "dependsOn": [],
                 "filePath": "Web Clippings/useMemo – React.md",
                 "taskLocation": {
-                    "startLine": 2,
+                    "startLine": 6,
                     "startCharIndex": 0,
-                    "endLine": 2,
+                    "endLine": 6,
                     "endCharIndex": 72
                 },
                 "completion": "",
@@ -48,9 +48,9 @@
                 "dependsOn": [],
                 "filePath": "Web Clippings/useMemo – React.md",
                 "taskLocation": {
-                    "startLine": 50,
+                    "startLine": 54,
                     "startCharIndex": 0,
-                    "endLine": 50,
+                    "endLine": 54,
                     "endCharIndex": 99
                 },
                 "completion": "",
@@ -74,9 +74,9 @@
                 "dependsOn": [],
                 "filePath": "Web Clippings/useMemo – React.md",
                 "taskLocation": {
-                    "startLine": 84,
+                    "startLine": 88,
                     "startCharIndex": 0,
-                    "endLine": 84,
+                    "endLine": 88,
                     "endCharIndex": 44
                 },
                 "completion": "",
@@ -84,7 +84,7 @@
                 "reminder": ""
             },
             {
-                "id": 3569311157,
+                "id": 335053146,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] This is a sub-task.",
@@ -100,9 +100,9 @@
                 "dependsOn": [],
                 "filePath": "Web Clippings/useMemo – React.md",
                 "taskLocation": {
-                    "startLine": 85,
+                    "startLine": 89,
                     "startCharIndex": 0,
-                    "endLine": 85,
+                    "endLine": 89,
                     "endCharIndex": 29
                 },
                 "completion": "",
@@ -110,7 +110,7 @@
                 "reminder": ""
             },
             {
-                "id": 11667159,
+                "id": 3531886737,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Test ⏫ ➕ 2025-05-26 🛫 2025-05-26 #test",
@@ -128,9 +128,9 @@
                 "dependsOn": [],
                 "filePath": "Web Clippings/useMemo – React.md",
                 "taskLocation": {
-                    "startLine": 220,
+                    "startLine": 224,
                     "startCharIndex": 0,
-                    "endLine": 220,
+                    "endLine": 224,
                     "endCharIndex": 45
                 },
                 "completion": "",
@@ -11093,14 +11093,16 @@
                 "id": 3,
                 "legacyId": "3",
                 "status": " ",
-                "title": "- [ ] This is another task. Simply updating more. Edited. 🔽  📅 202-08-18  ➕ 2025-08-16 🛫 2025-08-19  ⏳ 2025-08-17 🆔 3 ⛔ 25, 31, 27",
+                "title": "- [ ] This is another task. Simply updating more. Edited. 🔽  📅 202-08-18  ➕ 2025-08-16 🛫 2025-08-19  ⏳ 2025-08-17 🆔 3 ⛔ 25, 31, 27 #placeholder/link ",
                 "body": [],
                 "time": "",
                 "createdDate": "2025-08-16",
                 "startDate": "2025-08-19",
                 "scheduledDate": "2025-08-17",
                 "due": "",
-                "tags": [],
+                "tags": [
+                    "#placeholder/link"
+                ],
                 "frontmatterTags": [],
                 "priority": 4,
                 "dependsOn": [
@@ -11113,14 +11115,14 @@
                     "startLine": 8,
                     "startCharIndex": 0,
                     "endLine": 8,
-                    "endCharIndex": 134
+                    "endCharIndex": 153
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 151133262,
+                "id": 3034498900,
                 "legacyId": "mgqx2p",
                 "status": " ",
                 "title": "- [ ] This is a parent task. 🆔 mgqx2p ⛔ ullkbp",
@@ -11330,17 +11332,18 @@
         ],
         "TaskNotes/Tasks/I want to start working on adding id soon, edited.md": [
             {
-                "id": 2197375067,
+                "id": 1617997157,
                 "legacyId": "",
                 "title": "I want to start working on adding id soon, edited",
                 "body": [],
                 "createdDate": "",
                 "startDate": "",
-                "scheduledDate": "2025-09-04",
-                "due": "",
+                "scheduledDate": "2025-09-19",
+                "due": "2025-09-21",
                 "tags": [
-                    "#task",
-                    "#taskNote"
+                    "book",
+                    "task",
+                    "taskNote"
                 ],
                 "frontmatterTags": [],
                 "time": "",
@@ -11351,8 +11354,8 @@
                 "taskLocation": {
                     "startLine": 1,
                     "startCharIndex": 0,
-                    "endLine": 14,
-                    "endCharIndex": 0
+                    "endLine": 25,
+                    "endCharIndex": 81
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -12476,7 +12479,7 @@
         ],
         "2025-05-24.md": [
             {
-                "id": 414545720,
+                "id": 2556869813,
                 "legacyId": "ullkbp",
                 "status": "x",
                 "title": "- [x] This is a child task. So this has to be completed first to mark the parent task as complete. 🆔 ullkbp ✅ 2025-09-10",
