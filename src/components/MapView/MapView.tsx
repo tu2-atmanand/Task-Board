@@ -23,7 +23,7 @@ import TaskItem from '../KanbanView/TaskItem';
 import CustomNodeResizer from './CustomNodeResizer';
 import { updateTaskInFile } from 'src/utils/TaskItemUtils';
 import { debounce } from 'obsidian';
-import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/types/GlobalVariables';
+import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/types/uniqueIdentifiers';
 import { sanitizeDependsOn } from 'src/utils/TaskContentFormatter';
 
 type MapViewProps = {

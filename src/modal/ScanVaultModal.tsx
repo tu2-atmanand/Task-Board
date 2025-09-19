@@ -11,7 +11,7 @@ import TaskBoard from "main";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
-import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;

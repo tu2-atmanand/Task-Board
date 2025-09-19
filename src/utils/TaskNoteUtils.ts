@@ -12,6 +12,10 @@ import {
 	customFrontmatterCache,
 } from "./FrontmatterOperations";
 import { resolve } from "path";
+import {
+	TASK_NOTE_FRONTMATTER_KEYS,
+	TASK_NOTE_IDENTIFIER_TAG,
+} from "src/types/uniqueIdentifiers";
 
 /**
  * Check if a note is a Task Note by looking for #taskNote tag in frontmatter

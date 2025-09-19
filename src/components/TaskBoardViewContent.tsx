@@ -15,7 +15,7 @@ import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);

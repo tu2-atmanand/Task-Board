@@ -27,7 +27,7 @@ import { RealTimeScanning } from "src/utils/RealTimeScanning";
 import ScanningVault from "src/utils/ScanningVault";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import {
 	deleteAllLocalStorageKeys,

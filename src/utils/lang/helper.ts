@@ -10,7 +10,7 @@ import {
 	NODE_POSITIONS_STORAGE_KEY,
 	NODE_SIZE_STORAGE_KEY,
 	VIEWPORT_STORAGE_KEY,
-} from "src/types/GlobalVariables";
+} from "src/types/uniqueIdentifiers";
 
 let currentLang = "en";
 
