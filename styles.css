@@ -2122,6 +2122,12 @@ li:hover .taskboard-hidden-property {
 	border-radius: var(--radius-m);
 }
 
+.taskBoard-settings-wide-input {
+	width: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+}
+
 @media (max-width: 768px) {
 	.settingTabFooterDonationsSec {
 		display: flex;
