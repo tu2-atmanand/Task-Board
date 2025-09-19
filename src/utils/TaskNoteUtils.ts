@@ -175,19 +175,42 @@ export function mapStatusFromFrontmatter(
 	return " ";
 }
 
+/**
+ * Format the entire task note content with updated frontmatter
+ * @param plugin - TaskBoard plugin instance
+ * @param updatedTask - Task item with updated properties
+ * @param oldNoteContent - Existing content of the note
+ * @returns string - New content of the note with updated frontmatter
+ */
 export function formatTaskNoteContent(
 	plugin: TaskBoard,
-	task: taskItem,
-	bodyContent: string
+	updatedTask: taskItem,
+	oldNoteContent: string
 ): string {
-	console.log("formatTaskNoteContent called with:", task, bodyContent);
+	console.log(
+		"formatTaskNoteContent called with:",
+		updatedTask,
+		oldNoteContent
+	);
 	try {
-		const frontmatterMatch = bodyContent.match(/^---\n([\s\S]*?)\n---/);
 		// No frontmatter exists, create new one
-		const newFrontmatter = createFrontmatterFromTask(plugin, task);
+		// const newFrontmatter = createFrontmatterFromTask(plugin, task);
+		const file = plugin.app.vault.getFileByPath(updatedTask.filePath);
+		if (!file) {
+			throw new Error(`File not found: ${updatedTask.filePath}`);
+		}
+		const existingFrontmatter = extractFrontmatter(plugin, file);
+		const updatedFrontmatter = updateFrontmatterProperties(
+			plugin,
+			existingFrontmatter,
+			updatedTask
+		);
+		const newFrontmatter = createYamlFromObject(updatedFrontmatter);
+
+		const frontmatterMatch = oldNoteContent.match(/^---\n([\s\S]*?)\n---/);
 		const contentWithoutFrontmatter = frontmatterMatch
-			? bodyContent.replace(frontmatterMatch[0], "")
-			: bodyContent;
+			? oldNoteContent.replace(frontmatterMatch[0], "")
+			: oldNoteContent;
 		const newContent = `---\n${newFrontmatter}---${
 			contentWithoutFrontmatter || ""
 		}`; // I hope the content returned from the stringifyYaml API will always have a newline at the end.
