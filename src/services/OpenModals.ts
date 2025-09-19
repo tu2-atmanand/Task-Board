@@ -20,7 +20,7 @@ import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
 import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
 import { ScanFilterModal } from "src/modal/ScanFilterModal";
 import { taskItem } from "src/interfaces/TaskItem";
-import { updateTaskNoteFrontmatter } from "src/utils/TaskNoteUtils";
+import { updateFrontmatterInMarkdownFile } from "src/utils/TaskNoteUtils";
 import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
 
 // Function to open the BoardConfigModal
@@ -283,7 +283,7 @@ export const openEditTaskNoteModal = (
 			try {
 				if (!newTaskContent) {
 					// Update frontmatter with task properties
-					await updateTaskNoteFrontmatter(plugin, updatedTask).then(
+					await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(
 						() => {
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(
@@ -299,7 +299,7 @@ export const openEditTaskNoteModal = (
 					).then(() => {
 						sleep(2000).then(() => {
 							console.log(
-								"This will run after updateTaskNoteFrontmatter has successfully run."
+								"This will run after updateFrontmatterInMarkdownFile has successfully run."
 							);
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(

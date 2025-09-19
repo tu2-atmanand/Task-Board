@@ -3,7 +3,7 @@
 import { App, Notice } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
-import { updateTaskNoteFrontmatter } from "./TaskNoteUtils";
+import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils";
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import {
@@ -36,7 +36,7 @@ export const handleTaskNoteEdit = (plugin: TaskBoard, task: taskItem) => {
 		// 		try {
 		// 			if (!newTaskContent) {
 		// 				// Update frontmatter with task properties
-		// 				await updateTaskNoteFrontmatter(
+		// 				await updateFrontmatterInMarkdownFile(
 		// 					plugin,
 		// 					updatedTask
 		// 				).then(() => {
@@ -109,7 +109,7 @@ export const handleTaskNoteStatusChange = async (
 		};
 
 		// Update frontmatter with new status
-		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
+		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
@@ -136,7 +136,7 @@ export const handleTaskNotePropertyUpdate = async (
 ) => {
 	try {
 		// Update frontmatter with all updated properties
-		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
+		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
@@ -151,7 +151,7 @@ export const handleTaskNotePropertyUpdate = async (
 };
 
 /**
- * Handle task note deletion (remove #taskNote tag from frontmatter)
+ * Handle task note deletion (remove #TASK_NOTE_IDENTIFIER_TAG tag from frontmatter)
  * @param plugin - TaskBoard plugin instance
  * @param task - Task note to delete
  */
@@ -174,13 +174,12 @@ export const handleTaskNoteDelete = async (
 				? [...frontmatter.tags]
 				: [frontmatter.tags];
 			tags = tags.filter(
-				(tag: string) => tag !== "taskNote" && tag !== "#taskNote"
+				(tag: string) =>
+					tag.includes(
+						plugin.settings.data.globalSettings
+							.taskNoteIdentifierTag
+					) === false
 			);
-
-			const updatedTask = {
-				...task,
-				// Update to remove taskNote tag
-			};
 
 			// If no other tags remain, we could remove the tags property entirely
 			// But for now, just update with filtered tags

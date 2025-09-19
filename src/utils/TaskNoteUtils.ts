@@ -179,7 +179,7 @@ export function formatTaskNoteContent(
  * @param task - Task item with updated properties
  * @returns Promise<void>
  */
-export async function updateTaskNoteFrontmatter(
+export async function updateFrontmatterInMarkdownFile(
 	plugin: TaskBoard,
 	task: taskItem
 ): Promise<void> {
