@@ -16,7 +16,7 @@ import { buildTaskFromRawContent, generateTaskId } from "src/utils/ScanningVault
 import { DeleteIcon, EditIcon, FileInput, Network, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { DEFAULT_SETTINGS, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter, openEditTaskModal, openEditTaskNoteModal } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -661,6 +661,7 @@ const EditTaskContent: React.FC<{
 		componentRef.current = plugin.view;
 	}, []);
 
+	// TODO : This function should be optimized to avoid excessive parsing on every keystroke.
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
 		if (isTaskNote) return;
 
@@ -679,8 +680,6 @@ const EditTaskContent: React.FC<{
 		setPriority(updatedTask.priority || 0);
 		setStatus(updatedTask.status || '');
 		setReminder(updatedTask.reminder || '');
-
-		setIsEdited(true);
 	}, 50);
 
 	// // This useEffect is used to get the formatted content of the updated task, which will be rendered in the editor(s).
@@ -917,15 +916,15 @@ const EditTaskContent: React.FC<{
 			}
 			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
 				console.log("Selected Task after applying ID:", selectedTask);
-				if (!newId) {
-					bugReporter(plugin, "Failed to apply ID", `Failed to apply ID to the selected task with title ${choice}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
-					return;
-				}
 
 				const getUpdatedDependsOnIds = (prev: string[]) => {
 					console.log("Previous depends on values :", prev);
 					if (!prev.includes(task.legacyId ? task.legacyId : String(task.id))) {
-						if (selectedTask?.legacyId) {
+						if (newId === undefined && !selectedTask?.legacyId) {
+							// This case should ideally never happen, but just in case.
+							bugReporter(plugin, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
+							return [...prev, String(plugin.settings.data.globalSettings.uniqueIdCounter)];
+						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
 						} else {
 							// const idOfSelectedTask = plugin.settings.data.globalSettings.uniqueIdCounter;
