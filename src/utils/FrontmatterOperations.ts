@@ -30,7 +30,7 @@ export interface customFrontmatterCache extends FrontMatterCache {
 export function extractFrontmatter(
 	plugin: TaskBoard,
 	file: TFile
-): Partial<customFrontmatterCache> | undefined {
+): customFrontmatterCache | undefined {
 	// Method 1 - Find the frontmatter using delimiters
 	// // Check if the file starts with frontmatter delimiter
 	// if (!fileContent.startsWith("---\n")) {
@@ -128,8 +128,14 @@ export function createFrontmatterFromTask(
 		title: task?.title || "",
 		status: statusKey ?? `"${task.status}"`,
 		tags: [
-			"#taskNote",
-			...(task?.tags?.filter((tag) => tag !== "#taskNote") ?? []),
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			...(task?.tags?.filter(
+				(tag) =>
+					tag.includes(
+						plugin.settings.data.globalSettings
+							.taskNoteIdentifierTag
+					) === false
+			) ?? []),
 		],
 	};
 
@@ -174,6 +180,16 @@ export function updateFrontmatterProperties(
 				},
 		  };
 
+	console.log(
+		"updateFrontmatterProperties called with:",
+		"\nexistingFrontmatter:",
+		existingFrontmatter,
+		"\ntask:",
+		task,
+		"\nupdated (initial):",
+		updated
+	);
+
 	if (task.title) {
 		updated.title = task.title;
 	} else {
@@ -182,14 +198,20 @@ export function updateFrontmatterProperties(
 
 	// Ensure taskNote tag exists
 	if (!updated.tags) {
-		updated.tags = ["#taskNote"];
+		updated.tags = [
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		];
 	} else if (Array.isArray(updated.tags)) {
 		if (
-			!updated.tags.some(
-				(tag: string) => tag === "taskNote" || tag === "#taskNote"
+			!updated.tags.some((tag: string) =>
+				tag.includes(
+					plugin.settings.data.globalSettings.taskNoteIdentifierTag
+				)
 			)
 		) {
-			updated.tags.push("#taskNote");
+			updated.tags.push(
+				plugin.settings.data.globalSettings.taskNoteIdentifierTag
+			);
 		}
 	}
 
@@ -261,7 +283,7 @@ export function updateFrontmatterProperties(
 
 /**
  * Create YAML string from object (simple implementation)
- * @param obj - Object to convert to YAML
+ * @param obj - Frontmatter object to convert to YAML string
  * @returns string - YAML string
  */
 export function createYamlFromObject(

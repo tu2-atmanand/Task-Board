@@ -275,7 +275,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		setIsChecked(true); // Trigger animation
 		setTimeout(() => {
 			// Route to appropriate handler based on task type
-			if (isTaskNotePresentInTags(task.tags)) {
+			if (isTaskNotePresentInTags(plugin, task.tags)) {
 				handleTaskNoteStatusChange(plugin, task);
 			} else {
 				handleCheckboxChange(plugin, task);
@@ -306,7 +306,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 
-		if (!isTaskNotePresentInTags(task.tags)) {
+		if (!isTaskNotePresentInTags(plugin, task.tags)) {
 			// onSubTasksChange(updatedTask); // Notify parent of the change
 			handleSubTasksChange(plugin, task, updatedTask);
 		} else {
@@ -325,7 +325,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const onEditButtonClicked = (event: React.MouseEvent) => {
 		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
 			// Route to appropriate handler based on task type
-			if (isTaskNotePresentInTags(task.tags)) {
+			if (isTaskNotePresentInTags(plugin, task.tags)) {
 				handleTaskNoteEdit(plugin, task);
 			} else {
 				handleEditTask(plugin, task);

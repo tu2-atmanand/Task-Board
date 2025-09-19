@@ -193,7 +193,7 @@ export default class ScanningVault {
 		if (
 			this.plugin.settings.data.globalSettings.experimentalFeatures &&
 			frontmatter &&
-			isTaskNotePresentInFrontmatter(frontmatter)
+			isTaskNotePresentInFrontmatter(this.plugin, frontmatter)
 		) {
 			this.TaskDetected = true;
 
@@ -238,7 +238,7 @@ export default class ScanningVault {
 				startDate: taskNoteProperties.startDate || "",
 				scheduledDate: taskNoteProperties.scheduledDate || "",
 				due: taskNoteProperties.due || "",
-				tags: extractFrontmatterTags(frontmatter), // Use frontmatter tags
+				tags: taskNoteProperties.tags || [],
 				frontmatterTags: [],
 				time: "", // Task notes don't have time ranges
 				priority: taskNoteProperties.priority || 0,

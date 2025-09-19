@@ -228,6 +228,7 @@ export class SettingsManager {
 			tasksCacheFilePath,
 			scanVaultAtStartup,
 			preDefinedNote,
+			taskNoteIdentifierTag,
 			taskNoteDefaultLocation,
 			autoAddUniqueID,
 			experimentalFeatures,
@@ -405,11 +406,33 @@ export class SettingsManager {
 				);
 			});
 
+		new Setting(contentEl)
+			.setName(t("Task note identifier tag"))
+			.setDesc(
+				t(
+					"Enter the tag which will be used to indentify a normal task as a task-note."
+				)
+			)
+			.addText((text) => {
+				text.setValue(taskNoteIdentifierTag).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteIdentifierTag =
+							value.startsWith("#")
+								? value.replace("#", "")
+								: value;
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., taskNote";
+			});
+
 		// Setting for choosing the default location for task notes
 		new Setting(contentEl)
-			.setName("Default location for Task Notes")
+			.setName(t("Default location for Task Notes"))
 			.setDesc(
-				"Default folder where new task notes will be saved when using 'Save as note' button"
+				t(
+					"Default folder where new task notes will be saved when using 'Save as note' button"
+				)
 			)
 			.addText((text) => {
 				text.setValue(taskNoteDefaultLocation).onChange((value) => {
@@ -420,7 +443,7 @@ export class SettingsManager {
 				const inputEl = text.inputEl;
 				// For folders, we could use folder suggestions or just allow text input
 				// For now, let's keep it simple with text input
-				inputEl.placeholder = "e.g., TaskNotes or Notes/Tasks";
+				inputEl.placeholder = "e.g., Task Notes or Notes/Tasks";
 			});
 
 		// Setting for choosing the default file to archive tasks
@@ -434,7 +457,7 @@ export class SettingsManager {
 				});
 
 				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(app);
+				const suggestionContent = getFileSuggestions(this.plugin.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTasksFilePath =
@@ -453,6 +476,7 @@ export class SettingsManager {
 			});
 
 		new Setting(contentEl)
+			.setClass("taskBoard-settings-wide-input")
 			.setName(t("tasks-cache-file-path"))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(

@@ -1018,7 +1018,8 @@ const EditTaskContent: React.FC<{
 		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
 
 		//For now will simply open it in a new modal.
-		if (isTaskNotePresentInTags(childTask.tags)) {
+		console.log("Output of isTaskNotePresentInTags(plugin, childTask.tags): ", isTaskNotePresentInTags(plugin, childTask.tags));
+		if (isTaskNotePresentInTags(plugin, childTask.tags)) {
 			plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
 			await sleep(50);
 			openEditTaskNoteModal(plugin, childTask);

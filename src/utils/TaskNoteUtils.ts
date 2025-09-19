@@ -3,13 +3,10 @@
 import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import {
-	readDataOfVaultFile,
-	writeDataToVaultFile,
-} from "./MarkdownFileOperations";
-import {
-	createFrontmatterFromTask,
 	updateFrontmatterProperties,
 	customFrontmatterCache,
+	extractFrontmatter,
+	createYamlFromObject,
 } from "./FrontmatterOperations";
 import { resolve } from "path";
 import {
@@ -18,11 +15,12 @@ import {
 } from "src/types/uniqueIdentifiers";
 
 /**
- * Check if a note is a Task Note by looking for #taskNote tag in frontmatter
+ * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
  * @param frontmatter - The frontmatter object from a file
- * @returns boolean - True if the note contains #taskNote tag
+ * @returns boolean - True if the note contains TASK_NOTE_IDENTIFIER_TAG tag
  */
 export function isTaskNotePresentInFrontmatter(
+	plugin: TaskBoard,
 	frontmatter: Partial<customFrontmatterCache> | undefined
 ): boolean {
 	if (!frontmatter || !frontmatter.tags) {
@@ -39,17 +37,29 @@ export function isTaskNotePresentInFrontmatter(
 
 	console.log("isTaskNotePresentInFrontmatter - Tags extracted:", tags);
 
-	// Check for #taskNote tag (with or without #)
-	return tags.some((tag) => tag === "taskNote" || tag === "#taskNote");
+	// Check for TASK_NOTE_IDENTIFIER_TAG tag (with or without #)
+	return tags.some((tag) =>
+		tag.includes(plugin.settings.data.globalSettings.taskNoteIdentifierTag)
+	);
 }
 
 /**
- * Check if a note is a Task Note by looking for #taskNote tag in tags
+ * Check if a note is a Task Note by looking for #TASK_NOTE_IDENTIFIER_TAG tag in tags
  * @param tags - The tags array from a file
- * @returns boolean - True if the note contains #taskNote tag
+ * @returns boolean - True if the note contains #TASK_NOTE_IDENTIFIER_TAG tag
  */
-export function isTaskNotePresentInTags(tags: string[]): boolean {
-	return tags.includes("taskNote") || tags.includes("#taskNote");
+export function isTaskNotePresentInTags(
+	plugin: TaskBoard,
+	tags: string[]
+): boolean {
+	console.log("isTaskNotePresentInTags - Tags provided:", tags);
+	return tags
+		? tags.some((tag) =>
+				tag.includes(
+					plugin.settings.data.globalSettings.taskNoteIdentifierTag
+				)
+		  )
+		: false;
 }
 
 /**
