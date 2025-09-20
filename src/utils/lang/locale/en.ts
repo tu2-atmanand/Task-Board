@@ -163,7 +163,7 @@ const en: Lang = {
 	"file-not-found-at-path": "File not found at path:",
 	"edit-button-mode": "Edit button action",
 	"edit-button-mode-info": "Select what should the edit button do.",
-	"use-edit-task-window-feature": "Use edit task window feature",
+	"use-edit-task-window-feature": "Edit task modal",
 	"open-note-in-new-tab": "Open note in new tab",
 	"open-note-in-right-split": "Open note in right split",
 	"open-note-in-new-window": "Open note in new window",
