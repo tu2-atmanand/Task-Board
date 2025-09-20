@@ -1222,6 +1222,35 @@ export class SettingsManager {
 					})
 			);
 
+		new Setting(contentEl)
+			.setName(t("double-click-card-action"))
+			.setDesc(t("double-click-card-action-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.None]: t("none"),
+						[EditButtonMode.PopUp]: t(
+							"use-edit-task-window-feature"
+						),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split"
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window"
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview"
+						),
+					})
+					.setValue(this.globalSettings!.doubleClickCardToEdit)
+					.onChange(async (value) => {
+						this.globalSettings!.doubleClickCardToEdit =
+							value as EditButtonMode;
+						await this.saveSettings();
+					})
+			);
+
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
 			.setName(t("auto-add-universal-date-to-tasks"))

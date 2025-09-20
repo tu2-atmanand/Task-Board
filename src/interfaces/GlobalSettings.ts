@@ -33,6 +33,7 @@ export interface TagColor {
 }
 
 export enum EditButtonMode {
+	None = "none",
 	PopUp = "popUp",
 	NoteInTab = "noteInTab",
 	NoteInSplit = "noteInSplit",
@@ -125,6 +126,7 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
+	doubleClickCardToEdit: EditButtonMode;
 	universalDate: string;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
@@ -382,6 +384,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 			],
 			editButtonAction: EditButtonMode.PopUp,
+			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
 			tasksPluginCustomStatuses: [],
 			tagColorsType: TagColorType.Text,
