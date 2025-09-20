@@ -162,7 +162,7 @@ const en: Lang = {
 	"your-boards": "Your boards",
 	"file-not-found-at-path": "File not found at path:",
 	"edit-button-mode": "Edit button mode",
-	"edit-button-mode-info": "Select how should the parent note open. Double click on the card to open the note.",
+	"edit-button-mode-info": "Select what should the edit button do.",
 	"use-edit-task-window-feature": "Use edit task window feature",
 	"open-note-in-new-tab": "Open note in new tab",
 	"open-note-in-right-split": "Open note in right split",
