@@ -110,7 +110,7 @@ export function extractTaskNoteProperties(
 			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.completionDate] ||
 			frontmatter?.completed ||
 			"",
-		priority: mapPriorityFromFrontmatter(
+		priority: mapPriorityNameFromFrontmatter(
 			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.priority]
 		),
 		status: mapStatusFromFrontmatter(
@@ -127,26 +127,42 @@ export function extractTaskNoteProperties(
  * @param priorityValue - Priority value from frontmatter
  * @returns number - Priority number (0-5)
  */
-export function mapPriorityFromFrontmatter(priorityValue: any): number {
+export function mapPriorityNameFromFrontmatter(priorityValue: any): number {
 	if (!priorityValue) return 0;
 
-	const priorityStr = String(priorityValue).trim();
+	const priorityStr = String(priorityValue).trim().toLowerCase();
 
 	// Map emojis to priority numbers
 	switch (priorityStr) {
-		case "🔺":
+		case "highest":
 			return 1; // Highest
-		case "⏫":
+		case "high":
 			return 2; // High
-		case "🔼":
+		case "medium":
 			return 3; // Medium
-		case "🔽":
+		case "low":
 			return 4; // Low
-		case "⏬":
+		case "lowest":
 			return 5; // Lowest
 		default:
 			return 0; // None
 	}
+}
+
+/**
+ * Get priority emoji from priority number
+ * @param priority - Priority number (1-5)
+ * @returns string - Priority emoji
+ */
+export function getPriorityNameForTaskNote(priority: number): string {
+	const priorityNames: { [key: number]: string } = {
+		1: "highest",
+		2: "high",
+		3: "medium",
+		4: "low",
+		5: "lowest",
+	};
+	return priorityNames[priority] || "URGENT";
 }
 
 /**
@@ -283,19 +299,3 @@ export async function updateFrontmatterInMarkdownFile(
 		throw error;
 	}
 }
-
-/**
- * Get priority emoji from priority number
- * @param priority - Priority number (1-5)
- * @returns string - Priority emoji
- */
-// function getPriorityEmoji(priority: number): string {
-// 	const priorityEmojis: { [key: number]: string } = {
-// 		1: "🔺", // Highest
-// 		2: "⏫", // High
-// 		3: "🔼", // Medium
-// 		4: "🔽", // Low
-// 		5: "⏬", // Lowest
-// 	};
-// 	return priorityEmojis[priority] || "";
-// }

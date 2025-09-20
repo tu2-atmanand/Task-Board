@@ -1,11 +1,11 @@
 import TaskBoard from "main";
 import { FrontMatterCache, stringifyYaml, TFile } from "obsidian";
 import {
-	priorityEmojis,
 	taskItem,
 	taskStatuses,
 } from "src/interfaces/TaskItem";
 import { getLocalDateTimeString } from "./TimeCalculations";
+import { getPriorityNameForTaskNote } from "./TaskNoteUtils";
 
 export interface customFrontmatterCache extends FrontMatterCache {
 	tags?: string[] | string;
@@ -142,7 +142,8 @@ export function createFrontmatterFromTask(
 	if (task.id && plugin.settings.data.globalSettings.autoAddUniqueID)
 		frontmatterObj.id = task.legacyId ? task.legacyId : task.id;
 	if (task.priority && task.priority > 0) {
-		frontmatterObj.priority = priorityEmojis[task.priority || 0];
+		frontmatterObj.priority =
+			getPriorityNameForTaskNote(task.priority) || "";
 	}
 	if (task.createdDate) frontmatterObj["created-date"] = task.createdDate;
 	if (task.startDate) frontmatterObj["start-date"] = task.startDate;
@@ -257,7 +258,7 @@ export function updateFrontmatterProperties(
 	}
 
 	if (task.priority && task.priority > 0) {
-		updated.priority = priorityEmojis[task.priority || 0];
+		updated.priority = getPriorityNameForTaskNote(task.priority) || "";
 	} else {
 		delete updated.priority;
 	}
