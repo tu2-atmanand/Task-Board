@@ -161,7 +161,7 @@ const en: Lang = {
 	"file-name": "File name",
 	"your-boards": "Your boards",
 	"file-not-found-at-path": "File not found at path:",
-	"edit-button-mode": "Edit button mode",
+	"edit-button-mode": "Edit button action",
 	"edit-button-mode-info": "Select what should the edit button do.",
 	"use-edit-task-window-feature": "Use edit task window feature",
 	"open-note-in-new-tab": "Open note in new tab",
@@ -277,6 +277,10 @@ const en: Lang = {
 	"enable-experimental-features-info-1": "Enable this setting to test out the experimental features.",
 	"enable-experimental-features-info-2": "Although these features have been completely developed, I need to make sure that they are working fine in different environments and setups. Hence, if you are willing to help in testing, enable this setting and test out the features released as experimental features with this release. Share whatever bugs you find or any suggestions you have in mind. After thorough testing, these features will be released for production use in the next version release.",
 	"map-view": "Map view",
+	"reading-mode-preview": "Reading mode preview",
+	"source-mode-preview": "Source mode preview",
+	"double-click-card-action": "Double click card action",
+	"double-click-card-action-info": "Select what should happen when you double click on the task card.",
 };
 
 export default en;
