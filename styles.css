@@ -2083,24 +2083,33 @@ li:hover .taskboard-hidden-property {
 	padding: 5px;
 	padding-block: 1em;
 	border-radius: var(--radius-m);
-	background-color: var(--background-primary-alt);
-}
-
-.global-setting-tab-live-preview {
+	/* background-color: var(--background-primary-alt); */
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
 
-.global-setting-tab-live-preview-label {
+.global-setting-tab-source-mode-preview-label,
+.global-setting-tab-reading-mode-preview-label {
 	background-color: var(--background-primary);
 	text-align: center;
 }
 
-.settingTabFooterSection {
-	margin-top: 2em;
-	align-items: center;
-	text-align: center;
+.global-setting-tab-reading-mode-preview-markdown,
+.global-setting-tab-source-mode-preview-data {
+	background-color: var(--background-modifier-border);
+	padding: 10px;
+	border-radius: var(--radius-m);
+	font-family: monospace;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	max-height: 150px;
+	overflow-y: auto;
+}
+
+.global-setting-tab-reading-mode-preview-markdown ul {
+	margin: 0 !important;
+	padding-inline-start: 22px !important;
 }
 
 .settingTabFooterDonationsSec {
