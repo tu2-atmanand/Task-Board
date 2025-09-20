@@ -35,12 +35,8 @@ export function isTaskNotePresentInFrontmatter(
 		tags = frontmatter.tags.split(",").map((tag: string) => tag.trim());
 	}
 
-	console.log("isTaskNotePresentInFrontmatter - Tags extracted:", tags);
-
 	// Check for TASK_NOTE_IDENTIFIER_TAG tag (with or without #)
-	return tags.some((tag) =>
-		tag.includes(plugin.settings.data.globalSettings.taskNoteIdentifierTag)
-	);
+	return isTaskNotePresentInTags(plugin, tags);
 }
 
 /**
@@ -52,7 +48,6 @@ export function isTaskNotePresentInTags(
 	plugin: TaskBoard,
 	tags: string[]
 ): boolean {
-	console.log("isTaskNotePresentInTags - Tags provided:", tags);
 	return tags
 		? tags.some((tag) =>
 				tag.includes(

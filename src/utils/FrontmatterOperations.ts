@@ -1,11 +1,11 @@
 import TaskBoard from "main";
 import { FrontMatterCache, stringifyYaml, TFile } from "obsidian";
-import {
-	taskItem,
-	taskStatuses,
-} from "src/interfaces/TaskItem";
+import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import { getLocalDateTimeString } from "./TimeCalculations";
-import { getPriorityNameForTaskNote } from "./TaskNoteUtils";
+import {
+	getPriorityNameForTaskNote,
+	isTaskNotePresentInTags,
+} from "./TaskNoteUtils";
 
 export interface customFrontmatterCache extends FrontMatterCache {
 	tags?: string[] | string;
@@ -203,13 +203,7 @@ export function updateFrontmatterProperties(
 			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
 		];
 	} else if (Array.isArray(updated.tags)) {
-		if (
-			!updated.tags.some((tag: string) =>
-				tag.includes(
-					plugin.settings.data.globalSettings.taskNoteIdentifierTag
-				)
-			)
-		) {
+		if (!isTaskNotePresentInTags(plugin, updated.tags)) {
 			updated.tags.push(
 				plugin.settings.data.globalSettings.taskNoteIdentifierTag
 			);
