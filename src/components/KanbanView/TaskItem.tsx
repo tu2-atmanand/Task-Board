@@ -4,7 +4,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
-import { handleTaskNoteEdit, handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
+import { handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component } from 'obsidian';
@@ -323,13 +323,22 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
-		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
-			// Route to appropriate handler based on task type
-			if (isTaskNotePresentInTags(plugin, task.tags)) {
-				handleTaskNoteEdit(plugin, task);
-			} else {
-				handleEditTask(plugin, task);
-			}
+		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
+		} else {
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+			event.ctrlKey = false;
+		}
+	}
+
+	const handleDoubleClickOnCard = (event: React.MouseEvent) => {
+		const settingOption = plugin.settings.data.globalSettings.doubleClickCardToEdit;
+		if (settingOption === EditButtonMode.None) return;
+
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
 		} else {
 			event.ctrlKey = true;
 			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
@@ -401,7 +410,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 							</div>
 							{/* Drag Handle */}
-							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} /></div> */}
+							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} /></div> */}
 						</div>
 					</>);
 			} else {
@@ -614,7 +623,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (
-		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}>
+		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+			onDoubleClick={handleDoubleClickOnCard}
+		>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				<div className="taskItemFileNameSection">

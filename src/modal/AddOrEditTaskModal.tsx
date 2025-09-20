@@ -1025,7 +1025,7 @@ const EditTaskContent: React.FC<{
 		} else {
 			plugin.app.workspace.openPopoutLeaf();
 			await sleep(50);
-			openEditTaskModal(plugin, childTask, false);
+			openEditTaskModal(plugin, childTask);
 		}
 	}
 

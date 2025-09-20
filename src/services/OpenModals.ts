@@ -235,8 +235,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 
 export const openEditTaskModal = async (
 	plugin: TaskBoard,
-	existingTask: taskItem,
-	isTaskNote: boolean
+	existingTask: taskItem
 ) => {
 	const EditTaskModal = new AddOrEditTaskModal(
 		plugin,
@@ -260,7 +259,7 @@ export const openEditTaskModal = async (
 			// );
 			// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 		},
-		isTaskNote,
+		false,
 		false,
 		true,
 		existingTask,
@@ -283,14 +282,15 @@ export const openEditTaskNoteModal = (
 			try {
 				if (!newTaskContent) {
 					// Update frontmatter with task properties
-					await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(
-						() => {
-							// This is required to rescan the updated file and refresh the board.
-							plugin.realTimeScanning.processAllUpdatedFiles(
-								updatedTask.filePath
-							);
-						}
-					);
+					await updateFrontmatterInMarkdownFile(
+						plugin,
+						updatedTask
+					).then(() => {
+						// This is required to rescan the updated file and refresh the board.
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							updatedTask.filePath
+						);
+					});
 				} else {
 					writeDataToVaultFile(
 						plugin,
