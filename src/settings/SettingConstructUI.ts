@@ -35,6 +35,7 @@ import {
 	exportConfigurations,
 	importConfigurations,
 } from "./SettingSynchronizer";
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 
 export class SettingsManager {
 	win: Window;
@@ -1454,14 +1455,38 @@ export class SettingsManager {
 		const previewEl = contentEl.createDiv({
 			cls: "global-setting-tab-live-preview",
 		});
-		const previewLabel = previewEl.createDiv({
-			cls: "global-setting-tab-live-preview-label",
-		});
-		previewLabel.setText(t("preview"));
 
-		const previewData = previewEl.createDiv({
-			cls: "global-setting-tab-live-preview-data",
+		const readingPreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-label",
 		});
+		readingPreviewLabel.setText(t("reading-mode-preview"));
+		// Render markdown preview above the raw preview
+		const markdownPreviewEl = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-markdown",
+		});
+
+		const sourcePreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-label",
+		});
+		sourcePreviewLabel.setText(t("source-mode-preview"));
+		const previewData = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-data",
+		});
+
+		// Helper to render markdown using MarkdownUIRenderer
+		const renderMarkdownPreview = (markdown: string) => {
+			// Remove previous preview if any
+			markdownPreviewEl.empty();
+			// Use Obsidian's MarkdownUIRenderer to render markdown
+			// @ts-ignore
+			MarkdownUIRenderer.renderSubtaskText(
+				this.plugin.app,
+				markdown,
+				markdownPreviewEl,
+				"",
+				this.plugin.view
+			);
+		};
 		const updatePreview = () => {
 			let taskTitle = t("dummy-task-title");
 			let priority = "⏫";
@@ -1477,9 +1502,9 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [>] ${time} ${taskTitle} ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [>] ${taskTitle} ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
 					}
 					break;
 				}
@@ -1488,11 +1513,11 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} ${priority} 📅 ${dueDate} ${tags} ✅ ${
+						preview = `- [>] ${time} ${taskTitle} ${priority} 📅 ${dueDate} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${taskTitle} ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
+						preview = `- [>] ${taskTitle} ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -1503,9 +1528,9 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [>] ${time} ${taskTitle} [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [>] ${taskTitle} [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
 					}
 					break;
 				}
@@ -1514,13 +1539,14 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [>] ${time} ${taskTitle} @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					} else {
-						preview = `- [x] ${taskTitle} @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [>] ${taskTitle} @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
 					}
 					break;
 				}
 			}
+			renderMarkdownPreview(preview);
 			previewData.setText(preview);
 		};
 
