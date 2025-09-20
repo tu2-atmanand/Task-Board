@@ -6,13 +6,8 @@ import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
-
-// Function to get all tags from a task (both line tags and frontmatter tags)
-const getAllTaskTags = (task: taskItem): string[] => {
-	const lineTags = task.tags || [];
-	const frontmatterTags = task.frontmatterTags || [];
-	return [...lineTags, ...frontmatterTags];
-};
+import { matchTagsWithWildcards } from "./FiltersVerifier";
+import { getAllTaskTags } from "./TaskItemUtils";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
@@ -150,11 +145,18 @@ export const renderColumns = (
 		);
 	} else if (columnData.colType === "namedTag") {
 		tasksToDisplay = pendingTasks.filter((task) =>
-			getAllTaskTags(task).some(
-				(tag) =>
-					tag.replace(`#`, "").toLocaleLowerCase() ===
-					columnData.coltag?.replace(`#`, "").toLowerCase()
-			)
+			getAllTaskTags(task).some((tag) => {
+				// return (
+				// 	tag.replace(`#`, "").toLocaleLowerCase() ===
+				// 	columnData.coltag?.replace(`#`, "").toLowerCase()
+				// );
+
+				const result = matchTagsWithWildcards(
+					columnData?.coltag || "",
+					tag
+				);
+				return result !== null;
+			})
 		);
 	} else if (columnData.colType === "pathFiltered") {
 		// Filter tasks based on their file path
@@ -200,16 +202,23 @@ export const renderColumns = (
 		const namedTags =
 			currentBoard?.columns
 				.filter((col) => col.colType === "namedTag" && col.coltag)
-				.map((col) => col.coltag?.toLowerCase().replace(`#`, "")) || [];
+				.map((col) => col.coltag?.toLowerCase().replace(`#`, ""))
+				.filter(
+					(tag): tag is string =>
+						typeof tag === "string" && tag.length > 0
+				) || [];
+
 		// 3. Now filter tasks
 		tasksToDisplay = pendingTasks.filter((task) => {
 			const allTaskTags = getAllTaskTags(task);
 			if (allTaskTags.length === 0) return false;
 
 			// Check if none of the task's tags are in the namedTags list
-			return allTaskTags.every(
-				(tag) => !namedTags.includes(tag.replace("#", "").toLowerCase())
-			);
+			return allTaskTags.every((tag) => {
+				// return !namedTags.includes(tag.replace("#", "").toLowerCase());
+				const result = matchTagsWithWildcards(namedTags, tag);
+				return result === null;
+			});
 		});
 	} else if (columnData.colType === "completed") {
 		const boardConfigs = plugin.settings.data.boardConfigs;

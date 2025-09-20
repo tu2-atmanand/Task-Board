@@ -147,7 +147,8 @@ export function checkFolderFilters(
 		} else {
 			return true;
 		}
-	} else {// This else body will never run because this function is only called if the scanFilters.folders.polarity !== 3.
+	} else {
+		// This else body will never run because this function is only called if the scanFilters.folders.polarity !== 3.
 		if (
 			scanFilters.files.polarity === 1 &&
 			scanFilters.folders.polarity === 1 &&
@@ -179,8 +180,26 @@ export function checkFolderFilters(
 }
 
 export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
-	const tagInFilters = tags.some((tag) =>
-		scanFilters.tags.values.includes(tag)
+	const tagInFilters = tags.some((tag) => {
+		// return scanFilters.tags.values.includes(tag);
+		const result = matchTagsWithWildcards(scanFilters.tags.values, tag);
+		console.log(
+			"scanFilterForTags - matchTagsWithWildcards result:",
+			result,
+			" for tag:",
+			tag,
+			" with scanFilters.tags.values:",
+			scanFilters.tags.values
+		);
+		return result !== null;
+	});
+	console.log(
+		"scanFilterForTags - Tags provided:",
+		tags,
+		"\nscanFilters :",
+		scanFilters,
+		"\ntagInFilters :",
+		tagInFilters
 	);
 
 	const tagPolarity = scanFilters.tags.polarity;
@@ -194,4 +213,54 @@ export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
 	} else {
 		return false;
 	}
+}
+
+/**
+ * Matches user input tags against settings tags that may include wildcards (*).
+ * Wildcard (*) can be used at the start or end of a tag to match any sequence of characters.
+ * Examples:
+ *   - "#tag*" matches "#tag1", "#tag-abc", etc.
+ *   - "*tag" matches "#mytag", "#yourtag", etc.
+ *   - "*tag*" matches "#mytag123", "#123tag456", etc.
+ * @param settingsTags - Tags from settings which may include wildcards
+ * @param userInputTags - Tags from user input to match against settings tags
+ * @returns An array of matching tags or null if no match is found
+ */
+export function matchTagsWithWildcards(
+	settingsTags: string | string[],
+	userInputTags: string | string[]
+): string[] | null {
+	if (!settingsTags || !userInputTags) return null;
+
+	// Normalize to arrays
+	const settingsArr = Array.isArray(settingsTags)
+		? settingsTags
+		: [settingsTags];
+	const userArr = Array.isArray(userInputTags)
+		? userInputTags
+		: [userInputTags];
+
+	// Convert settings tags to regex patterns
+	const patterns = settingsArr.map((tag) => {
+		// Escape regex special chars except *
+		let pattern = tag.replace("#", ""); // Remove leading #
+
+		pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+		// Replace * with .+ (at least one character)
+		pattern = pattern.replace(/\\\*/g, ".*").replace(/\*/g, ".+");
+		// If wildcard is at the start, allow anything before
+		if (pattern.startsWith(".+")) pattern = "^" + pattern;
+		else pattern = "^" + pattern;
+		// If wildcard is at the end, allow anything after
+		if (pattern.endsWith(".+")) pattern = pattern + "$";
+		else pattern = pattern + "$";
+		return new RegExp(pattern);
+	});
+
+	// Find matches
+	const matches = userArr.filter((userTag) =>
+		patterns.some((regex) => regex.test(userTag.replace("#", "")))
+	);
+
+	return matches.length > 0 ? matches : null;
 }

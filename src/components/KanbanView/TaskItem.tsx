@@ -19,6 +19,7 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
 import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
+import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
 
 export interface TaskProps {
 	key: number;
@@ -242,7 +243,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 		for (const rawTag of tags) {
 			const tagName = rawTag.replace('#', '');
-			const tagData = tagColorMap.get(tagName);
+			let tagData = tagColorMap.get(tagName);
+
+			if (!tagData) {
+				tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+					const result = matchTagsWithWildcards(tagNameKey, tagName || '');
+					// Return the first match found
+					if (result) tagData = tagColor;
+				});
+			}
 
 			if (tagData) {
 				if (
@@ -371,7 +380,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && activeBoardSettings?.filters.includes(tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
+										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && matchTagsWithWildcards(activeBoardSettings?.filters, tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
 											return null;
 										}
 

@@ -9,6 +9,7 @@ import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 import TaskBoard from 'main';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
+import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
 
 type CustomCSSProperties = CSSProperties & {
 	'--column-width': string;
@@ -58,7 +59,15 @@ const Column: React.FC<ColumnProps> = ({
 	// Extra code to provide special data-types for theme support.
 	const tagColors = plugin.settings.data.globalSettings.tagColors;
 	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
-	const tagData = tagColorMap.get(columnData?.coltag || '');
+	let tagData = tagColorMap.get(columnData?.coltag || '');
+	if (!tagData) {
+		tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+			const result = matchTagsWithWildcards(tagNameKey, columnData?.coltag || '');
+			console.log("Column.tsx : Matching tag result : ", { tagNameKey, columnTag: columnData?.coltag, result });
+			// Return the first match found
+			if (result) tagData = tagColor;
+		});
+	}
 
 	return (
 		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties} data-column-type={columnData.colType} data-column-tag-name={tagData?.name} data-column-tag-color={tagData?.color}>
@@ -77,8 +86,12 @@ const Column: React.FC<ColumnProps> = ({
 						const shouldRenderTask = parseInt(activeBoardData?.filterPolarity || "0") === 1 &&
 							activeBoardData.filters.length > 0 &&
 							allTaskTags.length > 0 &&
-							allTaskTags.some((tag: string) => activeBoardData?.filters?.includes(tag));
+							allTaskTags.some((tag: string) => {
+								const match = matchTagsWithWildcards(activeBoardData.filters, tag);
+								return match !== null;
+							}); // TODO : I need to create a util function to get this value to decide whether to render the task or not.
 
+						// If filterPolarity is 1 (Include), render only if shouldRenderTask is true
 						if (shouldRenderTask || parseInt(activeBoardData?.filterPolarity || "0") === 0) {
 							return (
 								<div key={index} className="taskItemFadeIn">
