@@ -117,7 +117,8 @@ export class MarkdownUIRenderer {
 	) {
 		try {
 			// console.log("renderSubtaskText : Received following text : ", subtaskText);
-			if (!taskItemComponent) {
+			let componentEl = taskItemComponent ?? new Component();
+			if (!componentEl) {
 				return;
 			}
 			// Call Obsidian's MarkdownRenderer to render the subtaskText as markdown
@@ -126,7 +127,7 @@ export class MarkdownUIRenderer {
 				subtaskText,
 				el,
 				path,
-				taskItemComponent
+				componentEl
 			);
 		} catch (error) {
 			console.error("Error rendering subtask text:", error, {
