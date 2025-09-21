@@ -3116,6 +3116,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	padding: 0.5rem;
 	border-radius: 10px;
 	border: 2px solid var(--text-accent);
+	overflow-wrap: anywhere;
+	text-wrap-mode: wrap;
 }
 
 .bugReporterActions {
