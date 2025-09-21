@@ -5,7 +5,6 @@ import { Notice, Plugin } from "obsidian";
  * Tasks API v1 interface
  */
 interface TasksPluginApiV1 {
-
 	/**
 	 * Checks if the Tasks plugin is enabled.
 	 *
@@ -13,27 +12,37 @@ interface TasksPluginApiV1 {
 	 */
 	isTasksPluginEnabled(): boolean;
 
-    /**
-     * Opens the Tasks UI and returns the Markdown string for the task entered.
-     *
-     * @returns {Promise<string>} A promise that contains the Markdown string for the task entered or
-     * an empty string, if data entry was cancelled.
-     */
-    createTaskLineModal(): Promise<string | null | undefined>;
+	/**
+	 * Opens the Tasks UI and returns the Markdown string for the task entered.
+	 *
+	 * @returns {Promise<string>} A promise that contains the Markdown string for the task entered or
+	 * an empty string, if data entry was cancelled.
+	 */
+	createTaskLineModal(): Promise<string>;
 
-    /**
-     * Executes the 'Tasks: Toggle task done' command on the supplied line string
-     *
-     * @param line The markdown string of the task line being toggled
-     * @param path The path to the file containing line
-     * @returns The updated line string, which will contain two lines
-     *          if a recurring task was completed.
-     */
-    executeToggleTaskDoneCommand(line: string, path: string): string | undefined;
+	/**
+	 * Opens the Tasks UI pre-filled with the provided task line for editing.
+	 * Does not edit the task line in the file, but returns the edited task line as a Markdown string.
+	 *
+	 * @param taskLine The markdown string of the task line to edit
+	 * @returns {Promise<string>} A promise that contains the Markdown string for the edited task or
+	 * an empty string in the case where the data entry was cancelled.
+	 */
+	editTaskLineModal(taskLine: string): Promise<string>;
+
+	/**
+	 * Executes the 'Tasks: Toggle task done' command on the supplied line string
+	 *
+	 * @param line The markdown string of the task line being toggled
+	 * @param path The path to the file containing line
+	 * @returns The updated line string, which will contain two lines
+	 *          if a recurring task was completed.
+	 */
+	executeToggleTaskDoneCommand: (line: string, path: string) => string;
 }
 
 export class TasksPluginApi implements TasksPluginApiV1 {
-    private readonly apiV1: TasksPluginApiV1 | null;
+	private readonly apiV1: TasksPluginApiV1 | null;
 
 	public constructor(plugin?: Plugin) {
 		// @ts-expect-error - official guidance for accessing the plugin, see:
@@ -49,41 +58,20 @@ export class TasksPluginApi implements TasksPluginApiV1 {
 		return !!this.apiV1;
 	}
 
-    public async createTaskLineModal(): Promise<string | null | undefined> {
-        return this.apiV1?.createTaskLineModal();
-    }
-
-    public executeToggleTaskDoneCommand(line: string, path: string): string | undefined {
-        return this.apiV1?.executeToggleTaskDoneCommand(line, path);
-    }
-}
-
-
-export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
-	try {
-		const tasksPluginO = new TasksPluginApi(plugin);
-		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
-		if (tasksPluginO.isTasksPluginEnabled()) {
-			// Define the path to the tasks plugin data.json file
-			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
-
-			// Read the file content
-			const data: string = await plugin.app.vault.adapter.read(path);
-			const parsedData = JSON.parse(data);
-
-			// Extract customStatuses from the JSON
-			const customStatuses =
-				parsedData?.statusSettings?.customStatuses || [];
-
-			// Store it in the plugin settings
-			plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
-				customStatuses;
-			plugin.saveSettings();
+	public editTaskLineModal(taskLine: string): Promise<string> {
+		if (this.apiV1) {
+			return this.apiV1.editTaskLineModal(taskLine);
 		}
-	} catch (error) {
-		console.warn(
-			"Error fetching custom statuses from tasks plugin:",
-			error
-		);
+		return Promise.resolve("");
+	}
+
+	public async createTaskLineModal(): Promise<string> {
+		const result = await this.apiV1?.createTaskLineModal();
+		return typeof result === "string" ? result : "";
+	}
+
+	public executeToggleTaskDoneCommand(line: string, path: string): string {
+		const result = this.apiV1?.executeToggleTaskDoneCommand(line, path);
+		return typeof result === "string" ? result : "";
 	}
 }

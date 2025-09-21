@@ -35,10 +35,7 @@ import {
 	t,
 } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
-import {
-	fetchTasksPluginCustomStatuses,
-	TasksPluginApi,
-} from "src/services/tasks-plugin/api";
+import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import {
 	getTaskPropertyRegexPatterns,
@@ -48,6 +45,7 @@ import {
 	allowedFileExtensionsRegEx,
 	notAllowedFileExtensionsRegEx,
 } from "src/regularExpressions/MiscelleneousRegExpr";
+import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 
 export default class TaskBoard extends Plugin {
 	app: App;

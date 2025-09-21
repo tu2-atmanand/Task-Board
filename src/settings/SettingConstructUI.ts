@@ -1201,9 +1201,11 @@ export class SettingsManager {
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[EditButtonMode.PopUp]: t(
+						[EditButtonMode.Modal]: t(
 							"use-edit-task-window-feature"
 						),
+						[EditButtonMode.TasksPluginModal]:
+							t("Tasks Plugin Modal"),
 						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
 						[EditButtonMode.NoteInSplit]: t(
 							"open-note-in-right-split"
@@ -1230,7 +1232,7 @@ export class SettingsManager {
 				dropdown
 					.addOptions({
 						[EditButtonMode.None]: t("none"),
-						[EditButtonMode.PopUp]: t(
+						[EditButtonMode.Modal]: t(
 							"use-edit-task-window-feature"
 						),
 						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),

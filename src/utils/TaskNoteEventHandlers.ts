@@ -4,8 +4,6 @@ import { App, Notice } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils";
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,

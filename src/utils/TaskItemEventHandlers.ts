@@ -10,7 +10,7 @@ import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { DeleteConfirmationModal } from "src/modal/DeleteConfirmationModal";
 import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
-import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
+import { moment as _moment, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { t } from "./lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
@@ -21,6 +21,7 @@ import {
 } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { isTaskNotePresentInTags } from "./TaskNoteUtils";
+import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
@@ -162,11 +163,20 @@ export const handleEditTask = (
 ) => {
 	console.log("Setting :", settingOption);
 	switch (settingOption) {
-		case EditButtonMode.PopUp:
+		case EditButtonMode.Modal:
 			if (isTaskNotePresentInTags(plugin, task.tags)) {
 				openEditTaskNoteModal(plugin, task);
 			} else {
 				openEditTaskModal(plugin, task);
+			}
+			break;
+		case EditButtonMode.TasksPluginModal:
+			if (isTaskNotePresentInTags(plugin, task.tags)) {
+				new Notice(
+					"This is a task-note, you cannot use Tasks plugin modal to edit it."
+				);
+			} else {
+				openTasksPluginEditModal(plugin, task);
 			}
 			break;
 		case EditButtonMode.NoteInTab: {
@@ -215,7 +225,7 @@ export const openFileAndHighlightTask = async (
 
 			break;
 		}
-		case EditButtonMode.PopUp:
+		case EditButtonMode.Modal:
 		default:
 			bugReporter(
 				plugin,

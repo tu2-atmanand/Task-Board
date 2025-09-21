@@ -34,7 +34,8 @@ export interface TagColor {
 
 export enum EditButtonMode {
 	None = "none",
-	PopUp = "popUp",
+	Modal = "popUp",
+	TasksPluginModal = "tasksPluginModal",
 	NoteInTab = "noteInTab",
 	NoteInSplit = "noteInSplit",
 	NoteInWindow = "noteInWindow",
@@ -383,7 +384,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					priority: 3,
 				},
 			],
-			editButtonAction: EditButtonMode.PopUp,
+			editButtonAction: EditButtonMode.Modal,
 			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
 			tasksPluginCustomStatuses: [],

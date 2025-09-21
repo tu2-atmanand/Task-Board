@@ -561,7 +561,7 @@ export const useTasksPluginToUpdateInFile = async (
 					oldTask.filePath
 				);
 
-			if (tasksPluginApiOutput === undefined) {
+			if (!tasksPluginApiOutput) {
 				bugReporter(
 					plugin,
 					"Tasks plugin API did not return any output.",
