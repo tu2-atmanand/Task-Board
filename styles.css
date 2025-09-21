@@ -634,14 +634,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .taskItemTagFrontmatter {
-	background-color: var(--tag-background) !important;
+	background-color: var(--background-modifier-border) !important;
 	border: var(--pill-border-width) solid var(--pill-border-color) !important;
 	border-radius: var(--pill-radius) !important;
 	color: var(--pill-color) !important;
 	cursor: var(--cursor);
 	font-weight: var(--pill-weight);
-	padding: 0 var(--pill-padding-y) !important;
-	max-width: calc(100% - var(--size-2-3) - 1ch);
+	padding: 0 var(--pill-padding-x) !important;
 }
 
 .taskItemTag {
