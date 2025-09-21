@@ -63,7 +63,7 @@ const Column: React.FC<ColumnProps> = ({
 	if (!tagData) {
 		tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
 			const result = matchTagsWithWildcards(tagNameKey, columnData?.coltag || '');
-			console.log("Column.tsx : Matching tag result : ", { tagNameKey, columnTag: columnData?.coltag, result });
+			// console.log("Column.tsx : Matching tag result : ", { tagNameKey, columnTag: columnData?.coltag, result });
 			// Return the first match found
 			if (result) tagData = tagColor;
 		});

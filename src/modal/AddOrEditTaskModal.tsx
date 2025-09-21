@@ -537,6 +537,7 @@ const EditTaskContent: React.FC<{
 
 
 	// ------------------ Tab Switching and other components ------------------
+
 	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
 	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
 
@@ -877,13 +878,13 @@ const EditTaskContent: React.FC<{
 			console.log("Formatted Task Note Content:", newFormattedTaskNoteContent);
 			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 			setFormattedTaskContent(newFormattedTaskNoteContent);
-			setIsEditorContentChanged(false);
+			// setIsEditorContentChanged(false);
 		}
 		else {
 			const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
 			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 			setFormattedTaskContent(newFormattedTaskNoteContent);
-			setIsEditorContentChanged(false);
+			// setIsEditorContentChanged(false);
 		}
 	}, [isEditorContentChanged]);
 
@@ -916,7 +917,7 @@ const EditTaskContent: React.FC<{
 				return;
 			}
 			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
-				console.log("Selected Task after applying ID:", selectedTask);
+				console.log("Selected Task after applying ID:", selectedTask, "\nnewId : ", newId);
 
 				const getUpdatedDependsOnIds = (prev: string[]) => {
 					console.log("Previous depends on values :", prev);
@@ -927,7 +928,7 @@ const EditTaskContent: React.FC<{
 						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
 						} else if (newId) {
-								return [...prev, String(newId)];
+							return [...prev, String(newId)];
 						}
 					}
 					return prev;

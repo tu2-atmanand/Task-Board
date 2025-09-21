@@ -42,6 +42,7 @@ import {
 	extractFrontmatter,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
+import { t } from "./lang/helper";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -551,12 +552,7 @@ export default class vaultScanner {
 				// };
 			} else {
 				if (showNotice) {
-					new Notice(
-						`The file "${
-							files[0] ? files[0].path : "Unknown"
-						}" does not satisfy the 'filters for scanning' applied in setting. Hence it will not be scanned for tasks.`,
-						5000
-					);
+					new Notice(t("not-valid-file-type-for-scanning"), 5000);
 				}
 			}
 		}
@@ -760,7 +756,7 @@ export function extractBody(
 			break;
 		}
 	}
-	console.log("Extracted body lines:", bodyLines);
+
 	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
 }
 
