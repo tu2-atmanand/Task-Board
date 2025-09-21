@@ -24,7 +24,7 @@ import {
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
-import ScanningVault from "src/utils/ScanningVault";
+import vaultScanner from "src/utils/VaultScanner";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
@@ -50,7 +50,7 @@ export default class TaskBoard extends Plugin {
 	plugin: TaskBoard;
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
-	scanningVault: ScanningVault;
+	vaultScanner: vaultScanner;
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
@@ -66,11 +66,11 @@ export default class TaskBoard extends Plugin {
 		this.app = this.plugin.app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.scanningVault = new ScanningVault(this.app, this.plugin);
+		this.vaultScanner = new vaultScanner(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(
 			this.app,
 			this.plugin,
-			this.scanningVault
+			this.vaultScanner
 		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
@@ -99,7 +99,7 @@ export default class TaskBoard extends Plugin {
 
 		await loadTranslationsOnStartup(this);
 
-		await this.scanningVault.initializeTasksCache();
+		await this.vaultScanner.initializeTasksCache();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -261,7 +261,7 @@ export default class TaskBoard extends Plugin {
 
 	scanVaultAtStartup() {
 		if (this.settings.data.globalSettings.scanVaultAtStartup) {
-			this.scanningVault.scanVaultForTasks();
+			this.vaultScanner.scanVaultForTasks();
 		}
 	}
 
@@ -698,7 +698,7 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.scanningVault.refreshTasksFromFiles(
+								this.vaultScanner.refreshTasksFromFiles(
 									[file],
 									true
 								);

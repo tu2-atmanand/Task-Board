@@ -76,12 +76,12 @@ export const saveBoardsData = async (
 
 // ------------  Operations with tasks.json ----------------
 
-// load tasks from plugin.scanningVault.tasksCache
+// load tasks from plugin.vaultScanner.tasksCache
 export const loadJsonCacheData = async (
 	plugin: TaskBoard
 ): Promise<jsonCacheData> => {
 	try {
-		return plugin.scanningVault.tasksCache;
+		return plugin.vaultScanner.tasksCache;
 	} catch (error) {
 		bugReporter(
 			plugin,

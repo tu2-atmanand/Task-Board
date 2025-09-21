@@ -141,7 +141,7 @@ export function getYAMLPropertySuggestions(app: App): string[] {
 }
 
 export function getPendingTasksSuggestions(plugin: TaskBoard): taskItem[] {
-	const pendingObj = plugin.scanningVault.tasksCache?.Pending ?? {};
+	const pendingObj = plugin.vaultScanner.tasksCache?.Pending ?? {};
 	const taskSet = new Set<taskItem>();
 	Object.values(pendingObj).forEach((tasksArr) => {
 		tasksArr.forEach((task) => {

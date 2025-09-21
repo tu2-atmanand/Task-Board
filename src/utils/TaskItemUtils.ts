@@ -27,7 +27,7 @@ import {
 	extractFrontmatter,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
-import { generateTaskId } from "./ScanningVault";
+import { generateTaskId } from "./VaultScanner";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -656,7 +656,7 @@ export const useTasksPluginToUpdateInFile = async (
 
 			// Just to scan the file after updating.
 			// plugin.fileUpdatedUsingModal = "";
-			// const scannVault = new ScanningVault(plugin.app, plugin);
+			// const scannVault = new vaultScanner(plugin.app, plugin);
 			// const file = plugin.app.vault.getAbstractFileByPath(filePath);
 			// if (file && file instanceof TFile)
 			// 	scannVault.refreshTasksFromFiles([file]);
@@ -987,7 +987,7 @@ export const getTaskFromId = async (
 		let foundTask: taskItem | undefined;
 
 		// Search in Pending tasks
-		const pendingTasksObj = plugin.scanningVault.tasksCache?.Pending ?? {};
+		const pendingTasksObj = plugin.vaultScanner.tasksCache?.Pending ?? {};
 		for (const tasks of Object.values(pendingTasksObj)) {
 			if (typeof id === "string") {
 				foundTask = tasks.find((task) => task.legacyId === id);
@@ -999,7 +999,7 @@ export const getTaskFromId = async (
 
 		// Search in Completed tasks
 		const completedTasksObj =
-			plugin.scanningVault.tasksCache?.Completed ?? {};
+			plugin.vaultScanner.tasksCache?.Completed ?? {};
 		for (const tasks of Object.values(completedTasksObj)) {
 			if (typeof id === "string") {
 				foundTask = tasks.find((task) => task.legacyId === id);

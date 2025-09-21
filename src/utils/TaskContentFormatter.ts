@@ -6,7 +6,7 @@ import {
 	extractPriority,
 	extractTaskId,
 	generateTaskId,
-} from "./ScanningVault";
+} from "./VaultScanner";
 import {
 	NotificationService,
 	UniversalDateOptions,

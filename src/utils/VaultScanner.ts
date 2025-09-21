@@ -47,9 +47,9 @@ import {
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
  * @param app The Obsidian app instance
  * @param plugin The TaskBoard plugin instance
- * @description Initializes the ScanningVault with the app and plugin instances, and sets up the initial tasks cache.
+ * @description Initializes the vaultScanner with the app and plugin instances, and sets up the initial tasks cache.
  */
-export default class ScanningVault {
+export default class vaultScanner {
 	app: App;
 	plugin: TaskBoard;
 	tasksCache: jsonCacheData;
