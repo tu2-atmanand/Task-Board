@@ -37,7 +37,7 @@ import {
 import { TaskBoardApi } from "src/taskboardAPIs";
 import {
 	fetchTasksPluginCustomStatuses,
-	TasksApi,
+	TasksPluginApi,
 } from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import {
@@ -295,7 +295,7 @@ export default class TaskBoard extends Plugin {
 		if (hiddenProperties.length === 0) {
 			return;
 		}
-		const tasksPlugin = new TasksApi(this);
+		const tasksPlugin = new TasksPluginApi(this);
 		if (!tasksPlugin.isTasksPluginEnabled()) {
 			this.registerMarkdownPostProcessor((element, context) => {
 				// console.log("Element : ", element, "\nContent :", context);

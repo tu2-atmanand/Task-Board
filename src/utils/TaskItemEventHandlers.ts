@@ -19,13 +19,13 @@ import {
 	openEditTaskModal,
 	openEditTaskNoteModal,
 } from "src/services/OpenModals";
-import { TasksApi } from "src/services/tasks-plugin/api";
+import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { isTaskNotePresentInTags } from "./TaskNoteUtils";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
-	const tasksPlugin = new TasksApi(plugin);
+	const tasksPlugin = new TasksPluginApi(plugin);
 
 	if (!tasksPlugin.isTasksPluginEnabled()) {
 		// Check if the task is completed

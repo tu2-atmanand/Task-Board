@@ -4,7 +4,7 @@ import { Notice, Plugin } from "obsidian";
 /**
  * Tasks API v1 interface
  */
-interface TasksApiV1 {
+interface TasksPluginApiV1 {
 
 	/**
 	 * Checks if the Tasks plugin is enabled.
@@ -32,13 +32,13 @@ interface TasksApiV1 {
     executeToggleTaskDoneCommand(line: string, path: string): string | undefined;
 }
 
-export class TasksApi implements TasksApiV1 {
-    private readonly apiV1: TasksApiV1 | null;
+export class TasksPluginApi implements TasksPluginApiV1 {
+    private readonly apiV1: TasksPluginApiV1 | null;
 
 	public constructor(plugin?: Plugin) {
 		// @ts-expect-error - official guidance for accessing the plugin, see:
 		// https://publish.obsidian.md/tasks/Advanced/Tasks+Api
-		const apiV1 = plugin?.app?.plugins?.plugins?.["obsidian-tasks-plugin"]?.apiV1 as TasksApiV1 | null;
+		const apiV1 = plugin?.app?.plugins?.plugins?.["obsidian-tasks-plugin"]?.apiV1 as TasksPluginApiV1 | null;
 		if (!apiV1) {
 			// throw new Error("obsidian-tasks-plugin must be installed");
 		}
@@ -61,7 +61,7 @@ export class TasksApi implements TasksApiV1 {
 
 export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 	try {
-		const tasksPluginO = new TasksApi(plugin);
+		const tasksPluginO = new TasksPluginApi(plugin);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
 			// Define the path to the tasks plugin data.json file

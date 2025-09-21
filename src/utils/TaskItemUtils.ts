@@ -17,7 +17,7 @@ import {
 import { Notice } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { TasksApi } from "src/services/tasks-plugin/api";
+import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import {
 	bugReporter,
 	openDiffContentCompareModal,
@@ -538,7 +538,7 @@ export const updateTaskInJson = async (
 
 export const useTasksPluginToUpdateInFile = async (
 	plugin: TaskBoard,
-	tasksPlugin: TasksApi,
+	tasksPlugin: TasksPluginApi,
 	oldTask: taskItem
 ): Promise<void> => {
 	try {
