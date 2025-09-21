@@ -325,7 +325,8 @@ export const archiveTask = async (
 export const updateTaskInFile = async (
 	plugin: TaskBoard,
 	updatedTask: taskItem,
-	oldTask: taskItem
+	oldTask: taskItem,
+	forceAddId?: boolean
 ): Promise<number | undefined> => {
 	try {
 		console.log("updateTaskInFile : updatedTask :\n", updatedTask, oldTask);
@@ -341,7 +342,8 @@ export const updateTaskInFile = async (
 		let updatedTaskContent = await getFormattedTaskContent(updatedTask);
 		const { formattedTaskContent, newId } = await addIdToTaskContent(
 			plugin,
-			updatedTaskContent
+			updatedTaskContent,
+			forceAddId
 		);
 		updatedTaskContent = formattedTaskContent;
 		if (updatedTaskContent === "")
@@ -684,26 +686,35 @@ export const useTasksPluginToUpdateInFile = async (
 	}
 };
 
+/**
+ * Applies a new id to the task in a file if it does not have one already. This function will force an id to be added to the task.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param task - The taskItem object representing the task to which an id needs to be applied.
+ * @returns A promise that resolves to the new id if applied, or undefined if the task already has an id or if an error occurs.
+ *
+ * @throws Will throw an error if there are issues updating the task in the file.
+ */
 export const applyIdToTaskInNote = async (
 	plugin: TaskBoard,
 	task: taskItem
 ): Promise<number | undefined> => {
 	if (task.legacyId) {
-		return;
+		return undefined;
 	} else {
-		await updateTaskInFile(plugin, task, task)
-			.then((newId) => {
-				return newId;
-			})
-			.catch((error) => {
-				bugReporter(
-					plugin,
-					"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
-					String(error),
-					"TaskItemUtils.ts/applyIdToTaskInNote"
-				);
-				return undefined;
-			});
+		let newIdToReturn = await updateTaskInFile(plugin, task, task, true);
+		// .then((newId) => {
+		// 	newIdToReturn = newId;
+		// })
+		// .catch((error) => {
+		// 	bugReporter(
+		// 		plugin,
+		// 		"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
+		// 		String(error),
+		// 		"TaskItemUtils.ts/applyIdToTaskInNote"
+		// 	);
+		// 	return undefined;
+		// });
+		return newIdToReturn;
 	}
 };
 

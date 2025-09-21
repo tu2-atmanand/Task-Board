@@ -61,11 +61,15 @@ export const getFormattedTaskContent = async (
 
 export const addIdToTaskContent = async (
 	Plugin: TaskBoard,
-	formattedTaskContent: string
+	formattedTaskContent: string,
+	forcefullyAddId?: boolean
 ): Promise<{ formattedTaskContent: string; newId: number | undefined }> => {
 	const taskId = extractTaskId(formattedTaskContent);
 	let newId = undefined;
-	if (!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) {
+	if (
+		(!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) ||
+		forcefullyAddId
+	) {
 		newId = generateTaskId(Plugin);
 		formattedTaskContent = formattedTaskContent.replace(
 			/^(.*?)(\n|$)/,

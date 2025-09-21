@@ -922,16 +922,12 @@ const EditTaskContent: React.FC<{
 					console.log("Previous depends on values :", prev);
 					if (!prev.includes(task.legacyId ? task.legacyId : String(task.id))) {
 						if (newId === undefined && !selectedTask?.legacyId) {
-							// This case should ideally never happen, but just in case.
 							bugReporter(plugin, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
 							return [...prev, String(plugin.settings.data.globalSettings.uniqueIdCounter)];
 						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
-						} else {
-							// const idOfSelectedTask = plugin.settings.data.globalSettings.uniqueIdCounter;
-							if (newId) {
+						} else if (newId) {
 								return [...prev, String(newId)];
-							}
 						}
 					}
 					return prev;
@@ -946,7 +942,7 @@ const EditTaskContent: React.FC<{
 						setTitle(newTitle);
 					}
 
-					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter);
+					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : (newId ? String(newId) : String(plugin.settings.data.globalSettings.uniqueIdCounter));
 					setChildTasks(prevChildTasks => {
 						// Avoid adding duplicates
 						if (!prevChildTasks.find(t => t.id === selectedTask.id)) {
