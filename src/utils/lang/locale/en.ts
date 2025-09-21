@@ -281,6 +281,7 @@ const en: Lang = {
 	"source-mode-preview": "Source mode preview",
 	"double-click-card-action": "Double click card action",
 	"double-click-card-action-info": "Select what should happen when you double click on the task card.",
+	"not-valid-file-type-for-scanning": "This file is either not an allowed file type or does not satisfy the 'filters for scanning' applied in setting'. Hence it will not be scanned for tasks."
 };
 
 export default en;
