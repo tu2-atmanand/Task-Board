@@ -1,6 +1,7 @@
 import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
 	content: Set<string>;
@@ -60,7 +61,9 @@ export function getFileSuggestions(app: App): string[] {
 	// Pass only loaded files
 	const files = app.vault
 		.getAllLoadedFiles()
-		.filter((f) => f instanceof TFile && f.extension === "md")
+		.filter(
+			(f) => f instanceof TFile && allowedFileExtensionsRegEx.test(f.path)
+		)
 		.map((f) => f.path);
 
 	return files;

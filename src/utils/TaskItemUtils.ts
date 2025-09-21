@@ -28,6 +28,7 @@ import {
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
 import { generateTaskId } from "./VaultScanner";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -748,7 +749,7 @@ export const addTaskInNote = async (
 	editorActive: boolean,
 	cursorPosition?: { line: number; ch: number } | undefined
 ): Promise<number | undefined> => {
-	const filePath = newTask.filePath.endsWith(".md")
+	const filePath = allowedFileExtensionsRegEx.test(newTask.filePath)
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
 
@@ -836,7 +837,7 @@ export const replaceOldTaskWithNewTask = async (
 	oldTaskContent: string,
 	newTaskContent: string
 ): Promise<boolean> => {
-	const filePath = oldTask.filePath.endsWith(".md")
+	const filePath = allowedFileExtensionsRegEx.test(oldTask.filePath)
 		? oldTask.filePath
 		: `${oldTask.filePath}.md`;
 

@@ -8,6 +8,7 @@ import { ColumnData } from "src/interfaces/BoardConfigs";
 import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { matchTagsWithWildcards } from "./FiltersVerifier";
 import { getAllTaskTags } from "./TaskItemUtils";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
@@ -176,7 +177,7 @@ export const renderColumns = (
 					const lowerCasePath = task.filePath;
 					const matchedPattern = pathPatterns.some(
 						(pattern: string) => {
-							if (pattern.endsWith(".md")) {
+							if (allowedFileExtensionsRegEx.test(pattern)) {
 								return pattern === lowerCasePath;
 							} else {
 								// Check if the task's file path contains the pattern

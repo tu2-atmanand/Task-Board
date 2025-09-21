@@ -20,6 +20,7 @@ import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegula
 import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
 import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
+import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 
 export interface TaskProps {
 	key: number;
@@ -640,7 +641,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				<div className="taskItemFileNameSection">
 					{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
 						<div className="taskItemFileName" aria-label={task.filePath}>
-							{task.filePath.split('/').pop()?.replace('.md', '')}
+							{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
 						</div>
 					)}
 				</div>

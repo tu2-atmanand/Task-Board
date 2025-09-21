@@ -25,6 +25,7 @@ import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
 import { eventEmitter } from "src/services/EventEmitter";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -486,7 +487,7 @@ const EditTaskContent: React.FC<{
 		}
 
 		// Determine file path for task note
-		let taskNoteFilePath = newFilePath.endsWith('.md') ? newFilePath : `${newFilePath}.md`;
+		let taskNoteFilePath = allowedFileExtensionsRegEx.test(newFilePath) ? newFilePath : `${newFilePath}.md`;
 		taskNoteFilePath = normalizePath(taskNoteFilePath);
 
 		const taskNoteItem: taskItem = {
@@ -1388,7 +1389,7 @@ export class AddOrEditTaskModal extends Modal {
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
 
-			if (!this.task.title) this.task.title = this.filePath.split('/')[-1].replace('.md', "");
+			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
 
 			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
 				this.task.id = generateTaskId(this.plugin);

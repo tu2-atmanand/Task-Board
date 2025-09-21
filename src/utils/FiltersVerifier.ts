@@ -2,13 +2,14 @@ import { TFile } from "obsidian";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { extractFrontmatter } from "./FrontmatterOperations";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export function scanFilterForFilesNFoldersNFrontmatter(
 	plugin: TaskBoard,
 	file: TFile,
 	scanFilters: scanFilters
 ): boolean {
-	if (file.extension !== "md") {
+	if (allowedFileExtensionsRegEx.test(file.path) === false) {
 		return false; // Only process markdown files
 	}
 

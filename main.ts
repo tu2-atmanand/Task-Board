@@ -44,6 +44,10 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
+import {
+	allowedFileExtensionsRegEx,
+	notAllowedFileExtensionsRegEx,
+} from "src/regularExpressions/MiscelleneousRegExpr";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -611,10 +615,11 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				console.log("File modified event :", file);
 				if (
+					notAllowedFileExtensionsRegEx.test(file.path) ||
 					file.path ===
 						this.settings.data.globalSettings
 							.archivedTasksFilePath ||
-					file.path.endsWith(".excalidraw.md")
+					allowedFileExtensionsRegEx.test(file.path) === false
 				) {
 					return false;
 				}
