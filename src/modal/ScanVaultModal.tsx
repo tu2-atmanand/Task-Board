@@ -62,7 +62,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		vaultScanner.tasksCache.Pending = {};
 		vaultScanner.tasksCache.Completed = {};
 
-		const files = app.vault.getMarkdownFiles();
+		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
 
 		for (let i = 0; i < files.length; i++) {
