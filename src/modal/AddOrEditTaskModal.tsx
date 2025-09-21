@@ -1001,7 +1001,7 @@ const EditTaskContent: React.FC<{
 	}, [childTasks]);
 
 	const handleOpenChildTaskModal = async (taskId: string) => {
-		const childTask = childTasks.find(t => String(t.id) === taskId);
+		const childTask = childTasks.find(t => String(t.legacyId) === taskId);
 		if (!childTask) {
 			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
 			return;
