@@ -413,7 +413,7 @@ const MapView: React.FC<MapViewProps> = ({
 										const newVp: viewPort = {
 											x: - (node.position.x - 200),
 											y: - (node.position.y),
-											zoom: 1.5
+											zoom: 1
 										};
 										instance.setViewport(newVp);
 										setViewport(newVp);

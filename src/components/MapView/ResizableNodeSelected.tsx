@@ -17,8 +17,6 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 				color="#ff0071"
 				isVisible={selected}
 				autoScale={true}
-				minWidth={width ?? 100}
-				minHeight={height ?? 30}
 				onResizeEnd={(newSize, params) => {
 					// console.log('Node resized to:', newSize, "\nparams:", params, "\nNode ID:", id);
 					try {
