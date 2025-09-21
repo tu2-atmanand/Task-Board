@@ -7,7 +7,7 @@ import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksC
 import { handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component } from 'obsidian';
+import { Component, Notice } from 'obsidian';
 import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
@@ -19,7 +19,7 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
 import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
-import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
+import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/FiltersVerifier';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 
 export interface TaskProps {
@@ -281,17 +281,23 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	}
 
 	// Function to handle the main checkbox click
-	const handleMainCheckBoxClick = () => {
+	const handleMainCheckBoxClick = async () => {
 		setIsChecked(true); // Trigger animation
-		setTimeout(() => {
-			// Route to appropriate handler based on task type
-			if (isTaskNotePresentInTags(plugin, task.tags)) {
-				handleTaskNoteStatusChange(plugin, task);
-			} else {
-				handleCheckboxChange(plugin, task);
-			}
+		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
+		if (condition) {
+			setTimeout(() => {
+				// Route to appropriate handler based on task type
+				if (isTaskNotePresentInTags(plugin, task.tags)) {
+					handleTaskNoteStatusChange(plugin, task);
+				} else {
+					handleCheckboxChange(plugin, task);
+				}
+				setIsChecked(false); // Reset checkbox state
+			}, 500); // 1-second delay for animation
+		} else {
 			setIsChecked(false); // Reset checkbox state
-		}, 500); // 1-second delay for animation
+			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
+		}
 	};
 
 	const handleMainTaskDelete = () => {

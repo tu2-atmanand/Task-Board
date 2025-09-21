@@ -281,7 +281,10 @@ const en: Lang = {
 	"source-mode-preview": "Source mode preview",
 	"double-click-card-action": "Double click card action",
 	"double-click-card-action-info": "Select what should happen when you double click on the task card.",
-	"not-valid-file-type-for-scanning": "This file is either not an allowed file type or does not satisfy the 'filters for scanning' applied in setting'. Hence it will not be scanned for tasks."
+	"not-valid-file-type-for-scanning": "This file is either not an allowed file type or does not satisfy the 'filters for scanning' applied in setting'. Hence it will not be scanned for tasks.",
+	"restrict-task-completion-to-child-tasks": "Restrict task completion to child tasks",
+	"restrict-task-completion-to-child-tasks-info": "Enable this setting to restrict the completion of a parent task until all its child tasks (sub-tasks and depends-on tasks) are completed. This will help you to ensure that all related tasks are completed before marking the parent task as done.",
+	"complete-all-child-tasks-before-completing-task": "Complete all child-tasks and sub-tasks related to this task before completing it. You can turn this setting off, if you dont want this restriction.",
 };
 
 export default en;

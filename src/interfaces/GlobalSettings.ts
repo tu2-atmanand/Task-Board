@@ -162,6 +162,7 @@ export interface globalSettingsData {
 		boardIndex: number;
 		taskId?: string;
 	};
+	boundTaskCompletionToChildTasks: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -454,6 +455,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				viewedType: "kanban",
 				boardIndex: 0,
 			},
+			boundTaskCompletionToChildTasks: false,
 		},
 	},
 };

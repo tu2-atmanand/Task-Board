@@ -3,7 +3,17 @@ import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { extractFrontmatter } from "./FrontmatterOperations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { isCompleted, isTaskLine } from "./CheckBoxUtils";
+import { getTaskFromId } from "./TaskItemUtils";
+import { taskItem } from "src/interfaces/TaskItem";
 
+/**
+ * Scans a file and its front-matter for specific filters.
+ * @param plugin The main plugin instance.
+ * @param file The file to scan.
+ * @param scanFilters The filters to apply.
+ * @returns True if the file and its front-matter match the filters for scanning, false otherwise.
+ */
 export function scanFilterForFilesNFoldersNFrontmatter(
 	plugin: TaskBoard,
 	file: TFile,
@@ -264,4 +274,43 @@ export function matchTagsWithWildcards(
 	);
 
 	return matches.length > 0 ? matches : null;
+}
+
+/**
+ * Verifies if all sub-tasks and child-tasks (dependsOn) of a task are complete.
+ * Returns true if no sub-tasks/child-tasks, or all are complete; otherwise false.
+ */
+export async function verifySubtasksAndChildtasksAreComplete(
+	plugin: TaskBoard,
+	task: taskItem
+): Promise<boolean> {
+	if (!plugin.settings.data.globalSettings.boundTaskCompletionToChildTasks)
+		return true;
+
+	let flag = true;
+
+	// Check sub-tasks in body
+	const subTasks = (task.body ?? []).filter((line) => isTaskLine(line));
+	if (subTasks.length > 0) {
+		// Check if all sub-tasks are completed
+		const allSubTasksCompleted = subTasks.every((line) =>
+			isCompleted(line)
+		);
+		if (!allSubTasksCompleted) flag = false;
+	}
+
+	// Check if all child-tasks (dependsOn) are completed
+	if (task?.dependsOn && (task?.dependsOn?.length ?? 0) > 0) {
+		for (const childId of task?.dependsOn ?? []) {
+			const childTask = await getTaskFromId(plugin, childId);
+			if (
+				!childTask ||
+				!(childTask.status === "X" || childTask.status === "x")
+			) {
+				flag = false;
+			}
+		}
+	}
+
+	return flag;
 }

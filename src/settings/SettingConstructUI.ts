@@ -1193,6 +1193,7 @@ export class SettingsManager {
 			quickAddPluginDefaultChoice,
 			notificationService,
 			frontmatterPropertyForReminder,
+			boundTaskCompletionToChildTasks,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -1250,6 +1251,19 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.doubleClickCardToEdit =
 							value as EditButtonMode;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("restrict-task-completion-to-child-tasks"))
+			.setDesc(t("restrict-task-completion-to-child-tasks-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(boundTaskCompletionToChildTasks)
+					.onChange(async (value) => {
+						this.globalSettings!.boundTaskCompletionToChildTasks =
+							value;
 						await this.saveSettings();
 					})
 			);
