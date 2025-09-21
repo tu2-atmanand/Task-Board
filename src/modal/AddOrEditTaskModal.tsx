@@ -16,7 +16,7 @@ import { buildTaskFromRawContent, generateTaskId } from "src/utils/VaultScanner"
 import { DeleteIcon, EditIcon, FileInput, Network, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { DEFAULT_SETTINGS, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { DEFAULT_SETTINGS, EditButtonMode, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter, openEditTaskModal, openEditTaskNoteModal } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -26,6 +26,8 @@ import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { handleEditTask } from "src/utils/TaskItemEventHandlers";
+import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -1001,7 +1003,8 @@ const EditTaskContent: React.FC<{
 		});
 	}, [childTasks]);
 
-	const handleOpenChildTaskModal = async (taskId: string) => {
+	const handleOpenChildTaskModal = async (event: React.MouseEvent, taskId: string) => {
+		event.stopPropagation();
 		const childTask = childTasks.find(t => String(t.legacyId) === taskId);
 		if (!childTask) {
 			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
@@ -1014,18 +1017,27 @@ const EditTaskContent: React.FC<{
 		// // Clear existing children in the leaf
 		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
 
-		//For now will simply open it in a new modal.
-		console.log("Output of isTaskNotePresentInTags(plugin, childTask.tags): ", isTaskNotePresentInTags(plugin, childTask.tags));
-		if (isTaskNotePresentInTags(plugin, childTask.tags)) {
-			plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
-			await sleep(50);
-			openEditTaskNoteModal(plugin, childTask);
+		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
+			handleEditTask(plugin, task, settingOption);
+		} else if (settingOption === EditButtonMode.Modal) {
+			//For now will simply open it in a new modal.
+			console.log("Output of isTaskNotePresentInTags(plugin, childTask.tags): ", isTaskNotePresentInTags(plugin, childTask.tags));
+			if (isTaskNotePresentInTags(plugin, childTask.tags)) {
+				plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
+				await sleep(50);
+				openEditTaskNoteModal(plugin, childTask);
+			} else {
+				plugin.app.workspace.openPopoutLeaf();
+				await sleep(50);
+				openEditTaskModal(plugin, childTask);
+			}
 		} else {
-			plugin.app.workspace.openPopoutLeaf();
-			await sleep(50);
-			openEditTaskModal(plugin, childTask);
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+			event.ctrlKey = false;
 		}
-	}
+	};
 
 	const handleRemoveChildTask = (taskId: string) => {
 		console.log("Removing child task with ID:", taskId);
@@ -1168,7 +1180,7 @@ const EditTaskContent: React.FC<{
 													<span className="EditTaskModalChildTasksListItemIdValue">{taskId}</span>
 												</div>
 												<div className="EditTaskModalChildTasksListItemFooterBtns">
-													<button className="EditTaskModalChildTasksListItemEditBtn" onClick={() => handleOpenChildTaskModal(taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
+													<button className="EditTaskModalChildTasksListItemEditBtn" onClick={(e) => handleOpenChildTaskModal(e, taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
 													<button className="EditTaskModalChildTasksListItemDeleteBtn" onClick={() => handleRemoveChildTask(taskId)}><DeleteIcon size={20} /></button>
 												</div>
 											</div>
