@@ -71,7 +71,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 /**
  * Exports the plugin settings to a file chosen by the user.
  */
-export async function exportConfigurations(plugin: TaskBoard) {
+export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 	try {
 		const data = plugin.settings;
 		const exportFileName = "task-board-configs-export.json";
@@ -135,7 +135,9 @@ export async function exportConfigurations(plugin: TaskBoard) {
  * Imports plugin settings from a file chosen by the user, merging with existing settings.
  * Preserves new fields in both files.
  */
-export async function importConfigurations(plugin: TaskBoard) {
+export async function importConfigurations(
+	plugin: TaskBoard
+): Promise<boolean> {
 	try {
 		let importedContent: string | undefined = undefined;
 		let extensions = ["json"];
@@ -156,7 +158,7 @@ export async function importConfigurations(plugin: TaskBoard) {
 			});
 			if (!filePaths || filePaths.length === 0) {
 				new Notice("Import cancelled or file not selected.");
-				return;
+				return false;
 			}
 			const pickedFile = new NodePickedFile(filePaths[0]);
 			importedContent = await pickedFile.readText();
@@ -188,7 +190,7 @@ export async function importConfigurations(plugin: TaskBoard) {
 			});
 			if (!importedContent) {
 				new Notice("Import cancelled or file not selected.");
-				return;
+				return false;
 			}
 		}
 
@@ -219,6 +221,7 @@ export async function importConfigurations(plugin: TaskBoard) {
 		// plugin.settings = mergedSettings;
 		// await plugin.saveSettings();
 		new Notice("Settings imported and merged successfully.");
+		return true;
 	} catch (err) {
 		new Notice("Failed to import settings.");
 		console.error(err);

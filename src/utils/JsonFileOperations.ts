@@ -183,14 +183,14 @@ export const moveTasksCacheFileToNewPath = (
 	oldPath: string,
 	newPath: string
 ) => {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<boolean>((resolve, reject) => {
 		if (
 			oldPath === newPath ||
 			(newPath !== "" && newPath.endsWith(".json") === false) ||
 			(oldPath !== "" && oldPath.endsWith(".json") === false)
 		) {
-			resolve();
-			return;
+			resolve(true);
+			return true;
 		}
 
 		if (newPath === "")
@@ -206,7 +206,7 @@ export const moveTasksCacheFileToNewPath = (
 			// 	// Save the updated settings
 			// 	return plugin.saveSettings();
 			// })
-			.then(() => resolve())
+			.then(() => resolve(true))
 			.catch((error) => {
 				bugReporter(
 					plugin,
@@ -215,6 +215,7 @@ export const moveTasksCacheFileToNewPath = (
 					"JsonFileOperations.ts/moveTasksCacheFileToNewPath"
 				);
 				reject(error);
+				return false;
 			});
 	});
 };
