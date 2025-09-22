@@ -215,7 +215,7 @@ const en: Lang = {
 	"default-note-for-adding-new-tasks": "Default note for adding new tasks",
 	"default-note-for-new-tasks-description": "Select the default note in which all the newly added tasks through 'add new task modal' should be saved.",
 	"universal-date": "Universal date",
-	"universal-date-description": "Select what type of date you want task board to consider as your universal date for all the automation operations, unless specified.",
+	"universal-date-description": "Select what type of date you want task board to consider as your universal date for all the automation operations.",
 	"auto-add-created-date-to-tasks": "Auto add created date to tasks",
 	"auto-add-created-date-to-tasks-desc": "When enabled, todays date will be automatically added as the created date to the task.",
 	"file-for-archived-tasks": "File for archived tasks",
@@ -282,9 +282,17 @@ const en: Lang = {
 	"double-click-card-action": "Double click card action",
 	"double-click-card-action-info": "Select what should happen when you double click on the task card.",
 	"not-valid-file-type-for-scanning": "This file is either not an allowed file type or does not satisfy the 'filters for scanning' applied in setting'. Hence it will not be scanned for tasks.",
-	"restrict-task-completion-to-child-tasks": "Restrict task completion to child tasks",
-	"restrict-task-completion-to-child-tasks-info": "Enable this setting to restrict the completion of a parent task until all its child tasks (sub-tasks and depends-on tasks) are completed. This will help you to ensure that all related tasks are completed before marking the parent task as done.",
+	"restrict-task-completion-to-child-tasks-and-sub-tasks": "Restrict task completion to child-tasks and sub-tasks",
+	"restrict-task-completion-to-child-tasks-info": "Enable this setting to restrict the completion of a parent task until all its child tasks (depends-on tasks) and sub-tasks are completed. This will help you to ensure that all related tasks are completed before marking the parent task as done.",
 	"complete-all-child-tasks-before-completing-task": "Complete all child-tasks and sub-tasks related to this task before completing it. You can turn this setting off, if you dont want this restriction.",
+	"task-note-identifier-tag": "Task note identifier tag",
+	"task-note-identifier-tag-description": "Enter the tag which will be used to indentify a normal task as a task-note. This tag will be automatically added to the tasks created through 'add new task modal'. You can change this tag, if you want to use your own custom tag. Dont forget to add # in the beginning of the tag.",
+	"default-location-for-new-task-notes": "Default location for new task notes",
+	"default-location-for-new-task-notes-description": "Default folder where new task-notes will be saved. You can also change the location from the 'add new task modal' while creating a new task-note.",
+	"tasks-plugin-modal": "Tasks plugin modal",
+	"reload-obsidian-notice-message": "You have changed a setting which requires Obsidian to be reloaded. Reload now or after you are done with all the setting changes.",
+	"reload-now": "Reload now",
+	"ignore": "Ignore",
 };
 
 export default en;
