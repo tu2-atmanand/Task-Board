@@ -5,6 +5,7 @@ import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
+import { t } from "src/utils/lang/helper";
 
 /**
  * Migrates settings from imported data to current settings, preserving new fields and syncing new ones.
@@ -225,5 +226,48 @@ export async function importConfigurations(
 	} catch (err) {
 		new Notice("Failed to import settings.");
 		console.error(err);
+		return false;
 	}
+}
+
+/**
+ * Shows a notice prompting the user to reload Obsidian to apply certain changes.
+ * @param plugin - TaskBoard plugin instance
+ */
+export async function showReloadObsidianNotice(
+	plugin: TaskBoard
+): Promise<void> {
+	const reloadObsidianNotice = new Notice(
+		createFragment((f) => {
+			f.createDiv("reloadObsidianNotice", (el) => {
+				el.createEl("p", {
+					text: t("reload-obsidian-notice-message"),
+				});
+				el.createEl("button", {
+					text: t("reload-now"),
+					cls: "reloadNowButton",
+					onclick: () => {
+						plugin.app.commands.executeCommandById("app:reload");
+						el.hide();
+					},
+				});
+				el.createEl("button", {
+					text: t("ignore"),
+					cls: "ignoreButton",
+					onclick: () => {
+						el.hide();
+					},
+				});
+			});
+		}),
+		0
+	);
+
+	reloadObsidianNotice.messageEl.onClickEvent((e) => {
+		if (!(e.target instanceof HTMLButtonElement)) {
+			e.stopPropagation();
+			e.preventDefault();
+			e.stopImmediatePropagation();
+		}
+	});
 }
