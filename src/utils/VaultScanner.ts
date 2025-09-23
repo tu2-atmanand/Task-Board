@@ -261,11 +261,29 @@ export default class vaultScanner {
 
 			// Add to appropriate cache based on completion status
 			const isTaskNoteCompleted =
-				taskNoteItem.status === "x" || taskNoteItem.status === "X";
+				taskNoteItem.status === "unchecked" || taskNoteItem.status === "pending";
 			if (isTaskNoteCompleted) {
-				this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
+				// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
+				const completed = this.tasksCache.Completed;
+				if (completed) {
+					delete completed[fileNameWithPath];
+					this.tasksCache.Completed = {
+						[fileNameWithPath]: [taskNoteItem],
+						...completed,
+					};
+				}
 			} else {
-				this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
+				// this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
+				const pending = this.tasksCache.Pending;
+				if (pending) {
+					// Remove and re-insert at the top
+					// const tasks = pending[fileNameWithPath];
+					delete pending[fileNameWithPath];
+					this.tasksCache.Pending = {
+						[fileNameWithPath]: [taskNoteItem],
+						...pending,
+					};
+				}
 			}
 		} else {
 			// Else, proceed with normal task line detection inside the file content.
@@ -415,11 +433,37 @@ export default class vaultScanner {
 					}
 				}
 			}
-			if (this.tasksCache.Pending[fileNameWithPath]?.length === 0)
-				delete this.tasksCache.Pending[fileNameWithPath];
 
-			if (this.tasksCache.Completed[fileNameWithPath]?.length === 0)
+			if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
+				delete this.tasksCache.Pending[fileNameWithPath];
+			} else {
+				// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
+				const pending = this.tasksCache.Pending;
+				if (pending && pending[fileNameWithPath]) {
+					// Remove and re-insert at the top
+					const tasks = pending[fileNameWithPath];
+					delete pending[fileNameWithPath];
+					this.tasksCache.Pending = {
+						[fileNameWithPath]: tasks,
+						...pending,
+					};
+				}
+			}
+
+			if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
 				delete this.tasksCache.Completed[fileNameWithPath];
+			} else {
+				const completed = this.tasksCache.Completed;
+				if (completed && completed[fileNameWithPath]) {
+					// Remove and re-insert at the top
+					const tasks = completed[fileNameWithPath];
+					delete completed[fileNameWithPath];
+					this.tasksCache.Completed = {
+						[fileNameWithPath]: tasks,
+						...completed,
+					};
+				}
+			}
 		}
 
 		this.saveTasksToJsonCache(); // TODO : This function call can be moved to the place where I am calling extractTasksFromFile for each file. No need to call this function after each file scan.
@@ -445,7 +489,7 @@ export default class vaultScanner {
 				// TODO : Try testing if removing the await from the below line will going to speed up the process.
 				await this.extractTasksFromFile(file, scanFilters).then(() => {
 					if (showNotice) {
-						new Notice("Tasks refreshed successfully.");
+						new Notice("tasks-refreshed-successfully");
 					}
 				});
 
@@ -501,7 +545,7 @@ export default class vaultScanner {
 				// 					.showFrontmatterTagsOnCards
 				// 			) {
 				// 				// Extract frontmatter from the file
-				// 				const frontmatter = extractFrontmatter(
+				// 				const frontmatter = extractFrontmatterFromFile(
 				// 					this.plugin,
 				// 					file
 				// 				);
