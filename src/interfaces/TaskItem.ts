@@ -87,6 +87,8 @@ export const priorityOptions = [
 
 export enum taskStatuses {
 	unchecked = " ",
+	incomplete = " ",
+	pending = " ",
 	regular = "x",
 	checked = "X",
 	dropped = "-",
