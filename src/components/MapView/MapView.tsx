@@ -25,6 +25,7 @@ import { updateTaskInFile } from 'src/utils/TaskItemUtils';
 import { debounce } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/types/uniqueIdentifiers';
 import { sanitizeDependsOn } from 'src/utils/TaskContentFormatter';
+import { t } from 'src/utils/lang/helper';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -377,7 +378,7 @@ const MapView: React.FC<MapViewProps> = ({
 				<div className="mapView">
 					<div className="mapViewContainer" style={{ width: '100%', height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 						<div className="spinner"></div>
-						<span>Loading map data...</span>
+						<span>{t('loading-map-data')}</span>
 					</div>
 				</div>
 			</div>

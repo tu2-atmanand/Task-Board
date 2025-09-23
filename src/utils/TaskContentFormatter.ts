@@ -963,6 +963,14 @@ export const sanitizeReminder = (
 	return `${title} ${formattedReminder}`;
 };
 
+/**
+ * Sanitizes the "dependsOn" section of the task title.
+ * @param globalSettings - The global settings data.
+ * @param title - The title of the task.
+ * @param dependesOnIds - The IDs of the tasks that this task depends on.
+ * @param cursorLocation - (Optional) The cursor location to insert the dependsOn at a specific position.
+ * @returns The sanitized dependsOn string to be used in the task title.
+ */
 export const sanitizeDependsOn = (
 	globalSettings: globalSettingsData,
 	title: string,

@@ -293,6 +293,8 @@ const en: Lang = {
 	"reload-obsidian-notice-message": "You have changed a setting which requires Obsidian to be reloaded. Reload now or after you are done with all the setting changes.",
 	"reload-now": "Reload now",
 	"ignore": "Ignore",
+	"loading-map-data": "Loading map data...",
+	"tasks-refreshed-successfully": "Tasks refreshed successfully",
 };
 
 export default en;
