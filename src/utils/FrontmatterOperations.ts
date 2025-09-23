@@ -223,7 +223,7 @@ export function updateFrontmatterProperties(
 	if (task.title) {
 		updated.title = task.title;
 	} else {
-		updated.title = getLocalDateTimeString();
+		updated.title = "";
 	}
 
 	// Ensure taskNote tag exists
