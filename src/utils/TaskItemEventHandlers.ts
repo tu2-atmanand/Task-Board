@@ -172,9 +172,7 @@ export const handleEditTask = (
 			break;
 		case EditButtonMode.TasksPluginModal:
 			if (isTaskNotePresentInTags(plugin, task.tags)) {
-				new Notice(
-					"This is a task-note, you cannot use Tasks plugin modal to edit it."
-				);
+				openEditTaskNoteModal(plugin, task);
 			} else {
 				openTasksPluginEditModal(plugin, task);
 			}
