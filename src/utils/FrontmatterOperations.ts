@@ -230,15 +230,19 @@ export function updateFrontmatterProperties(
 	if (!updated.tags) {
 		updated.tags = [
 			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			...task.tags,
 		];
 	} else if (Array.isArray(updated.tags)) {
-		if (!isTaskNotePresentInTags(plugin, updated.tags)) {
-			updated.tags.push(
-				plugin.settings.data.globalSettings.taskNoteIdentifierTag
-			);
-		}
+		updated.tags = [
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			...updated.tags,
+			...task.tags,
+		];
 	}
+	// Remove duplicate tags
+	updated.tags = Array.from(new Set(updated.tags));
 
+	// Update or add unique ID
 	if (updated.id && plugin.settings.data.globalSettings.autoAddUniqueID) {
 		updated.legacyId = task.legacyId ? task.legacyId : updated.id;
 	}
