@@ -39,7 +39,7 @@ import {
 } from "../regularExpressions/TasksPluginRegularExpr";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
 import {
-	extractFrontmatter,
+	extractFrontmatterFromFile,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
 import { t } from "./lang/helper";
@@ -125,7 +125,7 @@ export default class vaultScanner {
 		this.tasksCache.Completed[fileNameWithPath] = [];
 
 		// Extract frontmatter from the file
-		const frontmatter = extractFrontmatter(this.plugin, file);
+		const frontmatter = extractFrontmatterFromFile(this.plugin, file);
 		console.log(
 			"FrontmatterCache extracted : ",
 			frontmatter,

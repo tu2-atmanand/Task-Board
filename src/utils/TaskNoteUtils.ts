@@ -5,8 +5,9 @@ import TaskBoard from "main";
 import {
 	updateFrontmatterProperties,
 	customFrontmatterCache,
-	extractFrontmatter,
+	extractFrontmatterFromFile,
 	createYamlFromObject,
+	extractFrontmatterFromContent,
 } from "./FrontmatterOperations";
 import { resolve } from "path";
 import {
@@ -204,13 +205,12 @@ export function formatTaskNoteContent(
 		oldNoteContent
 	);
 	try {
-		// No frontmatter exists, create new one
-		// const newFrontmatter = createFrontmatterFromTask(plugin, task);
-		const file = plugin.app.vault.getFileByPath(updatedTask.filePath);
-		if (!file) {
-			throw new Error(`File not found: ${updatedTask.filePath}`);
-		}
-		const existingFrontmatter = extractFrontmatter(plugin, file);
+		const existingFrontmatter = extractFrontmatterFromContent(
+			plugin,
+			oldNoteContent
+		);
+		console.log("Existing frontmatter extracted:", existingFrontmatter);
+		// Update frontmatter properties based on updatedTask
 		const updatedFrontmatter = updateFrontmatterProperties(
 			plugin,
 			existingFrontmatter,
@@ -228,7 +228,7 @@ export function formatTaskNoteContent(
 		return newContent;
 	} catch (error) {
 		console.error("Error updating task note frontmatter:", error);
-		throw error;
+		return ""; // Return empty content on error
 	}
 }
 

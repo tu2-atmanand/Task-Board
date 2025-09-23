@@ -1,7 +1,7 @@
 import { TFile } from "obsidian";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
-import { extractFrontmatter } from "./FrontmatterOperations";
+import { extractFrontmatterFromFile } from "./FrontmatterOperations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { isCompleted, isTaskLine } from "./CheckBoxUtils";
 import { getTaskFromId } from "./TaskItemUtils";
@@ -104,7 +104,7 @@ export function checkFrontMatterFilters(
 	file: TFile,
 	scanFilters: scanFilters
 ): boolean | undefined {
-	const frontmatter = extractFrontmatter(plugin, file);
+	const frontmatter = extractFrontmatterFromFile(plugin, file);
 
 	if (!frontmatter) {
 		return; // No front matter found

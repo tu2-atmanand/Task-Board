@@ -24,7 +24,7 @@ import {
 } from "src/services/OpenModals";
 import { isTheContentDiffAreOnlySpaces } from "src/modal/DiffContentCompareModal";
 import {
-	extractFrontmatter,
+	extractFrontmatterFromFile,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
 import { generateTaskId } from "./VaultScanner";
@@ -731,7 +731,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 	const file = plugin.app.vault.getFileByPath(newTask.filePath);
-	const frontmatter = file ? extractFrontmatter(plugin, file) : {};
+	const frontmatter = file ? extractFrontmatterFromFile(plugin, file) : {};
 	const frontmatterTags = extractFrontmatterTags(frontmatter);
 
 	const newTaskWithId = {

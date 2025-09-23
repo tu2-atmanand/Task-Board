@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { FrontMatterCache, stringifyYaml, TFile } from "obsidian";
+import { FrontMatterCache, parseYaml, stringifyYaml, TFile } from "obsidian";
 import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import { getLocalDateTimeString } from "./TimeCalculations";
 import {
@@ -27,7 +27,7 @@ export interface customFrontmatterCache extends FrontMatterCache {
  * @param file - Obsidian file
  * @returns any - Frontmatter object or null if not found
  */
-export function extractFrontmatter(
+export function extractFrontmatterFromFile(
 	plugin: TaskBoard,
 	file: TFile
 ): customFrontmatterCache | undefined {
@@ -69,6 +69,35 @@ export function extractFrontmatter(
 		return frontmatterAsObject;
 	} catch (error) {
 		// console.warn("Failed to parse frontmatter:", error);
+		return undefined;
+	}
+}
+
+export function extractFrontmatterFromContent(
+	plugin: TaskBoard,
+	fileContent: string
+): customFrontmatterCache | undefined {
+	// Method 1 - Find the frontmatter using delimiters
+	// Check if the content starts with frontmatter delimiter
+	if (!fileContent.startsWith("---\n")) {
+		return undefined;
+	}
+
+	// Find the end of frontmatter
+	const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
+	if (secondDelimiterIndex === -1) {
+		return undefined;
+	}
+
+	// Extract the YAML content between delimiters
+	const yamlContent = fileContent.substring(4, secondDelimiterIndex);
+
+	try {
+		// Parse the YAML content using Obsidian's API
+		const frontmatter = parseYaml(yamlContent) as customFrontmatterCache;
+		return frontmatter;
+	} catch (error) {
+		console.warn("Failed to parse frontmatter:", error);
 		return undefined;
 	}
 }
