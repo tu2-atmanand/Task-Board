@@ -99,7 +99,7 @@ const EditTaskContent: React.FC<{
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
-	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(false);
+	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(true);
 	const cursorLocationRef = useRef<cursorLocation | null>(null);
 
 	const indentationString = getObsidianIndentationSetting(plugin);
@@ -874,19 +874,21 @@ const EditTaskContent: React.FC<{
 		}
 	}
 	useEffect(() => {
-		console.log("Task.Body :", task.body);
-		if (isTaskNote) {
-			const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
-			console.log("Formatted Task Note Content:", newFormattedTaskNoteContent);
-			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
-			setFormattedTaskContent(newFormattedTaskNoteContent);
-			// setIsEditorContentChanged(false);
-		}
-		else {
-			const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
-			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
-			setFormattedTaskContent(newFormattedTaskNoteContent);
-			// setIsEditorContentChanged(false);
+		console.log("isEditorContentChanged :", isEditorContentChanged);
+		if (isEditorContentChanged) {
+			if (isTaskNote) {
+				const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				console.log("Formatted Task Note Content:", newFormattedTaskNoteContent);
+				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
+				setFormattedTaskContent(newFormattedTaskNoteContent);
+				setIsEditorContentChanged(false);
+			}
+			else {
+				const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
+				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
+				setFormattedTaskContent(newFormattedTaskNoteContent);
+				setIsEditorContentChanged(false);
+			}
 		}
 	}, [isEditorContentChanged]);
 
