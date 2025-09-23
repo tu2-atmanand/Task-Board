@@ -1,6 +1,6 @@
 import { Notice } from "obsidian";
 import TaskBoard from "main";
-import { fsPromises, NodePickedFile } from "src/utils/FileSystem";
+import { fsPromises, NodePickedFile } from "src/services/FileSystem";
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
