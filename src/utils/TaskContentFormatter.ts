@@ -13,7 +13,10 @@ import {
 	globalSettingsData,
 	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
-import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
+import {
+	TaskRegularExpressions,
+	TASKS_PLUGIN_DEFAULT_SYMBOLS,
+} from "src/regularExpressions/TasksPluginRegularExpr";
 import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
 
 export interface cursorLocation {
@@ -1317,6 +1320,16 @@ export const cleanTaskTitleLegacy = (
 		}
 	});
 
+	// Remove id
+	if (task.id) {
+		const idMatch = cleanedTitle.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
+		);
+		if (idMatch) {
+			cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
+		}
+	}
+
 	// Remove time (handles both formats)
 	if (task.time) {
 		const timeRegex =
@@ -1396,6 +1409,17 @@ export const cleanTaskTitleLegacy = (
 			cleanedTitle = cleanedTitle.replace(priorityRegex, (match) => {
 				return match.trim() === priorityIcon ? " " : match;
 			});
+		}
+	}
+
+	// Remove dependsOn in various formats
+	if (task.dependsOn && task.dependsOn.length > 0) {
+		const match = cleanedTitle.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.dependsOnRegex
+		);
+		if (match) {
+			cleanedTitle = cleanedTitle.replace(match[0], "");
 		}
 	}
 
