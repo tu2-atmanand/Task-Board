@@ -16,7 +16,7 @@ import {
 } from "./CheckBoxUtils";
 import {
 	loadJsonCacheDataFromDisk,
-	writeJsonCacheDataFromDisk,
+	writeJsonCacheDataToDisk,
 } from "./JsonFileOperations";
 import {
 	jsonCacheData,
@@ -980,28 +980,12 @@ export function extractDueDate(text: string): string {
 
 // Extract priority from task title using RegEx
 export function extractPriority(text: string): number {
-	let match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex
-	);
-	if (match) {
-		return parseInt(match[1]);
-	}
-
-	match = text.match(/@priority\(\s*(\d{1,2})\s*\)/);
-	if (match) {
-		return parseInt(match[1]);
-	}
-
-	// Create a regex pattern to match any priority emoji
-	const emojiPattern = new RegExp(
-		`(${Object.values(priorityEmojis)
-			.map((emoji) => `\\s*${emoji}\\s*`)
-			.join("|")})`,
-		"g"
-	);
-
 	// Execute the regex to find all priority emoji matches
-	const matches = text.match(emojiPattern) || [];
+	const matches =
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.priorityRegex
+		) || [];
 
 	// Filter out any empty or incorrect values
 	const validMatches = matches
@@ -1016,6 +1000,18 @@ export function extractPriority(text: string): number {
 		if (priorityMatch) {
 			return parseInt(priorityMatch[0]); // Return the first matching priority
 		}
+	}
+
+	let match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex
+	);
+	if (match) {
+		return parseInt(match[1]);
+	}
+
+	match = text.match(/@priority\(\s*(\d{1,2})\s*\)/);
+	if (match) {
+		return parseInt(match[1]);
 	}
 
 	// Default priority if no emoji is found
