@@ -665,7 +665,8 @@
         "taskId": ""
       },
       "taskNoteIdentifierTag": "taskNote",
-      "doubleClickCardToEdit": "noteInTab"
+      "doubleClickCardToEdit": "noteInTab",
+      "boundTaskCompletionToChildTasks": false
     }
   }
 }
