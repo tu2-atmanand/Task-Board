@@ -28,6 +28,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { handleEditTask } from "src/utils/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
+import { ViewUpdate } from "@codemirror/view";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -724,7 +725,7 @@ const EditTaskContent: React.FC<{
 							head: formattedTaskContent.split("\n")[0].length,
 						},
 
-						onEnter: (editor, mod, shift) => {
+						onEnter: (editor: EmbeddableMarkdownEditor, mod: boolean, shift: boolean) => {
 							// if (mod) {
 							// 	// Submit on Cmd/Ctrl+Enter
 							// 	handleSave();
@@ -737,11 +738,11 @@ const EditTaskContent: React.FC<{
 						// 	onClose();
 						// },
 
-						onSubmit: (editor) => {
+						onSubmit: (editor: EmbeddableMarkdownEditor) => {
 							handleSave();
 						},
 
-						onChange: (update) => {
+						onChange: (update: ViewUpdate) => {
 							setIsEdited(true);
 							const capturedContent = fullMarkdownEditor?.value || "";
 							setFormattedTaskContent(capturedContent);
@@ -752,7 +753,7 @@ const EditTaskContent: React.FC<{
 							// 	charIndex: editor?.obsidianEditor?.getCursor().ch || formattedTaskContent.split("\n")[0].length,
 							// });
 						},
-						onBlur: (editor) => {
+						onBlur: (editor: EmbeddableMarkdownEditor) => {
 							// setCursorLocation({
 							// 	lineNumber: 1,
 							// 	charIndex: editor.options.cursorLocation?.head || formattedTaskContent.split("\n")[0].length,
