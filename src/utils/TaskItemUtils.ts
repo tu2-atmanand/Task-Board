@@ -899,6 +899,12 @@ export const replaceOldTaskWithNewTask = async (
 
 		// Step 3: Extract the old task content from file using char indexes
 		const linesBefore = lines.slice(0, startLine - 1);
+		console.log(
+			"linesBefore : ",
+			linesBefore,
+			"\nCondition :",
+			linesBefore.join("\n").endsWith("\n")
+		);
 		const taskLines = lines.slice(startLine - 1, endLine);
 
 		// Adjust the first and last lines by slicing at char indexes
@@ -910,6 +916,24 @@ export const replaceOldTaskWithNewTask = async (
 
 		const oldTaskContentFromFile = taskLines.join("\n");
 
+		const joinFinalNoteContent = (
+			before: string,
+			newTaskContent: string,
+			after: string
+		) => {
+			if (newTaskContent.trim() === "") {
+				return `${before}${after ? after : ""}`;
+			}
+
+			return `${before}\n${newTaskContent}${
+				after
+					? newTaskContent.endsWith("\n") || after.startsWith("\n")
+						? after
+						: `\n${after}`
+					: ""
+			}`;
+		};
+
 		// Step 4: Match with oldTaskContent
 		if (oldTaskContentFromFile === oldTaskContent) {
 			// Safe to replace directly
@@ -918,13 +942,11 @@ export const replaceOldTaskWithNewTask = async (
 				.slice(endLine - 1)
 				.join("\n")
 				.slice(endCharIndex);
-			const newContent = `${before}\n${newTaskContent}${
+			const newContent = joinFinalNoteContent(
+				before,
+				newTaskContent,
 				after
-					? newTaskContent.endsWith("\n") || after.startsWith("\n")
-						? after
-						: `\n${after}`
-					: ""
-			}`;
+			);
 			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else if (
 			isTheContentDiffAreOnlySpaces(
@@ -938,13 +960,12 @@ export const replaceOldTaskWithNewTask = async (
 				.slice(endLine - 1)
 				.join("\n")
 				.slice(endCharIndex);
-			const newContent = `${before}\n${newTaskContent}${
+			const newContent = joinFinalNoteContent(
+				before,
+				newTaskContent,
 				after
-					? newTaskContent.endsWith("\n") || after.startsWith("\n")
-						? after
-						: `\n${after}`
-					: ""
-			}`;
+			);
+			// Replace the old task block with the updated content
 			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else {
 			// Ask user to choose between old and new content
@@ -959,14 +980,12 @@ export const replaceOldTaskWithNewTask = async (
 							.slice(endLine - 1)
 							.join("\n")
 							.slice(endCharIndex);
-						const newContent = `${before}\n${newTaskContent}${
+						const newContent = joinFinalNoteContent(
+							before,
+							newTaskContent,
 							after
-								? newTaskContent.endsWith("\n") ||
-								  after.startsWith("\n")
-									? after
-									: `\n${after}`
-								: ""
-						}`;
+						);
+						// Replace the old task block with the updated content
 						await writeDataToVaultFile(
 							plugin,
 							filePath,
