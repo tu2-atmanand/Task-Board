@@ -201,13 +201,20 @@ export default class vaultScanner {
 			frontmatter &&
 			isTaskNotePresentInFrontmatter(this.plugin, frontmatter)
 		) {
-			this.TaskDetected = true;
-
 			// Extract properties from frontmatter
 			const taskNoteProperties = extractTaskNoteProperties(
 				frontmatter,
 				fileNameWithPath
 			);
+			if (
+				scanFilterForTags(taskNoteProperties?.tags || [], scanFilters)
+			) {
+				console.log(
+					"Scanning only following file as it is a task-note:",
+					file
+				);
+
+				this.TaskDetected = true;
 
 			// Extract sub-tasks from the note content (excluding frontmatter)
 			const contentWithoutFrontmatter = fileContent.replace(
