@@ -652,8 +652,8 @@ export default class vaultScanner {
 			this.tasksCache
 		);
 		this.tasksCache.Modified_at = new Date().toISOString();
-		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
-		this.plugin.saveSettings();
+		await writeJsonCacheDataToDisk(this.plugin, this.tasksCache);
+		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 		if (
 			this.plugin.settings.data.globalSettings.realTimeScanning &&
 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||

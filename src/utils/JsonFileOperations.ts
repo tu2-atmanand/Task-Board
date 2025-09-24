@@ -151,7 +151,7 @@ export const loadJsonCacheDataFromDisk = async (
 // };
 
 // Function to write tasks data to disk
-export const writeJsonCacheDataFromDisk = async (
+export const writeJsonCacheDataToDisk = async (
 	plugin: TaskBoard,
 	tasksData: jsonCacheData
 ): Promise<void> => {

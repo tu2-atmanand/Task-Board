@@ -6,7 +6,7 @@ import {
 } from "./TaskContentFormatter";
 import {
 	loadJsonCacheDataFromDisk,
-	writeJsonCacheDataFromDisk,
+	writeJsonCacheDataToDisk,
 } from "./JsonFileOperations";
 import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
@@ -50,7 +50,7 @@ export const moveFromPendingToCompleted = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeJsonCacheDataFromDisk(plugin, allTasks);
+		await writeJsonCacheDataToDisk(plugin, allTasks);
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -83,7 +83,7 @@ export const moveFromCompletedToPending = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeJsonCacheDataFromDisk(plugin, allTasks);
+		await writeJsonCacheDataToDisk(plugin, allTasks);
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -191,7 +191,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 			].filter((t: any) => t.id !== task.id);
 		}
 
-		await writeJsonCacheDataFromDisk(plugin, allTasks);
+		await writeJsonCacheDataToDisk(plugin, allTasks);
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
@@ -525,7 +525,7 @@ export const updateTaskInJson = async (
 			Notes: allTasks.Notes,
 		};
 		// Write the updated data back to the JSON file using the new function
-		await writeJsonCacheDataFromDisk(plugin, updatedData);
+		await writeJsonCacheDataToDisk(plugin, updatedData);
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
@@ -749,7 +749,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	allTasks.Pending[newTask.filePath].push(newTaskWithId);
 
-	await writeJsonCacheDataFromDisk(plugin, allTasks);
+	await writeJsonCacheDataToDisk(plugin, allTasks);
 
 	eventEmitter.emit("REFRESH_COLUMN");
 };
