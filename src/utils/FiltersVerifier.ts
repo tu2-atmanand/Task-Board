@@ -19,9 +19,9 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 	file: TFile,
 	scanFilters: scanFilters
 ): boolean {
-	if (allowedFileExtensionsRegEx.test(file.path) === false) {
-		return false; // Only process markdown files
-	}
+	// if (allowedFileExtensionsRegEx.test(file.path) === false) {
+	// 	return false; // Only process markdown files
+	// }
 
 	if (
 		scanFilters.files.polarity === 3 &&
@@ -194,24 +194,8 @@ export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
 	const tagInFilters = tags.some((tag) => {
 		// return scanFilters.tags.values.includes(tag);
 		const result = matchTagsWithWildcards(scanFilters.tags.values, tag);
-		console.log(
-			"scanFilterForTags - matchTagsWithWildcards result:",
-			result,
-			" for tag:",
-			tag,
-			" with scanFilters.tags.values:",
-			scanFilters.tags.values
-		);
 		return result !== null;
 	});
-	console.log(
-		"scanFilterForTags - Tags provided:",
-		tags,
-		"\nscanFilters :",
-		scanFilters,
-		"\ntagInFilters :",
-		tagInFilters
-	);
 
 	const tagPolarity = scanFilters.tags.polarity;
 
@@ -220,6 +204,17 @@ export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
 		(tagPolarity === 2 && !tagInFilters) ||
 		tagPolarity === 3;
 	if (tagCheck) {
+		console.log(
+			"scanFilterForTags - Tags provided:",
+			tags,
+			"\nscanFilters :",
+			scanFilters,
+			"\ntagInFilters :",
+			tagInFilters,
+			"\ntagCheck :",
+			tagCheck,
+			"\nReturning true"
+		);
 		return true;
 	} else {
 		return false;

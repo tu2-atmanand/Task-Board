@@ -289,6 +289,14 @@ export default class vaultScanner {
 						...pending,
 					};
 				}
+				}
+			}
+
+			if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
+				delete this.tasksCache.Pending[fileNameWithPath];
+			}
+			if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
+				delete this.tasksCache.Completed[fileNameWithPath];
 			}
 		} else {
 			// Else, proceed with normal task line detection inside the file content.
