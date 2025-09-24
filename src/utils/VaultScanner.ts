@@ -43,6 +43,11 @@ import {
 	extractFrontmatterTags,
 } from "./FrontmatterOperations";
 import { t } from "./lang/helper";
+import {
+	allowedFileExtensionsRegEx,
+	notAllowedFileExtensionsRegEx,
+} from "src/regularExpressions/MiscelleneousRegExpr";
+import { bugReporter } from "src/services/OpenModals";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -480,6 +485,7 @@ export default class vaultScanner {
 		for (const file of files) {
 			if (
 				file !== null &&
+					fileTypeAllowedForScanning(this.plugin, file) &&
 				scanFilterForFilesNFoldersNFrontmatter(
 					this.plugin,
 					file,
@@ -623,6 +629,22 @@ export default class vaultScanner {
 	saveTasksToJsonCache() {
 		this.saveTasksToJsonCacheDebounced();
 	}
+}
+
+export function fileTypeAllowedForScanning(
+	plugin: TaskBoard,
+	file: TFile | TAbstractFile
+): boolean {
+	if (
+		notAllowedFileExtensionsRegEx.test(file.path) ||
+		file.path ===
+			plugin.settings.data.globalSettings.archivedTasksFilePath ||
+		allowedFileExtensionsRegEx.test(file.path) === false
+	) {
+		return false;
+	}
+
+	return true;
 }
 
 // Generate a unique ID for each task

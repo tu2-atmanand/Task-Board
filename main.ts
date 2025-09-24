@@ -24,7 +24,9 @@ import {
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
-import vaultScanner from "src/utils/VaultScanner";
+import vaultScanner, {
+	fileTypeAllowedForScanning,
+} from "src/utils/VaultScanner";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
@@ -612,20 +614,12 @@ export default class TaskBoard extends Plugin {
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				console.log("File modified event :", file);
-				if (
-					notAllowedFileExtensionsRegEx.test(file.path) ||
-					file.path ===
-						this.settings.data.globalSettings
-							.archivedTasksFilePath ||
-					allowedFileExtensionsRegEx.test(file.path) === false
-				) {
-					return false;
-				}
-
-				if (file instanceof TFile) {
-					// 	this.taskBoardFileStack.push(file.path);
-					this.realTimeScanning.onFileModified(file);
-					this.editorModified = true;
+				if (fileTypeAllowedForScanning(this.plugin, file)) {
+					if (file instanceof TFile) {
+						// 	this.taskBoardFileStack.push(file.path);
+						this.realTimeScanning.onFileModified(file);
+						this.editorModified = true;
+					}
 				}
 			})
 		);

@@ -6,7 +6,7 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import vaultScanner from "src/utils/VaultScanner";
+import vaultScanner, { fileTypeAllowedForScanning } from "src/utils/VaultScanner";
 import TaskBoard from "main";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
@@ -64,14 +64,16 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
+		const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 
-			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
-			if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
-				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
-				await vaultScanner.extractTasksFromFile(file, scanFilters);
+			if (fileTypeAllowedForScanning(plugin, file)) {
+				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
+					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
+					await vaultScanner.extractTasksFromFile(file, scanFilters);
+				}
 			}
 
 			setProgress(((i + 1) / files.length) * 100); // Update progress
@@ -82,6 +84,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		new Notice(t("vault-scanning-complete"));
 
 		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
+		console.log("Calling saveTasksToJsonCache\nFinal tasksCache after scan:", plugin.vaultScanner.tasksCache);
 		vaultScanner.saveTasksToJsonCache();
 
 		findMaxIdCounterAndUpdateSettings(plugin);
