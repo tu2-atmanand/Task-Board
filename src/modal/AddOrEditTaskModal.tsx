@@ -11,7 +11,6 @@ import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
 import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
-import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { buildTaskFromRawContent, generateTaskId } from "src/utils/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
@@ -29,6 +28,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { handleEditTask } from "src/utils/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
+import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/markdownEditor";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
