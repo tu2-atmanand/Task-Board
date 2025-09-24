@@ -1,3 +1,5 @@
+// /src/components/MapView/MapView.tsx
+
 import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import {
 	ReactFlow,
@@ -141,9 +143,8 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
-		// console.log("Are all the nodes re-calculating when the allTasksArranged changes or only specific ones?\nAllTasksArranged:", allTasksArranged, "\nPositions:", positions, "\nNodeSizes:", nodeSizes);
 		const nodes: Node[] = [];
-		// const allTasksFlat: taskItem[] = allTasksArranged.flat();
+		const usedIds = new Set<string>();
 		const columnSpacing = 350;
 		const rowSpacing = 170;
 
@@ -153,6 +154,11 @@ const MapView: React.FC<MapViewProps> = ({
 			columnTasks.forEach((task, rowIdx) => {
 				if (task.legacyId) {
 					const id = task.legacyId ? task.legacyId : String(task.id);
+					if (usedIds.has(id)) {
+						console.warn('Duplicate node id detected:', id);
+						return; // Skip duplicate
+					}
+					usedIds.add(id);
 					const savedPos = positions[id] || {};
 					const savedSize = nodeSizes[id] || {};
 					nodes.push({
@@ -168,15 +174,15 @@ const MapView: React.FC<MapViewProps> = ({
 							/>
 						},
 						position: {
-							x: savedPos.x ?? xOffset,
-							y: savedPos.y ?? yOffset
+							x: Number.isFinite(savedPos.x) ? savedPos.x : xOffset,
+							y: Number.isFinite(savedPos.y) ? savedPos.y : yOffset
 						},
 						// style: {
 						// 	width: savedSize.width ?? 300,
 						// 	height: savedSize.height ?? 80,
 						// },
-						width: savedSize.width ?? plugin.settings.data.globalSettings.columnWidth,
-						height: savedSize.height ?? undefined,
+						width: Number.isFinite(savedSize.width) ? savedSize.width : Number(plugin.settings.data.globalSettings.columnWidth),
+						height: Number.isFinite(savedSize.height) ? savedSize.height : undefined,
 					});
 					yOffset += rowSpacing;
 				}
