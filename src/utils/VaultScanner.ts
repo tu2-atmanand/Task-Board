@@ -486,7 +486,9 @@ export default class vaultScanner {
 			}
 		}
 
-		this.saveTasksToJsonCache(); // TODO : This function call can be moved to the place where I am calling extractTasksFromFile for each file. No need to call this function after each file scan.
+		return true;
+
+		// this.saveTasksToJsonCache(); // TODO : This function call can be moved to the place where I am calling extractTasksFromFile for each file. No need to call this function after each file scan.
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
