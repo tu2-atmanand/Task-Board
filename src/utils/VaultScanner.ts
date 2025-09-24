@@ -1,6 +1,13 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, Notice, TFile, moment as _moment, debounce } from "obsidian";
+import {
+	App,
+	Notice,
+	TAbstractFile,
+	TFile,
+	moment as _moment,
+	debounce,
+} from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -118,7 +125,10 @@ export default class vaultScanner {
 	}
 
 	// Extract tasks from a specific file
-	async extractTasksFromFile(file: TFile, scanFilters: scanFilters) {
+	async extractTasksFromFile(
+		file: TFile,
+		scanFilters: scanFilters
+	): Promise<boolean> {
 		const fileNameWithPath = file.path;
 		const fileContent = await readDataOfVaultFile(
 			this.plugin,
@@ -139,28 +149,6 @@ export default class vaultScanner {
 			"\nValue of first tag:",
 			frontmatter?.tags?.[0]
 		);
-		// console.log(
-		// 	"Frontmatter extracted:",
-		// 	frontmatter,
-		// 	"\nfile:",
-		// 	fileNameWithPath,
-		// 	"\nvalue of frontmatterPropertyForReminder:",
-		// 	this.plugin.settings.data.globalSettings
-		// 		.frontmatterPropertyForReminder,
-		// 	"\nvalue of frontmatter for the key:",
-		// 	frontmatter[
-		// 		this.plugin.settings.data.globalSettings
-		// 			.frontmatterPropertyForReminder
-		// 	],
-		// 	"Condition : ",
-		// 	this.plugin.settings.data.globalSettings
-		// 		.frontmatterPropertyForReminder &&
-		// 		frontmatter &&
-		// 		frontmatter[
-		// 			this.plugin.settings.data.globalSettings
-		// 				.frontmatterPropertyForReminder
-		// 		]
-		// );
 
 		// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
 		if (
@@ -216,86 +204,87 @@ export default class vaultScanner {
 
 				this.TaskDetected = true;
 
-			// Extract sub-tasks from the note content (excluding frontmatter)
-			const contentWithoutFrontmatter = fileContent.replace(
-				/^---[\s\S]*?---\n?/,
-				""
-			);
-			const contentLines = contentWithoutFrontmatter.split("\n");
-			const subTasks: string[] = [];
+				// Extract sub-tasks from the note content (excluding frontmatter)
+				const contentWithoutFrontmatter = fileContent.replace(
+					/^---[\s\S]*?---\n?/,
+					""
+				);
+				const contentLines = contentWithoutFrontmatter.split("\n");
+				const subTasks: string[] = [];
 
-			// Find tasks within the note content to use as sub-tasks
-			for (
-				let lineIndex = 0;
-				lineIndex < contentLines.length;
-				lineIndex++
-			) {
-				const line = contentLines[lineIndex];
-				if (isTaskLine(line)) {
-					// Add this task line as a sub-task
-					subTasks.push(line);
+				// Find tasks within the note content to use as sub-tasks
+				for (
+					let lineIndex = 0;
+					lineIndex < contentLines.length;
+					lineIndex++
+				) {
+					const line = contentLines[lineIndex];
+					if (isTaskLine(line)) {
+						// Add this task line as a sub-task
+						subTasks.push(line);
+					}
 				}
-			}
 
-			// Create task item for the task note
-			const taskNoteItem: taskItem = {
-				id: Number(taskNoteProperties.id)
-					? Number(taskNoteProperties.id)
-					: generateRandomTempTaskId(),
-				legacyId: taskNoteProperties.id
-					? String(taskNoteProperties.id)
-					: "", // Storing the legacyId for backward compatibility
-				title: taskNoteProperties.title || file.basename,
-				body: subTasks, // Store sub-tasks in body
-				createdDate: taskNoteProperties.createdDate || "",
-				startDate: taskNoteProperties.startDate || "",
-				scheduledDate: taskNoteProperties.scheduledDate || "",
-				due: taskNoteProperties.due || "",
-				tags: taskNoteProperties.tags || [],
-				frontmatterTags: [],
-				time: "", // Task notes don't have time ranges
-				priority: taskNoteProperties.priority || 0,
-				dependsOn: taskNoteProperties.dependsOn || [],
-				status: taskNoteProperties.status || " ", // Default to unchecked
-				filePath: fileNameWithPath,
-				taskLocation: {
-					startLine: 1,
-					startCharIndex: 0,
-					endLine: lines.length,
-					endCharIndex: lines[lines.length - 1]?.length || 0,
-				},
-				completion: taskNoteProperties.completion || "",
-				cancelledDate: taskNoteProperties.cancelledDate || "",
-				reminder: taskNoteProperties.reminder || "",
-			};
+				// Create task item for the task note
+				const taskNoteItem: taskItem = {
+					id: Number(taskNoteProperties.id)
+						? Number(taskNoteProperties.id)
+						: generateRandomTempTaskId(),
+					legacyId: taskNoteProperties.id
+						? String(taskNoteProperties.id)
+						: "", // Storing the legacyId for backward compatibility
+					title: taskNoteProperties.title || file.basename,
+					body: subTasks, // Store sub-tasks in body
+					createdDate: taskNoteProperties.createdDate || "",
+					startDate: taskNoteProperties.startDate || "",
+					scheduledDate: taskNoteProperties.scheduledDate || "",
+					due: taskNoteProperties.due || "",
+					tags: taskNoteProperties.tags || [],
+					frontmatterTags: [],
+					time: "", // Task notes don't have time ranges
+					priority: taskNoteProperties.priority || 0,
+					dependsOn: taskNoteProperties.dependsOn || [],
+					status: taskNoteProperties.status || " ", // Default to unchecked
+					filePath: fileNameWithPath,
+					taskLocation: {
+						startLine: 1,
+						startCharIndex: 0,
+						endLine: lines.length,
+						endCharIndex: lines[lines.length - 1]?.length || 0,
+					},
+					completion: taskNoteProperties.completion || "",
+					cancelledDate: taskNoteProperties.cancelledDate || "",
+					reminder: taskNoteProperties.reminder || "",
+				};
 
-			console.log("Task Note Item Created:", taskNoteItem);
+				console.log("Task Note Item Created:", taskNoteItem);
 
-			// Add to appropriate cache based on completion status
-			const isTaskNoteCompleted =
-				taskNoteItem.status === "unchecked" || taskNoteItem.status === "pending";
-			if (isTaskNoteCompleted) {
-				// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
-				const completed = this.tasksCache.Completed;
-				if (completed) {
-					delete completed[fileNameWithPath];
-					this.tasksCache.Completed = {
-						[fileNameWithPath]: [taskNoteItem],
-						...completed,
-					};
-				}
-			} else {
-				// this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
-				const pending = this.tasksCache.Pending;
-				if (pending) {
-					// Remove and re-insert at the top
-					// const tasks = pending[fileNameWithPath];
-					delete pending[fileNameWithPath];
-					this.tasksCache.Pending = {
-						[fileNameWithPath]: [taskNoteItem],
-						...pending,
-					};
-				}
+				// Add to appropriate cache based on completion status
+				const isTaskNoteCompleted =
+					taskNoteItem.status === "unchecked" ||
+					taskNoteItem.status === "pending";
+				if (isTaskNoteCompleted) {
+					// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
+					const completed = this.tasksCache.Completed;
+					if (completed) {
+						delete completed[fileNameWithPath];
+						this.tasksCache.Completed = {
+							[fileNameWithPath]: [taskNoteItem],
+							...completed,
+						};
+					}
+				} else {
+					// this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
+					const pending = this.tasksCache.Pending;
+					if (pending) {
+						// Remove and re-insert at the top
+						// const tasks = pending[fileNameWithPath];
+						delete pending[fileNameWithPath];
+						this.tasksCache.Pending = {
+							[fileNameWithPath]: [taskNoteItem],
+							...pending,
+						};
+					}
 				}
 			}
 
@@ -492,143 +481,176 @@ export default class vaultScanner {
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
-	async refreshTasksFromFiles(files: (TFile | null)[], showNotice: boolean) {
+	async refreshTasksFromFiles(
+		files: (TFile | null)[],
+		showNotice: boolean
+	): Promise<void> {
 		if (!files || files.length === 0) {
 			return;
 		}
 
-		const scanFilters =
-			this.plugin.settings.data.globalSettings.scanFilters;
-		for (const file of files) {
-			if (
-				file !== null &&
+		try {
+			const scanFilters =
+				this.plugin.settings.data.globalSettings.scanFilters;
+			for (const file of files) {
+				if (
+					file !== null &&
 					fileTypeAllowedForScanning(this.plugin, file) &&
-				scanFilterForFilesNFoldersNFrontmatter(
-					this.plugin,
-					file,
-					scanFilters
-				)
-			) {
-				// TODO : Try testing if removing the await from the below line will going to speed up the process.
-				await this.extractTasksFromFile(file, scanFilters).then(() => {
+					scanFilterForFilesNFoldersNFrontmatter(
+						this.plugin,
+						file,
+						scanFilters
+					)
+				) {
+					// TODO : Try testing if removing the await from the below line will going to speed up the process.
+					await this.extractTasksFromFile(file, scanFilters).then(
+						(result) => {
+							if (!result)
+								throw new Error(
+									"extractTasksFromFile returned false"
+								);
+
+							if (showNotice) {
+								new Notice("tasks-refreshed-successfully");
+							}
+
+							console.log(
+								"Should run after the file has been properly scanned."
+							);
+							this.saveTasksToJsonCache();
+						}
+					);
+
+					return;
+
+					// const fileNameWithPath = file.path;
+					// const fileContent = await this.app.vault.cachedRead(file);
+					// const lines = fileContent.split("\n");
+					// const newPendingTasks: taskItem[] = [];
+					// const newCompletedTasks: taskItem[] = [];
+
+					// for (let i = 0; i < lines.length; i++) {
+					// 	const line = lines[i];
+					// 	if (isTaskLine(line)) {
+					// 		const tags = extractTags(line);
+					// 		if (scanFilterForTags(tags, scanFilters)) {
+					// 			this.TaskDetected = true;
+					// 			const taskStatus = extractCheckboxSymbol(line);
+					// 			const isTaskCompleted = isCompleted(line);
+					// 			const title = extractTitle(line);
+					// 			const time = extractTime(line);
+					// 			const createdDate = extractCreatedDate(line);
+					// 			const startDate = extractStartDate(line);
+					// 			const scheduledDate = extractScheduledDate(line);
+					// 			const priority = extractPriority(line);
+					// 			const completionDate = extractCompletionDate(line);
+					// 			const cancelledDate = extractCancelledDate(line);
+					// 			const body = extractBody(lines, i + 1);
+					// 			let due = extractDueDate(line);
+					// 			if (
+					// 				!due &&
+					// 				this.plugin.settings.data.globalSettings
+					// 					.dailyNotesPluginComp
+					// 			) {
+					// 				const dueFormat =
+					// 					this.plugin.settings.data.globalSettings
+					// 						.universalDateFormat;
+					// 				const basename = file.basename;
+
+					// 				// Check if the basename matches the dueFormat using moment
+					// 				const moment =
+					// 					_moment as unknown as typeof _moment.default;
+					// 				if (
+					// 					moment(basename, dueFormat, true).isValid()
+					// 				) {
+					// 					due = basename; // If the basename matches the dueFormat, assign it to due
+					// 				} else {
+					// 					due = ""; // If not, assign an empty string
+					// 				}
+					// 			}
+
+					// 			let frontmatterTags: string[] = []; // Initialize frontmatterTags
+					// 			if (
+					// 				this.plugin.settings.data.globalSettings
+					// 					.showFrontmatterTagsOnCards
+					// 			) {
+					// 				// Extract frontmatter from the file
+					// 				const frontmatter = extractFrontmatterFromFile(
+					// 					this.plugin,
+					// 					file
+					// 				);
+					// 				// Extract frontmatter tags
+					// 				frontmatterTags =
+					// 					extractFrontmatterTags(frontmatter);
+					// 			}
+
+					// 			const task: taskItem = {
+					// 				id: this.generateTaskId(),
+					// 				status: taskStatus,
+					// 				title,
+					// 				body,
+					// 				time,
+					// 				createdDate,
+					// 				startDate,
+					// 				scheduledDate,
+					// 				due,
+					// 				tags,
+					// 				frontmatterTags,
+					// 				priority,
+					// 				filePath: fileNameWithPath,
+					// 				lineNumber: i + 1,
+					// 				completion: completionDate,
+					// 				cancelledDate: cancelledDate,
+					// 			};
+
+					// 			if (isTaskCompleted) {
+					// 				newCompletedTasks.push(task);
+					// 			} else {
+					// 				newPendingTasks.push(task);
+					// 			}
+					// 		} else {
+					// 			// console.log("The tasks is not allowed...");
+					// 		}
+					// 	}
+					// }
+
+					// // Only replace the tasks for the specific file
+					// this.tasksCache.Pending = {
+					// 	...oldTasks.Pending, // Keep the existing tasks for other files
+					// 	[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
+					// };
+
+					// this.tasksCache.Completed = {
+					// 	...oldTasks.Completed, // Keep the existing tasks for other files
+					// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
+					// };
+				} else {
 					if (showNotice) {
-						new Notice("tasks-refreshed-successfully");
+						new Notice(t("not-valid-file-type-for-scanning"), 5000);
 					}
-				});
 
-				// const fileNameWithPath = file.path;
-				// const fileContent = await this.app.vault.cachedRead(file);
-				// const lines = fileContent.split("\n");
-				// const newPendingTasks: taskItem[] = [];
-				// const newCompletedTasks: taskItem[] = [];
-
-				// for (let i = 0; i < lines.length; i++) {
-				// 	const line = lines[i];
-				// 	if (isTaskLine(line)) {
-				// 		const tags = extractTags(line);
-				// 		if (scanFilterForTags(tags, scanFilters)) {
-				// 			this.TaskDetected = true;
-				// 			const taskStatus = extractCheckboxSymbol(line);
-				// 			const isTaskCompleted = isCompleted(line);
-				// 			const title = extractTitle(line);
-				// 			const time = extractTime(line);
-				// 			const createdDate = extractCreatedDate(line);
-				// 			const startDate = extractStartDate(line);
-				// 			const scheduledDate = extractScheduledDate(line);
-				// 			const priority = extractPriority(line);
-				// 			const completionDate = extractCompletionDate(line);
-				// 			const cancelledDate = extractCancelledDate(line);
-				// 			const body = extractBody(lines, i + 1);
-				// 			let due = extractDueDate(line);
-				// 			if (
-				// 				!due &&
-				// 				this.plugin.settings.data.globalSettings
-				// 					.dailyNotesPluginComp
-				// 			) {
-				// 				const dueFormat =
-				// 					this.plugin.settings.data.globalSettings
-				// 						.universalDateFormat;
-				// 				const basename = file.basename;
-
-				// 				// Check if the basename matches the dueFormat using moment
-				// 				const moment =
-				// 					_moment as unknown as typeof _moment.default;
-				// 				if (
-				// 					moment(basename, dueFormat, true).isValid()
-				// 				) {
-				// 					due = basename; // If the basename matches the dueFormat, assign it to due
-				// 				} else {
-				// 					due = ""; // If not, assign an empty string
-				// 				}
-				// 			}
-
-				// 			let frontmatterTags: string[] = []; // Initialize frontmatterTags
-				// 			if (
-				// 				this.plugin.settings.data.globalSettings
-				// 					.showFrontmatterTagsOnCards
-				// 			) {
-				// 				// Extract frontmatter from the file
-				// 				const frontmatter = extractFrontmatterFromFile(
-				// 					this.plugin,
-				// 					file
-				// 				);
-				// 				// Extract frontmatter tags
-				// 				frontmatterTags =
-				// 					extractFrontmatterTags(frontmatter);
-				// 			}
-
-				// 			const task: taskItem = {
-				// 				id: this.generateTaskId(),
-				// 				status: taskStatus,
-				// 				title,
-				// 				body,
-				// 				time,
-				// 				createdDate,
-				// 				startDate,
-				// 				scheduledDate,
-				// 				due,
-				// 				tags,
-				// 				frontmatterTags,
-				// 				priority,
-				// 				filePath: fileNameWithPath,
-				// 				lineNumber: i + 1,
-				// 				completion: completionDate,
-				// 				cancelledDate: cancelledDate,
-				// 			};
-
-				// 			if (isTaskCompleted) {
-				// 				newCompletedTasks.push(task);
-				// 			} else {
-				// 				newPendingTasks.push(task);
-				// 			}
-				// 		} else {
-				// 			// console.log("The tasks is not allowed...");
-				// 		}
-				// 	}
-				// }
-
-				// // Only replace the tasks for the specific file
-				// this.tasksCache.Pending = {
-				// 	...oldTasks.Pending, // Keep the existing tasks for other files
-				// 	[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
-				// };
-
-				// this.tasksCache.Completed = {
-				// 	...oldTasks.Completed, // Keep the existing tasks for other files
-				// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
-				// };
-			} else {
-				if (showNotice) {
-					new Notice(t("not-valid-file-type-for-scanning"), 5000);
+					return;
 				}
 			}
+		} catch (error) {
+			bugReporter(
+				this.plugin,
+				error as string,
+				`There was an error while scanning tasks from the file(s): ${files.every(
+					(f) => f?.path + "\n"
+				)}`,
+				"VaultScanner.tsx/refreshTasksFromFiles"
+			);
+			console.error("Error refreshing tasks for file(s):", error);
 		}
 	}
 
 	// Debounced saveTasksToJsonCache function
 	private saveTasksToJsonCacheDebounced = debounce(async () => {
-		if (!this.TaskDetected) return;
-
+		console.log(
+			"Debounced saveTasksToJsonCache called...\nSaving following tasksCache to disk:",
+			this.tasksCache
+		);
 		this.tasksCache.Modified_at = new Date().toISOString();
 		await writeJsonCacheDataFromDisk(this.plugin, this.tasksCache);
 		this.plugin.saveSettings();
@@ -644,6 +666,9 @@ export default class vaultScanner {
 
 	// Save tasks to JSON file
 	saveTasksToJsonCache() {
+		console.log("saveTasksToJsonCache called...");
+		// if (!this.TaskDetected) return;
+
 		this.saveTasksToJsonCacheDebounced();
 	}
 }
