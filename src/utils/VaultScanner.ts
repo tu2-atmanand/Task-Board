@@ -706,7 +706,7 @@ export function generateTaskId(plugin: TaskBoard): number {
 		plugin.settings.data.globalSettings.uniqueIdCounter
 	);
 	// Save the updated uniqueIdCounter back to settings
-	// plugin.saveSettings();
+	plugin.saveSettings();
 	// Return the current counter value and then increment it for the next ID
 	return plugin.settings.data.globalSettings.uniqueIdCounter;
 }
