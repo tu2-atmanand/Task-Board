@@ -28,7 +28,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { handleEditTask } from "src/utils/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
-import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/markdownEditor";
+import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
