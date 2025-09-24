@@ -474,6 +474,25 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	opacity: 50% !important;
 }
 
+/* /src/components/MapView/MapView.tsx */
+
+.mapViewWrapper {
+	opacity: 0;
+	animation: mapViewFadeIn 0.5s ease-in forwards;
+}
+
+@keyframes mapViewFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 /* Subtask Summary */
 .subtask-summary-container {
 	margin-top: 8px;
@@ -634,14 +653,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .taskItemTagFrontmatter {
-	background-color: var(--tag-background) !important;
+	background-color: var(--background-modifier-border) !important;
 	border: var(--pill-border-width) solid var(--pill-border-color) !important;
 	border-radius: var(--pill-radius) !important;
 	color: var(--pill-color) !important;
 	cursor: var(--cursor);
 	font-weight: var(--pill-weight);
-	padding: 0 var(--pill-padding-y) !important;
-	max-width: calc(100% - var(--size-2-3) - 1ch);
+	padding: 0 var(--pill-padding-x) !important;
 }
 
 .taskItemTag {
@@ -688,6 +706,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-size: 0.9rem;
 	opacity: 0.7;
 	color: var(--code-value);
+	padding-inline: 5px;
 }
 
 .taskItemHeader {
@@ -797,6 +816,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-size: 1.2em;
 	font-weight: bold;
 	margin-bottom: 0.5em;
+}
+
+.EditTaskModalHomeModalTitleInput {
+	margin-bottom: 2rem !important;
 }
 
 .EditTaskModalHomeBody {
@@ -2083,24 +2106,33 @@ li:hover .taskboard-hidden-property {
 	padding: 5px;
 	padding-block: 1em;
 	border-radius: var(--radius-m);
-	background-color: var(--background-primary-alt);
-}
-
-.global-setting-tab-live-preview {
+	/* background-color: var(--background-primary-alt); */
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
 
-.global-setting-tab-live-preview-label {
+.global-setting-tab-source-mode-preview-label,
+.global-setting-tab-reading-mode-preview-label {
 	background-color: var(--background-primary);
 	text-align: center;
 }
 
-.settingTabFooterSection {
-	margin-top: 2em;
-	align-items: center;
-	text-align: center;
+.global-setting-tab-reading-mode-preview-markdown,
+.global-setting-tab-source-mode-preview-data {
+	background-color: var(--background-modifier-border);
+	padding: 10px;
+	border-radius: var(--radius-m);
+	font-family: monospace;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	max-height: 150px;
+	overflow-y: auto;
+}
+
+.global-setting-tab-reading-mode-preview-markdown ul {
+	margin: 0 !important;
+	padding-inline-start: 22px !important;
 }
 
 .settingTabFooterDonationsSec {
@@ -2120,6 +2152,12 @@ li:hover .taskboard-hidden-property {
 	margin-block: 0 !important;
 	padding-block: 1em;
 	border-radius: var(--radius-m);
+}
+
+.taskBoard-settings-wide-input {
+	width: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
 }
 
 @media (max-width: 768px) {
@@ -3102,6 +3140,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	padding: 0.5rem;
 	border-radius: 10px;
 	border: 2px solid var(--text-accent);
+	overflow-wrap: anywhere;
+	text-wrap-mode: wrap;
 }
 
 .bugReporterActions {

@@ -76,12 +76,12 @@ export const saveBoardsData = async (
 
 // ------------  Operations with tasks.json ----------------
 
-// load tasks from plugin.scanningVault.tasksCache
+// load tasks from plugin.vaultScanner.tasksCache
 export const loadJsonCacheData = async (
 	plugin: TaskBoard
 ): Promise<jsonCacheData> => {
 	try {
-		return plugin.scanningVault.tasksCache;
+		return plugin.vaultScanner.tasksCache;
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -151,7 +151,7 @@ export const loadJsonCacheDataFromDisk = async (
 // };
 
 // Function to write tasks data to disk
-export const writeJsonCacheDataFromDisk = async (
+export const writeJsonCacheDataToDisk = async (
 	plugin: TaskBoard,
 	tasksData: jsonCacheData
 ): Promise<void> => {
@@ -183,14 +183,14 @@ export const moveTasksCacheFileToNewPath = (
 	oldPath: string,
 	newPath: string
 ) => {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<boolean>((resolve, reject) => {
 		if (
 			oldPath === newPath ||
 			(newPath !== "" && newPath.endsWith(".json") === false) ||
 			(oldPath !== "" && oldPath.endsWith(".json") === false)
 		) {
-			resolve();
-			return;
+			resolve(true);
+			return true;
 		}
 
 		if (newPath === "")
@@ -206,7 +206,7 @@ export const moveTasksCacheFileToNewPath = (
 			// 	// Save the updated settings
 			// 	return plugin.saveSettings();
 			// })
-			.then(() => resolve())
+			.then(() => resolve(true))
 			.catch((error) => {
 				bugReporter(
 					plugin,
@@ -215,6 +215,7 @@ export const moveTasksCacheFileToNewPath = (
 					"JsonFileOperations.ts/moveTasksCacheFileToNewPath"
 				);
 				reject(error);
+				return false;
 			});
 	});
 };

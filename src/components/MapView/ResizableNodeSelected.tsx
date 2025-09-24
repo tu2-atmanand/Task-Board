@@ -1,7 +1,7 @@
 import { memo, ReactNode, FC } from 'react';
 import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
 import { nodeSize } from './MapView';
-import { NODE_SIZE_STORAGE_KEY } from 'src/types/GlobalVariables';
+import { NODE_SIZE_STORAGE_KEY } from 'src/types/uniqueIdentifiers';
 
 interface ResizableNodeSelectedProps {
 	data: { label: ReactNode };
@@ -17,8 +17,6 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 				color="#ff0071"
 				isVisible={selected}
 				autoScale={true}
-				minWidth={width ?? 100}
-				minHeight={height ?? 30}
 				onResizeEnd={(newSize, params) => {
 					// console.log('Node resized to:', newSize, "\nparams:", params, "\nNode ID:", id);
 					try {

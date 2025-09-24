@@ -12,11 +12,11 @@ import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
 import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
-import { buildTaskFromRawContent, generateTaskId } from "src/utils/ScanningVault";
-import { DeleteIcon, EditIcon, FileInput, Network, RefreshCcw } from "lucide-react";
+import { buildTaskFromRawContent, generateTaskId } from "src/utils/VaultScanner";
+import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { DEFAULT_SETTINGS, EditButtonMode, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter, openEditTaskModal, openEditTaskNoteModal } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
@@ -24,6 +24,10 @@ import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNo
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
+import { eventEmitter } from "src/services/EventEmitter";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { handleEditTask } from "src/utils/TaskItemEventHandlers";
+import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 
 const taskItemEmpty: taskItem = {
 	id: 0,
@@ -95,7 +99,7 @@ const EditTaskContent: React.FC<{
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
-	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(false);
+	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(true);
 	const cursorLocationRef = useRef<cursorLocation | null>(null);
 
 	const indentationString = getObsidianIndentationSetting(plugin);
@@ -341,10 +345,6 @@ const EditTaskContent: React.FC<{
 		handleTaskEditedThroughEditors(e.target.value);
 	};
 
-	// useEffect(() => {
-	// 	console.log("Cursor Location in useEffect:", cursorLocationRef.current);
-	// }, [cursorLocationRef.current]);
-
 	// Tags input
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Enter') {
@@ -410,73 +410,8 @@ const EditTaskContent: React.FC<{
 		setIsEditorContentChanged(true);
 	};
 
-	const handleRemoveChildTask = (taskId: string) => {
-		console.log("Removing child task with ID:", taskId);
-		const newDependsOn = dependsOn.filter(id => id !== taskId);
-		setDependsOn(newDependsOn);
-		if (!isTaskNote) {
-			const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, newDependsOn, cursorLocationRef.current ?? undefined);
-			setTitle(newTitle);
-		}
-		setIsEdited(true);
-		setIsEditorContentChanged(true);
-	};
 
-	// ------------ Handle save task, open file and close actions ------------
-
-	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
-	useEffect(() => {
-		if (!Platform.isMobile) {
-			markdownEditor?.editor?.focus();
-		}
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.ctrlKey || e.metaKey) {
-				setIsCtrlPressed(true);
-			}
-		};
-
-		const handleKeyUp = () => {
-			setIsCtrlPressed(false);
-		};
-
-		root.addEventListener('keydown', handleKeyDown);
-		root.addEventListener('keyup', handleKeyUp);
-
-		return () => {
-			root.removeEventListener('keydown', handleKeyDown);
-			root.removeEventListener('keyup', handleKeyUp);
-		};
-	}, []);
-	const onOpenFilBtnClicked = async (evt: UserEvent, newWindow: boolean) => {
-		if (newWindow) {
-			// plugin.app.workspace.openLinkText('', newFilePath, 'window')
-			const leaf = plugin.app.workspace.getLeaf('window');
-			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
-			} else {
-				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
-			}
-		} else {
-			// await plugin.app.workspace.openLinkText('', newFilePath, false);
-			// const activeEditor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
-			// console.log("Note View:", activeEditor);
-			// activeEditor?.scrollIntoView({
-			// 	from: { line: 5, ch: 0 },
-			// 	to: { line: 5, ch: 5 },
-			// }, true);
-
-			const leaf = plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
-			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-
-			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
-			} else {
-				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
-			}
-		}
-		onClose();
-	}
+	// ------------ Handle save task ------------
 
 	// Function to handle saving the updated task
 	const handleSave = () => {
@@ -554,7 +489,7 @@ const EditTaskContent: React.FC<{
 		}
 
 		// Determine file path for task note
-		let taskNoteFilePath = newFilePath.endsWith('.md') ? newFilePath : `${newFilePath}.md`;
+		let taskNoteFilePath = allowedFileExtensionsRegEx.test(newFilePath) ? newFilePath : `${newFilePath}.md`;
 		taskNoteFilePath = normalizePath(taskNoteFilePath);
 
 		const taskNoteItem: taskItem = {
@@ -603,6 +538,125 @@ const EditTaskContent: React.FC<{
 	};
 
 
+	// ------------------ Tab Switching and other components ------------------
+
+	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
+	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
+
+	const filePathRef = useRef<HTMLInputElement>(null);
+	const communityPlugins = new CommunityPlugins(plugin);
+	useEffect(() => {
+		if (!filePathRef.current) return;
+
+		if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists) {
+			const suggestionContent = getQuickAddPluginChoices(
+				plugin.app,
+				communityPlugins.quickAddPlugin
+			);
+			const onSelectCallback = (choice: string) => {
+				setQuickAddPluginChoice(choice);
+				// setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
+		} else {
+			const suggestionContent = getFileSuggestions(plugin.app);
+			const onSelectCallback = (selectedPath: string) => {
+				setNewFilePath(selectedPath);
+			};
+			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
+		}
+	}, [plugin.app]);
+
+	const handleOpenTaskInMapView = () => {
+		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
+			new Notice(t("enable-experimental-features-message"));
+			return;
+		}
+
+		applyIdToTaskInNote(plugin, task).then((newId) => { // Somehow the newId is not passed by the async functions. I always get undefined here. Need to check.
+			console.log("Task after ensuring it has an ID:", newId);
+
+			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
+			plugin.settings.data.globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter));
+
+			console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
+
+			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
+				onClose();
+				sleep(2000).then(() => {
+					console.log("Emitting SWITCH_VIEW event for map view, 2000ms after closing the modal.");
+					eventEmitter.emit("SWITCH_VIEW", 'map');
+				});
+			});
+
+			console.log("Opening task in map view:", newFilePath);
+		});
+
+		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+		// if (file && file instanceof TFile) {
+		// 	plugin.app.workspace.openLinkText('', newFilePath, 'map');
+		// } else {
+		// 	new Notice(t("file-not-found"));
+		// }
+		// onClose();
+	};
+
+	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+	useEffect(() => {
+		if (!Platform.isMobile) {
+			markdownEditor?.editor?.focus();
+		}
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey || e.metaKey) {
+				setIsCtrlPressed(true);
+			}
+		};
+
+		const handleKeyUp = () => {
+			setIsCtrlPressed(false);
+		};
+
+		root.addEventListener('keydown', handleKeyDown);
+		root.addEventListener('keyup', handleKeyUp);
+
+		return () => {
+			root.removeEventListener('keydown', handleKeyDown);
+			root.removeEventListener('keyup', handleKeyUp);
+		};
+	}, []);
+	const onOpenFilBtnClicked = async (evt: UserEvent, newWindow: boolean) => {
+		if (newWindow) {
+			// plugin.app.workspace.openLinkText('', newFilePath, 'window')
+			const leaf = plugin.app.workspace.getLeaf('window');
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
+			} else {
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+			}
+		} else {
+			// await plugin.app.workspace.openLinkText('', newFilePath, false);
+			// const activeEditor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+			// console.log("Note View:", activeEditor);
+			// activeEditor?.scrollIntoView({
+			// 	from: { line: 5, ch: 0 },
+			// 	to: { line: 5, ch: 5 },
+			// }, true);
+
+			const leaf = plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
+			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+
+			if (file && file instanceof TFile) {
+				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
+			} else {
+				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+			}
+		}
+		onClose();
+	}
+	// const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+
 	// ------------- Handle Live markdown editor integration ------------
 
 	const componentRef = useRef<Component | null>(null); // Reference to the HTML element where markdown will be rendered
@@ -611,6 +665,7 @@ const EditTaskContent: React.FC<{
 		componentRef.current = plugin.view;
 	}, []);
 
+	// TODO : This function should be optimized to avoid excessive parsing on every keystroke.
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
 		if (isTaskNote) return;
 
@@ -629,8 +684,6 @@ const EditTaskContent: React.FC<{
 		setPriority(updatedTask.priority || 0);
 		setStatus(updatedTask.status || '');
 		setReminder(updatedTask.reminder || '');
-
-		setIsEdited(true);
 	}, 50);
 
 	// // This useEffect is used to get the formatted content of the updated task, which will be rendered in the editor(s).
@@ -821,58 +874,36 @@ const EditTaskContent: React.FC<{
 		}
 	}
 	useEffect(() => {
-		console.log("Task.Body :", task.body);
-		if (isTaskNote) {
-			const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
-			console.log("Formatted Task Note Content:", newFormattedTaskNoteContent);
-			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
-			setFormattedTaskContent(newFormattedTaskNoteContent);
-			setIsEditorContentChanged(false);
-		}
-		else {
-			const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
-			updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
-			setFormattedTaskContent(newFormattedTaskNoteContent);
-			setIsEditorContentChanged(false);
+		console.log("isEditorContentChanged :", isEditorContentChanged);
+		if (isEditorContentChanged) {
+			if (isTaskNote) {
+				const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				console.log("Formatted Task Note Content:", newFormattedTaskNoteContent);
+				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
+				setFormattedTaskContent(newFormattedTaskNoteContent);
+				setIsEditorContentChanged(false);
+			}
+			else {
+				const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
+				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
+				setFormattedTaskContent(newFormattedTaskNoteContent);
+				setIsEditorContentChanged(false);
+			}
 		}
 	}, [isEditorContentChanged]);
 
 	// Not focusing on mobile as it brings up the keyboard everytime this modal is opened. Which is a little distrubing.
+	// Also if its a TaskNote, then dont focus inside the Live editor, instead focus on the title input field.
 	useEffect(() => {
 		if (markdownEditor) {
-			if (!Platform.isMobile) {
+			if (!Platform.isMobile && !isTaskNote) {
 				markdownEditor?.editor.focus();
 			}
 		}
 	}, [markdownEditor]);
 
-	// ------------------ Tab Switching and other components ------------------
-	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
-	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
 
-	const filePathRef = useRef<HTMLInputElement>(null);
-	const communityPlugins = new CommunityPlugins(plugin);
-	useEffect(() => {
-		if (!filePathRef.current) return;
-
-		if (communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists) {
-			const suggestionContent = getQuickAddPluginChoices(
-				plugin.app,
-				communityPlugins.quickAddPlugin
-			);
-			const onSelectCallback = (choice: string) => {
-				setQuickAddPluginChoice(choice);
-				// setNewFilePath(selectedPath);
-			};
-			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
-		} else {
-			const suggestionContent = getFileSuggestions(plugin.app);
-			const onSelectCallback = (selectedPath: string) => {
-				setNewFilePath(selectedPath);
-			};
-			new MultiSuggest(filePathRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
-		}
-	}, [plugin.app]);
+	// ------------------ Child Tasks Management -----------------
 
 	const childTaskInputRef = useRef<HTMLInputElement>(null);
 	useEffect(() => {
@@ -889,18 +920,19 @@ const EditTaskContent: React.FC<{
 				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
 				return;
 			}
-			applyIdToTaskInNote(plugin, selectedTask).then(() => {
+			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
+				console.log("Selected Task after applying ID:", selectedTask, "\nnewId : ", newId);
 
 				const getUpdatedDependsOnIds = (prev: string[]) => {
 					console.log("Previous depends on values :", prev);
 					if (!prev.includes(task.legacyId ? task.legacyId : String(task.id))) {
-						if (selectedTask?.legacyId) {
+						if (newId === undefined && !selectedTask?.legacyId) {
+							bugReporter(plugin, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
+							return [...prev, String(plugin.settings.data.globalSettings.uniqueIdCounter)];
+						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
-						} else {
-							const idOfSelectedTask = plugin.settings.data.globalSettings.uniqueIdCounter;
-							if (idOfSelectedTask) {
-								return [...prev, String(idOfSelectedTask)];
-							}
+						} else if (newId) {
+							return [...prev, String(newId)];
 						}
 					}
 					return prev;
@@ -915,7 +947,7 @@ const EditTaskContent: React.FC<{
 						setTitle(newTitle);
 					}
 
-					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter);
+					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : (newId ? String(newId) : String(plugin.settings.data.globalSettings.uniqueIdCounter));
 					setChildTasks(prevChildTasks => {
 						// Avoid adding duplicates
 						if (!prevChildTasks.find(t => t.id === selectedTask.id)) {
@@ -973,8 +1005,9 @@ const EditTaskContent: React.FC<{
 		});
 	}, [childTasks]);
 
-	const handleOpenChildTaskModal = async (taskId: string) => {
-		const childTask = childTasks.find(t => String(t.id) === taskId);
+	const handleOpenChildTaskModal = async (event: React.MouseEvent, taskId: string) => {
+		event.stopPropagation();
+		const childTask = childTasks.find(t => String(t.legacyId) === taskId);
 		if (!childTask) {
 			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
 			return;
@@ -986,33 +1019,39 @@ const EditTaskContent: React.FC<{
 		// // Clear existing children in the leaf
 		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
 
-		//For now will simply open it in a new modal.
-		if (isTaskNotePresentInTags(childTask.tags)) {
-			plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
-			await sleep(50);
-			openEditTaskNoteModal(plugin, childTask);
+		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
+			handleEditTask(plugin, task, settingOption);
+		} else if (settingOption === EditButtonMode.Modal) {
+			//For now will simply open it in a new modal.
+			console.log("Output of isTaskNotePresentInTags(plugin, childTask.tags): ", isTaskNotePresentInTags(plugin, childTask.tags));
+			if (isTaskNotePresentInTags(plugin, childTask.tags)) {
+				plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
+				await sleep(50);
+				openEditTaskNoteModal(plugin, childTask);
+			} else {
+				plugin.app.workspace.openPopoutLeaf();
+				await sleep(50);
+				openEditTaskModal(plugin, childTask);
+			}
 		} else {
-			plugin.app.workspace.openPopoutLeaf();
-			await sleep(50);
-			openEditTaskModal(plugin, childTask, false);
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+			event.ctrlKey = false;
 		}
-	}
+	};
 
-	const handleOpenTaskInMapView = () => {
-		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
-			new Notice(t("enable-experimental-features-message"));
-			return;
+	const handleRemoveChildTask = (taskId: string) => {
+		console.log("Removing child task with ID:", taskId);
+		const newDependsOn = dependsOn.filter(id => id !== taskId);
+		setDependsOn(newDependsOn);
+		if (!isTaskNote) {
+			const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, newDependsOn, cursorLocationRef.current ?? undefined);
+			setTitle(newTitle);
 		}
-
-		console.log("Opening task in map view:", newFilePath);
-		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-		// if (file && file instanceof TFile) {
-		// 	plugin.app.workspace.openLinkText('', newFilePath, 'map');
-		// } else {
-		// 	new Notice(t("file-not-found"));
-		// }
-		// onClose();
-	}
+		setIsEdited(true);
+		setIsEditorContentChanged(true);
+	};
 
 	// ------------------ Rendering the component ------------------
 
@@ -1041,9 +1080,11 @@ const EditTaskContent: React.FC<{
 									<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 								</div>
 								<div className="EditTaskModalTabHeaderRightBtnSec">
-									<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
-										<Network height={16} />
-									</div>
+									{taskExists && (
+										<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
+											<Network height={17} />
+										</div>
+									)}
 								</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
@@ -1072,14 +1113,14 @@ const EditTaskContent: React.FC<{
 										id="EditTaskModalHomeLiveEditorRefreshBtn"
 										aria-label="Refresh the live editor"
 										onClick={() => setIsEditorContentChanged(true)}>
-										<RefreshCcw height={20} />
+										<RefreshCcw height={16} />
 									</button>
 									{taskExists && <button className="EditTaskModalHomeOpenFileBtn"
 										id="EditTaskModalHomeOpenFileBtn"
 										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
 										onClick={(event) => isCtrlPressed ? onOpenFilBtnClicked(event.nativeEvent, true) : onOpenFilBtnClicked(event.nativeEvent, false)}
 									>
-										<FileInput height={20} />
+										<FileInput height={16} />
 									</button>}
 								</div>
 							</div>
@@ -1141,7 +1182,7 @@ const EditTaskContent: React.FC<{
 													<span className="EditTaskModalChildTasksListItemIdValue">{taskId}</span>
 												</div>
 												<div className="EditTaskModalChildTasksListItemFooterBtns">
-													<button className="EditTaskModalChildTasksListItemEditBtn" onClick={() => handleOpenChildTaskModal(taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
+													<button className="EditTaskModalChildTasksListItemEditBtn" onClick={(e) => handleOpenChildTaskModal(e, taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
 													<button className="EditTaskModalChildTasksListItemDeleteBtn" onClick={() => handleRemoveChildTask(taskId)}><DeleteIcon size={20} /></button>
 												</div>
 											</div>
@@ -1155,7 +1196,7 @@ const EditTaskContent: React.FC<{
 						<div className="EditTaskModalHomeFooterBtnSec">
 							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
 							<button className="EditTaskModalHomeToggleBtn" onClick={toggleRightSec} aria-label="Toggle Details">
-								☰
+								<PanelRightOpenIcon size={18} />
 							</button>
 						</div>
 					</div>
@@ -1359,7 +1400,7 @@ export class AddOrEditTaskModal extends Modal {
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
 
-			if (!this.task.title) this.task.title = this.filePath.split('/')[-1].replace('.md', "");
+			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
 
 			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
 				this.task.id = generateTaskId(this.plugin);

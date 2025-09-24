@@ -10,18 +10,23 @@ import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { DeleteConfirmationModal } from "src/modal/DeleteConfirmationModal";
 import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
-import { moment as _moment } from "obsidian";
+import { moment as _moment, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { t } from "./lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
-import { bugReporter, openEditTaskModal } from "src/services/OpenModals";
-import { TasksApi } from "src/services/tasks-plugin/api";
+import {
+	bugReporter,
+	openEditTaskModal,
+	openEditTaskNoteModal,
+} from "src/services/OpenModals";
+import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { isTaskNotePresentInTags } from "./TaskNoteUtils";
+import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
-	const tasksPlugin = new TasksApi(plugin);
+	const tasksPlugin = new TasksPluginApi(plugin);
 
 	if (!tasksPlugin.isTasksPluginEnabled()) {
 		// Check if the task is completed
@@ -32,12 +37,16 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				completion: "",
 				status: newStatus,
 			};
-			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+				(newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						task.filePath
+					);
 
-				// // Move from Completed to Pending
-				// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
-			});
+					// // Move from Completed to Pending
+					// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+				}
+			);
 		} else {
 			const globalSettings = plugin.settings.data.globalSettings;
 			const moment = _moment as unknown as typeof _moment.default;
@@ -51,7 +60,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 			if (!isTaskRecurring(task.title)) {
 				updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
-					() => {
+					(newId) => {
 						plugin.realTimeScanning.processAllUpdatedFiles(
 							taskWithUpdatedStatus.filePath
 						);
@@ -117,24 +126,9 @@ export const handleSubTasksChange = (
 	updatedTask: taskItem
 ) => {
 	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated.
-	updateTaskInFile(plugin, updatedTask, oldTask)
-		.then(() => {
-			plugin.realTimeScanning.processAllUpdatedFiles(
-				updatedTask.filePath
-			);
-		})
-		.catch((error) => {
-			// bugReporter(
-			// 	plugin,
-			// 	"Error updating task in file",
-			// 	error as string,
-			// 	"TaskItemEventHandlers.ts/handleEditTask"
-			// );
-			console.error(
-				"TaskItemEventHandlers.ts : Error updating task in file",
-				error
-			);
-		});
+	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
+		plugin.realTimeScanning.processAllUpdatedFiles(updatedTask.filePath);
+	});
 };
 
 export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
@@ -162,78 +156,124 @@ export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
 	deleteModal.open();
 };
 
-export const handleEditTask = (plugin: TaskBoard, task: taskItem) => {
-	if (
-		plugin.settings.data.globalSettings.editButtonAction ===
-		EditButtonMode.PopUp
-	) {
-		const isTaskNote = isTaskNotePresentInTags(task.tags);
-		openEditTaskModal(plugin, task, isTaskNote);
-		// const editTaskModal = new AddOrEditTaskModal(
-		// 	plugin,
-		// 	(updatedTask, quickAddPluginChoice) => {
-		// 		updatedTask.filePath = task.filePath;
-		// 		// Update the task in the file and JSON
-		// 		updateTaskInFile(plugin, updatedTask, task)
-		// 			.then(() => {
-		// 				plugin.realTimeScanning.processAllUpdatedFiles(
-		// 					updatedTask.filePath
-		// 				);
-		// 			})
-		// 			.catch((error) => {
-		// 				// bugReporter(
-		// 				// 	plugin,
-		// 				// 	"Error updating task in file",
-		// 				// 	error as string,
-		// 				// 	"TaskItemEventHandlers.ts/handleEditTask"
-		// 				// );
-		// 				console.error(
-		// 					"TaskItemEventHandlers.ts : Error updating task in file",
-		// 					error
-		// 				);
-		// 			});
-
-		// 		// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
-
-		// 		// setTasks((prevTasks) =>
-		// 		// 	prevTasks.map((task) =>
-		// 		// 		task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-		// 		// 	)
-		// 		// );
-		// 		// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
-		// 	},
-		// 	isTaskNote,
-		// 	false,
-		// 	true,
-		// 	task,
-		// 	task.filePath
-		// );
-		// editTaskModal.open();
-	} else if (
-		plugin.settings.data.globalSettings.editButtonAction ===
-		EditButtonMode.NoteInTab
-	) {
-		const getFile = plugin.app.vault.getFileByPath(task.filePath);
-		if (getFile) {
-			plugin.app.workspace.getLeaf("tab").openFile(getFile);
+export const handleEditTask = (
+	plugin: TaskBoard,
+	task: taskItem,
+	settingOption: string
+) => {
+	console.log("Setting :", settingOption);
+	switch (settingOption) {
+		case EditButtonMode.Modal:
+			if (isTaskNotePresentInTags(plugin, task.tags)) {
+				openEditTaskNoteModal(plugin, task);
+			} else {
+				openEditTaskModal(plugin, task);
+			}
+			break;
+		case EditButtonMode.TasksPluginModal:
+			if (isTaskNotePresentInTags(plugin, task.tags)) {
+				openEditTaskNoteModal(plugin, task);
+			} else {
+				openTasksPluginEditModal(plugin, task);
+			}
+			break;
+		case EditButtonMode.NoteInTab: {
+			openFileAndHighlightTask(plugin, task, settingOption);
+			break;
 		}
-	} else if (
-		plugin.settings.data.globalSettings.editButtonAction ===
-		EditButtonMode.NoteInSplit
-	) {
-		const getFile = plugin.app.vault.getFileByPath(task.filePath);
-		if (getFile) {
-			plugin.app.workspace.getLeaf("split").openFile(getFile);
+		case EditButtonMode.NoteInSplit: {
+			openFileAndHighlightTask(plugin, task, settingOption);
+			break;
 		}
-	} else if (
-		plugin.settings.data.globalSettings.editButtonAction ===
-		EditButtonMode.NoteInWindow
-	) {
-		const getFile = plugin.app.vault.getFileByPath(task.filePath);
-		if (getFile) {
-			plugin.app.workspace.getLeaf("window").openFile(getFile);
+		case EditButtonMode.NoteInWindow: {
+			openFileAndHighlightTask(plugin, task, settingOption);
+			break;
 		}
-	} else {
-		// markdownButtonHoverPreviewEvent(app, event, task.filePath);
+		default:
+			bugReporter(
+				plugin,
+				"This should never happen, looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
+				"NA",
+				"TaskItemEventHandlers.ts/handleEditTask"
+			);
+			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
+			break;
 	}
+};
+
+export const openFileAndHighlightTask = async (
+	plugin: TaskBoard,
+	task: taskItem,
+	mode: string
+) => {
+	const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
+	let leaf: WorkspaceLeaf | null = null;
+
+	switch (mode) {
+		case EditButtonMode.NoteInTab: {
+			leaf = plugin.app.workspace.getLeaf("tab");
+			break;
+		}
+		case EditButtonMode.NoteInSplit: {
+			leaf = plugin.app.workspace.getLeaf("split");
+			break;
+		}
+		case EditButtonMode.NoteInWindow: {
+			leaf = plugin.app.workspace.getLeaf("window");
+
+			break;
+		}
+		case EditButtonMode.Modal:
+		default:
+			bugReporter(
+				plugin,
+				"This is a low priority error and it should never happen. Looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
+				"NA",
+				"TaskItemEventHandlers.ts/handleEditTask"
+			);
+			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
+			break;
+	}
+
+	if (file && file instanceof TFile && leaf) {
+		await leaf.openFile(file, {
+			eState: { line: task.taskLocation.startLine - 1 },
+		});
+	} else {
+		bugReporter(
+			plugin,
+			"Either file not found or Leaf initialization failed. Please check below details for more information. First try to find if the file exists as per the below path. If the issue is critical, report it to developer.",
+			`Trying to open the following file: ${task.filePath}.\nLeaf type: ${
+				leaf ? leaf.constructor.name : "undefined"
+			}`,
+			"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
+		);
+	}
+
+	// if (newWindow) {
+	// 	// plugin.app.workspace.openLinkText('', newFilePath, 'window')
+	// 	const leaf = plugin.app.workspace.getLeaf("window");
+	// } else {
+	// await plugin.app.workspace.openLinkText('', newFilePath, false);
+	// const activeEditor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+	// console.log("Note View:", activeEditor);
+	// activeEditor?.scrollIntoView({
+	// 	from: { line: 5, ch: 0 },
+	// 	to: { line: 5, ch: 5 },
+	// }, true);
+	// const leaf = plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
+	// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
+	// if (file && file instanceof TFile) {
+	// 	await leaf.openFile(file, {
+	// 		eState: { line: task.taskLocation.startLine - 1 },
+	// 	});
+	// } else {
+	// 	bugReporter(
+	// 		plugin,
+	// 		"File not found",
+	// 		`The file at path ${newFilePath} could not be found.`,
+	// 		"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
+	// 	);
+	// }
+	// }
 };

@@ -3,93 +3,12 @@
 import { App, Notice } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
-import { updateTaskNoteFrontmatter } from "./TaskNoteUtils";
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { EditButtonMode } from "src/interfaces/GlobalSettings";
+import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils";
 import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
 } from "./MarkdownFileOperations";
 import { checkboxStateSwitcher } from "./CheckBoxUtils";
-import { bugReporter, openEditTaskNoteModal } from "src/services/OpenModals";
-
-/**
- * Handle editing a task note
- * @param plugin - TaskBoard plugin instance
- * @param app - Obsidian app instance
- * @param task - Task note to edit
- */
-export const handleTaskNoteEdit = (plugin: TaskBoard, task: taskItem) => {
-	const editButtonAction =
-		plugin.settings.data.globalSettings.editButtonAction;
-
-	if (editButtonAction === EditButtonMode.PopUp) {
-		openEditTaskNoteModal(plugin, task);
-		// Open task note in edit modal
-		// const editTaskModal = new AddOrEditTaskModal(
-		// 	plugin,
-		// 	async (
-		// 		updatedTask: taskItem,
-		// 		quickAddPluginChoice: string,
-		// 		newTaskContent: string | undefined
-		// 	) => {
-		// 		try {
-		// 			if (!newTaskContent) {
-		// 				// Update frontmatter with task properties
-		// 				await updateTaskNoteFrontmatter(
-		// 					plugin,
-		// 					updatedTask
-		// 				).then(() => {
-		// 					// This is required to rescan the updated file and refresh the board.
-		// 					plugin.realTimeScanning.processAllUpdatedFiles(
-		// 						updatedTask.filePath
-		// 					);
-		// 				});
-		// 			} else {
-		// 				writeDataToVaultFile(
-		// 					plugin,
-		// 					updatedTask.filePath,
-		// 					newTaskContent
-		// 				).then(() => {
-		// 					// This is required to rescan the updated file and refresh the board.
-		// 					plugin.realTimeScanning.processAllUpdatedFiles(
-		// 						updatedTask.filePath
-		// 					);
-		// 				});
-		// 			}
-		// 		} catch (error) {
-		// 			bugReporter(
-		// 				plugin,
-		// 				"Error updating task note",
-		// 				error as string,
-		// 				"TaskNoteEventHandlers.ts/handleTaskNoteEdit"
-		// 			);
-		// 		}
-		// 	},
-		// 	true,
-		// 	false, // activeNote
-		// 	true, // taskExists
-		// 	task, // task
-		// 	task.filePath
-		// );
-		// editTaskModal.open();
-	} else if (editButtonAction === EditButtonMode.NoteInTab) {
-		const getFile = plugin.app.vault.getFileByPath(task.filePath);
-		if (getFile) {
-			plugin.app.workspace.getLeaf("tab").openFile(getFile);
-		}
-	} else if (editButtonAction === EditButtonMode.NoteInSplit) {
-		const getFile = plugin.app.vault.getFileByPath(task.filePath);
-		if (getFile) {
-			plugin.app.workspace.getLeaf("split").openFile(getFile);
-		}
-	} else if (editButtonAction === EditButtonMode.NoteInWindow) {
-		const getFile = plugin.app.vault.getFileByPath(task.filePath);
-		if (getFile) {
-			plugin.app.workspace.getLeaf("window").openFile(getFile);
-		}
-	}
-};
 
 /**
  * Handle task note status change (checkbox change)
@@ -109,7 +28,7 @@ export const handleTaskNoteStatusChange = async (
 		};
 
 		// Update frontmatter with new status
-		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
+		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
@@ -136,7 +55,7 @@ export const handleTaskNotePropertyUpdate = async (
 ) => {
 	try {
 		// Update frontmatter with all updated properties
-		await updateTaskNoteFrontmatter(plugin, updatedTask).then(() => {
+		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				updatedTask.filePath
@@ -151,7 +70,7 @@ export const handleTaskNotePropertyUpdate = async (
 };
 
 /**
- * Handle task note deletion (remove #taskNote tag from frontmatter)
+ * Handle task note deletion (remove #TASK_NOTE_IDENTIFIER_TAG tag from frontmatter)
  * @param plugin - TaskBoard plugin instance
  * @param task - Task note to delete
  */
@@ -174,13 +93,12 @@ export const handleTaskNoteDelete = async (
 				? [...frontmatter.tags]
 				: [frontmatter.tags];
 			tags = tags.filter(
-				(tag: string) => tag !== "taskNote" && tag !== "#taskNote"
+				(tag: string) =>
+					tag.includes(
+						plugin.settings.data.globalSettings
+							.taskNoteIdentifierTag
+					) === false
 			);
-
-			const updatedTask = {
-				...task,
-				// Update to remove taskNote tag
-			};
 
 			// If no other tags remain, we could remove the tags property entirely
 			// But for now, just update with filtered tags

@@ -1,3 +1,5 @@
+// /src/components/MapView/MapView.tsx
+
 import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import {
 	ReactFlow,
@@ -23,8 +25,9 @@ import TaskItem from '../KanbanView/TaskItem';
 import CustomNodeResizer from './CustomNodeResizer';
 import { updateTaskInFile } from 'src/utils/TaskItemUtils';
 import { debounce } from 'obsidian';
-import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/types/GlobalVariables';
+import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/types/uniqueIdentifiers';
 import { sanitizeDependsOn } from 'src/utils/TaskContentFormatter';
+import { t } from 'src/utils/lang/helper';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -60,6 +63,7 @@ const nodeTypes = {
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
+	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	// console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
 
 	// Load positions from localStorage, board-wise
@@ -139,17 +143,22 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
-		// console.log("Are all the nodes re-calculating when the allTasksArranged changes or only specific ones?\nAllTasksArranged:", allTasksArranged, "\nPositions:", positions, "\nNodeSizes:", nodeSizes);
 		const nodes: Node[] = [];
-		// const allTasksFlat: taskItem[] = allTasksArranged.flat();
-		let xOffset = 0;
+		const usedIds = new Set<string>();
 		const columnSpacing = 350;
-		const rowSpacing = 120;
+		const rowSpacing = 170;
+
+		let xOffset = 0;
 		allTasksArranged.forEach((columnTasks, colIdx) => {
 			let yOffset = 0;
 			columnTasks.forEach((task, rowIdx) => {
 				if (task.legacyId) {
 					const id = task.legacyId ? task.legacyId : String(task.id);
+					if (usedIds.has(id)) {
+						console.warn('Duplicate node id detected:', id);
+						return; // Skip duplicate
+					}
+					usedIds.add(id);
 					const savedPos = positions[id] || {};
 					const savedSize = nodeSizes[id] || {};
 					nodes.push({
@@ -165,15 +174,15 @@ const MapView: React.FC<MapViewProps> = ({
 							/>
 						},
 						position: {
-							x: savedPos.x ?? xOffset,
-							y: savedPos.y ?? yOffset
+							x: Number.isFinite(savedPos.x) ? savedPos.x : xOffset,
+							y: Number.isFinite(savedPos.y) ? savedPos.y : yOffset
 						},
 						// style: {
 						// 	width: savedSize.width ?? 300,
 						// 	height: savedSize.height ?? 80,
 						// },
-						width: savedSize.width ?? plugin.settings.data.globalSettings.columnWidth,
-						height: savedSize.height ?? undefined,
+						width: Number.isFinite(savedSize.width) ? savedSize.width : Number(plugin.settings.data.globalSettings.columnWidth),
+						height: Number.isFinite(savedSize.height) ? savedSize.height : undefined,
 					});
 					yOffset += rowSpacing;
 				}
@@ -288,7 +297,7 @@ const MapView: React.FC<MapViewProps> = ({
 		};
 	}, [allTasksArranged]);
 
-	// Dummy function for connecting parent to child
+	// Function for connecting parent to child
 	function connectParentToChild(sourceNodeId: string, targetNodeId: string, allTasks: taskItem[]) {
 		// const allTasks = allTasksArranged.flat();
 		// console.log("AllTasksArranged:", allTasksArranged);
@@ -314,7 +323,7 @@ const MapView: React.FC<MapViewProps> = ({
 			updatedSourceTask.title = updatedSourceTaskTitle;
 
 			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-			updateTaskInFile(plugin, updatedSourceTask, sourceTask).finally(() => {
+			updateTaskInFile(plugin, updatedSourceTask, sourceTask).then((newId) => {
 				plugin.realTimeScanning.processAllUpdatedFiles(updatedSourceTask.filePath);
 			});
 		}
@@ -375,7 +384,7 @@ const MapView: React.FC<MapViewProps> = ({
 				<div className="mapView">
 					<div className="mapViewContainer" style={{ width: '100%', height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 						<div className="spinner"></div>
-						<span>Loading map data...</span>
+						<span>{t('loading-map-data')}</span>
 					</div>
 				</div>
 			</div>
@@ -402,20 +411,16 @@ const MapView: React.FC<MapViewProps> = ({
 							zoomOnPinch={true}
 							zoomOnScroll={true}
 							onlyRenderVisibleElements={true}
-							defaultViewport={viewport}
-							onMoveEnd={(_, vp) => {
-								setViewport(vp);
-								debouncedSetViewportStorage(vp);
-								// throttledSetViewportStorage(vp);
-							}}
 							onInit={(instance) => {
+								console.log("focusOnTaskId:", focusOnTaskId, "Viewport:", viewport);
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
+									console.log("Focusing on node:", node);
 									if (node) {
 										const newVp: viewPort = {
-											x: node.position.x - 100,
-											y: node.position.y - 100,
-											zoom: 1.5
+											x: - (node.position.x - 200),
+											y: - (node.position.y),
+											zoom: 1
 										};
 										instance.setViewport(newVp);
 										setViewport(newVp);
@@ -425,7 +430,16 @@ const MapView: React.FC<MapViewProps> = ({
 										return;
 									}
 								}
-								instance.setViewport(viewport);
+								else {
+									instance.setViewport(viewport);
+								}
+							}}
+							defaultViewport={viewport}
+							onMoveEnd={(_, vp) => {
+								console.log("Current viewport : ", vp);
+								setViewport(vp);
+								debouncedSetViewportStorage(vp);
+								// throttledSetViewportStorage(vp);
 							}}
 						>
 							<Controls />

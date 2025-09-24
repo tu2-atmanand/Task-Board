@@ -1,16 +1,27 @@
 import { TFile } from "obsidian";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
-import { extractFrontmatter } from "./FrontmatterOperations";
+import { extractFrontmatterFromFile } from "./FrontmatterOperations";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { isCompleted, isTaskLine } from "./CheckBoxUtils";
+import { getTaskFromId } from "./TaskItemUtils";
+import { taskItem } from "src/interfaces/TaskItem";
 
+/**
+ * Scans a file and its front-matter for specific filters.
+ * @param plugin The main plugin instance.
+ * @param file The file to scan.
+ * @param scanFilters The filters to apply.
+ * @returns True if the file and its front-matter match the filters for scanning, false otherwise.
+ */
 export function scanFilterForFilesNFoldersNFrontmatter(
 	plugin: TaskBoard,
 	file: TFile,
 	scanFilters: scanFilters
 ): boolean {
-	if (file.extension !== "md") {
-		return false; // Only process markdown files
-	}
+	// if (allowedFileExtensionsRegEx.test(file.path) === false) {
+	// 	return false; // Only process markdown files
+	// }
 
 	if (
 		scanFilters.files.polarity === 3 &&
@@ -93,7 +104,7 @@ export function checkFrontMatterFilters(
 	file: TFile,
 	scanFilters: scanFilters
 ): boolean | undefined {
-	const frontmatter = extractFrontmatter(plugin, file);
+	const frontmatter = extractFrontmatterFromFile(plugin, file);
 
 	if (!frontmatter) {
 		return; // No front matter found
@@ -147,7 +158,8 @@ export function checkFolderFilters(
 		} else {
 			return true;
 		}
-	} else {// This else body will never run because this function is only called if the scanFilters.folders.polarity !== 3.
+	} else {
+		// This else body will never run because this function is only called if the scanFilters.folders.polarity !== 3.
 		if (
 			scanFilters.files.polarity === 1 &&
 			scanFilters.folders.polarity === 1 &&
@@ -179,9 +191,11 @@ export function checkFolderFilters(
 }
 
 export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
-	const tagInFilters = tags.some((tag) =>
-		scanFilters.tags.values.includes(tag)
-	);
+	const tagInFilters = tags.some((tag) => {
+		// return scanFilters.tags.values.includes(tag);
+		const result = matchTagsWithWildcards(scanFilters.tags.values, tag);
+		return result !== null;
+	});
 
 	const tagPolarity = scanFilters.tags.polarity;
 
@@ -190,8 +204,108 @@ export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
 		(tagPolarity === 2 && !tagInFilters) ||
 		tagPolarity === 3;
 	if (tagCheck) {
+		console.log(
+			"scanFilterForTags - Tags provided:",
+			tags,
+			"\nscanFilters :",
+			scanFilters,
+			"\ntagInFilters :",
+			tagInFilters,
+			"\ntagCheck :",
+			tagCheck,
+			"\nReturning true"
+		);
 		return true;
 	} else {
 		return false;
 	}
+}
+
+/**
+ * Matches user input tags against settings tags that may include wildcards (*).
+ * Wildcard (*) can be used at the start or end of a tag to match any sequence of characters.
+ * Examples:
+ *   - "#tag*" matches "#tag1", "#tag-abc", etc.
+ *   - "*tag" matches "#mytag", "#yourtag", etc.
+ *   - "*tag*" matches "#mytag123", "#123tag456", etc.
+ * @param settingsTags - Tags from settings which may include wildcards
+ * @param userInputTags - Tags from user input to match against settings tags
+ * @returns An array of matching tags or null if no match is found
+ */
+export function matchTagsWithWildcards(
+	settingsTags: string | string[],
+	userInputTags: string | string[]
+): string[] | null {
+	if (!settingsTags || !userInputTags) return null;
+
+	// Normalize to arrays
+	const settingsArr = Array.isArray(settingsTags)
+		? settingsTags
+		: [settingsTags];
+	const userArr = Array.isArray(userInputTags)
+		? userInputTags
+		: [userInputTags];
+
+	// Convert settings tags to regex patterns
+	const patterns = settingsArr.map((tag) => {
+		// Escape regex special chars except *
+		let pattern = tag.replace("#", ""); // Remove leading #
+
+		pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+		// Replace * with .+ (at least one character)
+		pattern = pattern.replace(/\\\*/g, ".*").replace(/\*/g, ".+");
+		// If wildcard is at the start, allow anything before
+		if (pattern.startsWith(".+")) pattern = "^" + pattern;
+		else pattern = "^" + pattern;
+		// If wildcard is at the end, allow anything after
+		if (pattern.endsWith(".+")) pattern = pattern + "$";
+		else pattern = pattern + "$";
+		return new RegExp(pattern);
+	});
+
+	// Find matches
+	const matches = userArr.filter((userTag) =>
+		patterns.some((regex) => regex.test(userTag.replace("#", "")))
+	);
+
+	return matches.length > 0 ? matches : null;
+}
+
+/**
+ * Verifies if all sub-tasks and child-tasks (dependsOn) of a task are complete.
+ * Returns true if no sub-tasks/child-tasks, or all are complete; otherwise false.
+ */
+export async function verifySubtasksAndChildtasksAreComplete(
+	plugin: TaskBoard,
+	task: taskItem
+): Promise<boolean> {
+	if (!plugin.settings.data.globalSettings.boundTaskCompletionToChildTasks)
+		return true;
+
+	let flag = true;
+
+	// Check sub-tasks in body
+	const subTasks = (task.body ?? []).filter((line) => isTaskLine(line));
+	if (subTasks.length > 0) {
+		// Check if all sub-tasks are completed
+		const allSubTasksCompleted = subTasks.every((line) =>
+			isCompleted(line)
+		);
+		if (!allSubTasksCompleted) flag = false;
+	}
+
+	// Check if all child-tasks (dependsOn) are completed
+	if (task?.dependsOn && (task?.dependsOn?.length ?? 0) > 0) {
+		for (const childId of task?.dependsOn ?? []) {
+			const childTask = await getTaskFromId(plugin, childId);
+			if (
+				!childTask ||
+				!(childTask.status === "X" || childTask.status === "x")
+			) {
+				flag = false;
+			}
+		}
+	}
+
+	return flag;
 }

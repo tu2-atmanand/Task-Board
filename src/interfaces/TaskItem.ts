@@ -63,22 +63,15 @@ export interface taskJsonMerged {
 
 export const priorityEmojis: { [key: number]: string } = {
 	0: "0",
-	1: "🔺",
-	2: "⏫",
-	3: "🔼",
-	4: "🔽",
-	5: "⏬",
+	1: "🔺", // Highest
+	2: "⏫", // High
+	3: "🔼", // Medium
+	4: "🔽", // Low
+	5: "⏬", // Lowest
 };
 
 // Helper function to get priority emoji
 export const getPriorityEmoji = (priority: number): string => {
-	const priorityEmojis: { [key: number]: string } = {
-		1: "🔺", // Highest
-		2: "⏫", // High
-		3: "🔼", // Medium
-		4: "🔽", // Low
-		5: "⏬", // Lowest
-	};
 	return priorityEmojis[priority] || "";
 };
 
@@ -94,6 +87,8 @@ export const priorityOptions = [
 
 export enum taskStatuses {
 	unchecked = " ",
+	incomplete = " ",
+	pending = " ",
 	regular = "x",
 	checked = "X",
 	dropped = "-",
@@ -102,7 +97,7 @@ export enum taskStatuses {
 	date = "D",
 	question = "?",
 	halfDone = "/",
-	"In progress" = "/",
+	"in-progress" = "/",
 	add = "+",
 	research = "R",
 	important = "!",
@@ -144,7 +139,7 @@ export const taskStatusesDropdown = [
 	{ value: taskStatuses.migrated, text: "Migrated [<]" },
 	{ value: taskStatuses.date, text: "Date [D]" },
 	{ value: taskStatuses.question, text: "Question [?]" },
-	{ value: taskStatuses.halfDone, text: "Half-done [/]" },
+	{ value: taskStatuses.halfDone, text: "In progress [/]" },
 	{ value: taskStatuses.add, text: "Add [+]" },
 	{ value: taskStatuses.research, text: "Research [R]" },
 	{ value: taskStatuses.important, text: "Important [!]" },

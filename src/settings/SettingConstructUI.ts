@@ -34,7 +34,10 @@ import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 import {
 	exportConfigurations,
 	importConfigurations,
+	showReloadObsidianNotice,
 } from "./SettingSynchronizer";
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 
 export class SettingsManager {
 	win: Window;
@@ -42,6 +45,7 @@ export class SettingsManager {
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData | null = null;
 	allPickrs: Pickr[] = [];
+	reloadNoticeAlreadyShown: boolean = false;
 
 	constructor(plugin: TaskBoard) {
 		this.app = plugin.app;
@@ -73,6 +77,17 @@ export class SettingsManager {
 			[HideableTaskProperty.Dependencies]: "Dependens-on ⛔ fa4sm9",
 		};
 		return displayNames[property] || property;
+	}
+
+	private openReloadNoticeIfNeeded() {
+		if (!this.reloadNoticeAlreadyShown) {
+			sleep(100).then(() => {
+				showReloadObsidianNotice(this.plugin);
+				this.reloadNoticeAlreadyShown = true;
+			});
+			return;
+		}
+		return;
 	}
 
 	// Function to load the settings from data.json
@@ -200,6 +215,8 @@ export class SettingsManager {
 		// Reset global settings if necessary
 		this.globalSettings = null;
 
+		this.reloadNoticeAlreadyShown = false;
+
 		//Destroy all Pickr instances
 		this.allPickrs.forEach((pickr) => pickr.destroy());
 
@@ -221,13 +238,13 @@ export class SettingsManager {
 
 		const {
 			scanFilters,
-			showHeader,
 			openOnStartup,
 			realTimeScanning,
 			archivedTasksFilePath,
 			tasksCacheFilePath,
 			scanVaultAtStartup,
 			preDefinedNote,
+			taskNoteIdentifierTag,
 			taskNoteDefaultLocation,
 			autoAddUniqueID,
 			experimentalFeatures,
@@ -375,6 +392,8 @@ export class SettingsManager {
 				toggle.setValue(autoAddUniqueID).onChange(async (value) => {
 					this.globalSettings!.autoAddUniqueID = value;
 					await this.saveSettings();
+
+					this.openReloadNoticeIfNeeded();
 				})
 			);
 
@@ -405,12 +424,26 @@ export class SettingsManager {
 				);
 			});
 
+		new Setting(contentEl)
+			.setName(t("task-note-identifier-tag"))
+			.setDesc(t("task-note-identifier-tag-description"))
+			.addText((text) => {
+				text.setValue(taskNoteIdentifierTag).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteIdentifierTag =
+							value.startsWith("#")
+								? value.replace("#", "")
+								: value;
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., taskNote";
+			});
+
 		// Setting for choosing the default location for task notes
 		new Setting(contentEl)
-			.setName("Default location for Task Notes")
-			.setDesc(
-				"Default folder where new task notes will be saved when using 'Save as note' button"
-			)
+			.setName(t("default-location-for-new-task-notes"))
+			.setDesc(t("default-location-for-new-task-notes-description"))
 			.addText((text) => {
 				text.setValue(taskNoteDefaultLocation).onChange((value) => {
 					if (this.globalSettings)
@@ -420,7 +453,7 @@ export class SettingsManager {
 				const inputEl = text.inputEl;
 				// For folders, we could use folder suggestions or just allow text input
 				// For now, let's keep it simple with text input
-				inputEl.placeholder = "e.g., TaskNotes or Notes/Tasks";
+				inputEl.placeholder = "e.g., Task Notes or Notes/Tasks";
 			});
 
 		// Setting for choosing the default file to archive tasks
@@ -434,7 +467,7 @@ export class SettingsManager {
 				});
 
 				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(app);
+				const suggestionContent = getFileSuggestions(this.plugin.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTasksFilePath =
@@ -453,6 +486,7 @@ export class SettingsManager {
 			});
 
 		new Setting(contentEl)
+			.setClass("taskBoard-settings-wide-input")
 			.setName(t("tasks-cache-file-path"))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
@@ -481,15 +515,17 @@ export class SettingsManager {
 				dropdown.setValue(tasksCacheFilePath);
 
 				dropdown.onChange(async (selectedPath) => {
-					moveTasksCacheFileToNewPath(
+					const result = await moveTasksCacheFileToNewPath(
 						this.plugin,
 						tasksCacheFilePath,
 						selectedPath
 					);
 
-					if (this.globalSettings) {
+					if (this.globalSettings && result) {
 						this.globalSettings.tasksCacheFilePath = selectedPath;
 						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
 					}
 				});
 			});
@@ -531,7 +567,12 @@ export class SettingsManager {
 			.setDesc(t("update-language-translations-info"))
 			.addButton((button) =>
 				button.setButtonText("Update").onClick(async () => {
-					await downloadAndApplyLanguageFile(this.plugin);
+					const result = await downloadAndApplyLanguageFile(
+						this.plugin
+					);
+					if (result) {
+						this.openReloadNoticeIfNeeded();
+					}
 				})
 			);
 
@@ -540,7 +581,10 @@ export class SettingsManager {
 			.setDesc(t("import-export-configurations-info"))
 			.addButton((button) =>
 				button.setButtonText(t("import")).onClick(async () => {
-					await importConfigurations(this.plugin);
+					const result = await importConfigurations(this.plugin);
+					if (result) {
+						this.openReloadNoticeIfNeeded();
+					}
 				})
 			)
 			.addButton((button) =>
@@ -564,6 +608,8 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.experimentalFeatures = value;
 						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
 					})
 			);
 
@@ -853,6 +899,8 @@ export class SettingsManager {
 								);
 						}
 						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
 					});
 				});
 
@@ -1168,6 +1216,7 @@ export class SettingsManager {
 			quickAddPluginDefaultChoice,
 			notificationService,
 			frontmatterPropertyForReminder,
+			boundTaskCompletionToChildTasks,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -1176,9 +1225,11 @@ export class SettingsManager {
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[EditButtonMode.PopUp]: t(
+						[EditButtonMode.Modal]: t(
 							"use-edit-task-window-feature"
 						),
+						[EditButtonMode.TasksPluginModal]:
+							t("tasks-plugin-modal"),
 						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
 						[EditButtonMode.NoteInSplit]: t(
 							"open-note-in-right-split"
@@ -1194,6 +1245,48 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.editButtonAction =
 							value as EditButtonMode;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("double-click-card-action"))
+			.setDesc(t("double-click-card-action-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.None]: t("none"),
+						[EditButtonMode.Modal]: t(
+							"use-edit-task-window-feature"
+						),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split"
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window"
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview"
+						),
+					})
+					.setValue(this.globalSettings!.doubleClickCardToEdit)
+					.onChange(async (value) => {
+						this.globalSettings!.doubleClickCardToEdit =
+							value as EditButtonMode;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("restrict-task-completion-to-child-tasks-and-sub-tasks"))
+			.setDesc(t("restrict-task-completion-to-child-tasks-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(boundTaskCompletionToChildTasks)
+					.onChange(async (value) => {
+						this.globalSettings!.boundTaskCompletionToChildTasks =
+							value;
 						await this.saveSettings();
 					})
 			);
@@ -1271,16 +1364,20 @@ export class SettingsManager {
 							communityPlugins.isQuickAddPluginEnabled()
 					)
 					.onChange(async (value) => {
-						if (this.globalSettings === null) return;
-
-						if (!communityPlugins.isQuickAddPluginEnabled()) {
+						if (
+							this.globalSettings &&
+							!communityPlugins.isQuickAddPluginEnabled()
+						) {
 							new Notice(t("quickadd-plugin-not-enabled"));
 							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								false;
-						} else {
+						} else if (this.globalSettings) {
 							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								value;
+
+							this.openReloadNoticeIfNeeded();
 						}
+
 						await this.saveSettings();
 					})
 			)
@@ -1401,19 +1498,66 @@ export class SettingsManager {
 		const previewEl = contentEl.createDiv({
 			cls: "global-setting-tab-live-preview",
 		});
-		const previewLabel = previewEl.createDiv({
-			cls: "global-setting-tab-live-preview-label",
-		});
-		previewLabel.setText(t("preview"));
 
-		const previewData = previewEl.createDiv({
-			cls: "global-setting-tab-live-preview-data",
+		const readingPreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-label",
 		});
+		readingPreviewLabel.setText(t("reading-mode-preview"));
+		// Render markdown preview above the raw preview
+		const markdownPreviewEl = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-markdown",
+		});
+
+		const sourcePreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-label",
+		});
+		sourcePreviewLabel.setText(t("source-mode-preview"));
+		const previewData = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-data",
+		});
+
+		// Helper to render markdown using MarkdownUIRenderer
+		const renderMarkdownPreview = (markdown: string) => {
+			// Remove previous preview if any
+			markdownPreviewEl.empty();
+			// Use Obsidian's MarkdownUIRenderer to render markdown
+			// @ts-ignore
+			MarkdownUIRenderer.renderSubtaskText(
+				this.plugin.app,
+				markdown,
+				markdownPreviewEl,
+				"",
+				this.plugin.view
+			);
+		};
 		const updatePreview = () => {
 			let taskTitle = t("dummy-task-title");
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
-			let dueDate = "2024-09-21";
+			let universalDateEmoji = "";
+			let universalDateString = "";
+			if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.startDate
+			) {
+				universalDateEmoji =
+					TASKS_PLUGIN_DEFAULT_SYMBOLS.startDateSymbol;
+				universalDateString = "start";
+			} else if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.scheduledDate
+			) {
+				universalDateEmoji =
+					TASKS_PLUGIN_DEFAULT_SYMBOLS.scheduledDateSymbol;
+				universalDateString = "scheduled";
+			} else if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.dueDate
+			) {
+				universalDateEmoji = TASKS_PLUGIN_DEFAULT_SYMBOLS.dueDateSymbol;
+				universalDateString = "due";
+			}
+			let date = "2024-09-21";
 			let tags = `#tag #test`;
 			let completionDate = "2024-09-21/12:20:33";
 
@@ -1424,9 +1568,9 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
 					} else {
-						preview = `- [x] ${taskTitle} ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [>] ${taskTitle} ${priority} ⏰[${time}] ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
 					}
 					break;
 				}
@@ -1435,11 +1579,11 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} ${priority} 📅 ${dueDate} ${tags} ✅ ${
+						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji} ${date} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${taskTitle} ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
+						preview = `- [>] ${taskTitle} ${priority} ⏰ ${time} ${universalDateEmoji} ${date} ${tags} ✅${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -1450,9 +1594,9 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [>] ${time} ${taskTitle} [priority:: 2] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [>] ${taskTitle} [priority:: 2] [time:: ${time}] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
 					}
 					break;
 				}
@@ -1461,13 +1605,14 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [>] ${time} ${taskTitle} @priority(2) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
 					} else {
-						preview = `- [x] ${taskTitle} @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [>] ${taskTitle} @priority(2) @time(${time}) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
 					}
 					break;
 				}
 			}
+			renderMarkdownPreview(preview);
 			previewData.setText(preview);
 		};
 
@@ -1498,6 +1643,8 @@ export class SettingsManager {
 					this.globalSettings!.taskPropertyFormat = value;
 					await this.saveSettings();
 					updatePreview();
+
+					this.openReloadNoticeIfNeeded();
 				});
 			});
 

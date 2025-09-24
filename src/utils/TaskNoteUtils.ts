@@ -3,22 +3,25 @@
 import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import {
-	readDataOfVaultFile,
-	writeDataToVaultFile,
-} from "./MarkdownFileOperations";
-import {
-	createFrontmatterFromTask,
 	updateFrontmatterProperties,
 	customFrontmatterCache,
+	extractFrontmatterFromFile,
+	createYamlFromObject,
+	extractFrontmatterFromContent,
 } from "./FrontmatterOperations";
 import { resolve } from "path";
+import {
+	TASK_NOTE_FRONTMATTER_KEYS,
+	TASK_NOTE_IDENTIFIER_TAG,
+} from "src/types/uniqueIdentifiers";
 
 /**
- * Check if a note is a Task Note by looking for #taskNote tag in frontmatter
+ * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
  * @param frontmatter - The frontmatter object from a file
- * @returns boolean - True if the note contains #taskNote tag
+ * @returns boolean - True if the note contains TASK_NOTE_IDENTIFIER_TAG tag
  */
 export function isTaskNotePresentInFrontmatter(
+	plugin: TaskBoard,
 	frontmatter: Partial<customFrontmatterCache> | undefined
 ): boolean {
 	if (!frontmatter || !frontmatter.tags) {
@@ -33,19 +36,26 @@ export function isTaskNotePresentInFrontmatter(
 		tags = frontmatter.tags.split(",").map((tag: string) => tag.trim());
 	}
 
-	console.log("isTaskNotePresentInFrontmatter - Tags extracted:", tags);
-
-	// Check for #taskNote tag (with or without #)
-	return tags.some((tag) => tag === "taskNote" || tag === "#taskNote");
+	// Check for TASK_NOTE_IDENTIFIER_TAG tag (with or without #)
+	return isTaskNotePresentInTags(plugin, tags);
 }
 
 /**
- * Check if a note is a Task Note by looking for #taskNote tag in tags
+ * Check if a note is a Task Note by looking for #TASK_NOTE_IDENTIFIER_TAG tag in tags
  * @param tags - The tags array from a file
- * @returns boolean - True if the note contains #taskNote tag
+ * @returns boolean - True if the note contains #TASK_NOTE_IDENTIFIER_TAG tag
  */
-export function isTaskNotePresentInTags(tags: string[]): boolean {
-	return tags.includes("taskNote") || tags.includes("#taskNote");
+export function isTaskNotePresentInTags(
+	plugin: TaskBoard,
+	tags: string[]
+): boolean {
+	return tags
+		? tags.some((tag) =>
+				tag.includes(
+					plugin.settings.data.globalSettings.taskNoteIdentifierTag
+				)
+		  )
+		: false;
 }
 
 /**
@@ -55,7 +65,7 @@ export function isTaskNotePresentInTags(tags: string[]): boolean {
  * @returns Partial taskItem with properties mapped from frontmatter
  */
 export function extractTaskNoteProperties(
-	frontmatter: any,
+	frontmatter: Partial<customFrontmatterCache> | undefined,
 	filePath: string
 ): Partial<taskItem> {
 	if (!frontmatter) {
@@ -63,22 +73,47 @@ export function extractTaskNoteProperties(
 	}
 
 	return {
-		id: frontmatter.id || "",
-		title: frontmatter.title || "",
-		tags: frontmatter?.tags || [],
-		createdDate: frontmatter["created-date"] || frontmatter?.created || "",
-		startDate: frontmatter["start-date"] || frontmatter?.start || "",
+		id: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.id] || "",
+		title: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.title] || "",
+		tags: Array.isArray(frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags])
+			? frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags]
+			: typeof frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags] === "string"
+			? frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags]
+					.split(",")
+					.map((tag: string) => tag.trim())
+			: [],
+		createdDate:
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.createdDate] ||
+			frontmatter?.created ||
+			"",
+		startDate:
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.startDate] ||
+			frontmatter?.start ||
+			"",
 		scheduledDate:
-			frontmatter["schedule-date"] || frontmatter?.scheduled || "",
-		due: frontmatter["due-date"] || frontmatter?.due || "",
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.scheduledDate] ||
+			frontmatter?.scheduled ||
+			"",
+		due:
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.dueDate] ||
+			frontmatter?.due ||
+			"",
 		cancelledDate:
-			frontmatter["cancelled-date"] || frontmatter?.cancelled || "",
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.cancelledDate] ||
+			frontmatter?.cancelled ||
+			"",
 		completion:
-			frontmatter["completion-date"] || frontmatter?.completed || "",
-		priority: mapPriorityFromFrontmatter(frontmatter?.priority),
-		status: mapStatusFromFrontmatter(frontmatter?.status),
-		dependsOn: frontmatter?.dependsOn || frontmatter?.depends_on || [],
-		reminder: frontmatter?.reminder || "",
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.completionDate] ||
+			frontmatter?.completed ||
+			"",
+		priority: mapPriorityNameFromFrontmatter(
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.priority]
+		),
+		status: mapStatusFromFrontmatter(
+			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.status]
+		),
+		dependsOn: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.dependsOn] || [],
+		reminder: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.reminder] || "",
 		filePath: filePath,
 	};
 }
@@ -88,26 +123,42 @@ export function extractTaskNoteProperties(
  * @param priorityValue - Priority value from frontmatter
  * @returns number - Priority number (0-5)
  */
-export function mapPriorityFromFrontmatter(priorityValue: any): number {
+export function mapPriorityNameFromFrontmatter(priorityValue: any): number {
 	if (!priorityValue) return 0;
 
-	const priorityStr = String(priorityValue).trim();
+	const priorityStr = String(priorityValue).trim().toLowerCase();
 
 	// Map emojis to priority numbers
 	switch (priorityStr) {
-		case "🔺":
+		case "highest":
 			return 1; // Highest
-		case "⏫":
+		case "high":
 			return 2; // High
-		case "🔼":
+		case "medium":
 			return 3; // Medium
-		case "🔽":
+		case "low":
 			return 4; // Low
-		case "⏬":
+		case "lowest":
 			return 5; // Lowest
 		default:
 			return 0; // None
 	}
+}
+
+/**
+ * Get priority emoji from priority number
+ * @param priority - Priority number (1-5)
+ * @returns string - Priority emoji
+ */
+export function getPriorityNameForTaskNote(priority: number): string {
+	const priorityNames: { [key: number]: string } = {
+		1: "highest",
+		2: "high",
+		3: "medium",
+		4: "low",
+		5: "lowest",
+	};
+	return priorityNames[priority] || "URGENT";
 }
 
 /**
@@ -136,26 +187,48 @@ export function mapStatusFromFrontmatter(
 	return " ";
 }
 
+/**
+ * Format the entire task note content with updated frontmatter
+ * @param plugin - TaskBoard plugin instance
+ * @param updatedTask - Task item with updated properties
+ * @param oldNoteContent - Existing content of the note
+ * @returns string - New content of the note with updated frontmatter
+ */
 export function formatTaskNoteContent(
 	plugin: TaskBoard,
-	task: taskItem,
-	bodyContent: string
+	updatedTask: taskItem,
+	oldNoteContent: string
 ): string {
-	console.log("formatTaskNoteContent called with:", task, bodyContent);
+	console.log(
+		"formatTaskNoteContent called with:",
+		updatedTask,
+		oldNoteContent
+	);
 	try {
-		const frontmatterMatch = bodyContent.match(/^---\n([\s\S]*?)\n---/);
-		// No frontmatter exists, create new one
-		const newFrontmatter = createFrontmatterFromTask(plugin, task);
+		const existingFrontmatter = extractFrontmatterFromContent(
+			plugin,
+			oldNoteContent
+		);
+		console.log("Existing frontmatter extracted:", existingFrontmatter);
+		// Update frontmatter properties based on updatedTask
+		const updatedFrontmatter = updateFrontmatterProperties(
+			plugin,
+			existingFrontmatter,
+			updatedTask
+		);
+		const newFrontmatter = createYamlFromObject(updatedFrontmatter);
+
+		const frontmatterMatch = oldNoteContent.match(/^---\n([\s\S]*?)\n---/);
 		const contentWithoutFrontmatter = frontmatterMatch
-			? bodyContent.replace(frontmatterMatch[0], "")
-			: bodyContent;
+			? oldNoteContent.replace(frontmatterMatch[0], "")
+			: oldNoteContent;
 		const newContent = `---\n${newFrontmatter}---${
 			contentWithoutFrontmatter || ""
 		}`; // I hope the content returned from the stringifyYaml API will always have a newline at the end.
 		return newContent;
 	} catch (error) {
 		console.error("Error updating task note frontmatter:", error);
-		throw error;
+		return ""; // Return empty content on error
 	}
 }
 
@@ -165,7 +238,7 @@ export function formatTaskNoteContent(
  * @param task - Task item with updated properties
  * @returns Promise<void>
  */
-export async function updateTaskNoteFrontmatter(
+export async function updateFrontmatterInMarkdownFile(
 	plugin: TaskBoard,
 	task: taskItem
 ): Promise<void> {
@@ -221,19 +294,3 @@ export async function updateTaskNoteFrontmatter(
 		throw error;
 	}
 }
-
-/**
- * Get priority emoji from priority number
- * @param priority - Priority number (1-5)
- * @returns string - Priority emoji
- */
-// function getPriorityEmoji(priority: number): string {
-// 	const priorityEmojis: { [key: number]: string } = {
-// 		1: "🔺", // Highest
-// 		2: "⏫", // High
-// 		3: "🔼", // Medium
-// 		4: "🔽", // Low
-// 		5: "⏬", // Lowest
-// 	};
-// 	return priorityEmojis[priority] || "";
-// }

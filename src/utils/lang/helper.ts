@@ -10,7 +10,7 @@ import {
 	NODE_POSITIONS_STORAGE_KEY,
 	NODE_SIZE_STORAGE_KEY,
 	VIEWPORT_STORAGE_KEY,
-} from "src/types/GlobalVariables";
+} from "src/types/uniqueIdentifiers";
 
 let currentLang = "en";
 
@@ -125,12 +125,12 @@ export function tSync(key: string): string {
 // Download and apply a new language file
 export async function downloadAndApplyLanguageFile(
 	plugin: TaskBoard
-): Promise<void> {
+): Promise<boolean> {
 	const lang = getLanguage();
 
 	if (lang === "en") {
 		new Notice("English is the default language. No download needed.");
-		return;
+		return false;
 	}
 
 	const pluginFolder = `${plugin.app.vault.configDir}/plugins/task-board/`;
@@ -163,6 +163,8 @@ export async function downloadAndApplyLanguageFile(
 			`Language file '${lang}.json' downloaded successfully!\nPlease reload Obsidian to apply changes.`,
 			0
 		);
+
+		return true;
 	} catch (err) {
 		progressNotice.hide();
 		bugReporter(
@@ -171,6 +173,8 @@ export async function downloadAndApplyLanguageFile(
 			err as string,
 			"helper.ts/downloadAndApplyLanguageFile"
 		);
+
+		return false;
 	}
 }
 

@@ -4,10 +4,10 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
-import { handleTaskNoteEdit, handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
+import { handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component } from 'obsidian';
+import { Component, Notice } from 'obsidian';
 import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
@@ -19,6 +19,8 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
 import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
+import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/FiltersVerifier';
+import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 
 export interface TaskProps {
 	key: number;
@@ -242,7 +244,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 		for (const rawTag of tags) {
 			const tagName = rawTag.replace('#', '');
-			const tagData = tagColorMap.get(tagName);
+			let tagData = tagColorMap.get(tagName);
+
+			if (!tagData) {
+				tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+					const result = matchTagsWithWildcards(tagNameKey, tagName || '');
+					// Return the first match found
+					if (result) tagData = tagColor;
+				});
+			}
 
 			if (tagData) {
 				if (
@@ -271,17 +281,23 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	}
 
 	// Function to handle the main checkbox click
-	const handleMainCheckBoxClick = () => {
+	const handleMainCheckBoxClick = async () => {
 		setIsChecked(true); // Trigger animation
-		setTimeout(() => {
-			// Route to appropriate handler based on task type
-			if (isTaskNotePresentInTags(task.tags)) {
-				handleTaskNoteStatusChange(plugin, task);
-			} else {
-				handleCheckboxChange(plugin, task);
-			}
+		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
+		if (condition) {
+			setTimeout(() => {
+				// Route to appropriate handler based on task type
+				if (isTaskNotePresentInTags(plugin, task.tags)) {
+					handleTaskNoteStatusChange(plugin, task);
+				} else {
+					handleCheckboxChange(plugin, task);
+				}
+				setIsChecked(false); // Reset checkbox state
+			}, 500); // 1-second delay for animation
+		} else {
 			setIsChecked(false); // Reset checkbox state
-		}, 500); // 1-second delay for animation
+			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
+		}
 	};
 
 	const handleMainTaskDelete = () => {
@@ -306,7 +322,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 
-		if (!isTaskNotePresentInTags(task.tags)) {
+		if (!isTaskNotePresentInTags(plugin, task.tags)) {
 			// onSubTasksChange(updatedTask); // Notify parent of the change
 			handleSubTasksChange(plugin, task, updatedTask);
 		} else {
@@ -323,13 +339,22 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
-		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
-			// Route to appropriate handler based on task type
-			if (isTaskNotePresentInTags(task.tags)) {
-				handleTaskNoteEdit(plugin, task);
-			} else {
-				handleEditTask(plugin, task);
-			}
+		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
+		} else {
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+			event.ctrlKey = false;
+		}
+	}
+
+	const handleDoubleClickOnCard = (event: React.MouseEvent) => {
+		const settingOption = plugin.settings.data.globalSettings.doubleClickCardToEdit;
+		if (settingOption === EditButtonMode.None) return;
+
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
 		} else {
 			event.ctrlKey = true;
 			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
@@ -362,7 +387,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && activeBoardSettings?.filters.includes(tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
+										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && matchTagsWithWildcards(activeBoardSettings?.filters, tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
 											return null;
 										}
 
@@ -401,7 +426,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 							</div>
 							{/* Drag Handle */}
-							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} /></div> */}
+							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} /></div> */}
 						</div>
 					</>);
 			} else {
@@ -614,13 +639,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (
-		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}>
+		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+			onDoubleClick={handleDoubleClickOnCard}
+		>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				<div className="taskItemFileNameSection">
 					{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
 						<div className="taskItemFileName" aria-label={task.filePath}>
-							{task.filePath.split('/').pop()?.replace('.md', '')}
+							{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
 						</div>
 					)}
 				</div>

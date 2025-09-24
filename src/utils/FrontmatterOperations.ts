@@ -1,11 +1,11 @@
 import TaskBoard from "main";
-import { FrontMatterCache, stringifyYaml, TFile } from "obsidian";
-import {
-	priorityEmojis,
-	taskItem,
-	taskStatuses,
-} from "src/interfaces/TaskItem";
+import { FrontMatterCache, parseYaml, stringifyYaml, TFile } from "obsidian";
+import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import { getLocalDateTimeString } from "./TimeCalculations";
+import {
+	getPriorityNameForTaskNote,
+	isTaskNotePresentInTags,
+} from "./TaskNoteUtils";
 
 export interface customFrontmatterCache extends FrontMatterCache {
 	tags?: string[] | string;
@@ -27,10 +27,10 @@ export interface customFrontmatterCache extends FrontMatterCache {
  * @param file - Obsidian file
  * @returns any - Frontmatter object or null if not found
  */
-export function extractFrontmatter(
+export function extractFrontmatterFromFile(
 	plugin: TaskBoard,
 	file: TFile
-): Partial<customFrontmatterCache> | undefined {
+): customFrontmatterCache | undefined {
 	// Method 1 - Find the frontmatter using delimiters
 	// // Check if the file starts with frontmatter delimiter
 	// if (!fileContent.startsWith("---\n")) {
@@ -69,6 +69,35 @@ export function extractFrontmatter(
 		return frontmatterAsObject;
 	} catch (error) {
 		// console.warn("Failed to parse frontmatter:", error);
+		return undefined;
+	}
+}
+
+export function extractFrontmatterFromContent(
+	plugin: TaskBoard,
+	fileContent: string
+): customFrontmatterCache | undefined {
+	// Method 1 - Find the frontmatter using delimiters
+	// Check if the content starts with frontmatter delimiter
+	if (!fileContent.startsWith("---\n")) {
+		return undefined;
+	}
+
+	// Find the end of frontmatter
+	const secondDelimiterIndex = fileContent.indexOf("\n---\n", 4);
+	if (secondDelimiterIndex === -1) {
+		return undefined;
+	}
+
+	// Extract the YAML content between delimiters
+	const yamlContent = fileContent.substring(4, secondDelimiterIndex);
+
+	try {
+		// Parse the YAML content using Obsidian's API
+		const frontmatter = parseYaml(yamlContent) as customFrontmatterCache;
+		return frontmatter;
+	} catch (error) {
+		console.warn("Failed to parse frontmatter:", error);
 		return undefined;
 	}
 }
@@ -128,15 +157,22 @@ export function createFrontmatterFromTask(
 		title: task?.title || "",
 		status: statusKey ?? `"${task.status}"`,
 		tags: [
-			"#taskNote",
-			...(task?.tags?.filter((tag) => tag !== "#taskNote") ?? []),
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			...(task?.tags?.filter(
+				(tag) =>
+					tag.includes(
+						plugin.settings.data.globalSettings
+							.taskNoteIdentifierTag
+					) === false
+			) ?? []),
 		],
 	};
 
 	if (task.id && plugin.settings.data.globalSettings.autoAddUniqueID)
 		frontmatterObj.id = task.legacyId ? task.legacyId : task.id;
 	if (task.priority && task.priority > 0) {
-		frontmatterObj.priority = priorityEmojis[task.priority || 0];
+		frontmatterObj.priority =
+			getPriorityNameForTaskNote(task.priority) || "";
 	}
 	if (task.createdDate) frontmatterObj["created-date"] = task.createdDate;
 	if (task.startDate) frontmatterObj["start-date"] = task.startDate;
@@ -174,25 +210,39 @@ export function updateFrontmatterProperties(
 				},
 		  };
 
+	console.log(
+		"updateFrontmatterProperties called with:",
+		"\nexistingFrontmatter:",
+		existingFrontmatter,
+		"\ntask:",
+		task,
+		"\nupdated (initial):",
+		updated
+	);
+
 	if (task.title) {
 		updated.title = task.title;
 	} else {
-		updated.title = getLocalDateTimeString();
+		updated.title = "";
 	}
 
 	// Ensure taskNote tag exists
 	if (!updated.tags) {
-		updated.tags = ["#taskNote"];
+		updated.tags = [
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			...task.tags,
+		];
 	} else if (Array.isArray(updated.tags)) {
-		if (
-			!updated.tags.some(
-				(tag: string) => tag === "taskNote" || tag === "#taskNote"
-			)
-		) {
-			updated.tags.push("#taskNote");
-		}
+		updated.tags = [
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			...updated.tags,
+			...task.tags,
+		];
 	}
+	// Remove duplicate tags
+	updated.tags = Array.from(new Set(updated.tags));
 
+	// Update or add unique ID
 	if (updated.id && plugin.settings.data.globalSettings.autoAddUniqueID) {
 		updated.legacyId = task.legacyId ? task.legacyId : updated.id;
 	}
@@ -235,7 +285,7 @@ export function updateFrontmatterProperties(
 	}
 
 	if (task.priority && task.priority > 0) {
-		updated.priority = priorityEmojis[task.priority || 0];
+		updated.priority = getPriorityNameForTaskNote(task.priority) || "";
 	} else {
 		delete updated.priority;
 	}
@@ -261,7 +311,7 @@ export function updateFrontmatterProperties(
 
 /**
  * Create YAML string from object (simple implementation)
- * @param obj - Object to convert to YAML
+ * @param obj - Frontmatter object to convert to YAML string
  * @returns string - YAML string
  */
 export function createYamlFromObject(

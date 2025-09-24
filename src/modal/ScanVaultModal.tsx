@@ -6,18 +6,18 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import ScanningVault from "src/utils/ScanningVault";
+import vaultScanner, { fileTypeAllowedForScanning } from "src/utils/VaultScanner";
 import TaskBoard from "main";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
-import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;
 
 	// Check Pending tasks
-	Object.values(plugin.scanningVault.tasksCache.Pending).forEach((tasks) => {
+	Object.values(plugin.vaultScanner.tasksCache.Pending).forEach((tasks) => {
 		tasks.forEach((task) => {
 			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
 			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
@@ -27,7 +27,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	});
 
 	// Check Completed tasks
-	Object.values(plugin.scanningVault.tasksCache.Completed).forEach((tasks) => {
+	Object.values(plugin.vaultScanner.tasksCache.Completed).forEach((tasks) => {
 		tasks.forEach((task) => {
 			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
 			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
@@ -41,7 +41,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	plugin.saveSettings();
 }
 
-const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVault: ScanningVault }> = ({ app, plugin, scanningVault }) => {
+const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanner: vaultScanner }> = ({ app, plugin, vaultScanner }) => {
 
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
@@ -59,30 +59,33 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 		setIsRunning(true);
 
 		// Reset terminal output and collected tasks
-		scanningVault.tasksCache.Pending = {};
-		scanningVault.tasksCache.Completed = {};
+		vaultScanner.tasksCache.Pending = {};
+		vaultScanner.tasksCache.Completed = {};
 
-		const files = app.vault.getMarkdownFiles();
+		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
+		const scanFilters = plugin.settings.data.globalSettings.scanFilters;
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 
-			const scanFilters = plugin.settings.data.globalSettings.scanFilters;
-			if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
-				setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
-				await scanningVault.extractTasksFromFile(file, scanFilters);
+			if (fileTypeAllowedForScanning(plugin, file)) {
+				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
+					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
+					await vaultScanner.extractTasksFromFile(file, scanFilters);
+				}
 			}
 
 			setProgress(((i + 1) / files.length) * 100); // Update progress
 		}
 
 		// setIsRunning(false);
-		setCollectedTasks(scanningVault.tasksCache);
+		setCollectedTasks(vaultScanner.tasksCache);
 		new Notice(t("vault-scanning-complete"));
 
-		plugin.scanningVault.tasksCache = scanningVault.tasksCache;
-		scanningVault.saveTasksToJsonCache();
+		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
+		console.log("Calling saveTasksToJsonCache\nFinal tasksCache after scan:", plugin.vaultScanner.tasksCache);
+		vaultScanner.saveTasksToJsonCache();
 
 		findMaxIdCounterAndUpdateSettings(plugin);
 
@@ -214,13 +217,13 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, scanningVau
 }
 
 export class ScanVaultModal extends Modal {
-	scanningVault: ScanningVault;
+	vaultScanner: vaultScanner;
 	plugin: TaskBoard;
 
 	constructor(app: App, plugin: TaskBoard) {
 		super(app);
 		this.plugin = plugin;
-		this.scanningVault = plugin.scanningVault;
+		this.vaultScanner = plugin.vaultScanner;
 	}
 
 	onOpen() {
@@ -235,7 +238,7 @@ export class ScanVaultModal extends Modal {
 		root.render(<ScanVaultModalContent
 			app={this.app}
 			plugin={this.plugin}
-			scanningVault={this.scanningVault}
+			vaultScanner={this.vaultScanner}
 		/>);
 
 		// Render React component inside the Obsidian modal

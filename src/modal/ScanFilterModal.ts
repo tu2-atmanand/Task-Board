@@ -13,6 +13,7 @@ import { t } from "src/utils/lang/helper";
 export class ScanFilterModal extends Modal {
 	private inputEl!: HTMLInputElement;
 	private selectedValues: Set<string> = new Set();
+	private selectedValue: string = "";
 	private suggestionContent: Set<string> = new Set();
 
 	constructor(
@@ -26,6 +27,7 @@ export class ScanFilterModal extends Modal {
 				this.filterType
 			].values
 		);
+		this.selectedValue = "";
 	}
 
 	async onOpen() {
@@ -40,6 +42,17 @@ export class ScanFilterModal extends Modal {
 			cls: "scan-filter-input",
 			placeholder: "Type to search...",
 		});
+
+		this.inputEl.onchange = (e) => {
+			const target = e.target as HTMLInputElement;
+			const value = target.value.trim();
+			if (this.selectedValues.has(this.selectedValue)) {
+				this.selectedValues.delete(this.selectedValue);
+			}
+			this.selectedValue = value;
+			this.selectedValues.add(value);
+			this.renderList();
+		};
 
 		// Load suggestion content
 		if (this.filterType === "files") {
@@ -58,6 +71,7 @@ export class ScanFilterModal extends Modal {
 			this.inputEl,
 			this.suggestionContent,
 			(value: string) => {
+				this.selectedValue = value;
 				if (!this.selectedValues.has(value)) {
 					this.selectedValues.add(value);
 					this.renderList();

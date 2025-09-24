@@ -33,7 +33,9 @@ export interface TagColor {
 }
 
 export enum EditButtonMode {
-	PopUp = "popUp",
+	None = "none",
+	Modal = "popUp",
+	TasksPluginModal = "tasksPluginModal",
 	NoteInTab = "noteInTab",
 	NoteInSplit = "noteInSplit",
 	NoteInWindow = "noteInWindow",
@@ -125,12 +127,14 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
+	doubleClickCardToEdit: EditButtonMode;
 	universalDate: string;
 	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
 	preDefinedNote: string;
+	taskNoteIdentifierTag: string;
 	taskNoteDefaultLocation: string;
 	quickAddPluginDefaultChoice: string;
 	compatiblePlugins: {
@@ -156,7 +160,9 @@ export interface globalSettingsData {
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
+		taskId?: string;
 	};
+	boundTaskCompletionToChildTasks: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -379,7 +385,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					priority: 3,
 				},
 			],
-			editButtonAction: EditButtonMode.PopUp,
+			editButtonAction: EditButtonMode.Modal,
+			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
 			tasksPluginCustomStatuses: [],
 			tagColorsType: TagColorType.Text,
@@ -421,6 +428,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				quickAddPlugin: false,
 			},
 			preDefinedNote: "Task_board_note.md",
+			taskNoteIdentifierTag: "taskNote",
 			taskNoteDefaultLocation: "TaskNotes",
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
@@ -447,6 +455,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				viewedType: "kanban",
 				boardIndex: 0,
 			},
+			boundTaskCompletionToChildTasks: false,
 		},
 	},
 };

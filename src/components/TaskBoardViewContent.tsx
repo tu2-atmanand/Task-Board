@@ -15,7 +15,7 @@ import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -128,6 +128,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		const refreshBoardListener = () => setRefreshCount((prev) => prev + 1);
 		eventEmitter.on("REFRESH_BOARD", refreshBoardListener);
 		return () => eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
+	}, []);
+
+	useEffect(() => {
+		const refreshView = (viewType: string) => {
+			console.log("SWITCH_VIEW event called. Switching view to:", viewType);
+			setViewType(viewType);
+		};
+		eventEmitter.on("SWITCH_VIEW", refreshView);
+		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
 	}, []);
 
 	const refreshBoardButton = useCallback(async () => {
@@ -340,6 +349,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 								boards={boards}
 								activeBoardIndex={activeBoardIndex}
 								allTasksArranged={allTasksArrangedPerColumn}
+								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
 							/>
 						)
 					) : (

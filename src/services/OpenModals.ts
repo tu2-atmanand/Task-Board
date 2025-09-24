@@ -20,7 +20,7 @@ import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
 import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
 import { ScanFilterModal } from "src/modal/ScanFilterModal";
 import { taskItem } from "src/interfaces/TaskItem";
-import { updateTaskNoteFrontmatter } from "src/utils/TaskNoteUtils";
+import { updateFrontmatterInMarkdownFile } from "src/utils/TaskNoteUtils";
 import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
 
 // Function to open the BoardConfigModal
@@ -47,11 +47,13 @@ export const openAddNewTaskInCurrentFileModal = (
 	const AddTaskModal = new AddOrEditTaskModal(
 		plugin,
 		(newTask: taskItem, quickAddPluginChoice: string) => {
-			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
-					newTask.filePath
-				);
-			});
+			addTaskInNote(plugin, newTask, true, cursorPosition).then(
+				(newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						newTask.filePath
+					);
+				}
+			);
 
 			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
 			// if (
@@ -92,7 +94,9 @@ export const openAddNewTaskModal = (
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
 				let completeTask = await getFormattedTaskContent(newTask);
-				completeTask = addIdToTaskContent(plugin, completeTask);
+				const { formattedTaskContent, newId } =
+					await addIdToTaskContent(plugin, completeTask);
+				completeTask = formattedTaskContent;
 
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
 					quickAddPluginChoice,
@@ -101,7 +105,7 @@ export const openAddNewTaskModal = (
 					}
 				);
 			} else {
-				await addTaskInNote(plugin, newTask, false).then(() => {
+				await addTaskInNote(plugin, newTask, false).then((newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
 						newTask.filePath
 					);
@@ -231,32 +235,20 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 
 export const openEditTaskModal = async (
 	plugin: TaskBoard,
-	existingTask: taskItem,
-	isTaskNote: boolean
+	existingTask: taskItem
 ) => {
 	const EditTaskModal = new AddOrEditTaskModal(
 		plugin,
 		(updatedTask: taskItem) => {
 			updatedTask.filePath = existingTask.filePath;
 			// Update the task in the file and JSON
-			updateTaskInFile(plugin, updatedTask, existingTask)
-				.then(() => {
+			updateTaskInFile(plugin, updatedTask, existingTask).then(
+				(newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
 						updatedTask.filePath
 					);
-				})
-				.catch((error) => {
-					// bugReporter(
-					// 	plugin,
-					// 	"Error updating task in file",
-					// 	error as string,
-					// 	"TaskItemEventHandlers.ts/handleEditTask"
-					// );
-					console.error(
-						"TaskItemEventHandlers.ts : Error updating task in file",
-						error
-					);
-				});
+				}
+			);
 
 			// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 
@@ -267,7 +259,7 @@ export const openEditTaskModal = async (
 			// );
 			// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 		},
-		isTaskNote,
+		false,
 		false,
 		true,
 		existingTask,
@@ -290,14 +282,15 @@ export const openEditTaskNoteModal = (
 			try {
 				if (!newTaskContent) {
 					// Update frontmatter with task properties
-					await updateTaskNoteFrontmatter(plugin, updatedTask).then(
-						() => {
-							// This is required to rescan the updated file and refresh the board.
-							plugin.realTimeScanning.processAllUpdatedFiles(
-								updatedTask.filePath
-							);
-						}
-					);
+					await updateFrontmatterInMarkdownFile(
+						plugin,
+						updatedTask
+					).then(() => {
+						// This is required to rescan the updated file and refresh the board.
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							updatedTask.filePath
+						);
+					});
 				} else {
 					writeDataToVaultFile(
 						plugin,
@@ -306,7 +299,7 @@ export const openEditTaskNoteModal = (
 					).then(() => {
 						sleep(2000).then(() => {
 							console.log(
-								"This will run after updateTaskNoteFrontmatter has successfully run."
+								"This will run after updateFrontmatterInMarkdownFile has successfully run."
 							);
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(

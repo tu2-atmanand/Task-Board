@@ -2,7 +2,7 @@
 
 import { App, TAbstractFile, TFile, TFolder } from "obsidian";
 
-import type ScanningVault from "src/utils/ScanningVault";
+import type vaultScanner from "src/utils/VaultScanner";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -11,12 +11,12 @@ export class RealTimeScanning {
 	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
-	scanningVault: ScanningVault;
+	vaultScanner: vaultScanner;
 
-	constructor(app: App, plugin: TaskBoard, scanningVault: ScanningVault) {
+	constructor(app: App, plugin: TaskBoard, vaultScanner: vaultScanner) {
 		this.app = app;
 		this.plugin = plugin;
-		this.scanningVault = scanningVault;
+		this.vaultScanner = vaultScanner;
 	}
 
 	async initializeStack() {
@@ -48,6 +48,11 @@ export class RealTimeScanning {
 	}
 
 	async processAllUpdatedFiles(currentFile?: TFile | string | undefined) {
+		console.log(
+			"Starting to process all updated files...\ncurrentFile:",
+			currentFile
+		);
+		// If a current file is provided, ensure it's included in the processing
 		let newFile: TFile | null | undefined = null;
 		if (currentFile && typeof currentFile === "string") {
 			newFile = this.plugin.app.vault.getFileByPath(currentFile);
@@ -73,7 +78,7 @@ export class RealTimeScanning {
 		}
 		if (filesToProcess.length > 0) {
 			// Send all files for scanning and updating tasks
-			await this.scanningVault.refreshTasksFromFiles(files, false);
+			await this.vaultScanner.refreshTasksFromFiles(files, false);
 		}
 		// Save updated stack (which should now be empty)
 		this.saveStack();
@@ -102,9 +107,9 @@ export class RealTimeScanning {
 
 	onFileRenamed(file: TAbstractFile, oldPath: string) {
 		let foundFlag = false;
-		// Find the oldPath inside the plugin.scanningVault.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
+		// Find the oldPath inside the plugin.vaultScanner.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
 		const { Pending, Completed, Notes } =
-			this.plugin.scanningVault.tasksCache;
+			this.plugin.vaultScanner.tasksCache;
 
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
@@ -173,10 +178,10 @@ export class RealTimeScanning {
 		// }
 
 		if (foundFlag) {
-			this.plugin.scanningVault.tasksCache.Pending = Pending;
-			this.plugin.scanningVault.tasksCache.Completed = Completed;
-			this.plugin.scanningVault.tasksCache.Notes = Notes;
-			this.plugin.scanningVault.saveTasksToJsonCache();
+			this.plugin.vaultScanner.tasksCache.Pending = Pending;
+			this.plugin.vaultScanner.tasksCache.Completed = Completed;
+			this.plugin.vaultScanner.tasksCache.Notes = Notes;
+			this.plugin.vaultScanner.saveTasksToJsonCache();
 			eventEmitter.emit("REFRESH_COLUMN");
 		}
 	}
@@ -192,7 +197,7 @@ export class RealTimeScanning {
 
 		// Also remove the file from the tasks cache
 		const { Pending, Completed, Notes } =
-			this.plugin.scanningVault.tasksCache;
+			this.plugin.vaultScanner.tasksCache;
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
 				if (file instanceof TFile && cache.hasOwnProperty(file.path)) {
@@ -238,10 +243,10 @@ export class RealTimeScanning {
 		}
 
 		if (foundFlag) {
-			this.plugin.scanningVault.tasksCache.Pending = Pending;
-			this.plugin.scanningVault.tasksCache.Completed = Completed;
-			this.plugin.scanningVault.tasksCache.Notes = Notes;
-			this.plugin.scanningVault.saveTasksToJsonCache();
+			this.plugin.vaultScanner.tasksCache.Pending = Pending;
+			this.plugin.vaultScanner.tasksCache.Completed = Completed;
+			this.plugin.vaultScanner.tasksCache.Notes = Notes;
+			this.plugin.vaultScanner.saveTasksToJsonCache();
 			eventEmitter.emit("REFRESH_COLUMN");
 		}
 	}

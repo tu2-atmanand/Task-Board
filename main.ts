@@ -24,10 +24,12 @@ import {
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanning } from "src/utils/RealTimeScanning";
-import ScanningVault from "src/utils/ScanningVault";
+import vaultScanner, {
+	fileTypeAllowedForScanning,
+} from "src/utils/VaultScanner";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
+import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import {
 	deleteAllLocalStorageKeys,
@@ -35,22 +37,24 @@ import {
 	t,
 } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
-import {
-	fetchTasksPluginCustomStatuses,
-	TasksApi,
-} from "src/services/tasks-plugin/api";
+import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
+import {
+	allowedFileExtensionsRegEx,
+	notAllowedFileExtensionsRegEx,
+} from "src/regularExpressions/MiscelleneousRegExpr";
+import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
-	scanningVault: ScanningVault;
+	vaultScanner: vaultScanner;
 	realTimeScanning: RealTimeScanning;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
@@ -66,11 +70,11 @@ export default class TaskBoard extends Plugin {
 		this.app = this.plugin.app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.scanningVault = new ScanningVault(this.app, this.plugin);
+		this.vaultScanner = new vaultScanner(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanning(
 			this.app,
 			this.plugin,
-			this.scanningVault
+			this.vaultScanner
 		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
@@ -99,7 +103,7 @@ export default class TaskBoard extends Plugin {
 
 		await loadTranslationsOnStartup(this);
 
-		await this.scanningVault.initializeTasksCache();
+		await this.vaultScanner.initializeTasksCache();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -136,6 +140,7 @@ export default class TaskBoard extends Plugin {
 	onunload() {
 		console.log("TaskBoard : Unloading plugin...");
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
+
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
@@ -260,7 +265,7 @@ export default class TaskBoard extends Plugin {
 
 	scanVaultAtStartup() {
 		if (this.settings.data.globalSettings.scanVaultAtStartup) {
-			this.scanningVault.scanVaultForTasks();
+			this.vaultScanner.scanVaultForTasks();
 		}
 	}
 
@@ -290,7 +295,7 @@ export default class TaskBoard extends Plugin {
 		if (hiddenProperties.length === 0) {
 			return;
 		}
-		const tasksPlugin = new TasksApi(this);
+		const tasksPlugin = new TasksPluginApi(this);
 		if (!tasksPlugin.isTasksPluginEnabled()) {
 			this.registerMarkdownPostProcessor((element, context) => {
 				// console.log("Element : ", element, "\nContent :", context);
@@ -586,7 +591,7 @@ export default class TaskBoard extends Plugin {
 		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
 		// 	callback: () => {
-		// 		writeJsonCacheDataFromDisk(this.plugin);
+		// 		writeJsonCacheDataToDisk(this.plugin);
 		// 	},
 		// });
 		// this.addCommand({
@@ -609,19 +614,12 @@ export default class TaskBoard extends Plugin {
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				console.log("File modified event :", file);
-				if (
-					file.path ===
-						this.settings.data.globalSettings
-							.archivedTasksFilePath ||
-					file.path.endsWith(".excalidraw.md")
-				) {
-					return false;
-				}
-
-				if (file instanceof TFile) {
-					// 	this.taskBoardFileStack.push(file.path);
-					this.realTimeScanning.onFileModified(file);
-					this.editorModified = true;
+				if (fileTypeAllowedForScanning(this.plugin, file)) {
+					if (file instanceof TFile) {
+						// 	this.taskBoardFileStack.push(file.path);
+						this.realTimeScanning.onFileModified(file);
+						this.editorModified = true;
+					}
 				}
 			})
 		);
@@ -697,7 +695,7 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.scanningVault.refreshTasksFromFiles(
+								this.vaultScanner.refreshTasksFromFiles(
 									[file],
 									true
 								);

@@ -6,14 +6,17 @@ import {
 	extractPriority,
 	extractTaskId,
 	generateTaskId,
-} from "./ScanningVault";
+} from "./VaultScanner";
 import {
 	NotificationService,
 	UniversalDateOptions,
 	globalSettingsData,
 	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
-import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
+import {
+	TaskRegularExpressions,
+	TASKS_PLUGIN_DEFAULT_SYMBOLS,
+} from "src/regularExpressions/TasksPluginRegularExpr";
 import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
 
 export interface cursorLocation {
@@ -59,19 +62,24 @@ export const getFormattedTaskContent = async (
 	return completeTask;
 };
 
-export const addIdToTaskContent = (
+export const addIdToTaskContent = async (
 	Plugin: TaskBoard,
-	formattedTaskContent: string
-): string => {
+	formattedTaskContent: string,
+	forcefullyAddId?: boolean
+): Promise<{ formattedTaskContent: string; newId: number | undefined }> => {
 	const taskId = extractTaskId(formattedTaskContent);
-	if (!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) {
-		const newId = generateTaskId(Plugin);
+	let newId = undefined;
+	if (
+		(!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) ||
+		forcefullyAddId
+	) {
+		newId = generateTaskId(Plugin);
 		formattedTaskContent = formattedTaskContent.replace(
 			/^(.*?)(\n|$)/,
 			`$1 🆔 ${newId}$2`
 		);
 	}
-	return formattedTaskContent;
+	return { formattedTaskContent, newId };
 };
 
 export const getFormattedTaskContentSync = (task: taskItem): string => {
@@ -958,6 +966,14 @@ export const sanitizeReminder = (
 	return `${title} ${formattedReminder}`;
 };
 
+/**
+ * Sanitizes the "dependsOn" section of the task title.
+ * @param globalSettings - The global settings data.
+ * @param title - The title of the task.
+ * @param dependesOnIds - The IDs of the tasks that this task depends on.
+ * @param cursorLocation - (Optional) The cursor location to insert the dependsOn at a specific position.
+ * @returns The sanitized dependsOn string to be used in the task title.
+ */
 export const sanitizeDependsOn = (
 	globalSettings: globalSettingsData,
 	title: string,
@@ -1304,6 +1320,16 @@ export const cleanTaskTitleLegacy = (
 		}
 	});
 
+	// Remove id
+	if (task.id) {
+		const idMatch = cleanedTitle.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
+		);
+		if (idMatch) {
+			cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
+		}
+	}
+
 	// Remove time (handles both formats)
 	if (task.time) {
 		const timeRegex =
@@ -1383,6 +1409,17 @@ export const cleanTaskTitleLegacy = (
 			cleanedTitle = cleanedTitle.replace(priorityRegex, (match) => {
 				return match.trim() === priorityIcon ? " " : match;
 			});
+		}
+	}
+
+	// Remove dependsOn in various formats
+	if (task.dependsOn && task.dependsOn.length > 0) {
+		const match = cleanedTitle.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.dependsOnRegex
+		);
+		if (match) {
+			cleanedTitle = cleanedTitle.replace(match[0], "");
 		}
 	}
 

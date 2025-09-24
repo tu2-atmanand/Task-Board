@@ -1,10 +1,11 @@
 import { Notice } from "obsidian";
 import TaskBoard from "main";
-import { fsPromises, NodePickedFile } from "src/utils/FileSystem";
+import { fsPromises, NodePickedFile } from "src/services/FileSystem";
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
+import { t } from "src/utils/lang/helper";
 
 /**
  * Migrates settings from imported data to current settings, preserving new fields and syncing new ones.
@@ -71,7 +72,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 /**
  * Exports the plugin settings to a file chosen by the user.
  */
-export async function exportConfigurations(plugin: TaskBoard) {
+export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 	try {
 		const data = plugin.settings;
 		const exportFileName = "task-board-configs-export.json";
@@ -135,7 +136,9 @@ export async function exportConfigurations(plugin: TaskBoard) {
  * Imports plugin settings from a file chosen by the user, merging with existing settings.
  * Preserves new fields in both files.
  */
-export async function importConfigurations(plugin: TaskBoard) {
+export async function importConfigurations(
+	plugin: TaskBoard
+): Promise<boolean> {
 	try {
 		let importedContent: string | undefined = undefined;
 		let extensions = ["json"];
@@ -156,7 +159,7 @@ export async function importConfigurations(plugin: TaskBoard) {
 			});
 			if (!filePaths || filePaths.length === 0) {
 				new Notice("Import cancelled or file not selected.");
-				return;
+				return false;
 			}
 			const pickedFile = new NodePickedFile(filePaths[0]);
 			importedContent = await pickedFile.readText();
@@ -188,7 +191,7 @@ export async function importConfigurations(plugin: TaskBoard) {
 			});
 			if (!importedContent) {
 				new Notice("Import cancelled or file not selected.");
-				return;
+				return false;
 			}
 		}
 
@@ -219,8 +222,52 @@ export async function importConfigurations(plugin: TaskBoard) {
 		// plugin.settings = mergedSettings;
 		// await plugin.saveSettings();
 		new Notice("Settings imported and merged successfully.");
+		return true;
 	} catch (err) {
 		new Notice("Failed to import settings.");
 		console.error(err);
+		return false;
 	}
+}
+
+/**
+ * Shows a notice prompting the user to reload Obsidian to apply certain changes.
+ * @param plugin - TaskBoard plugin instance
+ */
+export async function showReloadObsidianNotice(
+	plugin: TaskBoard
+): Promise<void> {
+	const reloadObsidianNotice = new Notice(
+		createFragment((f) => {
+			f.createDiv("reloadObsidianNotice", (el) => {
+				el.createEl("p", {
+					text: t("reload-obsidian-notice-message"),
+				});
+				el.createEl("button", {
+					text: t("reload-now"),
+					cls: "reloadNowButton",
+					onclick: () => {
+						plugin.app.commands.executeCommandById("app:reload");
+						el.hide();
+					},
+				});
+				el.createEl("button", {
+					text: t("ignore"),
+					cls: "ignoreButton",
+					onclick: () => {
+						el.hide();
+					},
+				});
+			});
+		}),
+		0
+	);
+
+	reloadObsidianNotice.messageEl.onClickEvent((e) => {
+		if (!(e.target instanceof HTMLButtonElement)) {
+			e.stopPropagation();
+			e.preventDefault();
+			e.stopImmediatePropagation();
+		}
+	});
 }

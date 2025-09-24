@@ -176,13 +176,23 @@
             "index": 5,
             "coltag": "done",
             "id": 328227
+          },
+          {
+            "id": 1936828579,
+            "index": 6,
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "*/seeding/*",
+            "coltag": "*/seeding/*"
           }
         ],
         "filters": [
           "#Test",
-          "#working"
+          "#working",
+          "*/seeding/*"
         ],
-        "filterPolarity": "0",
+        "filterPolarity": "1",
         "filterScope": "Both",
         "name": "Tag based board",
         "index": 2,
@@ -210,9 +220,11 @@
           ]
         },
         "tags": {
-          "polarity": 2,
+          "polarity": 3,
           "values": [
-            "#CS"
+            "#CS",
+            "#placeholder/author",
+            "*/seeding/*"
           ]
         },
         "frontMatter": {
@@ -242,7 +254,7 @@
       "showVerticalScroll": false,
       "tagColors": [
         {
-          "name": "bug",
+          "name": "Bug",
           "color": "rgba(253, 17, 33, 0.75)",
           "priority": 1
         },
@@ -275,6 +287,11 @@
           "name": "done",
           "color": "rgba(6, 255, 173, 1)",
           "priority": 7
+        },
+        {
+          "name": "*/seeding/*",
+          "color": "rgba(47, 147, 137, 1)",
+          "priority": 8
         }
       ],
       "editButtonAction": "popUp",
@@ -638,14 +655,18 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 37,
+      "uniqueIdCounter": 45,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 0
-      }
+        "boardIndex": 1,
+        "taskId": ""
+      },
+      "taskNoteIdentifierTag": "taskNote",
+      "doubleClickCardToEdit": "noteInTab",
+      "boundTaskCompletionToChildTasks": false
     }
   }
 }
