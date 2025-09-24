@@ -13,7 +13,7 @@ import { t } from "src/utils/lang/helper";
 import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { buildTaskFromRawContent, generateTaskId } from "src/utils/VaultScanner";
-import { DeleteIcon, EditIcon, FileInput, Network, RefreshCcw } from "lucide-react";
+import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { DEFAULT_SETTINGS, EditButtonMode, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
@@ -1082,7 +1082,7 @@ const EditTaskContent: React.FC<{
 								<div className="EditTaskModalTabHeaderRightBtnSec">
 									{taskExists && (
 										<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
-											<Network height={16} />
+											<Network height={17} />
 										</div>
 									)}
 								</div>
@@ -1113,14 +1113,14 @@ const EditTaskContent: React.FC<{
 										id="EditTaskModalHomeLiveEditorRefreshBtn"
 										aria-label="Refresh the live editor"
 										onClick={() => setIsEditorContentChanged(true)}>
-										<RefreshCcw height={20} />
+										<RefreshCcw height={16} />
 									</button>
 									{taskExists && <button className="EditTaskModalHomeOpenFileBtn"
 										id="EditTaskModalHomeOpenFileBtn"
 										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
 										onClick={(event) => isCtrlPressed ? onOpenFilBtnClicked(event.nativeEvent, true) : onOpenFilBtnClicked(event.nativeEvent, false)}
 									>
-										<FileInput height={20} />
+										<FileInput height={16} />
 									</button>}
 								</div>
 							</div>
@@ -1196,7 +1196,7 @@ const EditTaskContent: React.FC<{
 						<div className="EditTaskModalHomeFooterBtnSec">
 							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
 							<button className="EditTaskModalHomeToggleBtn" onClick={toggleRightSec} aria-label="Toggle Details">
-								☰
+								<PanelRightOpenIcon size={18} />
 							</button>
 						</div>
 					</div>
