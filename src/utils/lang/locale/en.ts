@@ -295,6 +295,7 @@ const en: Lang = {
 	"ignore": "Ignore",
 	"loading-map-data": "Loading map data...",
 	"tasks-refreshed-successfully": "Tasks refreshed successfully",
+	"add-new-task-note": "Add new task-note",
 };
 
 export default en;

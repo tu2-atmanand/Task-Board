@@ -1010,6 +1010,12 @@ export const replaceOldTaskWithNewTask = async (
 	}
 };
 
+/**
+ * Retrieves a task from the TaskBoard plugin's task cache using its ID.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param id - The ID of the task to retrieve. Can be a string (legacyId) or a number (id).
+ * @returns The task item if found, or null if not found.
+ */
 export const getTaskFromId = async (
 	plugin: TaskBoard,
 	id: string | number
