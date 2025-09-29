@@ -129,353 +129,369 @@ export default class vaultScanner {
 		file: TFile,
 		scanFilters: scanFilters
 	): Promise<boolean> {
-		const fileNameWithPath = file.path;
-		const fileContent = await readDataOfVaultFile(
-			this.plugin,
-			fileNameWithPath
-		);
-		const lines = fileContent.split("\n");
-
-		this.tasksCache.Pending[fileNameWithPath] = [];
-		this.tasksCache.Completed[fileNameWithPath] = [];
-
-		// Extract frontmatter from the file
-		const frontmatter = extractFrontmatterFromFile(this.plugin, file);
-		console.log(
-			"FrontmatterCache extracted : ",
-			frontmatter,
-			"\nFor file:",
-			fileNameWithPath,
-			"\nValue of first tag:",
-			frontmatter?.tags?.[0]
-		);
-
-		// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
-		if (
-			this.plugin.settings.data.globalSettings
-				.frontmatterPropertyForReminder &&
-			frontmatter &&
-			frontmatter[
-				this.plugin.settings.data.globalSettings
-					.frontmatterPropertyForReminder
-			]
-		) {
-			const note: noteItem = {
-				filePath: fileNameWithPath,
-				frontmatter: frontmatter,
-				reminder:
-					frontmatter[
-						this.plugin.settings.data.globalSettings
-							.frontmatterPropertyForReminder
-					],
-			};
-
-			// Check if the note already exists
-			const existingNoteIndex = this.tasksCache.Notes.findIndex(
-				(n) => n.filePath === fileNameWithPath
-			);
-			if (existingNoteIndex !== -1) {
-				// Replace the existing note
-				this.tasksCache.Notes[existingNoteIndex] = note;
-			} else {
-				// Add the new note
-				this.tasksCache.Notes.push(note);
-			}
-		}
-
-		// Task Note Detection: Check if this note is marked as a task note
-		if (
-			this.plugin.settings.data.globalSettings.experimentalFeatures &&
-			frontmatter &&
-			isTaskNotePresentInFrontmatter(this.plugin, frontmatter)
-		) {
-			// Extract properties from frontmatter
-			const taskNoteProperties = extractTaskNoteProperties(
-				frontmatter,
+		try {
+			const fileNameWithPath = file.path;
+			const fileContent = await readDataOfVaultFile(
+				this.plugin,
 				fileNameWithPath
 			);
+			const lines = fileContent.split("\n");
+
+			this.tasksCache.Pending[fileNameWithPath] = [];
+			this.tasksCache.Completed[fileNameWithPath] = [];
+
+			// Extract frontmatter from the file
+			const frontmatter = extractFrontmatterFromFile(this.plugin, file);
+			console.log(
+				"FrontmatterCache extracted : ",
+				frontmatter,
+				"\nFor file:",
+				fileNameWithPath,
+				"\nValue of first tag:",
+				frontmatter?.tags?.[0]
+			);
+
+			// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
 			if (
-				scanFilterForTags(taskNoteProperties?.tags || [], scanFilters)
+				this.plugin.settings.data.globalSettings
+					.frontmatterPropertyForReminder &&
+				frontmatter &&
+				frontmatter[
+					this.plugin.settings.data.globalSettings
+						.frontmatterPropertyForReminder
+				]
 			) {
-				console.log(
-					"Scanning only following file as it is a task-note:",
-					file
+				const note: noteItem = {
+					filePath: fileNameWithPath,
+					frontmatter: frontmatter,
+					reminder:
+						frontmatter[
+							this.plugin.settings.data.globalSettings
+								.frontmatterPropertyForReminder
+						],
+				};
+
+				// Check if the note already exists
+				const existingNoteIndex = this.tasksCache.Notes.findIndex(
+					(n) => n.filePath === fileNameWithPath
 				);
+				if (existingNoteIndex !== -1) {
+					// Replace the existing note
+					this.tasksCache.Notes[existingNoteIndex] = note;
+				} else {
+					// Add the new note
+					this.tasksCache.Notes.push(note);
+				}
+			}
 
-				this.TaskDetected = true;
-
-				// Extract sub-tasks from the note content (excluding frontmatter)
-				const contentWithoutFrontmatter = fileContent.replace(
-					/^---[\s\S]*?---\n?/,
-					""
+			// Task Note Detection: Check if this note is marked as a task note
+			if (
+				this.plugin.settings.data.globalSettings.experimentalFeatures &&
+				frontmatter &&
+				isTaskNotePresentInFrontmatter(this.plugin, frontmatter)
+			) {
+				// Extract properties from frontmatter
+				const taskNoteProperties = extractTaskNoteProperties(
+					frontmatter,
+					fileNameWithPath
 				);
-				const contentLines = contentWithoutFrontmatter.split("\n");
-				const subTasks: string[] = [];
-
-				// Find tasks within the note content to use as sub-tasks
-				for (
-					let lineIndex = 0;
-					lineIndex < contentLines.length;
-					lineIndex++
+				if (
+					scanFilterForTags(
+						taskNoteProperties?.tags || [],
+						scanFilters
+					)
 				) {
-					const line = contentLines[lineIndex];
-					if (isTaskLine(line)) {
-						// Add this task line as a sub-task
-						subTasks.push(line);
+					console.log(
+						"Scanning only following file as it is a task-note:",
+						file
+					);
+
+					this.TaskDetected = true;
+
+					// Extract sub-tasks from the note content (excluding frontmatter)
+					const contentWithoutFrontmatter = fileContent.replace(
+						/^---[\s\S]*?---\n?/,
+						""
+					);
+					const contentLines = contentWithoutFrontmatter.split("\n");
+					const subTasks: string[] = [];
+
+					// Find tasks within the note content to use as sub-tasks
+					for (
+						let lineIndex = 0;
+						lineIndex < contentLines.length;
+						lineIndex++
+					) {
+						const line = contentLines[lineIndex];
+						if (isTaskLine(line)) {
+							// Add this task line as a sub-task
+							subTasks.push(line);
+						}
+					}
+
+					// Create task item for the task note
+					const taskNoteItem: taskItem = {
+						id: Number(taskNoteProperties.id)
+							? Number(taskNoteProperties.id)
+							: generateRandomTempTaskId(),
+						legacyId: taskNoteProperties.id
+							? String(taskNoteProperties.id)
+							: "", // Storing the legacyId for backward compatibility
+						title: taskNoteProperties.title || file.basename,
+						body: subTasks, // Store sub-tasks in body
+						createdDate: taskNoteProperties.createdDate || "",
+						startDate: taskNoteProperties.startDate || "",
+						scheduledDate: taskNoteProperties.scheduledDate || "",
+						due: taskNoteProperties.due || "",
+						tags: taskNoteProperties.tags || [],
+						frontmatterTags: [],
+						time: "", // Task notes don't have time ranges
+						priority: taskNoteProperties.priority || 0,
+						dependsOn: taskNoteProperties.dependsOn || [],
+						status: taskNoteProperties.status || " ", // Default to unchecked
+						filePath: fileNameWithPath,
+						taskLocation: {
+							startLine: 1,
+							startCharIndex: 0,
+							endLine: lines.length,
+							endCharIndex: lines[lines.length - 1]?.length || 0,
+						},
+						completion: taskNoteProperties.completion || "",
+						cancelledDate: taskNoteProperties.cancelledDate || "",
+						reminder: taskNoteProperties.reminder || "",
+					};
+
+					console.log("Task Note Item Created:", taskNoteItem);
+
+					// Add to appropriate cache based on completion status
+					const isTaskNoteCompleted =
+						taskNoteItem.status === "unchecked" ||
+						taskNoteItem.status === "pending";
+					if (isTaskNoteCompleted) {
+						// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
+						const completed = this.tasksCache.Completed;
+						if (completed) {
+							delete completed[fileNameWithPath];
+							this.tasksCache.Completed = {
+								[fileNameWithPath]: [taskNoteItem],
+								...completed,
+							};
+						}
+					} else {
+						// this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
+						const pending = this.tasksCache.Pending;
+						if (pending) {
+							// Remove and re-insert at the top
+							// const tasks = pending[fileNameWithPath];
+							delete pending[fileNameWithPath];
+							this.tasksCache.Pending = {
+								[fileNameWithPath]: [taskNoteItem],
+								...pending,
+							};
+						}
 					}
 				}
 
-				// Create task item for the task note
-				const taskNoteItem: taskItem = {
-					id: Number(taskNoteProperties.id)
-						? Number(taskNoteProperties.id)
-						: generateRandomTempTaskId(),
-					legacyId: taskNoteProperties.id
-						? String(taskNoteProperties.id)
-						: "", // Storing the legacyId for backward compatibility
-					title: taskNoteProperties.title || file.basename,
-					body: subTasks, // Store sub-tasks in body
-					createdDate: taskNoteProperties.createdDate || "",
-					startDate: taskNoteProperties.startDate || "",
-					scheduledDate: taskNoteProperties.scheduledDate || "",
-					due: taskNoteProperties.due || "",
-					tags: taskNoteProperties.tags || [],
-					frontmatterTags: [],
-					time: "", // Task notes don't have time ranges
-					priority: taskNoteProperties.priority || 0,
-					dependsOn: taskNoteProperties.dependsOn || [],
-					status: taskNoteProperties.status || " ", // Default to unchecked
-					filePath: fileNameWithPath,
-					taskLocation: {
-						startLine: 1,
-						startCharIndex: 0,
-						endLine: lines.length,
-						endCharIndex: lines[lines.length - 1]?.length || 0,
-					},
-					completion: taskNoteProperties.completion || "",
-					cancelledDate: taskNoteProperties.cancelledDate || "",
-					reminder: taskNoteProperties.reminder || "",
-				};
+				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
+					delete this.tasksCache.Pending[fileNameWithPath];
+				}
+				if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
+					delete this.tasksCache.Completed[fileNameWithPath];
+				}
 
-				console.log("Task Note Item Created:", taskNoteItem);
+				return true;
+			} else {
+				// Else, proceed with normal task line detection inside the file content.
+				for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+					const line = lines[lineIndex];
+					if (isTaskLine(line)) {
+						const tags = extractTags(line);
+						if (scanFilterForTags(tags, scanFilters)) {
+							this.TaskDetected = true;
+							const legacyId = extractTaskId(line);
+							const taskStatus = extractCheckboxSymbol(line);
+							const isTaskCompleted = isCompleted(line);
+							// const title = extractTitle(line);
+							const title = line; // we will be storing the taskLine as it is inside the title property
+							const time = extractTime(line);
+							const createdDate = extractCreatedDate(line);
+							let startDate = extractStartDate(line);
+							let scheduledDate = extractScheduledDate(line);
+							let dueDate = extractDueDate(line);
+							const priority = extractPriority(line);
+							const dependsOn = extractDependsOn(line)[1];
+							const reminder = extractReminder(
+								line,
+								startDate,
+								scheduledDate,
+								dueDate
+							);
+							const completionDate = extractCompletionDate(line);
+							const cancelledDate = extractCancelledDate(line);
+							const bodyLines = extractBody(
+								lines,
+								lineIndex + 1,
+								this.indentationString
+							);
 
-				// Add to appropriate cache based on completion status
-				const isTaskNoteCompleted =
-					taskNoteItem.status === "unchecked" ||
-					taskNoteItem.status === "pending";
-				if (isTaskNoteCompleted) {
-					// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
-					const completed = this.tasksCache.Completed;
-					if (completed) {
-						delete completed[fileNameWithPath];
-						this.tasksCache.Completed = {
-							[fileNameWithPath]: [taskNoteItem],
-							...completed,
-						};
+							if (
+								this.plugin.settings.data.globalSettings
+									.dailyNotesPluginComp &&
+								((this.plugin.settings.data.globalSettings
+									.universalDate ===
+									UniversalDateOptions.dueDate &&
+									dueDate === "") ||
+									(this.plugin.settings.data.globalSettings
+										.universalDate ===
+										UniversalDateOptions.startDate &&
+										startDate === "") ||
+									(this.plugin.settings.data.globalSettings
+										.universalDate ===
+										UniversalDateOptions.scheduledDate &&
+										scheduledDate === ""))
+							) {
+								const universalDateFormat =
+									this.plugin.settings.data.globalSettings
+										.universalDateFormat;
+								const basename = file.basename;
+
+								// Check if the basename matches the dueFormat using moment
+								const moment =
+									_moment as unknown as typeof _moment.default;
+								if (
+									moment(
+										basename,
+										universalDateFormat,
+										true
+									).isValid()
+								) {
+									if (
+										this.plugin.settings.data.globalSettings
+											.universalDate ===
+										UniversalDateOptions.dueDate
+									) {
+										dueDate = basename; // If the basename matches the dueFormat, assign it to due
+									} else if (
+										this.plugin.settings.data.globalSettings
+											.universalDate ===
+										UniversalDateOptions.startDate
+									) {
+										startDate = basename; // If the basename matches the dueFormat, assign it to startDate
+									} else if (
+										this.plugin.settings.data.globalSettings
+											.universalDate ===
+										UniversalDateOptions.scheduledDate
+									) {
+										scheduledDate = basename; // If the basename matches the dueFormat, assign it to scheduledDate
+									}
+								}
+							}
+
+							let frontmatterTags: string[] = []; // Initialize frontmatterTags
+							if (
+								this.plugin.settings.data.globalSettings
+									.showFrontmatterTagsOnCards
+							) {
+								// Extract frontmatter tags
+								frontmatterTags =
+									extractFrontmatterTags(frontmatter);
+							}
+
+							const task: taskItem = {
+								id: Number(legacyId)
+									? Number(legacyId)
+									: generateRandomTempTaskId(),
+								legacyId: legacyId, // Storing the legacyId for backward compatibility
+								status: taskStatus,
+								title: title,
+								body: bodyLines,
+								time: time,
+								createdDate: createdDate,
+								startDate: startDate,
+								scheduledDate: scheduledDate,
+								due: dueDate,
+								tags: tags,
+								frontmatterTags: frontmatterTags,
+								priority: priority,
+								dependsOn: dependsOn
+									? dependsOn.split(",").map((d) => d.trim())
+									: [],
+								filePath: fileNameWithPath,
+								taskLocation: {
+									startLine: lineIndex + 1,
+									startCharIndex: 0,
+									endLine: lineIndex + 1 + bodyLines.length,
+									endCharIndex:
+										bodyLines.length > 0
+											? bodyLines[bodyLines.length - 1]
+													.length
+											: line.length,
+								},
+								completion: completionDate,
+								cancelledDate: cancelledDate,
+								reminder: reminder,
+							};
+
+							console.log("Task Item Created:", task);
+
+							if (isTaskCompleted) {
+								this.tasksCache.Completed[
+									fileNameWithPath
+								].push(task);
+							} else {
+								this.tasksCache.Pending[fileNameWithPath].push(
+									task
+								);
+							}
+							lineIndex = lineIndex + bodyLines.length; // Move the lineIndex forward by the number of body lines
+						} else {
+							// console.log("The tasks is not allowed...");
+						}
 					}
+				}
+
+				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
+					delete this.tasksCache.Pending[fileNameWithPath];
 				} else {
-					// this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
+					// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
 					const pending = this.tasksCache.Pending;
-					if (pending) {
+					if (pending && pending[fileNameWithPath]) {
 						// Remove and re-insert at the top
-						// const tasks = pending[fileNameWithPath];
+						const tasks = pending[fileNameWithPath];
 						delete pending[fileNameWithPath];
 						this.tasksCache.Pending = {
-							[fileNameWithPath]: [taskNoteItem],
+							[fileNameWithPath]: tasks,
 							...pending,
 						};
 					}
 				}
-			}
 
-			if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
-				delete this.tasksCache.Pending[fileNameWithPath];
-			}
-			if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
-				delete this.tasksCache.Completed[fileNameWithPath];
-			}
-		} else {
-			// Else, proceed with normal task line detection inside the file content.
-			for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-				const line = lines[lineIndex];
-				if (isTaskLine(line)) {
-					const tags = extractTags(line);
-					if (scanFilterForTags(tags, scanFilters)) {
-						this.TaskDetected = true;
-						const legacyId = extractTaskId(line);
-						const taskStatus = extractCheckboxSymbol(line);
-						const isTaskCompleted = isCompleted(line);
-						// const title = extractTitle(line);
-						const title = line; // we will be storing the taskLine as it is inside the title property
-						const time = extractTime(line);
-						const createdDate = extractCreatedDate(line);
-						let startDate = extractStartDate(line);
-						let scheduledDate = extractScheduledDate(line);
-						let dueDate = extractDueDate(line);
-						const priority = extractPriority(line);
-						const dependsOn = extractDependsOn(line)[1];
-						const reminder = extractReminder(
-							line,
-							startDate,
-							scheduledDate,
-							dueDate
-						);
-						const completionDate = extractCompletionDate(line);
-						const cancelledDate = extractCancelledDate(line);
-						const bodyLines = extractBody(
-							lines,
-							lineIndex + 1,
-							this.indentationString
-						);
-
-						if (
-							this.plugin.settings.data.globalSettings
-								.dailyNotesPluginComp &&
-							((this.plugin.settings.data.globalSettings
-								.universalDate ===
-								UniversalDateOptions.dueDate &&
-								dueDate === "") ||
-								(this.plugin.settings.data.globalSettings
-									.universalDate ===
-									UniversalDateOptions.startDate &&
-									startDate === "") ||
-								(this.plugin.settings.data.globalSettings
-									.universalDate ===
-									UniversalDateOptions.scheduledDate &&
-									scheduledDate === ""))
-						) {
-							const universalDateFormat =
-								this.plugin.settings.data.globalSettings
-									.universalDateFormat;
-							const basename = file.basename;
-
-							// Check if the basename matches the dueFormat using moment
-							const moment =
-								_moment as unknown as typeof _moment.default;
-							if (
-								moment(
-									basename,
-									universalDateFormat,
-									true
-								).isValid()
-							) {
-								if (
-									this.plugin.settings.data.globalSettings
-										.universalDate ===
-									UniversalDateOptions.dueDate
-								) {
-									dueDate = basename; // If the basename matches the dueFormat, assign it to due
-								} else if (
-									this.plugin.settings.data.globalSettings
-										.universalDate ===
-									UniversalDateOptions.startDate
-								) {
-									startDate = basename; // If the basename matches the dueFormat, assign it to startDate
-								} else if (
-									this.plugin.settings.data.globalSettings
-										.universalDate ===
-									UniversalDateOptions.scheduledDate
-								) {
-									scheduledDate = basename; // If the basename matches the dueFormat, assign it to scheduledDate
-								}
-							}
-						}
-
-						let frontmatterTags: string[] = []; // Initialize frontmatterTags
-						if (
-							this.plugin.settings.data.globalSettings
-								.showFrontmatterTagsOnCards
-						) {
-							// Extract frontmatter tags
-							frontmatterTags =
-								extractFrontmatterTags(frontmatter);
-						}
-
-						const task: taskItem = {
-							id: Number(legacyId)
-								? Number(legacyId)
-								: generateRandomTempTaskId(),
-							legacyId: legacyId, // Storing the legacyId for backward compatibility
-							status: taskStatus,
-							title: title,
-							body: bodyLines,
-							time: time,
-							createdDate: createdDate,
-							startDate: startDate,
-							scheduledDate: scheduledDate,
-							due: dueDate,
-							tags: tags,
-							frontmatterTags: frontmatterTags,
-							priority: priority,
-							dependsOn: dependsOn
-								? dependsOn.split(",").map((d) => d.trim())
-								: [],
-							filePath: fileNameWithPath,
-							taskLocation: {
-								startLine: lineIndex + 1,
-								startCharIndex: 0,
-								endLine: lineIndex + 1 + bodyLines.length,
-								endCharIndex:
-									bodyLines.length > 0
-										? bodyLines[bodyLines.length - 1].length
-										: line.length,
-							},
-							completion: completionDate,
-							cancelledDate: cancelledDate,
-							reminder: reminder,
+				if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
+					delete this.tasksCache.Completed[fileNameWithPath];
+				} else {
+					const completed = this.tasksCache.Completed;
+					if (completed && completed[fileNameWithPath]) {
+						// Remove and re-insert at the top
+						const tasks = completed[fileNameWithPath];
+						delete completed[fileNameWithPath];
+						this.tasksCache.Completed = {
+							[fileNameWithPath]: tasks,
+							...completed,
 						};
-
-						console.log("Task Item Created:", task);
-
-						if (isTaskCompleted) {
-							this.tasksCache.Completed[fileNameWithPath].push(
-								task
-							);
-						} else {
-							this.tasksCache.Pending[fileNameWithPath].push(
-								task
-							);
-						}
-						lineIndex = lineIndex + bodyLines.length; // Move the lineIndex forward by the number of body lines
-					} else {
-						// console.log("The tasks is not allowed...");
 					}
 				}
-			}
 
-			if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
-				delete this.tasksCache.Pending[fileNameWithPath];
-			} else {
-				// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
-				const pending = this.tasksCache.Pending;
-				if (pending && pending[fileNameWithPath]) {
-					// Remove and re-insert at the top
-					const tasks = pending[fileNameWithPath];
-					delete pending[fileNameWithPath];
-					this.tasksCache.Pending = {
-						[fileNameWithPath]: tasks,
-						...pending,
-					};
-				}
+				return true;
 			}
-
-			if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
-				delete this.tasksCache.Completed[fileNameWithPath];
-			} else {
-				const completed = this.tasksCache.Completed;
-				if (completed && completed[fileNameWithPath]) {
-					// Remove and re-insert at the top
-					const tasks = completed[fileNameWithPath];
-					delete completed[fileNameWithPath];
-					this.tasksCache.Completed = {
-						[fileNameWithPath]: tasks,
-						...completed,
-					};
-				}
-			}
+		} catch (error) {
+			console.error(
+				"Error occurred while extracting tasks from file:",
+				file.path,
+				"\nERROR :",
+				error
+			);
+			return false;
 		}
-
-		return true;
 
 		// this.saveTasksToJsonCache(); // TODO : This function call can be moved to the place where I am calling extractTasksFromFile for each file. No need to call this function after each file scan.
 	}
@@ -484,14 +500,17 @@ export default class vaultScanner {
 	async refreshTasksFromFiles(
 		files: (TFile | null)[],
 		showNotice: boolean
-	): Promise<void> {
+	): Promise<boolean> {
+		console.log("refreshTasksFromFiles - Files received : ", files);
 		if (!files || files.length === 0) {
-			return;
+			return false;
 		}
 
 		try {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
+			let flag: boolean | void = true;
+			let atleastOneFileScanned = false;
 			for (const file of files) {
 				if (
 					file !== null &&
@@ -502,26 +521,23 @@ export default class vaultScanner {
 						scanFilters
 					)
 				) {
+					atleastOneFileScanned = true;
 					// TODO : Try testing if removing the await from the below line will going to speed up the process.
-					await this.extractTasksFromFile(file, scanFilters).then(
-						(result) => {
-							if (!result)
-								throw new Error(
-									"extractTasksFromFile returned false"
-								);
-
-							if (showNotice) {
-								new Notice("tasks-refreshed-successfully");
-							}
-
-							console.log(
-								"Should run after the file has been properly scanned."
-							);
-							this.saveTasksToJsonCache();
-						}
+					flag = await this.extractTasksFromFile(file, scanFilters);
+					console.log(
+						"result value return  by extractTasksFromFile :",
+						flag
 					);
+					// .then((result) => {
+					// 	if (!result)
+					// 		throw new Error(
+					// 			"extractTasksFromFile returned false"
+					// 		);
 
-					return;
+					// 	if (showNotice) {
+					// 		new Notice("tasks-refreshed-successfully");
+					// 	}
+					// });
 
 					// const fileNameWithPath = file.path;
 					// const fileContent = await this.app.vault.cachedRead(file);
@@ -628,20 +644,37 @@ export default class vaultScanner {
 					if (showNotice) {
 						new Notice(t("not-valid-file-type-for-scanning"), 5000);
 					}
-
-					return;
 				}
+			}
+
+			console.log(
+				"Should run after all the files have been properly scanned."
+			);
+
+			if (flag) {
+				if (atleastOneFileScanned) {
+					if (showNotice) {
+						new Notice("tasks-refreshed-successfully");
+					}
+
+					this.saveTasksToJsonCache();
+				}
+
+				return true;
+			} else {
+				throw new Error("extractTasksFromFile returned false");
 			}
 		} catch (error) {
 			bugReporter(
 				this.plugin,
+				`There was an error while scanning tasks from the file(s): ${files
+					.map((f) => f?.path)
+					.join("\n")}`,
 				error as string,
-				`There was an error while scanning tasks from the file(s): ${files.every(
-					(f) => f?.path + "\n"
-				)}`,
 				"VaultScanner.tsx/refreshTasksFromFiles"
 			);
-			console.error("Error refreshing tasks for file(s):", error);
+			console.error(error);
+			return false;
 		}
 	}
 

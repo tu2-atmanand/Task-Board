@@ -62,8 +62,7 @@ export class RealTimeScanning {
 
 		const filesToProcess = this.taskBoardFileStack.slice();
 		console.log("Processing files from stack:", filesToProcess);
-		// Clear the stack to avoid re-processing during this run.
-		this.taskBoardFileStack = [];
+
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
 			.filter((file) => !!file);
@@ -76,12 +75,22 @@ export class RealTimeScanning {
 				files.push(newFile);
 			}
 		}
+
+		let result = false;
 		if (filesToProcess.length > 0) {
 			// Send all files for scanning and updating tasks
-			await this.vaultScanner.refreshTasksFromFiles(files, false);
+			result = await this.vaultScanner.refreshTasksFromFiles(
+				files,
+				false
+			);
 		}
-		// Save updated stack (which should now be empty)
-		this.saveStack();
+
+		if (result) {
+			// Clear the stack to avoid re-processing during this run.
+			this.taskBoardFileStack = [];
+			// Save updated stack (which should now be empty)
+			this.saveStack();
+		}
 
 		// Reset the editorModified flag after the scan.
 		this.plugin.editorModified = false;
