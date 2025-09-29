@@ -261,8 +261,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border-radius: 5px;
 	display: flex;
 	flex-direction: column;
-	min-width: var(--column-width) !important;
-	width: var(--column-width) !important;
+	min-width: var(--task-board-column-width) !important;
+	width: var(--task-board-column-width) !important;
 }
 
 .taskBoardColumnSecHeader {

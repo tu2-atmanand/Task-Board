@@ -12,7 +12,7 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
 
 type CustomCSSProperties = CSSProperties & {
-	'--column-width': string;
+	'--task-board-column-width': string;
 };
 
 export interface ColumnProps {
@@ -70,7 +70,7 @@ const Column: React.FC<ColumnProps> = ({
 	}
 
 	return (
-		<div className="TaskBoardColumnsSection" style={{ '--column-width': columnWidth } as CustomCSSProperties} data-column-type={columnData.colType} data-column-tag-name={tagData?.name} data-column-tag-color={tagData?.color}>
+		<div className="TaskBoardColumnsSection" style={{ '--task-board-column-width': columnWidth } as CustomCSSProperties} data-column-type={columnData.colType} data-column-tag-name={tagData?.name} data-column-tag-color={tagData?.color}>
 			<div className="taskBoardColumnSecHeader">
 				<div className="taskBoardColumnSecHeaderTitleSec">
 					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
