@@ -455,6 +455,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-recurring { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
+
 					// TODO : Reminder is pending.
 				}
 			});
@@ -733,15 +734,6 @@ export default class TaskBoard extends Plugin {
 								});
 						});
 					}
-
-					// menu.addItem((item) => {
-					// 	item.setTitle("DEV : Save Changes") // Cant keep this option in the meny, only for dev
-					// 		.setIcon(TaskBoardIcon)
-					// 		.setSection("action")
-					// 		.onClick(() => {
-					// 			onUnloadSave(this.plugin);
-					// 		});
-					// });
 				}
 
 				if (fileIsFolder) {

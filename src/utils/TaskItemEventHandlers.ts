@@ -125,7 +125,7 @@ export const handleSubTasksChange = (
 	oldTask: taskItem,
 	updatedTask: taskItem
 ) => {
-	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated.
+	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated in the note.
 	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
 		plugin.realTimeScanning.processAllUpdatedFiles(updatedTask.filePath);
 	});

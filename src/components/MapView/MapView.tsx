@@ -137,7 +137,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// const reactFlowInstance = useReactFlow();
 	// useEffect(() => {
 	// 	// Set initial viewport (x, y, zoom)
-	// 	reactFlowInstance.setViewport({ x: positions[0].x, y: positions[0].y, zoom: 1 }); // TODO : Later store this value and then apply it. Also, a new feature can be added, where user will open this MapView with the position of a selected task. In this case, directly set the viewport to that position, with adequate zoom level.
+	// 	reactFlowInstance.setViewport({ x: positions[0].x, y: positions[0].y, zoom: 1 });
 	// }, []);
 
 

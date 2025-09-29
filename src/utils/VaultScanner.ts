@@ -492,8 +492,6 @@ export default class vaultScanner {
 			);
 			return false;
 		}
-
-		// this.saveTasksToJsonCache(); // TODO : This function call can be moved to the place where I am calling extractTasksFromFile for each file. No need to call this function after each file scan.
 	}
 
 	// Update tasks for an array of files (overwrite existing tasks for each file)
@@ -892,8 +890,6 @@ export function extractBody(
 		) {
 			bodyLines.push(line);
 		} else {
-			// TODO : Initially i tried considering the next line without any indentation also as the body of the task, but if user has added multiple tasks right one after another then those should be different tasks.
-			// bodyLines.push(`\t${line}`);
 			break;
 		}
 	}
