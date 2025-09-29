@@ -48,16 +48,16 @@
       {
         "columns": [
           {
-            "id": 3494,
-            "colType": "dated",
+            "id": 1799377278,
+            "index": 1,
+            "colType": "undated",
             "active": true,
             "collapsed": false,
-            "name": "Today, updated",
-            "index": 2,
+            "name": "Backlog",
             "datedBasedColumn": {
-              "dateType": "scheduledDate",
               "from": 0,
-              "to": 0
+              "to": 0,
+              "dateType": "scheduledDate"
             }
           },
           {
@@ -65,12 +65,25 @@
             "colType": "dated",
             "active": true,
             "collapsed": false,
-            "name": "Over Due, updating",
-            "index": 3,
+            "name": "Over Due",
+            "index": 2,
             "datedBasedColumn": {
               "dateType": "scheduledDate",
               "from": -300,
               "to": -1
+            }
+          },
+          {
+            "id": 3494,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Today",
+            "index": 3,
+            "datedBasedColumn": {
+              "dateType": "scheduledDate",
+              "from": 0,
+              "to": 0
             }
           },
           {
@@ -107,15 +120,6 @@
             "limit": 20,
             "name": "Completed, updated",
             "index": 6
-          },
-          {
-            "id": 4257554450,
-            "index": 7,
-            "colType": "pathFiltered",
-            "active": true,
-            "collapsed": false,
-            "name": "DailyNotes.md",
-            "filePaths": "DailyNotes.md"
           }
         ],
         "filters": [
@@ -172,7 +176,7 @@
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Working as Expected",
+            "name": "Ready to publish",
             "index": 5,
             "coltag": "done",
             "id": 328227
@@ -181,7 +185,7 @@
             "id": 1936828579,
             "index": 6,
             "colType": "namedTag",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*"
@@ -192,7 +196,7 @@
           "#working",
           "*/seeding/*"
         ],
-        "filterPolarity": "1",
+        "filterPolarity": "0",
         "filterScope": "Both",
         "name": "Tag based board",
         "index": 2,
@@ -207,16 +211,13 @@
         "files": {
           "polarity": 3,
           "values": [
-            "TODO.md",
-            "0-ImportantData.md",
-            "2025-05-23.md"
+            "Testing Indented Task Bug.md"
           ]
         },
         "folders": {
-          "polarity": 2,
+          "polarity": 3,
           "values": [
-            "obsidian-hub-0.2.1",
-            "Daily_Notes"
+            "Task Board/1.7.0"
           ]
         },
         "tags": {
@@ -637,7 +638,7 @@
       "autoAddUniversalDate": true,
       "universalDate": "scheduledDate",
       "archivedTasksFilePath": "",
-      "showFileNameInCard": true,
+      "showFileNameInCard": false,
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": ".obsidian/plugins/task-board/tasks.json",
       "notificationService": "obsiApp",
@@ -651,11 +652,25 @@
         }
       ],
       "cardSectionsVisibility": "hideBoth",
-      "hiddenTaskProperties": [],
+      "hiddenTaskProperties": [
+        "tags",
+        "createdDate",
+        "startDate",
+        "scheduledDate",
+        "dueDate",
+        "completionDate",
+        "cancelledDate",
+        "on-completion",
+        "priority",
+        "recurring",
+        "time",
+        "dependencies",
+        "reminder"
+      ],
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 45,
+      "uniqueIdCounter": 18,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
@@ -666,7 +681,7 @@
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",
-      "boundTaskCompletionToChildTasks": false
+      "boundTaskCompletionToChildTasks": true
     }
   }
 }
