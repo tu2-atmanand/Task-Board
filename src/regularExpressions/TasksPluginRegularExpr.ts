@@ -113,6 +113,7 @@ export interface DefaultTaskSerializerSymbols {
 	readonly onCompletionSymbol: string;
 	readonly idSymbol: string;
 	readonly dependsOnSymbol: string;
+	readonly dependsOnCompletedSymbol: string;
 	readonly TaskFormatRegularExpressions: {
 		priorityRegex: RegExp;
 		startDateRegex: RegExp;
@@ -184,6 +185,7 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 	recurrenceSymbol: "🔁",
 	onCompletionSymbol: "🏁",
 	dependsOnSymbol: "⛔",
+	dependsOnCompletedSymbol: "⛔︎",
 	idSymbol: "🆔",
 	TaskFormatRegularExpressions: {
 		priorityRegex: fieldRegex("(🔺|⏫|🔼|🔽|⏬)", "", ""),

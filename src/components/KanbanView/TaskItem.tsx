@@ -1,6 +1,6 @@
 // /src/components/TaskItem.tsx
 
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaExternalLinkSquareAlt, FaLink, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
@@ -8,19 +8,20 @@ import { handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNot
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component, Notice } from 'obsidian';
-import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
+import { EditButtonMode, cardSectionsVisibilityOptions, viewTypeNames } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { parseUniversalDate } from 'src/utils/TaskItemUtils';
+import { getTaskFromId, parseUniversalDate } from 'src/utils/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
-import { TaskRegularExpressions } from 'src/regularExpressions/TasksPluginRegularExpr';
+import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
 import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/FiltersVerifier';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
+import { bugReporter } from 'src/services/OpenModals';
 
 export interface TaskProps {
 	key: number;
@@ -362,6 +363,29 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	}
 
+	const handleOpenChildTaskModal = async (event: React.MouseEvent, childTaskId: string) => {
+		event.stopPropagation();
+		try {
+			const childTask = await getTaskFromId(plugin, childTaskId);
+			if (!childTask) {
+				bugReporter(plugin, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "TaskItem.tsx/handleOpenChildTaskModal");
+				return;
+			}
+
+			const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+			if (settingOption !== EditButtonMode.NoteInHover) {
+				handleEditTask(plugin, childTask, settingOption);
+			} else {
+				event.ctrlKey = true;
+				markdownButtonHoverPreviewEvent(plugin.app, event, childTask.filePath);
+				event.ctrlKey = false;
+			}
+		} catch (error) {
+			console.error("Error opening child task modal:", error);
+			bugReporter(plugin, "Error opening child task modal", String(error), "TaskItem.tsx/handleOpenChildTaskModal");
+		}
+	}
+
 	const renderHeader = () => {
 		try {
 			if (plugin.settings.data.globalSettings?.showHeader) {
@@ -634,8 +658,78 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		}
 	};
 
+	// State to hold child tasks data
+	const [childTasksData, setChildTasksData] = useState<Record<string, taskItem | null>>({});
+
+	// Effect to load child tasks asynchronously
+	useEffect(() => {
+		if (task?.dependsOn && task.dependsOn.length > 0) {
+			const loadChildTasks = async () => {
+				const childTasksMap: Record<string, taskItem | null> = {};
+				await Promise.all((task?.dependsOn ?? []).map(async (dependsOnId) => {
+					const childTask = await getTaskFromId(plugin, dependsOnId);
+					childTasksMap[dependsOnId] = childTask;
+				}));
+				setChildTasksData(childTasksMap);
+			};
+			loadChildTasks();
+		} else {
+			setChildTasksData({});
+		}
+	}, [task.dependsOn]);
+
+	const renderChildTasks = () => {
+		try {
+			// Render only if the last viewed history is Kanban and there are child tasks
+			if (plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
+				return (
+					<div className="taskItemChildTasksSection">
+						{/* Placeholder for future child tasks rendering */}
+						<div className="taskItemChildTasks">
+							{task?.dependsOn && task?.dependsOn.map((dependsOnId) => {
+								const childTask = childTasksData[dependsOnId];
+								if (!childTask) return null; // Skip if child task not found in cache
+
+								// Render each child task with a link to open it in the modal
+								const isChildTaskCompleted = childTask.status === taskStatuses.checked || childTask.status === taskStatuses.regular || childTask.status === taskStatuses.dropped;
+								const depTaskTitle = childTask.title || `There was an error fetching the task with ID: ${dependsOnId}`;
+
+								// Simple version just showing the ID and a symbol
+								return (
+									<div key={`${task.id}-dep-${dependsOnId}`} className="taskItemChildTask">
+										<div className='taskItemChildTaskContent' onClick={(event) => handleOpenChildTaskModal(event, dependsOnId)}>
+											<span className='taskItemChildTaskSymbol' role="img" aria-label="blocked">{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
+											<span
+												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
+												style={{
+													whiteSpace: 'nowrap',
+													overflow: 'hidden',
+													textOverflow: 'ellipsis',
+													display: 'block',
+												}}
+												title={depTaskTitle.slice(6)}
+											>
+												{depTaskTitle.slice(6)}
+											</span></div>
+									</div>
+								)
+							})}
+						</div>
+					</div >);
+			} else {
+				return null;
+			}
+		} catch (error) {
+			// bugReporter(plugin, "Error while rendering child-tasks", error as string, "TaskItem.tsx/renderChildTasks");
+			console.warn("TaskItem.tsx/renderChildTasks : Error while rendering child-tasks", error);
+			return null;
+		}
+	};
+
+	// Memoize the render functions to prevent unnecessary re-renders
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body, showSubtasks]);
+	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (
@@ -701,6 +795,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							</div>
 						</div>
 					</div>)}
+					{memoizedRenderChildTasks}
 				</div>
 				{renderFooter()}
 			</div>
