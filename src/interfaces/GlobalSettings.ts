@@ -105,6 +105,11 @@ export enum HideableTaskProperty {
 	Reminder = "reminder",
 }
 
+export enum viewTypeNames {
+	kanban = "kanban",
+	map = "map",
+}
+
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
