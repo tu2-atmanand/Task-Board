@@ -1431,6 +1431,22 @@ export const cleanTaskTitleLegacy = (
 		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
 	}
 
+	// Remove recurring tag and onCompletion tag
+	cleanedTitle = cleanedTitle
+		.replace(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.recurrenceRegex,
+			""
+		)
+		.trim();
+	cleanedTitle = cleanedTitle
+		.replace(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.onCompletionRegex,
+			""
+		)
+		.trim();
+
 	// console.log("cleanedTitle", cleanedTitle.trim());
 
 	// Trim extra spaces and return the cleaned title
