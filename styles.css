@@ -459,6 +459,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	margin-top: 4px !important;
 }
 
+.subtaskTextRenderer {
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	word-break: break-all;
+}
+
 .subtaskTextRenderer p {
 	margin-block: 0 !important;
 }
@@ -517,8 +523,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	position: relative;
 	width: 100%;
 	height: 6px;
-	background-color: #ddd;
-	border: 1px solid var(--interactive-accent);
+	background-color: var(--background-modifier-box-shadow);
+	border: 1px solid var(--color-base-40);
 	border-radius: 4px;
 	overflow: hidden;
 }
@@ -645,6 +651,51 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding-inline-end: 4px !important;
 }
 
+.taskItemChildTasksSection {
+	margin-top: 0.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+}
+
+.taskItemChildTasks {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.5rem;
+}
+
+.taskItemChildTask {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	cursor: pointer;
+}
+
+.taskItemChildTaskContent {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 4px;
+}
+
+.taskItemChildTaskTitleText {
+	font-weight: 400;
+	max-width: calc(var(--task-board-column-width) - 70px);
+}
+
+.taskItemChildTaskTitleText-completed {
+	text-decoration: line-through;
+	max-width: calc(var(--task-board-column-width) - 70px);
+	opacity: 50%;
+}
+
+.taskItemChildTaskNavigateBtn {
+	margin-inline: 7px;
+	cursor: pointer;
+}
 
 .taskItemTags {
 	display: flex;
@@ -3107,10 +3158,12 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 
 /* BugReporterModal.ts */
 
+.reloadNowButton,
 .reportBugButton {
 	border: 1px solid var(--text-accent);
 }
 
+.ignoreButton,
 .ignoreBugButton {
 	margin-left: 1.5rem;
 }

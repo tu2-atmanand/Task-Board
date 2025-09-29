@@ -1197,7 +1197,7 @@ const EditTaskContent: React.FC<{
 						<div className="EditTaskModalHomeFooterBtnSec">
 							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
 							<button className="EditTaskModalHomeToggleBtn" onClick={toggleRightSec} aria-label="Toggle Details">
-								<PanelRightOpenIcon size={18} />
+								<PanelRightOpenIcon size={20} alignmentBaseline="middle" />
 							</button>
 						</div>
 					</div>
