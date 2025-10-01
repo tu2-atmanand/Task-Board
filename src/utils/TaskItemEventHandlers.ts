@@ -161,7 +161,6 @@ export const handleEditTask = (
 	task: taskItem,
 	settingOption: string
 ) => {
-	console.log("Setting :", settingOption);
 	switch (settingOption) {
 		case EditButtonMode.Modal:
 			if (isTaskNotePresentInTags(plugin, task.tags)) {

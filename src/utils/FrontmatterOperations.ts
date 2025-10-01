@@ -97,7 +97,10 @@ export function extractFrontmatterFromContent(
 		const frontmatter = parseYaml(yamlContent) as customFrontmatterCache;
 		return frontmatter;
 	} catch (error) {
-		console.warn("Failed to parse frontmatter:", error);
+		console.warn(
+			"FrontmatterOperations.ts/extractFrontmatterFromContent : Failed to parse frontmatter:",
+			error
+		);
 		return undefined;
 	}
 }
@@ -210,16 +213,6 @@ export function updateFrontmatterProperties(
 				},
 		  };
 
-	console.log(
-		"updateFrontmatterProperties called with:",
-		"\nexistingFrontmatter:",
-		existingFrontmatter,
-		"\ntask:",
-		task,
-		"\nupdated (initial):",
-		updated
-	);
-
 	if (task.title) {
 		updated.title = task.title;
 	} else {
@@ -317,14 +310,8 @@ export function updateFrontmatterProperties(
 export function createYamlFromObject(
 	obj: Partial<customFrontmatterCache>
 ): string {
-	console.log("createYamlFromObject called with:", obj);
-
 	// METHOD 1 - Using Obsidian's API
 	const YAMLstringUsingAPI = stringifyYaml(obj);
-	console.log(
-		"TESTING : YAML string using obsidian API : ",
-		YAMLstringUsingAPI
-	);
 
 	return YAMLstringUsingAPI;
 

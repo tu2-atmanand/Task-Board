@@ -204,17 +204,6 @@ export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
 		(tagPolarity === 2 && !tagInFilters) ||
 		tagPolarity === 3;
 	if (tagCheck) {
-		console.log(
-			"scanFilterForTags - Tags provided:",
-			tags,
-			"\nscanFilters :",
-			scanFilters,
-			"\ntagInFilters :",
-			tagInFilters,
-			"\ntagCheck :",
-			tagCheck,
-			"\nReturning true"
-		);
 		return true;
 	} else {
 		return false;

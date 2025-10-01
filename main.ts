@@ -317,7 +317,6 @@ export default class TaskBoard extends Plugin {
 				});
 			});
 		} else {
-			console.log("Tasks plugin is enabled");
 			// Else body will mean that Tasks plugin has been enabled, so here, I can basically directly make use of the CSS classes added to the span elements by Tasks plugin from the following link and add hide CSS style to the specific span elements, based on the hiddenTaskProperties setting. Link to refer : https://publish.obsidian.md/tasks/Advanced/Styling#Sample+HTML+Full+mode.
 
 			// Dynamically inject CSS to hide spans with the specified class names
@@ -498,7 +497,6 @@ export default class TaskBoard extends Plugin {
 			});
 
 			if (modified && textNode.parentElement) {
-				console.log("Text node :", textNode.parentElement);
 				// Create a temporary element to hold the HTML
 				const tempDiv = document.createElement("div");
 				tempDiv.innerHTML = content;
@@ -614,7 +612,6 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
-				console.log("File modified event :", file);
 				if (fileTypeAllowedForScanning(this.plugin, file)) {
 					if (file instanceof TFile) {
 						// 	this.taskBoardFileStack.push(file.path);

@@ -329,7 +329,6 @@ export const updateTaskInFile = async (
 	forceAddId?: boolean
 ): Promise<number | undefined> => {
 	try {
-		console.log("updateTaskInFile : updatedTask :\n", updatedTask, oldTask);
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
 		if (oldTaskContent === "")
 			bugReporter(
@@ -362,9 +361,6 @@ export const updateTaskInFile = async (
 		);
 
 		if (result) {
-			console.log(
-				"updateTaskInFile : Just now finished updating the file"
-			);
 			return newId;
 		} else {
 			return undefined;
@@ -899,12 +895,6 @@ export const replaceOldTaskWithNewTask = async (
 
 		// Step 3: Extract the old task content from file using char indexes
 		const linesBefore = lines.slice(0, startLine - 1);
-		console.log(
-			"linesBefore : ",
-			linesBefore,
-			"\nCondition :",
-			linesBefore.join("\n").endsWith("\n")
-		);
 		const taskLines = lines.slice(startLine - 1, endLine);
 
 		// Adjust the first and last lines by slicing at char indexes
@@ -997,7 +987,6 @@ export const replaceOldTaskWithNewTask = async (
 			);
 		}
 
-		console.log("Just now finished updating the file");
 		return true; // Indicate success
 	} catch (error) {
 		bugReporter(

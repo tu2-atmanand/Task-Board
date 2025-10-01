@@ -32,7 +32,6 @@ export interface cursorLocation {
 export const getFormattedTaskContent = async (
 	task: taskItem
 ): Promise<string> => {
-	console.log("getFormattedTaskContent\ntask :", task);
 	if (!task || !task.title) {
 		return "";
 	}
@@ -83,7 +82,6 @@ export const addIdToTaskContent = async (
 };
 
 export const getFormattedTaskContentSync = (task: taskItem): string => {
-	console.log("getFormattedTaskContentSync\ntask :", task);
 	if (!task || !task.title) {
 		return "";
 	}
@@ -981,17 +979,6 @@ export const sanitizeDependsOn = (
 	cursorLocation?: cursorLocation
 ): string => {
 	const extractedDependsOnMatch = extractDependsOn(title);
-
-	console.log(
-		"sanitizeDependsOn : title",
-		title,
-		"\ndependsOnIds",
-		dependesOnIds,
-		"\ncursorLocation",
-		cursorLocation,
-		"\nextractedDependsOnMatch",
-		extractedDependsOnMatch
-	);
 
 	if (!dependesOnIds || dependesOnIds.length === 0) {
 		if (extractedDependsOnMatch) {

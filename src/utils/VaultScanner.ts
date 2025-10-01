@@ -142,14 +142,6 @@ export default class vaultScanner {
 
 			// Extract frontmatter from the file
 			const frontmatter = extractFrontmatterFromFile(this.plugin, file);
-			console.log(
-				"FrontmatterCache extracted : ",
-				frontmatter,
-				"\nFor file:",
-				fileNameWithPath,
-				"\nValue of first tag:",
-				frontmatter?.tags?.[0]
-			);
 
 			// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
 			if (
@@ -201,11 +193,6 @@ export default class vaultScanner {
 						scanFilters
 					)
 				) {
-					console.log(
-						"Scanning only following file as it is a task-note:",
-						file
-					);
-
 					this.TaskDetected = true;
 
 					// Extract sub-tasks from the note content (excluding frontmatter)
@@ -260,8 +247,6 @@ export default class vaultScanner {
 						cancelledDate: taskNoteProperties.cancelledDate || "",
 						reminder: taskNoteProperties.reminder || "",
 					};
-
-					console.log("Task Note Item Created:", taskNoteItem);
 
 					// Add to appropriate cache based on completion status
 					const isTaskNoteCompleted =
@@ -432,8 +417,6 @@ export default class vaultScanner {
 								reminder: reminder,
 							};
 
-							console.log("Task Item Created:", task);
-
 							if (isTaskCompleted) {
 								this.tasksCache.Completed[
 									fileNameWithPath
@@ -499,7 +482,6 @@ export default class vaultScanner {
 		files: (TFile | null)[],
 		showNotice: boolean
 	): Promise<boolean> {
-		console.log("refreshTasksFromFiles - Files received : ", files);
 		if (!files || files.length === 0) {
 			return false;
 		}
@@ -522,10 +504,6 @@ export default class vaultScanner {
 					atleastOneFileScanned = true;
 					// TODO : Try testing if removing the await from the below line will going to speed up the process.
 					flag = await this.extractTasksFromFile(file, scanFilters);
-					console.log(
-						"result value return  by extractTasksFromFile :",
-						flag
-					);
 					// .then((result) => {
 					// 	if (!result)
 					// 		throw new Error(
@@ -645,10 +623,6 @@ export default class vaultScanner {
 				}
 			}
 
-			console.log(
-				"Should run after all the files have been properly scanned."
-			);
-
 			if (flag) {
 				if (atleastOneFileScanned) {
 					if (showNotice) {
@@ -678,10 +652,6 @@ export default class vaultScanner {
 
 	// Debounced saveTasksToJsonCache function
 	private saveTasksToJsonCacheDebounced = debounce(async () => {
-		console.log(
-			"Debounced saveTasksToJsonCache called...\nSaving following tasksCache to disk:",
-			this.tasksCache
-		);
 		this.tasksCache.Modified_at = new Date().toISOString();
 		await writeJsonCacheDataToDisk(this.plugin, this.tasksCache);
 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
@@ -697,7 +667,6 @@ export default class vaultScanner {
 
 	// Save tasks to JSON file
 	saveTasksToJsonCache() {
-		console.log("saveTasksToJsonCache called...");
 		// if (!this.TaskDetected) return;
 
 		this.saveTasksToJsonCacheDebounced();
@@ -732,10 +701,6 @@ export function generateTaskId(plugin: TaskBoard): number {
 	plugin.settings.data.globalSettings.uniqueIdCounter =
 		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
 
-	console.log(
-		"Generated unique ID:",
-		plugin.settings.data.globalSettings.uniqueIdCounter
-	);
 	// Save the updated uniqueIdCounter back to settings
 	plugin.saveSettings();
 	// Return the current counter value and then increment it for the next ID
@@ -816,7 +781,6 @@ export function extractTaskId(text: string): string {
 	let idMatch = text.match(
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
 	);
-	console.log("ID Match using emoji regex:", idMatch);
 	if (idMatch && idMatch[1]) {
 		return idMatch[1].trim();
 	}
@@ -856,7 +820,6 @@ export function extractBody(
 
 		let n = 0;
 		if (prevLine.startsWith(indentationString)) {
-			console.log("Previous line has indentation\nLine:", prevLine);
 			let tempLine = prevLine;
 			while (tempLine.startsWith(indentationString)) {
 				n++;

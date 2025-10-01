@@ -168,7 +168,6 @@ const EditTaskContent: React.FC<{
 		setIsEdited(true);
 
 		const newFormattedTaskNoteContent = formattedTaskContent.replace(/title: .*/, `title: ${value}`);
-		console.log("Updated formattedTaskContent after title change:", newFormattedTaskNoteContent);
 		updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 		setFormattedTaskContent(newFormattedTaskNoteContent);
 
@@ -511,8 +510,6 @@ const EditTaskContent: React.FC<{
 			reminder: modifiedTask.reminder,
 		};
 
-		console.log("Task Note Item to be saved:", taskNoteItem);
-
 		// Call onSave with the task note item
 		onSave(taskNoteItem, quickAddPluginChoice, formattedTaskContent ? formattedTaskContent : undefined);
 	};
@@ -574,23 +571,18 @@ const EditTaskContent: React.FC<{
 			return;
 		}
 
-		applyIdToTaskInNote(plugin, task).then((newId) => { // Somehow the newId is not passed by the async functions. I always get undefined here. Need to check.
-			console.log("Task after ensuring it has an ID:", newId);
-
+		applyIdToTaskInNote(plugin, task).then((newId) => {
 			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
 			plugin.settings.data.globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter));
 
-			console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
+			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
 
 			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
 				onClose();
 				sleep(2000).then(() => {
-					console.log("Emitting SWITCH_VIEW event for map view, 2000ms after closing the modal.");
 					eventEmitter.emit("SWITCH_VIEW", 'map');
 				});
 			});
-
-			console.log("Opening task in map view:", newFilePath);
 		});
 
 		// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
@@ -711,7 +703,6 @@ const EditTaskContent: React.FC<{
 
 
 			if (!markdownEditor) {
-				console.log("Creating new embedded markdown editor with content:", formattedTaskContent);
 				markdownEditorEmbeddedContainer.current.empty();
 				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
 					plugin.app,
@@ -875,11 +866,9 @@ const EditTaskContent: React.FC<{
 		}
 	}
 	useEffect(() => {
-		console.log("isEditorContentChanged :", isEditorContentChanged);
 		if (isEditorContentChanged) {
 			if (isTaskNote) {
 				const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
-				console.log("Formatted Task Note Content:", newFormattedTaskNoteContent);
 				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 				setFormattedTaskContent(newFormattedTaskNoteContent);
 				setIsEditorContentChanged(false);
@@ -915,17 +904,13 @@ const EditTaskContent: React.FC<{
 		);
 		const suggestionContent = pendingTaskItems.filter(t => t.title !== title).map(t => t.title && t.title !== undefined ? t.title : ""); // Exclude self from suggestions
 		const onSelectCallback = (choice: string) => {
-			console.log("Selected child task:", choice);
 			let selectedTask = pendingTaskItems.find(t => t.title === choice);
 			if (!selectedTask) {
 				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
 				return;
 			}
 			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
-				console.log("Selected Task after applying ID:", selectedTask, "\nnewId : ", newId);
-
 				const getUpdatedDependsOnIds = (prev: string[]) => {
-					console.log("Previous depends on values :", prev);
 					if (!prev.includes(task.legacyId ? task.legacyId : String(task.id))) {
 						if (newId === undefined && !selectedTask?.legacyId) {
 							bugReporter(plugin, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
@@ -944,7 +929,6 @@ const EditTaskContent: React.FC<{
 					const updated = getUpdatedDependsOnIds(prev);
 					if (!isTaskNote) {
 						const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, updated, cursorLocationRef.current ?? undefined);
-						console.log("New Title:", newTitle);
 						setTitle(newTitle);
 					}
 
@@ -970,7 +954,6 @@ const EditTaskContent: React.FC<{
 	}, [plugin.app]);
 
 	const childTaskTitleRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-	console.log("Is childTaskTitleRefs getting initialized to empty object after a new child task has been added :", childTaskTitleRefs.current, "\ndependsOn: ", dependsOn);
 	// This should run only on the first render to fetch child tasks based on dependsOn IDs
 	useEffect(() => {
 		if (childTasks.length === 0 && dependsOn.length > 0) {
@@ -1024,8 +1007,7 @@ const EditTaskContent: React.FC<{
 		if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
 			handleEditTask(plugin, task, settingOption);
 		} else if (settingOption === EditButtonMode.Modal) {
-			//For now will simply open it in a new modal.
-			console.log("Output of isTaskNotePresentInTags(plugin, childTask.tags): ", isTaskNotePresentInTags(plugin, childTask.tags));
+			//For now will simply open it in a new modal in a new window.
 			if (isTaskNotePresentInTags(plugin, childTask.tags)) {
 				plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
 				await sleep(50);
@@ -1043,7 +1025,6 @@ const EditTaskContent: React.FC<{
 	};
 
 	const handleRemoveChildTask = (taskId: string) => {
-		console.log("Removing child task with ID:", taskId);
 		const newDependsOn = dependsOn.filter(id => id !== taskId);
 		setDependsOn(newDependsOn);
 		if (!isTaskNote) {
@@ -1362,7 +1343,7 @@ export class AddOrEditTaskModal extends Modal {
 		this.isTaskNote = isTaskNote;
 		this.activeNote = activeNote;
 
-		console.log("AddOrEditTaskModal | isTaskNote: ", isTaskNote, " | activeNote: ", activeNote, " | taskExists: ", taskExists, " | task: ", this.task, " | filePath: ", this.filePath);
+		// console.log("AddOrEditTaskModal | isTaskNote: ", isTaskNote, " | activeNote: ", activeNote, " | taskExists: ", taskExists, " | task: ", this.task, " | filePath: ", this.filePath);
 
 		this.waitForClose = new Promise<string>((resolve, reject) => {
 			this.resolvePromise = resolve;
@@ -1418,7 +1399,6 @@ export class AddOrEditTaskModal extends Modal {
 			activeNote={this.activeNote}
 			filePath={this.filePath}
 			onSave={async (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => {
-				console.log("AddOrEditTaskModal | onSave called with updatedTask:", updatedTask, " | quickAddPluginChoice:", quickAddPluginChoice, " | updatedNoteContent:", updatedNoteContent);
 				this.isEdited = false;
 				const formattedContent = await getFormattedTaskContent(updatedTask);
 				this.resolvePromise(formattedContent);

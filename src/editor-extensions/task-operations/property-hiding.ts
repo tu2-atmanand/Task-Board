@@ -288,10 +288,6 @@ function createPropertyDecorations(
 
 			for (const match of matches) {
 				if (typeof match.index !== "number") {
-					console.warn(
-						"Match index is undefined, skipping match:",
-						match
-					);
 					continue;
 				}
 				const matchStart = line.from + match.index;

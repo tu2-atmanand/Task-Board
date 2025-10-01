@@ -371,7 +371,6 @@ const MapView: React.FC<MapViewProps> = ({
 	const debouncedSetViewportStorage = debounce((vp: viewPort) => {
 		const now = Date.now();
 		if (now - lastViewportSaveTime.current > 2000) {
-			console.log('Saving viewport:', vp);
 			localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(vp));
 			lastViewportSaveTime.current = now;
 		}
@@ -401,7 +400,6 @@ const MapView: React.FC<MapViewProps> = ({
 							nodeTypes={nodeTypes}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
-								console.log('Node drag stopped');
 								handleNodePositionChange();
 							}}
 							// onEdgesChange={onEdgesChange}
@@ -412,10 +410,8 @@ const MapView: React.FC<MapViewProps> = ({
 							zoomOnScroll={true}
 							onlyRenderVisibleElements={true}
 							onInit={(instance) => {
-								console.log("focusOnTaskId:", focusOnTaskId, "Viewport:", viewport);
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
-									console.log("Focusing on node:", node);
 									if (node) {
 										const newVp: viewPort = {
 											x: - (node.position.x - 200),
@@ -436,7 +432,6 @@ const MapView: React.FC<MapViewProps> = ({
 							}}
 							defaultViewport={viewport}
 							onMoveEnd={(_, vp) => {
-								console.log("Current viewport : ", vp);
 								setViewport(vp);
 								debouncedSetViewportStorage(vp);
 								// throttledSetViewportStorage(vp);

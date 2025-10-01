@@ -231,7 +231,10 @@ export async function getAllFiles(
 				}
 			}
 		} catch (e) {
-			console.log("Skipping path: ", file.name, e);
+			console.warn(
+				"FileSystem.ts/getAllFiles : There was an error while fetching all files : ",
+				e
+			);
 		}
 	}
 	return results;

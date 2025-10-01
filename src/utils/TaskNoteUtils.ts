@@ -199,17 +199,12 @@ export function formatTaskNoteContent(
 	updatedTask: taskItem,
 	oldNoteContent: string
 ): string {
-	console.log(
-		"formatTaskNoteContent called with:",
-		updatedTask,
-		oldNoteContent
-	);
 	try {
 		const existingFrontmatter = extractFrontmatterFromContent(
 			plugin,
 			oldNoteContent
 		);
-		console.log("Existing frontmatter extracted:", existingFrontmatter);
+
 		// Update frontmatter properties based on updatedTask
 		const updatedFrontmatter = updateFrontmatterProperties(
 			plugin,

@@ -133,7 +133,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	useEffect(() => {
 		const refreshView = (viewType: string) => {
-			console.log("SWITCH_VIEW event called. Switching view to:", viewType);
 			setViewType(viewType);
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);

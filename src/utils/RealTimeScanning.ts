@@ -48,10 +48,6 @@ export class RealTimeScanning {
 	}
 
 	async processAllUpdatedFiles(currentFile?: TFile | string | undefined) {
-		console.log(
-			"Starting to process all updated files...\ncurrentFile:",
-			currentFile
-		);
 		// If a current file is provided, ensure it's included in the processing
 		let newFile: TFile | null | undefined = null;
 		if (currentFile && typeof currentFile === "string") {
@@ -61,8 +57,6 @@ export class RealTimeScanning {
 		}
 
 		const filesToProcess = this.taskBoardFileStack.slice();
-		console.log("Processing files from stack:", filesToProcess);
-
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
 			.filter((file) => !!file);

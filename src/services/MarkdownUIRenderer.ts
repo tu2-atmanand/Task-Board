@@ -130,7 +130,7 @@ export class MarkdownUIRenderer {
 				componentEl
 			);
 		} catch (error) {
-			console.error("Error rendering subtask text:", error, {
+			console.warn("Error rendering subtask text:", error, {
 				subtaskText,
 				path,
 			});

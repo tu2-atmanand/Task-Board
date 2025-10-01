@@ -148,24 +148,15 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 			noteContent: string | undefined
 		) => {
 			if (!noteContent) {
-				console.warn("This code should not run...");
+				// console.warn("This code should not run...");
 			} else {
 				// If noteContent is provided, it means user wants to save this task as a TaskNote.
 				// Create the note content with frontmatter
-
-				console.log(
-					"The newTask received : ",
-					newTask,
-					"\nThe noteContent received :\n",
-					noteContent
-				);
-
 				try {
 					// Check if the directory exists, create if not
 					const parts = newTask.filePath.split("/");
 					if (parts.length > 1) {
 						const dirPath = parts.slice(0, -1).join("/");
-						console.log("Directory Path:", dirPath);
 						if (!(await plugin.app.vault.adapter.exists(dirPath))) {
 							await plugin.app.vault.createFolder(dirPath);
 						}
@@ -183,11 +174,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								plugin.realTimeScanning.onFileModified(
 									newTask.filePath
 								);
-								sleep(2000).then(() => {
-									console.log(
-										"New file is scanning after 1000 milliseconds : ",
-										newTask.filePath
-									);
+								sleep(2000).then(() => { // TODO : Is 2 seconds really required ?
 									plugin.realTimeScanning.processAllUpdatedFiles();
 								});
 							});
@@ -297,10 +284,7 @@ export const openEditTaskNoteModal = (
 						updatedTask.filePath,
 						newTaskContent
 					).then(() => {
-						sleep(2000).then(() => {
-							console.log(
-								"This will run after updateFrontmatterInMarkdownFile has successfully run."
-							);
+						sleep(2000).then(() => { // TODO : Is 2 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(
 								updatedTask.filePath

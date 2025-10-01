@@ -101,12 +101,6 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 					: folderPath +
 					  (folderPath.includes("/") ? "/" : "\\") +
 					  exportFileName;
-			console.log(
-				"Folder path :",
-				folderPath,
-				"\nExport path:",
-				exportPath
-			);
 			await fsPromises.writeFile(exportPath, fileContent, "utf8");
 			new Notice(`Settings exported to ${exportPath}`);
 		} else {
@@ -163,12 +157,6 @@ export async function importConfigurations(
 			}
 			const pickedFile = new NodePickedFile(filePaths[0]);
 			importedContent = await pickedFile.readText();
-			console.log(
-				"Imported content:",
-				importedContent,
-				"\nPicked File:",
-				pickedFile
-			);
 		} else {
 			// Web file picker
 			await new Promise<void>((resolve) => {
@@ -201,16 +189,8 @@ export async function importConfigurations(
 		const currentData = plugin.settings;
 		const defaultData = DEFAULT_SETTINGS;
 
-		console.log(
-			"Current Settings:",
-			defaultData,
-			"\nImported Settings:",
-			importedData
-		);
-
 		// Merge imported settings with current settings and defaults
 		const mergedSettings = migrateSettings(defaultData, importedData);
-		console.log("Merged Settings:", mergedSettings);
 
 		// Protect new fields in current settings that are not present in imported file
 		// for (const key in currentData) {
@@ -225,7 +205,10 @@ export async function importConfigurations(
 		return true;
 	} catch (err) {
 		new Notice("Failed to import settings.");
-		console.error(err);
+		console.error(
+			"SettingSynchronizer.ts/importConfigurations : Following error occured while importing settings : ",
+			err
+		);
 		return false;
 	}
 }
