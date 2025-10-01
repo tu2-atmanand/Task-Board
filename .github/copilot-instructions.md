@@ -96,14 +96,14 @@ npm run dev  # Should start watch mode and display "watching for changes..."
 │   │   ├── TaskItem.tsx       # Individual task component (26k lines - complex)
 │   │   ├── KanbanBoard.tsx    # Main board component
 │   │   ├── TaskBoardViewContent.tsx # Main board content wrapper
-│   │   └── CanvasView.tsx     # Canvas-based view component
+│   │   └── MapView.tsx     # Map-based view component
 │   ├── interfaces/            # TypeScript interfaces (3 files)
 │   │   ├── TaskItem.ts        # Task data structures
 │   │   ├── BoardConfigs.ts    # Board configuration types
 │   │   └── GlobalSettings.ts  # Plugin settings types (300+ lines)
 │   ├── services/              # Business logic and external integrations (~10 files)
 │   ├── utils/                 # Utility functions and helpers (~15 files)
-│   │   ├── ScanningVault.ts   # Core vault scanning logic
+│   │   ├── vaultScanner.ts   # Core vault scanning logic
 │   │   ├── RealTimeScanning.ts # Real-time file change handling
 │   │   ├── RenderColumns.ts   # Task filtering and column rendering
 │   │   └── ...               # File operations, task parsing, etc.
@@ -153,7 +153,7 @@ npm run dev  # Should start watch mode and display "watching for changes..."
 - **Plugin not loading**: Check `manifest.json` version compatibility with Obsidian
 - **Build failures**: Run `npx tsc --noEmit --skipLibCheck` to isolate TypeScript errors
 - **Runtime errors**: Use Obsidian's developer console (Ctrl+Shift+I)
-- **File scanning issues**: Check `utils/ScanningVault.ts` and `utils/RealTimeScanning.ts`
+- **File scanning issues**: Check `utils/vaultScanner.ts` and `utils/RealTimeScanning.ts`
 
 ## Release Process
 - Releases are automated via GitHub Actions on git tags

@@ -1,23 +1,27 @@
 // /src/components/TaskItem.tsx
 
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaExternalLinkSquareAlt, FaLink, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { taskItem, taskStatuses } from '../interfaces/TaskItem';
-import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting } from 'src/utils/CheckBoxUtils';
+import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
+import { handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component } from 'obsidian';
-import { EditButtonMode, cardSectionsVisibilityOptions } from 'src/interfaces/GlobalSettings';
+import { Component, Notice } from 'obsidian';
+import { EditButtonMode, cardSectionsVisibilityOptions, viewTypeNames } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { cleanTaskTitle, getUniversalDateFromTask, getUniversalDateEmoji } from 'src/utils/TaskContentFormatter';
+import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { parseUniversalDate } from 'src/utils/TaskItemUtils';
-import { priorityEmojis } from '../interfaces/TaskItem';
+import { getTaskFromId, parseUniversalDate } from 'src/utils/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
-import { bugReporter } from 'src/services/OpenModals';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
+import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
+import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
+import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
+import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/FiltersVerifier';
+import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
+import { bugReporter } from 'src/services/OpenModals';
 
 export interface TaskProps {
 	key: number;
@@ -56,14 +60,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		componentRef.current = plugin.view;
 	}, []);
 
-	const taskIdKey = `${task.id}`; // for rendering unique title
+	const taskIdKey = task.id; // for rendering unique title
 	const taskTitleRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
 		if (taskTitleRendererRef.current && componentRef.current) {
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement && task.title !== "") {
-				let cleanedTitle = cleanTaskTitle(plugin, task);
+				let cleanedTitle = cleanTaskTitleLegacy(plugin, task);
 				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
 				if (searchQuery) {
 					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -88,12 +92,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	useEffect(() => {
-		const allSubTasks = task.body.filter(line => /-\s\[.\s*\]/.test(line));
+		const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
 		// Render subtasks after componentRef is initialized
 		allSubTasks.forEach((subtaskText, index) => {
 			const uniqueKey = `${task.id}-${index}`;
 			const element = subtaskTextRefs.current[uniqueKey];
-			let strippedSubtaskText = subtaskText.replace(/- \[.*?\]/, "").trim();
+			const match = subtaskText.match(TaskRegularExpressions.taskRegex);
+			let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
 
 			if (element && strippedSubtaskText !== "") {
 				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
@@ -117,7 +122,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
 			}
 		});
-	}, [task.body.filter(line => (line.trim().startsWith('- [ ]') && line.trim().startsWith('- [x]'))), task.filePath]);
+	}, [task.body, task.filePath]);
 
 	// Render the task description only when the description section is expanded
 	const descriptionRef = useRef<HTMLDivElement | null>(null);
@@ -126,7 +131,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
 		let descriptionContent = task.body
-			.filter((line) => !line.trim().startsWith("- [ ]") && !line.trim().startsWith("- [x]"))
+			.filter((line) => !isTaskLine(line.trim()))
 			.join("\n")
 			.trim();
 
@@ -240,7 +245,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 		for (const rawTag of tags) {
 			const tagName = rawTag.replace('#', '');
-			const tagData = tagColorMap.get(tagName);
+			let tagData = tagColorMap.get(tagName);
+
+			if (!tagData) {
+				tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+					const result = matchTagsWithWildcards(tagNameKey, tagName || '');
+					// Return the first match found
+					if (result) tagData = tagColor;
+				});
+			}
 
 			if (tagData) {
 				if (
@@ -269,13 +282,23 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	}
 
 	// Function to handle the main checkbox click
-	const handleMainCheckBoxClick = () => {
+	const handleMainCheckBoxClick = async () => {
 		setIsChecked(true); // Trigger animation
-		setTimeout(() => {
-			// onCheckboxChange(task); // Call parent function after 1 second
-			handleCheckboxChange(plugin, task);
+		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
+		if (condition) {
+			setTimeout(() => {
+				// Route to appropriate handler based on task type
+				if (isTaskNotePresentInTags(plugin, task.tags)) {
+					handleTaskNoteStatusChange(plugin, task);
+				} else {
+					handleCheckboxChange(plugin, task);
+				}
+				setIsChecked(false); // Reset checkbox state
+			}, 500); // 1-second delay for animation
+		} else {
 			setIsChecked(false); // Reset checkbox state
-		}, 500); // 1-second delay for animation
+			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
+		}
 	};
 
 	const handleMainTaskDelete = () => {
@@ -291,15 +314,21 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				const symbol = extractCheckboxSymbol(line);
 				const nextSymbol = checkboxStateSwitcher(plugin, symbol);
 
-				return line.replace(`- [${symbol}]`, `- [${nextSymbol}]`);
+				return line.replace(`[${symbol}]`, `[${nextSymbol}]`);
 			}
 			return line;
 		});
 
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
-		// onSubTasksChange(updatedTask); // Notify parent of the change
-		handleSubTasksChange(plugin, task, updatedTask)
+
+		if (!isTaskNotePresentInTags(plugin, task.tags)) {
+			// onSubTasksChange(updatedTask); // Notify parent of the change
+			handleSubTasksChange(plugin, task, updatedTask);
+		} else {
+			// If it's a task note, open the note for editing
+			handleTaskNoteBodyChange(plugin, task, updatedTask);
+		}
 	};
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
@@ -310,12 +339,49 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
-		if (plugin.settings.data.globalSettings.editButtonAction !== EditButtonMode.NoteInHover) {
-			handleEditTask(plugin, task);
+		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
 		} else {
 			event.ctrlKey = true;
 			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
 			event.ctrlKey = false;
+		}
+	}
+
+	const handleDoubleClickOnCard = (event: React.MouseEvent) => {
+		const settingOption = plugin.settings.data.globalSettings.doubleClickCardToEdit;
+		if (settingOption === EditButtonMode.None) return;
+
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
+		} else {
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+			event.ctrlKey = false;
+		}
+	}
+
+	const handleOpenChildTaskModal = async (event: React.MouseEvent, childTaskId: string) => {
+		event.stopPropagation();
+		try {
+			const childTask = await getTaskFromId(plugin, childTaskId);
+			if (!childTask) {
+				bugReporter(plugin, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "TaskItem.tsx/handleOpenChildTaskModal");
+				return;
+			}
+
+			const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+			if (settingOption !== EditButtonMode.NoteInHover) {
+				handleEditTask(plugin, childTask, settingOption);
+			} else {
+				event.ctrlKey = true;
+				markdownButtonHoverPreviewEvent(plugin.app, event, childTask.filePath);
+				event.ctrlKey = false;
+			}
+		} catch (error) {
+			console.error("Error opening child task modal:", error);
+			bugReporter(plugin, "Error opening child task modal", String(error), "TaskItem.tsx/handleOpenChildTaskModal");
 		}
 	}
 
@@ -344,7 +410,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										}
 
 										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && activeBoardSettings?.filters.includes(tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
+										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && matchTagsWithWildcards(activeBoardSettings?.filters, tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
 											return null;
 										}
 
@@ -383,7 +449,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 							</div>
 							{/* Drag Handle */}
-							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} /></div> */}
+							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} /></div> */}
 						</div>
 					</>);
 			} else {
@@ -402,10 +468,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const body = task.body ?? [];
 			if (body.length === 0) return null;
 
-			const allSubTasks = body.filter(line => /-\s\[.\s*\]/.test(line));
+			const allSubTasks = body.filter(line => TaskRegularExpressions.taskRegex.test(line));
+			// console.log("renderSubTasks : allSubTasks :", allSubTasks);
+			// if (allSubTasks.length === 0) return null;
 
 			const total = allSubTasks.length;
-			const completed = allSubTasks.filter(line => /-\s\[(x|X)\]\s+/i.test(line)).length;
+			const completed = allSubTasks.filter(line => isCompleted(line)).length;
 
 			const showSubTaskSummaryBar = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
 
@@ -440,13 +508,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<div className={showSubtasks ? 'taskItemBodySubtaskSection-show' : 'taskItemBodySubtaskSection-hide'}>
 						{allSubTasks.map((line, index) => {
 							// console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
-							const isCompleted = line.trim().startsWith('- [x]') || line.trim().startsWith('- [X]');
+							const isSubTaskCompleted = isCompleted(line);
 
 							// Calculate padding based on the number of tabs
 							const tabString = getObsidianIndentationSetting(plugin);
 							const tabMatch = line.match(new RegExp(`^(${tabString})+`));
+							const tabMatchInTitle = task.title.match(new RegExp(`^(${tabString})+`));
+							const titleTabs = tabMatchInTitle && tabMatchInTitle[0] ? tabMatchInTitle[0].length / tabString.length : 0;
 							const numTabs = tabMatch && tabMatch[0] ? tabMatch[0].length / tabString.length : 0;
-							const paddingLeft = numTabs > 1 ? `${(numTabs - 1) * 15}px` : '0px';
+							const paddingLeft = numTabs > 1 ? `${(numTabs - titleTabs - 1) * 15}px` : '0px';
 
 							// Create a unique key for this subtask based on task.id and index
 							const uniqueKey = `${task.id}-${index}`;
@@ -461,12 +531,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 									<input
 										type="checkbox"
 										className="taskItemBodySubtaskItemCheckbox"
-										checked={isCompleted}
-										onChange={() => handleSubtaskCheckboxChange(line, isCompleted)}
+										checked={isSubTaskCompleted}
+										onChange={() => handleSubtaskCheckboxChange(line, isSubTaskCompleted)}
 									/>
 									{/* Render each subtask separately */}
 									<div
-										className={isCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
+										className={isSubTaskCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
 										ref={(el) => { subtaskTextRefs.current[uniqueKey] = el; }}
 									/>
 								</div>
@@ -477,7 +547,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			);
 
 		} catch (error) {
-			bugReporter(plugin, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
+			// bugReporter(plugin, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
+			console.warn("TaskItem.tsx/renderSubTasks : Error while rendering sub-tasks", error);
 			return null;
 		}
 	};
@@ -486,7 +557,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
 		let descriptionContent = task.body
-			.filter((line) => !line.trim().startsWith("- [ ]") && !line.trim().startsWith("- [x]"))
+			.filter((line) => !isTaskLine(line))
 			.join("\n")
 			.trim();
 
@@ -580,23 +651,96 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				);
 			}
 		} catch (error) {
-			bugReporter(plugin, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
+			// bugReporter(plugin, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
+			console.warn("TaskItem.tsx/renderFooter : Error while rendering task footer", error);
 			return null;
 		}
 	};
 
+	// State to hold child tasks data
+	const [childTasksData, setChildTasksData] = useState<Record<string, taskItem | null>>({});
+
+	// Effect to load child tasks asynchronously
+	useEffect(() => {
+		if (task?.dependsOn && task.dependsOn.length > 0) {
+			const loadChildTasks = async () => {
+				const childTasksMap: Record<string, taskItem | null> = {};
+				await Promise.all((task?.dependsOn ?? []).map(async (dependsOnId) => {
+					const childTask = await getTaskFromId(plugin, dependsOnId);
+					childTasksMap[dependsOnId] = childTask;
+				}));
+				setChildTasksData(childTasksMap);
+			};
+			loadChildTasks();
+		} else {
+			setChildTasksData({});
+		}
+	}, [task.dependsOn]);
+
+	const renderChildTasks = () => {
+		try {
+			// Render only if the last viewed history is Kanban and there are child tasks
+			if (plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
+				return (
+					<div className="taskItemChildTasksSection">
+						{/* Placeholder for future child tasks rendering */}
+						<div className="taskItemChildTasks">
+							{task?.dependsOn && task?.dependsOn.map((dependsOnId) => {
+								const childTask = childTasksData[dependsOnId];
+								if (!childTask) return null; // Skip if child task not found in cache
+
+								// Render each child task with a link to open it in the modal
+								const isChildTaskCompleted = childTask.status === taskStatuses.checked || childTask.status === taskStatuses.regular || childTask.status === taskStatuses.dropped;
+								const depTaskTitle = childTask.title || `There was an error fetching the task with ID: ${dependsOnId}`;
+
+								// Simple version just showing the ID and a symbol
+								return (
+									<div key={`${task.id}-dep-${dependsOnId}`} className="taskItemChildTask">
+										<div className='taskItemChildTaskContent' onClick={(event) => handleOpenChildTaskModal(event, dependsOnId)}>
+											<span className='taskItemChildTaskSymbol' role="img" aria-label="blocked">{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
+											<span
+												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
+												style={{
+													whiteSpace: 'nowrap',
+													overflow: 'hidden',
+													textOverflow: 'ellipsis',
+													display: 'block',
+												}}
+												title={depTaskTitle.slice(6)}
+											>
+												{depTaskTitle.slice(6)}
+											</span></div>
+									</div>
+								)
+							})}
+						</div>
+					</div >);
+			} else {
+				return null;
+			}
+		} catch (error) {
+			// bugReporter(plugin, "Error while rendering child-tasks", error as string, "TaskItem.tsx/renderChildTasks");
+			console.warn("TaskItem.tsx/renderChildTasks : Error while rendering child-tasks", error);
+			return null;
+		}
+	};
+
+	// Memoize the render functions to prevent unnecessary re-renders
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body, showSubtasks]);
+	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (
-		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}>
+		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+			onDoubleClick={handleDoubleClickOnCard}
+		>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				<div className="taskItemFileNameSection">
 					{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
 						<div className="taskItemFileName" aria-label={task.filePath}>
-							{task.filePath.split('/').pop()?.replace('.md', '')}
+							{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
 						</div>
 					)}
 				</div>
@@ -624,7 +768,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						</div>
 					)}
 					{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
-						{task.body.at(0) !== "" && task.body.filter(line => (!line.trim().startsWith('- [ ]') && !line.trim().startsWith('- [x]'))).length > 0 && (
+						{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
 							<div
 								className='taskItemMainBodyDescriptionSectionToggler'
 								onClick={toggleDescription}
@@ -650,6 +794,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 							</div>
 						</div>
 					</div>)}
+					{memoizedRenderChildTasks}
 				</div>
 				{renderFooter()}
 			</div>

@@ -1,6 +1,5 @@
 import TaskBoard from "main";
 import { TaskBoardSubmodule } from "./subModules";
-import { Plugin } from "obsidian";
 
 export class CommunityPlugins extends TaskBoardSubmodule {
 	get reminderPlugin() {
@@ -20,7 +19,10 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 	}
 
 	isQuickAddPluginIntegrationEnabled() {
-		return this.settings.data.globalSettings.compatiblePlugins.quickAddPlugin && this.isQuickAddPluginEnabled();
+		return (
+			this.settings.data.globalSettings.compatiblePlugins
+				.quickAddPlugin && this.isQuickAddPluginEnabled()
+		);
 	}
 
 	// async getSettings(): Promise<void> {

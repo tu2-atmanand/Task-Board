@@ -11,7 +11,7 @@ import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2 } from "react-icons/rx";
-import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
+import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
@@ -165,7 +165,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// Function to render the Add Column Modal
 	const renderAddColumnModal = () => {
 		if (!isAddColumnModalOpen) return null;
-		// TODO : THis wont work if you havent assigned a very high z-index to this specific modal.
+
 		const modal = new AddColumnModal(plugin.app, {
 			app: plugin.app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
