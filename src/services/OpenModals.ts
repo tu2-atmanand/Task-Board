@@ -1,9 +1,10 @@
 // src/services/OpenModals.ts
 
-import { App, Notice, TFile } from "obsidian";
+import { App, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { addTaskInNote, updateTaskInFile } from "src/utils/TaskItemUtils";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
+import { AddOrEditTaskView } from "src/views/AddOrEditTaskView";
 import { Board } from "../interfaces/BoardConfigs";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { ScanVaultModal } from "src/modal/ScanVaultModal";
@@ -22,6 +23,7 @@ import { ScanFilterModal } from "src/modal/ScanFilterModal";
 import { taskItem } from "src/interfaces/TaskItem";
 import { updateFrontmatterInMarkdownFile } from "src/utils/TaskNoteUtils";
 import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
+import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -470,4 +472,109 @@ export const openScanFiltersModal = (
 	new ScanFilterModal(plugin, filterType, async (newValues) => {
 		onSave(newValues);
 	}).open();
+};
+
+/**
+ * Open AddOrEditTask as a view in a new leaf (tab or popout window)
+ * This allows the task editor to be used in tabs alongside other content
+ * 
+ * @param plugin - The TaskBoard plugin instance
+ * @param saveTask - Callback function to handle task saving
+ * @param isTaskNote - Whether this is a task note
+ * @param activeNote - Whether the active note should be used
+ * @param taskExists - Whether editing an existing task
+ * @param task - Optional task to edit
+ * @param filePath - Optional file path for the task
+ * @param location - Where to open the view: "tab" (new tab), "split" (split pane), or "window" (popout window)
+ * @returns Promise resolving to the WorkspaceLeaf or null
+ * 
+ * @example
+ * // Open in a new tab for editing an existing task
+ * openAddOrEditTaskView(
+ *   plugin,
+ *   (updatedTask, quickAddChoice, noteContent) => {
+ *     // Handle task update
+ *     updateTaskInFile(plugin, updatedTask);
+ *   },
+ *   false,
+ *   false,
+ *   true,
+ *   existingTask,
+ *   "path/to/file.md",
+ *   "tab"
+ * );
+ * 
+ * @example
+ * // Open in a popout window for creating a new task
+ * openAddOrEditTaskView(
+ *   plugin,
+ *   (newTask, quickAddChoice, noteContent) => {
+ *     // Handle new task creation
+ *     addTaskInNote(plugin, newTask, false);
+ *   },
+ *   false,
+ *   false,
+ *   false,
+ *   undefined,
+ *   "path/to/file.md",
+ *   "window"
+ * );
+ */
+export const openAddOrEditTaskView = async (
+	plugin: TaskBoard,
+	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void,
+	isTaskNote: boolean,
+	activeNote: boolean,
+	taskExists: boolean,
+	task?: taskItem,
+	filePath?: string,
+	location: "tab" | "split" | "window" = "tab"
+): Promise<WorkspaceLeaf | null> => {
+	const { workspace } = plugin.app;
+
+	// Detach any existing AddOrEditTask views
+	workspace.detachLeavesOfType(VIEW_TYPE_ADD_OR_EDIT_TASK);
+
+	let leaf: WorkspaceLeaf | null = null;
+
+	if (location === "window") {
+		// Open in a new popout window
+		leaf = workspace.getLeaf("window");
+	} else if (location === "split") {
+		// Open in a split pane
+		leaf = workspace.getLeaf("split");
+	} else {
+		// Open in a new tab
+		leaf = workspace.getLeaf("tab");
+	}
+
+	if (leaf) {
+		// Create the view with the proper constructor parameters
+		const view = new AddOrEditTaskView(
+			plugin,
+			leaf,
+			saveTask,
+			isTaskNote,
+			activeNote,
+			taskExists,
+			task,
+			filePath
+		);
+
+		// Set the view on the leaf
+		await leaf.setViewState({
+			type: VIEW_TYPE_ADD_OR_EDIT_TASK,
+			active: true,
+		});
+
+		// Replace the leaf's view with our configured view
+		// This is a workaround since registerView creates a default instance
+		(leaf as any).view = view;
+		await view.onOpen();
+
+		// Reveal the leaf
+		workspace.revealLeaf(leaf);
+	}
+
+	return leaf;
 };
