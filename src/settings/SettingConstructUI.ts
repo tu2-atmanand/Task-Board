@@ -862,7 +862,7 @@ export class SettingsManager {
 		// Setting for hiding specific task properties in Live Editor and Reading mode
 		new Setting(contentEl)
 			.setName(t("hide-specific-properties-in-notes"))
-			.setDesc("hide-specific-properties-in-notes-description")
+			.setDesc(t("hide-specific-properties-in-notes-description"))
 			.setClass("taskboard-hidden-properties-setting");
 
 		// Create a container for checkboxes
