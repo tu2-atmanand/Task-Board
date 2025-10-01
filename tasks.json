@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-09-30T18:04:06.190Z",
+    "Modified_at": "2025-10-01T11:08:39.611Z",
     "Pending": {
         "Task Board/1.7.0/Tasks.md": [
             {
@@ -32,69 +32,7 @@
                 "reminder": ""
             },
             {
-                "id": 6,
-                "legacyId": "6",
-                "status": " ",
-                "title": "- [ ] Post the two articles first. #pending 🆔 6 🔺",
-                "body": [
-                    "\t- [ ] In the **docs**, under a new section.",
-                    "\t- [ ] In **arXiv**.",
-                    "\t- I cant make the GitHub post, until I share this articles."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "frontmatterTags": [],
-                "priority": 1,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 21,
-                    "startCharIndex": 0,
-                    "endLine": 24,
-                    "endCharIndex": 60
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 22,
-                "legacyId": "22",
-                "status": " ",
-                "title": "- [ ] Share Post-2 on GitHub **Share and showcase** discussion topic. ⛔ 6 #pending  🆔 22",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "6"
-                ],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 25,
-                    "startCharIndex": 0,
-                    "endLine": 25,
-                    "endCharIndex": 89
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2023494945,
+                "id": 2828197427,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Publish the video on YouTube.",
@@ -120,7 +58,7 @@
                 "reminder": ""
             },
             {
-                "id": 4228468643,
+                "id": 1039325828,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Release the plugin with release notes.",
@@ -146,7 +84,7 @@
                 "reminder": ""
             },
             {
-                "id": 1596489644,
+                "id": 2006785742,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Share the Post-1.",
@@ -172,7 +110,7 @@
                 "reminder": ""
             },
             {
-                "id": 1199672631,
+                "id": 2205235859,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Another video on the methodology with a use-case.",
@@ -1082,6 +1020,68 @@
                     "endCharIndex": 53
                 },
                 "completion": "2025-09-30",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 6,
+                "legacyId": "6",
+                "status": "x",
+                "title": "- [x] Post the two articles first. #pending 🆔 6 🔺 ✅ 2025-10-01",
+                "body": [
+                    "\t- [x] In the **docs**, under a new section. ✅ 2025-10-01",
+                    "\t- [-] In **arXiv**.",
+                    "\t- I cant make the GitHub post, until I share this articles."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "dependsOn": [],
+                "filePath": "Task Board/1.7.0/Tasks.md",
+                "taskLocation": {
+                    "startLine": 21,
+                    "startCharIndex": 0,
+                    "endLine": 24,
+                    "endCharIndex": 60
+                },
+                "completion": "2025-10-01",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 22,
+                "legacyId": "22",
+                "status": "x",
+                "title": "- [x] Share Post-2 on GitHub **Share and showcase** discussion topic. #pending 🆔 22 ⛔ 6 ✅ 2025-10-01",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "6"
+                ],
+                "filePath": "Task Board/1.7.0/Tasks.md",
+                "taskLocation": {
+                    "startLine": 25,
+                    "startCharIndex": 0,
+                    "endLine": 25,
+                    "endCharIndex": 101
+                },
+                "completion": "2025-10-01",
                 "cancelledDate": "",
                 "reminder": ""
             }
