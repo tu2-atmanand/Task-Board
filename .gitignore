@@ -24,7 +24,7 @@ MyStuff/
 docs/MyReadme.md
 data.json
 tasks.json
-locales/
+locales/*
 main.css
 
 # Test files
