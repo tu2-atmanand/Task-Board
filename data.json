@@ -189,6 +189,15 @@
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*"
+          },
+          {
+            "id": 3193261849,
+            "index": 7,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20
           }
         ],
         "filters": [
@@ -670,13 +679,13 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 18,
+      "uniqueIdCounter": 22,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 2,
         "taskId": ""
       },
       "taskNoteIdentifierTag": "taskNote",
