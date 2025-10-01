@@ -16,7 +16,7 @@
 </p>
 <br/>
 
-<p align="center">An [Obsidian](https://obsidian.md/) plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
+<p align="center">An <a href="https://obsidian.md/">Obsidian</a> plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
 
 ![Task Board Thumbnail](./assets/MainThumbnail-2.jpg)
 
@@ -93,7 +93,7 @@ Marking a Task as complete from the board is real-time, as soon as you will mark
 
 ### Editing a Task
 
-Edit task directly from the Edit Task Window. You can add different properties to the task, add more subTask, add or edit description to the task. And the changes will be return to the parent markdown file exactly the way you see it in the preview.
+Edit task directly from the Edit Task modal. You can add different properties to the task, add more subTask, add or edit description to the task. And the changes will be updated in the parent markdown file exactly the way you see it in the modal preview.
 
 ![Editing a Task Item](./assets/EditTaskWindow.gif)
 
@@ -133,7 +133,7 @@ While development I took inspirations from CardBoard and Kanban plugin as well a
 
 ## Support
 
-A great effort of work has been put into this idea to make it happen. I created the plugin for personal use, but I believed it will surely help other to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider donating for further improvement of this idea.
+A great effort of work has been put into this idea to bring it to reality. I created the plugin for personal use, but I believed it will surely help other Obsidian users to make their work easier in managing tasks and handling project. If you have got benefitted with this plugin, consider donating for further improvement of this project.
 
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/tu2-atmanand?label=Sponsor&logo=GitHub%20Sponsors&style=for-the-badge)](https://github.com/sponsors/tu2-atmanand)
 
