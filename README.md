@@ -58,7 +58,7 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 ### Task Formats
 
-This plugin can scan all kinds of task formats which are supported by the [Tasks plugin](). Whether the tasks are multi-level indented tasks, tasks from callouts and tas with checkboxes starting with the patterns `- [ ]`, `+ [ ]`, `* [ ]` or `> [ ]` will be scanned.
+This plugin can scan all kinds of task formats which are supported by the [Tasks plugin](https://github.com/obsidian-tasks-group/obsidian-tasks). Whether the tasks are multi-level indented tasks, tasks from callouts and tas with checkboxes starting with the patterns `- [ ]`, `+ [ ]`, `* [ ]` or `> [ ]` will be scanned.
 
 Additionally, you can add multi-level sub-tasks and body description with images and files with the accepted format as explained in the docs. Following is an example of a task :
 
@@ -109,12 +109,9 @@ Apply Board filters to filter out and see the urgent tasks on the board with eas
 ## Upcoming Features
 
 - **Task Sorting :** Sorting feature for each individual Column.
-- **Task Searching :** Search any task from any board.
-- **New Column Type :** Similar to the `Dated` and `Tagged` type of columns, a new column type on `priority` will be added.
 - **Drag N Drop for Tasks :** User will be able to drag and drop tasks from one column to another for easy editing fields.
-- **Temporary Task :** User will be able to add a temporary task which is not required to be saved in any file.
-- **New Board Type :** A new type of Board knows as `Markdown` will be added, which will work with a single markdown file, similar to the Kanban Plugin.
-- **Comments and Activity :** From the Task Popup window, you can add comments to the task, which will help you to document everything you were doing while working on this task, similar to GitHub Projects Kanban boards.
+- **New Board Type :** A new type of Board called `Static Board` will be added, which will work with a single markdown file, similar to the Kanban Plugin.
+- **Comments and Activity :** Using the Add or Edit task modal, you can add comments to the task, which will help you to document everything you were doing while working on this task, similar to GitHub Projects Planning Issus feature.
 
 
 ## How to Contribute
