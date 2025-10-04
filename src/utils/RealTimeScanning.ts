@@ -2,7 +2,7 @@
 
 import { App, TAbstractFile, TFile, TFolder } from "obsidian";
 
-import type ScanningVault from "src/utils/ScanningVault";
+import type vaultScanner from "src/utils/VaultScanner";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -11,12 +11,12 @@ export class RealTimeScanning {
 	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
-	scanningVault: ScanningVault;
+	vaultScanner: vaultScanner;
 
-	constructor(app: App, plugin: TaskBoard, scanningVault: ScanningVault) {
+	constructor(app: App, plugin: TaskBoard, vaultScanner: vaultScanner) {
 		this.app = app;
 		this.plugin = plugin;
-		this.scanningVault = scanningVault;
+		this.vaultScanner = vaultScanner;
 	}
 
 	async initializeStack() {
@@ -47,48 +47,72 @@ export class RealTimeScanning {
 		}
 	}
 
-	async processAllUpdatedFiles(currentFile?: TFile | null) {
+	async processAllUpdatedFiles(currentFile?: TFile | string | undefined) {
+		// If a current file is provided, ensure it's included in the processing
+		let newFile: TFile | null | undefined = null;
+		if (currentFile && typeof currentFile === "string") {
+			newFile = this.plugin.app.vault.getFileByPath(currentFile);
+		} else {
+			newFile = currentFile as TFile | undefined;
+		}
+
 		const filesToProcess = this.taskBoardFileStack.slice();
-		this.taskBoardFileStack = [];
 		const files = filesToProcess
 			.map((filePath) => this.getFileFromPath(filePath))
 			.filter((file) => !!file);
 
-		if (currentFile) {
+		if (newFile) {
 			// If a current file is provided, ensure it's included in the processing
-			const currentFilePath = currentFile.path;
+			const currentFilePath = newFile.path;
 			if (!filesToProcess.includes(currentFilePath)) {
 				filesToProcess.push(currentFilePath);
-				files.push(currentFile);
+				files.push(newFile);
 			}
 		}
+
+		let result = false;
 		if (filesToProcess.length > 0) {
 			// Send all files for scanning and updating tasks
-			await this.scanningVault.refreshTasksFromFiles(files);
+			result = await this.vaultScanner.refreshTasksFromFiles(
+				files,
+				false
+			);
 		}
-		// Save updated stack (which should now be empty)
-		this.saveStack();
+
+		if (result) {
+			// Clear the stack to avoid re-processing during this run.
+			this.taskBoardFileStack = [];
+			// Save updated stack (which should now be empty)
+			this.saveStack();
+		}
+
+		// Reset the editorModified flag after the scan.
+		this.plugin.editorModified = false;
 	}
 
 	getFileFromPath(filePath: string): TFile | null {
 		return this.plugin.app?.vault.getFileByPath(filePath);
 	}
 
-	onFileModified(file: TFile) {
+	onFileModified(file: TFile | string) {
 		if (
 			this.taskBoardFileStack.at(0) === undefined ||
-			!this.taskBoardFileStack.includes(file.path)
+			!this.taskBoardFileStack.includes(
+				file instanceof TFile ? file.path : file
+			)
 		) {
-			this.taskBoardFileStack.push(file.path); // Add the file to the stack
+			this.taskBoardFileStack.push(
+				file instanceof TFile ? file.path : file
+			); // Add the file to the stack
 			this.saveStack(); // Save the updated stack
 		}
 	}
 
 	onFileRenamed(file: TAbstractFile, oldPath: string) {
 		let foundFlag = false;
-		// Find the oldPath inside the plugin.scanningVault.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
+		// Find the oldPath inside the plugin.vaultScanner.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
 		const { Pending, Completed, Notes } =
-			this.plugin.scanningVault.tasksCache;
+			this.plugin.vaultScanner.tasksCache;
 
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
@@ -157,10 +181,10 @@ export class RealTimeScanning {
 		// }
 
 		if (foundFlag) {
-			this.plugin.scanningVault.tasksCache.Pending = Pending;
-			this.plugin.scanningVault.tasksCache.Completed = Completed;
-			this.plugin.scanningVault.tasksCache.Notes = Notes;
-			this.plugin.scanningVault.saveTasksToJsonCache();
+			this.plugin.vaultScanner.tasksCache.Pending = Pending;
+			this.plugin.vaultScanner.tasksCache.Completed = Completed;
+			this.plugin.vaultScanner.tasksCache.Notes = Notes;
+			this.plugin.vaultScanner.saveTasksToJsonCache();
 			eventEmitter.emit("REFRESH_COLUMN");
 		}
 	}
@@ -176,7 +200,7 @@ export class RealTimeScanning {
 
 		// Also remove the file from the tasks cache
 		const { Pending, Completed, Notes } =
-			this.plugin.scanningVault.tasksCache;
+			this.plugin.vaultScanner.tasksCache;
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
 				if (file instanceof TFile && cache.hasOwnProperty(file.path)) {
@@ -222,10 +246,10 @@ export class RealTimeScanning {
 		}
 
 		if (foundFlag) {
-			this.plugin.scanningVault.tasksCache.Pending = Pending;
-			this.plugin.scanningVault.tasksCache.Completed = Completed;
-			this.plugin.scanningVault.tasksCache.Notes = Notes;
-			this.plugin.scanningVault.saveTasksToJsonCache();
+			this.plugin.vaultScanner.tasksCache.Pending = Pending;
+			this.plugin.vaultScanner.tasksCache.Completed = Completed;
+			this.plugin.vaultScanner.tasksCache.Notes = Notes;
+			this.plugin.vaultScanner.saveTasksToJsonCache();
 			eventEmitter.emit("REFRESH_COLUMN");
 		}
 	}

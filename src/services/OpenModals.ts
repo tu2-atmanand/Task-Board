@@ -1,7 +1,7 @@
 // src/services/OpenModals.ts
 
 import { App, Notice, TFile } from "obsidian";
-import { addTaskInNote } from "src/utils/TaskItemUtils";
+import { addTaskInNote, updateTaskInFile } from "src/utils/TaskItemUtils";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { Board } from "../interfaces/BoardConfigs";
@@ -11,11 +11,17 @@ import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
-import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
+import {
+	addIdToTaskContent,
+	getFormattedTaskContent,
+} from "src/utils/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
 import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
 import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
 import { ScanFilterModal } from "src/modal/ScanFilterModal";
+import { taskItem } from "src/interfaces/TaskItem";
+import { updateFrontmatterInMarkdownFile } from "src/utils/TaskNoteUtils";
+import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -39,15 +45,15 @@ export const openAddNewTaskInCurrentFileModal = (
 	cursorPosition?: { line: number; ch: number } | undefined
 ) => {
 	const AddTaskModal = new AddOrEditTaskModal(
-		app,
 		plugin,
-		(newTask, quickAddPluginChoice) => {
-			addTaskInNote(plugin, newTask, true, cursorPosition).then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
-					newTask.filePath
-				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
-			});
+		(newTask: taskItem, quickAddPluginChoice: string) => {
+			addTaskInNote(plugin, newTask, true, cursorPosition).then(
+				(newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						newTask.filePath
+					);
+				}
+			);
 
 			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
 			// if (
@@ -62,6 +68,7 @@ export const openAddNewTaskInCurrentFileModal = (
 			cursorPosition = undefined;
 			return true;
 		},
+		false,
 		true,
 		false,
 		undefined,
@@ -82,12 +89,15 @@ export const openAddNewTaskModal = (
 	const activeTFile = activeFile ? activeFile : preDefinedNoteFile;
 	const communityPlugins = new CommunityPlugins(plugin);
 	const AddTaskModal = new AddOrEditTaskModal(
-		app,
 		plugin,
-		async (newTask, quickAddPluginChoice) => {
+		async (newTask: taskItem, quickAddPluginChoice: string) => {
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
-				const completeTask = await getFormattedTaskContent(newTask);
+				let completeTask = await getFormattedTaskContent(newTask);
+				const { formattedTaskContent, newId } =
+					await addIdToTaskContent(plugin, completeTask);
+				completeTask = formattedTaskContent;
+
 				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
 					quickAddPluginChoice,
 					{
@@ -95,11 +105,10 @@ export const openAddNewTaskModal = (
 					}
 				);
 			} else {
-				await addTaskInNote(plugin, newTask, false).then(() => {
-					const currentFile = plugin.app.vault.getFileByPath(
+				await addTaskInNote(plugin, newTask, false).then((newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
 						newTask.filePath
 					);
-					plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
 				});
 			}
 
@@ -116,12 +125,189 @@ export const openAddNewTaskModal = (
 		},
 		false,
 		false,
+		false,
 		undefined,
 		activeTFile
 			? activeTFile.path
 			: plugin.settings.data.globalSettings.preDefinedNote
 	);
 	AddTaskModal.open();
+};
+
+export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
+	if (!plugin.settings.data.globalSettings.experimentalFeatures) {
+		new Notice(t("enable-experimental-features-message"), 5000);
+		return;
+	}
+
+	const AddTaskModal = new AddOrEditTaskModal(
+		plugin,
+		async (
+			newTask: taskItem,
+			quickAddPluginChoice: string,
+			noteContent: string | undefined
+		) => {
+			if (!noteContent) {
+				// console.warn("This code should not run...");
+			} else {
+				// If noteContent is provided, it means user wants to save this task as a TaskNote.
+				// Create the note content with frontmatter
+				try {
+					// Check if the directory exists, create if not
+					const parts = newTask.filePath.split("/");
+					if (parts.length > 1) {
+						const dirPath = parts.slice(0, -1).join("/");
+						if (!(await plugin.app.vault.adapter.exists(dirPath))) {
+							await plugin.app.vault.createFolder(dirPath);
+						}
+					}
+
+					// Create or update the file
+					const existingFile = plugin.app.vault.getFileByPath(
+						newTask.filePath
+					);
+					if (!existingFile) {
+						await plugin.app.vault
+							.create(newTask.filePath, noteContent)
+							.then(() => {
+								// This is required to rescan the updated file and refresh the board.
+								plugin.realTimeScanning.onFileModified(
+									newTask.filePath
+								);
+								sleep(2000).then(() => { // TODO : Is 2 seconds really required ?
+									plugin.realTimeScanning.processAllUpdatedFiles();
+								});
+							});
+					} else {
+						new Notice(
+							t("file-note-already-exists") +
+								t(
+									"creating a new file with the following name :"
+								) +
+								` Copy-${newTask.filePath}`,
+							10000
+						);
+						await plugin.app.vault
+							.create(`Copy-${newTask.filePath}`, noteContent)
+							.then(() => {
+								// This is required to rescan the updated file and refresh the board.
+								plugin.realTimeScanning.onFileModified(
+									`Copy-${newTask.filePath}`
+								);
+								sleep(2000).then(() => {
+									plugin.realTimeScanning.processAllUpdatedFiles();
+								});
+							});
+					}
+				} catch (error) {
+					console.error(
+						"Error creating or updating task note:",
+						error
+					);
+					new Notice(t("error-creating-task-note"), 5000);
+					return false;
+				}
+			}
+
+			eventEmitter.emit("REFRESH_COLUMN");
+		},
+		true,
+		false,
+		false,
+		undefined,
+		""
+	);
+	AddTaskModal.open();
+};
+
+export const openEditTaskModal = async (
+	plugin: TaskBoard,
+	existingTask: taskItem
+) => {
+	const EditTaskModal = new AddOrEditTaskModal(
+		plugin,
+		(updatedTask: taskItem) => {
+			updatedTask.filePath = existingTask.filePath;
+			// Update the task in the file and JSON
+			updateTaskInFile(plugin, updatedTask, existingTask).then(
+				(newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						updatedTask.filePath
+					);
+				}
+			);
+
+			// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
+
+			// setTasks((prevTasks) =>
+			// 	prevTasks.map((task) =>
+			// 		task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+			// 	)
+			// );
+			// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
+		},
+		false,
+		false,
+		true,
+		existingTask,
+		existingTask.filePath
+	);
+	EditTaskModal.open();
+};
+
+export const openEditTaskNoteModal = (
+	plugin: TaskBoard,
+	existingTask: taskItem
+) => {
+	const EditTaskModal = new AddOrEditTaskModal(
+		plugin,
+		async (
+			updatedTask: taskItem,
+			quickAddPluginChoice: string,
+			newTaskContent: string | undefined
+		) => {
+			try {
+				if (!newTaskContent) {
+					// Update frontmatter with task properties
+					await updateFrontmatterInMarkdownFile(
+						plugin,
+						updatedTask
+					).then(() => {
+						// This is required to rescan the updated file and refresh the board.
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							updatedTask.filePath
+						);
+					});
+				} else {
+					writeDataToVaultFile(
+						plugin,
+						updatedTask.filePath,
+						newTaskContent
+					).then(() => {
+						sleep(2000).then(() => { // TODO : Is 2 sec really required ?
+							// This is required to rescan the updated file and refresh the board.
+							plugin.realTimeScanning.processAllUpdatedFiles(
+								updatedTask.filePath
+							);
+						});
+					});
+				}
+			} catch (error) {
+				bugReporter(
+					plugin,
+					"Error updating task note",
+					error as string,
+					"TaskNoteEventHandlers.ts/handleTaskNoteEdit"
+				);
+			}
+		},
+		true,
+		false,
+		true,
+		existingTask,
+		existingTask.filePath
+	);
+	EditTaskModal.open();
 };
 
 export const bugReporter = (

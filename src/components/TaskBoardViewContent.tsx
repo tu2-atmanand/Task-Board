@@ -13,20 +13,19 @@ import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
 import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
-import KanbanBoard from "./KanbanBoard";
-import CanvasView from "./CanvasView";
-import { VIEW_TYPE_TASKBOARD } from "src/types/GlobalVariables";
-
-type ViewType = "kanban" | "list" | "table" | "canvas";
+import KanbanBoard from "./KanbanView/KanbanBoardView";
+import MapView from "./MapView/MapView";
+import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
+import { viewTypeNames } from "src/interfaces/GlobalSettings";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
-	const [activeBoardIndex, setActiveBoardIndex] = useState(0);
+	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
-	const [viewType, setViewType] = useState<ViewType>("kanban");
+	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || viewTypeNames.kanban);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
@@ -132,6 +131,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		return () => eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
 	}, []);
 
+	useEffect(() => {
+		const refreshView = (viewType: string) => {
+			setViewType(viewType);
+		};
+		eventEmitter.on("SWITCH_VIEW", refreshView);
+		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
+	}, []);
+
 	const refreshBoardButton = useCallback(async () => {
 		if (plugin.settings.data.globalSettings.realTimeScanning) {
 			eventEmitter.emit("REFRESH_BOARD");
@@ -206,6 +213,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		setFilteredTasksPerColumn(filtered);
 	}
 
+	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+		const newViewType = e.target.value;
+		setViewType(newViewType);
+		plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
+		plugin.saveSettings();
+	}
+
 
 	return (
 		<div className="taskBoardView">
@@ -215,7 +229,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<button
 							key={index}
 							className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
-							onClick={() => setActiveBoardIndex(index)}
+							onClick={() => { setActiveBoardIndex(index); plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index; plugin.saveSettings(); }}
 						>
 							{board.name}
 						</button>
@@ -279,16 +293,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
 						<Bot size={20} />
 					</button> */}
-					{/* <select
-						className="taskBoardViewDropdown"
-						value={viewType}
-						onChange={(e) => setViewType(e.target.value as ViewType)}
-					>
-						<option value="kanban">Kanban</option>
-						<option value="list">List</option>
-						<option value="table">Table</option>
-						<option value="canvas">Canvas</option>
-					</select> */}
+					{plugin.settings.data.globalSettings.experimentalFeatures && (
+						<select
+							className="taskBoardViewDropdown"
+							value={viewType}
+							onChange={(e) => { handleViewTypeChange(e); }}
+						>
+							<option value="kanban">Kanban</option>
+							{/* <option value="list">List</option>
+							<option value="table">Table</option> */}
+							<option value="map">Map</option>
+						</select>
+					)}
 					<button className="RefreshBtn" aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
@@ -307,13 +323,35 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							loading={loading}
 							freshInstall={freshInstall}
 						/>
-					) : viewType === "canvas" ? (
-						<CanvasView
-							plugin={plugin}
-							boards={boards}
-							activeBoardIndex={activeBoardIndex}
-							allTasksArranged={allTasksArrangedPerColumn}
-						/>
+					) : viewType === "map" ? (
+						loading ? (
+							<div className="loadingContainer" >
+								{freshInstall ? (
+									<h2 className="initializationMessage" >
+										{t("fresh-install-1")}
+										<br />
+										<br />
+										{t("fresh-install-2")}
+										<br />
+										<br />
+										{t("fresh-install-3")}
+									</h2>
+								) : (
+									<>
+										<div className="spinner"></div>
+										<p>{t("loading-tasks")}</p>
+									</>
+								)}
+							</div>
+						) : (
+							<MapView
+								plugin={plugin}
+								boards={boards}
+								activeBoardIndex={activeBoardIndex}
+								allTasksArranged={allTasksArrangedPerColumn}
+								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
+							/>
+						)
 					) : (
 						<div className="emptyBoardMessage">
 							{/* Placeholder for other view types */}

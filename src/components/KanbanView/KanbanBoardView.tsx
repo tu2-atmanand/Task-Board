@@ -1,8 +1,8 @@
 // src/components/KanbanBoard.tsx
 
-import { Board } from "../interfaces/BoardConfigs";
+import { Board } from "../../interfaces/BoardConfigs";
 import React, { memo } from "react";
-import { taskJsonMerged } from "src/interfaces/TaskItem";
+import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
 import Column from "./Column";
@@ -14,7 +14,7 @@ interface KanbanBoardProps {
 	plugin: TaskBoard;
 	board: Board;
 	allTasks: taskJsonMerged | undefined;
-	tasksPerColumn: any[];
+	tasksPerColumn: taskItem[][];
 	loading: boolean;
 	freshInstall: boolean;
 }

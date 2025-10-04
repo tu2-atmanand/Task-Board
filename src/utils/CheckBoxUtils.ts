@@ -1,6 +1,7 @@
 import TaskBoard from "main";
 import { App } from "obsidian";
 import { taskStatuses } from "src/interfaces/TaskItem";
+import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**
  * Switches the checkbox state based on the current symbol.
@@ -35,7 +36,8 @@ export function checkboxStateSwitcher(plugin: any, symbol: string): string {
  * @returns True if the symbol represents a completed state, otherwise false.
  */
 export function isCompleted(task: string): boolean {
-	const match = task.match(/-\s\[(.)\]/); // Extract the symbol inside [ ]
+	const match = task.match(/\s\[(.)\]/); // Extract the symbol inside [ ]
+	// console.log("CheckBoxUtils.ts : isCompleted : match :", match);
 	if (!match || match.length < 2) return false;
 
 	const symbol = match[1];
@@ -52,7 +54,14 @@ export function isCompleted(task: string): boolean {
  * @returns Returns "True" if the line matches the task pattern, otherwise "False".
  */
 export function isTaskLine(line: string): boolean {
-	return /^- \[[^\]]\]\s+.*\S/.test(line);
+	line = line.trim();
+	const regexMatch = line.match(TaskRegularExpressions.taskRegex);
+	// return /^- \[[^\]]\]\s+.*\S/.test(line);
+	return (
+		regexMatch !== null &&
+		regexMatch.length > 0 &&
+		regexMatch[0].trim().length > 0
+	);
 }
 
 /**
@@ -61,7 +70,7 @@ export function isTaskLine(line: string): boolean {
  * @returns The checkbox symbol.
  */
 export function extractCheckboxSymbol(task: string): string {
-	const match = task.match(/- \[(.)\]/); // Extract the symbol inside [ ]
+	const match = task.match(/\[(.)\]/); // Extract the symbol inside [ ]
 	if (!match || match.length < 2) return " ";
 
 	return match[1];

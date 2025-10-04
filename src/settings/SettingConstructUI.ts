@@ -14,6 +14,8 @@ import {
 	UniversalDateOptions,
 	cardSectionsVisibilityOptions,
 	globalSettingsData,
+	HideableTaskProperty,
+	taskPropertyFormatOptions,
 } from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import Pickr from "@simonwep/pickr";
@@ -29,6 +31,13 @@ import {
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
+import {
+	exportConfigurations,
+	importConfigurations,
+	showReloadObsidianNotice,
+} from "./SettingSynchronizer";
+import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 
 export class SettingsManager {
 	win: Window;
@@ -36,6 +45,7 @@ export class SettingsManager {
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData | null = null;
 	allPickrs: Pickr[] = [];
+	reloadNoticeAlreadyShown: boolean = false;
 
 	constructor(plugin: TaskBoard) {
 		this.app = plugin.app;
@@ -45,6 +55,40 @@ export class SettingsManager {
 
 	private static createFragmentWithHTML = (html: string) =>
 		sanitizeHTMLToDom(html);
+
+	private getPropertyDisplayName(property: HideableTaskProperty): string {
+		const displayNames: Record<HideableTaskProperty, string> = {
+			[HideableTaskProperty.ID]: "ID (🆔 fpyvkz)",
+			[HideableTaskProperty.Tags]: "Tags (#tag)",
+			[HideableTaskProperty.Priority]: "Priority (🔺)",
+			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
+			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)",
+			[HideableTaskProperty.ScheduledDate]:
+				"Scheduled Date (⏳ 2024-01-01)",
+			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
+			[HideableTaskProperty.CompletionDate]:
+				"Completion Date (✅ 2024-01-01)",
+			[HideableTaskProperty.CancelledDate]:
+				"Cancelled Date (❌ 2024-01-01)",
+			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
+			[HideableTaskProperty.Reminder]: "Reminder ((@12:30))",
+			[HideableTaskProperty.Recurring]: "Recurring (🔁 every 2 weeks)",
+			[HideableTaskProperty.OnCompletion]: "On-completion (🏁 delete)",
+			[HideableTaskProperty.Dependencies]: "Dependens-on ⛔ fa4sm9",
+		};
+		return displayNames[property] || property;
+	}
+
+	private openReloadNoticeIfNeeded() {
+		if (!this.reloadNoticeAlreadyShown) {
+			sleep(100).then(() => {
+				showReloadObsidianNotice(this.plugin);
+				this.reloadNoticeAlreadyShown = true;
+			});
+			return;
+		}
+		return;
+	}
 
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
@@ -171,6 +215,8 @@ export class SettingsManager {
 		// Reset global settings if necessary
 		this.globalSettings = null;
 
+		this.reloadNoticeAlreadyShown = false;
+
 		//Destroy all Pickr instances
 		this.allPickrs.forEach((pickr) => pickr.destroy());
 
@@ -192,13 +238,16 @@ export class SettingsManager {
 
 		const {
 			scanFilters,
-			showHeader,
 			openOnStartup,
 			realTimeScanning,
 			archivedTasksFilePath,
 			tasksCacheFilePath,
 			scanVaultAtStartup,
 			preDefinedNote,
+			taskNoteIdentifierTag,
+			taskNoteDefaultLocation,
+			autoAddUniqueID,
+			experimentalFeatures,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -316,6 +365,38 @@ export class SettingsManager {
 				})
 			);
 
+		// Setting to scan the modified file in realtime
+		new Setting(contentEl)
+			.setName(t("auto-add-unique-id"))
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					t("auto-add-unique-id-description") +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						t("link-parent-child-tasks") +
+						"</li>" +
+						"<li>" +
+						t("pin-tasks-on-top-in-each-column-upcoming") +
+						"</li>" +
+						"<li>" +
+						t("manual-sorting-inside-each-column-upcoming") +
+						"</li>" +
+						"<li>" +
+						t("map-view-upcoming") +
+						"</li>" +
+						"</ul>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(autoAddUniqueID).onChange(async (value) => {
+					this.globalSettings!.autoAddUniqueID = value;
+					await this.saveSettings();
+
+					this.openReloadNoticeIfNeeded();
+				})
+			);
+
 		new Setting(contentEl)
 			.setName(t("default-note-for-adding-new-tasks"))
 			.setDesc(t("default-note-for-new-tasks-description"))
@@ -343,6 +424,38 @@ export class SettingsManager {
 				);
 			});
 
+		new Setting(contentEl)
+			.setName(t("task-note-identifier-tag"))
+			.setDesc(t("task-note-identifier-tag-description"))
+			.addText((text) => {
+				text.setValue(taskNoteIdentifierTag).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteIdentifierTag =
+							value.startsWith("#")
+								? value.replace("#", "")
+								: value;
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., taskNote";
+			});
+
+		// Setting for choosing the default location for task notes
+		new Setting(contentEl)
+			.setName(t("default-location-for-new-task-notes"))
+			.setDesc(t("default-location-for-new-task-notes-description"))
+			.addText((text) => {
+				text.setValue(taskNoteDefaultLocation).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteDefaultLocation = value;
+				});
+
+				const inputEl = text.inputEl;
+				// For folders, we could use folder suggestions or just allow text input
+				// For now, let's keep it simple with text input
+				inputEl.placeholder = "e.g., Task Notes or Notes/Tasks";
+			});
+
 		// Setting for choosing the default file to archive tasks
 		new Setting(contentEl)
 			.setName(t("file-for-archived-tasks"))
@@ -354,7 +467,7 @@ export class SettingsManager {
 				});
 
 				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(app);
+				const suggestionContent = getFileSuggestions(this.plugin.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTasksFilePath =
@@ -373,6 +486,7 @@ export class SettingsManager {
 			});
 
 		new Setting(contentEl)
+			.setClass("taskBoard-settings-wide-input")
 			.setName(t("tasks-cache-file-path"))
 			.setDesc(
 				SettingsManager.createFragmentWithHTML(
@@ -390,7 +504,7 @@ export class SettingsManager {
 					),
 				];
 				// Add 'Default' option label for the default path
-				dropdown.addOption(defaultPath, "Default");
+				dropdown.addOption(defaultPath, `Default - ${defaultPath}`);
 
 				// Add options to dropdown
 				suggestionContent.forEach((path) => {
@@ -401,15 +515,17 @@ export class SettingsManager {
 				dropdown.setValue(tasksCacheFilePath);
 
 				dropdown.onChange(async (selectedPath) => {
-					moveTasksCacheFileToNewPath(
+					const result = await moveTasksCacheFileToNewPath(
 						this.plugin,
 						tasksCacheFilePath,
 						selectedPath
 					);
 
-					if (this.globalSettings) {
+					if (this.globalSettings && result) {
 						this.globalSettings.tasksCacheFilePath = selectedPath;
 						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
 					}
 				});
 			});
@@ -451,8 +567,50 @@ export class SettingsManager {
 			.setDesc(t("update-language-translations-info"))
 			.addButton((button) =>
 				button.setButtonText("Update").onClick(async () => {
-					await downloadAndApplyLanguageFile(this.plugin);
+					const result = await downloadAndApplyLanguageFile(
+						this.plugin
+					);
+					if (result) {
+						this.openReloadNoticeIfNeeded();
+					}
 				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("import-export-configurations"))
+			.setDesc(t("import-export-configurations-info"))
+			.addButton((button) =>
+				button.setButtonText(t("import")).onClick(async () => {
+					const result = await importConfigurations(this.plugin);
+					if (result) {
+						this.openReloadNoticeIfNeeded();
+					}
+				})
+			)
+			.addButton((button) =>
+				button.setButtonText(t("export")).onClick(async () => {
+					await exportConfigurations(this.plugin);
+				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				SettingsManager.createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						t("enable-experimental-features-info-2")
+				)
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(experimentalFeatures)
+					.onChange(async (value) => {
+						this.globalSettings!.experimentalFeatures = value;
+						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
+					})
 			);
 
 		// // Helper to add filter rows
@@ -616,6 +774,7 @@ export class SettingsManager {
 			showFileNameInCard,
 			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
+			hiddenTaskProperties,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -699,6 +858,55 @@ export class SettingsManager {
 						await this.saveSettings();
 					})
 			);
+
+		// Setting for hiding specific task properties in Live Editor and Reading mode
+		new Setting(contentEl)
+			.setName(t("hide-specific-properties-in-notes"))
+			.setDesc(t("hide-specific-properties-in-notes-description"))
+			.setClass("taskboard-hidden-properties-setting");
+
+		// Create a container for checkboxes
+		const checkboxContainer = contentEl.createDiv(
+			"taskboard-hidden-properties-container"
+		);
+
+		// Create checkboxes for each hideable property
+		Object.values(HideableTaskProperty).forEach((property) => {
+			const displayName = this.getPropertyDisplayName(property);
+
+			const checkboxSetting = new Setting(checkboxContainer)
+				.setName(displayName)
+				.setClass("taskboard-property-checkbox-setting")
+				.addToggle((toggle) => {
+					const isSelected = hiddenTaskProperties.includes(property);
+					toggle.setValue(isSelected).onChange(async (value) => {
+						if (value) {
+							// Add property if not already included
+							if (
+								!this.globalSettings!.hiddenTaskProperties.includes(
+									property
+								)
+							) {
+								this.globalSettings!.hiddenTaskProperties.push(
+									property
+								);
+							}
+						} else {
+							// Remove property
+							this.globalSettings!.hiddenTaskProperties =
+								this.globalSettings!.hiddenTaskProperties.filter(
+									(p) => p !== property
+								);
+						}
+						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
+					});
+				});
+
+			// Style the checkbox setting to be more compact
+			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+		});
 
 		// Setting to take the width of each Column in px.
 		new Setting(contentEl)
@@ -1008,6 +1216,7 @@ export class SettingsManager {
 			quickAddPluginDefaultChoice,
 			notificationService,
 			frontmatterPropertyForReminder,
+			boundTaskCompletionToChildTasks,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -1016,9 +1225,11 @@ export class SettingsManager {
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[EditButtonMode.PopUp]: t(
+						[EditButtonMode.Modal]: t(
 							"use-edit-task-window-feature"
 						),
+						[EditButtonMode.TasksPluginModal]:
+							t("tasks-plugin-modal"),
 						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
 						[EditButtonMode.NoteInSplit]: t(
 							"open-note-in-right-split"
@@ -1034,6 +1245,48 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.editButtonAction =
 							value as EditButtonMode;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("double-click-card-action"))
+			.setDesc(t("double-click-card-action-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.None]: t("none"),
+						[EditButtonMode.Modal]: t(
+							"use-edit-task-window-feature"
+						),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split"
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window"
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview"
+						),
+					})
+					.setValue(this.globalSettings!.doubleClickCardToEdit)
+					.onChange(async (value) => {
+						this.globalSettings!.doubleClickCardToEdit =
+							value as EditButtonMode;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("restrict-task-completion-to-child-tasks-and-sub-tasks"))
+			.setDesc(t("restrict-task-completion-to-child-tasks-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(boundTaskCompletionToChildTasks)
+					.onChange(async (value) => {
+						this.globalSettings!.boundTaskCompletionToChildTasks =
+							value;
 						await this.saveSettings();
 					})
 			);
@@ -1111,16 +1364,20 @@ export class SettingsManager {
 							communityPlugins.isQuickAddPluginEnabled()
 					)
 					.onChange(async (value) => {
-						if (this.globalSettings === null) return;
-
-						if (!communityPlugins.isQuickAddPluginEnabled()) {
+						if (
+							this.globalSettings &&
+							!communityPlugins.isQuickAddPluginEnabled()
+						) {
 							new Notice(t("quickadd-plugin-not-enabled"));
 							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								false;
-						} else {
+						} else if (this.globalSettings) {
 							this.globalSettings.compatiblePlugins.quickAddPlugin =
 								value;
+
+							this.openReloadNoticeIfNeeded();
 						}
+
 						await this.saveSettings();
 					})
 			)
@@ -1230,7 +1487,7 @@ export class SettingsManager {
 
 		const {
 			universalDateFormat,
-			taskCompletionFormat,
+			taskPropertyFormat,
 			// taskCompletionDateTimePattern,
 			firstDayOfWeek,
 			taskCompletionInLocalTime,
@@ -1241,32 +1498,79 @@ export class SettingsManager {
 		const previewEl = contentEl.createDiv({
 			cls: "global-setting-tab-live-preview",
 		});
-		const previewLabel = previewEl.createDiv({
-			cls: "global-setting-tab-live-preview-label",
-		});
-		previewLabel.setText(t("preview"));
 
-		const previewData = previewEl.createDiv({
-			cls: "global-setting-tab-live-preview-data",
+		const readingPreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-label",
 		});
+		readingPreviewLabel.setText(t("reading-mode-preview"));
+		// Render markdown preview above the raw preview
+		const markdownPreviewEl = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-markdown",
+		});
+
+		const sourcePreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-label",
+		});
+		sourcePreviewLabel.setText(t("source-mode-preview"));
+		const previewData = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-data",
+		});
+
+		// Helper to render markdown using MarkdownUIRenderer
+		const renderMarkdownPreview = (markdown: string) => {
+			// Remove previous preview if any
+			markdownPreviewEl.empty();
+			// Use Obsidian's MarkdownUIRenderer to render markdown
+			// @ts-ignore
+			MarkdownUIRenderer.renderSubtaskText(
+				this.plugin.app,
+				markdown,
+				markdownPreviewEl,
+				"",
+				this.plugin.view
+			);
+		};
 		const updatePreview = () => {
 			let taskTitle = t("dummy-task-title");
 			let priority = "⏫";
 			let time = "10:00 - 11:00";
-			let dueDate = "2024-09-21";
+			let universalDateEmoji = "";
+			let universalDateString = "";
+			if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.startDate
+			) {
+				universalDateEmoji =
+					TASKS_PLUGIN_DEFAULT_SYMBOLS.startDateSymbol;
+				universalDateString = "start";
+			} else if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.scheduledDate
+			) {
+				universalDateEmoji =
+					TASKS_PLUGIN_DEFAULT_SYMBOLS.scheduledDateSymbol;
+				universalDateString = "scheduled";
+			} else if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.dueDate
+			) {
+				universalDateEmoji = TASKS_PLUGIN_DEFAULT_SYMBOLS.dueDateSymbol;
+				universalDateString = "due";
+			}
+			let date = "2024-09-21";
 			let tags = `#tag #test`;
 			let completionDate = "2024-09-21/12:20:33";
 
 			let preview = "";
-			switch (this.globalSettings!.taskCompletionFormat) {
+			switch (this.globalSettings!.taskPropertyFormat) {
 				// Default
 				case "1": {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} ${priority} 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
 					} else {
-						preview = `- [x] ${taskTitle} ${priority} ⏰[${time}] 📅[${dueDate}] ${tags} ✅[${completionDate}]`;
+						preview = `- [>] ${taskTitle} ${priority} ⏰[${time}] ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
 					}
 					break;
 				}
@@ -1275,11 +1579,11 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} ${priority} 📅 ${dueDate} ${tags} ✅ ${
+						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji} ${date} ${tags} ✅ ${
 							completionDate.split("/")[0]
 						}`;
 					} else {
-						preview = `- [x] ${taskTitle} ${priority} ⏰ ${time} 📅 ${dueDate} ${tags} ✅${
+						preview = `- [>] ${taskTitle} ${priority} ⏰ ${time} ${universalDateEmoji} ${date} ${tags} ✅${
 							completionDate.split("/")[0]
 						}`;
 					}
@@ -1290,9 +1594,9 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} [priority:: 2] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [>] ${time} ${taskTitle} [priority:: 2] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
 					} else {
-						preview = `- [x] ${taskTitle} [priority:: 2] [time:: ${time}] [due:: ${dueDate}] ${tags} [completion:: ${completionDate}]`;
+						preview = `- [>] ${taskTitle} [priority:: 2] [time:: ${time}] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
 					}
 					break;
 				}
@@ -1301,13 +1605,14 @@ export class SettingsManager {
 					if (
 						this.globalSettings!.compatiblePlugins.dayPlannerPlugin
 					) {
-						preview = `- [x] ${time} ${taskTitle} @priority(2) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [>] ${time} ${taskTitle} @priority(2) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
 					} else {
-						preview = `- [x] ${taskTitle} @priority(2) @time(${time}) @due(${dueDate}) ${tags} @completion(${completionDate})`;
+						preview = `- [>] ${taskTitle} @priority(2) @time(${time}) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
 					}
 					break;
 				}
 			}
+			renderMarkdownPreview(preview);
 			previewData.setText(preview);
 		};
 
@@ -1316,16 +1621,30 @@ export class SettingsManager {
 			.setName(t("supported-plugin-formats"))
 			.setDesc(t("supported-plugin-formats-info"))
 			.addDropdown((dropdown) => {
-				dropdown.addOption("1", t("default"));
-				dropdown.addOption("2", "Tasks " + t("plugin"));
-				dropdown.addOption("3", "Dataview " + t("plugin"));
-				dropdown.addOption("4", "Obsidian " + t("native"));
+				dropdown.addOption(
+					taskPropertyFormatOptions.default,
+					t("default")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.tasksPlugin,
+					"Tasks " + t("plugin")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.dataviewPlugin,
+					"Dataview " + t("plugin")
+				);
+				dropdown.addOption(
+					taskPropertyFormatOptions.obsidianNative,
+					"Obsidian " + t("native")
+				);
 
-				dropdown.setValue(taskCompletionFormat as string);
+				dropdown.setValue(taskPropertyFormat as string);
 				dropdown.onChange(async (value) => {
-					this.globalSettings!.taskCompletionFormat = value;
+					this.globalSettings!.taskPropertyFormat = value;
 					await this.saveSettings();
 					updatePreview();
+
+					this.openReloadNoticeIfNeeded();
 				});
 			});
 

@@ -1,5 +1,5 @@
 {
-  "version": "1.6.3",
+  "version": "1.7.0",
   "data": {
     "boardConfigs": [
       {
@@ -12,8 +12,8 @@
             "colType": "pathFiltered",
             "active": true,
             "collapsed": false,
-            "name": "Daily Notes",
-            "filePaths": "Daily_Notes/"
+            "name": "TaskNotes",
+            "filePaths": "TaskNotes/"
           },
           {
             "id": 1312742179,
@@ -48,16 +48,16 @@
       {
         "columns": [
           {
-            "id": 3494,
-            "colType": "dated",
+            "id": 1799377278,
+            "index": 1,
+            "colType": "undated",
             "active": true,
             "collapsed": false,
-            "name": "Today, updated",
-            "index": 2,
+            "name": "Backlog",
             "datedBasedColumn": {
-              "dateType": "scheduledDate",
               "from": 0,
-              "to": 0
+              "to": 0,
+              "dateType": "scheduledDate"
             }
           },
           {
@@ -65,12 +65,25 @@
             "colType": "dated",
             "active": true,
             "collapsed": false,
-            "name": "Over Due, updating",
-            "index": 3,
+            "name": "Over Due",
+            "index": 2,
             "datedBasedColumn": {
               "dateType": "scheduledDate",
               "from": -300,
               "to": -1
+            }
+          },
+          {
+            "id": 3494,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Today",
+            "index": 3,
+            "datedBasedColumn": {
+              "dateType": "scheduledDate",
+              "from": 0,
+              "to": 0
             }
           },
           {
@@ -107,15 +120,6 @@
             "limit": 20,
             "name": "Completed, updated",
             "index": 6
-          },
-          {
-            "id": 4257554450,
-            "index": 7,
-            "colType": "pathFiltered",
-            "active": true,
-            "collapsed": false,
-            "name": "DailyNotes.md",
-            "filePaths": "DailyNotes.md"
           }
         ],
         "filters": [
@@ -172,15 +176,34 @@
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
-            "name": "Working as Expected",
+            "name": "Ready to publish",
             "index": 5,
             "coltag": "done",
             "id": 328227
+          },
+          {
+            "id": 1936828579,
+            "index": 6,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "*/seeding/*",
+            "coltag": "*/seeding/*"
+          },
+          {
+            "id": 3193261849,
+            "index": 7,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20
           }
         ],
         "filters": [
           "#Test",
-          "#working"
+          "#working",
+          "*/seeding/*"
         ],
         "filterPolarity": "0",
         "filterScope": "Both",
@@ -197,21 +220,22 @@
         "files": {
           "polarity": 3,
           "values": [
-            "TODO.md",
-            "0-ImportantData.md",
-            "2025-05-23.md"
+            "Testing Indented Task Bug.md"
           ]
         },
         "folders": {
-          "polarity": 2,
+          "polarity": 1,
           "values": [
-            "obsidian-hub-0.2.1",
-            "Daily_Notes"
+            "Task Board/1.7.0"
           ]
         },
         "tags": {
           "polarity": 3,
-          "values": []
+          "values": [
+            "#CS",
+            "#placeholder/author",
+            "*/seeding/*"
+          ]
         },
         "frontMatter": {
           "polarity": 3,
@@ -240,7 +264,7 @@
       "showVerticalScroll": false,
       "tagColors": [
         {
-          "name": "bug",
+          "name": "Bug",
           "color": "rgba(253, 17, 33, 0.75)",
           "priority": 1
         },
@@ -273,6 +297,11 @@
           "name": "done",
           "color": "rgba(6, 255, 173, 1)",
           "priority": 7
+        },
+        {
+          "name": "*/seeding/*",
+          "color": "rgba(47, 147, 137, 1)",
+          "priority": 8
         }
       ],
       "editButtonAction": "popUp",
@@ -618,7 +647,7 @@
       "autoAddUniversalDate": true,
       "universalDate": "scheduledDate",
       "archivedTasksFilePath": "",
-      "showFileNameInCard": true,
+      "showFileNameInCard": false,
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": ".obsidian/plugins/task-board/tasks.json",
       "notificationService": "obsiApp",
@@ -632,19 +661,36 @@
         }
       ],
       "cardSectionsVisibility": "hideBoth",
-      "taskPropertyFormat": "1",
-      "doubleClickCardToEdit": "none",
-      "taskNoteIdentifierTag": "taskNote",
+      "hiddenTaskProperties": [
+        "tags",
+        "createdDate",
+        "startDate",
+        "scheduledDate",
+        "dueDate",
+        "completionDate",
+        "cancelledDate",
+        "on-completion",
+        "priority",
+        "recurring",
+        "time",
+        "dependencies",
+        "reminder"
+      ],
+      "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
-      "hiddenTaskProperties": [],
-      "autoAddUniqueID": false,
-      "uniqueIdCounter": 0,
-      "experimentalFeatures": false,
+      "autoAddUniqueID": true,
+      "uniqueIdCounter": 23,
+      "experimentalFeatures": true,
+      "searchQuery": "",
+      "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 0
+        "boardIndex": 2,
+        "taskId": ""
       },
-      "boundTaskCompletionToChildTasks": false
+      "taskNoteIdentifierTag": "taskNote",
+      "doubleClickCardToEdit": "noteInTab",
+      "boundTaskCompletionToChildTasks": true
     }
   }
 }

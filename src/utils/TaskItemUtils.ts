@@ -1,26 +1,34 @@
 // /src/utils/TaskItemUtils.ts
 
-import { getFormattedTaskContent } from "./TaskContentFormatter";
+import {
+	addIdToTaskContent,
+	getFormattedTaskContent,
+} from "./TaskContentFormatter";
 import {
 	loadJsonCacheDataFromDisk,
-	writeJsonCacheDataFromDisk,
+	writeJsonCacheDataToDisk,
 } from "./JsonFileOperations";
 import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
-	readDataOfVaultFiles,
-	writeDataToVaultFiles,
+	readDataOfVaultFile,
+	writeDataToVaultFile,
 } from "./MarkdownFileOperations";
-import { extractFrontmatter, extractFrontmatterTags } from "./ScanningVault";
 
 import { Notice } from "obsidian";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { TasksApi } from "src/services/tasks-plugin/api";
+import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import {
 	bugReporter,
 	openDiffContentCompareModal,
 } from "src/services/OpenModals";
 import { isTheContentDiffAreOnlySpaces } from "src/modal/DiffContentCompareModal";
+import {
+	extractFrontmatterFromFile,
+	extractFrontmatterTags,
+} from "./FrontmatterOperations";
+import { generateTaskId } from "./VaultScanner";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -42,7 +50,7 @@ export const moveFromPendingToCompleted = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeJsonCacheDataFromDisk(plugin, allTasks);
+		await writeJsonCacheDataToDisk(plugin, allTasks);
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -75,7 +83,7 @@ export const moveFromCompletedToPending = async (
 		}
 
 		// Write the updated data back to the JSON file
-		await writeJsonCacheDataFromDisk(plugin, allTasks);
+		await writeJsonCacheDataToDisk(plugin, allTasks);
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -109,7 +117,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 		);
 
 		// // Step 1: Read the file content
-		// const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		// const fileContent = await readDataOfVaultFile(plugin, filePath);
 
 		// // Step 3: Split the file content into lines
 		// const lines = fileContent.split("\n");
@@ -148,7 +156,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 		// 	const newContent = fileContent.replace(taskBlock, "");
 
 		// 	// Step 6: Write the updated content back to the file
-		// 	await writeDataToVaultFiles(plugin, filePath, newContent);
+		// 	await writeDataToVaultFile(plugin, filePath, newContent);
 		// } else {
 		// 	bugReporter(
 		// 		plugin,
@@ -183,7 +191,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 			].filter((t: any) => t.id !== task.id);
 		}
 
-		await writeJsonCacheDataFromDisk(plugin, allTasks);
+		await writeJsonCacheDataToDisk(plugin, allTasks);
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
@@ -224,7 +232,7 @@ export const archiveTask = async (
 	if (archivedFilePath) {
 		try {
 			// Read the content of the file where archived tasks will be stored
-			const archivedFileContent = await readDataOfVaultFiles(
+			const archivedFileContent = await readDataOfVaultFile(
 				plugin,
 				archivedFilePath
 			);
@@ -233,7 +241,7 @@ export const archiveTask = async (
 			const newArchivedContent = `> Archived at ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
 
 			// Write the updated content back to the archived file
-			await writeDataToVaultFiles(
+			await writeDataToVaultFile(
 				plugin,
 				archivedFilePath,
 				newArchivedContent
@@ -241,10 +249,7 @@ export const archiveTask = async (
 
 			// Now delete the task from its original file
 			await deleteTaskFromFile(plugin, task).then(() => {
-				const currentFile = plugin.app.vault.getFileByPath(
-					task.filePath
-				);
-				plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 			});
 
 			// await deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
@@ -273,7 +278,7 @@ export const archiveTask = async (
 			// );
 
 			// // Write the updated content back to the file
-			// await writeDataToVaultFiles(plugin, filePath, newContet).then(
+			// await writeDataToVaultFile(plugin, filePath, newContet).then(
 			// 	() => {
 			// 		const currentFile = plugin.app.vault.getFileByPath(
 			// 			task.filePath
@@ -305,11 +310,24 @@ export const archiveTask = async (
 
 // For handleEditTask and for handleSubTasksChange, when task is edited from Modal
 
+/*
+ * Replaces an old task in a file with new task content.
+ * If the new task content is an empty string, it deletes the old task from the file.
+ * If there are differences in whitespace only, it prompts the user for confirmation before proceeding.
+ *
+ * @param plugin - The TaskBoard plugin instance used to access settings and perform file operations.
+ * @param task - The taskItem object representing the task to be replaced.
+ * @param oldTaskContent - The original content of the task to be replaced.
+ * @param newTaskContent - The new content to replace the old task with. If empty, the old task will be deleted.
+ *
+ * @throws Will throw an error if there are issues reading or writing to the file.
+ */
 export const updateTaskInFile = async (
 	plugin: TaskBoard,
 	updatedTask: taskItem,
-	oldTask: taskItem
-): Promise<void> => {
+	oldTask: taskItem,
+	forceAddId?: boolean
+): Promise<number | undefined> => {
 	try {
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
 		if (oldTaskContent === "")
@@ -320,7 +338,13 @@ export const updateTaskInFile = async (
 				"TaskItemUtils.ts/updateTaskInFile"
 			);
 
-		const updatedTaskContent = await getFormattedTaskContent(updatedTask);
+		let updatedTaskContent = await getFormattedTaskContent(updatedTask);
+		const { formattedTaskContent, newId } = await addIdToTaskContent(
+			plugin,
+			updatedTaskContent,
+			forceAddId
+		);
+		updatedTaskContent = formattedTaskContent;
 		if (updatedTaskContent === "")
 			bugReporter(
 				plugin,
@@ -329,15 +353,21 @@ export const updateTaskInFile = async (
 				"TaskItemUtils.ts/updateTaskInFile"
 			);
 
-		await replaceOldTaskWithNewTask(
+		const result = await replaceOldTaskWithNewTask(
 			plugin,
 			oldTask,
 			oldTaskContent,
 			updatedTaskContent
 		);
 
+		if (result) {
+			return newId;
+		} else {
+			return undefined;
+		}
+
 		// // Step 1: Read the file content
-		// const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		// const fileContent = await readDataOfVaultFile(plugin, filePath);
 		// // Step 3: Split the file content into lines
 		// const lines = fileContent.split("\n");
 		// const taskLines: string[] = [];
@@ -378,7 +408,7 @@ export const updateTaskInFile = async (
 		// 	const newContent = fileContent.replace(taskBlock, completeTask);
 
 		// 	// Step 6: Write the updated content back to the file
-		// 	await writeDataToVaultFiles(plugin, filePath, newContent);
+		// 	await writeDataToVaultFile(plugin, filePath, newContent);
 		// } else {
 		// 	bugReporter(
 		// 		plugin,
@@ -394,7 +424,7 @@ export const updateTaskInFile = async (
 			String(error),
 			"TaskItemUtils.ts/updateTaskInFile"
 		);
-		throw error;
+		return undefined;
 	}
 };
 
@@ -407,7 +437,7 @@ export const updateTaskInFile = async (
 
 // 	try {
 // 		// Read the file content using Obsidian's API
-// 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+// 		const fileContent = await readDataOfVaultFile(plugin, filePath);
 // 		console.log("updateTaskInFile : Old file content :\n", fileContent);
 
 // 		console.log("updateTaskInFile : updatedTask :\n", updatedTask);
@@ -446,7 +476,7 @@ export const updateTaskInFile = async (
 // 			const newContent = fileContent.replace(taskRegex, completeTask);
 
 // 			// Write the updated content back to the file using Obsidian's API
-// 			await writeDataToVaultFiles(plugin, filePath, newContent);
+// 			await writeDataToVaultFile(plugin, filePath, newContent);
 // 		}
 // 	} catch (error) {
 // 		console.error("Error updating task in file:", error);
@@ -491,7 +521,7 @@ export const updateTaskInJson = async (
 			Notes: allTasks.Notes,
 		};
 		// Write the updated data back to the JSON file using the new function
-		await writeJsonCacheDataFromDisk(plugin, updatedData);
+		await writeJsonCacheDataToDisk(plugin, updatedData);
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
@@ -506,7 +536,7 @@ export const updateTaskInJson = async (
 
 export const useTasksPluginToUpdateInFile = async (
 	plugin: TaskBoard,
-	tasksPlugin: TasksApi,
+	tasksPlugin: TasksPluginApi,
 	oldTask: taskItem
 ): Promise<void> => {
 	try {
@@ -516,13 +546,18 @@ export const useTasksPluginToUpdateInFile = async (
 			throw "getSanitizedTaskContent returned empty string";
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
+			const { formattedTaskContent, newId } = await addIdToTaskContent(
+				plugin,
+				oldTask.title
+			);
+			const oldTaskTitleWithId = formattedTaskContent;
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
-					`- [${oldTask.status}] ${oldTask.title}`,
+					oldTaskTitleWithId,
 					oldTask.filePath
 				);
 
-			if (tasksPluginApiOutput === undefined) {
+			if (!tasksPluginApiOutput) {
 				bugReporter(
 					plugin,
 					"Tasks plugin API did not return any output.",
@@ -552,7 +587,10 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 1)) {
-				newContent = `${tasksPluginApiOutput}${
+				const { formattedTaskContent, newId } =
+					await addIdToTaskContent(plugin, tasksPluginApiOutput);
+				const tasksPluginApiOutputWithId = formattedTaskContent;
+				newContent = `${tasksPluginApiOutputWithId}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`
 						: ""
@@ -564,41 +602,41 @@ export const useTasksPluginToUpdateInFile = async (
 					newContent
 				);
 			} else if ((twoTaskTitles.length = 2)) {
-				if (twoTaskTitles[1].trim().startsWith("- [x]")) {
-					newContent = `${twoTaskTitles[0]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}\n${twoTaskTitles[1]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}`;
+				// if (twoTaskTitles[1].trim().startsWith("- [x]")) {
+				newContent = `${twoTaskTitles[0]}${
+					oldTask.body.length > 0
+						? `\n${oldTask.body.join("\n")}`
+						: ""
+				}\n${twoTaskTitles[1]}${
+					oldTask.body.length > 0
+						? `\n${oldTask.body.join("\n")}`
+						: ""
+				}`;
 
-					await replaceOldTaskWithNewTask(
-						plugin,
-						oldTask,
-						completeOldTaskContent,
-						newContent
-					);
-				} else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
-					newContent = `${twoTaskTitles[0]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}\n${twoTaskTitles[1]}${
-						oldTask.body.length > 0
-							? `\n${oldTask.body.join("\n")}`
-							: ""
-					}`;
+				await replaceOldTaskWithNewTask(
+					plugin,
+					oldTask,
+					completeOldTaskContent,
+					newContent
+				);
+				// } else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
+				// 	newContent = `${twoTaskTitles[0]}${
+				// 		oldTask.body.length > 0
+				// 			? `\n${oldTask.body.join("\n")}`
+				// 			: ""
+				// 	}\n${twoTaskTitles[1]}${
+				// 		oldTask.body.length > 0
+				// 			? `\n${oldTask.body.join("\n")}`
+				// 			: ""
+				// 	}`;
 
-					await replaceOldTaskWithNewTask(
-						plugin,
-						oldTask,
-						completeOldTaskContent,
-						newContent
-					);
-				}
+				// 	await replaceOldTaskWithNewTask(
+				// 		plugin,
+				// 		oldTask,
+				// 		completeOldTaskContent,
+				// 		newContent
+				// 	);
+				// }
 			} else {
 				bugReporter(
 					plugin,
@@ -613,11 +651,11 @@ export const useTasksPluginToUpdateInFile = async (
 			// 	newContent
 			// );
 
-			// await writeDataToVaultFiles(plugin, filePath, newFileContent);
+			// await writeDataToVaultFile(plugin, filePath, newFileContent);
 
 			// Just to scan the file after updating.
 			// plugin.fileUpdatedUsingModal = "";
-			// const scannVault = new ScanningVault(plugin.app, plugin);
+			// const scannVault = new vaultScanner(plugin.app, plugin);
 			// const file = plugin.app.vault.getAbstractFileByPath(filePath);
 			// if (file && file instanceof TFile)
 			// 	scannVault.refreshTasksFromFiles([file]);
@@ -644,25 +682,57 @@ export const useTasksPluginToUpdateInFile = async (
 	}
 };
 
+/**
+ * Applies a new id to the task in a file if it does not have one already. This function will force an id to be added to the task.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param task - The taskItem object representing the task to which an id needs to be applied.
+ * @returns A promise that resolves to the new id if applied, or undefined if the task already has an id or if an error occurs.
+ *
+ * @throws Will throw an error if there are issues updating the task in the file.
+ */
+export const applyIdToTaskInNote = async (
+	plugin: TaskBoard,
+	task: taskItem
+): Promise<number | undefined> => {
+	if (task.legacyId) {
+		return undefined;
+	} else {
+		let newIdToReturn = await updateTaskInFile(plugin, task, task, true);
+		// .then((newId) => {
+		// 	newIdToReturn = newId;
+		// })
+		// .catch((error) => {
+		// 	bugReporter(
+		// 		plugin,
+		// 		"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
+		// 		String(error),
+		// 		"TaskItemUtils.ts/applyIdToTaskInNote"
+		// 	);
+		// 	return undefined;
+		// });
+		return newIdToReturn;
+	}
+};
+
 // For Adding New Task from Modal
 
-// Generate a unique ID for each task
-export const generateTaskId = (): number => {
-	const array = new Uint32Array(1);
-	crypto.getRandomValues(array);
-	return array[0];
-};
+// // Generate a unique ID for each task
+// export const generateTaskId = (): number => {
+// 	const array = new Uint32Array(1);
+// 	crypto.getRandomValues(array);
+// 	return array[0];
+// };
 
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 	const file = plugin.app.vault.getFileByPath(newTask.filePath);
-	const frontmatter = file ? extractFrontmatter(plugin, file) : {};
+	const frontmatter = file ? extractFrontmatterFromFile(plugin, file) : {};
 	const frontmatterTags = extractFrontmatterTags(frontmatter);
 
 	const newTaskWithId = {
 		...newTask,
-		id: generateTaskId(),
+		id: generateTaskId(plugin),
 		filePath: newTask.filePath,
 		completed: "",
 		frontmatterTags: frontmatterTags,
@@ -675,7 +745,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	allTasks.Pending[newTask.filePath].push(newTaskWithId);
 
-	await writeJsonCacheDataFromDisk(plugin, allTasks);
+	await writeJsonCacheDataToDisk(plugin, allTasks);
 
 	eventEmitter.emit("REFRESH_COLUMN");
 };
@@ -685,8 +755,8 @@ export const addTaskInNote = async (
 	newTask: taskItem,
 	editorActive: boolean,
 	cursorPosition?: { line: number; ch: number } | undefined
-) => {
-	const filePath = newTask.filePath.endsWith(".md")
+): Promise<number | undefined> => {
+	const filePath = allowedFileExtensionsRegEx.test(newTask.filePath)
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
 
@@ -701,12 +771,17 @@ export const addTaskInNote = async (
 	}
 
 	try {
-		const completeTask = await getFormattedTaskContent(newTask);
+		let completeTask = await getFormattedTaskContent(newTask);
+		const { formattedTaskContent, newId } = await addIdToTaskContent(
+			plugin,
+			completeTask
+		);
+		completeTask = formattedTaskContent;
 		if (completeTask === "")
 			throw "getSanitizedTaskContent returned empty string";
 
 		// Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath);
 		let newContent = fileContent;
 
 		if (editorActive) {
@@ -722,14 +797,14 @@ export const addTaskInNote = async (
 			}
 
 			// Write the updated content back to the file
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else {
 			// Join the lines back into a single string
 			newContent = fileContent.concat("\n\n", completeTask);
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		}
 		cursorPosition = undefined;
-		return true;
+		return newId;
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -768,8 +843,8 @@ export const replaceOldTaskWithNewTask = async (
 	oldTask: taskItem,
 	oldTaskContent: string,
 	newTaskContent: string
-) => {
-	const filePath = oldTask.filePath.endsWith(".md")
+): Promise<boolean> => {
+	const filePath = allowedFileExtensionsRegEx.test(oldTask.filePath)
 		? oldTask.filePath
 		: `${oldTask.filePath}.md`;
 
@@ -784,7 +859,7 @@ export const replaceOldTaskWithNewTask = async (
 
 	try {
 		// Step 1: Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath);
 		const lines = fileContent.split("\n");
 
 		const { startLine, startCharIndex, endLine, endCharIndex } =
@@ -792,7 +867,11 @@ export const replaceOldTaskWithNewTask = async (
 
 		// Step 2: Check that the starting line is a task checkbox line
 		const startLineText = lines[startLine - 1];
-		if (!startLineText.match(/^- \[.{1}\]/)) {
+		if (
+			!startLineText
+				.trim()
+				.startsWith(oldTask.title.trim().substring(0, 5))
+		) {
 			// console.log(
 			// 	"\n\nOldTask location :",
 			// 	oldTask.taskLocation,
@@ -803,11 +882,15 @@ export const replaceOldTaskWithNewTask = async (
 			// );
 			bugReporter(
 				plugin,
-				`Task board couldnt able to find the task which you are trying to edit at the line : ${oldTask.taskLocation.startLine} . The task might have been edited in the absence of Task Board. Please scan the file again using the file menu option.`,
-				`\n\nOldTask location :${oldTask.taskLocation}\n\nLine in the file at the startLine: ${startLineText}`,
+				`Task board couldnt able to find the task which you are trying to edit at the line : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option.\n\nThis is a normal bug hence developer attention is not required. Just scan the file again. But if the issue persists, please report it.`,
+				`\n\nOldTask location :${JSON.stringify(
+					oldTask.taskLocation
+				)}\n\nAt present the line at line number ${
+					oldTask.taskLocation.startLine
+				} is: ${startLineText}`,
 				"TaskItemUtils.ts/replaceOldTaskWithNewTask"
 			);
-			return;
+			return false;
 		}
 
 		// Step 3: Extract the old task content from file using char indexes
@@ -823,6 +906,24 @@ export const replaceOldTaskWithNewTask = async (
 
 		const oldTaskContentFromFile = taskLines.join("\n");
 
+		const joinFinalNoteContent = (
+			before: string,
+			newTaskContent: string,
+			after: string
+		) => {
+			if (newTaskContent.trim() === "") {
+				return `${before}${after ? after : ""}`;
+			}
+
+			return `${before}\n${newTaskContent}${
+				after
+					? newTaskContent.endsWith("\n") || after.startsWith("\n")
+						? after
+						: `\n${after}`
+					: ""
+			}`;
+		};
+
 		// Step 4: Match with oldTaskContent
 		if (oldTaskContentFromFile === oldTaskContent) {
 			// Safe to replace directly
@@ -831,14 +932,12 @@ export const replaceOldTaskWithNewTask = async (
 				.slice(endLine - 1)
 				.join("\n")
 				.slice(endCharIndex);
-			const newContent = `${before}\n${newTaskContent}${
+			const newContent = joinFinalNoteContent(
+				before,
+				newTaskContent,
 				after
-					? newTaskContent.endsWith("\n") || after.startsWith("\n")
-						? after
-						: `\n${after}`
-					: ""
-			}`;
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			);
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else if (
 			isTheContentDiffAreOnlySpaces(
 				oldTaskContent,
@@ -851,14 +950,13 @@ export const replaceOldTaskWithNewTask = async (
 				.slice(endLine - 1)
 				.join("\n")
 				.slice(endCharIndex);
-			const newContent = `${before}\n${newTaskContent}${
+			const newContent = joinFinalNoteContent(
+				before,
+				newTaskContent,
 				after
-					? newTaskContent.endsWith("\n") || after.startsWith("\n")
-						? after
-						: `\n${after}`
-					: ""
-			}`;
-			await writeDataToVaultFiles(plugin, filePath, newContent);
+			);
+			// Replace the old task block with the updated content
+			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else {
 			// Ask user to choose between old and new content
 			openDiffContentCompareModal(
@@ -872,15 +970,13 @@ export const replaceOldTaskWithNewTask = async (
 							.slice(endLine - 1)
 							.join("\n")
 							.slice(endCharIndex);
-						const newContent = `${before}\n${newTaskContent}${
+						const newContent = joinFinalNoteContent(
+							before,
+							newTaskContent,
 							after
-								? newTaskContent.endsWith("\n") ||
-								  after.startsWith("\n")
-									? after
-									: `\n${after}`
-								: ""
-						}`;
-						await writeDataToVaultFiles(
+						);
+						// Replace the old task block with the updated content
+						await writeDataToVaultFile(
 							plugin,
 							filePath,
 							newContent
@@ -890,6 +986,8 @@ export const replaceOldTaskWithNewTask = async (
 				}
 			);
 		}
+
+		return true; // Indicate success
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -897,5 +995,54 @@ export const replaceOldTaskWithNewTask = async (
 			String(error),
 			"TaskItemUtils.ts/replaceOldTaskWithNewTask"
 		);
+		return false;
+	}
+};
+
+/**
+ * Retrieves a task from the TaskBoard plugin's task cache using its ID.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param id - The ID of the task to retrieve. Can be a string (legacyId) or a number (id).
+ * @returns The task item if found, or null if not found.
+ */
+export const getTaskFromId = async (
+	plugin: TaskBoard,
+	id: string | number
+): Promise<taskItem | null> => {
+	try {
+		let foundTask: taskItem | undefined;
+
+		// Search in Pending tasks
+		const pendingTasksObj = plugin.vaultScanner.tasksCache?.Pending ?? {};
+		for (const tasks of Object.values(pendingTasksObj)) {
+			if (typeof id === "string") {
+				foundTask = tasks.find((task) => task.legacyId === id);
+			} else if (typeof id === "number") {
+				foundTask = tasks.find((task) => task.id === id);
+			}
+			if (foundTask) return foundTask;
+		}
+
+		// Search in Completed tasks
+		const completedTasksObj =
+			plugin.vaultScanner.tasksCache?.Completed ?? {};
+		for (const tasks of Object.values(completedTasksObj)) {
+			if (typeof id === "string") {
+				foundTask = tasks.find((task) => task.legacyId === id);
+			} else if (typeof id === "number") {
+				foundTask = tasks.find((task) => task.id === id);
+			}
+			if (foundTask) return foundTask;
+		}
+
+		return null; // Return null if the task is not found
+	} catch (error) {
+		bugReporter(
+			plugin,
+			"Error retrieving task from tasksCache using ID",
+			String(error),
+			"TaskItemUtils.ts/getTaskFromId"
+		);
+		return null;
 	}
 };
