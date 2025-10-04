@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-01T11:08:39.611Z",
+    "Modified_at": "2025-10-02T15:07:12.914Z",
     "Pending": {
         "Task Board/1.7.0/Tasks.md": [
             {
@@ -32,85 +32,7 @@
                 "reminder": ""
             },
             {
-                "id": 2828197427,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] Publish the video on YouTube.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 26,
-                    "startCharIndex": 0,
-                    "endLine": 26,
-                    "endCharIndex": 35
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1039325828,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] Release the plugin with release notes.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 27,
-                    "startCharIndex": 0,
-                    "endLine": 27,
-                    "endCharIndex": 44
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2006785742,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] Share the Post-1.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 28,
-                    "startCharIndex": 0,
-                    "endLine": 28,
-                    "endCharIndex": 23
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2205235859,
+                "id": 1869897416,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] Another video on the methodology with a use-case.",
@@ -139,7 +61,7 @@
                 "id": 4,
                 "legacyId": "4",
                 "status": " ",
-                "title": "- [ ] Research paper explaining:  🆔 4",
+                "title": "- [ ] Research paper explaining:  🆔 4 #working ",
                 "body": [
                     "\t- [ ] I am in trouble now, I have to find specific differences between PERT Charts and DFP. #pending ",
                     "\t- what it is",
@@ -154,7 +76,9 @@
                 "startDate": "",
                 "scheduledDate": "",
                 "due": "",
-                "tags": [],
+                "tags": [
+                    "#working"
+                ],
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
@@ -168,14 +92,12 @@
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
-            }
-        ],
-        "Breakfast.md": [
+            },
             {
-                "id": 13,
-                "legacyId": "13",
+                "id": 1068943416,
+                "legacyId": "",
                 "status": " ",
-                "title": "- [ ] Put the pan on the heater. 🆔 13",
+                "title": "- [ ] After the above video and Research paper has been published. Share Post-2 on all social media, the same content and provide the link to the discussion.",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -186,577 +108,12 @@
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Breakfast.md",
+                "filePath": "Task Board/1.7.0/Tasks.md",
                 "taskLocation": {
-                    "startLine": 3,
+                    "startLine": 48,
                     "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 38
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 14,
-                "legacyId": "14",
-                "status": " ",
-                "title": "- [ ] Apply some oil to the pan. 🆔 14 ⛔ 13",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "13"
-                ],
-                "filePath": "Breakfast.md",
-                "taskLocation": {
-                    "startLine": 4,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 43
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Eggs.md": [
-            {
-                "id": 15,
-                "legacyId": "15",
-                "status": " ",
-                "title": "- [ ] Crack open the egg directly on the pan. 🆔 15 ⛔ 14",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "14"
-                ],
-                "filePath": "Eggs.md",
-                "taskLocation": {
-                    "startLine": 3,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 56
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 16,
-                "legacyId": "16",
-                "status": " ",
-                "title": "- [ ] Crack open the egg in a glass, mix it and then pour it on the pan. 🆔 16",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Eggs.md",
-                "taskLocation": {
-                    "startLine": 4,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 78
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Testing Indented Task Bug.md": [
-            {
-                "id": 45,
-                "legacyId": "45",
-                "status": " ",
-                "title": "- [ ] Main task 1 #book/seeding/1  🆔 45  ",
-                "body": [
-                    "\tMain task description",
-                    "\t- [ ] Subtask 1",
-                    "\t\tSubtask 1 description",
-                    "\t- [ ] Subtask 2",
-                    "\t\tSubtask 2 description",
-                    "\t\t- [ ] Sub-subtask 1",
-                    "\t\t\tSub-subtask 1 description"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#book/seeding/1"
-                ],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 7,
-                    "startCharIndex": 0,
-                    "endLine": 14,
-                    "endCharIndex": 28
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 16,
-                "legacyId": "16",
-                "status": " ",
-                "title": "\t- [ ] This is a first task with one level of indentation, very next to the paragraph line. Lets edit this task. 🆔 16",
-                "body": [
-                    "\t\t- [ ] This is a sub-tasks of the one-level indented task.",
-                    "\t\t- Thi is a bullet point.",
-                    "\t\tThis is a normal line in the one-level indented task."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 18,
-                    "startCharIndex": 0,
-                    "endLine": 21,
-                    "endCharIndex": 55
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 27,
-                "legacyId": "27",
-                "status": " ",
-                "title": "- [ ] some task, but this task starts with a lot of spaces after the checkbox. 🏁 delete ⏳ 2025-08-24 🆔 27",
-                "body": [
-                    "\t- [ ] This is a sub-task.",
-                    "\t- Line in description."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-08-24",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 24,
-                    "startCharIndex": 0,
-                    "endLine": 26,
-                    "endCharIndex": 23
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1801851214,
-                "legacyId": "",
-                "status": " ",
-                "title": ">- [ ] This is a first task inside callout  [due:: 2025-04-20] #todo",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "2025-04-20",
-                "tags": [
-                    "#todo"
-                ],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 31,
-                    "startCharIndex": 0,
-                    "endLine": 31,
-                    "endCharIndex": 68
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2158642969,
-                "legacyId": "",
-                "status": " ",
-                "title": "> + [ ] This is task inside callout with a space at the beginning. And it starts with `+ [ ]`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 32,
-                    "startCharIndex": 0,
-                    "endLine": 32,
-                    "endCharIndex": 93
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3007986106,
-                "legacyId": "",
-                "status": " ",
-                "title": ">1. [ ] This is a task inside callout and it starts with `1.`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 33,
-                    "startCharIndex": 0,
-                    "endLine": 33,
-                    "endCharIndex": 61
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 10,
-                "legacyId": "10",
-                "status": " ",
-                "title": ">\t1. [ ] This is a task inside callout, but its indented. **Please note this is not a sub-task.** ⏳ 2025-09-27  🆔 10",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-09-27",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 34,
-                    "startCharIndex": 0,
-                    "endLine": 34,
-                    "endCharIndex": 117
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 9,
-                "legacyId": "9",
-                "status": " ",
-                "title": ">- [ ] **Task Board** will be able to detect this task as a single task and you are not allowed to add any sub-tasks or description to tasks inside callout.  [scheduled:: 2025-09-27] #todo  🆔 9 #done ",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-09-27",
-                "due": "",
-                "tags": [
-                    "#todo",
-                    "#done"
-                ],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 37,
-                    "startCharIndex": 0,
-                    "endLine": 37,
-                    "endCharIndex": 201
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 8,
-                "legacyId": "8",
-                "status": " ",
-                "title": ">    - [ ] **NOTE :** Even though this task is right after the main task line and also since its been indented, still it will not possible to detect this task as a sub-task of the main task. Hence this will be considered as a separate task. 🆔 8 ⏳ 2025-09-27 ",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-09-27",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 38,
-                    "startCharIndex": 0,
-                    "endLine": 38,
-                    "endCharIndex": 259
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 12,
-                "legacyId": "12",
-                "status": " ",
-                "title": "- [ ] This is an lonely indented task. Not sure why this theme is not giving it a proper task styling. 📅 2025-09-27 ⏳ 2025-09-28  🆔 12",
-                "body": [
-                    "\t\t- [ ] This is a sub-task to the lonely indented task.",
-                    "\t\t- This is a bullet point inside the lonely indented task.",
-                    "\t\tThis is a normal line as description inside the lonely indented task."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-09-28",
-                "due": "2025-09-27",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 52,
-                    "startCharIndex": 0,
-                    "endLine": 55,
-                    "endCharIndex": 71
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2868362506,
-                "legacyId": "",
-                "status": " ",
-                "title": "    - [ ] This is a first indented task right after a normal line. (old one)",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 60,
-                    "startCharIndex": 0,
-                    "endLine": 60,
-                    "endCharIndex": 76
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 63565079,
-                "legacyId": "",
-                "status": " ",
-                "title": "    + [ ] This is second indented task which starts with `+ [ ]`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 61,
-                    "startCharIndex": 0,
-                    "endLine": 61,
-                    "endCharIndex": 64
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1090367426,
-                "legacyId": "",
-                "status": " ",
-                "title": "2. [ ] Second numbered task.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 67,
-                    "startCharIndex": 0,
-                    "endLine": 67,
-                    "endCharIndex": 28
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 11,
-                "legacyId": "11",
-                "status": " ",
-                "title": "- [ ] All the below numbered tasks should be completed. ⏳ 2025-09-18  🆔 11",
-                "body": [
-                    "\t1. [ ] This is a first numbered sub-task.",
-                    "\t2. [ ] This is a second numbered sub-task, with a little space at start."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-09-18",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 70,
-                    "startCharIndex": 0,
-                    "endLine": 72,
-                    "endCharIndex": 73
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 210037404,
-                "legacyId": "",
-                "status": " ",
-                "title": "1) [ ] Another numbered task which starts with pattern `1) [ ]`.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 74,
-                    "startCharIndex": 0,
-                    "endLine": 74,
-                    "endCharIndex": 64
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 18,
-                "legacyId": "18",
-                "status": " ",
-                "title": "- [ ] Lets add a new task at the current postion in the current note. #Test  🆔 18",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#Test"
-                ],
-                "frontmatterTags": [
-                    "#Test"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 78,
-                    "startCharIndex": 0,
-                    "endLine": 78,
-                    "endCharIndex": 82
+                    "endLine": 48,
+                    "endCharIndex": 157
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -765,7 +122,7 @@
         ],
         "Task Board/1.7.0/Post for socials - 2.md": [
             {
-                "id": 3643186080,
+                "id": 1395361145,
                 "legacyId": "",
                 "status": " ",
                 "title": "> - [ ] First post the above as a Topic in the \"Share and showcase\" discussions on GitHub.",
@@ -791,7 +148,7 @@
                 "reminder": ""
             },
             {
-                "id": 3349659007,
+                "id": 2712938032,
                 "legacyId": "",
                 "status": " ",
                 "title": "> - [ ] Then, once you have released your research paper, share the above as a post on all social media and add the below line with it, along with the discussion link. You may remove the links to the article and simply share the discussion link.",
@@ -811,37 +168,6 @@
                     "startCharIndex": 0,
                     "endLine": 22,
                     "endCharIndex": 245
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Pending.md": [
-            {
-                "id": 2110830589,
-                "legacyId": "",
-                "title": "Need to add the content of the essay in this note and submit it.",
-                "body": [],
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-09-28",
-                "due": "",
-                "tags": [
-                    "taskNote",
-                    "#Test"
-                ],
-                "frontmatterTags": [],
-                "time": "",
-                "priority": 0,
-                "dependsOn": [],
-                "status": " ",
-                "filePath": "Pending.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 15,
-                    "endCharIndex": 80
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1084,14 +410,12 @@
                 "completion": "2025-10-01",
                 "cancelledDate": "",
                 "reminder": ""
-            }
-        ],
-        "Testing Indented Task Bug.md": [
+            },
             {
-                "id": 1789273159,
+                "id": 3356491638,
                 "legacyId": "",
                 "status": "x",
-                "title": "    - [x] This is a first indented task, just by itself, no content before this taskLine, no content after this taskLine. ✅ 2025-08-22",
+                "title": "- [x] Publish the video on YouTube. ✅ 2025-10-01",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1099,27 +423,25 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
+                "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
+                "filePath": "Task Board/1.7.0/Tasks.md",
                 "taskLocation": {
-                    "startLine": 49,
+                    "startLine": 26,
                     "startCharIndex": 0,
-                    "endLine": 49,
-                    "endCharIndex": 134
+                    "endLine": 26,
+                    "endCharIndex": 48
                 },
-                "completion": "2025-08-22",
+                "completion": "2025-10-01",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 134881517,
+                "id": 3405554765,
                 "legacyId": "",
                 "status": "x",
-                "title": "    * [x] This is Third indented task which starts with `* [ ]` ✅ 2025-08-22",
+                "title": "- [x] Release the plugin with release notes. ✅ 2025-10-01",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1127,27 +449,25 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
+                "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
+                "filePath": "Task Board/1.7.0/Tasks.md",
                 "taskLocation": {
-                    "startLine": 62,
+                    "startLine": 27,
                     "startCharIndex": 0,
-                    "endLine": 62,
-                    "endCharIndex": 76
+                    "endLine": 27,
+                    "endCharIndex": 57
                 },
-                "completion": "2025-08-22",
+                "completion": "2025-10-01",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3107312097,
+                "id": 4067081687,
                 "legacyId": "",
                 "status": "x",
-                "title": "1. [x] This is a numbered task. ✅ 2025-08-22",
+                "title": "- [x] Share the Post-1. ✅ 2025-10-01",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -1155,19 +475,17 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [
-                    "#Test"
-                ],
+                "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
+                "filePath": "Task Board/1.7.0/Tasks.md",
                 "taskLocation": {
-                    "startLine": 66,
+                    "startLine": 28,
                     "startCharIndex": 0,
-                    "endLine": 66,
-                    "endCharIndex": 44
+                    "endLine": 28,
+                    "endCharIndex": 36
                 },
-                "completion": "2025-08-22",
+                "completion": "2025-10-01",
                 "cancelledDate": "",
                 "reminder": ""
             }
