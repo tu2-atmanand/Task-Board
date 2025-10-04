@@ -631,7 +631,20 @@
           "targetColumn": "6"
         }
       ],
-      "cardSectionsVisibility": "hideBoth"
+      "cardSectionsVisibility": "hideBoth",
+      "taskPropertyFormat": "1",
+      "doubleClickCardToEdit": "none",
+      "taskNoteIdentifierTag": "taskNote",
+      "taskNoteDefaultLocation": "TaskNotes",
+      "hiddenTaskProperties": [],
+      "autoAddUniqueID": false,
+      "uniqueIdCounter": 0,
+      "experimentalFeatures": false,
+      "lastViewHistory": {
+        "viewedType": "kanban",
+        "boardIndex": 0
+      },
+      "boundTaskCompletionToChildTasks": false
     }
   }
 }
