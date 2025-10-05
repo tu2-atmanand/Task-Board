@@ -538,6 +538,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	margin-block: 0 !important;
 }
 
+/* .subtaskTextRenderer p>a {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+} */
+
 .subtaskTextRenderer strong {
 	color: var(--text-normal) !important;
 	font-size: unset !important;
@@ -1267,6 +1274,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalLiveEditor {
 	min-height: 20vh;
+	max-height: 40vh;
+}
+
+.EditTaskModalLiveEditor .markdown-source-view.mod-cm6 {
+	max-height: 40vh;
+	padding-block: 1rem;
+	padding-inline-end: 1rem;
 }
 
 .EditTaskModalBodyDescription {
@@ -1407,7 +1421,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		transform: translateX(0);
 
 		border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
-		background: rgba(255, 255, 255, 0.2);
+		background: var(--color-base-30);
 		backdrop-filter: blur(10px);
 		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
 	}
