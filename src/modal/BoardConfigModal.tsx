@@ -809,9 +809,8 @@ export class BoardConfigureModal extends Modal {
 		this.settingsManager = new SettingsManager(plugin);
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
-		this.modalEl.setAttribute('data-type', 'task-board-view');
-		contentEl.setAttribute('data-type', 'task-board-view');
-		this.modalEl.setAttribute('modal-type', 'task-board-board-config');
+
+		this.modalEl.setAttribute('modal-type', 'task-board-config');
 	}
 
 	onOpen() {
