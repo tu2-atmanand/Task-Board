@@ -15,7 +15,7 @@ import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCc
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { DEFAULT_SETTINGS, EditButtonMode, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
-import { bugReporter, openEditTaskModal, openEditTaskNoteModal } from "src/services/OpenModals";
+import { bugReporter, openEditTaskModal, openEditTaskNoteModal, openEditTaskView } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNoteUtils";
@@ -30,23 +30,23 @@ import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 
 export interface filterOptions {
-value: string;
-text: string;
+	value: string;
+	text: string;
 }
 
 // Functional React component for adding or editing tasks
 export const AddOrEditTaskRC: React.FC<{
-plugin: TaskBoard,
-root: HTMLElement,
-activeNote: boolean,
-filePath: string;
-isTaskNote: boolean;
-noteContent: string;
-task?: taskItem,
-taskExists?: boolean,
-onSave: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void;
-onClose: () => void;
-setIsEdited: (value: boolean) => void;
+	plugin: TaskBoard,
+	root: HTMLElement,
+	activeNote: boolean,
+	filePath: string;
+	isTaskNote: boolean;
+	noteContent: string;
+	task?: taskItem,
+	taskExists?: boolean,
+	onSave: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void;
+	onClose: () => void;
+	setIsEdited: (value: boolean) => void;
 }> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
 	const [title, setTitle] = useState(
 		task.title
@@ -982,13 +982,17 @@ setIsEdited: (value: boolean) => void;
 		} else if (settingOption === EditButtonMode.Modal) {
 			//For now will simply open it in a new modal in a new window.
 			if (isTaskNotePresentInTags(plugin, childTask.tags)) {
-				plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
-				await sleep(50);
-				openEditTaskNoteModal(plugin, childTask);
+				// plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
+				// await sleep(50);
+				// openEditTaskNoteModal(plugin, childTask);
+
+				openEditTaskView(plugin, true, false, true, childTask, childTask.filePath, "window");
 			} else {
-				plugin.app.workspace.openPopoutLeaf();
-				await sleep(50);
-				openEditTaskModal(plugin, childTask);
+				// plugin.app.workspace.openPopoutLeaf();
+				// await sleep(50);
+				// openEditTaskModal(plugin, childTask);
+
+				openEditTaskView(plugin, false, false, true, childTask, childTask.filePath, "window");
 			}
 		} else {
 			event.ctrlKey = true;
