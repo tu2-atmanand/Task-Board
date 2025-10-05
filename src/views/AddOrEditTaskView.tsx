@@ -4,7 +4,7 @@ import { ItemView, WorkspaceLeaf, normalizePath } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 
-import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
+import { taskItem, taskItemEmpty, taskStatuses } from "src/interfaces/TaskItem";
 import TaskBoard from "../../main";
 import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
 import { t } from "src/utils/lang/helper";
@@ -15,31 +15,6 @@ import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
-const taskItemEmpty: taskItem = {
-	id: 0,
-	legacyId: "",
-	title: "",
-	body: [],
-	createdDate: "",
-	startDate: "",
-	scheduledDate: "",
-	due: "",
-	tags: [],
-	frontmatterTags: [],
-	time: "",
-	priority: 0,
-	reminder: "",
-	completion: "",
-	cancelledDate: "",
-	filePath: "",
-	taskLocation: {
-		startLine: 0,
-		startCharIndex: 0,
-		endLine: 0,
-		endCharIndex: 0,
-	},
-	status: taskStatuses.unchecked,
-};
 
 export class AddOrEditTaskView extends ItemView {
 	plugin: TaskBoard;
@@ -146,6 +121,7 @@ export class AddOrEditTaskView extends ItemView {
 	}
 
 	async onClose() {
+		console.log("This should run while closing the tab.");
 		// Clean up when view is closed
 		this.root?.unmount();
 	}

@@ -4,7 +4,7 @@
 import { Component, Keymap, Notice, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
 import { FaLinkedin, FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { priorityOptions, taskItem, taskStatuses } from "src/interfaces/TaskItem";
+import { priorityOptions, taskItem, taskItemEmpty } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
@@ -28,32 +28,6 @@ import { handleEditTask } from "src/utils/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
-
-const taskItemEmpty: taskItem = {
-id: 0,
-legacyId: "",
-title: "",
-body: [],
-createdDate: "",
-startDate: "",
-scheduledDate: "",
-due: "",
-tags: [],
-frontmatterTags: [],
-time: "",
-priority: 0,
-reminder: "",
-completion: "",
-cancelledDate: "",
-filePath: "",
-taskLocation: {
-startLine: 0,
-startCharIndex: 0,
-endLine: 0,
-endCharIndex: 0,
-},
-status: taskStatuses.unchecked,
-};
 
 export interface filterOptions {
 value: string;
