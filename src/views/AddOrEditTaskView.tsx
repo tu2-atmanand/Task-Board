@@ -19,6 +19,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 export class AddOrEditTaskView extends ItemView {
 	plugin: TaskBoard;
 	root: Root | null = null;
+	viewTypeId: string = "";
 	task: taskItem = taskItemEmpty;
 	filePath: string;
 	taskExists: boolean;
@@ -30,6 +31,7 @@ export class AddOrEditTaskView extends ItemView {
 	constructor(
 		plugin: TaskBoard,
 		leaf: WorkspaceLeaf,
+		viewTypeId: string,
 		saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void,
 		isTaskNote: boolean,
 		activeNote: boolean,
@@ -40,6 +42,7 @@ export class AddOrEditTaskView extends ItemView {
 		super(leaf);
 		this.app = plugin.app;
 		this.plugin = plugin;
+		this.viewTypeId = viewTypeId;
 		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;
 		this.saveTask = saveTask;
@@ -52,16 +55,18 @@ export class AddOrEditTaskView extends ItemView {
 	}
 
 	getViewType() {
-		return VIEW_TYPE_ADD_OR_EDIT_TASK;
+		return this.viewTypeId;
 	}
 
 	getDisplayText() {
-		return this.taskExists ? t("edit-task") : t("add-new-task");
+		return this.taskExists ? t("edit-task") + this.task.id : t("add-new-task");
 	}
 
 	async onOpen() {
+		console.log("Container of Edit View :", this.containerEl);
 		const container = this.containerEl.children[1];
-		container.empty();
+		console.log("Ephemeral state in the view : ", this.getEphemeralState());
+		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
 		if (!this.isTaskNote && this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
@@ -108,11 +113,11 @@ export class AddOrEditTaskView extends ItemView {
 						const formattedContent = await getFormattedTaskContent(updatedTask);
 						this.saveTask(updatedTask, quickAddPluginChoice, updatedNoteContent);
 						// Close the view leaf
-						this.app.workspace.detachLeavesOfType(VIEW_TYPE_ADD_OR_EDIT_TASK);
+						this.app.workspace.detachLeavesOfType(this.viewTypeId);
 					}}
 					onClose={() => {
 						// Close the view leaf
-						this.app.workspace.detachLeavesOfType(VIEW_TYPE_ADD_OR_EDIT_TASK);
+						// this.app.workspace.detachLeavesOfType(this.viewTypeId);
 					}}
 					setIsEdited={(value: boolean) => { this.isEdited = value; }}
 				/>

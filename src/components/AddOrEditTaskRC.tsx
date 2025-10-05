@@ -19,8 +19,6 @@ import { bugReporter, openEditTaskModal, openEditTaskNoteModal, openEditTaskView
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNoteUtils";
-import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
