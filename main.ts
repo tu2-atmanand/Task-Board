@@ -30,7 +30,10 @@ import vaultScanner, {
 } from "src/utils/VaultScanner";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import { VIEW_TYPE_TASKBOARD, VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
+import {
+	VIEW_TYPE_TASKBOARD,
+	VIEW_TYPE_ADD_OR_EDIT_TASK,
+} from "src/types/uniqueIdentifiers";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import {
 	deleteAllLocalStorageKeys,
@@ -274,13 +277,6 @@ export default class TaskBoard extends Plugin {
 		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
 			this.view = new TaskBoardView(this, leaf);
 			return this.view;
-		});
-		
-		// Register AddOrEditTask view (can be opened in tabs or popout windows)
-		this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {
-			// This view will be created dynamically when needed via openAddOrEditTaskView
-			// The constructor requires specific parameters, so we return a placeholder
-			return new AddOrEditTaskView(this, leaf, () => {}, false, false, false);
 		});
 	}
 
