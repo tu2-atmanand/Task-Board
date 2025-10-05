@@ -1,5 +1,5 @@
 {
-  "version": "1.6.3",
+  "version": "1.7.0",
   "data": {
     "boardConfigs": [
       {
@@ -224,7 +224,7 @@
           ]
         },
         "folders": {
-          "polarity": 3,
+          "polarity": 1,
           "values": [
             "Task Board/1.7.0"
           ]
