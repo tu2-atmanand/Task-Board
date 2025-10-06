@@ -6,6 +6,7 @@
 	padding-inline: 8px !important;
 } */
 
+/* leaf (tabs) */
 
 .workspace-leaf-content[data-type="task-board-view"] .view-content {
 	overflow: unset;
@@ -13,18 +14,86 @@
 	padding-inline: 5px !important;
 }
 
-.modal[data-type="task-board-view"] {
-	width: auto;
-	min-height: auto;
-	max-width: none;
+/* modals */
+
+.modal-close-button {
+	z-index: 20;
 }
 
-.is-phone .modal[data-type="task-board-view"] {
+.modal-container[modal-type='task-board-edit-task'] {
+	justify-content: flex-end;
+}
+
+@keyframes slideInRightModal {
+	from {
+		transform: translateX(100%);
+		opacity: 0.2;
+	}
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideOutRightModal {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateX(100%);
+		opacity: 0.2;
+	}
+}
+
+.modal[modal-type="task-board-edit-task"] {
+	width: 75vw;
+	max-width: 1100px;
+	height: 100%;
+	min-height: 92%;
+	border-radius: var(--modal-radius) 0 0 var(--modal-radius);
+	/* Animation for sliding in */
+	animation: slideInRightModal 0.35s cubic-bezier(0.4, 0.2, 0.2, 1) both;
+}
+
+/* To animate sliding out, add a class like .slide-out to the modal when closing */
+.modal[modal-type="task-board-edit-task"].slide-out {
+	animation: slideOutRightModal 0.3s cubic-bezier(0.4, 0.2, 0.2, 1) both;
+}
+
+.modal-content[modal-type="task-board-edit-task"] {
+	position: relative;
+	height: 95%;
+}
+
+.modal[modal-type="task-board-config"] {
+	width: auto;
+	max-width: none;
+	min-height: auto;
+}
+
+.is-phone .modal[modal-type="task-board-config"] {
 	width: 100vw;
 	max-width: 100vw;
+	min-width: 100vw;
 	overflow: auto;
 	/* min-height: fit-content; */
 	max-height: 80vh;
+}
+
+@media screen and (max-width: 768px) {
+
+	.modal[modal-type="task-board-edit-task"],
+	.modal[modal-type="task-board-config"] {
+		width: 100vw;
+		max-width: 100vw;
+		min-width: 100vw;
+		overflow: auto;
+		/* min-height: fit-content; */
+		max-height: 80vh;
+	}
 }
 
 /* src/TaskBoardView.tsx */
@@ -469,6 +538,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	margin-block: 0 !important;
 }
 
+/* .subtaskTextRenderer p>a {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+} */
+
 .subtaskTextRenderer strong {
 	color: var(--text-normal) !important;
 	font-size: unset !important;
@@ -852,9 +928,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	max-height: calc(var(--dialog-max-height) - 11vh);
+	/* max-height: calc(var(--dialog-max-height) - 11vh); */
 	box-sizing: border-box;
 	position: relative;
+	height: 100%;
 }
 
 .EditTaskModalHomeTitle {
@@ -887,9 +964,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .EditTaskModalHomeLeftSec {
 	display: flex;
 	flex-direction: column;
-	min-width: 500px;
-	width: 45vw;
-	max-width: 40vw;
+	width: 100%;
+	/* max-width: 40vw;
+	min-width: 500px; */
 	flex-grow: 1;
 	max-height: 100%;
 	justify-content: space-between;
@@ -1197,6 +1274,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalLiveEditor {
 	min-height: 20vh;
+	max-height: 40vh;
+}
+
+.EditTaskModalLiveEditor .markdown-source-view.mod-cm6 {
+	max-height: 40vh;
+	padding-block: 1rem;
+	padding-inline-end: 1rem;
 }
 
 .EditTaskModalBodyDescription {
@@ -1212,8 +1296,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
 	border-radius: 5px;
 	padding: 0.5em;
-	min-width: 8vw;
-	max-width: 14vw;
+	min-width: 14vw;
+	max-width: 15vw;
 	box-sizing: border-box;
 	transition: transform 0.3s ease-in-out;
 	overflow: auto;
@@ -1284,11 +1368,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	}
 
 	.EditTaskModalHomeLeftSec {
-		width: 100%;
 		display: flex;
 		flex-direction: column;
-		max-width: 100%;
-		min-width: 75vw;
+		width: 100%;
+		/* max-width: 100%;
+		min-width: 75vw; */
 		flex-grow: 1;
 		max-height: 100%;
 		justify-content: space-between;
@@ -1298,7 +1382,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		display: flex;
 		flex-direction: column;
 		max-width: 100%;
-		max-height: 60vh;
+		height: 100%;
+		max-height: 100%;
 		overflow-y: auto;
 		padding-inline-end: 0px;
 	}
@@ -1336,7 +1421,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		transform: translateX(0);
 
 		border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
-		background: rgba(255, 255, 255, 0.2);
+		background: var(--color-base-30);
 		backdrop-filter: blur(10px);
 		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
 	}

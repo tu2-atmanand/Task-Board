@@ -170,3 +170,29 @@ export const taskStatusesDropdown = [
 	{ value: taskStatuses.symbolism, text: "Symbolism [&]" },
 	{ value: taskStatuses.secret, text: "Secret [s]" },
 ];
+
+export const taskItemEmpty: taskItem = {
+	id: 0,
+	legacyId: "",
+	title: "",
+	body: [],
+	createdDate: "",
+	startDate: "",
+	scheduledDate: "",
+	due: "",
+	tags: [],
+	frontmatterTags: [],
+	time: "",
+	priority: 0,
+	reminder: "",
+	completion: "",
+	cancelledDate: "",
+	filePath: "",
+	taskLocation: {
+		startLine: 0,
+		startCharIndex: 0,
+		endLine: 0,
+		endCharIndex: 0,
+	},
+	status: taskStatuses.unchecked,
+};
