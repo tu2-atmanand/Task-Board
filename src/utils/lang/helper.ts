@@ -12,9 +12,6 @@ import {
 	VIEWPORT_STORAGE_KEY,
 } from "src/types/uniqueIdentifiers";
 
-// Initialize i18next instance
-let isI18nInitialized = false;
-
 // --- Called Once On Plugin Load ---
 export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 	const lang = getLanguage();
@@ -25,28 +22,36 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 		fallbackLng: "en",
 		resources: {
 			en: {
-				translation: en
-			}
+				translation: en,
+			},
 		},
 		interpolation: {
-			escapeValue: false // React already escapes values
+			escapeValue: false, // React already escapes values
 		},
 		returnEmptyString: false,
-		returnNull: false
+		returnNull: false,
 	});
 
-	isI18nInitialized = true;
+	plugin.isI18nInitialized = true;
 
 	// If language is not English, load the translation file from disk
 	if (lang !== "en" && lang in langCodes) {
 		try {
 			const pluginFolder = `${plugin.app.vault.configDir}/plugins/task-board/`;
-			const filePath = normalizePath(`${pluginFolder}/locales/${lang}.json`);
+			const filePath = normalizePath(
+				`${pluginFolder}/locales/${lang}.json`
+			);
 			const file = await plugin.app.vault.adapter.read(filePath);
 			const parsed = JSON.parse(file);
 
 			// Add the loaded translations to i18next
 			i18next.addResourceBundle(lang, "translation", parsed, true, true);
+			console.log(
+				"Another resource added to i18n : ",
+				i18next.languages,
+				"\nData in the instance :",
+				i18next.getDataByLanguage(lang)
+			);
 		} catch (err) {
 			console.warn(
 				`Could not load language file for '${lang}', falling back to English.`,
@@ -58,12 +63,19 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 
 // Main translation function
 export function t(key: string): string {
-	if (!isI18nInitialized) {
-		console.warn("i18n not initialized, falling back to English");
+	// if (!isI18nInitialized) { // INFO : Cannot use this method, since I dont have access to plugin instance to access the isI18nInitialized variable.
+	// 	console.warn("i18n not initialized, falling back to English");
+	// 	return en?.[key] || `Missing translation for "${key}"`;
+	// }
+
+	try {
+		const transString = i18next.t(key, {
+			defaultValue: en?.[key] || `Missing translation for "${key}"`,
+		});
+		return transString;
+	} catch {
 		return en?.[key] || `Missing translation for "${key}"`;
 	}
-	
-	return i18next.t(key, { defaultValue: en?.[key] || `Missing translation for "${key}"` });
 }
 
 // Sync fallback version (used sparingly) - now just calls t()
@@ -105,10 +117,10 @@ export async function downloadAndApplyLanguageFile(
 		await plugin.app.vault.adapter.rename(tempPath, filePath);
 
 		// Load the new translations into i18next
-		if (isI18nInitialized) {
-			const parsed = JSON.parse(res.text);
-			i18next.addResourceBundle(lang, "translation", parsed, true, true);
-		}
+		// if (plugin.isI18nInitialized) {
+		// 	const parsed = JSON.parse(res.text);
+		// 	i18next.addResourceBundle(lang, "translation", parsed, true, true);
+		// }
 
 		progressNotice.hide();
 		new Notice(
