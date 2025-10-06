@@ -1,0 +1,249 @@
+/* Filter Component Styles */
+.filter-component {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-2);
+	padding: var(--size-4-2) var(--size-4-3);
+	background-color: var(--background-primary);
+	min-height: 48px;
+
+	flex: 1;
+}
+
+/* Filter Pills Container */
+.filter-pills-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	flex: 1;
+}
+
+/* Filter Controls */
+.filter-controls {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	margin-left: auto;
+}
+
+/* Filter Pills */
+.filter-pill {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	padding: 5px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	font-size: var(--font-ui-small);
+	animation: filter-pill-appear 200ms ease-out;
+	transition: background-color var(--duration-fast),
+		transform var(--duration-fast);
+}
+
+.filter-pill-remove .clickable-icon:hover {
+	background-color: unset;
+}
+
+.filter-pill:hover {
+	background-color: var(--background-tertiary);
+}
+
+.filter-pill-category {
+	font-weight: 500;
+	color: var(--text-muted);
+}
+
+.filter-pill-value {
+	color: var(--text-normal);
+}
+
+.filter-pill-remove {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: transparent;
+	border: none;
+	padding: 0;
+	margin-left: var(--size-4-1);
+	cursor: pointer;
+	color: var(--text-faint);
+	font-size: 14px;
+	line-height: 1;
+	transition: background-color var(--duration-fast),
+		color var(--duration-fast);
+}
+
+.filter-pill-remove:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.filter-pill-remove-icon {
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Filter Buttons */
+.filter-add-button,
+.filter-clear-all-button {
+	display: flex;
+	align-items: center;
+	padding: 6px 10px;
+	font-size: var(--font-ui-small);
+	cursor: pointer;
+}
+
+.filter-add-button {
+	gap: var(--size-4-1);
+	color: var(--text-muted);
+}
+
+.filter-add-icon {
+	font-weight: var(--font-bold);
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Filter Dropdown */
+.filter-dropdown {
+	position: fixed;
+	width: 220px;
+	background-color: var(--background-primary);
+	border-radius: var(--radius-m);
+	box-shadow: var(--shadow-l);
+	border: 1px solid var(--background-modifier-border);
+	z-index: var(--layer-popover);
+	max-height: 400px;
+	display: flex;
+	flex-direction: column;
+	opacity: 0;
+	transform: translateY(-8px);
+	transition: opacity var(--duration-normal), transform var(--duration-normal);
+	overflow: hidden;
+}
+
+.filter-dropdown-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.filter-dropdown-header {
+	padding: var(--size-4-2);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.filter-dropdown-search {
+	width: 100%;
+	padding: var(--size-4-2);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background-color: var(--background-secondary);
+	font-size: var(--font-ui-small);
+	outline: none;
+}
+
+.filter-dropdown-search:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px var(--focus-ring-color);
+}
+
+.filter-dropdown-list {
+	overflow-y: auto;
+	max-height: 350px;
+}
+
+.filter-dropdown-item {
+	display: flex;
+	align-items: center;
+	padding: var(--size-4-2) var(--size-4-3);
+	cursor: pointer;
+	font-size: var(--font-ui-small);
+	color: var(--text-normal);
+	transition: background-color var(--duration-fast);
+}
+
+.filter-dropdown-item:hover {
+	background-color: var(--background-secondary);
+}
+
+.filter-dropdown-item-label {
+	flex: 1;
+}
+
+.filter-dropdown-item-arrow {
+	color: var(--text-faint);
+	font-size: 18px;
+}
+
+.filter-dropdown-item-arrow.back {
+	margin-right: var(--size-4-2);
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.filter-dropdown-back {
+	color: var(--text-muted);
+}
+
+.filter-dropdown-separator {
+	height: 1px;
+	background-color: var(--divider-color);
+	margin: var(--size-4-1) 0;
+}
+
+.filter-dropdown-empty {
+	padding: var(--size-4-4);
+	text-align: center;
+	color: var(--text-faint);
+	font-size: var(--font-ui-small);
+}
+
+.filter-dropdown-value-item {
+	padding-left: var(--size-4-4);
+}
+
+.filter-dropdown-category {
+	padding: var(--size-4-2) 0;
+	color: var(--text-muted);
+	font-weight: 500;
+}
+
+.filter-dropdown-value-preview {
+	padding: var(--size-4-1) var(--size-4-4);
+	cursor: pointer;
+	transition: background-color var(--duration-fast);
+	font-size: var(--font-ui-small);
+	color: var(--text-normal);
+}
+
+.filter-dropdown-value-preview:hover {
+	background-color: var(--background-secondary);
+}
+
+/* Animations */
+@keyframes filter-pill-appear {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.filter-pill-removing {
+	opacity: 0;
+	transform: scale(0.9);
+	transition: opacity 150ms ease-out, transform 150ms ease-out;
+}

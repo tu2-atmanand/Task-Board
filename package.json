@@ -32,6 +32,7 @@
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
+		"@popperjs/core": "^2.11.8",
 		"@simonwep/pickr": "^1.8.2",
 		"@xyflow/react": "^12.8.2",
 		"i18next": "^25.5.3",
