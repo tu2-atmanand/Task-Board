@@ -3,8 +3,6 @@ import {
 	ExtraButtonComponent,
 	setIcon,
 	DropdownComponent,
-	ButtonComponent,
-	CloseableComponent,
 	App,
 	setTooltip,
 } from "obsidian";
@@ -78,9 +76,9 @@ export class TaskFilterComponent extends Component {
 	onload() {
 		const savedState = this.leafId
 			? this.app.loadLocalStorage(
-					`task-genius-view-filter-${this.leafId}`
+					`task-board-view-filter-${this.leafId}`
 			  )
-			: this.app.loadLocalStorage("task-genius-view-filter");
+			: this.app.loadLocalStorage("task-board-view-filter");
 
 		console.log("savedState", savedState, this.leafId);
 		if (
@@ -1138,8 +1136,8 @@ export class TaskFilterComponent extends Component {
 		if (this.app) {
 			this.app.saveLocalStorage(
 				this.leafId
-					? `task-genius-view-filter-${this.leafId}`
-					: "task-genius-view-filter",
+					? `task-board-view-filter-${this.leafId}`
+					: "task-board-view-filter",
 				this.rootFilterState
 			);
 
@@ -1147,7 +1145,7 @@ export class TaskFilterComponent extends Component {
 			if (triggerRealtimeUpdate) {
 				// 触发过滤器变更事件，传递当前的过滤器状态
 				this.app.workspace.trigger(
-					"task-genius:filter-changed",
+					"task-board:filter-changed",
 					this.rootFilterState,
 					this.leafId || undefined
 				);

@@ -133,7 +133,24 @@
         "index": 1,
         "showColumnTags": true,
         "showFilteredTags": false,
-        "hideEmptyColumns": false
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": [
+            {
+              "id": "id-1759769822732-we6pfeqpi",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1759769822734-2yqs1dyh5",
+                  "property": "content",
+                  "condition": "contains",
+                  "value": "this"
+                }
+              ]
+            }
+          ]
+        }
       },
       {
         "columns": [
@@ -211,7 +228,28 @@
         "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true,
-        "hideEmptyColumns": false
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": [
+            {
+              "id": "id-1759769822732-we6pfeqpi",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1759769822734-2yqs1dyh5",
+                  "property": "content",
+                  "condition": "contains",
+                  "value": "this"
+                }
+              ]
+            }
+          ]
+        },
+        "filterConfig": {
+          "enableSavedFilters": true,
+          "savedConfigs": []
+        }
       }
     ],
     "globalSettings": {
