@@ -2,7 +2,7 @@
 
 import { Notice, normalizePath, requestUrl, getLanguage } from "obsidian";
 import i18next from "i18next";
-import en, { Lang } from "./locale/en";
+import en from "./locale/en";
 import TaskBoard from "main";
 import { langCodes } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
