@@ -7,6 +7,9 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "jest --config=jest.config.cjs",
+		"test:watch": "jest --config=jest.config.cjs --watch",
+		"test:coverage": "jest --config=jest.config.cjs --coverage",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [],
@@ -17,6 +20,8 @@
 		"@codemirror/search": "^6.0.0",
 		"@codemirror/state": "^6.5.2",
 		"@codemirror/view": "^6.36.7",
+		"@testing-library/jest-dom": "^6.8.0",
+		"@types/jest": "^30.0.0",
 		"@types/node": "^24.0.14",
 		"@types/react": "^19.1.8",
 		"@types/react-dom": "^19.1.6",
@@ -26,8 +31,11 @@
 		"builtin-modules": "5.0.0",
 		"codemirror": "^6.0.0",
 		"esbuild": "0.25.6",
+		"jest": "^30.1.1",
+		"jest-environment-jsdom": "^30.1.1",
 		"obsidian": "latest",
 		"obsidian-typings": "^3.12.1",
+		"ts-jest": "^29.4.1",
 		"tslib": "2.8.1",
 		"typescript": "^5.8.3"
 	},

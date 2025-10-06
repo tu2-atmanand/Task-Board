@@ -15,6 +15,11 @@ main.js
 # Exclude sourcemaps
 *.map
 
+# Testing
+coverage/
+.nyc_output
+*.lcov
+
 # obsidian
 main.css
 MyStuff/
