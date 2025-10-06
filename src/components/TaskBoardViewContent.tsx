@@ -1,8 +1,8 @@
 // src/components/TaskBoardViewContent.tsx
 
-import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, CirclePlus, RefreshCcw, Search, SearchX } from 'lucide-react';
-import React, { use, useCallback, useEffect, useMemo, useState } from "react";
+import { Board, ColumnData, AdvancedFilters } from "../interfaces/BoardConfigs";
+import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter } from 'lucide-react';
+import React, { use, useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
@@ -17,6 +17,8 @@ import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
 import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 import { viewTypeNames } from "src/interfaces/GlobalSettings";
+import { ViewTaskFilterPopover } from "./filter/ViewTaskFilterPopover";
+import ReactDOM from "react-dom";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -28,6 +30,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || viewTypeNames.kanban);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [showFilterPopover, setShowFilterPopover] = useState(false);
+	const filterButtonRef = useRef<HTMLButtonElement>(null);
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
 
 	const [showProgressBar, setShowProgressBar] = useState(true);
@@ -220,6 +224,32 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		plugin.saveSettings();
 	}
 
+	const handleFilterButtonClick = () => {
+		setShowFilterPopover((prev) => !prev);
+	};
+
+	const handleSaveFilters = async (filters: AdvancedFilters) => {
+		const updatedBoards = [...boards];
+		updatedBoards[activeBoardIndex].advancedFilters = filters;
+		await handleUpdateBoards(plugin, updatedBoards, setBoards);
+		setShowFilterPopover(false);
+		// Refresh the board to apply new filters
+		setRefreshCount((prev) => prev + 1);
+	};
+
+	const getCurrentFilters = (): AdvancedFilters => {
+		return boards[activeBoardIndex]?.advancedFilters || {
+			enabled: false,
+			matchType: "All",
+			groups: [],
+		};
+	};
+
+	const hasActiveFilters = (): boolean => {
+		const filters = boards[activeBoardIndex]?.advancedFilters;
+		return filters?.enabled && filters?.groups?.length > 0 || false;
+	};
+
 
 	return (
 		<div className="taskBoardView">
@@ -274,6 +304,32 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						onClick={() => handleSearchButtonClick()}
 					>
 						{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
+					</button>
+
+					<button 
+						ref={filterButtonRef}
+						className="filterTaskBtn" 
+						aria-label="Filter tasks"
+						onClick={handleFilterButtonClick}
+						style={{
+							position: "relative",
+							color: hasActiveFilters() ? "var(--interactive-accent)" : "inherit"
+						}}
+					>
+						<Filter size={18} />
+						{hasActiveFilters() && (
+							<span 
+								style={{
+									position: "absolute",
+									top: "2px",
+									right: "2px",
+									width: "6px",
+									height: "6px",
+									borderRadius: "50%",
+									background: "var(--interactive-accent)",
+								}}
+							/>
+						)}
 					</button>
 
 					<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={handleOpenAddNewTaskModal}>
@@ -365,6 +421,21 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					</div>
 				)}
 			</div>
+
+			{/* Filter Popover Portal */}
+			{showFilterPopover && filterButtonRef.current &&
+				ReactDOM.createPortal(
+					<ViewTaskFilterPopover
+						plugin={plugin}
+						boardIndex={activeBoardIndex}
+						currentFilters={getCurrentFilters()}
+						onSave={handleSaveFilters}
+						onClose={() => setShowFilterPopover(false)}
+						anchorEl={filterButtonRef.current}
+					/>,
+					document.body
+				)
+			}
 		</div>
 	);
 };
