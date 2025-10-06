@@ -1,5 +1,5 @@
 import { App, Modal, Setting, Notice, DropdownComponent } from "obsidian";
-import { RootFilterState } from "./ViewTaskFilter";
+import { RootFilterState, FilterGroup } from "./ViewTaskFilter";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { SavedFilterConfig } from "src/interfaces/BoardConfigs";
@@ -10,11 +10,13 @@ export class FilterConfigModal extends Modal {
 	private currentFilterState?: RootFilterState;
 	private onSave?: (config: SavedFilterConfig) => void;
 	private onLoad?: (config: SavedFilterConfig) => void;
+	private activeBoardIndex: number;
 
 	constructor(
 		app: App,
 		plugin: TaskBoard,
 		mode: "save" | "load",
+		activeBoardIndex: number,
 		currentFilterState?: RootFilterState,
 		onSave?: (config: SavedFilterConfig) => void,
 		onLoad?: (config: SavedFilterConfig) => void
@@ -22,6 +24,7 @@ export class FilterConfigModal extends Modal {
 		super(app);
 		this.plugin = plugin;
 		this.mode = mode;
+		this.activeBoardIndex = activeBoardIndex;
 		this.currentFilterState = currentFilterState;
 		this.onSave = onSave;
 		this.onLoad = onLoad;
@@ -93,7 +96,14 @@ export class FilterConfigModal extends Modal {
 
 		contentEl.createEl("h2", { text: t("Load Filter Configuration") });
 
-		const savedConfigs = this.plugin.settings.data.boardConfigs[activeBoardIndex].filterConfig.savedConfigs;
+		const board = this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) {
+			board.filterConfig = {
+				enableSavedFilters: true,
+				savedConfigs: []
+			};
+		}
+		const savedConfigs = board.filterConfig.savedConfigs;
 
 		if (savedConfigs.length === 0) {
 			contentEl.createEl("p", {
@@ -170,9 +180,10 @@ export class FilterConfigModal extends Modal {
 
 		if (!configId) return;
 
-		const config = this.plugin.settings.data.boardConfigs[
-			activeBoardIndex
-		].filterConfig.savedConfigs.find((c) => c.id === configId);
+		const board = this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) return;
+		
+		const config = board.filterConfig.savedConfigs.find((c: SavedFilterConfig) => c.id === configId);
 
 		if (!config) return;
 
@@ -204,7 +215,7 @@ export class FilterConfigModal extends Modal {
 
 		const groupCount = config.filterState.filterGroups.length;
 		const totalFilters = config.filterState.filterGroups.reduce(
-			(sum, group) => sum + group.filters.length,
+			(sum: number, group: FilterGroup) => sum + group.filters.length,
 			0
 		);
 
@@ -243,9 +254,14 @@ export class FilterConfigModal extends Modal {
 		};
 
 		try {
-			this.plugin.settings.data.boardConfigs[
-				activeBoardIndex
-			].filterConfig.savedConfigs.push(config);
+			const board = this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+			if (!board.filterConfig) {
+				board.filterConfig = {
+					enableSavedFilters: true,
+					savedConfigs: []
+				};
+			}
+			board.filterConfig.savedConfigs.push(config);
 			await this.plugin.saveSettings();
 
 			new Notice(t("Filter configuration saved successfully"));
@@ -267,9 +283,10 @@ export class FilterConfigModal extends Modal {
 			return;
 		}
 
-		const config = this.plugin.settings.data.boardConfigs[
-			activeBoardIndex
-		].filterConfig.savedConfigs.find((c) => c.id === configId);
+		const board = this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) return;
+		
+		const config = board.filterConfig.savedConfigs.find((c: SavedFilterConfig) => c.id === configId);
 
 		if (!config) {
 			new Notice(t("Failed to load filter configuration"));
@@ -295,9 +312,10 @@ export class FilterConfigModal extends Modal {
 			return;
 		}
 
-		const config = this.plugin.settings.data.boardConfigs[
-			activeBoardIndex
-		].filterConfig.savedConfigs.find((c) => c.id === configId);
+		const board = this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) return;
+		
+		const config = board.filterConfig.savedConfigs.find((c: SavedFilterConfig) => c.id === configId);
 
 		if (!config) {
 			new Notice(t("Failed to delete filter configuration"));
@@ -342,12 +360,12 @@ export class FilterConfigModal extends Modal {
 		if (!confirmed) return;
 
 		try {
-			this.plugin.settings.data.boardConfigs[
-				activeBoardIndex
-			].filterConfig.savedConfigs =
-				this.plugin.settings.data.boardConfigs[
-					activeBoardIndex
-				].filterConfig.savedConfigs.filter((c) => c.id !== configId);
+			const board = this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+			if (!board.filterConfig) return;
+			
+			board.filterConfig.savedConfigs = board.filterConfig.savedConfigs.filter(
+				(c: SavedFilterConfig) => c.id !== configId
+			);
 
 			await this.plugin.saveSettings();
 
@@ -361,6 +379,7 @@ export class FilterConfigModal extends Modal {
 				this.app,
 				this.plugin,
 				"load",
+				this.activeBoardIndex,
 				undefined,
 				this.onSave,
 				this.onLoad

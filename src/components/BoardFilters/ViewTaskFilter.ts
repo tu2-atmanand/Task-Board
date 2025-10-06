@@ -9,10 +9,10 @@ import {
 	setTooltip,
 } from "obsidian";
 import Sortable from "sortablejs";
-import "@/styles/global-filter.css";
 import { FilterConfigModal } from "./FilterConfigModal";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { SavedFilterConfig } from "src/interfaces/BoardConfigs";
 
 // --- Interfaces (from focus.md and example HTML) ---
 // (Using 'any' for property types for now, will refine based on focus.md property list)
@@ -56,6 +56,7 @@ export class TaskFilterComponent extends Component {
 	private app: App;
 	private filterGroupsContainerEl!: HTMLElement;
 	private plugin?: TaskBoard;
+	private activeBoardIndex?: number;
 
 	// Sortable instances
 	private groupsSortable?: Sortable;
@@ -64,12 +65,14 @@ export class TaskFilterComponent extends Component {
 		hostEl: HTMLElement,
 		app: App,
 		private leafId?: string | undefined,
-		plugin?: TaskBoard
+		plugin?: TaskBoard,
+		activeBoardIndex?: number
 	) {
 		super();
 		this.hostEl = hostEl;
 		this.app = app;
 		this.plugin = plugin;
+		this.activeBoardIndex = activeBoardIndex;
 	}
 
 	onload() {
@@ -82,8 +85,8 @@ export class TaskFilterComponent extends Component {
 		console.log("savedState", savedState, this.leafId);
 		if (
 			savedState &&
-			typeof savedState.rootCondition === "string" &&
-			Array.isArray(savedState.filterGroups)
+			typeof (savedState as any).rootCondition === "string" &&
+			Array.isArray((savedState as any).filterGroups)
 		) {
 			// Basic validation passed
 			this.rootFilterState = savedState as RootFilterState;
@@ -1154,14 +1157,15 @@ export class TaskFilterComponent extends Component {
 
 	// --- Filter Configuration Management ---
 	private openSaveConfigModal(): void {
-		if (!this.plugin) return;
+		if (!this.plugin || this.activeBoardIndex === undefined) return;
 
 		const modal = new FilterConfigModal(
 			this.app,
 			this.plugin,
 			"save",
+			this.activeBoardIndex,
 			this.getFilterState(),
-			(config) => {
+			(config: SavedFilterConfig) => {
 				// Optional: Handle successful save
 				console.log("Filter configuration saved:", config.name);
 			}
@@ -1170,15 +1174,16 @@ export class TaskFilterComponent extends Component {
 	}
 
 	private openLoadConfigModal(): void {
-		if (!this.plugin) return;
+		if (!this.plugin || this.activeBoardIndex === undefined) return;
 
 		const modal = new FilterConfigModal(
 			this.app,
 			this.plugin,
 			"load",
+			this.activeBoardIndex,
 			undefined,
 			undefined,
-			(config) => {
+			(config: SavedFilterConfig) => {
 				// Load the configuration
 				this.loadFilterState(config.filterState);
 				console.log("Filter configuration loaded:", config.name);
