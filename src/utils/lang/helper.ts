@@ -1,125 +1,74 @@
 // /src/utils/lang/helper.ts
 
-import { Notice, normalizePath, requestUrl } from "obsidian";
+import { Notice, normalizePath, requestUrl, getLanguage } from "obsidian";
+import i18next from "i18next";
 import en, { Lang } from "./locale/en";
 import TaskBoard from "main";
 import { langCodes } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
 import {
-	LOCAL_STORAGE_TRANSLATIONS,
 	NODE_POSITIONS_STORAGE_KEY,
 	NODE_SIZE_STORAGE_KEY,
 	VIEWPORT_STORAGE_KEY,
 } from "src/types/uniqueIdentifiers";
 
-let currentLang = "en";
+// Initialize i18next instance
+let isI18nInitialized = false;
 
 // --- Called Once On Plugin Load ---
 export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 	const lang = getLanguage();
 
-	currentLang = lang;
+	// Initialize i18next with English as the default/fallback language
+	await i18next.init({
+		lng: lang,
+		fallbackLng: "en",
+		resources: {
+			en: {
+				translation: en
+			}
+		},
+		interpolation: {
+			escapeValue: false // React already escapes values
+		},
+		returnEmptyString: false,
+		returnNull: false
+	});
 
-	if (lang === "en") return; // no need to load, use bundled English
+	isI18nInitialized = true;
 
-	try {
-		const pluginFolder = `${plugin.app.vault.configDir}/plugins/task-board/`;
-		const filePath = normalizePath(`${pluginFolder}/locales/${lang}.json`);
-		const file = await plugin.app.vault.adapter.read(filePath);
-		const parsed = JSON.parse(file);
+	// If language is not English, load the translation file from disk
+	if (lang !== "en" && lang in langCodes) {
+		try {
+			const pluginFolder = `${plugin.app.vault.configDir}/plugins/task-board/`;
+			const filePath = normalizePath(`${pluginFolder}/locales/${lang}.json`);
+			const file = await plugin.app.vault.adapter.read(filePath);
+			const parsed = JSON.parse(file);
 
-		// TODO : Right now I am loading the entire translations file into localStorage. And everytime the t() function is called, I am parsing the entire file again from localStorage. This can be optimized by storing this data into a sessionStorage instead of localStorage. Because, I anyways have this data in my disk and loads the data at startup and its only required as long as the Obsidian is open, that is the session. So in this situation, sessionStorage is more appropriate than localStorage. As sessionStorage is stored in RAM and localStorage is stored in disk. And sessionStorage is cleared when the browser (or Obsidian in this case) is closed. So this will save some disk read write cycles and improve performance a bit.
-		// localStorage.setItem(LOCAL_STORAGE_KEY, lang);
-		localStorage.setItem(
-			LOCAL_STORAGE_TRANSLATIONS,
-			JSON.stringify(parsed)
-		);
-	} catch (err) {
-		// localStorage.removeItem(LOCAL_STORAGE_KEY);
-		localStorage.removeItem(LOCAL_STORAGE_TRANSLATIONS);
-	}
-};
-
-// Get language preference
-const getLanguage = (): string => {
-	// return window.localStorage.getItem("taskBoardLang") || "en";
-
-	const obsidianLang = window.localStorage.getItem("language");
-
-	if (obsidianLang && obsidianLang in langCodes) {
-		return obsidianLang;
-	} else {
-		return "en"; // default to English
+			// Add the loaded translations to i18next
+			i18next.addResourceBundle(lang, "translation", parsed, true, true);
+		} catch (err) {
+			console.warn(
+				`Could not load language file for '${lang}', falling back to English.`,
+				err
+			);
+		}
 	}
 };
 
 // Main translation function
 export function t(key: string): string {
-	const currentLang = getLanguage();
-	const cachedLangData = window.localStorage.getItem(
-		LOCAL_STORAGE_TRANSLATIONS
-	);
-
-	let translations: Partial<Lang> = {};
-
-	if (currentLang && cachedLangData && currentLang !== "en") {
-		try {
-			translations = JSON.parse(cachedLangData);
-		} catch {
-			// fallback to english
-		}
+	if (!isI18nInitialized) {
+		console.warn("i18n not initialized, falling back to English");
+		return en?.[key] || `Missing translation for "${key}"`;
 	}
-
-	return (
-		translations?.[key] || en?.[key] || `Missing translation for "${key}"`
-	);
+	
+	return i18next.t(key, { defaultValue: en?.[key] || `Missing translation for "${key}"` });
 }
 
-// // Load language file from disk if available
-// const loadLocaleFromDisk = async (
-// 	plugin: TaskBoard,
-// 	lang: string
-// ): Promise<Partial<Lang>> => {
-// 	const pluginFolder = await getPluginConfigFolder();
-// 	const filePath = normalizePath(`${pluginFolder}/locales/${lang}.json`);
-
-// 	try {
-// 		const file = await plugin.app.vault.adapter.read(filePath);
-// 		const json = JSON.parse(file);
-// 		return json;
-// 	} catch (err) {
-// 		console.warn(
-// 			`Could not load language file for '${lang}', falling back to English.`,
-// 			err
-// 		);
-// 		return {};
-// 	}
-// };
-
-// // Get current locale (from cache or load)
-// const getLocale = async (): Promise<Partial<Lang>> => {
-// 	const lang = getLanguage();
-
-// 	if (lang === "en") return {};
-// 	if (cachedTranslations[lang]) return cachedTranslations[lang];
-
-// 	const locale = await loadLocaleFromDisk(lang);
-// 	cachedTranslations[lang] = locale;
-// 	currentLang = lang;
-// 	return locale;
-// };
-
-// // Main async translation function
-// export async function t(key: string): Promise<string> {
-// 	const locale = await getLocale();
-// 	return locale[key] || en[key] || `Missing translation for "${key}"`;
-// }
-
-// Sync fallback version (used sparingly)
+// Sync fallback version (used sparingly) - now just calls t()
 export function tSync(key: string): string {
-	if (currentLang === "en")
-		return en[key] || `Missing translation for "${key}"`;
-	return en[key] || `Missing translation for "${key}"`;
+	return t(key);
 }
 
 // Download and apply a new language file
@@ -155,8 +104,11 @@ export async function downloadAndApplyLanguageFile(
 		await plugin.app.vault.adapter.remove(filePath).catch(() => {});
 		await plugin.app.vault.adapter.rename(tempPath, filePath);
 
-		// // Invalidate cache
-		// delete cachedTranslations[lang];
+		// Load the new translations into i18next
+		if (isI18nInitialized) {
+			const parsed = JSON.parse(res.text);
+			i18next.addResourceBundle(lang, "translation", parsed, true, true);
+		}
 
 		progressNotice.hide();
 		new Notice(
@@ -179,8 +131,7 @@ export async function downloadAndApplyLanguageFile(
 }
 
 export const deleteAllLocalStorageKeys = () => {
-	// localStorage.removeItem(LOCAL_STORAGE_KEY);
-	localStorage.removeItem(LOCAL_STORAGE_TRANSLATIONS);
+	// No longer need to remove LOCAL_STORAGE_TRANSLATIONS as we're using i18next
 	localStorage.removeItem(NODE_POSITIONS_STORAGE_KEY);
 	localStorage.removeItem(NODE_SIZE_STORAGE_KEY);
 	localStorage.removeItem(VIEWPORT_STORAGE_KEY);
