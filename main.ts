@@ -65,6 +65,7 @@ export default class TaskBoard extends Plugin {
 	// currentModifiedFile: TFile | null;
 	// fileUpdatedUsingModal: string;
 	IstasksJsonDataChanged: boolean;
+	isI18nInitialized: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
@@ -86,6 +87,7 @@ export default class TaskBoard extends Plugin {
 		this.IstasksJsonDataChanged = false;
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
+		this.isI18nInitialized = false;
 	}
 
 	get api(): ReturnType<typeof TaskBoardApi.GetApi> {
