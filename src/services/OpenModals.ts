@@ -1,9 +1,10 @@
 // src/services/OpenModals.ts
 
-import { App, Notice, TFile } from "obsidian";
+import { App, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { addTaskInNote, updateTaskInFile } from "src/utils/TaskItemUtils";
 
 import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
+import { AddOrEditTaskView } from "src/views/AddOrEditTaskView";
 import { Board } from "../interfaces/BoardConfigs";
 import { BoardConfigureModal } from "src/modal/BoardConfigModal";
 import { ScanVaultModal } from "src/modal/ScanVaultModal";
@@ -22,6 +23,7 @@ import { ScanFilterModal } from "src/modal/ScanFilterModal";
 import { taskItem } from "src/interfaces/TaskItem";
 import { updateFrontmatterInMarkdownFile } from "src/utils/TaskNoteUtils";
 import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
+import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -174,7 +176,8 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								plugin.realTimeScanning.onFileModified(
 									newTask.filePath
 								);
-								sleep(2000).then(() => { // TODO : Is 2 seconds really required ?
+								sleep(2000).then(() => {
+									// TODO : Is 2 seconds really required ?
 									plugin.realTimeScanning.processAllUpdatedFiles();
 								});
 							});
@@ -284,7 +287,8 @@ export const openEditTaskNoteModal = (
 						updatedTask.filePath,
 						newTaskContent
 					).then(() => {
-						sleep(2000).then(() => { // TODO : Is 2 sec really required ?
+						sleep(2000).then(() => {
+							// TODO : Is 2 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(
 								updatedTask.filePath
@@ -470,4 +474,260 @@ export const openScanFiltersModal = (
 	new ScanFilterModal(plugin, filterType, async (newValues) => {
 		onSave(newValues);
 	}).open();
+};
+
+/**
+ * Open AddOrEditTask as a view in a new leaf (tab or popout window)
+ * This allows the task editor to be used in tabs alongside other content
+ *
+ * @param plugin - The TaskBoard plugin instance
+ * @param saveTask - Callback function to handle task saving
+ * @param isTaskNote - Whether this is a task note
+ * @param activeNote - Whether the active note should be used
+ * @param taskExists - Whether editing an existing task
+ * @param task - Optional task to edit
+ * @param filePath - Optional file path for the task
+ * @param location - Where to open the view: "tab" (new tab), "split" (split pane), or "window" (popout window)
+ * @returns Promise resolving to the WorkspaceLeaf or null
+ *
+ * @example
+ * // Open in a new tab for editing an existing task
+ * openAddOrEditTaskView(
+ *   plugin,
+ *   (updatedTask, quickAddChoice, noteContent) => {
+ *     // Handle task update
+ *     updateTaskInFile(plugin, updatedTask);
+ *   },
+ *   false,
+ *   false,
+ *   true,
+ *   existingTask,
+ *   "path/to/file.md",
+ *   "tab"
+ * );
+ *
+ * @example
+ * // Open in a popout window for creating a new task
+ * openAddOrEditTaskView(
+ *   plugin,
+ *   (newTask, quickAddChoice, noteContent) => {
+ *     // Handle new task creation
+ *     addTaskInNote(plugin, newTask, false);
+ *   },
+ *   false,
+ *   false,
+ *   false,
+ *   undefined,
+ *   "path/to/file.md",
+ *   "window"
+ * );
+ */
+export const openEditTaskView = async (
+	plugin: TaskBoard,
+	isTaskNote: boolean,
+	activeNote: boolean,
+	taskExists: boolean,
+	task: taskItem,
+	filePath: string,
+	location: "tab" | "split" | "window" = "tab"
+): Promise<WorkspaceLeaf | null> => {
+	const { workspace } = plugin.app;
+
+	const viewTypeId = task.legacyId
+		? `${VIEW_TYPE_ADD_OR_EDIT_TASK}-${task.legacyId}`
+		: `${VIEW_TYPE_ADD_OR_EDIT_TASK}-${String(task.id)}`;
+
+	const taskId = task.legacyId ? task.legacyId : String(task.id);
+
+	const leaves = workspace.getLeavesOfType(viewTypeId);
+	console.log("Leaves : ", leaves);
+	const matchLeaf = leaves.find((leaf) => {
+		// const viewEphemeralState = leaf.getEphemeralState();
+		// console.log("empheral states of : ", viewEphemeralState);
+
+		const customView = leaf.view as AddOrEditTaskView;
+		const leafTaskId = customView?.task.legacyId
+			? customView.task.legacyId
+			: String(customView?.task.id);
+		console.log("taskId :", taskId, "\nleafTaskId :", leafTaskId);
+
+		return taskId === leafTaskId;
+	});
+	console.log("Matched leaf :", matchLeaf);
+
+	if (matchLeaf) {
+		// Set the view on the leaf
+		// await matchLeaf.setViewState(
+		// 	{
+		// 		type: VIEW_TYPE_ADD_OR_EDIT_TASK,
+		// 		active: true,
+		// 	},
+		// 	{ viewTaskId: taskId }
+		// );
+
+		matchLeaf.setEphemeralState({ viewTaskId: taskId });
+
+		// Reveal the leaf
+		workspace.revealLeaf(matchLeaf);
+
+		return leaves[0];
+	} else {
+		// Detach any existing AddOrEditTask views
+		// workspace.detachLeavesOfType(VIEW_TYPE_ADD_OR_EDIT_TASK);
+
+		let leaf: WorkspaceLeaf | null = null;
+
+		if (location === "window") {
+			// Open in a new popout window
+			leaf = workspace.getLeaf("window");
+		} else if (location === "split") {
+			// Open in a split pane
+			leaf = workspace.getLeaf("split");
+		} else {
+			// Open in a new tab
+			leaf = workspace.getLeaf("tab");
+		}
+
+		if (leaf) {
+			try {
+				// For the first time after the plugin has loaded, a new view will be registered only if this openEditTaskView has been called. If any error occurs then eter the 'catch' body and simply replace the old view of the leaf with the new view created.
+
+				// Register AddOrEditTask view (can be opened in tabs or popout windows)
+				plugin.registerView(viewTypeId, (leaf) => {
+					leaf.setEphemeralState({
+						viewTaskId: taskId,
+					});
+
+					return new AddOrEditTaskView(
+						plugin,
+						leaf,
+						viewTypeId,
+						async (
+							updatedTask,
+							quickAddPluginChoice,
+							updatedNoteContent
+						) => {
+							if (!isTaskNote) {
+								// Update the task in the file and JSON
+								updateTaskInFile(
+									plugin,
+									updatedTask,
+									task
+								).then((newId) => {
+									plugin.realTimeScanning.processAllUpdatedFiles(
+										updatedTask.filePath
+									);
+								});
+							} else {
+								if (!updatedNoteContent) {
+									// Update frontmatter with task properties
+									await updateFrontmatterInMarkdownFile(
+										plugin,
+										updatedTask
+									).then(() => {
+										// This is required to rescan the updated file and refresh the board.
+										plugin.realTimeScanning.processAllUpdatedFiles(
+											updatedTask.filePath
+										);
+									});
+								} else {
+									writeDataToVaultFile(
+										plugin,
+										updatedTask.filePath,
+										updatedNoteContent
+									).then(() => {
+										sleep(2000).then(() => {
+											// TODO : Is 2 sec really required ?
+											// This is required to rescan the updated file and refresh the board.
+											plugin.realTimeScanning.processAllUpdatedFiles(
+												updatedTask.filePath
+											);
+										});
+									});
+								}
+							}
+						},
+						isTaskNote,
+						activeNote,
+						taskExists,
+						task,
+						filePath
+					);
+				});
+			} catch {
+				const view = new AddOrEditTaskView(
+					plugin,
+					leaf,
+					viewTypeId,
+					async (
+						updatedTask,
+						quickAddPluginChoice,
+						updatedNoteContent
+					) => {
+						if (!isTaskNote) {
+							// Update the task in the file and JSON
+							updateTaskInFile(plugin, updatedTask, task).then(
+								(newId) => {
+									plugin.realTimeScanning.processAllUpdatedFiles(
+										updatedTask.filePath
+									);
+								}
+							);
+						} else {
+							if (!updatedNoteContent) {
+								// Update frontmatter with task properties
+								await updateFrontmatterInMarkdownFile(
+									plugin,
+									updatedTask
+								).then(() => {
+									// This is required to rescan the updated file and refresh the board.
+									plugin.realTimeScanning.processAllUpdatedFiles(
+										updatedTask.filePath
+									);
+								});
+							} else {
+								writeDataToVaultFile(
+									plugin,
+									updatedTask.filePath,
+									updatedNoteContent
+								).then(() => {
+									sleep(2000).then(() => {
+										// TODO : Is 2 sec really required ?
+										// This is required to rescan the updated file and refresh the board.
+										plugin.realTimeScanning.processAllUpdatedFiles(
+											updatedTask.filePath
+										);
+									});
+								});
+							}
+						}
+					},
+					isTaskNote,
+					activeNote,
+					taskExists,
+					task,
+					filePath
+				);
+
+				// Replace the leaf's view with our configured view
+				// This is a workaround since registerView creates a default instance
+				// (leaf as any).view = view;
+				await view.onOpen();
+			}
+
+			// Set the view on the leaf
+			await leaf.setViewState({
+				type: viewTypeId,
+				active: true,
+			});
+			leaf.setEphemeralState({
+				viewTaskId: taskId,
+			});
+			console.log("EphemeralState : ", leaf.getEphemeralState());
+
+			// Reveal the leaf
+			workspace.revealLeaf(leaf);
+		}
+		return leaf;
+	}
 };

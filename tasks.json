@@ -1,14 +1,84 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-02T15:07:12.914Z",
+    "Modified_at": "2025-10-05T05:22:45.057Z",
     "Pending": {
-        "Task Board/1.7.0/Tasks.md": [
+        "Important Note.md": [
             {
-                "id": 20,
-                "legacyId": "20",
+                "id": 222,
+                "legacyId": "222",
                 "status": " ",
-                "title": "- [ ] The issue mentioned in the discussion post has not been fixed yet. #pending  🆔 20",
+                "title": "- [ ] This is a task title, keep it short. #pending #doc 🆔 222 ⛔ 224,225 ⏫ 🔁 every day 🏁 keep ➕ 2025-09-28 🛫 2025-09-28 ⏳ 2025-09-29 📅 2025-09-29⏰[16:00 - 17:00] ",
+                "body": [
+                    "\t- [ ] This is a first sub-task.",
+                    "\tElaborate and explain the task here. Add links, embeddings or any other resources.",
+                    "\t![[Pasted image 20250928160808.png]]",
+                    "\t- This task is dependent on two other tasks.",
+                    "\t- One of the dependency has been completed."
+                ],
+                "time": "16:00 - 17:00",
+                "createdDate": "2025-09-28",
+                "startDate": "2025-09-28",
+                "scheduledDate": "2025-09-29",
+                "due": "2025-09-29",
+                "tags": [
+                    "#pending",
+                    "#doc"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "dependsOn": [
+                    "224",
+                    "225"
+                ],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 44
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 224,
+                "legacyId": "224",
+                "status": " ",
+                "title": "- [ ] This is a child task for 222. 📅 2025-09-29 ⏳ 2025-09-29 🔼 🆔 224 #working ",
                 "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-09-29",
+                "due": "2025-09-29",
+                "tags": [
+                    "#working"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 10,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 82
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3982199262,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] This is a task which contains long links in its sub-tasks. #pending ",
+                "body": [
+                    "\t- [ ] https://forum.obsidian.md/t/new-plugin-edit-transcluded-embedded-notes-blocks-in-place/106257",
+                    "\t- [ ] https://forum.obsidian.md/t/option-to-hide-show-top-bar-s-when-note-is-scrolled-when-keyboard-appears-disappears/69610/20",
+                    "\t- [ ] https://forum.obsidian.md/t/issues-with-context-aware-embedded-base-searching-for-files-with-tags-by-this-tags/106468"
+                ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
@@ -20,112 +90,24 @@
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "filePath": "Important Note.md",
                 "taskLocation": {
-                    "startLine": 3,
+                    "startLine": 17,
                     "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 88
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1869897416,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] Another video on the methodology with a use-case.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 36,
-                    "startCharIndex": 0,
-                    "endLine": 36,
-                    "endCharIndex": 55
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 4,
-                "legacyId": "4",
-                "status": " ",
-                "title": "- [ ] Research paper explaining:  🆔 4 #working ",
-                "body": [
-                    "\t- [ ] I am in trouble now, I have to find specific differences between PERT Charts and DFP. #pending ",
-                    "\t- what it is",
-                    "\t- what are its components",
-                    "\t- Tawk node",
-                    "\t- Edges which chabg w color when done",
-                    "\t- how it can be used with a use case.",
-                    "\t- Benefits in the conclusion"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#working"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 38,
-                    "startCharIndex": 0,
-                    "endLine": 45,
-                    "endCharIndex": 29
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1068943416,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] After the above video and Research paper has been published. Share Post-2 on all social media, the same content and provide the link to the discussion.",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 48,
-                    "startCharIndex": 0,
-                    "endLine": 48,
-                    "endCharIndex": 157
+                    "endLine": 20,
+                    "endCharIndex": 124
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             }
         ],
-        "Task Board/1.7.0/Post for socials - 2.md": [
+        "Styles for modal.md": [
             {
-                "id": 1395361145,
+                "id": 1959284418,
                 "legacyId": "",
                 "status": " ",
-                "title": "> - [ ] First post the above as a Topic in the \"Share and showcase\" discussions on GitHub.",
+                "title": "1. [ ]  width: auto;",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -136,22 +118,22 @@
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Post for socials - 2.md",
+                "filePath": "Styles for modal.md",
                 "taskLocation": {
-                    "startLine": 21,
+                    "startLine": 9,
                     "startCharIndex": 0,
-                    "endLine": 21,
-                    "endCharIndex": 90
+                    "endLine": 9,
+                    "endCharIndex": 20
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 2712938032,
+                "id": 2812064155,
                 "legacyId": "",
                 "status": " ",
-                "title": "> - [ ] Then, once you have released your research paper, share the above as a post on all social media and add the below line with it, along with the discussion link. You may remove the links to the article and simply share the discussion link.",
+                "title": "2. [ ]  height: 100%;",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -162,27 +144,188 @@
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Post for socials - 2.md",
+                "filePath": "Styles for modal.md",
                 "taskLocation": {
-                    "startLine": 22,
+                    "startLine": 10,
                     "startCharIndex": 0,
-                    "endLine": 22,
-                    "endCharIndex": 245
+                    "endLine": 10,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3950798449,
+                "legacyId": "",
+                "status": " ",
+                "title": "3. [ ]  min-height: 93%;",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Styles for modal.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 24
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4054310859,
+                "legacyId": "",
+                "status": " ",
+                "title": "4. [ ]  max-width: none;",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Styles for modal.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 24
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             }
-        ]
-    },
-    "Completed": {
-        "Task Board/1.7.0/Tasks.md": [
+        ],
+        "Another QMD file.qmd": [
             {
-                "id": 19,
-                "legacyId": "19",
-                "status": "x",
-                "title": "- [x] Create Thumbnail for the release. #working 🆔 19 ✅ 2025-09-30",
+                "id": 2871357860,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] A new task in the  second QMD file. ",
+                "body": [
+                    "\t- [ ] Lets add a sub-task",
+                    "\tAnd a line in description."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 27
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2725582111,
+                "legacyId": "2fudi1",
+                "status": " ",
+                "title": "- [ ] Another task in `Anotehr QMD file`. 📅 2025-09-24 🔺 🆔 2fudi1 ",
                 "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-09-24",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 1,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 69
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2986397323,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] This is task 1 📅 2025-09-25 ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-09-25",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 8,
+                    "startCharIndex": 0,
+                    "endLine": 8,
+                    "endCharIndex": 35
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 542371332,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] This is task 3 📅 2025-09-25 ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-09-25",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 9,
+                    "startCharIndex": 0,
+                    "endLine": 9,
+                    "endCharIndex": 35
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 716723733,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] This task has sub-tasks which are raw links. They will flow out of the card.",
+                "body": [
+                    "\t- [ ] https://forum.obsidian.md/t/my-project-management-workflow-an-in-depth-explanation/82508/2",
+                    "\t- [ ] https://forum.obsidian.md/t/introducing-obsidian-medilig-ehr-emr-application-showcasing-obsidians-power-in-healthcare/106033",
+                    "\t- [ ] https://forum.obsidian.md/t/flowershow-publish-your-obsidian-vault-as-a-website-hosted-edition/105957"
+                ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
@@ -194,78 +337,83 @@
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "filePath": "Another QMD file.qmd",
                 "taskLocation": {
-                    "startLine": 5,
+                    "startLine": 11,
                     "startCharIndex": 0,
-                    "endLine": 5,
-                    "endCharIndex": 67
+                    "endLine": 14,
+                    "endCharIndex": 108
                 },
-                "completion": "2025-09-30",
+                "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
-            },
+            }
+        ],
+        "Destinatio/Task Source 1.md": [
             {
-                "id": 21,
-                "legacyId": "21",
-                "status": "x",
-                "title": "- [x] Create thumbnail/images for the articles. 🆔 21 ✅ 2025-09-30",
+                "id": 1,
+                "legacyId": "1",
+                "status": " ",
+                "title": "- [ ] Task 1 with Tag #tasks 🆔 1",
                 "body": [
-                    "\t- An illustrated images of map view."
+                    "\t- [ ] This is a sub-task to the task ID 1.",
+                    "\t- I should complete this task as soon as possible, faster."
                 ],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "",
                 "due": "",
-                "tags": [],
+                "tags": [
+                    "#tasks"
+                ],
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "filePath": "Destinatio/Task Source 1.md",
                 "taskLocation": {
-                    "startLine": 6,
+                    "startLine": 2,
                     "startCharIndex": 0,
-                    "endLine": 7,
-                    "endCharIndex": 37
+                    "endLine": 4,
+                    "endCharIndex": 59
                 },
-                "completion": "2025-09-30",
+                "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
                 "id": 2,
                 "legacyId": "2",
-                "status": "x",
-                "title": "- [x] Release Notes #done 🆔 2 ✅ 2025-09-30",
+                "status": " ",
+                "title": "- [ ] Task 2 without Tags 🆔 2 ⛔ 1 ⏫ ➕ 2025-09-21 ⏳ 2025-09-23 📅 2025-09-21",
                 "body": [],
                 "time": "",
-                "createdDate": "",
+                "createdDate": "2025-09-21",
                 "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#done"
-                ],
+                "scheduledDate": "2025-09-23",
+                "due": "2025-09-21",
+                "tags": [],
                 "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "priority": 2,
+                "dependsOn": [
+                    "1"
+                ],
+                "filePath": "Destinatio/Task Source 1.md",
                 "taskLocation": {
-                    "startLine": 8,
+                    "startLine": 5,
                     "startCharIndex": 0,
-                    "endLine": 8,
-                    "endCharIndex": 43
+                    "endLine": 5,
+                    "endCharIndex": 76
                 },
-                "completion": "2025-09-30",
+                "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
                 "id": 3,
                 "legacyId": "3",
-                "status": "x",
-                "title": "- [x] Main post for the release #done 🆔 3 ⛔ 5,7 ✅ 2025-09-30",
+                "status": "/",
+                "title": "- [/] In progress Task 3 with Tag #tasks ⛔2, 5  🆔 3",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -273,46 +421,54 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [
-                    "#done"
+                    "#tasks"
                 ],
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [
-                    "5",
-                    "7"
+                    "2",
+                    "5"
                 ],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "filePath": "Destinatio/Task Source 1.md",
                 "taskLocation": {
-                    "startLine": 9,
+                    "startLine": 6,
                     "startCharIndex": 0,
-                    "endLine": 9,
-                    "endCharIndex": 61
+                    "endLine": 6,
+                    "endCharIndex": 52
                 },
-                "completion": "2025-09-30",
+                "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
-            },
+            }
+        ],
+        "Task source 2.md": [
             {
-                "id": 7,
-                "legacyId": "7",
-                "status": "-",
-                "title": "- [-] Another post about the methodology and link it to a new topic inside the share and showcase GitHub discussion 🆔 7",
-                "body": [],
+                "id": 3161939460,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] Task 5 with Tag #project1 ⛔5  🛫2025-09-21",
+                "body": [
+                    "\t- a"
+                ],
                 "time": "",
                 "createdDate": "",
-                "startDate": "",
+                "startDate": "2025-09-21",
                 "scheduledDate": "",
                 "due": "",
-                "tags": [],
+                "tags": [
+                    "#project1"
+                ],
                 "frontmatterTags": [],
                 "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "dependsOn": [
+                    "5"
+                ],
+                "filePath": "Task source 2.md",
                 "taskLocation": {
-                    "startLine": 10,
+                    "startLine": 2,
                     "startCharIndex": 0,
-                    "endLine": 10,
-                    "endCharIndex": 120
+                    "endLine": 3,
+                    "endCharIndex": 4
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -321,71 +477,8 @@
             {
                 "id": 5,
                 "legacyId": "5",
-                "status": "x",
-                "title": "- [x] A main YouTube video for the release #working 🆔 5 ⏳ 2025-10-01 ✅ 2025-09-30",
-                "body": [
-                    "\t- [x] Only finding a good lofi music for start and a suspense music for the map view. ✅ 2025-09-30",
-                    "\t- The current lofi music can also be used if needed."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-01",
-                "due": "",
-                "tags": [
-                    "#working"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 12,
-                    "startCharIndex": 0,
-                    "endLine": 14,
-                    "endCharIndex": 53
-                },
-                "completion": "2025-09-30",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 6,
-                "legacyId": "6",
-                "status": "x",
-                "title": "- [x] Post the two articles first. #pending 🆔 6 🔺 ✅ 2025-10-01",
-                "body": [
-                    "\t- [x] In the **docs**, under a new section. ✅ 2025-10-01",
-                    "\t- [-] In **arXiv**.",
-                    "\t- I cant make the GitHub post, until I share this articles."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "frontmatterTags": [],
-                "priority": 1,
-                "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
-                "taskLocation": {
-                    "startLine": 21,
-                    "startCharIndex": 0,
-                    "endLine": 24,
-                    "endCharIndex": 60
-                },
-                "completion": "2025-10-01",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 22,
-                "legacyId": "22",
-                "status": "x",
-                "title": "- [x] Share Post-2 on GitHub **Share and showcase** discussion topic. #pending 🆔 22 ⛔ 6 ✅ 2025-10-01",
+                "status": " ",
+                "title": "- [ ] Task 6 with Tag with dashes #this-tag  🆔 5",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -393,29 +486,89 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [
-                    "#pending"
+                    "#this-tag"
                 ],
                 "frontmatterTags": [],
                 "priority": 0,
-                "dependsOn": [
-                    "6"
-                ],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "dependsOn": [],
+                "filePath": "Task source 2.md",
                 "taskLocation": {
-                    "startLine": 25,
+                    "startLine": 48,
                     "startCharIndex": 0,
-                    "endLine": 25,
-                    "endCharIndex": 101
+                    "endLine": 4,
+                    "endCharIndex": 49
                 },
-                "completion": "2025-10-01",
+                "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3356491638,
+                "id": 3860520161,
+                "legacyId": "wiu07b",
+                "status": "/",
+                "title": "- [/] In progress Task 7 with Tag #project2 🆔 wiu07b",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#project2"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Task source 2.md",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 53
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "TaskNotes/2025-09-23T00_15.md": [
+            {
+                "id": 1123980699,
                 "legacyId": "",
-                "status": "x",
-                "title": "- [x] Publish the video on YouTube. ✅ 2025-10-01",
+                "title": "This is a first task note in this vault.",
+                "body": [],
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-09-23",
+                "due": "2025-09-23",
+                "tags": [
+                    "taskNote",
+                    "#tasks",
+                    "#this-tag"
+                ],
+                "frontmatterTags": [],
+                "time": "",
+                "priority": 0,
+                "dependsOn": [],
+                "status": " ",
+                "filePath": "TaskNotes/2025-09-23T00_15.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 15,
+                    "endCharIndex": 84
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md": [
+            {
+                "id": 1060723467,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] Sample task 1: status symbol=`space` status name='Todo'",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -426,19 +579,773 @@
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task Board/1.7.0/Tasks.md",
+                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
                 "taskLocation": {
-                    "startLine": 26,
+                    "startLine": 70,
                     "startCharIndex": 0,
-                    "endLine": 26,
-                    "endCharIndex": 48
+                    "endLine": 70,
+                    "endCharIndex": 61
                 },
-                "completion": "2025-10-01",
+                "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3405554765,
+                "id": 1842791995,
+                "legacyId": "",
+                "status": "/",
+                "title": "- [/] Sample task 3: status symbol=`/` status name='In Progress'",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
+                "taskLocation": {
+                    "startLine": 72,
+                    "startCharIndex": 0,
+                    "endLine": 72,
+                    "endCharIndex": 64
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Testing Indented Task Bug.md": [
+            {
+                "id": 45,
+                "legacyId": "45",
+                "status": " ",
+                "title": "- [ ] Main task 1 #book/seeding/1  🆔 45  ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#book/seeding/1"
+                ],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 18,
+                    "startCharIndex": 0,
+                    "endLine": 18,
+                    "endCharIndex": 42
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 930874392,
+                "legacyId": "",
+                "status": " ",
+                "title": "\t- [ ] Subtask 1",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 20,
+                    "startCharIndex": 0,
+                    "endLine": 20,
+                    "endCharIndex": 16
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 665470772,
+                "legacyId": "",
+                "status": " ",
+                "title": "\t- [ ] Subtask 2",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 22,
+                    "startCharIndex": 0,
+                    "endLine": 22,
+                    "endCharIndex": 16
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1776602481,
+                "legacyId": "",
+                "status": " ",
+                "title": "\t\t- [ ] Sub-subtask 1",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 24,
+                    "startCharIndex": 0,
+                    "endLine": 24,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 37123573,
+                "legacyId": "",
+                "status": " ",
+                "title": "\t- [ ] This is a first task with one level of indentation, very next to the paragraph line.",
+                "body": [
+                    "\t\t- [ ] This is a sub-tasks of the one-level indented task.",
+                    "\t\t- Thi is a bullet point.",
+                    "\t\tThis is a normal line in the one-level indented task."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 29,
+                    "startCharIndex": 0,
+                    "endLine": 32,
+                    "endCharIndex": 55
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 27,
+                "legacyId": "27",
+                "status": " ",
+                "title": "- [ ] some task, but this task starts with a lot of spaces after the checkbox. 🏁 delete ⏳ 2025-08-24 🆔 27",
+                "body": [
+                    "\t- [ ] This is a sub-task.",
+                    "\t- Line in description."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-08-24",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 35,
+                    "startCharIndex": 0,
+                    "endLine": 37,
+                    "endCharIndex": 23
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 270952063,
+                "legacyId": "",
+                "status": " ",
+                "title": ">- [ ] This is a first task inside callout  [due:: 2025-04-20] #todo",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-20",
+                "tags": [
+                    "#todo"
+                ],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 42,
+                    "startCharIndex": 0,
+                    "endLine": 42,
+                    "endCharIndex": 68
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 334029061,
+                "legacyId": "",
+                "status": " ",
+                "title": "> + [ ] This is task inside callout with a space at the beginning. And it starts with `+ [ ]`",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 43,
+                    "startCharIndex": 0,
+                    "endLine": 43,
+                    "endCharIndex": 93
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 650810115,
+                "legacyId": "",
+                "status": " ",
+                "title": ">1. [ ] This is a task inside callout and it starts with `1.`",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 44,
+                    "startCharIndex": 0,
+                    "endLine": 44,
+                    "endCharIndex": 61
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 789649715,
+                "legacyId": "",
+                "status": " ",
+                "title": ">\t1. [ ] This is a task inside callout, but its indented. **Please note this is not a sub-task.**",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 45,
+                    "startCharIndex": 0,
+                    "endLine": 45,
+                    "endCharIndex": 97
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3457992324,
+                "legacyId": "",
+                "status": " ",
+                "title": ">- [ ] **Task Board** will be able to detect this task.   [due:: 2025-04-20] #todo",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-04-20",
+                "tags": [
+                    "#todo"
+                ],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 48,
+                    "startCharIndex": 0,
+                    "endLine": 48,
+                    "endCharIndex": 82
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 908127944,
+                "legacyId": "",
+                "status": " ",
+                "title": ">    - [ ] Even though this task is right after the main task and also since its been indented, still its not possible to detect this is as a sub-task of the main task. Hence this will be considered as a separate task.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 49,
+                    "startCharIndex": 0,
+                    "endLine": 49,
+                    "endCharIndex": 218
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 455755016,
+                "legacyId": "",
+                "status": " ",
+                "title": "    - [ ] This is a first indented task, just by itself, no content before this taskLine, no content after this taskLine. ✅ 2025-08-22",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 60,
+                    "startCharIndex": 0,
+                    "endLine": 60,
+                    "endCharIndex": 134
+                },
+                "completion": "2025-08-22",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2762496632,
+                "legacyId": "",
+                "status": " ",
+                "title": "\t- [ ] This is an lonely indented task. Not sure why this theme is not giving it a proper task styling.",
+                "body": [
+                    "\t\t- [ ] This is a sub-task to the lonely indented task.",
+                    "\t\t- This is a bullet point inside the lonely indented task.",
+                    "\t\tThis is a normal line as description inside the lonely indented task."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 63,
+                    "startCharIndex": 0,
+                    "endLine": 66,
+                    "endCharIndex": 71
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1165054213,
+                "legacyId": "",
+                "status": " ",
+                "title": "    - [ ] This is a first indented task right after a normal line. (old one)",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 71,
+                    "startCharIndex": 0,
+                    "endLine": 71,
+                    "endCharIndex": 76
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2772450250,
+                "legacyId": "",
+                "status": " ",
+                "title": "    + [ ] This is second indented task which starts with `+ [ ]`",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 72,
+                    "startCharIndex": 0,
+                    "endLine": 72,
+                    "endCharIndex": 64
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 358269084,
+                "legacyId": "",
+                "status": " ",
+                "title": "2. [ ] Second numbered task.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 78,
+                    "startCharIndex": 0,
+                    "endLine": 78,
+                    "endCharIndex": 28
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3879783474,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] All the below numbered tasks should be completed.",
+                "body": [
+                    "\t1. [ ] This is a first numbered sub-task.",
+                    "\t2. [ ] This is a second numbered sub-task, with a little space at start."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 81,
+                    "startCharIndex": 0,
+                    "endLine": 83,
+                    "endCharIndex": 73
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1104711983,
+                "legacyId": "",
+                "status": " ",
+                "title": "1) [ ] Another numbered task which starts with pattern `1) [ ]`.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 85,
+                    "startCharIndex": 0,
+                    "endLine": 85,
+                    "endCharIndex": 64
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ]
+    },
+    "Completed": {
+        "Important Note.md": [
+            {
+                "id": 225,
+                "legacyId": "225",
+                "status": "x",
+                "title": "- [x] This is another child task for the image card. 🆔 225 ✅ 2025-09-28",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 13,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 72
+                },
+                "completion": "2025-09-28",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "A QMD file.qmd": [
+            {
+                "id": 4182709202,
+                "legacyId": "",
+                "status": "x",
+                "title": "- [x] This is a first task in the first qmd file. Edited. ✅ 2025-09-23",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "A QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 2,
+                    "endCharIndex": 70
+                },
+                "completion": "2025-09-23",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Destinatio/Task Source 1.md": [
+            {
+                "id": 3599588763,
+                "legacyId": "",
+                "status": "x",
+                "title": "- [x] Completed Task 4 with Tag #tasks",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#tasks"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 7,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 38
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Task source 2.md": [
+            {
+                "id": 1791015624,
+                "legacyId": "",
+                "status": "x",
+                "title": "- [x] Completed Task 8 with Tag #project1 ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#project1"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Task source 2.md",
+                "taskLocation": {
+                    "startLine": 6,
+                    "startCharIndex": 0,
+                    "endLine": 6,
+                    "endCharIndex": 42
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md": [
+            {
+                "id": 3347493735,
+                "legacyId": "",
+                "status": "x",
+                "title": "- [x] Sample task 2: status symbol=`x` status name='Done'",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
+                "taskLocation": {
+                    "startLine": 71,
+                    "startCharIndex": 0,
+                    "endLine": 71,
+                    "endCharIndex": 57
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3641121551,
+                "legacyId": "",
+                "status": "-",
+                "title": "- [-] Sample task 4: status symbol=`-` status name='Cancelled'",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
+                "taskLocation": {
+                    "startLine": 73,
+                    "startCharIndex": 0,
+                    "endLine": 73,
+                    "endCharIndex": 62
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Testing Indented Task Bug.md": [
+            {
+                "id": 1889607362,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] Release the plugin with release notes. ✅ 2025-10-01",
@@ -449,22 +1356,24 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "dependsOn": [],
                 "filePath": "Task Board/1.7.0/Tasks.md",
                 "taskLocation": {
-                    "startLine": 27,
+                    "startLine": 73,
                     "startCharIndex": 0,
-                    "endLine": 27,
-                    "endCharIndex": 57
+                    "endLine": 73,
+                    "endCharIndex": 76
                 },
                 "completion": "2025-10-01",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 4067081687,
+                "id": 3990595054,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] Share the Post-1. ✅ 2025-10-01",
@@ -475,15 +1384,17 @@
                 "scheduledDate": "",
                 "due": "",
                 "tags": [],
-                "frontmatterTags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
                 "priority": 0,
                 "dependsOn": [],
                 "filePath": "Task Board/1.7.0/Tasks.md",
                 "taskLocation": {
-                    "startLine": 28,
+                    "startLine": 77,
                     "startCharIndex": 0,
-                    "endLine": 28,
-                    "endCharIndex": 36
+                    "endLine": 77,
+                    "endCharIndex": 44
                 },
                 "completion": "2025-10-01",
                 "cancelledDate": "",
