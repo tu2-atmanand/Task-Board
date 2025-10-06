@@ -93,7 +93,7 @@ export class FilterConfigModal extends Modal {
 
 		contentEl.createEl("h2", { text: t("Load Filter Configuration") });
 
-		const savedConfigs = this.plugin.settings.filterConfig.savedConfigs;
+		const savedConfigs = this.plugin.settings.data.boardConfigs[activeBoardIndex].filterConfig.savedConfigs;
 
 		if (savedConfigs.length === 0) {
 			contentEl.createEl("p", {
@@ -170,9 +170,9 @@ export class FilterConfigModal extends Modal {
 
 		if (!configId) return;
 
-		const config = this.plugin.settings.filterConfig.savedConfigs.find(
-			(c) => c.id === configId
-		);
+		const config = this.plugin.settings.data.boardConfigs[
+			activeBoardIndex
+		].filterConfig.savedConfigs.find((c) => c.id === configId);
 
 		if (!config) return;
 
@@ -243,7 +243,9 @@ export class FilterConfigModal extends Modal {
 		};
 
 		try {
-			this.plugin.settings.filterConfig.savedConfigs.push(config);
+			this.plugin.settings.data.boardConfigs[
+				activeBoardIndex
+			].filterConfig.savedConfigs.push(config);
 			await this.plugin.saveSettings();
 
 			new Notice(t("Filter configuration saved successfully"));
@@ -265,9 +267,9 @@ export class FilterConfigModal extends Modal {
 			return;
 		}
 
-		const config = this.plugin.settings.filterConfig.savedConfigs.find(
-			(c) => c.id === configId
-		);
+		const config = this.plugin.settings.data.boardConfigs[
+			activeBoardIndex
+		].filterConfig.savedConfigs.find((c) => c.id === configId);
 
 		if (!config) {
 			new Notice(t("Failed to load filter configuration"));
@@ -293,9 +295,9 @@ export class FilterConfigModal extends Modal {
 			return;
 		}
 
-		const config = this.plugin.settings.filterConfig.savedConfigs.find(
-			(c) => c.id === configId
-		);
+		const config = this.plugin.settings.data.boardConfigs[
+			activeBoardIndex
+		].filterConfig.savedConfigs.find((c) => c.id === configId);
 
 		if (!config) {
 			new Notice(t("Failed to delete filter configuration"));
@@ -340,10 +342,12 @@ export class FilterConfigModal extends Modal {
 		if (!confirmed) return;
 
 		try {
-			this.plugin.settings.filterConfig.savedConfigs =
-				this.plugin.settings.filterConfig.savedConfigs.filter(
-					(c) => c.id !== configId
-				);
+			this.plugin.settings.data.boardConfigs[
+				activeBoardIndex
+			].filterConfig.savedConfigs =
+				this.plugin.settings.data.boardConfigs[
+					activeBoardIndex
+				].filterConfig.savedConfigs.filter((c) => c.id !== configId);
 
 			await this.plugin.saveSettings();
 
