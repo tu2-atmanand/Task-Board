@@ -9,6 +9,7 @@ import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { matchTagsWithWildcards } from "./FiltersVerifier";
 import { getAllTaskTags } from "./TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { applyAdvancedFilters } from "./AdvancedFilters";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
@@ -247,6 +248,12 @@ export const renderColumns = (
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.priority === columnData.taskPriority
 		);
+	}
+
+	// Apply advanced filters if enabled for the active board
+	const boardConfig = plugin.settings.data.boardConfigs[activeBoard];
+	if (boardConfig?.advancedFilters) {
+		tasksToDisplay = applyAdvancedFilters(tasksToDisplay, boardConfig.advancedFilters);
 	}
 
 	// setTasks(tasksToDisplay);

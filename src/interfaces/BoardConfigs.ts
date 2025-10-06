@@ -1,4 +1,57 @@
 // Define the structure of Board, Column, and the Data read from JSON
+
+// Filter operator types for advanced filters
+export type FilterOperator = 
+	| "is" 
+	| "is not" 
+	| "contains" 
+	| "does not contain" 
+	| "starts with" 
+	| "ends with" 
+	| "is empty" 
+	| "is not empty"
+	| ">="
+	| "<="
+	| "="
+	| ">"
+	| "<";
+
+// Filter property types
+export type FilterProperty = 
+	| "priority" 
+	| "status" 
+	| "due date" 
+	| "created date"
+	| "scheduled date"
+	| "start date"
+	| "completion date"
+	| "file path"
+	| "tags";
+
+// Individual filter definition
+export type TaskFilter = {
+	id: string;
+	property: FilterProperty;
+	operator: FilterOperator;
+	value: string;
+	logicalOperator: "AND" | "OR"; // Operator to combine with next filter
+};
+
+// Filter group containing multiple filters
+export type FilterGroup = {
+	id: string;
+	matchType: "All" | "Any"; // Match all filters (AND) or any filter (OR)
+	filters: TaskFilter[];
+	logicalOperator?: "AND" | "OR"; // Operator to combine with next group
+};
+
+// Advanced filters structure
+export type AdvancedFilters = {
+	enabled: boolean;
+	matchType: "All" | "Any"; // Match all groups (AND) or any group (OR)
+	groups: FilterGroup[];
+};
+
 export type ColumnData = {
 	id: number;
 	index: number;
@@ -34,11 +87,12 @@ export type Board = {
 	index: number;
 	columns: ColumnData[];
 	hideEmptyColumns: boolean;
-	filters: string[];
+	filters: string[]; // Legacy tag filters
 	filterPolarity: string;
 	filterScope: string;
 	showColumnTags: boolean;
 	showFilteredTags: boolean;
+	advancedFilters?: AdvancedFilters; // New advanced filters
 };
 
 export type BoardConfigs = Board[];
