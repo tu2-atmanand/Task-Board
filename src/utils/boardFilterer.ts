@@ -1,7 +1,14 @@
 // src/utils/boardFilterer.ts
 
 import { taskItem } from "src/interfaces/TaskItem";
-import { RootFilterState, Filter, FilterGroup } from "src/components/BoardFilters/ViewTaskFilter";
+import {
+	RootFilterState,
+	Filter,
+	FilterGroup,
+} from "src/components/BoardFilters/ViewTaskFilter";
+import {
+	getFormattedTaskContentSync,
+} from "./TaskContentFormatter";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -14,7 +21,11 @@ export function boardFilterer(
 	filterState: RootFilterState | undefined
 ): taskItem[] {
 	// If no filter state or no filter groups, return all tasks
-	if (!filterState || !filterState.filterGroups || filterState.filterGroups.length === 0) {
+	if (
+		!filterState ||
+		!filterState.filterGroups ||
+		filterState.filterGroups.length === 0
+	) {
 		return tasks;
 	}
 
@@ -23,7 +34,7 @@ export function boardFilterer(
 	const filterGroups = filterState.filterGroups;
 
 	return tasks.filter((task) => {
-		const groupResults = filterGroups.map((group) => 
+		const groupResults = filterGroups.map((group) =>
 			evaluateFilterGroup(task, group)
 		);
 
@@ -51,9 +62,7 @@ function evaluateFilterGroup(task: taskItem, group: FilterGroup): boolean {
 		return true;
 	}
 
-	const filterResults = filters.map((filter) => 
-		evaluateFilter(task, filter)
-	);
+	const filterResults = filters.map((filter) => evaluateFilter(task, filter));
 
 	// Combine filter results based on group condition
 	switch (groupCondition) {
@@ -80,10 +89,18 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 	// Evaluate based on condition
 	switch (condition) {
 		case "isSet":
-			return taskValue !== null && taskValue !== undefined && taskValue !== "";
+			return (
+				taskValue !== null &&
+				taskValue !== undefined &&
+				taskValue !== ""
+			);
 		case "isEmpty":
 		case "isNotSet":
-			return taskValue === null || taskValue === undefined || taskValue === "";
+			return (
+				taskValue === null ||
+				taskValue === undefined ||
+				taskValue === ""
+			);
 		case "equals":
 		case "is":
 			return taskValue === value;
@@ -92,33 +109,45 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			return taskValue !== value;
 		case "contains":
 			if (typeof taskValue === "string") {
-				return taskValue.toLowerCase().includes(String(value).toLowerCase());
+				return taskValue
+					.toLowerCase()
+					.includes(String(value).toLowerCase());
 			}
 			if (Array.isArray(taskValue)) {
-				return taskValue.some((item) => 
-					String(item).toLowerCase().includes(String(value).toLowerCase())
+				return taskValue.some((item) =>
+					String(item)
+						.toLowerCase()
+						.includes(String(value).toLowerCase())
 				);
 			}
 			return false;
 		case "notContains":
 		case "doesNotContain":
 			if (typeof taskValue === "string") {
-				return !taskValue.toLowerCase().includes(String(value).toLowerCase());
+				return !taskValue
+					.toLowerCase()
+					.includes(String(value).toLowerCase());
 			}
 			if (Array.isArray(taskValue)) {
-				return !taskValue.some((item) => 
-					String(item).toLowerCase().includes(String(value).toLowerCase())
+				return !taskValue.some((item) =>
+					String(item)
+						.toLowerCase()
+						.includes(String(value).toLowerCase())
 				);
 			}
 			return true;
 		case "startsWith":
 			if (typeof taskValue === "string") {
-				return taskValue.toLowerCase().startsWith(String(value).toLowerCase());
+				return taskValue
+					.toLowerCase()
+					.startsWith(String(value).toLowerCase());
 			}
 			return false;
 		case "endsWith":
 			if (typeof taskValue === "string") {
-				return taskValue.toLowerCase().endsWith(String(value).toLowerCase());
+				return taskValue
+					.toLowerCase()
+					.endsWith(String(value).toLowerCase());
 			}
 			return false;
 		case "greaterThan":
@@ -143,15 +172,19 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			return compareDates(taskValue, value) >= 0;
 		case "hasTag":
 			if (Array.isArray(taskValue)) {
-				return taskValue.some((tag) => 
-					String(tag).toLowerCase() === String(value).toLowerCase()
+				return taskValue.some(
+					(tag) =>
+						String(tag).toLowerCase() ===
+						String(value).toLowerCase()
 				);
 			}
 			return false;
 		case "doesNotHaveTag":
 			if (Array.isArray(taskValue)) {
-				return !taskValue.some((tag) => 
-					String(tag).toLowerCase() === String(value).toLowerCase()
+				return !taskValue.some(
+					(tag) =>
+						String(tag).toLowerCase() ===
+						String(value).toLowerCase()
 				);
 			}
 			return true;
@@ -166,6 +199,7 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 function getTaskPropertyValue(task: taskItem, property: string): any {
 	switch (property) {
 		case "content":
+			return getFormattedTaskContentSync(task);
 		case "title":
 			return task.title;
 		case "body":
@@ -212,7 +246,9 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 			// Handle tag properties like "tags.myTag"
 			if (property.startsWith("tags.")) {
 				const tagName = property.substring(5);
-				return task.tags.some((tag) => tag.toLowerCase() === tagName.toLowerCase());
+				return task.tags.some(
+					(tag) => tag.toLowerCase() === tagName.toLowerCase()
+				);
 			}
 			return undefined;
 	}
@@ -225,11 +261,11 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 function compareDates(date1: any, date2: any): number {
 	const d1 = new Date(date1);
 	const d2 = new Date(date2);
-	
+
 	if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
 		return 0;
 	}
-	
+
 	if (d1 < d2) return -1;
 	if (d1 > d2) return 1;
 	return 0;

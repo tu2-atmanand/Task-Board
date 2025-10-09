@@ -346,7 +346,7 @@ const en: Lang = {
 	"is-empty": "is empty",
 	"is-not-empty": "is not empty",
 	"nor": "NOR",
-	
+	"does-not-contain": "does not contains"
 };
 
 export default en;

@@ -757,7 +757,7 @@ export class TaskFilterComponent extends Component {
 					},
 					{
 						value: "doesNotContain",
-						text: t("does not contain"),
+						text: t("does-not-contain"),
 					},
 					{ value: "is", text: t("is") },
 					{
