@@ -146,7 +146,7 @@ export class TaskFilterComponent extends Component {
 		rootConditionSection.addClass("root-condition-section");
 
 		rootConditionSection.createEl("label", {
-			text: t("Match"),
+			text: t("match"),
 			attr: { for: "task-filter-root-condition" },
 			cls: ["compact-text", "root-condition-label"],
 		});
@@ -155,9 +155,9 @@ export class TaskFilterComponent extends Component {
 			rootConditionSection
 		)
 			.addOptions({
-				any: t("Any"),
-				all: t("All"),
-				none: t("None"),
+				any: t("any"),
+				all: t("all"),
+				none: t("none"),
 			})
 			.setValue(this.rootFilterState.rootCondition)
 			.onChange((value) => {
@@ -173,7 +173,7 @@ export class TaskFilterComponent extends Component {
 
 		rootConditionSection.createEl("span", {
 			cls: ["compact-text", "root-condition-span"],
-			text: t("filter group"),
+			text: t("filter-group"),
 		});
 
 		// Filter Groups Container
@@ -204,7 +204,7 @@ export class TaskFilterComponent extends Component {
 				);
 				el.createEl("span", {
 					cls: "add-filter-group-btn-text",
-					text: t("Add filter group"),
+					text: t("add-filter-group"),
 				});
 
 				this.registerDomEvent(el, "click", () => {
@@ -233,7 +233,7 @@ export class TaskFilterComponent extends Component {
 						},
 						(iconEl) => {
 							setIcon(iconEl, "save");
-							setTooltip(el, t("Save Current Filter"));
+							setTooltip(el, t("save-current-filter"));
 						}
 					);
 
@@ -257,7 +257,7 @@ export class TaskFilterComponent extends Component {
 						},
 						(iconEl) => {
 							setIcon(iconEl, "folder-open");
-							setTooltip(el, t("Load Saved Filter"));
+							setTooltip(el, t("load-saved-filter"));
 						}
 					);
 
@@ -312,14 +312,14 @@ export class TaskFilterComponent extends Component {
 
 		groupHeaderLeft.createEl("label", {
 			cls: ["compact-text"],
-			text: t("Match"),
+			text: t("match"),
 		});
 
 		const groupConditionSelect = new DropdownComponent(groupHeaderLeft)
 			.addOptions({
-				all: t("All"),
-				any: t("Any"),
-				none: t("None"),
+				all: t("all"),
+				any: t("any"),
+				none: t("none"),
 			})
 			.onChange((value) => {
 				const selectedValue = value as "all" | "any" | "none";
@@ -338,7 +338,7 @@ export class TaskFilterComponent extends Component {
 
 		groupHeaderLeft.createEl("span", {
 			cls: ["compact-text"],
-			text: t("filter in this group"),
+			text: t("filter-in-this-group"),
 		});
 
 		const groupHeaderRight = groupHeader.createDiv({
@@ -347,7 +347,7 @@ export class TaskFilterComponent extends Component {
 
 		const duplicateGroupBtn = new ExtraButtonComponent(groupHeaderRight)
 			.setIcon("copy")
-			.setTooltip(t("Duplicate filter group"))
+			.setTooltip(t("duplicate-filter-group"))
 			.onClick(() => {
 				const newGroupId = this.generateId();
 				const duplicatedFilters = groupData.filters.map((f) => ({
@@ -368,7 +368,7 @@ export class TaskFilterComponent extends Component {
 
 		const removeGroupBtn = new ExtraButtonComponent(groupHeaderRight)
 			.setIcon("trash-2")
-			.setTooltip(t("Remove filter group"))
+			.setTooltip(t("remove-filter-group"))
 			.onClick(() => {
 				const filtersListElForSortable = newGroupEl.querySelector(
 					".filters-list"
@@ -449,7 +449,7 @@ export class TaskFilterComponent extends Component {
 				);
 				el.createEl("span", {
 					cls: "add-filter-btn-text",
-					text: t("Add filter"),
+					text: t("add-filter"),
 				});
 
 				this.registerDomEvent(el, "click", () => {
@@ -553,17 +553,17 @@ export class TaskFilterComponent extends Component {
 		if (groupData.groupCondition === "any") {
 			newFilterEl.createEl("span", {
 				cls: ["filter-conjunction"],
-				text: t("OR"),
+				text: t("or"),
 			});
 		} else if (groupData.groupCondition === "none") {
 			newFilterEl.createEl("span", {
 				cls: ["filter-conjunction"],
-				text: t("AND NOT"),
+				text: t("and-note"),
 			});
 		} else {
 			newFilterEl.createEl("span", {
 				cls: ["filter-conjunction"],
-				text: t("AND"),
+				text: t("and"),
 			});
 		}
 
@@ -586,7 +586,7 @@ export class TaskFilterComponent extends Component {
 
 		propertySelect.onChange((value) => {
 			filterData.property = value;
-			this.saveStateToLocalStorage(false); // 不立即触发更新
+			this.saveStateToLocalStorage(false);
 			setTimeout(() => this.saveStateToLocalStorage(true), 300);
 			this.updateFilterPropertyOptions(
 				newFilterEl,
@@ -637,7 +637,7 @@ export class TaskFilterComponent extends Component {
 
 		conditionSelect.onChange((newCondition) => {
 			filterData.condition = newCondition;
-			this.saveStateToLocalStorage(false); // 不立即触发更新
+			this.saveStateToLocalStorage(false);
 			setTimeout(() => this.saveStateToLocalStorage(true), 300);
 			toggleValueInputVisibility(newCondition, filterData.property);
 			if (
@@ -655,18 +655,18 @@ export class TaskFilterComponent extends Component {
 		let valueInputTimeout: NodeJS.Timeout;
 		this.registerDomEvent(valueInput, "input", (event) => {
 			filterData.value = (event.target as HTMLInputElement).value;
-			// 在输入时不立即触发实时更新，只保存状态
+
 			this.saveStateToLocalStorage(false);
-			// 延迟触发实时更新
+
 			clearTimeout(valueInputTimeout);
 			valueInputTimeout = setTimeout(() => {
 				this.saveStateToLocalStorage(true);
-			}, 400); // 400ms 防抖
+			}, 400);
 		});
 
 		const removeFilterBtn = new ExtraButtonComponent(newFilterEl)
 			.setIcon("trash-2")
-			.setTooltip(t("Remove filter"))
+			.setTooltip(t("remove-filter"))
 			.onClick(() => {
 				groupData.filters = groupData.filters.filter(
 					(f) => f.id !== filterData.id
@@ -728,16 +728,16 @@ export class TaskFilterComponent extends Component {
 
 		if (propertySelect.selectEl.options.length === 0) {
 			propertySelect.addOptions({
-				content: t("Content"),
-				status: t("Status"),
-				priority: t("Priority"),
-				dueDate: t("Due Date"),
-				startDate: t("Start Date"),
-				scheduledDate: t("Scheduled Date"),
-				tags: t("Tags"),
-				filePath: t("File Path"),
-				project: t("Project"),
-				completed: t("Completed"),
+				content: t("content"),
+				status: t("status"),
+				priority: t("priority"),
+				dueDate: t("due-date"),
+				startDate: t("start-date"),
+				scheduledDate: t("scheduled-date"),
+				tags: t("tags"),
+				filePath: t("file-path"),
+				// project: t("project"),
+				completed: t("completed"),
 			});
 		}
 		propertySelect.setValue(property);
@@ -762,23 +762,23 @@ export class TaskFilterComponent extends Component {
 					{ value: "is", text: t("is") },
 					{
 						value: "isNot",
-						text: t("is not"),
+						text: t("is-not"),
 					},
 					{
 						value: "startsWith",
-						text: t("starts with"),
+						text: t("starts-with"),
 					},
 					{
 						value: "endsWith",
-						text: t("ends with"),
+						text: t("ends-with"),
 					},
 					{
 						value: "isEmpty",
-						text: t("is empty"),
+						text: t("is-empty"),
 					},
 					{
 						value: "isNotEmpty",
-						text: t("is not empty"),
+						text: t("is-not-empty"),
 					},
 				];
 				break;
@@ -790,15 +790,15 @@ export class TaskFilterComponent extends Component {
 					},
 					{
 						value: "isNot",
-						text: t("is not"),
+						text: t("is-not"),
 					},
 					{
 						value: "isEmpty",
-						text: t("is empty"),
+						text: t("is-empty"),
 					},
 					{
 						value: "isNotEmpty",
-						text: t("is not empty"),
+						text: t("is-not-empty"),
 					},
 				];
 				break;
@@ -810,7 +810,7 @@ export class TaskFilterComponent extends Component {
 					{ value: "is", text: t("is") },
 					{
 						value: "isNot",
-						text: t("is not"),
+						text: t("is-not"),
 					},
 					{
 						value: ">",
@@ -830,11 +830,11 @@ export class TaskFilterComponent extends Component {
 					},
 					{
 						value: "isEmpty",
-						text: t("is empty"),
+						text: t("is-empty"),
 					},
 					{
 						value: "isNotEmpty",
-						text: t("is not empty"),
+						text: t("is-not-empty"),
 					},
 				];
 				break;
@@ -846,15 +846,15 @@ export class TaskFilterComponent extends Component {
 					},
 					{
 						value: "doesNotContain",
-						text: t("does not contain"),
+						text: t("does-not-contain"),
 					},
 					{
 						value: "isEmpty",
-						text: t("is empty"),
+						text: t("is-empty"),
 					},
 					{
 						value: "isNotEmpty",
-						text: t("is not empty"),
+						text: t("is-not-empty"),
 					},
 				];
 				break;
@@ -862,11 +862,11 @@ export class TaskFilterComponent extends Component {
 				conditionOptions = [
 					{
 						value: "isTrue",
-						text: t("is true"),
+						text: t("is-true"),
 					},
 					{
 						value: "isFalse",
-						text: t("is false"),
+						text: t("is-false"),
 					},
 				];
 				break;
@@ -874,11 +874,11 @@ export class TaskFilterComponent extends Component {
 				conditionOptions = [
 					{
 						value: "isSet",
-						text: t("is set"),
+						text: t("is-set"),
 					},
 					{
 						value: "isNotSet",
-						text: t("is not set"),
+						text: t("is-not-set"),
 					},
 					{
 						value: "equals",
@@ -977,20 +977,20 @@ export class TaskFilterComponent extends Component {
 				if (index !== 0) {
 					conjunctionElement.show();
 					if (groupCondition === "any") {
-						conjunctionElement.textContent = t("OR");
+						conjunctionElement.textContent = t("or");
 					} else if (groupCondition === "none") {
-						conjunctionElement.textContent = t("NOR");
+						conjunctionElement.textContent = t("nor");
 					} else {
-						conjunctionElement.textContent = t("AND");
+						conjunctionElement.textContent = t("and");
 					}
 				} else {
 					conjunctionElement.hide();
 					if (groupCondition === "any") {
-						conjunctionElement.textContent = t("OR");
+						conjunctionElement.textContent = t("or");
 					} else if (groupCondition === "none") {
-						conjunctionElement.textContent = t("NOR");
+						conjunctionElement.textContent = t("not");
 					} else {
-						conjunctionElement.textContent = t("AND");
+						conjunctionElement.textContent = t("and");
 					}
 				}
 			}
@@ -1017,9 +1017,9 @@ export class TaskFilterComponent extends Component {
 					});
 
 					const rootCond = this.rootFilterState.rootCondition;
-					let separatorText = t("OR");
-					if (rootCond === "all") separatorText = t("AND");
-					else if (rootCond === "none") separatorText = t("AND NOT");
+					let separatorText = t("or");
+					if (rootCond === "all") separatorText = t("and");
+					else if (rootCond === "none") separatorText = t("and-not");
 
 					separator.textContent = separatorText.toUpperCase();
 					group.parentNode?.insertBefore(
@@ -1141,9 +1141,7 @@ export class TaskFilterComponent extends Component {
 				this.rootFilterState
 			);
 
-			// 只有在需要实时更新时才触发事件
 			if (triggerRealtimeUpdate) {
-				// 触发过滤器变更事件，传递当前的过滤器状态
 				this.app.workspace.trigger(
 					"task-board:filter-changed",
 					this.rootFilterState,
