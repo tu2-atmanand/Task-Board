@@ -43,7 +43,11 @@
             "limit": 20
           }
         ],
-        "hideEmptyColumns": false
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        }
       },
       {
         "columns": [
@@ -133,7 +137,24 @@
         "index": 1,
         "showColumnTags": true,
         "showFilteredTags": false,
-        "hideEmptyColumns": false
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": [
+            {
+              "id": "id-1759769822732-we6pfeqpi",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1759769822734-2yqs1dyh5",
+                  "property": "content",
+                  "condition": "contains",
+                  "value": "this"
+                }
+              ]
+            }
+          ]
+        }
       },
       {
         "columns": [
@@ -211,7 +232,28 @@
         "index": 2,
         "showColumnTags": true,
         "showFilteredTags": true,
-        "hideEmptyColumns": false
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": [
+            {
+              "id": "id-1760029960520-z2a1g0ka4",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1760029960521-t33fwt542",
+                  "property": "filePath",
+                  "condition": "startsWith",
+                  "value": "Destinatio"
+                }
+              ]
+            }
+          ]
+        },
+        "filterConfig": {
+          "enableSavedFilters": true,
+          "savedConfigs": []
+        }
       }
     ],
     "globalSettings": {

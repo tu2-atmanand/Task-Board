@@ -1,8 +1,8 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, CirclePlus, RefreshCcw, Search, SearchX } from 'lucide-react';
-import React, { use, useCallback, useEffect, useMemo, useState } from "react";
+import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter } from 'lucide-react';
+import React, { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
@@ -17,6 +17,9 @@ import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
 import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 import { viewTypeNames } from "src/interfaces/GlobalSettings";
+import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
+import { RootFilterState } from "./BoardFilters/ViewTaskFilter";
+import { boardFilterer } from "src/utils/boardFilterer";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -29,6 +32,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
+	
+	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
 
 	const [showProgressBar, setShowProgressBar] = useState(true);
 	const [leafWidth, setLeafWidth] = useState<number>(1000);
@@ -93,10 +98,20 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	const allTasksArrangedPerColumn = useMemo(() => {
 		if (allTasks && boards[activeBoardIndex]) {
-			return boards[activeBoardIndex].columns
+			// Apply board filters to pending tasks
+			const currentBoard = boards[activeBoardIndex];
+			const boardFilter = currentBoard.boardFilter;
+			
+			// Create a copy of allTasks with filtered pending tasks
+			const filteredAllTasks = {
+				...allTasks,
+				Pending: boardFilterer(allTasks.Pending, boardFilter)
+			};
+			
+			return currentBoard.columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					renderColumns(plugin, activeBoardIndex, column, allTasks)
+					renderColumns(plugin, activeBoardIndex, column, filteredAllTasks)
 				);
 		}
 		return [];
@@ -220,6 +235,59 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		plugin.saveSettings();
 	}
 
+	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
+		// Close existing popover if open
+		if (filterPopoverRef.current) {
+			filterPopoverRef.current.close();
+			filterPopoverRef.current = null;
+			return;
+		}
+
+		// Get button position
+		const buttonRect = event.currentTarget.getBoundingClientRect();
+		const position = {
+			x: buttonRect.left,
+			y: buttonRect.bottom
+		};
+
+		// Create and show popover
+		const popover = new ViewTaskFilterPopover(
+			app,
+			undefined,
+			plugin,
+			activeBoardIndex
+		);
+		
+		// Load existing filter state if available
+		const currentBoard = boards[activeBoardIndex];
+		if (currentBoard.boardFilter) {
+			// Wait for component to be created and loaded
+			setTimeout(() => {
+				if (popover.taskFilterComponent) {
+					popover.taskFilterComponent.loadFilterState(currentBoard.boardFilter!);
+				}
+			}, 100);
+		}
+
+		// Set up close callback to save filter state
+		popover.onClose = async (filterState?: RootFilterState) => {
+			if (filterState) {
+				// Save the filter state to the board
+				const updatedBoards = [...boards];
+				updatedBoards[activeBoardIndex].boardFilter = filterState;
+				setBoards(updatedBoards);
+				
+				// Persist to settings
+				plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
+				await plugin.saveSettings();
+			}
+			filterPopoverRef.current = null;
+		};
+
+		popover.showAtPosition(position);
+		filterPopoverRef.current = popover;
+	}
+
 
 	return (
 		<div className="taskBoardView">
@@ -274,6 +342,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						onClick={() => handleSearchButtonClick()}
 					>
 						{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
+					</button>
+
+					<button 
+						className="filterTaskBtn" 
+						aria-label={t("filter-tasks")}
+						onClick={handleFilterButtonClick}
+					>
+						<Filter size={18} />
 					</button>
 
 					<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={handleOpenAddNewTaskModal}>

@@ -1,3 +1,5 @@
+import { RootFilterState } from "src/components/BoardFilters/ViewTaskFilter";
+
 // Define the structure of Board, Column, and the Data read from JSON
 export type ColumnData = {
 	id: number;
@@ -20,7 +22,8 @@ export type ColumnData = {
 		criteria: string;
 		order: boolean; // Ascending = 0 AND Descending = 1
 	};
-	range?: { // Keep it for few versions, this is required while settings migrations
+	range?: {
+		// Keep it for few versions, this is required while settings migrations
 		tag: string;
 		rangedata: {
 			from: number;
@@ -39,6 +42,8 @@ export type Board = {
 	filterScope: string;
 	showColumnTags: boolean;
 	showFilteredTags: boolean;
+	filterConfig?: FilterConfigSettings;
+	boardFilter?: RootFilterState;
 };
 
 export type BoardConfigs = Board[];
@@ -54,3 +59,19 @@ export const columnTypeAndNameMapping: { [key: string]: string } = {
 	pathFiltered: "Path filtered",
 	completed: "Completed",
 };
+
+// Define saved filter configuration interface
+export interface SavedFilterConfig {
+	id: string;
+	name: string;
+	description?: string;
+	filterState: RootFilterState;
+	createdAt: string;
+	updatedAt: string;
+}
+
+// Define filter configuration settings
+export interface FilterConfigSettings {
+	enableSavedFilters: boolean;
+	savedConfigs: SavedFilterConfig[];
+}
