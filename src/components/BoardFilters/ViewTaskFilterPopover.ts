@@ -54,14 +54,10 @@ export class ViewTaskFilterPopover
 
 		// Add column filter heading if this is for a column
 		if (this.columnName) {
-			const heading = contentEl.createEl("h3", {
+			contentEl.createEl("h3", {
 				text: `Column filters for ${this.columnName}`,
 				cls: "column-filter-heading"
 			});
-			heading.style.margin = "0 0 12px 0";
-			heading.style.padding = "0";
-			heading.style.fontSize = "14px";
-			heading.style.fontWeight = "600";
 		}
 
 		// Prevent clicks inside the popover from bubbling up

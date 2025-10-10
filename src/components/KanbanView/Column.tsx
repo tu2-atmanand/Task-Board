@@ -123,46 +123,43 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("Configure column filtering"));
 			item.onClick(async () => {
 				// Get the position of the menu (approximate column position)
-				const columnElement = document.querySelector(`[data-column-tag-name="${columnData.coltag}"]`) as HTMLElement;
+				const columnElement = document.querySelector(`[data-column-tag-name="${columnData.coltag?.replace(/["\\]/g, '\\$&')}"]`) as HTMLElement;
 				const position = columnElement 
 					? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
 					: { x: 100, y: 100 }; // Fallback position
 
+				// Find board index once
+				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+					(board: Board) => board.name === activeBoardData.name
+				);
+
 				// Create and show filter popover
+				// leafId is undefined for column filters (not tied to a specific leaf)
 				const popover = new ViewTaskFilterPopover(
 					plugin.app,
 					undefined,
 					plugin,
-					plugin.settings.data.boardConfigs.findIndex(
-						(board: Board) => board.name === activeBoardData.name
-					),
+					boardIndex,
 					columnData.name,
 					columnData.filters
 				);
 
 				// Set up close callback to save filter state
 				popover.onClose = async (filterState?: RootFilterState) => {
-					if (filterState) {
-						// Update the column configuration in the board data
-						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-							(board: Board) => board.name === activeBoardData.name
+					if (filterState && boardIndex !== -1) {
+						const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+							(col: ColumnData) => col.name === columnData.name
 						);
 
-						if (boardIndex !== -1) {
-							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-								(col: ColumnData) => col.name === columnData.name
-							);
+						if (columnIndex !== -1) {
+							// Update the column filters
+							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
 
-							if (columnIndex !== -1) {
-								// Update the column filters
-								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+							// Save the settings
+							await plugin.saveSettings();
 
-								// Save the settings
-								await plugin.saveSettings();
-
-								// Refresh the board view
-								eventEmitter.emit('REFRESH_COLUMN');
-							}
+							// Refresh the board view
+							eventEmitter.emit('REFRESH_COLUMN');
 						}
 					}
 				};

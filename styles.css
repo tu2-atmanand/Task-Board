@@ -4611,6 +4611,14 @@ svg.react-flow__connectionline {
 	border: 1px solid var(--background-modifier-border);
 }
 
+.column-filter-heading {
+	margin: 0 0 12px 0;
+	padding: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
 /* rootFilterSetupSection in TS, corresponds to HTML's #root-filter-container */
 .root-filter-setup-section {
 	display: flex;
