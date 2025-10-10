@@ -23,7 +23,7 @@ export class ConfigureColumnSortingModal extends Modal {
 		this.columnConfiguration = { ...columnConfiguration }; // Create a copy to avoid mutating original
 		this.onSave = onSave;
 		this.onCancel = onCancel;
-		
+
 		// Initialize sortCriterias if not present
 		if (!this.columnConfiguration.sortCriterias) {
 			this.columnConfiguration.sortCriterias = [];
@@ -69,8 +69,12 @@ export class ConfigureColumnSortingModal extends Modal {
 			onSort: async () => {
 				const newOrder = Array.from(sortingCriteriaList.children)
 					.map((child, index) => {
-						const criteriaName = child.getAttribute("data-criteria-name");
-						const criteria = this.columnConfiguration.sortCriterias?.find((c) => c.criteria === criteriaName);
+						const criteriaName =
+							child.getAttribute("data-criteria-name");
+						const criteria =
+							this.columnConfiguration.sortCriterias?.find(
+								(c) => c.criteria === criteriaName
+							);
 						if (criteria) {
 							criteria.priority = index + 1;
 							return criteria;
@@ -78,9 +82,8 @@ export class ConfigureColumnSortingModal extends Modal {
 						return null;
 					})
 					.filter(
-						(
-							criteria
-						): criteria is columnSortingCriteria => criteria !== null
+						(criteria): criteria is columnSortingCriteria =>
+							criteria !== null
 					);
 
 				this.columnConfiguration.sortCriterias = newOrder;
@@ -92,97 +95,114 @@ export class ConfigureColumnSortingModal extends Modal {
 
 			sortingCriteriaList.empty(); // Clear existing rendered rows
 
-			this.columnConfiguration.sortCriterias.sort(
-				(a, b) => a.priority - b.priority
-			).forEach((sortCriteria, index) => {
-				const row = sortingCriteriaList.createDiv({
-					cls: "tag-color-row",
-					attr: { "data-criteria-name": sortCriteria.criteria },
-				});
+			this.columnConfiguration.sortCriterias
+				.sort((a, b) => a.priority - b.priority)
+				.forEach((sortCriteria, index) => {
+					const row = sortingCriteriaList.createDiv({
+						cls: "tag-color-row",
+						attr: { "data-criteria-name": sortCriteria.criteria },
+					});
 
-				new Setting(row)
-					.setClass("tag-color-row-element")
-					.addButton((drag) =>
-						drag
-							.setTooltip("Hold and drag")
-							.setIcon("grip-horizontal")
-							.setClass(
-								"taskboard-setting-tag-color-row-element-drag-handle"
-							)
-					)
-					.addDropdown((dropdown) => {
-						dropdown
-							.addOption("status", t("Status"))
-							.addOption("completed", t("Completed"))
-							.addOption("priority", t("Priority"))
-							.addOption("dueDate", t("Due Date"))
-							.addOption("startDate", t("Start Date"))
-							.addOption("scheduledDate", t("Scheduled Date"))
-							.addOption("createdDate", t("Created Date"))
-							.addOption("completedDate", t("Completed Date"))
-							.addOption("content", t("Content"))
-							.addOption("tags", t("Tags"))
-							.addOption("project", t("Project"))
-							.addOption("context", t("Context"))
-							.addOption("recurrence", t("Recurrence"))
-							.addOption("filePath", t("File Path"))
-							.addOption("lineNumber", t("Line Number"))
-							.setValue(sortCriteria.criteria)
-							.onChange((value: string) => {
-								if (this.columnConfiguration.sortCriterias) {
-									this.columnConfiguration.sortCriterias[index].criteria = value as columnSortingCriteria["criteria"];
-								}
-							});
-					})
-					.addDropdown((dropdown) => {
-						dropdown
-							.addOption("asc", t("Ascending")) // Ascending might mean different things (e.g., High -> Low for priority)
-							.addOption("desc", t("Descending")) // Descending might mean different things (e.g., Low -> High for priority)
-							.setValue(sortCriteria.order)
-							.onChange((value: string) => {
-								if (this.columnConfiguration.sortCriterias) {
-									this.columnConfiguration.sortCriterias[index].order = value as columnSortingCriteria["order"];
-								}
-							});
-						// Add tooltips explaining what asc/desc means for each field type if possible
-						if (sortCriteria.criteria === "priority") {
-							dropdown.selectEl.title = t(
-								"Ascending: High -> Low -> None. Descending: None -> Low -> High"
-							);
-						} else if (
-							["dueDate", "startDate", "scheduledDate"].includes(
-								sortCriteria.criteria
-							)
-						) {
-							dropdown.selectEl.title = t(
-								"Ascending: Earlier -> Later -> None. Descending: None -> Later -> Earlier"
-							);
-						} else if (sortCriteria.criteria === "status") {
-							dropdown.selectEl.title = t(
-								"Ascending respects status order (Overdue first). Descending reverses it."
-							);
-						} else {
-							dropdown.selectEl.title = t(
-								"Ascending: A-Z. Descending: Z-A"
-							);
-						}
-					})
-					.addButton((del) =>
-						del
-							.setButtonText("Delete")
-							.setIcon("trash")
-							.setClass(
-								"taskboard-setting-tag-color-row-element-delete"
-							)
-							.setTooltip(t("delete-tag-color"))
-							.onClick(async () => {
-								if (this.columnConfiguration.sortCriterias) {
-									this.columnConfiguration.sortCriterias.splice(index, 1);
-									renderSortingCriterias(); // Re-render after delete
-								}
-							})
-					);
-			});
+					new Setting(row)
+						.setClass("tag-color-row-element")
+						.addButton((drag) =>
+							drag
+								.setTooltip("Hold and drag")
+								.setIcon("grip-horizontal")
+								.setClass(
+									"taskboard-setting-tag-color-row-element-drag-handle"
+								)
+						)
+						.addDropdown((dropdown) => {
+							dropdown
+								.addOption("content", t("Title"))
+								.addOption("id", t("Id"))
+								.addOption("status", t("Status"))
+								.addOption("priority", t("Priority"))
+								.addOption("tags", t("Tags"))
+								.addOption("project", t("Project")) // Will be implemented in future
+								.addOption("time", t("Time"))
+								.addOption("createdDate", t("Created date"))
+								.addOption("startDate", t("Start date"))
+								.addOption("scheduledDate", t("Scheduled date"))
+								.addOption("dueDate", t("Due Date"))
+								.addOption("completedDate", t("Completed date"))
+								.addOption("recurrence", t("Recurrence"))
+								.addOption("filePath", t("File Path"))
+								.addOption("lineNumber", t("Line Number"))
+								.setValue(sortCriteria.criteria)
+								.onChange((value: string) => {
+									if (
+										this.columnConfiguration.sortCriterias
+									) {
+										this.columnConfiguration.sortCriterias[
+											index
+										].criteria =
+											value as columnSortingCriteria["criteria"];
+									}
+								});
+						})
+						.addDropdown((dropdown) => {
+							dropdown
+								.addOption("asc", t("Ascending")) // Ascending might mean different things (e.g., High -> Low for priority)
+								.addOption("desc", t("Descending")) // Descending might mean different things (e.g., Low -> High for priority)
+								.setValue(sortCriteria.order)
+								.onChange((value: string) => {
+									if (
+										this.columnConfiguration.sortCriterias
+									) {
+										this.columnConfiguration.sortCriterias[
+											index
+										].order =
+											value as columnSortingCriteria["order"];
+									}
+								});
+							// Add tooltips explaining what asc/desc means for each field type if possible
+							if (sortCriteria.criteria === "priority") {
+								dropdown.selectEl.title = t(
+									"Ascending: High -> Low -> None. Descending: None -> Low -> High"
+								);
+							} else if (
+								[
+									"dueDate",
+									"startDate",
+									"scheduledDate",
+								].includes(sortCriteria.criteria)
+							) {
+								dropdown.selectEl.title = t(
+									"Ascending: Earlier -> Later -> None. Descending: None -> Later -> Earlier"
+								);
+							} else if (sortCriteria.criteria === "status") {
+								dropdown.selectEl.title = t(
+									"Ascending respects status order (Overdue first). Descending reverses it."
+								);
+							} else {
+								dropdown.selectEl.title = t(
+									"Ascending: A-Z. Descending: Z-A"
+								);
+							}
+						})
+						.addButton((del) =>
+							del
+								.setButtonText("Delete")
+								.setIcon("trash")
+								.setClass(
+									"taskboard-setting-tag-color-row-element-delete"
+								)
+								.setTooltip(t("delete-tag-color"))
+								.onClick(async () => {
+									if (
+										this.columnConfiguration.sortCriterias
+									) {
+										this.columnConfiguration.sortCriterias.splice(
+											index,
+											1
+										);
+										renderSortingCriterias(); // Re-render after delete
+									}
+								})
+						);
+				});
 		};
 
 		// Initial render
@@ -197,7 +217,9 @@ export class ConfigureColumnSortingModal extends Modal {
 					const newCriteria: columnSortingCriteria = {
 						criteria: "content",
 						order: "asc",
-						priority: (this.columnConfiguration.sortCriterias?.length || 0) + 1,
+						priority:
+							(this.columnConfiguration.sortCriterias?.length ||
+								0) + 1,
 					};
 					if (!this.columnConfiguration.sortCriterias) {
 						this.columnConfiguration.sortCriterias = [];
