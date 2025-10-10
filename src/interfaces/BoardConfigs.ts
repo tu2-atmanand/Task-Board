@@ -56,9 +56,6 @@ export type Board = {
 	index: number;
 	columns: ColumnData[];
 	hideEmptyColumns: boolean;
-	filters: string[];
-	filterPolarity: string;
-	filterScope: string;
 	showColumnTags: boolean;
 	showFilteredTags: boolean;
 	filterConfig?: FilterConfigSettings;

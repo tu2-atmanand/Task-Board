@@ -91,19 +91,19 @@ const Column: React.FC<ColumnProps> = ({
 						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 							(board: Board) => board.name === activeBoardData.name
 						);
-						
+
 						if (boardIndex !== -1) {
 							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
 								(col: ColumnData) => col.name === columnData.name
 							);
-							
+
 							if (columnIndex !== -1) {
 								// Update the column configuration
 								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
-								
+
 								// Save the settings
 								plugin.saveSettings();
-								
+
 								// Refresh the board view if needed (you may need to add a refresh method to the parent component)
 								// plugin.taskBoardView?.refresh();
 							}
@@ -144,32 +144,18 @@ const Column: React.FC<ColumnProps> = ({
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
 					tasks.map((task, index = task.id) => {
-						const allTaskTags = getAllTaskTags(task);
-						const shouldRenderTask = parseInt(activeBoardData?.filterPolarity || "0") === 1 &&
-							activeBoardData.filters.length > 0 &&
-							allTaskTags.length > 0 &&
-							allTaskTags.some((tag: string) => {
-								const match = matchTagsWithWildcards(activeBoardData.filters, tag);
-								return match !== null;
-							}); // TODO : I need to create a util function to get this value to decide whether to render the task or not.
-
-						// If filterPolarity is 1 (Include), render only if shouldRenderTask is true
-						if (shouldRenderTask || parseInt(activeBoardData?.filterPolarity || "0") === 0) {
-							return (
-								<div key={index} className="taskItemFadeIn">
-									<TaskItem
-										key={index}
-										plugin={plugin}
-										taskKey={index}
-										task={task}
-										columnIndex={columnIndex}
-										activeBoardSettings={activeBoardData}
-									/>
-								</div>
-							);
-						}
-
-						return null;
+						return (
+							<div key={index} className="taskItemFadeIn">
+								<TaskItem
+									key={index}
+									plugin={plugin}
+									taskKey={index}
+									task={task}
+									columnIndex={columnIndex}
+									activeBoardSettings={activeBoardData}
+								/>
+							</div>
+						);
 					})
 				) : (
 					<p>{t("no-tasks-available")}</p>
