@@ -164,7 +164,19 @@
             "collapsed": false,
             "name": "Backlogs",
             "index": 1,
-            "id": 226119
+            "id": 226119,
+            "sortCriterias": [
+              {
+                "criteria": "priority",
+                "order": "desc",
+                "priority": 1
+              },
+              {
+                "criteria": "startDate",
+                "order": "asc",
+                "priority": 2
+              }
+            ]
           },
           {
             "colType": "namedTag",
@@ -252,7 +264,32 @@
         },
         "filterConfig": {
           "enableSavedFilters": true,
-          "savedConfigs": []
+          "savedConfigs": [
+            {
+              "id": "filter-config-1760103432145-fevybeh8j",
+              "name": "Destinatio",
+              "description": "Filtering all tasks from \"Destinatio\" folder",
+              "filterState": {
+                "rootCondition": "any",
+                "filterGroups": [
+                  {
+                    "id": "id-1760029960520-z2a1g0ka4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1760029960521-t33fwt542",
+                        "property": "filePath",
+                        "condition": "startsWith",
+                        "value": "Destinatio"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-10-10T13:37:12.145Z",
+              "updatedAt": "2025-10-10T13:37:12.145Z"
+            }
+          ]
         }
       }
     ],
