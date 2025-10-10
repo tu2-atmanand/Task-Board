@@ -42,6 +42,8 @@ export type Board = {
 	filterScope: string;
 	showColumnTags: boolean;
 	showFilteredTags: boolean;
+	filterConfig?: FilterConfigSettings;
+	boardFilter?: RootFilterState;
 };
 
 export type BoardConfigs = Board[];

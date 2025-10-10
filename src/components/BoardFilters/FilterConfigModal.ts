@@ -1,5 +1,5 @@
 import { App, Modal, Setting, Notice, DropdownComponent } from "obsidian";
-import { RootFilterState } from "./ViewTaskFilter";
+import { RootFilterState, FilterGroup } from "./ViewTaskFilter";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { SavedFilterConfig } from "src/interfaces/BoardConfigs";
@@ -10,11 +10,13 @@ export class FilterConfigModal extends Modal {
 	private currentFilterState?: RootFilterState;
 	private onSave?: (config: SavedFilterConfig) => void;
 	private onLoad?: (config: SavedFilterConfig) => void;
+	private activeBoardIndex: number;
 
 	constructor(
 		app: App,
 		plugin: TaskBoard,
 		mode: "save" | "load",
+		activeBoardIndex: number,
 		currentFilterState?: RootFilterState,
 		onSave?: (config: SavedFilterConfig) => void,
 		onLoad?: (config: SavedFilterConfig) => void
@@ -22,6 +24,7 @@ export class FilterConfigModal extends Modal {
 		super(app);
 		this.plugin = plugin;
 		this.mode = mode;
+		this.activeBoardIndex = activeBoardIndex;
 		this.currentFilterState = currentFilterState;
 		this.onSave = onSave;
 		this.onLoad = onLoad;
@@ -41,16 +44,16 @@ export class FilterConfigModal extends Modal {
 	private renderSaveMode() {
 		const { contentEl } = this;
 
-		contentEl.createEl("h2", { text: t("Save Filter Configuration") });
+		contentEl.createEl("h2", { text: t("save-filter-configuration") });
 
 		let nameValue = "";
 		let descriptionValue = "";
 
 		new Setting(contentEl)
-			.setName(t("Filter Configuration Name"))
-			.setDesc(t("Enter a name for this filter configuration"))
+			.setName(t("filter-configuration-name"))
+			.setDesc(t("filter-configuration-name-info"))
 			.addText((text) => {
-				text.setPlaceholder(t("Filter Configuration Name"))
+				text.setPlaceholder(t("filter-configuration-name"))
 					.setValue(nameValue)
 					.onChange((value) => {
 						nameValue = value;
@@ -58,14 +61,10 @@ export class FilterConfigModal extends Modal {
 			});
 
 		new Setting(contentEl)
-			.setName(t("Filter Configuration Description"))
-			.setDesc(
-				t(
-					"Enter a description for this filter configuration (optional)"
-				)
-			)
+			.setName(t("filter-configuration-description"))
+			.setDesc(t("filter-configuration-description-info"))
 			.addTextArea((text) => {
-				text.setPlaceholder(t("Filter Configuration Description"))
+				text.setPlaceholder(t("filter-configuration-description"))
 					.setValue(descriptionValue)
 					.onChange((value) => {
 						descriptionValue = value;
@@ -75,14 +74,14 @@ export class FilterConfigModal extends Modal {
 
 		new Setting(contentEl)
 			.addButton((btn) => {
-				btn.setButtonText(t("Save"))
+				btn.setButtonText(t("save"))
 					.setCta()
 					.onClick(() => {
 						this.saveConfiguration(nameValue, descriptionValue);
 					});
 			})
 			.addButton((btn) => {
-				btn.setButtonText(t("Cancel")).onClick(() => {
+				btn.setButtonText(t("cancel")).onClick(() => {
 					this.close();
 				});
 			});
@@ -91,13 +90,21 @@ export class FilterConfigModal extends Modal {
 	private renderLoadMode() {
 		const { contentEl } = this;
 
-		contentEl.createEl("h2", { text: t("Load Filter Configuration") });
+		contentEl.createEl("h2", { text: t("load-filter-configuration") });
 
-		const savedConfigs = this.plugin.settings.data.boardConfigs[activeBoardIndex].filterConfig.savedConfigs;
+		const board =
+			this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) {
+			board.filterConfig = {
+				enableSavedFilters: true,
+				savedConfigs: [],
+			};
+		}
+		const savedConfigs = board.filterConfig.savedConfigs;
 
 		if (savedConfigs.length === 0) {
 			contentEl.createEl("p", {
-				text: t("No saved filter configurations"),
+				text: t("no-saved-filter-configurations"),
 			});
 			new Setting(contentEl).addButton((btn) => {
 				btn.setButtonText(t("Close")).onClick(() => {
@@ -110,11 +117,11 @@ export class FilterConfigModal extends Modal {
 		let selectedConfigId = "";
 
 		new Setting(contentEl)
-			.setName(t("Select a saved filter configuration"))
+			.setName(t("select-a-saved-filter-configuration"))
 			.addDropdown((dropdown: DropdownComponent) => {
 				dropdown.addOption(
 					"",
-					t("Select a saved filter configuration")
+					t("select-a-saved-filter-configuration")
 				);
 
 				savedConfigs.forEach((config) => {
@@ -139,21 +146,21 @@ export class FilterConfigModal extends Modal {
 
 		new Setting(buttonsContainer)
 			.addButton((btn) => {
-				btn.setButtonText(t("Load"))
+				btn.setButtonText(t("load"))
 					.setCta()
 					.onClick(() => {
 						this.loadConfiguration(selectedConfigId);
 					});
 			})
 			.addButton((btn) => {
-				btn.setButtonText(t("Delete"))
+				btn.setButtonText(t("delete"))
 					.setWarning()
 					.onClick(() => {
 						this.deleteConfiguration(selectedConfigId);
 					});
 			})
 			.addButton((btn) => {
-				btn.setButtonText(t("Cancel")).onClick(() => {
+				btn.setButtonText(t("cancel")).onClick(() => {
 					this.close();
 				});
 			});
@@ -170,9 +177,13 @@ export class FilterConfigModal extends Modal {
 
 		if (!configId) return;
 
-		const config = this.plugin.settings.data.boardConfigs[
-			activeBoardIndex
-		].filterConfig.savedConfigs.find((c) => c.id === configId);
+		const board =
+			this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) return;
+
+		const config = board.filterConfig.savedConfigs.find(
+			(c: SavedFilterConfig) => c.id === configId
+		);
 
 		if (!config) return;
 
@@ -183,14 +194,14 @@ export class FilterConfigModal extends Modal {
 		}
 
 		detailsContainer.createEl("p", {
-			text: `${t("Created")}: ${new Date(
+			text: `${t("created")}: ${new Date(
 				config.createdAt
 			).toLocaleString()}`,
 			cls: "filter-config-meta",
 		});
 
 		detailsContainer.createEl("p", {
-			text: `${t("Updated")}: ${new Date(
+			text: `${t("updated")}: ${new Date(
 				config.updatedAt
 			).toLocaleString()}`,
 			cls: "filter-config-meta",
@@ -200,33 +211,33 @@ export class FilterConfigModal extends Modal {
 		const filterSummary = detailsContainer.createDiv({
 			cls: "filter-config-summary",
 		});
-		filterSummary.createEl("h4", { text: t("Filter Summary") });
+		filterSummary.createEl("h4", { text: t("filter-summary") });
 
 		const groupCount = config.filterState.filterGroups.length;
 		const totalFilters = config.filterState.filterGroups.reduce(
-			(sum, group) => sum + group.filters.length,
+			(sum: number, group: FilterGroup) => sum + group.filters.length,
 			0
 		);
 
 		filterSummary.createEl("p", {
-			text: `${groupCount} ${t("filter group")}${
+			text: `${groupCount} ${t("filter-group")}${
 				groupCount !== 1 ? "s" : ""
 			}, ${totalFilters} ${t("filter")}${totalFilters !== 1 ? "s" : ""}`,
 		});
 
 		filterSummary.createEl("p", {
-			text: `${t("Root condition")}: ${config.filterState.rootCondition}`,
+			text: `${t("root-condition")}: ${config.filterState.rootCondition}`,
 		});
 	}
 
 	private async saveConfiguration(name: string, description: string) {
 		if (!name.trim()) {
-			new Notice(t("Filter configuration name is required"));
+			new Notice(t("filter-configuration-name-is-required"));
 			return;
 		}
 
 		if (!this.currentFilterState) {
-			new Notice(t("Failed to save filter configuration"));
+			new Notice(t("failed-to-save-filter-configuration"));
 			return;
 		}
 
@@ -243,12 +254,18 @@ export class FilterConfigModal extends Modal {
 		};
 
 		try {
-			this.plugin.settings.data.boardConfigs[
-				activeBoardIndex
-			].filterConfig.savedConfigs.push(config);
+			const board =
+				this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+			if (!board.filterConfig) {
+				board.filterConfig = {
+					enableSavedFilters: true,
+					savedConfigs: [],
+				};
+			}
+			board.filterConfig.savedConfigs.push(config);
 			await this.plugin.saveSettings();
 
-			new Notice(t("Filter configuration saved successfully"));
+			new Notice(t("filter-configuration-saved-successfully"));
 
 			if (this.onSave) {
 				this.onSave(config);
@@ -257,22 +274,26 @@ export class FilterConfigModal extends Modal {
 			this.close();
 		} catch (error) {
 			console.error("Failed to save filter configuration:", error);
-			new Notice(t("Failed to save filter configuration"));
+			new Notice(t("failed-to-save-filter-configuration"));
 		}
 	}
 
 	private async loadConfiguration(configId: string) {
 		if (!configId) {
-			new Notice(t("Select a saved filter configuration"));
+			new Notice(t("select-a-saved-filter-configuration"));
 			return;
 		}
 
-		const config = this.plugin.settings.data.boardConfigs[
-			activeBoardIndex
-		].filterConfig.savedConfigs.find((c) => c.id === configId);
+		const board =
+			this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) return;
+
+		const config = board.filterConfig.savedConfigs.find(
+			(c: SavedFilterConfig) => c.id === configId
+		);
 
 		if (!config) {
-			new Notice(t("Failed to load filter configuration"));
+			new Notice(t("failed-to-load-filter-configuration"));
 			return;
 		}
 
@@ -281,11 +302,11 @@ export class FilterConfigModal extends Modal {
 				this.onLoad(config);
 			}
 
-			new Notice(t("Filter configuration loaded successfully"));
+			new Notice(t("filter-configuration-loaded-successfully"));
 			this.close();
 		} catch (error) {
 			console.error("Failed to load filter configuration:", error);
-			new Notice(t("Failed to load filter configuration"));
+			new Notice(t("failed-to-load-filter-configuration"));
 		}
 	}
 
@@ -295,12 +316,16 @@ export class FilterConfigModal extends Modal {
 			return;
 		}
 
-		const config = this.plugin.settings.data.boardConfigs[
-			activeBoardIndex
-		].filterConfig.savedConfigs.find((c) => c.id === configId);
+		const board =
+			this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+		if (!board.filterConfig) return;
+
+		const config = board.filterConfig.savedConfigs.find(
+			(c: SavedFilterConfig) => c.id === configId
+		);
 
 		if (!config) {
-			new Notice(t("Failed to delete filter configuration"));
+			new Notice(t("failed-to-delete-filter-configuration"));
 			return;
 		}
 
@@ -308,12 +333,10 @@ export class FilterConfigModal extends Modal {
 		const confirmed = await new Promise<boolean>((resolve) => {
 			const confirmModal = new Modal(this.app);
 			confirmModal.contentEl.createEl("h2", {
-				text: t("Delete Filter Configuration"),
+				text: t("delete-filter-configuration"),
 			});
 			confirmModal.contentEl.createEl("p", {
-				text: t(
-					"Are you sure you want to delete this filter configuration?"
-				),
+				text: t("delete-filter-configuration-question"),
 			});
 			confirmModal.contentEl.createEl("p", {
 				text: `"${config.name}"`,
@@ -322,7 +345,7 @@ export class FilterConfigModal extends Modal {
 
 			new Setting(confirmModal.contentEl)
 				.addButton((btn) => {
-					btn.setButtonText(t("Delete"))
+					btn.setButtonText(t("delete"))
 						.setWarning()
 						.onClick(() => {
 							resolve(true);
@@ -330,7 +353,7 @@ export class FilterConfigModal extends Modal {
 						});
 				})
 				.addButton((btn) => {
-					btn.setButtonText(t("Cancel")).onClick(() => {
+					btn.setButtonText(t("cancel")).onClick(() => {
 						resolve(false);
 						confirmModal.close();
 					});
@@ -342,16 +365,18 @@ export class FilterConfigModal extends Modal {
 		if (!confirmed) return;
 
 		try {
-			this.plugin.settings.data.boardConfigs[
-				activeBoardIndex
-			].filterConfig.savedConfigs =
-				this.plugin.settings.data.boardConfigs[
-					activeBoardIndex
-				].filterConfig.savedConfigs.filter((c) => c.id !== configId);
+			const board =
+				this.plugin.settings.data.boardConfigs[this.activeBoardIndex];
+			if (!board.filterConfig) return;
+
+			board.filterConfig.savedConfigs =
+				board.filterConfig.savedConfigs.filter(
+					(c: SavedFilterConfig) => c.id !== configId
+				);
 
 			await this.plugin.saveSettings();
 
-			new Notice(t("Filter configuration deleted successfully"));
+			new Notice(t("filter-configuration-deleted-successfully"));
 
 			// Refresh the load mode display
 			this.close();
@@ -361,6 +386,7 @@ export class FilterConfigModal extends Modal {
 				this.app,
 				this.plugin,
 				"load",
+				this.activeBoardIndex,
 				undefined,
 				this.onSave,
 				this.onLoad
@@ -368,7 +394,7 @@ export class FilterConfigModal extends Modal {
 			newModal.open();
 		} catch (error) {
 			console.error("Failed to delete filter configuration:", error);
-			new Notice(t("Failed to delete filter configuration"));
+			new Notice(t("failed-to-delete-filter-configuration"));
 		}
 	}
 

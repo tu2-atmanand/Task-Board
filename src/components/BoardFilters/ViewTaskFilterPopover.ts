@@ -10,21 +10,24 @@ export class ViewTaskFilterPopover
 {
 	private app: App;
 	public popoverRef: HTMLDivElement | null = null;
-	public taskFilterComponent: TaskFilterComponent;
+	public taskFilterComponent!: TaskFilterComponent;
 	private win: Window;
 	private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
 	public onClose: ((filterState?: RootFilterState) => void) | null = null;
 	private plugin?: TaskBoard;
+	private activeBoardIndex?: number;
 
 	constructor(
 		app: App,
 		private leafId?: string | undefined,
-		plugin?: TaskBoard
+		plugin?: TaskBoard,
+		activeBoardIndex?: number
 	) {
 		super();
 		this.app = app;
 		this.plugin = plugin;
+		this.activeBoardIndex = activeBoardIndex;
 		this.win = app.workspace.containerEl.win || window;
 
 		this.scrollParent = this.win;
@@ -51,7 +54,8 @@ export class ViewTaskFilterPopover
 			contentEl,
 			this.app,
 			this.leafId,
-			this.plugin
+			this.plugin,
+			this.activeBoardIndex
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();
