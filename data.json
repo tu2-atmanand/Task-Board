@@ -43,7 +43,11 @@
             "limit": 20
           }
         ],
-        "hideEmptyColumns": false
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        }
       },
       {
         "columns": [
@@ -233,14 +237,14 @@
           "rootCondition": "any",
           "filterGroups": [
             {
-              "id": "id-1759769822732-we6pfeqpi",
+              "id": "id-1760029960520-z2a1g0ka4",
               "groupCondition": "all",
               "filters": [
                 {
-                  "id": "id-1759769822734-2yqs1dyh5",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "this"
+                  "id": "id-1760029960521-t33fwt542",
+                  "property": "filePath",
+                  "condition": "startsWith",
+                  "value": "Destinatio"
                 }
               ]
             }
