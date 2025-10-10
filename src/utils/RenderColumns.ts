@@ -9,6 +9,7 @@ import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { matchTagsWithWildcards } from "./FiltersVerifier";
 import { getAllTaskTags } from "./TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { boardFilterer } from "./boardFilterer";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
@@ -249,8 +250,10 @@ export const renderColumns = (
 		);
 	}
 
-	// call the filtering function here to filter out the taasks from tasksToDisplay
-	// based on the columnData.filters property
+	// Apply column-specific filters if configured
+	if (columnData.filters) {
+		tasksToDisplay = boardFilterer(tasksToDisplay, columnData.filters);
+	}
 	
 	// call the sorting function here to sort the tasks from tasksToDisplay
 	// based on the columnData.sortCriteria property

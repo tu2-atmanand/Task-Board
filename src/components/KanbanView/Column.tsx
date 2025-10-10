@@ -12,6 +12,9 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
 import { Menu } from 'obsidian';
 import { ConfigureColumnSortingModal } from 'src/modal/ConfigureColumnSortingModal';
+import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
+import { RootFilterState } from 'src/components/BoardFilters/ViewTaskFilter';
+import { eventEmitter } from 'src/services/EventEmitter';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -119,7 +122,52 @@ const Column: React.FC<ColumnProps> = ({
 		sortMenu.addItem((item) => {
 			item.setTitle(t("Configure column filtering"));
 			item.onClick(async () => {
-				// open filtering modal
+				// Get the position of the menu (approximate column position)
+				const columnElement = document.querySelector(`[data-column-tag-name="${columnData.coltag}"]`) as HTMLElement;
+				const position = columnElement 
+					? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
+					: { x: 100, y: 100 }; // Fallback position
+
+				// Create and show filter popover
+				const popover = new ViewTaskFilterPopover(
+					plugin.app,
+					undefined,
+					plugin,
+					plugin.settings.data.boardConfigs.findIndex(
+						(board: Board) => board.name === activeBoardData.name
+					),
+					columnData.name,
+					columnData.filters
+				);
+
+				// Set up close callback to save filter state
+				popover.onClose = async (filterState?: RootFilterState) => {
+					if (filterState) {
+						// Update the column configuration in the board data
+						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+							(board: Board) => board.name === activeBoardData.name
+						);
+
+						if (boardIndex !== -1) {
+							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+								(col: ColumnData) => col.name === columnData.name
+							);
+
+							if (columnIndex !== -1) {
+								// Update the column filters
+								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+
+								// Save the settings
+								await plugin.saveSettings();
+
+								// Refresh the board view
+								eventEmitter.emit('REFRESH_COLUMN');
+							}
+						}
+					}
+				};
+
+				popover.showAtPosition(position);
 			});
 		});
 
