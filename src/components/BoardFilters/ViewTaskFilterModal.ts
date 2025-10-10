@@ -33,7 +33,6 @@ export class ViewTaskFilterModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 
-		// 获取过滤状态并触发回调
 		let filterState: RootFilterState | undefined = undefined;
 		if (this.taskFilterComponent) {
 			try {
@@ -49,7 +48,6 @@ export class ViewTaskFilterModal extends Modal {
 
 		contentEl.empty();
 
-		// 调用自定义关闭回调
 		if (this.filterCloseCallback) {
 			try {
 				this.filterCloseCallback(filterState);

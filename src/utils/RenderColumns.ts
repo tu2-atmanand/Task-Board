@@ -249,6 +249,10 @@ export const renderColumns = (
 		);
 	}
 
-	// setTasks(tasksToDisplay);
+	// call the filtering function here to filter out the taasks from tasksToDisplay
+	// based on the columnData.filters property
+	
+	// call the sorting function here to sort the tasks from tasksToDisplay
+	// based on the columnData.sortCriteria property
 	return tasksToDisplay;
 };

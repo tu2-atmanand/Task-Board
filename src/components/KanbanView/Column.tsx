@@ -10,6 +10,8 @@ import TaskBoard from 'main';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
+import { Menu } from 'obsidian';
+import { ConfigureColumnSortingModal } from 'src/modal/ConfigureColumnSortingModal';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -69,6 +71,66 @@ const Column: React.FC<ColumnProps> = ({
 		});
 	}
 
+	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
+		const sortMenu = new Menu();
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("Sort and filter"));
+			item.setIcon("clock-arrow-down");
+			item.setIsLabel(true);
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("Configure column sorting"));
+			item.onClick(async () => {
+				// open sorting modal
+				const modal = new ConfigureColumnSortingModal(
+					plugin,
+					columnData,
+					(updatedColumnConfiguration: ColumnData) => {
+						// Update the column configuration in the board data
+						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+							(board: Board) => board.name === activeBoardData.name
+						);
+
+						if (boardIndex !== -1) {
+							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+								(col: ColumnData) => col.name === columnData.name
+							);
+
+							if (columnIndex !== -1) {
+								// Update the column configuration
+								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
+
+								// Save the settings
+								plugin.saveSettings();
+
+								// Refresh the board view if needed (you may need to add a refresh method to the parent component)
+								// plugin.taskBoardView?.refresh();
+							}
+						}
+					},
+					() => {
+						// onCancel callback - nothing to do
+					}
+				);
+				modal.open();
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("Configure column filtering"));
+			item.onClick(async () => {
+				// open filtering modal
+			});
+		});
+
+		sortMenu.addSeparator();
+
+		// Use native event if available (React event has nativeEvent property)
+		sortMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
 	return (
 		<div className="TaskBoardColumnsSection" style={{ '--task-board-column-width': columnWidth } as CustomCSSProperties} data-column-type={columnData.colType} data-column-tag-name={tagData?.name} data-column-tag-color={tagData?.color}>
 			<div className="taskBoardColumnSecHeader">
@@ -76,38 +138,24 @@ const Column: React.FC<ColumnProps> = ({
 					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 					<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 				</div>
-				<div className='taskBoardColumnSecHeaderTitleSecColumnCount'>{tasksForThisColumn.length}</div>
+				<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)}>{tasksForThisColumn.length}</div>
 				{/* <RxDotsVertical /> */}
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 				{tasks.length > 0 ? (
 					tasks.map((task, index = task.id) => {
-						const allTaskTags = getAllTaskTags(task);
-						const shouldRenderTask = parseInt(activeBoardData?.filterPolarity || "0") === 1 &&
-							activeBoardData.filters.length > 0 &&
-							allTaskTags.length > 0 &&
-							allTaskTags.some((tag: string) => {
-								const match = matchTagsWithWildcards(activeBoardData.filters, tag);
-								return match !== null;
-							}); // TODO : I need to create a util function to get this value to decide whether to render the task or not.
-
-						// If filterPolarity is 1 (Include), render only if shouldRenderTask is true
-						if (shouldRenderTask || parseInt(activeBoardData?.filterPolarity || "0") === 0) {
-							return (
-								<div key={index} className="taskItemFadeIn">
-									<TaskItem
-										key={index}
-										plugin={plugin}
-										taskKey={index}
-										task={task}
-										columnIndex={columnIndex}
-										activeBoardSettings={activeBoardData}
-									/>
-								</div>
-							);
-						}
-
-						return null;
+						return (
+							<div key={index} className="taskItemFadeIn">
+								<TaskItem
+									key={index}
+									plugin={plugin}
+									taskKey={index}
+									task={task}
+									columnIndex={columnIndex}
+									activeBoardSettings={activeBoardData}
+								/>
+							</div>
+						);
 					})
 				) : (
 					<p>{t("no-tasks-available")}</p>
