@@ -167,14 +167,19 @@
             "id": 226119,
             "sortCriterias": [
               {
-                "criteria": "priority",
-                "order": "desc",
+                "criteria": "status",
+                "order": "asc",
                 "priority": 1
               },
               {
-                "criteria": "startDate",
+                "criteria": "scheduledDate",
                 "order": "asc",
                 "priority": 2
+              },
+              {
+                "criteria": "priority",
+                "order": "desc",
+                "priority": 3
               }
             ]
           },
