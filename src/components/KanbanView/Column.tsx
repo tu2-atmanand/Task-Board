@@ -123,7 +123,9 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("Configure column filtering"));
 			item.onClick(async () => {
 				// Get the position of the menu (approximate column position)
-				const columnElement = document.querySelector(`[data-column-tag-name="${columnData.coltag?.replace(/["\\]/g, '\\$&')}"]`) as HTMLElement;
+				// Use CSS.escape to properly escape the selector value
+				const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
+				const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
 				const position = columnElement 
 					? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
 					: { x: 100, y: 100 }; // Fallback position
