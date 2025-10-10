@@ -169,7 +169,6 @@ export class ViewTaskFilterPopover
 			this.popperInstance = null;
 		}
 
-		// 在关闭前获取过滤状态并触发回调
 		let filterState: RootFilterState | undefined = undefined;
 		if (this.taskFilterComponent) {
 			try {
@@ -195,7 +194,6 @@ export class ViewTaskFilterPopover
 			this.taskFilterComponent.onunload();
 		}
 
-		// 调用关闭回调
 		if (this.onClose) {
 			try {
 				this.onClose(filterState);
