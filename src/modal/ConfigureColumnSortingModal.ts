@@ -24,9 +24,9 @@ export class ConfigureColumnSortingModal extends Modal {
 		this.onSave = onSave;
 		this.onCancel = onCancel;
 
-		// Initialize sortCriterias if not present
-		if (!this.columnConfiguration.sortCriterias) {
-			this.columnConfiguration.sortCriterias = [];
+		// Initialize sortCriteria if not present
+		if (!this.columnConfiguration.sortCriteria) {
+			this.columnConfiguration.sortCriteria = [];
 		}
 	}
 
@@ -72,7 +72,7 @@ export class ConfigureColumnSortingModal extends Modal {
 						const criteriaName =
 							child.getAttribute("data-criteria-name");
 						const criteria =
-							this.columnConfiguration.sortCriterias?.find(
+							this.columnConfiguration.sortCriteria?.find(
 								(c) => c.criteria === criteriaName
 							);
 						if (criteria) {
@@ -86,16 +86,16 @@ export class ConfigureColumnSortingModal extends Modal {
 							criteria !== null
 					);
 
-				this.columnConfiguration.sortCriterias = newOrder;
+				this.columnConfiguration.sortCriteria = newOrder;
 			},
 		});
 
 		const renderSortingCriterias = () => {
-			if (!this.columnConfiguration.sortCriterias) return;
+			if (!this.columnConfiguration.sortCriteria) return;
 
 			sortingCriteriaList.empty(); // Clear existing rendered rows
 
-			this.columnConfiguration.sortCriterias
+			this.columnConfiguration.sortCriteria
 				.sort((a, b) => a.priority - b.priority)
 				.forEach((sortCriteria, index) => {
 					const row = sortingCriteriaList.createDiv({
@@ -133,9 +133,9 @@ export class ConfigureColumnSortingModal extends Modal {
 								.setValue(sortCriteria.criteria)
 								.onChange((value: string) => {
 									if (
-										this.columnConfiguration.sortCriterias
+										this.columnConfiguration.sortCriteria
 									) {
-										this.columnConfiguration.sortCriterias[
+										this.columnConfiguration.sortCriteria[
 											index
 										].criteria =
 											value as columnSortingCriteria["criteria"];
@@ -149,9 +149,9 @@ export class ConfigureColumnSortingModal extends Modal {
 								.setValue(sortCriteria.order)
 								.onChange((value: string) => {
 									if (
-										this.columnConfiguration.sortCriterias
+										this.columnConfiguration.sortCriteria
 									) {
-										this.columnConfiguration.sortCriterias[
+										this.columnConfiguration.sortCriteria[
 											index
 										].order =
 											value as columnSortingCriteria["order"];
@@ -192,9 +192,9 @@ export class ConfigureColumnSortingModal extends Modal {
 								.setTooltip(t("delete-tag-color"))
 								.onClick(async () => {
 									if (
-										this.columnConfiguration.sortCriterias
+										this.columnConfiguration.sortCriteria
 									) {
-										this.columnConfiguration.sortCriterias.splice(
+										this.columnConfiguration.sortCriteria.splice(
 											index,
 											1
 										);
@@ -218,13 +218,13 @@ export class ConfigureColumnSortingModal extends Modal {
 						criteria: "content",
 						order: "asc",
 						priority:
-							(this.columnConfiguration.sortCriterias?.length ||
+							(this.columnConfiguration.sortCriteria?.length ||
 								0) + 1,
 					};
-					if (!this.columnConfiguration.sortCriterias) {
-						this.columnConfiguration.sortCriterias = [];
+					if (!this.columnConfiguration.sortCriteria) {
+						this.columnConfiguration.sortCriteria = [];
 					}
-					this.columnConfiguration.sortCriterias.push(newCriteria);
+					this.columnConfiguration.sortCriteria.push(newCriteria);
 					renderSortingCriterias();
 				})
 		);

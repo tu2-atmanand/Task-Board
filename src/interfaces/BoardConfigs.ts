@@ -39,7 +39,7 @@ export type ColumnData = {
 	taskStatus?: string;
 	taskPriority?: number;
 	limit?: number;
-	sortCriterias?: columnSortingCriteria[];
+	sortCriteria?: columnSortingCriteria[];
 	filters?: RootFilterState;
 	range?: {
 		// Keep it for few versions, this is required while settings migrations
