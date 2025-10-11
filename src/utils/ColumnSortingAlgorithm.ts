@@ -76,7 +76,7 @@ function compareDates(date1: any, date2: any, order: "asc" | "desc"): number {
 }
 
 /**
- * Compares two time strings (e.g., "09:00" or "09:00-10:00")
+ * Compares two time strings (e.g., "09:00", "9:00", or "09:00-10:00")
  * Returns: -1 if time1 < time2, 0 if equal, 1 if time1 > time2
  */
 function compareTimes(time1: any, time2: any, order: "asc" | "desc"): number {
@@ -93,15 +93,27 @@ function compareTimes(time1: any, time2: any, order: "asc" | "desc"): number {
 		if (timeStr.includes("-")) {
 			return timeStr.split("-")[0].trim();
 		}
-		return timeStr;
+		return timeStr.trim();
 	};
 
 	const t1 = extractStartTime(String(time1));
 	const t2 = extractStartTime(String(time2));
+	
+	// Parse time to compare numerically (handles both "9:00" and "09:00")
+	const parseTime = (timeStr: string): number => {
+		const parts = timeStr.split(":");
+		if (parts.length !== 2) return 0;
+		const hours = parseInt(parts[0], 10);
+		const minutes = parseInt(parts[1], 10);
+		if (isNaN(hours) || isNaN(minutes)) return 0;
+		return hours * 60 + minutes; // Convert to minutes since midnight
+	};
 
-	// Compare times as strings (works for HH:MM format)
-	if (t1 < t2) return -1;
-	if (t1 > t2) return 1;
+	const time1Minutes = parseTime(t1);
+	const time2Minutes = parseTime(t2);
+
+	if (time1Minutes < time2Minutes) return -1;
+	if (time1Minutes > time2Minutes) return 1;
 	return 0;
 }
 
@@ -133,22 +145,30 @@ function compareValues(
 		return compareTimes(value1, value2, order);
 	}
 
-	// Handle priority - special case where higher numbers are higher priority
+	// Handle priority - special case where lower numbers are higher priority
+	// Priority scale: 1 (highest) -> 5 (lowest) -> 0 (none)
 	if (criteria === "priority") {
-		const hasValue1 = value1 !== undefined && value1 !== null && value1 !== 0;
-		const hasValue2 = value2 !== undefined && value2 !== null && value2 !== 0;
+		const hasValue1 = value1 !== undefined && value1 !== null;
+		const hasValue2 = value2 !== undefined && value2 !== null;
 
 		if (!hasValue1 && !hasValue2) return 0;
-		// For priority, in ascending order: High (6) -> Low (1) -> None (0)
-		// So we want higher numbers first for "asc", which means we reverse the comparison
-		if (!hasValue1) return order === "asc" ? 1 : -1; // No priority goes to end for asc
-		if (!hasValue2) return order === "asc" ? -1 : 1;
+		
+		// Handle priority 0 (none) - should be treated as "no priority"
+		const isNone1 = value1 === 0;
+		const isNone2 = value2 === 0;
+		
+		if (isNone1 && isNone2) return 0;
+		// For ascending (High->Low->None): none goes to end
+		if (isNone1) return order === "asc" ? 1 : -1;
+		if (isNone2) return order === "asc" ? -1 : 1;
 
-		// For ascending: higher priority (bigger number) comes first
+		// For non-zero priorities: 1 (highest) to 5 (lowest)
+		// For ascending (High->Low->None): lower numbers (1) come before higher numbers (5)
 		if (order === "asc") {
-			return value2 - value1; // Reversed
+			return value1 - value2; // 1 before 5
 		} else {
-			return value1 - value2; // Normal
+			// For descending (None->Low->High): higher numbers (5) come before lower numbers (1)
+			return value2 - value1; // 5 before 1
 		}
 	}
 
