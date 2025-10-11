@@ -744,7 +744,7 @@ export class TaskFilterComponent extends Component {
 				startDate: t("start-date"),
 				scheduledDate: t("scheduled-date"),
 				dueDate: t("due-date"),
-				completed: t("completed-date"),
+				completedDate: t("completed-date"),
 				filePath: t("file-path"),
 				// project: t("project"),
 			});
@@ -816,6 +816,7 @@ export class TaskFilterComponent extends Component {
 			case "dueDate":
 			case "startDate":
 			case "scheduledDate":
+			case "completedDate":
 				valueInput.type = "date";
 				conditionOptions = [
 					{ value: "is", text: t("is") },

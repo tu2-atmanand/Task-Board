@@ -107,7 +107,20 @@
             ],
             "filters": {
               "rootCondition": "any",
-              "filterGroups": []
+              "filterGroups": [
+                {
+                  "id": "id-1760184422637-6hlzfbhzl",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760184422638-ibhyozbjt",
+                      "property": "tags",
+                      "condition": "doesNotContain",
+                      "value": ""
+                    }
+                  ]
+                }
+              ]
             }
           },
           {
@@ -156,7 +169,30 @@
             "collapsed": false,
             "limit": 20,
             "name": "Completed, updated",
-            "index": 6
+            "index": 6,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1760184422637-6hlzfbhzl",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760184422638-ibhyozbjt",
+                      "property": "completedDate",
+                      "condition": "<=",
+                      "value": "2025-10-11"
+                    },
+                    {
+                      "id": "id-1760186970354-3twr3szpq",
+                      "property": "completedDate",
+                      "condition": ">=",
+                      "value": "2025-10-01"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
         "filters": [
