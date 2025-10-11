@@ -14,9 +14,11 @@ export interface columnSortingCriteria {
 		| "tags"
 		| "project"
 		| "context"
+		| "time"
 		| "recurrence"
 		| "filePath"
-		| "lineNumber"; // Fields to sort by
+		| "lineNumber"
+		| "id"; // Fields to sort by
 	order: "asc" | "desc"; // Sort order
 	priority: number;
 }
