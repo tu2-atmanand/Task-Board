@@ -736,15 +736,17 @@ export class TaskFilterComponent extends Component {
 		if (propertySelect.selectEl.options.length === 0) {
 			propertySelect.addOptions({
 				content: t("content"),
+				id: t("id"),
 				status: t("status"),
 				priority: t("priority"),
-				dueDate: t("due-date"),
+				tags: t("tags"),
+				createdDate: t("created-date"),
 				startDate: t("start-date"),
 				scheduledDate: t("scheduled-date"),
-				tags: t("tags"),
+				dueDate: t("due-date"),
+				completed: t("completed-date"),
 				filePath: t("file-path"),
 				// project: t("project"),
-				completed: t("completed"),
 			});
 		}
 		propertySelect.setValue(property);
@@ -809,6 +811,8 @@ export class TaskFilterComponent extends Component {
 					},
 				];
 				break;
+			case "id":
+			case "createdDate":
 			case "dueDate":
 			case "startDate":
 			case "scheduledDate":
