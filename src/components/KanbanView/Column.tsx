@@ -107,8 +107,7 @@ const Column: React.FC<ColumnProps> = ({
 								// Save the settings
 								plugin.saveSettings();
 
-								// Refresh the board view if needed (you may need to add a refresh method to the parent component)
-								// plugin.taskBoardView?.refresh();
+								eventEmitter.emit('REFRESH_BOARD');
 							}
 						}
 					},
@@ -162,7 +161,7 @@ const Column: React.FC<ColumnProps> = ({
 							await plugin.saveSettings();
 
 							// Refresh the board view
-							eventEmitter.emit('REFRESH_COLUMN');
+							eventEmitter.emit('REFRESH_BOARD');
 						}
 					}
 				};
