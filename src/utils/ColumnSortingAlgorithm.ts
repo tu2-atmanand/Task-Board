@@ -102,15 +102,21 @@ function compareTimes(time1: any, time2: any, order: "asc" | "desc"): number {
 	// Parse time to compare numerically (handles both "9:00" and "09:00")
 	const parseTime = (timeStr: string): number => {
 		const parts = timeStr.split(":");
-		if (parts.length !== 2) return 0;
+		if (parts.length !== 2) return -1; // Invalid format
 		const hours = parseInt(parts[0], 10);
 		const minutes = parseInt(parts[1], 10);
-		if (isNaN(hours) || isNaN(minutes)) return 0;
+		if (isNaN(hours) || isNaN(minutes)) return -1; // Invalid number
+		if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return -1; // Out of range
 		return hours * 60 + minutes; // Convert to minutes since midnight
 	};
 
 	const time1Minutes = parseTime(t1);
 	const time2Minutes = parseTime(t2);
+	
+	// Treat invalid times as equal
+	if (time1Minutes < 0 && time2Minutes < 0) return 0;
+	if (time1Minutes < 0) return order === "asc" ? 1 : -1; // Invalid times go to end for asc
+	if (time2Minutes < 0) return order === "asc" ? -1 : 1;
 
 	if (time1Minutes < time2Minutes) return -1;
 	if (time1Minutes > time2Minutes) return 1;
