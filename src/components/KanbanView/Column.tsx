@@ -83,7 +83,7 @@ const Column: React.FC<ColumnProps> = ({
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("configure-column-sorting"));
-			item.setIcon("arrow-down-wide-narrow");
+			item.setIcon("arrow-up-down");
 			item.onClick(async () => {
 				// open sorting modal
 				const modal = new ConfigureColumnSortingModal(
@@ -121,7 +121,7 @@ const Column: React.FC<ColumnProps> = ({
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("configure-column-filtering"));
-			item.setIcon("funnel");
+			item.setIcon("list-filter");
 			item.onClick(async () => {
 				// Get the position of the menu (approximate column position)
 				// Use CSS.escape to properly escape the selector value
