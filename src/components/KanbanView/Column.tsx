@@ -172,6 +172,25 @@ const Column: React.FC<ColumnProps> = ({
 
 		sortMenu.addSeparator();
 
+		sortMenu.addItem((item) => {
+			item.setTitle(t("quick-actions"));
+			item.setIsLabel(true);
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("hide-column"));
+			item.setIcon("eye-off");
+			item.onClick(async () => {
+				// TODO : Pending to implement. Simply change the active property of the columnData to false for this column and refresh using emit.
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("minimize-column"));
+			item.setIcon("panel-left-close");
+			item.onClick(async () => {
+				// TODO : Pending to develop
+			});
+		});
+
 		// Use native event if available (React event has nativeEvent property)
 		sortMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)
