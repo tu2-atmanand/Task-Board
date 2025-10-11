@@ -238,6 +238,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .searchTaskBtn,
+.filterTaskBtn,
 .AddNewTaskBtn,
 .ConfigureBtn,
 .taskboardActionshBtn,
@@ -254,8 +255,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .searchTaskBtn:hover,
+.filterTaskBtn:hover,
 .AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
+.taskboardActionshBtn:hover,
 .RefreshBtn:hover,
 .taskboardActionshBtn:hover {
 	border: var(--border-width) solid olive;
@@ -5104,8 +5107,8 @@ svg.react-flow__connectionline {
 
 .configureColumnSortingModalHomeAddSortingBtn {
 	width: 100%;
-	padding-top: 1rem;
-	background: var(--indentation-guide-color-active);
+	margin-top: 1rem;
+	background: var(--background-activated-tab-header-dark);
 }
 
 .configureColumnSortingModalHomeButtonContainer {
