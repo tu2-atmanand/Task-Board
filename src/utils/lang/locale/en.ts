@@ -296,6 +296,7 @@ const en: Lang = {
 	"loading-map-data": "Loading map data...",
 	"tasks-refreshed-successfully": "Tasks refreshed successfully",
 	"add-new-task-note": "Add new task-note",
+	"search-for-task": "Search for task"
 };
 
 export default en;

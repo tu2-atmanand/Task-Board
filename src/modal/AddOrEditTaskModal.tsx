@@ -268,16 +268,16 @@ const EditTaskContent: React.FC<{
 	}
 
 	// Automatically update end time if only start time is provided
-	useEffect(() => {
+	const handleCompleteTimeChange = (updatedStartTime: string, updatedEndTime: string) => {
 		let newTime = '';
-		if (startTime && !endTime) {
-			const [hours, minutes] = startTime.split(':');
+		if (updatedStartTime && !updatedEndTime) {
+			const [hours, minutes] = updatedStartTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
-			newTime = `${startTime} - ${newEndTime}`;
+			newTime = `${updatedStartTime} - ${newEndTime}`;
 			setNewTime(newTime);
-		} else if (startTime && endTime) {
-			newTime = `${startTime} - ${endTime}`;
+		} else if (updatedStartTime && updatedEndTime) {
+			newTime = `${updatedStartTime} - ${updatedEndTime}`;
 			setNewTime(newTime);
 		}
 
@@ -285,18 +285,26 @@ const EditTaskContent: React.FC<{
 			const newTitle = sanitizeTime(plugin.settings.data.globalSettings, title, newTime, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 		}
-	}, [startTime, endTime]);
-
-	const handleStartTimeChange = (startTime: string) => {
-		setStartTime(startTime);
-		setIsEdited(true);
 		setIsEditorContentChanged(true);
 	}
 
-	const handleEndTimeChange = (endTime: string) => {
-		setEndTime(endTime);
+
+	const handleStartTimeChange = (updatedStartTime: string) => {
+		setStartTime(updatedStartTime);
 		setIsEdited(true);
-		setIsEditorContentChanged(true);
+
+		handleCompleteTimeChange(updatedStartTime, "");
+
+		// setIsEditorContentChanged(true);
+	}
+
+	const handleEndTimeChange = (updatedEndTime: string) => {
+		setEndTime(updatedEndTime);
+		setIsEdited(true);
+
+		handleCompleteTimeChange(startTime, updatedEndTime);
+
+		// setIsEditorContentChanged(true);
 	}
 
 	// // Function to toggle subtask completion
