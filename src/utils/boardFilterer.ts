@@ -215,9 +215,6 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "scheduledDate":
 		case "scheduled":
 			return task.scheduledDate;
-		case "createdDate":
-		case "created":
-			return task.createdDate;
 		case "completion":
 		case "completedDate":
 		case "done":
