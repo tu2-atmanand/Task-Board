@@ -12,15 +12,15 @@ export interface taskItem {
 	legacyId: string; // Legacy ID to support Tasks plugin id property
 	title: string;
 	body: string[];
+	status: string;
+	priority: number;
+	tags: string[];
+	frontmatterTags: string[]; // Tags extracted from frontmatter
+	time: string;
 	createdDate: string;
 	startDate: string;
 	scheduledDate: string;
 	due: string;
-	tags: string[];
-	frontmatterTags: string[]; // Tags extracted from frontmatter
-	time: string;
-	priority: number;
-	status: string;
 	filePath: string;
 	taskLocation: taskLocation;
 	dependsOn?: string[]; // Array of task IDs that this task depends on

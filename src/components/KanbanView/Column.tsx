@@ -78,12 +78,12 @@ const Column: React.FC<ColumnProps> = ({
 		const sortMenu = new Menu();
 
 		sortMenu.addItem((item) => {
-			item.setTitle(t("Sort and filter"));
-			item.setIcon("clock-arrow-down");
+			item.setTitle(t("sort-and-filter"));
 			item.setIsLabel(true);
 		});
 		sortMenu.addItem((item) => {
-			item.setTitle(t("Configure column sorting"));
+			item.setTitle(t("configure-column-sorting"));
+			item.setIcon("arrow-down-wide-narrow");
 			item.onClick(async () => {
 				// open sorting modal
 				const modal = new ConfigureColumnSortingModal(
@@ -120,7 +120,8 @@ const Column: React.FC<ColumnProps> = ({
 			});
 		});
 		sortMenu.addItem((item) => {
-			item.setTitle(t("Configure column filtering"));
+			item.setTitle(t("configure-column-filtering"));
+			item.setIcon("funnel");
 			item.onClick(async () => {
 				// Get the position of the menu (approximate column position)
 				// Use CSS.escape to properly escape the selector value
@@ -185,7 +186,7 @@ const Column: React.FC<ColumnProps> = ({
 					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 					<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 				</div>
-				<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)}>{tasksForThisColumn.length}</div>
+				<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>{tasksForThisColumn.length}</div>
 				{/* <RxDotsVertical /> */}
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
