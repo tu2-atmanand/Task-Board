@@ -368,7 +368,10 @@ const en: Lang = {
 	"column-filters-for": "Column filters for",
 	"board-filters-for": "Board filters for",
 	"apply-advanced-board-filters": "Apply advanced board filters",
-	"open-column-menu": "Open column menu"
+	"open-column-menu": "Open column menu",
+	"quick-actions": "Quick actions",
+	"hide-column": "Hide column",
+	"minimize-column": "Minimize column"
 };
 
 export default en;
