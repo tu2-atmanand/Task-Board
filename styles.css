@@ -20,6 +20,12 @@
 	z-index: 20;
 }
 
+.modal[modal-type="task-board-scan-vault-modal"] {
+	width: auto;
+	min-height: auto;
+	max-width: 100vw;
+}
+
 .modal-container[modal-type='task-board-edit-task'] {
 	justify-content: flex-end;
 }
@@ -232,6 +238,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .searchTaskBtn,
+.filterTaskBtn,
 .AddNewTaskBtn,
 .ConfigureBtn,
 .taskboardActionshBtn,
@@ -248,8 +255,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .searchTaskBtn:hover,
+.filterTaskBtn:hover,
 .AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
+.taskboardActionshBtn:hover,
 .RefreshBtn:hover,
 .taskboardActionshBtn:hover {
 	border: var(--border-width) solid olive;
@@ -367,6 +376,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border: 1px solid var(--text-muted);
 	border-radius: 5px;
 	padding-inline: 7px;
+	cursor: pointer;
 }
 
 .columnDragIcon {
@@ -4500,11 +4510,11 @@ svg.react-flow__connectionline {
 	align-items: center;
 	justify-content: center;
 	margin: var(--size-2-2) 0;
-	/* 使用 Obsidian 的尺寸变量 */
+	/* Use Obsidian size variable */
 	color: var(--text-muted);
-	/* 使用 Obsidian 的次要文本颜色 */
+	/* Use Obsidian secondary text color */
 	font-size: var(--font-ui-smaller);
-	/* 使用 Obsidian 的字体大小变量 */
+	/* Use Obsidian font size variable */
 }
 
 .filter-group-separator::before,
@@ -4513,9 +4523,9 @@ svg.react-flow__connectionline {
 	flex-grow: 1;
 	height: 1px;
 	background-color: var(--background-modifier-border);
-	/* 使用 Obsidian 的边框颜色 */
+	/* Use Obsidian border color */
 	margin: 0 var(--size-2-1);
-	/* 使用 Obsidian 的尺寸变量 */
+	/* Use Obsidian size variable */
 }
 
 .drag-handle {
@@ -4525,10 +4535,10 @@ svg.react-flow__connectionline {
 	justify-content: center;
 }
 
-/* 按钮和输入框的较小文本和内边距 */
+/* Smaller text and padding for buttons and inputs */
 .compact-btn {
 	padding: var(--size-2-1) var(--size-2-2);
-	/* 使用 Obsidian 的尺寸变量 */
+	/* Use Obsidian size variable */
 	box-shadow: unset !important;
 	border: unset !important;
 	--icon-size: var(--size-4-4);
@@ -4563,9 +4573,9 @@ svg.react-flow__connectionline {
 .compact-input,
 .compact-select {
 	font-size: var(--font-ui-smaller);
-	/* 使用 Obsidian 的字体大小变量 */
+	/* Use Obsidian font size variable */
 	height: var(--input-height);
-	/* 使用 Obsidian 的输入框高度变量 */
+	/* Use Obsidian input height variable */
 	border: 1px solid var(--background-modifier-border);
 	box-shadow: none;
 }
@@ -4576,30 +4586,49 @@ svg.react-flow__connectionline {
 
 .compact-text {
 	font-size: var(--font-ui-smaller);
-	/* 使用 Obsidian 的字体大小变量 */
+	/* Use Obsidian font size variable */
 }
 
-/* 拖动时的占位符 */
+/* Placeholder while dragging */
 .dragging-placeholder {
 	opacity: 0.5;
 	background-color: var(--background-modifier-hover);
-	/* 使用 Obsidian 的悬停背景色 */
+	/* Use Obsidian hover background color */
 }
 
-/* 如果需要，为过滤器组件的根容器设置样式 */
+/* If needed, set styles for the root container of the filter component */
 .task-filter-root-container.task-popover-content {
 	padding: var(--size-2-2);
-	/* 使用 Obsidian 的尺寸变量 */
+	/* Use Obsidian size variable */
 	max-width: 100%;
 	max-height: 100%;
+}
+
+.task-popover-content.task-popover-content-header {
+	padding: var(--size-2-2);
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	align-items: center;
+}
+
+.task-popover-content-header-heading {
+	margin: 1rem;
+	padding: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.task-popover-content hr {
+	margin: 0 !important;
 }
 
 .task-filter-main-panel {
 	max-width: 100%;
 	padding: var(--size-2-2);
-	/* 使用 Obsidian 的尺寸变量 */
+	/* Use Obsidian size variable */
 	border-radius: var(--radius-m);
-	/* 使用 Obsidian 的圆角变量 */
+	/* Use Obsidian border radius variable */
 }
 
 .filter-menu {
@@ -4610,6 +4639,7 @@ svg.react-flow__connectionline {
 	box-shadow: var(--shadow-s);
 	border: 1px solid var(--background-modifier-border);
 }
+
 
 /* rootFilterSetupSection in TS, corresponds to HTML's #root-filter-container */
 .root-filter-setup-section {
@@ -5058,4 +5088,35 @@ svg.react-flow__connectionline {
 .task-board-view-config-modal .advanced-filter-container .compact-input {
 	font-size: var(--font-ui-smaller);
 	height: 28px;
+}
+
+
+/* src/modal/ConfigureColumnSortingModal.ts */
+
+.configureColumnSortingModalHome {}
+
+.configureColumnSortingModalHomeSortingCriteriaList {}
+
+.configureColumnSortingModalHomeSortingCriteriaListItemRow {
+	display: flex;
+}
+
+.configureColumnSortingModalHomeSortingCriteriaListItem {
+	padding-inline: 5px !important;
+}
+
+.configureColumnSortingModalHomeAddSortingBtn {
+	width: 100%;
+	margin-top: 1rem;
+	background: var(--background-activated-tab-header-dark);
+}
+
+.configureColumnSortingModalHomeButtonContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 1rem;
+	padding-block-start: 2rem;
+	padding-block-end: 1rem;
 }

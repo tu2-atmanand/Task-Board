@@ -62,6 +62,23 @@
               "from": 0,
               "to": 0,
               "dateType": "scheduledDate"
+            },
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1759769822732-we6pfeqpi",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1759769822734-2yqs1dyh5",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": "this"
+                    }
+                  ]
+                }
+              ]
             }
           },
           {
@@ -75,6 +92,22 @@
               "dateType": "scheduledDate",
               "from": -300,
               "to": -1
+            },
+            "sortCriteria": [
+              {
+                "criteria": "scheduledDate",
+                "order": "asc",
+                "priority": 1
+              },
+              {
+                "criteria": "time",
+                "order": "asc",
+                "priority": 2
+              }
+            ],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
             }
           },
           {
@@ -164,7 +197,35 @@
             "collapsed": false,
             "name": "Backlogs",
             "index": 1,
-            "id": 226119
+            "id": 226119,
+            "sortCriterias": [
+              {
+                "criteria": "status",
+                "order": "asc",
+                "priority": 1
+              },
+              {
+                "criteria": "scheduledDate",
+                "order": "asc",
+                "priority": 2
+              },
+              {
+                "criteria": "priority",
+                "order": "desc",
+                "priority": 3
+              }
+            ],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "sortCriteria": [
+              {
+                "criteria": "id",
+                "order": "asc",
+                "priority": 1
+              }
+            ]
           },
           {
             "colType": "namedTag",
@@ -173,7 +234,11 @@
             "name": "Can be implemented",
             "index": 2,
             "coltag": "#pending",
-            "id": 47626
+            "id": 47626,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "colType": "namedTag",
@@ -235,24 +300,36 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1760029960520-z2a1g0ka4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1760029960521-t33fwt542",
-                  "property": "filePath",
-                  "condition": "startsWith",
-                  "value": "Destinatio"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "filterConfig": {
           "enableSavedFilters": true,
-          "savedConfigs": []
+          "savedConfigs": [
+            {
+              "id": "filter-config-1760103432145-fevybeh8j",
+              "name": "Destinatio",
+              "description": "Filtering all tasks from \"Destinatio\" folder",
+              "filterState": {
+                "rootCondition": "any",
+                "filterGroups": [
+                  {
+                    "id": "id-1760029960520-z2a1g0ka4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1760029960521-t33fwt542",
+                        "property": "filePath",
+                        "condition": "startsWith",
+                        "value": "Destinatio"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-10-10T13:37:12.145Z",
+              "updatedAt": "2025-10-10T13:37:12.145Z"
+            }
+          ]
         }
       }
     ],
@@ -266,7 +343,7 @@
           ]
         },
         "folders": {
-          "polarity": 1,
+          "polarity": 3,
           "values": [
             "Task Board/1.7.0"
           ]
@@ -707,13 +784,13 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 235,
+      "uniqueIdCounter": 238,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 1,
         "taskId": ""
       },
       "taskNoteIdentifierTag": "taskNote",

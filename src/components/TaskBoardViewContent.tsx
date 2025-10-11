@@ -32,7 +32,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
-	
+
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
 
 	const [showProgressBar, setShowProgressBar] = useState(true);
@@ -101,13 +101,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// Apply board filters to pending tasks
 			const currentBoard = boards[activeBoardIndex];
 			const boardFilter = currentBoard.boardFilter;
-			
+
 			// Create a copy of allTasks with filtered pending tasks
 			const filteredAllTasks = {
 				...allTasks,
 				Pending: boardFilterer(allTasks.Pending, boardFilter)
 			};
-			
+
 			return currentBoard.columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
@@ -252,12 +252,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 		// Create and show popover
 		const popover = new ViewTaskFilterPopover(
-			app,
-			undefined,
 			plugin,
-			activeBoardIndex
+			false, // forColumn = false since this is for board-level filter
+			undefined,
+			activeBoardIndex,
+			boards[activeBoardIndex]?.name || "Board",
 		);
-		
+
 		// Load existing filter state if available
 		const currentBoard = boards[activeBoardIndex];
 		if (currentBoard.boardFilter) {
@@ -276,7 +277,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				const updatedBoards = [...boards];
 				updatedBoards[activeBoardIndex].boardFilter = filterState;
 				setBoards(updatedBoards);
-				
+
 				// Persist to settings
 				plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
 				await plugin.saveSettings();
@@ -344,9 +345,9 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
 					</button>
 
-					<button 
-						className="filterTaskBtn" 
-						aria-label={t("filter-tasks")}
+					<button
+						className="filterTaskBtn"
+						aria-label={t("apply-advanced-board-filters")}
 						onClick={handleFilterButtonClick}
 					>
 						<Filter size={18} />

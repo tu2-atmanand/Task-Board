@@ -47,10 +47,6 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
-import {
-	allowedFileExtensionsRegEx,
-	notAllowedFileExtensionsRegEx,
-} from "src/regularExpressions/MiscelleneousRegExpr";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 
 export default class TaskBoard extends Plugin {

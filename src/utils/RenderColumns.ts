@@ -9,6 +9,8 @@ import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { matchTagsWithWildcards } from "./FiltersVerifier";
 import { getAllTaskTags } from "./TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { boardFilterer } from "./boardFilterer";
+import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 
 // Function to refresh tasks in any column by calling this utility function
 export const renderColumns = (
@@ -229,16 +231,17 @@ export const renderColumns = (
 		const tasksLimit =
 			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
 
-		const sortedCompletedTasks = completedTasks.sort((a, b): number => {
-			if (a.completion && b.completion) {
-				const dateA = new Date(a.completion).getTime();
-				const dateB = new Date(b.completion).getTime();
-				return dateB - dateA;
-			}
-			return 0;
-		});
+		// This sorting will be done through the columnData.sortCriteria for this column if its configured
+		// const sortedCompletedTasks = completedTasks.sort((a, b): number => {
+		// 	if (a.completion && b.completion) {
+		// 		const dateA = new Date(a.completion).getTime();
+		// 		const dateB = new Date(b.completion).getTime();
+		// 		return dateB - dateA;
+		// 	}
+		// 	return 0;
+		// });
 
-		tasksToDisplay = sortedCompletedTasks.slice(0, tasksLimit);
+		tasksToDisplay = completedTasks.slice(0, tasksLimit);
 	} else if (columnData.colType === "taskStatus") {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.status === columnData.taskStatus
@@ -249,6 +252,18 @@ export const renderColumns = (
 		);
 	}
 
-	// setTasks(tasksToDisplay);
+	// Apply column-specific filters if configured
+	if (columnData.filters) {
+		tasksToDisplay = boardFilterer(tasksToDisplay, columnData.filters);
+	}
+
+	// Apply column-specific sorting if configured
+	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
+		tasksToDisplay = columnSortingAlgorithm(
+			tasksToDisplay,
+			columnData.sortCriteria
+		);
+	}
+
 	return tasksToDisplay;
 };

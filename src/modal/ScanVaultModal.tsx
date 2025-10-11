@@ -229,8 +229,7 @@ export class ScanVaultModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		this.modalEl.setAttribute('data-type', 'task-board-view');
-		contentEl.setAttribute('data-type', 'task-board-view');
+		this.modalEl.setAttribute('modal-type', 'task-board-scan-vault-modal');
 
 		const root = ReactDOM.createRoot(this.contentEl);
 

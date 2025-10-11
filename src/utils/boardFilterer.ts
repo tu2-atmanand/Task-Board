@@ -6,9 +6,7 @@ import {
 	Filter,
 	FilterGroup,
 } from "src/components/BoardFilters/ViewTaskFilter";
-import {
-	getFormattedTaskContentSync,
-} from "./TaskContentFormatter";
+import { getFormattedTaskContentSync } from "./TaskContentFormatter";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -205,6 +203,9 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "body":
 		case "description":
 			return task.body.join("\n");
+		case "createdDate":
+		case "created":
+			return task.createdDate;
 		case "dueDate":
 		case "due":
 			return task.due;
@@ -214,9 +215,6 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "scheduledDate":
 		case "scheduled":
 			return task.scheduledDate;
-		case "createdDate":
-		case "created":
-			return task.createdDate;
 		case "completion":
 		case "completedDate":
 		case "done":

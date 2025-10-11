@@ -49,7 +49,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
-	const [filtersData, setFiltersData] = useState<string>(localBoards[activeBoardIndex]?.filters?.join(", ") || "");
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -180,9 +179,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			index: localBoards.length,
 			columns: [],
 			hideEmptyColumns: false,
-			filters: [],
-			filterPolarity: "0",
-			filterScope: "",
 			showColumnTags: true,
 			showFilteredTags: true
 		};
@@ -303,21 +299,21 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
-	const handleFiltersChange = (boardIndex: number, value: string) => {
-		setFiltersData(value);
-		const updatedBoards = [...localBoards];
-		// Split input string by commas and trim spaces to create an array
-		updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
+	// const handleFiltersChange = (boardIndex: number, value: string) => {
+	// 	setFiltersData(value);
+	// 	const updatedBoards = [...localBoards];
+	// 	// Split input string by commas and trim spaces to create an array
+	// 	updatedBoards[boardIndex].filters = value.split(",").map(tag => tag.trim());
+	// 	setLocalBoards(updatedBoards);
+	// 	setIsEdited(true);
+	// };
 
-	const handleFilterPolarityChange = (boardIndex: number, value: string) => {
-		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex].filterPolarity = value;
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
-	};
+	// const handleFilterPolarityChange = (boardIndex: number, value: string) => {
+	// 	const updatedBoards = [...localBoards];
+	// 	updatedBoards[boardIndex].filterPolarity = value;
+	// 	setLocalBoards(updatedBoards);
+	// 	setIsEdited(true);
+	// };
 
 	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags' | 'hideEmptyColumns';
 	const handleToggleChange = (boardIndex: number, field: BooleanBoardProperties, value: boolean) => {
@@ -344,8 +340,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			!localBoards[selectedBoardIndex]
 		)
 			return;
-
-		setFiltersData(localBoards[selectedBoardIndex].filters?.join(", ") || "");
 
 		const sortable = Sortable.create(columnListRef.current, {
 			animation: 150,
@@ -438,45 +432,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 					<hr className="boardConfigModalHr-100" />
 
-					<h3>{t("board-filters")}</h3>
-					<div className="boardConfigModalMainContent-Active-Body-InputItems">
-						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<div className="boardConfigModalSettingName">{t("filter-tags")}</div>
-							<div className="boardConfigModalSettingDescription">{t("filter-tags-setting-info")}</div>
-						</div>
-						<input
-							type="text"
-							placeholder={t("filter-tags-input-placeholder")}
-							value={filtersData}
-							onChange={(e) => handleFiltersChange(boardIndex, e.target.value)}
-						/>
-					</div>
-					<div className="boardConfigModalMainContent-Active-Body-InputItems">
-						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<div className="boardConfigModalSettingName">{t("filter-polarity")}</div>
-							<div className="boardConfigModalSettingDescription">{t("filter-polarity-info")}</div>
-						</div>
-						<select
-							value={board.filterPolarity}
-							onChange={(e) => handleFilterPolarityChange(boardIndex, e.target.value)}
-						>
-							<option value="1">{t("activate")}</option>
-							<option value="0">{t("deactivate")}</option>
-						</select>
-					</div>
-					<div className="boardConfigModalMainContent-Active-Body-InputItems">
-						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<div className="boardConfigModalSettingName">{t("show-filtered-tags")}</div>
-							<div className="boardConfigModalSettingDescription">{t("show-filtered-tags-info")}</div>
-						</div>
-						<input
-							type="checkbox"
-							checked={board.showFilteredTags}
-							onChange={(e) => handleToggleChange(boardIndex, "showFilteredTags", e.target.checked)}
-						/>
-					</div>
-
-					<hr className="boardConfigModalHr-100" />
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t("columns")}</h3>
 						<div

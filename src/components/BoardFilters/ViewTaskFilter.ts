@@ -64,7 +64,8 @@ export class TaskFilterComponent extends Component {
 		app: App,
 		private leafId?: string | undefined,
 		plugin?: TaskBoard,
-		activeBoardIndex?: number
+		activeBoardIndex?: number,
+		private initialFilterState?: RootFilterState
 	) {
 		super();
 		this.hostEl = hostEl;
@@ -74,32 +75,38 @@ export class TaskFilterComponent extends Component {
 	}
 
 	onload() {
-		const savedState = this.leafId
-			? this.app.loadLocalStorage(
-					`task-board-view-filter-${this.leafId}`
-			  )
-			: this.app.loadLocalStorage("task-board-view-filter");
-
-		console.log("savedState", savedState, this.leafId);
-		if (
-			savedState &&
-			typeof (savedState as any).rootCondition === "string" &&
-			Array.isArray((savedState as any).filterGroups)
-		) {
-			// Basic validation passed
-			this.rootFilterState = savedState as RootFilterState;
+		// If initial filter state is provided (for column filters), use it
+		if (this.initialFilterState) {
+			this.rootFilterState = this.initialFilterState;
 		} else {
-			if (savedState) {
-				// If it exists but failed validation
-				console.warn(
-					"Task Filter: Invalid data in local storage. Resetting to default state."
-				);
+			// Otherwise, load from localStorage (for board filters)
+			const savedState = this.leafId
+				? this.app.loadLocalStorage(
+						`task-board-view-filter-${this.leafId}`
+				  )
+				: this.app.loadLocalStorage("task-board-view-filter");
+
+			console.log("savedState", savedState, this.leafId);
+			if (
+				savedState &&
+				typeof (savedState as any).rootCondition === "string" &&
+				Array.isArray((savedState as any).filterGroups)
+			) {
+				// Basic validation passed
+				this.rootFilterState = savedState as RootFilterState;
+			} else {
+				if (savedState) {
+					// If it exists but failed validation
+					console.warn(
+						"Task Filter: Invalid data in local storage. Resetting to default state."
+					);
+				}
+				// Initialize with default state
+				this.rootFilterState = {
+					rootCondition: "any",
+					filterGroups: [],
+				};
 			}
-			// Initialize with default state
-			this.rootFilterState = {
-				rootCondition: "any",
-				filterGroups: [],
-			};
 		}
 
 		// Render first to initialize DOM elements
@@ -729,15 +736,17 @@ export class TaskFilterComponent extends Component {
 		if (propertySelect.selectEl.options.length === 0) {
 			propertySelect.addOptions({
 				content: t("content"),
+				id: t("id"),
 				status: t("status"),
 				priority: t("priority"),
-				dueDate: t("due-date"),
+				tags: t("tags"),
+				createdDate: t("created-date"),
 				startDate: t("start-date"),
 				scheduledDate: t("scheduled-date"),
-				tags: t("tags"),
+				dueDate: t("due-date"),
+				completed: t("completed-date"),
 				filePath: t("file-path"),
 				// project: t("project"),
-				completed: t("completed"),
 			});
 		}
 		propertySelect.setValue(property);
@@ -802,6 +811,8 @@ export class TaskFilterComponent extends Component {
 					},
 				];
 				break;
+			case "id":
+			case "createdDate":
 			case "dueDate":
 			case "startDate":
 			case "scheduledDate":

@@ -409,11 +409,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 											return null;
 										}
 
-										// If showFilteredTags is false, skip tags in the filters array
-										if (!activeBoardSettings?.showFilteredTags && activeBoardSettings?.filters && activeBoardSettings?.filters.length > 0 && matchTagsWithWildcards(activeBoardSettings?.filters, tag) && parseInt(activeBoardSettings?.filterPolarity || "0")) {
-											return null;
-										}
-
 										const tagKey = `${task.id}-${tag}`;
 										// Render the remaining tags
 										return (
