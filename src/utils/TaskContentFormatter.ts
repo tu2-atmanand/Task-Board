@@ -628,68 +628,102 @@ export const sanitizeTime = (
 	newTime: string,
 	cursorLocation?: cursorLocation
 ): string => {
-	const timeAtStartRegex = /^\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
+	console.log(
+		"sanitizeTime : Parameters received :\ntitle :",
+		title,
+		"\nnewTime :",
+		newTime,
+		"\nCurrentLocation :",
+		cursorLocation
+	);
+	const timeAtStartRegex = /]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
 	const timeFormatsRegex =
-		/\s*(⏰\s*\[.*?\]|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|@time\(.*?\))/g; // Match all three formats
+		/\s*(⏰\s*(\[.*?\]|(\d{2}:\d{2}\s*-\s*\d{2}:\d{2}))|\[time::(.*?)\]|@time\((.*?)\))/g; // Match all three formats
 
+	// Match both the time formats
+	const timeAtStartMatch = title.match(timeAtStartRegex);
+	console.log("Match 1 :", timeAtStartMatch);
+	// const timeFormatMatch = title.match(timeFormatsRegex);
+
+	let timeFormatMatch: string[] | null = null;
+	let match = timeFormatsRegex.exec(title);
+	console.log("Match 2 :", match);
+	if (match) {
+		timeFormatMatch = [];
+		timeFormatMatch.push(match[0].trim()); // original match
+		timeFormatMatch.push(match[3] || match[4] || match[5]); // extracted time range
+	}
+
+	// If newtime is empty, that means, either time was not present from initially, or it has been removed now in the modal.
+	if (newTime === "") {
+		if (timeAtStartMatch) {
+			return title.replace(timeAtStartMatch[1], "").trim();
+		}
+
+		if (timeFormatMatch) {
+			return title.replace(timeFormatMatch[0], "").trim();
+		}
+
+		return title;
+	}
+
+	// If dayPlanner plugin compatibility is enabled then place the time value at the start of the title only.
 	if (globalSettings.compatiblePlugins.dayPlannerPlugin) {
-		const timeAtStartMatch = title.match(timeAtStartRegex);
 		if (timeAtStartMatch) {
 			// If time is at the start of the title, replace it
-			return title.replace(timeAtStartMatch[0], newTime);
+			return title.replace(timeAtStartMatch[1], newTime);
 		}
 
-		const timeFormatMatch = title.match(timeFormatsRegex);
 		if (timeFormatMatch) {
-			// If time is present in any format, move it to the start
+			// If time is present in any format, remove it and add this new time at the start
 			title = title.replace(timeFormatsRegex, "").trim();
-			return `${newTime} ${title}`;
 		}
-
+		
 		// If no time is present, add it at the start
-		return `${newTime} ${title}`;
+		const beforePosition = title.slice(0, 5).trim();
+		const afterPosition = title.slice(5).trim();
+		return `${beforePosition} ${newTime} ${afterPosition}`;
 	} else {
-		const timeAtStartMatch = title.match(timeAtStartRegex);
-		const timeFormatMatch = title.match(timeFormatsRegex);
-
-		if (newTime === "") {
-			if (timeAtStartMatch) {
-				return title.replace(timeAtStartMatch[0], "").trim();
-			}
-
-			if (timeFormatMatch) {
-				return title.replace(timeFormatMatch[0], "").trim();
-			}
-
-			return title;
-		}
-
 		let newTimeWithFormat: string = "";
 		if (globalSettings.taskPropertyFormat === "1") {
 			newTimeWithFormat = `⏰[${newTime}]`;
 		} else if (globalSettings.taskPropertyFormat === "2") {
-			newTimeWithFormat = `⏰ [${newTime}]`;
+			newTimeWithFormat = `⏰ ${newTime}`;
 		} else if (globalSettings.taskPropertyFormat === "3") {
 			newTimeWithFormat = `[time:: ${newTime}]`;
 		} else {
 			newTimeWithFormat = `@time(${newTime})`;
 		}
 
+		// Remove the time from the beginning of the title
+		if (timeAtStartMatch) {
+			title.replace(timeAtStartMatch[1], "");
+		}
+
 		if (timeFormatMatch) {
-			return title.replace(timeFormatsRegex, newTimeWithFormat);
+			return title.replace(timeFormatMatch[0], newTimeWithFormat);
 		}
 
 		if (cursorLocation?.lineNumber === 1) {
+			const titleWithStar =
+				title.slice(0, cursorLocation.charIndex) +
+				"*" +
+				title.slice(cursorLocation.charIndex);
+			console.log("A * at the cursor position :", titleWithStar);
 			// Insert newTimeWithFormat at the specified charIndex with spaces
-			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
-			const spaceAfter =
-				" " + title.slice(cursorLocation.charIndex).trim();
-			return `${spaceBefore}${newTimeWithFormat}${spaceAfter}`;
+			const spaceBefore = title.slice(0, cursorLocation.charIndex).trim();
+			const spaceAfter = title.slice(cursorLocation.charIndex).trim();
+			console.log(
+				"spaceBefore :",
+				spaceBefore,
+				"\nspaceAfter :",
+				spaceAfter
+			);
+			return `${spaceBefore} ${newTimeWithFormat} ${spaceAfter}`;
 		}
 
 		// If no time is present, append it at the end
-		return `${title} ${newTimeWithFormat}`;
+		return `${title} ${newTimeWithFormat} `;
 	}
 };
 

@@ -20,6 +20,12 @@
 	z-index: 20;
 }
 
+.modal[modal-type="task-board-scan-vault-modal"] {
+	width: auto;
+	min-height: auto;
+	max-width: 100vw;
+}
+
 .modal-container[modal-type='task-board-edit-task'] {
 	justify-content: flex-end;
 }
@@ -232,6 +238,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .searchTaskBtn,
+.filterTaskBtn,
 .AddNewTaskBtn,
 .ConfigureBtn,
 .taskboardActionshBtn,
@@ -248,8 +255,10 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .searchTaskBtn:hover,
+.filterTaskBtn:hover,
 .AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
+.taskboardActionshBtn:hover,
 .RefreshBtn:hover,
 .taskboardActionshBtn:hover {
 	border: var(--border-width) solid olive;
@@ -367,6 +376,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	border: 1px solid var(--text-muted);
 	border-radius: 5px;
 	padding-inline: 7px;
+	cursor: pointer;
 }
 
 .columnDragIcon {
@@ -5078,4 +5088,35 @@ svg.react-flow__connectionline {
 .task-board-view-config-modal .advanced-filter-container .compact-input {
 	font-size: var(--font-ui-smaller);
 	height: 28px;
+}
+
+
+/* src/modal/ConfigureColumnSortingModal.ts */
+
+.configureColumnSortingModalHome {}
+
+.configureColumnSortingModalHomeSortingCriteriaList {}
+
+.configureColumnSortingModalHomeSortingCriteriaListItemRow {
+	display: flex;
+}
+
+.configureColumnSortingModalHomeSortingCriteriaListItem {
+	padding-inline: 5px !important;
+}
+
+.configureColumnSortingModalHomeAddSortingBtn {
+	width: 100%;
+	margin-top: 1rem;
+	background: var(--background-activated-tab-header-dark);
+}
+
+.configureColumnSortingModalHomeButtonContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 1rem;
+	padding-block-start: 2rem;
+	padding-block-end: 1rem;
 }

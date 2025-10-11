@@ -347,7 +347,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 					<button
 						className="filterTaskBtn"
-						aria-label={t("filter-tasks")}
+						aria-label={t("apply-advanced-board-filters")}
 						onClick={handleFilterButtonClick}
 					>
 						<Filter size={18} />

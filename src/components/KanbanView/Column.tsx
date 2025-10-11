@@ -78,12 +78,12 @@ const Column: React.FC<ColumnProps> = ({
 		const sortMenu = new Menu();
 
 		sortMenu.addItem((item) => {
-			item.setTitle(t("Sort and filter"));
-			item.setIcon("clock-arrow-down");
+			item.setTitle(t("sort-and-filter"));
 			item.setIsLabel(true);
 		});
 		sortMenu.addItem((item) => {
-			item.setTitle(t("Configure column sorting"));
+			item.setTitle(t("configure-column-sorting"));
+			item.setIcon("arrow-up-down");
 			item.onClick(async () => {
 				// open sorting modal
 				const modal = new ConfigureColumnSortingModal(
@@ -107,8 +107,7 @@ const Column: React.FC<ColumnProps> = ({
 								// Save the settings
 								plugin.saveSettings();
 
-								// Refresh the board view if needed (you may need to add a refresh method to the parent component)
-								// plugin.taskBoardView?.refresh();
+								eventEmitter.emit('REFRESH_BOARD');
 							}
 						}
 					},
@@ -120,7 +119,8 @@ const Column: React.FC<ColumnProps> = ({
 			});
 		});
 		sortMenu.addItem((item) => {
-			item.setTitle(t("Configure column filtering"));
+			item.setTitle(t("configure-column-filtering"));
+			item.setIcon("list-filter");
 			item.onClick(async () => {
 				// Get the position of the menu (approximate column position)
 				// Use CSS.escape to properly escape the selector value
@@ -161,7 +161,7 @@ const Column: React.FC<ColumnProps> = ({
 							await plugin.saveSettings();
 
 							// Refresh the board view
-							eventEmitter.emit('REFRESH_COLUMN');
+							eventEmitter.emit('REFRESH_BOARD');
 						}
 					}
 				};
@@ -171,6 +171,25 @@ const Column: React.FC<ColumnProps> = ({
 		});
 
 		sortMenu.addSeparator();
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("quick-actions"));
+			item.setIsLabel(true);
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("hide-column"));
+			item.setIcon("eye-off");
+			item.onClick(async () => {
+				// TODO : Pending to implement. Simply change the active property of the columnData to false for this column and refresh using emit.
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("minimize-column"));
+			item.setIcon("panel-left-close");
+			item.onClick(async () => {
+				// TODO : Pending to develop
+			});
+		});
 
 		// Use native event if available (React event has nativeEvent property)
 		sortMenu.showAtMouseEvent(
@@ -185,7 +204,7 @@ const Column: React.FC<ColumnProps> = ({
 					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 					<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 				</div>
-				<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)}>{tasksForThisColumn.length}</div>
+				<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>{tasksForThisColumn.length}</div>
 				{/* <RxDotsVertical /> */}
 			</div>
 			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
