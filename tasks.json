@@ -1,7 +1,107 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-11T06:07:41.873Z",
+    "Modified_at": "2025-10-11T10:46:26.213Z",
     "Pending": {
+        "Important Note.md": [
+            {
+                "id": 222,
+                "legacyId": "222",
+                "status": " ",
+                "title": "- [ ] This is a task title, keep it short. #pending #doc 🆔 222 ⛔ 224,225 ⏫ 🔁 every day 🏁 keep ➕ 2025-09-28 🛫 2025-09-28 ⏳ 2025-09-29 📅 2025-09-29⏰[16:00 - 17:00] ",
+                "body": [
+                    "\t- [ ] This is a first sub-task.",
+                    "\tElaborate and explain the task here. Add links, embeddings or any other resources.",
+                    "\t![[Pasted image 20250928160808.png]]",
+                    "\t- This task is dependent on two other tasks.",
+                    "\t- One of the dependency has been completed."
+                ],
+                "time": "16:00 - 17:00",
+                "createdDate": "2025-09-28",
+                "startDate": "2025-09-28",
+                "scheduledDate": "2025-09-29",
+                "due": "2025-09-29",
+                "tags": [
+                    "#pending",
+                    "#doc"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "dependsOn": [
+                    "224",
+                    "225"
+                ],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 44
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 224,
+                "legacyId": "224",
+                "status": " ",
+                "title": "- [ ] 18:12 - 12:12 This is a child task for 222. 📅 2025-09-29 ⏳ 2025-09-29 🔼 🆔 224 #working",
+                "body": [],
+                "time": "18:12 - 12:12",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-09-29",
+                "due": "2025-09-29",
+                "tags": [
+                    "#working"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 10,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 95
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2886700742,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] This is a task which contains long links in its sub-tasks. #pending ",
+                "body": [
+                    "\t- [ ] https://forum.obsidian.md/t/new-plugin-edit-transcluded-embedded-notes-blocks-in-place/106257",
+                    "\t- [ ] https://forum.obsidian.md/t/option-to-hide-show-top-bar-s-when-note-is-scrolled-when-keyboard-appears-disappears/69610/20",
+                    "\t- [ ] https://forum.obsidian.md/t/issues-with-context-aware-embedded-base-searching-for-files-with-tags-by-this-tags/106468"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 17,
+                    "startCharIndex": 0,
+                    "endLine": 20,
+                    "endCharIndex": 124
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "TaskNotes/2025-09-23T00_15.md": [
             {
                 "id": 2285824121,
@@ -259,106 +359,6 @@
                     "startCharIndex": 0,
                     "endLine": 6,
                     "endCharIndex": 52
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Important Note.md": [
-            {
-                "id": 222,
-                "legacyId": "222",
-                "status": " ",
-                "title": "- [ ] This is a task title, keep it short. #pending #doc 🆔 222 ⛔ 224,225 ⏫ 🔁 every day 🏁 keep ➕ 2025-09-28 🛫 2025-09-28 ⏳ 2025-09-29 📅 2025-09-29⏰[16:00 - 17:00] ",
-                "body": [
-                    "\t- [ ] This is a first sub-task.",
-                    "\tElaborate and explain the task here. Add links, embeddings or any other resources.",
-                    "\t![[Pasted image 20250928160808.png]]",
-                    "\t- This task is dependent on two other tasks.",
-                    "\t- One of the dependency has been completed."
-                ],
-                "time": "16:00 - 17:00",
-                "createdDate": "2025-09-28",
-                "startDate": "2025-09-28",
-                "scheduledDate": "2025-09-29",
-                "due": "2025-09-29",
-                "tags": [
-                    "#pending",
-                    "#doc"
-                ],
-                "frontmatterTags": [],
-                "priority": 2,
-                "dependsOn": [
-                    "224",
-                    "225"
-                ],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 2,
-                    "startCharIndex": 0,
-                    "endLine": 7,
-                    "endCharIndex": 44
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 224,
-                "legacyId": "224",
-                "status": " ",
-                "title": "- [ ] This is a child task for 222. 📅 2025-09-29 ⏳ 2025-09-29 🔼 🆔 224 #working ",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-09-29",
-                "due": "2025-09-29",
-                "tags": [
-                    "#working"
-                ],
-                "frontmatterTags": [],
-                "priority": 3,
-                "dependsOn": [],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 10,
-                    "startCharIndex": 0,
-                    "endLine": 10,
-                    "endCharIndex": 82
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3217531483,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] This is a task which contains long links in its sub-tasks. #pending ",
-                "body": [
-                    "\t- [ ] https://forum.obsidian.md/t/new-plugin-edit-transcluded-embedded-notes-blocks-in-place/106257",
-                    "\t- [ ] https://forum.obsidian.md/t/option-to-hide-show-top-bar-s-when-note-is-scrolled-when-keyboard-appears-disappears/69610/20",
-                    "\t- [ ] https://forum.obsidian.md/t/issues-with-context-aware-embedded-base-searching-for-files-with-tags-by-this-tags/106468"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 17,
-                    "startCharIndex": 0,
-                    "endLine": 20,
-                    "endCharIndex": 124
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1171,6 +1171,34 @@
         ]
     },
     "Completed": {
+        "Important Note.md": [
+            {
+                "id": 225,
+                "legacyId": "225",
+                "status": "x",
+                "title": "- [x] This is another child task for the image card. 🆔 225 ✅ 2025-09-28",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 13,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 72
+                },
+                "completion": "2025-09-28",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "A QMD file.qmd": [
             {
                 "id": 854625553,
@@ -1225,34 +1253,6 @@
                     "endCharIndex": 38
                 },
                 "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Important Note.md": [
-            {
-                "id": 225,
-                "legacyId": "225",
-                "status": "x",
-                "title": "- [x] This is another child task for the image card. 🆔 225 ✅ 2025-09-28",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 13,
-                    "startCharIndex": 0,
-                    "endLine": 13,
-                    "endCharIndex": 72
-                },
-                "completion": "2025-09-28",
                 "cancelledDate": "",
                 "reminder": ""
             }
