@@ -208,9 +208,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		const filtered = allTasksArrangedPerColumn.map((column) => {
 			const filteredTasks = column
 				.filter((task) => {
-					const titleMatch = task.title.toLowerCase().includes(lowerQuery);
-					const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
-					return titleMatch || bodyMatch;
+					if (lowerQuery.startsWith("file:")) {
+						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+					} else {
+						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
+						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						return titleMatch || bodyMatch;
+					}
 				});
 			// .map((task) => {
 			// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
