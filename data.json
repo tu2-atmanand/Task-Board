@@ -134,7 +134,14 @@
               "dateType": "scheduledDate",
               "from": 0,
               "to": 0
-            }
+            },
+            "sortCriteria": [
+              {
+                "criteria": "time",
+                "order": "asc",
+                "priority": 1
+              }
+            ]
           },
           {
             "id": 3493,
@@ -209,20 +216,7 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1759769822732-we6pfeqpi",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1759769822734-2yqs1dyh5",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "this"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         }
       },
       {
@@ -820,7 +814,7 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 238,
+      "uniqueIdCounter": 239,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
