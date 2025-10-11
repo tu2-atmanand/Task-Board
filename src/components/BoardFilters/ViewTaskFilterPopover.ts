@@ -5,38 +5,45 @@ import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import { TaskFilterComponent, RootFilterState } from "./ViewTaskFilter";
 import type TaskBoard from "main";
+import { t } from "src/utils/lang/helper";
 
 export class ViewTaskFilterPopover
 	extends Component
 	implements CloseableComponent
 {
+	private plugin: TaskBoard;
 	private app: App;
 	public popoverRef: HTMLDivElement | null = null;
+	public forColumn: boolean;
 	public taskFilterComponent!: TaskFilterComponent;
 	private win: Window;
 	private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
 	public onClose: ((filterState?: RootFilterState) => void) | null = null;
-	private plugin?: TaskBoard;
 	private activeBoardIndex?: number;
-	private columnName?: string;
+	private columnOrBoardName?: string;
 	private initialFilterState?: RootFilterState;
 
 	constructor(
-		app: App,
+		plugin: TaskBoard,
+		forColumn: boolean,
 		private leafId?: string | undefined,
-		plugin?: TaskBoard,
 		activeBoardIndex?: number,
-		columnName?: string,
+		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState
 	) {
 		super();
-		this.app = app;
 		this.plugin = plugin;
+		this.app = plugin.app;
+		this.forColumn = forColumn;
 		this.activeBoardIndex = activeBoardIndex;
-		this.columnName = columnName;
+		this.columnOrBoardName = columnOrBoardName;
+		console.log(
+			"ViewTaskFilterPopover - initialFilterState:",
+			initialFilterState
+		);
 		this.initialFilterState = initialFilterState;
-		this.win = app.workspace.containerEl.win || window;
+		this.win = plugin.app.workspace.containerEl.win || window;
 
 		this.scrollParent = this.win;
 	}
@@ -51,23 +58,37 @@ export class ViewTaskFilterPopover
 
 		// Create content container
 		const contentEl = createDiv({ cls: "task-popover-content" });
-
-		// Add column filter heading if this is for a column
-		if (this.columnName) {
-			contentEl.createEl("h3", {
-				text: `Column filters for ${this.columnName}`,
-				cls: "column-filter-heading"
-			});
-		}
-
 		// Prevent clicks inside the popover from bubbling up
 		this.registerDomEvent(contentEl, "click", (e) => {
 			e.stopPropagation();
 		});
 
+		const headerEl = contentEl.createDiv({
+			cls: "task-popover-content-header",
+		});
+		// Add column filter heading if this is for a column
+		if (this.forColumn) {
+			headerEl.createEl("h3", {
+				text: t("Column filters for ") + this.columnOrBoardName,
+				cls: "task-popover-content-header-heading",
+			});
+		} else {
+			headerEl.createEl("h3", {
+				text: t("Board filters for ") + this.columnOrBoardName,
+				cls: "task-popover-content-header-heading",
+			});
+		}
+
+		// Add a horizontal rule
+		contentEl.createEl("hr");
+
+		const taskFilterContainer = contentEl.createDiv({
+			cls: "task-popover-content-body",
+		});
+
 		// Create metadata editor, use compact mode
 		this.taskFilterComponent = new TaskFilterComponent(
-			contentEl,
+			taskFilterContainer,
 			this.app,
 			this.leafId,
 			this.plugin,

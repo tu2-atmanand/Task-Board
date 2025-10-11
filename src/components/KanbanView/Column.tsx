@@ -126,7 +126,7 @@ const Column: React.FC<ColumnProps> = ({
 				// Use CSS.escape to properly escape the selector value
 				const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
 				const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
-				const position = columnElement 
+				const position = columnElement
 					? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
 					: { x: 100, y: 100 }; // Fallback position
 
@@ -138,9 +138,9 @@ const Column: React.FC<ColumnProps> = ({
 				// Create and show filter popover
 				// leafId is undefined for column filters (not tied to a specific leaf)
 				const popover = new ViewTaskFilterPopover(
-					plugin.app,
-					undefined,
 					plugin,
+					true, // forColumn is true
+					undefined,
 					boardIndex,
 					columnData.name,
 					columnData.filters
