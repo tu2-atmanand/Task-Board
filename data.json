@@ -181,7 +181,11 @@
                 "order": "desc",
                 "priority": 3
               }
-            ]
+            ],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "colType": "namedTag",
@@ -190,7 +194,11 @@
             "name": "Can be implemented",
             "index": 2,
             "coltag": "#pending",
-            "id": 47626
+            "id": 47626,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "colType": "namedTag",
