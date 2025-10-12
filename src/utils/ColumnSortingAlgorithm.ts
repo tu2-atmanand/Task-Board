@@ -1,12 +1,17 @@
 // /src/utils/ColumnSortingAlgorithm.ts
 
+import type TaskBoard from "main";
 import { columnSortingCriteria } from "src/interfaces/BoardConfigs";
 import { taskItem } from "src/interfaces/TaskItem";
 
 /**
  * Gets the property value from a task based on the criteria name
  */
-function getTaskPropertyValue(task: taskItem, criteria: string): any {
+function getTaskPropertyValue(
+	plugin: TaskBoard,
+	task: taskItem,
+	criteria: string
+): any {
 	switch (criteria) {
 		case "content":
 			return task.title;
@@ -36,7 +41,28 @@ function getTaskPropertyValue(task: taskItem, criteria: string): any {
 			// Context is not yet implemented in taskItem
 			return "";
 		case "time":
-			return task.time;
+			if (task.time) {
+				return task.time;
+			}
+			if (plugin.settings.data.globalSettings.defaultStartTime) {
+				return `${
+					plugin.settings.data.globalSettings.defaultStartTime
+				} - ${
+					plugin.settings.data.globalSettings.defaultStartTime
+						.split(":")[0]
+						.trim() === "23"
+						? "00"
+						: Number(
+								plugin.settings.data.globalSettings.defaultStartTime
+									.split(":")[0]
+									.trim()
+						  ) + 1
+				}:${plugin.settings.data.globalSettings.defaultStartTime
+					.split(":")[1]
+					.trim()}`;
+			} else {
+				return "";
+			}
 		case "recurrence":
 			// Recurrence is not yet implemented in taskItem
 			return "";
@@ -98,7 +124,7 @@ function compareTimes(time1: any, time2: any, order: "asc" | "desc"): number {
 
 	const t1 = extractStartTime(String(time1));
 	const t2 = extractStartTime(String(time2));
-	
+
 	// Parse time to compare numerically (handles both "9:00" and "09:00")
 	const parseTime = (timeStr: string): number => {
 		const parts = timeStr.split(":");
@@ -112,7 +138,7 @@ function compareTimes(time1: any, time2: any, order: "asc" | "desc"): number {
 
 	const time1Minutes = parseTime(t1);
 	const time2Minutes = parseTime(t2);
-	
+
 	// Treat invalid times as equal
 	if (time1Minutes < 0 && time2Minutes < 0) return 0;
 	if (time1Minutes < 0) return order === "asc" ? 1 : -1; // Invalid times go to end for asc
@@ -158,11 +184,11 @@ function compareValues(
 		const hasValue2 = value2 !== undefined && value2 !== null;
 
 		if (!hasValue1 && !hasValue2) return 0;
-		
+
 		// Handle priority 0 (none) - should be treated as "no priority"
 		const isNone1 = value1 === 0;
 		const isNone2 = value2 === 0;
-		
+
 		if (isNone1 && isNone2) return 0;
 		// For ascending (High->Low->None): none goes to end
 		if (isNone1) return order === "asc" ? 1 : -1;
@@ -231,6 +257,7 @@ function compareValues(
  * @returns Sorted array of tasks
  */
 export function columnSortingAlgorithm(
+	plugin: TaskBoard,
 	tasksToDisplay: taskItem[],
 	sortCriteria: columnSortingCriteria[]
 ): taskItem[] {
@@ -258,8 +285,20 @@ export function columnSortingAlgorithm(
 		const criterion = orderedCriteria[i];
 
 		sortedTasks = sortedTasks.sort((taskA, taskB) => {
-			const valueA = getTaskPropertyValue(taskA, criterion.criteria);
-			const valueB = getTaskPropertyValue(taskB, criterion.criteria);
+			const valueA = getTaskPropertyValue(
+				plugin,
+				taskA,
+				criterion.criteria
+			);
+			const valueB = getTaskPropertyValue(
+				plugin,
+				taskB,
+				criterion.criteria
+			);
+
+			if (criterion.criteria === "time") {
+				console.log("valueA :", valueA, "\nvalueB :", valueB);
+			}
 
 			const comparison = compareValues(
 				valueA,

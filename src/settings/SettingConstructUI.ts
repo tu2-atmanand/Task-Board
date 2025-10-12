@@ -1487,6 +1487,7 @@ export class SettingsManager {
 
 		const {
 			universalDateFormat,
+			defaultStartTime,
 			taskPropertyFormat,
 			// taskCompletionDateTimePattern,
 			firstDayOfWeek,
@@ -1681,6 +1682,20 @@ export class SettingsManager {
 						updatePreview(); // Update the preview when the text pattern changes
 					})
 					.setPlaceholder("yyyy-MM-DD")
+			);
+
+		// Text input for the default startime
+		new Setting(contentEl)
+			.setName(t("default-start-time"))
+			.setDesc(t("default-start-time-info"))
+			.addText((text) =>
+				text
+					.setValue(defaultStartTime)
+					.onChange(async (value) => {
+						this.globalSettings!.defaultStartTime = value;
+						await this.saveSettings();
+					})
+					.setPlaceholder("eg.: 00:00 or 23:59")
 			);
 
 		// Text input for the taskCompletionDateTimePattern

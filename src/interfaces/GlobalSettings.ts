@@ -120,6 +120,7 @@ export interface globalSettingsData {
 	taskCompletionDateTimePattern: string;
 	dailyNotesPluginComp: boolean;
 	universalDateFormat: string;
+	defaultStartTime: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
 	autoAddCreatedDate: boolean;
@@ -357,6 +358,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
 			dailyNotesPluginComp: false,
 			universalDateFormat: "yyyy-MM-DD",
+			defaultStartTime: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
 			autoAddCreatedDate: false,

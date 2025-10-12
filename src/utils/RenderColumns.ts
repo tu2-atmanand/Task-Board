@@ -260,6 +260,7 @@ export const renderColumns = (
 	// Apply column-specific sorting if configured
 	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
 		tasksToDisplay = columnSortingAlgorithm(
+			plugin,
 			tasksToDisplay,
 			columnData.sortCriteria
 		);
