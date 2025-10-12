@@ -130,10 +130,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const renderTaskDescriptionWithObsidianAPI = async () => {
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		let descriptionContent = task.body
+		let descriptionContent = task.body ? task.body
 			.filter((line) => !isTaskLine(line.trim()))
 			.join("\n")
-			.trim();
+			.trim() : "";
 
 		if (descElement && descriptionContent !== "") {
 			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
@@ -551,10 +551,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const renderDescriptionSection = useMemo(() => {
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		let descriptionContent = task.body
+		let descriptionContent = task.body ? task.body
 			.filter((line) => !isTaskLine(line))
 			.join("\n")
-			.trim();
+			.trim() : "";
 
 		if (!descriptionContent) return null; // If no description content, return null
 
