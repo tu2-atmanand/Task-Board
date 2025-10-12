@@ -12,12 +12,14 @@ import {
 	UniversalDateOptions,
 	globalSettingsData,
 	HideableTaskProperty,
+	taskPropertyFormatOptions,
 } from "src/interfaces/GlobalSettings";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
 } from "src/regularExpressions/TasksPluginRegularExpr";
 import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
 
 export interface cursorLocation {
 	lineNumber: number;
@@ -73,10 +75,25 @@ export const addIdToTaskContent = async (
 		forcefullyAddId
 	) {
 		newId = generateTaskId(Plugin);
-		formattedTaskContent = formattedTaskContent.replace(
-			/^(.*?)(\n|$)/,
-			`$1 🆔 ${newId}$2`
-		);
+		if (
+			Plugin.settings.data.globalSettings.taskPropertyFormat ===
+				taskPropertyFormatOptions.tasksPlugin ||
+			Plugin.settings.data.globalSettings.taskPropertyFormat ===
+				taskPropertyFormatOptions.default
+		) {
+			formattedTaskContent = formattedTaskContent.replace(
+				/^(.*?)(\n|$)/,
+				`$1 🆔 ${newId} $2`
+			);
+		} else if (
+			Plugin.settings.data.globalSettings.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
+			formattedTaskContent = formattedTaskContent.replace(
+				/^(.*?)(\n|$)/,
+				`$1 [id:: ${newId}] $2`
+			);
+		}
 	}
 	return { formattedTaskContent, newId };
 };
@@ -678,7 +695,7 @@ export const sanitizeTime = (
 			// If time is present in any format, remove it and add this new time at the start
 			title = title.replace(timeFormatsRegex, "").trim();
 		}
-		
+
 		// If no time is present, add it at the start
 		const beforePosition = title.slice(0, 5).trim();
 		const afterPosition = title.slice(5).trim();
@@ -1342,12 +1359,17 @@ export const cleanTaskTitleLegacy = (
 	});
 
 	// Remove id
-	if (task.id) {
-		const idMatch = cleanedTitle.match(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
+	if (task.legacyId) {
+		const combinedIdRegex = new RegExp(
+			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
+			"g" // add the 'g' flag if you want to match all occurrences
 		);
-		if (idMatch) {
-			cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
+
+		if (task.legacyId) {
+			const idMatch = cleanedTitle.match(combinedIdRegex);
+			if (idMatch) {
+				cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
+			}
 		}
 	}
 
@@ -1445,11 +1467,13 @@ export const cleanTaskTitleLegacy = (
 	}
 
 	// Remove reminder if it exists
-	const reminderRegex =
-		/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
-	const reminderMatch = cleanedTitle.match(reminderRegex);
-	if (reminderMatch) {
-		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
+	if (task.reminder) {
+		const reminderRegex =
+			/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
+		const reminderMatch = cleanedTitle.match(reminderRegex);
+		if (reminderMatch) {
+			cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
+		}
 	}
 
 	// Remove recurring tag and onCompletion tag
@@ -1467,8 +1491,6 @@ export const cleanTaskTitleLegacy = (
 			""
 		)
 		.trim();
-
-	// console.log("cleanedTitle", cleanedTitle.trim());
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();

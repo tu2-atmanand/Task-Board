@@ -353,7 +353,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			firstDayOfWeek: "Mon",
 			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
-			taskPropertyFormat: "1",
+			taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
 			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
 			dailyNotesPluginComp: false,
 			universalDateFormat: "yyyy-MM-DD",

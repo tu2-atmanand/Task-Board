@@ -778,6 +778,16 @@ export function extractTitle(text: string): string {
 }
 
 export function extractTaskId(text: string): string {
+	// const combinedIdRegex = new RegExp(
+	// 	`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
+	// 	"g" // add the 'g' flag if you want to match all occurrences
+	// );
+	// let idMatch = text.match(combinedIdRegex);
+	// console.log("ID match while scanning :", idMatch);
+	// if (idMatch && idMatch[1]) {
+	// 	return idMatch[1].trim();
+	// }
+
 	let idMatch = text.match(
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
 	);
