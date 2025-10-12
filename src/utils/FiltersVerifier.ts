@@ -80,7 +80,22 @@ export function checkFileFilters(
 	fileName: string,
 	scanFilters: scanFilters
 ): boolean | undefined {
-	const fileInFilters = scanFilters.files.values.includes(fileName);
+	// const fileInFilters = scanFilters.files.values.includes(fileName);
+	const fileInFilters = scanFilters.files.values.some((value) => {
+		if (value.startsWith("/") && value.endsWith("/")) {
+			// Try to create a RegExp from the pattern
+			try {
+				const pattern = value.slice(1, -1);
+				const regex = new RegExp(pattern);
+				return regex.test(fileName);
+			} catch {
+				// Invalid regex, skip this value
+				return false;
+			}
+		} else {
+			return value === fileName;
+		}
+	});
 
 	if (fileInFilters && scanFilters.files.polarity === 1) {
 		return true;
@@ -141,9 +156,25 @@ export function checkFolderFilters(
 	let folderInFilters = scanFilters.folders.values.includes(parentFolder);
 
 	if (!folderInFilters && parentFolder !== "") {
-		folderInFilters = scanFilters.folders.values.some((filter: string) =>
-			parentFolder.includes(filter)
-		);
+		folderInFilters = scanFilters.folders.values.some((filter: string) => {
+			if (filter.startsWith("/") && filter.endsWith("/")) {
+				// Try to create a RegExp from the pattern
+				try {
+					const pattern = filter.slice(1, -1);
+					const regex = new RegExp(pattern);
+					console.log(
+						"checkFolderFilters : Its a valid regex pattern. Here is the matching file :",
+						parentFolder.match(regex)
+					);
+					return regex.test(parentFolder);
+				} catch {
+					// Invalid regex, skip this value
+					return false;
+				}
+			} else {
+				return parentFolder === filter;
+			}
+		});
 	}
 
 	if (scanFilters.folders.polarity === 1) {
