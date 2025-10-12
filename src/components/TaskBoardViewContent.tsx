@@ -1,7 +1,7 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter } from 'lucide-react';
+import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu } from 'lucide-react';
 import React, { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
@@ -37,6 +37,9 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	const [showProgressBar, setShowProgressBar] = useState(true);
 	const [leafWidth, setLeafWidth] = useState<number>(1000);
+	const [isMobileView, setIsMobileView] = useState(false);
+	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
+	const [sidebarAnimating, setSidebarAnimating] = useState(false);
 
 	// plugin.registerEvent(
 	// 	plugin.app.workspace.on("resize", () => {
@@ -60,9 +63,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		const handleResize = () => {
 			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
 			if (taskBoardLeaf) {
+				console.log("View width :", taskBoardLeaf.width);
 				setLeafWidth(taskBoardLeaf.width);
 			}
 		};
+		handleResize();
 		plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
 		return () => {
 			// cleanup if needed
@@ -71,6 +76,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	useEffect(() => {
 		setShowProgressBar(leafWidth >= 1000);
+		setIsMobileView(leafWidth < 768);
 	}, [leafWidth]);
 
 	useEffect(() => {
@@ -293,21 +299,86 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		filterPopoverRef.current = popover;
 	}
 
+	function handleBoardSelection(index: number) {
+		if (index !== activeBoardIndex) {
+			setActiveBoardIndex(index);
+			plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index;
+			plugin.saveSettings();
+		}
+		closeBoardSidebar(); // Close sidebar after selection
+	}
+
+	function toggleBoardSidebar() {
+		if (showBoardSidebar) {
+			closeBoardSidebar();
+		} else {
+			openBoardSidebar();
+		}
+	}
+
+	function openBoardSidebar() {
+		setShowBoardSidebar(true);
+		setSidebarAnimating(true);
+	}
+
+	function closeBoardSidebar() {
+		setSidebarAnimating(false);
+		// Wait for animation to complete before hiding
+		setTimeout(() => {
+			setShowBoardSidebar(false);
+		}, 300); // Match animation duration
+	}
+
+	// useEffect(() => {
+	// 	const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
+	// 	if (taskBoardLeaf) {
+	// 		console.log("View width :", taskBoardLeaf.width);
+	// 	}
+	// }, [leafWidth]);
+
+	// Close sidebar when clicking outside or pressing escape
+	useEffect(() => {
+		function handleKeyDown(event: KeyboardEvent) {
+			if (event.key === 'Escape' && showBoardSidebar) {
+				closeBoardSidebar();
+			}
+		}
+
+		if (showBoardSidebar) {
+			document.addEventListener('keydown', handleKeyDown);
+			return () => document.removeEventListener('keydown', handleKeyDown);
+		}
+	}, [showBoardSidebar]);
 
 	return (
 		<div className="taskBoardView">
 			<div className="taskBoardHeader">
-				<div className="boardTitles">
-					{boards.map((board, index) => (
+				{isMobileView ? (
+					// Mobile view: Hamburger button + current board name
+					<div className="mobileBoardHeader">
 						<button
-							key={index}
-							className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
-							onClick={() => { setActiveBoardIndex(index); plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index; plugin.saveSettings(); }}
+							className="hamburgerMenuButton"
+							onClick={toggleBoardSidebar}
+							aria-label="Toggle board menu"
 						>
-							{board.name}
+							<Menu size={20} />
 						</button>
-					))}
-				</div>
+						<span className="currentBoardName">{boards[activeBoardIndex]?.name}</span>
+					</div>
+				) : (
+					// Desktop view: Original board titles
+					<div className="boardTitles">
+						{boards.map((board, index) => (
+							<button
+								key={index}
+								className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
+								onClick={() => handleBoardSelection(index)}
+							>
+								{board.name}
+							</button>
+						))}
+					</div>
+				)}
 				<div className="taskBoardHeaderBtns">
 					<div className="taskCountContainer">
 						<div className={`taskCountContainerProgressBar${showProgressBar ? "" : "-hidden"}`}>
@@ -391,6 +462,38 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					</button>
 				</div>
 			</div>
+
+			{/* Mobile board sidebar overlay */}
+			{isMobileView && showBoardSidebar && (
+				<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
+					<div
+						className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
+						onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
+					>
+						<div className="boardSidebarHeader">
+							<h3>Boards</h3>
+							<button
+								className="closeSidebarButton"
+								onClick={closeBoardSidebar}
+								aria-label="Close board menu"
+							>
+								×
+							</button>
+						</div>
+						<div className="boardSidebarContent">
+							{boards.map((board, index) => (
+								<button
+									key={index}
+									className={`boardSidebarButton ${index === activeBoardIndex ? 'boardSidebarButton--active' : ''}`}
+									onClick={() => handleBoardSelection(index)}
+								>
+									{board.name}
+								</button>
+							))}
+						</div>
+					</div>
+				</div>
+			)}
 
 			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
 				{boards[activeBoardIndex] ? (
