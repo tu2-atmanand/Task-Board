@@ -10,11 +10,13 @@ import TaskBoard from 'main';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
-import { Menu } from 'obsidian';
+import { Menu, Platform } from 'obsidian';
 import { ConfigureColumnSortingModal } from 'src/modal/ConfigureColumnSortingModal';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
 import { RootFilterState } from 'src/components/BoardFilters/ViewTaskFilter';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { bugReporter } from 'src/services/OpenModals';
+import { ViewTaskFilterModal } from '../BoardFilters';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -122,51 +124,82 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("configure-column-filtering"));
 			item.setIcon("list-filter");
 			item.onClick(async () => {
-				// Get the position of the menu (approximate column position)
-				// Use CSS.escape to properly escape the selector value
-				const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
-				const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
-				const position = columnElement
-					? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
-					: { x: 100, y: 100 }; // Fallback position
+				try {
+					// TODO : The indexes are finding using the name, this might create issues if there are duplicate names. Use the id to find the indexes.
+					// Find board index once
+					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+						(board: Board) => board.name === activeBoardData.name
+					);
+					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+						(col: ColumnData) => col.name === columnData.name
+					);
 
-				// Find board index once
-				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-					(board: Board) => board.name === activeBoardData.name
-				);
-
-				// Create and show filter popover
-				// leafId is undefined for column filters (not tied to a specific leaf)
-				const popover = new ViewTaskFilterPopover(
-					plugin,
-					true, // forColumn is true
-					undefined,
-					boardIndex,
-					columnData.name,
-					columnData.filters
-				);
-
-				// Set up close callback to save filter state
-				popover.onClose = async (filterState?: RootFilterState) => {
-					if (filterState && boardIndex !== -1) {
-						const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-							(col: ColumnData) => col.name === columnData.name
+					if (Platform.isMobile) {
+						// If its a mobile platform, then we will open a modal instead of popover.
+						const filterModal = new ViewTaskFilterModal(
+							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
 						);
 
-						if (columnIndex !== -1) {
-							// Update the column filters
-							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+						// Set the close callback - mainly used for handling cancel actions
+						filterModal.filterCloseCallback = async (filterState) => {
+							console.log("Column.tsx : Filter modal closed on mobile with state:", filterState);
+							if (filterState && boardIndex !== -1) {
+								if (columnIndex !== -1) {
+									// Update the column filters
+									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
 
-							// Save the settings
-							await plugin.saveSettings();
+									// Save the settings
+									await plugin.saveSettings();
 
-							// Refresh the board view
-							eventEmitter.emit('REFRESH_BOARD');
-						}
+									// Refresh the board view
+									eventEmitter.emit('REFRESH_BOARD');
+								}
+							}
+						};
+
+						filterModal.open();
+					} else {
+						// Get the position of the menu (approximate column position)
+						// Use CSS.escape to properly escape the selector value
+						const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
+						const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
+						const position = columnElement
+							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
+							: { x: 100, y: 100 }; // Fallback position
+
+						// Create and show filter popover
+						// leafId is undefined for column filters (not tied to a specific leaf)
+						const popover = new ViewTaskFilterPopover(
+							plugin,
+							true, // forColumn is true
+							undefined,
+							boardIndex,
+							columnData.name,
+							columnData.filters
+						);
+
+						// Set up close callback to save filter state
+						popover.onClose = async (filterState?: RootFilterState) => {
+							if (filterState && boardIndex !== -1) {
+								if (columnIndex !== -1) {
+									// Update the column filters
+									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+
+									// Save the settings
+									await plugin.saveSettings();
+
+									// Refresh the board view
+									eventEmitter.emit('REFRESH_BOARD');
+								}
+							}
+						};
+
+						popover.showAtPosition(position);
+
 					}
-				};
-
-				popover.showAtPosition(position);
+				} catch (error) {
+					bugReporter(plugin, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+				}
 			});
 		});
 

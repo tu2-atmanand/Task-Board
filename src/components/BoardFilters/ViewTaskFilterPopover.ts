@@ -38,10 +38,6 @@ export class ViewTaskFilterPopover
 		this.forColumn = forColumn;
 		this.activeBoardIndex = activeBoardIndex;
 		this.columnOrBoardName = columnOrBoardName;
-		console.log(
-			"ViewTaskFilterPopover - initialFilterState:",
-			initialFilterState
-		);
 		this.initialFilterState = initialFilterState;
 		this.win = plugin.app.workspace.containerEl.win || window;
 

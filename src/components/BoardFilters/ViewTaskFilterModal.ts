@@ -4,15 +4,29 @@ import { TaskFilterComponent, RootFilterState } from "./ViewTaskFilter";
 import type TaskBoard from "main";
 
 export class ViewTaskFilterModal extends Modal {
+	private plugin: TaskBoard;
+	public activeBoardIndex?: number;
 	public taskFilterComponent: TaskFilterComponent | null;
+	private columnOrBoardName?: string;
+	private initialFilterState?: RootFilterState;
 	public filterCloseCallback:
 		| ((filterState?: RootFilterState) => void)
 		| null = null;
-	private plugin?: TaskBoard;
 
-	constructor(app: App, private leafId?: string, plugin?: TaskBoard) {
-		super(app);
+	constructor(
+		plugin: TaskBoard,
+		forColumn: boolean,
+		private leafId?: string,
+		activeBoardIndex?: number,
+		columnOrBoardName?: string,
+		initialFilterState?: RootFilterState
+	) {
+		super(plugin.app);
 		this.plugin = plugin;
+		this.activeBoardIndex = activeBoardIndex;
+		this.columnOrBoardName = columnOrBoardName;
+		this.initialFilterState = initialFilterState;
+
 		this.taskFilterComponent = null;
 	}
 
@@ -24,7 +38,9 @@ export class ViewTaskFilterModal extends Modal {
 			this.contentEl,
 			this.app,
 			this.leafId,
-			this.plugin
+			this.plugin,
+			this.activeBoardIndex,
+			this.initialFilterState
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();

@@ -20,6 +20,7 @@ import { viewTypeNames } from "src/interfaces/GlobalSettings";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { RootFilterState } from "./BoardFilters/ViewTaskFilter";
 import { boardFilterer } from "src/utils/boardFilterer";
+import { ViewTaskFilterModal } from "./BoardFilters";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -246,57 +247,105 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
-		// Close existing popover if open
-		if (filterPopoverRef.current) {
-			filterPopoverRef.current.close();
-			filterPopoverRef.current = null;
-			return;
-		}
+		try {
+			const currentBoard = boards[activeBoardIndex];
+			if (Platform.isMobile) {
+				// If its a mobile platform, then we will open a modal instead of popover.
+				const filterModal = new ViewTaskFilterModal(
+					plugin, false, undefined, activeBoardIndex, currentBoard.name
+				);
 
-		// Get button position
-		const buttonRect = event.currentTarget.getBoundingClientRect();
-		const position = {
-			x: buttonRect.left,
-			y: buttonRect.bottom
-		};
-
-		// Create and show popover
-		const popover = new ViewTaskFilterPopover(
-			plugin,
-			false, // forColumn = false since this is for board-level filter
-			undefined,
-			activeBoardIndex,
-			boards[activeBoardIndex]?.name || "Board",
-		);
-
-		// Load existing filter state if available
-		const currentBoard = boards[activeBoardIndex];
-		if (currentBoard.boardFilter) {
-			// Wait for component to be created and loaded
-			setTimeout(() => {
-				if (popover.taskFilterComponent) {
-					popover.taskFilterComponent.loadFilterState(currentBoard.boardFilter!);
+				// Set initial filter state
+				if (currentBoard.boardFilter) {
+					setTimeout(() => {
+						// Use type assertion to resolve non-null issues
+						// const filterState = filterModal.liveFilterState as RootFilterState;
+						if (filterModal.taskFilterComponent) {
+							filterModal.taskFilterComponent.loadFilterState(currentBoard.boardFilter!);
+						}
+					}, 100);
 				}
-			}, 100);
-		}
 
-		// Set up close callback to save filter state
-		popover.onClose = async (filterState?: RootFilterState) => {
-			if (filterState) {
-				// Save the filter state to the board
-				const updatedBoards = [...boards];
-				updatedBoards[activeBoardIndex].boardFilter = filterState;
-				setBoards(updatedBoards);
+				// Set the close callback - mainly used for handling cancel actions
+				filterModal.filterCloseCallback = async (filterState) => {
+					console.log("Filter modal closed on mobile with state:", filterState);
+					if (filterState) {
+						// Save the filter state to the board
+						const updatedBoards = [...boards];
+						updatedBoards[activeBoardIndex].boardFilter = filterState;
+						setBoards(updatedBoards);
 
-				// Persist to settings
-				plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
-				await plugin.saveSettings();
+						// Persist to settings
+						plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
+						await plugin.saveSettings();
+
+						// Refresh the board view
+						eventEmitter.emit('REFRESH_BOARD');
+					}
+				};
+
+				filterModal.open();
+
+			} else {
+				// If the platform is not mobile, then we will open a popover near the button.
+
+				// Close existing popover if open
+				if (filterPopoverRef.current) {
+					filterPopoverRef.current.close();
+					filterPopoverRef.current = null;
+					return;
+				}
+
+				// Get button position
+				const buttonRect = event.currentTarget.getBoundingClientRect();
+				const position = {
+					x: buttonRect.left,
+					y: buttonRect.bottom
+				};
+
+				// Create and show popover
+				const popover = new ViewTaskFilterPopover(
+					plugin,
+					false, // forColumn = false since this is for board-level filter
+					undefined,
+					activeBoardIndex,
+					boards[activeBoardIndex]?.name || "Board",
+				);
+
+				// Load existing filter state if available
+				if (currentBoard.boardFilter) {
+					// Wait for component to be created and loaded
+					setTimeout(() => {
+						if (popover.taskFilterComponent) {
+							popover.taskFilterComponent.loadFilterState(currentBoard.boardFilter!);
+						}
+					}, 100);
+				}
+
+				// Set up close callback to save filter state
+				popover.onClose = async (filterState?: RootFilterState) => {
+					if (filterState) {
+						// Save the filter state to the board
+						const updatedBoards = [...boards];
+						updatedBoards[activeBoardIndex].boardFilter = filterState;
+						setBoards(updatedBoards);
+
+						// Persist to settings
+						plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
+						await plugin.saveSettings();
+
+						// Refresh the board view
+						eventEmitter.emit('REFRESH_BOARD');
+					}
+					filterPopoverRef.current = null;
+				};
+
+				popover.showAtPosition(position);
+				filterPopoverRef.current = popover;
 			}
-			filterPopoverRef.current = null;
-		};
-
-		popover.showAtPosition(position);
-		filterPopoverRef.current = popover;
+		} catch (error) {
+			bugReporter(plugin, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+		}
 	}
 
 	function handleBoardSelection(index: number) {
