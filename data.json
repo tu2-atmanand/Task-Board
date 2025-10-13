@@ -117,6 +117,42 @@
                       "property": "tags",
                       "condition": "doesNotContain",
                       "value": ""
+                    },
+                    {
+                      "id": "id-1760359812566-wg9g61ros",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": ""
+                    },
+                    {
+                      "id": "id-1760365394696-74jp632ik",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": ""
+                    }
+                  ]
+                },
+                {
+                  "id": "id-1760365396112-drsf6flse",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760365396114-q7016yhjn",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": ""
+                    }
+                  ]
+                },
+                {
+                  "id": "id-1760365398448-atfw6bxql",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760365398449-vmfkwafxp",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": ""
                     }
                   ]
                 }
@@ -141,7 +177,11 @@
                 "order": "asc",
                 "priority": 1
               }
-            ]
+            ],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "id": 3493,
@@ -277,7 +317,36 @@
             "name": "In Progress",
             "index": 3,
             "coltag": "working",
-            "id": 908753
+            "id": 908753,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1760365709344-buyyxwhhh",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760365709345-8uyz54hm3",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": "This"
+                    }
+                  ]
+                },
+                {
+                  "id": "id-1760365717816-lfhxidsw4",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760365717817-fjsotu7dy",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": "is"
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "colType": "namedTag",
@@ -330,7 +399,20 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": []
+          "filterGroups": [
+            {
+              "id": "id-1760365709344-buyyxwhhh",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1760365709345-8uyz54hm3",
+                  "property": "content",
+                  "condition": "contains",
+                  "value": "This"
+                }
+              ]
+            }
+          ]
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -816,13 +898,13 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 245,
+      "uniqueIdCounter": 248,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 2,
         "taskId": ""
       },
       "taskNoteIdentifierTag": "taskNote",
