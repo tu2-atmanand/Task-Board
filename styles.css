@@ -4857,6 +4857,7 @@ svg.react-flow__connectionline {
 	/* border-radius: var(--radius-m); */
 	padding-top: 0;
 	padding-bottom: 0;
+	width: max-content !important;
 }
 
 .filter-item .filter-conjunction {
@@ -4902,6 +4903,7 @@ svg.react-flow__connectionline {
 	/* flex-grow */
 	border: 1px solid var(--input-border-color, var(--background-modifier-border));
 	width: 100%;
+	min-width: 10rem !important;
 }
 
 .filter-item .filter-value-input.compact-input:focus {
