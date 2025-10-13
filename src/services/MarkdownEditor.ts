@@ -1,5 +1,10 @@
 // /src/services/MarkdownEditor.ts
 
+/**
+ * This complete EmbeddableMarkdownEditor component has been imported from Task Genius plugin.
+ * @see https://github.com/Quorafind/Obsidian-Task-Genius/blob/59a2d42f9fb95a5700d32975917e56372e5bdb7d/src/editor-extensions/core/markdown-editor.ts
+ */
+
 import {
 	App,
 	Editor,
