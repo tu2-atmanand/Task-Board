@@ -423,7 +423,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			});
 		});
 		sortMenu.addItem((item) => {
-			item.setTitle(t("map"));
+			item.setTitle(t("map-view"));
 			item.setIcon("waypoints");
 			item.onClick(async () => {
 				openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>

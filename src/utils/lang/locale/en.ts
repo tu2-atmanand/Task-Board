@@ -40,6 +40,8 @@ const en: Lang = {
 	"to": "To",
 	"delete-column": "Delete column",
 	"add-column": "Add column",
+	"board": "Board",
+	"your-boards": "Your boards",
 	"delete-this-board": "Delete this board",
 	"global-settings": "Global settings",
 	"add-board": "Add board",
@@ -150,7 +152,6 @@ const en: Lang = {
 	"delete-sub-task": "Delete Sub-Task",
 	"hold-ctrl-button-to-open-in-new-window": "Open note in new tab. Hold CTRL to open in new window",
 	"file-name": "File name",
-	"your-boards": "Your boards",
 	"file-not-found-at-path": "File not found at path:",
 	"edit-button-mode": "Edit button action",
 	"edit-button-mode-info": "Select what should the edit button do.",
@@ -373,7 +374,12 @@ const en: Lang = {
 	"hide-column": "Hide column",
 	"minimize-column": "Minimize column",
 	"default-start-time": "Default start time",
-	"default-start-time-info": "Enter the time (in HH:mm) format which you want to consider for tasks with a universal date but having not time. This will be only used for sorting tasks within column. Leave empty, if you want task with no time to be sorted below the tasks which are having time property."
+	"default-start-time-info": "Enter the time (in HH:mm) format which you want to consider for tasks with a universal date but having not time. This will be only used for sorting tasks within column. Leave empty, if you want task with no time to be sorted below the tasks which are having time property.",
+	"refresh-the-board": "Refresh the board",
+	"open-board-configuration-modal": "Open board config modal",
+	"open-board-filters-modal": "Open board filters modal",
+	"switch-view-type": "Switch view type",
+	"kanban-view": "Kanban view"
 };
 
 export default en;
