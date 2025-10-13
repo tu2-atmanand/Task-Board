@@ -242,6 +242,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .AddNewTaskBtn,
 .ConfigureBtn,
 .taskboardActionshBtn,
+.taskBoardViewHeaderOptionsBtn,
 .RefreshBtn {
 	background-color: transparent !important;
 	background: none;
@@ -260,6 +261,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .ConfigureBtn:hover,
 .taskboardActionshBtn:hover,
 .RefreshBtn:hover,
+.taskBoardViewHeaderOptionsBtn:hover,
 .taskboardActionshBtn:hover {
 	border: var(--border-width) solid olive;
 }
@@ -840,13 +842,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	justify-content: center;
 	border-radius: 0 4px 0 0;
 	margin: -4px;
+	opacity: 0.8;
 	margin-bottom: 5px;
 	margin-inline-start: -5px;
 }
 
 .taskItemFileName {
-	font-weight: 500;
-	font-size: 0.9rem;
+	font-weight: 450;
+	font-size: 0.8rem;
 	opacity: 0.7;
 	color: var(--code-value);
 	padding-inline: 5px;
