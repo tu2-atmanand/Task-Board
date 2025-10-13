@@ -1,12 +1,12 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData } from "../interfaces/BoardConfigs";
-import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu } from 'lucide-react';
+import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter, Cross, Menu as MenuICon, Settings, Ellipsis, EllipsisVertical } from 'lucide-react';
 import React, { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform } from "obsidian";
+import { App, debounce, Platform, Menu } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
@@ -35,7 +35,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
 
-	const [showProgressBar, setShowProgressBar] = useState(true);
+	const [showAllElements, setShowAllElements] = useState(true);
 	const [leafWidth, setLeafWidth] = useState<number>(1000);
 	const [isMobileView, setIsMobileView] = useState(false);
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
@@ -75,8 +75,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	useEffect(() => {
-		setShowProgressBar(leafWidth >= 1000);
-		setIsMobileView(leafWidth < 768);
+		setShowAllElements(leafWidth >= 1000);
+		setIsMobileView(leafWidth <= 800); // For even little bigger screen smartphones, let go with 800
 	}, [leafWidth]);
 
 	useEffect(() => {
@@ -329,6 +329,66 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}, 300); // Match animation duration
 	}
 
+	function openHeaderMoreOptionsMenu(event: MouseEvent | React.MouseEvent) {
+		const sortMenu = new Menu();
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("quick-actions"));
+			item.setIsLabel(true);
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("refresh-the-board"));
+			item.setIcon("arrow-up-down");
+			item.onClick(async () => {
+				refreshBoardButton();
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("open-board-configuration-modal"));
+			item.setIcon("settings");
+			item.onClick(async () => {
+				openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
+					handleUpdateBoards(plugin, updatedBoards, setBoards)
+				);
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("open-board-filters-modal"));
+			item.setIcon("funnel");
+			item.onClick(async (event) => {
+				if (event instanceof MouseEvent) {
+					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
+				}
+			});
+		});
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("switch-view-type"));
+			item.setIsLabel(true);
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("kanban"));
+			item.setIcon("square-kanban");
+			item.onClick(async () => {
+				refreshBoardButton();
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("map"));
+			item.setIcon("waypoints");
+			item.onClick(async () => {
+				openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
+					handleUpdateBoards(plugin, updatedBoards, setBoards)
+				);
+			});
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		sortMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
 	// useEffect(() => {
 	// 	const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
 	// 	if (taskBoardLeaf) {
@@ -353,7 +413,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	return (
 		<div className="taskBoardView">
 			<div className="taskBoardHeader">
-				{isMobileView ? (
+				{!showAllElements ? (
 					// Mobile view: Hamburger button + current board name
 					<div className="mobileBoardHeader">
 						<button
@@ -361,9 +421,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							onClick={toggleBoardSidebar}
 							aria-label="Toggle board menu"
 						>
-							<Menu size={20} />
+							<MenuICon size={20} />
 						</button>
-						<span className="currentBoardName">{boards[activeBoardIndex]?.name}</span>
+						{!showSearchInput && (
+							<span className="currentBoardName">{boards[activeBoardIndex]?.name}</span>
+						)}
 					</div>
 				) : (
 					// Desktop view: Original board titles
@@ -381,7 +443,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				)}
 				<div className="taskBoardHeaderBtns">
 					<div className="taskCountContainer">
-						<div className={`taskCountContainerProgressBar${showProgressBar ? "" : "-hidden"}`}>
+						<div className={`taskCountContainerProgressBar${leafWidth >= 1500 ? "" : "-hidden"}`}>
 							<div
 								className="taskCountContainerProgressBarProgress"
 								style={{
@@ -421,7 +483,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					</button>
 
 					<button
-						className="filterTaskBtn"
+						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("apply-advanced-board-filters")}
 						onClick={handleFilterButtonClick}
 					>
@@ -432,7 +494,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<CirclePlus size={18} />
 					</button>
 					<button
-						className="ConfigureBtn"
+						className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("board-configure-button")}
 						onClick={() =>
 							openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
@@ -440,14 +502,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							)
 						}
 					>
-						<Bolt size={18} />
+						<Settings size={18} />
 					</button>
 					{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
 						<Bot size={20} />
 					</button> */}
 					{plugin.settings.data.globalSettings.experimentalFeatures && (
 						<select
-							className="taskBoardViewDropdown"
+							className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 							value={viewType}
 							onChange={(e) => { handleViewTypeChange(e); }}
 						>
@@ -457,39 +519,39 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							<option value="map">Map</option>
 						</select>
 					)}
-					<button className="RefreshBtn" aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
+					<button className={`RefreshBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
+					{(isMobileView || Platform.isMobile) && (
+						<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
+							<EllipsisVertical size={20} />
+						</button>
+					)}
 				</div>
 			</div>
 
 			{/* Mobile board sidebar overlay */}
-			{isMobileView && showBoardSidebar && (
+			{!showAllElements && showBoardSidebar && (
 				<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
 					<div
 						className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
 						onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
 					>
 						<div className="boardSidebarHeader">
-							<h3>Boards</h3>
-							<button
-								className="closeSidebarButton"
-								onClick={closeBoardSidebar}
-								aria-label="Close board menu"
-							>
-								×
-							</button>
+							<h3>{t("your-boards")}</h3>
 						</div>
 						<div className="boardSidebarContent">
-							{boards.map((board, index) => (
-								<button
-									key={index}
-									className={`boardSidebarButton ${index === activeBoardIndex ? 'boardSidebarButton--active' : ''}`}
-									onClick={() => handleBoardSelection(index)}
-								>
-									{board.name}
-								</button>
-							))}
+							<div className="boardSidebarContentBtnContainer">
+								{boards.map((board, index) => (
+									<button
+										key={index}
+										className={`boardSidebarButton ${index === activeBoardIndex ? 'boardSidebarButton--active' : ''}`}
+										onClick={() => handleBoardSelection(index)}
+									>
+										{board.name}
+									</button>
+								))}
+							</div>
 						</div>
 					</div>
 				</div>

@@ -230,7 +230,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	background-color: var(--background-secondary);
 	color: var(--text-normal);
 	margin-inline-start: 8px;
-	margin-inline-end: -8px !important;
+	margin-inline-end: 4px !important;
 	font-size: 14px;
 	min-width: 12rem;
 	max-width: 20rem;
@@ -262,6 +262,12 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 .RefreshBtn:hover,
 .taskboardActionshBtn:hover {
 	border: var(--border-width) solid olive;
+}
+
+.taskBoardViewHeaderHideElements {
+	display: none !important;
+	width: 0 !important;
+	height: 0 !important;
 }
 
 .taskBoardViewSection {}
@@ -992,10 +998,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 
 .EditTaskModalHomeFieldTitle {
-	font-size: 1em;
+	font-size: 0.8em;
 	/* text-align: center; */
-	font-weight: 700;
+	/* font-weight: 400; */
 	margin-bottom: 5px;
+	color: var(--text-muted);
 }
 
 .EditTaskModalHomeFieldTitleInput {
@@ -1848,7 +1855,6 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 		left: 1em;
 		width: 4.2em !important;
 		height: 2.5em !important;
-		border: 2px solid var(--accent-color, blue) !important;
 		color: white;
 		border: none;
 		padding: 9px 20px !important;
@@ -5129,16 +5135,13 @@ svg.react-flow__connectionline {
 }
 
 .hamburgerMenuButton {
-	display: flex;
 	align-items: center;
-	gap: 8px;
 	padding: 8px 12px;
-	border: none;
-	background: var(--background-modifier-hover);
-	border-radius: var(--border-radius);
+	border: none !important;
+	box-shadow: none !important;
+	background: transparent !important;
 	cursor: pointer;
 	color: var(--text-normal);
-	font-size: var(--font-size-default);
 	transition: background-color 0.2s ease;
 }
 
@@ -5148,7 +5151,7 @@ svg.react-flow__connectionline {
 
 .currentBoardName {
 	font-weight: 500;
-	max-width: 150px;
+	/* max-width: 150px; */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -5173,6 +5176,7 @@ svg.react-flow__connectionline {
 	from {
 		opacity: 0;
 	}
+
 	to {
 		opacity: 1;
 	}
@@ -5218,27 +5222,7 @@ svg.react-flow__connectionline {
 	font-size: var(--font-size-large);
 	color: var(--text-normal);
 	font-weight: 600;
-}
-
-.closeSidebarButton {
-	background: none;
-	border: none;
-	font-size: 24px;
-	color: var(--text-muted);
-	cursor: pointer;
-	padding: 4px;
-	border-radius: var(--border-radius);
-	transition: all 0.2s ease;
-	width: 32px;
-	height: 32px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.closeSidebarButton:hover {
-	background: var(--background-modifier-hover);
-	color: var(--text-normal);
+	color: var(--background-mod-left-CSS-light) !important;
 }
 
 /* Board Sidebar Content */
@@ -5248,16 +5232,21 @@ svg.react-flow__connectionline {
 	overflow-y: auto;
 }
 
+.boardSidebarContentBtnContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	margin-block: 1rem;
+}
+
 .boardSidebarButton {
 	display: block;
 	width: 100%;
-	padding: 12px 16px;
-	margin-bottom: 4px;
 	border: none;
 	background: transparent;
-	color: var(--text-normal);
+	color: var(--background-mod-left-CSS-light) !important;
 	text-align: left;
-	border-radius: var(--border-radius);
+	border-radius: var(--radius-m);
 	cursor: pointer;
 	font-size: var(--font-size-default);
 	transition: all 0.2s ease;
@@ -5271,8 +5260,7 @@ svg.react-flow__connectionline {
 }
 
 .boardSidebarButton--active {
-	background: var(--background-modifier-active);
-	color: var(--text-accent);
+	border: 1px solid var(--text-accent) !important;
 	font-weight: 500;
 }
 
@@ -5285,6 +5273,7 @@ svg.react-flow__connectionline {
 	from {
 		transform: translateX(-100%);
 	}
+
 	to {
 		transform: translateX(0);
 	}
@@ -5294,6 +5283,7 @@ svg.react-flow__connectionline {
 	from {
 		transform: translateX(0);
 	}
+
 	to {
 		transform: translateX(-100%);
 	}
