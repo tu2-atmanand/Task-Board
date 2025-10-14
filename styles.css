@@ -339,16 +339,19 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 /* src/styles/Column.tsx */
 .TaskBoardColumnsSection {
-	background: transparent !important;
+	/* background: transparent !important; */
 	/* backdrop-filter: blur(10px) saturate(300%) contrast(80%) brightness(60%); */
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
-	border-radius: 15px;
+	/* border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8)); */
 	margin-right: 8px;
 	border-radius: 5px;
 	display: flex;
 	flex-direction: column;
 	min-width: var(--task-board-column-width) !important;
 	width: var(--task-board-column-width) !important;
+
+	/* New UI */
+	background-color: var(--background-secondary);
+	border: var(--border-width) solid var(--background-modifier-border);
 }
 
 .taskBoardColumnSecHeader {
@@ -446,7 +449,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 /* Minimized column styles */
 .TaskBoardColumnsSection.minimized {
 	min-width: 2.2rem !important;
-		width: 2.2rem !important;
+	width: 2.2rem !important;
 	transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
 }
 
@@ -482,11 +485,16 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItem {
 	background: var(--background-primary-alt);
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 1), calc(var(--accent-l) * 0.7));
+	/* border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 1), calc(var(--accent-l) * 0.7)); */
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
-	box-shadow: 3px 4px 1px -1px rgb(82 52 102 / 48%), -1px 4px 10px 0 rgba(209, 144, 255, 0.2);
+	/* box-shadow: 3px 4px 1px -1px rgb(82 52 102 / 48%), -1px 4px 10px 0 rgba(209, 144, 255, 0.2); */
+
+	/* New UI */
+	border: var(--border-width) solid var(--background-modifier-border-focus);
+	box-shadow: 0px 0px 0px 1px rgb(82 52 102 / 48%), 0px 4px 10px 0 var(--background-modifier-cover);
+	transition: box-shadow 0.3s ease-in-out;
 }
 
 .colorIndicator {
