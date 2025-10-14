@@ -416,7 +416,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.setIsLabel(true);
 		});
 		sortMenu.addItem((item) => {
-			item.setTitle(t("kanban"));
+			item.setTitle(t("kanban-view"));
 			item.setIcon("square-kanban");
 			item.onClick(async () => {
 				refreshBoardButton();
