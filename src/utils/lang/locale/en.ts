@@ -373,6 +373,7 @@ const en: Lang = {
 	"quick-actions": "Quick actions",
 	"hide-column": "Hide column",
 	"minimize-column": "Minimize column",
+	"maximize-column": "Maximize column",
 	"default-start-time": "Default start time",
 	"default-start-time-info": "Enter the time (in HH:mm) format which you want to consider for tasks with a universal date but having not time. This will be only used for sorting tasks within column. Leave empty, if you want task with no time to be sorted below the tasks which are having time property.",
 	"refresh-the-board": "Refresh the board",

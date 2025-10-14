@@ -295,7 +295,8 @@
                 "order": "asc",
                 "priority": 1
               }
-            ]
+            ],
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -308,7 +309,8 @@
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
-            }
+            },
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -346,7 +348,8 @@
                   ]
                 }
               ]
-            }
+            },
+            "minimized": false
           },
           {
             "colType": "namedTag",

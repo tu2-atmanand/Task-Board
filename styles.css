@@ -443,6 +443,40 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	}
 }
 
+/* Minimized column styles */
+.TaskBoardColumnsSection.minimized {
+	min-width: 2.2rem !important;
+		width: 2.2rem !important;
+	transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
+}
+
+.taskBoardColumnMinimized {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 10px 5px;
+	height: 100%;
+	gap: 10px;
+}
+
+.taskBoardColumnMinimizedTitle {
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	transform: rotate(0deg);
+	color: var(--foreground-primary);
+	font-size: 1.1em;
+	font-weight: 600;
+	text-align: center;
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.TaskBoardColumnsSection:not(.minimized) {
+	transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
+}
+
 
 /* /src/components/TaskItem.tsx */
 

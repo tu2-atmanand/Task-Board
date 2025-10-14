@@ -30,6 +30,7 @@ export type ColumnData = {
 	colType: string;
 	active: boolean;
 	collapsed?: boolean;
+	minimized?: boolean;
 	name: string;
 	coltag?: string;
 	filePaths?: string;
