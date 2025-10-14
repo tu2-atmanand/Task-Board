@@ -213,16 +213,88 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("hide-column"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
-				// TODO : Pending to implement. Simply change the active property of the columnData to false for this column and refresh using emit.
+				// Find the board and column indices
+				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+					(board: Board) => board.name === activeBoardData.name
+				);
+
+				if (boardIndex !== -1) {
+					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+						(col: ColumnData) => col.name === columnData.name
+					);
+
+					if (columnIndex !== -1) {
+						// Set the active property to false
+						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+
+						// Save the settings
+						await plugin.saveSettings();
+
+						// Refresh the board view
+						eventEmitter.emit('REFRESH_BOARD');
+					}
+				}
 			});
 		});
-		sortMenu.addItem((item) => {
-			item.setTitle(t("minimize-column"));
-			item.setIcon("panel-left-close");
-			item.onClick(async () => {
-				// TODO : Pending to develop
+		
+		// Show minimize or maximize option based on current state
+		if (columnData.minimized) {
+			sortMenu.addItem((item) => {
+				item.setTitle(t("maximize-column"));
+				item.setIcon("panel-left-open");
+				item.onClick(async () => {
+					// Find the board and column indices
+					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+						(board: Board) => board.name === activeBoardData.name
+					);
+
+					if (boardIndex !== -1) {
+						const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+							(col: ColumnData) => col.name === columnData.name
+						);
+
+						if (columnIndex !== -1) {
+							// Set the minimized property to false
+							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = false;
+
+							// Save the settings
+							await plugin.saveSettings();
+
+							// Refresh the board view
+							eventEmitter.emit('REFRESH_BOARD');
+						}
+					}
+				});
 			});
-		});
+		} else {
+			sortMenu.addItem((item) => {
+				item.setTitle(t("minimize-column"));
+				item.setIcon("panel-left-close");
+				item.onClick(async () => {
+					// Find the board and column indices
+					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+						(board: Board) => board.name === activeBoardData.name
+					);
+
+					if (boardIndex !== -1) {
+						const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+							(col: ColumnData) => col.name === columnData.name
+						);
+
+						if (columnIndex !== -1) {
+							// Set the minimized property to true
+							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = true;
+
+							// Save the settings
+							await plugin.saveSettings();
+
+							// Refresh the board view
+							eventEmitter.emit('REFRESH_BOARD');
+						}
+					}
+				});
+			});
+		}
 
 		// Use native event if available (React event has nativeEvent property)
 		sortMenu.showAtMouseEvent(
@@ -231,35 +303,54 @@ const Column: React.FC<ColumnProps> = ({
 	}
 
 	return (
-		<div className="TaskBoardColumnsSection" style={{ '--task-board-column-width': columnWidth } as CustomCSSProperties} data-column-type={columnData.colType} data-column-tag-name={tagData?.name} data-column-tag-color={tagData?.color}>
-			<div className="taskBoardColumnSecHeader">
-				<div className="taskBoardColumnSecHeaderTitleSec">
-					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
-					<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+		<div 
+			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}`} 
+			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties} 
+			data-column-type={columnData.colType} 
+			data-column-tag-name={tagData?.name} 
+			data-column-tag-color={tagData?.color}
+		>
+			{columnData.minimized ? (
+				// Minimized view - vertical bar with count and rotated text
+				<div className="taskBoardColumnMinimized">
+					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>
+						{tasksForThisColumn.length}
+					</div>
+					<div className="taskBoardColumnMinimizedTitle">{columnData.name}</div>
 				</div>
-				<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>{tasksForThisColumn.length}</div>
-				{/* <RxDotsVertical /> */}
-			</div>
-			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
-				{tasks.length > 0 ? (
-					tasks.map((task, index = task.id) => {
-						return (
-							<div key={index} className="taskItemFadeIn">
-								<TaskItem
-									key={index}
-									plugin={plugin}
-									taskKey={index}
-									task={task}
-									columnIndex={columnIndex}
-									activeBoardSettings={activeBoardData}
-								/>
-							</div>
-						);
-					})
-				) : (
-					<p>{t("no-tasks-available")}</p>
-				)}
-			</div>
+			) : (
+				// Normal view
+				<>
+					<div className="taskBoardColumnSecHeader">
+						<div className="taskBoardColumnSecHeaderTitleSec">
+							{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
+							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+						</div>
+						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>{tasksForThisColumn.length}</div>
+						{/* <RxDotsVertical /> */}
+					</div>
+					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
+						{tasks.length > 0 ? (
+							tasks.map((task, index = task.id) => {
+								return (
+									<div key={index} className="taskItemFadeIn">
+										<TaskItem
+											key={index}
+											plugin={plugin}
+											taskKey={index}
+											task={task}
+											columnIndex={columnIndex}
+											activeBoardSettings={activeBoardData}
+										/>
+									</div>
+								);
+							})
+						) : (
+							<p>{t("no-tasks-available")}</p>
+						)}
+					</div>
+				</>
+			)}
 		</div>
 	);
 
