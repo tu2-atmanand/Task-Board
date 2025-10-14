@@ -32,7 +32,20 @@ export function resolveMetadataEditorPrototype(plugin: TaskBoard): MetadataEdito
 
 	const { workspace, viewRegistry } = plugin.app;
 	
-	// Create a temporary markdown view to extract the MetadataEditor prototype
+	// Try to find an existing MarkdownView first to avoid creating a temporary one
+	let existingView: MarkdownView | undefined;
+	workspace.iterateAllLeaves((leaf) => {
+		if (leaf.view instanceof MarkdownView && !existingView) {
+			existingView = leaf.view;
+		}
+	});
+
+	// If an existing MarkdownView is found, use its MetadataEditor
+	if (existingView?.metadataEditor) {
+		return Object.getPrototypeOf(existingView.metadataEditor) as MetadataEditor;
+	}
+
+	// Fallback: Create a temporary markdown view to extract the MetadataEditor prototype
 	const leaf = workspace.getLeaf("tab");
 	const view = viewRegistry.viewByType["markdown"](leaf) as MarkdownView;
 	
@@ -57,7 +70,7 @@ export function patchMetadataEditor(plugin: TaskBoard): () => void {
 	// Patch the load method to add custom initialization
 	const removePatch = around(mdePrototype, {
 		load(old) {
-			return dedupe("task-board-metadata-editor", old, function (this: PatchedMetadataEditor) {
+			return dedupe("task-board-metadata-editor-load", old, function (this: PatchedMetadataEditor) {
 				// Call the original load method
 				old.call(this);
 				
@@ -66,7 +79,7 @@ export function patchMetadataEditor(plugin: TaskBoard): () => void {
 			});
 		},
 		synchronize(old) {
-			return dedupe("task-board-metadata-editor", old, function (this: PatchedMetadataEditor, data) {
+			return dedupe("task-board-metadata-editor-synchronize", old, function (this: PatchedMetadataEditor, data) {
 				// Call the original synchronize method
 				old.call(this, data);
 				
