@@ -402,20 +402,7 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1760365709344-buyyxwhhh",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1760365709345-8uyz54hm3",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "This"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "filterConfig": {
           "enableSavedFilters": true,
