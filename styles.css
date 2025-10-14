@@ -5327,3 +5327,76 @@ svg.react-flow__connectionline {
 		transform: translateX(-100%);
 	}
 }
+
+/* Frontmatter Section Styles */
+.frontmatter-section {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	margin-bottom: 8px;
+	background-color: var(--background-secondary);
+	overflow: hidden;
+}
+
+.frontmatter-header {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px;
+	cursor: pointer;
+	user-select: none;
+	background-color: var(--background-secondary);
+	transition: background-color 0.15s ease;
+	gap: 6px;
+}
+
+.frontmatter-header:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.frontmatter-icon {
+	display: flex;
+	align-items: center;
+	color: var(--text-muted);
+	flex-shrink: 0;
+}
+
+.frontmatter-label {
+	font-weight: 500;
+	color: var(--text-normal);
+	font-size: 13px;
+	flex-shrink: 0;
+}
+
+.frontmatter-count {
+	font-size: 11px;
+	color: var(--text-muted);
+	margin-left: auto;
+}
+
+.frontmatter-content {
+	border-top: 1px solid var(--background-modifier-border);
+	padding: 8px;
+	background-color: var(--background-primary);
+}
+
+.frontmatter-textarea {
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: 13px;
+	border: none;
+	background-color: transparent;
+	color: var(--text-normal);
+	resize: vertical;
+	padding: 4px;
+	outline: none;
+	line-height: 1.5;
+}
+
+.frontmatter-textarea:focus {
+	background-color: var(--background-primary-alt);
+	border-radius: 2px;
+}
+
+/* Integration with embedded markdown editor */
+.addOrEditTaskModal-markdown-editor-embed .frontmatter-section {
+	margin: 0 0 8px 0;
+}

@@ -26,6 +26,7 @@ import { handleEditTask } from "src/utils/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
+import { FrontmatterSection, extractFrontmatterFromMarkdown, reconstructMarkdownWithFrontmatter } from "./FrontmatterSection";
 
 export interface filterOptions {
 	value: string;
@@ -73,6 +74,11 @@ export const AddOrEditTaskRC: React.FC<{
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
 	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(true);
 	const cursorLocationRef = useRef<cursorLocation | null>(null);
+
+	// Frontmatter state management
+	const [frontmatterContent, setFrontmatterContent] = useState<string>("");
+	const [editorBodyContent, setEditorBodyContent] = useState<string>("");
+	const [hasFrontmatter, setHasFrontmatter] = useState<boolean>(false);
 
 	const indentationString = getObsidianIndentationSetting(plugin);
 
@@ -637,6 +643,15 @@ export const AddOrEditTaskRC: React.FC<{
 		componentRef.current = plugin.view;
 	}, []);
 
+	// Handler for frontmatter changes
+	const handleFrontmatterChange = (newFrontmatter: string) => {
+		setFrontmatterContent(newFrontmatter);
+		const fullContent = reconstructMarkdownWithFrontmatter(newFrontmatter, editorBodyContent);
+		setFormattedTaskContent(fullContent);
+		setIsEdited(true);
+		setIsEditorContentChanged(true);
+	};
+
 	// TODO : This function should be optimized to avoid excessive parsing on every keystroke.
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
 		if (isTaskNote) return;
@@ -665,21 +680,24 @@ export const AddOrEditTaskRC: React.FC<{
 	// 	setFormattedTaskContent(formatedContent);
 	// }, [modifiedTask]); // Re-render when modifiedTask changes
 
+	// Extract frontmatter from formatted task content when it changes
+	useEffect(() => {
+		if (isTaskNote && formattedTaskContent) {
+			const extracted = extractFrontmatterFromMarkdown(formattedTaskContent);
+			setHasFrontmatter(extracted.hasFrontmatter);
+			setFrontmatterContent(extracted.frontmatter);
+			setEditorBodyContent(extracted.body);
+		}
+	}, [formattedTaskContent, isTaskNote]);
+
 	const markdownEditorEmbeddedContainer = useRef<HTMLElement>(null);
 	const updateEmbeddableMarkdownEditor = (formattedTaskContent: string) => {
 		if (markdownEditorEmbeddedContainer.current) {
 
-			// const formattedTaskContent = getSanitizedTaskContent(plugin, modifiedTask);
-			// let formattedTaskContent = "";
-			// const fetchFormattedTaskContent = async () => {
-			// 	const output = getFormattedTaskContent(modifiedTask);
-			// 	const resolvedFormattedTaskContent = await output;
-			// 	formattedTaskContent = resolvedFormattedTaskContent;
-			// 	setFormattedTaskContent(resolvedFormattedTaskContent);
-			// };
-
-			// fetchFormattedTaskContent();
-
+			// For task notes, extract frontmatter and only show body in editor
+			const contentForEditor = isTaskNote && hasFrontmatter 
+				? editorBodyContent 
+				: formattedTaskContent;
 
 			if (!markdownEditor) {
 				markdownEditorEmbeddedContainer.current.empty();
@@ -688,11 +706,11 @@ export const AddOrEditTaskRC: React.FC<{
 					markdownEditorEmbeddedContainer.current,
 					{
 						placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
-						value: formattedTaskContent,
+						value: contentForEditor,
 						cls: "addOrEditTaskModal-markdown-editor-embed",
 						cursorLocation: {
-							anchor: formattedTaskContent.split("\n")[0].length,
-							head: formattedTaskContent.split("\n")[0].length,
+							anchor: contentForEditor.split("\n")[0].length,
+							head: contentForEditor.split("\n")[0].length,
 						},
 
 						onEnter: (editor: EmbeddableMarkdownEditor, mod: boolean, shift: boolean) => {
@@ -715,7 +733,15 @@ export const AddOrEditTaskRC: React.FC<{
 						onChange: (update: ViewUpdate) => {
 							setIsEdited(true);
 							const capturedContent = fullMarkdownEditor?.value || "";
-							setFormattedTaskContent(capturedContent);
+							
+							// For task notes, reconstruct full content with frontmatter
+							if (isTaskNote && hasFrontmatter) {
+								const fullContent = reconstructMarkdownWithFrontmatter(frontmatterContent, capturedContent);
+								setFormattedTaskContent(fullContent);
+								setEditorBodyContent(capturedContent);
+							} else {
+								setFormattedTaskContent(capturedContent);
+							}
 							handleTaskEditedThroughEditors(capturedContent);
 
 							// setCursorLocation({
@@ -830,7 +856,10 @@ export const AddOrEditTaskRC: React.FC<{
 				// fullMarkdownEditor?.editor?.focus();
 			} else {
 				// If the editor already exists, just update its content
-				markdownEditor.set(formattedTaskContent, false);
+				const contentForEditor = isTaskNote && hasFrontmatter 
+					? editorBodyContent 
+					: formattedTaskContent;
+				markdownEditor.set(contentForEditor, false);
 
 				// if (markdownEditor && markdownEditor.editorEl) {
 				// 	markdownEditor.editorEl.onblur = () => {
@@ -1095,6 +1124,14 @@ export const AddOrEditTaskRC: React.FC<{
 							<div className={`EditTaskModalTabContent ${activeTab === 'liveEditor' ? 'show' : 'hide'}`}>
 								<div className="EditTaskModalHomePreview" style={{ display: activeTab === 'liveEditor' ? 'block' : 'none' }}>
 									<div className="EditTaskModalHomePreviewContainer">
+										{/* Render FrontmatterSection for task notes with frontmatter */}
+										{isTaskNote && hasFrontmatter && (
+											<FrontmatterSection
+												frontmatterContent={frontmatterContent}
+												onFrontmatterChange={handleFrontmatterChange}
+												collapsed={true}
+											/>
+										)}
 										<span
 											className="EditTaskModalLiveEditor"
 											ref={markdownEditorEmbeddedContainer}
