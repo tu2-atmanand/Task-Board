@@ -1,7 +1,7 @@
 // /src/components/FrontmatterSection.tsx
 // Component for collapsible frontmatter section in the markdown editor
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface FrontmatterSectionProps {
@@ -9,6 +9,9 @@ interface FrontmatterSectionProps {
 	onFrontmatterChange?: (newContent: string) => void;
 	collapsed?: boolean;
 }
+
+// Regex for extracting frontmatter - defined at module level for performance
+const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---\n/;
 
 /**
  * FrontmatterSection component
@@ -33,6 +36,19 @@ export const FrontmatterSection: React.FC<FrontmatterSectionProps> = ({
 		}
 	};
 
+	// Memoize field count calculation to avoid repeated string operations
+	const fieldCount = useMemo(() => {
+		return frontmatterContent
+			.split('\n')
+			.filter(line => line.trim() && !line.trim().startsWith('---'))
+			.length;
+	}, [frontmatterContent]);
+
+	// Memoize rows calculation to avoid repeated string operations
+	const textareaRows = useMemo(() => {
+		return frontmatterContent.split('\n').length;
+	}, [frontmatterContent]);
+
 	return (
 		<div className="frontmatter-section">
 			<div className="frontmatter-header" onClick={toggleCollapse}>
@@ -41,7 +57,7 @@ export const FrontmatterSection: React.FC<FrontmatterSectionProps> = ({
 				</span>
 				<span className="frontmatter-label">Properties</span>
 				<span className="frontmatter-count">
-					{frontmatterContent.split('\n').filter(line => line.trim() && !line.trim().startsWith('---')).length} fields
+					{fieldCount} fields
 				</span>
 			</div>
 			{!isCollapsed && (
@@ -50,7 +66,7 @@ export const FrontmatterSection: React.FC<FrontmatterSectionProps> = ({
 						className="frontmatter-textarea"
 						value={frontmatterContent}
 						onChange={handleContentChange}
-						rows={frontmatterContent.split('\n').length}
+						rows={textareaRows}
 						spellCheck={false}
 					/>
 				</div>
@@ -69,8 +85,7 @@ export function extractFrontmatterFromMarkdown(content: string): {
 	frontmatter: string;
 	body: string;
 } {
-	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n/;
-	const match = content.match(frontmatterRegex);
+	const match = content.match(FRONTMATTER_REGEX);
 
 	if (match) {
 		return {

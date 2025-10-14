@@ -742,6 +742,8 @@ export const AddOrEditTaskRC: React.FC<{
 							} else {
 								setFormattedTaskContent(capturedContent);
 							}
+							// Note: handleTaskEditedThroughEditors early returns for task notes,
+							// so passing body content here is safe
 							handleTaskEditedThroughEditors(capturedContent);
 
 							// setCursorLocation({
