@@ -310,19 +310,25 @@ export class EmbeddableMarkdownEditor {
 				return;
 			}
 
-			// Create a wrapper for frontmatter UI before the editor
-			const editorParent = this.containerEl.parentElement;
-			if (!editorParent) {
-				return;
+			// Find or create a wrapper in the container
+			// We'll prepend the frontmatter UI to the container
+			const wrapper = this.containerEl.querySelector(".taskboard-frontmatter-wrapper") as HTMLElement;
+			
+			if (!wrapper) {
+				// Create a wrapper div for frontmatter UI at the start of container
+				this.frontmatterUIContainer = this.containerEl.createDiv({
+					cls: "taskboard-frontmatter-wrapper"
+				});
+				
+				// Insert at the beginning of the container
+				this.containerEl.insertBefore(
+					this.frontmatterUIContainer,
+					this.containerEl.firstChild
+				);
+			} else {
+				this.frontmatterUIContainer = wrapper;
+				this.frontmatterUIContainer.empty();
 			}
-
-			// Create frontmatter UI container
-			this.frontmatterUIContainer = editorParent.createDiv({
-				cls: "taskboard-frontmatter-ui-wrapper"
-			});
-
-			// Insert before the editor container
-			editorParent.insertBefore(this.frontmatterUIContainer, this.containerEl);
 
 			// Render the frontmatter properties
 			const renderer = new FrontmatterPropertyRenderer(this.app, this.editor);

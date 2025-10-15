@@ -5338,153 +5338,158 @@ svg.react-flow__connectionline {
 
 /* ==================== Frontmatter UI Styles ==================== */
 
+/* Wrapper for the frontmatter UI inside the editor container */
+.taskboard-frontmatter-wrapper {
+	margin-bottom: 0.75em;
+}
+
 /* Wrapper for the entire frontmatter UI */
 .taskboard-frontmatter-ui-wrapper {
-margin-bottom: 0.5em;
-border: 1px solid var(--background-modifier-border);
-border-radius: 4px;
-background-color: var(--background-primary-alt);
+	margin-bottom: 0.5em;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-primary-alt);
 }
 
 /* Frontmatter section container */
 .taskboard-frontmatter-section {
-padding: 0;
+	padding: 0;
 }
 
 /* Collapsible header */
 .taskboard-frontmatter-header {
-display: flex;
-align-items: center;
-gap: 0.5em;
-padding: 0.5em 0.75em;
-cursor: pointer;
-user-select: none;
-background-color: var(--background-secondary);
-border-bottom: 1px solid var(--background-modifier-border);
-transition: background-color 0.15s ease;
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.5em 0.75em;
+	cursor: pointer;
+	user-select: none;
+	background-color: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	transition: background-color 0.15s ease;
 }
 
 .taskboard-frontmatter-header:hover {
-background-color: var(--background-modifier-hover);
+	background-color: var(--background-modifier-hover);
 }
 
 /* Collapse icon */
 .taskboard-frontmatter-collapse-icon {
-display: flex;
-align-items: center;
-transition: transform 0.2s ease;
-color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	transition: transform 0.2s ease;
+	color: var(--text-muted);
 }
 
 .taskboard-frontmatter-section.is-collapsed .taskboard-frontmatter-collapse-icon {
-transform: rotate(-90deg);
+	transform: rotate(-90deg);
 }
 
 /* Header text */
 .taskboard-frontmatter-header-text {
-font-weight: 500;
-color: var(--text-normal);
-flex-grow: 1;
+	font-weight: 500;
+	color: var(--text-normal);
+	flex-grow: 1;
 }
 
 /* Property count badge */
 .taskboard-frontmatter-property-count {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-min-width: 1.5em;
-height: 1.5em;
-padding: 0 0.4em;
-background-color: var(--interactive-accent);
-color: var(--text-on-accent);
-border-radius: 10px;
-font-size: 0.85em;
-font-weight: 500;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.5em;
+	height: 1.5em;
+	padding: 0 0.4em;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 10px;
+	font-size: 0.85em;
+	font-weight: 500;
 }
 
 /* Properties container */
 .taskboard-frontmatter-properties {
-padding: 0.75em;
-max-height: 400px;
-overflow-y: auto;
+	padding: 0.75em;
+	max-height: 400px;
+	overflow-y: auto;
 }
 
 /* Individual property row */
 .taskboard-frontmatter-property-row {
-display: grid;
-grid-template-columns: minmax(100px, 200px) 1fr;
-gap: 1em;
-padding: 0.5em;
-margin-bottom: 0.5em;
-border-radius: 4px;
-background-color: var(--background-primary);
-transition: background-color 0.15s ease;
+	display: grid;
+	grid-template-columns: minmax(100px, 200px) 1fr;
+	gap: 1em;
+	padding: 0.5em;
+	margin-bottom: 0.5em;
+	border-radius: 4px;
+	background-color: var(--background-primary);
+	transition: background-color 0.15s ease;
 }
 
 .taskboard-frontmatter-property-row:hover {
-background-color: var(--background-modifier-hover);
+	background-color: var(--background-modifier-hover);
 }
 
 .taskboard-frontmatter-property-row:last-child {
-margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 /* Property key */
 .taskboard-frontmatter-property-key {
-font-weight: 500;
-color: var(--text-muted);
-display: flex;
-align-items: center;
-word-wrap: break-word;
-word-break: break-word;
+	font-weight: 500;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	word-wrap: break-word;
+	word-break: break-word;
 }
 
 /* Property value */
 .taskboard-frontmatter-property-value {
-color: var(--text-normal);
-display: flex;
-align-items: center;
-word-wrap: break-word;
-word-break: break-word;
+	color: var(--text-normal);
+	display: flex;
+	align-items: center;
+	word-wrap: break-word;
+	word-break: break-word;
 }
 
 /* Property list (for array values) */
 .taskboard-frontmatter-property-list {
-list-style: none;
-padding: 0;
-margin: 0;
-display: flex;
-flex-wrap: wrap;
-gap: 0.3em;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3em;
 }
 
 .taskboard-frontmatter-property-list li {
-padding: 0.2em 0.5em;
-background-color: var(--background-secondary);
-border-radius: 3px;
-font-size: 0.9em;
+	padding: 0.2em 0.5em;
+	background-color: var(--background-secondary);
+	border-radius: 3px;
+	font-size: 0.9em;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-.taskboard-frontmatter-property-row {
-grid-template-columns: 1fr;
-gap: 0.5em;
-}
-
-.taskboard-frontmatter-property-key {
-font-size: 0.9em;
-}
+	.taskboard-frontmatter-property-row {
+		grid-template-columns: 1fr;
+		gap: 0.5em;
+	}
+	
+	.taskboard-frontmatter-property-key {
+		font-size: 0.9em;
+	}
 }
 
 /* Smooth collapse animation */
 .taskboard-frontmatter-properties {
-transition: max-height 0.3s ease, opacity 0.2s ease;
-opacity: 1;
+	transition: max-height 0.3s ease, opacity 0.2s ease;
+	opacity: 1;
 }
 
 .taskboard-frontmatter-section.is-collapsed .taskboard-frontmatter-properties {
-max-height: 0;
-opacity: 0;
-overflow: hidden;
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
 }

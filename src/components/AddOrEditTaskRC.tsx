@@ -690,6 +690,7 @@ export const AddOrEditTaskRC: React.FC<{
 						placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
 						value: formattedTaskContent,
 						cls: "addOrEditTaskModal-markdown-editor-embed",
+						enableFrontmatterUI: isTaskNote, // Enable frontmatter UI for task notes
 						cursorLocation: {
 							anchor: formattedTaskContent.split("\n")[0].length,
 							head: formattedTaskContent.split("\n")[0].length,
