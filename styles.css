@@ -97,7 +97,7 @@
 		max-width: 100vw;
 		min-width: 100vw;
 		overflow: auto;
-		/* min-height: fit-content; */
+		min-height: fit-content;
 		max-height: 80vh;
 	}
 }
@@ -1228,7 +1228,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalTabContent.show {
 	opacity: 1;
-	height: 100%;
+	/* height: 100%; */
 	border: 2px solid var(--table-header-border-color);
 	border-radius: 0px 0px 10px 10px;
 	margin-bottom: 2em;
@@ -1336,11 +1336,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalLiveEditor {
 	min-height: 20vh;
-	max-height: 40vh;
+	/* max-height: 40vh; */
 }
 
 .EditTaskModalLiveEditor .markdown-source-view.mod-cm6 {
-	max-height: 40vh;
+	/* max-height: 40vh; */
 	padding-block: 1rem;
 	padding-inline-end: 1rem;
 }
