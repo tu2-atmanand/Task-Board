@@ -69,6 +69,8 @@ interface MarkdownEditorProps {
 	value?: string;
 	cls?: string;
 	placeholder?: string;
+	enableFrontmatterUI?: boolean; // Enable enhanced frontmatter UI
+	file?: TFile; // Optional file for context in property rendering
 
 	onEnter: (
 		editor: EmbeddableMarkdownEditor,
@@ -87,6 +89,8 @@ const defaultProperties: MarkdownEditorProps = {
 	value: "",
 	cls: "",
 	placeholder: "",
+	enableFrontmatterUI: false,
+	file: undefined,
 
 	onEnter: () => false,
 	// onEscape: () => {},
@@ -105,6 +109,7 @@ export class EmbeddableMarkdownEditor {
 	initial_value: string;
 	scope: Scope;
 	editor: MarkdownScrollableEditView;
+	private frontmatterUIContainer: HTMLElement | null = null;
 
 	// Expose commonly accessed properties
 	get editorEl(): HTMLElement {
@@ -280,6 +285,61 @@ export class EmbeddableMarkdownEditor {
 	// Set content in the editor
 	set(content: string, focus: boolean = false): void {
 		this.editor.set(content, focus);
+		
+		// Update frontmatter UI if enabled
+		if (this.options.enableFrontmatterUI) {
+			this.updateFrontmatterUI(content);
+		}
+	}
+
+	/**
+	 * Update the frontmatter UI based on content
+	 * @param content - Markdown content to check for frontmatter
+	 */
+	private updateFrontmatterUI(content: string): void {
+		// Import the FrontmatterPropertyRenderer dynamically to avoid circular dependencies
+		import("./FrontmatterPropertyRenderer").then(({ FrontmatterPropertyRenderer }) => {
+			// Remove existing frontmatter UI if any
+			if (this.frontmatterUIContainer) {
+				this.frontmatterUIContainer.remove();
+				this.frontmatterUIContainer = null;
+			}
+
+			// Check if content has frontmatter
+			if (!content.startsWith("---\n")) {
+				return;
+			}
+
+			// Create a wrapper for frontmatter UI before the editor
+			const editorParent = this.containerEl.parentElement;
+			if (!editorParent) {
+				return;
+			}
+
+			// Create frontmatter UI container
+			this.frontmatterUIContainer = editorParent.createDiv({
+				cls: "taskboard-frontmatter-ui-wrapper"
+			});
+
+			// Insert before the editor container
+			editorParent.insertBefore(this.frontmatterUIContainer, this.containerEl);
+
+			// Render the frontmatter properties
+			const renderer = new FrontmatterPropertyRenderer(this.app, this.editor);
+			const result = renderer.renderCollapsibleFrontmatter(
+				this.frontmatterUIContainer,
+				content,
+				this.options.file
+			);
+
+			// If no frontmatter was rendered, remove the container
+			if (!result.frontmatterContainer) {
+				this.frontmatterUIContainer.remove();
+				this.frontmatterUIContainer = null;
+			}
+		}).catch(error => {
+			console.error("Failed to load FrontmatterPropertyRenderer:", error);
+		});
 	}
 
 	// Register cleanup callback
@@ -289,6 +349,12 @@ export class EmbeddableMarkdownEditor {
 
 	// Clean up method that ensures proper destruction
 	destroy(): void {
+		// Clean up frontmatter UI
+		if (this.frontmatterUIContainer) {
+			this.frontmatterUIContainer.remove();
+			this.frontmatterUIContainer = null;
+		}
+
 		if (this._loaded && typeof this.editor.unload === "function") {
 			this.editor.unload();
 		}
