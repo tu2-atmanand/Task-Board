@@ -1,10 +1,41 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-13T02:38:52.491Z",
+    "Modified_at": "2025-10-14T17:32:48.645Z",
     "Pending": {
+        "TaskNotes/2025-09-23T00_15.md": [
+            {
+                "id": 403939800,
+                "legacyId": "",
+                "title": "This is a first task note in this vault.",
+                "body": [],
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-09-29",
+                "due": "2025-09-23",
+                "tags": [
+                    "taskNote",
+                    "Test"
+                ],
+                "frontmatterTags": [],
+                "time": "",
+                "priority": 0,
+                "dependsOn": [],
+                "status": " ",
+                "filePath": "TaskNotes/2025-09-23T00_15.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 15,
+                    "endCharIndex": 84
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "TaskNotes/Tasks/This is a new TaskNote with only due date.md": [
             {
-                "id": 4275778861,
+                "id": 825616994,
                 "legacyId": "",
                 "title": "This is a new TaskNote with only due date",
                 "body": [],

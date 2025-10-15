@@ -48,6 +48,7 @@ import {
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
+import { patchMetadataEditor } from "src/services/MetadataEditor";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -136,6 +137,9 @@ export default class TaskBoard extends Plugin {
 
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
+
+			// Apply the patch
+			patchMetadataEditor(this);
 		});
 	}
 
