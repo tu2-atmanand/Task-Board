@@ -382,7 +382,7 @@
             "id": 3193261849,
             "index": 7,
             "colType": "completed",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "Completed",
             "limit": 20
