@@ -493,7 +493,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 	/* New UI */
 	border: var(--border-width) solid var(--background-modifier-border-focus);
-	box-shadow: 0px 0px 0px 1px rgb(82 52 102 / 48%), 0px 4px 10px 0 var(--background-modifier-cover);
+	box-shadow: 0px 4px 10px 0 rgba(0,0,0,0.3);
 	transition: box-shadow 0.3s ease-in-out;
 }
 
@@ -1343,6 +1343,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	/* max-height: 40vh; */
 	padding-block: 1rem;
 	padding-inline-end: 1rem;
+	padding-inline-start: 0.5rem;
 }
 
 .EditTaskModalBodyDescription {
