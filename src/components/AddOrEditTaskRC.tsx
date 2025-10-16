@@ -684,7 +684,7 @@ export const AddOrEditTaskRC: React.FC<{
 			if (!markdownEditor) {
 				markdownEditorEmbeddedContainer.current.empty();
 				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
-					plugin.app,
+					plugin,
 					markdownEditorEmbeddedContainer.current,
 					{
 						placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
@@ -713,9 +713,11 @@ export const AddOrEditTaskRC: React.FC<{
 							handleSave();
 						},
 
-						onChange: (update: ViewUpdate) => {
+						onChange: (update: ViewUpdate, fullContent: string) => {
 							setIsEdited(true);
-							const capturedContent = fullMarkdownEditor?.value || "";
+							// const capturedContent = fullMarkdownEditor?.value || "";
+							console.log("Content changed in embedded markdown editor:", fullContent);
+							const capturedContent = fullContent || "";
 							setFormattedTaskContent(capturedContent);
 							handleTaskEditedThroughEditors(capturedContent);
 

@@ -1,4 +1,4 @@
-// /src/services/FrontmatterPropertyRenderer.ts
+// /src/services/FrontmatterRenderer.ts
 
 /**
  * Utility class for rendering frontmatter properties using Obsidian's PropertyWidget API
@@ -6,17 +6,26 @@
  * @see https://github.com/unxok/obsidian-better-properties/blob/main/src/classes/PropertyComponent/index.ts
  */
 
+import type TaskBoard from "main";
 import { App, Component, parseYaml, TFile } from "obsidian";
+import {
+	TypeInfo,
+	PropertyWidget,
+	MetadataTypeManager,
+} from "obsidian-typings";
+import { extractFrontmatterFromContent } from "~/utils/FrontmatterOperations";
 
 /**
  * Renders frontmatter properties using Obsidian's PropertyWidget API
  */
-export class FrontmatterPropertyRenderer {
+export class FrontmatterRenderer {
+	private plugin: TaskBoard;
 	private app: App;
 	private component: Component;
 
-	constructor(app: App, component: Component) {
-		this.app = app;
+	constructor(plugin: TaskBoard, component: Component) {
+		this.plugin = plugin;
+		this.app = plugin.app;
 		this.component = component;
 	}
 
@@ -25,18 +34,30 @@ export class FrontmatterPropertyRenderer {
 	 * @param content - Full markdown content
 	 * @returns The frontmatter content (including delimiters) or null if not found
 	 */
-	private extractFrontmatterContent(content: string): string | null {
+	public extractFrontmatterContent(content: string): string {
 		if (!content.startsWith("---\n")) {
-			return null;
+			return "";
 		}
 
 		const secondDelimiterIndex = content.indexOf("\n---\n", 4);
 		if (secondDelimiterIndex === -1) {
-			return null;
+			return "";
 		}
 
 		// Return the complete frontmatter including delimiters
-		return content.substring(0, secondDelimiterIndex + 5); // +5 to include "\n---\n"
+		return content.substring(0, secondDelimiterIndex + 5) ?? ""; // +5 to include "\n---\n"
+	}
+
+	public extractContentWithoutFrontmatter(
+		content: string,
+		frontmatterContent: string
+	): string {
+		if (!frontmatterContent) return content;
+
+		const contentWithoutFrontmatter = content.substring(
+			frontmatterContent.length
+		);
+		return contentWithoutFrontmatter;
 	}
 
 	/**
@@ -44,27 +65,29 @@ export class FrontmatterPropertyRenderer {
 	 * @param content - Full markdown content
 	 * @returns Frontmatter object or null
 	 */
-	private extractFrontmatterObject(content: string): Record<string, any> | null {
-		if (!content.startsWith("---\n")) {
-			return null;
-		}
+	// private extractFrontmatterObject(
+	// 	content: string
+	// ): Record<string, any> | null {
+	// 	if (!content.startsWith("---\n")) {
+	// 		return null;
+	// 	}
 
-		const secondDelimiterIndex = content.indexOf("\n---\n", 4);
-		if (secondDelimiterIndex === -1) {
-			return null;
-		}
+	// 	const secondDelimiterIndex = content.indexOf("\n---\n", 4);
+	// 	if (secondDelimiterIndex === -1) {
+	// 		return null;
+	// 	}
 
-		// Extract the YAML content between delimiters
-		const yamlContent = content.substring(4, secondDelimiterIndex);
+	// 	// Extract the YAML content between delimiters
+	// 	const yamlContent = content.substring(4, secondDelimiterIndex);
 
-		try {
-			const frontmatter = parseYaml(yamlContent);
-			return frontmatter as Record<string, any>;
-		} catch (error) {
-			console.warn("Failed to parse frontmatter:", error);
-			return null;
-		}
-	}
+	// 	try {
+	// 		const frontmatter = parseYaml(yamlContent);
+	// 		return frontmatter as Record<string, any>;
+	// 	} catch (error) {
+	// 		console.warn("Failed to parse frontmatter:", error);
+	// 		return null;
+	// 	}
+	// }
 
 	/**
 	 * Create a collapsible properties section for frontmatter
@@ -77,55 +100,69 @@ export class FrontmatterPropertyRenderer {
 		containerEl: HTMLElement,
 		content: string,
 		file?: TFile
-	): { frontmatterContainer: HTMLElement | null; contentWithoutFrontmatter: string } {
+	): {
+		frontmatterContainer: HTMLElement | null;
+		contentWithoutFrontmatter: string;
+	} {
 		const frontmatterContent = this.extractFrontmatterContent(content);
 
 		if (!frontmatterContent) {
-			return { frontmatterContainer: null, contentWithoutFrontmatter: content };
+			return {
+				frontmatterContainer: null,
+				contentWithoutFrontmatter: content,
+			};
 		}
 
 		// Extract frontmatter object
-		const frontmatter = this.extractFrontmatterObject(content);
-		
+		const frontmatter = extractFrontmatterFromContent(this.plugin, content);
+
 		if (!frontmatter) {
-			return { frontmatterContainer: null, contentWithoutFrontmatter: content };
+			return {
+				frontmatterContainer: null,
+				contentWithoutFrontmatter: content,
+			};
 		}
 
 		// Get the content after frontmatter
-		const contentWithoutFrontmatter = content.substring(frontmatterContent.length);
+		const contentWithoutFrontmatter = this.extractContentWithoutFrontmatter(
+			content,
+			frontmatterContent
+		);
 
 		// Create the frontmatter section container
 		const frontmatterSection = containerEl.createDiv({
-			cls: "taskboard-frontmatter-section"
+			cls: "taskboard-frontmatter-section",
 		});
 
 		// Create the collapsible header
 		const header = frontmatterSection.createDiv({
-			cls: "taskboard-frontmatter-header"
+			cls: "taskboard-frontmatter-header",
 		});
 
 		// Add collapse icon
 		const collapseIcon = header.createSpan({
-			cls: "taskboard-frontmatter-collapse-icon"
+			cls: "taskboard-frontmatter-collapse-icon",
 		});
 		collapseIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
 		// Add "Properties" text
 		header.createSpan({
 			cls: "taskboard-frontmatter-header-text",
-			text: "Properties"
+			text: "Properties",
 		});
 
 		// Add property count
-		const propertyCount = Object.keys(frontmatter).filter(key => key !== "position").length;
+		const propertyCount = Object.keys(frontmatter).filter(
+			(key) => key !== "position"
+		).length;
 		header.createSpan({
 			cls: "taskboard-frontmatter-property-count",
-			text: `${propertyCount}`
+			text: `${propertyCount}`,
 		});
 
 		// Create the properties container
 		const propertiesContainer = frontmatterSection.createDiv({
-			cls: "taskboard-frontmatter-properties"
+			cls: ["metadata-properties", "taskboard-frontmatter-properties"],
 		});
 
 		// Render each property using PropertyWidget
@@ -135,19 +172,22 @@ export class FrontmatterPropertyRenderer {
 		let isCollapsed = false;
 		header.addEventListener("click", () => {
 			isCollapsed = !isCollapsed;
-			
+
 			if (isCollapsed) {
 				propertiesContainer.style.display = "none";
 				collapseIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
 			} else {
-				propertiesContainer.style.display = "block";
+				propertiesContainer.style.display = "flex";
 				collapseIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 			}
-			
+
 			frontmatterSection.toggleClass("is-collapsed", isCollapsed);
 		});
 
-		return { frontmatterContainer: frontmatterSection, contentWithoutFrontmatter };
+		return {
+			frontmatterContainer: frontmatterSection,
+			contentWithoutFrontmatter,
+		};
 	}
 
 	/**
@@ -161,8 +201,23 @@ export class FrontmatterPropertyRenderer {
 		frontmatter: Record<string, any>,
 		file?: TFile
 	): void {
-		const metadataTypeManager = (this.app as any).metadataTypeManager;
-		
+		this.renderPropertiesSimple(containerEl, frontmatter);
+		return;
+
+		// TODO : Will work on implementing a Full Metadata editor inside this embeddableEditor later.
+		/**
+		 * Current Issues which I am facing right now :
+		 * - `plugin.app` doesnt seems to have all the properties of `window.app`.
+		 * - The values are not being populated inside the rendered widgets.
+		 * - After changing the value from the widget the onChange cb is not called immediaterly. Its getting called when user tries to update the property second time.
+		 * - The suggestions menu flashes when trying to edit the property value. Also the experience of editing it is not smooth.
+		 * A full metadataEditor will be required to be implemented, instead of simply the propertyWidget.
+		 */
+		/*
+		const metadataTypeManager = this.plugin.app
+			.metadataTypeManager as MetadataTypeManager;
+		console.log("metadataTypeManager :", metadataTypeManager);
+
 		if (!metadataTypeManager) {
 			// Fallback to simple rendering if PropertyWidget API is not available
 			this.renderPropertiesSimple(containerEl, frontmatter);
@@ -176,68 +231,81 @@ export class FrontmatterPropertyRenderer {
 
 		for (const [key, value] of propertiesToRender) {
 			const propertyRow = containerEl.createDiv({
-				cls: "taskboard-frontmatter-property-row"
+				cls: [
+					"metadata-property",
+					"taskboard-frontmatter-property-row",
+				],
 			});
 
 			// Render property key
 			const keyEl = propertyRow.createDiv({
 				cls: "taskboard-frontmatter-property-key",
-				text: key
+				text: key,
 			});
 
 			// Render property value using PropertyWidget
 			const valueEl = propertyRow.createDiv({
-				cls: "taskboard-frontmatter-property-value"
+				cls: "taskboard-frontmatter-property-value",
 			});
 
 			try {
 				// Get the property widget type
-				const typeInfo = metadataTypeManager.getTypeInfo({
-					key,
-					value,
-					file: file?.path || ""
-				});
+				const typeInfo = metadataTypeManager.getTypeInfo(key, value);
 
 				const widget = typeInfo?.inferred || typeInfo?.expected;
 
 				if (widget && widget.render) {
 					// Create context for rendering
 					const context = {
-						app: this.app,
+						app: window.app,
 						key,
-						metadataEditor: null, // We don't have a full metadata editor
 						sourcePath: file?.path || "",
 						blur: () => {},
 						onChange: (newValue: unknown) => {
 							// Handle property value changes
 							// This would require updating the frontmatter in the editor
-							console.log(`Property ${key} changed to:`, newValue);
-						}
+							console.log(
+								`Property ${key} changed to:`,
+								newValue
+							);
+						},
 					};
 
 					const entryData = {
 						key,
 						type: widget.type,
-						value
+						value,
 					};
 
 					// Render the widget
-					const component = widget.render(valueEl, entryData, context);
-					
+					const widgetComponent = widget.render(
+						valueEl,
+						entryData,
+						context
+					);
+					console.log("Widget component :", widgetComponent);
+
 					// Register the component if it's a Component instance
-					if (component && component instanceof Component) {
-						this.component.addChild(component);
+					if (
+						widgetComponent &&
+						widgetComponent instanceof Component
+					) {
+						this.component.addChild(widgetComponent);
 					}
 				} else {
 					// Fallback to simple rendering
 					this.renderPropertyValueSimple(valueEl, value);
 				}
 			} catch (error) {
-				console.warn(`Failed to render property ${key} with PropertyWidget:`, error);
+				console.warn(
+					`FALLBACK : Failed to render property ${key} with PropertyWidget:`,
+					error
+				);
 				// Fallback to simple rendering
 				this.renderPropertyValueSimple(valueEl, value);
 			}
 		}
+		*/
 	}
 
 	/**
@@ -255,16 +323,16 @@ export class FrontmatterPropertyRenderer {
 
 		for (const [key, value] of propertiesToRender) {
 			const propertyRow = containerEl.createDiv({
-				cls: "taskboard-frontmatter-property-row"
+				cls: "taskboard-frontmatter-property-row",
 			});
 
 			propertyRow.createDiv({
 				cls: "taskboard-frontmatter-property-key",
-				text: key
+				text: key,
 			});
 
 			const valueEl = propertyRow.createDiv({
-				cls: "taskboard-frontmatter-property-value"
+				cls: "taskboard-frontmatter-property-value",
 			});
 
 			this.renderPropertyValueSimple(valueEl, value);
@@ -276,12 +344,15 @@ export class FrontmatterPropertyRenderer {
 	 * @param containerEl - Container for value
 	 * @param value - Property value
 	 */
-	private renderPropertyValueSimple(containerEl: HTMLElement, value: any): void {
+	private renderPropertyValueSimple(
+		containerEl: HTMLElement,
+		value: any
+	): void {
 		if (Array.isArray(value)) {
 			const list = containerEl.createEl("ul", {
-				cls: "taskboard-frontmatter-property-list"
+				cls: "taskboard-frontmatter-property-list",
 			});
-			value.forEach(item => {
+			value.forEach((item) => {
 				list.createEl("li", { text: String(item) });
 			});
 		} else if (typeof value === "object" && value !== null) {

@@ -1265,9 +1265,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .EditTaskModalHomePreview ul {
-	padding-inline-start: 30px;
+	/* padding-inline-start: 30px;
 	margin-top: 0.7em;
-	padding-inline-end: 10px;
+	padding-inline-end: 10px; */
 }
 
 .EditTaskModalHomePreviewContainer {
@@ -5416,13 +5416,11 @@ svg.react-flow__connectionline {
 
 /* Individual property row */
 .taskboard-frontmatter-property-row {
-	display: grid;
-	grid-template-columns: minmax(100px, 200px) 1fr;
-	gap: 1em;
-	padding: 0.5em;
-	margin-bottom: 0.5em;
-	border-radius: 4px;
-	background-color: var(--background-primary);
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-start;
 	transition: background-color 0.15s ease;
 }
 
@@ -5440,6 +5438,7 @@ svg.react-flow__connectionline {
 	color: var(--text-muted);
 	display: flex;
 	align-items: center;
+	width: 10rem;
 	word-wrap: break-word;
 	word-break: break-word;
 }
@@ -5476,7 +5475,7 @@ svg.react-flow__connectionline {
 		grid-template-columns: 1fr;
 		gap: 0.5em;
 	}
-	
+
 	.taskboard-frontmatter-property-key {
 		font-size: 0.9em;
 	}
@@ -5492,4 +5491,19 @@ svg.react-flow__connectionline {
 	max-height: 0;
 	opacity: 0;
 	overflow: hidden;
+}
+
+/* Frontmatter Hiding Extension Styles */
+/* Hide frontmatter content in markdown editor when using the frontmatter hiding extension */
+.task-board-frontmatter-hidden {
+	display: none !important;
+	visibility: hidden !important;
+}
+
+/* Alternative approach for better performance - can be toggled */
+.task-board-frontmatter-hidden-collapsed {
+	height: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	transition: opacity 0.2s ease;
 }
