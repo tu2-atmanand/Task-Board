@@ -712,9 +712,9 @@ export const AddOrEditTaskRC: React.FC<{
 							handleSave();
 						},
 
-						onChange: (update: ViewUpdate) => {
+						onChange: (update: ViewUpdate, editor: EmbeddableMarkdownEditor) => {
 							setIsEdited(true);
-							const capturedContent = fullMarkdownEditor?.value || "";
+							const capturedContent = editor.value || "";
 							setFormattedTaskContent(capturedContent);
 							handleTaskEditedThroughEditors(capturedContent);
 
@@ -729,7 +729,8 @@ export const AddOrEditTaskRC: React.FC<{
 							// 	charIndex: editor.options.cursorLocation?.head || formattedTaskContent.split("\n")[0].length,
 							// });
 						}
-					}
+					},
+					filePath
 				)
 				setMarkdownEditor(fullMarkdownEditor);
 				// const cursorLocation = fullMarkdownEditor.options.cursorLocation;

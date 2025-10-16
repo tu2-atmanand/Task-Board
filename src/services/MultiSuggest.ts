@@ -74,7 +74,12 @@ export function getTagSuggestions(app: App): string[] {
 	const allTagsDict = app.metadataCache.getTags() || {};
 	const tagsArray = Object.entries(allTagsDict)
 		.filter(([tag]) => tag.startsWith("#"))
-		.sort(([, countA], [, countB]) => countB - countA) // Sort by number of occurrences in descending order
+		.sort(([, countA], [, countB]) => {
+			// Convert to numbers for sorting
+			const numA = typeof countA === 'number' ? countA : 0;
+			const numB = typeof countB === 'number' ? countB : 0;
+			return numB - numA;
+		}) // Sort by number of occurrences in descending order
 		.map(([tag]) => tag); // Extract the tag names
 
 	return tagsArray;
