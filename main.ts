@@ -139,7 +139,7 @@ export default class TaskBoard extends Plugin {
 			this.registerReadingModePostProcessor();
 
 			// Apply the patch
-			patchMetadataEditor(this);
+			// patchMetadataEditor(this);
 		});
 	}
 
