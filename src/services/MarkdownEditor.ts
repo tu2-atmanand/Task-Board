@@ -97,7 +97,7 @@ interface MarkdownEditorProps {
 	onSubmit: (editor: EmbeddableMarkdownEditor) => void;
 	onBlur: (editor: EmbeddableMarkdownEditor) => void;
 	onPaste: (e: ClipboardEvent, editor: EmbeddableMarkdownEditor) => void;
-	onChange: (update: ViewUpdate, fullContent: string) => void;
+	onChange: (update: ViewUpdate) => void;
 }
 
 const defaultProperties: MarkdownEditorProps = {
@@ -128,8 +128,6 @@ export class EmbeddableMarkdownEditor {
 	editor: MarkdownScrollableEditView;
 	frontmatterRenderer: FrontmatterRenderer;
 	private frontmatterUIContainer: HTMLElement | null = null;
-
-public frontmatterContent = "";
 
 	// Expose commonly accessed properties
 	get editorEl(): HTMLElement {
@@ -301,9 +299,7 @@ public frontmatterContent = "";
 		this.editor.onUpdate = (update: ViewUpdate, changed: boolean) => {
 			originalOnUpdate(update, changed);
 			if (changed) {
-				const fullContent =
-					this.frontmatterContent + this.editor.editor?.getValue();
-				this.options.onChange(update, fullContent);
+				this.options.onChange(update);
 			}
 		};
 	}

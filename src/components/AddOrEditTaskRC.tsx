@@ -67,6 +67,7 @@ export const AddOrEditTaskRC: React.FC<{
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
 
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>(isTaskNote ? noteContent : getFormattedTaskContentSync(task));
+	const frontmatterContentRef = useRef<string>('');
 	const [newFilePath, setNewFilePath] = useState<string>(filePath);
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
@@ -682,6 +683,8 @@ export const AddOrEditTaskRC: React.FC<{
 
 
 			if (!markdownEditor) {
+				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				frontmatterContentRef.current = newFrontmatter;
 				markdownEditorEmbeddedContainer.current.empty();
 				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
 					plugin,
@@ -713,13 +716,13 @@ export const AddOrEditTaskRC: React.FC<{
 							handleSave();
 						},
 
-						onChange: (update: ViewUpdate, fullContent: string) => {
+						onChange: (update: ViewUpdate) => {
 							setIsEdited(true);
-							// const capturedContent = fullMarkdownEditor?.value || "";
-							console.log("Content changed in embedded markdown editor:", fullContent);
-							const capturedContent = fullContent || "";
-							setFormattedTaskContent(capturedContent);
-							handleTaskEditedThroughEditors(capturedContent);
+							const editorUpdatedContent = fullMarkdownEditor?.value || "";
+							const fullFileContent = (frontmatterContentRef ? `---\n${frontmatterContentRef.current}\n---\n` : "") + editorUpdatedContent;
+							console.log("Editor content changed.\neditor content :", editorUpdatedContent, " \nFull file content:", fullFileContent);
+							setFormattedTaskContent(fullFileContent);
+							handleTaskEditedThroughEditors(fullFileContent);
 
 							// setCursorLocation({
 							// 	lineNumber: 1,
@@ -850,9 +853,14 @@ export const AddOrEditTaskRC: React.FC<{
 	useEffect(() => {
 		if (isEditorContentChanged) {
 			if (isTaskNote) {
-				const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				const newFormattedTaskNoteContent = newContent;
+				console.log("Updating embedded markdown editor for task note with content:\n", newFormattedTaskNoteContent,
+					"\nFrontmatter:\n", newFrontmatter, "\nContent without frontmatter:\n", contentWithoutFrontmatter
+				);
 				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 				setFormattedTaskContent(newFormattedTaskNoteContent);
+				frontmatterContentRef.current = newFrontmatter;
 				setIsEditorContentChanged(false);
 			}
 			else {
