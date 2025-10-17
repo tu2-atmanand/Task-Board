@@ -198,7 +198,17 @@ export function formatTaskNoteContent(
 	plugin: TaskBoard,
 	updatedTask: taskItem,
 	oldNoteContent: string
-): string {
+): {
+	newContent: string;
+	newFrontmatter: string;
+	contentWithoutFrontmatter: string;
+} {
+	console.log(
+		"formatTaskNoteContent: updatedTask :",
+		updatedTask,
+		"\noldNoteContent :",
+		oldNoteContent
+	);
 	try {
 		const existingFrontmatter = extractFrontmatterFromContent(
 			plugin,
@@ -220,10 +230,14 @@ export function formatTaskNoteContent(
 		const newContent = `---\n${newFrontmatter}---${
 			contentWithoutFrontmatter || ""
 		}`; // I hope the content returned from the stringifyYaml API will always have a newline at the end.
-		return newContent;
+		return { newContent, newFrontmatter, contentWithoutFrontmatter };
 	} catch (error) {
 		console.error("Error updating task note frontmatter:", error);
-		return ""; // Return empty content on error
+		return {
+			newContent: "",
+			newFrontmatter: "",
+			contentWithoutFrontmatter: "",
+		}; // Return empty content on error
 	}
 }
 

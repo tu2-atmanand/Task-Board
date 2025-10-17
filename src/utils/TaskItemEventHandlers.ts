@@ -18,6 +18,7 @@ import {
 	bugReporter,
 	openEditTaskModal,
 	openEditTaskNoteModal,
+	openEditTaskView,
 } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { isTaskNotePresentInTags } from "./TaskNoteUtils";
@@ -168,6 +169,18 @@ export const handleEditTask = (
 			} else {
 				openEditTaskModal(plugin, task);
 			}
+			break;
+		case EditButtonMode.View:
+			const isTaskNote = isTaskNotePresentInTags(plugin, task.tags);
+			openEditTaskView(
+				plugin,
+				isTaskNote,
+				false,
+				true,
+				task,
+				task.filePath,
+				"window"
+			);
 			break;
 		case EditButtonMode.TasksPluginModal:
 			if (isTaskNotePresentInTags(plugin, task.tags)) {

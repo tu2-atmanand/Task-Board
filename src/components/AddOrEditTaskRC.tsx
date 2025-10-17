@@ -67,6 +67,7 @@ export const AddOrEditTaskRC: React.FC<{
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
 
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>(isTaskNote ? noteContent : getFormattedTaskContentSync(task));
+	const frontmatterContentRef = useRef<string>('');
 	const [newFilePath, setNewFilePath] = useState<string>(filePath);
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
@@ -682,14 +683,17 @@ export const AddOrEditTaskRC: React.FC<{
 
 
 			if (!markdownEditor) {
+				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				frontmatterContentRef.current = newFrontmatter;
 				markdownEditorEmbeddedContainer.current.empty();
 				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
-					plugin.app,
+					plugin,
 					markdownEditorEmbeddedContainer.current,
 					{
 						placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
 						value: formattedTaskContent,
 						cls: "addOrEditTaskModal-markdown-editor-embed",
+						enableFrontmatterUI: isTaskNote, // Enable frontmatter UI for task notes
 						cursorLocation: {
 							anchor: formattedTaskContent.split("\n")[0].length,
 							head: formattedTaskContent.split("\n")[0].length,
@@ -714,9 +718,11 @@ export const AddOrEditTaskRC: React.FC<{
 
 						onChange: (update: ViewUpdate) => {
 							setIsEdited(true);
-							const capturedContent = fullMarkdownEditor?.value || "";
-							setFormattedTaskContent(capturedContent);
-							handleTaskEditedThroughEditors(capturedContent);
+							const editorUpdatedContent = fullMarkdownEditor?.value || "";
+							const fullFileContent = (frontmatterContentRef ? `---\n${frontmatterContentRef.current}\n---\n` : "") + editorUpdatedContent;
+							console.log("Editor content changed.\neditor content :", editorUpdatedContent, " \nFull file content:", fullFileContent);
+							setFormattedTaskContent(fullFileContent);
+							handleTaskEditedThroughEditors(fullFileContent);
 
 							// setCursorLocation({
 							// 	lineNumber: 1,
@@ -847,9 +853,14 @@ export const AddOrEditTaskRC: React.FC<{
 	useEffect(() => {
 		if (isEditorContentChanged) {
 			if (isTaskNote) {
-				const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				const newFormattedTaskNoteContent = newContent;
+				console.log("Updating embedded markdown editor for task note with content:\n", newFormattedTaskNoteContent,
+					"\nFrontmatter:\n", newFrontmatter, "\nContent without frontmatter:\n", contentWithoutFrontmatter
+				);
 				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 				setFormattedTaskContent(newFormattedTaskNoteContent);
+				frontmatterContentRef.current = newFrontmatter;
 				setIsEditorContentChanged(false);
 			}
 			else {
@@ -983,28 +994,48 @@ export const AddOrEditTaskRC: React.FC<{
 		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
 
 		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
-		if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
-			handleEditTask(plugin, task, settingOption);
-		} else if (settingOption === EditButtonMode.Modal) {
-			//For now will simply open it in a new modal in a new window.
-			if (isTaskNotePresentInTags(plugin, childTask.tags)) {
-				// plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
-				// await sleep(50);
-				// openEditTaskNoteModal(plugin, childTask);
-
-				openEditTaskView(plugin, true, false, true, childTask, childTask.filePath, "window");
-			} else {
-				// plugin.app.workspace.openPopoutLeaf();
-				// await sleep(50);
-				// openEditTaskModal(plugin, childTask);
-
-				openEditTaskView(plugin, false, false, true, childTask, childTask.filePath, "window");
-			}
-		} else {
-			event.ctrlKey = true;
-			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
-			event.ctrlKey = false;
+		switch (settingOption) {
+			case EditButtonMode.NoteInSplit:
+			case EditButtonMode.NoteInTab:
+			case EditButtonMode.NoteInWindow:
+				handleEditTask(plugin, task, settingOption);
+				break;
+			case EditButtonMode.NoteInHover:
+				event.ctrlKey = true;
+				markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+				event.ctrlKey = false;
+				break;
+			case EditButtonMode.Modal:
+			case EditButtonMode.View:
+			case EditButtonMode.TasksPluginModal:
+			default:
+				const isTaskNotePresent = isTaskNotePresentInTags(plugin, childTask.tags);
+				openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
+				break;
 		}
+
+		// if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
+		// 	handleEditTask(plugin, task, settingOption);
+		// } else if (settingOption === EditButtonMode.Modal) {
+		// 	//For now will simply open it in a new modal in a new window.
+		// 	if (isTaskNotePresentInTags(plugin, childTask.tags)) {
+		// 		// plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
+		// 		// await sleep(50);
+		// 		// openEditTaskNoteModal(plugin, childTask);
+
+		// 		openEditTaskView(plugin, true, false, true, childTask, childTask.filePath, "window");
+		// 	} else {
+		// 		// plugin.app.workspace.openPopoutLeaf();
+		// 		// await sleep(50);
+		// 		// openEditTaskModal(plugin, childTask);
+
+		// 		openEditTaskView(plugin, false, false, true, childTask, childTask.filePath, "window");
+		// 	}
+		// } else {
+		// 	event.ctrlKey = true;
+		// 	markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+		// 	event.ctrlKey = false;
+		// }
 	};
 
 	const handleRemoveChildTask = (taskId: string) => {
@@ -1165,6 +1196,8 @@ export const AddOrEditTaskRC: React.FC<{
 							</button>
 						</div>
 					</div>
+
+					{/* Right Section for other task properties */}
 					<div
 						ref={rightSecRef}
 						className={`EditTaskModalHomeRightSec ${isRightSecVisible ? "visible" : ""}`}

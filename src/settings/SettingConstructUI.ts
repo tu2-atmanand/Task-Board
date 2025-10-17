@@ -1226,8 +1226,9 @@ export class SettingsManager {
 				dropdown
 					.addOptions({
 						[EditButtonMode.Modal]: t(
-							"use-edit-task-window-feature"
+							"use-edit-task-modal-feature"
 						),
+						[EditButtonMode.View]: t("use-edit-task-window-feature"),
 						[EditButtonMode.TasksPluginModal]:
 							t("tasks-plugin-modal"),
 						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),

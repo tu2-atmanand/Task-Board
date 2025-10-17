@@ -97,7 +97,7 @@
 		max-width: 100vw;
 		min-width: 100vw;
 		overflow: auto;
-		/* min-height: fit-content; */
+		min-height: fit-content;
 		max-height: 80vh;
 	}
 }
@@ -410,10 +410,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .tasksContainer-SH {
-	padding: 7px;
+	padding-inline: 7px;
+	padding-block: 12px;
 	flex: 1;
 	overflow-y: auto;
-	gap: 7px;
+	gap: 12px;
 	display: flex;
 	flex-direction: column;
 	height: auto;
@@ -493,7 +494,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 	/* New UI */
 	border: var(--border-width) solid var(--background-modifier-border-focus);
-	box-shadow: 0px 0px 0px 1px rgb(82 52 102 / 48%), 0px 4px 10px 0 var(--background-modifier-cover);
+	box-shadow: 0px 4px 10px 0 rgba(0, 0, 0, 0.3);
 	transition: box-shadow 0.3s ease-in-out;
 }
 
@@ -564,6 +565,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	text-align: center;
 	border: 0;
 	cursor: pointer;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 	margin-block-start: 3px !important;
 }
@@ -1228,7 +1230,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalTabContent.show {
 	opacity: 1;
-	height: 100%;
+	/* height: 100%; */
 	border: 2px solid var(--table-header-border-color);
 	border-radius: 0px 0px 10px 10px;
 	margin-bottom: 2em;
@@ -1265,9 +1267,9 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .EditTaskModalHomePreview ul {
-	padding-inline-start: 30px;
+	/* padding-inline-start: 30px;
 	margin-top: 0.7em;
-	padding-inline-end: 10px;
+	padding-inline-end: 10px; */
 }
 
 .EditTaskModalHomePreviewContainer {
@@ -1336,13 +1338,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .EditTaskModalLiveEditor {
 	min-height: 20vh;
-	max-height: 40vh;
+	/* max-height: 40vh; */
 }
 
 .EditTaskModalLiveEditor .markdown-source-view.mod-cm6 {
-	max-height: 40vh;
+	/* max-height: 40vh; */
 	padding-block: 1rem;
 	padding-inline-end: 1rem;
+	padding-inline-start: 0.5rem;
 }
 
 .EditTaskModalBodyDescription {
@@ -2836,6 +2839,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox.taskItemCheckbox-checked:is([data-tas
 	border: 0;
 	border: none !important;
 	cursor: pointer;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 }
 
@@ -2994,6 +2998,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 	background-color: transparent;
 	top: -4px;
 	left: 0px;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 	border: none !important;
 }
@@ -3378,6 +3383,7 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 	box-sizing: border-box;
 	outline: none;
 	border: none;
+	appearance: none;
 	-webkit-appearance: none;
 }
 
@@ -3445,6 +3451,7 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 	box-sizing: border-box;
 	outline: none;
 	border: none;
+	appearance: none;
 	-webkit-appearance: none;
 }
 
@@ -5334,4 +5341,176 @@ svg.react-flow__connectionline {
 	to {
 		transform: translateX(-100%);
 	}
+}
+
+/* ==================== Frontmatter UI Styles ==================== */
+
+/* Wrapper for the frontmatter UI inside the editor container */
+.taskboard-frontmatter-wrapper {
+	margin-bottom: 0.75em;
+}
+
+/* Wrapper for the entire frontmatter UI */
+.taskboard-frontmatter-ui-wrapper {
+	margin-bottom: 0.5em;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-primary-alt);
+}
+
+/* Frontmatter section container */
+.taskboard-frontmatter-section {
+	padding: 0;
+}
+
+/* Collapsible header */
+.taskboard-frontmatter-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.5em 0.75em;
+	cursor: pointer;
+	user-select: none;
+	background-color: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	transition: background-color 0.15s ease;
+}
+
+.taskboard-frontmatter-header:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* Collapse icon */
+.taskboard-frontmatter-collapse-icon {
+	display: flex;
+	align-items: center;
+	transition: transform 0.2s ease;
+	color: var(--text-muted);
+}
+
+.taskboard-frontmatter-section.is-collapsed .taskboard-frontmatter-collapse-icon {
+	transform: rotate(-90deg);
+}
+
+/* Header text */
+.taskboard-frontmatter-header-text {
+	font-weight: 500;
+	color: var(--text-normal);
+	flex-grow: 1;
+}
+
+/* Property count badge */
+.taskboard-frontmatter-property-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.5em;
+	height: 1.5em;
+	padding: 0 0.4em;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 10px;
+	font-size: 0.85em;
+	font-weight: 500;
+}
+
+/* Properties container */
+.taskboard-frontmatter-properties {
+	padding: 0.75em;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+/* Individual property row */
+.taskboard-frontmatter-property-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-start;
+	transition: background-color 0.15s ease;
+}
+
+.taskboard-frontmatter-property-row:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.taskboard-frontmatter-property-row:last-child {
+	margin-bottom: 0;
+}
+
+/* Property key */
+.taskboard-frontmatter-property-key {
+	font-weight: 500;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	width: 10rem;
+	word-wrap: break-word;
+	word-break: break-word;
+}
+
+/* Property value */
+.taskboard-frontmatter-property-value {
+	color: var(--text-normal);
+	display: flex;
+	align-items: center;
+	word-wrap: break-word;
+	word-break: break-word;
+}
+
+/* Property list (for array values) */
+.taskboard-frontmatter-property-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3em;
+}
+
+.taskboard-frontmatter-property-list li {
+	padding: 0.2em 0.5em;
+	background-color: var(--background-secondary);
+	border-radius: 3px;
+	font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.taskboard-frontmatter-property-row {
+		grid-template-columns: 1fr;
+		gap: 0.5em;
+	}
+
+	.taskboard-frontmatter-property-key {
+		font-size: 0.9em;
+	}
+}
+
+/* Smooth collapse animation */
+.taskboard-frontmatter-properties {
+	transition: max-height 0.3s ease, opacity 0.2s ease;
+	opacity: 1;
+}
+
+.taskboard-frontmatter-section.is-collapsed .taskboard-frontmatter-properties {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+}
+
+/* Frontmatter Hiding Extension Styles */
+/* Hide frontmatter content in markdown editor when using the frontmatter hiding extension */
+.task-board-frontmatter-hidden {
+	display: none !important;
+	visibility: hidden !important;
+}
+
+/* Alternative approach for better performance - can be toggled */
+.task-board-frontmatter-hidden-collapsed {
+	height: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	transition: opacity 0.2s ease;
 }
