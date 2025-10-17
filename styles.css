@@ -410,10 +410,11 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .tasksContainer-SH {
-	padding: 7px;
+	padding-inline: 7px;
+	padding-block: 12px;
 	flex: 1;
 	overflow-y: auto;
-	gap: 7px;
+	gap: 12px;
 	display: flex;
 	flex-direction: column;
 	height: auto;
@@ -493,7 +494,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 	/* New UI */
 	border: var(--border-width) solid var(--background-modifier-border-focus);
-	box-shadow: 0px 4px 10px 0 rgba(0,0,0,0.3);
+	box-shadow: 0px 4px 10px 0 rgba(0, 0, 0, 0.3);
 	transition: box-shadow 0.3s ease-in-out;
 }
 
@@ -564,6 +565,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	text-align: center;
 	border: 0;
 	cursor: pointer;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 	margin-block-start: 3px !important;
 }
@@ -2837,6 +2839,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox.taskItemCheckbox-checked:is([data-tas
 	border: 0;
 	border: none !important;
 	cursor: pointer;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 }
 
@@ -2995,6 +2998,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 	background-color: transparent;
 	top: -4px;
 	left: 0px;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 	border: none !important;
 }
@@ -3379,6 +3383,7 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 	box-sizing: border-box;
 	outline: none;
 	border: none;
+	appearance: none;
 	-webkit-appearance: none;
 }
 
@@ -3446,6 +3451,7 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 	box-sizing: border-box;
 	outline: none;
 	border: none;
+	appearance: none;
 	-webkit-appearance: none;
 }
 
