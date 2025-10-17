@@ -84,7 +84,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		new Notice(t("vault-scanning-complete"));
 
 		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
-		vaultScanner.saveTasksToJsonCache();
+		await vaultScanner.saveTasksToJsonCache();
 
 		findMaxIdCounterAndUpdateSettings(plugin);
 

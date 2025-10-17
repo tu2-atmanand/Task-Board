@@ -119,7 +119,7 @@ export default class vaultScanner {
 			}
 		}
 
-		this.saveTasksToJsonCache();
+		await this.saveTasksToJsonCache();
 		// Emit the event
 		eventEmitter.emit("REFRESH_BOARD");
 	}
@@ -128,7 +128,7 @@ export default class vaultScanner {
 	async extractTasksFromFile(
 		file: TFile,
 		scanFilters: scanFilters
-	): Promise<boolean> {
+	): Promise<string> {
 		try {
 			const fileNameWithPath = file.path;
 			const fileContent = await readDataOfVaultFile(
@@ -284,7 +284,7 @@ export default class vaultScanner {
 					delete this.tasksCache.Completed[fileNameWithPath];
 				}
 
-				return true;
+				return "true";
 			} else {
 				// Else, proceed with normal task line detection inside the file content.
 				for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -464,7 +464,7 @@ export default class vaultScanner {
 					}
 				}
 
-				return true;
+				return "true";
 			}
 		} catch (error) {
 			console.error(
@@ -473,7 +473,7 @@ export default class vaultScanner {
 				"\nERROR :",
 				error
 			);
-			return false;
+			return String(error);
 		}
 	}
 
@@ -489,7 +489,7 @@ export default class vaultScanner {
 		try {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
-			let flag: boolean | void = true;
+			let isFileScanned: string = "";
 			let atleastOneFileScanned = false;
 			for (const file of files) {
 				if (
@@ -503,119 +503,10 @@ export default class vaultScanner {
 				) {
 					atleastOneFileScanned = true;
 					// TODO : Try testing if removing the await from the below line will going to speed up the process.
-					flag = await this.extractTasksFromFile(file, scanFilters);
-					// .then((result) => {
-					// 	if (!result)
-					// 		throw new Error(
-					// 			"extractTasksFromFile returned false"
-					// 		);
-
-					// 	if (showNotice) {
-					// 		new Notice("tasks-refreshed-successfully");
-					// 	}
-					// });
-
-					// const fileNameWithPath = file.path;
-					// const fileContent = await this.app.vault.cachedRead(file);
-					// const lines = fileContent.split("\n");
-					// const newPendingTasks: taskItem[] = [];
-					// const newCompletedTasks: taskItem[] = [];
-
-					// for (let i = 0; i < lines.length; i++) {
-					// 	const line = lines[i];
-					// 	if (isTaskLine(line)) {
-					// 		const tags = extractTags(line);
-					// 		if (scanFilterForTags(tags, scanFilters)) {
-					// 			this.TaskDetected = true;
-					// 			const taskStatus = extractCheckboxSymbol(line);
-					// 			const isTaskCompleted = isCompleted(line);
-					// 			const title = extractTitle(line);
-					// 			const time = extractTime(line);
-					// 			const createdDate = extractCreatedDate(line);
-					// 			const startDate = extractStartDate(line);
-					// 			const scheduledDate = extractScheduledDate(line);
-					// 			const priority = extractPriority(line);
-					// 			const completionDate = extractCompletionDate(line);
-					// 			const cancelledDate = extractCancelledDate(line);
-					// 			const body = extractBody(lines, i + 1);
-					// 			let due = extractDueDate(line);
-					// 			if (
-					// 				!due &&
-					// 				this.plugin.settings.data.globalSettings
-					// 					.dailyNotesPluginComp
-					// 			) {
-					// 				const dueFormat =
-					// 					this.plugin.settings.data.globalSettings
-					// 						.universalDateFormat;
-					// 				const basename = file.basename;
-
-					// 				// Check if the basename matches the dueFormat using moment
-					// 				const moment =
-					// 					_moment as unknown as typeof _moment.default;
-					// 				if (
-					// 					moment(basename, dueFormat, true).isValid()
-					// 				) {
-					// 					due = basename; // If the basename matches the dueFormat, assign it to due
-					// 				} else {
-					// 					due = ""; // If not, assign an empty string
-					// 				}
-					// 			}
-
-					// 			let frontmatterTags: string[] = []; // Initialize frontmatterTags
-					// 			if (
-					// 				this.plugin.settings.data.globalSettings
-					// 					.showFrontmatterTagsOnCards
-					// 			) {
-					// 				// Extract frontmatter from the file
-					// 				const frontmatter = extractFrontmatterFromFile(
-					// 					this.plugin,
-					// 					file
-					// 				);
-					// 				// Extract frontmatter tags
-					// 				frontmatterTags =
-					// 					extractFrontmatterTags(frontmatter);
-					// 			}
-
-					// 			const task: taskItem = {
-					// 				id: this.generateTaskId(),
-					// 				status: taskStatus,
-					// 				title,
-					// 				body,
-					// 				time,
-					// 				createdDate,
-					// 				startDate,
-					// 				scheduledDate,
-					// 				due,
-					// 				tags,
-					// 				frontmatterTags,
-					// 				priority,
-					// 				filePath: fileNameWithPath,
-					// 				lineNumber: i + 1,
-					// 				completion: completionDate,
-					// 				cancelledDate: cancelledDate,
-					// 			};
-
-					// 			if (isTaskCompleted) {
-					// 				newCompletedTasks.push(task);
-					// 			} else {
-					// 				newPendingTasks.push(task);
-					// 			}
-					// 		} else {
-					// 			// console.log("The tasks is not allowed...");
-					// 		}
-					// 	}
-					// }
-
-					// // Only replace the tasks for the specific file
-					// this.tasksCache.Pending = {
-					// 	...oldTasks.Pending, // Keep the existing tasks for other files
-					// 	[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
-					// };
-
-					// this.tasksCache.Completed = {
-					// 	...oldTasks.Completed, // Keep the existing tasks for other files
-					// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
-					// };
+					isFileScanned = await this.extractTasksFromFile(
+						file,
+						scanFilters
+					);
 				} else {
 					if (showNotice) {
 						new Notice(t("not-valid-file-type-for-scanning"), 5000);
@@ -623,18 +514,21 @@ export default class vaultScanner {
 				}
 			}
 
-			if (flag) {
+			let result = false;
+			if (isFileScanned === "true") {
 				if (atleastOneFileScanned) {
 					if (showNotice) {
 						new Notice("tasks-refreshed-successfully");
 					}
 
-					this.saveTasksToJsonCache();
+					result = await this.saveTasksToJsonCache();
 				}
 
-				return true;
+				return result;
 			} else {
-				throw new Error("extractTasksFromFile returned false");
+				throw new Error(
+					`extractTasksFromFile returned following error : ${isFileScanned}`
+				);
 			}
 		} catch (error) {
 			bugReporter(
@@ -651,9 +545,37 @@ export default class vaultScanner {
 	}
 
 	// Debounced saveTasksToJsonCache function
-	private saveTasksToJsonCacheDebounced = debounce(async () => {
+	// private saveTasksToJsonCacheDebounced = debounce(
+	// 	async (): Promise<boolean> => {
+	// 		this.tasksCache.Modified_at = new Date().toISOString();
+	// 		const result = await writeJsonCacheDataToDisk(
+	// 			this.plugin,
+	// 			this.tasksCache
+	// 		);
+	// 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
+	// 		if (
+	// 			this.plugin.settings.data.globalSettings.realTimeScanning &&
+	// 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
+	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
+	// 		) {
+	// 			eventEmitter.emit("REFRESH_COLUMN");
+	// 			this.TaskDetected = false;
+	// 		}
+
+	// 		return result;
+	// 	},
+	// 	500
+	// );
+
+	// Save tasks to JSON file
+	async saveTasksToJsonCache() {
+		// if (!this.TaskDetected) return;
+
 		this.tasksCache.Modified_at = new Date().toISOString();
-		await writeJsonCacheDataToDisk(this.plugin, this.tasksCache);
+		const result = await writeJsonCacheDataToDisk(
+			this.plugin,
+			this.tasksCache
+		);
 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 		if (
 			this.plugin.settings.data.globalSettings.realTimeScanning &&
@@ -663,13 +585,10 @@ export default class vaultScanner {
 			eventEmitter.emit("REFRESH_COLUMN");
 			this.TaskDetected = false;
 		}
-	}, 500);
 
-	// Save tasks to JSON file
-	saveTasksToJsonCache() {
-		// if (!this.TaskDetected) return;
+		return result;
 
-		this.saveTasksToJsonCacheDebounced();
+		// const result = this.saveTasksToJsonCacheDebounced();
 	}
 }
 
