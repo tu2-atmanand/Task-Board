@@ -35,6 +35,7 @@ export interface TagColor {
 export enum EditButtonMode {
 	None = "none",
 	Modal = "popUp",
+	View = "view",
 	TasksPluginModal = "tasksPluginModal",
 	NoteInTab = "noteInTab",
 	NoteInSplit = "noteInSplit",

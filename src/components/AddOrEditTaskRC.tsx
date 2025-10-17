@@ -994,28 +994,48 @@ export const AddOrEditTaskRC: React.FC<{
 		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
 
 		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
-		if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
-			handleEditTask(plugin, task, settingOption);
-		} else if (settingOption === EditButtonMode.Modal) {
-			//For now will simply open it in a new modal in a new window.
-			if (isTaskNotePresentInTags(plugin, childTask.tags)) {
-				// plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
-				// await sleep(50);
-				// openEditTaskNoteModal(plugin, childTask);
-
-				openEditTaskView(plugin, true, false, true, childTask, childTask.filePath, "window");
-			} else {
-				// plugin.app.workspace.openPopoutLeaf();
-				// await sleep(50);
-				// openEditTaskModal(plugin, childTask);
-
-				openEditTaskView(plugin, false, false, true, childTask, childTask.filePath, "window");
-			}
-		} else {
-			event.ctrlKey = true;
-			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
-			event.ctrlKey = false;
+		switch (settingOption) {
+			case EditButtonMode.NoteInSplit:
+			case EditButtonMode.NoteInTab:
+			case EditButtonMode.NoteInWindow:
+				handleEditTask(plugin, task, settingOption);
+				break;
+			case EditButtonMode.NoteInHover:
+				event.ctrlKey = true;
+				markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+				event.ctrlKey = false;
+				break;
+			case EditButtonMode.Modal:
+			case EditButtonMode.View:
+			case EditButtonMode.TasksPluginModal:
+			default:
+				const isTaskNotePresent = isTaskNotePresentInTags(plugin, childTask.tags);
+				openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
+				break;
 		}
+
+		// if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
+		// 	handleEditTask(plugin, task, settingOption);
+		// } else if (settingOption === EditButtonMode.Modal) {
+		// 	//For now will simply open it in a new modal in a new window.
+		// 	if (isTaskNotePresentInTags(plugin, childTask.tags)) {
+		// 		// plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
+		// 		// await sleep(50);
+		// 		// openEditTaskNoteModal(plugin, childTask);
+
+		// 		openEditTaskView(plugin, true, false, true, childTask, childTask.filePath, "window");
+		// 	} else {
+		// 		// plugin.app.workspace.openPopoutLeaf();
+		// 		// await sleep(50);
+		// 		// openEditTaskModal(plugin, childTask);
+
+		// 		openEditTaskView(plugin, false, false, true, childTask, childTask.filePath, "window");
+		// 	}
+		// } else {
+		// 	event.ctrlKey = true;
+		// 	markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+		// 	event.ctrlKey = false;
+		// }
 	};
 
 	const handleRemoveChildTask = (taskId: string) => {
@@ -1176,6 +1196,8 @@ export const AddOrEditTaskRC: React.FC<{
 							</button>
 						</div>
 					</div>
+
+					{/* Right Section for other task properties */}
 					<div
 						ref={rightSecRef}
 						className={`EditTaskModalHomeRightSec ${isRightSecVisible ? "visible" : ""}`}
