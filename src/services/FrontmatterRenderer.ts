@@ -7,7 +7,7 @@
  */
 
 import type TaskBoard from "main";
-import { App, Component, parseYaml, TFile } from "obsidian";
+import { App, Component, Notice, parseYaml, TFile } from "obsidian";
 import {
 	TypeInfo,
 	PropertyWidget,
@@ -22,11 +22,13 @@ export class FrontmatterRenderer {
 	private plugin: TaskBoard;
 	private app: App;
 	private component: Component;
+	public isFrontmatterContainerCollapsed: boolean;
 
 	constructor(plugin: TaskBoard, component: Component) {
 		this.plugin = plugin;
 		this.app = plugin.app;
 		this.component = component;
+		this.isFrontmatterContainerCollapsed = true;
 	}
 
 	/**
@@ -164,16 +166,20 @@ export class FrontmatterRenderer {
 		const propertiesContainer = frontmatterSection.createDiv({
 			cls: ["metadata-properties", "taskboard-frontmatter-properties"],
 		});
+		if (this.isFrontmatterContainerCollapsed) {
+			propertiesContainer.style.display = "none";
+			collapseIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
+		}
 
 		// Render each property using PropertyWidget
 		this.renderProperties(propertiesContainer, frontmatter, file);
 
 		// Add click handler for collapse/expand
-		let isCollapsed = false;
 		header.addEventListener("click", () => {
-			isCollapsed = !isCollapsed;
+			this.isFrontmatterContainerCollapsed =
+				!this.isFrontmatterContainerCollapsed;
 
-			if (isCollapsed) {
+			if (this.isFrontmatterContainerCollapsed) {
 				propertiesContainer.style.display = "none";
 				collapseIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
 			} else {
@@ -181,7 +187,10 @@ export class FrontmatterRenderer {
 				collapseIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 			}
 
-			frontmatterSection.toggleClass("is-collapsed", isCollapsed);
+			frontmatterSection.toggleClass(
+				"is-collapsed",
+				this.isFrontmatterContainerCollapsed
+			);
 		});
 
 		return {
@@ -324,6 +333,12 @@ export class FrontmatterRenderer {
 		for (const [key, value] of propertiesToRender) {
 			const propertyRow = containerEl.createDiv({
 				cls: "taskboard-frontmatter-property-row",
+			});
+
+			propertyRow.addEventListener("click", () => {
+				new Notice(
+					"This frontmatter section is read-only. A fully-functional frontmatter editor is under development."
+				);
 			});
 
 			propertyRow.createDiv({
