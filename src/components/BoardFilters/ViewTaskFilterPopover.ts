@@ -157,16 +157,27 @@ export class ViewTaskFilterPopover
 		// Use timeout to ensure popover is rendered before adding listeners
 		this.win.setTimeout(() => {
 			this.win.addEventListener("click", this.clickOutside);
-			this.scrollParent.addEventListener(
-				"scroll",
-				this.scrollHandler,
-				true
-			); // Use capture for scroll
+
+			// No need to close the popover on-scroll.
+			// this.scrollParent.addEventListener(
+			// 	"scroll",
+			// 	this.scrollHandler,
+			// 	true
+			// ); // Use capture for scroll
 		}, 10);
 	}
 
-	private clickOutside = (e: MouseEvent) => {
-		if (this.popoverRef && !this.popoverRef.contains(e.target as Node)) {
+	private clickOutside = (e: MouseEvent): void => {
+		if (this.taskFilterComponent.isMultiSuggestDropdownActive) {
+			this.taskFilterComponent.isMultiSuggestDropdownActive = false;
+			return;
+		}
+
+		if (
+			!this.taskFilterComponent.isMultiSuggestDropdownActive &&
+			this.popoverRef &&
+			!this.popoverRef.contains(e.target as Node)
+		) {
 			console.log("clickOutside - closing popover", {
 				target: e.target,
 				popoverRef: this.popoverRef,
@@ -176,23 +187,23 @@ export class ViewTaskFilterPopover
 		}
 	};
 
-	private scrollHandler = (e: Event) => {
-		if (this.popoverRef) {
-			if (
-				e.target instanceof Node &&
-				this.popoverRef.contains(e.target)
-			) {
-				const targetElement = e.target as HTMLElement;
-				if (
-					targetElement.scrollHeight > targetElement.clientHeight ||
-					targetElement.scrollWidth > targetElement.clientWidth
-				) {
-					return;
-				}
-			}
-			this.close();
-		}
-	};
+	// private scrollHandler = (e: Event) => {
+	// 	if (this.popoverRef) {
+	// 		if (
+	// 			e.target instanceof Node &&
+	// 			this.popoverRef.contains(e.target)
+	// 		) {
+	// 			const targetElement = e.target as HTMLElement;
+	// 			if (
+	// 				targetElement.scrollHeight > targetElement.clientHeight ||
+	// 				targetElement.scrollWidth > targetElement.clientWidth
+	// 			) {
+	// 				return;
+	// 			}
+	// 		}
+	// 		this.close();
+	// 	}
+	// };
 
 	/**
 	 * Closes the popover.
@@ -218,11 +229,11 @@ export class ViewTaskFilterPopover
 		}
 
 		this.win.removeEventListener("click", this.clickOutside);
-		this.scrollParent.removeEventListener(
-			"scroll",
-			this.scrollHandler,
-			true
-		);
+		// this.scrollParent.removeEventListener(
+		// 	"scroll",
+		// 	this.scrollHandler,
+		// 	true
+		// );
 
 		if (this.taskFilterComponent) {
 			this.taskFilterComponent.onunload();
