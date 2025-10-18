@@ -55,6 +55,7 @@ import {
 	notAllowedFileExtensionsRegEx,
 } from "src/regularExpressions/MiscelleneousRegExpr";
 import { bugReporter } from "src/services/OpenModals";
+import { getCurrentLocalTimeString } from "./TimeCalculations";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -74,7 +75,7 @@ export default class vaultScanner {
 		this.plugin = plugin;
 		this.tasksCache = {
 			VaultName: this.plugin.app?.vault.getName(),
-			Modified_at: new Date().toISOString(),
+			Modified_at: getCurrentLocalTimeString(),
 			Pending: {},
 			Completed: {},
 			Notes: [],
@@ -94,7 +95,7 @@ export default class vaultScanner {
 			);
 			this.tasksCache = {
 				VaultName: this.plugin?.app.vault.getName(),
-				Modified_at: new Date().toISOString(),
+				Modified_at: getCurrentLocalTimeString(),
 				Pending: {},
 				Completed: {},
 				Notes: [],
@@ -601,7 +602,7 @@ export default class vaultScanner {
 	async saveTasksToJsonCache() {
 		// if (!this.tasksDetectedOrUpdated) return;
 
-		this.tasksCache.Modified_at = new Date().toISOString();
+		this.tasksCache.Modified_at = getCurrentLocalTimeString();
 		const result = await writeJsonCacheDataToDisk(
 			this.plugin,
 			this.tasksCache
@@ -1111,7 +1112,7 @@ export async function compareFileCache(
 		// Quick null/undefined checks
 		if (!oldCache) return false;
 		if (!newCache) return oldCache.length === 0;
-		
+
 		// Quick length check before expensive serialization
 		if (newCache.length !== oldCache.length) return false;
 		if (newCache.length === 0) return true;
@@ -1125,5 +1126,3 @@ export async function compareFileCache(
 		return false;
 	}
 }
-
-
