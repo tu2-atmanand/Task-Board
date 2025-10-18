@@ -1,3 +1,5 @@
+// /src/components/BoardFilters/ViewTaskFilter.ts
+
 import {
 	Component,
 	ExtraButtonComponent,
@@ -565,7 +567,7 @@ export class TaskFilterComponent extends Component {
 		} else if (groupData.groupCondition === "none") {
 			newFilterEl.createEl("span", {
 				cls: ["filter-conjunction"],
-				text: t("and-note"),
+				text: t("and-not"),
 			});
 		} else {
 			newFilterEl.createEl("span", {
@@ -812,6 +814,38 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "id":
+				conditionOptions = [
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+					{
+						value: ">",
+						text: ">",
+					},
+					{
+						value: "<",
+						text: "<",
+					},
+					{
+						value: ">=",
+						text: ">=",
+					},
+					{
+						value: "<=",
+						text: "<=",
+					},
+					{
+						value: "isEmpty",
+						text: t("is-empty"),
+					},
+					{
+						value: "isNotEmpty",
+						text: t("is-not-empty"),
+					},
+				];
+				break;
 			case "createdDate":
 			case "dueDate":
 			case "startDate":
