@@ -2,7 +2,7 @@
 
 import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
-import { taskItem } from "src/interfaces/TaskItem";
+import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
@@ -143,6 +143,24 @@ export function getYAMLPropertySuggestions(app: App): string[] {
 	});
 
 	return Array.from(yamlPropertiesSet);
+}
+
+export function getStatusSuggestions(): string[] {
+	// Extract unique status values from the taskStatuses enum to ensure consistency
+	const uniqueStatuses = new Set<string>(Object.values(taskStatuses));
+	return Array.from(uniqueStatuses);
+}
+
+export function getPrioritySuggestions(): string[] {
+	// Return priority values with emojis
+	return [
+		"0",     // none
+		"1",     // highest 🔺
+		"2",     // high ⏫
+		"3",     // medium 🔼
+		"4",     // low 🔽
+		"5",     // lowest ⏬
+	];
 }
 
 export function getPendingTasksSuggestions(plugin: TaskBoard): taskItem[] {

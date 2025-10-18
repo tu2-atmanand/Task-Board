@@ -2,6 +2,7 @@ import { App } from "obsidian";
 import { Modal } from "obsidian";
 import { TaskFilterComponent, RootFilterState } from "./ViewTaskFilter";
 import type TaskBoard from "main";
+import { t } from "src/utils/lang/helper";
 
 export class ViewTaskFilterModal extends Modal {
 	private plugin: TaskBoard;
@@ -28,6 +29,16 @@ export class ViewTaskFilterModal extends Modal {
 		this.initialFilterState = initialFilterState;
 
 		this.taskFilterComponent = null;
+
+		if (forColumn) {
+			this.setTitle(
+				t("column-filters-for") + " " + this.columnOrBoardName
+			);
+		} else {
+			this.setTitle(
+				t("board-filters-for") + " " + this.columnOrBoardName
+			);
+		}
 	}
 
 	onOpen() {
