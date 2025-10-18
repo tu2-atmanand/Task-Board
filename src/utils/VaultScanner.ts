@@ -66,7 +66,7 @@ export default class vaultScanner {
 	app: App;
 	plugin: TaskBoard;
 	tasksCache: jsonCacheData;
-	TaskDetected: boolean;
+	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -79,7 +79,7 @@ export default class vaultScanner {
 			Completed: {},
 			Notes: [],
 		}; // Reset task structure
-		this.TaskDetected = false;
+		this.tasksDetectedOrUpdated = false;
 		this.indentationString = getObsidianIndentationSetting(plugin);
 	}
 
@@ -137,6 +137,11 @@ export default class vaultScanner {
 			);
 			const lines = fileContent.split("\n");
 
+			const oldPendingFileCache =
+				this.tasksCache.Pending[fileNameWithPath];
+			const oldCompletedFileCache =
+				this.tasksCache.Completed[fileNameWithPath];
+
 			this.tasksCache.Pending[fileNameWithPath] = [];
 			this.tasksCache.Completed[fileNameWithPath] = [];
 
@@ -193,7 +198,7 @@ export default class vaultScanner {
 						scanFilters
 					)
 				) {
-					this.TaskDetected = true;
+					this.tasksDetectedOrUpdated = true;
 
 					// Extract sub-tasks from the note content (excluding frontmatter)
 					const contentWithoutFrontmatter = fileContent.replace(
@@ -275,8 +280,21 @@ export default class vaultScanner {
 							};
 						}
 					}
+
+					const pendingCacheCompare = await compareFileCache(
+						this.tasksCache.Pending[fileNameWithPath],
+						oldPendingFileCache
+					);
+					const completedCacheCompare = await compareFileCache(
+						this.tasksCache.Pending[fileNameWithPath],
+						oldPendingFileCache
+					);
+					if (pendingCacheCompare && completedCacheCompare) {
+						this.tasksDetectedOrUpdated = false;
+					}
 				}
 
+				// Cleanup the file-object if it doesnt contain any taskItem.
 				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
 					delete this.tasksCache.Pending[fileNameWithPath];
 				}
@@ -292,7 +310,7 @@ export default class vaultScanner {
 					if (isTaskLine(line)) {
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
-							this.TaskDetected = true;
+							this.tasksDetectedOrUpdated = true;
 							const legacyId = extractTaskId(line);
 							const taskStatus = extractCheckboxSymbol(line);
 							const isTaskCompleted = isCompleted(line);
@@ -431,11 +449,18 @@ export default class vaultScanner {
 							// console.log("The tasks is not allowed...");
 						}
 					}
-				}
-
-				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
-					delete this.tasksCache.Pending[fileNameWithPath];
-				} else {
+					
+					const pendingCacheCompare = await compareFileCache(
+						this.tasksCache.Pending[fileNameWithPath],
+						oldPendingFileCache
+					);
+					const completedCacheCompare = await compareFileCache(
+						this.tasksCache.Pending[fileNameWithPath],
+						oldPendingFileCache
+					);
+					if (pendingCacheCompare && completedCacheCompare) {
+						this.tasksDetectedOrUpdated = false;
+					} else {
 					// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
 					const pending = this.tasksCache.Pending;
 					if (pending && pending[fileNameWithPath]) {
@@ -447,21 +472,28 @@ export default class vaultScanner {
 							...pending,
 						};
 					}
-				}
 
+					// Moving the completed file cache to the top.
+					// TODO : For now will keep this disabled, since in the Completed column the sorting should be based on the completion date-time value.
+					// const completed = this.tasksCache.Completed;
+					// if (completed && completed[fileNameWithPath]) {
+					// 	// Remove and re-insert at the top
+					// 	const tasks = completed[fileNameWithPath];
+					// 	delete completed[fileNameWithPath];
+					// 	this.tasksCache.Completed = {
+					// 		[fileNameWithPath]: tasks,
+					// 		...completed,
+					// 	};
+					// }
+
+					}
+
+				// Cleanup the file-object if it doesnt contain any taskItem.
+				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
+					delete this.tasksCache.Pending[fileNameWithPath];
+				}
 				if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
 					delete this.tasksCache.Completed[fileNameWithPath];
-				} else {
-					const completed = this.tasksCache.Completed;
-					if (completed && completed[fileNameWithPath]) {
-						// Remove and re-insert at the top
-						const tasks = completed[fileNameWithPath];
-						delete completed[fileNameWithPath];
-						this.tasksCache.Completed = {
-							[fileNameWithPath]: tasks,
-							...completed,
-						};
-					}
 				}
 
 				return "true";
@@ -490,7 +522,6 @@ export default class vaultScanner {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
 			let isFileScanned: string = "";
-			let atleastOneFileScanned = false;
 			for (const file of files) {
 				if (
 					file !== null &&
@@ -501,7 +532,6 @@ export default class vaultScanner {
 						scanFilters
 					)
 				) {
-					atleastOneFileScanned = true;
 					// TODO : Try testing if removing the await from the below line will going to speed up the process.
 					isFileScanned = await this.extractTasksFromFile(
 						file,
@@ -516,13 +546,14 @@ export default class vaultScanner {
 
 			let result = false;
 			if (isFileScanned === "true") {
-				if (atleastOneFileScanned) {
+
 					if (showNotice) {
 						new Notice("tasks-refreshed-successfully");
 					}
 
-					result = await this.saveTasksToJsonCache();
-				}
+					if(this.tasksDetectedOrUpdated) {
+						result = await this.saveTasksToJsonCache();
+					}
 
 				return result;
 			} else {
@@ -559,7 +590,7 @@ export default class vaultScanner {
 	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
 	// 		) {
 	// 			eventEmitter.emit("REFRESH_COLUMN");
-	// 			this.TaskDetected = false;
+	// 			this.tasksDetectedOrUpdated = false;
 	// 		}
 
 	// 		return result;
@@ -569,7 +600,7 @@ export default class vaultScanner {
 
 	// Save tasks to JSON file
 	async saveTasksToJsonCache() {
-		// if (!this.TaskDetected) return;
+		// if (!this.tasksDetectedOrUpdated) return;
 
 		this.tasksCache.Modified_at = new Date().toISOString();
 		const result = await writeJsonCacheDataToDisk(
@@ -583,7 +614,7 @@ export default class vaultScanner {
 				Object.values(this.tasksCache.Completed).flat().length > 0)
 		) {
 			eventEmitter.emit("REFRESH_COLUMN");
-			this.TaskDetected = false;
+			this.tasksDetectedOrUpdated = false;
 		}
 
 		return result;
