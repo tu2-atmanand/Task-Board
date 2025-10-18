@@ -67,9 +67,13 @@ export class TaskFilterComponent extends Component {
 
 	// Sortable instances
 	private groupsSortable?: Sortable;
-	
+
 	// WeakMap to store MultiSuggest instances for cleanup
-	private multiSuggestInstances = new WeakMap<HTMLInputElement, MultiSuggest>();
+	private multiSuggestInstances = new WeakMap<
+		HTMLInputElement,
+		MultiSuggest
+	>();
+	public isMultiSuggestDropdownActive = false;
 
 	constructor(
 		hostEl: HTMLElement,
@@ -602,6 +606,9 @@ export class TaskFilterComponent extends Component {
 			cls: ["filter-value-input", "compact-input"],
 		});
 		valueInput.hide();
+		valueInput.addEventListener("click", () => {
+			this.isMultiSuggestDropdownActive = true;
+		});
 
 		propertySelect.onChange((value) => {
 			filterData.property = value;
@@ -757,6 +764,10 @@ export class TaskFilterComponent extends Component {
 				scheduledDate: t("scheduled-date"),
 				dueDate: t("due-date"),
 				completedDate: t("completed-date"),
+				cancelledDate: t("cancelled-date"),
+				startTime: t("start-time"),
+				reminder: t("reminder"),
+				dependencies: t("dependencies"),
 				filePath: t("file-path"),
 				// project: t("project"),
 			});
@@ -894,15 +905,29 @@ export class TaskFilterComponent extends Component {
 					},
 				];
 				break;
-			case "tags":
+			case "startTime":
+				valueInput.type = "time";
 				conditionOptions = [
+					{ value: "is", text: t("is") },
 					{
-						value: "contains",
-						text: t("contains"),
+						value: "isNot",
+						text: t("is-not"),
 					},
 					{
-						value: "doesNotContain",
-						text: t("does-not-contain"),
+						value: ">",
+						text: ">",
+					},
+					{
+						value: "<",
+						text: "<",
+					},
+					{
+						value: ">=",
+						text: ">=",
+					},
+					{
+						value: "<=",
+						text: "<=",
 					},
 					{
 						value: "isEmpty",
@@ -911,6 +936,34 @@ export class TaskFilterComponent extends Component {
 					{
 						value: "isNotEmpty",
 						text: t("is-not-empty"),
+					},
+				];
+				break;
+			case "tags":
+				conditionOptions = [
+					{
+						value: "hasTag",
+						text: t("has-tag"),
+					},
+					{
+						value: "doesNotHaveTag",
+						text: t("does-not-have-tag"),
+					},
+					{
+						value: "contains",
+						text: t("contains-string"),
+					},
+					{
+						value: "doesNotContain",
+						text: t("does-not-contains-string"),
+					},
+					{
+						value: "isEmpty",
+						text: t("are-empty"),
+					},
+					{
+						value: "isNotEmpty",
+						text: t("are-not-empty"),
 					},
 				];
 				break;
@@ -937,12 +990,20 @@ export class TaskFilterComponent extends Component {
 						text: t("is-not-set"),
 					},
 					{
-						value: "equals",
-						text: t("equals"),
+						value: "is",
+						text: t("is"),
+					},
+					{
+						value: "isNot",
+						text: t("is-not"),
 					},
 					{
 						value: "contains",
-						text: t("contains"),
+						text: t("contains-string"),
+					},
+					{
+						value: "doesNotContain",
+						text: t("does-not-contains-string"),
 					},
 				];
 		}
@@ -1027,21 +1088,26 @@ export class TaskFilterComponent extends Component {
 		filterData: Filter
 	): void {
 		// Only setup suggestions for specific properties
-		const propertiesWithSuggestions = ["status", "priority", "tags", "filePath"];
-		
+		const propertiesWithSuggestions = [
+			"status",
+			"priority",
+			"tags",
+			"filePath",
+		];
+
 		// Clean up existing MultiSuggest instance if it exists
 		const existingInstance = this.multiSuggestInstances.get(valueInput);
 		if (existingInstance) {
 			existingInstance.close();
 			this.multiSuggestInstances.delete(valueInput);
 		}
-		
+
 		if (!propertiesWithSuggestions.includes(property)) {
 			return;
 		}
 
 		let suggestions: string[] = [];
-		
+
 		switch (property) {
 			case "status":
 				suggestions = getStatusSuggestions();
@@ -1070,7 +1136,7 @@ export class TaskFilterComponent extends Component {
 			onSelectCallback,
 			this.app
 		);
-		
+
 		// Store instance in WeakMap for cleanup
 		this.multiSuggestInstances.set(valueInput, multiSuggestInstance);
 	}
