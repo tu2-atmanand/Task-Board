@@ -67,6 +67,9 @@ export class TaskFilterComponent extends Component {
 
 	// Sortable instances
 	private groupsSortable?: Sortable;
+	
+	// WeakMap to store MultiSuggest instances for cleanup
+	private multiSuggestInstances = new WeakMap<HTMLInputElement, MultiSuggest>();
 
 	constructor(
 		hostEl: HTMLElement,
@@ -1027,9 +1030,10 @@ export class TaskFilterComponent extends Component {
 		const propertiesWithSuggestions = ["status", "priority", "tags", "filePath"];
 		
 		// Clean up existing MultiSuggest instance if it exists
-		if ((valueInput as any).multiSuggestInstance) {
-			((valueInput as any).multiSuggestInstance as MultiSuggest).close();
-			(valueInput as any).multiSuggestInstance = null;
+		const existingInstance = this.multiSuggestInstances.get(valueInput);
+		if (existingInstance) {
+			existingInstance.close();
+			this.multiSuggestInstances.delete(valueInput);
 		}
 		
 		if (!propertiesWithSuggestions.includes(property)) {
@@ -1067,8 +1071,8 @@ export class TaskFilterComponent extends Component {
 			this.app
 		);
 		
-		// Store instance on the input element for cleanup
-		(valueInput as any).multiSuggestInstance = multiSuggestInstance;
+		// Store instance in WeakMap for cleanup
+		this.multiSuggestInstances.set(valueInput, multiSuggestInstance);
 	}
 
 	// --- UI Updates (Conjunctions, Separators) ---

@@ -147,15 +147,7 @@ export function getYAMLPropertySuggestions(app: App): string[] {
 
 export function getStatusSuggestions(): string[] {
 	// Extract unique status values from the taskStatuses enum to ensure consistency
-	const uniqueStatuses = new Set<string>();
-	
-	// Get all unique values from the enum
-	Object.values(taskStatuses).forEach((value) => {
-		if (typeof value === "string") {
-			uniqueStatuses.add(value);
-		}
-	});
-	
+	const uniqueStatuses = new Set<string>(Object.values(taskStatuses));
 	return Array.from(uniqueStatuses);
 }
 
