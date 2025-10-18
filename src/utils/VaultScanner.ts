@@ -286,8 +286,8 @@ export default class vaultScanner {
 						oldPendingFileCache
 					);
 					const completedCacheCompare = await compareFileCache(
-						this.tasksCache.Pending[fileNameWithPath],
-						oldPendingFileCache
+						this.tasksCache.Completed[fileNameWithPath],
+						oldCompletedFileCache
 					);
 					if (pendingCacheCompare && completedCacheCompare) {
 						this.tasksDetectedOrUpdated = false;
@@ -449,18 +449,19 @@ export default class vaultScanner {
 							// console.log("The tasks is not allowed...");
 						}
 					}
-					
-					const pendingCacheCompare = await compareFileCache(
-						this.tasksCache.Pending[fileNameWithPath],
-						oldPendingFileCache
-					);
-					const completedCacheCompare = await compareFileCache(
-						this.tasksCache.Pending[fileNameWithPath],
-						oldPendingFileCache
-					);
-					if (pendingCacheCompare && completedCacheCompare) {
-						this.tasksDetectedOrUpdated = false;
-					} else {
+				}
+
+				const pendingCacheCompare = await compareFileCache(
+					this.tasksCache.Pending[fileNameWithPath],
+					oldPendingFileCache
+				);
+				const completedCacheCompare = await compareFileCache(
+					this.tasksCache.Completed[fileNameWithPath],
+					oldCompletedFileCache
+				);
+				if (pendingCacheCompare && completedCacheCompare) {
+					this.tasksDetectedOrUpdated = false;
+				} else {
 					// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
 					const pending = this.tasksCache.Pending;
 					if (pending && pending[fileNameWithPath]) {
@@ -485,8 +486,7 @@ export default class vaultScanner {
 					// 		...completed,
 					// 	};
 					// }
-
-					}
+				}
 
 				// Cleanup the file-object if it doesnt contain any taskItem.
 				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
@@ -546,14 +546,13 @@ export default class vaultScanner {
 
 			let result = false;
 			if (isFileScanned === "true") {
+				if (showNotice) {
+					new Notice("tasks-refreshed-successfully");
+				}
 
-					if (showNotice) {
-						new Notice("tasks-refreshed-successfully");
-					}
-
-					if(this.tasksDetectedOrUpdated) {
-						result = await this.saveTasksToJsonCache();
-					}
+				if (this.tasksDetectedOrUpdated) {
+					result = await this.saveTasksToJsonCache();
+				}
 
 				return result;
 			} else {
@@ -1095,4 +1094,131 @@ export function extractCancelledDate(text: string): string {
 	}
 	// Return the matched date or date-time, or an empty string if no match
 	return match ? match[0].trim() : "";
+}
+
+/**
+ * Compares two file cache arrays (taskItem[]) to determine if they are identical
+ * @param newCache - The newly scanned cache array for a specific file
+ * @param oldCache - The previous cache array for the same file
+ * @returns Promise<boolean> - Returns true if caches are identical, false if different or if oldCache is undefined
+ * @description This function performs a deep comparison of task arrays to detect changes in file content
+ */
+export async function compareFileCache(
+	newCache: taskItem[] | undefined,
+	oldCache: taskItem[] | undefined
+): Promise<boolean> {
+	try {
+		// If oldCache is undefined or null, consider it as different
+		if (!oldCache) {
+			return false;
+		}
+
+		// If newCache is undefined but oldCache exists, they're different
+		if (!newCache) {
+			return oldCache.length === 0;
+		}
+
+		// If arrays have different lengths, they're different
+		if (newCache.length !== oldCache.length) {
+			return false;
+		}
+
+		// If both arrays are empty, they're the same
+		if (newCache.length === 0 && oldCache.length === 0) {
+			return true;
+		}
+
+		// Deep comparison of each task item
+		for (let i = 0; i < newCache.length; i++) {
+			const newTask = newCache[i];
+			const oldTask = oldCache[i];
+
+			// Compare primitive properties
+			if (
+				newTask.id !== oldTask.id ||
+				newTask.legacyId !== oldTask.legacyId ||
+				newTask.title !== oldTask.title ||
+				newTask.status !== oldTask.status ||
+				newTask.priority !== oldTask.priority ||
+				newTask.time !== oldTask.time ||
+				newTask.createdDate !== oldTask.createdDate ||
+				newTask.startDate !== oldTask.startDate ||
+				newTask.scheduledDate !== oldTask.scheduledDate ||
+				newTask.due !== oldTask.due ||
+				newTask.filePath !== oldTask.filePath ||
+				newTask.reminder !== oldTask.reminder ||
+				newTask.completion !== oldTask.completion ||
+				newTask.cancelledDate !== oldTask.cancelledDate
+			) {
+				return false;
+			}
+
+			// Compare array properties (body, tags, frontmatterTags, dependsOn)
+			if (!compareStringArrays(newTask.body, oldTask.body)) {
+				return false;
+			}
+
+			if (!compareStringArrays(newTask.tags, oldTask.tags)) {
+				return false;
+			}
+
+			if (
+				!compareStringArrays(
+					newTask.frontmatterTags,
+					oldTask.frontmatterTags
+				)
+			) {
+				return false;
+			}
+
+			if (
+				!compareStringArrays(
+					newTask.dependsOn || [],
+					oldTask.dependsOn || []
+				)
+			) {
+				return false;
+			}
+
+			// Compare taskLocation object
+			if (
+				newTask.taskLocation.startLine !==
+					oldTask.taskLocation.startLine ||
+				newTask.taskLocation.startCharIndex !==
+					oldTask.taskLocation.startCharIndex ||
+				newTask.taskLocation.endLine !== oldTask.taskLocation.endLine ||
+				newTask.taskLocation.endCharIndex !==
+					oldTask.taskLocation.endCharIndex
+			) {
+				return false;
+			}
+		}
+
+		// If all comparisons pass, the caches are identical
+		return true;
+	} catch (error) {
+		console.error("Error comparing file caches:", error);
+		// In case of error, assume they're different to trigger a refresh
+		return false;
+	}
+}
+
+/**
+ * Helper function to compare two string arrays for equality
+ * @param arr1 - First string array
+ * @param arr2 - Second string array
+ * @returns boolean - True if arrays are identical, false otherwise
+ */
+function compareStringArrays(arr1: string[], arr2: string[]): boolean {
+	if (arr1.length !== arr2.length) {
+		return false;
+	}
+
+	for (let i = 0; i < arr1.length; i++) {
+		if (arr1[i] !== arr2[i]) {
+			return false;
+		}
+	}
+
+	return true;
 }
