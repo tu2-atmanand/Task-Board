@@ -2,7 +2,7 @@
 
 import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
-import { taskItem } from "src/interfaces/TaskItem";
+import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
@@ -146,47 +146,17 @@ export function getYAMLPropertySuggestions(app: App): string[] {
 }
 
 export function getStatusSuggestions(): string[] {
-	// Return common task status symbols
-	return [
-		" ",  // unchecked/incomplete/pending
-		"x",  // regular
-		"X",  // checked
-		"-",  // dropped
-		">",  // forward
-		"<",  // migrated
-		"D",  // date
-		"?",  // question
-		"/",  // halfDone/in-progress
-		"+",  // add
-		"R",  // research
-		"!",  // important
-		"i",  // idea
-		"B",  // brainstorm
-		"P",  // pro
-		"C",  // con
-		"Q",  // quote
-		"N",  // note
-		"b",  // bookmark
-		"I",  // information
-		"p",  // paraphrase
-		"L",  // location
-		"E",  // example
-		"A",  // answer
-		"r",  // reward
-		"c",  // choice
-		"d",  // doing
-		"T",  // time
-		"@",  // character
-		"t",  // talk
-		"O",  // outline
-		"~",  // conflict
-		"W",  // world
-		"f",  // find
-		"F",  // foreshadow
-		"H",  // favorite
-		"&",  // symbolism
-		"s",  // secret
-	];
+	// Extract unique status values from the taskStatuses enum to ensure consistency
+	const uniqueStatuses = new Set<string>();
+	
+	// Get all unique values from the enum
+	Object.values(taskStatuses).forEach((value) => {
+		if (typeof value === "string") {
+			uniqueStatuses.add(value);
+		}
+	});
+	
+	return Array.from(uniqueStatuses);
 }
 
 export function getPrioritySuggestions(): string[] {

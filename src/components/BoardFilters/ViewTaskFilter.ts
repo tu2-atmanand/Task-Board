@@ -1026,6 +1026,12 @@ export class TaskFilterComponent extends Component {
 		// Only setup suggestions for specific properties
 		const propertiesWithSuggestions = ["status", "priority", "tags", "filePath"];
 		
+		// Clean up existing MultiSuggest instance if it exists
+		if ((valueInput as any).multiSuggestInstance) {
+			((valueInput as any).multiSuggestInstance as MultiSuggest).close();
+			(valueInput as any).multiSuggestInstance = null;
+		}
+		
 		if (!propertiesWithSuggestions.includes(property)) {
 			return;
 		}
@@ -1053,13 +1059,16 @@ export class TaskFilterComponent extends Component {
 			this.saveStateToLocalStorage();
 		};
 
-		// Initialize MultiSuggest with suggestions
-		new MultiSuggest(
+		// Initialize MultiSuggest with suggestions and store instance for cleanup
+		const multiSuggestInstance = new MultiSuggest(
 			valueInput,
 			new Set(suggestions),
 			onSelectCallback,
 			this.app
 		);
+		
+		// Store instance on the input element for cleanup
+		(valueInput as any).multiSuggestInstance = multiSuggestInstance;
 	}
 
 	// --- UI Updates (Conjunctions, Separators) ---
