@@ -29,15 +29,6 @@
 		"types": [
 			"obsidian-typings"
 		],
-		"paths": {
-			"~/*": [
-				"./src/*"
-			],
-			"obsidian-typings/implementations": [
-				"./node_modules/obsidian-typings/dist/implementations.d.ts",
-				"./node_modules/obsidian-typings/dist/implementations.cjs"
-			]
-		},
 	},
 	"include": [
 		"src"
