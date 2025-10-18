@@ -29,6 +29,7 @@ import {
 } from "./FrontmatterOperations";
 import { generateTaskId } from "./VaultScanner";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { getCurrentLocalTimeString } from "./TimeCalculations";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -515,7 +516,7 @@ export const updateTaskInJson = async (
 		// Create the updated data object with both updated Pending and Completed tasks
 		const updatedData: jsonCacheData = {
 			VaultName: plugin.app.vault.getName(),
-			Modified_at: new Date().toISOString(),
+			Modified_at: getCurrentLocalTimeString(),
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
 			Notes: allTasks.Notes,

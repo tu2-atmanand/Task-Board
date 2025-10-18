@@ -7,13 +7,8 @@
  */
 
 import type TaskBoard from "main";
-import { App, Component, Notice, parseYaml, TFile } from "obsidian";
-import {
-	TypeInfo,
-	PropertyWidget,
-	MetadataTypeManager,
-} from "obsidian-typings";
-import { extractFrontmatterFromContent } from "~/utils/FrontmatterOperations";
+import { App, Component, Notice, TFile } from "obsidian";
+import { extractFrontmatterFromContent } from "src/utils/FrontmatterOperations";
 
 /**
  * Renders frontmatter properties using Obsidian's PropertyWidget API

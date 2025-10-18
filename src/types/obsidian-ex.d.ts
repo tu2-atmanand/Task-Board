@@ -1,5 +1,4 @@
 import "obsidian";
-import { Task, TaskCache } from "../utils/types/TaskIndex";
 import { EditorView, ViewUpdate } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
 import { App, FoldInfo } from "obsidian";
@@ -313,6 +312,7 @@ declare module "obsidian" {
 		commands: Commands;
 		setting: Setting;
 		embedRegistry: EmbedRegistry;
+		title: string;
 
 		appId: string;
 		metadataTypeManager: MetadataTypeManager;
@@ -325,7 +325,7 @@ declare module "obsidian" {
 	}
 
 	interface MetadataCache {
-		getTags(): Record<string, string>;
+		getTags(): Record<string, number>;
 	}
 
 	interface ItemView {

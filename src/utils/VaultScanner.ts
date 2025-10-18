@@ -55,6 +55,7 @@ import {
 	notAllowedFileExtensionsRegEx,
 } from "src/regularExpressions/MiscelleneousRegExpr";
 import { bugReporter } from "src/services/OpenModals";
+import { getCurrentLocalTimeString } from "./TimeCalculations";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -66,7 +67,7 @@ export default class vaultScanner {
 	app: App;
 	plugin: TaskBoard;
 	tasksCache: jsonCacheData;
-	TaskDetected: boolean;
+	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -74,12 +75,12 @@ export default class vaultScanner {
 		this.plugin = plugin;
 		this.tasksCache = {
 			VaultName: this.plugin.app?.vault.getName(),
-			Modified_at: new Date().toISOString(),
+			Modified_at: getCurrentLocalTimeString(),
 			Pending: {},
 			Completed: {},
 			Notes: [],
 		}; // Reset task structure
-		this.TaskDetected = false;
+		this.tasksDetectedOrUpdated = false;
 		this.indentationString = getObsidianIndentationSetting(plugin);
 	}
 
@@ -94,7 +95,7 @@ export default class vaultScanner {
 			);
 			this.tasksCache = {
 				VaultName: this.plugin?.app.vault.getName(),
-				Modified_at: new Date().toISOString(),
+				Modified_at: getCurrentLocalTimeString(),
 				Pending: {},
 				Completed: {},
 				Notes: [],
@@ -119,7 +120,7 @@ export default class vaultScanner {
 			}
 		}
 
-		this.saveTasksToJsonCache();
+		await this.saveTasksToJsonCache();
 		// Emit the event
 		eventEmitter.emit("REFRESH_BOARD");
 	}
@@ -128,7 +129,7 @@ export default class vaultScanner {
 	async extractTasksFromFile(
 		file: TFile,
 		scanFilters: scanFilters
-	): Promise<boolean> {
+	): Promise<string> {
 		try {
 			const fileNameWithPath = file.path;
 			const fileContent = await readDataOfVaultFile(
@@ -136,6 +137,11 @@ export default class vaultScanner {
 				fileNameWithPath
 			);
 			const lines = fileContent.split("\n");
+
+			const oldPendingFileCache =
+				this.tasksCache.Pending[fileNameWithPath];
+			const oldCompletedFileCache =
+				this.tasksCache.Completed[fileNameWithPath];
 
 			this.tasksCache.Pending[fileNameWithPath] = [];
 			this.tasksCache.Completed[fileNameWithPath] = [];
@@ -193,7 +199,7 @@ export default class vaultScanner {
 						scanFilters
 					)
 				) {
-					this.TaskDetected = true;
+					this.tasksDetectedOrUpdated = true;
 
 					// Extract sub-tasks from the note content (excluding frontmatter)
 					const contentWithoutFrontmatter = fileContent.replace(
@@ -275,8 +281,21 @@ export default class vaultScanner {
 							};
 						}
 					}
+
+					const pendingCacheCompare = await compareFileCache(
+						this.tasksCache.Pending[fileNameWithPath],
+						oldPendingFileCache
+					);
+					const completedCacheCompare = await compareFileCache(
+						this.tasksCache.Completed[fileNameWithPath],
+						oldCompletedFileCache
+					);
+					if (pendingCacheCompare && completedCacheCompare) {
+						this.tasksDetectedOrUpdated = false;
+					}
 				}
 
+				// Cleanup the file-object if it doesnt contain any taskItem.
 				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
 					delete this.tasksCache.Pending[fileNameWithPath];
 				}
@@ -284,7 +303,7 @@ export default class vaultScanner {
 					delete this.tasksCache.Completed[fileNameWithPath];
 				}
 
-				return true;
+				return "true";
 			} else {
 				// Else, proceed with normal task line detection inside the file content.
 				for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -292,7 +311,7 @@ export default class vaultScanner {
 					if (isTaskLine(line)) {
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
-							this.TaskDetected = true;
+							this.tasksDetectedOrUpdated = true;
 							const legacyId = extractTaskId(line);
 							const taskStatus = extractCheckboxSymbol(line);
 							const isTaskCompleted = isCompleted(line);
@@ -433,8 +452,16 @@ export default class vaultScanner {
 					}
 				}
 
-				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
-					delete this.tasksCache.Pending[fileNameWithPath];
+				const pendingCacheCompare = await compareFileCache(
+					this.tasksCache.Pending[fileNameWithPath],
+					oldPendingFileCache
+				);
+				const completedCacheCompare = await compareFileCache(
+					this.tasksCache.Completed[fileNameWithPath],
+					oldCompletedFileCache
+				);
+				if (pendingCacheCompare && completedCacheCompare) {
+					this.tasksDetectedOrUpdated = false;
 				} else {
 					// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
 					const pending = this.tasksCache.Pending;
@@ -447,24 +474,30 @@ export default class vaultScanner {
 							...pending,
 						};
 					}
+
+					// Moving the completed file cache to the top.
+					// TODO : For now will keep this disabled, since in the Completed column the sorting should be based on the completion date-time value.
+					// const completed = this.tasksCache.Completed;
+					// if (completed && completed[fileNameWithPath]) {
+					// 	// Remove and re-insert at the top
+					// 	const tasks = completed[fileNameWithPath];
+					// 	delete completed[fileNameWithPath];
+					// 	this.tasksCache.Completed = {
+					// 		[fileNameWithPath]: tasks,
+					// 		...completed,
+					// 	};
+					// }
 				}
 
+				// Cleanup the file-object if it doesnt contain any taskItem.
+				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
+					delete this.tasksCache.Pending[fileNameWithPath];
+				}
 				if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
 					delete this.tasksCache.Completed[fileNameWithPath];
-				} else {
-					const completed = this.tasksCache.Completed;
-					if (completed && completed[fileNameWithPath]) {
-						// Remove and re-insert at the top
-						const tasks = completed[fileNameWithPath];
-						delete completed[fileNameWithPath];
-						this.tasksCache.Completed = {
-							[fileNameWithPath]: tasks,
-							...completed,
-						};
-					}
 				}
 
-				return true;
+				return "true";
 			}
 		} catch (error) {
 			console.error(
@@ -473,7 +506,7 @@ export default class vaultScanner {
 				"\nERROR :",
 				error
 			);
-			return false;
+			return String(error);
 		}
 	}
 
@@ -489,8 +522,7 @@ export default class vaultScanner {
 		try {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
-			let flag: boolean | void = true;
-			let atleastOneFileScanned = false;
+			let isFileScanned: string = "";
 			for (const file of files) {
 				if (
 					file !== null &&
@@ -501,121 +533,11 @@ export default class vaultScanner {
 						scanFilters
 					)
 				) {
-					atleastOneFileScanned = true;
 					// TODO : Try testing if removing the await from the below line will going to speed up the process.
-					flag = await this.extractTasksFromFile(file, scanFilters);
-					// .then((result) => {
-					// 	if (!result)
-					// 		throw new Error(
-					// 			"extractTasksFromFile returned false"
-					// 		);
-
-					// 	if (showNotice) {
-					// 		new Notice("tasks-refreshed-successfully");
-					// 	}
-					// });
-
-					// const fileNameWithPath = file.path;
-					// const fileContent = await this.app.vault.cachedRead(file);
-					// const lines = fileContent.split("\n");
-					// const newPendingTasks: taskItem[] = [];
-					// const newCompletedTasks: taskItem[] = [];
-
-					// for (let i = 0; i < lines.length; i++) {
-					// 	const line = lines[i];
-					// 	if (isTaskLine(line)) {
-					// 		const tags = extractTags(line);
-					// 		if (scanFilterForTags(tags, scanFilters)) {
-					// 			this.TaskDetected = true;
-					// 			const taskStatus = extractCheckboxSymbol(line);
-					// 			const isTaskCompleted = isCompleted(line);
-					// 			const title = extractTitle(line);
-					// 			const time = extractTime(line);
-					// 			const createdDate = extractCreatedDate(line);
-					// 			const startDate = extractStartDate(line);
-					// 			const scheduledDate = extractScheduledDate(line);
-					// 			const priority = extractPriority(line);
-					// 			const completionDate = extractCompletionDate(line);
-					// 			const cancelledDate = extractCancelledDate(line);
-					// 			const body = extractBody(lines, i + 1);
-					// 			let due = extractDueDate(line);
-					// 			if (
-					// 				!due &&
-					// 				this.plugin.settings.data.globalSettings
-					// 					.dailyNotesPluginComp
-					// 			) {
-					// 				const dueFormat =
-					// 					this.plugin.settings.data.globalSettings
-					// 						.universalDateFormat;
-					// 				const basename = file.basename;
-
-					// 				// Check if the basename matches the dueFormat using moment
-					// 				const moment =
-					// 					_moment as unknown as typeof _moment.default;
-					// 				if (
-					// 					moment(basename, dueFormat, true).isValid()
-					// 				) {
-					// 					due = basename; // If the basename matches the dueFormat, assign it to due
-					// 				} else {
-					// 					due = ""; // If not, assign an empty string
-					// 				}
-					// 			}
-
-					// 			let frontmatterTags: string[] = []; // Initialize frontmatterTags
-					// 			if (
-					// 				this.plugin.settings.data.globalSettings
-					// 					.showFrontmatterTagsOnCards
-					// 			) {
-					// 				// Extract frontmatter from the file
-					// 				const frontmatter = extractFrontmatterFromFile(
-					// 					this.plugin,
-					// 					file
-					// 				);
-					// 				// Extract frontmatter tags
-					// 				frontmatterTags =
-					// 					extractFrontmatterTags(frontmatter);
-					// 			}
-
-					// 			const task: taskItem = {
-					// 				id: this.generateTaskId(),
-					// 				status: taskStatus,
-					// 				title,
-					// 				body,
-					// 				time,
-					// 				createdDate,
-					// 				startDate,
-					// 				scheduledDate,
-					// 				due,
-					// 				tags,
-					// 				frontmatterTags,
-					// 				priority,
-					// 				filePath: fileNameWithPath,
-					// 				lineNumber: i + 1,
-					// 				completion: completionDate,
-					// 				cancelledDate: cancelledDate,
-					// 			};
-
-					// 			if (isTaskCompleted) {
-					// 				newCompletedTasks.push(task);
-					// 			} else {
-					// 				newPendingTasks.push(task);
-					// 			}
-					// 		} else {
-					// 			// console.log("The tasks is not allowed...");
-					// 		}
-					// 	}
-					// }
-
-					// // Only replace the tasks for the specific file
-					// this.tasksCache.Pending = {
-					// 	...oldTasks.Pending, // Keep the existing tasks for other files
-					// 	[fileNameWithPath]: newPendingTasks, // Update only the tasks for the current file
-					// };
-
-					// this.tasksCache.Completed = {
-					// 	...oldTasks.Completed, // Keep the existing tasks for other files
-					// 	[fileNameWithPath]: newCompletedTasks, // Update only the tasks for the current file
-					// };
+					isFileScanned = await this.extractTasksFromFile(
+						file,
+						scanFilters
+					);
 				} else {
 					if (showNotice) {
 						new Notice(t("not-valid-file-type-for-scanning"), 5000);
@@ -623,18 +545,21 @@ export default class vaultScanner {
 				}
 			}
 
-			if (flag) {
-				if (atleastOneFileScanned) {
-					if (showNotice) {
-						new Notice("tasks-refreshed-successfully");
-					}
-
-					this.saveTasksToJsonCache();
+			let result = false;
+			if (isFileScanned === "true") {
+				if (showNotice) {
+					new Notice("tasks-refreshed-successfully");
 				}
 
-				return true;
+				if (this.tasksDetectedOrUpdated) {
+					result = await this.saveTasksToJsonCache();
+				}
+
+				return result;
 			} else {
-				throw new Error("extractTasksFromFile returned false");
+				throw new Error(
+					`extractTasksFromFile returned following error : ${isFileScanned}`
+				);
 			}
 		} catch (error) {
 			bugReporter(
@@ -651,9 +576,37 @@ export default class vaultScanner {
 	}
 
 	// Debounced saveTasksToJsonCache function
-	private saveTasksToJsonCacheDebounced = debounce(async () => {
-		this.tasksCache.Modified_at = new Date().toISOString();
-		await writeJsonCacheDataToDisk(this.plugin, this.tasksCache);
+	// private saveTasksToJsonCacheDebounced = debounce(
+	// 	async (): Promise<boolean> => {
+	// 		this.tasksCache.Modified_at = new Date().toISOString();
+	// 		const result = await writeJsonCacheDataToDisk(
+	// 			this.plugin,
+	// 			this.tasksCache
+	// 		);
+	// 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
+	// 		if (
+	// 			this.plugin.settings.data.globalSettings.realTimeScanning &&
+	// 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
+	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
+	// 		) {
+	// 			eventEmitter.emit("REFRESH_COLUMN");
+	// 			this.tasksDetectedOrUpdated = false;
+	// 		}
+
+	// 		return result;
+	// 	},
+	// 	500
+	// );
+
+	// Save tasks to JSON file
+	async saveTasksToJsonCache() {
+		// if (!this.tasksDetectedOrUpdated) return;
+
+		this.tasksCache.Modified_at = getCurrentLocalTimeString();
+		const result = await writeJsonCacheDataToDisk(
+			this.plugin,
+			this.tasksCache
+		);
 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 		if (
 			this.plugin.settings.data.globalSettings.realTimeScanning &&
@@ -661,15 +614,12 @@ export default class vaultScanner {
 				Object.values(this.tasksCache.Completed).flat().length > 0)
 		) {
 			eventEmitter.emit("REFRESH_COLUMN");
-			this.TaskDetected = false;
+			this.tasksDetectedOrUpdated = false;
 		}
-	}, 500);
 
-	// Save tasks to JSON file
-	saveTasksToJsonCache() {
-		// if (!this.TaskDetected) return;
+		return result;
 
-		this.saveTasksToJsonCacheDebounced();
+		// const result = this.saveTasksToJsonCacheDebounced();
 	}
 }
 
@@ -1145,4 +1095,34 @@ export function extractCancelledDate(text: string): string {
 	}
 	// Return the matched date or date-time, or an empty string if no match
 	return match ? match[0].trim() : "";
+}
+
+/**
+ * Compares two file cache arrays (taskItem[]) to determine if they are identical
+ * @param newCache - The newly scanned cache array for a specific file
+ * @param oldCache - The previous cache array for the same file
+ * @returns Promise<boolean> - Returns true if caches are identical, false if different or if oldCache is undefined
+ * @description This function performs a fast comparison of task arrays using JSON serialization
+ */
+export async function compareFileCache(
+	newCache: taskItem[] | undefined,
+	oldCache: taskItem[] | undefined
+): Promise<boolean> {
+	try {
+		// Quick null/undefined checks
+		if (!oldCache) return false;
+		if (!newCache) return oldCache.length === 0;
+
+		// Quick length check before expensive serialization
+		if (newCache.length !== oldCache.length) return false;
+		if (newCache.length === 0) return true;
+
+		// Fast JSON string comparison - significantly faster than property-by-property comparison
+		// This approach is optimal for most use cases as task arrays are typically small to medium sized
+		return JSON.stringify(newCache) === JSON.stringify(oldCache);
+	} catch (error) {
+		console.error("Error comparing file caches:", error);
+		// In case of error, assume they're different to trigger a refresh
+		return false;
+	}
 }

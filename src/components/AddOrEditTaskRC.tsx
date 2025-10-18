@@ -719,7 +719,7 @@ export const AddOrEditTaskRC: React.FC<{
 						onChange: (update: ViewUpdate) => {
 							setIsEdited(true);
 							const editorUpdatedContent = fullMarkdownEditor?.value || "";
-							const fullFileContent = (frontmatterContentRef ? `---\n${frontmatterContentRef.current}\n---\n` : "") + editorUpdatedContent;
+							const fullFileContent = isTaskNote ? (frontmatterContentRef?.current ? `---\n${frontmatterContentRef.current}\n---\n` : "") + editorUpdatedContent : editorUpdatedContent;
 							console.log("Editor content changed.\neditor content :", editorUpdatedContent, " \nFull file content:", fullFileContent);
 							setFormattedTaskContent(fullFileContent);
 							handleTaskEditedThroughEditors(fullFileContent);
