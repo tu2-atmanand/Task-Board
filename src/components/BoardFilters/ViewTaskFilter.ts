@@ -13,6 +13,13 @@ import { FilterConfigModal } from "./FilterConfigModal";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { SavedFilterConfig } from "src/interfaces/BoardConfigs";
+import {
+	MultiSuggest,
+	getTagSuggestions,
+	getFileSuggestions,
+	getStatusSuggestions,
+	getPrioritySuggestions,
+} from "src/services/MultiSuggest";
 
 // --- Interfaces (from focus.md and example HTML) ---
 // (Using 'any' for property types for now, will refine based on focus.md property list)
@@ -1006,6 +1013,53 @@ export class TaskFilterComponent extends Component {
 		if (conditionChanged || valueChanged) {
 			this.saveStateToLocalStorage();
 		}
+
+		// Setup MultiSuggest for appropriate properties
+		this.setupMultiSuggest(property, valueInput, filterData);
+	}
+
+	private setupMultiSuggest(
+		property: string,
+		valueInput: HTMLInputElement,
+		filterData: Filter
+	): void {
+		// Only setup suggestions for specific properties
+		const propertiesWithSuggestions = ["status", "priority", "tags", "filePath"];
+		
+		if (!propertiesWithSuggestions.includes(property)) {
+			return;
+		}
+
+		let suggestions: string[] = [];
+		
+		switch (property) {
+			case "status":
+				suggestions = getStatusSuggestions();
+				break;
+			case "priority":
+				suggestions = getPrioritySuggestions();
+				break;
+			case "tags":
+				suggestions = getTagSuggestions(this.app);
+				break;
+			case "filePath":
+				suggestions = getFileSuggestions(this.app);
+				break;
+		}
+
+		// Create callback to update filter data when suggestion is selected
+		const onSelectCallback = (value: string) => {
+			filterData.value = value;
+			this.saveStateToLocalStorage();
+		};
+
+		// Initialize MultiSuggest with suggestions
+		new MultiSuggest(
+			valueInput,
+			new Set(suggestions),
+			onSelectCallback,
+			this.app
+		);
 	}
 
 	// --- UI Updates (Conjunctions, Separators) ---

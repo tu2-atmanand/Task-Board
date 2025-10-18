@@ -145,6 +145,62 @@ export function getYAMLPropertySuggestions(app: App): string[] {
 	return Array.from(yamlPropertiesSet);
 }
 
+export function getStatusSuggestions(): string[] {
+	// Return common task status symbols
+	return [
+		" ",  // unchecked/incomplete/pending
+		"x",  // regular
+		"X",  // checked
+		"-",  // dropped
+		">",  // forward
+		"<",  // migrated
+		"D",  // date
+		"?",  // question
+		"/",  // halfDone/in-progress
+		"+",  // add
+		"R",  // research
+		"!",  // important
+		"i",  // idea
+		"B",  // brainstorm
+		"P",  // pro
+		"C",  // con
+		"Q",  // quote
+		"N",  // note
+		"b",  // bookmark
+		"I",  // information
+		"p",  // paraphrase
+		"L",  // location
+		"E",  // example
+		"A",  // answer
+		"r",  // reward
+		"c",  // choice
+		"d",  // doing
+		"T",  // time
+		"@",  // character
+		"t",  // talk
+		"O",  // outline
+		"~",  // conflict
+		"W",  // world
+		"f",  // find
+		"F",  // foreshadow
+		"H",  // favorite
+		"&",  // symbolism
+		"s",  // secret
+	];
+}
+
+export function getPrioritySuggestions(): string[] {
+	// Return priority values with emojis
+	return [
+		"0",     // none
+		"1",     // highest 🔺
+		"2",     // high ⏫
+		"3",     // medium 🔼
+		"4",     // low 🔽
+		"5",     // lowest ⏬
+	];
+}
+
 export function getPendingTasksSuggestions(plugin: TaskBoard): taskItem[] {
 	const pendingObj = plugin.vaultScanner.tasksCache?.Pending ?? {};
 	const taskSet = new Set<taskItem>();
