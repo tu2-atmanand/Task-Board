@@ -362,7 +362,7 @@ export const bugReporter = (
 					cls: "reportBugButton",
 					onclick: () => {
 						const bugReportModal = new BugReporterModal(
-							plugin.app,
+							plugin,
 							message,
 							bugContent,
 							context

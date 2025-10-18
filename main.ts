@@ -622,13 +622,6 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerEvents() {
-		// // Start a timer to write tasks from sessionStorage to disk every 5 minutes
-		// this.registerInterval(
-		// 	window.setInterval(async () => {
-		// 		await writeTasksFromSessionStorageToDisk(this.plugin);
-		// 	}, 5 * 60 * 1000)
-		// );
-
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				if (fileTypeAllowedForScanning(this.plugin, file)) {

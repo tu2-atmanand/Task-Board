@@ -188,6 +188,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	const handleDeleteCurrentBoard = () => {
+		const app = plugin.app;
 		const mssg = t("board-delete-confirmation-message")
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app,
