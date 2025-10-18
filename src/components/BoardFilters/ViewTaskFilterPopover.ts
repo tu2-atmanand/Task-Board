@@ -65,12 +65,12 @@ export class ViewTaskFilterPopover
 		// Add column filter heading if this is for a column
 		if (this.forColumn) {
 			headerEl.createEl("h3", {
-				text: t("column-filters-for") + this.columnOrBoardName,
+				text: t("column-filters-for") + " " + this.columnOrBoardName,
 				cls: "task-popover-content-header-heading",
 			});
 		} else {
 			headerEl.createEl("h3", {
-				text: t("board-filters-for") + this.columnOrBoardName,
+				text: t("board-filters-for") + " " + this.columnOrBoardName,
 				cls: "task-popover-content-header-heading",
 			});
 		}
