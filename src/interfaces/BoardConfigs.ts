@@ -56,6 +56,7 @@ export type ColumnData = {
 
 export type Board = {
 	name: string;
+	description?: string;
 	index: number;
 	columns: ColumnData[];
 	hideEmptyColumns: boolean;

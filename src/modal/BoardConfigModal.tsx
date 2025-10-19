@@ -300,6 +300,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
+	const handleBoardDescriptionChange = (index: number, description: string) => {
+		const updatedBoards = [...localBoards];
+		updatedBoards[index].description = description;
+		setLocalBoards(updatedBoards);
+		setIsEdited(true);
+	};
+
 	// const handleFiltersChange = (boardIndex: number, value: string) => {
 	// 	setFiltersData(value);
 	// 	const updatedBoards = [...localBoards];
@@ -405,6 +412,17 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							type="text"
 							value={board.name}
 							onChange={(e) => handleBoardNameChange(boardIndex, e.target.value)}
+						/>
+					</div>
+					<div className="boardConfigModalMainContent-Active-Body-InputItems">
+						<div className="boardConfigModalMainContent-Active-Body-boardDescriptionTag">
+							<div className="boardConfigModalSettingName">{t("board-description")}</div>
+							<div className="boardConfigModalSettingDescription">{t("board-description-info")}</div>
+						</div>
+						<textarea
+							rows={4}
+							value={board?.description || ""}
+							onChange={(e) => handleBoardDescriptionChange(boardIndex, e.target.value)}
 						/>
 					</div>
 					<div className="boardConfigModalMainContent-Active-Body-InputItems">
