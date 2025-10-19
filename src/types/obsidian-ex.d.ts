@@ -327,7 +327,7 @@ declare module "obsidian" {
 
 		internalPlugins: any;
 
-		communityPlugins: Plugins;
+		plugins: Plugins;
 
 		customCss: any;
 

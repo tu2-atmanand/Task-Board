@@ -90,7 +90,7 @@ export function getQuickAddPluginChoices(
 		if (!quickAddPluginObj) {
 			throw new Error("QuickAdd plugin object is undefined.");
 		}
-		const quickAddPlugin = app.communityPlugins.getPlugin("quickadd");
+		const quickAddPlugin = app.plugins.getPlugin("quickadd");
 		if (!quickAddPlugin) return [];
 
 		const choices = quickAddPluginObj.settings.choices;

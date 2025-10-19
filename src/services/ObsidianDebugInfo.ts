@@ -10,7 +10,7 @@ export async function getObsidianDebugInfo(app: App) {
 	const numSnippets = app.customCss.snippets.filter((snippet: any) =>
 		app.customCss.enabledSnippets.has(snippet)
 	).length;
-	const plugins = app.communityPlugins.plugins;
+	const plugins = app.plugins.plugins;
 
 	return {
 		...(await getSystemInfo()),
@@ -27,7 +27,7 @@ export async function getObsidianDebugInfo(app: App) {
 			? `${themeName} v${themeManifest.version}`
 			: "none",
 		"Snippets enabled": numSnippets,
-		"Plugins installed": Object.keys(app.communityPlugins.manifests).length,
+		"Plugins installed": Object.keys(app.plugins.manifests).length,
 		"Plugins enabled": Object.values(plugins).map(
 			(plugin) => `${plugin!.manifest.name} v${plugin!.manifest.version}`
 		),

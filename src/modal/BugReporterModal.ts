@@ -158,9 +158,9 @@ export class BugReporterModal extends Modal {
 		const obsidianVersion =
 			this.plugin.app.title.split(" ").pop() || "Unknown Version";
 		const appVersion = navigator.appVersion || "Unknown App Version";
-		const enabledPlugins = this.plugin.app.communityPlugins.enabledPlugins;
+		const enabledPlugins = this.plugin.app.plugins.enabledPlugins;
 		const manifests = Object.values(
-			this.plugin.app.communityPlugins.manifests
+			this.plugin.app.plugins.manifests
 		) as PluginManifest[];
 		const enabledPluginsWithVersionMap = manifests
 			.filter((plugin) => enabledPlugins.has(plugin.id))
