@@ -1,25 +1,11 @@
 import TaskBoard from "main";
 import { FrontMatterCache, parseYaml, stringifyYaml, TFile } from "obsidian";
-import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
-import { getLocalDateTimeString } from "./TimeCalculations";
+import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import {
 	getPriorityNameForTaskNote,
 	isTaskNotePresentInTags,
 } from "./TaskNoteUtils";
-
-export interface customFrontmatterCache extends FrontMatterCache {
-	tags?: string[] | string;
-	title?: string;
-	"created-date"?: string;
-	"start-date"?: string;
-	"schedule-date"?: string;
-	"due-date"?: string;
-	"cancelled-date"?: string;
-	"completion-date"?: string;
-	priority?: string | number;
-	status?: string;
-	reminder?: string;
-}
+import { taskStatuses } from "src/interfaces/Enums";
 
 /**
  * Extract frontmatter from file content
@@ -73,6 +59,12 @@ export function extractFrontmatterFromFile(
 	}
 }
 
+/**
+ * Extract frontmatter from file content string
+ * @param plugin - TaskBoard plugin instance
+ * @param fileContent - Content of the file as string
+ * @returns any - Frontmatter object or undefined if not found
+ */
 export function extractFrontmatterFromContent(
 	plugin: TaskBoard,
 	fileContent: string

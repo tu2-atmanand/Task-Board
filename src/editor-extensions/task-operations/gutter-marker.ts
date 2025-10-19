@@ -7,9 +7,9 @@ import { EditorView, gutter, GutterMarker } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
 import { App, ExtraButtonComponent } from "obsidian";
 import TaskBoard from "main";
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
 import { isTaskLine } from "src/utils/CheckBoxUtils";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
+import { AddOrEditTaskModal } from "src/modals/AddOrEditTaskModal";
 
 // Task icon marker
 class TaskGutterMarker extends GutterMarker {

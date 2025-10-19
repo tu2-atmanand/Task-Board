@@ -1,11 +1,10 @@
 import { TFile } from "obsidian";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
-import { extractFrontmatterFromFile } from "./FrontmatterOperations";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { isCompleted, isTaskLine } from "./CheckBoxUtils";
-import { getTaskFromId } from "./TaskItemUtils";
 import { taskItem } from "src/interfaces/TaskItem";
+import { isTaskLine, isCompleted } from "../CheckBoxUtils";
+import { getTaskFromId } from "../taskLine/TaskItemUtils";
+import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
 
 /**
  * Scans a file and its front-matter for specific filters.

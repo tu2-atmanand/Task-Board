@@ -7,12 +7,12 @@ import {
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
-} from "./JsonFileOperations";
+} from "../JsonFileOperations";
 import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
-} from "./MarkdownFileOperations";
+} from "../MarkdownFileOperations";
 
 import { Notice } from "obsidian";
 import TaskBoard from "main";
@@ -22,14 +22,14 @@ import {
 	bugReporter,
 	openDiffContentCompareModal,
 } from "src/services/OpenModals";
-import { isTheContentDiffAreOnlySpaces } from "src/modal/DiffContentCompareModal";
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
-} from "./FrontmatterOperations";
-import { generateTaskId } from "./VaultScanner";
+} from "../taskNote/FrontmatterOperations";
+import { generateTaskId } from "../../managers/VaultScanner";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { getCurrentLocalTimeString } from "./TimeCalculations";
+import { getCurrentLocalTimeString } from "../TimeCalculations";
+import { isTheContentDiffAreOnlySpaces } from "src/modals/DiffContentCompareModal";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,

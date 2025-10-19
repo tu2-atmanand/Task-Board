@@ -23,10 +23,10 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
 import CustomNodeResizer from './CustomNodeResizer';
-import { updateTaskInFile } from 'src/utils/TaskItemUtils';
+import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
 import { debounce } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/types/uniqueIdentifiers';
-import { sanitizeDependsOn } from 'src/utils/TaskContentFormatter';
+import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
 
 type MapViewProps = {

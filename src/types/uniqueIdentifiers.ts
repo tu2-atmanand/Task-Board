@@ -10,8 +10,6 @@ export const NODE_POSITIONS_STORAGE_KEY = "taskboard_map_node_positions"; // now
 export const NODE_SIZE_STORAGE_KEY = "taskboard_map_node_sizes";
 export const VIEWPORT_STORAGE_KEY = "taskboard_map_viewport";
 
-export const TASK_NOTE_IDENTIFIER_TAG = "taskNote";
-
 export const TASK_NOTE_FRONTMATTER_KEYS = {
 	title: "title",
 	id: "id",

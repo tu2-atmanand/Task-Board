@@ -1,19 +1,14 @@
 // /src/utils/TaskNoteUtils.ts
 
-import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import {
 	updateFrontmatterProperties,
-	customFrontmatterCache,
-	extractFrontmatterFromFile,
 	createYamlFromObject,
 	extractFrontmatterFromContent,
 } from "./FrontmatterOperations";
-import { resolve } from "path";
-import {
-	TASK_NOTE_FRONTMATTER_KEYS,
-	TASK_NOTE_IDENTIFIER_TAG,
-} from "src/types/uniqueIdentifiers";
+import { TASK_NOTE_FRONTMATTER_KEYS } from "src/types/uniqueIdentifiers";
+import { taskStatuses } from "src/interfaces/Enums";
+import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter

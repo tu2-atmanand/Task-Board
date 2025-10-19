@@ -1,5 +1,3 @@
-import { RootFilterState } from "src/components/BoardFilters/ViewTaskFilter";
-
 export interface columnSortingCriteria {
 	criteria:
 		| "status"
@@ -22,6 +20,42 @@ export interface columnSortingCriteria {
 	order: "asc" | "desc"; // Sort order
 	priority: number;
 }
+
+// --- Interfaces (from focus.md and example HTML) ---
+// (Using 'any' for property types for now, will refine based on focus.md property list)
+export interface Filter {
+	id: string;
+	property: string; // e.g., 'content', 'dueDate', 'priority'
+	condition: string; // e.g., 'isSet', 'equals', 'contains'
+	value?: any;
+}
+
+export interface FilterGroup {
+	id: string;
+	groupCondition: "all" | "any" | "none"; // How filters within this group are combined
+	filters: Filter[];
+}
+
+export interface RootFilterState {
+	rootCondition: "all" | "any" | "none"; // How filter groups are combined
+	filterGroups: FilterGroup[];
+}
+
+// Represents a single filter condition UI row from focus.md
+export interface FilterConditionItem {
+	property: string; // e.g., 'content', 'dueDate', 'priority', 'tags.myTag'
+	operator: string; // e.g., 'contains', 'is', '>=', 'isEmpty'
+	value?: any; // Value for the condition, type depends on property and operator
+}
+
+// Represents a group of filter conditions in the UI from focus.md
+export interface FilterGroupItem {
+	logicalOperator: "AND" | "OR"; // How conditions/groups within this group are combined
+	items: (FilterConditionItem | FilterGroupItem)[]; // Can contain conditions or nested groups
+}
+
+// Top-level filter configuration from the UI from focus.md
+export type FilterConfig = FilterGroupItem;
 
 // Define the structure of Board, Column, and the Data read from JSON
 export type ColumnData = {
@@ -54,6 +88,22 @@ export type ColumnData = {
 	};
 };
 
+// Define saved filter configuration interface
+export interface SavedFilterConfig {
+	id: string;
+	name: string;
+	description?: string;
+	filterState: RootFilterState;
+	createdAt: string;
+	updatedAt: string;
+}
+
+// Define filter configuration settings
+export interface FilterConfigSettings {
+	enableSavedFilters: boolean;
+	savedConfigs: SavedFilterConfig[];
+}
+
 export type Board = {
 	name: string;
 	description?: string;
@@ -71,31 +121,3 @@ export type Board = {
 };
 
 export type BoardConfigs = Board[];
-
-export const columnTypeAndNameMapping: { [key: string]: string } = {
-	undated: "Undated",
-	dated: "Dated",
-	namedTag: "Tagged",
-	untagged: "Untagged",
-	otherTags: "Other Tags",
-	taskStatus: "Status",
-	taskPriority: "Priority",
-	pathFiltered: "Path filtered",
-	completed: "Completed",
-};
-
-// Define saved filter configuration interface
-export interface SavedFilterConfig {
-	id: string;
-	name: string;
-	description?: string;
-	filterState: RootFilterState;
-	createdAt: string;
-	updatedAt: string;
-}
-
-// Define filter configuration settings
-export interface FilterConfigSettings {
-	enableSavedFilters: boolean;
-	savedConfigs: SavedFilterConfig[];
-}

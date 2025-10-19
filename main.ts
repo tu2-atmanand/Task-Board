@@ -13,7 +13,6 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
-	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
 import {
 	openAddNewTaskInCurrentFileModal,
@@ -24,10 +23,10 @@ import {
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
 import { AddOrEditTaskView } from "./src/views/AddOrEditTaskView";
-import { RealTimeScanning } from "src/utils/RealTimeScanning";
+import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import vaultScanner, {
 	fileTypeAllowedForScanning,
-} from "src/utils/VaultScanner";
+} from "src/managers/VaultScanner";
 import { TaskBoardIcon } from "src/types/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import {
@@ -48,6 +47,7 @@ import {
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
+import { colType, HideableTaskProperty } from "src/interfaces/Enums";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -55,7 +55,7 @@ export default class TaskBoard extends Plugin {
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: vaultScanner;
-	realTimeScanning: RealTimeScanning;
+	realTimeScanning: RealTimeScanner;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
 	// currentModifiedFile: TFile | null;
@@ -72,7 +72,7 @@ export default class TaskBoard extends Plugin {
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.vaultScanner = new vaultScanner(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanning(
+		this.realTimeScanning = new RealTimeScanner(
 			this.app,
 			this.plugin,
 			this.vaultScanner
@@ -896,8 +896,8 @@ export default class TaskBoard extends Plugin {
 							column.id = Math.floor(Math.random() * 1000000);
 						}
 						if (
-							column.colType === "dated" ||
-							(column.colType === "undated" &&
+							column.colType === colType.dated ||
+							(column.colType === colType.undated &&
 								!column.datedBasedColumn)
 						) {
 							column.datedBasedColumn = {

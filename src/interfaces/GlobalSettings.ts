@@ -1,4 +1,14 @@
 import { BoardConfigs } from "./BoardConfigs";
+import {
+	EditButtonMode,
+	TagColorType,
+	HideableTaskProperty,
+	taskPropertyFormatOptions,
+	UniversalDateOptions,
+	NotificationService,
+	cardSectionsVisibilityOptions,
+	colType,
+} from "./Enums";
 
 export interface scanFilters {
 	files: {
@@ -19,52 +29,10 @@ export interface scanFilters {
 	};
 }
 
-export enum taskPropertyFormatOptions {
-	default = "1",
-	tasksPlugin = "2",
-	dataviewPlugin = "3",
-	obsidianNative = "4",
-}
-
 export interface TagColor {
 	name: string;
 	color: string;
 	priority: number;
-}
-
-export enum EditButtonMode {
-	None = "none",
-	Modal = "popUp",
-	View = "view",
-	TasksPluginModal = "tasksPluginModal",
-	NoteInTab = "noteInTab",
-	NoteInSplit = "noteInSplit",
-	NoteInWindow = "noteInWindow",
-	NoteInHover = "noteInHover",
-}
-
-export enum UniversalDateOptions {
-	startDate = "startDate",
-	scheduledDate = "scheduledDate",
-	dueDate = "due",
-}
-
-export enum universalDateOptionsNames {
-	startDate = "Start Date",
-	scheduledDate = "Scheduled Date",
-	dueDate = "Due Date",
-}
-
-export enum TagColorType {
-	Text = "text",
-	Background = "background",
-}
-
-export enum NotificationService {
-	None = "none",
-	ReminderPlugin = "reminderPlugin",
-	NotifianApp = "notifianApp",
-	ObsidApp = "obsiApp",
 }
 
 export interface CustomStatus {
@@ -80,35 +48,6 @@ export interface TaskBoardAction {
 	trigger: "Complete" | "Incomplete";
 	type: "move" | "copy";
 	targetColumn: string;
-}
-
-export enum cardSectionsVisibilityOptions {
-	showSubTasksOnly = "showSubTasksOnly",
-	showDescriptionOnly = "showDescriptionOnly",
-	showBoth = "showBoth",
-	hideBoth = "hideBoth",
-}
-
-export enum HideableTaskProperty {
-	ID = "id",
-	Tags = "tags",
-	CreatedDate = "createdDate",
-	StartDate = "startDate",
-	ScheduledDate = "scheduledDate",
-	DueDate = "dueDate",
-	CompletionDate = "completionDate",
-	CancelledDate = "cancelledDate",
-	OnCompletion = "on-completion",
-	Priority = "priority",
-	Recurring = "recurring",
-	Time = "time",
-	Dependencies = "dependencies",
-	Reminder = "reminder",
-}
-
-export enum viewTypeNames {
-	kanban = "kanban",
-	map = "map",
 }
 
 export interface globalSettingsData {
@@ -189,7 +128,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				columns: [
 					{
 						id: 1,
-						colType: "undated",
+						colType: colType.undated,
 						active: true,
 						collapsed: false,
 						name: "Undated Tasks",
@@ -202,7 +141,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 2,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Over Due",
@@ -215,7 +154,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 3,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Today",
@@ -228,7 +167,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 4,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Tomorrow",
@@ -241,7 +180,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 5,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Future",
@@ -272,7 +211,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				columns: [
 					{
 						id: 7,
-						colType: "untagged",
+						colType: colType.untagged,
 						active: true,
 						collapsed: false,
 						name: "Backlogs",
@@ -280,7 +219,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 8,
-						colType: "namedTag",
+						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
 						name: "Can be implemented",
@@ -289,7 +228,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 9,
-						colType: "namedTag",
+						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
 						name: "In Progress",
@@ -298,7 +237,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 10,
-						colType: "namedTag",
+						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
 						name: "Done",
@@ -307,7 +246,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 11,
-						colType: "namedTag",
+						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
 						name: "In Review",
@@ -324,7 +263,69 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						name: "Completed",
 					},
 				],
-				name: "Static Kanban",
+				name: "Tag Based Workflow",
+				index: 1,
+				showColumnTags: false,
+				showFilteredTags: true,
+				hideEmptyColumns: false,
+			},
+			{
+				columns: [
+					{
+						id: 7,
+						colType: "",
+						active: true,
+						collapsed: false,
+						name: "Backlogs",
+						index: 1,
+					},
+					{
+						id: 8,
+						colType: colType.namedTag,
+						active: true,
+						collapsed: false,
+						name: "Can be implemented",
+						index: 2,
+						coltag: "pending",
+					},
+					{
+						id: 9,
+						colType: colType.namedTag,
+						active: true,
+						collapsed: false,
+						name: "In Progress",
+						index: 3,
+						coltag: "working",
+					},
+					{
+						id: 10,
+						colType: colType.namedTag,
+						active: true,
+						collapsed: false,
+						name: "Done",
+						index: 4,
+						coltag: "done",
+					},
+					{
+						id: 11,
+						colType: colType.namedTag,
+						active: true,
+						collapsed: false,
+						name: "In Review",
+						index: 5,
+						coltag: "Test",
+					},
+					{
+						id: 12,
+						colType: "Completed",
+						active: true,
+						collapsed: false,
+						index: 6,
+						limit: 10,
+						name: "Completed",
+					},
+				],
+				name: "Status Based Workflow",
 				index: 1,
 				showColumnTags: false,
 				showFilteredTags: true,

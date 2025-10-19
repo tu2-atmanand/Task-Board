@@ -1,29 +1,31 @@
 // src/services/OpenModals.ts
 
 import { App, Notice, TFile, WorkspaceLeaf } from "obsidian";
-import { addTaskInNote, updateTaskInFile } from "src/utils/TaskItemUtils";
-
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
+import {
+	addTaskInNote,
+	updateTaskInFile,
+} from "src/utils/taskLine/TaskItemUtils";
 import { AddOrEditTaskView } from "src/views/AddOrEditTaskView";
 import { Board } from "../interfaces/BoardConfigs";
-import { BoardConfigureModal } from "src/modal/BoardConfigModal";
-import { ScanVaultModal } from "src/modal/ScanVaultModal";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
-import { BugReporterModal } from "src/modal/BugReporterModal";
 import { CommunityPlugins } from "./CommunityPlugins";
 import {
 	addIdToTaskContent,
 	getFormattedTaskContent,
-} from "src/utils/TaskContentFormatter";
+} from "src/utils/taskLine/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
-import { DiffContentCompareModal } from "src/modal/DiffContentCompareModal";
-import { TaskBoardActionsModal } from "src/modal/TaskBoardActionsModal";
-import { ScanFilterModal } from "src/modal/ScanFilterModal";
 import { taskItem } from "src/interfaces/TaskItem";
-import { updateFrontmatterInMarkdownFile } from "src/utils/TaskNoteUtils";
+import { updateFrontmatterInMarkdownFile } from "src/utils/taskNote/TaskNoteUtils";
 import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
 import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
+import { AddOrEditTaskModal } from "src/modals/AddOrEditTaskModal";
+import { BoardConfigureModal } from "src/modals/BoardConfigModal";
+import { BugReporterModal } from "src/modals/BugReporterModal";
+import { DiffContentCompareModal } from "src/modals/DiffContentCompareModal";
+import { ScanFilterModal } from "src/modals/ScanFilterModal";
+import { ScanVaultModal } from "src/modals/ScanVaultModal";
+import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (

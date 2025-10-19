@@ -6,25 +6,22 @@ import {
 	extractPriority,
 	extractTaskId,
 	generateTaskId,
-} from "./VaultScanner";
-import {
-	NotificationService,
-	UniversalDateOptions,
-	globalSettingsData,
-	HideableTaskProperty,
-	taskPropertyFormatOptions,
-} from "src/interfaces/GlobalSettings";
+} from "../../managers/VaultScanner";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
 } from "src/regularExpressions/TasksPluginRegularExpr";
-import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
-
-export interface cursorLocation {
-	lineNumber: number;
-	charIndex: number;
-}
+import {
+	taskPropertyFormatOptions,
+	NotificationService,
+	HideableTaskProperty,
+	UniversalDateOptions,
+} from "src/interfaces/Enums";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
+import { priorityEmojis } from "src/interfaces/Mapping";
+import { taskItem } from "src/interfaces/TaskItem";
+import { cursorLocation } from "src/interfaces/TaskItem";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.

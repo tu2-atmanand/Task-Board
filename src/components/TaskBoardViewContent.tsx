@@ -1,6 +1,6 @@
 // src/components/TaskBoardViewContent.tsx
 
-import { Board, ColumnData } from "../interfaces/BoardConfigs";
+import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
 import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter, Cross, Menu as MenuICon, Settings, Ellipsis, EllipsisVertical } from 'lucide-react';
 import React, { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
@@ -11,16 +11,15 @@ import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
-import { renderColumns } from 'src/utils/RenderColumns';
+import { renderColumns } from 'src/utils/algorithms/ColumnSegregator';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
-import { viewTypeNames } from "src/interfaces/GlobalSettings";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { RootFilterState } from "./BoardFilters/ViewTaskFilter";
-import { boardFilterer } from "src/utils/boardFilterer";
-import { ViewTaskFilterModal } from "./BoardFilters";
+import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
+import { ViewTaskFilterModal } from 'src/components/BoardFilters';
+import { viewTypeNames } from "src/interfaces/Enums";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);

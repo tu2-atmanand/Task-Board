@@ -1,8 +1,8 @@
-import { App } from "obsidian";
 import { Modal } from "obsidian";
-import { TaskFilterComponent, RootFilterState } from "./ViewTaskFilter";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { RootFilterState } from "src/interfaces/BoardConfigs";
+import { TaskFilterComponent } from "./ViewTaskFilter";
 
 export class ViewTaskFilterModal extends Modal {
 	private plugin: TaskBoard;

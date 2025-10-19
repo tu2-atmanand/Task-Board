@@ -1,6 +1,6 @@
 import TaskBoard from "main";
 import { App } from "obsidian";
-import { AddOrEditTaskModal } from "./modal/AddOrEditTaskModal";
+import { AddOrEditTaskModal } from "./modals/AddOrEditTaskModal";
 
 export class TaskBoardApi {
 	public static GetApi(app: App, plugin: TaskBoard) {

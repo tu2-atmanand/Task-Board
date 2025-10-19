@@ -5,18 +5,16 @@ import React, { memo, useMemo } from 'react';
 import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
-import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 import TaskBoard from 'main';
-import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
-import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
 import { Menu, Platform } from 'obsidian';
-import { ConfigureColumnSortingModal } from 'src/modal/ConfigureColumnSortingModal';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
-import { RootFilterState } from 'src/components/BoardFilters/ViewTaskFilter';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
-import { ViewTaskFilterModal } from '../BoardFilters';
+import { ViewTaskFilterModal } from 'src/components/BoardFilters';
+import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
+import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;

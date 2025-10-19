@@ -12,7 +12,7 @@ import Sortable from "sortablejs";
 import { FilterConfigModal } from "./FilterConfigModal";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
-import { SavedFilterConfig } from "src/interfaces/BoardConfigs";
+import { Filter, FilterGroup, RootFilterState, SavedFilterConfig } from "src/interfaces/BoardConfigs";
 import {
 	MultiSuggest,
 	getTagSuggestions,
@@ -21,41 +21,6 @@ import {
 	getPrioritySuggestions,
 } from "src/services/MultiSuggest";
 
-// --- Interfaces (from focus.md and example HTML) ---
-// (Using 'any' for property types for now, will refine based on focus.md property list)
-export interface Filter {
-	id: string;
-	property: string; // e.g., 'content', 'dueDate', 'priority'
-	condition: string; // e.g., 'isSet', 'equals', 'contains'
-	value?: any;
-}
-
-export interface FilterGroup {
-	id: string;
-	groupCondition: "all" | "any" | "none"; // How filters within this group are combined
-	filters: Filter[];
-}
-
-export interface RootFilterState {
-	rootCondition: "all" | "any" | "none"; // How filter groups are combined
-	filterGroups: FilterGroup[];
-}
-
-// Represents a single filter condition UI row from focus.md
-interface FilterConditionItem {
-	property: string; // e.g., 'content', 'dueDate', 'priority', 'tags.myTag'
-	operator: string; // e.g., 'contains', 'is', '>=', 'isEmpty'
-	value?: any; // Value for the condition, type depends on property and operator
-}
-
-// Represents a group of filter conditions in the UI from focus.md
-interface FilterGroupItem {
-	logicalOperator: "AND" | "OR"; // How conditions/groups within this group are combined
-	items: (FilterConditionItem | FilterGroupItem)[]; // Can contain conditions or nested groups
-}
-
-// Top-level filter configuration from the UI from focus.md
-type FilterConfig = FilterGroupItem;
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;

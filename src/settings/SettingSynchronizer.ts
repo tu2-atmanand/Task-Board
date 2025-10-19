@@ -6,6 +6,7 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
+import { colType } from "src/interfaces/Enums";
 
 /**
  * Migrates settings from imported data to current settings, preserving new fields and syncing new ones.
@@ -38,8 +39,8 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 						column.id = Math.floor(Math.random() * 1000000);
 					}
 					if (
-						column.colType === "dated" ||
-						(column.colType === "undated" &&
+						column.colType === colType.dated ||
+						(column.colType === colType.undated &&
 							!column.datedBasedColumn)
 					) {
 						column.datedBasedColumn = {

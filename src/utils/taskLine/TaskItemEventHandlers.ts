@@ -1,17 +1,13 @@
-import { checkboxStateSwitcher, isCompleted } from "./CheckBoxUtils";
+import { checkboxStateSwitcher, isCompleted } from "../CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
 	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
 } from "./TaskItemUtils";
-
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { DeleteConfirmationModal } from "src/modal/DeleteConfirmationModal";
-import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { moment as _moment, Notice, TFile, WorkspaceLeaf } from "obsidian";
-import { t } from "./lang/helper";
+import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
 import {
@@ -21,8 +17,10 @@ import {
 	openEditTaskView,
 } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import { isTaskNotePresentInTags } from "./TaskNoteUtils";
+import { isTaskNotePresentInTags } from "../taskNote/TaskNoteUtils";
 import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
+import { EditButtonMode } from "src/interfaces/Enums";
+import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);

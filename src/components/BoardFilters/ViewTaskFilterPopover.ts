@@ -3,9 +3,10 @@
 import { App } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
-import { TaskFilterComponent, RootFilterState } from "./ViewTaskFilter";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { RootFilterState } from "src/interfaces/BoardConfigs";
+import { TaskFilterComponent } from "./ViewTaskFilter";
 
 export class ViewTaskFilterPopover
 	extends Component

@@ -1,8 +1,11 @@
 import { App, Modal, Setting, Notice, DropdownComponent } from "obsidian";
-import { RootFilterState, FilterGroup } from "./ViewTaskFilter";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
-import { SavedFilterConfig } from "src/interfaces/BoardConfigs";
+import {
+	FilterGroup,
+	RootFilterState,
+	SavedFilterConfig,
+} from "src/interfaces/BoardConfigs";
 
 export class FilterConfigModal extends Modal {
 	private plugin: TaskBoard;

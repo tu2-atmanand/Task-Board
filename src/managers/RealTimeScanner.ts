@@ -1,14 +1,14 @@
-// /src/utils/RealTimeScanning.ts
+// /src/utils/RealTimeScanner.ts
 
 import { App, TAbstractFile, TFile, TFolder } from "obsidian";
 
-import type vaultScanner from "src/utils/VaultScanner";
+import type vaultScanner from "src/managers/VaultScanner";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
 import { PENDING_SCAN_FILE_STACK } from "src/types/uniqueIdentifiers";
 
-export class RealTimeScanning {
+export class RealTimeScanner {
 	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
@@ -43,7 +43,7 @@ export class RealTimeScanning {
 				this.plugin,
 				"Error saving file stack to localStorage.",
 				String(error),
-				"RealTimeScanning.ts/saveStack"
+				"RealTimeScanner.ts/saveStack"
 			);
 		}
 	}

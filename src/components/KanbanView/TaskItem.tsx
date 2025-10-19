@@ -3,26 +3,27 @@
 import { FaEdit, FaExternalLinkSquareAlt, FaLink, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
-import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
-import { handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
+import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component, Notice } from 'obsidian';
-import { EditButtonMode, cardSectionsVisibilityOptions, viewTypeNames } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
+import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { getTaskFromId, parseUniversalDate } from 'src/utils/TaskItemUtils';
+import { getTaskFromId, parseUniversalDate } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
-import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
-import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
-import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/FiltersVerifier';
+import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
 import { ChevronDown, ChevronsUpDownIcon } from 'lucide-react';
+import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
+import { priorityEmojis } from 'src/interfaces/Mapping';
+import { taskItem } from 'src/interfaces/TaskItem';
+import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
+import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 
 export interface TaskProps {
 	key: number;
@@ -406,7 +407,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 										// If columnIndex is defined, proceed to get the column
 										const column = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
-										if ((!activeBoardSettings?.showColumnTags) && column && column?.colType === "namedTag" && tagName.replace('#', '') === column?.coltag?.replace('#', '')) {
+										if ((!activeBoardSettings?.showColumnTags) && column && column?.colType === colType.namedTag && tagName.replace('#', '') === column?.coltag?.replace('#', '')) {
 											return null;
 										}
 

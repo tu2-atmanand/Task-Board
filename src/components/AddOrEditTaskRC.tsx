@@ -4,28 +4,29 @@
 import { Component, Keymap, Notice, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
 import { FaLinkedin, FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { priorityOptions, taskItem, taskItemEmpty } from "src/interfaces/TaskItem";
+import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
-import { buildTaskFromRawContent, generateTaskId } from "src/utils/VaultScanner";
+import { cleanTaskTitleLegacy, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
+import { buildTaskFromRawContent, generateTaskId } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { DEFAULT_SETTINGS, EditButtonMode, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter, openEditTaskModal, openEditTaskNoteModal, openEditTaskView } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
-import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNoteUtils";
-import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
+import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/taskNote/TaskNoteUtils";
+import { applyIdToTaskInNote, getTaskFromId } from "src/utils/taskLine/TaskItemUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { handleEditTask } from "src/utils/TaskItemEventHandlers";
+import { handleEditTask } from "src/utils/taskLine/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
+import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
+import { taskItemEmpty, priorityOptions } from "src/interfaces/Mapping";
 
 export interface filterOptions {
 	value: string;

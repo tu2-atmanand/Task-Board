@@ -2,7 +2,8 @@
 
 import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
-import { taskItem, taskStatuses } from "src/interfaces/TaskItem";
+import { taskStatuses } from "src/interfaces/Enums";
+import { taskItem } from "src/interfaces/TaskItem";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {

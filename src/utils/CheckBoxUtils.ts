@@ -1,5 +1,5 @@
-import TaskBoard from "main";
-import { taskStatuses } from "src/interfaces/TaskItem";
+import type TaskBoard from "main";
+import { taskStatuses } from "src/interfaces/Enums";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**

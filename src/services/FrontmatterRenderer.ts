@@ -8,7 +8,7 @@
 
 import type TaskBoard from "main";
 import { App, Component, Notice, TFile } from "obsidian";
-import { extractFrontmatterFromContent } from "src/utils/FrontmatterOperations";
+import { extractFrontmatterFromContent } from "src/utils/taskNote/FrontmatterOperations";
 
 /**
  * Renders frontmatter properties using Obsidian's PropertyWidget API

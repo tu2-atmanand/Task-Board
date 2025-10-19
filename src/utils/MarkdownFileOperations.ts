@@ -1,7 +1,6 @@
 // /src/utils/MarkdownFileOperations.ts
 
 import { TFile } from "obsidian";
-
 import TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 

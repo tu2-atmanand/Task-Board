@@ -13,31 +13,25 @@ import {
 	getObsidianIndentationSetting,
 	isCompleted,
 	isTaskLine,
-} from "./CheckBoxUtils";
+} from "../utils/CheckBoxUtils";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
-} from "./JsonFileOperations";
+} from "../utils/JsonFileOperations";
 import {
 	jsonCacheData,
 	noteItem,
-	priorityEmojis,
 	taskItem,
 } from "src/interfaces/TaskItem";
 import {
-	scanFilterForFilesNFoldersNFrontmatter,
-	scanFilterForTags,
-} from "./FiltersVerifier";
-import {
 	extractTaskNoteProperties,
 	isTaskNotePresentInFrontmatter,
-} from "./TaskNoteUtils";
+} from "../utils/taskNote/TaskNoteUtils";
 
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { readDataOfVaultFile } from "./MarkdownFileOperations";
+import { readDataOfVaultFile } from "../utils/MarkdownFileOperations";
 import {
-	UniversalDateOptions,
 	scanFilters,
 } from "src/interfaces/GlobalSettings";
 import {
@@ -48,14 +42,17 @@ import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/Dataview
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
-} from "./FrontmatterOperations";
-import { t } from "./lang/helper";
+} from "../utils/taskNote/FrontmatterOperations";
+import { t } from "../utils/lang/helper";
 import {
 	allowedFileExtensionsRegEx,
 	notAllowedFileExtensionsRegEx,
 } from "src/regularExpressions/MiscelleneousRegExpr";
 import { bugReporter } from "src/services/OpenModals";
-import { getCurrentLocalTimeString } from "./TimeCalculations";
+import { getCurrentLocalTimeString } from "../utils/TimeCalculations";
+import { priorityEmojis } from "src/interfaces/Mapping";
+import { UniversalDateOptions } from "src/interfaces/Enums";
+import { scanFilterForFilesNFoldersNFrontmatter, scanFilterForTags } from "src/utils/algorithms/ScanningFilterer";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.

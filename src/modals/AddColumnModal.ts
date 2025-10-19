@@ -1,8 +1,8 @@
 // /src/modal/AddColumnModal.ts
 
 import { App, Modal } from "obsidian";
-import { columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
-import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
+import { colType, UniversalDateOptions } from "src/interfaces/Enums";
+import { columnTypeAndNameMapping } from "src/interfaces/Mapping";
 
 import { t } from "src/utils/lang/helper";
 
@@ -46,7 +46,7 @@ export class AddColumnModal extends Modal {
 		super(app);
 		this.onCancel = onCancel;
 		this.onSubmit = onSubmit;
-		this.colType = "undated";
+		this.colType = colType.undated;
 		this.name = "";
 	}
 
@@ -76,18 +76,36 @@ export class AddColumnModal extends Modal {
 		});
 
 		[
-			{ value: "undated", text: columnTypeAndNameMapping.undated },
-			{ value: "dated", text: columnTypeAndNameMapping.dated },
-			{ value: "namedTag", text: columnTypeAndNameMapping.namedTag },
-			{ value: "untagged", text: columnTypeAndNameMapping.untagged },
-			{ value: "otherTags", text: columnTypeAndNameMapping.otherTags },
-			{ value: "taskStatus", text: columnTypeAndNameMapping.taskStatus },
+			{ value: colType.undated, text: columnTypeAndNameMapping.undated },
+			{ value: colType.dated, text: columnTypeAndNameMapping.dated },
 			{
-				value: "taskPriority",
+				value: colType.namedTag,
+				text: columnTypeAndNameMapping.namedTag,
+			},
+			{
+				value: colType.untagged,
+				text: columnTypeAndNameMapping.untagged,
+			},
+			{
+				value: colType.otherTags,
+				text: columnTypeAndNameMapping.otherTags,
+			},
+			{
+				value: colType.taskStatus,
+				text: columnTypeAndNameMapping.taskStatus,
+			},
+			{
+				value: colType.taskPriority,
 				text: columnTypeAndNameMapping.taskPriority,
 			},
-			{ value: "completed", text: columnTypeAndNameMapping.completed },
-			{ value: "pathFiltered", text: t("path-filtered") },
+			{
+				value: colType.pathFiltered,
+				text: columnTypeAndNameMapping.pathFiltered,
+			},
+			{
+				value: colType.completed,
+				text: columnTypeAndNameMapping.completed,
+			},
 		].forEach((option) => {
 			colTypeSelect.createEl("option", {
 				attr: { value: option.value },
@@ -126,7 +144,7 @@ export class AddColumnModal extends Modal {
 		});
 		const submitButton = actions.createEl("button", { text: t("submit") });
 		submitButton.addEventListener("click", () => {
-			if (this.colType === "dated" || this.colType === "undated") {
+			if (this.colType === colType.dated || this.colType === colType.undated) {
 				this.onSubmit({
 					id: crypto.getRandomValues(new Uint32Array(1))[0], // Generate a random ID
 					colType: this.colType,
@@ -137,21 +155,21 @@ export class AddColumnModal extends Modal {
 						to: 0,
 					},
 				}); // Add range data
-			} else if (this.colType === "namedTag") {
+			} else if (this.colType === colType.namedTag) {
 				this.onSubmit({
 					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					coltag: "",
 				});
-			} else if (this.colType === "taskStatus") {
+			} else if (this.colType === colType.taskStatus) {
 				this.onSubmit({
 					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
 					name: this.name,
 					taskStatus: "",
 				});
-			} else if (this.colType === "taskPriority") {
+			} else if (this.colType === colType.taskPriority) {
 				this.onSubmit({
 					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,
@@ -165,7 +183,7 @@ export class AddColumnModal extends Modal {
 					name: this.name,
 					limit: 20,
 				}); // Add limit
-			} else if (this.colType === "pathFiltered") {
+			} else if (this.colType === colType.pathFiltered) {
 				this.onSubmit({
 					id: crypto.getRandomValues(new Uint32Array(1))[0],
 					colType: this.colType,

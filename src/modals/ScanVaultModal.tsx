@@ -6,13 +6,13 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import vaultScanner, { fileTypeAllowedForScanning } from "src/utils/VaultScanner";
+import vaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScanner";
 import TaskBoard from "main";
-import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
-import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
+import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
 import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 import { getCurrentLocalTimeString } from "src/utils/TimeCalculations";
+import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;

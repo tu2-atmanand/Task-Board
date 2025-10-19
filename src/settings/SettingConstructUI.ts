@@ -7,16 +7,6 @@ import {
 	normalizePath,
 	sanitizeHTMLToDom,
 } from "obsidian";
-import {
-	EditButtonMode,
-	NotificationService,
-	TagColorType,
-	UniversalDateOptions,
-	cardSectionsVisibilityOptions,
-	globalSettingsData,
-	HideableTaskProperty,
-	taskPropertyFormatOptions,
-} from "src/interfaces/GlobalSettings";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
@@ -38,6 +28,8 @@ import {
 } from "./SettingSynchronizer";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
+import { HideableTaskProperty, cardSectionsVisibilityOptions, TagColorType, EditButtonMode, NotificationService, UniversalDateOptions, taskPropertyFormatOptions } from "src/interfaces/Enums";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
 
 export class SettingsManager {
 	win: Window;

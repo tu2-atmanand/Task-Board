@@ -1,8 +1,6 @@
 // /src/modal/BoardConfigModal.tsx
 
-import { AddColumnModal, columnDataProp } from "src/modal/AddColumnModal";
 import { Modal, Notice } from "obsidian";
-import { Board, columnTypeAndNameMapping } from "src/interfaces/BoardConfigs";
 import Sortable from "sortablejs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,10 +13,12 @@ import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/GlobalSettings";
 import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { priorityOptions } from "src/interfaces/TaskItem";
+import { colType, UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/Enums";
+import { Board } from "src/interfaces/BoardConfigs";
+import { columnTypeAndNameMapping, priorityOptions } from "src/interfaces/Mapping";
+import { columnDataProp, AddColumnModal } from "./AddColumnModal";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -257,14 +257,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			const fileInputElement = filePathInputRefs.current[column.id];
 			if (!fileInputElement) return;
 
-			if (filePathInputRefs.current[column.id] !== null && column.colType === "pathFiltered") {
+			if (filePathInputRefs.current[column.id] !== null && column.colType === colType.pathFiltered) {
 				const suggestionContent = getFileSuggestions(plugin.app);
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
 					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
-			} else if (filePathInputRefs.current[column.id] !== null && column.colType === "namedTag") {
+			} else if (filePathInputRefs.current[column.id] !== null && column.colType === colType.namedTag) {
 				const suggestionContent = getTagSuggestions(plugin.app);
 				const onSelectCallback = (selectedTag: string) => {
 					handleColumnChange(selectedBoardIndex, index, "coltag", selectedTag);
@@ -486,7 +486,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											}
 											className="boardConfigModalColumnRowContentColName"
 										/>
-										{column.colType === "namedTag" && (
+										{column.colType === colType.namedTag && (
 											<input
 												type="text"
 												ref={(el) => {
@@ -505,7 +505,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												className="boardConfigModalColumnRowContentColName"
 											/>
 										)}
-										{column.colType === "taskStatus" && (
+										{column.colType === colType.taskStatus && (
 											<input
 												type="text"
 												placeholder={t("enter-status-placeholder")}
@@ -514,14 +514,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
-														"taskStatus",
+														colType.taskStatus,
 														e.target.value
 													)
 												}
 												className="boardConfigModalColumnRowContentColName"
 											/>
 										)}
-										{column.colType === "taskPriority" && (
+										{column.colType === colType.taskPriority && (
 											<select
 												aria-label="Select priority"
 												value={column.taskPriority || priorityOptions[0].value}
@@ -529,7 +529,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
-														"taskPriority",
+														colType.taskPriority,
 														e.target.value
 													)
 												}
@@ -556,7 +556,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												className="boardConfigModalColumnRowContentColDatedVal"
 											/>
 										)}
-										{column.colType === "pathFiltered" && (
+										{column.colType === colType.pathFiltered && (
 											<input
 												type="text"
 												ref={(el) => {
@@ -575,7 +575,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												placeholder={t("enter-path-pattern")}
 											/>
 										)}
-										{column.colType === "dated" && (
+										{column.colType === colType.dated && (
 											<>
 												<input
 													type="number"
@@ -633,7 +633,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												</select>
 											</>
 										)}
-										{column.colType === "undated" && (
+										{column.colType === colType.undated && (
 											<>
 												<select
 													aria-label="Select date type"

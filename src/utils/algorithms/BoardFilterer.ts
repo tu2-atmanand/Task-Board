@@ -1,13 +1,13 @@
 // src/utils/boardFilterer.ts
 
 import { taskItem } from "src/interfaces/TaskItem";
+import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter";
+import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import {
 	RootFilterState,
-	Filter,
 	FilterGroup,
-} from "src/components/BoardFilters/ViewTaskFilter";
-import { getFormattedTaskContentSync } from "./TaskContentFormatter";
-import { getAllTaskTags } from "./TaskItemUtils";
+	Filter,
+} from "src/interfaces/BoardConfigs";
 
 /**
  * Filters tasks based on the board's filter configuration
