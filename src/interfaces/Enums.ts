@@ -81,7 +81,7 @@ export enum taskStatuses {
 	date = "D",
 	question = "?",
 	halfDone = "/",
-	"in-progress" = "/",
+	inProgress = "/",
 	add = "+",
 	research = "R",
 	important = "!",

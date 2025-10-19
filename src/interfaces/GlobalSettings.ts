@@ -8,6 +8,7 @@ import {
 	NotificationService,
 	cardSectionsVisibilityOptions,
 	colType,
+	taskStatuses,
 } from "./Enums";
 
 export interface scanFilters {
@@ -273,7 +274,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				columns: [
 					{
 						id: 7,
-						colType: "",
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.unchecked,
 						active: true,
 						collapsed: false,
 						name: "Backlogs",
@@ -281,39 +283,30 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 8,
-						colType: colType.namedTag,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.forward,
 						active: true,
 						collapsed: false,
-						name: "Can be implemented",
+						name: "Ready to start",
 						index: 2,
-						coltag: "pending",
 					},
 					{
 						id: 9,
-						colType: colType.namedTag,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.inProgress,
 						active: true,
 						collapsed: false,
 						name: "In Progress",
 						index: 3,
-						coltag: "working",
-					},
-					{
-						id: 10,
-						colType: colType.namedTag,
-						active: true,
-						collapsed: false,
-						name: "Done",
-						index: 4,
-						coltag: "done",
 					},
 					{
 						id: 11,
-						colType: colType.namedTag,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.question,
 						active: true,
 						collapsed: false,
 						name: "In Review",
 						index: 5,
-						coltag: "Test",
 					},
 					{
 						id: 12,
