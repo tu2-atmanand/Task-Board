@@ -86,14 +86,22 @@ export function getQuickAddPluginChoices(
 	app: App,
 	quickAddPluginObj: any
 ): string[] {
-	const quickAddPlugin = app.plugins.getPlugin("quickadd");
-	if (!quickAddPlugin) return [];
+	try {
+		if (!quickAddPluginObj) {
+			throw new Error("QuickAdd plugin object is undefined.");
+		}
+		const quickAddPlugin = app.communityPlugins.getPlugin("quickadd");
+		if (!quickAddPlugin) return [];
 
-	const choices = quickAddPluginObj.settings.choices;
+		const choices = quickAddPluginObj.settings.choices;
 
-	return Object.keys(choices)
-		.filter((key) => choices[key].type === "Capture")
-		.map((key) => choices[key].name);
+		return Object.keys(choices)
+			.filter((key) => choices[key].type === "Capture")
+			.map((key) => choices[key].name);
+	} catch (error) {
+		console.warn("Error fetching QuickAdd plugin choices:", error);
+		return [];
+	}
 }
 
 export function getFrontmatterPropertyNames(app: App): string[] {
@@ -154,12 +162,12 @@ export function getStatusSuggestions(): string[] {
 export function getPrioritySuggestions(): string[] {
 	// Return priority values with emojis
 	return [
-		"0",     // none
-		"1",     // highest 🔺
-		"2",     // high ⏫
-		"3",     // medium 🔼
-		"4",     // low 🔽
-		"5",     // lowest ⏬
+		"0", // none
+		"1", // highest 🔺
+		"2", // high ⏫
+		"3", // medium 🔼
+		"4", // low 🔽
+		"5", // lowest ⏬
 	];
 }
 

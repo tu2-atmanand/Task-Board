@@ -1,14 +1,17 @@
 import "obsidian";
 import { EditorView, ViewUpdate } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
-import { App, FoldInfo } from "obsidian";
+import { App as obsidianApp, FoldInfo, Vault as obsidianVault } from "obsidian";
 import {
 	Editor,
 	EditorRange,
 	EditorSuggest,
 	MarkdownFileInfo,
 	TFile,
+	Setting,
+	Vault,
 } from "obsidian";
+import { Plugins } from "obsidian-typings";
 import { Component } from "obsidian";
 
 interface Token extends EditorRange {
@@ -300,6 +303,158 @@ interface MarkdownBaseView extends Component {
 }
 
 declare module "obsidian" {
+	interface App extends obsidianApp {
+		title: string;
+		commands: Commands;
+		setting: ExtendedSetting;
+
+		appId: string;
+		metadataTypeManager: MetadataTypeManager;
+
+		/** @public */
+		keymap: Keymap;
+		/** @public */
+		scope: Scope;
+		/** @public */
+		vault: ExtendedVault;
+		/** @public */
+		fileManager: FileManager;
+		/**
+		 * The last known user interaction event, to help commands find out what modifier keys are pressed.
+		 * @public
+		 */
+		lastEvent: UserEvent | null;
+
+		internalPlugins: any;
+
+		communityPlugins: Plugins;
+
+		customCss: any;
+
+		viewRegistry: any;
+		embedRegistry: EmbedRegistry;
+
+		/** @public */
+		metadataCache: ExtendedMetadataCache;
+		/** @public */ // exclude only the on method that takes a string and not a specific event name
+		workspace: Omit<Omit<ExtendedWorkspace, "on">, "trigger"> & {
+			on<K extends keyof CustomWorkspaceEvents>(
+				name: K,
+				callback: (
+					...args: Parameters<CustomWorkspaceEvents[K]>
+				) => void
+			): EventRef;
+			trigger<K extends keyof CustomWorkspaceEvents>(
+				name: K,
+				...args: Parameters<CustomWorkspaceEvents[K]>
+			): void;
+
+			// Inbuilt
+			on(
+				name: "quick-preview",
+				callback: (file: TFile, data: string) => any,
+				ctx?: any
+			): EventRef;
+			on(name: "resize", callback: () => any, ctx?: any): EventRef;
+			on(
+				name: "active-leaf-change",
+				callback: (leaf: WorkspaceLeaf | null) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "file-open",
+				callback: (file: TFile | null) => any,
+				ctx?: any
+			): EventRef;
+			on(name: "layout-change", callback: () => any, ctx?: any): EventRef;
+			on(
+				name: "window-open",
+				callback: (win: WorkspaceWindow, window: Window) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "window-close",
+				callback: (win: WorkspaceWindow, window: Window) => any,
+				ctx?: any
+			): EventRef;
+			on(name: "css-change", callback: () => any, ctx?: any): EventRef;
+			on(
+				name: "file-menu",
+				callback: (
+					menu: Menu,
+					file: TAbstractFile,
+					source: string,
+					leaf?: WorkspaceLeaf
+				) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "files-menu",
+				callback: (
+					menu: Menu,
+					files: TAbstractFile[],
+					source: string,
+					leaf?: WorkspaceLeaf
+				) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "url-menu",
+				callback: (menu: Menu, url: string) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "editor-menu",
+				callback: (
+					menu: Menu,
+					editor: Editor,
+					info: MarkdownView | MarkdownFileInfo
+				) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "editor-change",
+				callback: (
+					editor: Editor,
+					info: MarkdownView | MarkdownFileInfo
+				) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "editor-paste",
+				callback: (
+					evt: ClipboardEvent,
+					editor: Editor,
+					info: MarkdownView | MarkdownFileInfo
+				) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "editor-drop",
+				callback: (
+					evt: DragEvent,
+					editor: Editor,
+					info: MarkdownView | MarkdownFileInfo
+				) => any,
+				ctx?: any
+			): EventRef;
+			on(
+				name: "quit",
+				callback: (tasks: Tasks) => any,
+				ctx?: any
+			): EventRef;
+		};
+	}
+
+	interface ExternalPlugins {
+		app: App;
+		enabledPlugins: any;
+		loadingPluginId: any;
+		manifests: any;
+		plugins: any;
+		updates: any;
+	}
+
 	interface Editor {
 		cm: EditorView;
 	}
@@ -308,20 +463,24 @@ declare module "obsidian" {
 		properties: Record<string, any>;
 	}
 
-	interface App {
-		commands: Commands;
-		setting: Setting;
-		embedRegistry: EmbedRegistry;
-		title: string;
-
-		appId: string;
-		metadataTypeManager: MetadataTypeManager;
-	}
-
 	interface EmbedRegistry {
 		embedByExtension: {
 			md: (args: any, file: TFile, subpath: string) => WidgetEditorView;
 		};
+	}
+
+	export interface Vault extends obsidianVault {
+		config: any;
+
+		getMarkdownFiles: () => TFile[];
+
+		getConfig(key: string): any;
+
+		// Custom
+		recurseChildrenAC: (
+			origin: TAbstractFile,
+			traverse: (file: TAbstractFile) => void
+		) => void;
 	}
 
 	interface MetadataCache {
@@ -339,7 +498,7 @@ declare module "obsidian" {
 		setWarning(warning: boolean): this;
 	}
 
-	interface Setting {
+	interface ExtendedSetting extends Settings {
 		open(): void;
 		openTabById(tabId: string): void;
 	}
@@ -638,9 +797,5 @@ declare module "obsidian" {
 
 	interface AbstractInputSuggest<T> {
 		suggestEl: HTMLElement;
-	}
-
-	interface Vault {
-		getConfig(key: string): string | number | boolean | null;
 	}
 }

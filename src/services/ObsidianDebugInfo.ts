@@ -7,10 +7,10 @@ export async function getObsidianDebugInfo(app: App) {
 	// This is an empty string if it's the default theme
 	const themeName = app.customCss.theme;
 	const themeManifest = app.customCss.themes[themeName];
-	const numSnippets = app.customCss.snippets.filter((snippet) =>
+	const numSnippets = app.customCss.snippets.filter((snippet: any) =>
 		app.customCss.enabledSnippets.has(snippet)
 	).length;
-	const plugins = app.plugins.plugins;
+	const plugins = app.communityPlugins.plugins;
 
 	return {
 		...(await getSystemInfo()),
@@ -27,7 +27,7 @@ export async function getObsidianDebugInfo(app: App) {
 			? `${themeName} v${themeManifest.version}`
 			: "none",
 		"Snippets enabled": numSnippets,
-		"Plugins installed": Object.keys(app.plugins.manifests).length,
+		"Plugins installed": Object.keys(app.communityPlugins.manifests).length,
 		"Plugins enabled": Object.values(plugins).map(
 			(plugin) => `${plugin!.manifest.name} v${plugin!.manifest.version}`
 		),

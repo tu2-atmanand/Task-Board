@@ -3,7 +3,10 @@ import { TaskBoardSubmodule } from "./subModules";
 
 export class CommunityPlugins extends TaskBoardSubmodule {
 	get reminderPlugin() {
-		return this.app.plugins.plugins["obsidian-reminder-plugin"] ?? null;
+		return (
+			this.app.communityPlugins.plugins["obsidian-reminder-plugin"] ??
+			null
+		);
 	}
 
 	isReminderPluginEnabled() {
@@ -11,7 +14,7 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 	}
 
 	get quickAddPlugin() {
-		return this.app.plugins.plugins["quickadd"] ?? null;
+		return this.app.communityPlugins.plugins["quickadd"] ?? null;
 	}
 
 	isQuickAddPluginEnabled() {
