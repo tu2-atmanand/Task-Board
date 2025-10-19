@@ -11,7 +11,7 @@ import {
 	NODE_SIZE_STORAGE_KEY,
 	PENDING_SCAN_FILE_STACK,
 	VIEWPORT_STORAGE_KEY,
-} from "src/types/uniqueIdentifiers";
+} from "src/interfaces/Constants";
 
 // --- Called Once On Plugin Load ---
 export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {

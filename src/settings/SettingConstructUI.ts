@@ -7,7 +7,7 @@ import {
 	normalizePath,
 	sanitizeHTMLToDom,
 } from "obsidian";
-import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/types/Icons";
+import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
 import TaskBoard from "main";

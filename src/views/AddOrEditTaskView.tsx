@@ -4,7 +4,7 @@ import { ItemView, WorkspaceLeaf, normalizePath } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import TaskBoard from "../../main";
-import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
+import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/interfaces/Constants";
 import { t } from "src/utils/lang/helper";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";

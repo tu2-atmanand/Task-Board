@@ -18,7 +18,7 @@ import { t } from "src/utils/lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { updateFrontmatterInMarkdownFile } from "src/utils/taskNote/TaskNoteUtils";
 import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
-import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
+import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/interfaces/Constants";
 import { AddOrEditTaskModal } from "src/modals/AddOrEditTaskModal";
 import { BoardConfigureModal } from "src/modals/BoardConfigModal";
 import { BugReporterModal } from "src/modals/BugReporterModal";

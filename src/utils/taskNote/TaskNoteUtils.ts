@@ -6,7 +6,7 @@ import {
 	createYamlFromObject,
 	extractFrontmatterFromContent,
 } from "./FrontmatterOperations";
-import { TASK_NOTE_FRONTMATTER_KEYS } from "src/types/uniqueIdentifiers";
+import { TASK_NOTE_FRONTMATTER_KEYS } from "src/interfaces/Constants";
 import { taskStatuses } from "src/interfaces/Enums";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 

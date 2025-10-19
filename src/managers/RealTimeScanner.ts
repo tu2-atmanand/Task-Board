@@ -6,7 +6,7 @@ import type vaultScanner from "src/managers/VaultScanner";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
-import { PENDING_SCAN_FILE_STACK } from "src/types/uniqueIdentifiers";
+import { PENDING_SCAN_FILE_STACK } from "src/interfaces/Constants";
 
 export class RealTimeScanner {
 	app: App;

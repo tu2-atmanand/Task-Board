@@ -27,12 +27,12 @@ import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import vaultScanner, {
 	fileTypeAllowedForScanning,
 } from "src/managers/VaultScanner";
-import { TaskBoardIcon } from "src/types/Icons";
+import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import {
 	VIEW_TYPE_ADD_OR_EDIT_TASK,
 	VIEW_TYPE_TASKBOARD,
-} from "src/types/uniqueIdentifiers";
+} from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import {
 	deleteAllLocalStorageKeys,

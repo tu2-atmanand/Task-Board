@@ -2,13 +2,13 @@
 
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
-import { ScanVaultIcon, TaskBoardIcon } from "src/types/Icons";
+import { ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
 import { StrictMode } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
-import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
 import { bugReporter, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";

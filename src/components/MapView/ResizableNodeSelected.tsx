@@ -1,7 +1,7 @@
 import { memo, ReactNode, FC } from 'react';
 import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
 import { nodeSize } from './MapView';
-import { NODE_SIZE_STORAGE_KEY } from 'src/types/uniqueIdentifiers';
+import { NODE_SIZE_STORAGE_KEY } from 'src/interfaces/Constants';
 
 interface ResizableNodeSelectedProps {
 	data: { label: ReactNode };

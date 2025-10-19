@@ -10,7 +10,7 @@ import vaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScan
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { getCurrentLocalTimeString } from "src/utils/TimeCalculations";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 
