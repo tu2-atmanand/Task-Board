@@ -228,7 +228,7 @@ export default memo(KanbanBoard);
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		} else {
 // 			if (
-// 				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
+// 				localStorage.getItem(PENDING_SCAN_FILE_STACK)?.at(0) !== undefined
 // 			) {
 // 				await plugin.realTimeScanning.processAllUpdatedFiles();
 // 			}

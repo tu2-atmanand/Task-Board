@@ -6,6 +6,7 @@ import type vaultScanner from "src/utils/VaultScanner";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
+import { PENDING_SCAN_FILE_STACK } from "src/types/uniqueIdentifiers";
 
 export class RealTimeScanning {
 	app: App;
@@ -21,7 +22,7 @@ export class RealTimeScanning {
 
 	async initializeStack() {
 		try {
-			const storedStack = localStorage.getItem("taskBoardFileStack");
+			const storedStack = localStorage.getItem(PENDING_SCAN_FILE_STACK);
 			if (storedStack) {
 				this.taskBoardFileStack = JSON.parse(storedStack);
 			}
@@ -34,7 +35,7 @@ export class RealTimeScanning {
 	saveStack() {
 		try {
 			localStorage.setItem(
-				"taskBoardFileStack",
+				PENDING_SCAN_FILE_STACK,
 				JSON.stringify(this.taskBoardFileStack)
 			);
 		} catch (error) {

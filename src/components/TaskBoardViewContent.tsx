@@ -15,7 +15,7 @@ import { renderColumns } from 'src/utils/RenderColumns';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
+import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
 import { viewTypeNames } from "src/interfaces/GlobalSettings";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { RootFilterState } from "./BoardFilters/ViewTaskFilter";
@@ -165,7 +165,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		if (plugin.settings.data.globalSettings.realTimeScanning) {
 			eventEmitter.emit("REFRESH_BOARD");
 		} else {
-			const fileStackString = localStorage.getItem("taskBoardFileStack");
+			const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
 			const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
 
 			if (fileStack && fileStack.length > 0) {
@@ -789,7 +789,7 @@ export default TaskBoardViewContent;
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		} else {
 // 			if (
-// 				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
+// 				localStorage.getItem(PENDING_SCAN_FILE_STACK)?.at(0) !== undefined
 // 			) {
 // 				await plugin.realTimeScanning.processAllUpdatedFiles();
 // 			}
