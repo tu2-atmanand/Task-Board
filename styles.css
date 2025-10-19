@@ -869,14 +869,32 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	white-space: nowrap;
 }
 
-.taskItemDate {
+.taskItemUniversalDate {
 	color: rgb(185, 125, 13);
 	font-size: small;
 }
 
-.taskItemDateCompleted {
+.taskItemCompletedDate {
 	color: var(--text-success);
 	font-size: small;
+}
+
+.taskItemFooterDateTimeContainer {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: center;
+	align-items: center;
+	gap: 2px;
+	font-size: small;
+}
+
+.taskItemTimeContainer,
+.taskItemUniversalDateContainer {
+	background-color: var(--background-modifier-box-shadow);
+	padding-inline: 6px;
+	padding-block: 2px;
+	border-radius: var(--pill-radius);
 }
 
 .taskItemFileNameSection {
@@ -896,7 +914,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-weight: 450;
 	font-size: 0.8rem;
 	opacity: 0.7;
-	color: var(--code-value);
+	color: var(--bases-table-header-color);
 	padding-inline: 5px;
 }
 
@@ -941,6 +959,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: flex-end;
+	margin-top: 0.7rem;
 }
 
 .taskItemFooterHidden {
