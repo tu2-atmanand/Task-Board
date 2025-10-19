@@ -11,7 +11,7 @@ import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
-import { renderColumns } from 'src/utils/algorithms/ColumnSegregator';
+import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
@@ -124,7 +124,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			return currentBoard.columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					renderColumns(plugin, activeBoardIndex, column, filteredAllTasks)
+					columnSegregator(plugin, activeBoardIndex, column, filteredAllTasks)
 				);
 		}
 		return [];
@@ -726,7 +726,7 @@ export default TaskBoardViewContent;
 // import { eventEmitter } from "src/services/EventEmitter";
 // import { handleUpdateBoards } from "../utils/BoardOperations";
 // import { bugReporter, openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
-// import { renderColumns } from 'src/utils/RenderColumns';
+// import { columnSegregator } from 'src/utils/RenderColumns';
 // import { t } from "src/utils/lang/helper";
 
 // const TaskBoardViewContent: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
@@ -765,7 +765,7 @@ export default TaskBoardViewContent;
 // 			return boards[activeBoardIndex].columns
 // 				.filter((column) => column.active)
 // 				.map((column: ColumnData) =>
-// 					renderColumns(plugin, activeBoardIndex, column, allTasks)
+// 					columnSegregator(plugin, activeBoardIndex, column, allTasks)
 // 				);
 // 		}
 // 		return [];

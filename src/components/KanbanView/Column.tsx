@@ -54,7 +54,7 @@ const Column: React.FC<ColumnProps> = ({
 	// // Render tasks using the tasks passed from KanbanBoard
 	// useEffect(() => {
 	// 	if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
-	// 		renderColumns(plugin, setTasks, activeBoardIndex, colType, columnData, allTasksExternal);
+	// 		columnSegregator(plugin, setTasks, activeBoardIndex, colType, columnData, allTasksExternal);
 	// 	}
 	// }, [colType, columnData, allTasksExternal]);
 

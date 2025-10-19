@@ -13,7 +13,7 @@ import { matchTagsWithWildcards } from "./ScanningFilterer";
 import { boardFilterer } from "./BoardFilterer";
 
 // Function to refresh tasks in any column by calling this utility function
-export const renderColumns = (
+export const columnSegregator = (
 	plugin: TaskBoard,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
