@@ -64,6 +64,10 @@ export type Board = {
 	showFilteredTags: boolean;
 	filterConfig?: FilterConfigSettings;
 	boardFilter?: RootFilterState;
+	taskCount?: {
+		pending: number;
+		completed: number;
+	};
 };
 
 export type BoardConfigs = Board[];

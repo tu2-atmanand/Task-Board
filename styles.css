@@ -213,7 +213,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .taskCountContainerTaskCount {
-	font-size: 16px;
+	font-size: 14px;
 	font-weight: bold;
 	color: var(--text-muted);
 	text-wrap: nowrap;
@@ -791,6 +791,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItemChildTasksSection {
 	margin-top: 0.5rem;
+	margin-inline-start: 5px;
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -1739,7 +1740,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	justify-content: space-between;
 }
 
-.boardConfigModalMainContent-Active-Body-boardNameTag {
+.boardConfigModalMainContent-Active-Body-boardNameTag,
+.boardConfigModalMainContent-Active-Body-boardDescriptionTag {
 	display: flex;
 	flex-direction: column;
 }
@@ -5247,6 +5249,7 @@ svg.react-flow__connectionline {
 	display: flex;
 	flex-direction: column;
 	transform: translateX(-100%);
+	height: 100%;
 }
 
 .boardSidebar--slide-in {
@@ -5281,9 +5284,13 @@ svg.react-flow__connectionline {
 
 /* Board Sidebar Content */
 .boardSidebarContent {
-	flex: 1;
 	padding: 8px;
 	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	height: 100%;
 }
 
 .boardSidebarContentBtnContainer {
@@ -5293,32 +5300,101 @@ svg.react-flow__connectionline {
 	margin-block: 1rem;
 }
 
-.boardSidebarButton {
-	display: block;
+.boardSidebarCard {
+	display: flex;
 	width: 100%;
-	border: none;
+	padding: 0.5rem;
+	gap: 0.3rem;
 	background: transparent;
-	color: var(--background-mod-left-CSS-light) !important;
+	border: 1px solid var(--background-modifier-border-focus);
 	text-align: left;
 	border-radius: var(--radius-m);
 	cursor: pointer;
-	font-size: var(--font-size-default);
 	transition: all 0.2s ease;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	flex-direction: column;
+	align-items: flex-start;
 }
 
-.boardSidebarButton:hover {
+.boardSidebarCard:hover {
 	background: var(--background-modifier-hover);
 }
 
-.boardSidebarButton--active {
+.boardSidebarCard--active {
 	border: 1px solid var(--text-accent) !important;
-	font-weight: 500;
 }
 
-.boardSidebarButton--active:hover {
+.boardSidebarCardTitle {
+	font-weight: 500;
+	font-size: 1rem !important;
+	color: var(--background-modifier-border-focus) !important;
+	font-size: var(--font-size-default);
+}
+
+.boardSidebarCard--active .boardSidebarCardTitle {
+	color: var(--background-mod-left-CSS-light) !important;
+}
+
+.boardSidebarCardDescription {
+	/* white-space: nowrap; */
+	/* overflow: hidden; */
+	/* text-overflow: ellipsis; */
+	/* display: block; */
+	text-wrap: auto;
+	width: 100%;
+	font-size: 0.9rem;
+	padding-block-start: 0.7rem;
+}
+
+.taskCountContainerProgress {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+}
+
+.taskCountContainerProgressBar {
+	width: 100%;
+	min-width: 9rem;
+	height: 8px;
+	background-color: var(--background-modifier-border);
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.taskCountContainerProgressBarIndicator {
+	height: 100%;
+	background-color: var(--background-modifier-border-focus);
+	transition: width 0.5s ease-in-out;
+}
+
+.boardSidebarCard--active .taskCountContainerProgressBar {
+	width: 100%;
+	min-width: 9rem;
+	height: 8px;
+	background-color: var(--background-modifier-border);
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.boardSidebarCard--active .taskCountContainerProgressBarIndicator {
+	height: 100%;
+	background-color: #4CAF50;
+	transition: width 0.5s ease-in-out;
+}
+
+.taskCountContainerProgressCount {
+	font-size: 0.8rem;
+	/* font-weight: bold; */
+	color: var(--text-muted);
+	text-wrap: nowrap;
+}
+
+.boardSidebarCard--active:hover {
 	background: var(--background-modifier-active);
 }
 

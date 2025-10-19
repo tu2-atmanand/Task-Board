@@ -26,13 +26,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
+	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
+	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
+	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || viewTypeNames.kanban);
+
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
-	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || viewTypeNames.kanban);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
 
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
 
@@ -114,6 +116,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				...allTasks,
 				Pending: boardFilterer(allTasks.Pending, boardFilter)
 			};
+			plugin.settings.data.boardConfigs[activeBoardIndex].taskCount = {
+				pending: filteredAllTasks.Pending.length,
+				completed: filteredAllTasks.Completed.length,
+			};
+			setFilteredTasks(filteredAllTasks);
 
 			return currentBoard.columns
 				.filter((column) => column.active)
@@ -156,6 +163,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	useEffect(() => {
 		const refreshView = (viewType: string) => {
 			setViewType(viewType);
+			plugin.settings.data.globalSettings.lastViewHistory.viewedType = viewType;
+			plugin.saveSettings();
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);
 		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
@@ -387,7 +396,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("refresh-the-board"));
-			item.setIcon("arrow-up-down");
+			item.setIcon("rotate-cw");
 			item.onClick(async () => {
 				refreshBoardButton();
 			});
@@ -419,16 +428,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.setTitle(t("kanban-view"));
 			item.setIcon("square-kanban");
 			item.onClick(async () => {
-				refreshBoardButton();
+				eventEmitter.emit("SWITCH_VIEW", 'kanban');
 			});
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("map-view"));
 			item.setIcon("waypoints");
 			item.onClick(async () => {
-				openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
-					handleUpdateBoards(plugin, updatedBoards, setBoards)
-				);
+				eventEmitter.emit("SWITCH_VIEW", 'map');
 			});
 		});
 
@@ -496,12 +503,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							<div
 								className="taskCountContainerProgressBarProgress"
 								style={{
-									width: `${((allTasks ? allTasks?.Completed.length : 0) / (allTasks ? allTasks?.Pending.length + allTasks?.Completed.length : 1)) * 100}%`,
+									width: `${((filteredTasks ? filteredTasks?.Completed.length : 0) / (filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 1)) * 100}%`,
 								}}
 							/>
 						</div>
 						<span className="taskCountContainerTaskCount">
-							{allTasks?.Pending.length} / {allTasks ? allTasks?.Pending.length + allTasks?.Completed.length : 0}
+							{filteredTasks?.Pending.length} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
 						</span>
 					</div>
 					{showSearchInput && (
@@ -592,19 +599,50 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<div className="boardSidebarContent">
 							<div className="boardSidebarContentBtnContainer">
 								{boards.map((board, index) => (
-									<button
+									<div
 										key={index}
-										className={`boardSidebarButton ${index === activeBoardIndex ? 'boardSidebarButton--active' : ''}`}
+										className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
 										onClick={() => handleBoardSelection(index)}
 									>
-										{board.name}
-									</button>
+										<div className="boardSidebarCardTitle" >
+											{board.name}
+										</div>
+										<div className="boardSidebarCardDescription" >
+											{board?.description}
+										</div>
+										<div className="taskCountContainerProgress" >
+											<div className={"taskCountContainerProgressBar"}>
+												<div
+													className="taskCountContainerProgressBarIndicator"
+													style={{
+														width: `${((board?.taskCount ? board.taskCount.completed : 0) / (board?.taskCount ? board?.taskCount.pending + board.taskCount.completed : 1)) * 100}%`,
+													}}
+												/>
+											</div>
+											<span className="taskCountContainerProgressCount">
+												{board?.taskCount ? board?.taskCount.pending : 0} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
+											</span>
+										</div>
+									</div>
 								))}
+							</div>
+							<div className="boardSidebarFooter">
+								<button
+									className="boardConfigureBtn"
+									onClick={() =>
+										openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
+											handleUpdateBoards(plugin, updatedBoards, setBoards)
+										)
+									}
+								>
+									{t("configure-boards")}
+								</button>
 							</div>
 						</div>
 					</div>
 				</div>
-			)}
+			)
+			}
 
 			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
 				{boards[activeBoardIndex] ? (
@@ -660,7 +698,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					</div>
 				)}
 			</div>
-		</div>
+		</div >
 	);
 };
 

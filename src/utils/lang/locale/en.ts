@@ -381,7 +381,10 @@ const en: Lang = {
 	"open-board-configuration-modal": "Open board config modal",
 	"open-board-filters-modal": "Open board filters modal",
 	"switch-view-type": "Switch view type",
-	"kanban-view": "Kanban view"
+	"kanban-view": "Kanban view",
+	"configure-boards": "Configure boards",
+	"board-description": "Board description",
+	"board-description-info": "Enter a description for this board. (optional)",
 };
 
 export default en;
