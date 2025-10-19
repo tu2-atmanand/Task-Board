@@ -1,5 +1,4 @@
 import TaskBoard from "main";
-import { App } from "obsidian";
 import { taskStatuses } from "src/interfaces/TaskItem";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
@@ -76,10 +75,68 @@ export function extractCheckboxSymbol(task: string): string {
 	return match[1];
 }
 
+/**
+ * Gets the indentation settings from Obsidian configuration.
+ * @param plugin - The TaskBoard plugin instance.
+ * @returns The indentation string.
+ */
 export function getObsidianIndentationSetting(plugin: TaskBoard): string {
-	if (plugin.app.vault.config) {
-		const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
-		return plugin.app.vault.config.useTab ? `\t` : " ".repeat(tabSize);
+	try {
+		if (plugin.app.vault.config) {
+			plugin.app;
+			const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
+			return plugin.app.vault.config.useTab ? `\t` : " ".repeat(tabSize);
+		}
+		return `\t`; // Default indentation value
+	} catch {
+		// Fallback: try to read the vault's .obsidian/app.json to get tabSize / useTab
+		try {
+			const path = `${plugin.app.vault.configDir}/app.json`;
+			plugin.app.vault.adapter.read(path).then((content: string) => {
+				const parsed = JSON.parse(content || "{}");
+				const tabSize =
+					typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
+				return parsed?.useTab ? `\t` : " ".repeat(tabSize);
+			});
+			return `\t`; // Default indentation while async read happens
+		} catch {
+			console.warn(
+				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+			);
+			return `\t`;
+		}
 	}
-	return `\t`; // Default indentation value
+}
+
+/**
+ * Asynchronous version to get Obsidian indentation settings.
+ * @param plugin - The TaskBoard plugin instance.
+ * @returns A promise that resolves to the indentation string.
+ */
+export async function getObsidianIndentationSettingAsync(
+	plugin: TaskBoard
+): Promise<string> {
+	try {
+		if (plugin.app.vault.config) {
+			const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
+			return plugin.app.vault.config.useTab ? `\t` : " ".repeat(tabSize);
+		}
+		return `\t`; // Default indentation value
+	} catch {
+		// Fallback: try to read the vault's .obsidian/app.json to get tabSize / useTab
+		try {
+			const path = `${plugin.app.vault.configDir}/app.json`;
+			const content: string = await plugin.app.vault.adapter.read(path);
+			const parsed = JSON.parse(content || "{}");
+			const tabSize =
+				typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
+			const useTab = !!parsed?.useTab;
+			return useTab ? `\t` : " ".repeat(tabSize);
+		} catch {
+			console.warn(
+				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+			);
+			return `\t`;
+		}
+	}
 }
