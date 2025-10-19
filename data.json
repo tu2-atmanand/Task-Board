@@ -47,6 +47,10 @@
         "boardFilter": {
           "rootCondition": "any",
           "filterGroups": []
+        },
+        "taskCount": {
+          "pending": 51,
+          "completed": 8
         }
       },
       {
@@ -225,6 +229,11 @@
               ]
             }
           ]
+        },
+        "description": "Project to manage all the tasks related to plugin release.",
+        "taskCount": {
+          "pending": 51,
+          "completed": 8
         }
       },
       {
@@ -413,6 +422,10 @@
               "updatedAt": "2025-10-10T13:37:12.145Z"
             }
           ]
+        },
+        "taskCount": {
+          "pending": 30,
+          "completed": 8
         }
       }
     ],
@@ -842,8 +855,8 @@
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
         "reminderPlugin": false,
-        "dayPlannerPlugin": false,
-        "quickAddPlugin": false
+        "dayPlannerPlugin": true,
+        "quickAddPlugin": true
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
@@ -869,13 +882,13 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 247,
+      "uniqueIdCounter": 250,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 2,
         "taskId": ""
       },
       "taskNoteIdentifierTag": "taskNote",
