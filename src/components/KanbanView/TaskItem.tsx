@@ -22,6 +22,7 @@ import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem'
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/FiltersVerifier';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
+import { ChevronDown, ChevronsUpDownIcon } from 'lucide-react';
 
 export interface TaskProps {
 	key: number;
@@ -495,7 +496,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 									className={`subtask-toggle-icon ${showSubtasks ? 'rotated' : ''}`}
 									onClick={() => setShowSubtasks((prev) => !prev)}
 								>
-									▼
+									<ChevronDown size={18} style={{ verticalAlign: 'middle' }} />
 								</span>
 							</div>
 						</div>
