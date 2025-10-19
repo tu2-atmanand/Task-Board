@@ -76,6 +76,31 @@ const Column: React.FC<ColumnProps> = ({
 		});
 	}
 
+	async function handleMinimizeColumn() {
+		console.log("Minimizing column:", columnData.name);
+		// Find the board and column indices
+		const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+			(board: Board) => board.name === activeBoardData.name
+		);
+
+		if (boardIndex !== -1) {
+			const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+				(col: ColumnData) => col.name === columnData.name
+			);
+
+			if (columnIndex !== -1) {
+				// Set the minimized property to true
+				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
+
+				// Save the settings
+				await plugin.saveSettings();
+
+				// Refresh the board view
+				eventEmitter.emit('REFRESH_BOARD');
+			}
+		}
+	}
+
 	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
 		const sortMenu = new Menu();
 
@@ -236,34 +261,14 @@ const Column: React.FC<ColumnProps> = ({
 				}
 			});
 		});
-		
+
 		// Show minimize or maximize option based on current state
 		if (columnData.minimized) {
 			sortMenu.addItem((item) => {
 				item.setTitle(t("maximize-column"));
 				item.setIcon("panel-left-open");
 				item.onClick(async () => {
-					// Find the board and column indices
-					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-						(board: Board) => board.name === activeBoardData.name
-					);
-
-					if (boardIndex !== -1) {
-						const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-							(col: ColumnData) => col.name === columnData.name
-						);
-
-						if (columnIndex !== -1) {
-							// Set the minimized property to false
-							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = false;
-
-							// Save the settings
-							await plugin.saveSettings();
-
-							// Refresh the board view
-							eventEmitter.emit('REFRESH_BOARD');
-						}
-					}
+					await handleMinimizeColumn();
 				});
 			});
 		} else {
@@ -271,27 +276,7 @@ const Column: React.FC<ColumnProps> = ({
 				item.setTitle(t("minimize-column"));
 				item.setIcon("panel-left-close");
 				item.onClick(async () => {
-					// Find the board and column indices
-					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-						(board: Board) => board.name === activeBoardData.name
-					);
-
-					if (boardIndex !== -1) {
-						const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-							(col: ColumnData) => col.name === columnData.name
-						);
-
-						if (columnIndex !== -1) {
-							// Set the minimized property to true
-							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = true;
-
-							// Save the settings
-							await plugin.saveSettings();
-
-							// Refresh the board view
-							eventEmitter.emit('REFRESH_BOARD');
-						}
-					}
+					await handleMinimizeColumn();
 				});
 			});
 		}
@@ -303,11 +288,11 @@ const Column: React.FC<ColumnProps> = ({
 	}
 
 	return (
-		<div 
-			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}`} 
-			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties} 
-			data-column-type={columnData.colType} 
-			data-column-tag-name={tagData?.name} 
+		<div
+			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}`}
+			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
+			data-column-type={columnData.colType}
+			data-column-tag-name={tagData?.name}
 			data-column-tag-color={tagData?.color}
 		>
 			{columnData.minimized ? (
@@ -316,7 +301,10 @@ const Column: React.FC<ColumnProps> = ({
 					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>
 						{tasksForThisColumn.length}
 					</div>
-					<div className="taskBoardColumnMinimizedTitle">{columnData.name}</div>
+					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
+						await handleMinimizeColumn();
+						eventEmitter.emit('REFRESH_BOARD');
+					}}>{columnData.name}</div>
 				</div>
 			) : (
 				// Normal view
