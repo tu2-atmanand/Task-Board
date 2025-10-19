@@ -610,13 +610,25 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						<div className="taskItemFooter">
 							{/* Conditionally render task.completed or the date/time */}
 							{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
-								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
+								<div className='taskItemCompletedDate'>✅ {task.completion}</div>
 							) : (
-								<div className='taskItemDate'>
-									{task.title.contains("(@") && task.completion === "" ? `🔔 ` : ""}
-									{task.time ? `⏰${task.time}` : ''}
-									{task.time && universalDate ? ' | ' : ''}
-									{universalDate ? `${getUniversalDateEmoji(plugin)}${universalDate}` : ''}
+								<div className='taskItemFooterDateTimeContainer'>
+									{task?.reminder && task.completion && (
+										<div className='taskItemReminderContainer'>
+											🔔
+										</div>
+									)}
+									{task.time && (
+										<div className='taskItemTimeContainer'>
+											⏰ {task.time}
+										</div>
+									)}
+									{universalDate && (
+
+										<div className='taskItemUniversalDateContainer'>
+											{getUniversalDateEmoji(plugin)} {universalDate}
+										</div>
+									)}
 								</div>
 							)}
 							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
