@@ -9,6 +9,7 @@ import { bugReporter } from "src/services/OpenModals";
 import {
 	NODE_POSITIONS_STORAGE_KEY,
 	NODE_SIZE_STORAGE_KEY,
+	PENDING_SCAN_FILE_STACK,
 	VIEWPORT_STORAGE_KEY,
 } from "src/types/uniqueIdentifiers";
 
@@ -147,4 +148,5 @@ export const deleteAllLocalStorageKeys = () => {
 	localStorage.removeItem(NODE_POSITIONS_STORAGE_KEY);
 	localStorage.removeItem(NODE_SIZE_STORAGE_KEY);
 	localStorage.removeItem(VIEWPORT_STORAGE_KEY);
+	localStorage.removeItem(PENDING_SCAN_FILE_STACK);
 };
