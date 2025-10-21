@@ -304,7 +304,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const handleMainTaskDelete = () => {
-		handleDeleteTask(plugin, task);
+		handleDeleteTask(plugin, task, isTaskNotePresentInTags(plugin, task.tags));
 	}
 
 	// Function to handle the checkbox toggle inside the task body

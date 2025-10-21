@@ -9,6 +9,8 @@ import {
 import { taskStatuses } from "src/interfaces/Enums";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
+import { Notice, normalizePath } from "obsidian";
+import { bugReporter } from "src/services/OpenModals";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -354,14 +356,109 @@ export async function updateFrontmatterInMarkdownFile(
 	}
 }
 
-export function deleteTaskNote(plugin: TaskBoard, filePath: string) {
-	// Implementation pending...
-	// The file shoule be simply deleted using the Obsidian API : `plugin.app.vault.delete()`
+/**
+ * Delete a task note file
+ * @param plugin - TaskBoard plugin instance
+ * @param filePath - Path to the file to delete
+ */
+export async function deleteTaskNote(
+	plugin: TaskBoard,
+	filePath: string
+): Promise<void> {
+	try {
+		const file = plugin.app.vault.getFileByPath(filePath);
+		if (!file) {
+			bugReporter(
+				plugin,
+				"There was an issue while deleting the task note.",
+				`File not found at path: ${filePath}`,
+				"deleteTaskNote"
+			);
+			return;
+		}
+
+		await plugin.app.vault.delete(file);
+		new Notice(`Task note deleted: ${file.name}`);
+	} catch (error) {
+		console.error("Error deleting task note:", error);
+		bugReporter(
+			plugin,
+			"There was an issue while deleting the task note.",
+			String(error),
+			"deleteTaskNote"
+		);
+		throw error;
+	}
 }
 
-export function archiveTaskNote(plugin: TaskBoard, filePath: string) {
-	// TODO: Implementation pending...
-	// Make use of the setting `plugin.settings.data.globalSettings.archivedTBNotesFolderPath`, which is the folder path to store all the archived notes. So, the current file (filePath), should be moved inside this archived folder (archivedTBNotesFolderPath).
-	// This can be achieved using the obsidian API : `plugin.app.vault.rename()`
-	// Also before calling the API, it should be made sure that the archivedTBNotesFolderPath folder exists in the vault, if doesnt exists, it should be created first.
+/**
+ * Archive a task note by moving it to the archived folder
+ * @param plugin - TaskBoard plugin instance
+ * @param filePath - Path to the file to archive
+ */
+export async function archiveTaskNote(
+	plugin: TaskBoard,
+	filePath: string
+): Promise<void> {
+	try {
+		const file = plugin.app.vault.getFileByPath(filePath);
+		if (!file) {
+			bugReporter(
+				plugin,
+				"There was an issue while archiving the task note.",
+				`File not found at path: ${filePath}`,
+				"archiveTaskNote"
+			);
+			return;
+		}
+
+		// Get the archive folder path from settings
+		const archiveFolderPath =
+			plugin.settings.data.globalSettings.archivedTBNotesFolderPath;
+
+		if (!archiveFolderPath || archiveFolderPath.trim() === "") {
+			new Notice("Archive folder path is not configured in settings");
+			return;
+		}
+
+		// Normalize the archive folder path
+		const normalizedArchivePath = normalizePath(archiveFolderPath);
+
+		// Ensure the archive folder exists
+		if (!(await plugin.app.vault.adapter.exists(normalizedArchivePath))) {
+			await plugin.app.vault.createFolder(normalizedArchivePath);
+		}
+
+		// Construct the new file path
+		const newFilePath = normalizePath(
+			`${normalizedArchivePath}/${file.name}`
+		);
+
+		// Check if a file with the same name already exists in the archive folder
+		if (await plugin.app.vault.adapter.exists(newFilePath)) {
+			// Add timestamp to make filename unique
+			const timestamp = new Date().getTime();
+			const nameWithoutExt = file.basename;
+			const ext = file.extension;
+			const uniqueFilePath = normalizePath(
+				`${normalizedArchivePath}/${nameWithoutExt}-${timestamp}.${ext}`
+			);
+			await plugin.app.vault.rename(file, uniqueFilePath);
+			new Notice(
+				`Task note archived as: ${nameWithoutExt}-${timestamp}.${ext}`
+			);
+		} else {
+			await plugin.app.vault.rename(file, newFilePath);
+			new Notice(`Task note archived: ${file.name}`);
+		}
+	} catch (error) {
+		console.error("Error archiving task note:", error);
+		bugReporter(
+			plugin,
+			"There was an issue while archiving the task note.",
+			String(error),
+			"archiveTaskNote"
+		);
+		// throw error;
+	}
 }

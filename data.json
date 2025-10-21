@@ -936,7 +936,7 @@
         {
           "index": 11,
           "property": "Depends on",
-          "key": "depends-onn",
+          "key": "depends-on",
           "taskItemKey": "dependsOn"
         },
         {

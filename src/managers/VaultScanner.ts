@@ -619,6 +619,13 @@ export default class vaultScanner {
 	}
 }
 
+/**
+ * Checks if the file is allowed for scanning based on its extension and plugin settings.
+ * It also checks if the file is not the archived tasks file or inside the archived TB notes folder.
+ * @param plugin - The TaskBoard plugin instance
+ * @param file - The file to check (TFile)
+ * @returns boolean - True if the file is allowed for scanning, false otherwise
+ */
 export function fileTypeAllowedForScanning(
 	plugin: TaskBoard,
 	file: TFile | TAbstractFile
@@ -627,6 +634,7 @@ export function fileTypeAllowedForScanning(
 		notAllowedFileExtensionsRegEx.test(file.path) ||
 		file.path ===
 			plugin.settings.data.globalSettings.archivedTasksFilePath ||
+		plugin.settings.data.globalSettings.archivedTBNotesFolderPath ||
 		allowedFileExtensionsRegEx.test(file.path) === false
 	) {
 		return false;
