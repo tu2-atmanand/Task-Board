@@ -489,13 +489,14 @@ export const AddOrEditTaskRC: React.FC<{
 			cancelledDate: modifiedTask.cancelledDate || '',
 			status: modifiedTask.status,
 			reminder: modifiedTask.reminder,
+			dependsOn: dependsOn,
 		};
 
 		// Call onSave with the task note item
 		onSave(taskNoteItem, quickAddPluginChoice, formattedTaskContent ? formattedTaskContent : undefined);
 	};
 
-	const modifiedTask: taskItem = {
+	let modifiedTask: taskItem = {
 		...task,
 		title: title,
 		body: [
@@ -512,6 +513,7 @@ export const AddOrEditTaskRC: React.FC<{
 		status: status,
 		reminder: reminder,
 		taskLocation: task.taskLocation,
+		dependsOn: dependsOn,
 		completion: task.completion || '',
 		cancelledDate: task.cancelledDate || '',
 	};
