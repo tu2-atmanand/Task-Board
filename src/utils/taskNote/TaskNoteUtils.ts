@@ -189,7 +189,7 @@ export function getCustomFrontmatterKey(
 	const customMapping = frontmatterFormatting.find(
 		(mapping) => mapping.taskItemKey === taskItemKey
 	);
-	
+
 	// Return custom frontmatter key if found, otherwise return the original key
 	return customMapping?.key || taskItemKey;
 }
@@ -228,7 +228,7 @@ export function getStatusNameFromStatusSymbol(
 	// Create a reverse mapping from taskStatuses enum
 	// taskStatuses contains mappings like: { unchecked: " ", regular: "x", "in-progress": "/" }
 	const statusMapping: { [symbol: string]: string } = {};
-	
+
 	for (const [statusName, symbol] of Object.entries(taskStatuses)) {
 		statusMapping[symbol] = statusName;
 	}
@@ -352,4 +352,16 @@ export async function updateFrontmatterInMarkdownFile(
 		console.error("Error updating task note frontmatter:", error);
 		throw error;
 	}
+}
+
+export function deleteTaskNote(plugin: TaskBoard, filePath: string) {
+	// Implementation pending...
+	// The file shoule be simply deleted using the Obsidian API : `plugin.app.vault.delete()`
+}
+
+export function archiveTaskNote(plugin: TaskBoard, filePath: string) {
+	// TODO: Implementation pending...
+	// Make use of the setting `plugin.settings.data.globalSettings.archivedTBNotesFolderPath`, which is the folder path to store all the archived notes. So, the current file (filePath), should be moved inside this archived folder (archivedTBNotesFolderPath).
+	// This can be achieved using the obsidian API : `plugin.app.vault.rename()`
+	// Also before calling the API, it should be made sure that the archivedTBNotesFolderPath folder exists in the vault, if doesnt exists, it should be created first.
 }

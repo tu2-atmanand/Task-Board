@@ -17,7 +17,11 @@ import {
 	openEditTaskView,
 } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import { isTaskNotePresentInTags } from "../taskNote/TaskNoteUtils";
+import {
+	archiveTaskNote,
+	deleteTaskNote,
+	isTaskNotePresentInTags,
+} from "../taskNote/TaskNoteUtils";
 import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
 import { EditButtonMode } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
@@ -130,26 +134,40 @@ export const handleSubTasksChange = (
 	});
 };
 
-export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
+export const handleDeleteTask = (
+	plugin: TaskBoard,
+	task: taskItem,
+	isTaskNote: boolean
+) => {
 	const mssg = t("confirm-task-delete-description");
 	const app = plugin.app;
 	const deleteModal = new DeleteConfirmationModal(app, {
 		app,
 		mssg,
 		onConfirm: () => {
-			deleteTaskFromFile(plugin, task).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
-			});
+			if (isTaskNote) {
+				deleteTaskNote(plugin, task.filePath);
+			} else {
+				deleteTaskFromFile(plugin, task).then(() => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						task.filePath
+					);
+				});
 
-			// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
-			// Remove the task from state after deletion
-			// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
+				// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
+				// Remove the task from state after deletion
+				// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
+			}
 		},
 		onCancel: () => {
 			// console.log('Task deletion canceled');
 		},
 		onArchive: () => {
-			archiveTask(plugin, task);
+			if (isTaskNote) {
+				archiveTaskNote(plugin, task.filePath);
+			} else {
+				archiveTask(plugin, task);
+			}
 		},
 	});
 	deleteModal.open();
