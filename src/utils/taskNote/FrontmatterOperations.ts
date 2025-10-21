@@ -438,7 +438,7 @@ export function updateFrontmatterProperties(
 		"dependsOn",
 		frontmatterFormatting
 	);
-	if (task?.dependsOn) {
+	if (task?.dependsOn && task.dependsOn.length > 0) {
 		tempUpdates[dependsOnKey] = task.dependsOn;
 	} else {
 		delete tempUpdates[dependsOnKey];

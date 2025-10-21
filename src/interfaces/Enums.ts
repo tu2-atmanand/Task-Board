@@ -76,7 +76,7 @@ export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 	startDate = "start-date",
 	scheduledDate = "scheduled-date",
 	due = "due-date",
-	dependsOn = "depends-onn",
+	dependsOn = "depends-on",
 	cancelledDate = "cancelled-date",
 	completionDate = "completed-date",
 	dateCreated = "Created date",
