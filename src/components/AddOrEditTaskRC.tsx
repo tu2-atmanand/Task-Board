@@ -684,9 +684,8 @@ export const AddOrEditTaskRC: React.FC<{
 
 
 			if (!markdownEditor) {
-				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
-				frontmatterContentRef.current = newFrontmatter;
 				markdownEditorEmbeddedContainer.current.empty();
+				console.log("Finding where to place the cursor :", formattedTaskContent.split("\n")[0].length);
 				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
 					plugin,
 					markdownEditorEmbeddedContainer.current,
@@ -696,8 +695,8 @@ export const AddOrEditTaskRC: React.FC<{
 						cls: "addOrEditTaskModal-markdown-editor-embed",
 						enableFrontmatterUI: isTaskNote, // Enable frontmatter UI for task notes
 						cursorLocation: {
-							anchor: formattedTaskContent.split("\n")[0].length,
-							head: formattedTaskContent.split("\n")[0].length,
+							anchor: isTaskNote ? 0 : formattedTaskContent.split("\n")[0].length,
+							head: isTaskNote ? 0 : formattedTaskContent.split("\n")[0].length,
 						},
 
 						onEnter: (editor: EmbeddableMarkdownEditor, mod: boolean, shift: boolean) => {
