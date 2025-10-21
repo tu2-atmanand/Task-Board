@@ -28,8 +28,20 @@ import {
 } from "./SettingSynchronizer";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
-import { HideableTaskProperty, cardSectionsVisibilityOptions, TagColorType, EditButtonMode, NotificationService, UniversalDateOptions, taskPropertyFormatOptions } from "src/interfaces/Enums";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
+import {
+	HideableTaskProperty,
+	cardSectionsVisibilityOptions,
+	TagColorType,
+	EditButtonMode,
+	NotificationService,
+	UniversalDateOptions,
+	taskPropertyFormatOptions,
+} from "src/interfaces/Enums";
+import {
+	frontmatterFormatting,
+	globalSettingsData,
+} from "src/interfaces/GlobalSettings";
+import { createFragmentWithHTML } from "src/utils/UIHelpers";
 
 export class SettingsManager {
 	win: Window;
@@ -44,9 +56,6 @@ export class SettingsManager {
 		this.plugin = plugin;
 		this.win = window;
 	}
-
-	private static createFragmentWithHTML = (html: string) =>
-		sanitizeHTMLToDom(html);
 
 	private getPropertyDisplayName(property: HideableTaskProperty): string {
 		const displayNames: Record<HideableTaskProperty, string> = {
@@ -140,16 +149,20 @@ export class SettingsManager {
 				handler: () => this.renderGeneralTabSettings(tabContent),
 			},
 			{
-				key: t("board-ui"),
-				handler: () => this.renderBoardUISettings(tabContent),
+				key: t("all-ui"),
+				handler: () => this.renderAllUITabSettings(tabContent),
+			},
+			{
+				key: t("tbnote"),
+				handler: () => this.renderTBNoteTabSettings(tabContent),
 			},
 			{
 				key: t("automation"),
-				handler: () => this.renderAutomationSettings(tabContent),
+				handler: () => this.renderAutomationTabSettings(tabContent),
 			},
 			{
 				key: t("formats"),
-				handler: () => this.renderFormatsSettings(tabContent),
+				handler: () => this.renderFormatsTabSettings(tabContent),
 			},
 		].forEach(({ key, handler }) => {
 			sections[key] = handler;
@@ -236,17 +249,14 @@ export class SettingsManager {
 			tasksCacheFilePath,
 			scanVaultAtStartup,
 			preDefinedNote,
-			taskNoteIdentifierTag,
-			taskNoteDefaultLocation,
 			autoAddUniqueID,
 			experimentalFeatures,
 		} = this.globalSettings!;
 
-		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
 			.setName(t("filters-for-scanning"))
 			.setDesc(
-				SettingsManager.createFragmentWithHTML(
+				createFragmentWithHTML(
 					t("name-of-the-file-folder-tag-for-filter-info") +
 						"<br/>" +
 						"<b>" +
@@ -361,7 +371,7 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName(t("auto-add-unique-id"))
 			.setDesc(
-				SettingsManager.createFragmentWithHTML(
+				createFragmentWithHTML(
 					t("auto-add-unique-id-description") +
 						"<br/>" +
 						"<ul>" +
@@ -416,38 +426,6 @@ export class SettingsManager {
 				);
 			});
 
-		new Setting(contentEl)
-			.setName(t("task-note-identifier-tag"))
-			.setDesc(t("task-note-identifier-tag-description"))
-			.addText((text) => {
-				text.setValue(taskNoteIdentifierTag).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.taskNoteIdentifierTag =
-							value.startsWith("#")
-								? value.replace("#", "")
-								: value;
-				});
-
-				const inputEl = text.inputEl;
-				inputEl.placeholder = "e.g., taskNote";
-			});
-
-		// Setting for choosing the default location for task notes
-		new Setting(contentEl)
-			.setName(t("default-location-for-new-task-notes"))
-			.setDesc(t("default-location-for-new-task-notes-description"))
-			.addText((text) => {
-				text.setValue(taskNoteDefaultLocation).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.taskNoteDefaultLocation = value;
-				});
-
-				const inputEl = text.inputEl;
-				// For folders, we could use folder suggestions or just allow text input
-				// For now, let's keep it simple with text input
-				inputEl.placeholder = "e.g., Task Notes or Notes/Tasks";
-			});
-
 		// Setting for choosing the default file to archive tasks
 		new Setting(contentEl)
 			.setName(t("file-for-archived-tasks"))
@@ -481,7 +459,7 @@ export class SettingsManager {
 			.setClass("taskBoard-settings-wide-input")
 			.setName(t("tasks-cache-file-path"))
 			.setDesc(
-				SettingsManager.createFragmentWithHTML(
+				createFragmentWithHTML(
 					t("tasks-cache-file-path-description") +
 						"<br/>" +
 						t("tasks-cache-file-path-description-2")
@@ -537,7 +515,7 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName(t("auto-scan-the-vault-on-obsidian-startup"))
 			.setDesc(
-				SettingsManager.createFragmentWithHTML(
+				createFragmentWithHTML(
 					t("auto-scan-the-vault-on-obsidian-startup-info") +
 						"<br/>" +
 						"<b>" +
@@ -588,7 +566,7 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName(t("enable-experimental-features"))
 			.setDesc(
-				SettingsManager.createFragmentWithHTML(
+				createFragmentWithHTML(
 					t("enable-experimental-features-info-1") +
 						"<br/>" +
 						t("enable-experimental-features-info-2")
@@ -729,7 +707,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "Board UI settings" tab content
-	private renderBoardUISettings(contentEl: HTMLElement) {
+	private renderAllUITabSettings(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("board-ui-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -851,6 +829,35 @@ export class SettingsManager {
 					})
 			);
 
+		// Setting to take the width of each Column in px.
+		new Setting(contentEl)
+			.setName(t("width-of-task-card"))
+			.setDesc(t("enter-the-value-of-width-for-task-card"))
+			.addText((text) =>
+				text
+					.setValue(columnWidth)
+					.onChange(async (value) => {
+						this.globalSettings!.columnWidth = value;
+						await this.saveSettings();
+					})
+					.setPlaceholder("300px")
+			);
+
+		// Setting to show/Hide the Vertical ScrollBar of each Column
+		new Setting(contentEl)
+			.setName(t("show-column-scroll-bar"))
+			.setDesc(t("enable-to-see-a-scrollbar-for-each-column"))
+			.addToggle((toggle) =>
+				toggle.setValue(showVerticalScroll).onChange(async (value) => {
+					this.globalSettings!.showVerticalScroll = value;
+					await this.saveSettings();
+				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("live-editor-and-reading-mode"))
+			.setHeading();
+
 		// Setting for hiding specific task properties in Live Editor and Reading mode
 		new Setting(contentEl)
 			.setName(t("hide-specific-properties-in-notes"))
@@ -899,31 +906,6 @@ export class SettingsManager {
 			// Style the checkbox setting to be more compact
 			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
 		});
-
-		// Setting to take the width of each Column in px.
-		new Setting(contentEl)
-			.setName(t("width-of-each-column"))
-			.setDesc(t("enter-the-value-of-width-for-each-column"))
-			.addText((text) =>
-				text
-					.setValue(columnWidth)
-					.onChange(async (value) => {
-						this.globalSettings!.columnWidth = value;
-						await this.saveSettings();
-					})
-					.setPlaceholder("273px")
-			);
-
-		// Setting to show/Hide the Vertical ScrollBar of each Column
-		new Setting(contentEl)
-			.setName(t("show-column-scroll-bar"))
-			.setDesc(t("enable-to-see-a-scrollbar-for-each-column"))
-			.addToggle((toggle) =>
-				toggle.setValue(showVerticalScroll).onChange(async (value) => {
-					this.globalSettings!.showVerticalScroll = value;
-					await this.saveSettings();
-				})
-			);
 
 		// Tag Colors settings
 		// Setting to show/Hide the Header of the task card
@@ -1193,8 +1175,243 @@ export class SettingsManager {
 		);
 	}
 
+	private renderTBNoteTabSettings(contentEl: HTMLElement) {
+		const {
+			taskNoteIdentifierTag,
+			taskNoteDefaultLocation,
+			archivedTBNotesFolderPath,
+			frontmatterFormatting,
+		} = this.globalSettings!;
+
+		new Setting(contentEl)
+			.setName(t("task-note-vs-tbnote"))
+			.setDesc(
+				createFragmentWithHTML(
+					"<ul>" +
+						"<li><b>" +
+						t("task-note") +
+						":</b> " +
+						t("task-note-description") +
+						"</li>" +
+						"<li><b>" +
+						t("tbnote") +
+						":</b> " +
+						t("tbnote-description") +
+						" <a href='https://github.com/tu2-atmanand/Task-Board/issues/33'>" +
+						t("tbnote-development-ticker") +
+						"</a></li>" +
+						"</ul>"
+				)
+			);
+
+		new Setting(contentEl)
+			.setName(t("task-note-identifier-tag"))
+			.setDesc(t("task-note-identifier-tag-description"))
+			.addText((text) => {
+				text.setValue(taskNoteIdentifierTag).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteIdentifierTag =
+							value.startsWith("#")
+								? value.replace("#", "")
+								: value;
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., #taskNote";
+			});
+
+		// Setting for choosing the default location for task notes
+		new Setting(contentEl)
+			.setName(t("default-location-for-new-task-notes"))
+			.setDesc(t("default-location-for-new-task-notes-description"))
+			.addText((text) => {
+				text.setValue(taskNoteDefaultLocation).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteDefaultLocation = value;
+				});
+
+				const inputEl = text.inputEl;
+				// For folders, we could use folder suggestions or just allow text input
+				// For now, let's keep it simple with text input
+				inputEl.placeholder = "e.g., Task Notes/";
+			});
+
+		// Setting for choosing the default file to archive tasks
+		new Setting(contentEl)
+			.setName(t("folder-for-archived-task-notes"))
+			.setDesc(t("folder-for-archived-task-notes-description"))
+			.addText((text) => {
+				text.setValue(archivedTBNotesFolderPath).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.archivedTBNotesFolderPath = value;
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., TaskBoard/TaskNotes";
+				const suggestionContent = getFolderSuggestions(this.plugin.app);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.archivedTBNotesFolderPath =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app
+				);
+			});
+
+		new Setting(contentEl)
+			.setName(t("frontmatter-formatting"))
+			.setDesc(t("frontmatter-formatting-description"));
+
+		const frontmatterFormattingContainer = contentEl.createDiv({
+			cls: "taskBoardSettingsFrontmatterFormattingContainer",
+		});
+
+		// Initialize Sortable.js
+		Sortable.create(frontmatterFormattingContainer, {
+			animation: 150,
+			handle: ".taskBoardSettingsFrontmatterFormattingContainerItemDragHandle",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: async () => {
+				const newOrder = Array.from(
+					frontmatterFormattingContainer.children
+				)
+					.map((child, index) => {
+						const propertyName = child.getAttribute(
+							"data-frontmatterItem-name"
+						);
+						const frontmatterItem = frontmatterFormatting?.find(
+							(c) => c.property === propertyName
+						);
+						if (frontmatterItem) {
+							frontmatterItem.index = index + 1;
+							return frontmatterItem;
+						}
+						return null;
+					})
+					.filter(
+						(
+							frontmatterItem
+						): frontmatterItem is frontmatterFormatting =>
+							frontmatterItem !== null
+					);
+
+				this.plugin.settings.data.globalSettings.frontmatterFormatting =
+					newOrder;
+			},
+		});
+
+		const renderFrontmatterFormattingItems = () => {
+			if (!frontmatterFormatting) return;
+
+			frontmatterFormattingContainer.empty(); // Clear existing rendered rows
+
+			frontmatterFormatting
+				.sort((a, b) => a.index - b.index)
+				.forEach((sortfrontmatterItem, index) => {
+					const row = frontmatterFormattingContainer.createDiv({
+						cls: "taskBoardSettingsFrontmatterFormattingContainerItemRow",
+						attr: {
+							"data-frontmatterItem-name":
+								sortfrontmatterItem.property,
+						},
+					});
+
+					new Setting(row)
+						.setClass(
+							"taskBoardSettingsFrontmatterFormattingContainerItem"
+						)
+						.addButton((drag) =>
+							drag
+								.setTooltip("Hold and drag")
+								.setIcon("grip-horizontal")
+								.setClass(
+									"taskBoardSettingsFrontmatterFormattingContainerItemDragHandle"
+								)
+						)
+						.addButton((button) => {
+							button.setButtonText(sortfrontmatterItem.property);
+						})
+						.addText((text) => {
+							text.setValue(sortfrontmatterItem.key)
+								.setPlaceholder(t("Enter property key"))
+								.onChange((value) => {
+									this.plugin.settings.data.globalSettings.frontmatterFormatting[
+										index
+									].key = value.trim();
+								});
+						});
+					// .addButton((del) =>
+					// 	del
+					// 		.setButtonText("delete")
+					// 		.setIcon("trash")
+					// 		.setClass(
+					// 			"taskBoardSettingsFrontmatterFormattingContainerItemDeleteCriterion"
+					// 		)
+					// 		.setTooltip(t("remove-sort-criterion"))
+					// 		.onClick(async () => {
+					// 			if (
+					// 				this.plugin.settings.data.globalSettings
+					// 					.frontmatterFormatting
+					// 			) {
+					// 				this.plugin.settings.data.globalSettings.frontmatterFormatting.splice(
+					// 					index,
+					// 					1
+					// 				);
+					// 				this.saveSettings();
+					// 				renderFrontmatterFormattingItems(); // Re-render after delete
+					// 			}
+					// 		})
+					// );
+				});
+		};
+
+		// Initial render
+		renderFrontmatterFormattingItems();
+
+		// const addNewSortingButton = frontmatterFormattingContainer.createEl(
+		// 	"button",
+		// 	{
+		// 		text: t("add-new-sorting-criterion"),
+		// 		cls: "configureColumnSortingModalHomeAddSortingBtn",
+		// 	}
+		// );
+		// addNewSortingButton.addEventListener("click", async () => {
+		// 	const newfrontmatterItem: frontmatterFormatting = {
+		// 		index:
+		// 			(this.plugin.settings.data.globalSettings
+		// 				.frontmatterFormatting?.length || 0) + 1,
+		// 		property: "",
+		// 		key: "",
+		// 	};
+		// 	if (
+		// 		!this.plugin.settings.data.globalSettings.frontmatterFormatting
+		// 	) {
+		// 		this.plugin.settings.data.globalSettings.frontmatterFormatting =
+		// 			[];
+		// 	}
+		// 	this.plugin.settings.data.globalSettings.frontmatterFormatting.push(
+		// 		newfrontmatterItem
+		// 	);
+		// 	renderFrontmatterFormattingItems();
+		// });
+	}
+
 	// Function to render "Automation" tab content
-	private renderAutomationSettings(contentEl: HTMLElement) {
+	private renderAutomationTabSettings(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("automation-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -1220,7 +1437,9 @@ export class SettingsManager {
 						[EditButtonMode.Modal]: t(
 							"use-edit-task-modal-feature"
 						),
-						[EditButtonMode.View]: t("use-edit-task-window-feature"),
+						[EditButtonMode.View]: t(
+							"use-edit-task-window-feature"
+						),
 						[EditButtonMode.TasksPluginModal]:
 							t("tasks-plugin-modal"),
 						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
@@ -1472,7 +1691,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "Task formats" tab content
-	private renderFormatsSettings(contentEl: HTMLElement) {
+	private renderFormatsTabSettings(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("format-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
