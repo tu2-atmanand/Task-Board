@@ -118,6 +118,7 @@ export interface globalSettingsData {
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
+		settingTab: number;
 		taskId?: string;
 	};
 	boundTaskCompletionToChildTasks: boolean;
@@ -567,6 +568,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			lastViewHistory: {
 				viewedType: "kanban",
 				boardIndex: 0,
+				settingTab: 0,
 			},
 			boundTaskCompletionToChildTasks: false,
 		},
