@@ -855,11 +855,11 @@
       "uniqueIdCounter": 268,
       "experimentalFeatures": true,
       "searchQuery": "",
-      "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 1,
-        "taskId": ""
+        "taskId": "",
+        "settingTab": 3
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",

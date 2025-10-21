@@ -175,7 +175,7 @@ export class SettingsManager {
 				cls: "taskBoard-settings-tab-button",
 			});
 
-			tabButton.addEventListener("click", () => {
+			tabButton.addEventListener("click", async () => {
 				// Highlight selected tab
 				Array.from(tabBar.children).forEach((child) =>
 					child.toggleClass(
@@ -187,6 +187,15 @@ export class SettingsManager {
 				// Clear and render the appropriate content
 				tabContent.empty();
 				sections[tabName]();
+
+				// Store the tabIndex inside `this.plugin.settings.data.globalSettings.lastViewHistory.settingTab` and call this.saveSetting()
+				const tabKeys = Object.keys(sections);
+				const tabIndex = tabKeys.indexOf(tabName);
+				if (this.globalSettings) {
+					this.globalSettings.lastViewHistory.settingTab = tabIndex;
+					// saveSettings is async; call without awaiting inside this non-async handler
+					await this.saveSettings();
+				}
 			});
 
 			tabs[tabName] = tabButton;
@@ -194,8 +203,12 @@ export class SettingsManager {
 
 		contentEl.createEl("hr");
 
-		// Set the default tab
-		const defaultTab = Object.keys(sections)[0];
+		// Set the last viewed tab
+		const defaultTab =
+			Object.keys(sections)[
+				this.plugin.settings.data.globalSettings.lastViewHistory
+					.settingTab
+			];
 		tabs[defaultTab].click();
 
 		contentEl
