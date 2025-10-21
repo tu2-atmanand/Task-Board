@@ -10,6 +10,7 @@ import { taskStatuses } from "src/interfaces/Enums";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
+import { bugReporter } from "src/services/OpenModals";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -360,11 +361,19 @@ export async function updateFrontmatterInMarkdownFile(
  * @param plugin - TaskBoard plugin instance
  * @param filePath - Path to the file to delete
  */
-export async function deleteTaskNote(plugin: TaskBoard, filePath: string): Promise<void> {
+export async function deleteTaskNote(
+	plugin: TaskBoard,
+	filePath: string
+): Promise<void> {
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
 		if (!file) {
-			new Notice(`File not found: ${filePath}`);
+			bugReporter(
+				plugin,
+				"There was an issue while deleting the task note.",
+				`File not found at path: ${filePath}`,
+				"deleteTaskNote"
+			);
 			return;
 		}
 
@@ -372,7 +381,12 @@ export async function deleteTaskNote(plugin: TaskBoard, filePath: string): Promi
 		new Notice(`Task note deleted: ${file.name}`);
 	} catch (error) {
 		console.error("Error deleting task note:", error);
-		new Notice(`Error deleting task note: ${String(error)}`);
+		bugReporter(
+			plugin,
+			"There was an issue while deleting the task note.",
+			String(error),
+			"deleteTaskNote"
+		);
 		throw error;
 	}
 }
@@ -382,17 +396,26 @@ export async function deleteTaskNote(plugin: TaskBoard, filePath: string): Promi
  * @param plugin - TaskBoard plugin instance
  * @param filePath - Path to the file to archive
  */
-export async function archiveTaskNote(plugin: TaskBoard, filePath: string): Promise<void> {
+export async function archiveTaskNote(
+	plugin: TaskBoard,
+	filePath: string
+): Promise<void> {
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
 		if (!file) {
-			new Notice(`File not found: ${filePath}`);
+			bugReporter(
+				plugin,
+				"There was an issue while archiving the task note.",
+				`File not found at path: ${filePath}`,
+				"archiveTaskNote"
+			);
 			return;
 		}
 
 		// Get the archive folder path from settings
-		const archiveFolderPath = plugin.settings.data.globalSettings.archivedTBNotesFolderPath;
-		
+		const archiveFolderPath =
+			plugin.settings.data.globalSettings.archivedTBNotesFolderPath;
+
 		if (!archiveFolderPath || archiveFolderPath.trim() === "") {
 			new Notice("Archive folder path is not configured in settings");
 			return;
@@ -407,7 +430,9 @@ export async function archiveTaskNote(plugin: TaskBoard, filePath: string): Prom
 		}
 
 		// Construct the new file path
-		const newFilePath = normalizePath(`${normalizedArchivePath}/${file.name}`);
+		const newFilePath = normalizePath(
+			`${normalizedArchivePath}/${file.name}`
+		);
 
 		// Check if a file with the same name already exists in the archive folder
 		if (await plugin.app.vault.adapter.exists(newFilePath)) {
@@ -415,16 +440,25 @@ export async function archiveTaskNote(plugin: TaskBoard, filePath: string): Prom
 			const timestamp = new Date().getTime();
 			const nameWithoutExt = file.basename;
 			const ext = file.extension;
-			const uniqueFilePath = normalizePath(`${normalizedArchivePath}/${nameWithoutExt}-${timestamp}.${ext}`);
+			const uniqueFilePath = normalizePath(
+				`${normalizedArchivePath}/${nameWithoutExt}-${timestamp}.${ext}`
+			);
 			await plugin.app.vault.rename(file, uniqueFilePath);
-			new Notice(`Task note archived as: ${nameWithoutExt}-${timestamp}.${ext}`);
+			new Notice(
+				`Task note archived as: ${nameWithoutExt}-${timestamp}.${ext}`
+			);
 		} else {
 			await plugin.app.vault.rename(file, newFilePath);
 			new Notice(`Task note archived: ${file.name}`);
 		}
 	} catch (error) {
 		console.error("Error archiving task note:", error);
-		new Notice(`Error archiving task note: ${String(error)}`);
-		throw error;
+		bugReporter(
+			plugin,
+			"There was an issue while archiving the task note.",
+			String(error),
+			"archiveTaskNote"
+		);
+		// throw error;
 	}
 }
