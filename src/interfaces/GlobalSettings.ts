@@ -525,20 +525,21 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.completionDate,
 					taskItemKey: "completionDate",
 				},
+				// TODO : The below properties will be available once the TBNote feature has been implemented. The filePath will be actually the path of the task-note or the tb-note. A new property will be required to be added inside the taskItem interface to store the sourcePath.
+				// {
+				// 	index: 14,
+				// 	property: taskItemKeyToNameMapping["filePath"],
+				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.filePath,
+				// 	taskItemKey: "filePath",
+				// },
+				// {
+				// 	index: 15,
+				// 	property: taskItemKeyToNameMapping["taskLocation"],
+				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.taskLocation,
+				// 	taskItemKey: "taskLocation",
+				// },
 				{
 					index: 14,
-					property: taskItemKeyToNameMapping["filePath"],
-					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.filePath,
-					taskItemKey: "filePath",
-				},
-				{
-					index: 15,
-					property: taskItemKeyToNameMapping["taskLocation"],
-					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.taskLocation,
-					taskItemKey: "taskLocation",
-				},
-				{
-					index: 16,
 					property: taskItemKeyToNameMapping["dateModified"],
 					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
 					taskItemKey: "",
