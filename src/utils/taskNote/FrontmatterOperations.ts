@@ -152,15 +152,17 @@ function orderFrontmatterProperties(
 	existingFrontmatter?: customFrontmatterCache
 ): Partial<customFrontmatterCache> {
 	const orderedFrontmatter: Partial<customFrontmatterCache> = {};
-	
+
 	// Create a set of all custom frontmatter keys for quick lookup
 	const customKeys = new Set(
 		frontmatterFormatting.map((format) => format.key)
 	);
 
 	// Sort frontmatter formatting by index and add properties in order
-	const sortedFormatting = [...frontmatterFormatting].sort((a, b) => a.index - b.index);
-	
+	const sortedFormatting = [...frontmatterFormatting].sort(
+		(a, b) => a.index - b.index
+	);
+
 	for (const format of sortedFormatting) {
 		const key = format.key;
 		// If the key exists in the frontmatter object, add it to the ordered object
@@ -266,8 +268,11 @@ export function createFrontmatterFromTask(
 		] = task.completion;
 
 	// Order the frontmatter properties based on index values
-	const orderedFrontmatter = orderFrontmatterProperties(frontmatterObj, frontmatterFormatting);
-	
+	const orderedFrontmatter = orderFrontmatterProperties(
+		frontmatterObj,
+		frontmatterFormatting
+	);
+
 	return createYamlFromObject(orderedFrontmatter);
 }
 
@@ -276,6 +281,8 @@ export function createFrontmatterFromTask(
  * @param existingFrontmatter - Existing frontmatter object
  * @param task - Task item with updated properties
  * @returns object - Updated frontmatter object
+ *
+ * @todo Remove redundant code by creating a helper function for adding/deleting properties. This function seems to be doing expensive operations which might affect the performance and increase time complexity.
  */
 export function updateFrontmatterProperties(
 	plugin: TaskBoard,
@@ -284,14 +291,16 @@ export function updateFrontmatterProperties(
 ): Partial<customFrontmatterCache> {
 	const frontmatterFormatting: frontmatterFormatting[] =
 		plugin.settings.data.globalSettings.frontmatterFormatting;
-	
+
 	// Step 1: Build a temporary object with all the updated values
 	const tempUpdates: Record<string, any> = {};
 
 	if (task.title) {
-		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] = task.title;
+		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] =
+			task.title;
 	} else {
-		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] = "";
+		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] =
+			"";
 	}
 
 	// Ensure taskNote tag exists
@@ -318,53 +327,13 @@ export function updateFrontmatterProperties(
 	if (plugin.settings.data.globalSettings.autoAddUniqueID) {
 		const idKey = getCustomFrontmatterKey("id", frontmatterFormatting);
 		if (!existingFrontmatter?.[idKey]) {
-			tempUpdates[idKey] = task.legacyId ? task.legacyId : generateTaskId(plugin);
+			tempUpdates[idKey] = task.legacyId
+				? task.legacyId
+				: generateTaskId(plugin);
 		} else {
 			// Preserve existing ID
 			tempUpdates[idKey] = existingFrontmatter[idKey];
 		}
-	}
-
-	// Update time property
-	const timeKey = getCustomFrontmatterKey("time", frontmatterFormatting);
-	if (task.time) {
-		tempUpdates[timeKey] = task.time;
-	}
-
-	// Update date properties
-	const createdDateKey = getCustomFrontmatterKey("createdDate", frontmatterFormatting);
-	if (task.createdDate) {
-		tempUpdates[createdDateKey] = task.createdDate;
-	}
-
-	const startDateKey = getCustomFrontmatterKey("startDate", frontmatterFormatting);
-	if (task.startDate) {
-		tempUpdates[startDateKey] = task.startDate;
-	}
-
-	const scheduledDateKey = getCustomFrontmatterKey("scheduledDate", frontmatterFormatting);
-	if (task.scheduledDate) {
-		tempUpdates[scheduledDateKey] = task.scheduledDate;
-	}
-
-	const dueKey = getCustomFrontmatterKey("due", frontmatterFormatting);
-	if (task.due) {
-		tempUpdates[dueKey] = task.due;
-	}
-
-	const cancelledDateKey = getCustomFrontmatterKey("cancelledDate", frontmatterFormatting);
-	if (task.cancelledDate) {
-		tempUpdates[cancelledDateKey] = task.cancelledDate;
-	}
-
-	const completionKey = getCustomFrontmatterKey("completion", frontmatterFormatting);
-	if (task.completion) {
-		tempUpdates[completionKey] = task.completion;
-	}
-
-	const priorityKey = getCustomFrontmatterKey("priority", frontmatterFormatting);
-	if (task.priority && task.priority > 0) {
-		tempUpdates[priorityKey] = getPriorityNameForTaskNote(task.priority) || "";
 	}
 
 	const statusKey = getCustomFrontmatterKey("status", frontmatterFormatting);
@@ -376,20 +345,109 @@ export function updateFrontmatterProperties(
 		tempUpdates[statusKey] = statusKeyName ?? `"${task.status}"`;
 	}
 
-	const reminderKey = getCustomFrontmatterKey("reminder", frontmatterFormatting);
-	if (task.reminder) {
-		tempUpdates[reminderKey] = task.reminder;
+	// All the below properties are optional
+
+	// Update time property
+	const timeKey = getCustomFrontmatterKey("time", frontmatterFormatting);
+	if (task.time) {
+		tempUpdates[timeKey] = task.time;
+	} else {
+		delete tempUpdates[timeKey];
 	}
 
-	const dependsOnKey = getCustomFrontmatterKey("dependsOn", frontmatterFormatting);
-	if (task.dependsOn) {
+	// Update date properties
+	const createdDateKey = getCustomFrontmatterKey(
+		"createdDate",
+		frontmatterFormatting
+	);
+	if (task.createdDate) {
+		tempUpdates[createdDateKey] = task.createdDate;
+	} else {
+		delete tempUpdates[createdDateKey];
+	}
+
+	const startDateKey = getCustomFrontmatterKey(
+		"startDate",
+		frontmatterFormatting
+	);
+	if (task.startDate) {
+		tempUpdates[startDateKey] = task.startDate;
+	} else {
+		delete tempUpdates[startDateKey];
+	}
+
+	const scheduledDateKey = getCustomFrontmatterKey(
+		"scheduledDate",
+		frontmatterFormatting
+	);
+	if (task.scheduledDate) {
+		tempUpdates[scheduledDateKey] = task.scheduledDate;
+	} else {
+		delete tempUpdates[scheduledDateKey];
+	}
+
+	const dueKey = getCustomFrontmatterKey("due", frontmatterFormatting);
+	if (task.due) {
+		tempUpdates[dueKey] = task.due;
+	} else {
+		delete tempUpdates[dueKey];
+	}
+
+	const cancelledDateKey = getCustomFrontmatterKey(
+		"cancelledDate",
+		frontmatterFormatting
+	);
+	if (task?.cancelledDate) {
+		tempUpdates[cancelledDateKey] = task.cancelledDate;
+	} else {
+		delete tempUpdates[cancelledDateKey];
+	}
+
+	const completionKey = getCustomFrontmatterKey(
+		"completion",
+		frontmatterFormatting
+	);
+	if (task?.completion) {
+		tempUpdates[completionKey] = task.completion;
+	} else {
+		delete tempUpdates[completionKey];
+	}
+
+	const priorityKey = getCustomFrontmatterKey(
+		"priority",
+		frontmatterFormatting
+	);
+	if (task.priority && task.priority > 0) {
+		tempUpdates[priorityKey] =
+			getPriorityNameForTaskNote(task.priority) || "";
+	} else {
+		delete tempUpdates[priorityKey];
+	}
+
+	const reminderKey = getCustomFrontmatterKey(
+		"reminder",
+		frontmatterFormatting
+	);
+	if (task?.reminder) {
+		tempUpdates[reminderKey] = task.reminder;
+	} else {
+		delete tempUpdates[reminderKey];
+	}
+
+	const dependsOnKey = getCustomFrontmatterKey(
+		"dependsOn",
+		frontmatterFormatting
+	);
+	if (task?.dependsOn) {
 		tempUpdates[dependsOnKey] = task.dependsOn;
+	} else {
+		delete tempUpdates[dependsOnKey];
 	}
 
 	// Step 2: Order the frontmatter properties and add additional properties from existing frontmatter
 	const orderedFrontmatter = orderFrontmatterProperties(
-		tempUpdates, 
-		frontmatterFormatting, 
+		tempUpdates,
+		frontmatterFormatting,
 		existingFrontmatter
 	);
 
