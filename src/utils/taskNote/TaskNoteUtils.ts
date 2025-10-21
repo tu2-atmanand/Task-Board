@@ -6,9 +6,9 @@ import {
 	createYamlFromObject,
 	extractFrontmatterFromContent,
 } from "./FrontmatterOperations";
-import { TASK_NOTE_FRONTMATTER_KEYS } from "src/interfaces/Constants";
 import { taskStatuses } from "src/interfaces/Enums";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
+import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -60,6 +60,7 @@ export function isTaskNotePresentInTags(
  * @returns Partial taskItem with properties mapped from frontmatter
  */
 export function extractTaskNoteProperties(
+	frontmatterFormatting: frontmatterFormatting[],
 	frontmatter: Partial<customFrontmatterCache> | undefined,
 	filePath: string
 ): Partial<taskItem> {
@@ -68,47 +69,70 @@ export function extractTaskNoteProperties(
 	}
 
 	return {
-		id: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.id] || "",
-		title: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.title] || "",
-		tags: Array.isArray(frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags])
-			? frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags]
-			: typeof frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags] === "string"
-			? frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.tags]
+		id:
+			frontmatter[getCustomFrontmatterKey("id", frontmatterFormatting)] ||
+			"",
+		title:
+			frontmatter[
+				getCustomFrontmatterKey("title", frontmatterFormatting)
+			] || "",
+		tags: Array.isArray(
+			frontmatter[getCustomFrontmatterKey("tags", frontmatterFormatting)]
+		)
+			? frontmatter[
+					getCustomFrontmatterKey("tags", frontmatterFormatting)
+			  ]
+			: typeof frontmatter[
+					getCustomFrontmatterKey("tags", frontmatterFormatting)
+			  ] === "string"
+			? frontmatter[
+					getCustomFrontmatterKey("tags", frontmatterFormatting)
+			  ]
 					.split(",")
 					.map((tag: string) => tag.trim())
 			: [],
 		createdDate:
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.createdDate] ||
-			frontmatter?.created ||
-			"",
+			frontmatter[
+				getCustomFrontmatterKey("createdDate", frontmatterFormatting)
+			] || "",
 		startDate:
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.startDate] ||
-			frontmatter?.start ||
-			"",
+			frontmatter[
+				getCustomFrontmatterKey("startDate", frontmatterFormatting)
+			] || "",
 		scheduledDate:
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.scheduledDate] ||
-			frontmatter?.scheduled ||
-			"",
+			frontmatter[
+				getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
+			] || "",
 		due:
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.dueDate] ||
-			frontmatter?.due ||
-			"",
+			frontmatter[
+				getCustomFrontmatterKey("due", frontmatterFormatting)
+			] || "",
 		cancelledDate:
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.cancelledDate] ||
-			frontmatter?.cancelled ||
-			"",
+			frontmatter[
+				getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
+			] || "",
 		completion:
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.completionDate] ||
-			frontmatter?.completed ||
-			"",
+			frontmatter[
+				getCustomFrontmatterKey("icompletiond", frontmatterFormatting)
+			] || "",
 		priority: mapPriorityNameFromFrontmatter(
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.priority]
+			frontmatter[
+				getCustomFrontmatterKey("priority", frontmatterFormatting)
+			]
 		),
-		status: mapStatusFromFrontmatter(
-			frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.status]
+		status: getStatusSymbolFromStatusName(
+			frontmatter[
+				getCustomFrontmatterKey("status", frontmatterFormatting)
+			]
 		),
-		dependsOn: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.dependsOn] || [],
-		reminder: frontmatter?.[TASK_NOTE_FRONTMATTER_KEYS.reminder] || "",
+		dependsOn:
+			frontmatter[
+				getCustomFrontmatterKey("dependsOn", frontmatterFormatting)
+			] || [],
+		reminder:
+			frontmatter[
+				getCustomFrontmatterKey("reminder", frontmatterFormatting)
+			] || "",
 		filePath: filePath,
 	};
 }
@@ -147,6 +171,7 @@ export function mapPriorityNameFromFrontmatter(priorityValue: any): number {
  */
 export function getPriorityNameForTaskNote(priority: number): string {
 	const priorityNames: { [key: number]: string } = {
+		0: "None",
 		1: "highest",
 		2: "high",
 		3: "medium",
@@ -156,30 +181,60 @@ export function getPriorityNameForTaskNote(priority: number): string {
 	return priorityNames[priority] || "URGENT";
 }
 
+export function getCustomFrontmatterKey(
+	taskItemKey: string,
+	frontmatterFormatting: frontmatterFormatting[]
+): string {
+	// Find the custom mapping for this task item key
+	const customMapping = frontmatterFormatting.find(
+		(mapping) => mapping.taskItemKey === taskItemKey
+	);
+	
+	// Return custom frontmatter key if found, otherwise return the original key
+	return customMapping?.key || taskItemKey;
+}
+
 /**
- * Map status symbol from frontmatter to status string
+ * Map status string to status symbol
+ * Eg. statusValue="Pending" then output will be " ".
  * @param statusValue - Status value from frontmatter
  * @returns string - Status symbol
  */
-export function mapStatusFromFrontmatter(
+export function getStatusSymbolFromStatusName(
 	statusValue: string | undefined
 ): string {
 	if (!statusValue) return " ";
 
-	const statusStr = String(statusValue).trim();
+	const statusStr = statusValue.trim().toLowerCase();
 
 	// Handle both symbol and name formats
-	if (
-		Object.prototype.hasOwnProperty.call(
-			taskStatuses,
-			statusStr.toLowerCase()
-		)
-	) {
-		return (taskStatuses as Record<string, string>)[
-			statusStr.toLowerCase()
-		];
+	if (Object.prototype.hasOwnProperty.call(taskStatuses, statusStr)) {
+		return (taskStatuses as Record<string, string>)[statusStr];
 	}
 	return " ";
+}
+
+/**
+ * Map status symbol to status name
+ * Eg. statusValue="/" then output will be "inprogress".
+ * @param statusSymbol - Status value from frontmatter
+ * @returns string - Status symbol
+ */
+export function getStatusNameFromStatusSymbol(
+	statusSymbol: string | undefined
+): string {
+	if (!statusSymbol) return "pending";
+
+	// Create a reverse mapping from taskStatuses enum
+	// taskStatuses contains mappings like: { unchecked: " ", regular: "x", "in-progress": "/" }
+	const statusMapping: { [symbol: string]: string } = {};
+	
+	for (const [statusName, symbol] of Object.entries(taskStatuses)) {
+		statusMapping[symbol] = statusName;
+	}
+
+	// Return the status name for the given symbol, default to "pending" if not found
+	return statusMapping[statusSymbol] || "pending";
 }
 
 /**

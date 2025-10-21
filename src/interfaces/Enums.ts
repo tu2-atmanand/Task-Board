@@ -64,6 +64,27 @@ export enum HideableTaskProperty {
 	Reminder = "reminder",
 }
 
+export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
+	id = "id",
+	title = "title",
+	status = "status",
+	priority = "priority",
+	tags = "tags",
+	time = "time",
+	reminder = "reminder",
+	createdDate = "created-date",
+	startDate = "start-date",
+	scheduledDate = "scheduled-date",
+	due = "due-date",
+	dependsOn = "depends-onn",
+	cancelledDate = "cancelled-date",
+	completionDate = "completed-date",
+	dateCreated = "Created date",
+	dateModified = "Last modified",
+	filePath = "source-file",
+	taskLocation = "task-location",
+}
+
 export enum viewTypeNames {
 	kanban = "kanban",
 	map = "map",
@@ -81,7 +102,7 @@ export enum taskStatuses {
 	date = "D",
 	question = "?",
 	halfDone = "/",
-	inProgress = "/",
+	inprogress = "/",
 	add = "+",
 	research = "R",
 	important = "!",

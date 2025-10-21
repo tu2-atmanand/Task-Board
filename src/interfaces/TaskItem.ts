@@ -30,16 +30,16 @@ export interface taskItem {
 }
 
 export interface customFrontmatterCache extends FrontMatterCache {
-	tags?: string[] | string;
 	title?: string;
+	status?: string;
+	priority?: string | number;
+	tags?: string[] | string;
 	"created-date"?: string;
 	"start-date"?: string;
 	"schedule-date"?: string;
 	"due-date"?: string;
 	"cancelled-date"?: string;
 	"completion-date"?: string;
-	priority?: string | number;
-	status?: string;
 	reminder?: string;
 }
 

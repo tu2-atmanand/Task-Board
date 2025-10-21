@@ -10,23 +10,6 @@ export const NODE_POSITIONS_STORAGE_KEY = "taskboard_map_node_positions"; // now
 export const NODE_SIZE_STORAGE_KEY = "taskboard_map_node_sizes";
 export const VIEWPORT_STORAGE_KEY = "taskboard_map_viewport";
 
-export const TASK_NOTE_FRONTMATTER_KEYS = {
-	title: "title",
-	id: "id",
-	status: "status",
-	tags: "tags",
-	priority: "priority",
-	createdDate: "created",
-	startDate: "start",
-	scheduledDate: "scheduled",
-	dueDate: "due",
-	time: "time",
-	dependsOn: "dependsOn",
-	reminder: "reminder",
-	cancelledDate: "cancelled",
-	completionDate: "completed",
-};
-
 // Default file names and paths
 export const DEFAULT_TASKS_CACHE_FILE = "task-board-data.json";
 export const DEFAULT_ARCHIVED_TASKS_FILE = "archived-tasks.json";

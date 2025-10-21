@@ -94,6 +94,28 @@ export const taskItemEmpty: taskItem = {
 	status: taskStatuses.unchecked,
 };
 
+export const taskItemKeyToNameMapping: { [key: string]: string } = {
+	id: "ID",
+	title: "Title",
+	body: "Body",
+	status: "Status",
+	priority: "Priority",
+	tags: "Tags",
+	time: "Time",
+	reminder: "Reminder",
+	createdDate: "Created date",
+	startDate: "Start date",
+	scheduledDate: "Scheduled date",
+	due: "Due date",
+	dependsOn: "Depends on",
+	frontmatterTags: "Frontmatter tags",
+	completion: "Completed date",
+	cancelledDate: "Cancelled date",
+	filePath: "Source file",
+	taskLocation: "Task location",
+	dateModified: "Last modified",
+};
+
 export const columnTypeAndNameMapping: { [key: string]: string } = {
 	undated: "Undated",
 	dated: "Dated",

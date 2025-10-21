@@ -18,11 +18,7 @@ import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
 } from "../utils/JsonFileOperations";
-import {
-	jsonCacheData,
-	noteItem,
-	taskItem,
-} from "src/interfaces/TaskItem";
+import { jsonCacheData, noteItem, taskItem } from "src/interfaces/TaskItem";
 import {
 	extractTaskNoteProperties,
 	isTaskNotePresentInFrontmatter,
@@ -31,9 +27,7 @@ import {
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { readDataOfVaultFile } from "../utils/MarkdownFileOperations";
-import {
-	scanFilters,
-} from "src/interfaces/GlobalSettings";
+import { scanFilters } from "src/interfaces/GlobalSettings";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
@@ -52,7 +46,10 @@ import { bugReporter } from "src/services/OpenModals";
 import { getCurrentLocalTimeString } from "../utils/TimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { UniversalDateOptions } from "src/interfaces/Enums";
-import { scanFilterForFilesNFoldersNFrontmatter, scanFilterForTags } from "src/utils/algorithms/ScanningFilterer";
+import {
+	scanFilterForFilesNFoldersNFrontmatter,
+	scanFilterForTags,
+} from "src/utils/algorithms/ScanningFilterer";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -187,6 +184,8 @@ export default class vaultScanner {
 			) {
 				// Extract properties from frontmatter
 				const taskNoteProperties = extractTaskNoteProperties(
+					this.plugin.settings.data.globalSettings
+						.frontmatterFormatting,
 					frontmatter,
 					fileNameWithPath
 				);

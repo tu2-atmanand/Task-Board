@@ -2,10 +2,14 @@ import TaskBoard from "main";
 import { FrontMatterCache, parseYaml, stringifyYaml, TFile } from "obsidian";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import {
+	getCustomFrontmatterKey,
 	getPriorityNameForTaskNote,
+	getStatusNameFromStatusSymbol,
 	isTaskNotePresentInTags,
 } from "./TaskNoteUtils";
 import { taskStatuses } from "src/interfaces/Enums";
+import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
+import { generateTaskId } from "src/managers/VaultScanner";
 
 /**
  * Extract frontmatter from file content
@@ -142,46 +146,72 @@ export function extractFrontmatterTags(
  */
 export function createFrontmatterFromTask(
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
+	frontmatterFormatting: frontmatterFormatting[]
 ): string {
 	const statusKey = Object.keys(taskStatuses).find(
 		(key) => taskStatuses[key as keyof typeof taskStatuses] === task.status
 	);
 
-	const frontmatterObj: Partial<customFrontmatterCache> = {
-		title: task?.title || "",
-		status: statusKey ?? `"${task.status}"`,
-		tags: [
-			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-			...(task?.tags?.filter(
-				(tag) =>
-					tag.includes(
-						plugin.settings.data.globalSettings
-							.taskNoteIdentifierTag
-					) === false
-			) ?? []),
-		],
-	};
+	const frontmatterObj: Partial<customFrontmatterCache> = {};
+
+	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
+		task?.title || "";
+	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
+		getStatusNameFromStatusSymbol(task?.status) || "pending";
+	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
+		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		...(task?.tags?.filter(
+			(tag) =>
+				tag.includes(
+					plugin.settings.data.globalSettings.taskNoteIdentifierTag
+				) === false
+		) ?? []),
+	];
 
 	if (task.id && plugin.settings.data.globalSettings.autoAddUniqueID)
-		frontmatterObj.id = task.legacyId ? task.legacyId : task.id;
+		frontmatterObj[getCustomFrontmatterKey("id", frontmatterFormatting)] =
+			task.legacyId ? task.legacyId : task.id;
 	if (task.priority && task.priority > 0) {
-		frontmatterObj.priority =
-			getPriorityNameForTaskNote(task.priority) || "";
+		frontmatterObj[
+			getCustomFrontmatterKey("priority", frontmatterFormatting)
+		] = getPriorityNameForTaskNote(task.priority) || "";
 	}
-	if (task.createdDate) frontmatterObj["created-date"] = task.createdDate;
-	if (task.startDate) frontmatterObj["start-date"] = task.startDate;
+	if (task.createdDate)
+		frontmatterObj[
+			getCustomFrontmatterKey("createdDate", frontmatterFormatting)
+		] = task.createdDate;
+	if (task.startDate)
+		frontmatterObj[
+			getCustomFrontmatterKey("startDate", frontmatterFormatting)
+		] = task.startDate;
 	if (task.scheduledDate)
-		frontmatterObj["schedule-date"] = task.scheduledDate;
-	if (task.due) frontmatterObj["due-date"] = task.due;
-	if (task.time) frontmatterObj["time"] = task.time;
-	if (task.reminder) frontmatterObj.reminder = task.reminder;
+		frontmatterObj[
+			getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
+		] = task.scheduledDate;
+	if (task.due)
+		frontmatterObj[getCustomFrontmatterKey("due", frontmatterFormatting)] =
+			task.due;
+	if (task.time)
+		frontmatterObj[getCustomFrontmatterKey("time", frontmatterFormatting)] =
+			task.time;
+	if (task.reminder)
+		frontmatterObj[
+			getCustomFrontmatterKey("reminder", frontmatterFormatting)
+		] = task.reminder;
 	if (task.dependsOn && task.dependsOn.length > 0)
-		frontmatterObj["depends-on"] = task.dependsOn.join(", ");
+		frontmatterObj[
+			getCustomFrontmatterKey("dependsOn", frontmatterFormatting)
+		] = task.dependsOn.join(", ");
 
 	if (task.cancelledDate)
-		frontmatterObj["cancelled-date"] = task.cancelledDate;
-	if (task.completion) frontmatterObj["completion-date"] = task.completion;
+		frontmatterObj[
+			getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
+		] = task.cancelledDate;
+	if (task.completion)
+		frontmatterObj[
+			getCustomFrontmatterKey("completion", frontmatterFormatting)
+		] = task.completion;
 
 	return createYamlFromObject(frontmatterObj);
 }
@@ -197,7 +227,9 @@ export function updateFrontmatterProperties(
 	existingFrontmatter: customFrontmatterCache | undefined,
 	task: taskItem
 ): Partial<customFrontmatterCache> {
-	const updated: customFrontmatterCache = existingFrontmatter
+	const frontmatterFormatting: frontmatterFormatting[] =
+		plugin.settings.data.globalSettings.frontmatterFormatting;
+	const updatedFrontmatter: customFrontmatterCache = existingFrontmatter
 		? { ...existingFrontmatter }
 		: {
 				index__(key: string): any {
@@ -206,73 +238,147 @@ export function updateFrontmatterProperties(
 		  };
 
 	if (task.title) {
-		updated.title = task.title;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("title", frontmatterFormatting)
+		] = task.title;
 	} else {
-		updated.title = "";
+		updatedFrontmatter[
+			getCustomFrontmatterKey("title", frontmatterFormatting)
+		] = "";
 	}
 
 	// Ensure taskNote tag exists
-	if (!updated.tags) {
-		updated.tags = [
+	if (
+		!updatedFrontmatter[
+			getCustomFrontmatterKey("tags", frontmatterFormatting)
+		]
+	) {
+		updatedFrontmatter[
+			getCustomFrontmatterKey("tags", frontmatterFormatting)
+		] = [
 			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
 			...task.tags,
 		];
-	} else if (Array.isArray(updated.tags)) {
-		updated.tags = [
+	} else if (
+		Array.isArray(
+			updatedFrontmatter[
+				getCustomFrontmatterKey("tags", frontmatterFormatting)
+			]
+		)
+	) {
+		updatedFrontmatter[
+			getCustomFrontmatterKey("tags", frontmatterFormatting)
+		] = [
 			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-			...updated.tags,
+			...updatedFrontmatter[
+				getCustomFrontmatterKey("tags", frontmatterFormatting)
+			],
 			...task.tags,
 		];
 	}
 	// Remove duplicate tags
-	updated.tags = Array.from(new Set(updated.tags));
+	updatedFrontmatter[getCustomFrontmatterKey("tags", frontmatterFormatting)] =
+		Array.from(
+			new Set(
+				updatedFrontmatter[
+					getCustomFrontmatterKey("tags", frontmatterFormatting)
+				]
+			)
+		);
 
 	// Update or add unique ID
-	if (updated.id && plugin.settings.data.globalSettings.autoAddUniqueID) {
-		updated.legacyId = task.legacyId ? task.legacyId : updated.id;
+	if (plugin.settings.data.globalSettings.autoAddUniqueID) {
+		if (
+			!updatedFrontmatter[
+				getCustomFrontmatterKey("id", frontmatterFormatting)
+			]
+		) {
+			updatedFrontmatter[
+				getCustomFrontmatterKey("id", frontmatterFormatting)
+			] = task.legacyId ? task.legacyId : generateTaskId(plugin);
+		}
+	}
+
+	// Update time property
+	if (task.time) {
+		updatedFrontmatter[
+			getCustomFrontmatterKey("time", frontmatterFormatting)
+		] = task.time;
+	} else {
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("time", frontmatterFormatting)
+		];
 	}
 
 	// Update properties
 	if (task.createdDate) {
-		updated["created-date"] = task.createdDate;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("createdDate", frontmatterFormatting)
+		] = task.createdDate;
 	} else {
-		delete updated["created-date"];
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("createdDate", frontmatterFormatting)
+		];
 	}
 
 	if (task.startDate) {
-		updated["start-date"] = task.startDate;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("startDate", frontmatterFormatting)
+		] = task.startDate;
 	} else {
-		delete updated["start-date"];
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("startDate", frontmatterFormatting)
+		];
 	}
 
 	if (task.scheduledDate) {
-		updated["schedule-date"] = task.scheduledDate;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
+		] = task.scheduledDate;
 	} else {
-		delete updated["schedule-date"];
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
+		];
 	}
 
 	if (task.due) {
-		updated["due-date"] = task.due;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("due", frontmatterFormatting)
+		] = task.due;
 	} else {
-		delete updated["due-date"];
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("due", frontmatterFormatting)
+		];
 	}
 
 	if (task.cancelledDate) {
-		updated["cancelled-date"] = task.cancelledDate;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
+		] = task.cancelledDate;
 	} else {
-		delete updated["cancelled-date"];
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
+		];
 	}
 
 	if (task.completion) {
-		updated["completion-date"] = task.completion;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("completion", frontmatterFormatting)
+		] = task.completion;
 	} else {
-		delete updated["completion-date"];
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("completion", frontmatterFormatting)
+		];
 	}
 
 	if (task.priority && task.priority > 0) {
-		updated.priority = getPriorityNameForTaskNote(task.priority) || "";
+		updatedFrontmatter[
+			getCustomFrontmatterKey("priority", frontmatterFormatting)
+		] = getPriorityNameForTaskNote(task.priority) || "";
 	} else {
-		delete updated.priority;
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("priority", frontmatterFormatting)
+		];
 	}
 
 	if (task.status) {
@@ -280,18 +386,37 @@ export function updateFrontmatterProperties(
 			(key) =>
 				taskStatuses[key as keyof typeof taskStatuses] === task.status
 		);
-		updated.status = statusKey ?? `"${task.status}"`;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("status", frontmatterFormatting)
+		] = statusKey ?? `"${task.status}"`;
 	} else if (task.status === " ") {
-		delete updated.status;
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("status", frontmatterFormatting)
+		];
 	}
 
 	if (task.reminder) {
-		updated.reminder = task.reminder;
+		updatedFrontmatter[
+			getCustomFrontmatterKey("reminder", frontmatterFormatting)
+		] = task.reminder;
 	} else {
-		delete updated.reminder;
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("reminder", frontmatterFormatting)
+		];
 	}
 
-	return updated;
+	// Update properties
+	if (task.dependsOn) {
+		updatedFrontmatter[
+			getCustomFrontmatterKey("dependsOn", frontmatterFormatting)
+		] = task.dependsOn;
+	} else {
+		delete updatedFrontmatter[
+			getCustomFrontmatterKey("dependsOn", frontmatterFormatting)
+		];
+	}
+
+	return updatedFrontmatter;
 }
 
 /**

@@ -9,7 +9,9 @@ import {
 	cardSectionsVisibilityOptions,
 	colType,
 	taskStatuses,
+	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 } from "./Enums";
+import { taskItemKeyToNameMapping } from "./Mapping";
 
 export interface scanFilters {
 	files: {
@@ -49,6 +51,13 @@ export interface TaskBoardAction {
 	trigger: "Complete" | "Incomplete";
 	type: "move" | "copy";
 	targetColumn: string;
+}
+
+export interface frontmatterFormatting {
+	index: number;
+	property: string;
+	key: string;
+	taskItemKey: string;
 }
 
 export interface globalSettingsData {
@@ -92,6 +101,8 @@ export interface globalSettingsData {
 		quickAddPlugin: boolean;
 	};
 	archivedTasksFilePath: string;
+	archivedTBNotesFolderPath: string;
+	frontmatterFormatting: frontmatterFormatting[];
 	showFileNameInCard: boolean;
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
@@ -293,7 +304,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					{
 						id: 9,
 						colType: colType.taskStatus,
-						taskStatus: taskStatuses.inProgress,
+						taskStatus: taskStatuses.inprogress,
 						active: true,
 						collapsed: false,
 						name: "In Progress",
@@ -360,10 +371,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			autoAddUniversalDate: true,
 			scanVaultAtStartup: false,
 			realTimeScanning: true,
-			columnWidth: "273px",
+			columnWidth: "300px",
 			showHeader: true,
 			showFooter: true,
-			showVerticalScroll: false,
+			showVerticalScroll: true,
 			tagColors: [
 				{
 					name: "bug",
@@ -428,6 +439,111 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			taskNoteDefaultLocation: "TaskNotes",
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
+			archivedTBNotesFolderPath: "TaskBoard/TBNotes/",
+			frontmatterFormatting: [
+				{
+					index: 0,
+					property: taskItemKeyToNameMapping["id"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
+					taskItemKey: "id",
+				},
+				{
+					index: 1,
+					property: taskItemKeyToNameMapping["title"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.title,
+					taskItemKey: "title",
+				},
+				{
+					index: 2,
+					property: taskItemKeyToNameMapping["status"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.status,
+					taskItemKey: "status",
+				},
+				{
+					index: 3,
+					property: taskItemKeyToNameMapping["priority"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.priority,
+					taskItemKey: "priority",
+				},
+				{
+					index: 4,
+					property: taskItemKeyToNameMapping["tags"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.tags,
+					taskItemKey: "tags",
+				},
+				{
+					index: 5,
+					property: taskItemKeyToNameMapping["time"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.time,
+					taskItemKey: "time",
+				},
+				{
+					index: 6,
+					property: taskItemKeyToNameMapping["reminder"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.reminder,
+					taskItemKey: "reminder",
+				},
+				{
+					index: 7,
+					property: taskItemKeyToNameMapping["createdDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.createdDate,
+					taskItemKey: "createdDate",
+				},
+				{
+					index: 8,
+					property: taskItemKeyToNameMapping["startDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.startDate,
+					taskItemKey: "startDate",
+				},
+				{
+					index: 9,
+					property: taskItemKeyToNameMapping["scheduledDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.scheduledDate,
+					taskItemKey: "scheduledDate",
+				},
+				{
+					index: 10,
+					property: taskItemKeyToNameMapping["due"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.due,
+					taskItemKey: "due",
+				},
+				{
+					index: 11,
+					property: taskItemKeyToNameMapping["dependsOn"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dependsOn,
+					taskItemKey: "dependsOn",
+				},
+				{
+					index: 12,
+					property: taskItemKeyToNameMapping["cancelledDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
+					taskItemKey: "cancelledDate",
+				},
+				{
+					index: 13,
+					property: taskItemKeyToNameMapping["completionDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.completionDate,
+					taskItemKey: "completionDate",
+				},
+				{
+					index: 14,
+					property: taskItemKeyToNameMapping["filePath"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.filePath,
+					taskItemKey: "filePath",
+				},
+				{
+					index: 15,
+					property: taskItemKeyToNameMapping["taskLocation"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.taskLocation,
+					taskItemKey: "taskLocation",
+				},
+				{
+					index: 16,
+					property: taskItemKeyToNameMapping["dateModified"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
+					taskItemKey: "",
+				},
+			],
 			showFileNameInCard: false,
 			showFrontmatterTagsOnCards: false,
 			tasksCacheFilePath: "",

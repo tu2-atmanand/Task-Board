@@ -98,7 +98,7 @@ export function updateRGBAOpacity(
 	}
 }
 
-/** Create a DocumentFragment from sanitized HTML string
+/** Create a DocumentFragment from sanitized HTML string using Obsidian API
  * @param html - HTML string to sanitize and convert
  * @returns DocumentFragment containing the sanitized HTML
  */
