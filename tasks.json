@@ -1,7 +1,159 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-21T23:09:04",
+    "Modified_at": "2025-10-22T08:24:07",
     "Pending": {
+        "Destinatio/Task Source 1.md": [
+            {
+                "id": 1,
+                "legacyId": "1",
+                "status": " ",
+                "title": "- [ ] Task 1 with Tag #tasks 🆔 1",
+                "body": [
+                    "\t- [ ] This is a sub-task to the task ID 1.",
+                    "\t- I should complete this task as soon as possible, faster."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#tasks"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 59
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2,
+                "legacyId": "2",
+                "status": " ",
+                "title": "- [ ] Task 2 without Tags 🆔 2 ⛔ 1 ⏫ ➕ 2025-09-21 ⏳ 2025-09-23 📅 2025-09-21",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-09-21",
+                "startDate": "",
+                "scheduledDate": "2025-09-23",
+                "due": "2025-09-21",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 2,
+                "dependsOn": [
+                    "1"
+                ],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 76
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3,
+                "legacyId": "3",
+                "status": "/",
+                "title": "- [/] In progress Task 3 with Tag #tasks ⛔2, 5  🆔 3",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#tasks"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "2",
+                    "5"
+                ],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 6,
+                    "startCharIndex": 0,
+                    "endLine": 6,
+                    "endCharIndex": 52
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2025-10-10.md": [
+            {
+                "id": 240,
+                "legacyId": "240",
+                "status": " ",
+                "title": "- [ ] This is a task of yesterday. #doc  🆔 240  ⛔ 12b153",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-10-10",
+                "due": "",
+                "tags": [
+                    "#doc"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "12b153"
+                ],
+                "filePath": "Daily_Notes/2025-10-10.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 57
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Daily_Notes/2024-10-10.md": [
+            {
+                "id": 2401609950,
+                "legacyId": "12b153",
+                "status": " ",
+                "title": "- [ ] This is a task from past year. ⏳ 2025-10-12  🆔 12b153",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-10-12",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Daily_Notes/2024-10-10.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 60
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "TaskNotes/2025-10-21T19_40.md": [
             {
                 "id": 266,
@@ -592,156 +744,6 @@
                     "startCharIndex": 0,
                     "endLine": 5,
                     "endCharIndex": 53
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Destinatio/Task Source 1.md": [
-            {
-                "id": 1,
-                "legacyId": "1",
-                "status": " ",
-                "title": "- [ ] Task 1 with Tag #tasks 🆔 1",
-                "body": [
-                    "\t- [ ] This is a sub-task to the task ID 1.",
-                    "\t- I should complete this task as soon as possible, faster."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#tasks"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Destinatio/Task Source 1.md",
-                "taskLocation": {
-                    "startLine": 2,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 59
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2,
-                "legacyId": "2",
-                "status": " ",
-                "title": "- [ ] Task 2 without Tags 🆔 2 ⛔ 1 ⏫ ➕ 2025-09-21 ⏳ 2025-09-23 📅 2025-09-21",
-                "body": [],
-                "time": "",
-                "createdDate": "2025-09-21",
-                "startDate": "",
-                "scheduledDate": "2025-09-23",
-                "due": "2025-09-21",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 2,
-                "dependsOn": [
-                    "1"
-                ],
-                "filePath": "Destinatio/Task Source 1.md",
-                "taskLocation": {
-                    "startLine": 5,
-                    "startCharIndex": 0,
-                    "endLine": 5,
-                    "endCharIndex": 76
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3,
-                "legacyId": "3",
-                "status": "/",
-                "title": "- [/] In progress Task 3 with Tag #tasks ⛔2, 5  🆔 3",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#tasks"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "2",
-                    "5"
-                ],
-                "filePath": "Destinatio/Task Source 1.md",
-                "taskLocation": {
-                    "startLine": 6,
-                    "startCharIndex": 0,
-                    "endLine": 6,
-                    "endCharIndex": 52
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Daily_Notes/2024-10-10.md": [
-            {
-                "id": 2613597781,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] This is a task from past year. ⏳ 2025-10-12 ",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-12",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2024-10-10.md",
-                "taskLocation": {
-                    "startLine": 3,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 50
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Daily_Notes/2025-10-10.md": [
-            {
-                "id": 240,
-                "legacyId": "240",
-                "status": " ",
-                "title": "- [ ] This is a task of yesterday. #doc  🆔 240 ",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-10",
-                "due": "",
-                "tags": [
-                    "#doc"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-10.md",
-                "taskLocation": {
-                    "startLine": 3,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 48
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1694,7 +1696,7 @@
         ],
         "Destinatio/Task Source 1.md": [
             {
-                "id": 1184212051,
+                "id": 770831338,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] Completed Task 4 with Tag #tasks",
