@@ -625,6 +625,22 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	animation: mapViewFadeIn 0.5s ease-in forwards;
 }
 
+.taskBoardMapViewContainerNodeResizerHandle {
+	background-color: var(--white);
+}
+
+.taskBoardMapViewContainerNodeResizerHandle:hover {
+	background-color: var(--red);
+}
+
+.taskBoardMapViewContainerNodeResizerEdges {
+	background-color: #007bff;
+}
+
+.taskBoardMapViewContainerNodeResizerEdges:hover {
+	background-color: red;
+}
+
 @keyframes mapViewFadeIn {
 	from {
 		opacity: 0;
