@@ -68,6 +68,19 @@ const MapView: React.FC<MapViewProps> = ({
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	// console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
+	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
+	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
+		switch (mapViewSettings.background) {
+			case mapViewBackgrounVariantTypes.dots:
+				return BackgroundVariant.Dots;
+			case mapViewBackgrounVariantTypes.lines:
+				return BackgroundVariant.Lines;
+			case mapViewBackgrounVariantTypes.cross:
+				return BackgroundVariant.Lines;
+			default:
+				return undefined;
+		}
+	})();
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
@@ -441,8 +454,8 @@ const MapView: React.FC<MapViewProps> = ({
 							}}
 						>
 							<Controls />
-							<MiniMap />
-							<Background gap={12} size={1} color='transparent' />
+							<MapViewMinimap />
+							<Background gap={12} size={1} color='transparent' variant={userBackgroundVariant} />
 						</ReactFlow>
 					</div>
 				</ReactFlowProvider>
