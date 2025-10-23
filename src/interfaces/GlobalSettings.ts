@@ -10,6 +10,8 @@ import {
 	colType,
 	taskStatuses,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
+	mapViewBackgrounVariantTypes,
+	mapViewNodeHandlePosition,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -122,6 +124,13 @@ export interface globalSettingsData {
 		taskId?: string;
 	};
 	boundTaskCompletionToChildTasks: boolean;
+	mapView: {
+		background: string;
+		handlePosition: number;
+		optimizedRender: boolean;
+		arrowForward: boolean;
+		animatedEdges: boolean;
+	};
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -571,6 +580,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				settingTab: 0,
 			},
 			boundTaskCompletionToChildTasks: false,
+			mapView: {
+				background: mapViewBackgrounVariantTypes.none,
+				handlePosition: mapViewNodeHandlePosition.horizontal,
+				optimizedRender: false,
+				arrowForward: true,
+				animatedEdges: true,
+			},
 		},
 	},
 };

@@ -145,3 +145,16 @@ export enum colType {
 	pathFiltered = "pathFiltered",
 	completed = "completed",
 }
+
+export enum mapViewBackgrounVariantTypes {
+	lines = "lines",
+	dots = "dots",
+	cross = "cross",
+	none = "none",
+	transparent = "transparent",
+}
+
+export enum mapViewNodeHandlePosition {
+	horizontal = 1,
+	vertical = 2,
+}
