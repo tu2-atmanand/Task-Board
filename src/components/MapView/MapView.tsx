@@ -236,7 +236,7 @@ const MapView: React.FC<MapViewProps> = ({
 							source: sourceId,
 							target: depId,
 							type: 'default',
-							animated: false,
+							animated: mapViewSettings.animatedEdges,
 							markerEnd: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
