@@ -14,7 +14,8 @@ import {
 	Edge,
 	MiniMap,
 	Connection,
-	MarkerType
+	MarkerType,
+	BackgroundVariant
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -28,6 +29,8 @@ import { debounce } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/interfaces/Constants';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
+import { MapViewMinimap } from './MapViewMinimap';
+import { mapViewBackgrounVariantTypes } from 'src/interfaces/Enums';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -47,7 +50,7 @@ export type viewPort = {
 
 export type nodeSize = {
 	width: number;
-	height: number;
+	// height: number;
 }
 
 export type nodePosition = {
@@ -56,7 +59,7 @@ export type nodePosition = {
 }
 
 const nodeTypes = {
-	CustomNodeResizer,
+	// CustomNodeResizer,
 	ResizableNodeSelected,
 };
 
@@ -119,7 +122,7 @@ const MapView: React.FC<MapViewProps> = ({
 		const sizes = loadNodeSizes();
 		Object.keys(sizes).forEach(id => {
 			if (!Number.isFinite(sizes[id].width)) sizes[id].width = 300;
-			if (!Number.isFinite(sizes[id].height)) sizes[id].height = 80;
+			// if (!Number.isFinite(sizes[id].height)) sizes[id].height = 80;
 		});
 		setNodeSizes(sizes);
 
@@ -182,7 +185,7 @@ const MapView: React.FC<MapViewProps> = ({
 						// 	height: savedSize.height ?? 80,
 						// },
 						width: Number.isFinite(savedSize.width) ? savedSize.width : Number(plugin.settings.data.globalSettings.columnWidth),
-						height: Number.isFinite(savedSize.height) ? savedSize.height : undefined,
+						// height: Number.isFinite(savedSize.height) ? savedSize.height : undefined,
 					});
 					yOffset += rowSpacing;
 				}
