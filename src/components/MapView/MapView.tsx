@@ -171,7 +171,7 @@ const MapView: React.FC<MapViewProps> = ({
 				if (task.legacyId) {
 					const id = task.legacyId ? task.legacyId : String(task.id);
 					if (usedIds.has(id)) {
-						console.warn('Duplicate node id detected:', id);
+						console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
 						return; // Skip duplicate
 					}
 					usedIds.add(id);
@@ -397,7 +397,7 @@ const MapView: React.FC<MapViewProps> = ({
 		return (
 			<div className='mapViewWrapper'>
 				<div className="mapView">
-					<div className="mapViewContainer" style={{ width: '100%', height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 						<div className="spinner"></div>
 						<span>{t('loading-map-data')}</span>
 					</div>
@@ -409,8 +409,9 @@ const MapView: React.FC<MapViewProps> = ({
 		<div className='mapViewWrapper'>
 			<div className="mapView">
 				<ReactFlowProvider>
-					<div className="mapViewContainer" style={{ width: '100%', height: '80vh' }}>
+					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh' }}>
 						<ReactFlow
+							proOptions={{ hideAttribution: true }}
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
