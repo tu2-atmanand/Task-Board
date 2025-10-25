@@ -544,7 +544,7 @@ const MapView: React.FC<MapViewProps> = ({
 		<div className='mapViewWrapper'>
 			<div className="mapView">
 				<ReactFlowProvider>
-					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh', ['--xy-zoom' as string]: viewport.zoom }}>
+					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh', '--xy-zoom': viewport.zoom } as React.CSSProperties}>
 						<ReactFlow
 							// Data Initialization
 							proOptions={{ hideAttribution: true }}

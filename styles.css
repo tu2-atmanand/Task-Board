@@ -4154,9 +4154,9 @@ svg.react-flow__connectionline {
 	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
 	border-radius: 100%;
 	opacity: 0;
-	transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 	transform: scale(calc(1 / var(--xy-zoom, 1)));
 	transform-origin: center;
+	transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
 .react-flow__node:hover .react-flow__handle {
