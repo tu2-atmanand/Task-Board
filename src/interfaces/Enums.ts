@@ -158,3 +158,8 @@ export enum mapViewNodeHandlePosition {
 	horizontal = 1,
 	vertical = 2,
 }
+
+export enum mapViewScrollAction {
+	zoom = 1,
+	pan = 2,
+}

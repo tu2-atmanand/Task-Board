@@ -12,6 +12,7 @@ import {
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	mapViewBackgrounVariantTypes,
 	mapViewNodeHandlePosition,
+	mapViewScrollAction,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -130,6 +131,9 @@ export interface globalSettingsData {
 		optimizedRender: boolean;
 		arrowForward: boolean;
 		animatedEdges: boolean;
+		scrollAction: mapViewScrollAction;
+		showMinimap: boolean;
+		renderVisibleNodes: boolean;
 	};
 }
 
@@ -586,6 +590,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				optimizedRender: false,
 				arrowForward: true,
 				animatedEdges: true,
+				scrollAction: mapViewScrollAction.zoom,
+				showMinimap: true,
+				renderVisibleNodes: false,
 			},
 		},
 	},

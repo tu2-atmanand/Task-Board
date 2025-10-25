@@ -31,7 +31,7 @@ import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
 import { MapViewMinimap } from './MapViewMinimap';
-import { mapViewBackgrounVariantTypes } from 'src/interfaces/Enums';
+import { mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
 
 type MapViewProps = {
@@ -554,14 +554,14 @@ const MapView: React.FC<MapViewProps> = ({
 							}}
 							// fitView={true}
 
-							// viewport control
-							panOnScroll={false}
-							zoomOnScroll={true}
+							// viewport controls
+							panOnScroll={mapViewSettings.scrollAction === mapViewScrollAction.pan ? true : false}
+							zoomOnScroll={mapViewSettings.scrollAction === mapViewScrollAction.zoom ? true : false}
 							// preventScrolling={false}
 							selectionOnDrag={false}
-							panOnDrag={[0, 1, 2]}
-							selectionMode={SelectionMode.Partial}
+							panOnDrag={[1, 2]}
 							selectNodesOnDrag={true}
+							selectionMode={SelectionMode.Partial}
 
 							// Events
 							// onEdgesChange={onEdgesChange}
