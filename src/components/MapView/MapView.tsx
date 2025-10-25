@@ -229,8 +229,8 @@ const MapView: React.FC<MapViewProps> = ({
 			idToTask.set(id, task);
 		});
 		// Calculate marker size based on zoom level (inverse scaling to keep visual size consistent)
-		const baseMarkerSize = 30;
-		const scaledMarkerSize = baseMarkerSize / viewport.zoom;
+		const baseMarkerSize = 40;
+		const scaledMarkerSize = baseMarkerSize / (viewport.zoom > 1.2 ? 1 : (viewport.zoom < 0.7 ? 1 : viewport.zoom));
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
 			if (Array.isArray(task.dependsOn)) {
