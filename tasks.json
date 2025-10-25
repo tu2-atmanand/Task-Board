@@ -1546,8 +1546,8 @@
         ],
         "TaskBoard/TBNotes/2025-10-21T19_40 - Copy.md": [
             {
-                "id": 266,
-                "legacyId": "266",
+                "id": 286,
+                "legacyId": "286",
                 "title": "This is a new task-note after fixing the blank modal bug and with better frontmatter UI.",
                 "body": [
                     "- [ ] This should be the sub-task for this task-note."
