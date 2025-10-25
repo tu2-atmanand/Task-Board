@@ -4022,13 +4022,13 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 
 .react-flow__edge-path {
 	stroke: var(--xy-edge-stroke, var(--xy-edge-stroke-default));
-	stroke-width: var(--xy-edge-stroke-width, var(--xy-edge-stroke-width-default));
+	stroke-width: calc(var(--xy-edge-stroke-width, var(--xy-edge-stroke-width-default)) / var(--xy-zoom, 1));
 	fill: none;
 }
 
 .react-flow__connection-path {
 	stroke: var(--xy-connectionline-stroke, var(--xy-connectionline-stroke-default));
-	stroke-width: var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default));
+	stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--xy-zoom, 1));
 	fill: none;
 }
 
@@ -4153,6 +4153,14 @@ svg.react-flow__connectionline {
 	background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default));
 	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
 	border-radius: 100%;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+	transform: scale(calc(1 / var(--xy-zoom, 1)));
+	transform-origin: center;
+}
+
+.react-flow__node:hover .react-flow__handle {
+	opacity: 1;
 }
 
 .react-flow__handle.connectingfrom {

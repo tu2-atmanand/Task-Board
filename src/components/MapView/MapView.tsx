@@ -228,6 +228,9 @@ const MapView: React.FC<MapViewProps> = ({
 			const id = task.legacyId ? task.legacyId : String(task.id);
 			idToTask.set(id, task);
 		});
+		// Calculate marker size based on zoom level (inverse scaling to keep visual size consistent)
+		const baseMarkerSize = 30;
+		const scaledMarkerSize = baseMarkerSize / viewport.zoom;
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
 			if (Array.isArray(task.dependsOn)) {
@@ -243,15 +246,15 @@ const MapView: React.FC<MapViewProps> = ({
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
 								color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? 30 : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? 30 : 0,
+								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? scaledMarkerSize : 0,
+								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? scaledMarkerSize : 0,
 							},
 							markerEnd: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
 								color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? 30 : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? 30 : 0,
+								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? scaledMarkerSize : 0,
+								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? scaledMarkerSize : 0,
 							},
 						});
 					}
@@ -260,7 +263,7 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged]);
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged, viewport.zoom]);
 
 	const handleNodePositionChange = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
@@ -541,7 +544,7 @@ const MapView: React.FC<MapViewProps> = ({
 		<div className='mapViewWrapper'>
 			<div className="mapView">
 				<ReactFlowProvider>
-					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh' }}>
+					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh', ['--xy-zoom' as string]: viewport.zoom }}>
 						<ReactFlow
 							// Data Initialization
 							proOptions={{ hideAttribution: true }}
