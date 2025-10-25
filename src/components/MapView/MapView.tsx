@@ -492,7 +492,11 @@ const MapView: React.FC<MapViewProps> = ({
 							elevateEdgesOnSelect={true}
 						>
 							<Controls />
+
+							{mapViewSettings.showMinimap && (
 							<MapViewMinimap />
+							)}
+
 							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />
 						</ReactFlow>
 					</div>
