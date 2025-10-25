@@ -2079,13 +2079,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	flex-direction: row;
 	position: sticky;
 	z-index: 1;
+	overflow-x: scroll;
 	top: calc(-1 * var(--size-4-8));
 	box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
 	backdrop-filter: blur(5px);
 }
 
 .taskBoard-settings-tab-button {
-	flex: 1;
+	min-width: fit-content;
 	background-color: var(--background-secondary);
 	align-content: center;
 	text-align-last: center;
@@ -2093,6 +2094,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	font-weight: 700;
 	border: solid 1px var(--checkbox-color-hover);
 	border-radius: 4px;
+	padding-inline: 1rem;
 	color: var(--color-base-60);
 }
 
