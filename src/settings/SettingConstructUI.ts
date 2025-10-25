@@ -36,6 +36,10 @@ import {
 	NotificationService,
 	UniversalDateOptions,
 	taskPropertyFormatOptions,
+	mapViewBackgrounVariantTypes,
+	mapViewNodeMapOrientation,
+	mapViewArrowDirection,
+	mapViewScrollAction,
 } from "src/interfaces/Enums";
 import {
 	frontmatterFormatting,
@@ -155,6 +159,10 @@ export class SettingsManager {
 			{
 				key: t("tbnote"),
 				handler: () => this.renderTBNoteTabSettings(tabContent),
+			},
+			{
+				key: t("map-view"),
+				handler: () => this.renderMapViewTabSettings(tabContent),
 			},
 			{
 				key: t("automation"),
@@ -1421,6 +1429,155 @@ export class SettingsManager {
 		// 	);
 		// 	renderFrontmatterFormattingItems();
 		// });
+	}
+
+	private renderMapViewTabSettings(contentEl: HTMLElement) {
+		const {
+			background,
+			mapOrientation,
+			optimizedRender,
+			arrowDirection,
+			animatedEdges,
+			scrollAction,
+			showMinimap,
+			renderVisibleNodes,
+		} = this.globalSettings?.mapView!;
+
+		new Setting(contentEl)
+			.setName(
+				createFragmentWithHTML("<b>" + t("dfp-methodology") + "</b>")
+			)
+			.setDesc(
+				createFragmentWithHTML(
+					t("dfp-methodology-description-1") +
+						"<br />" +
+						t("dfp-methodology-description-2") +
+						" <a href='https://github.com/tu2-atmanand/Task-Board/discussions/400'>" +
+						t("dfp-methodology") +
+						"." +
+						"</a>"
+				)
+			);
+
+		new Setting(contentEl)
+			.setName(t("render-only-visible-nodes"))
+			.setDesc(
+				createFragmentWithHTML(
+					"<ul>" +
+						"<li>" +
+						t("render-only-visible-nodes-description-1") +
+						"</li>" +
+						"<li>" +
+						t("render-only-visible-nodes-description-2") +
+						"</li>" +
+						"</ul>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(renderVisibleNodes).onChange(async (value) => {
+					this.globalSettings!.mapView.renderVisibleNodes = value;
+					await this.saveSettings();
+				})
+			);
+
+		new Setting(contentEl).setName(t("controls")).setHeading();
+
+		new Setting(contentEl)
+			.setName(t("mouse-wheel-behaviour"))
+			.setDesc(t("mouse-wheel-behaviour-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewScrollAction.zoom]: t("zoom"),
+						[mapViewScrollAction.pan]: t("pan"),
+					})
+					.setValue(scrollAction)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.scrollAction =
+							value as mapViewScrollAction;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl).setName(t("appearance")).setHeading();
+
+		new Setting(contentEl)
+			.setName(t("canvas-background"))
+			.setDesc(t("canvas-background-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewBackgrounVariantTypes.none]: t("default"),
+						[mapViewBackgrounVariantTypes.transparent]:
+							t("transparent"),
+						[mapViewBackgrounVariantTypes.dots]: t("dots"),
+						[mapViewBackgrounVariantTypes.lines]: t("lines"),
+						[mapViewBackgrounVariantTypes.cross]: t("cross"),
+					})
+					.setValue(background)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.background =
+							value as mapViewBackgrounVariantTypes;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("map-orientation"))
+			.setDesc(t("map-orientation-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewNodeMapOrientation.horizontal]: t("horizontal"),
+						[mapViewNodeMapOrientation.vertical]: t("vertical"),
+					})
+					.setValue(mapOrientation)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.mapOrientation =
+							value as mapViewNodeMapOrientation;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("link-arrow-direction"))
+			.setDesc(t("link-arrow-direction-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewArrowDirection.childToParent]:
+							t("child-to-parent"),
+						[mapViewArrowDirection.parentToChild]:
+							t("parent-to-child"),
+						[mapViewArrowDirection.bothWay]: t("both-way"),
+					})
+					.setValue(arrowDirection)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.arrowDirection =
+							value as mapViewArrowDirection;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("animate-links"))
+			.setDesc(t("animate-links-description"))
+			.addToggle((toggle) =>
+				toggle.setValue(animatedEdges).onChange(async (value) => {
+					this.globalSettings!.mapView.animatedEdges = value;
+					await this.saveSettings();
+				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("show-minimap"))
+			.setDesc(t("show-minimap-description"))
+			.addToggle((toggle) =>
+				toggle.setValue(showMinimap).onChange(async (value) => {
+					this.globalSettings!.mapView.showMinimap = value;
+					await this.saveSettings();
+				})
+			);
 	}
 
 	// Function to render "Automation" tab content
