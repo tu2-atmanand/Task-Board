@@ -4146,10 +4146,8 @@ svg.react-flow__connectionline {
 .react-flow__handle {
 	position: absolute;
 	pointer-events: none;
-	min-width: 5px;
-	min-height: 5px;
-	width: 6px;
-	height: 6px;
+	min-width: 8px;
+	min-height: 8px;
 	background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default));
 	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
 	border-radius: 100%;
@@ -4177,24 +4175,36 @@ svg.react-flow__connectionline {
 	left: 50%;
 	bottom: 0;
 	transform: translate(-50%, 50%);
+
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-top {
 	top: 0;
 	left: 50%;
 	transform: translate(-50%, -50%);
+
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-left {
 	top: 50%;
 	left: 0;
 	transform: translate(-50%, -50%);
+
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-right {
 	top: 50%;
 	right: 0;
 	transform: translate(50%, -50%);
+
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__edgeupdater {
