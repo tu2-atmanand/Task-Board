@@ -456,7 +456,7 @@ const MapView: React.FC<MapViewProps> = ({
 						>
 							<Controls />
 							<MapViewMinimap />
-							<Background gap={12} size={1} color='transparent' variant={userBackgroundVariant} />
+							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />
 						</ReactFlow>
 					</div>
 				</ReactFlowProvider>
