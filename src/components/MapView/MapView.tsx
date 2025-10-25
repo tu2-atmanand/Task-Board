@@ -31,7 +31,7 @@ import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
 import { MapViewMinimap } from './MapViewMinimap';
-import { mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
+import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
 
 type MapViewProps = {
@@ -243,15 +243,15 @@ const MapView: React.FC<MapViewProps> = ({
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
 								color: 'var(--text-normal)',
-								height: mapViewSettings.arrowForward ? 0 : 30,
-								width: mapViewSettings.arrowForward ? 0 : 30,
+								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? 30 : 0,
+								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? 30 : 0,
 							},
 							markerEnd: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
 								color: 'var(--text-normal)',
-								height: mapViewSettings.arrowForward ? 30 : 0,
-								width: mapViewSettings.arrowForward ? 30 : 0,
+								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? 30 : 0,
+								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? 30 : 0,
 							},
 						});
 					}
@@ -407,7 +407,7 @@ const MapView: React.FC<MapViewProps> = ({
 		const sortMenu = new Menu();
 
 		sortMenu.addItem((item) => {
-			item.setTitle(t("add-task"));
+			item.setTitle(t("add-new-task"));
 			item.setIcon("square-check");
 			item.onClick(async () => {
 				new Notice(t("under-development-feature-message")); // TODO: Will be implemented in the next version.
@@ -424,7 +424,7 @@ const MapView: React.FC<MapViewProps> = ({
 		sortMenu.addSeparator();
 
 		sortMenu.addItem((item) => {
-			item.setTitle(t("backgrond"));
+			item.setTitle(t("background-style"));
 			item.setIcon("square");
 			const backgroundMenu = item.setSubmenu()
 
@@ -492,7 +492,7 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 
 		sortMenu.addItem((item) => {
-			item.setTitle(t("animate-connections"));
+			item.setTitle(t("animate-links"));
 			item.setIcon("worm");
 			item.onClick(async () => {
 				plugin.settings.data.globalSettings.mapView.animatedEdges = !plugin.settings.data.globalSettings.mapView.animatedEdges;
@@ -558,9 +558,9 @@ const MapView: React.FC<MapViewProps> = ({
 							panOnScroll={mapViewSettings.scrollAction === mapViewScrollAction.pan ? true : false}
 							zoomOnScroll={mapViewSettings.scrollAction === mapViewScrollAction.zoom ? true : false}
 							// preventScrolling={false}
-							selectionOnDrag={false}
 							panOnDrag={[1, 2]}
 							selectNodesOnDrag={true}
+							selectionOnDrag={true}
 							selectionMode={SelectionMode.Partial}
 
 							// Events
