@@ -52,7 +52,7 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 			{targetPosition === mapViewNodeHandlePosition.vertical && !arrowForward && (
 				<Handle type="source" position={Position.Left} />
 			)}
-			<div className='taskBoardMapViewContainerNodeResizerTaskItemConatiner'>{data.label}</div >
+			<div className={`taskBoardMapViewContainerNodeResizerTaskItem${selected ? '-selected' : ''}`}>{data.label}</div >
 			{targetPosition === mapViewNodeHandlePosition.horizontal && arrowForward && (
 				<Handle type="source" position={Position.Bottom} />
 			)

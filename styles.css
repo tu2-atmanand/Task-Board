@@ -629,7 +629,15 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	background-color: var(--white);
 }
 
-.taskBoardMapViewContainerNodeResizerHandle:hover {
+.taskBoardMapViewContainerNodeResizerTaskItem {}
+
+.taskBoardMapViewContainerNodeResizerTaskItem-selected {
+	border: 4px solid violet;
+	border-style: inset;
+	border-radius: 10px;
+}
+
+/* .taskBoardMapViewContainerNodeResizerHandle:hover {
 	background-color: var(--red);
 }
 
