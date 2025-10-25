@@ -24,6 +24,10 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 		<>
 			<NodeResizer
 				handleClassName='taskBoardMapViewContainerNodeResizerHandle'
+				shouldResize={(position) => {
+					// Should only be allowed to resize in horizontal (ie. width) direction.
+					if (position.dy) return false; else return true;
+				}}
 				isVisible={selected}
 				autoScale={true}
 				onResizeEnd={(newSize, params) => {
