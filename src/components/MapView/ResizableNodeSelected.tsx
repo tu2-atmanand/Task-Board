@@ -44,36 +44,20 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 					}
 				}}
 			/>
-			{targetPosition === mapViewNodeHandlePosition.horizontal && arrowForward && (
+			{targetPosition === mapViewNodeHandlePosition.horizontal && (
+				<Handle autoFocus={false} type="target" position={Position.Left} />
+			)}
+			{targetPosition === mapViewNodeHandlePosition.vertical && (
 				<Handle type="target" position={Position.Top} />
 			)}
-			{targetPosition === mapViewNodeHandlePosition.horizontal && !arrowForward && (
-				<Handle type="source" position={Position.Top} />
-			)}
-			{targetPosition === mapViewNodeHandlePosition.vertical && arrowForward && (
-				<Handle type="target" position={Position.Left} />
-			)}
-			{targetPosition === mapViewNodeHandlePosition.vertical && !arrowForward && (
-				<Handle type="source" position={Position.Left} />
-			)}
 			<div className={`taskBoardMapViewContainerNodeResizerTaskItem${selected ? '-selected' : ''}`}>{data.label}</div >
-			{targetPosition === mapViewNodeHandlePosition.horizontal && arrowForward && (
-				<Handle type="source" position={Position.Bottom} />
+			{targetPosition === mapViewNodeHandlePosition.horizontal && (
+				<Handle autoFocus={false} type="source" position={Position.Right} />
 			)
 			}
 			{
-				targetPosition === mapViewNodeHandlePosition.horizontal && !arrowForward && (
-					<Handle type="target" position={Position.Bottom} />
-				)
-			}
-			{
-				targetPosition === mapViewNodeHandlePosition.vertical && arrowForward && (
-					<Handle type="source" position={Position.Right} />
-				)
-			}
-			{
-				targetPosition === mapViewNodeHandlePosition.vertical && !arrowForward && (
-					<Handle type="target" position={Position.Right} />
+				targetPosition === mapViewNodeHandlePosition.vertical && (
+					<Handle type="source" position={Position.Bottom} />
 				)
 			}
 
