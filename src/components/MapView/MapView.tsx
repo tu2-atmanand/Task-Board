@@ -15,7 +15,8 @@ import {
 	MiniMap,
 	Connection,
 	MarkerType,
-	BackgroundVariant
+	BackgroundVariant,
+	SelectionMode
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -76,7 +77,7 @@ const MapView: React.FC<MapViewProps> = ({
 			case mapViewBackgrounVariantTypes.lines:
 				return BackgroundVariant.Lines;
 			case mapViewBackgrounVariantTypes.cross:
-				return BackgroundVariant.Lines;
+				return BackgroundVariant.Cross;
 			default:
 				return undefined;
 		}
@@ -392,6 +393,24 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	}, 2000);
 
+	const handleOnDragOver = () => {
+		console.log("On Drag Over...");
+	}
+
+	const handlePaneContextMenu = (event: MouseEvent | React.MouseEvent) => {
+		console.log("Right clicked on pane...\nEvent :", event);
+	}
+
+	const handleNodeMouseEnter = (node: Node) => {
+		console.log("Mouse entered inside the node...\nNode :", node);
+		node.selected = true;
+	}
+
+	const handleNodeMouseLeave = (node: Node) => {
+		console.log("Mouse left the node...\nNode :", node);
+		node.selected = false;
+	}
+
 
 	if (!storageLoaded) {
 		return (
@@ -411,6 +430,7 @@ const MapView: React.FC<MapViewProps> = ({
 				<ReactFlowProvider>
 					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh' }}>
 						<ReactFlow
+							// Data Initialization
 							proOptions={{ hideAttribution: true }}
 							nodes={nodes}
 							edges={edges}
@@ -419,13 +439,29 @@ const MapView: React.FC<MapViewProps> = ({
 							onNodeDragStop={() => {
 								handleNodePositionChange();
 							}}
+							// fitView={true}
+
+							// viewport control
+							panOnScroll={false}
+							zoomOnScroll={true}
+							// preventScrolling={false}
+							selectionOnDrag={false}
+							panOnDrag={[0, 1, 2]}
+							selectionMode={SelectionMode.Partial}
+							selectNodesOnDrag={true}
+
+							// Events
 							// onEdgesChange={onEdgesChange}
 							onConnect={onConnect}
-							// fitView={true}
-							panOnScroll={false}
-							zoomOnPinch={true}
-							zoomOnScroll={true}
-							onlyRenderVisibleElements={true}
+							onPaneContextMenu={(event) => handlePaneContextMenu(event)}
+							// onNodeMouseEnter={(event, node) => handleNodeMouseEnter(node)} // TODO : For now lets user select the node and then resize it, instead of hover and resize feature, similar to cavnas. Since this Map view shouldnt emulate exactly like the canvas, hence this decision.
+							// onNodeMouseLeave={(event, node) => handleNodeMouseLeave(node)}
+							// onEdgeMouseEnter={handleEdgeMouseEnter}
+							// onEdgeMouseLeave={handleEdgeMouseLeave}
+							// onDrag={handleOnDragOver}
+
+							// rendering
+							onlyRenderVisibleElements={false} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
 							onInit={(instance) => {
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
@@ -453,6 +489,7 @@ const MapView: React.FC<MapViewProps> = ({
 								debouncedSetViewportStorage(vp);
 								// throttledSetViewportStorage(vp);
 							}}
+							elevateEdgesOnSelect={true}
 						>
 							<Controls />
 							<MapViewMinimap />
