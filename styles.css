@@ -626,7 +626,8 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 }
 
 .taskBoardMapViewContainerNodeResizerHandle {
-	background-color: var(--white);
+	display: none !important;
+	/* background-color: var(--white); */
 }
 
 .taskBoardMapViewContainerNodeResizerTaskItem {}
@@ -639,7 +640,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 /* .taskBoardMapViewContainerNodeResizerHandle:hover {
 	background-color: var(--red);
-}
+} */
 
 .taskBoardMapViewContainerNodeResizerEdges {
 	background-color: #007bff;
@@ -3884,7 +3885,7 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 	--xy-attribution-background-color-default: rgba(255, 255, 255, 0.5);
 
 	--xy-minimap-background-color-default: #fff;
-	--xy-minimap-mask-background-color-default: rgba(240, 240, 240, 0.6);
+	--xy-minimap-mask-background-color-default: var(--background-modifier-box-shadow);
 	--xy-minimap-mask-stroke-color-default: transparent;
 	--xy-minimap-mask-stroke-width-default: 1;
 	--xy-minimap-node-background-color-default: #e2e2e2;
@@ -3933,7 +3934,7 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 	--xy-attribution-background-color-default: rgba(150, 150, 150, 0.25);
 
 	--xy-minimap-background-color-default: #141414;
-	--xy-minimap-mask-background-color-default: rgba(60, 60, 60, 0.6);
+	--xy-minimap-mask-background-color-default: var(--background-modifier-box-shadow);
 	--xy-minimap-mask-stroke-color-default: transparent;
 	--xy-minimap-mask-stroke-width-default: 1;
 	--xy-minimap-node-background-color-default: #2b2b2b;
@@ -4273,10 +4274,14 @@ svg.react-flow__connectionline {
 .react-flow__minimap {
 	background: var(--xy-minimap-background-color-props,
 			var(--xy-minimap-background-color, var(--xy-minimap-background-color-default)));
+	border: 1px solid var(--color-accent);
+	border-radius: 8px;
 }
 
 .react-flow__minimap-svg {
 	display: block;
+	border: 1px solid var(--color-accent);
+	border-radius: 8px;
 }
 
 .react-flow__minimap-mask {
@@ -4454,7 +4459,8 @@ svg.react-flow__connectionline {
 
 .react-flow__resize-control.top,
 .react-flow__resize-control.bottom {
-	cursor: ns-resize;
+	/* Keep the cursor normal, since height resizing is not allowed */
+	cursor: none;
 }
 
 .react-flow__resize-control.top.left,
@@ -4469,12 +4475,13 @@ svg.react-flow__connectionline {
 
 /* handle styles */
 .react-flow__resize-control.handle {
-	width: 5px;
+	/* width: 5px;
 	height: 5px;
 	border: 1px solid #fff;
 	border-radius: 1px;
 	background-color: var(--xy-resize-background-color, var(--xy-resize-background-color-default));
-	translate: -50% -50%;
+	translate: -50% -50%; */
+	display: none !important;
 }
 
 .react-flow__resize-control.handle.left {
@@ -4522,7 +4529,7 @@ svg.react-flow__connectionline {
 
 .react-flow__resize-control.line.left,
 .react-flow__resize-control.line.right {
-	width: 1px;
+	width: 5px;
 	transform: translate(-50%, 0);
 	top: 0;
 	height: 100%;
@@ -4530,17 +4537,17 @@ svg.react-flow__connectionline {
 
 .react-flow__resize-control.line.left {
 	left: 0;
-	border-left-width: 1px;
+	border-left-width: 0px !important;
 }
 
 .react-flow__resize-control.line.right {
 	left: 100%;
-	border-right-width: 1px;
+	border-right-width: 0px !important;
 }
 
 .react-flow__resize-control.line.top,
 .react-flow__resize-control.line.bottom {
-	height: 1px;
+	height: 5px;
 	transform: translate(0, -50%);
 	left: 0;
 	width: 100%;
@@ -4548,11 +4555,11 @@ svg.react-flow__connectionline {
 
 .react-flow__resize-control.line.top {
 	top: 0;
-	border-top-width: 1px;
+	border-top-width: 0px !important;
 }
 
 .react-flow__resize-control.line.bottom {
-	border-bottom-width: 1px;
+	border-bottom-width: 0px !important;
 	top: 100%;
 }
 
