@@ -26,7 +26,7 @@ import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
 import CustomNodeResizer from './CustomNodeResizer';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
-import { debounce } from 'obsidian';
+import { debounce, Menu, Notice } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/interfaces/Constants';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
@@ -238,12 +238,19 @@ const MapView: React.FC<MapViewProps> = ({
 							target: depId,
 							type: 'default',
 							animated: mapViewSettings.animatedEdges,
+							markerStart: {
+								type: MarkerType.ArrowClosed, // required property
+								// optional properties
+								color: 'var(--text-normal)',
+								height: mapViewSettings.arrowForward ? 0 : 30,
+								width: mapViewSettings.arrowForward ? 0 : 30,
+							},
 							markerEnd: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
-								color: 'white',
-								height: 30,
-								width: 30,
+								color: 'var(--text-normal)',
+								height: mapViewSettings.arrowForward ? 30 : 0,
+								width: mapViewSettings.arrowForward ? 30 : 0,
 							},
 						});
 					}
