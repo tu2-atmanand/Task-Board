@@ -32,6 +32,7 @@ import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
 import { MapViewMinimap } from './MapViewMinimap';
 import { mapViewBackgrounVariantTypes } from 'src/interfaces/Enums';
+import { eventEmitter } from 'src/services/EventEmitter';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -400,23 +401,128 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	}, 2000);
 
-	const handleOnDragOver = () => {
-		console.log("On Drag Over...");
-	}
 
 	const handlePaneContextMenu = (event: MouseEvent | React.MouseEvent) => {
-		console.log("Right clicked on pane...\nEvent :", event);
+
+		const sortMenu = new Menu();
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("add-task"));
+			item.setIcon("square-check");
+			item.onClick(async () => {
+				new Notice(t("under-development-feature-message")); // TODO: Will be implemented in the next version.
+			})
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("add-sticky-note"));
+			item.setIcon("sticky-note");
+			item.onClick(async () => {
+				new Notice(t("under-development-feature-message")); // TODO: Will be implemented in the next version.
+			})
+		});
+
+		sortMenu.addSeparator();
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("backgrond"));
+			item.setIcon("square");
+			const backgroundMenu = item.setSubmenu()
+
+			backgroundMenu.addItem((item) => {
+				item.setTitle(t("transparent"));
+				item.setIcon("eye-off");
+				item.onClick(() => {
+					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.transparent;
+					plugin.saveSettings();
+
+					// Refresh the board view
+					eventEmitter.emit('REFRESH_BOARD');
+				})
+				item.setChecked(mapViewSettings.background === mapViewBackgrounVariantTypes.transparent);
+			})
+
+			backgroundMenu.addItem((item) => {
+				item.setTitle(t("dots"));
+				item.setIcon("grip");
+				item.onClick(() => {
+					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.dots;
+					plugin.saveSettings();
+
+					eventEmitter.emit('REFRESH_BOARD');
+				})
+				item.setChecked(mapViewSettings.background === mapViewBackgrounVariantTypes.dots);
+			})
+
+			backgroundMenu.addItem((item) => {
+				item.setTitle(t("lines"));
+				item.setIcon("grid-3x3");
+				item.onClick(() => {
+					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.lines;
+					plugin.saveSettings();
+
+					eventEmitter.emit('REFRESH_BOARD');
+				})
+				item.setChecked(mapViewSettings.background === mapViewBackgrounVariantTypes.lines);
+			})
+
+			backgroundMenu.addItem((item) => {
+				item.setTitle(t("cross"));
+				item.setIcon("x");
+				item.onClick(() => {
+					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.cross;
+					plugin.saveSettings();
+
+					eventEmitter.emit('REFRESH_BOARD');
+				})
+				item.setChecked(mapViewSettings.background === mapViewBackgrounVariantTypes.cross);
+			})
+
+		});
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("show-minimap"));
+			item.setIcon("map");
+			item.onClick(async () => {
+				plugin.settings.data.globalSettings.mapView.showMinimap = !plugin.settings.data.globalSettings.mapView.showMinimap;
+				plugin.saveSettings();
+
+				eventEmitter.emit('REFRESH_BOARD');
+			})
+			item.setChecked(mapViewSettings.showMinimap);
+		});
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("animate-connections"));
+			item.setIcon("worm");
+			item.onClick(async () => {
+				plugin.settings.data.globalSettings.mapView.animatedEdges = !plugin.settings.data.globalSettings.mapView.animatedEdges;
+				plugin.saveSettings();
+
+				eventEmitter.emit('REFRESH_BOARD');
+			})
+			item.setChecked(mapViewSettings.animatedEdges);
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		sortMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
 	}
 
-	const handleNodeMouseEnter = (node: Node) => {
-		console.log("Mouse entered inside the node...\nNode :", node);
-		node.selected = true;
-	}
+	// Will implement the below function if required in future.
+	// const handleOnDragOver = () => {
+	// 	console.log("On Drag Over...");
+	// }
 
-	const handleNodeMouseLeave = (node: Node) => {
-		console.log("Mouse left the node...\nNode :", node);
-		node.selected = false;
-	}
+	// const handleNodeMouseEnter = (node: Node) => {
+	// 	console.log("Mouse entered inside the node...\nNode :", node);
+	// 	node.selected = true;
+	// }
+
+	// const handleNodeMouseLeave = (node: Node) => {
+	// 	console.log("Mouse left the node...\nNode :", node);
+	// 	node.selected = false;
+	// }
 
 
 	if (!storageLoaded) {
@@ -501,7 +607,7 @@ const MapView: React.FC<MapViewProps> = ({
 							<Controls />
 
 							{mapViewSettings.showMinimap && (
-							<MapViewMinimap />
+								<MapViewMinimap />
 							)}
 
 							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />
