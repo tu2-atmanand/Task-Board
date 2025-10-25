@@ -20,7 +20,7 @@ export const MapViewMinimap = () => {
 	return (
 		<MiniMap
 			className="taskBoardMapViewContainerMinimap"
-			bgColor="var(--background-primary)"
+			bgColor="var(--background-modifier-border-focus)"
 			// nodeColor={getNodeColor}
 			pannable
 			zoomable
