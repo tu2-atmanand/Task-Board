@@ -154,12 +154,18 @@ export enum mapViewBackgrounVariantTypes {
 	transparent = "transparent",
 }
 
-export enum mapViewNodeHandlePosition {
-	horizontal = 1,
-	vertical = 2,
+export enum mapViewNodeMapOrientation {
+	horizontal = "hor",
+	vertical = "ver",
 }
 
 export enum mapViewScrollAction {
-	zoom = 1,
-	pan = 2,
+	zoom = "zoom",
+	pan = "pan",
+}
+
+export enum mapViewArrowDirection {
+	parentToChild = "p2c",
+	childToParent = "c2p",
+	bothWay = "both",
 }

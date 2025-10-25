@@ -11,8 +11,9 @@ import {
 	taskStatuses,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	mapViewBackgrounVariantTypes,
-	mapViewNodeHandlePosition,
+	mapViewNodeMapOrientation,
 	mapViewScrollAction,
+	mapViewArrowDirection,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -127,9 +128,9 @@ export interface globalSettingsData {
 	boundTaskCompletionToChildTasks: boolean;
 	mapView: {
 		background: string;
-		handlePosition: number;
+		mapOrientation: string;
 		optimizedRender: boolean;
-		arrowForward: boolean;
+		arrowDirection: mapViewArrowDirection;
 		animatedEdges: boolean;
 		scrollAction: mapViewScrollAction;
 		showMinimap: boolean;
@@ -586,9 +587,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			boundTaskCompletionToChildTasks: false,
 			mapView: {
 				background: mapViewBackgrounVariantTypes.none,
-				handlePosition: mapViewNodeHandlePosition.horizontal,
+				mapOrientation: mapViewNodeMapOrientation.horizontal,
 				optimizedRender: false,
-				arrowForward: true,
+				arrowDirection: mapViewArrowDirection.childToParent,
 				animatedEdges: true,
 				scrollAction: mapViewScrollAction.zoom,
 				showMinimap: true,
