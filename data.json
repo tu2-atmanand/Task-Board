@@ -852,14 +852,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 268,
+      "uniqueIdCounter": 270,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "map",
         "boardIndex": 1,
         "taskId": "",
-        "settingTab": 3
+        "settingTab": 2
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",
@@ -977,7 +977,8 @@
         "animatedEdges": false,
         "scrollAction": "pan",
         "showMinimap": true,
-        "renderVisibleNodes": false
+        "renderVisibleNodes": true,
+        "edgeType": "smoothstep"
       }
     }
   }
