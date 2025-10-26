@@ -859,7 +859,7 @@
         "viewedType": "map",
         "boardIndex": 1,
         "taskId": "",
-        "settingTab": 2
+        "settingTab": 3
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",
@@ -977,7 +977,7 @@
         "animatedEdges": false,
         "scrollAction": "pan",
         "showMinimap": true,
-        "renderVisibleNodes": true,
+        "renderVisibleNodes": false,
         "edgeType": "smoothstep"
       }
     }
