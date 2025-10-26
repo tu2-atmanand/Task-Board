@@ -636,9 +636,11 @@ export function fileTypeAllowedForScanning(
 	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
 	if (
 		notAllowedFileExtensionsRegEx.test(file.path) ||
+		file.path.startsWith(
+			plugin.settings.data.globalSettings.archivedTBNotesFolderPath
+		) ||
 		file.path ===
 			plugin.settings.data.globalSettings.archivedTasksFilePath ||
-		file.path === plugin.settings.data.globalSettings.archivedTBNotesFolderPath ||
 		allowedFileExtensionsRegEx.test(file.path) === false
 	) {
 		return false;
