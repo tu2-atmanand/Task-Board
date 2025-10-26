@@ -16,7 +16,8 @@ import {
 	Connection,
 	MarkerType,
 	BackgroundVariant,
-	SelectionMode
+	SelectionMode,
+	NodeChange
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -264,10 +265,47 @@ const MapView: React.FC<MapViewProps> = ({
 			xOffset += columnSpacing;
 		});
 		return nodes;
-	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, positions]);
+	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, positions, nodeSizes]);
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+
+	// Custom handler that intercepts dimension changes and updates nodeSizes state
+	const handleNodesChange = useCallback((changes: NodeChange[]) => {
+		// First, apply the changes to ReactFlow's state
+		onNodesChange(changes);
+		
+		// Check if any of the changes are dimension changes
+		const dimensionChanges = changes.filter(change => change.type === 'dimensions');
+		
+		if (dimensionChanges.length > 0) {
+			// Update nodeSizes state and localStorage
+			const updatedSizes = { ...nodeSizes };
+			let hasChanges = false;
+			
+			dimensionChanges.forEach(change => {
+				if (change.type === 'dimensions' && change.dimensions?.width) {
+					const nodeId = change.id;
+					const newWidth = change.dimensions.width;
+					
+					// Only update if the width has actually changed
+					if (!updatedSizes[nodeId] || updatedSizes[nodeId].width !== newWidth) {
+						updatedSizes[nodeId] = { width: newWidth };
+						hasChanges = true;
+					}
+				}
+			});
+			
+			if (hasChanges) {
+				setNodeSizes(updatedSizes);
+				try {
+					localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(updatedSizes));
+				} catch (error) {
+					console.warn('Failed to save node sizes:', error);
+				}
+			}
+		}
+	}, [onNodesChange, nodeSizes]);
 
 	// Reset nodes when initialNodes changes
 	useEffect(() => {
@@ -633,7 +671,7 @@ const MapView: React.FC<MapViewProps> = ({
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
-							onNodesChange={onNodesChange}
+							onNodesChange={handleNodesChange}
 							onNodeDragStop={() => {
 								handleNodePositionChange();
 							}}
