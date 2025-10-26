@@ -4177,22 +4177,31 @@ svg.react-flow__connectionline {
 	left: 50%;
 	bottom: 0;
 	transform: translate(-50%, 50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-top {
 	top: 0;
 	left: 50%;
 	transform: translate(-50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-left {
 	top: 50%;
 	left: 0;
 	transform: translate(-50%, -50%);
-}
 
-.taskBoardMapViewContainerNodeHandleIconLeft,
-.taskBoardMapViewContainerNodeHandleIconRight {
 	min-width: 8px;
 	min-height: 8px;
 	border-radius: 15px;
@@ -4204,6 +4213,24 @@ svg.react-flow__connectionline {
 	top: 50%;
 	right: 0;
 	transform: translate(50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+}
+
+.taskBoardMapViewContainerNodeHandleIconLeft,
+.taskBoardMapViewContainerNodeHandleIconRight,
+.taskBoardMapViewContainerNodeHandleIconTop,
+.taskBoardMapViewContainerNodeHandleIconBottom {
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	pointer-events: none !important;
 }
 
 .react-flow__edgeupdater {
@@ -4479,7 +4506,7 @@ svg.react-flow__connectionline {
 .react-flow__resize-control.top,
 .react-flow__resize-control.bottom {
 	/* Keep the cursor normal, since height resizing is not allowed */
-	cursor: none;
+	cursor: default;
 }
 
 .react-flow__resize-control.top.left,
