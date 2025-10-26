@@ -296,9 +296,9 @@ export function columnSortingAlgorithm(
 				criterion.criteria
 			);
 
-			if (criterion.criteria === "time") {
-				console.log("valueA :", valueA, "\nvalueB :", valueB);
-			}
+			// if (criterion.criteria === "time") {
+			// 	console.log("valueA :", valueA, "\nvalueB :", valueB);
+			// }
 
 			const comparison = compareValues(
 				valueA,
