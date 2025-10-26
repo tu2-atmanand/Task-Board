@@ -4,6 +4,7 @@ import { nodeSize } from './MapView';
 import { NODE_SIZE_STORAGE_KEY } from 'src/interfaces/Constants';
 import type TaskBoard from 'main';
 import { mapViewNodeMapOrientation } from 'src/interfaces/Enums';
+import { CircleArrowDownIcon, CircleArrowRightIcon } from 'lucide-react';
 
 interface dataProps extends React.ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };
@@ -17,7 +18,7 @@ interface ResizableNodeSelectedProps {
 const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id, data, selected, width, height }) => {
 	const mapViewSettings = data.label?.props?.plugin.settings.data.globalSettings.mapView;
 	const orientationHorizontal = mapViewSettings.mapOrientation === mapViewNodeMapOrientation.horizontal;
-	// console.log('Rendering ResizableNodeSelected for node:', id, { mapViewSettings, selected, width, height });
+	// console.log('Rendering ResizableNodeSelected for node:', id, { data, selected, width, height });
 
 	return (
 		<>
@@ -46,20 +47,28 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 			{/* <Handle type="target" position={Position.Left} /> */}
 
 			{orientationHorizontal && (
-				<Handle type="target" position={Position.Left} />
+				<Handle type="target" position={Position.Left}>
+					<CircleArrowRightIcon className='taskBoardMapViewContainerNodeHandleIconLeft' onClick={() => console.log("Dragging....")} />
+				</Handle>
 			)}
 			{!orientationHorizontal && (
-				<Handle type="target" position={Position.Top} />
+				<Handle type="target" position={Position.Top}>
+					<CircleArrowDownIcon className='taskBoardMapViewContainerNodeHandleIconLeft' size={18} scale={10} />
+				</Handle>
 			)}
 			<div className={`taskBoardMapViewContainerNodeResizerTaskItem${selected ? '-selected' : ''}`}>{data.label}</div >
 
 			{/* <Handle type="source" position={Position.Right} /> */}
 
 			{orientationHorizontal && (
-				<Handle type="source" position={Position.Right} />
+				<Handle type="source" position={Position.Right}>
+					<CircleArrowRightIcon className='taskBoardMapViewContainerNodeHandleIconRight' onClick={() => console.log("Dragging....")} />
+				</Handle>
 			)}
 			{!orientationHorizontal && (
-				<Handle type="source" position={Position.Bottom} />
+				<Handle type="source" position={Position.Bottom}>
+					<CircleArrowDownIcon className='taskBoardMapViewContainerNodeHandleIconLeft' size={18} scale={10} />
+				</Handle>
 			)}
 		</>
 	);
