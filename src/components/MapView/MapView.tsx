@@ -83,6 +83,7 @@ const MapView: React.FC<MapViewProps> = ({
 				return undefined;
 		}
 	})();
+	const tagColors = plugin.settings.data.globalSettings.tagColors;
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
@@ -610,7 +611,7 @@ const MapView: React.FC<MapViewProps> = ({
 							<Controls />
 
 							{mapViewSettings.showMinimap && (
-								<MapViewMinimap />
+								<MapViewMinimap tagColors={tagColors} />
 							)}
 
 							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />
