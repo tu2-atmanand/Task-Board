@@ -169,3 +169,10 @@ export enum mapViewArrowDirection {
 	childToParent = "c2p",
 	bothWay = "both",
 }
+
+export enum mapViewEdgeType {
+	straight = "straight",
+	step = "step",
+	smoothstep = "smoothstep",
+	bezier = "default",
+}

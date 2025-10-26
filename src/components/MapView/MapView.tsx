@@ -113,7 +113,7 @@ const MapView: React.FC<MapViewProps> = ({
 			return {};
 		}
 	};
-	
+
 	// Load node sizes from localStorage
 	const loadNodeSizes = () => {
 		try {
@@ -130,7 +130,7 @@ const MapView: React.FC<MapViewProps> = ({
 			return {};
 		}
 	};
-	
+
 	// Viewport state
 	const loadViewport = (): viewPort => {
 		try {
@@ -232,13 +232,13 @@ const MapView: React.FC<MapViewProps> = ({
 					usedIds.add(id);
 					const savedPos = positions[id] || {};
 					const savedSize = nodeSizes[id] || {};
-					
+
 					// Ensure width is always a valid number
 					let nodeWidth = defaultWidth;
 					if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
 						nodeWidth = savedSize.width;
 					}
-					
+
 					nodes.push({
 						id,
 						type: 'ResizableNodeSelected',
@@ -283,13 +283,13 @@ const MapView: React.FC<MapViewProps> = ({
 			const id = task.legacyId ? task.legacyId : String(task.id);
 			idToTask.set(id, task);
 		});
-		
+
 		// Calculate marker size based on zoom level (inverse scaling to keep visual size consistent)
 		const baseMarkerSize = 40;
 		const zoomLevel = Number.isFinite(viewport.zoom) && viewport.zoom > 0 ? viewport.zoom : 1.5;
 		const scaledMarkerSize = baseMarkerSize / (zoomLevel > 1.2 ? 1 : (zoomLevel < 0.7 ? 1 : zoomLevel));
 		const safeMarkerSize = Number.isFinite(scaledMarkerSize) ? scaledMarkerSize : baseMarkerSize;
-		
+
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
 			if (Array.isArray(task.dependsOn)) {
@@ -299,7 +299,7 @@ const MapView: React.FC<MapViewProps> = ({
 							id: `${sourceId}->${depId}`,
 							source: sourceId,
 							target: depId,
-							type: 'default',
+							type: mapViewSettings.edgeType ?? "default",
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
@@ -346,10 +346,10 @@ const MapView: React.FC<MapViewProps> = ({
 			acc[n.id] = { x, y };
 			return acc;
 		}, {} as Record<string, nodePosition>);
-		
+
 		setPositions(posMap);
 		allBoardPositions[String(activeBoardIndex)] = posMap;
-		
+
 		try {
 			localStorage.setItem(NODE_POSITIONS_STORAGE_KEY, JSON.stringify(allBoardPositions));
 		} catch (error) {

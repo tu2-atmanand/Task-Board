@@ -14,6 +14,7 @@ import {
 	mapViewNodeMapOrientation,
 	mapViewScrollAction,
 	mapViewArrowDirection,
+	mapViewEdgeType,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -135,6 +136,7 @@ export interface globalSettingsData {
 		scrollAction: mapViewScrollAction;
 		showMinimap: boolean;
 		renderVisibleNodes: boolean;
+		edgeType: mapViewEdgeType;
 	};
 }
 
@@ -594,6 +596,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				scrollAction: mapViewScrollAction.zoom,
 				showMinimap: true,
 				renderVisibleNodes: false,
+				edgeType: mapViewEdgeType.bezier,
 			},
 		},
 	},
