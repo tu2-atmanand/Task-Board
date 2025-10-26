@@ -659,7 +659,7 @@ const MapView: React.FC<MapViewProps> = ({
 							// onDrag={handleOnDragOver}
 
 							// rendering
-							onlyRenderVisibleElements={false} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
+							onlyRenderVisibleElements={mapViewSettings.renderVisibleNodes} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
 							onInit={(instance) => {
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
