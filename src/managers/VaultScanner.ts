@@ -1040,7 +1040,7 @@ export function extractDependsOn(text: string): string[] {
 		return match;
 	}
 
-	match = text.match(/\[depends on::\s*(.*?)\]/);
+	match = text.match(/\[dependsOn::\s*(.*?)\]/);
 	if (match && match[1]) {
 		return match[1]
 			.split(",")

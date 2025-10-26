@@ -72,24 +72,36 @@ export const addIdToTaskContent = async (
 		forcefullyAddId
 	) {
 		newId = generateTaskId(Plugin);
-		if (
-			Plugin.settings.data.globalSettings.taskPropertyFormat ===
-				taskPropertyFormatOptions.tasksPlugin ||
-			Plugin.settings.data.globalSettings.taskPropertyFormat ===
-				taskPropertyFormatOptions.default
-		) {
-			formattedTaskContent = formattedTaskContent.replace(
-				/^(.*?)(\n|$)/,
-				`$1 🆔 ${newId} $2`
-			);
-		} else if (
-			Plugin.settings.data.globalSettings.taskPropertyFormat ===
-			taskPropertyFormatOptions.dataviewPlugin
-		) {
-			formattedTaskContent = formattedTaskContent.replace(
-				/^(.*?)(\n|$)/,
-				`$1 [id:: ${newId}] $2`
-			);
+		const format = Plugin.settings.data.globalSettings.taskPropertyFormat;
+		switch (format) {
+			case taskPropertyFormatOptions.tasksPlugin:
+			case taskPropertyFormatOptions.default:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 🆔 ${newId} $2`
+				);
+				break;
+
+			case taskPropertyFormatOptions.dataviewPlugin:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 [id:: ${newId}] $2`
+				);
+				break;
+
+			case taskPropertyFormatOptions.obsidianNative:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 @id(${newId}) $2`
+				);
+				break;
+
+			default:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 🆔 ${newId} $2`
+				);
+				break;
 		}
 	}
 	return { formattedTaskContent, newId };
@@ -1046,12 +1058,12 @@ export const sanitizeDependsOn = (
 	} else if (globalSettings?.taskPropertyFormat === "3") {
 		dependsOnFormat =
 			dependesOnIds.length > 0
-				? `[cancelled:: ${dependesOnIds.join(", ")}]`
+				? `[dependsOn:: ${dependesOnIds.join(", ")}]`
 				: "";
 	} else {
 		dependsOnFormat =
 			dependesOnIds.length > 0
-				? `@cancelled(${dependesOnIds.join(", ")})`
+				? `@dependsOn(${dependesOnIds.join(", ")})`
 				: "";
 	}
 
