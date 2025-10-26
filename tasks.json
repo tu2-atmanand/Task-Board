@@ -1,7 +1,99 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-26T16:33:11",
+    "Modified_at": "2025-10-26T23:04:24",
     "Pending": {
+        "Task source 2.md": [
+            {
+                "id": 1512946566,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] Task 5 with Tag #project1 ⛔5  🛫2025-09-21",
+                "body": [
+                    "\t- a"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "2025-09-21",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#project1"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "5"
+                ],
+                "filePath": "Task source 2.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 4
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 5,
+                "legacyId": "5",
+                "status": " ",
+                "title": "- [ ] Task 6 with Tag with dashes #this-tag  🆔 5 [dependsOn:: 245]",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#this-tag"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "245"
+                ],
+                "filePath": "Task source 2.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 67
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1196570687,
+                "legacyId": "wiu07b",
+                "status": "/",
+                "title": "- [/] In progress Task 7 with Tag #project2 🆔 wiu07b",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#project2"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Task source 2.md",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 53
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "Important Note.md": [
             {
                 "id": 222,
@@ -654,96 +746,6 @@
                     "startCharIndex": 0,
                     "endLine": 12,
                     "endCharIndex": 24
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Task source 2.md": [
-            {
-                "id": 1577161830,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] Task 5 with Tag #project1 ⛔5  🛫2025-09-21",
-                "body": [
-                    "\t- a"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "2025-09-21",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#project1"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "5"
-                ],
-                "filePath": "Task source 2.md",
-                "taskLocation": {
-                    "startLine": 2,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 4
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 5,
-                "legacyId": "5",
-                "status": " ",
-                "title": "- [ ] Task 6 with Tag with dashes #this-tag  🆔 5",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#this-tag"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task source 2.md",
-                "taskLocation": {
-                    "startLine": 4,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 49
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 693343591,
-                "legacyId": "wiu07b",
-                "status": "/",
-                "title": "- [/] In progress Task 7 with Tag #project2 🆔 wiu07b",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#project2"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Task source 2.md",
-                "taskLocation": {
-                    "startLine": 5,
-                    "startCharIndex": 0,
-                    "endLine": 5,
-                    "endCharIndex": 53
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1726,7 +1728,7 @@
         ],
         "Task source 2.md": [
             {
-                "id": 249454998,
+                "id": 2020811422,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] Completed Task 8 with Tag #project1 ",
