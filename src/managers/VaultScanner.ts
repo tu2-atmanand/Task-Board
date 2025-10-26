@@ -1042,18 +1042,12 @@ export function extractDependsOn(text: string): string[] {
 
 	match = text.match(/\[dependsOn::\s*(.*?)\]/);
 	if (match && match[1]) {
-		return match[1]
-			.split(",")
-			.map((id) => id.trim())
-			.filter((id) => id.length > 0);
+		return match;
 	}
 
 	match = text.match(/\@dependsOn\(\s*(.*?)\s*\)/);
 	if (match && match[1]) {
-		return match[1]
-			.split(",")
-			.map((id) => id.trim())
-			.filter((id) => id.length > 0);
+		return match;
 	}
 
 	return [];
