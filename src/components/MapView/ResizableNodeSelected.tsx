@@ -4,6 +4,8 @@ import { nodeSize } from './MapView';
 import { NODE_SIZE_STORAGE_KEY } from 'src/interfaces/Constants';
 import type TaskBoard from 'main';
 import { mapViewNodeMapOrientation } from 'src/interfaces/Enums';
+import { CircleArrowDownIcon, CircleArrowRightIcon } from 'lucide-react';
+import { t } from 'src/utils/lang/helper';
 
 interface dataProps extends React.ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };
@@ -17,7 +19,7 @@ interface ResizableNodeSelectedProps {
 const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id, data, selected, width, height }) => {
 	const mapViewSettings = data.label?.props?.plugin.settings.data.globalSettings.mapView;
 	const orientationHorizontal = mapViewSettings.mapOrientation === mapViewNodeMapOrientation.horizontal;
-	// console.log('Rendering ResizableNodeSelected for node:', id, { mapViewSettings, selected, width, height });
+	// console.log('Rendering ResizableNodeSelected for node:', id, { data, selected, width, height });
 
 	return (
 		<>
@@ -34,7 +36,7 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 					try {
 						const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
 						sizeData[id] = {
-							width: params.width ?? 100
+							width: params.width ?? data.label.props.plugin.settings.data.globalSettings.columnWidth ?? 300
 							// height: params.height ?? 30 
 						};
 						localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));
@@ -43,23 +45,29 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 					}
 				}}
 			/>
-			{/* <Handle type="target" position={Position.Left} /> */}
 
 			{orientationHorizontal && (
-				<Handle type="target" position={Position.Left} />
+				<Handle type="target" position={Position.Left}>
+					<CircleArrowRightIcon style={{ display: 'block' }} className='taskBoardMapViewContainerNodeHandleIconLeft' aria-label={t("connect-a-child")} />
+				</Handle>
 			)}
 			{!orientationHorizontal && (
-				<Handle type="target" position={Position.Top} />
+				<Handle type="target" position={Position.Top}>
+					<CircleArrowDownIcon style={{ display: 'block' }} className='taskBoardMapViewContainerNodeHandleIconTop' aria-label={t("connect-a-child")} />
+				</Handle>
 			)}
+
 			<div className={`taskBoardMapViewContainerNodeResizerTaskItem${selected ? '-selected' : ''}`}>{data.label}</div >
 
-			{/* <Handle type="source" position={Position.Right} /> */}
-
 			{orientationHorizontal && (
-				<Handle type="source" position={Position.Right} />
+				<Handle type="source" position={Position.Right}>
+					<CircleArrowRightIcon style={{ display: 'block' }} className='taskBoardMapViewContainerNodeHandleIconRight' aria-label={t("connect-a-parent")} />
+				</Handle>
 			)}
 			{!orientationHorizontal && (
-				<Handle type="source" position={Position.Bottom} />
+				<Handle type="source" position={Position.Bottom}>
+					<CircleArrowDownIcon style={{ display: 'block' }} className='taskBoardMapViewContainerNodeHandleIconBottom' aria-label={t("connect-a-parent")} />
+				</Handle>
 			)}
 		</>
 	);

@@ -429,7 +429,15 @@ const en: Lang = {
 	"parent-to-child": "Parent to child",
 	"both-way": "Both way",
 	"animate-links-description": "Enable this setting to have a nice animation for the links.",
-	"show-minimap-description": "Enable this setting to see the minimap within canvas."
+	"show-minimap-description": "Enable this setting to see the minimap within canvas.",
+	"link-style": "Link style",
+	"link-style-description": "Select the type of link style you want to have for the nodes connection links.",
+	"straight": "Straight",
+	"step": "Step",
+	"smooth-step": "Smooth step",
+	"curved": "Curved",
+	"connect-a-child": "Connect a child",
+	"connect-a-parent": "Connect a parent"
 };
 
 export default en;

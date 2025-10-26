@@ -4022,13 +4022,13 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 
 .react-flow__edge-path {
 	stroke: var(--xy-edge-stroke, var(--xy-edge-stroke-default));
-	stroke-width: var(--xy-edge-stroke-width, var(--xy-edge-stroke-width-default));
+	stroke-width: calc(var(--xy-edge-stroke-width, var(--xy-edge-stroke-width-default)) / var(--xy-zoom, 1));
 	fill: none;
 }
 
 .react-flow__connection-path {
 	stroke: var(--xy-connectionline-stroke, var(--xy-connectionline-stroke-default));
-	stroke-width: var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default));
+	stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--xy-zoom, 1));
 	fill: none;
 }
 
@@ -4146,13 +4146,21 @@ svg.react-flow__connectionline {
 .react-flow__handle {
 	position: absolute;
 	pointer-events: none;
-	min-width: 5px;
-	min-height: 5px;
-	width: 6px;
-	height: 6px;
+	min-width: 8px;
+	min-height: 8px;
+	/* width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important; */
 	background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default));
 	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
 	border-radius: 100%;
+	opacity: 0;
+	transform: scale(calc(1 / var(--xy-zoom, 1)));
+	transform-origin: center;
+	transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.react-flow__node:hover .react-flow__handle {
+	opacity: 1;
 }
 
 .react-flow__handle.connectingfrom {
@@ -4169,24 +4177,60 @@ svg.react-flow__connectionline {
 	left: 50%;
 	bottom: 0;
 	transform: translate(-50%, 50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-top {
 	top: 0;
 	left: 50%;
 	transform: translate(-50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-left {
 	top: 50%;
 	left: 0;
 	transform: translate(-50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
 }
 
 .react-flow__handle-right {
 	top: 50%;
 	right: 0;
 	transform: translate(50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+}
+
+.taskBoardMapViewContainerNodeHandleIconLeft,
+.taskBoardMapViewContainerNodeHandleIconRight,
+.taskBoardMapViewContainerNodeHandleIconTop,
+.taskBoardMapViewContainerNodeHandleIconBottom {
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	pointer-events: none !important;
 }
 
 .react-flow__edgeupdater {
@@ -4462,7 +4506,7 @@ svg.react-flow__connectionline {
 .react-flow__resize-control.top,
 .react-flow__resize-control.bottom {
 	/* Keep the cursor normal, since height resizing is not allowed */
-	cursor: none;
+	cursor: default;
 }
 
 .react-flow__resize-control.top.left,

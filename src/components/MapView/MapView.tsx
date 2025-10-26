@@ -83,35 +83,71 @@ const MapView: React.FC<MapViewProps> = ({
 				return undefined;
 		}
 	})();
+	const tagColors = plugin.settings.data.globalSettings.tagColors;
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
 		try {
-			allBoardPositions = JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}');
-		} catch {
+			const stored = localStorage.getItem(NODE_POSITIONS_STORAGE_KEY);
+			if (stored) {
+				allBoardPositions = JSON.parse(stored);
+				// Validate the structure
+				if (typeof allBoardPositions !== 'object' || allBoardPositions === null) {
+					allBoardPositions = {};
+				}
+			}
+		} catch (error) {
+			console.warn('Failed to load node positions from localStorage:', error);
 			allBoardPositions = {};
 		}
 
 		try {
-			return allBoardPositions[String(activeBoardIndex)] || {};
-		} catch {
+			const boardPositions = allBoardPositions[String(activeBoardIndex)];
+			if (typeof boardPositions === 'object' && boardPositions !== null) {
+				return boardPositions;
+			}
+			return {};
+		} catch (error) {
+			console.warn('Failed to get positions for board', activeBoardIndex, ':', error);
 			return {};
 		}
 	};
+
 	// Load node sizes from localStorage
 	const loadNodeSizes = () => {
 		try {
-			return JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}') as Record<string, nodeSize>;
-		} catch {
+			const stored = localStorage.getItem(NODE_SIZE_STORAGE_KEY);
+			if (stored) {
+				const parsed = JSON.parse(stored);
+				if (typeof parsed === 'object' && parsed !== null) {
+					return parsed as Record<string, nodeSize>;
+				}
+			}
+			return {};
+		} catch (error) {
+			console.warn('Failed to load node sizes from localStorage:', error);
 			return {};
 		}
 	};
+
 	// Viewport state
 	const loadViewport = (): viewPort => {
 		try {
-			return JSON.parse(localStorage.getItem(VIEWPORT_STORAGE_KEY) || '{}') as viewPort;
-		} catch {
+			const stored = localStorage.getItem(VIEWPORT_STORAGE_KEY);
+			if (stored) {
+				const parsed = JSON.parse(stored);
+				if (typeof parsed === 'object' && parsed !== null) {
+					return {
+						x: Number.isFinite(parsed.x) ? parsed.x : 10,
+						y: Number.isFinite(parsed.y) ? parsed.y : 10,
+						zoom: Number.isFinite(parsed.zoom) && parsed.zoom > 0 ? parsed.zoom : 1.5
+					};
+				}
+			}
+			return { x: 10, y: 10, zoom: 1.5 };
+		} catch (error) {
+			console.warn('Failed to load viewport from localStorage:', error);
 			return { x: 10, y: 10, zoom: 1.5 };
 		}
 	};
@@ -127,26 +163,33 @@ const MapView: React.FC<MapViewProps> = ({
 	useEffect(() => {
 		// Load and sanitize positions
 		const pos = loadPositions();
+		const sanitizedPositions: Record<string, nodePosition> = {};
 		Object.keys(pos).forEach(id => {
-			if (!Number.isFinite(pos[id].x)) pos[id].x = 0;
-			if (!Number.isFinite(pos[id].y)) pos[id].y = 0;
+			sanitizedPositions[id] = {
+				x: Number.isFinite(pos[id]?.x) ? pos[id].x : 0,
+				y: Number.isFinite(pos[id]?.y) ? pos[id].y : 0
+			};
 		});
-		setPositions(pos);
+		setPositions(sanitizedPositions);
 
 		// Load and sanitize node sizes
 		const sizes = loadNodeSizes();
+		const sanitizedSizes: Record<string, nodeSize> = {};
 		Object.keys(sizes).forEach(id => {
-			if (!Number.isFinite(sizes[id].width)) sizes[id].width = 300;
-			// if (!Number.isFinite(sizes[id].height)) sizes[id].height = 80;
+			sanitizedSizes[id] = {
+				width: Number.isFinite(sizes[id]?.width) && sizes[id].width > 0 ? sizes[id].width : 300
+			};
 		});
-		setNodeSizes(sizes);
+		setNodeSizes(sanitizedSizes);
 
 		// Load and sanitize viewport
 		const vp = loadViewport();
-		if (!Number.isFinite(vp.x)) vp.x = 10;
-		if (!Number.isFinite(vp.y)) vp.y = 10;
-		if (!Number.isFinite(vp.zoom)) vp.zoom = 1.5;
-		setViewport(vp);
+		const sanitizedViewport: viewPort = {
+			x: Number.isFinite(vp.x) ? vp.x : 10,
+			y: Number.isFinite(vp.y) ? vp.y : 10,
+			zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1.5
+		};
+		setViewport(sanitizedViewport);
 
 		setStorageLoaded(true);
 	}, [activeBoardIndex]);
@@ -166,6 +209,16 @@ const MapView: React.FC<MapViewProps> = ({
 		const columnSpacing = 350;
 		const rowSpacing = 170;
 
+		// Get default width with proper validation
+		const getDefaultWidth = () => {
+			const columnWidth = plugin.settings.data.globalSettings.columnWidth;
+			if (columnWidth && Number.isFinite(Number(columnWidth))) {
+				return Number(columnWidth);
+			}
+			return 300; // Fallback default width
+		};
+		const defaultWidth = getDefaultWidth();
+
 		let xOffset = 0;
 		allTasksArranged.forEach((columnTasks, colIdx) => {
 			let yOffset = 0;
@@ -179,6 +232,13 @@ const MapView: React.FC<MapViewProps> = ({
 					usedIds.add(id);
 					const savedPos = positions[id] || {};
 					const savedSize = nodeSizes[id] || {};
+
+					// Ensure width is always a valid number
+					let nodeWidth = defaultWidth;
+					if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
+						nodeWidth = savedSize.width;
+					}
+
 					nodes.push({
 						id,
 						type: 'ResizableNodeSelected',
@@ -195,12 +255,7 @@ const MapView: React.FC<MapViewProps> = ({
 							x: Number.isFinite(savedPos.x) ? savedPos.x : xOffset,
 							y: Number.isFinite(savedPos.y) ? savedPos.y : yOffset
 						},
-						// style: {
-						// 	width: savedSize.width ?? 300,
-						// 	height: savedSize.height ?? 80,
-						// },
-						width: Number.isFinite(savedSize.width) ? savedSize.width : Number(plugin.settings.data.globalSettings.columnWidth),
-						// height: Number.isFinite(savedSize.height) ? savedSize.height : undefined,
+						width: nodeWidth,
 					});
 					yOffset += rowSpacing;
 				}
@@ -228,6 +283,13 @@ const MapView: React.FC<MapViewProps> = ({
 			const id = task.legacyId ? task.legacyId : String(task.id);
 			idToTask.set(id, task);
 		});
+
+		// Calculate marker size based on zoom level (inverse scaling to keep visual size consistent)
+		const baseMarkerSize = 40;
+		const zoomLevel = Number.isFinite(viewport.zoom) && viewport.zoom > 0 ? viewport.zoom : 1.5;
+		const scaledMarkerSize = baseMarkerSize / (zoomLevel > 1.2 ? 1 : (zoomLevel < 0.7 ? 1 : zoomLevel));
+		const safeMarkerSize = Number.isFinite(scaledMarkerSize) ? scaledMarkerSize : baseMarkerSize;
+
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
 			if (Array.isArray(task.dependsOn)) {
@@ -237,21 +299,21 @@ const MapView: React.FC<MapViewProps> = ({
 							id: `${sourceId}->${depId}`,
 							source: sourceId,
 							target: depId,
-							type: 'default',
+							type: mapViewSettings.edgeType ?? "default",
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
 								color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? 30 : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? 30 : 0,
+								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
+								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
 							},
 							markerEnd: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
 								color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? 30 : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? 30 : 0,
+								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
+								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
 							},
 						});
 					}
@@ -260,26 +322,39 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged]);
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged, viewport.zoom]);
 
 	const handleNodePositionChange = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
 		try {
-			allBoardPositions = JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}');
-		} catch {
+			const stored = localStorage.getItem(NODE_POSITIONS_STORAGE_KEY);
+			if (stored) {
+				allBoardPositions = JSON.parse(stored);
+				if (typeof allBoardPositions !== 'object' || allBoardPositions === null) {
+					allBoardPositions = {};
+				}
+			}
+		} catch (error) {
+			console.warn('Failed to load existing positions:', error);
 			allBoardPositions = {};
 		}
 
-		// Update positions for current board
+		// Update positions for current board with validation
 		const posMap = nodes.reduce((acc, n) => {
-			acc[n.id] = { x: n.position?.x || 0, y: n.position?.y || 0 };
+			const x = Number.isFinite(n.position?.x) ? n.position.x : 0;
+			const y = Number.isFinite(n.position?.y) ? n.position.y : 0;
+			acc[n.id] = { x, y };
 			return acc;
 		}, {} as Record<string, nodePosition>);
+
 		setPositions(posMap);
-		// console.log('Updated positions map:', posMap);
 		allBoardPositions[String(activeBoardIndex)] = posMap;
-		localStorage.setItem(NODE_POSITIONS_STORAGE_KEY, JSON.stringify(allBoardPositions));
-		// console.log('Saved all board positions inside localStorage:', JSON.parse(localStorage.getItem(NODE_POSITIONS_STORAGE_KEY) || '{}'));
+
+		try {
+			localStorage.setItem(NODE_POSITIONS_STORAGE_KEY, JSON.stringify(allBoardPositions));
+		} catch (error) {
+			console.warn('Failed to save node positions:', error);
+		}
 	};
 
 	// Persist updated positions and sizes
@@ -396,8 +471,18 @@ const MapView: React.FC<MapViewProps> = ({
 	const debouncedSetViewportStorage = debounce((vp: viewPort) => {
 		const now = Date.now();
 		if (now - lastViewportSaveTime.current > 2000) {
-			localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(vp));
-			lastViewportSaveTime.current = now;
+			// Validate viewport values before saving
+			const safeViewport = {
+				x: Number.isFinite(vp.x) ? vp.x : 10,
+				y: Number.isFinite(vp.y) ? vp.y : 10,
+				zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1.5
+			};
+			try {
+				localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(safeViewport));
+				lastViewportSaveTime.current = now;
+			} catch (error) {
+				console.warn('Failed to save viewport:', error);
+			}
 		}
 	}, 2000);
 
@@ -541,7 +626,7 @@ const MapView: React.FC<MapViewProps> = ({
 		<div className='mapViewWrapper'>
 			<div className="mapView">
 				<ReactFlowProvider>
-					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh' }}>
+					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh', '--xy-zoom': viewport.zoom } as React.CSSProperties}>
 						<ReactFlow
 							// Data Initialization
 							proOptions={{ hideAttribution: true }}
@@ -574,26 +659,33 @@ const MapView: React.FC<MapViewProps> = ({
 							// onDrag={handleOnDragOver}
 
 							// rendering
-							onlyRenderVisibleElements={false} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
+							onlyRenderVisibleElements={mapViewSettings.renderVisibleNodes} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
 							onInit={(instance) => {
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
-									if (node) {
+									if (node && Number.isFinite(node.position.x) && Number.isFinite(node.position.y)) {
 										const newVp: viewPort = {
 											x: - (node.position.x - 200),
 											y: - (node.position.y),
 											zoom: 1
 										};
-										instance.setViewport(newVp);
-										setViewport(newVp);
-										// localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(newVp));
-										debouncedSetViewportStorage(newVp);
-										// throttledSetViewportStorage(newVp);
-										return;
+										// Validate the new viewport before setting
+										if (Number.isFinite(newVp.x) && Number.isFinite(newVp.y) && Number.isFinite(newVp.zoom)) {
+											instance.setViewport(newVp);
+											setViewport(newVp);
+											debouncedSetViewportStorage(newVp);
+											return;
+										}
 									}
 								}
-								else {
-									instance.setViewport(viewport);
+								// Use current viewport if valid, otherwise fall back to defaults
+								const currentVp = viewport;
+								if (Number.isFinite(currentVp.x) && Number.isFinite(currentVp.y) && Number.isFinite(currentVp.zoom)) {
+									instance.setViewport(currentVp);
+								} else {
+									const defaultVp = { x: 10, y: 10, zoom: 1.5 };
+									instance.setViewport(defaultVp);
+									setViewport(defaultVp);
 								}
 							}}
 							defaultViewport={viewport}
@@ -607,7 +699,7 @@ const MapView: React.FC<MapViewProps> = ({
 							<Controls />
 
 							{mapViewSettings.showMinimap && (
-								<MapViewMinimap />
+								<MapViewMinimap tagColors={tagColors} />
 							)}
 
 							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />

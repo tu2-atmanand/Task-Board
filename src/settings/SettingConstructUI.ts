@@ -40,6 +40,7 @@ import {
 	mapViewNodeMapOrientation,
 	mapViewArrowDirection,
 	mapViewScrollAction,
+	mapViewEdgeType,
 } from "src/interfaces/Enums";
 import {
 	frontmatterFormatting,
@@ -1441,6 +1442,7 @@ export class SettingsManager {
 			scrollAction,
 			showMinimap,
 			renderVisibleNodes,
+			edgeType,
 		} = this.globalSettings?.mapView!;
 
 		new Setting(contentEl)
@@ -1555,6 +1557,25 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.mapView.arrowDirection =
 							value as mapViewArrowDirection;
+						await this.saveSettings();
+					})
+			);
+
+		new Setting(contentEl)
+			.setName(t("link-style"))
+			.setDesc(t("link-style-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewEdgeType.straight]: t("straight"),
+						[mapViewEdgeType.step]: t("step"),
+						[mapViewEdgeType.smoothstep]: t("smooth-step"),
+						[mapViewEdgeType.bezier]: t("curved"),
+					})
+					.setValue(edgeType)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.edgeType =
+							value as mapViewEdgeType;
 						await this.saveSettings();
 					})
 			);
