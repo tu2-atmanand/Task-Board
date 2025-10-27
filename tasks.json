@@ -1,7 +1,37 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-26T23:04:24",
+    "Modified_at": "2025-10-28T00:40:40",
     "Pending": {
+        "A QMD file.qmd": [
+            {
+                "id": 247,
+                "legacyId": "247",
+                "status": " ",
+                "title": "- [ ] This is a task with high priority, edited... 🔺 #pending  [id:: 247] ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": 1,
+                "dependsOn": [],
+                "filePath": "A QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 75
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "Task source 2.md": [
             {
                 "id": 1512946566,
@@ -471,36 +501,6 @@
                     "startCharIndex": 0,
                     "endLine": 3,
                     "endCharIndex": 74
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "A QMD file.qmd": [
-            {
-                "id": 247,
-                "legacyId": "247",
-                "status": " ",
-                "title": "- [ ] This is a task with high priority 🔺 #pending  [id:: 247] ",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "frontmatterTags": [],
-                "priority": 1,
-                "dependsOn": [],
-                "filePath": "A QMD file.qmd",
-                "taskLocation": {
-                    "startLine": 4,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 64
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1786,7 +1786,7 @@
         ],
         "A QMD file.qmd": [
             {
-                "id": 261094405,
+                "id": 2948772471,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] This is a first task in the first qmd file. Edited. ✅ 2025-09-23",
