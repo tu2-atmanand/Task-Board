@@ -85,6 +85,7 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	})();
 	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
@@ -117,6 +118,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Load node sizes from localStorage
 	const loadNodeSizes = () => {
+		console.log("When is this called to load the node sizes...");
 		try {
 			const stored = localStorage.getItem(NODE_SIZE_STORAGE_KEY);
 			if (stored) {
@@ -194,7 +196,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 		setStorageLoaded(true);
 	}, [activeBoardIndex]);
-	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
+
 
 	// const reactFlowInstance = useReactFlow();
 	// useEffect(() => {
@@ -205,7 +207,8 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
-		const nodes: Node[] = [];
+		console.log("What is in nodes :");
+		const newNodes: Node[] = [];
 		const usedIds = new Set<string>();
 		const columnSpacing = 350;
 		const rowSpacing = 170;
@@ -240,7 +243,7 @@ const MapView: React.FC<MapViewProps> = ({
 						nodeWidth = savedSize.width;
 					}
 
-					nodes.push({
+					newNodes.push({
 						id,
 						type: 'ResizableNodeSelected',
 						data: {
@@ -264,48 +267,53 @@ const MapView: React.FC<MapViewProps> = ({
 			});
 			xOffset += columnSpacing;
 		});
-		return nodes;
-	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, positions, nodeSizes]);
+		return newNodes;
+	}, [allTasksArranged, activeBoardSettings, activeBoardIndex]);
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
 	// Custom handler that intercepts dimension changes and updates nodeSizes state
-	const handleNodesChange = useCallback((changes: NodeChange[]) => {
+	const handleNodesChange = (changes: NodeChange[]) => {
+		console.log("Changes :", changes);
 		// First, apply the changes to ReactFlow's state
 		onNodesChange(changes);
-		
-		// Check if any of the changes are dimension changes
-		const dimensionChanges = changes.filter(change => change.type === 'dimensions');
-		
-		if (dimensionChanges.length > 0) {
+
+		updateSingleNodeSizeOnDiskDebounced(changes);
+
+	};
+
+	const updateSingleNodeSizeOnDiskDebounced = debounce(
+		async (changes: NodeChange[]): Promise<void> => {
+			if (changes.length !== 1 || changes[0].type !== "dimensions") return;
+
 			// Update nodeSizes state and localStorage
 			const updatedSizes = { ...nodeSizes };
 			let hasChanges = false;
-			
-			dimensionChanges.forEach(change => {
-				if (change.type === 'dimensions' && change.dimensions?.width) {
-					const nodeId = change.id;
-					const newWidth = change.dimensions.width;
-					
-					// Only update if the width has actually changed
-					if (!updatedSizes[nodeId] || updatedSizes[nodeId].width !== newWidth) {
-						updatedSizes[nodeId] = { width: newWidth };
-						hasChanges = true;
-					}
+
+
+			if (changes[0].dimensions?.width) {
+				const nodeId = changes[0].id;
+				const newWidth = changes[0].dimensions.width;
+
+				// Only update if the width has actually changed
+				if (!updatedSizes[nodeId] || updatedSizes[nodeId].width !== newWidth) {
+					updatedSizes[nodeId] = { width: newWidth };
+					hasChanges = true;
 				}
-			});
-			
+			}
+
 			if (hasChanges) {
-				setNodeSizes(updatedSizes);
+				// setNodeSizes(updatedSizes);
 				try {
 					localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(updatedSizes));
 				} catch (error) {
 					console.warn('Failed to save node sizes:', error);
 				}
 			}
-		}
-	}, [onNodesChange, nodeSizes]);
+		},
+		500
+	);
 
 	// Reset nodes when initialNodes changes
 	useEffect(() => {
@@ -671,7 +679,7 @@ const MapView: React.FC<MapViewProps> = ({
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
-							onNodesChange={handleNodesChange}
+							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
 								handleNodePositionChange();
 							}}
