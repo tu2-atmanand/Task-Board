@@ -34,6 +34,7 @@ import { t } from 'src/utils/lang/helper';
 import { MapViewMinimap } from './MapViewMinimap';
 import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { bugReporter } from 'src/services/OpenModals';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -69,8 +70,12 @@ const nodeTypes = {
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
+	// Loading state for localStorage data
+	// replace state with a ref
+	const storageLoadedRef = useRef<boolean>(false);
+
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
-	// console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
+	console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
@@ -118,7 +123,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Load node sizes from localStorage
 	const loadNodeSizes = () => {
-		console.log("When is this called to load the node sizes...");
 		try {
 			const stored = localStorage.getItem(NODE_SIZE_STORAGE_KEY);
 			if (stored) {
@@ -157,13 +161,13 @@ const MapView: React.FC<MapViewProps> = ({
 
 
 	// Loading state for localStorage data
-	const [storageLoaded, setStorageLoaded] = useState(false);
 	const [positions, setPositions] = useState<Record<string, nodePosition>>({});
 	const [nodeSizes, setNodeSizes] = useState<Record<string, nodeSize>>({});
 	const [viewport, setViewport] = useState<viewPort>({ x: 10, y: 10, zoom: 1.5 });
 
 	// Load all storage data on mount and when activeBoardIndex changes
 	useEffect(() => {
+		storageLoadedRef.current = false;
 		// Load and sanitize positions
 		const pos = loadPositions();
 		const sanitizedPositions: Record<string, nodePosition> = {};
@@ -194,7 +198,7 @@ const MapView: React.FC<MapViewProps> = ({
 		};
 		setViewport(sanitizedViewport);
 
-		setStorageLoaded(true);
+		storageLoadedRef.current = true;
 	}, [activeBoardIndex]);
 
 
@@ -207,7 +211,11 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
-		console.log("What is in nodes :");
+		// Don't calculate nodes until storage data is loaded
+		if (!storageLoadedRef.current) {
+			return [];
+		}
+
 		const newNodes: Node[] = [];
 		const usedIds = new Set<string>();
 		const columnSpacing = 350;
@@ -231,6 +239,7 @@ const MapView: React.FC<MapViewProps> = ({
 					const id = task.legacyId ? task.legacyId : String(task.id);
 					if (usedIds.has(id)) {
 						console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
+						bugReporter(plugin, `Duplicate node id "${id}" detected in Map View. This may cause unexpected behavior. Please report this issue to the developer with details about the tasks involved.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
 						return; // Skip duplicate
 					}
 					usedIds.add(id);
@@ -268,14 +277,13 @@ const MapView: React.FC<MapViewProps> = ({
 			xOffset += columnSpacing;
 		});
 		return newNodes;
-	}, [allTasksArranged, activeBoardSettings, activeBoardIndex]);
+	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, storageLoadedRef.current]);
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
 	// Custom handler that intercepts dimension changes and updates nodeSizes state
 	const handleNodesChange = (changes: NodeChange[]) => {
-		console.log("Changes :", changes);
 		// First, apply the changes to ReactFlow's state
 		onNodesChange(changes);
 
@@ -656,7 +664,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// }
 
 
-	if (!storageLoaded) {
+	if (!storageLoadedRef.current || initialNodes.length === 0 || allTasksArranged.length === 0) {
 		return (
 			<div className='mapViewWrapper'>
 				<div className="mapView">
