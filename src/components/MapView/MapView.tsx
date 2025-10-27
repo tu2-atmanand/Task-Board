@@ -368,7 +368,7 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged, viewport.zoom]);
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged, viewport.zoom]); // TODO : Why viewport.zoom is a dependency
 
 	const handleNodePositionChange = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};

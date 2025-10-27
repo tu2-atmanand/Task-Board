@@ -569,10 +569,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							value={viewType}
 							onChange={(e) => { handleViewTypeChange(e); }}
 						>
-							<option value="kanban">Kanban</option>
+							<option value={viewTypeNames.kanban}>{t("kanban")}</option>
 							{/* <option value="list">List</option>
 							<option value="table">Table</option> */}
-							<option value="map">Map</option>
+							<option value={viewTypeNames.map}>{t("map")}</option>
 						</select>
 					)}
 					<button className={`RefreshBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>

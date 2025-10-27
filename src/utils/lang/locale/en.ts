@@ -437,7 +437,9 @@ const en: Lang = {
 	"smooth-step": "Smooth step",
 	"curved": "Curved",
 	"connect-a-child": "Connect a child",
-	"connect-a-parent": "Connect a parent"
+	"connect-a-parent": "Connect a parent",
+	"kanban": "Kanban",
+	"map": "map"
 };
 
 export default en;
