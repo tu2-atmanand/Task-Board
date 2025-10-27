@@ -284,46 +284,47 @@ const MapView: React.FC<MapViewProps> = ({
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
+	// TODO : Its not a good idea to use debounce and allow stale data. I am already storing the data in localStorage on resize end in ResizableNodeSelected component. And there its much better as I can capture the final size directly based on the callback.
 	// Custom handler that intercepts dimension changes and updates nodeSizes state
-	const handleNodesChange = (changes: NodeChange[]) => {
-		// First, apply the changes to ReactFlow's state
-		onNodesChange(changes);
+	// const handleNodesChange = (changes: NodeChange[]) => {
+	// 	// First, apply the changes to ReactFlow's state
+	// 	onNodesChange(changes);
 
-		updateSingleNodeSizeOnDiskDebounced(changes);
+	// 	updateSingleNodeSizeOnDiskDebounced(changes);
 
-	};
+	// };
 
-	const updateSingleNodeSizeOnDiskDebounced = debounce(
-		async (changes: NodeChange[]): Promise<void> => {
-			if (changes.length !== 1 || changes[0].type !== "dimensions") return;
+	// const updateSingleNodeSizeOnDiskDebounced = debounce(
+	// 	async (changes: NodeChange[]): Promise<void> => {
+	// 		if (changes.length !== 1 || changes[0].type !== "dimensions") return;
 
-			// Update nodeSizes state and localStorage
-			const updatedSizes = { ...nodeSizes };
-			let hasChanges = false;
+	// 		// Update nodeSizes state and localStorage
+	// 		const updatedSizes = { ...nodeSizes };
+	// 		let hasChanges = false;
 
 
-			if (changes[0].dimensions?.width) {
-				const nodeId = changes[0].id;
-				const newWidth = changes[0].dimensions.width;
+	// 		if (changes[0].dimensions?.width) {
+	// 			const nodeId = changes[0].id;
+	// 			const newWidth = changes[0].dimensions.width;
 
-				// Only update if the width has actually changed
-				if (!updatedSizes[nodeId] || updatedSizes[nodeId].width !== newWidth) {
-					updatedSizes[nodeId] = { width: newWidth };
-					hasChanges = true;
-				}
-			}
+	// 			// Only update if the width has actually changed
+	// 			if (!updatedSizes[nodeId] || updatedSizes[nodeId].width !== newWidth) {
+	// 				updatedSizes[nodeId] = { width: newWidth };
+	// 				hasChanges = true;
+	// 			}
+	// 		}
 
-			if (hasChanges) {
-				// setNodeSizes(updatedSizes);
-				try {
-					localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(updatedSizes));
-				} catch (error) {
-					console.warn('Failed to save node sizes:', error);
-				}
-			}
-		},
-		500
-	);
+	// 		if (hasChanges) {
+	// 			// setNodeSizes(updatedSizes);
+	// 			try {
+	// 				localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(updatedSizes));
+	// 			} catch (error) {
+	// 				console.warn('Failed to save node sizes:', error);
+	// 			}
+	// 		}
+	// 	},
+	// 	500
+	// );
 
 	// Reset nodes when initialNodes changes
 	useEffect(() => {
@@ -689,7 +690,7 @@ const MapView: React.FC<MapViewProps> = ({
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
-							onNodesChange={handleNodesChange}
+							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
 								handleNodePositionChange();
 							}}
