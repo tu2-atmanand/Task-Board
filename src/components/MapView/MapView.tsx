@@ -16,7 +16,8 @@ import {
 	Connection,
 	MarkerType,
 	BackgroundVariant,
-	SelectionMode
+	SelectionMode,
+	NodeChange
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -33,6 +34,7 @@ import { t } from 'src/utils/lang/helper';
 import { MapViewMinimap } from './MapViewMinimap';
 import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { bugReporter } from 'src/services/OpenModals';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -69,7 +71,6 @@ const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
-	// console.log('MapView rendered with', { activeBoardIndex, boards, allTasksArranged, focusOnTaskId });
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
@@ -84,6 +85,16 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	})();
 	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
+
+	// Loading state for localStorage data
+	const [storageLoaded, setStorageLoaded] = useState(false);
+	const [positions, setPositions] = useState<Record<string, nodePosition>>({});
+	const [nodeSizes, setNodeSizes] = useState<Record<string, nodeSize>>({});
+	const [viewport, setViewport] = useState<viewPort>({ x: 10, y: 10, zoom: 1.5 });
+
+	// Track when board changes to force node recalculation
+	const [boardChangeKey, setBoardChangeKey] = useState(0);
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
@@ -153,14 +164,10 @@ const MapView: React.FC<MapViewProps> = ({
 	};
 
 
-	// Loading state for localStorage data
-	const [storageLoaded, setStorageLoaded] = useState(false);
-	const [positions, setPositions] = useState<Record<string, nodePosition>>({});
-	const [nodeSizes, setNodeSizes] = useState<Record<string, nodeSize>>({});
-	const [viewport, setViewport] = useState<viewPort>({ x: 10, y: 10, zoom: 1.5 });
-
 	// Load all storage data on mount and when activeBoardIndex changes
 	useEffect(() => {
+		console.log("Loading Map View storage data for board index:", activeBoardIndex);
+		setStorageLoaded(false);
 		// Load and sanitize positions
 		const pos = loadPositions();
 		const sanitizedPositions: Record<string, nodePosition> = {};
@@ -192,8 +199,10 @@ const MapView: React.FC<MapViewProps> = ({
 		setViewport(sanitizedViewport);
 
 		setStorageLoaded(true);
+		// Increment board change key to force initialNodes recalculation
+		setBoardChangeKey(prev => prev + 1);
 	}, [activeBoardIndex]);
-	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
+
 
 	// const reactFlowInstance = useReactFlow();
 	// useEffect(() => {
@@ -204,7 +213,12 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
-		const nodes: Node[] = [];
+		// Don't calculate nodes until storage data is loaded
+		if (!storageLoaded) {
+			return [];
+		}
+
+		const newNodes: Node[] = [];
 		const usedIds = new Set<string>();
 		const columnSpacing = 350;
 		const rowSpacing = 170;
@@ -227,6 +241,7 @@ const MapView: React.FC<MapViewProps> = ({
 					const id = task.legacyId ? task.legacyId : String(task.id);
 					if (usedIds.has(id)) {
 						console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
+						bugReporter(plugin, `Duplicate node id "${id}" detected in Map View. This may cause unexpected behavior. Please report this issue to the developer with details about the tasks involved.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
 						return; // Skip duplicate
 					}
 					usedIds.add(id);
@@ -239,7 +254,7 @@ const MapView: React.FC<MapViewProps> = ({
 						nodeWidth = savedSize.width;
 					}
 
-					nodes.push({
+					newNodes.push({
 						id,
 						type: 'ResizableNodeSelected',
 						data: {
@@ -263,11 +278,53 @@ const MapView: React.FC<MapViewProps> = ({
 			});
 			xOffset += columnSpacing;
 		});
-		return nodes;
-	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, positions]);
+		return newNodes;
+	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey]);
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+
+	// TODO : Its not a good idea to use debounce and allow stale data. I am already storing the data in localStorage on resize end in ResizableNodeSelected component. And there its much better as I can capture the final size directly based on the callback.
+	// Custom handler that intercepts dimension changes and updates nodeSizes state
+	// const handleNodesChange = (changes: NodeChange[]) => {
+	// 	// First, apply the changes to ReactFlow's state
+	// 	onNodesChange(changes);
+
+	// 	updateSingleNodeSizeOnDiskDebounced(changes);
+
+	// };
+
+	// const updateSingleNodeSizeOnDiskDebounced = debounce(
+	// 	async (changes: NodeChange[]): Promise<void> => {
+	// 		if (changes.length !== 1 || changes[0].type !== "dimensions") return;
+
+	// 		// Update nodeSizes state and localStorage
+	// 		const updatedSizes = { ...nodeSizes };
+	// 		let hasChanges = false;
+
+
+	// 		if (changes[0].dimensions?.width) {
+	// 			const nodeId = changes[0].id;
+	// 			const newWidth = changes[0].dimensions.width;
+
+	// 			// Only update if the width has actually changed
+	// 			if (!updatedSizes[nodeId] || updatedSizes[nodeId].width !== newWidth) {
+	// 				updatedSizes[nodeId] = { width: newWidth };
+	// 				hasChanges = true;
+	// 			}
+	// 		}
+
+	// 		if (hasChanges) {
+	// 			// setNodeSizes(updatedSizes);
+	// 			try {
+	// 				localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(updatedSizes));
+	// 			} catch (error) {
+	// 				console.warn('Failed to save node sizes:', error);
+	// 			}
+	// 		}
+	// 	},
+	// 	500
+	// );
 
 	// Reset nodes when initialNodes changes
 	useEffect(() => {
@@ -322,7 +379,7 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged, viewport.zoom]);
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged, viewport.zoom]); // TODO : Why viewport.zoom is a dependency
 
 	const handleNodePositionChange = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
@@ -610,7 +667,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// }
 
 
-	if (!storageLoaded) {
+	if (!storageLoaded || initialNodes.length === 0 || allTasksArranged.length === 0) {
 		return (
 			<div className='mapViewWrapper'>
 				<div className="mapView">

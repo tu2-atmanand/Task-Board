@@ -49,7 +49,7 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 51,
+          "pending": 54,
           "completed": 8
         }
       },
@@ -394,7 +394,7 @@
           ]
         },
         "taskCount": {
-          "pending": 30,
+          "pending": 33,
           "completed": 8
         }
       }
@@ -857,7 +857,7 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "map",
-        "boardIndex": 1,
+        "boardIndex": 0,
         "taskId": "",
         "settingTab": 3
       },
