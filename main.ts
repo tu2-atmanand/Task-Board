@@ -22,23 +22,15 @@ import {
 } from "src/services/OpenModals";
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
-import { AddOrEditTaskView } from "./src/views/AddOrEditTaskView";
 import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import vaultScanner, {
 	fileTypeAllowedForScanning,
 } from "src/managers/VaultScanner";
 import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import {
-	VIEW_TYPE_ADD_OR_EDIT_TASK,
-	VIEW_TYPE_TASKBOARD,
-} from "src/interfaces/Constants";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
-import {
-	deleteAllLocalStorageKeys,
-	loadTranslationsOnStartup,
-	t,
-} from "src/utils/lang/helper";
+import { loadTranslationsOnStartup, t } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";

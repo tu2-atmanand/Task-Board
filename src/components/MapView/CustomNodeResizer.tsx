@@ -1,28 +1,42 @@
 import { memo } from 'react';
-import { Handle, Position, NodeResizeControl } from '@xyflow/react';
+import { Handle, Position, NodeResizeControl, NodeProps } from '@xyflow/react';
+import type TaskBoard from 'main';
 
 const controlStyle = {
 	background: 'transparent',
-	border: 'none',
+	border: '1px solid red',
 };
+
+interface dataProps extends React.ReactElement<unknown, string> {
+	props: { plugin: TaskBoard };
+}
 
 interface CustomNodeProps {
 	data: {
-		label: string;
+		label: dataProps;
 		[key: string]: any;
 	};
+	// selected: boolean;
+	// width: number | undefined;
+	// height: number | undefined;
 }
 
-const CustomNode = ({ data }: CustomNodeProps) => {
+const CustomNode = ({ data, selected, width, height }: CustomNodeProps & NodeProps) => {
+	console.log({ data, selected, width, height });
 	return (
 		<>
-			<NodeResizeControl style={controlStyle} minWidth={100} minHeight={50}>
-				<ResizeIcon />
+			<NodeResizeControl
+				// style={controlStyle}
+				minWidth={100}
+				minHeight={50}
+			// minHeight={ }
+			// {/* <ResizeIcon /> */}
+			>
+				<Handle type="target" position={Position.Left} />
+				<div>{data.label}</div>
+				<Handle type="source" position={Position.Right} />
 			</NodeResizeControl>
 
-			<Handle type="target" position={Position.Left} />
-			<div>{data.label}</div>
-			<Handle type="source" position={Position.Right} />
 		</>
 	);
 };

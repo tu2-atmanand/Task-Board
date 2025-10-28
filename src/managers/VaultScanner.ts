@@ -553,9 +553,11 @@ export default class vaultScanner {
 
 				return result;
 			} else {
-				throw new Error(
-					`extractTasksFromFile returned following error : ${isFileScanned}`
-				);
+				// throw new Error(
+				// 	`extractTasksFromFile returned following error : ${isFileScanned}`
+				// );
+
+				return result;
 			}
 		} catch (error) {
 			bugReporter(
@@ -630,11 +632,15 @@ export function fileTypeAllowedForScanning(
 	plugin: TaskBoard,
 	file: TFile | TAbstractFile
 ): boolean {
+	// console.log("Condition 1 :", notAllowedFileExtensionsRegEx.test(file.path), "\nCondition 2 :", file.path ===
+	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
 	if (
 		notAllowedFileExtensionsRegEx.test(file.path) ||
+		file.path.startsWith(
+			plugin.settings.data.globalSettings.archivedTBNotesFolderPath
+		) ||
 		file.path ===
 			plugin.settings.data.globalSettings.archivedTasksFilePath ||
-		plugin.settings.data.globalSettings.archivedTBNotesFolderPath ||
 		allowedFileExtensionsRegEx.test(file.path) === false
 	) {
 		return false;
@@ -1034,20 +1040,14 @@ export function extractDependsOn(text: string): string[] {
 		return match;
 	}
 
-	match = text.match(/\[depends on::\s*(.*?)\]/);
+	match = text.match(/\[dependsOn::\s*(.*?)\]/);
 	if (match && match[1]) {
-		return match[1]
-			.split(",")
-			.map((id) => id.trim())
-			.filter((id) => id.length > 0);
+		return match;
 	}
 
 	match = text.match(/\@dependsOn\(\s*(.*?)\s*\)/);
 	if (match && match[1]) {
-		return match[1]
-			.split(",")
-			.map((id) => id.trim())
-			.filter((id) => id.length > 0);
+		return match;
 	}
 
 	return [];

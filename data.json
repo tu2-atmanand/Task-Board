@@ -49,7 +49,7 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 51,
+          "pending": 54,
           "completed": 8
         }
       },
@@ -202,7 +202,7 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 52,
+          "pending": 54,
           "completed": 8
         }
       },
@@ -394,7 +394,7 @@
           ]
         },
         "taskCount": {
-          "pending": 30,
+          "pending": 33,
           "completed": 8
         }
       }
@@ -834,7 +834,7 @@
       "autoAddUniversalDate": true,
       "universalDate": "scheduledDate",
       "archivedTasksFilePath": "",
-      "showFileNameInCard": true,
+      "showFileNameInCard": false,
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": ".obsidian/plugins/task-board/tasks.json",
       "notificationService": "obsiApp",
@@ -852,12 +852,12 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 268,
+      "uniqueIdCounter": 270,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "kanban",
-        "boardIndex": 1,
+        "viewedType": "map",
+        "boardIndex": 0,
         "taskId": "",
         "settingTab": 3
       },
@@ -968,7 +968,18 @@
           "key": "last-modified",
           "taskItemKey": ""
         }
-      ]
+      ],
+      "mapView": {
+        "background": "dots",
+        "mapOrientation": "hor",
+        "optimizedRender": false,
+        "arrowDirection": "c2p",
+        "animatedEdges": false,
+        "scrollAction": "pan",
+        "showMinimap": true,
+        "renderVisibleNodes": false,
+        "edgeType": "smoothstep"
+      }
     }
   }
 }

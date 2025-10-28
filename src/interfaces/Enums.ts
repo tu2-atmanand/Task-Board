@@ -145,3 +145,34 @@ export enum colType {
 	pathFiltered = "pathFiltered",
 	completed = "completed",
 }
+
+export enum mapViewBackgrounVariantTypes {
+	lines = "lines",
+	dots = "dots",
+	cross = "cross",
+	none = "none",
+	transparent = "transparent",
+}
+
+export enum mapViewNodeMapOrientation {
+	horizontal = "hor",
+	vertical = "ver",
+}
+
+export enum mapViewScrollAction {
+	zoom = "zoom",
+	pan = "pan",
+}
+
+export enum mapViewArrowDirection {
+	parentToChild = "p2c",
+	childToParent = "c2p",
+	bothWay = "both",
+}
+
+export enum mapViewEdgeType {
+	straight = "straight",
+	step = "step",
+	smoothstep = "smoothstep",
+	bezier = "default",
+}

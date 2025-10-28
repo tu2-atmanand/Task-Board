@@ -10,6 +10,11 @@ import {
 	colType,
 	taskStatuses,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
+	mapViewBackgrounVariantTypes,
+	mapViewNodeMapOrientation,
+	mapViewScrollAction,
+	mapViewArrowDirection,
+	mapViewEdgeType,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -122,6 +127,17 @@ export interface globalSettingsData {
 		taskId?: string;
 	};
 	boundTaskCompletionToChildTasks: boolean;
+	mapView: {
+		background: string;
+		mapOrientation: string;
+		optimizedRender: boolean;
+		arrowDirection: mapViewArrowDirection;
+		animatedEdges: boolean;
+		scrollAction: mapViewScrollAction;
+		showMinimap: boolean;
+		renderVisibleNodes: boolean;
+		edgeType: mapViewEdgeType;
+	};
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -571,6 +587,17 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				settingTab: 0,
 			},
 			boundTaskCompletionToChildTasks: false,
+			mapView: {
+				background: mapViewBackgrounVariantTypes.none,
+				mapOrientation: mapViewNodeMapOrientation.horizontal,
+				optimizedRender: false,
+				arrowDirection: mapViewArrowDirection.childToParent,
+				animatedEdges: true,
+				scrollAction: mapViewScrollAction.zoom,
+				showMinimap: true,
+				renderVisibleNodes: false,
+				edgeType: mapViewEdgeType.bezier,
+			},
 		},
 	},
 };
