@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0",
+  "version": "1.8.0",
   "data": {
     "boardConfigs": [
       {
@@ -432,10 +432,11 @@
           ]
         },
         "folders": {
-          "polarity": 3,
+          "polarity": 2,
           "values": [
             "Task Board/1.7.0",
-            "/Notes/"
+            "/Notes/",
+            "Bible"
           ]
         },
         "tags": {
@@ -874,14 +875,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 273,
+      "uniqueIdCounter": 255,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 0,
         "taskId": "",
-        "settingTab": 3
+        "settingTab": 0
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",

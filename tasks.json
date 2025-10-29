@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-10-28T00:40:40",
+    "Modified_at": "2025-10-29T22:25:38",
     "Pending": {
         "A QMD file.qmd": [
             {
@@ -32,92 +32,231 @@
                 "reminder": ""
             }
         ],
-        "Task source 2.md": [
+        "Another QMD file.qmd": [
             {
-                "id": 1512946566,
+                "id": 1548844970,
                 "legacyId": "",
                 "status": " ",
-                "title": "- [ ] Task 5 with Tag #project1 ⛔5  🛫2025-09-21",
+                "title": "- [ ] A new task in the  second QMD file. ",
                 "body": [
-                    "\t- a"
+                    "\t- [ ] Lets add a sub-task",
+                    "\tAnd a line in description."
                 ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "2025-09-21",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#project1"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "5"
-                ],
-                "filePath": "Task source 2.md",
-                "taskLocation": {
-                    "startLine": 2,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 4
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 5,
-                "legacyId": "5",
-                "status": " ",
-                "title": "- [ ] Task 6 with Tag with dashes #this-tag  🆔 5 [dependsOn:: 245]",
-                "body": [],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "",
                 "due": "",
-                "tags": [
-                    "#this-tag"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "245"
-                ],
-                "filePath": "Task source 2.md",
-                "taskLocation": {
-                    "startLine": 4,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 67
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1196570687,
-                "legacyId": "wiu07b",
-                "status": "/",
-                "title": "- [/] In progress Task 7 with Tag #project2 🆔 wiu07b",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#project2"
-                ],
+                "tags": [],
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task source 2.md",
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 27
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1170300356,
+                "legacyId": "2fudi1",
+                "status": " ",
+                "title": "- [ ] Another task in `Anotehr QMD file`. 📅 2025-09-24 🔺 🆔 2fudi1 ",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-09-24",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 1,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
                 "taskLocation": {
                     "startLine": 5,
                     "startCharIndex": 0,
                     "endLine": 5,
-                    "endCharIndex": 53
+                    "endCharIndex": 69
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 236,
+                "legacyId": "236",
+                "status": " ",
+                "title": "- [ ] Apply id to this. 📅 2025-09-25  🆔 236",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-09-25",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 8,
+                    "startCharIndex": 0,
+                    "endLine": 8,
+                    "endCharIndex": 45
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 237,
+                "legacyId": "237",
+                "status": " ",
+                "title": "- [ ] This is task 3, apply Id to this. 📅 2025-09-25  🆔 237",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "2025-09-25",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 9,
+                    "startCharIndex": 0,
+                    "endLine": 9,
+                    "endCharIndex": 61
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 229395413,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] This task has sub-tasks which are raw links. They will flow out of the card.",
+                "body": [
+                    "\t- [ ] https://forum.obsidian.md/t/my-project-management-workflow-an-in-depth-explanation/82508/2",
+                    "\t- [ ] https://forum.obsidian.md/t/introducing-obsidian-medilig-ehr-emr-application-showcasing-obsidians-power-in-healthcare/106033",
+                    "\t- [ ] https://forum.obsidian.md/t/flowershow-publish-your-obsidian-vault-as-a-website-hosted-edition/105957"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Another QMD file.qmd",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 14,
+                    "endCharIndex": 108
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Destinatio/Task Source 1.md": [
+            {
+                "id": 1,
+                "legacyId": "1",
+                "status": " ",
+                "title": "- [ ] Task 1 with Tag #tasks 🆔 1",
+                "body": [
+                    "\t- [ ] This is a sub-task to the task ID 1.",
+                    "\t- I should complete this task as soon as possible, faster."
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#tasks"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 59
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2,
+                "legacyId": "2",
+                "status": " ",
+                "title": "- [ ] Task 2 without Tags 🆔 2 ⛔ 1 ⏫ ➕ 2025-09-21 ⏳ 2025-09-23 📅 2025-09-21",
+                "body": [],
+                "time": "",
+                "createdDate": "2025-09-21",
+                "startDate": "",
+                "scheduledDate": "2025-09-23",
+                "due": "2025-09-21",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 2,
+                "dependsOn": [
+                    "1"
+                ],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 5,
+                    "startCharIndex": 0,
+                    "endLine": 5,
+                    "endCharIndex": 76
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3,
+                "legacyId": "3",
+                "status": "/",
+                "title": "- [/] In progress Task 3 with Tag #tasks ⛔2, 5  🆔 3",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#tasks"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "2",
+                    "5"
+                ],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 6,
+                    "startCharIndex": 0,
+                    "endLine": 6,
+                    "endCharIndex": 52
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -224,255 +363,252 @@
                 "reminder": ""
             }
         ],
-        "TaskNotes/2025-09-23T00_15.md": [
+        "Styles for modal.md": [
             {
-                "id": 256,
-                "legacyId": "256",
-                "title": "2025-09-23T00_15",
-                "body": [
-                    "\t- [ ] This is a task. "
-                ],
-                "createdDate": "",
-                "startDate": "2025-10-16",
-                "scheduledDate": "",
-                "due": "2025-09-23",
-                "tags": [
-                    "taskNote",
-                    "Test",
-                    "#working"
-                ],
-                "frontmatterTags": [],
-                "time": "",
-                "priority": 0,
-                "dependsOn": [],
+                "id": 3965567640,
+                "legacyId": "",
                 "status": " ",
-                "filePath": "TaskNotes/2025-09-23T00_15.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 24,
-                    "endCharIndex": 23
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Destinatio/Task Source 1.md": [
-            {
-                "id": 1,
-                "legacyId": "1",
-                "status": " ",
-                "title": "- [ ] Task 1 with Tag #tasks 🆔 1",
-                "body": [
-                    "\t- [ ] This is a sub-task to the task ID 1.",
-                    "\t- I should complete this task as soon as possible, faster."
-                ],
+                "title": "1. [ ]  width: auto;",
+                "body": [],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "",
                 "due": "",
-                "tags": [
-                    "#tasks"
-                ],
+                "tags": [],
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Destinatio/Task Source 1.md",
+                "filePath": "Styles for modal.md",
                 "taskLocation": {
-                    "startLine": 2,
+                    "startLine": 9,
                     "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 59
+                    "endLine": 9,
+                    "endCharIndex": 20
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 2,
-                "legacyId": "2",
+                "id": 3182745836,
+                "legacyId": "",
                 "status": " ",
-                "title": "- [ ] Task 2 without Tags 🆔 2 ⛔ 1 ⏫ ➕ 2025-09-21 ⏳ 2025-09-23 📅 2025-09-21",
+                "title": "2. [ ]  height: 100%;",
                 "body": [],
                 "time": "",
-                "createdDate": "2025-09-21",
+                "createdDate": "",
                 "startDate": "",
-                "scheduledDate": "2025-09-23",
-                "due": "2025-09-21",
+                "scheduledDate": "",
+                "due": "",
                 "tags": [],
                 "frontmatterTags": [],
-                "priority": 2,
-                "dependsOn": [
-                    "1"
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Styles for modal.md",
+                "taskLocation": {
+                    "startLine": 10,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 21
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 3223470376,
+                "legacyId": "",
+                "status": " ",
+                "title": "3. [ ]  min-height: 93%;",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Styles for modal.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 11,
+                    "endCharIndex": 24
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 1141264834,
+                "legacyId": "",
+                "status": " ",
+                "title": "4. [ ]  max-width: none;",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Styles for modal.md",
+                "taskLocation": {
+                    "startLine": 12,
+                    "startCharIndex": 0,
+                    "endLine": 12,
+                    "endCharIndex": 24
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Task source 2.md": [
+            {
+                "id": 242048974,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] Task 5 with Tag #project1 ⛔5  🛫2025-09-21",
+                "body": [
+                    "\t- a"
                 ],
-                "filePath": "Destinatio/Task Source 1.md",
+                "time": "",
+                "createdDate": "",
+                "startDate": "2025-09-21",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#project1"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "5"
+                ],
+                "filePath": "Task source 2.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 4
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 5,
+                "legacyId": "5",
+                "status": " ",
+                "title": "- [ ] Task 6 with Tag with dashes #this-tag  🆔 5 [dependsOn:: 245]",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#this-tag"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [
+                    "245"
+                ],
+                "filePath": "Task source 2.md",
+                "taskLocation": {
+                    "startLine": 4,
+                    "startCharIndex": 0,
+                    "endLine": 4,
+                    "endCharIndex": 67
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 4270208178,
+                "legacyId": "wiu07b",
+                "status": "/",
+                "title": "- [/] In progress Task 7 with Tag #project2 🆔 wiu07b",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#project2"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Task source 2.md",
                 "taskLocation": {
                     "startLine": 5,
                     "startCharIndex": 0,
                     "endLine": 5,
-                    "endCharIndex": 76
+                    "endCharIndex": 53
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md": [
+            {
+                "id": 2349132837,
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] Sample task 1: status symbol=`space` status name='Todo'",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
+                "taskLocation": {
+                    "startLine": 70,
+                    "startCharIndex": 0,
+                    "endLine": 70,
+                    "endCharIndex": 61
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 3,
-                "legacyId": "3",
+                "id": 2636785287,
+                "legacyId": "",
                 "status": "/",
-                "title": "- [/] In progress Task 3 with Tag #tasks ⛔2, 5  🆔 3",
+                "title": "- [/] Sample task 3: status symbol=`/` status name='In Progress'",
                 "body": [],
                 "time": "",
                 "createdDate": "",
                 "startDate": "",
                 "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#tasks"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "2",
-                    "5"
-                ],
-                "filePath": "Destinatio/Task Source 1.md",
-                "taskLocation": {
-                    "startLine": 6,
-                    "startCharIndex": 0,
-                    "endLine": 6,
-                    "endCharIndex": 52
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Daily_Notes/2025-10-10.md": [
-            {
-                "id": 240,
-                "legacyId": "240",
-                "status": " ",
-                "title": "- [ ] This is a task of yesterday. #doc  🆔 240  ⛔ 12b153",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-10",
-                "due": "",
-                "tags": [
-                    "#doc"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [
-                    "12b153"
-                ],
-                "filePath": "Daily_Notes/2025-10-10.md",
-                "taskLocation": {
-                    "startLine": 3,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 57
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Daily_Notes/2024-10-10.md": [
-            {
-                "id": 2401609950,
-                "legacyId": "12b153",
-                "status": " ",
-                "title": "- [ ] This is a task from past year. ⏳ 2025-10-12  🆔 12b153",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-12",
                 "due": "",
                 "tags": [],
                 "frontmatterTags": [],
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Daily_Notes/2024-10-10.md",
+                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
                 "taskLocation": {
-                    "startLine": 3,
+                    "startLine": 72,
                     "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 60
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "TaskNotes/2025-10-21T19_40.md": [
-            {
-                "id": 266,
-                "legacyId": "266",
-                "title": "This is a new task-note after fixing the blank modal bug and with better frontmatter UI.",
-                "body": [
-                    "- [ ] This should be the sub-task for this task-note."
-                ],
-                "createdDate": "",
-                "startDate": "2025-10-21",
-                "scheduledDate": "2025-10-22",
-                "due": "2025-10-22",
-                "tags": [
-                    "taskNote",
-                    "#pending",
-                    "#working"
-                ],
-                "frontmatterTags": [],
-                "time": "",
-                "priority": 1,
-                "dependsOn": [
-                    "224"
-                ],
-                "status": " ",
-                "filePath": "TaskNotes/2025-10-21T19_40.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 23,
-                    "endCharIndex": 53
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": "2025-10-21T19:44"
-            }
-        ],
-        "TaskNotes/Tasks/This is a new TaskNote with only due date.md": [
-            {
-                "id": 3892089601,
-                "legacyId": "",
-                "title": "This is a new TaskNote with only due date",
-                "body": [
-                    "- [ ] This should be the sub-task."
-                ],
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "task",
-                    "taskNote"
-                ],
-                "frontmatterTags": [],
-                "time": "",
-                "priority": 0,
-                "dependsOn": [],
-                "status": " ",
-                "filePath": "TaskNotes/Tasks/This is a new TaskNote with only due date.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 26,
-                    "endCharIndex": 0
+                    "endLine": 72,
+                    "endCharIndex": 64
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -501,491 +637,6 @@
                     "startCharIndex": 0,
                     "endLine": 3,
                     "endCharIndex": 74
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Another QMD file.qmd": [
-            {
-                "id": 970451021,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] A new task in the  second QMD file. ",
-                "body": [
-                    "\t- [ ] Lets add a sub-task",
-                    "\tAnd a line in description."
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Another QMD file.qmd",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 27
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2705156138,
-                "legacyId": "2fudi1",
-                "status": " ",
-                "title": "- [ ] Another task in `Anotehr QMD file`. 📅 2025-09-24 🔺 🆔 2fudi1 ",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "2025-09-24",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 1,
-                "dependsOn": [],
-                "filePath": "Another QMD file.qmd",
-                "taskLocation": {
-                    "startLine": 5,
-                    "startCharIndex": 0,
-                    "endLine": 5,
-                    "endCharIndex": 69
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 236,
-                "legacyId": "236",
-                "status": " ",
-                "title": "- [ ] Apply id to this. 📅 2025-09-25  🆔 236",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "2025-09-25",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Another QMD file.qmd",
-                "taskLocation": {
-                    "startLine": 8,
-                    "startCharIndex": 0,
-                    "endLine": 8,
-                    "endCharIndex": 45
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 237,
-                "legacyId": "237",
-                "status": " ",
-                "title": "- [ ] This is task 3, apply Id to this. 📅 2025-09-25  🆔 237",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "2025-09-25",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Another QMD file.qmd",
-                "taskLocation": {
-                    "startLine": 9,
-                    "startCharIndex": 0,
-                    "endLine": 9,
-                    "endCharIndex": 61
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3307359135,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] This task has sub-tasks which are raw links. They will flow out of the card.",
-                "body": [
-                    "\t- [ ] https://forum.obsidian.md/t/my-project-management-workflow-an-in-depth-explanation/82508/2",
-                    "\t- [ ] https://forum.obsidian.md/t/introducing-obsidian-medilig-ehr-emr-application-showcasing-obsidians-power-in-healthcare/106033",
-                    "\t- [ ] https://forum.obsidian.md/t/flowershow-publish-your-obsidian-vault-as-a-website-hosted-edition/105957"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Another QMD file.qmd",
-                "taskLocation": {
-                    "startLine": 11,
-                    "startCharIndex": 0,
-                    "endLine": 14,
-                    "endCharIndex": 108
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Styles for modal.md": [
-            {
-                "id": 1865698243,
-                "legacyId": "",
-                "status": " ",
-                "title": "1. [ ]  width: auto;",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Styles for modal.md",
-                "taskLocation": {
-                    "startLine": 9,
-                    "startCharIndex": 0,
-                    "endLine": 9,
-                    "endCharIndex": 20
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 65909631,
-                "legacyId": "",
-                "status": " ",
-                "title": "2. [ ]  height: 100%;",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Styles for modal.md",
-                "taskLocation": {
-                    "startLine": 10,
-                    "startCharIndex": 0,
-                    "endLine": 10,
-                    "endCharIndex": 21
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3800638744,
-                "legacyId": "",
-                "status": " ",
-                "title": "3. [ ]  min-height: 93%;",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Styles for modal.md",
-                "taskLocation": {
-                    "startLine": 11,
-                    "startCharIndex": 0,
-                    "endLine": 11,
-                    "endCharIndex": 24
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2658925885,
-                "legacyId": "",
-                "status": " ",
-                "title": "4. [ ]  max-width: none;",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Styles for modal.md",
-                "taskLocation": {
-                    "startLine": 12,
-                    "startCharIndex": 0,
-                    "endLine": 12,
-                    "endCharIndex": 24
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Daily_Notes/2025-10-11.md": [
-            {
-                "id": 1002255424,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] 13:00-14:00 Task 1 ⏳ 2025-10-11 ",
-                "body": [],
-                "time": "13:00-14:00",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-11",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-11.md",
-                "taskLocation": {
-                    "startLine": 3,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 38
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2402526180,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] 14:00-14:30 Task 2 ⏳ 2025-10-11 ",
-                "body": [],
-                "time": "14:00-14:30",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-11",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-11.md",
-                "taskLocation": {
-                    "startLine": 4,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 38
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3497795974,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] 12:00-13:00 Task 3 ⏳ 2025-10-11 ",
-                "body": [],
-                "time": "12:00-13:00",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-11",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-11.md",
-                "taskLocation": {
-                    "startLine": 5,
-                    "startCharIndex": 0,
-                    "endLine": 5,
-                    "endCharIndex": 38
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Daily_Notes/2025-10-12.md": [
-            {
-                "id": 245,
-                "legacyId": "245",
-                "status": " ",
-                "title": "- [ ] 13:00 - 14:00 This is a task for tomorrow [id:: 245] ",
-                "body": [],
-                "time": "13:00 - 14:00",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-12",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-12.md",
-                "taskLocation": {
-                    "startLine": 3,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 59
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3451644822,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] 07:00 - 07:10 This is a temp task created through Day planner plugin",
-                "body": [],
-                "time": "07:00 - 07:10",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-12",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-12.md",
-                "taskLocation": {
-                    "startLine": 4,
-                    "startCharIndex": 0,
-                    "endLine": 4,
-                    "endCharIndex": 74
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2514240085,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] 15:00 - 18:00 This is a third task",
-                "body": [],
-                "time": "15:00 - 18:00",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-12",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-12.md",
-                "taskLocation": {
-                    "startLine": 5,
-                    "startCharIndex": 0,
-                    "endLine": 5,
-                    "endCharIndex": 40
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3249957155,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] This task dont have time",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-12",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Daily_Notes/2025-10-12.md",
-                "taskLocation": {
-                    "startLine": 6,
-                    "startCharIndex": 0,
-                    "endLine": 6,
-                    "endCharIndex": 30
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md": [
-            {
-                "id": 873228727,
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] Sample task 1: status symbol=`space` status name='Todo'",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
-                "taskLocation": {
-                    "startLine": 70,
-                    "startCharIndex": 0,
-                    "endLine": 70,
-                    "endCharIndex": 61
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 2776006097,
-                "legacyId": "",
-                "status": "/",
-                "title": "- [/] Sample task 3: status symbol=`/` status name='In Progress'",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md",
-                "taskLocation": {
-                    "startLine": 72,
-                    "startCharIndex": 0,
-                    "endLine": 72,
-                    "endCharIndex": 64
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1024,7 +675,7 @@
                 "reminder": ""
             },
             {
-                "id": 3693650616,
+                "id": 2742053313,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] Subtask 1",
@@ -1052,7 +703,7 @@
                 "reminder": ""
             },
             {
-                "id": 4531677,
+                "id": 269211964,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] Subtask 2",
@@ -1080,7 +731,7 @@
                 "reminder": ""
             },
             {
-                "id": 3532369836,
+                "id": 4066835977,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t\t- [ ] Sub-subtask 1",
@@ -1108,7 +759,7 @@
                 "reminder": ""
             },
             {
-                "id": 2737686390,
+                "id": 2660439438,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] This is a first task with one level of indentation, very next to the paragraph line.",
@@ -1171,7 +822,7 @@
                 "reminder": ""
             },
             {
-                "id": 332839352,
+                "id": 2437602770,
                 "legacyId": "",
                 "status": " ",
                 "title": ">- [ ] This is a first task inside callout  [due:: 2025-04-20] #todo",
@@ -1201,7 +852,7 @@
                 "reminder": ""
             },
             {
-                "id": 2262032512,
+                "id": 1147592015,
                 "legacyId": "",
                 "status": " ",
                 "title": "> + [ ] This is task inside callout with a space at the beginning. And it starts with `+ [ ]`",
@@ -1229,7 +880,7 @@
                 "reminder": ""
             },
             {
-                "id": 3643186437,
+                "id": 1229846359,
                 "legacyId": "",
                 "status": " ",
                 "title": ">1. [ ] This is a task inside callout and it starts with `1.`",
@@ -1257,7 +908,7 @@
                 "reminder": ""
             },
             {
-                "id": 2792394979,
+                "id": 2658611534,
                 "legacyId": "",
                 "status": " ",
                 "title": ">\t1. [ ] This is a task inside callout, but its indented. **Please note this is not a sub-task.**",
@@ -1285,7 +936,7 @@
                 "reminder": ""
             },
             {
-                "id": 2958442193,
+                "id": 3012788939,
                 "legacyId": "",
                 "status": " ",
                 "title": ">- [ ] **Task Board** will be able to detect this task.   [due:: 2025-04-20] #todo",
@@ -1315,7 +966,7 @@
                 "reminder": ""
             },
             {
-                "id": 3482851631,
+                "id": 3803777445,
                 "legacyId": "",
                 "status": " ",
                 "title": ">    - [ ] Even though this task is right after the main task and also since its been indented, still its not possible to detect this is as a sub-task of the main task. Hence this will be considered as a separate task.",
@@ -1343,7 +994,7 @@
                 "reminder": ""
             },
             {
-                "id": 1152865972,
+                "id": 1211988672,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] This is a first indented task, just by itself, no content before this taskLine, no content after this taskLine. ✅ 2025-08-22",
@@ -1371,7 +1022,7 @@
                 "reminder": ""
             },
             {
-                "id": 1303505081,
+                "id": 3759031876,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] This is an lonely indented task. Not sure why this theme is not giving it a proper task styling.",
@@ -1403,7 +1054,7 @@
                 "reminder": ""
             },
             {
-                "id": 2211340318,
+                "id": 1106583437,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] This is a first indented task right after a normal line. (old one)",
@@ -1431,7 +1082,7 @@
                 "reminder": ""
             },
             {
-                "id": 2240594816,
+                "id": 195628130,
                 "legacyId": "",
                 "status": " ",
                 "title": "    + [ ] This is second indented task which starts with `+ [ ]`",
@@ -1459,7 +1110,7 @@
                 "reminder": ""
             },
             {
-                "id": 3281425133,
+                "id": 3127947692,
                 "legacyId": "",
                 "status": " ",
                 "title": "2. [ ] Second numbered task.",
@@ -1487,7 +1138,7 @@
                 "reminder": ""
             },
             {
-                "id": 2025318082,
+                "id": 2823991903,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] All the below numbered tasks should be completed. 🔺 ",
@@ -1518,7 +1169,7 @@
                 "reminder": ""
             },
             {
-                "id": 3108781963,
+                "id": 2670156352,
                 "legacyId": "",
                 "status": " ",
                 "title": "1) [ ] Another numbered task which starts with pattern `1) [ ]`.",
@@ -1545,48 +1196,12 @@
                 "cancelledDate": "",
                 "reminder": ""
             }
-        ],
-        "TaskBoard/TBNotes/2025-10-21T19_40 - Copy.md": [
-            {
-                "id": 286,
-                "legacyId": "286",
-                "title": "This is a new task-note after fixing the blank modal bug and with better frontmatter UI.",
-                "body": [
-                    "- [ ] This should be the sub-task for this task-note."
-                ],
-                "createdDate": "",
-                "startDate": "2025-10-21",
-                "scheduledDate": "2025-10-22",
-                "due": "2025-10-22",
-                "tags": [
-                    "taskNote",
-                    "#pending",
-                    "#working"
-                ],
-                "frontmatterTags": [],
-                "time": "",
-                "priority": 1,
-                "dependsOn": [
-                    "224"
-                ],
-                "status": " ",
-                "filePath": "TaskBoard/TBNotes/2025-10-21T19_40 - Copy.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 23,
-                    "endCharIndex": 53
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": "2025-10-21T19:44"
-            }
         ]
     },
     "Completed": {
         "Testing Indented Task Bug.md": [
             {
-                "id": 11291207,
+                "id": 640069555,
                 "legacyId": "",
                 "status": "x",
                 "title": "    * [x] This is Third indented task which starts with `* [ ]` ✅ 2025-08-22",
@@ -1614,7 +1229,7 @@
                 "reminder": ""
             },
             {
-                "id": 2446662607,
+                "id": 1288750136,
                 "legacyId": "",
                 "status": "x",
                 "title": "1. [x] This is a numbered task. ✅ 2025-08-22",
@@ -1644,7 +1259,7 @@
         ],
         "Tasks Plugin - Review and check your Statuses 2025-09-22 23-11-57.md": [
             {
-                "id": 1822782453,
+                "id": 2927806788,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] Sample task 2: status symbol=`x` status name='Done'",
@@ -1670,7 +1285,7 @@
                 "reminder": ""
             },
             {
-                "id": 1538820217,
+                "id": 660647488,
                 "legacyId": "",
                 "status": "-",
                 "title": "- [-] Sample task 4: status symbol=`-` status name='Cancelled'",
@@ -1696,39 +1311,9 @@
                 "reminder": ""
             }
         ],
-        "Destinatio/Task Source 1.md": [
-            {
-                "id": 770831338,
-                "legacyId": "",
-                "status": "x",
-                "title": "- [x] Completed Task 4 with Tag #tasks",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#tasks"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Destinatio/Task Source 1.md",
-                "taskLocation": {
-                    "startLine": 7,
-                    "startCharIndex": 0,
-                    "endLine": 7,
-                    "endCharIndex": 38
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
         "Task source 2.md": [
             {
-                "id": 2020811422,
+                "id": 1162305423,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] Completed Task 8 with Tag #project1 ",
@@ -1784,9 +1369,39 @@
                 "reminder": ""
             }
         ],
+        "Destinatio/Task Source 1.md": [
+            {
+                "id": 1661477197,
+                "legacyId": "",
+                "status": "x",
+                "title": "- [x] Completed Task 4 with Tag #tasks",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#tasks"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Destinatio/Task Source 1.md",
+                "taskLocation": {
+                    "startLine": 7,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 38
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "A QMD file.qmd": [
             {
-                "id": 2948772471,
+                "id": 3552137081,
                 "legacyId": "",
                 "status": "x",
                 "title": "- [x] This is a first task in the first qmd file. Edited. ✅ 2025-09-23",
