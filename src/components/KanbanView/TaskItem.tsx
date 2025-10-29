@@ -210,11 +210,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				const now = new Date();
 
 				if (now < startTime) {
-					return 'var(--color-yellow)'; // Not started yet
+					// return 'var(--color-yellow)'; // Not started yet
+					return '#e8ce4aa8'; // Not started yet
 				} else if (now >= startTime && now <= endTime) {
 					return 'var(--color-blue)'; // In progress
 				} else if (now > endTime) {
-					return 'var(--color-red)'; // Over
+					return '#f23a3ab8'; // Past due
 				}
 			} else {
 				return 'var(--color-yellow)'; // Due today but no time info
@@ -222,7 +223,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		} else if (taskUniversalDate > today) {
 			return 'green'; // Due in future
 		} else if (taskUniversalDate < today) {
-			return 'var(--color-red)'; // Past due
+			// return 'var(--color-red)'; // Past due
+			return '#f23a3ab8'; // Past due
 		} else {
 			return 'grey'; // No due date
 		}
@@ -419,7 +421,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 												className="taskItemTag"
 												style={{
 													color: tagColor,
-													border: `1px solid ${borderColor}`,
+													// border: `1px solid ${borderColor}`,
 													backgroundColor: backgroundColor
 												}}
 											>
