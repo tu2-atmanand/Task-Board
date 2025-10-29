@@ -109,7 +109,11 @@ export class RealTimeScanner {
 		}
 	}
 
-	onFileRenamed(file: TAbstractFile, oldPath: string) {
+	onFileRenamed(
+		file: TAbstractFile,
+		oldPath: string,
+		archivedTaskNotesPath: string
+	) {
 		let foundFlag = false;
 		// Find the oldPath inside the plugin.vaultScanner.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
 		const { Pending, Completed, Notes } =
@@ -118,13 +122,22 @@ export class RealTimeScanner {
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
 				if (file instanceof TFile && cache.hasOwnProperty(oldPath)) {
-					cache[file.path] = cache[oldPath];
-					cache[file.path].forEach((task) => {
-						if (task.filePath === oldPath) {
-							task.filePath = file.path; // Update the file path in the task
-							foundFlag = true;
-						}
-					});
+					if (
+						!file.path
+							.toLowerCase()
+							.startsWith(archivedTaskNotesPath.toLowerCase())
+					) {
+						// This check helps to remove the file cache, when the task note is archived.
+						cache[file.path] = cache[oldPath];
+						cache[file.path].forEach((task) => {
+							if (task.filePath === oldPath) {
+								task.filePath = file.path; // Update the file path in the task
+								foundFlag = true;
+							}
+						});
+					} else {
+						foundFlag = true;
+					}
 					delete cache[oldPath];
 				} else if (file instanceof TFolder) {
 					// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.

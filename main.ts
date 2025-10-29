@@ -642,7 +642,12 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("rename", (file, oldPath) => {
 				if (file instanceof TFile) {
 					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
-					this.realTimeScanning.onFileRenamed(file, oldPath);
+					this.realTimeScanning.onFileRenamed(
+						file,
+						oldPath,
+						this.plugin.settings.data.globalSettings
+							.archivedTBNotesFolderPath
+					);
 				}
 			})
 		);
