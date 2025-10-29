@@ -170,9 +170,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	const refreshBoardButton = useCallback(async () => {
-		if (plugin.settings.data.globalSettings.realTimeScanning) {
-			eventEmitter.emit("REFRESH_BOARD");
-		} else {
 			const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
 			const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
 
@@ -180,7 +177,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				await plugin.realTimeScanning.processAllUpdatedFiles();
 			}
 			eventEmitter.emit("REFRESH_BOARD");
-		}
+
 	}, [plugin]);
 
 	function handleOpenAddNewTaskModal() {
