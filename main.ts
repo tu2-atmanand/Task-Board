@@ -660,11 +660,17 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
-		// this.registerEvent(
-		// 	this.app.vault.on("create", (file) => {
-		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-		// 	})
-		// );
+		this.registerEvent(
+			this.app.vault.on("create", (file) => {
+				console.log("File created : ", file);
+				if (file instanceof TFile) {
+					setTimeout(() => {
+						console.log("Calling for scanning...");
+						this.realTimeScanning.processAllUpdatedFiles(file);
+					}, 400);
+				}
+			})
+		);
 
 		// const closeButton = document.querySelector<HTMLElement>(
 		// 	".titlebar-button.mod-close"
