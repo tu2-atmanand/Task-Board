@@ -439,7 +439,8 @@ const en: Lang = {
 	"connect-a-child": "Connect a child",
 	"connect-a-parent": "Connect a parent",
 	"kanban": "Kanban",
-	"map": "map"
+	"map": "map",
+	"search-for-task": "Search for task"
 };
 
 export default en;
