@@ -180,7 +180,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			columns: [],
 			hideEmptyColumns: false,
 			showColumnTags: true,
-			showFilteredTags: true
+			showFilteredTags: true,
+			boardFilter: {
+				rootCondition: "any",
+				filterGroups: [],
+			},
 		};
 		setLocalBoards([...oldBoards, newBoard]);
 		setSelectedBoardIndex(localBoards.length);

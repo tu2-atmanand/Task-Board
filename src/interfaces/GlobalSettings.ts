@@ -150,7 +150,7 @@ export interface PluginDataJson {
 }
 
 export const DEFAULT_SETTINGS: PluginDataJson = {
-	version: "1.4.2",
+	version: "1.8.0",
 	data: {
 		boardConfigs: [
 			{
@@ -235,6 +235,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				showColumnTags: false,
 				showFilteredTags: true,
 				hideEmptyColumns: false,
+				boardFilter: {
+					rootCondition: "any",
+					filterGroups: [],
+				},
 			},
 			{
 				columns: [
@@ -297,6 +301,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				showColumnTags: false,
 				showFilteredTags: true,
 				hideEmptyColumns: false,
+				boardFilter: {
+					rootCondition: "any",
+					filterGroups: [],
+				},
 			},
 			{
 				columns: [
@@ -351,6 +359,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				showColumnTags: false,
 				showFilteredTags: true,
 				hideEmptyColumns: false,
+				boardFilter: {
+					rootCondition: "any",
+					filterGroups: [],
+				},
 			},
 		],
 		globalSettings: {
