@@ -537,11 +537,14 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	padding-inline-start: 0.4em;
 	font-weight: 500;
 	overflow-wrap: anywhere;
-	color: var(--accent-strong);
 }
 
 .taskItemTitle p {
 	margin-block: 0 !important;
+}
+
+.taskItemBody {
+	font-size: 0.85rem;
 }
 
 .taskItem ol {
@@ -594,6 +597,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	max-width: 100%;
 	overflow-wrap: anywhere;
 	word-break: break-all;
+	align-self: end;
 }
 
 .subtaskTextRenderer p {
@@ -750,6 +754,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 
 .taskItemMainBodyDescriptionSection {
 	width: 100%;
+	font-size: 0.9rem;
 }
 
 .taskItemMainBodyDescriptionSectionVisible {
@@ -821,6 +826,7 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	flex-direction: column;
 	gap: 4px;
 	width: 100%;
+	font-size: 0.9rem;
 }
 
 .taskItemChildTasks {
@@ -882,13 +888,13 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	/* border: var(--tag-border-width) solid var(--tag-border-color); */
 	border-radius: var(--tag-radius);
 	/* color: var(--tag-color); */
-	font-size: var(--tag-size);
+	font-size: 0.7rem;
 	font-weight: var(--tag-weight);
 	text-decoration: var(--tag-decoration);
 	padding: var(--tag-padding-y) var(--tag-padding-x);
-	line-height: 1;
+	/* line-height: 1; */
 	border-radius: 1em;
-	padding: 2px 8px;
+	padding: 1px 6px;
 	margin-right: 2px;
 	display: inline-block;
 	white-space: nowrap;
@@ -911,14 +917,16 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	align-content: center;
 	align-items: center;
 	gap: 2px;
-	font-size: small;
+	font-size: 0.75rem;
 }
 
 .taskItemTimeContainer,
 .taskItemUniversalDateContainer {
-	background-color: var(--background-modifier-box-shadow);
+	background-color: var(--background-modifier-form-field-hover);
 	padding-inline: 6px;
+	border: 1px solid var(--graph-line);
 	padding-block: 2px;
+	color: var(--icon-color);
 	border-radius: var(--pill-radius);
 }
 
@@ -2081,12 +2089,15 @@ button.clickable-icon.view-action.scan-vault-btn.highlight {
 	z-index: 1;
 	overflow-x: scroll;
 	top: calc(-1 * var(--size-4-8));
-	box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
+	/* box-shadow: 0px 10px 15px -10px var(--background-modifier-success); */
 	backdrop-filter: blur(5px);
+	justify-content: space-evenly;
+	margin-block: 5px;
 }
 
 .taskBoard-settings-tab-button {
 	min-width: fit-content;
+	width: -webkit-fill-available;
 	background-color: var(--background-secondary);
 	align-content: center;
 	text-align-last: center;
