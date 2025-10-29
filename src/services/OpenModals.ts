@@ -91,10 +91,10 @@ export const openAddNewTaskModal = (
 		plugin.settings.data.globalSettings.preDefinedNote
 	);
 	const activeTFile = activeFile ? activeFile : preDefinedNoteFile;
-	const communityPlugins = new CommunityPlugins(plugin);
 	const AddTaskModal = new AddOrEditTaskModal(
 		plugin,
 		async (newTask: taskItem, quickAddPluginChoice: string) => {
+			const communityPlugins = new CommunityPlugins(plugin);
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
 				let completeTask = await getFormattedTaskContent(newTask);
