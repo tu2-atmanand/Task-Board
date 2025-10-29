@@ -636,11 +636,13 @@ export function fileTypeAllowedForScanning(
 	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
 	if (
 		notAllowedFileExtensionsRegEx.test(file.path) ||
-		file.path.startsWith(
-			plugin.settings.data.globalSettings.archivedTBNotesFolderPath
-		) ||
-		file.path ===
-			plugin.settings.data.globalSettings.archivedTasksFilePath ||
+		file.path
+			.toLowerCase()
+			.startsWith(
+				plugin.settings.data.globalSettings.archivedTBNotesFolderPath.toLowerCase()
+			) ||
+		file.path.toLowerCase() ===
+			plugin.settings.data.globalSettings.archivedTasksFilePath.toLowerCase() ||
 		allowedFileExtensionsRegEx.test(file.path) === false
 	) {
 		return false;
