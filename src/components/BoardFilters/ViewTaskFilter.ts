@@ -12,7 +12,12 @@ import Sortable from "sortablejs";
 import { FilterConfigModal } from "./FilterConfigModal";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
-import { Filter, FilterGroup, RootFilterState, SavedFilterConfig } from "src/interfaces/BoardConfigs";
+import {
+	Filter,
+	FilterGroup,
+	RootFilterState,
+	SavedFilterConfig,
+} from "src/interfaces/BoardConfigs";
 import {
 	MultiSuggest,
 	getTagSuggestions,
@@ -20,7 +25,6 @@ import {
 	getStatusSuggestions,
 	getPrioritySuggestions,
 } from "src/services/MultiSuggest";
-
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;
@@ -111,10 +115,6 @@ export class TaskFilterComponent extends Component {
 
 	close() {
 		this.onunload();
-	}
-
-	private generateId(): string {
-		return `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 	}
 
 	private render(): void {
@@ -337,10 +337,10 @@ export class TaskFilterComponent extends Component {
 			.setIcon("copy")
 			.setTooltip(t("duplicate-filter-group"))
 			.onClick(() => {
-				const newGroupId = this.generateId();
+				const newGroupId = generateIdForFilters();
 				const duplicatedFilters = groupData.filters.map((f) => ({
 					...f,
-					id: this.generateId(),
+					id: generateIdForFilters(),
 				}));
 				const duplicatedGroupData: FilterGroup = {
 					...groupData,
@@ -463,7 +463,7 @@ export class TaskFilterComponent extends Component {
 
 		const newGroupId = groupDataToClone
 			? groupDataToClone.id
-			: this.generateId();
+			: generateIdForFilters();
 
 		let newGroupData: FilterGroup;
 		if (groupDataToClone && insertAfterElement) {
@@ -472,7 +472,7 @@ export class TaskFilterComponent extends Component {
 				groupCondition: groupDataToClone.groupCondition,
 				filters: groupDataToClone.filters.map((f) => ({
 					...f,
-					id: this.generateId(),
+					id: generateIdForFilters(),
 				})),
 			};
 		} else {
@@ -689,7 +689,7 @@ export class TaskFilterComponent extends Component {
 		groupData: FilterGroup,
 		filtersListEl: HTMLElement
 	): void {
-		const newFilterId = this.generateId();
+		const newFilterId = generateIdForFilters();
 		const newFilterData: Filter = {
 			id: newFilterId,
 			property: "content",
@@ -1331,4 +1331,8 @@ export class TaskFilterComponent extends Component {
 		);
 		modal.open();
 	}
+}
+
+export function generateIdForFilters(): string {
+	return `id-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
