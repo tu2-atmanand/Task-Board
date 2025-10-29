@@ -585,25 +585,34 @@ export class SettingsManager {
 				})
 			);
 
-		new Setting(contentEl)
-			.setName(t("enable-experimental-features"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("enable-experimental-features-info-1") +
-						"<br/>" +
-						t("enable-experimental-features-info-2")
-				)
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(experimentalFeatures)
-					.onChange(async (value) => {
-						this.globalSettings!.experimentalFeatures = value;
-						await this.saveSettings();
+		// new Setting(contentEl)
+		// 	.setName(t("enable-experimental-features"))
+		// 	.setDesc(
+		// 		createFragmentWithHTML(
+		// 			t("enable-experimental-features-info-1") +
+		// 				"<br/>" +
+		// 				t("enable-experimental-features-info-2") +
+		// 				"<br/>" +
+		// 				"<ul>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				t("drag-and-drop") +
+		// 				"</b>" +
+		// 				t("drag-and-drop-feature-description") +
+		// 				"</li>" +
+		// 				"</ul>" +
+		// 		)
+		// 	)
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(experimentalFeatures)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.experimentalFeatures = value;
+		// 				await this.saveSettings();
 
-						this.openReloadNoticeIfNeeded();
-					})
-			);
+		// 				this.openReloadNoticeIfNeeded();
+		// 			})
+		// 	);
 
 		// // Helper to add filter rows
 		// const addFilterRow = (

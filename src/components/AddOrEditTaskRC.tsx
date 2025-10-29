@@ -554,10 +554,10 @@ export const AddOrEditTaskRC: React.FC<{
 	}, [plugin.app]);
 
 	const handleOpenTaskInMapView = () => {
-		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
-			new Notice(t("enable-experimental-features-message"));
-			return;
-		}
+		// if (!plugin.settings.data.globalSettings.experimentalFeatures) {
+		// 	new Notice(t("enable-experimental-features-message"));
+		// 	return;
+		// }
 
 		applyIdToTaskInNote(plugin, task).then((newId) => {
 			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';

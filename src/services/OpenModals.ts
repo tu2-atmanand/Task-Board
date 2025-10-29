@@ -139,11 +139,6 @@ export const openAddNewTaskModal = (
 };
 
 export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
-	if (!plugin.settings.data.globalSettings.experimentalFeatures) {
-		new Notice(t("enable-experimental-features-message"), 5000);
-		return;
-	}
-
 	const AddTaskModal = new AddOrEditTaskModal(
 		plugin,
 		async (

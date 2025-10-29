@@ -566,21 +566,22 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					>
 						<Settings size={18} />
 					</button>
+
 					{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
 						<Bot size={20} />
 					</button> */}
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
-						<select
-							className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-							value={viewType}
-							onChange={(e) => { handleViewTypeChange(e); }}
-						>
-							<option value={viewTypeNames.kanban}>{t("kanban")}</option>
-							{/* <option value="list">List</option>
+
+					<select
+						className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+						value={viewType}
+						onChange={(e) => { handleViewTypeChange(e); }}
+					>
+						<option value={viewTypeNames.kanban}>{t("kanban")}</option>
+						{/* <option value="list">List</option>
 							<option value="table">Table</option> */}
-							<option value={viewTypeNames.map}>{t("map")}</option>
-						</select>
-					)}
+						<option value={viewTypeNames.map}>{t("map")}</option>
+					</select>
+
 					<button className={`RefreshBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
