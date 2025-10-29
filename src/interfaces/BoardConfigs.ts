@@ -112,12 +112,15 @@ export type Board = {
 	hideEmptyColumns: boolean;
 	showColumnTags: boolean;
 	showFilteredTags: boolean;
+	boardFilter: RootFilterState;
 	filterConfig?: FilterConfigSettings;
-	boardFilter?: RootFilterState;
 	taskCount?: {
 		pending: number;
 		completed: number;
 	};
+	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
+	filters?: string[];
+	filterPolarity?: string;
 };
 
 export type BoardConfigs = Board[];
