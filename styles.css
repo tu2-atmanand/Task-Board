@@ -108,7 +108,7 @@
 	color: var(--color-orange);
 }
 
-button.clickable-icon.view-action.scan-vault-btn.highlight {
+button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	background-color: var(--color-yellow) !important;
 	color: black !important;
 	cursor: pointer;

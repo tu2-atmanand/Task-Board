@@ -3,7 +3,7 @@
 	"close": "Close",
 	"archive": "Archive",
 	"add-sub-task": "Add sub task",
-	"scan-vault-window": "Scan vault window",
+	"scan-vault-modal": "Scan vault modal",
 	"general": "General",
 	"no-tasks-available": "No tasks available",
 	"edit-task": "Edit task",

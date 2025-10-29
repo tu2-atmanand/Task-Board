@@ -3,7 +3,7 @@
 	"close": "बंद करना",
 	"archive": "पुरालेख",
 	"add-sub-task": "उप कार्य जोड़ें",
-	"scan-vault-window": "स्कैन वॉल्ट विंडो",
+	"scan-vault-modal": "स्कैन वॉल्ट विंडो",
 	"general": "सामान्य",
 	"no-tasks-available": "कोई कार्य उपलब्ध नहीं है",
 	"edit-task": "कार्य को संपादित करें",

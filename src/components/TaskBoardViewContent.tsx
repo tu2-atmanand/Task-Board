@@ -10,7 +10,7 @@ import { App, debounce, Platform, Menu } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
-import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openTaskBoardActionsModal } from "../services/OpenModals";
+import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
 import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
@@ -20,6 +20,7 @@ import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { viewTypeNames } from "src/interfaces/Enums";
+import { ScanVaultIcon } from "src/interfaces/Icons";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -170,13 +171,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	const refreshBoardButton = useCallback(async () => {
-			const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
-			const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
+		const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
+		const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
 
-			if (fileStack && fileStack.length > 0) {
-				await plugin.realTimeScanning.processAllUpdatedFiles();
-			}
-			eventEmitter.emit("REFRESH_BOARD");
+		if (fileStack && fileStack.length > 0) {
+			await plugin.realTimeScanning.processAllUpdatedFiles();
+		}
+		eventEmitter.emit("REFRESH_BOARD");
 
 	}, [plugin]);
 
@@ -398,6 +399,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			});
 		});
 		sortMenu.addItem((item) => {
+			item.setTitle(t("open-board-filters-modal"));
+			item.setIcon("funnel");
+			item.onClick(async (event) => {
+				if (event instanceof MouseEvent) {
+					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
+				}
+			});
+		});
+		sortMenu.addItem((item) => {
 			item.setTitle(t("open-board-configuration-modal"));
 			item.setIcon("settings");
 			item.onClick(async () => {
@@ -407,17 +417,16 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			});
 		});
 		sortMenu.addItem((item) => {
-			item.setTitle(t("open-board-filters-modal"));
-			item.setIcon("funnel");
-			item.onClick(async (event) => {
-				if (event instanceof MouseEvent) {
-					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
-				}
+			item.setTitle(t("scan-vault-modal"));
+			item.setIcon(ScanVaultIcon);
+			item.onClick(async () => {
+				openScanVaultModal(plugin.app, plugin);
 			});
 		});
 
+
 		sortMenu.addItem((item) => {
-			item.setTitle(t("switch-view-type"));
+			item.setTitle(t("view-type"));
 			item.setIsLabel(true);
 		});
 		sortMenu.addItem((item) => {

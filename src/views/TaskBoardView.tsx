@@ -1,17 +1,18 @@
 // src/views/TaskBoardView.tsx
 
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, Platform, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
-import { ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
+import { RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
 import { StrictMode } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
 import { bugReporter, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
+import { eventEmitter } from "src/services/EventEmitter";
 
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
@@ -39,11 +40,28 @@ export class TaskBoardView extends ItemView {
 	}
 
 	async onOpen() {
-		this.addAction(ScanVaultIcon, t("scan-vault-window"), () => {
-			openScanVaultModal(this.app, this.plugin);
-		}).addClass("scan-vault-btn");
+		if (Platform.isMobile) {
+			console.log("Adding new icon...");
+			this.addAction(RefreshIcon, t("refresh-board-button"), async () => {
+				const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
+				const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
 
-		if (localStorage.getItem("manadatoryScan") === "true") this.highlighgtScanvaultIcon();
+				if (fileStack && fileStack.length > 0) {
+					await this.plugin.realTimeScanning.processAllUpdatedFiles();
+				}
+				eventEmitter.emit("REFRESH_BOARD");
+			}).addClass("taskboardRefreshBtn");
+		}
+
+		const mandatoryScanSignal = localStorage.getItem("manadatoryScan") === "true";
+
+		if (!Platform.isMobile || mandatoryScanSignal) {
+			this.addAction(ScanVaultIcon, t("scan-vault-modal"), () => {
+				openScanVaultModal(this.app, this.plugin);
+			}).addClass("taskboardScanVaultBtn");
+		}
+
+		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
 		await this.loadBoards();
 		this.renderBoard();
@@ -51,7 +69,7 @@ export class TaskBoardView extends ItemView {
 
 	async highlighgtScanvaultIcon() {
 		const scanVaultIcon = this.containerEl.querySelector(
-			".scan-vault-btn"
+			".taskboardScanVaultBtn"
 		) as HTMLElement;
 		if (scanVaultIcon) {
 			scanVaultIcon.classList.add("highlight");

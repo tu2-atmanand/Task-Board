@@ -3,7 +3,7 @@
 	"close": "Cerrar",
 	"archive": "Archivar",
 	"add-sub-task": "Agregar subtarea",
-	"scan-vault-window": "Ventana de escaneo de bóveda",
+	"scan-vault-modal": "Ventana de escaneo de bóveda",
 	"general": "General",
 	"no-tasks-available": "No hay tareas disponibles",
 	"edit-task": "Editar tarea",

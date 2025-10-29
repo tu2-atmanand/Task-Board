@@ -1,6 +1,6 @@
 export const TaskBoardIcon = "brick-wall";
 
-export const RefreshIcon = "lucide-refresh";
+export const RefreshIcon = "rotate-cw";
 
 export const ScanVaultIcon = "lucide-scan-text";
 

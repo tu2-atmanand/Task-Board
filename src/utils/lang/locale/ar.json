@@ -3,7 +3,7 @@
 	"close": "يغلق",
 	"archive": "أرشيف",
 	"add-sub-task": "أضف مهمة فرعية",
-	"scan-vault-window": "مسح نافذة قبو",
+	"scan-vault-modal": "مسح نافذة قبو",
 	"general": "عام",
 	"no-tasks-available": "لا توجد مهام متاحة",
 	"edit-task": "تحرير المهمة",

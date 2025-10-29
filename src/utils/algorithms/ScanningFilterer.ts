@@ -161,10 +161,6 @@ export function checkFolderFilters(
 				try {
 					const pattern = filter.slice(1, -1);
 					const regex = new RegExp(pattern);
-					console.log(
-						"checkFolderFilters : Its a valid regex pattern. Here is the matching file :",
-						parentFolder.match(regex)
-					);
 					return regex.test(parentFolder);
 				} catch {
 					// Invalid regex, skip this value
