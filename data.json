@@ -22,7 +22,11 @@
             "active": true,
             "collapsed": false,
             "name": "Indented Bug",
-            "filePaths": "Testing Indented Task Bug.md"
+            "filePaths": "Testing Indented Task Bug.md",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "id": 2025781698,
@@ -46,10 +50,28 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": []
+          "filterGroups": [
+            {
+              "id": "id-1761753563955-v373astvn",
+              "groupCondition": "any",
+              "filters": [
+                {
+                  "id": "id-1761753563970-px2z8dfdl",
+                  "property": "tags",
+                  "condition": "contains"
+                },
+                {
+                  "id": "id-1761753631098-pra23ios4",
+                  "property": "tags",
+                  "condition": "contains",
+                  "value": ""
+                }
+              ]
+            }
+          ]
         },
         "taskCount": {
-          "pending": 54,
+          "pending": 33,
           "completed": 8
         }
       },
@@ -856,7 +878,7 @@
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "map",
+        "viewedType": "kanban",
         "boardIndex": 0,
         "taskId": "",
         "settingTab": 3
