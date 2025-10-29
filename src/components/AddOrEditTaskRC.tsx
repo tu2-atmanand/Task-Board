@@ -373,7 +373,12 @@ export const AddOrEditTaskRC: React.FC<{
 			setIsEdited(true);
 			setIsEditorContentChanged(true);
 
-			tagsInputFieldRef.current?.setText('');
+			// Clear the input field after MultiSuggest has finished processing
+			setTimeout(() => {
+				if (tagsInputFieldRef.current) {
+					tagsInputFieldRef.current.value = '';
+				}
+			}, 0);
 		};
 		new MultiSuggest(tagsInputFieldRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
 	}, [plugin.app]);
