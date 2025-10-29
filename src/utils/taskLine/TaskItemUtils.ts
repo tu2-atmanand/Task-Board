@@ -232,6 +232,62 @@ export const archiveTask = async (
 
 	if (archivedFilePath) {
 		try {
+			// Ensure the archived file exists. If not, create it.
+			if (!(await plugin.fileExists(archivedFilePath))) {
+				new Notice(
+					`New Archived file created since it did not exist at path: "${archivedFilePath}"`,
+					0
+				);
+				// Ensure all folders in the path exist before creating the file
+				const lastSlash = archivedFilePath.lastIndexOf("/");
+				if (lastSlash !== -1) {
+					const folderPath = archivedFilePath.substring(0, lastSlash);
+					const parts = folderPath.split("/").filter(Boolean);
+					let currentPath = "";
+					for (const part of parts) {
+						currentPath = currentPath
+							? `${currentPath}/${part}`
+							: part;
+						console.log(
+							"Ensuring folder exists:",
+							currentPath,
+							"\npart:",
+							part
+						);
+						const existing =
+							plugin.app.vault.getAbstractFileByPath(currentPath);
+						if (!existing) {
+							// createFolder will create the single folder at currentPath
+							try {
+								await plugin.app.vault.createFolder(
+									currentPath
+								);
+							} catch (error) {
+								if (String(error).contains("already exists"))
+									continue;
+							}
+						} else {
+							// If a file exists where a folder is expected, report and abort
+							// (this is unlikely but safer to surface)
+							// existing.type may not be available in all builds, so just check truthiness and skip create
+							if (
+								(existing as any).path &&
+								!(existing as any).children
+							) {
+								bugReporter(
+									plugin,
+									`A file exists where a folder is expected: ${currentPath}`,
+									`Unexpected file at folder path: ${currentPath}`,
+									"TaskItemUtils.ts/archiveTask"
+								);
+							}
+						}
+					}
+				}
+				// Now create the archived file
+				await plugin.app.vault.create(archivedFilePath, "");
+			}
+
 			// Read the content of the file where archived tasks will be stored
 			const archivedFileContent = await readDataOfVaultFile(
 				plugin,
