@@ -389,7 +389,7 @@ const en: Lang = {
 	"task-note": "Task note",
 	"task-note-description": "Task note can be any simple note which you can show as a task inside task board for reminders, etc.",
 	"tbnote": "TB note",
-	"tbnote-description": "TB note is an extended version of task-note where you can add activity about the task when you interact with the task through task board. This is under development, read more here : ",
+	"tbnote-description": "A TB Notes is essentially a task-note, but it becomes a TB note when you enable activity tracking for the task. This is under development, read more here : ",
 	"task-note-vs-tbnote": "Task note vs TB note",
 	"tbnote-development-ticker": "TB note development ticket",
 	"folder-for-archived-task-notes": "Folder for archived task notes",
