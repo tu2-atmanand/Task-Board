@@ -13,7 +13,6 @@ import {
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
-	HideableTaskProperty,
 } from "src/interfaces/GlobalSettings";
 import {
 	openAddNewTaskInCurrentFileModal,
@@ -23,23 +22,15 @@ import {
 } from "src/services/OpenModals";
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
-import { AddOrEditTaskView } from "./src/views/AddOrEditTaskView";
-import { RealTimeScanning } from "src/utils/RealTimeScanning";
+import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import vaultScanner, {
 	fileTypeAllowedForScanning,
-} from "src/utils/VaultScanner";
-import { TaskBoardIcon } from "src/types/Icons";
+} from "src/managers/VaultScanner";
+import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import {
-	VIEW_TYPE_ADD_OR_EDIT_TASK,
-	VIEW_TYPE_TASKBOARD,
-} from "src/types/uniqueIdentifiers";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
-import {
-	deleteAllLocalStorageKeys,
-	loadTranslationsOnStartup,
-	t,
-} from "src/utils/lang/helper";
+import { loadTranslationsOnStartup, t } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
@@ -48,6 +39,8 @@ import {
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
+import { colType, HideableTaskProperty } from "src/interfaces/Enums";
+import { migrateSettings } from "src/settings/SettingSynchronizer";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -55,7 +48,7 @@ export default class TaskBoard extends Plugin {
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: vaultScanner;
-	realTimeScanning: RealTimeScanning;
+	realTimeScanning: RealTimeScanner;
 	taskBoardFileStack: string[] = [];
 	editorModified: boolean;
 	// currentModifiedFile: TFile | null;
@@ -72,7 +65,7 @@ export default class TaskBoard extends Plugin {
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.vaultScanner = new vaultScanner(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanning(
+		this.realTimeScanning = new RealTimeScanner(
 			this.app,
 			this.plugin,
 			this.vaultScanner
@@ -235,7 +228,7 @@ export default class TaskBoard extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData()
 		);
-		this.migrateSettings(DEFAULT_SETTINGS, this.settings);
+		// this.migrateSettings(DEFAULT_SETTINGS, this.settings);
 		this.saveSettings();
 	}
 
@@ -622,13 +615,6 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerEvents() {
-		// // Start a timer to write tasks from sessionStorage to disk every 5 minutes
-		// this.registerInterval(
-		// 	window.setInterval(async () => {
-		// 		await writeTasksFromSessionStorageToDisk(this.plugin);
-		// 	}, 5 * 60 * 1000)
-		// );
-
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
 				if (fileTypeAllowedForScanning(this.plugin, file)) {
@@ -657,7 +643,12 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("rename", (file, oldPath) => {
 				if (file instanceof TFile) {
 					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
-					this.realTimeScanning.onFileRenamed(file, oldPath);
+					this.realTimeScanning.onFileRenamed(
+						file,
+						oldPath,
+						this.plugin.settings.data.globalSettings
+							.archivedTBNotesFolderPath
+					);
 				}
 			})
 		);
@@ -670,11 +661,17 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
-		// this.registerEvent(
-		// 	this.app.vault.on("create", (file) => {
-		// 		// NOT REQUIRED : This will be same as the modify functinality, since after adding the file, it will be modified, so i will catch that.
-		// 	})
-		// );
+		this.registerEvent(
+			this.app.vault.on("create", (file) => {
+				console.log("File created : ", file);
+				if (file instanceof TFile) {
+					setTimeout(() => {
+						console.log("Calling for scanning...");
+						this.realTimeScanning.processAllUpdatedFiles(file);
+					}, 400);
+				}
+			})
+		);
 
 		// const closeButton = document.querySelector<HTMLElement>(
 		// 	".titlebar-button.mod-close"
@@ -874,88 +871,101 @@ export default class TaskBoard extends Plugin {
 		isReminderPluginInstalled(this.plugin);
 	}
 
-	private migrateSettings(defaults: any, settings: any) {
-		for (const key in defaults) {
-			if (!(key in settings)) {
-				settings[key] = defaults[key];
-			} else if (
-				// This is a temporary fix for the tagColors
-				!Array.isArray(settings[key]) &&
-				key === "tagColors" &&
-				typeof settings[key] === "object" &&
-				settings[key] !== null
-			) {
-				settings[key] = Object.entries(
-					settings[key] as Record<string, string>
-				).map(
-					([name, color], idx) =>
-						({
-							name,
-							color,
-							priority: idx + 1,
-						} as any)
-				);
-			} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-				// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
-				settings[key].forEach((boardConfig: Board) => {
-					boardConfig.columns.forEach((column: ColumnData) => {
-						if (!column.id) {
-							column.id = Math.floor(Math.random() * 1000000);
-						}
-						if (
-							column.colType === "dated" ||
-							(column.colType === "undated" &&
-								!column.datedBasedColumn)
-						) {
-							column.datedBasedColumn = {
-								dateType:
-									this.settings.data.globalSettings
-										.universalDate,
-								from: column.datedBasedColumn?.from || 0,
-								to: column.datedBasedColumn?.to || 0,
-							};
-							delete column.range;
-						}
-					});
+	// private migrateSettings(defaults: any, settings: any) {
+	// 	for (const key in defaults) {
+	// 		if (!(key in settings)) {
+	// 			settings[key] = defaults[key];
+	// 		} else if (
+	// 			// This is a temporary fix for the tagColors
+	// 			!Array.isArray(settings[key]) &&
+	// 			key === "tagColors" &&
+	// 			typeof settings[key] === "object" &&
+	// 			settings[key] !== null
+	// 		) {
+	// 			settings[key] = Object.entries(
+	// 				settings[key] as Record<string, string>
+	// 			).map(
+	// 				([name, color], idx) =>
+	// 					({
+	// 						name,
+	// 						color,
+	// 						priority: idx + 1,
+	// 					} as any)
+	// 			);
+	// 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
+	// 			// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
+	// 			settings[key].forEach((boardConfig: Board) => {
+	// 				boardConfig.columns.forEach((column: ColumnData) => {
+	// 					if (!column.id) {
+	// 						column.id = Math.floor(Math.random() * 1000000);
+	// 					}
+	// 					if (
+	// 						column.colType === colType.dated ||
+	// 						(column.colType === colType.undated &&
+	// 							!column.datedBasedColumn)
+	// 					) {
+	// 						column.datedBasedColumn = {
+	// 							dateType:
+	// 								this.settings.data.globalSettings
+	// 									.universalDate,
+	// 							from: column.datedBasedColumn?.from || 0,
+	// 							to: column.datedBasedColumn?.to || 0,
+	// 						};
+	// 						delete column.range;
+	// 					}
+	// 				});
 
-					if (!boardConfig.hideEmptyColumns) {
-						boardConfig.hideEmptyColumns = false;
-					}
-				});
-			} else if (
-				typeof defaults[key] === "object" &&
-				defaults[key] !== null &&
-				!Array.isArray(defaults[key])
-			) {
-				// Recursively sync nested objects
-				// console.log(
-				// 	"Syncing settings for key:",
-				// 	key,
-				// 	"Defaults:",
-				// 	defaults[key],
-				// 	"Settings:",
-				// 	settings[key]
-				// );
-				this.migrateSettings(defaults[key], settings[key]);
-			} else if (key === "tasksCacheFilePath" && settings[key] === "") {
-				settings[
-					key
-				] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
-			}
-		}
+	// 				if (!boardConfig.hideEmptyColumns) {
+	// 					boardConfig.hideEmptyColumns = false;
+	// 				}
+	// 			});
+	// 		} else if (
+	// 			typeof defaults[key] === "object" &&
+	// 			defaults[key] !== null &&
+	// 			!Array.isArray(defaults[key])
+	// 		) {
+	// 			// Recursively sync nested objects
+	// 			// console.log(
+	// 			// 	"Syncing settings for key:",
+	// 			// 	key,
+	// 			// 	"Defaults:",
+	// 			// 	defaults[key],
+	// 			// 	"Settings:",
+	// 			// 	settings[key]
+	// 			// );
+	// 			this.migrateSettings(defaults[key], settings[key]);
+	// 		} else if (key === "tasksCacheFilePath" && settings[key] === "") {
+	// 			settings[
+	// 				key
+	// 			] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+	// 		}
+	// 	}
 
-		this.settings = settings;
-		// this.saveSettings();
-	}
+	// 	this.settings = settings;
+	// 	// this.saveSettings();
+	// }
 
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed
-		const currentVersion = this.manifest.version;
+		const currentVersion = DEFAULT_SETTINGS.version;
 		const previousVersion = this.settings.version;
+		console.log(
+			"current version :",
+			currentVersion,
+			"\nprevious version :",
+			previousVersion,
+			"\ncondition :",
+			currentVersion[2] !== previousVersion[2]
+		);
 
 		if (previousVersion == "" || currentVersion[2] !== previousVersion[2]) {
 			// make the localStorage flag, 'manadatoryScan' to True
 			localStorage.setItem("manadatoryScan", "true");
+
+			console.log("Migrations process started...");
+			// Settings migrations should be only applied after plugin update.
+			this.settings = migrateSettings(DEFAULT_SETTINGS, this.settings);
+			console.log("Migrations process finished");
 
 			this.settings.version = currentVersion;
 			this.saveSettings();

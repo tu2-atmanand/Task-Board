@@ -3,7 +3,7 @@
 	"close": "Fermer",
 	"archive": "Archive",
 	"add-sub-task": "Ajouter un sous-tâche",
-	"scan-vault-window": "Scanner la fenêtre Vault",
+	"scan-vault-modal": "Scanner la fenêtre Vault",
 	"general": "Général",
 	"no-tasks-available": "Aucune tâche disponible",
 	"edit-task": "Modifier la tâche",

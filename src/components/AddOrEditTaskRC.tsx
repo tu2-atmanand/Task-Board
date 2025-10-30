@@ -4,28 +4,29 @@
 import { Component, Keymap, Notice, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
 import { FaLinkedin, FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
-import { priorityOptions, taskItem, taskItemEmpty } from "src/interfaces/TaskItem";
+import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, cursorLocation, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/TaskContentFormatter";
-import { buildTaskFromRawContent, generateTaskId } from "src/utils/VaultScanner";
+import { cleanTaskTitleLegacy, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
+import { buildTaskFromRawContent, generateTaskId } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { DEFAULT_SETTINGS, EditButtonMode, NotificationService, UniversalDateOptions } from "src/interfaces/GlobalSettings";
 import { bugReporter, openEditTaskModal, openEditTaskNoteModal, openEditTaskView } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
-import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/TaskNoteUtils";
-import { applyIdToTaskInNote, getTaskFromId } from "src/utils/TaskItemUtils";
+import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/taskNote/TaskNoteUtils";
+import { applyIdToTaskInNote, getTaskFromId } from "src/utils/taskLine/TaskItemUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { handleEditTask } from "src/utils/TaskItemEventHandlers";
+import { handleEditTask } from "src/utils/taskLine/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
+import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
+import { taskItemEmpty, priorityOptions } from "src/interfaces/Mapping";
 
 export interface filterOptions {
 	value: string;
@@ -67,6 +68,7 @@ export const AddOrEditTaskRC: React.FC<{
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
 
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>(isTaskNote ? noteContent : getFormattedTaskContentSync(task));
+	const frontmatterContentRef = useRef<string>('');
 	const [newFilePath, setNewFilePath] = useState<string>(filePath);
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
 
@@ -371,7 +373,12 @@ export const AddOrEditTaskRC: React.FC<{
 			setIsEdited(true);
 			setIsEditorContentChanged(true);
 
-			tagsInputFieldRef.current?.setText('');
+			// Clear the input field after MultiSuggest has finished processing
+			setTimeout(() => {
+				if (tagsInputFieldRef.current) {
+					tagsInputFieldRef.current.value = '';
+				}
+			}, 0);
 		};
 		new MultiSuggest(tagsInputFieldRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
 	}, [plugin.app]);
@@ -487,13 +494,14 @@ export const AddOrEditTaskRC: React.FC<{
 			cancelledDate: modifiedTask.cancelledDate || '',
 			status: modifiedTask.status,
 			reminder: modifiedTask.reminder,
+			dependsOn: dependsOn,
 		};
 
 		// Call onSave with the task note item
 		onSave(taskNoteItem, quickAddPluginChoice, formattedTaskContent ? formattedTaskContent : undefined);
 	};
 
-	const modifiedTask: taskItem = {
+	let modifiedTask: taskItem = {
 		...task,
 		title: title,
 		body: [
@@ -510,6 +518,7 @@ export const AddOrEditTaskRC: React.FC<{
 		status: status,
 		reminder: reminder,
 		taskLocation: task.taskLocation,
+		dependsOn: dependsOn,
 		completion: task.completion || '',
 		cancelledDate: task.cancelledDate || '',
 	};
@@ -545,10 +554,10 @@ export const AddOrEditTaskRC: React.FC<{
 	}, [plugin.app]);
 
 	const handleOpenTaskInMapView = () => {
-		if (!plugin.settings.data.globalSettings.experimentalFeatures) {
-			new Notice(t("enable-experimental-features-message"));
-			return;
-		}
+		// if (!plugin.settings.data.globalSettings.experimentalFeatures) {
+		// 	new Notice(t("enable-experimental-features-message"));
+		// 	return;
+		// }
 
 		applyIdToTaskInNote(plugin, task).then((newId) => {
 			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
@@ -683,16 +692,18 @@ export const AddOrEditTaskRC: React.FC<{
 
 			if (!markdownEditor) {
 				markdownEditorEmbeddedContainer.current.empty();
+				console.log("Finding where to place the cursor :", formattedTaskContent.split("\n")[0].length);
 				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
-					plugin.app,
+					plugin,
 					markdownEditorEmbeddedContainer.current,
 					{
 						placeholder: "Start typing your task in this editor and use the various input fields to add the properties.",
 						value: formattedTaskContent,
 						cls: "addOrEditTaskModal-markdown-editor-embed",
+						enableFrontmatterUI: isTaskNote, // Enable frontmatter UI for task notes
 						cursorLocation: {
-							anchor: formattedTaskContent.split("\n")[0].length,
-							head: formattedTaskContent.split("\n")[0].length,
+							anchor: isTaskNote ? 0 : formattedTaskContent.split("\n")[0].length,
+							head: isTaskNote ? 0 : formattedTaskContent.split("\n")[0].length,
 						},
 
 						onEnter: (editor: EmbeddableMarkdownEditor, mod: boolean, shift: boolean) => {
@@ -714,9 +725,11 @@ export const AddOrEditTaskRC: React.FC<{
 
 						onChange: (update: ViewUpdate) => {
 							setIsEdited(true);
-							const capturedContent = fullMarkdownEditor?.value || "";
-							setFormattedTaskContent(capturedContent);
-							handleTaskEditedThroughEditors(capturedContent);
+							const editorUpdatedContent = fullMarkdownEditor?.value || "";
+							const fullFileContent = isTaskNote ? (frontmatterContentRef?.current ? `---\n${frontmatterContentRef.current}\n---\n` : "") + editorUpdatedContent : editorUpdatedContent;
+							console.log("Editor content changed.\neditor content :", editorUpdatedContent, " \nFull file content:", fullFileContent);
+							setFormattedTaskContent(fullFileContent);
+							handleTaskEditedThroughEditors(fullFileContent);
 
 							// setCursorLocation({
 							// 	lineNumber: 1,
@@ -847,9 +860,14 @@ export const AddOrEditTaskRC: React.FC<{
 	useEffect(() => {
 		if (isEditorContentChanged) {
 			if (isTaskNote) {
-				const newFormattedTaskNoteContent = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				const newFormattedTaskNoteContent = newContent;
+				console.log("Updating embedded markdown editor for task note with content:\n", newFormattedTaskNoteContent,
+					"\nFrontmatter:\n", newFrontmatter, "\nContent without frontmatter:\n", contentWithoutFrontmatter
+				);
 				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 				setFormattedTaskContent(newFormattedTaskNoteContent);
+				frontmatterContentRef.current = newFrontmatter;
 				setIsEditorContentChanged(false);
 			}
 			else {
@@ -983,28 +1001,48 @@ export const AddOrEditTaskRC: React.FC<{
 		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
 
 		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
-		if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
-			handleEditTask(plugin, task, settingOption);
-		} else if (settingOption === EditButtonMode.Modal) {
-			//For now will simply open it in a new modal in a new window.
-			if (isTaskNotePresentInTags(plugin, childTask.tags)) {
-				// plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
-				// await sleep(50);
-				// openEditTaskNoteModal(plugin, childTask);
-
-				openEditTaskView(plugin, true, false, true, childTask, childTask.filePath, "window");
-			} else {
-				// plugin.app.workspace.openPopoutLeaf();
-				// await sleep(50);
-				// openEditTaskModal(plugin, childTask);
-
-				openEditTaskView(plugin, false, false, true, childTask, childTask.filePath, "window");
-			}
-		} else {
-			event.ctrlKey = true;
-			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
-			event.ctrlKey = false;
+		switch (settingOption) {
+			case EditButtonMode.NoteInSplit:
+			case EditButtonMode.NoteInTab:
+			case EditButtonMode.NoteInWindow:
+				handleEditTask(plugin, task, settingOption);
+				break;
+			case EditButtonMode.NoteInHover:
+				event.ctrlKey = true;
+				markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+				event.ctrlKey = false;
+				break;
+			case EditButtonMode.Modal:
+			case EditButtonMode.View:
+			case EditButtonMode.TasksPluginModal:
+			default:
+				const isTaskNotePresent = isTaskNotePresentInTags(plugin, childTask.tags);
+				openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
+				break;
 		}
+
+		// if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
+		// 	handleEditTask(plugin, task, settingOption);
+		// } else if (settingOption === EditButtonMode.Modal) {
+		// 	//For now will simply open it in a new modal in a new window.
+		// 	if (isTaskNotePresentInTags(plugin, childTask.tags)) {
+		// 		// plugin.app.workspace.openPopoutLeaf(); // This is temporary solution for now. Later we can open it as a new tab in a new window.
+		// 		// await sleep(50);
+		// 		// openEditTaskNoteModal(plugin, childTask);
+
+		// 		openEditTaskView(plugin, true, false, true, childTask, childTask.filePath, "window");
+		// 	} else {
+		// 		// plugin.app.workspace.openPopoutLeaf();
+		// 		// await sleep(50);
+		// 		// openEditTaskModal(plugin, childTask);
+
+		// 		openEditTaskView(plugin, false, false, true, childTask, childTask.filePath, "window");
+		// 	}
+		// } else {
+		// 	event.ctrlKey = true;
+		// 	markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+		// 	event.ctrlKey = false;
+		// }
 	};
 
 	const handleRemoveChildTask = (taskId: string) => {
@@ -1053,7 +1091,7 @@ export const AddOrEditTaskRC: React.FC<{
 								</div>
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !isTaskNote && !activeNote) ? t("quickadd-plugin-choice") : t("file")}:
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !isTaskNote && !activeNote) ? t("quickadd-plugin-choice") : t("file")}
 									<input
 										type="text"
 										ref={filePathRef}
@@ -1165,6 +1203,8 @@ export const AddOrEditTaskRC: React.FC<{
 							</button>
 						</div>
 					</div>
+
+					{/* Right Section for other task properties */}
 					<div
 						ref={rightSecRef}
 						className={`EditTaskModalHomeRightSec ${isRightSecVisible ? "visible" : ""}`}

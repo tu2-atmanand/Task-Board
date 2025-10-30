@@ -6,23 +6,22 @@ import {
 	extractPriority,
 	extractTaskId,
 	generateTaskId,
-} from "./VaultScanner";
-import {
-	NotificationService,
-	UniversalDateOptions,
-	globalSettingsData,
-	HideableTaskProperty,
-} from "src/interfaces/GlobalSettings";
+} from "../../managers/VaultScanner";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
 } from "src/regularExpressions/TasksPluginRegularExpr";
-import { priorityEmojis, taskItem } from "src/interfaces/TaskItem";
-
-export interface cursorLocation {
-	lineNumber: number;
-	charIndex: number;
-}
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
+import {
+	taskPropertyFormatOptions,
+	NotificationService,
+	HideableTaskProperty,
+	UniversalDateOptions,
+} from "src/interfaces/Enums";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
+import { priorityEmojis } from "src/interfaces/Mapping";
+import { taskItem } from "src/interfaces/TaskItem";
+import { cursorLocation } from "src/interfaces/TaskItem";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -73,10 +72,37 @@ export const addIdToTaskContent = async (
 		forcefullyAddId
 	) {
 		newId = generateTaskId(Plugin);
-		formattedTaskContent = formattedTaskContent.replace(
-			/^(.*?)(\n|$)/,
-			`$1 🆔 ${newId}$2`
-		);
+		const format = Plugin.settings.data.globalSettings.taskPropertyFormat;
+		switch (format) {
+			case taskPropertyFormatOptions.tasksPlugin:
+			case taskPropertyFormatOptions.default:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 🆔 ${newId} $2`
+				);
+				break;
+
+			case taskPropertyFormatOptions.dataviewPlugin:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 [id:: ${newId}] $2`
+				);
+				break;
+
+			case taskPropertyFormatOptions.obsidianNative:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 @id(${newId}) $2`
+				);
+				break;
+
+			default:
+				formattedTaskContent = formattedTaskContent.replace(
+					/^(.*?)(\n|$)/,
+					`$1 🆔 ${newId} $2`
+				);
+				break;
+		}
 	}
 	return { formattedTaskContent, newId };
 };
@@ -678,7 +704,7 @@ export const sanitizeTime = (
 			// If time is present in any format, remove it and add this new time at the start
 			title = title.replace(timeFormatsRegex, "").trim();
 		}
-		
+
 		// If no time is present, add it at the start
 		const beforePosition = title.slice(0, 5).trim();
 		const afterPosition = title.slice(5).trim();
@@ -1032,12 +1058,12 @@ export const sanitizeDependsOn = (
 	} else if (globalSettings?.taskPropertyFormat === "3") {
 		dependsOnFormat =
 			dependesOnIds.length > 0
-				? `[cancelled:: ${dependesOnIds.join(", ")}]`
+				? `[dependsOn:: ${dependesOnIds.join(", ")}]`
 				: "";
 	} else {
 		dependsOnFormat =
 			dependesOnIds.length > 0
-				? `@cancelled(${dependesOnIds.join(", ")})`
+				? `@dependsOn(${dependesOnIds.join(", ")})`
 				: "";
 	}
 
@@ -1342,12 +1368,17 @@ export const cleanTaskTitleLegacy = (
 	});
 
 	// Remove id
-	if (task.id) {
-		const idMatch = cleanedTitle.match(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
+	if (task.legacyId) {
+		const combinedIdRegex = new RegExp(
+			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
+			"g" // add the 'g' flag if you want to match all occurrences
 		);
-		if (idMatch) {
-			cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
+
+		if (task.legacyId) {
+			const idMatch = cleanedTitle.match(combinedIdRegex);
+			if (idMatch) {
+				cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
+			}
 		}
 	}
 
@@ -1445,11 +1476,13 @@ export const cleanTaskTitleLegacy = (
 	}
 
 	// Remove reminder if it exists
-	const reminderRegex =
-		/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
-	const reminderMatch = cleanedTitle.match(reminderRegex);
-	if (reminderMatch) {
-		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
+	if (task.reminder) {
+		const reminderRegex =
+			/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
+		const reminderMatch = cleanedTitle.match(reminderRegex);
+		if (reminderMatch) {
+			cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
+		}
 	}
 
 	// Remove recurring tag and onCompletion tag
@@ -1467,8 +1500,6 @@ export const cleanTaskTitleLegacy = (
 			""
 		)
 		.trim();
-
-	// console.log("cleanedTitle", cleanedTitle.trim());
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();

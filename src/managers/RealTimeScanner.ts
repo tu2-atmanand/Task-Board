@@ -1,13 +1,14 @@
-// /src/utils/RealTimeScanning.ts
+// /src/utils/RealTimeScanner.ts
 
 import { App, TAbstractFile, TFile, TFolder } from "obsidian";
 
-import type vaultScanner from "src/utils/VaultScanner";
+import type vaultScanner from "src/managers/VaultScanner";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
+import { PENDING_SCAN_FILE_STACK } from "src/interfaces/Constants";
 
-export class RealTimeScanning {
+export class RealTimeScanner {
 	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
@@ -21,7 +22,7 @@ export class RealTimeScanning {
 
 	async initializeStack() {
 		try {
-			const storedStack = localStorage.getItem("taskBoardFileStack");
+			const storedStack = localStorage.getItem(PENDING_SCAN_FILE_STACK);
 			if (storedStack) {
 				this.taskBoardFileStack = JSON.parse(storedStack);
 			}
@@ -34,7 +35,7 @@ export class RealTimeScanning {
 	saveStack() {
 		try {
 			localStorage.setItem(
-				"taskBoardFileStack",
+				PENDING_SCAN_FILE_STACK,
 				JSON.stringify(this.taskBoardFileStack)
 			);
 		} catch (error) {
@@ -42,7 +43,7 @@ export class RealTimeScanning {
 				this.plugin,
 				"Error saving file stack to localStorage.",
 				String(error),
-				"RealTimeScanning.ts/saveStack"
+				"RealTimeScanner.ts/saveStack"
 			);
 		}
 	}
@@ -108,7 +109,11 @@ export class RealTimeScanning {
 		}
 	}
 
-	onFileRenamed(file: TAbstractFile, oldPath: string) {
+	onFileRenamed(
+		file: TAbstractFile,
+		oldPath: string,
+		archivedTaskNotesPath: string
+	) {
 		let foundFlag = false;
 		// Find the oldPath inside the plugin.vaultScanner.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
 		const { Pending, Completed, Notes } =
@@ -117,13 +122,22 @@ export class RealTimeScanning {
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
 				if (file instanceof TFile && cache.hasOwnProperty(oldPath)) {
-					cache[file.path] = cache[oldPath];
-					cache[file.path].forEach((task) => {
-						if (task.filePath === oldPath) {
-							task.filePath = file.path; // Update the file path in the task
-							foundFlag = true;
-						}
-					});
+					if (
+						!file.path
+							.toLowerCase()
+							.startsWith(archivedTaskNotesPath.toLowerCase())
+					) {
+						// This check helps to remove the file cache, when the task note is archived.
+						cache[file.path] = cache[oldPath];
+						cache[file.path].forEach((task) => {
+							if (task.filePath === oldPath) {
+								task.filePath = file.path; // Update the file path in the task
+								foundFlag = true;
+							}
+						});
+					} else {
+						foundFlag = true;
+					}
 					delete cache[oldPath];
 				} else if (file instanceof TFolder) {
 					// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.

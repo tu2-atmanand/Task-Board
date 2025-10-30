@@ -1,11 +1,10 @@
 import { TFile } from "obsidian";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
-import { extractFrontmatterFromFile } from "./FrontmatterOperations";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { isCompleted, isTaskLine } from "./CheckBoxUtils";
-import { getTaskFromId } from "./TaskItemUtils";
 import { taskItem } from "src/interfaces/TaskItem";
+import { isTaskLine, isCompleted } from "../CheckBoxUtils";
+import { getTaskFromId } from "../taskLine/TaskItemUtils";
+import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
 
 /**
  * Scans a file and its front-matter for specific filters.
@@ -80,7 +79,22 @@ export function checkFileFilters(
 	fileName: string,
 	scanFilters: scanFilters
 ): boolean | undefined {
-	const fileInFilters = scanFilters.files.values.includes(fileName);
+	// const fileInFilters = scanFilters.files.values.includes(fileName);
+	const fileInFilters = scanFilters.files.values.some((value) => {
+		if (value.startsWith("/") && value.endsWith("/")) {
+			// Try to create a RegExp from the pattern
+			try {
+				const pattern = value.slice(1, -1);
+				const regex = new RegExp(pattern);
+				return regex.test(fileName);
+			} catch {
+				// Invalid regex, skip this value
+				return false;
+			}
+		} else {
+			return value === fileName;
+		}
+	});
 
 	if (fileInFilters && scanFilters.files.polarity === 1) {
 		return true;
@@ -141,9 +155,21 @@ export function checkFolderFilters(
 	let folderInFilters = scanFilters.folders.values.includes(parentFolder);
 
 	if (!folderInFilters && parentFolder !== "") {
-		folderInFilters = scanFilters.folders.values.some((filter: string) =>
-			parentFolder.includes(filter)
-		);
+		folderInFilters = scanFilters.folders.values.some((filter: string) => {
+			if (filter.startsWith("/") && filter.endsWith("/")) {
+				// Try to create a RegExp from the pattern
+				try {
+					const pattern = filter.slice(1, -1);
+					const regex = new RegExp(pattern);
+					return regex.test(parentFolder);
+				} catch {
+					// Invalid regex, skip this value
+					return false;
+				}
+			} else {
+				return parentFolder === filter;
+			}
+		});
 	}
 
 	if (scanFilters.folders.polarity === 1) {

@@ -3,9 +3,10 @@
 import { App } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
-import { TaskFilterComponent, RootFilterState } from "./ViewTaskFilter";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { RootFilterState } from "src/interfaces/BoardConfigs";
+import { TaskFilterComponent } from "./ViewTaskFilter";
 
 export class ViewTaskFilterPopover
 	extends Component
@@ -38,10 +39,6 @@ export class ViewTaskFilterPopover
 		this.forColumn = forColumn;
 		this.activeBoardIndex = activeBoardIndex;
 		this.columnOrBoardName = columnOrBoardName;
-		console.log(
-			"ViewTaskFilterPopover - initialFilterState:",
-			initialFilterState
-		);
 		this.initialFilterState = initialFilterState;
 		this.win = plugin.app.workspace.containerEl.win || window;
 
@@ -69,12 +66,12 @@ export class ViewTaskFilterPopover
 		// Add column filter heading if this is for a column
 		if (this.forColumn) {
 			headerEl.createEl("h3", {
-				text: t("column-filters-for") + this.columnOrBoardName,
+				text: t("column-filters-for") + " " + this.columnOrBoardName,
 				cls: "task-popover-content-header-heading",
 			});
 		} else {
 			headerEl.createEl("h3", {
-				text: t("board-filters-for") + this.columnOrBoardName,
+				text: t("board-filters-for") + " " + this.columnOrBoardName,
 				cls: "task-popover-content-header-heading",
 			});
 		}
@@ -161,16 +158,27 @@ export class ViewTaskFilterPopover
 		// Use timeout to ensure popover is rendered before adding listeners
 		this.win.setTimeout(() => {
 			this.win.addEventListener("click", this.clickOutside);
-			this.scrollParent.addEventListener(
-				"scroll",
-				this.scrollHandler,
-				true
-			); // Use capture for scroll
+
+			// No need to close the popover on-scroll.
+			// this.scrollParent.addEventListener(
+			// 	"scroll",
+			// 	this.scrollHandler,
+			// 	true
+			// ); // Use capture for scroll
 		}, 10);
 	}
 
-	private clickOutside = (e: MouseEvent) => {
-		if (this.popoverRef && !this.popoverRef.contains(e.target as Node)) {
+	private clickOutside = (e: MouseEvent): void => {
+		if (this.taskFilterComponent.isMultiSuggestDropdownActive) {
+			this.taskFilterComponent.isMultiSuggestDropdownActive = false;
+			return;
+		}
+
+		if (
+			!this.taskFilterComponent.isMultiSuggestDropdownActive &&
+			this.popoverRef &&
+			!this.popoverRef.contains(e.target as Node)
+		) {
 			console.log("clickOutside - closing popover", {
 				target: e.target,
 				popoverRef: this.popoverRef,
@@ -180,23 +188,23 @@ export class ViewTaskFilterPopover
 		}
 	};
 
-	private scrollHandler = (e: Event) => {
-		if (this.popoverRef) {
-			if (
-				e.target instanceof Node &&
-				this.popoverRef.contains(e.target)
-			) {
-				const targetElement = e.target as HTMLElement;
-				if (
-					targetElement.scrollHeight > targetElement.clientHeight ||
-					targetElement.scrollWidth > targetElement.clientWidth
-				) {
-					return;
-				}
-			}
-			this.close();
-		}
-	};
+	// private scrollHandler = (e: Event) => {
+	// 	if (this.popoverRef) {
+	// 		if (
+	// 			e.target instanceof Node &&
+	// 			this.popoverRef.contains(e.target)
+	// 		) {
+	// 			const targetElement = e.target as HTMLElement;
+	// 			if (
+	// 				targetElement.scrollHeight > targetElement.clientHeight ||
+	// 				targetElement.scrollWidth > targetElement.clientWidth
+	// 			) {
+	// 				return;
+	// 			}
+	// 		}
+	// 		this.close();
+	// 	}
+	// };
 
 	/**
 	 * Closes the popover.
@@ -222,11 +230,11 @@ export class ViewTaskFilterPopover
 		}
 
 		this.win.removeEventListener("click", this.clickOutside);
-		this.scrollParent.removeEventListener(
-			"scroll",
-			this.scrollHandler,
-			true
-		);
+		// this.scrollParent.removeEventListener(
+		// 	"scroll",
+		// 	this.scrollHandler,
+		// 	true
+		// );
 
 		if (this.taskFilterComponent) {
 			this.taskFilterComponent.onunload();

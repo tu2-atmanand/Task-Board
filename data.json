@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0",
+  "version": "1.8.0",
   "data": {
     "boardConfigs": [
       {
@@ -22,7 +22,11 @@
             "active": true,
             "collapsed": false,
             "name": "Indented Bug",
-            "filePaths": "Testing Indented Task Bug.md"
+            "filePaths": "Testing Indented Task Bug.md",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "id": 2025781698,
@@ -30,8 +34,8 @@
             "colType": "pathFiltered",
             "active": true,
             "collapsed": false,
-            "name": "Today",
-            "filePaths": "2025-05-24.md"
+            "name": "QMD",
+            "filePaths": "A QMD file.qmd"
           },
           {
             "id": 1623496994,
@@ -46,7 +50,29 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": []
+          "filterGroups": [
+            {
+              "id": "id-1761753563955-v373astvn",
+              "groupCondition": "any",
+              "filters": [
+                {
+                  "id": "id-1761753563970-px2z8dfdl",
+                  "property": "tags",
+                  "condition": "contains"
+                },
+                {
+                  "id": "id-1761753631098-pra23ios4",
+                  "property": "tags",
+                  "condition": "contains",
+                  "value": ""
+                }
+              ]
+            }
+          ]
+        },
+        "taskCount": {
+          "pending": 33,
+          "completed": 8
         }
       },
       {
@@ -65,20 +91,7 @@
             },
             "filters": {
               "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1759769822732-we6pfeqpi",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1759769822734-2yqs1dyh5",
-                      "property": "content",
-                      "condition": "contains",
-                      "value": "this"
-                    }
-                  ]
-                }
-              ]
+              "filterGroups": []
             }
           },
           {
@@ -121,6 +134,17 @@
               "dateType": "scheduledDate",
               "from": 0,
               "to": 0
+            },
+            "sortCriteria": [
+              {
+                "criteria": "time",
+                "order": "asc",
+                "priority": 1
+              }
+            ],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
             }
           },
           {
@@ -156,7 +180,30 @@
             "collapsed": false,
             "limit": 20,
             "name": "Completed, updated",
-            "index": 6
+            "index": 6,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1760184422637-6hlzfbhzl",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760184422638-ibhyozbjt",
+                      "property": "completedDate",
+                      "condition": "<=",
+                      "value": "2025-10-11"
+                    },
+                    {
+                      "id": "id-1760186970354-3twr3szpq",
+                      "property": "completedDate",
+                      "condition": ">=",
+                      "value": "2025-10-01"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
         "filters": [
@@ -173,20 +220,12 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1759769822732-we6pfeqpi",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1759769822734-2yqs1dyh5",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "this"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
+        },
+        "description": "Project to manage all the tasks related to plugin release.",
+        "taskCount": {
+          "pending": 54,
+          "completed": 8
         }
       },
       {
@@ -225,7 +264,8 @@
                 "order": "asc",
                 "priority": 1
               }
-            ]
+            ],
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -238,7 +278,8 @@
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
-            }
+            },
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -247,7 +288,37 @@
             "name": "In Progress",
             "index": 3,
             "coltag": "working",
-            "id": 908753
+            "id": 908753,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1760365709344-buyyxwhhh",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760365709345-8uyz54hm3",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": "This"
+                    }
+                  ]
+                },
+                {
+                  "id": "id-1760365717816-lfhxidsw4",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1760365717817-fjsotu7dy",
+                      "property": "content",
+                      "condition": "contains",
+                      "value": "is"
+                    }
+                  ]
+                }
+              ]
+            },
+            "minimized": false
           },
           {
             "colType": "namedTag",
@@ -280,7 +351,7 @@
             "id": 3193261849,
             "index": 7,
             "colType": "completed",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "Completed",
             "limit": 20
@@ -300,7 +371,20 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": []
+          "filterGroups": [
+            {
+              "id": "id-1760365709344-buyyxwhhh",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1760365709345-8uyz54hm3",
+                  "property": "content",
+                  "condition": "contains",
+                  "value": "This"
+                }
+              ]
+            }
+          ]
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -330,6 +414,10 @@
               "updatedAt": "2025-10-10T13:37:12.145Z"
             }
           ]
+        },
+        "taskCount": {
+          "pending": 33,
+          "completed": 8
         }
       }
     ],
@@ -339,13 +427,16 @@
         "files": {
           "polarity": 3,
           "values": [
-            "Testing Indented Task Bug.md"
+            "Testing Indented Task Bug.md",
+            "/\\b2025-\\d{2}-\\d{2}\\b/"
           ]
         },
         "folders": {
-          "polarity": 3,
+          "polarity": 2,
           "values": [
-            "Task Board/1.7.0"
+            "Task Board/1.7.0",
+            "/Notes/",
+            "Bible"
           ]
         },
         "tags": {
@@ -757,8 +848,8 @@
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
         "reminderPlugin": false,
-        "dayPlannerPlugin": false,
-        "quickAddPlugin": false
+        "dayPlannerPlugin": true,
+        "quickAddPlugin": true
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
@@ -781,21 +872,137 @@
       ],
       "cardSectionsVisibility": "hideBoth",
       "hiddenTaskProperties": [],
-      "taskPropertyFormat": "2",
+      "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 238,
+      "uniqueIdCounter": 255,
       "experimentalFeatures": true,
       "searchQuery": "",
-      "lastViewedType": "map",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
-        "taskId": ""
+        "boardIndex": 0,
+        "taskId": "",
+        "settingTab": 0
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",
-      "boundTaskCompletionToChildTasks": true
+      "boundTaskCompletionToChildTasks": true,
+      "defaultStartTime": "23:59",
+      "archivedTBNotesFolderPath": "TaskBoard/TBNotes/",
+      "frontmatterFormatting": [
+        {
+          "index": 0,
+          "property": "ID",
+          "key": "id",
+          "taskItemKey": "id"
+        },
+        {
+          "index": 1,
+          "property": "Title",
+          "key": "title",
+          "taskItemKey": "title"
+        },
+        {
+          "index": 2,
+          "property": "Status",
+          "key": "status",
+          "taskItemKey": "status"
+        },
+        {
+          "index": 3,
+          "property": "Priority",
+          "key": "priority",
+          "taskItemKey": "priority"
+        },
+        {
+          "index": 4,
+          "property": "Tags",
+          "key": "tags",
+          "taskItemKey": "tags"
+        },
+        {
+          "index": 5,
+          "property": "Time",
+          "key": "time",
+          "taskItemKey": "time"
+        },
+        {
+          "index": 6,
+          "property": "Reminder",
+          "key": "reminder",
+          "taskItemKey": "reminder"
+        },
+        {
+          "index": 7,
+          "property": "Created date",
+          "key": "created-date",
+          "taskItemKey": "createdDate"
+        },
+        {
+          "index": 8,
+          "property": "Start date",
+          "key": "start-date",
+          "taskItemKey": "startDate"
+        },
+        {
+          "index": 9,
+          "property": "Scheduled date",
+          "key": "scheduled-date",
+          "taskItemKey": "scheduledDate"
+        },
+        {
+          "index": 10,
+          "property": "Due date",
+          "key": "due-date",
+          "taskItemKey": "due"
+        },
+        {
+          "index": 11,
+          "property": "Depends on",
+          "key": "depends-on",
+          "taskItemKey": "dependsOn"
+        },
+        {
+          "index": 12,
+          "property": "Cancelled date",
+          "key": "cancelled-date",
+          "taskItemKey": "cancelledDate"
+        },
+        {
+          "index": 13,
+          "key": "completed-date",
+          "taskItemKey": "completionDate"
+        },
+        {
+          "index": 14,
+          "property": "Source file",
+          "key": "source-file",
+          "taskItemKey": "filePath"
+        },
+        {
+          "index": 15,
+          "property": "Task location",
+          "key": "task-location",
+          "taskItemKey": "taskLocation"
+        },
+        {
+          "index": 16,
+          "property": "Last modified",
+          "key": "last-modified",
+          "taskItemKey": ""
+        }
+      ],
+      "mapView": {
+        "background": "dots",
+        "mapOrientation": "hor",
+        "optimizedRender": false,
+        "arrowDirection": "c2p",
+        "animatedEdges": false,
+        "scrollAction": "pan",
+        "showMinimap": true,
+        "renderVisibleNodes": false,
+        "edgeType": "smoothstep"
+      }
     }
   }
 }

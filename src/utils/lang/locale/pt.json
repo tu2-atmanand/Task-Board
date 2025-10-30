@@ -3,7 +3,7 @@
 	"close": "Fechar",
 	"archive": "Arquivo",
 	"add-sub-task": "Adicione a sub -tarefa",
-	"scan-vault-window": "Digitalizar janela do cofre",
+	"scan-vault-modal": "Digitalizar janela do cofre",
 	"general": "Em geral",
 	"no-tasks-available": "Nenhuma tarefa disponível",
 	"edit-task": "Editar tarefa",

@@ -1,17 +1,25 @@
 // /src/modal/BugReporter.ts
 
+import type TaskBoard from "main";
 import { App, Modal, Notice, PluginManifest } from "obsidian";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
 
 export class BugReporterModal extends Modal {
+	private plugin: TaskBoard;
 	private bugContent: string;
 	private context: string;
 	private message: string;
 
-	constructor(app: App, message: string, bug: string, context: string) {
-		super(app);
+	constructor(
+		plugin: TaskBoard,
+		message: string,
+		bug: string,
+		context: string
+	) {
+		super(plugin.app);
+		this.plugin = plugin;
 		this.message = message;
 		this.bugContent = bug;
 		this.context = context;
@@ -113,8 +121,8 @@ export class BugReporterModal extends Modal {
 	) {
 		// Sanitize the bug report content to prevent XSS attacks
 		let sanitizedErrorContent = bugContent;
-			// .replace(/</g, "&lt;")
-			// .replace(/>/g, "&gt;");
+		// .replace(/</g, "&lt;")
+		// .replace(/>/g, "&gt;");
 		// This sanitization function will also going to hide user data to preserve privacy. To do this, I will be replacing all the alphabets and nembers with '*', and keep the rest of characters as it is. This will help me to get the format of the their content and also preserve the privacy of the user.
 		// sanitizedErrorContent = sanitizedErrorContent.replace(/[a-zA-Z0-9]/g, "*");
 
@@ -148,14 +156,15 @@ export class BugReporterModal extends Modal {
 	getSystemInfo() {
 		// Get system information like OS, Obsidian version, etc.
 		const obsidianVersion =
-			this.app.title.split(" ").pop() || "Unknown Version";
+			this.plugin.app.title.split(" ").pop() || "Unknown Version";
 		const appVersion = navigator.appVersion || "Unknown App Version";
-		const enabledPlugins = this.app.plugins.enabledPlugins;
-		const enabledPluginsWithVersionMap = Object.values(
-			this.app.plugins.manifests
-		)
-			.filter((plugin: PluginManifest) => enabledPlugins.has(plugin.id))
-			.map((plugin: PluginManifest) => ({
+		const enabledPlugins = this.plugin.app.plugins.enabledPlugins;
+		const manifests = Object.values(
+			this.plugin.app.plugins.manifests
+		) as PluginManifest[];
+		const enabledPluginsWithVersionMap = manifests
+			.filter((plugin) => enabledPlugins.has(plugin.id))
+			.map((plugin) => ({
 				id: plugin.id,
 				version: plugin.version,
 			}));

@@ -5,16 +5,16 @@ import React, { memo, useMemo } from 'react';
 import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
-import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 import TaskBoard from 'main';
-import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
-import { matchTagsWithWildcards } from 'src/utils/FiltersVerifier';
-import { Menu } from 'obsidian';
-import { ConfigureColumnSortingModal } from 'src/modal/ConfigureColumnSortingModal';
+import { Menu, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
-import { RootFilterState } from 'src/components/BoardFilters/ViewTaskFilter';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { bugReporter } from 'src/services/OpenModals';
+import { ViewTaskFilterModal } from 'src/components/BoardFilters';
+import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
+import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -54,7 +54,7 @@ const Column: React.FC<ColumnProps> = ({
 	// // Render tasks using the tasks passed from KanbanBoard
 	// useEffect(() => {
 	// 	if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
-	// 		renderColumns(plugin, setTasks, activeBoardIndex, colType, columnData, allTasksExternal);
+	// 		columnSegregator(plugin, setTasks, activeBoardIndex, colType, columnData, allTasksExternal);
 	// 	}
 	// }, [colType, columnData, allTasksExternal]);
 
@@ -72,6 +72,31 @@ const Column: React.FC<ColumnProps> = ({
 			// Return the first match found
 			if (result) tagData = tagColor;
 		});
+	}
+
+	async function handleMinimizeColumn() {
+		console.log("Minimizing column:", columnData.name);
+		// Find the board and column indices
+		const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+			(board: Board) => board.name === activeBoardData.name
+		);
+
+		if (boardIndex !== -1) {
+			const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+				(col: ColumnData) => col.name === columnData.name
+			);
+
+			if (columnIndex !== -1) {
+				// Set the minimized property to true
+				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
+
+				// Save the settings
+				await plugin.saveSettings();
+
+				// Refresh the board view
+				eventEmitter.emit('REFRESH_BOARD');
+			}
+		}
 	}
 
 	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
@@ -122,51 +147,82 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("configure-column-filtering"));
 			item.setIcon("list-filter");
 			item.onClick(async () => {
-				// Get the position of the menu (approximate column position)
-				// Use CSS.escape to properly escape the selector value
-				const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
-				const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
-				const position = columnElement
-					? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
-					: { x: 100, y: 100 }; // Fallback position
+				try {
+					// TODO : The indexes are finding using the name, this might create issues if there are duplicate names. Use the id to find the indexes.
+					// Find board index once
+					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+						(board: Board) => board.name === activeBoardData.name
+					);
+					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+						(col: ColumnData) => col.name === columnData.name
+					);
 
-				// Find board index once
-				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-					(board: Board) => board.name === activeBoardData.name
-				);
-
-				// Create and show filter popover
-				// leafId is undefined for column filters (not tied to a specific leaf)
-				const popover = new ViewTaskFilterPopover(
-					plugin,
-					true, // forColumn is true
-					undefined,
-					boardIndex,
-					columnData.name,
-					columnData.filters
-				);
-
-				// Set up close callback to save filter state
-				popover.onClose = async (filterState?: RootFilterState) => {
-					if (filterState && boardIndex !== -1) {
-						const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-							(col: ColumnData) => col.name === columnData.name
+					if (Platform.isMobile) {
+						// If its a mobile platform, then we will open a modal instead of popover.
+						const filterModal = new ViewTaskFilterModal(
+							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
 						);
 
-						if (columnIndex !== -1) {
-							// Update the column filters
-							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+						// Set the close callback - mainly used for handling cancel actions
+						filterModal.filterCloseCallback = async (filterState) => {
+							console.log("Column.tsx : Filter modal closed on mobile with state:", filterState);
+							if (filterState && boardIndex !== -1) {
+								if (columnIndex !== -1) {
+									// Update the column filters
+									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
 
-							// Save the settings
-							await plugin.saveSettings();
+									// Save the settings
+									await plugin.saveSettings();
 
-							// Refresh the board view
-							eventEmitter.emit('REFRESH_BOARD');
-						}
+									// Refresh the board view
+									eventEmitter.emit('REFRESH_BOARD');
+								}
+							}
+						};
+
+						filterModal.open();
+					} else {
+						// Get the position of the menu (approximate column position)
+						// Use CSS.escape to properly escape the selector value
+						const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
+						const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
+						const position = columnElement
+							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
+							: { x: 100, y: 100 }; // Fallback position
+
+						// Create and show filter popover
+						// leafId is undefined for column filters (not tied to a specific leaf)
+						const popover = new ViewTaskFilterPopover(
+							plugin,
+							true, // forColumn is true
+							undefined,
+							boardIndex,
+							columnData.name,
+							columnData.filters
+						);
+
+						// Set up close callback to save filter state
+						popover.onClose = async (filterState?: RootFilterState) => {
+							if (filterState && boardIndex !== -1) {
+								if (columnIndex !== -1) {
+									// Update the column filters
+									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+
+									// Save the settings
+									await plugin.saveSettings();
+
+									// Refresh the board view
+									eventEmitter.emit('REFRESH_BOARD');
+								}
+							}
+						};
+
+						popover.showAtPosition(position);
+
 					}
-				};
-
-				popover.showAtPosition(position);
+				} catch (error) {
+					bugReporter(plugin, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+				}
 			});
 		});
 
@@ -180,16 +236,48 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("hide-column"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
-				// TODO : Pending to implement. Simply change the active property of the columnData to false for this column and refresh using emit.
+				// Find the board and column indices
+				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+					(board: Board) => board.name === activeBoardData.name
+				);
+
+				if (boardIndex !== -1) {
+					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+						(col: ColumnData) => col.name === columnData.name
+					);
+
+					if (columnIndex !== -1) {
+						// Set the active property to false
+						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+
+						// Save the settings
+						await plugin.saveSettings();
+
+						// Refresh the board view
+						eventEmitter.emit('REFRESH_BOARD');
+					}
+				}
 			});
 		});
-		sortMenu.addItem((item) => {
-			item.setTitle(t("minimize-column"));
-			item.setIcon("panel-left-close");
-			item.onClick(async () => {
-				// TODO : Pending to develop
+
+		// Show minimize or maximize option based on current state
+		if (columnData.minimized) {
+			sortMenu.addItem((item) => {
+				item.setTitle(t("maximize-column"));
+				item.setIcon("panel-left-open");
+				item.onClick(async () => {
+					await handleMinimizeColumn();
+				});
 			});
-		});
+		} else {
+			sortMenu.addItem((item) => {
+				item.setTitle(t("minimize-column"));
+				item.setIcon("panel-left-close");
+				item.onClick(async () => {
+					await handleMinimizeColumn();
+				});
+			});
+		}
 
 		// Use native event if available (React event has nativeEvent property)
 		sortMenu.showAtMouseEvent(
@@ -198,35 +286,57 @@ const Column: React.FC<ColumnProps> = ({
 	}
 
 	return (
-		<div className="TaskBoardColumnsSection" style={{ '--task-board-column-width': columnWidth } as CustomCSSProperties} data-column-type={columnData.colType} data-column-tag-name={tagData?.name} data-column-tag-color={tagData?.color}>
-			<div className="taskBoardColumnSecHeader">
-				<div className="taskBoardColumnSecHeaderTitleSec">
-					{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
-					<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+		<div
+			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}`}
+			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
+			data-column-type={columnData.colType}
+			data-column-tag-name={tagData?.name}
+			data-column-tag-color={tagData?.color}
+		>
+			{columnData.minimized ? (
+				// Minimized view - vertical bar with count and rotated text
+				<div className="taskBoardColumnMinimized">
+					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>
+						{tasksForThisColumn.length}
+					</div>
+					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
+						await handleMinimizeColumn();
+						eventEmitter.emit('REFRESH_BOARD');
+					}}>{columnData.name}</div>
 				</div>
-				<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>{tasksForThisColumn.length}</div>
-				{/* <RxDotsVertical /> */}
-			</div>
-			<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
-				{tasks.length > 0 ? (
-					tasks.map((task, index = task.id) => {
-						return (
-							<div key={index} className="taskItemFadeIn">
-								<TaskItem
-									key={index}
-									plugin={plugin}
-									taskKey={index}
-									task={task}
-									columnIndex={columnIndex}
-									activeBoardSettings={activeBoardData}
-								/>
-							</div>
-						);
-					})
-				) : (
-					<p>{t("no-tasks-available")}</p>
-				)}
-			</div>
+			) : (
+				// Normal view
+				<>
+					<div className="taskBoardColumnSecHeader">
+						<div className="taskBoardColumnSecHeaderTitleSec">
+							{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
+							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+						</div>
+						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>{tasksForThisColumn.length}</div>
+						{/* <RxDotsVertical /> */}
+					</div>
+					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
+						{tasks.length > 0 ? (
+							tasks.map((task, index = task.id) => {
+								return (
+									<div key={index} className="taskItemFadeIn">
+										<TaskItem
+											key={index}
+											plugin={plugin}
+											taskKey={index}
+											task={task}
+											columnIndex={columnIndex}
+											activeBoardSettings={activeBoardData}
+										/>
+									</div>
+								);
+							})
+						) : (
+							<p>{t("no-tasks-available")}</p>
+						)}
+					</div>
+				</>
+			)}
 		</div>
 	);
 

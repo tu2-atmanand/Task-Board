@@ -3,25 +3,27 @@
 import { FaEdit, FaExternalLinkSquareAlt, FaLink, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
-import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/TaskItemEventHandlers';
-import { handleTaskNoteStatusChange, handleTaskNotePropertyUpdate, handleTaskNoteBodyChange } from 'src/utils/TaskNoteEventHandlers';
+import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component, Notice } from 'obsidian';
-import { EditButtonMode, cardSectionsVisibilityOptions, viewTypeNames } from 'src/interfaces/GlobalSettings';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/TaskContentFormatter';
+import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { getTaskFromId, parseUniversalDate } from 'src/utils/TaskItemUtils';
+import { getTaskFromId, parseUniversalDate } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
-import { isTaskNotePresentInTags } from 'src/utils/TaskNoteUtils';
-import { priorityEmojis, taskItem, taskStatuses } from 'src/interfaces/TaskItem';
-import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/FiltersVerifier';
+import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
+import { ChevronDown, ChevronsUpDownIcon } from 'lucide-react';
+import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
+import { priorityEmojis } from 'src/interfaces/Mapping';
+import { taskItem } from 'src/interfaces/TaskItem';
+import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
+import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 
 export interface TaskProps {
 	key: number;
@@ -130,10 +132,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const renderTaskDescriptionWithObsidianAPI = async () => {
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		let descriptionContent = task.body
+		let descriptionContent = task.body ? task.body
 			.filter((line) => !isTaskLine(line.trim()))
 			.join("\n")
-			.trim();
+			.trim() : "";
 
 		if (descElement && descriptionContent !== "") {
 			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
@@ -208,11 +210,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				const now = new Date();
 
 				if (now < startTime) {
-					return 'var(--color-yellow)'; // Not started yet
+					// return 'var(--color-yellow)'; // Not started yet
+					return '#e8ce4aa8'; // Not started yet
 				} else if (now >= startTime && now <= endTime) {
 					return 'var(--color-blue)'; // In progress
 				} else if (now > endTime) {
-					return 'var(--color-red)'; // Over
+					return '#f23a3ab8'; // Past due
 				}
 			} else {
 				return 'var(--color-yellow)'; // Due today but no time info
@@ -220,7 +223,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		} else if (taskUniversalDate > today) {
 			return 'green'; // Due in future
 		} else if (taskUniversalDate < today) {
-			return 'var(--color-red)'; // Past due
+			// return 'var(--color-red)'; // Past due
+			return '#f23a3ab8'; // Past due
 		} else {
 			return 'grey'; // No due date
 		}
@@ -302,7 +306,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const handleMainTaskDelete = () => {
-		handleDeleteTask(plugin, task);
+		handleDeleteTask(plugin, task, isTaskNotePresentInTags(plugin, task.tags));
 	}
 
 	// Function to handle the checkbox toggle inside the task body
@@ -405,7 +409,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 										// If columnIndex is defined, proceed to get the column
 										const column = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
-										if ((!activeBoardSettings?.showColumnTags) && column && column?.colType === "namedTag" && tagName.replace('#', '') === column?.coltag?.replace('#', '')) {
+										if ((!activeBoardSettings?.showColumnTags) && column && column?.colType === colType.namedTag && tagName.replace('#', '') === column?.coltag?.replace('#', '')) {
 											return null;
 										}
 
@@ -417,7 +421,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 												className="taskItemTag"
 												style={{
 													color: tagColor,
-													border: `1px solid ${borderColor}`,
+													// border: `1px solid ${borderColor}`,
 													backgroundColor: backgroundColor
 												}}
 											>
@@ -495,7 +499,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 									className={`subtask-toggle-icon ${showSubtasks ? 'rotated' : ''}`}
 									onClick={() => setShowSubtasks((prev) => !prev)}
 								>
-									▼
+									<ChevronDown size={18} style={{ verticalAlign: 'middle' }} />
 								</span>
 							</div>
 						</div>
@@ -551,10 +555,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const renderDescriptionSection = useMemo(() => {
 		const uniqueKey = `${task.id}-desc`;
 		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		let descriptionContent = task.body
+		let descriptionContent = task.body ? task.body
 			.filter((line) => !isTaskLine(line))
 			.join("\n")
-			.trim();
+			.trim() : "";
 
 		if (!descriptionContent) return null; // If no description content, return null
 
@@ -609,13 +613,25 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 						<div className="taskItemFooter">
 							{/* Conditionally render task.completed or the date/time */}
 							{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
-								<div className='taskItemDateCompleted'>✅ {task.completion}</div>
+								<div className='taskItemCompletedDate'>✅ {task.completion}</div>
 							) : (
-								<div className='taskItemDate'>
-									{task.title.contains("(@") && task.completion === "" ? `🔔 ` : ""}
-									{task.time ? `⏰${task.time}` : ''}
-									{task.time && universalDate ? ' | ' : ''}
-									{universalDate ? `${getUniversalDateEmoji(plugin)}${universalDate}` : ''}
+								<div className='taskItemFooterDateTimeContainer'>
+									{task?.reminder && task.completion && (
+										<div className='taskItemReminderContainer'>
+											🔔
+										</div>
+									)}
+									{task.time && (
+										<div className='taskItemTimeContainer'>
+											⏰ {task.time}
+										</div>
+									)}
+									{universalDate && (
+
+										<div className='taskItemUniversalDateContainer'>
+											{getUniversalDateEmoji(plugin)} {universalDate}
+										</div>
+									)}
 								</div>
 							)}
 							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>

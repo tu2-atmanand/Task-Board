@@ -1,18 +1,18 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
 import { Modal, normalizePath } from "obsidian";
-import { taskItem, taskItemEmpty, taskStatuses } from "src/interfaces/TaskItem";
-
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
-import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
-import { generateTaskId } from "src/utils/VaultScanner";
+import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
+import { generateTaskId } from "src/managers/VaultScanner";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
+import { taskItemEmpty } from "src/interfaces/Mapping";
+import { taskItem } from "src/interfaces/TaskItem";
 
 
 // Class component extending Modal for Obsidian
@@ -61,7 +61,7 @@ export class AddOrEditTaskModal extends Modal {
 
 		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
-		if (!this.isTaskNote && this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
+		if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
 			this.task.id = generateTaskId(this.plugin);
 			this.task.legacyId = String(this.task.id);
 		}
@@ -82,10 +82,9 @@ export class AddOrEditTaskModal extends Modal {
 			}
 
 			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
-
-			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
-				this.task.id = generateTaskId(this.plugin);
-			}
+		} else {
+			if (!this.taskExists)
+				this.task.title = "- [ ] ";
 		}
 
 		root.render(<AddOrEditTaskRC

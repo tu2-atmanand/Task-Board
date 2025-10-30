@@ -3,17 +3,17 @@
 import { ItemView, WorkspaceLeaf, normalizePath } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
-
-import { taskItem, taskItemEmpty, taskStatuses } from "src/interfaces/TaskItem";
 import TaskBoard from "../../main";
-import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/types/uniqueIdentifiers";
+import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/interfaces/Constants";
 import { t } from "src/utils/lang/helper";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
-import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
-import { generateTaskId } from "src/utils/VaultScanner";
+import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
+import { generateTaskId } from "src/managers/VaultScanner";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
 import { getLocalDateTimeString } from "src/utils/TimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import { taskItemEmpty } from "src/interfaces/Mapping";
+import { taskItem } from "src/interfaces/TaskItem";
 
 
 export class AddOrEditTaskView extends ItemView {

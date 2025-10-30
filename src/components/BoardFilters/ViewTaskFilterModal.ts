@@ -1,19 +1,44 @@
-import { App } from "obsidian";
 import { Modal } from "obsidian";
-import { TaskFilterComponent, RootFilterState } from "./ViewTaskFilter";
 import type TaskBoard from "main";
+import { t } from "src/utils/lang/helper";
+import { RootFilterState } from "src/interfaces/BoardConfigs";
+import { TaskFilterComponent } from "./ViewTaskFilter";
 
 export class ViewTaskFilterModal extends Modal {
+	private plugin: TaskBoard;
+	public activeBoardIndex?: number;
 	public taskFilterComponent: TaskFilterComponent | null;
+	private columnOrBoardName?: string;
+	private initialFilterState?: RootFilterState;
 	public filterCloseCallback:
 		| ((filterState?: RootFilterState) => void)
 		| null = null;
-	private plugin?: TaskBoard;
 
-	constructor(app: App, private leafId?: string, plugin?: TaskBoard) {
-		super(app);
+	constructor(
+		plugin: TaskBoard,
+		forColumn: boolean,
+		private leafId?: string,
+		activeBoardIndex?: number,
+		columnOrBoardName?: string,
+		initialFilterState?: RootFilterState
+	) {
+		super(plugin.app);
 		this.plugin = plugin;
+		this.activeBoardIndex = activeBoardIndex;
+		this.columnOrBoardName = columnOrBoardName;
+		this.initialFilterState = initialFilterState;
+
 		this.taskFilterComponent = null;
+
+		if (forColumn) {
+			this.setTitle(
+				t("column-filters-for") + " " + this.columnOrBoardName
+			);
+		} else {
+			this.setTitle(
+				t("board-filters-for") + " " + this.columnOrBoardName
+			);
+		}
 	}
 
 	onOpen() {
@@ -24,7 +49,9 @@ export class ViewTaskFilterModal extends Modal {
 			this.contentEl,
 			this.app,
 			this.leafId,
-			this.plugin
+			this.plugin,
+			this.activeBoardIndex,
+			this.initialFilterState
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();

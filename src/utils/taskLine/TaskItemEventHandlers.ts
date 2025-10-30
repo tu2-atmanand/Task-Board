@@ -1,27 +1,30 @@
-import { checkboxStateSwitcher, isCompleted } from "./CheckBoxUtils";
+import { checkboxStateSwitcher, isCompleted } from "../CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
 	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
 } from "./TaskItemUtils";
-
-import { AddOrEditTaskModal } from "src/modal/AddOrEditTaskModal";
-import { DeleteConfirmationModal } from "src/modal/DeleteConfirmationModal";
-import { EditButtonMode } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { moment as _moment, Notice, TFile, WorkspaceLeaf } from "obsidian";
-import { t } from "./lang/helper";
+import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";
 import {
 	bugReporter,
 	openEditTaskModal,
 	openEditTaskNoteModal,
+	openEditTaskView,
 } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import { isTaskNotePresentInTags } from "./TaskNoteUtils";
+import {
+	archiveTaskNote,
+	deleteTaskNote,
+	isTaskNotePresentInTags,
+} from "../taskNote/TaskNoteUtils";
 import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
+import { EditButtonMode } from "src/interfaces/Enums";
+import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
@@ -131,26 +134,40 @@ export const handleSubTasksChange = (
 	});
 };
 
-export const handleDeleteTask = (plugin: TaskBoard, task: taskItem) => {
+export const handleDeleteTask = (
+	plugin: TaskBoard,
+	task: taskItem,
+	isTaskNote: boolean
+) => {
 	const mssg = t("confirm-task-delete-description");
 	const app = plugin.app;
 	const deleteModal = new DeleteConfirmationModal(app, {
 		app,
 		mssg,
 		onConfirm: () => {
-			deleteTaskFromFile(plugin, task).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
-			});
+			if (isTaskNote) {
+				deleteTaskNote(plugin, task.filePath);
+			} else {
+				deleteTaskFromFile(plugin, task).then(() => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						task.filePath
+					);
+				});
 
-			// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
-			// Remove the task from state after deletion
-			// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
+				// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
+				// Remove the task from state after deletion
+				// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
+			}
 		},
 		onCancel: () => {
 			// console.log('Task deletion canceled');
 		},
 		onArchive: () => {
-			archiveTask(plugin, task);
+			if (isTaskNote) {
+				archiveTaskNote(plugin, task.filePath);
+			} else {
+				archiveTask(plugin, task);
+			}
 		},
 	});
 	deleteModal.open();
@@ -168,6 +185,18 @@ export const handleEditTask = (
 			} else {
 				openEditTaskModal(plugin, task);
 			}
+			break;
+		case EditButtonMode.View:
+			const isTaskNote = isTaskNotePresentInTags(plugin, task.tags);
+			openEditTaskView(
+				plugin,
+				isTaskNote,
+				false,
+				true,
+				task,
+				task.filePath,
+				"window"
+			);
 			break;
 		case EditButtonMode.TasksPluginModal:
 			if (isTaskNotePresentInTags(plugin, task.tags)) {

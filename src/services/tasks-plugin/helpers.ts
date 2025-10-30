@@ -6,8 +6,8 @@ import { taskItem } from "src/interfaces/TaskItem";
 import {
 	addIdToTaskContent,
 	getFormattedTaskContent,
-} from "src/utils/TaskContentFormatter";
-import { replaceOldTaskWithNewTask } from "src/utils/TaskItemUtils";
+} from "src/utils/taskLine/TaskContentFormatter";
+import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskItemUtils";
 
 export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 	try {

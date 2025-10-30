@@ -3,6 +3,7 @@
  * Properties are hidden by default and revealed when the cursor is positioned on them.
  */
 
+import type TaskBoard from "main";
 import {
 	EditorView,
 	Decoration,
@@ -13,14 +14,13 @@ import {
 } from "@codemirror/view";
 import { Extension, Range, StateField } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
-import TaskBoard from "main";
-import { HideableTaskProperty } from "src/interfaces/GlobalSettings";
 import { isTaskLine } from "src/utils/CheckBoxUtils";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
 } from "src/regularExpressions/TasksPluginRegularExpr";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
+import { HideableTaskProperty } from "src/interfaces/Enums";
 
 /**
  * Widget for showing placeholder text when properties are hidden

@@ -4,11 +4,11 @@ import { App, Notice } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils";
+import { checkboxStateSwitcher } from "../CheckBoxUtils";
 import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
-} from "./MarkdownFileOperations";
-import { checkboxStateSwitcher } from "./CheckBoxUtils";
+} from "../MarkdownFileOperations";
 
 /**
  * Handle task note status change (checkbox change)
@@ -144,7 +144,7 @@ export const handleTaskNoteBodyChange = async (
 
 		// Split content into lines and replace the old line with the new line
 		const lines = fileContent.split("\n");
-		const updatedLines = lines.map((line) => {
+		const updatedLines = lines.map((line: string) => {
 			for (const oldLine of oldLinesWhichAreModified) {
 				const index = oldBodyLines.indexOf(oldLine);
 				const newLine = index !== -1 ? newBodyLines[index] : "";

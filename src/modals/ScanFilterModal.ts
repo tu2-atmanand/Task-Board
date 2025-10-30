@@ -7,7 +7,7 @@ import {
 	getTagSuggestions,
 	getYAMLPropertySuggestions,
 } from "src/services/MultiSuggest";
-import { trashIcon } from "src/types/Icons";
+import { trashIcon } from "src/interfaces/Icons";
 import { t } from "src/utils/lang/helper";
 
 export class ScanFilterModal extends Modal {

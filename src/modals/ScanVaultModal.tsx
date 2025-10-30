@@ -6,12 +6,13 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import vaultScanner, { fileTypeAllowedForScanning } from "src/utils/VaultScanner";
+import vaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScanner";
 import TaskBoard from "main";
-import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/FiltersVerifier";
 import { t } from "src/utils/lang/helper";
-import { getFormattedTaskContent } from "src/utils/TaskContentFormatter";
-import { VIEW_TYPE_TASKBOARD } from "src/types/uniqueIdentifiers";
+import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { getCurrentLocalTimeString } from "src/utils/TimeCalculations";
+import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;
@@ -49,7 +50,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
 		VaultName: plugin.app.vault.getName(),
-		Modified_at: new Date().toISOString(),
+		Modified_at: getCurrentLocalTimeString(),
 		Pending: {},
 		Completed: {},
 		Notes: [],
@@ -84,7 +85,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		new Notice(t("vault-scanning-complete"));
 
 		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
-		vaultScanner.saveTasksToJsonCache();
+		await vaultScanner.saveTasksToJsonCache();
 
 		findMaxIdCounterAndUpdateSettings(plugin);
 

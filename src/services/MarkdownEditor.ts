@@ -1,5 +1,10 @@
 // /src/services/MarkdownEditor.ts
 
+/**
+ * This complete EmbeddableMarkdownEditor component has been imported from Task Genius plugin.
+ * @see https://github.com/Quorafind/Obsidian-Task-Genius/blob/59a2d42f9fb95a5700d32975917e56372e5bdb7d/src/editor-extensions/core/markdown-editor.ts
+ */
+
 import {
 	App,
 	Editor,
@@ -11,9 +16,19 @@ import {
 } from "obsidian";
 
 import { EditorSelection, Prec } from "@codemirror/state";
-import { EditorView, keymap, placeholder, ViewUpdate } from "@codemirror/view";
+import {
+	EditorView,
+	keymap,
+	placeholder,
+	ViewUpdate,
+	Decoration,
+	DecorationSet,
+} from "@codemirror/view";
+import { StateField, StateEffect } from "@codemirror/state";
 
 import { around } from "monkey-around";
+import type TaskBoard from "main";
+import { FrontmatterRenderer } from "./FrontmatterRenderer";
 
 /**
  * Creates an embeddable markdown editor
@@ -23,15 +38,21 @@ import { around } from "monkey-around";
  * @returns A configured markdown editor
  */
 export function createEmbeddableMarkdownEditor(
-	app: App,
+	plugin: TaskBoard,
 	container: HTMLElement,
 	options: Partial<MarkdownEditorProps>
 ): EmbeddableMarkdownEditor {
 	// Get the editor class
-	const EditorClass = resolveEditorPrototype(app);
+	const EditorClass = resolveEditorPrototype(plugin.app);
 
 	// Create the editor instance
-	return new EmbeddableMarkdownEditor(app, EditorClass, container, options);
+	return new EmbeddableMarkdownEditor(
+		plugin,
+		plugin.app,
+		EditorClass,
+		container,
+		options
+	);
 }
 
 /**
@@ -64,6 +85,8 @@ interface MarkdownEditorProps {
 	value?: string;
 	cls?: string;
 	placeholder?: string;
+	enableFrontmatterUI?: boolean; // Enable enhanced frontmatter UI
+	file?: TFile; // Optional file for context in property rendering
 
 	onEnter: (
 		editor: EmbeddableMarkdownEditor,
@@ -82,6 +105,8 @@ const defaultProperties: MarkdownEditorProps = {
 	value: "",
 	cls: "",
 	placeholder: "",
+	enableFrontmatterUI: false,
+	file: undefined,
 
 	onEnter: () => false,
 	// onEscape: () => {},
@@ -96,10 +121,13 @@ const defaultProperties: MarkdownEditorProps = {
  * A markdown editor that can be embedded in any container
  */
 export class EmbeddableMarkdownEditor {
+	private plugin: TaskBoard;
 	options: MarkdownEditorProps;
 	initial_value: string;
 	scope: Scope;
 	editor: MarkdownScrollableEditView;
+	frontmatterRenderer: FrontmatterRenderer;
+	private frontmatterUIContainer: HTMLElement | null = null;
 
 	// Expose commonly accessed properties
 	get editorEl(): HTMLElement {
@@ -132,11 +160,13 @@ export class EmbeddableMarkdownEditor {
 	 * @param options - Options for controlling the initial state of the editor
 	 */
 	constructor(
+		plugin: TaskBoard,
 		app: App,
 		EditorClass: any,
 		container: HTMLElement,
 		options: Partial<MarkdownEditorProps>
 	) {
+		this.plugin = plugin;
 		// Create the editor with the app instance
 		this.editor = new EditorClass(app, container, {
 			app,
@@ -144,6 +174,8 @@ export class EmbeddableMarkdownEditor {
 			onMarkdownScroll: () => {},
 			getMode: () => "source",
 		});
+
+		this.frontmatterRenderer = new FrontmatterRenderer(plugin, this.editor);
 
 		// Store user options
 		this.options = { ...defaultProperties, ...options };
@@ -220,6 +252,9 @@ export class EmbeddableMarkdownEditor {
 				extensions.push(placeholder(this.options.placeholder));
 			}
 
+			// Add frontmatter hiding extension
+			// extensions.push(this.createFrontmatterHidingExtension());
+
 			// Add paste event handler
 			extensions.push(
 				EditorView.domEventHandlers({
@@ -263,8 +298,70 @@ export class EmbeddableMarkdownEditor {
 		const originalOnUpdate = this.editor.onUpdate.bind(this.editor);
 		this.editor.onUpdate = (update: ViewUpdate, changed: boolean) => {
 			originalOnUpdate(update, changed);
-			if (changed) this.options.onChange(update);
+			if (changed) {
+				this.options.onChange(update);
+			}
 		};
+	}
+
+	/**
+	 * Creates an extension for hiding frontmatter content in the editor
+	 * Frontmatter is content that starts and ends with '---' lines
+	 * @returns CodeMirror extension for frontmatter hiding
+	 */
+	private createFrontmatterHidingExtension() {
+		// Helper function to build decorations for frontmatter
+		const buildDecorations = (state: any): DecorationSet => {
+			const decorations: any[] = [];
+			const doc = state.doc;
+			const text = doc.toString();
+
+			// Regular expression to match frontmatter blocks
+			// Matches content that starts with '---' and ends with '---'
+			const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*$/gm;
+			let match;
+
+			while ((match = frontmatterRegex.exec(text)) !== null) {
+				const start = match.index;
+				const end = match.index + match[0].length;
+				console.log(
+					"frontmatter match :\n",
+					match,
+					"\nStart : ",
+					start,
+					"\nEnd : ",
+					end
+				);
+
+				// Create decoration to hide the frontmatter content
+				decorations.push(
+					Decoration.mark({
+						class: "task-board-frontmatter-hidden",
+						attributes: {
+							style: "display: none;",
+						},
+					}).range(start, end)
+				);
+			}
+
+			return Decoration.set(decorations);
+		};
+
+		// StateField to track frontmatter positions and generate decorations
+		const frontmatterStateField = StateField.define<DecorationSet>({
+			create(state) {
+				return buildDecorations(state);
+			},
+			update(decorations, transaction) {
+				if (transaction.docChanged) {
+					return buildDecorations(transaction.state);
+				}
+				return decorations.map(transaction.changes);
+			},
+			provide: (field) => EditorView.decorations.from(field),
+		});
+
+		return frontmatterStateField;
 	}
 
 	// Get the current editor value
@@ -274,7 +371,82 @@ export class EmbeddableMarkdownEditor {
 
 	// Set content in the editor
 	set(content: string, focus: boolean = false): void {
-		this.editor.set(content, focus);
+		const frontmatterContent =
+			this.frontmatterRenderer.extractFrontmatterContent(content);
+		const contentWithoutFrontmatter =
+			this.frontmatterRenderer.extractContentWithoutFrontmatter(
+				content,
+				frontmatterContent
+			);
+
+		console.log(
+			"Setting editor content...\nComplete content :\n",
+			content,
+			"\nfrontmatterContent :\n",
+			frontmatterContent,
+			"\ncontentWithoutFrontmatter:\n",
+			contentWithoutFrontmatter
+		);
+
+		this.editor.set(contentWithoutFrontmatter, focus);
+
+		// Update frontmatter UI if enabled
+		if (this.options.enableFrontmatterUI && frontmatterContent) {
+			this.updateFrontmatterUI(content);
+		}
+	}
+
+	/**
+	 * Update the frontmatter UI based on content
+	 * @param content - Markdown content to check for frontmatter
+	 */
+	private updateFrontmatterUI(content: string): void {
+		// Import the FrontmatterRenderer dynamically to avoid circular dependencies
+		// Remove existing frontmatter UI if any
+		if (this.frontmatterUIContainer) {
+			this.frontmatterUIContainer.remove();
+			this.frontmatterUIContainer = null;
+		}
+
+		// Check if content has frontmatter
+		if (!content.startsWith("---\n")) {
+			return;
+		}
+
+		// Find or create a wrapper in the container
+		// We'll prepend the frontmatter UI to the container
+		const wrapper = this.containerEl.querySelector(
+			".taskboard-frontmatter-wrapper"
+		) as HTMLElement;
+
+		if (!wrapper) {
+			// Create a wrapper div for frontmatter UI at the start of container
+			this.frontmatterUIContainer = this.containerEl.createDiv({
+				cls: "taskboard-frontmatter-wrapper",
+			});
+
+			// Insert at the beginning of the container
+			this.containerEl.insertBefore(
+				this.frontmatterUIContainer,
+				this.containerEl.firstChild
+			);
+		} else {
+			this.frontmatterUIContainer = wrapper;
+			this.frontmatterUIContainer.empty();
+		}
+
+		// Render the frontmatter properties
+		const result = this.frontmatterRenderer.renderCollapsibleFrontmatter(
+			this.frontmatterUIContainer,
+			content,
+			this.options.file
+		);
+
+		// If no frontmatter was rendered, remove the container
+		if (!result.frontmatterContainer) {
+			this.frontmatterUIContainer.remove();
+			this.frontmatterUIContainer = null;
+		}
 	}
 
 	// Register cleanup callback
@@ -284,6 +456,12 @@ export class EmbeddableMarkdownEditor {
 
 	// Clean up method that ensures proper destruction
 	destroy(): void {
+		// Clean up frontmatter UI
+		if (this.frontmatterUIContainer) {
+			this.frontmatterUIContainer.remove();
+			this.frontmatterUIContainer = null;
+		}
+
 		if (this._loaded && typeof this.editor.unload === "function") {
 			this.editor.unload();
 		}

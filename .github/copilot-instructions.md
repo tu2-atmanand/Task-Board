@@ -104,7 +104,7 @@ npm run dev  # Should start watch mode and display "watching for changes..."
 │   ├── services/              # Business logic and external integrations (~10 files)
 │   ├── utils/                 # Utility functions and helpers (~15 files)
 │   │   ├── vaultScanner.ts   # Core vault scanning logic
-│   │   ├── RealTimeScanning.ts # Real-time file change handling
+│   │   ├── RealTimeScanner.ts # Real-time file change handling
 │   │   ├── RenderColumns.ts   # Task filtering and column rendering
 │   │   └── ...               # File operations, task parsing, etc.
 │   ├── settings/              # Plugin settings UI
@@ -153,7 +153,7 @@ npm run dev  # Should start watch mode and display "watching for changes..."
 - **Plugin not loading**: Check `manifest.json` version compatibility with Obsidian
 - **Build failures**: Run `npx tsc --noEmit --skipLibCheck` to isolate TypeScript errors
 - **Runtime errors**: Use Obsidian's developer console (Ctrl+Shift+I)
-- **File scanning issues**: Check `utils/vaultScanner.ts` and `utils/RealTimeScanning.ts`
+- **File scanning issues**: Check `utils/vaultScanner.ts` and `utils/RealTimeScanner.ts`
 
 ## Release Process
 - Releases are automated via GitHub Actions on git tags

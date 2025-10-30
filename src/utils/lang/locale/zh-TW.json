@@ -3,7 +3,7 @@
 	"close": "關閉",
 	"archive": "檔案",
 	"add-sub-task": "添加子任務",
-	"scan-vault-window": "掃描保險庫窗口",
+	"scan-vault-modal": "掃描保險庫窗口",
 	"general": "一般的",
 	"no-tasks-available": "沒有可用的任務",
 	"edit-task": "編輯任務",

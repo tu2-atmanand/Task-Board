@@ -1,3 +1,5 @@
+// /src/components/BoardFilters/ViewTaskFilter.ts
+
 import {
 	Component,
 	ExtraButtonComponent,
@@ -10,43 +12,19 @@ import Sortable from "sortablejs";
 import { FilterConfigModal } from "./FilterConfigModal";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
-import { SavedFilterConfig } from "src/interfaces/BoardConfigs";
-
-// --- Interfaces (from focus.md and example HTML) ---
-// (Using 'any' for property types for now, will refine based on focus.md property list)
-export interface Filter {
-	id: string;
-	property: string; // e.g., 'content', 'dueDate', 'priority'
-	condition: string; // e.g., 'isSet', 'equals', 'contains'
-	value?: any;
-}
-
-export interface FilterGroup {
-	id: string;
-	groupCondition: "all" | "any" | "none"; // How filters within this group are combined
-	filters: Filter[];
-}
-
-export interface RootFilterState {
-	rootCondition: "all" | "any" | "none"; // How filter groups are combined
-	filterGroups: FilterGroup[];
-}
-
-// Represents a single filter condition UI row from focus.md
-interface FilterConditionItem {
-	property: string; // e.g., 'content', 'dueDate', 'priority', 'tags.myTag'
-	operator: string; // e.g., 'contains', 'is', '>=', 'isEmpty'
-	value?: any; // Value for the condition, type depends on property and operator
-}
-
-// Represents a group of filter conditions in the UI from focus.md
-interface FilterGroupItem {
-	logicalOperator: "AND" | "OR"; // How conditions/groups within this group are combined
-	items: (FilterConditionItem | FilterGroupItem)[]; // Can contain conditions or nested groups
-}
-
-// Top-level filter configuration from the UI from focus.md
-type FilterConfig = FilterGroupItem;
+import {
+	Filter,
+	FilterGroup,
+	RootFilterState,
+	SavedFilterConfig,
+} from "src/interfaces/BoardConfigs";
+import {
+	MultiSuggest,
+	getTagSuggestions,
+	getFileSuggestions,
+	getStatusSuggestions,
+	getPrioritySuggestions,
+} from "src/services/MultiSuggest";
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;
@@ -58,6 +36,13 @@ export class TaskFilterComponent extends Component {
 
 	// Sortable instances
 	private groupsSortable?: Sortable;
+
+	// WeakMap to store MultiSuggest instances for cleanup
+	private multiSuggestInstances = new WeakMap<
+		HTMLInputElement,
+		MultiSuggest
+	>();
+	public isMultiSuggestDropdownActive = false;
 
 	constructor(
 		hostEl: HTMLElement,
@@ -130,10 +115,6 @@ export class TaskFilterComponent extends Component {
 
 	close() {
 		this.onunload();
-	}
-
-	private generateId(): string {
-		return `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 	}
 
 	private render(): void {
@@ -356,10 +337,10 @@ export class TaskFilterComponent extends Component {
 			.setIcon("copy")
 			.setTooltip(t("duplicate-filter-group"))
 			.onClick(() => {
-				const newGroupId = this.generateId();
+				const newGroupId = generateIdForFilters();
 				const duplicatedFilters = groupData.filters.map((f) => ({
 					...f,
-					id: this.generateId(),
+					id: generateIdForFilters(),
 				}));
 				const duplicatedGroupData: FilterGroup = {
 					...groupData,
@@ -482,7 +463,7 @@ export class TaskFilterComponent extends Component {
 
 		const newGroupId = groupDataToClone
 			? groupDataToClone.id
-			: this.generateId();
+			: generateIdForFilters();
 
 		let newGroupData: FilterGroup;
 		if (groupDataToClone && insertAfterElement) {
@@ -491,7 +472,7 @@ export class TaskFilterComponent extends Component {
 				groupCondition: groupDataToClone.groupCondition,
 				filters: groupDataToClone.filters.map((f) => ({
 					...f,
-					id: this.generateId(),
+					id: generateIdForFilters(),
 				})),
 			};
 		} else {
@@ -565,7 +546,7 @@ export class TaskFilterComponent extends Component {
 		} else if (groupData.groupCondition === "none") {
 			newFilterEl.createEl("span", {
 				cls: ["filter-conjunction"],
-				text: t("and-note"),
+				text: t("and-not"),
 			});
 		} else {
 			newFilterEl.createEl("span", {
@@ -590,6 +571,9 @@ export class TaskFilterComponent extends Component {
 			cls: ["filter-value-input", "compact-input"],
 		});
 		valueInput.hide();
+		valueInput.addEventListener("click", () => {
+			this.isMultiSuggestDropdownActive = true;
+		});
 
 		propertySelect.onChange((value) => {
 			filterData.property = value;
@@ -705,7 +689,7 @@ export class TaskFilterComponent extends Component {
 		groupData: FilterGroup,
 		filtersListEl: HTMLElement
 	): void {
-		const newFilterId = this.generateId();
+		const newFilterId = generateIdForFilters();
 		const newFilterData: Filter = {
 			id: newFilterId,
 			property: "content",
@@ -744,7 +728,11 @@ export class TaskFilterComponent extends Component {
 				startDate: t("start-date"),
 				scheduledDate: t("scheduled-date"),
 				dueDate: t("due-date"),
-				completed: t("completed-date"),
+				completedDate: t("completed-date"),
+				cancelledDate: t("cancelled-date"),
+				startTime: t("start-time"),
+				reminder: t("reminder"),
+				dependencies: t("dependencies"),
 				filePath: t("file-path"),
 				// project: t("project"),
 			});
@@ -812,11 +800,78 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "id":
+				conditionOptions = [
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+					{
+						value: ">",
+						text: ">",
+					},
+					{
+						value: "<",
+						text: "<",
+					},
+					{
+						value: ">=",
+						text: ">=",
+					},
+					{
+						value: "<=",
+						text: "<=",
+					},
+					{
+						value: "isEmpty",
+						text: t("is-empty"),
+					},
+					{
+						value: "isNotEmpty",
+						text: t("is-not-empty"),
+					},
+				];
+				break;
 			case "createdDate":
 			case "dueDate":
 			case "startDate":
 			case "scheduledDate":
+			case "completedDate":
 				valueInput.type = "date";
+				conditionOptions = [
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+					{
+						value: ">",
+						text: ">",
+					},
+					{
+						value: "<",
+						text: "<",
+					},
+					{
+						value: ">=",
+						text: ">=",
+					},
+					{
+						value: "<=",
+						text: "<=",
+					},
+					{
+						value: "isEmpty",
+						text: t("is-empty"),
+					},
+					{
+						value: "isNotEmpty",
+						text: t("is-not-empty"),
+					},
+				];
+				break;
+			case "startTime":
+				valueInput.type = "time";
 				conditionOptions = [
 					{ value: "is", text: t("is") },
 					{
@@ -852,20 +907,28 @@ export class TaskFilterComponent extends Component {
 			case "tags":
 				conditionOptions = [
 					{
+						value: "hasTag",
+						text: t("has-tag"),
+					},
+					{
+						value: "doesNotHaveTag",
+						text: t("does-not-have-tag"),
+					},
+					{
 						value: "contains",
-						text: t("contains"),
+						text: t("contains-string"),
 					},
 					{
 						value: "doesNotContain",
-						text: t("does-not-contain"),
+						text: t("does-not-contains-string"),
 					},
 					{
 						value: "isEmpty",
-						text: t("is-empty"),
+						text: t("are-empty"),
 					},
 					{
 						value: "isNotEmpty",
-						text: t("is-not-empty"),
+						text: t("are-not-empty"),
 					},
 				];
 				break;
@@ -892,12 +955,20 @@ export class TaskFilterComponent extends Component {
 						text: t("is-not-set"),
 					},
 					{
-						value: "equals",
-						text: t("equals"),
+						value: "is",
+						text: t("is"),
+					},
+					{
+						value: "isNot",
+						text: t("is-not"),
 					},
 					{
 						value: "contains",
-						text: t("contains"),
+						text: t("contains-string"),
+					},
+					{
+						value: "doesNotContain",
+						text: t("does-not-contains-string"),
 					},
 				];
 		}
@@ -971,6 +1042,68 @@ export class TaskFilterComponent extends Component {
 		if (conditionChanged || valueChanged) {
 			this.saveStateToLocalStorage();
 		}
+
+		// Setup MultiSuggest for appropriate properties
+		this.setupMultiSuggest(property, valueInput, filterData);
+	}
+
+	private setupMultiSuggest(
+		property: string,
+		valueInput: HTMLInputElement,
+		filterData: Filter
+	): void {
+		// Only setup suggestions for specific properties
+		const propertiesWithSuggestions = [
+			"status",
+			"priority",
+			"tags",
+			"filePath",
+		];
+
+		// Clean up existing MultiSuggest instance if it exists
+		const existingInstance = this.multiSuggestInstances.get(valueInput);
+		if (existingInstance) {
+			existingInstance.close();
+			this.multiSuggestInstances.delete(valueInput);
+		}
+
+		if (!propertiesWithSuggestions.includes(property)) {
+			return;
+		}
+
+		let suggestions: string[] = [];
+
+		switch (property) {
+			case "status":
+				suggestions = getStatusSuggestions();
+				break;
+			case "priority":
+				suggestions = getPrioritySuggestions();
+				break;
+			case "tags":
+				suggestions = getTagSuggestions(this.app);
+				break;
+			case "filePath":
+				suggestions = getFileSuggestions(this.app);
+				break;
+		}
+
+		// Create callback to update filter data when suggestion is selected
+		const onSelectCallback = (value: string) => {
+			filterData.value = value;
+			this.saveStateToLocalStorage();
+		};
+
+		// Initialize MultiSuggest with suggestions and store instance for cleanup
+		const multiSuggestInstance = new MultiSuggest(
+			valueInput,
+			new Set(suggestions),
+			onSelectCallback,
+			this.app
+		);
+
+		// Store instance in WeakMap for cleanup
+		this.multiSuggestInstances.set(valueInput, multiSuggestInstance);
 	}
 
 	// --- UI Updates (Conjunctions, Separators) ---
@@ -1198,4 +1331,8 @@ export class TaskFilterComponent extends Component {
 		);
 		modal.open();
 	}
+}
+
+export function generateIdForFilters(): string {
+	return `id-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }

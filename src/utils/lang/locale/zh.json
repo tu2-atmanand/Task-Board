@@ -1,6 +1,6 @@
 {
 	"add-sub-task": "添加子任务",
-	"scan-vault-window": "扫描Obsidian仓库",
+	"scan-vault-modal": "扫描Obsidian仓库",
 	"no-tasks-available": "暂无任务",
 	"edit-task": "编辑任务",
 	"delete-task": "删除任务",

@@ -5,15 +5,15 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
-import { UniversalDateOptions } from "src/interfaces/GlobalSettings";
-import { matchTagsWithWildcards } from "./FiltersVerifier";
-import { getAllTaskTags } from "./TaskItemUtils";
+import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { boardFilterer } from "./boardFilterer";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
+import { colType, UniversalDateOptions } from "src/interfaces/Enums";
+import { matchTagsWithWildcards } from "./ScanningFilterer";
+import { boardFilterer } from "./BoardFilterer";
 
 // Function to refresh tasks in any column by calling this utility function
-export const renderColumns = (
+export const columnSegregator = (
 	plugin: TaskBoard,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
@@ -25,7 +25,7 @@ export const renderColumns = (
 	const pendingTasks = allTasks.Pending;
 	const completedTasks = allTasks.Completed;
 
-	if (columnData.colType === "undated") {
+	if (columnData.colType === colType.undated) {
 		tasksToDisplay = pendingTasks.filter((task) => {
 			if (
 				columnData.datedBasedColumn?.dateType ===
@@ -44,7 +44,7 @@ export const renderColumns = (
 				return !task.scheduledDate;
 			}
 		});
-	} else if (columnData.colType === "dated") {
+	} else if (columnData.colType === colType.dated) {
 		const { dateType, from, to } = columnData.datedBasedColumn || {
 			dateType: "due",
 			from: 0,
@@ -142,11 +142,11 @@ export const renderColumns = (
 
 			return diffDays >= from && diffDays <= to;
 		});
-	} else if (columnData.colType === "untagged") {
+	} else if (columnData.colType === colType.untagged) {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => getAllTaskTags(task).length === 0
 		);
-	} else if (columnData.colType === "namedTag") {
+	} else if (columnData.colType === colType.namedTag) {
 		tasksToDisplay = pendingTasks.filter((task) =>
 			getAllTaskTags(task).some((tag) => {
 				// return (
@@ -161,7 +161,7 @@ export const renderColumns = (
 				return result !== null;
 			})
 		);
-	} else if (columnData.colType === "pathFiltered") {
+	} else if (columnData.colType === colType.pathFiltered) {
 		// Filter tasks based on their file path
 		if (columnData.filePaths) {
 			// Split the path patterns by comma and trim whitespace
@@ -195,7 +195,7 @@ export const renderColumns = (
 		} else {
 			tasksToDisplay = [];
 		}
-	} else if (columnData.colType === "otherTags") {
+	} else if (columnData.colType === colType.otherTags) {
 		// 1. Get the current board based on activeBoard index
 		const currentBoard = plugin.settings.data.boardConfigs.find(
 			(board) => board.index === activeBoard + 1
@@ -204,7 +204,7 @@ export const renderColumns = (
 		// 2. Collect all coltags from columns where colType is 'namedTag'
 		const namedTags =
 			currentBoard?.columns
-				.filter((col) => col.colType === "namedTag" && col.coltag)
+				.filter((col) => col.colType === colType.namedTag && col.coltag)
 				.map((col) => col.coltag?.toLowerCase().replace(`#`, ""))
 				.filter(
 					(tag): tag is string =>
@@ -242,11 +242,11 @@ export const renderColumns = (
 		// });
 
 		tasksToDisplay = completedTasks.slice(0, tasksLimit);
-	} else if (columnData.colType === "taskStatus") {
+	} else if (columnData.colType === colType.taskStatus) {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.status === columnData.taskStatus
 		);
-	} else if (columnData.colType === "taskPriority") {
+	} else if (columnData.colType === colType.taskPriority) {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.priority === columnData.taskPriority
 		);
@@ -260,6 +260,7 @@ export const renderColumns = (
 	// Apply column-specific sorting if configured
 	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
 		tasksToDisplay = columnSortingAlgorithm(
+			plugin,
 			tasksToDisplay,
 			columnData.sortCriteria
 		);

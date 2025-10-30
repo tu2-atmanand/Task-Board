@@ -3,7 +3,7 @@
 	"close": "닫다",
 	"archive": "보관소",
 	"add-sub-task": "하위 작업을 추가하십시오",
-	"scan-vault-window": "금고 창을 스캔하십시오",
+	"scan-vault-modal": "금고 창을 스캔하십시오",
 	"general": "일반적인",
 	"no-tasks-available": "사용 가능한 작업이 없습니다",
 	"edit-task": "작업 편집",

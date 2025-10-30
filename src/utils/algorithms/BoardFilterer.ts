@@ -1,12 +1,13 @@
 // src/utils/boardFilterer.ts
 
 import { taskItem } from "src/interfaces/TaskItem";
+import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter";
+import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import {
 	RootFilterState,
-	Filter,
 	FilterGroup,
-} from "src/components/BoardFilters/ViewTaskFilter";
-import { getFormattedTaskContentSync } from "./TaskContentFormatter";
+	Filter,
+} from "src/interfaces/BoardConfigs";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -87,17 +88,20 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 	// Evaluate based on condition
 	switch (condition) {
 		case "isSet":
+		case "isNotEmpty":
 			return (
-				taskValue !== null &&
-				taskValue !== undefined &&
-				taskValue !== ""
+				taskValue !== null ||
+				taskValue !== undefined ||
+				taskValue !== "" ||
+				taskValue?.length() > 0
 			);
 		case "isEmpty":
 		case "isNotSet":
 			return (
 				taskValue === null ||
 				taskValue === undefined ||
-				taskValue === ""
+				taskValue === "" ||
+				taskValue?.length() === 0
 			);
 		case "equals":
 		case "is":
@@ -199,47 +203,47 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "content":
 			return getFormattedTaskContentSync(task);
 		case "title":
-			return task.title;
+			return task.title || "";
 		case "body":
 		case "description":
-			return task.body.join("\n");
+			return task.body.join("\n") || "";
 		case "createdDate":
 		case "created":
-			return task.createdDate;
+			return task.createdDate || "";
 		case "dueDate":
 		case "due":
-			return task.due;
+			return task.due || "";
 		case "startDate":
 		case "start":
-			return task.startDate;
+			return task.startDate || "";
 		case "scheduledDate":
 		case "scheduled":
-			return task.scheduledDate;
+			return task.scheduledDate || "";
 		case "completion":
 		case "completedDate":
 		case "done":
-			return task.completion;
+			return task?.completion || "";
 		case "cancelled":
 		case "cancelledDate":
-			return task.cancelledDate;
+			return task?.cancelledDate || "";
 		case "priority":
-			return task.priority;
+			return String(task.priority) || "";
 		case "status":
-			return task.status;
+			return task.status || "";
 		case "tags":
-			return task.tags;
+			return getAllTaskTags(task) || [];
 		case "frontmatterTags":
-			return task.frontmatterTags;
+			return task.frontmatterTags || [];
 		case "filePath":
 		case "path":
-			return task.filePath;
+			return task.filePath || "";
 		case "time":
-			return task.time;
+			return task.time || "";
 		case "reminder":
-			return task.reminder;
+			return task?.reminder || "";
 		case "dependsOn":
 		case "dependencies":
-			return task.dependsOn;
+			return task?.dependsOn || [];
 		default:
 			// Handle tag properties like "tags.myTag"
 			if (property.startsWith("tags.")) {

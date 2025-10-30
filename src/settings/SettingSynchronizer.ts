@@ -6,6 +6,9 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
+import { colType } from "src/interfaces/Enums";
+import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
 
 /**
  * Migrates settings from imported data to current settings, preserving new fields and syncing new ones.
@@ -14,6 +17,7 @@ import { t } from "src/utils/lang/helper";
 export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 	for (const key in defaults) {
 		if (!(key in settings)) {
+			// This is a cumpulsory migration which will be required in every new version update, since a new field should be added into the users settings.
 			settings[key] = defaults[key];
 		} else if (
 			!Array.isArray(settings[key]) &&
@@ -21,6 +25,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			typeof settings[key] === "object" &&
 			settings[key] !== null
 		) {
+			// This is a temporary migration applied since version 1.2.0. Can be removed, after around 6 months.
 			settings[key] = Object.entries(
 				settings[key] as Record<string, string>
 			).map(
@@ -32,26 +37,61 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 					} as any)
 			);
 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-			settings[key].forEach((boardConfig: any) => {
-				boardConfig.columns.forEach((column: any) => {
+			// This is a temporary solution to sync the boardConfigs. Will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
+			// This migration was applied since version 1.5.0.
+			settings[key].forEach((boardConfig: Board) => {
+				boardConfig.columns.forEach((column: ColumnData) => {
 					if (!column.id) {
 						column.id = Math.floor(Math.random() * 1000000);
 					}
 					if (
-						column.colType === "dated" ||
-						(column.colType === "undated" &&
+						column.colType === colType.dated ||
+						(column.colType === colType.undated &&
 							!column.datedBasedColumn)
 					) {
 						column.datedBasedColumn = {
-							dateType: defaults.universalDate,
+							dateType:
+								column.datedBasedColumn?.dateType ??
+								defaults.universalDate,
 							from: column.datedBasedColumn?.from || 0,
 							to: column.datedBasedColumn?.to || 0,
 						};
 						delete column.range;
 					}
 				});
+
+				// Migration applied since version 1.4.0
 				if (!boardConfig.hideEmptyColumns) {
 					boardConfig.hideEmptyColumns = false;
+				}
+
+				// Migration applied since version 1.8.0
+				if (boardConfig?.filters && boardConfig.filters.length > 0) {
+					if (
+						boardConfig?.filterPolarity &&
+						boardConfig.filterPolarity === "1"
+					) {
+						boardConfig.boardFilter = {
+							rootCondition: "any",
+							filterGroups: [
+								{
+									id: generateIdForFilters(),
+									groupCondition: "any",
+									filters: boardConfig.filters.map(
+										(f: string) => ({
+											id: generateIdForFilters(),
+											property: "tags",
+											condition: "contains",
+											value: f,
+										})
+									),
+								},
+							],
+						};
+
+						delete boardConfig?.filters;
+						delete boardConfig?.filterPolarity;
+					}
 				}
 			});
 		} else if (
@@ -60,10 +100,6 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			!Array.isArray(defaults[key])
 		) {
 			migrateSettings(defaults[key], settings[key]);
-		} else if (key === "tasksCacheFilePath" && settings[key] === "") {
-			settings[key] = `${
-				defaults.app?.vault?.configDir || ""
-			}/plugins/task-board/tasks.json`;
 		}
 	}
 	return settings;

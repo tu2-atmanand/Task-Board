@@ -3,7 +3,7 @@
 	"close": "近い",
 	"archive": "アーカイブ",
 	"add-sub-task": "サブタスクを追加します",
-	"scan-vault-window": "ボールトウィンドウをスキャンします",
+	"scan-vault-modal": "ボールトウィンドウをスキャンします",
 	"general": "一般的な",
 	"no-tasks-available": "利用可能なタスクはありません",
 	"edit-task": "タスクを編集します",

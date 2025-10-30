@@ -28,7 +28,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"types": [
 			"obsidian-typings"
-		]
+		],
 	},
 	"include": [
 		"src"

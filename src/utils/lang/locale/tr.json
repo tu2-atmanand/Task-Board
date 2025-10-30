@@ -3,7 +3,7 @@
 	"close": "Kapalı",
 	"archive": "Arşiv",
 	"add-sub-task": "Alt görev ekle",
-	"scan-vault-window": "Tonoz penceresini tarama",
+	"scan-vault-modal": "Tonoz penceresini tarama",
 	"general": "Genel",
 	"no-tasks-available": "Mevcut görev yok",
 	"edit-task": "Görev düzenleme",

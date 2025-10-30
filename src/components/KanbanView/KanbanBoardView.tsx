@@ -98,7 +98,7 @@ export default memo(KanbanBoard);
 // import { eventEmitter } from "src/services/EventEmitter";
 // import { handleUpdateBoards } from "../utils/BoardOperations";
 // import { bugReporter, openAddNewTaskModal, openBoardConfigModal } from "../services/OpenModals";
-// import { renderColumns } from 'src/utils/RenderColumns';
+// import { columnSegregator } from 'src/utils/RenderColumns';
 // import { t } from "src/utils/lang/helper";
 
 // const KanbanBoard: React.FC<{ app: App, plugin: TaskBoard, boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
@@ -137,7 +137,7 @@ export default memo(KanbanBoard);
 // 			return boards[activeBoardIndex].columns
 // 				.filter((column) => column.active)
 // 				.map((column: ColumnData) =>
-// 					renderColumns(plugin, activeBoardIndex, column, allTasks)
+// 					columnSegregator(plugin, activeBoardIndex, column, allTasks)
 // 				);
 // 		}
 // 		return [];
@@ -171,7 +171,7 @@ export default memo(KanbanBoard);
 // 	// 	if (allTasks && boards[activeBoardIndex]) {
 // 	// 		const columns = boards[activeBoardIndex].columns;
 // 	// 		const arrangedTasks = columns.map((column: ColumnData) => {
-// 	// 			return renderColumns(plugin, activeBoardIndex, column, allTasks);
+// 	// 			return columnSegregator(plugin, activeBoardIndex, column, allTasks);
 // 	// 		});
 // 	// 		console.log("KanbanBoard.tsx : Data in setAllTasksArrangedPerColumn:", arrangedTasks);
 // 	// 		setAllTasksArrangedPerColumn(arrangedTasks);
@@ -228,7 +228,7 @@ export default memo(KanbanBoard);
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		} else {
 // 			if (
-// 				localStorage.getItem("taskBoardFileStack")?.at(0) !== undefined
+// 				localStorage.getItem(PENDING_SCAN_FILE_STACK)?.at(0) !== undefined
 // 			) {
 // 				await plugin.realTimeScanning.processAllUpdatedFiles();
 // 			}
