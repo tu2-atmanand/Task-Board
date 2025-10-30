@@ -223,11 +223,11 @@ export const columnSegregator = (
 				return result === null;
 			});
 		});
-	} else if (columnData.colType === "completed") {
+	} else if (columnData.colType === colType.completed) {
 		const boardConfigs = plugin.settings.data.boardConfigs;
 		const completedColumnIndex = boardConfigs[
 			activeBoard
-		]?.columns.findIndex((column) => column.colType === "completed");
+		]?.columns.findIndex((column) => column.colType === colType.completed);
 		const tasksLimit =
 			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
 
