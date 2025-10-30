@@ -1466,8 +1466,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .EditTaskModalHomeSaveBtn {
 	bottom: 0;
-	background-color: green !important;
-	color: white !important;
+	/* border: 2px solid #54f72275 !important;
+	color: #60ff2fbd !important; */
 	font-weight: 600;
 	width: 100%;
 	border: none;
@@ -1476,6 +1476,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .EditTaskModalHomeSaveBtn:hover {
 	background-color: green;
+	color: white !important;
 }
 
 .EditTaskModalHomeToggleBtn {
@@ -1748,13 +1749,14 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .boardConfigModalSidebarSaveBtn {
 	width: 100%;
-	background-color: var(--color-green) !important;
-	color: white !important;
+	/* border: 2px solid #54f72275 !important;
+	color: #60ff2fbd !important; */
 	cursor: pointer;
 }
 
 .boardConfigModalSidebarSaveBtn:hover {
-	background-color: var(--color-accent) !important
+	background-color: green;
+	color: white !important;
 }
 
 .boardConfigModalMainContent {
