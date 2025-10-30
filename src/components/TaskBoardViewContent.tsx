@@ -114,7 +114,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// Create a copy of allTasks with filtered pending tasks
 			const filteredAllTasks = {
 				...allTasks,
-				Pending: boardFilterer(allTasks.Pending, boardFilter)
+				Pending: boardFilterer(allTasks.Pending, boardFilter),
+				Completed: boardFilterer(allTasks.Completed, boardFilter),
 			};
 			plugin.settings.data.boardConfigs[activeBoardIndex].taskCount = {
 				pending: filteredAllTasks.Pending.length,
