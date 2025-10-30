@@ -142,7 +142,7 @@ const en: Lang = {
 	"automation-section-description": "This section contains the settings to automate certain tasks for an efficient workflow, so you can spend more time on your project than tasks management.",
 	"note": "Note",
 	"format-section-description": "This section contains the settings to adjust the formats you use for creating tasks.",
-	"none": "NONE",
+	"none": "none",
 	"highest": "Highest",
 	"high": "High",
 	"medium": "Medium",
@@ -310,8 +310,8 @@ const en: Lang = {
 	"delete-filter-configuration-question": "Are you sure you want to delete this filter configuration?",
 	"filter-configuration-deleted-successfully": "Filter configuration deleted successfully",
 	"match": "Match",
-	"any": "Any",
-	"all": "All",
+	"any": "any",
+	"all": "all",
 	"add-filter-group": "Add filter group",
 	"save-current-filter": "Save current filter",
 	"load-saved-filter": "Load saved filter",
@@ -440,7 +440,16 @@ const en: Lang = {
 	"connect-a-parent": "Connect a parent",
 	"kanban": "Kanban",
 	"map": "map",
-	"search-for-task": "Search for task"
+	"search-for-task": "Search for task",
+	"cancelled-date": "Cancelled date",
+	"reminder": "Reminder",
+	"dependencies": "Dependencies",
+	"has-tag": "has tag",
+	"does-not-have-tag": "doesn't have tag",
+	"contains-string": "contains string",
+	"does-not-contains-string": "doesn't contains string",
+	"are-empty": "are empty",
+	"are-not-empty": "are not empty"
 };
 
 export default en;
