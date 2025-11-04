@@ -719,7 +719,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 												}}
 												title={depTaskTitle.slice(6)}
 											>
-												{depTaskTitle.slice(6)}
+												{cleanTaskTitleLegacy(childTask)}
 											</span></div>
 									</div>
 								)
