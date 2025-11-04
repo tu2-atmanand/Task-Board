@@ -96,11 +96,11 @@ export class TaskFilterComponent extends Component {
 			// 	};
 			// }
 
-				// Initialize with default state
-				this.rootFilterState = {
-					rootCondition: "any",
-					filterGroups: [],
-				};
+			// Initialize with default state
+			this.rootFilterState = {
+				rootCondition: "any",
+				filterGroups: [],
+			};
 		}
 
 		// Render first to initialize DOM elements
@@ -753,8 +753,64 @@ export class TaskFilterComponent extends Component {
 
 		switch (property) {
 			case "content":
+				conditionOptions = [
+					{
+						value: "contains",
+						text: t("contains"),
+					},
+					{
+						value: "doesNotContain",
+						text: t("does-not-contain"),
+					},
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+					{
+						value: "startsWith",
+						text: t("starts-with"),
+					},
+					{
+						value: "endsWith",
+						text: t("ends-with"),
+					},
+				];
+				break;
 			case "filePath":
+				conditionOptions = [
+					{
+						value: "contains",
+						text: t("contains"),
+					},
+					{
+						value: "doesNotContain",
+						text: t("does-not-contain"),
+					},
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+					{
+						value: "startsWith",
+						text: t("starts-with"),
+					},
+					{
+						value: "endsWith",
+						text: t("ends-with"),
+					},
+				];
+				break;
 			case "status":
+				conditionOptions = [
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+				];
+				break;
 			case "project":
 				conditionOptions = [
 					{
@@ -916,14 +972,6 @@ export class TaskFilterComponent extends Component {
 			case "tags":
 				conditionOptions = [
 					{
-						value: "hasTag",
-						text: t("has-tag"),
-					},
-					{
-						value: "doesNotHaveTag",
-						text: t("does-not-have-tag"),
-					},
-					{
 						value: "contains",
 						text: t("contains-string"),
 					},
@@ -938,18 +986,6 @@ export class TaskFilterComponent extends Component {
 					{
 						value: "isNotEmpty",
 						text: t("are-not-empty"),
-					},
-				];
-				break;
-			case "completed":
-				conditionOptions = [
-					{
-						value: "isTrue",
-						text: t("is-true"),
-					},
-					{
-						value: "isFalse",
-						text: t("is-false"),
 					},
 				];
 				break;
@@ -973,11 +1009,11 @@ export class TaskFilterComponent extends Component {
 					},
 					{
 						value: "contains",
-						text: t("contains-string"),
+						text: t("contains"),
 					},
 					{
 						value: "doesNotContain",
-						text: t("does-not-contains-string"),
+						text: t("does-not-contains"),
 					},
 				];
 		}
