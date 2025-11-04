@@ -93,7 +93,7 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 				taskValue !== null ||
 				taskValue !== undefined ||
 				taskValue !== "" ||
-				taskValue?.length() > 0
+				taskValue?.length > 0
 			);
 		case "isEmpty":
 		case "isNotSet":
@@ -101,7 +101,7 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 				taskValue === null ||
 				taskValue === undefined ||
 				taskValue === "" ||
-				taskValue?.length() === 0
+				taskValue?.length === 0
 			);
 		case "equals":
 		case "is":
@@ -119,11 +119,10 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 				return taskValue.some((item) =>
 					String(item)
 						.toLowerCase()
-						.includes(String(value).toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase())
 				);
 			}
 			return false;
-		case "notContains":
 		case "doesNotContain":
 			if (typeof taskValue === "string") {
 				return !taskValue
