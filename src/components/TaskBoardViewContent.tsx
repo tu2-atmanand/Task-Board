@@ -514,7 +514,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							/>
 						</div>
 						<span className="taskCountContainerTaskCount">
-							{filteredTasks?.Pending.length} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
+							{(filteredTasks ? filteredTasks?.Completed.length : 0)} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
 						</span>
 					</div>
 					{showSearchInput && (
@@ -628,7 +628,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 												/>
 											</div>
 											<span className="taskCountContainerProgressCount">
-												{board?.taskCount ? board?.taskCount.pending : 0} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
+												{(board?.taskCount ? board.taskCount.completed : 0)} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
 											</span>
 										</div>
 									</div>
