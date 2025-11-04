@@ -64,34 +64,43 @@ export class TaskFilterComponent extends Component {
 		if (this.initialFilterState) {
 			this.rootFilterState = this.initialFilterState;
 		} else {
-			// Otherwise, load from localStorage (for board filters)
-			const savedState = this.leafId
-				? this.app.loadLocalStorage(
-						`task-board-view-filter-${this.leafId}`
-				  )
-				: this.app.loadLocalStorage("task-board-view-filter");
+			/**
+			 * Otherwise, load from localStorage (for board filters)
+			 * This is a feature where, if there are no filters applied to the board or column, the last used filters will be auto-populated for ease of user.
+			 * @todo For now, will be disablig this feature. Will see about this in the future.
+			 */
+			// const savedState = this.leafId
+			// 	? this.app.loadLocalStorage(
+			// 			`task-board-view-filter-${this.leafId}`
+			// 	  )
+			// 	: this.app.loadLocalStorage("task-board-view-filter");
+			// console.log("savedState", savedState, this.leafId);
+			// if (
+			// 	savedState &&
+			// 	typeof (savedState as any).rootCondition === "string" &&
+			// 	Array.isArray((savedState as any).filterGroups)
+			// ) {
+			// 	// Basic validation passed
+			// 	this.rootFilterState = savedState as RootFilterState;
+			// } else {
+			// 	if (savedState) {
+			// 		// If it exists but failed validation
+			// 		console.warn(
+			// 			"Task Filter: Invalid data in local storage. Resetting to default state."
+			// 		);
+			// 	}
+			// 	// Initialize with default state
+			// 	this.rootFilterState = {
+			// 		rootCondition: "any",
+			// 		filterGroups: [],
+			// 	};
+			// }
 
-			console.log("savedState", savedState, this.leafId);
-			if (
-				savedState &&
-				typeof (savedState as any).rootCondition === "string" &&
-				Array.isArray((savedState as any).filterGroups)
-			) {
-				// Basic validation passed
-				this.rootFilterState = savedState as RootFilterState;
-			} else {
-				if (savedState) {
-					// If it exists but failed validation
-					console.warn(
-						"Task Filter: Invalid data in local storage. Resetting to default state."
-					);
-				}
 				// Initialize with default state
 				this.rootFilterState = {
 					rootCondition: "any",
 					filterGroups: [],
 				};
-			}
 		}
 
 		// Render first to initialize DOM elements
@@ -1277,22 +1286,26 @@ export class TaskFilterComponent extends Component {
 	private saveStateToLocalStorage(
 		triggerRealtimeUpdate: boolean = true
 	): void {
-		if (this.app) {
-			this.app.saveLocalStorage(
-				this.leafId
-					? `task-board-view-filter-${this.leafId}`
-					: "task-board-view-filter",
-				this.rootFilterState
-			);
-
-			if (triggerRealtimeUpdate) {
-				this.app.workspace.trigger(
-					"task-board:filter-changed",
-					this.rootFilterState,
-					this.leafId || undefined
-				);
-			}
-		}
+		/**
+		 * This feature is in disabled state, hence no need to store anything in localStorage.
+		 *
+		 * @todo See this if required sometime in future.
+		 */
+		// if (this.app) {
+		// 	this.app.saveLocalStorage(
+		// 		this.leafId
+		// 			? `task-board-view-filter-${this.leafId}`
+		// 			: "task-board-view-filter",
+		// 		this.rootFilterState
+		// 	);
+		// 	if (triggerRealtimeUpdate) {
+		// 		this.app.workspace.trigger(
+		// 			"task-board:filter-changed",
+		// 			this.rootFilterState,
+		// 			this.leafId || undefined
+		// 		);
+		// 	}
+		// }
 	}
 
 	// --- Filter Configuration Management ---
