@@ -221,7 +221,7 @@ const Column: React.FC<ColumnProps> = ({
 
 					}
 				} catch (error) {
-					bugReporter(plugin, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+					bugReporter(plugin, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
 				}
 			});
 		});
