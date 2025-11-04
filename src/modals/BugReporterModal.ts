@@ -29,8 +29,7 @@ export class BugReporterModal extends Modal {
 	async onOpen() {
 		const { contentEl } = this;
 
-		this.modalEl.setAttribute("data-type", "task-board-view");
-		contentEl.setAttribute("data-type", "task-board-view");
+		this.modalEl.setAttribute("modal-type", "task-board-bug-reporter-modal");
 
 		const modalContent = contentEl.createDiv({
 			cls: "taskBoardBugReporterModal",

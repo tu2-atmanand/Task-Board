@@ -20,6 +20,7 @@
 	z-index: 20;
 }
 
+.modal[modal-type="task-board-bug-reporter-modal"],
 .modal[modal-type="task-board-scan-vault-modal"] {
 	width: auto;
 	min-height: auto;
