@@ -16,8 +16,8 @@ export const getPriorityEmoji = (priority: number): string => {
 	return priorityEmojis[priority] || "";
 };
 
-// Priority Options
-export const priorityOptions = [
+// Priority Options - function to ensure translations are loaded
+export const getPriorityOptions = () => [
 	{ value: 0, text: t("none") },
 	{ value: 1, text: t("highest") + " : 🔺" },
 	{ value: 2, text: t("high") + " : ⏫" },
@@ -25,6 +25,9 @@ export const priorityOptions = [
 	{ value: 4, text: t("low") + " : 🔽" },
 	{ value: 5, text: t("lowest") + " : ⏬" },
 ];
+
+// Legacy export for backward compatibility
+export const priorityOptions = getPriorityOptions();
 
 // TODO : From the following values I am only going to display the ones that are selected by user in the tasks plugin settings.
 export const taskStatusesDropdown = [

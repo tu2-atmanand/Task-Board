@@ -26,7 +26,7 @@ import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPrevi
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
-import { taskItemEmpty, priorityOptions } from "src/interfaces/Mapping";
+import { getPriorityOptions, taskItemEmpty } from "src/interfaces/Mapping";
 
 export interface filterOptions {
 	value: string;
@@ -1279,11 +1279,10 @@ export const AddOrEditTaskRC: React.FC<{
 							</div>
 						)}
 
-						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
 							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => handlePriorityChange(parseInt(e.target.value))}>
-								{priorityOptions.map((option) => (
+								{getPriorityOptions().map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
 								))}
 							</select>
