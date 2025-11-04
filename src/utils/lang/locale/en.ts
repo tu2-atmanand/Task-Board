@@ -449,7 +449,9 @@ const en: Lang = {
 	"contains-string": "contains string",
 	"does-not-contains-string": "doesn't contains string",
 	"are-empty": "are empty",
-	"are-not-empty": "are not empty"
+	"are-not-empty": "are not empty",
+	"toggle-board-drawer": "Toggle board drawer",
+	"child-task": "Child task"
 };
 
 export default en;

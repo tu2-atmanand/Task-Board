@@ -408,8 +408,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
-										const column = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
-										if ((!activeBoardSettings?.showColumnTags) && column && column?.colType === colType.namedTag && tagName.replace('#', '') === column?.coltag?.replace('#', '')) {
+										const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
+										if (
+											(!activeBoardSettings?.showColumnTags) &&
+											columnData &&
+											columnData?.colType === colType.namedTag &&
+											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+										) {
 											return null;
 										}
 
@@ -708,15 +713,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								return (
 									<div key={`${task.id}-dep-${dependsOnId}`} className="taskItemChildTask">
 										<div className='taskItemChildTaskContent' onClick={(event) => handleOpenChildTaskModal(event, dependsOnId)}>
-											<span className='taskItemChildTaskSymbol' role="img" aria-label="blocked">{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
+											<span className='taskItemChildTaskSymbol' role="img" aria-label={t("child-task")}>{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
 											<span
 												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
-												style={{
-													whiteSpace: 'nowrap',
-													overflow: 'hidden',
-													textOverflow: 'ellipsis',
-													display: 'block',
-												}}
 												title={depTaskTitle.slice(6)}
 											>
 												{cleanTaskTitleLegacy(childTask)}
