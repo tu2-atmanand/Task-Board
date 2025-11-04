@@ -354,8 +354,8 @@ const MapView: React.FC<MapViewProps> = ({
 					if (idToTask.has(depId)) {
 						edges.push({
 							id: `${sourceId}->${depId}`,
-							source: sourceId,
-							target: depId,
+							source: depId,
+							target: sourceId,
 							type: mapViewSettings.edgeType ?? "default",
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
@@ -467,21 +467,21 @@ const MapView: React.FC<MapViewProps> = ({
 		const targetTask = allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId);
 		if (!targetTask) return;
 
-		const updatedSourceTask = {
-			...sourceTask,
-			dependsOn: Array.isArray(sourceTask.dependsOn) ? [...sourceTask.dependsOn] : []
+		const updatedTargetTask = {
+			...targetTask,
+			dependsOn: Array.isArray(targetTask.dependsOn) ? [...targetTask.dependsOn] : []
 		};
 
-		const targetLegacyId = targetTask.legacyId ? targetTask.legacyId : String(targetTask.id);
+		const sourceLegacyId = sourceTask.legacyId ? sourceTask.legacyId : String(sourceTask.id);
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
-		if (!updatedSourceTask.dependsOn.includes(targetLegacyId)) {
-			updatedSourceTask.dependsOn.push(targetLegacyId);
-			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedSourceTask.title, updatedSourceTask.dependsOn);
-			updatedSourceTask.title = updatedSourceTaskTitle;
+		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
+			updatedTargetTask.dependsOn.push(sourceLegacyId);
+			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+			updatedTargetTask.title = updatedSourceTaskTitle;
 
 			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-			updateTaskInFile(plugin, updatedSourceTask, sourceTask).then((newId) => {
-				plugin.realTimeScanning.processAllUpdatedFiles(updatedSourceTask.filePath);
+			updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
+				plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
 			});
 		}
 	}
