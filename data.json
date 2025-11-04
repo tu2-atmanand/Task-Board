@@ -71,8 +71,8 @@
           ]
         },
         "taskCount": {
-          "pending": 33,
-          "completed": 8
+          "pending": 28,
+          "completed": 4
         }
       },
       {
@@ -224,7 +224,7 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 54,
+          "pending": 41,
           "completed": 8
         }
       },
@@ -416,8 +416,8 @@
           ]
         },
         "taskCount": {
-          "pending": 33,
-          "completed": 8
+          "pending": 23,
+          "completed": 4
         }
       }
     ],
