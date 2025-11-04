@@ -1182,7 +1182,7 @@ export const sanitizeDependsOn = (
 // For handleCheckboxChange
 
 /**
- * Function to clean the task title by removing metadata and formatting.
+ * Function to clean the task title by removing metadata.
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The task item to clean.
  * @returns The cleaned task title without metadata.
@@ -1212,7 +1212,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	// If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
 	if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
-		return cleanTaskTitleLegacy(plugin, task);
+		return cleanTaskTitleLegacy(task);
 	}
 
 	// Hide only selected properties
@@ -1344,11 +1344,15 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	return cleanedTitle.trim();
 };
 
-// Legacy function for backward compatibility
-export const cleanTaskTitleLegacy = (
-	plugin: TaskBoard,
-	task: taskItem
-): string => {
+/**
+ * Function to clean the task title by removing metadata. This is legacy function for compatibility.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param task - The task item to clean.
+ * @returns The cleaned task title without metadata.
+ * 
+ * @todo Improve the performance of this function as its called at extermely high rate.
+ */
+export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	let cleanedTitle = task.title;
 
 	cleanedTitle = cleanedTitle
