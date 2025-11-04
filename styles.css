@@ -779,11 +779,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemBodyDescription-expanded {
 	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	margin-inline: -5px;
 }
 
 .taskItemBodyDescriptionRenderer {
 	padding: 2px;
-	border-radius: 4px;
 	background: var(--background-modifier-box-shadow);
 	margin: 0 !important;
 }
@@ -852,9 +852,17 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 4px;
 }
 
+.taskItemChildTaskSymbol {
+	opacity: 50% !important;
+}
+
 .taskItemChildTaskTitleText {
 	font-weight: 400;
 	max-width: calc(var(--task-board-column-width) - 70px);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
 }
 
 .taskItemChildTaskTitleText-completed {
@@ -929,6 +937,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-block: 2px;
 	color: var(--icon-color);
 	border-radius: var(--pill-radius);
+	opacity: 75%;
 }
 
 .taskItemFileNameSection {
@@ -3070,6 +3079,13 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 }
 
 /*--Checkbox Type Icons--*/
+/* Apply ITS font family to all checkbox icons */
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked p>input[type=checkbox]:checked::after {
+	font-family: "its";
+}
+
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=X]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X] p>input[type=checkbox]:checked::after {
@@ -3228,8 +3244,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=A] p>input[type=che
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=r]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r] p>input[type=checkbox]:checked::after {
-	content: "\ec22";
-	color: rgb(var(--chbx-r));
+	content: "\ec22" !important;
+	color: rgb(var(--chbx-r)) !important;
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=c]::after,
@@ -4164,7 +4180,8 @@ svg.react-flow__connectionline {
 	min-height: 8px;
 	/* width: calc(10px / var(--xy-zoom, 1), 8px) !important;
 	height: calc(10px / var(--xy-zoom, 1), 8px) !important; */
-	background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default));
+	/* background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default)); */
+	background-color: transparent;
 	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
 	border-radius: 100%;
 	opacity: 0;
@@ -5438,6 +5455,7 @@ svg.react-flow__connectionline {
 
 .boardSidebarCard--active {
 	border: 1px solid var(--text-accent) !important;
+	cursor: default;
 }
 
 .boardSidebarCardTitle {
