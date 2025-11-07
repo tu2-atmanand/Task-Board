@@ -1165,13 +1165,13 @@ export const AddOrEditTaskRC: React.FC<{
 							</div>
 
 							{/* Child Tasks */}
-							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks-depends-on")}</label>
+							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
 							<div className="EditTaskModalChildTasksContainer">
 								<input
 									type="text"
 									ref={childTaskInputRef}
 									className="EditTaskModalChildTaskInput"
-									placeholder={t("search-for-task")}
+									placeholder={t("child-tasks-section-description")}
 									value={''}
 									onChange={(e) => { e.preventDefault(); }}
 								/>
@@ -1193,6 +1193,13 @@ export const AddOrEditTaskRC: React.FC<{
 										</div>
 									))}
 								</div>
+							</div>
+
+
+							{/* Activity & Comments */}
+							<label className="EditTaskModalHomeFieldTitle">{t("activity-and-comments")}</label>
+							<div className="EditTaskModalActivityContainer">
+								{t("coming-soon")}
 							</div>
 						</div>
 

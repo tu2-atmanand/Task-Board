@@ -187,7 +187,8 @@ const en: Lang = {
 	"background-of-the-card": "Background of the card",
 	"liveEditor": "Live Editor",
 	"rawEditor": "Raw Editor",
-	"child-tasks-depends-on": "Child tasks (Depends on)",
+	"child-tasks": "Child tasks",
+	"child-tasks-section-description": "Connect the tasks which are blocking the current task.",
 	"task-board-bug-reporter": "Task Board bug reporter",
 	"report": "Report",
 	"ignore-this-bug": "Ignore this bug",
@@ -451,7 +452,9 @@ const en: Lang = {
 	"are-empty": "are empty",
 	"are-not-empty": "are not empty",
 	"toggle-board-drawer": "Toggle board drawer",
-	"child-task": "Child task"
+	"child-task": "Child task",
+	"activity-and-comments": "Activity & comments",
+	"coming-soon": "Coming soon..."
 };
 
 export default en;

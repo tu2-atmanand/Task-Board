@@ -1127,6 +1127,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
+	margin-block-end: 1.5rem;
 }
 
 .EditTaskModalChildTaskInput {
@@ -1139,7 +1140,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 0.5em;
 	overflow-y: auto;
 	margin-top: 0.5em;
-	margin-bottom: 1rem;
 	padding-right: 5px;
 }
 
@@ -1226,6 +1226,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .EditTaskModalChildTasksListItemDeleteBtn {
 	color: var(--background-modifier-error) !important;
+}
+
+.EditTaskModalActivityContainer {
+	opacity: 0.4;
 }
 
 .EditTaskModalsubTaskItem {
