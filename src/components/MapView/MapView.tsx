@@ -37,6 +37,7 @@ import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollActio
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
 import { PanelLeftOpenIcon, Wand } from 'lucide-react';
+import { TasksImporterPanel } from './TasksImporterPanel';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -97,6 +98,9 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Track when board changes to force node recalculation
 	const [boardChangeKey, setBoardChangeKey] = useState(0);
+
+	// Task importer panel state
+	const [isImporterPanelVisible, setIsImporterPanelVisible] = useState(false);
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
@@ -681,7 +685,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// }
 
 	const toggleTasksImporterPanel = () => {
-		console.log("This will open a side panel on the left side, where the tasks will be listed in column, rendered as TaskItem component and user can select them to import it inside the board. That is basically assign them a ID, which will trigger them to automatically appear on the board. Also provide a search menu within this panel on top, so user can search for the task easily. Also provide a nice animation while toggling this panel.")
+		setIsImporterPanelVisible(prev => !prev);
 	}
 
 
@@ -804,6 +808,14 @@ const MapView: React.FC<MapViewProps> = ({
 
 							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />
 						</ReactFlow>
+
+						<TasksImporterPanel
+							plugin={plugin}
+							allTasksArranged={allTasksArranged}
+							activeBoardSettings={activeBoardSettings}
+							isVisible={isImporterPanelVisible}
+							onClose={() => setIsImporterPanelVisible(false)}
+						/>
 					</div>
 				</ReactFlowProvider>
 			</div>

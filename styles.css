@@ -5742,3 +5742,170 @@ svg.react-flow__connectionline {
 	opacity: 0 !important;
 	transition: opacity 0.2s ease;
 }
+
+/* Tasks Importer Panel Styles */
+.tasksImporterPanelOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1001;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	animation: fadeIn 0.2s ease-out;
+}
+
+.tasksImporterPanel {
+	background: var(--background-primary);
+	width: 320px;
+	max-width: 90vw;
+	height: 100vh;
+	border-right: 1px solid var(--background-modifier-border);
+	box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
+	display: flex;
+	flex-direction: column;
+	transform: translateX(-100%);
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tasksImporterPanel--visible {
+	transform: translateX(0);
+}
+
+.tasksImporterPanelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+}
+
+.tasksImporterPanelTitle {
+	margin: 0;
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelCloseBtn {
+	background: transparent;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 0.25rem;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.tasksImporterPanelCloseBtn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelSearchContainer {
+	position: relative;
+	padding: 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.tasksImporterPanelSearchIcon {
+	position: absolute;
+	left: 1.5rem;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--text-muted);
+	pointer-events: none;
+}
+
+.tasksImporterPanelSearchInput {
+	width: 100%;
+	padding: 0.5rem 2rem 0.5rem 2.5rem;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 0.9rem;
+	transition: border-color 0.2s;
+}
+
+.tasksImporterPanelSearchInput:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+}
+
+.tasksImporterPanelSearchInput::placeholder {
+	color: var(--text-muted);
+}
+
+.tasksImporterPanelSearchClear {
+	position: absolute;
+	right: 1.5rem;
+	top: 50%;
+	transform: translateY(-50%);
+	background: transparent;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 0.25rem;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.tasksImporterPanelSearchClear:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelContent {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.tasksImporterPanelTaskList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.5rem;
+}
+
+.tasksImporterPanelTaskItemWrapper {
+	cursor: pointer;
+	border-radius: 6px;
+	transition: background-color 0.2s, transform 0.1s;
+	padding: 0.25rem;
+}
+
+.tasksImporterPanelTaskItemWrapper:hover {
+	background: var(--background-modifier-hover);
+	transform: translateX(4px);
+}
+
+.tasksImporterPanelTaskItemWrapper:active {
+	transform: translateX(2px);
+}
+
+.tasksImporterPanelEmptyState {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3rem 2rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.tasksImporterPanelEmptyState p {
+	margin: 0;
+}
+
