@@ -279,7 +279,7 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": true
+            "minimized": false
           },
           {
             "colType": "namedTag",
@@ -351,7 +351,7 @@
             "id": 3193261849,
             "index": 7,
             "colType": "completed",
-            "active": false,
+            "active": true,
             "collapsed": false,
             "name": "Completed",
             "limit": 20
@@ -880,9 +880,9 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 0,
+        "boardIndex": 2,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 3
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",
@@ -1001,7 +1001,7 @@
         "scrollAction": "pan",
         "showMinimap": true,
         "renderVisibleNodes": false,
-        "edgeType": "smoothstep"
+        "edgeType": "default"
       }
     }
   }
