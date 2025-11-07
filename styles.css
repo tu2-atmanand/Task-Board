@@ -4272,6 +4272,10 @@ svg.react-flow__connectionline {
 	pointer-events: none !important;
 }
 
+.taskBoardMapViewControlsBtnContainer {
+	margin-top: 1rem;
+}
+
 .react-flow__edgeupdater {
 	cursor: move;
 	pointer-events: all;

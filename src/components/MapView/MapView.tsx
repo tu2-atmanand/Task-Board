@@ -17,7 +17,8 @@ import {
 	MarkerType,
 	BackgroundVariant,
 	SelectionMode,
-	NodeChange
+	NodeChange,
+	ControlButton
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -35,6 +36,7 @@ import { MapViewMinimap } from './MapViewMinimap';
 import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
+import { PanelLeftOpenIcon, Wand } from 'lucide-react';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -678,6 +680,10 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	node.selected = false;
 	// }
 
+	const toggleTasksImporterPanel = () => {
+		console.log("This will open a side panel on the left side, where the tasks will be listed in column, rendered as TaskItem component and user can select them to import it inside the board. That is basically assign them a ID, which will trigger them to automatically appear on the board. Also provide a search menu within this panel on top, so user can search for the task easily. Also provide a nice animation while toggling this panel.")
+	}
+
 
 	if (!storageLoaded || initialNodes.length === 0 || allTasksArranged.length === 0) {
 		return (
@@ -784,7 +790,13 @@ const MapView: React.FC<MapViewProps> = ({
 							}}
 							elevateEdgesOnSelect={true}
 						>
-							<Controls />
+							<Controls>
+								<div className='taskBoardMapViewControlsBtnContainer'>
+									<ControlButton onClick={() => toggleTasksImporterPanel()}>
+										<PanelLeftOpenIcon />
+									</ControlButton>
+								</div>
+							</Controls>
 
 							{mapViewSettings.showMinimap && (
 								<MapViewMinimap tagColors={tagColors} />
