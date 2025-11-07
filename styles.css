@@ -4051,17 +4051,19 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 }
 
 .react-flow__edge-path {
-	stroke: var(--xy-edge-stroke, var(--xy-edge-stroke-default));
-	/* stroke-width: calc(var(--xy-edge-stroke-width, var(--xy-edge-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
-	stroke-width: calc(1.5px * var(--task-board-map-zoom));
-	fill: none;
-}
-
-.react-flow__connection-path {
-	stroke: var(--xy-connectionline-stroke, var(--xy-connectionline-stroke-default));
+	stroke: rgb(var(--canvas-color));
 	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
 	stroke-width: calc(1.5px * var(--task-board-map-zoom));
 	fill: none;
+	transition: stroke-width 100ms ease-out;
+}
+
+.react-flow__connection-path {
+	stroke: rgb(var(--canvas-color));
+	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
+	stroke-width: calc(1.5px * var(--task-board-map-zoom));
+	fill: none;
+	transition: stroke-width 100ms ease-out;
 }
 
 .react-flow .react-flow__edges {
@@ -4184,7 +4186,7 @@ svg.react-flow__connectionline {
 	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
 	/* background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default)); */
 	background-color: transparent;
-	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
+	/* border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default)); */
 	border-radius: 100%;
 	opacity: 0;
 	/* transform: scale(calc(1 / var(--task-board-map-zoom, 1))); */
