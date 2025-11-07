@@ -8,6 +8,7 @@ import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { applyIdToTaskInNote } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
+import { eventEmitter } from 'src/services/EventEmitter';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
@@ -54,6 +55,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 				setImportedTaskIds(prev => new Set(prev).add(task.id));
 				// Trigger re-scan to update the map view
 				await plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+				// Emit event to refresh the board
+				eventEmitter.emit('REFRESH_BOARD');
 			}
 		} catch (error) {
 			console.error('Error importing task:', error);
@@ -67,6 +70,22 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 			setSearchQuery('');
 		}
 	}, [isVisible]);
+
+	// Handle escape key to close panel
+	useEffect(() => {
+		if (!isVisible) return;
+
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				onClose();
+			}
+		};
+
+		document.addEventListener('keydown', handleEscape);
+		return () => {
+			document.removeEventListener('keydown', handleEscape);
+		};
+	}, [isVisible, onClose]);
 
 	if (!isVisible) return null;
 
