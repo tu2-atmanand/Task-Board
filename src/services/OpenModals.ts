@@ -412,17 +412,19 @@ export const bugReporter = (
 
 export const openDiffContentCompareModal = (
 	plugin: TaskBoard,
-	oldContent: string,
-	newContent: string,
+	cachedTaskContent: string,
+	EditedTaskContent: string,
+	taskContentFromFile: string,
 	onSelect: (which: "old" | "new") => void
 ) => {
 	const contentMismatchNotice = new Notice(
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
+				el.createEl("h5", {
+					text: t("task-board") + " " + t("safe-guard"),
+				});
 				el.createEl("p", {
-					text: `${t("safe-guard")} : ${t(
-						"content-mismatch-notice-message"
-					)}`,
+					text: t("content-mismatch-notice-message"),
 				});
 				el.createEl("button", {
 					text: t("show-conflicts"),
@@ -430,8 +432,9 @@ export const openDiffContentCompareModal = (
 					onclick: () => {
 						const modal = new DiffContentCompareModal(
 							plugin,
-							oldContent,
-							newContent,
+							cachedTaskContent,
+							EditedTaskContent,
+							taskContentFromFile,
 							onSelect
 						);
 						modal.open();

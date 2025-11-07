@@ -939,10 +939,12 @@ export const replaceOldTaskWithNewTask = async (
 			// );
 			bugReporter(
 				plugin,
-				`Task board couldnt able to find the task which you are trying to edit at the line : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option.\n\nThis is a normal bug hence developer attention is not required. Just scan the file again. But if the issue persists, please report it.`,
+				`Task board couldnt able to find the task which you are trying to edit inside the file ${oldTask.filePath} at the line number : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.\n\nThis was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.`,
 				`\n\nOldTask location :${JSON.stringify(
 					oldTask.taskLocation
-				)}\n\nAt present the line at line number ${
+				)}\n\nOldTask content inside task-board-cache :${
+					oldTask.title
+				}\n\nAt present the content inside file at line number ${
 					oldTask.taskLocation.startLine
 				} is: ${startLineText}`,
 				"TaskItemUtils.ts/replaceOldTaskWithNewTask"
@@ -1019,9 +1021,11 @@ export const replaceOldTaskWithNewTask = async (
 			openDiffContentCompareModal(
 				plugin,
 				oldTaskContent,
+				newTaskContent,
 				oldTaskContentFromFile,
 				async (userChoice) => {
-					if (userChoice === "new") {
+					console.log("User choice :", userChoice);
+					if (userChoice === "old") {
 						const before = linesBefore.join("\n");
 						const after = lines
 							.slice(endLine - 1)

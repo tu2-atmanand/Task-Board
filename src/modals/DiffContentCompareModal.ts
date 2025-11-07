@@ -6,19 +6,22 @@ import { App, Modal, ButtonComponent } from "obsidian";
 export type DiffSelection = "old" | "new";
 
 export class DiffContentCompareModal extends Modal {
-	oldContent: string;
-	newContent: string;
+	cachedTaskContent: string;
+	EditedTaskContent: string;
+	taskContentFromFile: string;
 	onSelect: (which: DiffSelection) => void;
 
 	constructor(
 		plugin: TaskBoard,
-		oldContent: string,
-		newContent: string,
+		cachedTaskContent: string,
+		EditedTaskContent: string,
+		taskContentFromFile: string,
 		onSelect: (sel: DiffSelection) => void
 	) {
 		super(plugin.app);
-		this.oldContent = oldContent;
-		this.newContent = newContent;
+		this.cachedTaskContent = cachedTaskContent;
+		this.EditedTaskContent = EditedTaskContent;
+		this.taskContentFromFile = taskContentFromFile;
 		this.onSelect = onSelect;
 	}
 
@@ -36,24 +39,44 @@ export class DiffContentCompareModal extends Modal {
 
 		contentEl.createEl("h2", { text: "Content mismatch detected" });
 		contentEl.createEl("p", {
-			text: "Looks like the task content has changed. Choose which version to save:",
+			text: "Looks like the task content in your file is a little different from the content you just edited through Task Board. Choose which version of content you would like to keep:",
 		});
 
 		const container = contentEl.createDiv({
 			cls: "taskboard-diff-content-compare-modal-container",
 		});
 
+		const rightDiv = container.createDiv({
+			cls: "taskboard-diff-content-compare-modal-side",
+		});
+		rightDiv.createEl("h3", { text: "Current content in your note" });
+		const newContentDiv = rightDiv.createDiv({
+			cls: "taskboard-diff-content-compare-modal-content",
+		});
+		newContentDiv.innerHTML = this.getHighlightedDiff(
+			this.cachedTaskContent,
+			this.taskContentFromFile,
+			"left"
+		);
+		new ButtonComponent(rightDiv)
+			.setButtonText("Keep this as it is")
+			.setClass("taskboard-diff-content-compare-modal-new-content-button")
+			.onClick(() => {
+				this.onSelect("new");
+				this.close();
+			});
+
 		const leftDiv = container.createDiv({
 			cls: "taskboard-diff-content-compare-modal-side",
 		});
-		leftDiv.createEl("h3", { text: "Content from task-board memory" });
+		leftDiv.createEl("h3", { text: "Content you just edited" });
 		const oldContentDiv = leftDiv.createDiv({
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
 		oldContentDiv.innerHTML = this.getHighlightedDiff(
-			this.oldContent,
-			this.newContent,
-			"left"
+			this.taskContentFromFile,
+			this.EditedTaskContent,
+			"right"
 		);
 		new ButtonComponent(leftDiv)
 			.setButtonText("Use this")
@@ -63,38 +86,21 @@ export class DiffContentCompareModal extends Modal {
 				this.close();
 			});
 
-		const rightDiv = container.createDiv({
-			cls: "taskboard-diff-content-compare-modal-side",
-		});
-		rightDiv.createEl("h3", { text: "Current content from the note" });
-		const newContentDiv = rightDiv.createDiv({
-			cls: "taskboard-diff-content-compare-modal-content",
-		});
-		newContentDiv.innerHTML = this.getHighlightedDiff(
-			this.oldContent,
-			this.newContent,
-			"right"
-		);
-		new ButtonComponent(rightDiv)
-			.setButtonText("Use this")
-			.setClass("taskboard-diff-content-compare-modal-new-content-button")
-			.onClick(() => {
-				this.onSelect("new");
-				this.close();
-			});
-
 		const infoDiv = contentEl.createDiv({
 			cls: "taskboard-diff-content-compare-modal-info",
 		});
 		infoDiv.createEl("ul", {}, (ul) => {
 			ul.createEl("li", {
-				text: "Red highlighted content indicates, this line or words has been changed by the content shown in the Green highlighted content on right-side.",
+				text: "Red highlighted content indicates the characters which are different by comparing the task-board-cache content and the current content in your note.",
 			});
 			ul.createEl("li", {
-				text: "Select the version of content you want Task Board to use, to update it as per your new action.",
+				text: "Green highlighted content indicates the characters which are different by comparing the content you just now edited and the current content in your note.",
 			});
 			ul.createEl("li", {
-				text: "If the content shown in right-side is completely different than the content you are trying to edit. This probably means, that Task Board couldnt able to find the task you are looking for inside the current file at stored line. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below or close this modal, to avoid any data updation. And manually scan the file or update the task.",
+				text: "Select the version of content you want Task Board to write in your note.",
+			});
+			ul.createEl("li", {
+				text: "If the content shown on left-side is completely different from the content of the task you just edited. This probably means, that Task Board couldnt able to find the task you are looking for inside the current file at stored line. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below or close this modal, to avoid updating any data. And manually scan the file or update the task.",
 			});
 		});
 
@@ -131,6 +137,8 @@ export class DiffContentCompareModal extends Modal {
 			const oldLine = oldLines[i] || "";
 			const newLine = newLines[i] || "";
 
+			console.log("oldLine :", oldLine, "\nNewLine :", newLine);
+
 			if (oldLine === newLine) {
 				lines.push(
 					`<div>${this.escapeHtml(
@@ -143,9 +151,20 @@ export class DiffContentCompareModal extends Modal {
 				const maxChars = Math.max(charsOld.length, charsNew.length);
 				const highlightedChars: string[] = [];
 
+				console.log(
+					"charsOld :",
+					charsOld,
+					"\ncharsOld lenght : ",
+					charsOld.length,
+					"\ncharsNew :",
+					charsNew,
+					"\ncharsNew length :",
+					charsNew.length
+				);
+
 				for (let j = 0; j < maxChars; j++) {
-					const charOld = charsOld[j] || "";
-					const charNew = charsNew[j] || "";
+					const charOld = charsOld[j] || " ";
+					const charNew = charsNew[j] || " ";
 
 					if (charOld === charNew) {
 						const char = this.escapeHtml(
@@ -156,7 +175,7 @@ export class DiffContentCompareModal extends Modal {
 						if (side === "left") {
 							highlightedChars.push(
 								`<span style="background-color:#ff5858c0;">${this.escapeHtml(
-									charOld
+									charNew
 								)}</span>`
 							);
 						} else {
@@ -194,7 +213,6 @@ export class DiffContentCompareModal extends Modal {
 			.replace(/'/g, "&#039;");
 	}
 }
-
 
 export function isTheContentDiffAreOnlySpaces(
 	oldContent: string,
