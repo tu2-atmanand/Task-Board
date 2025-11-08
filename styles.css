@@ -937,7 +937,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-block: 2px;
 	color: var(--icon-color);
 	border-radius: var(--pill-radius);
-	opacity: 75% !important;
+	opacity: 75%;
 }
 
 .taskItemFileNameSection {
@@ -1108,6 +1108,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-height: 100%;
 	overflow-y: auto;
 	padding-inline-end: 8px;
+}
+
+.markdown-source-view.mod-cm6 .cm-content>[contenteditable=false] {
+	max-width: 100% !important;
 }
 
 
