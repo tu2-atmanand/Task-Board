@@ -107,11 +107,10 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 				</div>
 
 				<div className="tasksImporterPanelSearchContainer">
-					<Search size={16} className="tasksImporterPanelSearchIcon" />
 					<input
 						type="text"
 						className="tasksImporterPanelSearchInput"
-						placeholder={t('search-tasks-to-import')}
+						placeholder={t('search-tasks')}
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 					/>

@@ -456,7 +456,7 @@ const en: Lang = {
 	"activity-and-comments": "Activity & comments",
 	"coming-soon": "Coming soon...",
 	"import-tasks-to-map": "Import tasks to map",
-	"search-tasks-to-import": "Search tasks to import...",
+	"search-tasks": "Search tasks...",
 	"clear-search": "Clear search",
 	"no-tasks-match-search": "No tasks match your search",
 	"all-tasks-have-ids": "All tasks already have IDs"

@@ -720,9 +720,11 @@ const MapView: React.FC<MapViewProps> = ({
 							const z = Number.isFinite(viewport.zoom) ? viewport.zoom : 1.5;
 							const clamped = Math.max(0.5, Math.min(2, z));
 							const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
-							const mapped = 1 - ratio * (2 - 1);
+							// Map so that zoom 0.5 -> 2 and zoom 2 -> 1
+							const mapped = 2 - ratio;
 							// Keep a compact string value suitable for CSS variable
-							return String(Number(mapped));
+							console.log("map zoom size :", mapped);
+							return String(mapped);
 						})()
 					} as React.CSSProperties}>
 						<ReactFlow
@@ -796,8 +798,8 @@ const MapView: React.FC<MapViewProps> = ({
 						>
 							<Controls>
 								<div className='taskBoardMapViewControlsBtnContainer'>
-									<ControlButton onClick={() => toggleTasksImporterPanel()}>
-										<PanelLeftOpenIcon />
+									<ControlButton aria-label='Open left panel' onClick={() => toggleTasksImporterPanel()}>
+										<PanelLeftOpenIcon size={34} />
 									</ControlButton>
 								</div>
 							</Controls>
