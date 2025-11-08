@@ -6,7 +6,7 @@ import React, { use, useCallback, useEffect, useMemo, useRef, useState } from "r
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform, Menu } from "obsidian";
+import { App, debounce, Platform, Menu, addIcon } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
@@ -20,7 +20,7 @@ import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { viewTypeNames } from "src/interfaces/Enums";
-import { ScanVaultIcon } from "src/interfaces/Icons";
+import { funnelIconSVG, ScanVaultIcon } from "src/interfaces/Icons";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -61,6 +61,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	// 		}
 	// 	})
 	// );
+
+	const funnelIcon = addIcon("funnelIcon", funnelIconSVG);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -401,7 +403,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("open-board-filters-modal"));
-			item.setIcon("funnel");
+			item.setIcon("funnelIcon");
 			item.onClick(async (event) => {
 				if (event instanceof MouseEvent) {
 					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
