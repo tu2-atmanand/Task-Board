@@ -13,6 +13,7 @@ import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { getCurrentLocalTimeString } from "src/utils/TimeCalculations";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
+import { eventEmitter } from "src/services/EventEmitter";
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;
@@ -95,6 +96,9 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 				leaf.detach();
 			});
 			plugin.registerTaskBoardView();
+		} else {
+			// Emit REFRESH_BOARD event to update the board with newly scanned tasks
+			eventEmitter.emit("REFRESH_BOARD");
 		}
 	};
 

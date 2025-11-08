@@ -167,7 +167,8 @@ export function checkFolderFilters(
 					return false;
 				}
 			} else {
-				return parentFolder === filter;
+				// Check if parentFolder is exactly the filter OR is a subfolder of the filter
+				return parentFolder === filter || parentFolder.startsWith(filter + "/");
 			}
 		});
 	}

@@ -235,8 +235,8 @@ export async function importConfigurations(
 		//     }
 		// }
 
-		// plugin.settings = mergedSettings;
-		// await plugin.saveSettings();
+		plugin.settings = mergedSettings;
+		await plugin.saveSettings();
 		new Notice("Settings imported and merged successfully.");
 		return true;
 	} catch (err) {
