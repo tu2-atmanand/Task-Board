@@ -654,7 +654,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
 				{boards[activeBoardIndex] ? (
-					viewType === "kanban" ? (
+					viewType === viewTypeNames.kanban ? (
 						<KanbanBoard
 							app={app}
 							plugin={plugin}
@@ -664,7 +664,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							loading={loading}
 							freshInstall={freshInstall}
 						/>
-					) : viewType === "map" ? (
+					) : viewType === viewTypeNames.map ? (
 						loading ? (
 							<div className="loadingContainer" >
 								{freshInstall ? (
