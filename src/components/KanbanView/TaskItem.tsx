@@ -39,7 +39,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
 
-	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false
+	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
+	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 
 
 	let universalDate = getUniversalDateFromTask(task, plugin);
@@ -292,7 +293,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		if (condition) {
 			setTimeout(() => {
 				// Route to appropriate handler based on task type
-				if (isTaskNotePresentInTags(plugin, task.tags)) {
+				if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
 					handleTaskNoteStatusChange(plugin, task);
 				} else {
 					handleCheckboxChange(plugin, task);
@@ -306,7 +307,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const handleMainTaskDelete = () => {
-		handleDeleteTask(plugin, task, isTaskNotePresentInTags(plugin, task.tags));
+		handleDeleteTask(plugin, task, isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags));
 	}
 
 	// Function to handle the checkbox toggle inside the task body
@@ -326,7 +327,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 
-		if (!isTaskNotePresentInTags(plugin, task.tags)) {
+		if (!isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
 			// onSubTasksChange(updatedTask); // Notify parent of the change
 			handleSubTasksChange(plugin, task, updatedTask);
 		} else {

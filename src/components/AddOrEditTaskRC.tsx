@@ -1016,7 +1016,7 @@ export const AddOrEditTaskRC: React.FC<{
 			case EditButtonMode.View:
 			case EditButtonMode.TasksPluginModal:
 			default:
-				const isTaskNotePresent = isTaskNotePresentInTags(plugin, childTask.tags);
+				const isTaskNotePresent = isTaskNotePresentInTags(plugin.settings.data.globalSettings.taskNoteIdentifierTag, childTask.tags);
 				openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
 				break;
 		}
