@@ -255,7 +255,13 @@ export const columnSegregator = (
 	}
 
 	// Apply column-specific filters if configured
-	if (columnData.filters) {
+	if (columnData?.filters && columnData.filters.filterGroups) {
+		console.log(
+			"columnData :",
+			columnData,
+			"tasksToDisplay :",
+			tasksToDisplay
+		);
 		tasksToDisplay = boardFilterer(tasksToDisplay, columnData.filters);
 	}
 
