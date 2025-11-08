@@ -22,6 +22,7 @@ import { jsonCacheData, noteItem, taskItem } from "src/interfaces/TaskItem";
 import {
 	extractTaskNoteProperties,
 	isTaskNotePresentInFrontmatter,
+	isTaskNotePresentInTags,
 } from "../utils/taskNote/TaskNoteUtils";
 
 import type TaskBoard from "main";
@@ -459,7 +460,7 @@ export default class vaultScanner {
 					this.tasksCache.Completed[fileNameWithPath],
 					oldCompletedFileCache
 				);
-				if (pendingCacheCompare && completedCacheCompare) {
+				if (pendingCacheCompare || completedCacheCompare) {
 					this.tasksDetectedOrUpdated = false;
 				} else {
 					// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
@@ -489,11 +490,30 @@ export default class vaultScanner {
 				}
 
 				// Cleanup the file-object if it doesnt contain any taskItem.
-				if (this.tasksCache.Pending[fileNameWithPath]?.length === 0) {
+				if (
+					this.tasksCache.Pending[fileNameWithPath]?.length === 0 ||
+					// This second condition is required in the case when user simply removes the taskNoteIdentifierTag from the frontmatter of the note, so its not longer a task-note now and also if the note doesnt have any tasks in its content, then this task-note cache should be removed.
+					(oldPendingFileCache.length === 1 &&
+						!isTaskNotePresentInTags(
+							this.plugin.settings.data.globalSettings
+								.taskNoteIdentifierTag,
+							oldPendingFileCache[0].tags
+						))
+				) {
 					delete this.tasksCache.Pending[fileNameWithPath];
+					this.tasksDetectedOrUpdated = true;
 				}
-				if (this.tasksCache.Completed[fileNameWithPath]?.length === 0) {
+				if (
+					this.tasksCache.Completed[fileNameWithPath]?.length === 0 ||
+					(oldCompletedFileCache.length === 1 &&
+						!isTaskNotePresentInTags(
+							this.plugin.settings.data.globalSettings
+								.taskNoteIdentifierTag,
+							oldCompletedFileCache[0].tags
+						))
+				) {
 					delete this.tasksCache.Completed[fileNameWithPath];
+					this.tasksDetectedOrUpdated = true;
 				}
 
 				return "true";
