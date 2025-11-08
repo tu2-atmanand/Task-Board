@@ -937,7 +937,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-block: 2px;
 	color: var(--icon-color);
 	border-radius: var(--pill-radius);
-	opacity: 75%;
+	opacity: 75% !important;
 }
 
 .taskItemFileNameSection {

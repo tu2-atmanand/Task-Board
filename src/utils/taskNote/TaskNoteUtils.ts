@@ -18,7 +18,7 @@ import { bugReporter } from "src/services/OpenModals";
  * @returns boolean - True if the note contains TASK_NOTE_IDENTIFIER_TAG tag
  */
 export function isTaskNotePresentInFrontmatter(
-	plugin: TaskBoard,
+	taskNoteIdentifierTag: string,
 	frontmatter: Partial<customFrontmatterCache> | undefined
 ): boolean {
 	if (!frontmatter || !frontmatter.tags) {
@@ -34,7 +34,7 @@ export function isTaskNotePresentInFrontmatter(
 	}
 
 	// Check for TASK_NOTE_IDENTIFIER_TAG tag (with or without #)
-	return isTaskNotePresentInTags(plugin, tags);
+	return isTaskNotePresentInTags(taskNoteIdentifierTag, tags);
 }
 
 /**
@@ -43,15 +43,11 @@ export function isTaskNotePresentInFrontmatter(
  * @returns boolean - True if the note contains #TASK_NOTE_IDENTIFIER_TAG tag
  */
 export function isTaskNotePresentInTags(
-	plugin: TaskBoard,
+	taskNoteIdentifierTag: string,
 	tags: string[]
 ): boolean {
 	return tags
-		? tags.some((tag) =>
-				tag.includes(
-					plugin.settings.data.globalSettings.taskNoteIdentifierTag
-				)
-		  )
+		? tags.some((tag) => tag.includes(taskNoteIdentifierTag))
 		: false;
 }
 

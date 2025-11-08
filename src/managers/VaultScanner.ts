@@ -179,7 +179,11 @@ export default class vaultScanner {
 			// Task Note Detection: Check if this note is marked as a task note
 			if (
 				frontmatter &&
-				isTaskNotePresentInFrontmatter(this.plugin, frontmatter)
+				isTaskNotePresentInFrontmatter(
+					this.plugin.settings.data.globalSettings
+						.taskNoteIdentifierTag,
+					frontmatter
+				)
 			) {
 				// Extract properties from frontmatter
 				const taskNoteProperties = extractTaskNoteProperties(
