@@ -265,7 +265,7 @@
                 "priority": 1
               }
             ],
-            "minimized": true
+            "minimized": false
           },
           {
             "colType": "namedTag",
@@ -416,7 +416,7 @@
           ]
         },
         "taskCount": {
-          "pending": 23,
+          "pending": 25,
           "completed": 4
         }
       }
@@ -875,7 +875,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 255,
+      "uniqueIdCounter": 260,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
