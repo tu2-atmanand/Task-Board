@@ -736,7 +736,7 @@ export class TaskFilterComponent extends Component {
 				createdDate: t("created-date"),
 				startDate: t("start-date"),
 				scheduledDate: t("scheduled-date"),
-				dueDate: t("due-date"),
+				due: t("due-date"),
 				completedDate: t("completed-date"),
 				cancelledDate: t("cancelled-date"),
 				startTime: t("start-time"),
@@ -898,7 +898,7 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "createdDate":
-			case "dueDate":
+			case "due":
 			case "startDate":
 			case "scheduledDate":
 			case "completedDate":
