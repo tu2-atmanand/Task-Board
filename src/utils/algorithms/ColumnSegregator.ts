@@ -19,7 +19,9 @@ export const columnSegregator = (
 	activeBoard: number,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged
-) => {
+): taskItem[] => {
+	if (activeBoard < 0) return [];
+
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
 	const pendingTasks = allTasks.Pending;
@@ -198,7 +200,7 @@ export const columnSegregator = (
 	} else if (columnData.colType === colType.otherTags) {
 		// 1. Get the current board based on activeBoard index
 		const currentBoard = plugin.settings.data.boardConfigs.find(
-			(board) => board.index === activeBoard + 1
+			(board) => board.index === activeBoard
 		);
 
 		// 2. Collect all coltags from columns where colType is 'namedTag'
