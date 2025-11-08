@@ -1,3 +1,5 @@
+import { addIcon } from "obsidian";
+
 export const TaskBoardIcon = "brick-wall";
 
 export const RefreshIcon = "rotate-cw";
@@ -53,3 +55,8 @@ export const kofiSVGIcon = `
   </g>
 </svg>
 `;
+
+export const funnelIconSVG = `<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#000000" fill="none"><polygon points="8.5 8.46 55.5 8.46 55.38 15 36 34 36 55.54 26 50 26 34 8.5 15 8.5 8.46"/><line x1="8.5" y1="14.47" x2="55.5" y2="14.47"/></svg>`;
+
+export const funnelIcon = addIcon("funnel", funnelIconSVG);
