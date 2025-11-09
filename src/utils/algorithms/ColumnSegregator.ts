@@ -19,7 +19,9 @@ export const columnSegregator = (
 	activeBoard: number,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged
-) => {
+): taskItem[] => {
+	if (activeBoard < 0) return [];
+
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
 	const pendingTasks = allTasks.Pending;
@@ -198,7 +200,7 @@ export const columnSegregator = (
 	} else if (columnData.colType === colType.otherTags) {
 		// 1. Get the current board based on activeBoard index
 		const currentBoard = plugin.settings.data.boardConfigs.find(
-			(board) => board.index === activeBoard + 1
+			(board) => board.index === activeBoard
 		);
 
 		// 2. Collect all coltags from columns where colType is 'namedTag'
@@ -223,11 +225,11 @@ export const columnSegregator = (
 				return result === null;
 			});
 		});
-	} else if (columnData.colType === "completed") {
+	} else if (columnData.colType === colType.completed) {
 		const boardConfigs = plugin.settings.data.boardConfigs;
 		const completedColumnIndex = boardConfigs[
 			activeBoard
-		]?.columns.findIndex((column) => column.colType === "completed");
+		]?.columns.findIndex((column) => column.colType === colType.completed);
 		const tasksLimit =
 			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
 
@@ -253,7 +255,13 @@ export const columnSegregator = (
 	}
 
 	// Apply column-specific filters if configured
-	if (columnData.filters) {
+	if (columnData?.filters && columnData.filters.filterGroups) {
+		console.log(
+			"columnData :",
+			columnData,
+			"tasksToDisplay :",
+			tasksToDisplay
+		);
 		tasksToDisplay = boardFilterer(tasksToDisplay, columnData.filters);
 	}
 

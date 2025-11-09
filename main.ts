@@ -86,9 +86,6 @@ export default class TaskBoard extends Plugin {
 	async onload() {
 		console.log("TaskBoard : Loading plugin ...");
 
-		//Creates a Icon on Ribbon Bar
-		await this.getRibbonIcon();
-
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.runOnPluginUpdate();
@@ -102,6 +99,9 @@ export default class TaskBoard extends Plugin {
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
+			//Creates a Icon on Ribbon Bar (after i18n is initialized)
+			this.getRibbonIcon();
+
 			// Creating Few Events
 			this.registerEvents();
 
@@ -199,7 +199,7 @@ export default class TaskBoard extends Plugin {
 		// Create a ribbon icon to open the Kanban board view
 		this.ribbonIconEl = this.addRibbonIcon(
 			TaskBoardIcon,
-			t("open-task-board"),
+			t("open-task-board") ?? "Open task board",
 			() => {
 				this.activateView("icon");
 

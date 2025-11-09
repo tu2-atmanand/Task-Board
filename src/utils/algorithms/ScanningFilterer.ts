@@ -167,7 +167,8 @@ export function checkFolderFilters(
 					return false;
 				}
 			} else {
-				return parentFolder === filter;
+				// Check if parentFolder is exactly the filter OR is a subfolder of the filter
+				return parentFolder === filter || parentFolder.startsWith(filter + "/");
 			}
 		});
 	}
@@ -264,7 +265,7 @@ export function matchTagsWithWildcards(
 	// Convert settings tags to regex patterns
 	const patterns = settingsArr.map((tag) => {
 		// Escape regex special chars except *
-		let pattern = tag.replace("#", ""); // Remove leading #
+		let pattern = tag.toLowerCase().replace("#", ""); // Remove leading #
 
 		pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
 		// Replace * with .+ (at least one character)
@@ -280,7 +281,9 @@ export function matchTagsWithWildcards(
 
 	// Find matches
 	const matches = userArr.filter((userTag) =>
-		patterns.some((regex) => regex.test(userTag.replace("#", "")))
+		patterns.some((regex) =>
+			regex.test(userTag.toLowerCase().replace("#", ""))
+		)
 	);
 
 	return matches.length > 0 ? matches : null;

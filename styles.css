@@ -20,6 +20,7 @@
 	z-index: 20;
 }
 
+.modal[modal-type="task-board-bug-reporter-modal"],
 .modal[modal-type="task-board-scan-vault-modal"] {
 	width: auto;
 	min-height: auto;
@@ -774,15 +775,16 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	height: 0;
 	opacity: 0;
 	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	margin-inline: -5px;
 }
 
 .taskItemBodyDescription-expanded {
 	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	margin-inline: -5px;
 }
 
 .taskItemBodyDescriptionRenderer {
 	padding: 2px;
-	border-radius: 4px;
 	background: var(--background-modifier-box-shadow);
 	margin: 0 !important;
 }
@@ -851,9 +853,17 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 4px;
 }
 
+.taskItemChildTaskSymbol {
+	opacity: 50% !important;
+}
+
 .taskItemChildTaskTitleText {
 	font-weight: 400;
 	max-width: calc(var(--task-board-column-width) - 70px);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
 }
 
 .taskItemChildTaskTitleText-completed {
@@ -928,6 +938,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-block: 2px;
 	color: var(--icon-color);
 	border-radius: var(--pill-radius);
+	opacity: 75%;
 }
 
 .taskItemFileNameSection {
@@ -1100,6 +1111,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-inline-end: 8px;
 }
 
+.markdown-source-view.mod-cm6 .cm-content>[contenteditable=false] {
+	max-width: 100% !important;
+}
+
 
 .EditTaskModalHomeFieldTitle {
 	font-size: 0.8em;
@@ -1117,6 +1132,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
+	margin-block-end: 1.5rem;
 }
 
 .EditTaskModalChildTaskInput {
@@ -1129,7 +1145,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 0.5em;
 	overflow-y: auto;
 	margin-top: 0.5em;
-	margin-bottom: 1rem;
 	padding-right: 5px;
 }
 
@@ -1216,6 +1231,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .EditTaskModalChildTasksListItemDeleteBtn {
 	color: var(--background-modifier-error) !important;
+}
+
+.EditTaskModalActivityContainer {
+	opacity: 0.4;
 }
 
 .EditTaskModalsubTaskItem {
@@ -1466,8 +1485,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .EditTaskModalHomeSaveBtn {
 	bottom: 0;
-	background-color: green !important;
-	color: white !important;
+	/* border: 2px solid #54f72275 !important;
+	color: #60ff2fbd !important; */
 	font-weight: 600;
 	width: 100%;
 	border: none;
@@ -1476,6 +1495,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .EditTaskModalHomeSaveBtn:hover {
 	background-color: green;
+	color: white !important;
 }
 
 .EditTaskModalHomeToggleBtn {
@@ -1748,13 +1768,14 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .boardConfigModalSidebarSaveBtn {
 	width: 100%;
-	background-color: var(--color-green) !important;
-	color: white !important;
+	/* border: 2px solid #54f72275 !important;
+	color: #60ff2fbd !important; */
 	cursor: pointer;
 }
 
 .boardConfigModalSidebarSaveBtn:hover {
-	background-color: var(--color-accent) !important
+	background-color: green;
+	color: white !important;
 }
 
 .boardConfigModalMainContent {
@@ -3067,6 +3088,13 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 }
 
 /*--Checkbox Type Icons--*/
+/* Apply ITS font family to all checkbox icons */
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked p>input[type=checkbox]:checked::after {
+	font-family: "its";
+}
+
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=X]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X] p>input[type=checkbox]:checked::after {
@@ -3225,8 +3253,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=A] p>input[type=che
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=r]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r] p>input[type=checkbox]:checked::after {
-	content: "\ec22";
-	color: rgb(var(--chbx-r));
+	content: "\ec22" !important;
+	color: rgb(var(--chbx-r)) !important;
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=c]::after,
@@ -4032,15 +4060,19 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 }
 
 .react-flow__edge-path {
-	stroke: var(--xy-edge-stroke, var(--xy-edge-stroke-default));
-	stroke-width: calc(var(--xy-edge-stroke-width, var(--xy-edge-stroke-width-default)) / var(--xy-zoom, 1));
+	stroke: rgb(var(--canvas-color));
+	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
+	stroke-width: calc(1.5px * var(--task-board-map-zoom));
 	fill: none;
+	transition: stroke-width 100ms ease-out;
 }
 
 .react-flow__connection-path {
-	stroke: var(--xy-connectionline-stroke, var(--xy-connectionline-stroke-default));
-	stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--xy-zoom, 1));
+	stroke: rgb(var(--canvas-color));
+	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
+	stroke-width: calc(1.5px * var(--task-board-map-zoom));
 	fill: none;
+	transition: stroke-width 100ms ease-out;
 }
 
 .react-flow .react-flow__edges {
@@ -4159,13 +4191,14 @@ svg.react-flow__connectionline {
 	pointer-events: none;
 	min-width: 8px;
 	min-height: 8px;
-	/* width: calc(10px / var(--xy-zoom, 1), 8px) !important;
-	height: calc(10px / var(--xy-zoom, 1), 8px) !important; */
-	background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default));
-	border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
+	/* background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default)); */
+	background-color: transparent;
+	/* border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default)); */
 	border-radius: 100%;
 	opacity: 0;
-	transform: scale(calc(1 / var(--xy-zoom, 1)));
+	/* transform: scale(calc(1 / var(--task-board-map-zoom, 1))); */
 	transform-origin: center;
 	transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
@@ -4192,8 +4225,8 @@ svg.react-flow__connectionline {
 	min-width: 8px;
 	min-height: 8px;
 	border-radius: 15px;
-	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
-	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
 }
 
 .react-flow__handle-top {
@@ -4204,8 +4237,8 @@ svg.react-flow__connectionline {
 	min-width: 8px;
 	min-height: 8px;
 	border-radius: 15px;
-	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
-	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
 }
 
 .react-flow__handle-left {
@@ -4216,8 +4249,8 @@ svg.react-flow__connectionline {
 	min-width: 8px;
 	min-height: 8px;
 	border-radius: 15px;
-	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
-	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
 }
 
 .react-flow__handle-right {
@@ -4228,8 +4261,8 @@ svg.react-flow__connectionline {
 	min-width: 8px;
 	min-height: 8px;
 	border-radius: 15px;
-	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
-	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
 }
 
 .taskBoardMapViewContainerNodeHandleIconLeft,
@@ -4239,9 +4272,17 @@ svg.react-flow__connectionline {
 	min-width: 8px;
 	min-height: 8px;
 	border-radius: 15px;
-	width: calc(10px / var(--xy-zoom, 1), 8px) !important;
-	height: calc(10px / var(--xy-zoom, 1), 8px) !important;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
 	pointer-events: none !important;
+}
+
+.taskBoardMapViewControlsBtnContainer {
+	margin-top: 1rem;
+}
+
+.taskBoardMapViewControlsBtnContainer .react-flow__controls-button svg {
+	fill: none !important;
 }
 
 .react-flow__edgeupdater {
@@ -4388,19 +4429,25 @@ svg.react-flow__connectionline {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	height: 26px;
-	width: 26px;
-	padding: 4px;
-	border: none;
-	background: var(--xy-controls-button-background-color, var(--xy-controls-button-background-color-default));
-	border-bottom: 1px solid var(--xy-controls-button-border-color-props,
-			var(--xy-controls-button-border-color, var(--xy-controls-button-border-color-default)));
-	color: var(--xy-controls-button-color-props,
-			var(--xy-controls-button-color, var(--xy-controls-button-color-default)));
-	cursor: pointer;
+	height: 30px;
+	width: 30px;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	user-select: none;
+	/* height: auto; */
+	line-height: 1;
+	font-size: inherit;
+	cursor: var(--cursor);
+	padding: 0px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	--icon-size: var(--icon-s);
+	--icon-stroke: var(--icon-s-stroke-width);
+
+	border-radius: var(--radius-s);
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: var(--input-shadow);
 }
 
 .react-flow__controls-button svg {
@@ -4477,10 +4524,8 @@ svg.react-flow__connectionline {
 }
 
 .react-flow__controls-button:hover {
-	background: var(--xy-controls-button-background-color-hover-props,
-			var(--xy-controls-button-background-color-hover, var(--xy-controls-button-background-color-hover-default)));
-	color: var(--xy-controls-button-color-hover-props,
-			var(--xy-controls-button-color-hover, var(--xy-controls-button-color-hover-default)));
+	color: var(--text-normal);
+	background-color: var(--interactive-hover);
 }
 
 .react-flow__controls-button:disabled {
@@ -5435,6 +5480,7 @@ svg.react-flow__connectionline {
 
 .boardSidebarCard--active {
 	border: 1px solid var(--text-accent) !important;
+	cursor: default;
 }
 
 .boardSidebarCardTitle {
@@ -5708,4 +5754,161 @@ svg.react-flow__connectionline {
 	overflow: hidden !important;
 	opacity: 0 !important;
 	transition: opacity 0.2s ease;
+}
+
+/* Tasks Importer Panel Styles */
+.tasksImporterPanelOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1001;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	animation: fadeIn 0.2s ease-out;
+}
+
+.tasksImporterPanel {
+	background: var(--background-primary);
+	width: 320px;
+	max-width: 90vw;
+	height: 100vh;
+	border-right: 1px solid var(--background-modifier-border);
+	box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
+	display: flex;
+	flex-direction: column;
+	transform: translateX(-100%);
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tasksImporterPanel--visible {
+	transform: translateX(0);
+}
+
+.tasksImporterPanelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+}
+
+.tasksImporterPanelTitle {
+	margin: 0;
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelCloseBtn {
+	background: transparent;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 0.25rem;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.tasksImporterPanelCloseBtn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelSearchContainer {
+	position: relative;
+	padding: 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.tasksImporterPanelSearchInput {
+	width: 100%;
+	padding: 0.5rem 2rem 0.5rem 2.5rem;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 0.9rem;
+	transition: border-color 0.2s;
+}
+
+.tasksImporterPanelSearchInput:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+}
+
+.tasksImporterPanelSearchInput::placeholder {
+	color: var(--text-muted);
+}
+
+.tasksImporterPanelSearchClear {
+	position: absolute;
+	right: 1.5rem;
+	top: 50%;
+	transform: translateY(-50%);
+	background: transparent;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 0.25rem;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.tasksImporterPanelSearchClear:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelContent {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.tasksImporterPanelTaskList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.5rem;
+}
+
+.tasksImporterPanelTaskItemWrapper {
+	cursor: pointer;
+	border-radius: 6px;
+	transition: background-color 0.2s, transform 0.1s;
+	padding: 0.25rem;
+}
+
+.tasksImporterPanelTaskItemWrapper:hover {
+	background: var(--background-modifier-hover);
+	transform: translateX(4px);
+}
+
+.tasksImporterPanelTaskItemWrapper:active {
+	transform: translateX(2px);
+}
+
+.tasksImporterPanelEmptyState {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3rem 2rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.tasksImporterPanelEmptyState p {
+	margin: 0;
 }

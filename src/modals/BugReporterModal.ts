@@ -29,8 +29,10 @@ export class BugReporterModal extends Modal {
 	async onOpen() {
 		const { contentEl } = this;
 
-		this.modalEl.setAttribute("data-type", "task-board-view");
-		contentEl.setAttribute("data-type", "task-board-view");
+		this.modalEl.setAttribute(
+			"modal-type",
+			"task-board-bug-reporter-modal"
+		);
 
 		const modalContent = contentEl.createDiv({
 			cls: "taskBoardBugReporterModal",
@@ -146,7 +148,13 @@ export class BugReporterModal extends Modal {
 			)
 			.join("\n");
 
-		const finalContentForHTMLDom = `<h4>Developer message</h4><br/>${message}<br/><br/><h5>Error Message</h5><i>${sanitizedErrorContent}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfoTextHTMLDom}<br/><h5>Any additional information and screenshots</h5>`;
+		const finalContentForHTMLDom = `<h4>Developer message</h4><br/>${message.replaceAll(
+			"\n",
+			"<br/>"
+		)}<br/><br/><h5>Error Message</h5><i>${sanitizedErrorContent.replaceAll(
+			"\n",
+			"<br/>"
+		)}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfoTextHTMLDom}<br/><h5>Any additional information and screenshots</h5>`;
 
 		const finalContentForMarkdown = `# Bug Report\n\n## Developer message\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n### Any additional information and screenshots`;
 

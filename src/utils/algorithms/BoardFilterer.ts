@@ -85,23 +85,37 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 	// Get the property value from the task
 	const taskValue = getTaskPropertyValue(task, property);
 
+	// console.log(
+	// 	"task :",
+	// 	task,
+	// 	"\nfilter :",
+	// 	filter,
+	// 	"\ntaskValue :",
+	// 	taskValue
+	// );
+
 	// Evaluate based on condition
 	switch (condition) {
 		case "isSet":
 		case "isNotEmpty":
-			return (
-				taskValue !== null ||
-				taskValue !== undefined ||
-				taskValue !== "" ||
-				taskValue?.length() > 0
-			);
+			if (Array.isArray(taskValue && taskValue.length > 0)) return true;
+			else if (taskValue && taskValue !== "") return true;
+			else if (taskValue) return true;
+			else return false;
+
+		// return (
+		// 	taskValue !== "" ||
+		// 	taskValue !== null ||
+		// 	taskValue !== undefined ||
+		// 	taskValue?.length > 0
+		// );
 		case "isEmpty":
 		case "isNotSet":
 			return (
+				taskValue === "" ||
 				taskValue === null ||
 				taskValue === undefined ||
-				taskValue === "" ||
-				taskValue?.length() === 0
+				(Array.isArray(taskValue) && taskValue.length === 0)
 			);
 		case "equals":
 		case "is":
@@ -119,11 +133,10 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 				return taskValue.some((item) =>
 					String(item)
 						.toLowerCase()
-						.includes(String(value).toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase())
 				);
 			}
 			return false;
-		case "notContains":
 		case "doesNotContain":
 			if (typeof taskValue === "string") {
 				return !taskValue
@@ -237,8 +250,8 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "filePath":
 		case "path":
 			return task.filePath || "";
-		case "time":
-			return task.time || "";
+		case "startTime":
+			return task.time ? task.time.split("-")[0].trim() : "";
 		case "reminder":
 			return task?.reminder || "";
 		case "dependsOn":

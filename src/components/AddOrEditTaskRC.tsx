@@ -26,7 +26,7 @@ import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPrevi
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
-import { taskItemEmpty, priorityOptions } from "src/interfaces/Mapping";
+import { getPriorityOptions, taskItemEmpty } from "src/interfaces/Mapping";
 
 export interface filterOptions {
 	value: string;
@@ -120,7 +120,7 @@ export const AddOrEditTaskRC: React.FC<{
 	useEffect(() => {
 		if (isTaskNote) return;
 
-		const cleanedTaskTitle = cleanTaskTitleLegacy(plugin, modifiedTask);
+		const cleanedTaskTitle = cleanTaskTitleLegacy(modifiedTask);
 		// setFormattedTaskContent(cleanedTaskTitle);
 		if (titleComponentRef.current && cleanedTaskTitle !== "") {
 			// Clear previous content before rendering new markdown
@@ -1016,7 +1016,7 @@ export const AddOrEditTaskRC: React.FC<{
 			case EditButtonMode.View:
 			case EditButtonMode.TasksPluginModal:
 			default:
-				const isTaskNotePresent = isTaskNotePresentInTags(plugin, childTask.tags);
+				const isTaskNotePresent = isTaskNotePresentInTags(plugin.settings.data.globalSettings.taskNoteIdentifierTag, childTask.tags);
 				openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
 				break;
 		}
@@ -1165,13 +1165,13 @@ export const AddOrEditTaskRC: React.FC<{
 							</div>
 
 							{/* Child Tasks */}
-							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks-depends-on")}</label>
+							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
 							<div className="EditTaskModalChildTasksContainer">
 								<input
 									type="text"
 									ref={childTaskInputRef}
 									className="EditTaskModalChildTaskInput"
-									placeholder={t("search-for-task")}
+									placeholder={t("child-tasks-section-description")}
 									value={''}
 									onChange={(e) => { e.preventDefault(); }}
 								/>
@@ -1193,6 +1193,13 @@ export const AddOrEditTaskRC: React.FC<{
 										</div>
 									))}
 								</div>
+							</div>
+
+
+							{/* Activity & Comments */}
+							<label className="EditTaskModalHomeFieldTitle">{t("activity-and-comments")}</label>
+							<div className="EditTaskModalActivityContainer">
+								{t("coming-soon")}
 							</div>
 						</div>
 
@@ -1279,11 +1286,10 @@ export const AddOrEditTaskRC: React.FC<{
 							</div>
 						)}
 
-						{/* Task Priority */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
 							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => handlePriorityChange(parseInt(e.target.value))}>
-								{priorityOptions.map((option) => (
+								{getPriorityOptions().map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
 								))}
 							</select>

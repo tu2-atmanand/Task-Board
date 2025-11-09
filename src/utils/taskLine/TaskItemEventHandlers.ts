@@ -25,6 +25,7 @@ import {
 import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
 import { EditButtonMode } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
+import { eventEmitter } from "src/services/EventEmitter";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
@@ -164,7 +165,9 @@ export const handleDeleteTask = (
 		},
 		onArchive: () => {
 			if (isTaskNote) {
-				archiveTaskNote(plugin, task.filePath);
+				archiveTaskNote(plugin, task.filePath).then(() => {
+					eventEmitter.emit("REFRESH_COLUMN");
+				});
 			} else {
 				archiveTask(plugin, task);
 			}
@@ -178,16 +181,21 @@ export const handleEditTask = (
 	task: taskItem,
 	settingOption: string
 ) => {
+	const taskNoteIdentifierTag =
+		plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	switch (settingOption) {
 		case EditButtonMode.Modal:
-			if (isTaskNotePresentInTags(plugin, task.tags)) {
+			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
 				openEditTaskNoteModal(plugin, task);
 			} else {
 				openEditTaskModal(plugin, task);
 			}
 			break;
 		case EditButtonMode.View:
-			const isTaskNote = isTaskNotePresentInTags(plugin, task.tags);
+			const isTaskNote = isTaskNotePresentInTags(
+				taskNoteIdentifierTag,
+				task.tags
+			);
 			openEditTaskView(
 				plugin,
 				isTaskNote,
@@ -199,7 +207,7 @@ export const handleEditTask = (
 			);
 			break;
 		case EditButtonMode.TasksPluginModal:
-			if (isTaskNotePresentInTags(plugin, task.tags)) {
+			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
 				openEditTaskNoteModal(plugin, task);
 			} else {
 				openTasksPluginEditModal(plugin, task);

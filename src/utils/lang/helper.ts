@@ -73,6 +73,20 @@ export function t(key: string): string {
 		const transString = i18next.t(key, {
 			defaultValue: en?.[key] || `Missing translation for "${key}"`,
 		});
+
+		// // Ensure we always return a valid string
+		// if (
+		// 	typeof transString !== "string" ||
+		// 	transString === null ||
+		// 	transString === undefined
+		// ) {
+		// 	console.warn(
+		// 		`Translation for "${key}" returned invalid value:`,
+		// 		transString
+		// 	);
+		// 	return en?.[key] || `Missing translation for "${key}"`;
+		// }
+
 		return transString;
 	} catch {
 		return en?.[key] || `Missing translation for "${key}"`;

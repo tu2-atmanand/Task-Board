@@ -17,7 +17,8 @@ import {
 	MarkerType,
 	BackgroundVariant,
 	SelectionMode,
-	NodeChange
+	NodeChange,
+	ControlButton
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -35,6 +36,8 @@ import { MapViewMinimap } from './MapViewMinimap';
 import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
+import { PanelLeftOpenIcon, Wand } from 'lucide-react';
+import { TasksImporterPanel } from './TasksImporterPanel';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -95,6 +98,9 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Track when board changes to force node recalculation
 	const [boardChangeKey, setBoardChangeKey] = useState(0);
+
+	// Task importer panel state
+	const [isImporterPanelVisible, setIsImporterPanelVisible] = useState(false);
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
@@ -342,10 +348,22 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 
 		// Calculate marker size based on zoom level (inverse scaling to keep visual size consistent)
-		const baseMarkerSize = 40;
-		const zoomLevel = Number.isFinite(viewport.zoom) && viewport.zoom > 0 ? viewport.zoom : 1.5;
-		const scaledMarkerSize = baseMarkerSize / (zoomLevel > 1.2 ? 1 : (zoomLevel < 0.7 ? 1 : zoomLevel));
-		const safeMarkerSize = Number.isFinite(scaledMarkerSize) ? scaledMarkerSize : baseMarkerSize;
+		// const baseMarkerSize = 40;
+		// const zoomLevel = Number.isFinite(viewport.zoom) && viewport.zoom > 0 ? viewport.zoom : 1.5;
+		// const scaledMarkerSize = baseMarkerSize / (zoomLevel > 1.2 ? 1 : (zoomLevel < 0.7 ? 1 : zoomLevel));
+		// const safeMarkerSize = Number.isFinite(scaledMarkerSize) ? scaledMarkerSize : baseMarkerSize;
+
+		// const minZ = 0.5;
+		// const maxZ = 2;
+		// const cssMin = 1.2; // value when zoom is maxZ
+		// const cssMax = 1.5;   // value when zoom is minZ
+
+		const z = Number.isFinite(viewport.zoom) ? viewport.zoom : 1.5;
+		const clamped = Math.max(0.5, Math.min(2, z));
+		const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
+		const mapped = 1.5 - ratio * (1.5 - 1.2);
+		// Keep a compact string value suitable for CSS variable
+		const safeMarkerSize = 20 * mapped;
 
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
@@ -354,8 +372,8 @@ const MapView: React.FC<MapViewProps> = ({
 					if (idToTask.has(depId)) {
 						edges.push({
 							id: `${sourceId}->${depId}`,
-							source: sourceId,
-							target: depId,
+							source: depId,
+							target: sourceId,
 							type: mapViewSettings.edgeType ?? "default",
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
@@ -379,7 +397,7 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged, viewport.zoom]); // TODO : Why viewport.zoom is a dependency
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged]); // TODO : Why viewport.zoom is a dependency
 
 	const handleNodePositionChange = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
@@ -467,21 +485,21 @@ const MapView: React.FC<MapViewProps> = ({
 		const targetTask = allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId);
 		if (!targetTask) return;
 
-		const updatedSourceTask = {
-			...sourceTask,
-			dependsOn: Array.isArray(sourceTask.dependsOn) ? [...sourceTask.dependsOn] : []
+		const updatedTargetTask = {
+			...targetTask,
+			dependsOn: Array.isArray(targetTask.dependsOn) ? [...targetTask.dependsOn] : []
 		};
 
-		const targetLegacyId = targetTask.legacyId ? targetTask.legacyId : String(targetTask.id);
+		const sourceLegacyId = sourceTask.legacyId ? sourceTask.legacyId : String(sourceTask.id);
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
-		if (!updatedSourceTask.dependsOn.includes(targetLegacyId)) {
-			updatedSourceTask.dependsOn.push(targetLegacyId);
-			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedSourceTask.title, updatedSourceTask.dependsOn);
-			updatedSourceTask.title = updatedSourceTaskTitle;
+		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
+			updatedTargetTask.dependsOn.push(sourceLegacyId);
+			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+			updatedTargetTask.title = updatedSourceTaskTitle;
 
 			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-			updateTaskInFile(plugin, updatedSourceTask, sourceTask).then((newId) => {
-				plugin.realTimeScanning.processAllUpdatedFiles(updatedSourceTask.filePath);
+			updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
+				plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
 			});
 		}
 	}
@@ -666,6 +684,10 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	node.selected = false;
 	// }
 
+	const toggleTasksImporterPanel = () => {
+		setIsImporterPanelVisible(prev => !prev);
+	}
+
 
 	if (!storageLoaded || initialNodes.length === 0 || allTasksArranged.length === 0) {
 		return (
@@ -683,7 +705,28 @@ const MapView: React.FC<MapViewProps> = ({
 		<div className='mapViewWrapper'>
 			<div className="mapView">
 				<ReactFlowProvider>
-					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '85vh', '--xy-zoom': viewport.zoom } as React.CSSProperties}>
+					<div className="taskBoardMapViewContainer" style={{
+						width: '100%',
+						height: '85vh',
+						// Map viewport.zoom (0.5..2) inversely to CSS variable such that:
+						// zoom=2   -> 0.7
+						// zoom=0.5 -> 4
+						'--task-board-map-zoom': (() => {
+							// const minZ = 0.5;
+							// const maxZ = 2;
+							// const cssMin = 1; // value when zoom is maxZ
+							// const cssMax = 2;   // value when zoom is minZ
+
+							const z = Number.isFinite(viewport.zoom) ? viewport.zoom : 1.5;
+							const clamped = Math.max(0.5, Math.min(2, z));
+							const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
+							// Map so that zoom 0.5 -> 2 and zoom 2 -> 1
+							const mapped = 2 - ratio;
+							// Keep a compact string value suitable for CSS variable
+							console.log("map zoom size :", mapped);
+							return String(mapped);
+						})()
+					} as React.CSSProperties}>
 						<ReactFlow
 							// Data Initialization
 							proOptions={{ hideAttribution: true }}
@@ -753,7 +796,13 @@ const MapView: React.FC<MapViewProps> = ({
 							}}
 							elevateEdgesOnSelect={true}
 						>
-							<Controls />
+							<Controls>
+								<div className='taskBoardMapViewControlsBtnContainer'>
+									<ControlButton aria-label='Open left panel' onClick={() => toggleTasksImporterPanel()}>
+										<PanelLeftOpenIcon size={34} />
+									</ControlButton>
+								</div>
+							</Controls>
 
 							{mapViewSettings.showMinimap && (
 								<MapViewMinimap tagColors={tagColors} />
@@ -761,6 +810,14 @@ const MapView: React.FC<MapViewProps> = ({
 
 							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />
 						</ReactFlow>
+
+						<TasksImporterPanel
+							plugin={plugin}
+							allTasksArranged={allTasksArranged}
+							activeBoardSettings={activeBoardSettings}
+							isVisible={isImporterPanelVisible}
+							onClose={() => setIsImporterPanelVisible(false)}
+						/>
 					</div>
 				</ReactFlowProvider>
 			</div>

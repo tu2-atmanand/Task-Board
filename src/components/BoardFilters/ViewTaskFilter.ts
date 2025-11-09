@@ -64,34 +64,43 @@ export class TaskFilterComponent extends Component {
 		if (this.initialFilterState) {
 			this.rootFilterState = this.initialFilterState;
 		} else {
-			// Otherwise, load from localStorage (for board filters)
-			const savedState = this.leafId
-				? this.app.loadLocalStorage(
-						`task-board-view-filter-${this.leafId}`
-				  )
-				: this.app.loadLocalStorage("task-board-view-filter");
+			/**
+			 * Otherwise, load from localStorage (for board filters)
+			 * This is a feature where, if there are no filters applied to the board or column, the last used filters will be auto-populated for ease of user.
+			 * @todo For now, will be disablig this feature. Will see about this in the future.
+			 */
+			// const savedState = this.leafId
+			// 	? this.app.loadLocalStorage(
+			// 			`task-board-view-filter-${this.leafId}`
+			// 	  )
+			// 	: this.app.loadLocalStorage("task-board-view-filter");
+			// console.log("savedState", savedState, this.leafId);
+			// if (
+			// 	savedState &&
+			// 	typeof (savedState as any).rootCondition === "string" &&
+			// 	Array.isArray((savedState as any).filterGroups)
+			// ) {
+			// 	// Basic validation passed
+			// 	this.rootFilterState = savedState as RootFilterState;
+			// } else {
+			// 	if (savedState) {
+			// 		// If it exists but failed validation
+			// 		console.warn(
+			// 			"Task Filter: Invalid data in local storage. Resetting to default state."
+			// 		);
+			// 	}
+			// 	// Initialize with default state
+			// 	this.rootFilterState = {
+			// 		rootCondition: "any",
+			// 		filterGroups: [],
+			// 	};
+			// }
 
-			console.log("savedState", savedState, this.leafId);
-			if (
-				savedState &&
-				typeof (savedState as any).rootCondition === "string" &&
-				Array.isArray((savedState as any).filterGroups)
-			) {
-				// Basic validation passed
-				this.rootFilterState = savedState as RootFilterState;
-			} else {
-				if (savedState) {
-					// If it exists but failed validation
-					console.warn(
-						"Task Filter: Invalid data in local storage. Resetting to default state."
-					);
-				}
-				// Initialize with default state
-				this.rootFilterState = {
-					rootCondition: "any",
-					filterGroups: [],
-				};
-			}
+			// Initialize with default state
+			this.rootFilterState = {
+				rootCondition: "any",
+				filterGroups: [],
+			};
 		}
 
 		// Render first to initialize DOM elements
@@ -727,7 +736,7 @@ export class TaskFilterComponent extends Component {
 				createdDate: t("created-date"),
 				startDate: t("start-date"),
 				scheduledDate: t("scheduled-date"),
-				dueDate: t("due-date"),
+				due: t("due-date"),
 				completedDate: t("completed-date"),
 				cancelledDate: t("cancelled-date"),
 				startTime: t("start-time"),
@@ -744,8 +753,64 @@ export class TaskFilterComponent extends Component {
 
 		switch (property) {
 			case "content":
+				conditionOptions = [
+					{
+						value: "contains",
+						text: t("contains"),
+					},
+					{
+						value: "doesNotContain",
+						text: t("does-not-contain"),
+					},
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+					{
+						value: "startsWith",
+						text: t("starts-with"),
+					},
+					{
+						value: "endsWith",
+						text: t("ends-with"),
+					},
+				];
+				break;
 			case "filePath":
+				conditionOptions = [
+					{
+						value: "contains",
+						text: t("contains"),
+					},
+					{
+						value: "doesNotContain",
+						text: t("does-not-contain"),
+					},
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+					{
+						value: "startsWith",
+						text: t("starts-with"),
+					},
+					{
+						value: "endsWith",
+						text: t("ends-with"),
+					},
+				];
+				break;
 			case "status":
+				conditionOptions = [
+					{ value: "is", text: t("is") },
+					{
+						value: "isNot",
+						text: t("is-not"),
+					},
+				];
+				break;
 			case "project":
 				conditionOptions = [
 					{
@@ -833,7 +898,7 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "createdDate":
-			case "dueDate":
+			case "due":
 			case "startDate":
 			case "scheduledDate":
 			case "completedDate":
@@ -907,14 +972,6 @@ export class TaskFilterComponent extends Component {
 			case "tags":
 				conditionOptions = [
 					{
-						value: "hasTag",
-						text: t("has-tag"),
-					},
-					{
-						value: "doesNotHaveTag",
-						text: t("does-not-have-tag"),
-					},
-					{
 						value: "contains",
 						text: t("contains-string"),
 					},
@@ -929,18 +986,6 @@ export class TaskFilterComponent extends Component {
 					{
 						value: "isNotEmpty",
 						text: t("are-not-empty"),
-					},
-				];
-				break;
-			case "completed":
-				conditionOptions = [
-					{
-						value: "isTrue",
-						text: t("is-true"),
-					},
-					{
-						value: "isFalse",
-						text: t("is-false"),
 					},
 				];
 				break;
@@ -964,11 +1009,11 @@ export class TaskFilterComponent extends Component {
 					},
 					{
 						value: "contains",
-						text: t("contains-string"),
+						text: t("contains"),
 					},
 					{
 						value: "doesNotContain",
-						text: t("does-not-contains-string"),
+						text: t("does-not-contains"),
 					},
 				];
 		}
@@ -1277,22 +1322,26 @@ export class TaskFilterComponent extends Component {
 	private saveStateToLocalStorage(
 		triggerRealtimeUpdate: boolean = true
 	): void {
-		if (this.app) {
-			this.app.saveLocalStorage(
-				this.leafId
-					? `task-board-view-filter-${this.leafId}`
-					: "task-board-view-filter",
-				this.rootFilterState
-			);
-
-			if (triggerRealtimeUpdate) {
-				this.app.workspace.trigger(
-					"task-board:filter-changed",
-					this.rootFilterState,
-					this.leafId || undefined
-				);
-			}
-		}
+		/**
+		 * This feature is in disabled state, hence no need to store anything in localStorage.
+		 *
+		 * @todo See this if required sometime in future.
+		 */
+		// if (this.app) {
+		// 	this.app.saveLocalStorage(
+		// 		this.leafId
+		// 			? `task-board-view-filter-${this.leafId}`
+		// 			: "task-board-view-filter",
+		// 		this.rootFilterState
+		// 	);
+		// 	if (triggerRealtimeUpdate) {
+		// 		this.app.workspace.trigger(
+		// 			"task-board:filter-changed",
+		// 			this.rootFilterState,
+		// 			this.leafId || undefined
+		// 		);
+		// 	}
+		// }
 	}
 
 	// --- Filter Configuration Management ---

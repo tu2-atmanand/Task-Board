@@ -39,7 +39,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
 
-	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false
+	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
+	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 
 
 	let universalDate = getUniversalDateFromTask(task, plugin);
@@ -69,7 +70,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
 			if (titleElement && task.title !== "") {
-				let cleanedTitle = cleanTaskTitleLegacy(plugin, task);
+				let cleanedTitle = cleanTaskTitleLegacy(task);
 				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
 				if (searchQuery) {
 					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -292,7 +293,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		if (condition) {
 			setTimeout(() => {
 				// Route to appropriate handler based on task type
-				if (isTaskNotePresentInTags(plugin, task.tags)) {
+				if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
 					handleTaskNoteStatusChange(plugin, task);
 				} else {
 					handleCheckboxChange(plugin, task);
@@ -306,7 +307,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const handleMainTaskDelete = () => {
-		handleDeleteTask(plugin, task, isTaskNotePresentInTags(plugin, task.tags));
+		handleDeleteTask(plugin, task, isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags));
 	}
 
 	// Function to handle the checkbox toggle inside the task body
@@ -326,7 +327,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 
-		if (!isTaskNotePresentInTags(plugin, task.tags)) {
+		if (!isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
 			// onSubTasksChange(updatedTask); // Notify parent of the change
 			handleSubTasksChange(plugin, task, updatedTask);
 		} else {
@@ -408,8 +409,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
-										const column = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
-										if ((!activeBoardSettings?.showColumnTags) && column && column?.colType === colType.namedTag && tagName.replace('#', '') === column?.coltag?.replace('#', '')) {
+										const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
+										if (
+											(!activeBoardSettings?.showColumnTags) &&
+											columnData &&
+											columnData?.colType === colType.namedTag &&
+											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+										) {
 											return null;
 										}
 
@@ -708,18 +714,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 								return (
 									<div key={`${task.id}-dep-${dependsOnId}`} className="taskItemChildTask">
 										<div className='taskItemChildTaskContent' onClick={(event) => handleOpenChildTaskModal(event, dependsOnId)}>
-											<span className='taskItemChildTaskSymbol' role="img" aria-label="blocked">{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
+											<span className='taskItemChildTaskSymbol' role="img" aria-label={t("child-task")}>{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
 											<span
 												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
-												style={{
-													whiteSpace: 'nowrap',
-													overflow: 'hidden',
-													textOverflow: 'ellipsis',
-													display: 'block',
-												}}
 												title={depTaskTitle.slice(6)}
 											>
-												{depTaskTitle.slice(6)}
+												{cleanTaskTitleLegacy(childTask)}
 											</span></div>
 									</div>
 								)
