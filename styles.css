@@ -775,6 +775,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	height: 0;
 	opacity: 0;
 	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	margin-inline: -5px;
 }
 
 .taskItemBodyDescription-expanded {

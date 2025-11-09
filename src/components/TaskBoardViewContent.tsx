@@ -62,8 +62,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	// 	})
 	// );
 
-	const funnelIcon = addIcon("funnelIcon", funnelIconSVG);
-
 	useEffect(() => {
 		const handleResize = () => {
 			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];

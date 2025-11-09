@@ -25,6 +25,7 @@ import {
 import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
 import { EditButtonMode } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
+import { eventEmitter } from "src/services/EventEmitter";
 
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
@@ -164,7 +165,9 @@ export const handleDeleteTask = (
 		},
 		onArchive: () => {
 			if (isTaskNote) {
-				archiveTaskNote(plugin, task.filePath);
+				archiveTaskNote(plugin, task.filePath).then(() => {
+					eventEmitter.emit("REFRESH_COLUMN");
+				});
 			} else {
 				archiveTask(plugin, task);
 			}

@@ -345,7 +345,6 @@ export const archiveTask = async (
 			// );
 
 			// await deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
-			eventEmitter.emit("REFRESH_COLUMN");
 		} catch (error) {
 			bugReporter(
 				plugin,
@@ -361,7 +360,6 @@ export const archiveTask = async (
 			"Archived file path is not set in the plugin settings.",
 			"TaskItemUtils.ts/archiveTask"
 		);
-		throw "Archived file path is not set in the plugin settings.";
 	}
 };
 
