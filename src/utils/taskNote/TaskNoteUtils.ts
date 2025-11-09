@@ -447,6 +447,12 @@ export async function archiveTaskNote(
 			await plugin.app.vault.rename(file, newFilePath);
 			new Notice(`Task note archived: ${file.name}`);
 		}
+
+		if (plugin.vaultScanner.tasksCache.Pending[filePath])
+			delete plugin.vaultScanner.tasksCache.Pending[filePath];
+
+		if (plugin.vaultScanner.tasksCache.Completed[filePath])
+			delete plugin.vaultScanner.tasksCache.Completed[filePath];
 	} catch (error) {
 		console.error("Error archiving task note:", error);
 		bugReporter(
