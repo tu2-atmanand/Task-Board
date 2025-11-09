@@ -296,7 +296,7 @@ const Column: React.FC<ColumnProps> = ({
 			{columnData.minimized ? (
 				// Minimized view - vertical bar with count and rotated text
 				<div className="taskBoardColumnMinimized">
-					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>
+					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
 						{tasksForThisColumn.length}
 					</div>
 					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
@@ -312,7 +312,7 @@ const Column: React.FC<ColumnProps> = ({
 							{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 						</div>
-						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-placeholder={t("open-column-menu")}>{tasksForThisColumn.length}</div>
+						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
 						{/* <RxDotsVertical /> */}
 					</div>
 					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
