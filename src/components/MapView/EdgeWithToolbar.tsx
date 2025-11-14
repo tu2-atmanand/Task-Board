@@ -1,6 +1,6 @@
 // /src/components/MapView/EdgeWithToolbar.tsx
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
 	EdgeLabelRenderer,
 	getBezierPath,
@@ -19,6 +19,21 @@ interface EdgeWithToolbarProps extends EdgeProps {
 	allTasks: taskItem[];
 }
 
+/**
+ * EdgeWithToolbar - Custom edge component with interactive toolbar for map view
+ * 
+ * Displays a toolbar when an edge is selected, providing controls for:
+ * - Deleting the edge (removes dependency relationship between tasks)
+ * - Changing edge color (placeholder for future implementation)
+ * - Toggling edge animation (placeholder for future implementation)
+ * 
+ * The toolbar appears with a fade-in animation when the edge is selected
+ * and automatically disappears when clicking elsewhere or selecting another element.
+ * 
+ * @param props.plugin - TaskBoard plugin instance for accessing settings and methods
+ * @param props.allTasks - Array of all tasks to find the target task for dependency removal
+ * @param props...edgeProps - Standard ReactFlow EdgeProps including source, target, selected state, etc.
+ */
 export function EdgeWithToolbar(props: EdgeWithToolbarProps) {
 	const { plugin, allTasks, ...edgeProps } = props;
 	const [edgePath, labelX, labelY] = getBezierPath(edgeProps);
