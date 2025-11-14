@@ -38,6 +38,7 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
 import { PanelLeftOpenIcon, Wand } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
+import { EdgeWithToolbar } from './EdgeWithToolbar';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -75,6 +76,17 @@ const MapView: React.FC<MapViewProps> = ({
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
+
+	// Define edge types with custom toolbar edge
+	const edgeTypes = useMemo(() => ({
+		edgeWithToolbar: (props: any) => (
+			<EdgeWithToolbar
+				{...props}
+				plugin={plugin}
+				allTasks={allTasksArranged.flat()}
+			/>
+		),
+	}), [plugin, allTasksArranged]);
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
 			case mapViewBackgrounVariantTypes.dots:
@@ -374,7 +386,7 @@ const MapView: React.FC<MapViewProps> = ({
 							id: `${sourceId}->${depId}`,
 							source: depId,
 							target: sourceId,
-							type: mapViewSettings.edgeType ?? "default",
+							type: 'edgeWithToolbar',
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
@@ -733,6 +745,7 @@ const MapView: React.FC<MapViewProps> = ({
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
+							edgeTypes={edgeTypes}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
 								handleNodePositionChange();
