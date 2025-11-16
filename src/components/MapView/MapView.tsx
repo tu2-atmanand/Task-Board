@@ -363,7 +363,7 @@ const MapView: React.FC<MapViewProps> = ({
 		const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 		const mapped = 1.5 - ratio * (1.5 - 1.2);
 		// Keep a compact string value suitable for CSS variable
-		const safeMarkerSize = 20 * mapped;
+		const safeMarkerSize = 15 * mapped;
 
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
@@ -379,14 +379,14 @@ const MapView: React.FC<MapViewProps> = ({
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
-								color: 'var(--text-normal)',
+								// color: 'var(--text-normal)',
 								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
 								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
 							},
 							markerEnd: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
-								color: 'var(--text-normal)',
+								// color: 'var(--text-normal)',
 								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
 								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
 							},
