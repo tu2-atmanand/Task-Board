@@ -1,5 +1,3 @@
-import { addIcon } from "obsidian";
-
 export const TaskBoardIcon = "brick-wall";
 
 export const RefreshIcon = "rotate-cw";

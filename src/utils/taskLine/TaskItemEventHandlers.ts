@@ -6,7 +6,7 @@ import {
 	updateTaskInFile,
 } from "./TaskItemUtils";
 import TaskBoard from "main";
-import { moment as _moment, Notice, TFile, WorkspaceLeaf } from "obsidian";
+import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskRecurring } from "./TaskContentFormatter";

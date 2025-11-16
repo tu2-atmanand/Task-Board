@@ -1,12 +1,6 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import {
-	App,
-	Notice,
-	Setting,
-	normalizePath,
-	sanitizeHTMLToDom,
-} from "obsidian";
+import { App, Notice, Setting, normalizePath } from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";

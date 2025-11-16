@@ -1,7 +1,7 @@
 // /src/components/MapView/TasksImporterPanel.tsx
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { taskItem } from 'src/interfaces/TaskItem';
 import TaskItem from '../KanbanView/TaskItem';
 import TaskBoard from 'main';
@@ -40,7 +40,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 			return tasksWithoutId;
 		}
 		const query = searchQuery.toLowerCase();
-		return tasksWithoutId.filter(task => 
+		return tasksWithoutId.filter(task =>
 			task.title.toLowerCase().includes(query) ||
 			task.filePath.toLowerCase().includes(query) ||
 			task.tags.some(tag => tag.toLowerCase().includes(query))
@@ -91,14 +91,14 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 
 	return (
 		<div className="tasksImporterPanelOverlay" onClick={onClose}>
-			<div 
+			<div
 				className={`tasksImporterPanel ${isVisible ? 'tasksImporterPanel--visible' : ''}`}
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="tasksImporterPanelHeader">
 					<h3 className="tasksImporterPanelTitle">{t('import-tasks-to-map')}</h3>
-					<button 
-						className="tasksImporterPanelCloseBtn" 
+					<button
+						className="tasksImporterPanelCloseBtn"
 						onClick={onClose}
 						aria-label={t('close')}
 					>
@@ -129,16 +129,16 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 					{filteredTasks.length === 0 ? (
 						<div className="tasksImporterPanelEmptyState">
 							<p>
-								{searchQuery 
-									? t('no-tasks-match-search') 
+								{searchQuery
+									? t('no-tasks-match-search')
 									: t('all-tasks-have-ids')}
 							</p>
 						</div>
 					) : (
 						<div className="tasksImporterPanelTaskList">
 							{filteredTasks.map((task) => (
-								<div 
-									key={task.id} 
+								<div
+									key={task.id}
 									className="tasksImporterPanelTaskItemWrapper"
 									onClick={() => handleImportTask(task)}
 								>

@@ -179,11 +179,11 @@ export class ViewTaskFilterPopover
 			this.popoverRef &&
 			!this.popoverRef.contains(e.target as Node)
 		) {
-			console.log("clickOutside - closing popover", {
-				target: e.target,
-				popoverRef: this.popoverRef,
-				contains: this.popoverRef.contains(e.target as Node),
-			});
+			// console.log("clickOutside - closing popover", {
+			// 	target: e.target,
+			// 	popoverRef: this.popoverRef,
+			// 	contains: this.popoverRef.contains(e.target as Node),
+			// });
 			this.close();
 		}
 	};

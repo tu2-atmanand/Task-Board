@@ -1,4 +1,4 @@
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import { sanitizeHTMLToDom } from "obsidian";
 
 /**

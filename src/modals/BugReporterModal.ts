@@ -1,7 +1,7 @@
 // /src/modal/BugReporter.ts
 
 import type TaskBoard from "main";
-import { App, Modal, Notice, PluginManifest } from "obsidian";
+import { Modal, Notice, PluginManifest } from "obsidian";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";

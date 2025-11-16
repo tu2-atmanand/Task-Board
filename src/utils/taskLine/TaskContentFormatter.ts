@@ -654,26 +654,16 @@ export const sanitizeTime = (
 	newTime: string,
 	cursorLocation?: cursorLocation
 ): string => {
-	console.log(
-		"sanitizeTime : Parameters received :\ntitle :",
-		title,
-		"\nnewTime :",
-		newTime,
-		"\nCurrentLocation :",
-		cursorLocation
-	);
 	const timeAtStartRegex = /]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
 	const timeFormatsRegex =
 		/\s*(⏰\s*(\[.*?\]|(\d{2}:\d{2}\s*-\s*\d{2}:\d{2}))|\[time::(.*?)\]|@time\((.*?)\))/g; // Match all three formats
 
 	// Match both the time formats
 	const timeAtStartMatch = title.match(timeAtStartRegex);
-	console.log("Match 1 :", timeAtStartMatch);
 	// const timeFormatMatch = title.match(timeFormatsRegex);
 
 	let timeFormatMatch: string[] | null = null;
 	let match = timeFormatsRegex.exec(title);
-	console.log("Match 2 :", match);
 	if (match) {
 		timeFormatMatch = [];
 		timeFormatMatch.push(match[0].trim()); // original match
@@ -735,16 +725,10 @@ export const sanitizeTime = (
 				title.slice(0, cursorLocation.charIndex) +
 				"*" +
 				title.slice(cursorLocation.charIndex);
-			console.log("A * at the cursor position :", titleWithStar);
 			// Insert newTimeWithFormat at the specified charIndex with spaces
 			const spaceBefore = title.slice(0, cursorLocation.charIndex).trim();
 			const spaceAfter = title.slice(cursorLocation.charIndex).trim();
-			console.log(
-				"spaceBefore :",
-				spaceBefore,
-				"\nspaceAfter :",
-				spaceAfter
-			);
+
 			return `${spaceBefore} ${newTimeWithFormat} ${spaceAfter}`;
 		}
 
@@ -1349,7 +1333,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The task item to clean.
  * @returns The cleaned task title without metadata.
- * 
+ *
  * @todo Improve the performance of this function as its called at extermely high rate.
  */
 export const cleanTaskTitleLegacy = (task: taskItem): string => {

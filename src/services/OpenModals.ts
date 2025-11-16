@@ -538,9 +538,7 @@ export const openEditTaskView = async (
 		: `${VIEW_TYPE_ADD_OR_EDIT_TASK}-${String(task.id)}`;
 
 	const taskId = task.legacyId ? task.legacyId : String(task.id);
-
 	const leaves = workspace.getLeavesOfType(viewTypeId);
-	console.log("Leaves : ", leaves);
 	const matchLeaf = leaves.find((leaf) => {
 		// const viewEphemeralState = leaf.getEphemeralState();
 		// console.log("empheral states of : ", viewEphemeralState);
@@ -549,11 +547,9 @@ export const openEditTaskView = async (
 		const leafTaskId = customView?.task.legacyId
 			? customView.task.legacyId
 			: String(customView?.task.id);
-		console.log("taskId :", taskId, "\nleafTaskId :", leafTaskId);
 
 		return taskId === leafTaskId;
 	});
-	console.log("Matched leaf :", matchLeaf);
 
 	if (matchLeaf) {
 		// Set the view on the leaf
@@ -723,7 +719,6 @@ export const openEditTaskView = async (
 			leaf.setEphemeralState({
 				viewTaskId: taskId,
 			});
-			console.log("EphemeralState : ", leaf.getEphemeralState());
 
 			// Reveal the leaf
 			workspace.revealLeaf(leaf);

@@ -24,7 +24,7 @@ import {
 	Decoration,
 	DecorationSet,
 } from "@codemirror/view";
-import { StateField, StateEffect } from "@codemirror/state";
+import { StateField } from "@codemirror/state";
 
 import { around } from "monkey-around";
 import type TaskBoard from "main";
@@ -324,14 +324,6 @@ export class EmbeddableMarkdownEditor {
 			while ((match = frontmatterRegex.exec(text)) !== null) {
 				const start = match.index;
 				const end = match.index + match[0].length;
-				console.log(
-					"frontmatter match :\n",
-					match,
-					"\nStart : ",
-					start,
-					"\nEnd : ",
-					end
-				);
 
 				// Create decoration to hide the frontmatter content
 				decorations.push(
@@ -378,15 +370,6 @@ export class EmbeddableMarkdownEditor {
 				content,
 				frontmatterContent
 			);
-
-		console.log(
-			"Setting editor content...\nComplete content :\n",
-			content,
-			"\nfrontmatterContent :\n",
-			frontmatterContent,
-			"\ncontentWithoutFrontmatter:\n",
-			contentWithoutFrontmatter
-		);
 
 		this.editor.set(contentWithoutFrontmatter, focus);
 

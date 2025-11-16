@@ -2,11 +2,6 @@ import { memo } from 'react';
 import { Handle, Position, NodeResizeControl, NodeProps } from '@xyflow/react';
 import type TaskBoard from 'main';
 
-const controlStyle = {
-	background: 'transparent',
-	border: '1px solid red',
-};
-
 interface dataProps extends React.ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };
 }
@@ -22,7 +17,6 @@ interface CustomNodeProps {
 }
 
 const CustomNode = ({ data, selected, width, height }: CustomNodeProps & NodeProps) => {
-	console.log({ data, selected, width, height });
 	return (
 		<>
 			<NodeResizeControl

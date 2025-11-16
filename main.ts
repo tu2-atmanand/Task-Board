@@ -33,13 +33,12 @@ import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import { loadTranslationsOnStartup, t } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
-import { colType, HideableTaskProperty } from "src/interfaces/Enums";
+import { HideableTaskProperty } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 
 export default class TaskBoard extends Plugin {
@@ -84,8 +83,6 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onload() {
-		console.log("TaskBoard : Loading plugin ...");
-
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.runOnPluginUpdate();
@@ -133,9 +130,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	onunload() {
-		console.log("TaskBoard : Unloading plugin...");
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
-
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
@@ -663,10 +658,8 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
-				console.log("File created : ", file);
 				if (file instanceof TFile) {
 					setTimeout(() => {
-						console.log("Calling for scanning...");
 						this.realTimeScanning.processAllUpdatedFiles(file);
 					}, 400);
 				}
@@ -949,23 +942,13 @@ export default class TaskBoard extends Plugin {
 		// Check if the plugin version has changed
 		const currentVersion = DEFAULT_SETTINGS.version;
 		const previousVersion = this.settings.version;
-		console.log(
-			"current version :",
-			currentVersion,
-			"\nprevious version :",
-			previousVersion,
-			"\ncondition :",
-			currentVersion[2] !== previousVersion[2]
-		);
 
 		if (previousVersion == "" || currentVersion[2] !== previousVersion[2]) {
 			// make the localStorage flag, 'manadatoryScan' to True
 			localStorage.setItem("manadatoryScan", "true");
 
-			console.log("Migrations process started...");
 			// Settings migrations should be only applied after plugin update.
 			this.settings = migrateSettings(DEFAULT_SETTINGS, this.settings);
-			console.log("Migrations process finished");
 
 			this.settings.version = currentVersion;
 			this.saveSettings();
