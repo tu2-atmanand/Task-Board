@@ -251,12 +251,6 @@ export function formatTaskNoteContent(
 	newFrontmatter: string;
 	contentWithoutFrontmatter: string;
 } {
-	console.log(
-		"formatTaskNoteContent: updatedTask :",
-		updatedTask,
-		"\noldNoteContent :",
-		oldNoteContent
-	);
 	try {
 		const existingFrontmatter = extractFrontmatterFromContent(
 			plugin,

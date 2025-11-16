@@ -1,12 +1,12 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
-import { Bolt, CirclePlus, RefreshCcw, Search, SearchX, Filter, Cross, Menu as MenuICon, Settings, Ellipsis, EllipsisVertical } from 'lucide-react';
-import React, { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform, Menu, addIcon } from "obsidian";
+import { App, debounce, Platform, Menu } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
@@ -20,7 +20,7 @@ import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { viewTypeNames } from "src/interfaces/Enums";
-import { funnelIconSVG, ScanVaultIcon } from "src/interfaces/Icons";
+import { ScanVaultIcon } from "src/interfaces/Icons";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -66,7 +66,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		const handleResize = () => {
 			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
 			if (taskBoardLeaf) {
-				console.log("View width :", taskBoardLeaf.width);
 				setLeafWidth(taskBoardLeaf.width);
 			}
 		};
@@ -275,7 +274,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 				// Set the close callback - mainly used for handling cancel actions
 				filterModal.filterCloseCallback = async (filterState) => {
-					console.log("Filter modal closed on mobile with state:", filterState);
 					if (filterState) {
 						// Save the filter state to the board
 						const updatedBoards = [...boards];

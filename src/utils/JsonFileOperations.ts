@@ -7,7 +7,7 @@ import {
 } from "src/interfaces/TaskItem";
 
 import { Board } from "../interfaces/BoardConfigs";
-import TaskBoard from "main";
+import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 
 // --------------- Operations with data.json ---------------
@@ -162,11 +162,11 @@ const writeFileWithRetry = async (
 		try {
 			await plugin.app.vault.adapter.write(path, content);
 			// Log successful recovery if it was a retry
-			if (attempt > 1) {
-				console.log(
-					`Task Board: File write succeeded on attempt ${attempt}`
-				);
-			}
+			// if (attempt > 1) {
+			// 	console.log(
+			// 		`Task Board: File write succeeded on attempt ${attempt}`
+			// 	);
+			// }
 			return; // Success, exit the function
 		} catch (error) {
 			const errorMessage = String(error);

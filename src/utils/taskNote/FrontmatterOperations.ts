@@ -1,11 +1,10 @@
 import TaskBoard from "main";
-import { FrontMatterCache, parseYaml, stringifyYaml, TFile } from "obsidian";
+import { parseYaml, stringifyYaml, TFile } from "obsidian";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import {
 	getCustomFrontmatterKey,
 	getPriorityNameForTaskNote,
 	getStatusNameFromStatusSymbol,
-	isTaskNotePresentInTags,
 } from "./TaskNoteUtils";
 import { taskStatuses } from "src/interfaces/Enums";
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";

@@ -75,7 +75,6 @@ const Column: React.FC<ColumnProps> = ({
 	}
 
 	async function handleMinimizeColumn() {
-		console.log("Minimizing column:", columnData.name);
 		// Find the board and column indices
 		const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 			(board: Board) => board.name === activeBoardData.name
@@ -165,7 +164,6 @@ const Column: React.FC<ColumnProps> = ({
 
 						// Set the close callback - mainly used for handling cancel actions
 						filterModal.filterCloseCallback = async (filterState) => {
-							console.log("Column.tsx : Filter modal closed on mobile with state:", filterState);
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
 									// Update the column filters

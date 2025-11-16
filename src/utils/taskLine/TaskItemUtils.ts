@@ -248,12 +248,7 @@ export const archiveTask = async (
 						currentPath = currentPath
 							? `${currentPath}/${part}`
 							: part;
-						console.log(
-							"Ensuring folder exists:",
-							currentPath,
-							"\npart:",
-							part
-						);
+
 						const existing =
 							plugin.app.vault.getAbstractFileByPath(currentPath);
 						if (!existing) {
@@ -1022,7 +1017,6 @@ export const replaceOldTaskWithNewTask = async (
 				newTaskContent,
 				oldTaskContentFromFile,
 				async (userChoice) => {
-					console.log("User choice :", userChoice);
 					if (userChoice === "old") {
 						const before = linesBefore.join("\n");
 						const after = lines

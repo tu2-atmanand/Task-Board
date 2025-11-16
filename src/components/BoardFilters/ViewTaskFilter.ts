@@ -7,6 +7,7 @@ import {
 	DropdownComponent,
 	App,
 	setTooltip,
+	Notice,
 } from "obsidian";
 import Sortable from "sortablejs";
 import { FilterConfigModal } from "./FilterConfigModal";
@@ -1356,7 +1357,9 @@ export class TaskFilterComponent extends Component {
 			this.getFilterState(),
 			(config: SavedFilterConfig) => {
 				// Optional: Handle successful save
-				console.log("Filter configuration saved:", config.name);
+				new Notice(
+					`${t("filter-configs-saved-successfully")} : ${config.name}`
+				);
 			}
 		);
 		modal.open();
@@ -1375,7 +1378,11 @@ export class TaskFilterComponent extends Component {
 			(config: SavedFilterConfig) => {
 				// Load the configuration
 				this.loadFilterState(config.filterState);
-				console.log("Filter configuration loaded:", config.name);
+				new Notice(
+					`${t("filter-configuration-loaded-successfully")} : ${
+						config.name
+					}`
+				);
 			}
 		);
 		modal.open();

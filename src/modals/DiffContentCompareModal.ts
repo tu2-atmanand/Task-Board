@@ -137,8 +137,6 @@ export class DiffContentCompareModal extends Modal {
 			const oldLine = oldLines[i] || "";
 			const newLine = newLines[i] || "";
 
-			console.log("oldLine :", oldLine, "\nNewLine :", newLine);
-
 			if (oldLine === newLine) {
 				lines.push(
 					`<div>${this.escapeHtml(
@@ -150,17 +148,6 @@ export class DiffContentCompareModal extends Modal {
 				const charsNew = newLine.split("");
 				const maxChars = Math.max(charsOld.length, charsNew.length);
 				const highlightedChars: string[] = [];
-
-				console.log(
-					"charsOld :",
-					charsOld,
-					"\ncharsOld lenght : ",
-					charsOld.length,
-					"\ncharsNew :",
-					charsNew,
-					"\ncharsNew length :",
-					charsNew.length
-				);
 
 				for (let j = 0; j < maxChars; j++) {
 					const charOld = charsOld[j] || " ";

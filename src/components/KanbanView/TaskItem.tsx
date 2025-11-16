@@ -1,6 +1,6 @@
 // /src/components/TaskItem.tsx
 
-import { FaEdit, FaExternalLinkSquareAlt, FaLink, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
@@ -18,7 +18,7 @@ import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regula
 import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
-import { ChevronDown, ChevronsUpDownIcon } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
 import { priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem } from 'src/interfaces/TaskItem';

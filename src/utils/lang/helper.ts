@@ -47,12 +47,6 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 
 			// Add the loaded translations to i18next
 			i18next.addResourceBundle(lang, "translation", parsed, true, true);
-			console.log(
-				"Another resource added to i18n : ",
-				i18next.languages,
-				"\nData in the instance :",
-				i18next.getDataByLanguage(lang)
-			);
 		} catch (err) {
 			console.warn(
 				`Could not load language file for '${lang}', falling back to English.`,

@@ -268,7 +268,7 @@ export class FilterConfigModal extends Modal {
 			board.filterConfig.savedConfigs.push(config);
 			await this.plugin.saveSettings();
 
-			new Notice(t("filter-configuration-saved-successfully"));
+			new Notice(t("filter-configs-saved-successfully"));
 
 			if (this.onSave) {
 				this.onSave(config);

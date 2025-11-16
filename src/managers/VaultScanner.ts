@@ -1,13 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import {
-	App,
-	Notice,
-	TAbstractFile,
-	TFile,
-	moment as _moment,
-	debounce,
-} from "obsidian";
+import { App, Notice, TAbstractFile, TFile, moment as _moment } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -22,7 +15,6 @@ import { jsonCacheData, noteItem, taskItem } from "src/interfaces/TaskItem";
 import {
 	extractTaskNoteProperties,
 	isTaskNotePresentInFrontmatter,
-	isTaskNotePresentInTags,
 } from "../utils/taskNote/TaskNoteUtils";
 
 import type TaskBoard from "main";
@@ -126,10 +118,6 @@ export default class vaultScanner {
 		scanFilters: scanFilters
 	): Promise<string> {
 		try {
-			console.log(
-				"tasksDetectedOrUpdated 2 : ",
-				this.tasksDetectedOrUpdated
-			);
 			const fileNameWithPath = file.path;
 			const fileContent = await readDataOfVaultFile(
 				this.plugin,
@@ -141,22 +129,9 @@ export default class vaultScanner {
 				this.tasksCache.Pending[fileNameWithPath];
 			const oldCompletedFileCache =
 				this.tasksCache.Completed[fileNameWithPath];
-			console.log(
-				"oldPendingFileCache :",
-				oldPendingFileCache,
-				"\noldCompletedFileCache",
-				oldCompletedFileCache
-			);
 
 			this.tasksCache.Pending[fileNameWithPath] = [];
 			this.tasksCache.Completed[fileNameWithPath] = [];
-
-			console.log(
-				"After deleting..\noldPendingFileCache :",
-				oldPendingFileCache,
-				"\noldCompletedFileCache",
-				oldCompletedFileCache
-			);
 
 			// Extract frontmatter from the file
 			const frontmatter = extractFrontmatterFromFile(this.plugin, file);
@@ -322,18 +297,10 @@ export default class vaultScanner {
 
 				return "true";
 			} else {
-				console.log(
-					"tasksDetectedOrUpdated 4 : ",
-					this.tasksDetectedOrUpdated
-				);
 				// Else, proceed with normal task line detection inside the file content.
 				for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
 					const line = lines[lineIndex];
 					if (isTaskLine(line)) {
-						console.log(
-							"tasksDetectedOrUpdated 5 : ",
-							this.tasksDetectedOrUpdated
-						);
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
 							this.tasksDetectedOrUpdated = true;
@@ -485,12 +452,7 @@ export default class vaultScanner {
 					this.tasksCache.Completed[fileNameWithPath],
 					oldCompletedFileCache
 				);
-				console.log(
-					"pendingCacheCompare :",
-					pendingCacheCompare,
-					"\ncompletedCacheCompare",
-					completedCacheCompare
-				);
+
 				if (pendingCacheCompare) {
 					this.tasksDetectedOrUpdated = false;
 				} else {
@@ -539,12 +501,7 @@ export default class vaultScanner {
 					// 		));
 					// if (secondCondition) {
 					// }
-					console.log(
-						"Deleting the pending object...\noldPendingFileCache :",
-						oldPendingFileCache,
-						"\nLength :",
-						oldPendingFileCache.length
-					);
+
 					delete this.tasksCache.Pending[fileNameWithPath];
 					this.tasksDetectedOrUpdated = true;
 				}
@@ -564,20 +521,9 @@ export default class vaultScanner {
 					this.tasksCache.Completed[fileNameWithPath]?.length === 0 &&
 					oldCompletedFileCache
 				) {
-					console.log(
-						"Deleting the completed object...\noldCompletedFileCache :",
-						oldCompletedFileCache,
-						"\nLength :",
-						oldCompletedFileCache.length
-					);
 					delete this.tasksCache.Completed[fileNameWithPath];
 					this.tasksDetectedOrUpdated = true;
 				}
-
-				console.log(
-					"tasksDetectedOrUpdated 6 : ",
-					this.tasksDetectedOrUpdated
-				);
 
 				return "true";
 			}
@@ -601,7 +547,6 @@ export default class vaultScanner {
 			return false;
 		}
 
-		console.log("tasksDetectedOrUpdated 1 : ", this.tasksDetectedOrUpdated);
 		try {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
@@ -634,10 +579,6 @@ export default class vaultScanner {
 					new Notice("tasks-refreshed-successfully");
 				}
 
-				console.log(
-					"tasksDetectedOrUpdated 2 : ",
-					this.tasksDetectedOrUpdated
-				);
 				if (this.tasksDetectedOrUpdated) {
 					result = await this.saveTasksToJsonCache();
 				}
@@ -696,7 +637,6 @@ export default class vaultScanner {
 			this.plugin,
 			this.tasksCache
 		);
-		console.log("Cache updated successfully...");
 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 		if (
 			this.plugin.settings.data.globalSettings.realTimeScanning &&
@@ -1206,12 +1146,6 @@ export async function compareFileCache(
 	newCache: taskItem[] | undefined,
 	oldCache: taskItem[] | undefined
 ): Promise<boolean> {
-	console.log(
-		"compareFileCache...\nnewCache:",
-		newCache,
-		"\noldCache:",
-		oldCache
-	);
 	try {
 		// Quick null/undefined checks
 		if (!oldCache && !newCache) return true;

@@ -1,20 +1,20 @@
 // /src/components/AddOrEditTaskRC.tsx
 // React component for adding or editing tasks, usable in both modals and views
 
-import { Component, Keymap, Notice, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
-import { FaLinkedin, FaTimes } from 'react-icons/fa';
+import { Component, Keymap, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
+import { FaTimes } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, getFormattedTaskContent, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
-import { buildTaskFromRawContent, generateTaskId } from "src/managers/VaultScanner";
+import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
+import { buildTaskFromRawContent } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { bugReporter, openEditTaskModal, openEditTaskNoteModal, openEditTaskView } from "src/services/OpenModals";
+import { bugReporter, openEditTaskView } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/taskNote/TaskNoteUtils";
@@ -692,7 +692,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			if (!markdownEditor) {
 				markdownEditorEmbeddedContainer.current.empty();
-				console.log("Finding where to place the cursor :", formattedTaskContent.split("\n")[0].length);
+				// console.log("Finding where to place the cursor :", formattedTaskContent.split("\n")[0].length);
 				const fullMarkdownEditor = createEmbeddableMarkdownEditor(
 					plugin,
 					markdownEditorEmbeddedContainer.current,
@@ -727,7 +727,7 @@ export const AddOrEditTaskRC: React.FC<{
 							setIsEdited(true);
 							const editorUpdatedContent = fullMarkdownEditor?.value || "";
 							const fullFileContent = isTaskNote ? (frontmatterContentRef?.current ? `---\n${frontmatterContentRef.current}\n---\n` : "") + editorUpdatedContent : editorUpdatedContent;
-							console.log("Editor content changed.\neditor content :", editorUpdatedContent, " \nFull file content:", fullFileContent);
+							// console.log("Editor content changed.\neditor content :", editorUpdatedContent, " \nFull file content:", fullFileContent);
 							setFormattedTaskContent(fullFileContent);
 							handleTaskEditedThroughEditors(fullFileContent);
 
@@ -862,9 +862,9 @@ export const AddOrEditTaskRC: React.FC<{
 			if (isTaskNote) {
 				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
 				const newFormattedTaskNoteContent = newContent;
-				console.log("Updating embedded markdown editor for task note with content:\n", newFormattedTaskNoteContent,
-					"\nFrontmatter:\n", newFrontmatter, "\nContent without frontmatter:\n", contentWithoutFrontmatter
-				);
+				// console.log("Updating embedded markdown editor for task note with content:\n", newFormattedTaskNoteContent,
+				// 	"\nFrontmatter:\n", newFrontmatter, "\nContent without frontmatter:\n", contentWithoutFrontmatter
+				// );
 				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 				setFormattedTaskContent(newFormattedTaskNoteContent);
 				frontmatterContentRef.current = newFrontmatter;

@@ -3,8 +3,7 @@
 import { ItemView, WorkspaceLeaf, normalizePath } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
-import TaskBoard from "../../main";
-import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/interfaces/Constants";
+import type TaskBoard from "../../main";
 import { t } from "src/utils/lang/helper";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
@@ -63,9 +62,7 @@ export class AddOrEditTaskView extends ItemView {
 	}
 
 	async onOpen() {
-		console.log("Container of Edit View :", this.containerEl);
 		const container = this.containerEl.children[1];
-		console.log("Ephemeral state in the view : ", this.getEphemeralState());
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
@@ -126,7 +123,6 @@ export class AddOrEditTaskView extends ItemView {
 	}
 
 	async onClose() {
-		console.log("This should run while closing the tab.");
 		// Clean up when view is closed
 		this.root?.unmount();
 	}

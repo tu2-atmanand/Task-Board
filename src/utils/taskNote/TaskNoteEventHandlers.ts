@@ -1,6 +1,6 @@
 // /src/utils/TaskNoteEventHandlers.ts
 
-import { App, Notice } from "obsidian";
+import { Notice } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils";
