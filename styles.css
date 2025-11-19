@@ -448,6 +448,21 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	}
 }
 
+.lazyLoadIndicator {
+	padding: 1rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-style: italic;
+	opacity: 0.7;
+	border-top: 1px solid var(--background-modifier-border);
+	margin-top: 0.5rem;
+}
+
+.lazyLoadIndicator p {
+	margin: 0;
+}
+
 /* Minimized column styles */
 .TaskBoardColumnsSection.minimized {
 	min-width: 2.2rem !important;

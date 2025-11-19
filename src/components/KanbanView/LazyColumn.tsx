@@ -1,6 +1,6 @@
-// /src/components/Column.tsx
+// src/components/KanbanView/LazyColumn.tsx
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
@@ -20,7 +20,7 @@ type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
 };
 
-export interface ColumnProps {
+export interface LazyColumnProps {
 	plugin: TaskBoard;
 	columnIndex: number;
 	activeBoardData: Board;
@@ -29,8 +29,7 @@ export interface ColumnProps {
 	tasksForThisColumn: taskItem[];
 }
 
-
-const Column: React.FC<ColumnProps> = ({
+const LazyColumn: React.FC<LazyColumnProps> = ({
 	plugin,
 	columnIndex,
 	activeBoardData,
@@ -40,41 +39,83 @@ const Column: React.FC<ColumnProps> = ({
 	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
-	// Local tasks state, initially set from external tasks
-	// const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
-	const tasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
-	// console.log("Column.tsx : Data in tasks :", tasks);
 
-	// // Sync local tasks state with external tasks when they change
-	// useEffect(() => {
-	// 	setTasks(tasksForThisColumn);
-	// }, [tasksForThisColumn]);
+	// Lazy loading settings from plugin
+	const lazySettings = plugin.settings.data.globalSettings.kanbanView;
+	const initialTaskCount = lazySettings.initialTaskCount || 20;
+	const loadMoreCount = lazySettings.loadMoreCount || 10;
+	const scrollThresholdPercent = lazySettings.scrollThresholdPercent || 80;
 
-	// // Render tasks using the tasks passed from KanbanBoard
-	// useEffect(() => {
-	// 	if (allTasksExternal.Pending.length > 0 || allTasksExternal.Completed.length > 0) {
-	// 		columnSegregator(plugin, setTasks, activeBoardIndex, colType, columnData, allTasksExternal);
-	// 	}
-	// }, [colType, columnData, allTasksExternal]);
+	// State for managing visible tasks
+	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);
+	const tasksContainerRef = useRef<HTMLDivElement>(null);
+
+	// Memoize all tasks
+	const allTasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
+	
+	// Memoize visible tasks based on count
+	const visibleTasks = useMemo(() => {
+		return allTasks.slice(0, visibleTaskCount);
+	}, [allTasks, visibleTaskCount]);
+
+	// Reset visible count when tasks change (e.g., switching boards or filtering)
+	useEffect(() => {
+		setVisibleTaskCount(initialTaskCount);
+	}, [tasksForThisColumn, initialTaskCount]);
+
+	// Scroll event handler
+	const handleScroll = useCallback(() => {
+		const container = tasksContainerRef.current;
+		if (!container) return;
+
+		const { scrollTop, scrollHeight, clientHeight } = container;
+		const scrollPercentage = ((scrollTop + clientHeight) / scrollHeight) * 100;
+
+		// Load more tasks when scroll threshold is reached and there are more tasks to load
+		if (scrollPercentage >= scrollThresholdPercent && visibleTaskCount < allTasks.length) {
+			setVisibleTaskCount((prevCount) => {
+				const newCount = Math.min(prevCount + loadMoreCount, allTasks.length);
+				return newCount;
+			});
+		}
+	}, [scrollThresholdPercent, visibleTaskCount, allTasks.length, loadMoreCount]);
+
+	// Attach scroll listener
+	useEffect(() => {
+		const container = tasksContainerRef.current;
+		if (!container) return;
+
+		// Throttle scroll events for performance
+		let throttleTimeout: NodeJS.Timeout | null = null;
+		const throttledScroll = () => {
+			if (throttleTimeout) return;
+			throttleTimeout = setTimeout(() => {
+				handleScroll();
+				throttleTimeout = null;
+			}, 100);
+		};
+
+		container.addEventListener('scroll', throttledScroll);
+		return () => {
+			container.removeEventListener('scroll', throttledScroll);
+			if (throttleTimeout) clearTimeout(throttleTimeout);
+		};
+	}, [handleScroll]);
 
 	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
-	// const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	// Extra code to provide special data-types for theme support.
 	const tagColors = plugin.settings.data.globalSettings.tagColors;
 	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
 	let tagData = tagColorMap.get(columnData?.coltag || '');
 	if (!tagData) {
-		tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+		tagColorMap.forEach((tagColor, tagNameKey) => {
 			const result = matchTagsWithWildcards(tagNameKey, columnData?.coltag || '');
-			// console.log("Column.tsx : Matching tag result : ", { tagNameKey, columnTag: columnData?.coltag, result });
-			// Return the first match found
 			if (result) tagData = tagColor;
 		});
 	}
 
 	async function handleMinimizeColumn() {
-		// Find the board and column indices
 		const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 			(board: Board) => board.name === activeBoardData.name
 		);
@@ -85,13 +126,8 @@ const Column: React.FC<ColumnProps> = ({
 			);
 
 			if (columnIndex !== -1) {
-				// Set the minimized property to true
 				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
-
-				// Save the settings
 				await plugin.saveSettings();
-
-				// Refresh the board view
 				eventEmitter.emit('REFRESH_BOARD');
 			}
 		}
@@ -108,12 +144,10 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("configure-column-sorting"));
 			item.setIcon("arrow-up-down");
 			item.onClick(async () => {
-				// open sorting modal
 				const modal = new ConfigureColumnSortingModal(
 					plugin,
 					columnData,
 					(updatedColumnConfiguration: ColumnData) => {
-						// Update the column configuration in the board data
 						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 							(board: Board) => board.name === activeBoardData.name
 						);
@@ -124,18 +158,14 @@ const Column: React.FC<ColumnProps> = ({
 							);
 
 							if (columnIndex !== -1) {
-								// Update the column configuration
 								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
-
-								// Save the settings
 								plugin.saveSettings();
-
 								eventEmitter.emit('REFRESH_BOARD');
 							}
 						}
 					},
 					() => {
-						// onCancel callback - nothing to do
+						// onCancel callback
 					}
 				);
 				modal.open();
@@ -146,8 +176,6 @@ const Column: React.FC<ColumnProps> = ({
 			item.setIcon("list-filter");
 			item.onClick(async () => {
 				try {
-					// TODO : The indexes are finding using the name, this might create issues if there are duplicate names. Use the id to find the indexes.
-					// Find board index once
 					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 						(board: Board) => board.name === activeBoardData.name
 					);
@@ -156,22 +184,15 @@ const Column: React.FC<ColumnProps> = ({
 					);
 
 					if (Platform.isMobile) {
-						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new ViewTaskFilterModal(
 							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
 						);
 
-						// Set the close callback - mainly used for handling cancel actions
 						filterModal.filterCloseCallback = async (filterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
-									// Update the column filters
 									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
-
-									// Save the settings
 									await plugin.saveSettings();
-
-									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
 								}
 							}
@@ -179,46 +200,35 @@ const Column: React.FC<ColumnProps> = ({
 
 						filterModal.open();
 					} else {
-						// Get the position of the menu (approximate column position)
-						// Use CSS.escape to properly escape the selector value
 						const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
 						const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
 						const position = columnElement
 							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
-							: { x: 100, y: 100 }; // Fallback position
+							: { x: 100, y: 100 };
 
-						// Create and show filter popover
-						// leafId is undefined for column filters (not tied to a specific leaf)
 						const popover = new ViewTaskFilterPopover(
 							plugin,
-							true, // forColumn is true
+							true,
 							undefined,
 							boardIndex,
 							columnData.name,
 							columnData.filters
 						);
 
-						// Set up close callback to save filter state
 						popover.onClose = async (filterState?: RootFilterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
-									// Update the column filters
 									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
-
-									// Save the settings
 									await plugin.saveSettings();
-
-									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
 								}
 							}
 						};
 
 						popover.showAtPosition(position);
-
 					}
 				} catch (error) {
-					bugReporter(plugin, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
+					bugReporter(plugin, "Error showing filter popover", String(error), "LazyColumn.tsx/column-menu/configure-column-filters");
 				}
 			});
 		});
@@ -233,7 +243,6 @@ const Column: React.FC<ColumnProps> = ({
 			item.setTitle(t("hide-column"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
-				// Find the board and column indices
 				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 					(board: Board) => board.name === activeBoardData.name
 				);
@@ -244,13 +253,8 @@ const Column: React.FC<ColumnProps> = ({
 					);
 
 					if (columnIndex !== -1) {
-						// Set the active property to false
 						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
-
-						// Save the settings
 						await plugin.saveSettings();
-
-						// Refresh the board view
 						eventEmitter.emit('REFRESH_BOARD');
 					}
 				}
@@ -276,7 +280,6 @@ const Column: React.FC<ColumnProps> = ({
 			});
 		}
 
-		// Use native event if available (React event has nativeEvent property)
 		sortMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)
 		);
@@ -291,10 +294,10 @@ const Column: React.FC<ColumnProps> = ({
 			data-column-tag-color={tagData?.color}
 		>
 			{columnData.minimized ? (
-				// Minimized view - vertical bar with count and rotated text
+				// Minimized view
 				<div className="taskBoardColumnMinimized">
 					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-						{tasksForThisColumn.length}
+						{allTasks.length}
 					</div>
 					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
 						await handleMinimizeColumn();
@@ -306,28 +309,38 @@ const Column: React.FC<ColumnProps> = ({
 				<>
 					<div className="taskBoardColumnSecHeader">
 						<div className="taskBoardColumnSecHeaderTitleSec">
-							{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 						</div>
-						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
-						{/* <RxDotsVertical /> */}
+						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+							{allTasks.length}
+						</div>
 					</div>
-					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
-						{tasks.length > 0 ? (
-							tasks.map((task, index = task.id) => {
-								return (
-									<div key={index} className="taskItemFadeIn">
-										<TaskItem
-											key={index}
-											plugin={plugin}
-											taskKey={index}
-											task={task}
-											columnIndex={columnIndex}
-											activeBoardSettings={activeBoardData}
-										/>
+					<div 
+						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
+						ref={tasksContainerRef}
+					>
+						{visibleTasks.length > 0 ? (
+							<>
+								{visibleTasks.map((task, index = task.id) => {
+									return (
+										<div key={index} className="taskItemFadeIn">
+											<TaskItem
+												key={index}
+												plugin={plugin}
+												taskKey={index}
+												task={task}
+												columnIndex={columnIndex}
+												activeBoardSettings={activeBoardData}
+											/>
+										</div>
+									);
+								})}
+								{visibleTaskCount < allTasks.length && (
+									<div className="lazyLoadIndicator">
+										<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length})</p>
 									</div>
-								);
-							})
+								)}
+							</>
 						) : (
 							<p>{t("no-tasks-available")}</p>
 						)}
@@ -336,22 +349,6 @@ const Column: React.FC<ColumnProps> = ({
 			)}
 		</div>
 	);
-
 };
 
-// const MemoizedTaskItem = memo(TaskItem, (prevProps, nextProps) => {
-// 	return (
-// 		prevProps.task.id === nextProps.task.id && // Immutable check
-// 		prevProps.task.title === nextProps.task.title &&
-// 		prevProps.task.body === nextProps.task.body &&
-// 		prevProps.task.due === nextProps.task.due &&
-// 		prevProps.task.tags.join(",") === nextProps.task.tags.join(",") &&
-// 		prevProps.task.priority === nextProps.task.priority &&
-// 		prevProps.task.completed === nextProps.task.completed &&
-// 		prevProps.task.filePath === nextProps.task.filePath &&
-// 		prevProps.columnIndex === nextProps.columnIndex &&
-// 		prevProps.activeBoardSettings === nextProps.activeBoardSettings
-// 	);
-// });
-
-export default memo(Column);
+export default memo(LazyColumn);
