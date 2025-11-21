@@ -14,10 +14,10 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 
-interface EdgeWithToolbarProps extends EdgeProps {
-	plugin: TaskBoard;
-	allTasks: taskItem[];
-}
+// interface EdgeWithToolbarProps extends EdgeProps {
+// 	plugin: TaskBoard;
+// 	allTasks: taskItem[];
+// }
 
 /**
  * EdgeWithToolbar - Custom edge component with interactive toolbar for map view
@@ -34,54 +34,57 @@ interface EdgeWithToolbarProps extends EdgeProps {
  * @param props.allTasks - Array of all tasks to find the target task for dependency removal
  * @param props...edgeProps - Standard ReactFlow EdgeProps including source, target, selected state, etc.
  */
-export function EdgeWithToolbar(props: EdgeWithToolbarProps) {
-	const { plugin, allTasks, ...edgeProps } = props;
+export function EdgeWithToolbar(props: EdgeProps) {
+	// const { plugin, allTasks, ...edgeProps } = props;
+	const edgeProps = props;
 	const [edgePath, labelX, labelY] = getBezierPath(edgeProps);
 	const { deleteElements, getEdges } = useReactFlow();
 
 	const deleteEdge = async () => {
-		// Find the edge
-		const edge = getEdges().find((e) => e.id === edgeProps.id);
-		if (!edge) return;
+		console.log("Edge pressed :", edgeProps);
 
-		// Extract source and target IDs from edge
-		const sourceId = edge.source; // This is the parent task (dependsOn)
-		const targetId = edge.target; // This is the child task that depends on parent
+		// // Find the edge
+		// const edge = getEdges().find((e) => e.id === edgeProps.id);
+		// if (!edge) return;
 
-		// Find the target task (the one that has dependsOn property)
-		const targetTask = allTasks.find(
-			(t) => t.legacyId === targetId || String(t.id) === targetId
-		);
+		// // Extract source and target IDs from edge
+		// const sourceId = edge.source; // This is the parent task (dependsOn)
+		// const targetId = edge.target; // This is the child task that depends on parent
 
-		if (!targetTask) {
-			console.warn('Target task not found for edge deletion');
-			return;
-		}
+		// // Find the target task (the one that has dependsOn property)
+		// const targetTask = allTasks.find(
+		// 	(t) => t.legacyId === targetId || String(t.id) === targetId
+		// );
 
-		// Create updated task with the dependency removed
-		const updatedTargetTask = {
-			...targetTask,
-			dependsOn: Array.isArray(targetTask.dependsOn)
-				? targetTask.dependsOn.filter((depId) => depId !== sourceId)
-				: [],
-		};
+		// if (!targetTask) {
+		// 	console.warn('Target task not found for edge deletion');
+		// 	return;
+		// }
 
-		// Update the task title to reflect the removed dependency
-		const updatedTaskTitle = sanitizeDependsOn(
-			plugin.settings.data.globalSettings,
-			updatedTargetTask.title,
-			updatedTargetTask.dependsOn
-		);
-		updatedTargetTask.title = updatedTaskTitle;
+		// // Create updated task with the dependency removed
+		// const updatedTargetTask = {
+		// 	...targetTask,
+		// 	dependsOn: Array.isArray(targetTask.dependsOn)
+		// 		? targetTask.dependsOn.filter((depId) => depId !== sourceId)
+		// 		: [],
+		// };
 
-		// Update the task in the file
-		await updateTaskInFile(plugin, updatedTargetTask, targetTask);
-		
-		// Trigger real-time scanning to update the UI
-		plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+		// // Update the task title to reflect the removed dependency
+		// const updatedTaskTitle = sanitizeDependsOn(
+		// 	plugin.settings.data.globalSettings,
+		// 	updatedTargetTask.title,
+		// 	updatedTargetTask.dependsOn
+		// );
+		// updatedTargetTask.title = updatedTaskTitle;
 
-		// Delete the edge from the graph
-		deleteElements({ edges: [edge] });
+		// // Update the task in the file
+		// await updateTaskInFile(plugin, updatedTargetTask, targetTask);
+
+		// // Trigger real-time scanning to update the UI
+		// plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+
+		// // Delete the edge from the graph
+		// deleteElements({ edges: [edge] });
 	};
 
 	const handleColorChange = () => {
@@ -104,43 +107,41 @@ export function EdgeWithToolbar(props: EdgeWithToolbarProps) {
 					cursor: 'pointer',
 				}}
 			/>
-			{edgeProps.selected && (
-				<EdgeLabelRenderer>
-					<div
-						className="edge-toolbar-container"
-						style={{
-							position: 'absolute',
-							transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
-							pointerEvents: 'all',
-						}}
+			<EdgeLabelRenderer>
+				<div
+					className="edge-toolbar-container"
+					style={{
+						position: 'absolute',
+						transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+						pointerEvents: 'all',
+					}}
+				>
+					<button
+						className="edge-toolbar-button edge-toolbar-delete"
+						onClick={deleteEdge}
+						title="Delete connection"
+						aria-label="Delete edge"
 					>
-						<button
-							className="edge-toolbar-button edge-toolbar-delete"
-							onClick={deleteEdge}
-							title="Delete connection"
-							aria-label="Delete edge"
-						>
-							<Trash2 size={16} />
-						</button>
-						<button
-							className="edge-toolbar-button edge-toolbar-color"
-							onClick={handleColorChange}
-							title="Change color (coming soon)"
-							aria-label="Change edge color"
-						>
-							<Palette size={16} />
-						</button>
-						<button
-							className="edge-toolbar-button edge-toolbar-animation"
-							onClick={handleAnimationToggle}
-							title="Toggle animation (coming soon)"
-							aria-label="Toggle edge animation"
-						>
-							<Sparkles size={16} />
-						</button>
-					</div>
-				</EdgeLabelRenderer>
-			)}
+						<Trash2 size={16} />
+					</button>
+					<button
+						className="edge-toolbar-button edge-toolbar-color"
+						onClick={handleColorChange}
+						title="Change color (coming soon)"
+						aria-label="Change edge color"
+					>
+						<Palette size={16} />
+					</button>
+					<button
+						className="edge-toolbar-button edge-toolbar-animation"
+						onClick={handleAnimationToggle}
+						title="Toggle animation (coming soon)"
+						aria-label="Toggle edge animation"
+					>
+						<Sparkles size={16} />
+					</button>
+				</div>
+			</EdgeLabelRenderer>
 		</>
 	);
 }

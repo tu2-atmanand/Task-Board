@@ -18,7 +18,8 @@ import {
 	BackgroundVariant,
 	SelectionMode,
 	NodeChange,
-	ControlButton
+	ControlButton,
+	EdgeTypes
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -71,6 +72,10 @@ const nodeTypes = {
 	ResizableNodeSelected,
 };
 
+const edgeTypes: EdgeTypes = {
+	edgeToolbar: EdgeWithToolbar,
+};
+
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
@@ -78,15 +83,15 @@ const MapView: React.FC<MapViewProps> = ({
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 
 	// Define edge types with custom toolbar edge
-	const edgeTypes = useMemo(() => ({
-		edgeWithToolbar: (props: any) => (
-			<EdgeWithToolbar
-				{...props}
-				plugin={plugin}
-				allTasks={allTasksArranged.flat()}
-			/>
-		),
-	}), [plugin, allTasksArranged]);
+	// const edgeTypes = useMemo(() => ({
+	// 	edgeWithToolbar: (props: any) => (
+	// 		<EdgeWithToolbar
+	// 			{...props}
+	// 			plugin={plugin}
+	// 			allTasks={allTasksArranged.flat()}
+	// 		/>
+	// 	),
+	// }), [plugin, allTasksArranged]);
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
 			case mapViewBackgrounVariantTypes.dots:
@@ -386,7 +391,7 @@ const MapView: React.FC<MapViewProps> = ({
 							id: `${sourceId}->${depId}`,
 							source: depId,
 							target: sourceId,
-							type: 'edgeWithToolbar',
+							type: 'edgeToolbar',
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
