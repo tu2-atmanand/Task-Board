@@ -35,6 +35,7 @@ import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
  * @param props...edgeProps - Standard ReactFlow EdgeProps including source, target, selected state, etc.
  */
 export function EdgeWithToolbar(props: EdgeProps) {
+	console.log("Edge :", props);
 	// const { plugin, allTasks, ...edgeProps } = props;
 	const edgeProps = props;
 	const [edgePath, labelX, labelY] = getBezierPath(edgeProps);

@@ -72,9 +72,9 @@ const nodeTypes = {
 	ResizableNodeSelected,
 };
 
-const edgeTypes: EdgeTypes = {
-	edgeToolbar: EdgeWithToolbar,
-};
+// const edgeTypes: EdgeTypes = {
+// 	edgeToolbar: EdgeWithToolbar,
+// };
 
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
@@ -391,7 +391,7 @@ const MapView: React.FC<MapViewProps> = ({
 							id: `${sourceId}->${depId}`,
 							source: depId,
 							target: sourceId,
-							type: 'edgeToolbar',
+							type: mapViewSettings.edgeType,
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
@@ -705,6 +705,10 @@ const MapView: React.FC<MapViewProps> = ({
 		setIsImporterPanelVisible(prev => !prev);
 	}
 
+	const handleEdgeClick = (event: any, edge: Edge) => {
+		console.log("Edge clicked :", edge);
+	}
+
 
 	if (!storageLoaded || initialNodes.length === 0 || allTasksArranged.length === 0) {
 		return (
@@ -750,7 +754,8 @@ const MapView: React.FC<MapViewProps> = ({
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
-							edgeTypes={edgeTypes}
+							// edgeTypes={edgeTypes} // We dont need this anymore. We can have our simple edges itself and using the onEdgeClick callback implement the functionality very easily using the native Obsidian menu. When user will click on a particular edge, we can display the Obsidian menu at this specific location, through the MouseEvent prop. And this will also work out of the box on mobile as well. No need of using this EdgeToolbar feature.
+							onEdgeClick={handleEdgeClick}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
 								handleNodePositionChange();
