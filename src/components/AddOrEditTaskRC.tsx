@@ -1082,13 +1082,13 @@ export const AddOrEditTaskRC: React.FC<{
 									<div onClick={() => handleTabSwitch('liveEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'liveEditor' ? '-active' : ''}`}>{t("liveEditor")}</div>
 									<div onClick={() => handleTabSwitch('rawEditor')} className={`EditTaskModalTabHeaderBtn${activeTab === 'rawEditor' ? '-active' : ''}`}>{t("rawEditor")}</div>
 								</div>
-								<div className="EditTaskModalTabHeaderRightBtnSec">
+								{/* <div className="EditTaskModalTabHeaderRightBtnSec">
 									{taskExists && (
 										<div className="EditTaskModalTabHeaderOpenMapBtn" onClick={handleOpenTaskInMapView} aria-placeholder={t("open-in-map-view")}>
 											<Network height={17} />
 										</div>
 									)}
-								</div>
+								</div> */}
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
 								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !isTaskNote && !activeNote) ? t("quickadd-plugin-choice") : t("file")}
@@ -1111,21 +1111,22 @@ export const AddOrEditTaskRC: React.FC<{
 										placeholder={(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? "Select the QuickAdd choice" : "Select file path"}
 									/>
 								</div>
-								<div className="EditTaskModalHomePreviewHeaderBtnSec">
-									<button className="EditTaskModalHomeLiveEditorRefreshBtn"
-										id="EditTaskModalHomeLiveEditorRefreshBtn"
-										aria-label="Refresh the live editor"
-										onClick={() => setIsEditorContentChanged(true)}>
-										<RefreshCcw height={16} />
-									</button>
-									{taskExists && <button className="EditTaskModalHomeOpenFileBtn"
-										id="EditTaskModalHomeOpenFileBtn"
-										aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-										onClick={(event) => isCtrlPressed ? onOpenFilBtnClicked(event.nativeEvent, true) : onOpenFilBtnClicked(event.nativeEvent, false)}
-									>
-										<FileInput height={16} />
-									</button>}
-								</div>
+								{taskExists && (
+									<div className="EditTaskModalHomePreviewHeaderBtnSec">
+										<button className="EditTaskModalTabHeaderOpenMapBtn"
+											onClick={handleOpenTaskInMapView}
+											aria-label={t("open-in-map-view")}>
+											<Network height={17} />
+										</button>
+										<button className="EditTaskModalHomeOpenFileBtn"
+											id="EditTaskModalHomeOpenFileBtn"
+											aria-label={t("hold-ctrl-button-to-open-in-new-window")}
+											onClick={(event) => isCtrlPressed ? onOpenFilBtnClicked(event.nativeEvent, true) : onOpenFilBtnClicked(event.nativeEvent, false)}
+										>
+											<FileInput height={16} />
+										</button>
+									</div>
+								)}
 							</div>
 
 							{/* Conditional rendering based on active tab */}
