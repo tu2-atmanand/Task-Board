@@ -879,6 +879,25 @@ export class SettingsManager {
 				})
 			);
 
+		// Lazy loading settings for Kanban view
+		new Setting(contentEl)
+			.setName("Enable lazy loading for Kanban view")
+			.setDesc("When enabled, only a limited number of task cards are initially rendered per column. More tasks load automatically as you scroll. This significantly improves performance for boards with hundreds of tasks.")
+			.addToggle((toggle) =>
+				toggle.setValue(this.globalSettings!.kanbanView?.lazyLoadingEnabled ?? false).onChange(async (value) => {
+					if (!this.globalSettings!.kanbanView) {
+						this.globalSettings!.kanbanView = {
+							lazyLoadingEnabled: false,
+							initialTaskCount: 20,
+							loadMoreCount: 10,
+							scrollThresholdPercent: 80,
+						};
+					}
+					this.globalSettings!.kanbanView.lazyLoadingEnabled = value;
+					await this.saveSettings();
+				})
+			);
+
 		new Setting(contentEl)
 			.setName(t("live-editor-and-reading-mode"))
 			.setHeading();

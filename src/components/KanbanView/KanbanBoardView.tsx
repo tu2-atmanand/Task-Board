@@ -6,6 +6,7 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
 import Column from "./Column";
+import LazyColumn from "./LazyColumn";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
@@ -20,6 +21,10 @@ interface KanbanBoardProps {
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn, loading, freshInstall }) => {
+	// Check if lazy loading is enabled
+	const lazyLoadingEnabled = plugin.settings.data.globalSettings.kanbanView?.lazyLoadingEnabled ?? false;
+	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+
 	return (
 		<div className="kanbanBoard">
 			<div className="columnsContainer">
@@ -57,6 +62,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn
 								activeBoardData={board}
 								columnData={column}
 								tasksForThisColumn={tasksPerColumn[index]}
+								Component={ColumnComponent}
 							/>
 						))
 				)}
@@ -65,10 +71,20 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn
 	);
 };
 
-const MemoizedColumn = memo(Column, (prevProps, nextProps) => {
+const MemoizedColumn = memo<{
+	plugin: TaskBoard;
+	columnIndex: number;
+	activeBoardData: Board;
+	columnData: any;
+	tasksForThisColumn: taskItem[];
+	Component: typeof Column | typeof LazyColumn;
+}>(({ Component, ...props }) => {
+	return <Component {...props} />;
+}, (prevProps, nextProps) => {
 	return (
 		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
-		prevProps.columnData === nextProps.columnData
+		prevProps.columnData === nextProps.columnData &&
+		prevProps.Component === nextProps.Component
 	);
 });
 
