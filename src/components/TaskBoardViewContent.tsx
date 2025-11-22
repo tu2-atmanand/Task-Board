@@ -20,7 +20,7 @@ import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { viewTypeNames } from "src/interfaces/Enums";
-import { funnelIconSVG, ScanVaultIcon } from "src/interfaces/Icons";
+import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -43,9 +43,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [isMobileView, setIsMobileView] = useState(false);
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
-
-	// Importing an SVG icon inside Obsidian application lucude icons library.
-	addIcon("funnelIcon", funnelIconSVG);
 
 	// plugin.registerEvent(
 	// 	plugin.app.workspace.on("resize", () => {
@@ -402,7 +399,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("open-board-filters-modal"));
-			item.setIcon("funnelIcon");
+			item.setIcon(funnelIcon);
 			item.onClick(async (event) => {
 				if (event instanceof MouseEvent) {
 					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
