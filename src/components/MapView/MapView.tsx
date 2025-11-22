@@ -736,7 +736,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 		menu.addItem((item) => {
 			item.setTitle(t("change-color"));
-			item.setIcon("palatte");
+			item.setIcon("palette");
 			item.onClick(() => {
 				console.log("Will be implemented in future...");
 			});
