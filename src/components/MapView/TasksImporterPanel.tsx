@@ -144,7 +144,6 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 								>
 									<TaskItem
 										key={task.id}
-										plugin={plugin}
 										taskKey={task.id}
 										task={task}
 										activeBoardSettings={activeBoardSettings}

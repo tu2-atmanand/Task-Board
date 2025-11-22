@@ -7,6 +7,7 @@ import { StrictMode } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContent from "src/components/TaskBoardViewContent";
+import { PluginProvider } from 'src/context/PluginContext';
 import type TaskBoard from "../../main";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
@@ -95,11 +96,12 @@ export class TaskBoardView extends ItemView {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
-				<TaskBoardViewContent
-					app={this.app}
-					plugin={this.plugin}
-					boardConfigs={this.boards}
-				/>,
+				<PluginProvider plugin={this.plugin}>
+					<TaskBoardViewContent
+						app={this.app}
+						boardConfigs={this.boards}
+					/>
+				</PluginProvider>,
 			</StrictMode>,
 		);
 	}

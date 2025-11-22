@@ -12,7 +12,7 @@ import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy }
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { getTaskFromId, parseUniversalDate } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
-import TaskBoard from 'main';
+import { useTaskBoardPlugin } from 'src/context/PluginContext';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
@@ -27,14 +27,14 @@ import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/
 
 export interface TaskProps {
 	key: number;
-	plugin: TaskBoard;
 	taskKey: number;
 	task: taskItem;
 	activeBoardSettings: Board;
 	columnIndex?: number;
 }
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
+const TaskItem: React.FC<TaskProps> = ({ taskKey, task, columnIndex, activeBoardSettings }) => {
+	const plugin = useTaskBoardPlugin();
 	const [isChecked, setIsChecked] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);

@@ -319,7 +319,6 @@ const Column: React.FC<ColumnProps> = ({
 									<div key={index} className="taskItemFadeIn">
 										<TaskItem
 											key={index}
-											plugin={plugin}
 											taskKey={index}
 											task={task}
 											columnIndex={columnIndex}
