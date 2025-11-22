@@ -1,5 +1,4 @@
-import TaskBoard from "main";
-import { Notice, Plugin } from "obsidian";
+import { Plugin } from "obsidian";
 
 /**
  * Tasks API v1 interface

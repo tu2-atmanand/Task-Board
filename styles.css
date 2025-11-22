@@ -485,8 +485,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 /* /src/components/TaskItem.tsx */
 
-.taskItem {
+.taskItemContainer {
 	background: var(--background-primary-alt);
+}
+
+.taskItem {
 	/* border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 1), calc(var(--accent-l) * 0.7)); */
 	border-radius: 5px;
 	display: flex;
@@ -932,7 +935,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemTimeContainer,
 .taskItemUniversalDateContainer {
-	background-color: var(--background-modifier-form-field-hover);
+	background-color: var(--background-modifier-box-shadow);
 	padding-inline: 6px;
 	border: 1px solid var(--graph-line);
 	padding-block: 2px;

@@ -4,22 +4,16 @@ import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from '
 import {
 	ReactFlow,
 	ReactFlowProvider,
-	addEdge,
 	useNodesState,
-	useEdgesState,
 	Controls,
 	Background,
-	useReactFlow,
 	Node,
 	Edge,
-	MiniMap,
 	Connection,
 	MarkerType,
 	BackgroundVariant,
 	SelectionMode,
-	NodeChange,
 	ControlButton,
-	EdgeTypes
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -27,7 +21,6 @@ import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
-import CustomNodeResizer from './CustomNodeResizer';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
 import { debounce, Menu, Notice } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/interfaces/Constants';
@@ -37,7 +30,7 @@ import { MapViewMinimap } from './MapViewMinimap';
 import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
-import { PanelLeftOpenIcon, Wand } from 'lucide-react';
+import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
 
 type MapViewProps = {
@@ -175,7 +168,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Load all storage data on mount and when activeBoardIndex changes
 	useEffect(() => {
-		console.log("Loading Map View storage data for board index:", activeBoardIndex);
 		setStorageLoaded(false);
 		// Load and sanitize positions
 		const pos = loadPositions();
@@ -341,6 +333,7 @@ const MapView: React.FC<MapViewProps> = ({
 	}, [initialNodes, setNodes]);
 
 	// Calculate edges from dependsOn property
+	// TODO : Might be efficient to make use of the addEdge api of reactflow.
 	function getEdgesFromTasks(): Edge[] {
 		const tasks: taskItem[] = allTasksArranged.flat();
 		const edges: Edge[] = [];
@@ -366,7 +359,7 @@ const MapView: React.FC<MapViewProps> = ({
 		const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 		const mapped = 1.5 - ratio * (1.5 - 1.2);
 		// Keep a compact string value suitable for CSS variable
-		const safeMarkerSize = 20 * mapped;
+		const safeMarkerSize = 15 * mapped;
 
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
@@ -382,14 +375,14 @@ const MapView: React.FC<MapViewProps> = ({
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
-								color: 'var(--text-normal)',
+								// color: 'var(--text-normal)',
 								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
 								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
 							},
 							markerEnd: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
-								color: 'var(--text-normal)',
+								// color: 'var(--text-normal)',
 								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
 								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
 							},
@@ -400,7 +393,7 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged]); // TODO : Why viewport.zoom is a dependency
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged]);
 
 	const handleNodePositionChange = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
@@ -789,8 +782,8 @@ const MapView: React.FC<MapViewProps> = ({
 							const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 							// Map so that zoom 0.5 -> 2 and zoom 2 -> 1
 							const mapped = 2 - ratio;
+
 							// Keep a compact string value suitable for CSS variable
-							console.log("map zoom size :", mapped);
 							return String(mapped);
 						})()
 					} as React.CSSProperties}>

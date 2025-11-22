@@ -303,7 +303,7 @@ const en: Lang = {
 	"root-condition": "Root condition",
 	"filter-configuration-name-is-required": "Filter configuration name is required",
 	"failed-to-save-filter-configuration": "Failed to save filter configuration",
-	"filter-configuration-saved-successfully": "Filter configuration saved successfully",
+	"filter-configs-saved-successfully": "Filter configs saved successfully",
 	"failed-to-load-filter-configuration": "Failed to load filter configuration",
 	"filter-configuration-loaded-successfully": "Filter configuration loaded successfully",
 	"failed-to-delete-filter-configuration": "Failed to delete filter configuration",

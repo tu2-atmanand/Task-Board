@@ -1,13 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import {
-	App,
-	Notice,
-	TAbstractFile,
-	TFile,
-	moment as _moment,
-	debounce,
-} from "obsidian";
+import { App, Notice, TAbstractFile, TFile, moment as _moment } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -22,7 +15,6 @@ import { jsonCacheData, noteItem, taskItem } from "src/interfaces/TaskItem";
 import {
 	extractTaskNoteProperties,
 	isTaskNotePresentInFrontmatter,
-	isTaskNotePresentInTags,
 } from "../utils/taskNote/TaskNoteUtils";
 
 import type TaskBoard from "main";
@@ -460,7 +452,8 @@ export default class vaultScanner {
 					this.tasksCache.Completed[fileNameWithPath],
 					oldCompletedFileCache
 				);
-				if (pendingCacheCompare || completedCacheCompare) {
+
+				if (pendingCacheCompare) {
 					this.tasksDetectedOrUpdated = false;
 				} else {
 					// Moving the fileNameWithPath object to be placed at the top inside this.tasksCache.Pending, so that its shown at top inside columns as a default sorting criteria to show latest modified tasks on top.
@@ -489,28 +482,44 @@ export default class vaultScanner {
 					// }
 				}
 
+				if (!completedCacheCompare) this.tasksDetectedOrUpdated = true;
+
 				// Cleanup the file-object if it doesnt contain any taskItem.
 				if (
-					this.tasksCache.Pending[fileNameWithPath]?.length === 0 ||
-					// This second condition is required in the case when user simply removes the taskNoteIdentifierTag from the frontmatter of the note, so its not longer a task-note now and also if the note doesnt have any tasks in its content, then this task-note cache should be removed.
-					(oldPendingFileCache.length === 1 &&
-						!isTaskNotePresentInTags(
-							this.plugin.settings.data.globalSettings
-								.taskNoteIdentifierTag,
-							oldPendingFileCache[0].tags
-						))
+					this.tasksCache.Pending[fileNameWithPath]?.length === 0 &&
+					oldPendingFileCache
 				) {
+					// const secondCondition =
+					// 	oldPendingFileCache.length !== 0 ||
+					// 	// First sub-condition is whether the olderCache was non empty
+					// 	// The second sub-condition is to check if the older file was a task-note. This second sub-condition is required in the case when user simply removes the taskNoteIdentifierTag from the frontmatter of the note, so its not longer a task-note now and also if the note doesnt have any tasks in its content, then this task-note cache should be removed.
+					// 	(oldPendingFileCache.length === 1 &&
+					// 		isTaskNotePresentInTags(
+					// 			this.plugin.settings.data.globalSettings
+					// 				.taskNoteIdentifierTag,
+					// 			oldPendingFileCache[0].tags
+					// 		));
+					// if (secondCondition) {
+					// }
+
 					delete this.tasksCache.Pending[fileNameWithPath];
 					this.tasksDetectedOrUpdated = true;
 				}
+
+				// secondCondition =
+				// 	(oldCompletedFileCache &&
+				// 		oldCompletedFileCache.length !== 0) ||
+				// 	(oldCompletedFileCache &&
+				// 		oldCompletedFileCache.length === 1 &&
+				// 		isTaskNotePresentInTags(
+				// 			this.plugin.settings.data.globalSettings
+				// 				.taskNoteIdentifierTag,
+				// 			oldCompletedFileCache[0].tags
+				// 		));
+
 				if (
-					this.tasksCache.Completed[fileNameWithPath]?.length === 0 ||
-					(oldCompletedFileCache.length === 1 &&
-						!isTaskNotePresentInTags(
-							this.plugin.settings.data.globalSettings
-								.taskNoteIdentifierTag,
-							oldCompletedFileCache[0].tags
-						))
+					this.tasksCache.Completed[fileNameWithPath]?.length === 0 &&
+					oldCompletedFileCache
 				) {
 					delete this.tasksCache.Completed[fileNameWithPath];
 					this.tasksDetectedOrUpdated = true;
@@ -628,7 +637,6 @@ export default class vaultScanner {
 			this.plugin,
 			this.tasksCache
 		);
-		console.log("Cache updated successfully...");
 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 		if (
 			this.plugin.settings.data.globalSettings.realTimeScanning &&
@@ -636,8 +644,8 @@ export default class vaultScanner {
 				Object.values(this.tasksCache.Completed).flat().length > 0)
 		) {
 			eventEmitter.emit("REFRESH_COLUMN");
-			this.tasksDetectedOrUpdated = false;
 		}
+		this.tasksDetectedOrUpdated = false;
 
 		return result;
 
@@ -1140,12 +1148,15 @@ export async function compareFileCache(
 ): Promise<boolean> {
 	try {
 		// Quick null/undefined checks
-		if (!oldCache) return false;
-		if (!newCache) return oldCache.length === 0;
+		if (!oldCache && !newCache) return true;
+		// if (!oldCache && newCache?.length === 0) return true;
+		if (oldCache && !newCache) return oldCache.length === 0;
+		if (newCache && !oldCache) return newCache.length === 0;
 
 		// Quick length check before expensive serialization
-		if (newCache.length !== oldCache.length) return false;
-		if (newCache.length === 0) return true;
+		if (newCache && oldCache && newCache.length !== oldCache.length)
+			return false;
+		if (newCache && newCache.length === 0) return true;
 
 		// Fast JSON string comparison - significantly faster than property-by-property comparison
 		// This approach is optimal for most use cases as task arrays are typically small to medium sized

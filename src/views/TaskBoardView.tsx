@@ -41,7 +41,6 @@ export class TaskBoardView extends ItemView {
 
 	async onOpen() {
 		if (Platform.isMobile) {
-			console.log("Adding new icon...");
 			this.addAction(RefreshIcon, t("refresh-board-button"), async () => {
 				const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
 				const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
