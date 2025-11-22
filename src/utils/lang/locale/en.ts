@@ -459,7 +459,10 @@ const en: Lang = {
 	"search-tasks": "Search tasks...",
 	"clear-search": "Clear search",
 	"no-tasks-match-search": "No tasks match your search",
-	"all-tasks-have-ids": "All tasks already have IDs"
+	"all-tasks-have-ids": "All tasks already have IDs",
+	"delete-dependency": "Delete dependancy",
+	"toggle-animation": "Toggle animation",
+	"change-color": "Change color"
 };
 
 export default en;

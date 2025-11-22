@@ -39,7 +39,6 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
 import { PanelLeftOpenIcon, Wand } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
-import { EdgeWithToolbar } from './EdgeWithToolbar';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -72,9 +71,6 @@ const nodeTypes = {
 	ResizableNodeSelected,
 };
 
-// const edgeTypes: EdgeTypes = {
-// 	edgeToolbar: EdgeWithToolbar,
-// };
 
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
@@ -82,16 +78,6 @@ const MapView: React.FC<MapViewProps> = ({
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 
-	// Define edge types with custom toolbar edge
-	// const edgeTypes = useMemo(() => ({
-	// 	edgeWithToolbar: (props: any) => (
-	// 		<EdgeWithToolbar
-	// 			{...props}
-	// 			plugin={plugin}
-	// 			allTasks={allTasksArranged.flat()}
-	// 		/>
-	// 	),
-	// }), [plugin, allTasksArranged]);
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
 			case mapViewBackgrounVariantTypes.dots:
@@ -511,8 +497,8 @@ const MapView: React.FC<MapViewProps> = ({
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
 			updatedTargetTask.dependsOn.push(sourceLegacyId);
-			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
-			updatedTargetTask.title = updatedSourceTaskTitle;
+			const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+			updatedTargetTask.title = updatedTargetTaskTitle;
 
 			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
 			updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
@@ -706,7 +692,67 @@ const MapView: React.FC<MapViewProps> = ({
 	}
 
 	const handleEdgeClick = (event: any, edge: Edge) => {
-		console.log("Edge clicked :", edge);
+		// Show Obsidian menu for the selected edge
+		const menu = new Menu();
+		menu.addItem((item) => {
+			item.setTitle(t("delete-dependency"));
+			item.setIcon("trash");
+			item.onClick(async () => {
+				// Edge id format: `${targetId}->${sourceId}`
+				const [targetId, sourceId] = edge.id.split('->');
+				const allTasks = allTasksArranged.flat();
+				const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
+				if (!targetTask) {
+					new Notice(t("error-task-not-found"));
+					return;
+				}
+
+				if (!Array.isArray(targetTask.dependsOn)) {
+					new Notice(t("error-no-dependencies"));
+					return;
+				}
+				const updatedDependsOn = targetTask.dependsOn.filter(dep => dep !== sourceId);
+				console.log("updatedDependsOn :", updatedDependsOn);
+				const updatedTargetTask = {
+					...targetTask,
+					dependsOn: updatedDependsOn
+				};
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+				updatedTargetTask.title = updatedTargetTaskTitle;
+
+				console.log("Source ID :", sourceId, "\nTarget ID :", targetId, "\ntargetTask :", targetTask, "\nupdatedTask :", updatedTargetTask);
+				try {
+					await updateTaskInFile(plugin, updatedTargetTask, targetTask);
+					sleep(100);
+					plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+					new Notice(t("dependency-deleted"));
+					eventEmitter.emit('REFRESH_BOARD');
+				} catch (err) {
+					bugReporter(plugin, t("error-updating-task"), String(err), "MapView.tsx/handleEdgeClick");
+					new Notice(t("error-updating-task"));
+				}
+			});
+		});
+
+		menu.addItem((item) => {
+			item.setTitle(t("toggle-animation"));
+			item.setIcon("sparkles");
+			item.onClick(() => {
+				console.log("Will be implemented in future...");
+			});
+			item.setDisabled(true);
+		});
+
+		menu.addItem((item) => {
+			item.setTitle(t("change-color"));
+			item.setIcon("palatte");
+			item.onClick(() => {
+				console.log("Will be implemented in future...");
+			});
+			item.setDisabled(true);
+		});
+
+		menu.showAtMouseEvent(event instanceof MouseEvent ? event : event.nativeEvent);
 	}
 
 
@@ -754,7 +800,6 @@ const MapView: React.FC<MapViewProps> = ({
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
-							// edgeTypes={edgeTypes} // We dont need this anymore. We can have our simple edges itself and using the onEdgeClick callback implement the functionality very easily using the native Obsidian menu. When user will click on a particular edge, we can display the Obsidian menu at this specific location, through the MouseEvent prop. And this will also work out of the box on mobile as well. No need of using this EdgeToolbar feature.
 							onEdgeClick={handleEdgeClick}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
