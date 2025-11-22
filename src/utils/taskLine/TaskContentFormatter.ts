@@ -1495,11 +1495,9 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 export const getUniversalDateFromTask = (
 	task: taskItem,
-	plugin: TaskBoard
+	universalDateChoice: string
 ): string => {
 	// Method 1 - Comparing
-	const universalDateChoice =
-		plugin.settings.data.globalSettings.universalDate;
 
 	if (universalDateChoice === UniversalDateOptions.dueDate) {
 		return task.due;

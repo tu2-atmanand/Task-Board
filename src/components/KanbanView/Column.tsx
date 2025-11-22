@@ -15,26 +15,27 @@ import { bugReporter } from 'src/services/OpenModals';
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
+import { PluginDataJson } from 'src/interfaces/GlobalSettings';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
 };
 
 export interface ColumnProps {
-	plugin: TaskBoard;
 	columnIndex: number;
-	activeBoardData: Board;
-	collapsed?: boolean;
 	columnData: ColumnData;
+	activeBoardData: Board;
+	pluginSettings: PluginDataJson;
 	tasksForThisColumn: taskItem[];
+	collapsed?: boolean;
 }
 
 
 const Column: React.FC<ColumnProps> = ({
-	plugin,
 	columnIndex,
-	activeBoardData,
 	columnData,
+	activeBoardData,
+	pluginSettings,
 	tasksForThisColumn,
 }) => {
 	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
@@ -57,11 +58,11 @@ const Column: React.FC<ColumnProps> = ({
 	// 	}
 	// }, [colType, columnData, allTasksExternal]);
 
-	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
-	// const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
+	const columnWidth = pluginSettings.data.globalSettings.columnWidth || '273px';
+	// const activeBoardSettings = pluginSettings.data.boardConfigs[activeBoardIndex];
 
 	// Extra code to provide special data-types for theme support.
-	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const tagColors = pluginSettings.data.globalSettings.tagColors;
 	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
 	let tagData = tagColorMap.get(columnData?.coltag || '');
 	if (!tagData) {
@@ -75,18 +76,18 @@ const Column: React.FC<ColumnProps> = ({
 
 	async function handleMinimizeColumn() {
 		// Find the board and column indices
-		const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+		const boardIndex = pluginSettings.data.boardConfigs.findIndex(
 			(board: Board) => board.name === activeBoardData.name
 		);
 
 		if (boardIndex !== -1) {
-			const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+			const columnIndex = pluginSettings.data.boardConfigs[boardIndex].columns.findIndex(
 				(col: ColumnData) => col.name === columnData.name
 			);
 
 			if (columnIndex !== -1) {
 				// Set the minimized property to true
-				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
+				pluginSettings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !pluginSettings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
 
 				// Save the settings
 				await plugin.saveSettings();
@@ -110,22 +111,21 @@ const Column: React.FC<ColumnProps> = ({
 			item.onClick(async () => {
 				// open sorting modal
 				const modal = new ConfigureColumnSortingModal(
-					plugin,
 					columnData,
 					(updatedColumnConfiguration: ColumnData) => {
 						// Update the column configuration in the board data
-						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+						const boardIndex = pluginSettings.data.boardConfigs.findIndex(
 							(board: Board) => board.name === activeBoardData.name
 						);
 
 						if (boardIndex !== -1) {
-							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+							const columnIndex = pluginSettings.data.boardConfigs[boardIndex].columns.findIndex(
 								(col: ColumnData) => col.name === columnData.name
 							);
 
 							if (columnIndex !== -1) {
 								// Update the column configuration
-								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
+								pluginSettings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
 
 								// Save the settings
 								plugin.saveSettings();
@@ -148,17 +148,17 @@ const Column: React.FC<ColumnProps> = ({
 				try {
 					// TODO : The indexes are finding using the name, this might create issues if there are duplicate names. Use the id to find the indexes.
 					// Find board index once
-					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+					const boardIndex = pluginSettings.data.boardConfigs.findIndex(
 						(board: Board) => board.name === activeBoardData.name
 					);
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					const columnIndex = pluginSettings.data.boardConfigs[boardIndex].columns.findIndex(
 						(col: ColumnData) => col.name === columnData.name
 					);
 
 					if (Platform.isMobile) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new ViewTaskFilterModal(
-							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
+							true, undefined, boardIndex, columnData.name, columnData.filters
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
@@ -166,7 +166,7 @@ const Column: React.FC<ColumnProps> = ({
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									pluginSettings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
 
 									// Save the settings
 									await plugin.saveSettings();
@@ -190,7 +190,6 @@ const Column: React.FC<ColumnProps> = ({
 						// Create and show filter popover
 						// leafId is undefined for column filters (not tied to a specific leaf)
 						const popover = new ViewTaskFilterPopover(
-							plugin,
 							true, // forColumn is true
 							undefined,
 							boardIndex,
@@ -203,7 +202,7 @@ const Column: React.FC<ColumnProps> = ({
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									pluginSettings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
 
 									// Save the settings
 									await plugin.saveSettings();
@@ -218,7 +217,7 @@ const Column: React.FC<ColumnProps> = ({
 
 					}
 				} catch (error) {
-					bugReporter(plugin, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
+					bugReporter("Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
 				}
 			});
 		});
@@ -234,18 +233,18 @@ const Column: React.FC<ColumnProps> = ({
 			item.setIcon("eye-off");
 			item.onClick(async () => {
 				// Find the board and column indices
-				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+				const boardIndex = pluginSettings.data.boardConfigs.findIndex(
 					(board: Board) => board.name === activeBoardData.name
 				);
 
 				if (boardIndex !== -1) {
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					const columnIndex = pluginSettings.data.boardConfigs[boardIndex].columns.findIndex(
 						(col: ColumnData) => col.name === columnData.name
 					);
 
 					if (columnIndex !== -1) {
 						// Set the active property to false
-						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+						pluginSettings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
 
 						// Save the settings
 						await plugin.saveSettings();
@@ -312,18 +311,18 @@ const Column: React.FC<ColumnProps> = ({
 						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
 						{/* <RxDotsVertical /> */}
 					</div>
-					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
+					<div className={`tasksContainer${pluginSettings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 						{tasks.length > 0 ? (
 							tasks.map((task, index = task.id) => {
 								return (
 									<div key={index} className="taskItemFadeIn">
 										<TaskItem
 											key={index}
-											plugin={plugin}
 											taskKey={index}
 											task={task}
 											columnIndex={columnIndex}
 											activeBoardSettings={activeBoardData}
+											pluginSettings={pluginSettings}
 										/>
 									</div>
 								);

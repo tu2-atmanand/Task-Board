@@ -12,7 +12,7 @@ import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy }
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { getTaskFromId, parseUniversalDate } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
-import TaskBoard from 'main';
+import { useTaskBoardPlugin } from 'src/context/PluginContext';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
@@ -24,28 +24,30 @@ import { priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
+import { PluginDataJson } from 'src/interfaces/GlobalSettings';
 
 export interface TaskProps {
 	key: number;
-	plugin: TaskBoard;
 	taskKey: number;
 	task: taskItem;
-	activeBoardSettings: Board;
 	columnIndex?: number;
+	activeBoardSettings: Board;
+	pluginSettings: PluginDataJson;
 }
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
+const TaskItem: React.FC<TaskProps> = ({ taskKey, task, columnIndex, activeBoardSettings, pluginSettings }) => {
+	// const plugin = useTaskBoardPlugin();
 	const [isChecked, setIsChecked] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
+	const [showSubtasks, setShowSubtasks] = useState(pluginSettings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || pluginSettings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
 
-	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
-	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+	const showDescriptionSection = pluginSettings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || pluginSettings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
+	const taskNoteIdentifierTag = pluginSettings.data.globalSettings.taskNoteIdentifierTag;
 
 
-	let universalDate = getUniversalDateFromTask(task, plugin);
+	let universalDate = getUniversalDateFromTask(task, pluginSettings.data.globalSettings.universalDate);
 	useEffect(() => {
-		universalDate = getUniversalDateFromTask(task, plugin);
+		universalDate = getUniversalDateFromTask(task, pluginSettings.data.globalSettings.universalDate);
 	}, [task.due, task.startDate, task.scheduledDate]);
 
 	// const handleTaskInteraction = useCallback(
@@ -71,7 +73,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 			if (titleElement && task.title !== "") {
 				let cleanedTitle = cleanTaskTitleLegacy(task);
-				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				const searchQuery = pluginSettings.data.globalSettings.searchQuery || '';
 				if (searchQuery) {
 					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 					const regex = new RegExp(`(${escapedQuery})`, "gi");
@@ -107,7 +109,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 				element.empty(); // Clear previous content
 
-				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				const searchQuery = pluginSettings.data.globalSettings.searchQuery || '';
 				if (searchQuery) {
 					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 					const regex = new RegExp(`(${escapedQuery})`, "gi");
@@ -139,7 +141,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			.trim() : "";
 
 		if (descElement && descriptionContent !== "") {
-			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			const searchQuery = pluginSettings.data.globalSettings.searchQuery || '';
 			if (searchQuery) {
 				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 				const regex = new RegExp(`(${escapedQuery})`, "gi");
@@ -233,11 +235,11 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
-		if (plugin.settings.data.globalSettings.tagColorsType === "text") {
+		if (pluginSettings.data.globalSettings.tagColorsType === "text") {
 			return undefined;
 		}
 
-		const tagColors = plugin.settings.data.globalSettings.tagColors;
+		const tagColors = pluginSettings.data.globalSettings.tagColors;
 
 		if (!Array.isArray(tagColors) || tagColors.length === 0) {
 			return undefined;
@@ -344,7 +346,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
-		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		const settingOption = pluginSettings.data.globalSettings.editButtonAction;
 		if (settingOption !== EditButtonMode.NoteInHover) {
 			handleEditTask(plugin, task, settingOption);
 		} else {
@@ -355,7 +357,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	}
 
 	const handleDoubleClickOnCard = (event: React.MouseEvent) => {
-		const settingOption = plugin.settings.data.globalSettings.doubleClickCardToEdit;
+		const settingOption = pluginSettings.data.globalSettings.doubleClickCardToEdit;
 		if (settingOption === EditButtonMode.None) return;
 
 		if (settingOption !== EditButtonMode.NoteInHover) {
@@ -376,7 +378,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				return;
 			}
 
-			const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+			const settingOption = pluginSettings.data.globalSettings.editButtonAction;
 			if (settingOption !== EditButtonMode.NoteInHover) {
 				handleEditTask(plugin, childTask, settingOption);
 			} else {
@@ -392,7 +394,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 	const renderHeader = () => {
 		try {
-			if (plugin.settings.data.globalSettings?.showHeader) {
+			if (pluginSettings.data.globalSettings?.showHeader) {
 				return (
 					<>
 						<div className="taskItemHeader">
@@ -403,7 +405,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
 										const tagName = tag.replace('#', '');
-										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
+										const customTag = pluginSettings.data.globalSettings.tagColorsType === "text" ? pluginSettings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
 										const tagColor = customTag?.color || `var(--tag-color)`;
 										const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
@@ -480,7 +482,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			const total = allSubTasks.length;
 			const completed = allSubTasks.filter(line => isCompleted(line)).length;
 
-			const showSubTaskSummaryBar = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
+			const showSubTaskSummaryBar = pluginSettings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || pluginSettings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
 
 			return (
 				<>
@@ -569,7 +571,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		if (!descriptionContent) return null; // If no description content, return null
 
 		if (descElement) {
-			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			const searchQuery = pluginSettings.data.globalSettings.searchQuery || '';
 			if (searchQuery) {
 				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 				const regex = new RegExp(`(${escapedQuery})`, "gi");
@@ -613,7 +615,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// Render Footer based on the settings
 	const renderFooter = () => {
 		try {
-			if (plugin.settings.data.globalSettings.showFooter) {
+			if (pluginSettings.data.globalSettings.showFooter) {
 				return (
 					<>
 						<div className="taskItemFooter">
@@ -697,7 +699,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const renderChildTasks = () => {
 		try {
 			// Render only if the last viewed history is Kanban and there are child tasks
-			if (plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
+			if (pluginSettings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
 				return (
 					<div className="taskItemChildTasksSection">
 						{/* Placeholder for future child tasks rendering */}
@@ -737,10 +739,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [pluginSettings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
-	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
+	// const memoizedRenderFooter = useMemo(() => renderFooter(), [pluginSettings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (<div className='taskItemContainer'>
 		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
@@ -749,7 +751,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 			<div className="taskItemMainContent">
 				<div className="taskItemFileNameSection">
-					{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
+					{pluginSettings.data.globalSettings.showFileNameInCard && task.filePath && (
 						<div className="taskItemFileName" aria-label={task.filePath}>
 							{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
 						</div>

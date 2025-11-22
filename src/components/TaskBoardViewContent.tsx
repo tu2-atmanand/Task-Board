@@ -8,6 +8,7 @@ import { taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App, debounce, Platform, Menu, addIcon } from "obsidian";
 import type TaskBoard from "main";
+import { useTaskBoardPlugin } from 'src/context/PluginContext';
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
@@ -22,7 +23,8 @@ import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { viewTypeNames } from "src/interfaces/Enums";
 import { funnelIconSVG, ScanVaultIcon } from "src/interfaces/Icons";
 
-const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
+const TaskBoardViewContent: React.FC<{ app: App; boardConfigs: Board[] }> = ({ app, boardConfigs }) => {
+	const plugin = useTaskBoardPlugin();
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
@@ -658,7 +660,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					viewType === viewTypeNames.kanban ? (
 						<KanbanBoard
 							app={app}
-							plugin={plugin}
 							board={boards[activeBoardIndex]}
 							allTasks={allTasks}
 							tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
@@ -687,7 +688,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							</div>
 						) : (
 							<MapView
-								plugin={plugin}
 								boards={boards}
 								activeBoardIndex={activeBoardIndex}
 								allTasksArranged={allTasksArrangedPerColumn}

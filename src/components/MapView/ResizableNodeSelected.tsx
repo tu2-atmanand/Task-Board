@@ -3,21 +3,19 @@ import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
 import { nodeSize } from './MapView';
 import { NODE_SIZE_STORAGE_KEY } from 'src/interfaces/Constants';
 import type TaskBoard from 'main';
+import { useTaskBoardPlugin } from 'src/context/PluginContext';
 import { mapViewNodeMapOrientation } from 'src/interfaces/Enums';
 import { CircleArrowDownIcon, CircleArrowRightIcon } from 'lucide-react';
 import { t } from 'src/utils/lang/helper';
 
-interface dataProps extends React.ReactElement<unknown, string> {
-	props: { plugin: TaskBoard };
-}
-
 interface ResizableNodeSelectedProps {
-	data: { label: dataProps };
+	data: { label: React.ReactElement };
 	selected: boolean;
 }
 
 const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id, data, selected, width, height }) => {
-	const mapViewSettings = data.label?.props?.plugin.settings.data.globalSettings.mapView;
+	const plugin = useTaskBoardPlugin();
+	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 	const orientationHorizontal = mapViewSettings.mapOrientation === mapViewNodeMapOrientation.horizontal;
 	// console.log('Rendering ResizableNodeSelected for node:', id, { data, selected, width, height });
 
@@ -36,7 +34,7 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 					try {
 						const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
 						sizeData[id] = {
-							width: params.width ?? data.label.props.plugin.settings.data.globalSettings.columnWidth ?? 300
+							width: params.width ?? plugin.settings.data.globalSettings.columnWidth ?? 300
 							// height: params.height ?? 30 
 						};
 						localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));

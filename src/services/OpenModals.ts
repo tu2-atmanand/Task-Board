@@ -26,6 +26,7 @@ import { DiffContentCompareModal } from "src/modals/DiffContentCompareModal";
 import { ScanFilterModal } from "src/modals/ScanFilterModal";
 import { ScanVaultModal } from "src/modals/ScanVaultModal";
 import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
+import { useTaskBoardPlugin } from "src/context/PluginContext";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -295,7 +296,6 @@ export const openEditTaskNoteModal = (
 				}
 			} catch (error) {
 				bugReporter(
-					plugin,
 					"Error updating task note",
 					error as string,
 					"TaskNoteEventHandlers.ts/handleTaskNoteEdit"
@@ -312,7 +312,6 @@ export const openEditTaskNoteModal = (
 };
 
 export const bugReporter = (
-	plugin: TaskBoard,
 	message: string,
 	bugContent: string,
 	context: string
@@ -348,6 +347,8 @@ export const bugReporter = (
 
 	// Anotehr method to open the bug reporter modal
 
+	const taskBoardPlugin = useTaskBoardPlugin();
+
 	const bugReportNotice = new Notice(
 		createFragment((f) => {
 			f.createDiv("bugReportNotice", (el) => {
@@ -359,7 +360,7 @@ export const bugReporter = (
 					cls: "reportBugButton",
 					onclick: () => {
 						const bugReportModal = new BugReporterModal(
-							plugin,
+							taskBoardPlugin,
 							message,
 							bugContent,
 							context

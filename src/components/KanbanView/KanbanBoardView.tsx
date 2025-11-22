@@ -8,11 +8,11 @@ import { App } from "obsidian";
 import Column from "./Column";
 import LazyColumn from "./LazyColumn";
 import type TaskBoard from "main";
+import { useTaskBoardPlugin } from 'src/context/PluginContext';
 import { t } from "src/utils/lang/helper";
 
 interface KanbanBoardProps {
 	app: App;
-	plugin: TaskBoard;
 	board: Board;
 	allTasks: taskJsonMerged | undefined;
 	tasksPerColumn: taskItem[][];
@@ -20,7 +20,8 @@ interface KanbanBoardProps {
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn, loading, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, tasksPerColumn, loading, freshInstall }) => {
+	const plugin = useTaskBoardPlugin();
 	// Check if lazy loading is enabled
 	const lazyLoadingEnabled = plugin.settings.data.globalSettings.kanbanView?.lazyLoadingEnabled ?? false;
 	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
@@ -72,10 +73,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn
 };
 
 const MemoizedColumn = memo<{
-	plugin: TaskBoard;
 	columnIndex: number;
-	activeBoardData: Board;
 	columnData: any;
+	activeBoardData: Board;
+	pluginSettings: any;
 	tasksForThisColumn: taskItem[];
 	Component: typeof Column | typeof LazyColumn;
 }>(({ Component, ...props }) => {

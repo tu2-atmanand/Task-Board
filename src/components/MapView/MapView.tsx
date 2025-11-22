@@ -18,6 +18,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
+import { useTaskBoardPlugin } from 'src/context/PluginContext';
 import { Board } from 'src/interfaces/BoardConfigs';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
@@ -34,7 +35,6 @@ import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
 
 type MapViewProps = {
-	plugin: TaskBoard;
 	boards: Board[];
 	activeBoardIndex: number;
 	allTasksArranged: taskItem[][];
@@ -66,8 +66,9 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
+	boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
+	const plugin = useTaskBoardPlugin();
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 
@@ -258,15 +259,14 @@ const MapView: React.FC<MapViewProps> = ({
 					newNodes.push({
 						id,
 						type: 'ResizableNodeSelected',
-						data: {
-							label: <TaskItem
-								key={task.id}
-								plugin={plugin}
-								taskKey={task.id}
-								task={task}
-								activeBoardSettings={activeBoardSettings}
-							/>
-						},
+								data: {
+									label: <TaskItem
+										key={task.id}
+										taskKey={task.id}
+										task={task}
+										activeBoardSettings={activeBoardSettings}
+									/>
+								},
 						position: {
 							x: Number.isFinite(savedPos.x) ? savedPos.x : xOffset,
 							y: Number.isFinite(savedPos.y) ? savedPos.y : yOffset
