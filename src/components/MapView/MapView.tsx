@@ -13,7 +13,7 @@ import {
 	MarkerType,
 	BackgroundVariant,
 	SelectionMode,
-	ControlButton
+	ControlButton,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
@@ -64,11 +64,13 @@ const nodeTypes = {
 	ResizableNodeSelected,
 };
 
+
 const MapView: React.FC<MapViewProps> = ({
 	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
+
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
 			case mapViewBackgrounVariantTypes.dots:
@@ -368,7 +370,7 @@ const MapView: React.FC<MapViewProps> = ({
 							id: `${sourceId}->${depId}`,
 							source: depId,
 							target: sourceId,
-							type: mapViewSettings.edgeType ?? "default",
+							type: mapViewSettings.edgeType,
 							animated: mapViewSettings.animatedEdges,
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
@@ -488,8 +490,8 @@ const MapView: React.FC<MapViewProps> = ({
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
 			updatedTargetTask.dependsOn.push(sourceLegacyId);
-			const updatedSourceTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
-			updatedTargetTask.title = updatedSourceTaskTitle;
+			const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+			updatedTargetTask.title = updatedTargetTaskTitle;
 
 			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
 			updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
@@ -682,6 +684,68 @@ const MapView: React.FC<MapViewProps> = ({
 		setIsImporterPanelVisible(prev => !prev);
 	}
 
+	const handleEdgeClick = (event: any, edge: Edge) => {
+		// Show Obsidian menu for the selected edge
+		const menu = new Menu();
+		menu.addItem((item) => {
+			item.setTitle(t("delete-dependency"));
+			item.setIcon("trash");
+			item.onClick(async () => {
+				// Edge id format: `${targetId}->${sourceId}`
+				const [targetId, sourceId] = edge.id.split('->');
+				const allTasks = allTasksArranged.flat();
+				const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
+				if (!targetTask) {
+					bugReporter(plugin, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
+					return;
+				}
+
+				if (!Array.isArray(targetTask.dependsOn)) {
+					bugReporter(plugin, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
+					return;
+				}
+
+				const updatedDependsOn = targetTask.dependsOn.filter(dep => dep !== sourceId);
+				const updatedTargetTask = {
+					...targetTask,
+					dependsOn: updatedDependsOn
+				};
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+				updatedTargetTask.title = updatedTargetTaskTitle;
+
+				try {
+					await updateTaskInFile(plugin, updatedTargetTask, targetTask);
+					sleep(100);
+					plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+					new Notice(t("dependency-deleted"));
+					eventEmitter.emit('REFRESH_BOARD');
+				} catch (err) {
+					bugReporter(plugin, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
+				}
+			});
+		});
+
+		menu.addItem((item) => {
+			item.setTitle(t("toggle-animation"));
+			item.setIcon("sparkles");
+			item.onClick(() => {
+				console.log("Will be implemented in future...");
+			});
+			item.setDisabled(true);
+		});
+
+		menu.addItem((item) => {
+			item.setTitle(t("change-color"));
+			item.setIcon("palette");
+			item.onClick(() => {
+				console.log("Will be implemented in future...");
+			});
+			item.setDisabled(true);
+		});
+
+		menu.showAtMouseEvent(event instanceof MouseEvent ? event : event.nativeEvent);
+	}
+
 
 	if (!storageLoaded || initialNodes.length === 0 || allTasksArranged.length === 0) {
 		return (
@@ -727,6 +791,7 @@ const MapView: React.FC<MapViewProps> = ({
 							nodes={nodes}
 							edges={edges}
 							nodeTypes={nodeTypes}
+							onEdgeClick={handleEdgeClick}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
 								handleNodePositionChange();
