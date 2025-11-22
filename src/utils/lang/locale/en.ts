@@ -462,7 +462,8 @@ const en: Lang = {
 	"all-tasks-have-ids": "All tasks already have IDs",
 	"delete-dependency": "Delete dependancy",
 	"toggle-animation": "Toggle animation",
-	"change-color": "Change color"
+	"change-color": "Change color",
+	"dependency-deleted": "Dependency deleted successfully."
 };
 
 export default en;

@@ -696,16 +696,16 @@ const MapView: React.FC<MapViewProps> = ({
 				const allTasks = allTasksArranged.flat();
 				const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
 				if (!targetTask) {
-					new Notice(t("error-task-not-found"));
+					bugReporter(plugin, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
 					return;
 				}
 
 				if (!Array.isArray(targetTask.dependsOn)) {
-					new Notice(t("error-no-dependencies"));
+					bugReporter(plugin, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
 					return;
 				}
+
 				const updatedDependsOn = targetTask.dependsOn.filter(dep => dep !== sourceId);
-				console.log("updatedDependsOn :", updatedDependsOn);
 				const updatedTargetTask = {
 					...targetTask,
 					dependsOn: updatedDependsOn
@@ -713,7 +713,6 @@ const MapView: React.FC<MapViewProps> = ({
 				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
 				updatedTargetTask.title = updatedTargetTaskTitle;
 
-				console.log("Source ID :", sourceId, "\nTarget ID :", targetId, "\ntargetTask :", targetTask, "\nupdatedTask :", updatedTargetTask);
 				try {
 					await updateTaskInFile(plugin, updatedTargetTask, targetTask);
 					sleep(100);
@@ -721,8 +720,7 @@ const MapView: React.FC<MapViewProps> = ({
 					new Notice(t("dependency-deleted"));
 					eventEmitter.emit('REFRESH_BOARD');
 				} catch (err) {
-					bugReporter(plugin, t("error-updating-task"), String(err), "MapView.tsx/handleEdgeClick");
-					new Notice(t("error-updating-task"));
+					bugReporter(plugin, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
 				}
 			});
 		});
