@@ -3,6 +3,7 @@ import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { RootFilterState } from "src/interfaces/BoardConfigs";
 import { TaskFilterComponent } from "./ViewTaskFilter";
+import { useTaskBoardPlugin } from "src/context/PluginContext";
 
 export class ViewTaskFilterModal extends Modal {
 	private plugin: TaskBoard;
@@ -15,15 +16,15 @@ export class ViewTaskFilterModal extends Modal {
 		| null = null;
 
 	constructor(
-		plugin: TaskBoard,
 		forColumn: boolean,
 		private leafId?: string,
 		activeBoardIndex?: number,
 		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState
 	) {
-		super(plugin.app);
-		this.plugin = plugin;
+		const taskBoardPlugin = useTaskBoardPlugin();
+		super(taskBoardPlugin.app);
+		this.plugin = taskBoardPlugin;
 		this.activeBoardIndex = activeBoardIndex;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;

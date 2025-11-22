@@ -3,6 +3,7 @@
 import type TaskBoard from "main";
 import { Modal, Setting } from "obsidian";
 import Sortable from "sortablejs";
+import { useTaskBoardPlugin } from "src/context/PluginContext";
 import { ColumnData, columnSortingCriteria } from "src/interfaces/BoardConfigs";
 import { t } from "src/utils/lang/helper";
 
@@ -13,13 +14,13 @@ export class ConfigureColumnSortingModal extends Modal {
 	onCancel: () => void;
 
 	constructor(
-		plugin: TaskBoard,
 		columnConfiguration: ColumnData,
 		onSave: (updatedColumnConfiguration: ColumnData) => void,
 		onCancel: () => void
 	) {
-		super(plugin.app);
-		this.plugin = plugin;
+		const taskBoardPlugin = useTaskBoardPlugin();
+		super(taskBoardPlugin.app);
+		this.plugin = taskBoardPlugin;
 		this.columnConfiguration = { ...columnConfiguration }; // Create a copy to avoid mutating original
 		this.onSave = onSave;
 		this.onCancel = onCancel;

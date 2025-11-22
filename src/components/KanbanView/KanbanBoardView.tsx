@@ -73,10 +73,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, tasksPerColumn, loadin
 };
 
 const MemoizedColumn = memo<{
-	plugin: TaskBoard;
 	columnIndex: number;
-	activeBoardData: Board;
 	columnData: any;
+	activeBoardData: Board;
+	pluginSettings: any;
 	tasksForThisColumn: taskItem[];
 	Component: typeof Column | typeof LazyColumn;
 }>(({ Component, ...props }) => {

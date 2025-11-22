@@ -7,6 +7,7 @@ import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { RootFilterState } from "src/interfaces/BoardConfigs";
 import { TaskFilterComponent } from "./ViewTaskFilter";
+import { useTaskBoardPlugin } from "src/context/PluginContext";
 
 export class ViewTaskFilterPopover
 	extends Component
@@ -26,21 +27,21 @@ export class ViewTaskFilterPopover
 	private initialFilterState?: RootFilterState;
 
 	constructor(
-		plugin: TaskBoard,
 		forColumn: boolean,
 		private leafId?: string | undefined,
 		activeBoardIndex?: number,
 		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState
 	) {
+		const taskBoardPlugin = useTaskBoardPlugin();
 		super();
-		this.plugin = plugin;
-		this.app = plugin.app;
+		this.plugin = taskBoardPlugin;
+		this.app = taskBoardPlugin.app;
 		this.forColumn = forColumn;
 		this.activeBoardIndex = activeBoardIndex;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
-		this.win = plugin.app.workspace.containerEl.win || window;
+		this.win = taskBoardPlugin.app.workspace.containerEl.win || window;
 
 		this.scrollParent = this.win;
 	}
