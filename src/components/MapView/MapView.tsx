@@ -747,11 +747,45 @@ const MapView: React.FC<MapViewProps> = ({
 	}
 
 
-	if (!storageLoaded || initialNodes.length === 0 || allTasksArranged.length === 0) {
+	if (allTasksArranged.flat().length === 0) {
 		return (
-			<div className='mapViewWrapper'>
-				<div className="mapView">
-					<div className="taskBoardMapViewContainer" style={{ width: '100%', height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+			<div className='taskBoardMapViewWrapper'>
+				<div className="taskBoardMapView">
+					<div className="taskBoardMapViewContainer">
+						<span className="taskBoardMapViewContainerInitialMessage">{t("no-tasks-found-for-current-board-message")}</span>
+					</div>
+				</div>
+			</div>
+		);
+	} else if (storageLoaded && initialNodes.length === 0) {
+		return (
+			<div className='taskBoardMapViewWrapper'>
+				<div className="taskBoardMapView">
+					<div className="taskBoardMapViewContainer">
+						<span className="taskBoardMapViewContainerInitialMessage">{t("tasks-on-this-board-have-no-id-message-1")}</span>
+						<br />
+						<br />
+						<span className="taskBoardMapViewContainerInitialMessage">{t("note")} : {t("tasks-on-this-board-have-no-id-message-2")}</span>
+					</div>
+					<button className='taskBoardMapViewImportPanelBtn'
+						onClick={() => toggleTasksImporterPanel()} ><PanelLeftOpenIcon size={20} />
+					</button>
+
+					<TasksImporterPanel
+						plugin={plugin}
+						allTasksArranged={allTasksArranged}
+						activeBoardSettings={activeBoardSettings}
+						isVisible={isImporterPanelVisible}
+						onClose={() => setIsImporterPanelVisible(false)}
+					/>
+				</div>
+			</div>
+		);
+	} else if (!storageLoaded) {
+		return (
+			<div className='taskBoardMapViewWrapper'>
+				<div className="taskBoardMapView">
+					<div className="taskBoardMapViewContainer">
 						<div className="spinner"></div>
 						<span>{t('loading-map-data')}</span>
 					</div>
@@ -759,9 +793,10 @@ const MapView: React.FC<MapViewProps> = ({
 			</div>
 		);
 	}
+
 	return (
-		<div className='mapViewWrapper'>
-			<div className="mapView">
+		<div className='taskBoardMapViewWrapper'>
+			<div className="taskBoardMapView">
 				<ReactFlowProvider>
 					<div className="taskBoardMapViewContainer" style={{
 						width: '100%',
