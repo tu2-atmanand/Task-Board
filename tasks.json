@@ -1,13 +1,13 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-11-21T23:31:27",
+    "Modified_at": "2025-11-22T10:01:27",
     "Pending": {
         "Important Note.md": [
             {
                 "id": 222,
                 "legacyId": "222",
                 "status": " ",
-                "title": "- [ ] This is a task title, keep it short. #pending #doc 🆔 222 [dependsOn:: 254, 225]⏫ 🔁 every day 🏁 keep ➕ 2025-09-28 🛫 2025-09-28 [scheduled:: 2025-10-18] [due:: 2025-10-18] ⏰[16:00 - 17:00] ",
+                "title": "- [ ] This is a task title, keep it short. #pending #doc 🆔 222 [dependsOn:: 254, 224]⏫ 🔁 every day 🏁 keep ➕ 2025-09-28 🛫 2025-09-28 [scheduled:: 2025-10-18] [due:: 2025-10-18] ⏰[16:00 - 17:00] ",
                 "body": [
                     "\t- [ ] This is a first sub-task.",
                     "\tElaborate and explain the task here. Add links, embeddings or any other resources.",
@@ -28,7 +28,7 @@
                 "priority": 2,
                 "dependsOn": [
                     "254",
-                    "225"
+                    "224"
                 ],
                 "filePath": "Important Note.md",
                 "taskLocation": {
@@ -1620,7 +1620,8 @@
                 "cancelledDate": "",
                 "reminder": ""
             }
-        ]
+        ],
+        "Important Note.md": []
     },
     "Notes": [
         {
