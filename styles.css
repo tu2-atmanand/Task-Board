@@ -5915,3 +5915,104 @@ svg.react-flow__connectionline {
 .tasksImporterPanelEmptyState p {
 	margin: 0;
 }
+
+/* Edge Toolbar Styles */
+.edge-toolbar-container {
+display: flex;
+align-items: center;
+gap: 4px;
+background: var(--background-primary);
+border: 1px solid var(--background-modifier-border);
+border-radius: 8px;
+padding: 6px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+animation: edgeToolbarFadeIn 0.2s ease-out;
+transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.edge-toolbar-container:hover {
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+transform: translateY(-1px);
+}
+
+.edge-toolbar-button {
+display: flex;
+align-items: center;
+justify-content: center;
+width: 32px;
+height: 32px;
+border: none;
+border-radius: 6px;
+background: var(--background-secondary);
+color: var(--text-normal);
+cursor: pointer;
+transition: all 0.15s ease;
+padding: 0;
+}
+
+.edge-toolbar-button:hover {
+background: var(--background-modifier-hover);
+transform: scale(1.1);
+}
+
+.edge-toolbar-button:active {
+transform: scale(0.95);
+}
+
+.edge-toolbar-delete {
+color: var(--text-error);
+}
+
+.edge-toolbar-delete:hover {
+background: var(--background-modifier-error-hover);
+color: var(--text-on-accent);
+}
+
+.edge-toolbar-color:hover {
+background: var(--interactive-accent);
+color: var(--text-on-accent);
+}
+
+.edge-toolbar-animation:hover {
+background: var(--interactive-accent);
+color: var(--text-on-accent);
+}
+
+/* Edge Toolbar Fade In Animation */
+@keyframes edgeToolbarFadeIn {
+from {
+opacity: 0;
+transform: translateY(-10px) scale(0.9);
+}
+to {
+opacity: 1;
+transform: translateY(0) scale(1);
+}
+}
+
+/* Edge Toolbar Fade Out Animation */
+.edge-toolbar-container.hiding {
+animation: edgeToolbarFadeOut 0.2s ease-in;
+}
+
+@keyframes edgeToolbarFadeOut {
+from {
+opacity: 1;
+transform: translateY(0) scale(1);
+}
+to {
+opacity: 0;
+transform: translateY(-10px) scale(0.9);
+}
+}
+
+/* Make edges more interactive */
+.react-flow__edge.selected .react-flow__edge-path {
+stroke: var(--interactive-accent);
+stroke-width: 2;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+stroke: var(--text-normal);
+stroke-width: 2;
+}

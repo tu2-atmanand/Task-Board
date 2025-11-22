@@ -417,7 +417,7 @@
         },
         "taskCount": {
           "pending": 25,
-          "completed": 4
+          "completed": 3
         }
       }
     ],
@@ -879,7 +879,7 @@
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "kanban",
+        "viewedType": "map",
         "boardIndex": 2,
         "taskId": "",
         "settingTab": 0
