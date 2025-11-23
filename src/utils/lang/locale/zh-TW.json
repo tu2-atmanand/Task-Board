@@ -90,7 +90,7 @@
 	"plugin-compatibility": "插件兼容性",
 	"day-planner-plugin-compatibility": "如果您已經安裝了“ Day Planner”插件，則可以在元數據中查看任務標題開始時的時間。啟用此功能後，時間將根據日期銷售文件中的日期插件顯示，但是在任務卡中，時間將像往常一樣在頁腳中顯示。",
 	"due-date-format": "到期日格式",
-	"due-date-format-info": "輸入您使用的日期格式來命名日常文件。請使用“ yyyy-mm-dd”或“ dd-mm-yyyy”格式。",
+	"due-date-format-info": "輸入您使用的日期格式來命名日常文件。請使用“ YYYY-mm-dd”或“ dd-mm-YYYY”格式。",
 	"your-task-will-look-like-following-in-your-notes": "您的任務將如下所示",
 	"supported-plugin-formats": "支持的插件格式",
 	"supported-plugin-formats-info": "不同的插件具有不同的格式，可以為任務提供“應得的”和“完成”值。請選擇一個值之一，並查看上述格式，如果它與當前設置兼容。",

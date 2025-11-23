@@ -90,7 +90,7 @@
 	"plugin-compatibility": "Compatibilità del plugin",
 	"day-planner-plugin-compatibility": "Se hai installato il plug -in 'Planner Day Planner', abilita questo per vedere l'ora all'inizio del titolo dell'attività, invece nei metadati. Dopo aver abilitato questa funzione, il tempo verrà mostrato in base al plug -in del Pianificatore giornaliero all'interno dei file di Markdown, ma nella scheda Task, il tempo verrà mostrato nel piè di pagina come al solito.",
 	"due-date-format": "Formato di scadenza",
-	"due-date-format-info": "Inserisci il formato della data che stai utilizzando per nominare i file dei tuoi notti quotidiani. Si prega di utilizzare i formati 'yyyy-mm-dd' o 'dd-mm-yyyy'.",
+	"due-date-format-info": "Inserisci il formato della data che stai utilizzando per nominare i file dei tuoi notti quotidiani. Si prega di utilizzare i formati 'YYYY-mm-dd' o 'dd-mm-YYYY'.",
 	"your-task-will-look-like-following-in-your-notes": "Il tuo compito apparirà come segue nelle tue note",
 	"supported-plugin-formats": "Formati di plug -in supportati",
 	"supported-plugin-formats-info": "Plug -in diversi hanno un formato diverso per fornire i valori 'dovuti' e 'completamento' all'attività. Selezionare uno dei valore e consultare il formato sopra, se è compatibile con la configurazione corrente.",

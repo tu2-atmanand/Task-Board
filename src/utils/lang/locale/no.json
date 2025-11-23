@@ -95,7 +95,7 @@
 	"supported-plugin-formats": "Støttede plugin -formater",
 	"supported-plugin-formats-info": "Ulike plugins har forskjellig format for å gi verdiene 'forfalte og' fullføring 'til oppgaven. Velg en av verdien og se ovennevnte format, hvis det er kompatibelt med det nåværende oppsettet.",
 	"task-completion-date-time-pattern": "Oppgave fullføring Dato-tidsmønster",
-	"task-completion-date-time-pattern-info": "Skriv inn mønsteret på datoen som du vil se for fullføringsverdien. F.eks. yyyy-mm-dd/hh: mm: ss",
+	"task-completion-date-time-pattern-info": "Skriv inn mønsteret på datoen som du vil se for fullføringsverdien. F.eks. YYYY-mm-dd/hh: mm: ss",
 	"first-day-of-the-week": "Første ukedag",
 	"first-day-of-the-week-info": "Sett den første ukens dag",
 	"task-completion-in-local-time": "Oppgave fullføring på lokal tid",

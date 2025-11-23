@@ -90,7 +90,7 @@
 	"plugin-compatibility": "plug -in compatibiliteit",
 	"day-planner-plugin-compatibility": "Als u 'Day Planner' -plug -in hebt geïnstalleerd, schakelt u dit in om de tijd te zien aan het begin van de taaktitel, in plaats daarvan in de metagegevens. Na het inschakelen van deze functie wordt de tijd weergegeven volgens de Day Planner -plug -in in Markdown -bestanden, maar in de taakkaart wordt de tijd zoals gewoonlijk in de voettekst weergegeven.",
 	"due-date-format": "Vervaldatum -indeling",
-	"due-date-format-info": "Voer het formaat in van de datum die u gebruikt om uw Daily-Nots-bestanden te noemen. Gebruik ofwel 'yyy-mm-dd' of 'dd-mm-yyyy' formaten.",
+	"due-date-format-info": "Voer het formaat in van de datum die u gebruikt om uw Daily-Nots-bestanden te noemen. Gebruik ofwel 'yyy-mm-dd' of 'dd-mm-YYYY' formaten.",
 	"your-task-will-look-like-following-in-your-notes": "Je taak zal er als volgt uitzien in je notities",
 	"supported-plugin-formats": "Ondersteunde plug -in formaten",
 	"supported-plugin-formats-info": "Verschillende plug -ins hebben een ander formaat om de 'Due' en 'Completion' -waarden aan de taak te geven. Selecteer een van de waarde en bekijk het bovenstaande formaat, als deze compatibel is met uw huidige opstelling.",

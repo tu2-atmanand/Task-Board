@@ -243,7 +243,7 @@ export const getSanitizedTaskContent = (
  * Function to sanitize the created date inside the task title.
  * @param globalSettings - The global settings data.
  * @param title  - The title of the task.
- * @param createdDate - The new created date. Only single format supported right now. (yyyy-MM-dd)
+ * @param createdDate - The new created date. Only single format supported right now. (YYYY-MM-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the created date at a specific position.
  * @returns The sanitized created date string to be used in the task title.
  */
@@ -445,7 +445,7 @@ export const sanitizeScheduledDate = (
  * Function to sanitize the tags inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param dueDate - The due date of the task. Only one format supported right now. (yyyy-mm-dd)
+ * @param dueDate - The due date of the task. Only one format supported right now. (YYYY-mm-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the due date at a specific position.
  * @returns The sanitized due date string to be used in the task title.
  */
@@ -510,7 +510,7 @@ export const sanitizeDueDate = (
  * Function to sanitize the completion date inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param completionDate - The completion date of the task. Only one format supported right now. (yyyy-mm-dd)
+ * @param completionDate - The completion date of the task. Only one format supported right now. (YYYY-mm-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the completion date at a specific position.
  * @returns The sanitized completion date string to be used in the task title.
  */
@@ -577,7 +577,7 @@ export const sanitizeCompletionDate = (
  * Function to sanitize the cancellation date inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param cancelledDate - The cancellation date of the task. Only one format supported right now. (yyyy-mm-dd)
+ * @param cancelledDate - The cancellation date of the task. Only one format supported right now. (YYYY-mm-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the cancellation date at a specific position.
  * @returns The sanitized cancellation date string to be used in the task title.
  */
@@ -935,7 +935,7 @@ export const sanitizeTags = (
  * Function to sanitize the reminder inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param newReminder - The new reminder to be sanitized and added to the title. Must be in the format "yyyy-MM-ddTHH:mm".
+ * @param newReminder - The new reminder to be sanitized and added to the title. Must be in the format "YYYY-MM-ddTHH:mm".
  * @param cursorLocation - (Optional) The cursor location to insert the reminder at a specific position.
  * @returns The sanitized reminder string to be used in the task title.
  */

@@ -1,3 +1,4 @@
+import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 import { BoardConfigs } from "./BoardConfigs";
 import {
 	EditButtonMode,
@@ -405,9 +406,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
 			taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
-			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
+			taskCompletionDateTimePattern:
+				TaskRegularExpressions.dateTimeFormat,
 			dailyNotesPluginComp: false,
-			universalDateFormat: "yyyy-MM-DD",
+			universalDateFormat: TaskRegularExpressions.dateFormat,
 			defaultStartTime: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,

@@ -2106,7 +2106,7 @@ export class SettingsManager {
 						await this.saveSettings();
 						updatePreview(); // Update the preview when the text pattern changes
 					})
-					.setPlaceholder("yyyy-MM-DD")
+					.setPlaceholder("YYYY-MM-DD")
 			);
 
 		// Text input for the default startime
@@ -2136,7 +2136,7 @@ export class SettingsManager {
 		// 				await this.saveSettings();
 		// 				updatePreview();
 		// 			})
-		// 			.setPlaceholder("yyyy-MM-DD/HH:mm")
+		// 			.setPlaceholder("YYYY-MM-DD/HH:mm")
 		// 	);
 
 		// Initialize the preview on page load

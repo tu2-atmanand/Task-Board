@@ -95,7 +95,7 @@
 	"supported-plugin-formats": "Format e mbështetura të shtojcave",
 	"supported-plugin-formats-info": "Shtojca të ndryshme kanë format të ndryshëm për t'i dhënë vlerave 'Duji' dhe 'Përfundimit' të detyrës. Ju lutemi zgjidhni një nga vlerat dhe shihni formatin e mësipërm, nëse është i pajtueshëm me konfigurimin tuaj aktual.",
 	"task-completion-date-time-pattern": "Modeli i datës së përfundimit të detyrës",
-	"task-completion-date-time-pattern-info": "Vendosni modelin e kohës së datës që dëshironi të shihni për vlerën e përfundimit. P.sh. yyyy-mm-dd/hh: mm: ss",
+	"task-completion-date-time-pattern-info": "Vendosni modelin e kohës së datës që dëshironi të shihni për vlerën e përfundimit. P.sh. YYYY-mm-dd/hh: mm: ss",
 	"first-day-of-the-week": "Dita e parë e javës",
 	"first-day-of-the-week-info": "Vendosni ditën e parë të javës",
 	"task-completion-in-local-time": "Përfundimi i detyrës në kohën lokale",

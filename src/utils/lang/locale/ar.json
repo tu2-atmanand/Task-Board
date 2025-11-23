@@ -93,7 +93,7 @@
 	"supported-plugin-formats": "تنسيقات البرنامج المساعد المدعومة",
 	"supported-plugin-formats-info": "تحتوي الإضافات المختلفة على تنسيق مختلف لإعطاء قيم 'الاستحقاق' و 'الانتهاء' للمهمة. يرجى تحديد إحدى القيمة ورؤية التنسيق أعلاه ، إذا كان متوافقًا مع الإعداد الحالي.",
 	"task-completion-date-time-pattern": "نمط تاريخ الانتهاء من المهمة",
-	"task-completion-date-time-pattern-info": "أدخل نمط وقت التاريخ الذي ترغب في رؤيته لقيمة الانتهاء. على سبيل المثال. yyyy-mm-dd/hh: mm: ss",
+	"task-completion-date-time-pattern-info": "أدخل نمط وقت التاريخ الذي ترغب في رؤيته لقيمة الانتهاء. على سبيل المثال. YYYY-mm-dd/hh: mm: ss",
 	"first-day-of-the-week": "اليوم الأول من الأسبوع",
 	"first-day-of-the-week-info": "حدد اليوم الأول من الأسبوع",
 	"task-completion-in-local-time": "إكمال المهمة في التوقيت المحلي",
