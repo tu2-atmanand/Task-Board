@@ -32,6 +32,7 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
 import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
+import { isCompleted } from 'src/utils/CheckBoxUtils';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -366,12 +367,17 @@ const MapView: React.FC<MapViewProps> = ({
 			if (Array.isArray(task.dependsOn)) {
 				task.dependsOn.forEach(depId => {
 					if (idToTask.has(depId)) {
+						const childTask = idToTask.get(depId);
+						const isChildTaskCompleted = childTask ? isCompleted(childTask.title) : false;
 						edges.push({
 							id: `${sourceId}->${depId}`,
 							source: depId,
 							target: sourceId,
 							type: mapViewSettings.edgeType,
-							animated: mapViewSettings.animatedEdges,
+							animated: isChildTaskCompleted ? false : mapViewSettings.animatedEdges,
+							style: {
+								opacity: isChildTaskCompleted ? '50%' : "100%",
+							},
 							markerStart: {
 								type: MarkerType.ArrowClosed, // required property
 								// optional properties
