@@ -22,8 +22,6 @@
 
 > YouTube playlist : [Task Board - Obsidian plugin](https://youtube.com/playlist?list=PLqEPxsDi1dtepfcaUO9r1BTGZN6IuhvvH&si=yohu1rczpRVq68D6)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?si=XipQFbawEnKG_PzJ&amp;list=PLqEPxsDi1dtepfcaUO9r1BTGZN6IuhvvH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
 This plugin is designed to help you document your work seamlessly from start to finish while completing a specific task. With this plugin, you can quickly open a task without manually accessing the markdown file, allowing you to add solutions, key points, resources, and even sub-tasks effortlessly.
 
 Inspired by the [GitHub Projects Board Layout](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout), the goal is to bring the full functionality of GitHub Projects into Obsidian. This will enable you to manage private projects efficiently or even create a collaborative workspace within Obsidian.
