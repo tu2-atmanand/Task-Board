@@ -22,7 +22,7 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
-import { debounce, Menu, Notice } from 'obsidian';
+import { debounce, Menu, Notice, Platform } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/interfaces/Constants';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
@@ -838,8 +838,8 @@ const MapView: React.FC<MapViewProps> = ({
 							zoomOnScroll={mapViewSettings.scrollAction === mapViewScrollAction.zoom ? true : false}
 							// preventScrolling={false}
 							panOnDrag={[1, 2]}
-							selectNodesOnDrag={true}
-							selectionOnDrag={true}
+							selectNodesOnDrag={false}
+							selectionOnDrag={Platform.isPhone ? false : true}
 							selectionMode={SelectionMode.Partial}
 
 							// Events
