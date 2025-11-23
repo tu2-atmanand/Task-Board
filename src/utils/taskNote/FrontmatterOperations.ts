@@ -302,25 +302,60 @@ export function updateFrontmatterProperties(
 			"";
 	}
 
-	// Ensure taskNote tag exists
+	// Ensure taskNote tag exists and respect removed tags (task.tags is source of truth)
 	const tagsKey = getCustomFrontmatterKey("tags", frontmatterFormatting);
-	const existingTags = existingFrontmatter?.[tagsKey];
-	if (!existingTags) {
-		tempUpdates[tagsKey] = [
-			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-			...task.tags,
-		];
-	} else if (Array.isArray(existingTags)) {
-		tempUpdates[tagsKey] = [
-			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-			...existingTags,
-			...task.tags,
-		];
+	const existingTagsRaw = existingFrontmatter?.[tagsKey];
+
+	// Normalize existing tags to array of strings
+	let existingTags: string[] = [];
+	if (Array.isArray(existingTagsRaw)) {
+		existingTags = existingTagsRaw
+			.map((t) => String(t).replace("#", "").trim())
+			.filter(Boolean);
+	} else if (
+		typeof existingTagsRaw === "string" &&
+		existingTagsRaw.replace("#", "").trim().length
+	) {
+		existingTags = existingTagsRaw
+			.split(",")
+			.map((t) => t.replace("#", "").trim())
+			.filter(Boolean);
 	}
-	// Remove duplicate tags
-	if (tempUpdates[tagsKey]) {
-		tempUpdates[tagsKey] = Array.from(new Set(tempUpdates[tagsKey]));
-	}
+
+	// Normalize task tags to array of strings (task.tags is the source of truth)
+	// const taskTags: string[] = task.tags
+	// 	? Array.isArray(task.tags)
+	// 		? task.tags.map((t) => String(t).trim()).filter(Boolean)
+	// 		: typeof task.tags === "string" &&
+	// 		  task.tags &&
+	// 		  task.tags.trim().length
+	// 		? task.tags
+	// 				.split(",")
+	// 				.map((t) => t.trim())
+	// 				.filter(Boolean)
+	// 		: []
+	// 	: [];
+
+	const taskTags: string[] = task.tags
+		.map((tag: string) => String(tag).replace("#", "").trim())
+		.filter(Boolean);
+
+	const identifierTag =
+		plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+
+	// // Step 1: Add any new tags from task.tags that are not in existingTags
+	// let newTagsToAdd = taskTags.filter((t) => !existingTags.includes(t));
+
+	// Do not carry over tags that exist in existingTags but were removed from task.tags
+	existingTags = existingTags.filter((tag: string) => taskTags.includes(tag));
+
+	// Build final tags: identifier + all tags from taskTags (which covers common + new)
+	const finalTags = [identifierTag, ...taskTags, ...existingTags];
+
+	// Remove duplicates and empty entries
+	tempUpdates[tagsKey] = Array.from(
+		new Set(finalTags.map((t) => String(t).trim()).filter(Boolean))
+	);
 
 	// Update or add unique ID
 	if (plugin.settings.data.globalSettings.autoAddUniqueID) {
