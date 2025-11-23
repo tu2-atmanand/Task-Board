@@ -964,7 +964,9 @@ export const replaceOldTaskWithNewTask = async (
 			after: string
 		) => {
 			if (newTaskContent.trim() === "") {
-				return `${before}${after ? after : ""}`;
+				return `${before}${
+					after ? (after.endsWith(`\n`) ? after : `${after}\n`) : "\n"
+				}`;
 			}
 
 			return `${before}\n${newTaskContent}${
@@ -972,7 +974,9 @@ export const replaceOldTaskWithNewTask = async (
 					? newTaskContent.endsWith("\n") || after.startsWith("\n")
 						? after
 						: `\n${after}`
-					: ""
+					: newTaskContent.endsWith("\n")
+					? ""
+					: `\n`
 			}`;
 		};
 
