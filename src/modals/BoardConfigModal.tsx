@@ -193,7 +193,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const handleDeleteCurrentBoard = () => {
 		const app = plugin.app;
-		const mssg = t("board-delete-confirmation-message")
+		const mssg = t("board-delete-confirmation-message");
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app,
 			mssg,
@@ -339,10 +339,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Function to delete a column from the selected board
 	const handleDeleteColumnFromBoard = (boardIndex: number, columnIndex: number) => {
-		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex].columns.splice(columnIndex, 1);
-		setLocalBoards(updatedBoards);
-		setIsEdited(true);
+		const app = plugin.app;
+		const mssg = t("column-delete-confirmation-message") + localBoards[boardIndex].columns[columnIndex].name;
+
+		const deleteModal = new DeleteConfirmationModal(app, {
+			app,
+			mssg,
+			onConfirm: () => {
+				if (columnIndex !== -1) {
+					const updatedBoards = [...localBoards];
+					updatedBoards[boardIndex].columns.splice(columnIndex, 1);
+					setLocalBoards(updatedBoards);
+					setIsEdited(true);
+				} else {
+					bugReporter(plugin, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
+				}
+			},
+			onCancel: () => {
+				// console.log("Board Deletion Operation Cancelled.");
+			},
+		});
+		deleteModal.open();
 	};
 
 	useEffect(() => {
