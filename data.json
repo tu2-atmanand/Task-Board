@@ -71,7 +71,7 @@
           ]
         },
         "taskCount": {
-          "pending": 28,
+          "pending": 30,
           "completed": 4
         }
       },
@@ -183,26 +183,7 @@
             "index": 6,
             "filters": {
               "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1760184422637-6hlzfbhzl",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1760184422638-ibhyozbjt",
-                      "property": "completedDate",
-                      "condition": "<=",
-                      "value": "2025-10-11"
-                    },
-                    {
-                      "id": "id-1760186970354-3twr3szpq",
-                      "property": "completedDate",
-                      "condition": ">=",
-                      "value": "2025-10-01"
-                    }
-                  ]
-                }
-              ]
+              "filterGroups": []
             }
           }
         ],
@@ -220,12 +201,31 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": []
+          "filterGroups": [
+            {
+              "id": "id-1763871967163-8a21jnuiq",
+              "groupCondition": "any",
+              "filters": [
+                {
+                  "id": "id-1763871967165-lct3l84v6",
+                  "property": "tags",
+                  "condition": "contains",
+                  "value": "#task"
+                },
+                {
+                  "id": "id-1763871980225-nbzhu6dnv",
+                  "property": "tags",
+                  "condition": "contains",
+                  "value": "#taskNote"
+                }
+              ]
+            }
+          ]
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 41,
-          "completed": 8
+          "pending": 3,
+          "completed": 1
         }
       },
       {
@@ -237,23 +237,7 @@
             "name": "Backlogs",
             "index": 1,
             "id": 226119,
-            "sortCriterias": [
-              {
-                "criteria": "status",
-                "order": "asc",
-                "priority": 1
-              },
-              {
-                "criteria": "scheduledDate",
-                "order": "asc",
-                "priority": 2
-              },
-              {
-                "criteria": "priority",
-                "order": "desc",
-                "priority": 3
-              }
-            ],
+            "sortCriterias": [],
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -261,18 +245,28 @@
             "sortCriteria": [
               {
                 "criteria": "id",
-                "order": "asc",
-                "priority": 1
+                "order": "desc",
+                "priority": 1,
+                "uid": "k6wjlc63"
               }
             ],
             "minimized": false
+          },
+          {
+            "id": 2485661779,
+            "index": 2,
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "#Task",
+            "coltag": "#Task"
           },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Can be implemented",
-            "index": 2,
+            "index": 3,
             "coltag": "#pending",
             "id": 47626,
             "filters": {
@@ -286,7 +280,7 @@
             "active": true,
             "collapsed": false,
             "name": "In Progress",
-            "index": 3,
+            "index": 4,
             "coltag": "working",
             "id": 908753,
             "filters": {
@@ -325,7 +319,7 @@
             "active": true,
             "collapsed": false,
             "name": "In Review",
-            "index": 4,
+            "index": 5,
             "coltag": "Test",
             "id": 396902
           },
@@ -334,13 +328,13 @@
             "active": true,
             "collapsed": false,
             "name": "Ready to publish",
-            "index": 5,
+            "index": 6,
             "coltag": "done",
             "id": 328227
           },
           {
             "id": 1936828579,
-            "index": 6,
+            "index": 7,
             "colType": "namedTag",
             "active": false,
             "collapsed": false,
@@ -349,12 +343,28 @@
           },
           {
             "id": 3193261849,
-            "index": 7,
+            "index": 8,
             "colType": "completed",
             "active": true,
             "collapsed": false,
             "name": "Completed",
-            "limit": 20
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1763878153878-2dyqv7914",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1763878153879-cc19ylpzx",
+                      "property": "completedDate",
+                      "condition": "isNotEmpty"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
         "filters": [
@@ -417,7 +427,7 @@
         },
         "taskCount": {
           "pending": 25,
-          "completed": 3
+          "completed": 5
         }
       }
     ],
@@ -432,7 +442,7 @@
           ]
         },
         "folders": {
-          "polarity": 2,
+          "polarity": 3,
           "values": [
             "Task Board/1.7.0",
             "/Notes/",
@@ -459,9 +469,9 @@
       "firstDayOfWeek": "2",
       "ignoreFileNameDates": false,
       "taskCompletionFormat": "2",
-      "taskCompletionDateTimePattern": "yyyy-MM-DD/HH:mm",
+      "taskCompletionDateTimePattern": "YYYY-MM-DD/HH:mm",
       "dailyNotesPluginComp": true,
-      "universalDateFormat": "yyyy-MM-DD",
+      "universalDateFormat": "YYYY-MM-DD",
       "taskCompletionInLocalTime": true,
       "taskCompletionShowUtcOffset": false,
       "autoAddDue": true,
@@ -875,11 +885,11 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 261,
+      "uniqueIdCounter": 263,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "map",
+        "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
         "settingTab": 0
@@ -947,13 +957,13 @@
         {
           "index": 9,
           "property": "Scheduled date",
-          "key": "scheduled-date",
+          "key": "scheduled",
           "taskItemKey": "scheduledDate"
         },
         {
           "index": 10,
           "property": "Due date",
-          "key": "due-date",
+          "key": "due",
           "taskItemKey": "due"
         },
         {
@@ -993,12 +1003,12 @@
         }
       ],
       "mapView": {
-        "background": "dots",
+        "background": "transparent",
         "mapOrientation": "hor",
         "optimizedRender": false,
         "arrowDirection": "c2p",
         "animatedEdges": false,
-        "scrollAction": "pan",
+        "scrollAction": "zoom",
         "showMinimap": true,
         "renderVisibleNodes": false,
         "edgeType": "default"
