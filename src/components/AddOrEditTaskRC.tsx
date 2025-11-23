@@ -1173,7 +1173,6 @@ export const AddOrEditTaskRC: React.FC<{
 									ref={childTaskInputRef}
 									className="EditTaskModalChildTaskInput"
 									placeholder={t("child-tasks-section-description")}
-									value={''}
 									onChange={(e) => { e.preventDefault(); }}
 								/>
 								{/* Here I want to show all the depends on tasks */}
