@@ -19,6 +19,7 @@ export interface columnSortingCriteria {
 		| "id"; // Fields to sort by
 	order: "asc" | "desc"; // Sort order
 	priority: number;
+	uid: string;
 }
 
 // --- Interfaces (from focus.md and example HTML) ---

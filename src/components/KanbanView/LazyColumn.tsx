@@ -52,7 +52,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	// Memoize all tasks
 	const allTasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
-	
 	// Memoize visible tasks based on count
 	const visibleTasks = useMemo(() => {
 		return allTasks.slice(0, visibleTaskCount);
@@ -315,7 +314,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							{allTasks.length}
 						</div>
 					</div>
-					<div 
+					<div
 						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}
 					>

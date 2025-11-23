@@ -5,10 +5,12 @@ import { Modal, Setting } from "obsidian";
 import Sortable from "sortablejs";
 import { ColumnData, columnSortingCriteria } from "src/interfaces/BoardConfigs";
 import { t } from "src/utils/lang/helper";
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 
 export class ConfigureColumnSortingModal extends Modal {
 	plugin: TaskBoard;
 	columnConfiguration: ColumnData;
+	isEdited: boolean;
 	onSave: (updatedColumnConfiguration: ColumnData) => void;
 	onCancel: () => void;
 
@@ -20,13 +22,25 @@ export class ConfigureColumnSortingModal extends Modal {
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
-		this.columnConfiguration = { ...columnConfiguration }; // Create a copy to avoid mutating original
+		this.isEdited = false;
+		// Deep-copy columnConfiguration to avoid mutating caller's object (avoid stale/unsaved changes)
+		try {
+			this.columnConfiguration = JSON.parse(JSON.stringify(columnConfiguration));
+		} catch (e) {
+			// Fallback to shallow copy if stringify fails
+			this.columnConfiguration = { ...columnConfiguration };
+		}
 		this.onSave = onSave;
 		this.onCancel = onCancel;
 
-		// Initialize sortCriteria if not present
+		// Initialize sortCriteria if not present, and ensure each criterion has a stable uid
 		if (!this.columnConfiguration.sortCriteria) {
 			this.columnConfiguration.sortCriteria = [];
+		} else {
+			this.columnConfiguration.sortCriteria = this.columnConfiguration.sortCriteria.map((c) => ({
+				...c,
+				uid: (c as any).uid || Math.random().toString(36).slice(2, 10),
+			}));
 		}
 	}
 
@@ -69,28 +83,26 @@ export class ConfigureColumnSortingModal extends Modal {
 			forceFallback: true,
 			fallbackClass: "task-board-sortable-fallback",
 			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: async () => {
-				const newOrder = Array.from(sortingCriteriaList.children)
-					.map((child, index) => {
-						const criteriaName =
-							child.getAttribute("data-criteria-name");
-						const criteria =
-							this.columnConfiguration.sortCriteria?.find(
-								(c) => c.criteria === criteriaName
-							);
-						if (criteria) {
-							criteria.priority = index + 1;
-							return criteria;
-						}
-						return null;
-					})
-					.filter(
-						(criteria): criteria is columnSortingCriteria =>
-							criteria !== null
+				onSort: async () => {
+					// Use stable uid attributes on DOM rows to determine new order
+					const uidsInDom = Array.from(sortingCriteriaList.children).map((child) =>
+						child.getAttribute("data-uid")
 					);
-
-				this.columnConfiguration.sortCriteria = newOrder;
-			},
+					const existing = this.columnConfiguration.sortCriteria || [];
+					const newOrder: ColumnData["sortCriteria"] = [];
+					uidsInDom.forEach((uid, idx) => {
+						if (!uid) return;
+						const found = existing.find((c) => (c as any).uid === uid);
+						if (found) {
+							found.priority = idx + 1;
+							newOrder.push(found);
+						}
+					});
+					this.columnConfiguration.sortCriteria = newOrder;
+					this.isEdited = true;
+					// Re-render to refresh indices and listeners
+					renderSortingCriterias();
+				},
 		});
 
 		const renderSortingCriterias = () => {
@@ -103,7 +115,10 @@ export class ConfigureColumnSortingModal extends Modal {
 				.forEach((sortCriteria, index) => {
 					const row = sortingCriteriaList.createDiv({
 						cls: "configureColumnSortingModalHomeSortingCriteriaListItemRow",
-						attr: { "data-criteria-name": sortCriteria.criteria },
+						attr: {
+							"data-criteria-name": sortCriteria.criteria,
+							"data-uid": (sortCriteria as any).uid,
+						},
 					});
 
 					new Setting(row)
@@ -143,6 +158,7 @@ export class ConfigureColumnSortingModal extends Modal {
 										].criteria =
 											value as columnSortingCriteria["criteria"];
 									}
+									this.isEdited = true;
 								});
 						})
 						.addDropdown((dropdown) => {
@@ -157,6 +173,7 @@ export class ConfigureColumnSortingModal extends Modal {
 										].order =
 											value as columnSortingCriteria["order"];
 									}
+									this.isEdited = true;
 								});
 							// Add tooltips explaining what asc/desc means for each field type if possible
 							if (sortCriteria.criteria === "priority") {
@@ -192,6 +209,7 @@ export class ConfigureColumnSortingModal extends Modal {
 								)
 								.setTooltip(t("remove-sort-criterion"))
 								.onClick(async () => {
+									this.isEdited = true;
 									if (this.columnConfiguration.sortCriteria) {
 										this.columnConfiguration.sortCriteria.splice(
 											index,
@@ -212,11 +230,13 @@ export class ConfigureColumnSortingModal extends Modal {
 			cls: "configureColumnSortingModalHomeAddSortingBtn",
 		});
 		addNewSortingButton.addEventListener("click", async () => {
-			const newCriteria: columnSortingCriteria = {
+			this.isEdited = true;
+			const newCriteria: any = {
 				criteria: "content",
 				order: "asc",
 				priority:
 					(this.columnConfiguration.sortCriteria?.length || 0) + 1,
+				uid: Math.random().toString(36).slice(2, 10),
 			};
 			if (!this.columnConfiguration.sortCriteria) {
 				this.columnConfiguration.sortCriteria = [];
@@ -236,6 +256,7 @@ export class ConfigureColumnSortingModal extends Modal {
 		});
 		saveButton.addEventListener("click", () => {
 			this.onSave(this.columnConfiguration);
+			this.isEdited = false;
 			this.close();
 		});
 
@@ -254,5 +275,31 @@ export class ConfigureColumnSortingModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+	}
+
+	handleCloseAttempt() {
+		// Open confirmation modal
+		const mssg = t("edit-task-modal-close-confirm-mssg");
+		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
+			app: this.app,
+			mssg,
+			onDiscard: () => {
+				this.isEdited = false;
+				this.close();
+			},
+			onGoBack: () => {
+				// Do nothing
+			},
+		});
+		closeConfirmModal.open();
+	}
+
+	public close(): void {
+		if (this.isEdited) {
+			this.handleCloseAttempt();
+		} else {
+			this.onClose();
+			super.close();
+		}
 	}
 }
