@@ -8,7 +8,7 @@ import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegula
  * @param symbol - The current checkbox symbol.
  * @returns The next checkbox state symbol.
  */
-export function checkboxStateSwitcher(plugin: any, symbol: string): string {
+export function checkboxStateSwitcher(plugin: TaskBoard, symbol: string): string {
 	const { tasksPluginCustomStatuses, customStatuses } =
 		plugin.settings.data.globalSettings;
 

@@ -657,6 +657,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	justify-content: center;
 }
 
+.taskBoardMapViewContainerNodeResizerTaskItem .taskItemContainer .taskItem.completed {
+	opacity: 60%;
+}
+
 .taskBoardMapViewContainerInitialMessage {
 	max-width: 80vw;
 	margin-top: 1rem;
@@ -668,12 +672,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* background-color: var(--white); */
 }
 
-.taskBoardMapViewContainerNodeResizerTaskItem {}
-
-.taskBoardMapViewContainerNodeResizerTaskItem-selected {
-	border: 4px solid violet;
-	border-style: inset;
-	border-radius: 10px;
+.taskBoardMapViewContainerNodeResizerTaskItem-selected .taskItemContainer .taskItem {
+	border: 1px solid var(--color-accent);
 }
 
 /* .taskBoardMapViewContainerNodeResizerHandle:hover {
