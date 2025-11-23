@@ -192,7 +192,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 		// Load and sanitize viewport (board-wise)
 		const vpMap = loadViewport();
-		console.log("Loading viewport data for board : ", activeBoardIndex, "\nData :", vpMap);
 		const rawForBoard = vpMap[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
 		const sanitizedForBoard: viewPort = {
 			x: Number.isFinite(rawForBoard.x) ? rawForBoard.x : 10,

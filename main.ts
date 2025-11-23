@@ -83,6 +83,8 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async onload() {
+		console.log("Task Board : Loading...");
+
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.runOnPluginUpdate();
@@ -130,6 +132,8 @@ export default class TaskBoard extends Plugin {
 	}
 
 	onunload() {
+		console.log("Task Board : Uninstalling...");
+
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
