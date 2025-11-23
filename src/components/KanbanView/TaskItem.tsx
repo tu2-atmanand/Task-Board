@@ -35,7 +35,7 @@ export interface TaskProps {
 }
 
 const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
-	const [isChecked, setIsChecked] = useState(false);
+	const [isChecked, setIsChecked] = useState(isCompleted(task.title));
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
 
@@ -743,7 +743,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	return (<div className='taskItemContainer'>
-		<div className="taskItem" key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+		<div className={`taskItem${isChecked ? ' completed' : ''}`} key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 			onDoubleClick={handleDoubleClickOnCard}
 		>
 			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
@@ -760,7 +760,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<div className="taskItemMainBodyTitleNsubTasks">
 						<input
 							type="checkbox"
-							checked={(task.status === taskStatuses.checked || task.status === taskStatuses.regular || isChecked) ? true : false}
+							checked={(isChecked) ? true : false}
 							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
 							data-task={task.status} // Add the data-task attribute
 							dir='auto'

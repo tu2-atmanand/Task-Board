@@ -91,13 +91,16 @@ const MapView: React.FC<MapViewProps> = ({
 	const [storageLoaded, setStorageLoaded] = useState(false);
 	const [positions, setPositions] = useState<Record<string, nodePosition>>({});
 	const [nodeSizes, setNodeSizes] = useState<Record<string, nodeSize>>({});
-	const [viewport, setViewport] = useState<viewPort>({ x: 10, y: 10, zoom: 1.5 });
+	const [viewport, setViewport] = useState<Record<number, viewPort>>({});
 
 	// Track when board changes to force node recalculation
 	const [boardChangeKey, setBoardChangeKey] = useState(0);
 
 	// Task importer panel state
 	const [isImporterPanelVisible, setIsImporterPanelVisible] = useState(false);
+
+	// ReactFlow instance ref so we can programmatically set viewport when switching boards
+	const reactFlowInstanceRef = useRef<any | null>(null);
 
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
@@ -117,7 +120,7 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 
 		try {
-			const boardPositions = allBoardPositions[String(activeBoardIndex)];
+			const boardPositions = allBoardPositions[activeBoardIndex];
 			if (typeof boardPositions === 'object' && boardPositions !== null) {
 				return boardPositions;
 			}
@@ -145,24 +148,20 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	};
 
-	// Viewport state
-	const loadViewport = (): viewPort => {
+	// Viewport state (board-wise)
+	const loadViewport = (): Record<string, viewPort> => {
 		try {
 			const stored = localStorage.getItem(VIEWPORT_STORAGE_KEY);
 			if (stored) {
 				const parsed = JSON.parse(stored);
 				if (typeof parsed === 'object' && parsed !== null) {
-					return {
-						x: Number.isFinite(parsed.x) ? parsed.x : 10,
-						y: Number.isFinite(parsed.y) ? parsed.y : 10,
-						zoom: Number.isFinite(parsed.zoom) && parsed.zoom > 0 ? parsed.zoom : 1.5
-					};
+					return parsed as Record<string, viewPort>;
 				}
 			}
-			return { x: 10, y: 10, zoom: 1.5 };
+			return { [activeBoardIndex]: { x: 10, y: 10, zoom: 1.5 } };
 		} catch (error) {
 			console.warn('Failed to load viewport from localStorage:', error);
-			return { x: 10, y: 10, zoom: 1.5 };
+			return { [activeBoardIndex]: { x: 10, y: 10, zoom: 1.5 } };
 		}
 	};
 
@@ -191,14 +190,16 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		setNodeSizes(sanitizedSizes);
 
-		// Load and sanitize viewport
-		const vp = loadViewport();
-		const sanitizedViewport: viewPort = {
-			x: Number.isFinite(vp.x) ? vp.x : 10,
-			y: Number.isFinite(vp.y) ? vp.y : 10,
-			zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1.5
+		// Load and sanitize viewport (board-wise)
+		const vpMap = loadViewport();
+		console.log("Loading viewport data for board : ", activeBoardIndex, "\nData :", vpMap);
+		const rawForBoard = vpMap[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
+		const sanitizedForBoard: viewPort = {
+			x: Number.isFinite(rawForBoard.x) ? rawForBoard.x : 10,
+			y: Number.isFinite(rawForBoard.y) ? rawForBoard.y : 10,
+			zoom: Number.isFinite(rawForBoard.zoom) ? rawForBoard.zoom : 1.5
 		};
-		setViewport(sanitizedViewport);
+		setViewport(prev => ({ ...vpMap, [activeBoardIndex]: sanitizedForBoard }));
 
 		setStorageLoaded(true);
 		// Increment board change key to force initialNodes recalculation
@@ -333,6 +334,20 @@ const MapView: React.FC<MapViewProps> = ({
 		setNodes(initialNodes);
 	}, [initialNodes, setNodes]);
 
+	// When the active board or viewport data changes, apply the stored viewport to the ReactFlow instance.
+	useEffect(() => {
+		const instance = reactFlowInstanceRef.current;
+		if (!instance) return;
+		const vpForBoard = viewport[activeBoardIndex];
+		if (vpForBoard && Number.isFinite(vpForBoard.x) && Number.isFinite(vpForBoard.y) && Number.isFinite(vpForBoard.zoom)) {
+			try {
+				instance.setViewport(vpForBoard);
+			} catch (e) {
+				// ignore - instance may be transitioning
+			}
+		}
+	}, [activeBoardIndex, viewport]);
+
 	// Calculate edges from dependsOn property
 	// TODO : Might be efficient to make use of the addEdge api of reactflow.
 	function getEdgesFromTasks(): Edge[] {
@@ -355,8 +370,9 @@ const MapView: React.FC<MapViewProps> = ({
 		// const cssMin = 1.2; // value when zoom is maxZ
 		// const cssMax = 1.5;   // value when zoom is minZ
 
-		const z = Number.isFinite(viewport.zoom) ? viewport.zoom : 1.5;
-		const clamped = Math.max(0.5, Math.min(2, z));
+		const vpForBoard = viewport[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
+		const zoom = Number.isFinite(vpForBoard.zoom) ? vpForBoard.zoom : 1.5;
+		const clamped = Math.max(0.5, Math.min(2, zoom));
 		const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 		const mapped = 1.5 - ratio * (1.5 - 1.2);
 		// Keep a compact string value suitable for CSS variable
@@ -549,13 +565,25 @@ const MapView: React.FC<MapViewProps> = ({
 		const now = Date.now();
 		if (now - lastViewportSaveTime.current > 2000) {
 			// Validate viewport values before saving
-			const safeViewport = {
+			const safeViewport: viewPort = {
 				x: Number.isFinite(vp.x) ? vp.x : 10,
 				y: Number.isFinite(vp.y) ? vp.y : 10,
 				zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1.5
 			};
 			try {
-				localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(safeViewport));
+				// Load existing map, update only current board entry
+				const stored = localStorage.getItem(VIEWPORT_STORAGE_KEY);
+				let parsed: Record<string, viewPort> = {};
+				if (stored) {
+					try {
+						const p = JSON.parse(stored);
+						if (typeof p === 'object' && p !== null) parsed = p;
+					} catch (e) {
+						parsed = {};
+					}
+				}
+				parsed[activeBoardIndex] = safeViewport;
+				localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(parsed));
 				lastViewportSaveTime.current = now;
 			} catch (error) {
 				console.warn('Failed to save viewport:', error);
@@ -816,7 +844,8 @@ const MapView: React.FC<MapViewProps> = ({
 							// const cssMin = 1; // value when zoom is maxZ
 							// const cssMax = 2;   // value when zoom is minZ
 
-							const z = Number.isFinite(viewport.zoom) ? viewport.zoom : 1.5;
+							const vpForBoard = viewport[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
+							const z = Number.isFinite(vpForBoard.zoom) ? vpForBoard.zoom : 1.5;
 							const clamped = Math.max(0.5, Math.min(2, z));
 							const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 							// Map so that zoom 0.5 -> 2 and zoom 2 -> 1
@@ -861,6 +890,12 @@ const MapView: React.FC<MapViewProps> = ({
 							// rendering
 							onlyRenderVisibleElements={mapViewSettings.renderVisibleNodes} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
 							onInit={(instance) => {
+								// store reactflow instance for later programmatic viewport updates
+								try {
+									reactFlowInstanceRef.current = instance;
+								} catch (e) {
+									// ignore
+								}
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
 									if (node && Number.isFinite(node.position.x) && Number.isFinite(node.position.y)) {
@@ -872,25 +907,25 @@ const MapView: React.FC<MapViewProps> = ({
 										// Validate the new viewport before setting
 										if (Number.isFinite(newVp.x) && Number.isFinite(newVp.y) && Number.isFinite(newVp.zoom)) {
 											instance.setViewport(newVp);
-											setViewport(newVp);
+											setViewport(prev => ({ ...prev, [activeBoardIndex]: newVp }));
 											debouncedSetViewportStorage(newVp);
 											return;
 										}
 									}
 								}
-								// Use current viewport if valid, otherwise fall back to defaults
-								const currentVp = viewport;
-								if (Number.isFinite(currentVp.x) && Number.isFinite(currentVp.y) && Number.isFinite(currentVp.zoom)) {
-									instance.setViewport(currentVp);
+								// Use current viewport if valid for this board, otherwise fall back to defaults
+								const currentVpForBoard = viewport[activeBoardIndex];
+								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom)) {
+									instance.setViewport(currentVpForBoard);
 								} else {
 									const defaultVp = { x: 10, y: 10, zoom: 1.5 };
 									instance.setViewport(defaultVp);
-									setViewport(defaultVp);
+									setViewport(prev => ({ ...prev, [activeBoardIndex]: defaultVp }));
 								}
 							}}
-							defaultViewport={viewport}
+							defaultViewport={viewport[activeBoardIndex]}
 							onMoveEnd={(_, vp) => {
-								setViewport(vp);
+								setViewport(prev => ({ ...prev, [activeBoardIndex]: vp }));
 								debouncedSetViewportStorage(vp);
 								// throttledSetViewportStorage(vp);
 							}}
