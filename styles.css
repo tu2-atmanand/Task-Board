@@ -6047,3 +6047,8 @@ svg.react-flow__connectionline {
 	stroke: var(--text-normal);
 	stroke-width: 2;
 }
+
+/* FIX : Recent lucide added some weired margin on right */
+.lucide {
+	margin-right: 0px !important;
+}
