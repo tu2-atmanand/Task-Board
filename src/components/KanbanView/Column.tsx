@@ -15,6 +15,7 @@ import { bugReporter } from 'src/services/OpenModals';
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
+import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -282,6 +283,8 @@ const Column: React.FC<ColumnProps> = ({
 		);
 	}
 
+	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
+
 	return (
 		<div
 			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}`}
@@ -293,7 +296,7 @@ const Column: React.FC<ColumnProps> = ({
 			{columnData.minimized ? (
 				// Minimized view - vertical bar with count and rotated text
 				<div className="taskBoardColumnMinimized">
-					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+					<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
 						{tasksForThisColumn.length}
 					</div>
 					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
@@ -309,7 +312,7 @@ const Column: React.FC<ColumnProps> = ({
 							{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
 							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 						</div>
-						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
+						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
 						{/* <RxDotsVertical /> */}
 					</div>
 					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>

@@ -168,7 +168,10 @@ export function checkFolderFilters(
 				}
 			} else {
 				// Check if parentFolder is exactly the filter OR is a subfolder of the filter
-				return parentFolder === filter || parentFolder.startsWith(filter + "/");
+				return (
+					parentFolder === filter ||
+					parentFolder.startsWith(filter + "/")
+				);
 			}
 		});
 	}
@@ -218,13 +221,14 @@ export function checkFolderFilters(
 }
 
 export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
+	const tagPolarity = scanFilters.tags.polarity;
+	if (tagPolarity === 3) return true;
+
 	const tagInFilters = tags.some((tag) => {
 		// return scanFilters.tags.values.includes(tag);
 		const result = matchTagsWithWildcards(scanFilters.tags.values, tag);
 		return result !== null;
 	});
-
-	const tagPolarity = scanFilters.tags.polarity;
 
 	const tagCheck =
 		(tagPolarity === 1 && tagInFilters) ||

@@ -285,3 +285,24 @@ function compareDates(date1: any, date2: any): number {
 	if (d1 > d2) return 1;
 	return 0;
 }
+
+/**
+ * Checks if the root filter state is empty (no filter groups or filters)
+ * @param filterState - The root filter state to check
+ * @returns true if empty, false otherwise
+ */
+export function isRootFilterStateEmpty(
+	filterState: RootFilterState | undefined
+): boolean {
+	if (!filterState) return true;
+	if (!filterState.filterGroups || filterState.filterGroups.length === 0)
+		return true;
+
+	for (const group of filterState.filterGroups) {
+		if (group.filters && group.filters.length > 0) {
+			return false;
+		}
+	}
+
+	return true;
+}
