@@ -16,11 +16,13 @@
 </p>
 <br/>
 
-<p align="center">An <a href="https://obsidian.md/">Obsidian</a> plugin to view and manage all your tasks, throughout the vault in a much efficient Kanban board format.</p>
+<p align="center">An <a href="https://obsidian.md/">Obsidian</a> plugin to view and manage all your tasks, throughout the vault on a centralized board using various kinds of views. Use boards to manage small to large projects.</p>
 
 ![Task Board Thumbnail](./assets/MainThumbnail-3.jpg)
 
-> Introductory YouTube video : [Task Board plugin - Introduction](https://youtu.be/ZizsPBuXW8g)
+> YouTube playlist : [Task Board - Obsidian plugin](https://youtube.com/playlist?list=PLqEPxsDi1dtepfcaUO9r1BTGZN6IuhvvH&si=yohu1rczpRVq68D6)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?si=XipQFbawEnKG_PzJ&amp;list=PLqEPxsDi1dtepfcaUO9r1BTGZN6IuhvvH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 This plugin is designed to help you document your work seamlessly from start to finish while completing a specific task. With this plugin, you can quickly open a task without manually accessing the markdown file, allowing you to add solutions, key points, resources, and even sub-tasks effortlessly.
 
@@ -51,14 +53,16 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 **Step 3 :** Click on the **Scan vault modal** button from the top-right corner in the Task Board view header. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters](https://tu2-atmanand.github.io/task-board-docs/docs/Features/Filters_for_Scanning/) to exclude certain files from scanning.
 
-**Step 4 :** There are already two predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToCreateNewBoard/) from the Configure Board settings. Enjoy !
+**Step 4 :** There are already three predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToCreateNewBoard/) from the [Board configure modal](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToUseBoardSettings/). 
+
+Enjoy !
 
 
 ## Features
 
 ### Task Formats
 
-This plugin can scan all kinds of task formats which are supported by the [Tasks plugin](https://github.com/obsidian-tasks-group/obsidian-tasks). Whether the tasks are multi-level indented tasks, tasks from callouts and tas with checkboxes starting with the patterns `- [ ]`, `+ [ ]`, `* [ ]` or `> [ ]` will be scanned.
+This plugin can scan all kinds of task formats which are supported by the [Tasks plugin](https://github.com/obsidian-tasks-group/obsidian-tasks). Whether the tasks are multi-level indented tasks, tasks from callouts and tasks with checkboxes starting with the patterns `- [ ]`, `+ [ ]`, `* [ ]` or `> [ ]` will be scanned.
 
 Additionally, you can add multi-level sub-tasks and body description with images and files with the accepted format as explained in the docs. Following is an example of a task :
 
@@ -95,23 +99,27 @@ Marking a Task as complete from the board is real-time, as soon as you will mark
 
 Edit task directly from the Edit Task modal. You can add different properties to the task, add more subTask, add or edit description to the task. And the changes will be updated in the parent markdown file exactly the way you see it in the modal preview.
 
-![Editing a Task Item](./assets/EditTaskWindow.gif)
+![Editing a Task Item](./assets/EditTaskWindow-2.gif)
 
 ### Deleting a Task
 
-Directly delete unwanted task from the board using the delete Icon. The task will also be deleted from the parent markdown file.
+Directly delete unwanted task from the board using the delete button on card.
+
+You have also the option to archive the task either in the same note or move it in a dedicated `archived-tasks-note.md`.
 
 ### Applying Filters
 
-Apply Board filters to filter out and see the urgent tasks on the board with ease. Filters for Columns coming soon.
+Apply advanced filters to boards as well as columns to have double level of filtering for customized views.
+
+This advanced and dynamic filters will help you to use boards as separate projects to manage them effectively.
 
 
 ## Upcoming Features
 
-- **Task Sorting :** Sorting feature for each individual Column.
 - **Drag N Drop for Tasks :** User will be able to drag and drop tasks from one column to another for easy editing fields.
-- **New Board Type :** A new type of Board called `Static Board` will be added, which will work with a single markdown file, similar to the Kanban Plugin.
 - **Comments and Activity :** Using the Add or Edit task modal, you can add comments to the task, which will help you to document everything you were doing while working on this task, similar to GitHub Projects Planning Issus feature.
+- **Separate tabs for different boars :** View your boards in different tabs to see them at the same time.
+- **New Board Type :** A new type of Board called `Static Board` will be added, which will work with a single markdown file, similar to the Kanban Plugin.
 
 
 ## How to Contribute
