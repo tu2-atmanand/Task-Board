@@ -865,9 +865,9 @@ const MapView: React.FC<MapViewProps> = ({
 							onNodeDragStop={() => {
 								handleNodePositionChange();
 							}}
-							// fitView={true}
 
 							// viewport controls
+							// fitView={true}
 							panOnScroll={mapViewSettings.scrollAction === mapViewScrollAction.pan ? true : false}
 							zoomOnScroll={mapViewSettings.scrollAction === mapViewScrollAction.zoom ? true : false}
 							// preventScrolling={false}
@@ -875,6 +875,11 @@ const MapView: React.FC<MapViewProps> = ({
 							selectNodesOnDrag={false}
 							selectionOnDrag={Platform.isPhone ? false : true}
 							selectionMode={SelectionMode.Partial}
+							onMoveEnd={(_, vp) => {
+								// setViewport(prev => ({ ...prev, [activeBoardIndex]: vp })); // NOTE : Dont update the viewport here again, as it is giving a glitching behavior.
+								debouncedSetViewportStorage(vp);
+								// throttledSetViewportStorage(vp);
+							}}
 
 							// Events
 							// onEdgesChange={onEdgesChange}
@@ -923,11 +928,6 @@ const MapView: React.FC<MapViewProps> = ({
 								}
 							}}
 							defaultViewport={viewport[activeBoardIndex]}
-							onMoveEnd={(_, vp) => {
-								setViewport(prev => ({ ...prev, [activeBoardIndex]: vp }));
-								debouncedSetViewportStorage(vp);
-								// throttledSetViewportStorage(vp);
-							}}
 							elevateEdgesOnSelect={true}
 						>
 							<Controls>
