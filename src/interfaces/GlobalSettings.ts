@@ -157,7 +157,7 @@ export interface PluginDataJson {
 }
 
 export const DEFAULT_SETTINGS: PluginDataJson = {
-	version: "1.8.0",
+	version: "", // Keep this empty only. Change the version number in the runOnPluginUpdate function inside main.ts file whenever you will going to release a new version.
 	data: {
 		boardConfigs: [
 			{

@@ -944,12 +944,18 @@ export default class TaskBoard extends Plugin {
 
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed
-		const currentVersion = DEFAULT_SETTINGS.version;
+		const currentVersion = "1.8.2"; // Change this whenever you will going to release a new version.
+		const runMandatoryScan = false; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
 		const previousVersion = this.settings.version;
 
-		if (previousVersion == "" || currentVersion[2] !== previousVersion[2]) {
+		if (previousVersion == "" || currentVersion !== previousVersion) {
 			// make the localStorage flag, 'manadatoryScan' to True
-			localStorage.setItem("manadatoryScan", "true");
+
+			if (previousVersion === "" || runMandatoryScan) {
+				localStorage.setItem("manadatoryScan", "true");
+			}
+
+			this.settings.version = currentVersion;
 
 			// Settings migrations should be only applied after plugin update.
 			this.settings = migrateSettings(DEFAULT_SETTINGS, this.settings);

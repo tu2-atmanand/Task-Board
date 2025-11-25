@@ -11,8 +11,11 @@ import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
 
 /**
- * Migrates settings from imported data to current settings, preserving new fields and syncing new ones.
- * This function is recursive for nested objects.
+ * Recursively migrates settings by adding missing fields from defaults to settings.
+ * Also handles specific migrations for certain fields.
+ * @param defaults - The default settings object
+ * @param settings - The current settings object to migrate
+ * @returns The migrated settings object
  */
 export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 	for (const key in defaults) {
