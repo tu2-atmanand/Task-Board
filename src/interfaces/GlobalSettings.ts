@@ -631,7 +631,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			},
 			boundTaskCompletionToChildTasks: false,
 			kanbanView: {
-				lazyLoadingEnabled: false,
+				lazyLoadingEnabled: true,
 				initialTaskCount: 20,
 				loadMoreCount: 10,
 				scrollThresholdPercent: 80,

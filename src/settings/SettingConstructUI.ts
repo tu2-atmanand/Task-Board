@@ -882,20 +882,28 @@ export class SettingsManager {
 		// Lazy loading settings for Kanban view
 		new Setting(contentEl)
 			.setName("Enable lazy loading for Kanban view")
-			.setDesc("When enabled, only a limited number of task cards are initially rendered per column. More tasks load automatically as you scroll. This significantly improves performance for boards with hundreds of tasks.")
+			.setDesc(
+				"When enabled, only a limited number of task cards are initially rendered per column. More tasks load automatically as you scroll within each column. This significantly improves performance for boards with thousands of tasks. This setting is just to provide a backward compatibility in case user faces any issue with rendering. If there are no issues faced with this approach, this setting will be removed in the future releases and this technique will be used a default behavior for rendering the columns."
+			)
 			.addToggle((toggle) =>
-				toggle.setValue(this.globalSettings!.kanbanView?.lazyLoadingEnabled ?? false).onChange(async (value) => {
-					if (!this.globalSettings!.kanbanView) {
-						this.globalSettings!.kanbanView = {
-							lazyLoadingEnabled: false,
-							initialTaskCount: 20,
-							loadMoreCount: 10,
-							scrollThresholdPercent: 80,
-						};
-					}
-					this.globalSettings!.kanbanView.lazyLoadingEnabled = value;
-					await this.saveSettings();
-				})
+				toggle
+					.setValue(
+						this.globalSettings!.kanbanView?.lazyLoadingEnabled ??
+							false
+					)
+					.onChange(async (value) => {
+						if (!this.globalSettings!.kanbanView) {
+							this.globalSettings!.kanbanView = {
+								lazyLoadingEnabled: false,
+								initialTaskCount: 20,
+								loadMoreCount: 10,
+								scrollThresholdPercent: 80,
+							};
+						}
+						this.globalSettings!.kanbanView.lazyLoadingEnabled =
+							value;
+						await this.saveSettings();
+					})
 			);
 
 		new Setting(contentEl)
