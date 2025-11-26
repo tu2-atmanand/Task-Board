@@ -885,14 +885,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 263,
+      "uniqueIdCounter": 265,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "taskNote",
       "doubleClickCardToEdit": "noteInTab",
@@ -1008,9 +1008,9 @@
         "optimizedRender": false,
         "arrowDirection": "c2p",
         "animatedEdges": false,
-        "scrollAction": "zoom",
+        "scrollAction": "pan",
         "showMinimap": true,
-        "renderVisibleNodes": false,
+        "renderVisibleNodes": true,
         "edgeType": "default"
       }
     }
