@@ -268,8 +268,6 @@ export class FilterConfigModal extends Modal {
 			board.filterConfig.savedConfigs.push(config);
 			await this.plugin.saveSettings();
 
-			new Notice(t("filter-configs-saved-successfully"));
-
 			if (this.onSave) {
 				this.onSave(config);
 			}
@@ -305,7 +303,6 @@ export class FilterConfigModal extends Modal {
 				this.onLoad(config);
 			}
 
-			new Notice(t("filter-configuration-loaded-successfully"));
 			this.close();
 		} catch (error) {
 			console.error("Failed to load filter configuration:", error);

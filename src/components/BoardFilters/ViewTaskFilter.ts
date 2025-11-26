@@ -44,6 +44,7 @@ export class TaskFilterComponent extends Component {
 		MultiSuggest
 	>();
 	public isMultiSuggestDropdownActive = false;
+	public isConfigModalOpen = false;
 
 	constructor(
 		hostEl: HTMLElement,
@@ -235,7 +236,7 @@ export class TaskFilterComponent extends Component {
 						}
 					);
 
-					this.registerDomEvent(el, "click", () => {
+					this.registerDomEvent(el, "click", async () => {
 						this.openSaveConfigModal();
 					});
 				}
@@ -259,7 +260,7 @@ export class TaskFilterComponent extends Component {
 						}
 					);
 
-					this.registerDomEvent(el, "click", () => {
+					this.registerDomEvent(el, "click", async () => {
 						this.openLoadConfigModal();
 					});
 				}
@@ -1362,6 +1363,10 @@ export class TaskFilterComponent extends Component {
 				);
 			}
 		);
+		modal.setCloseCallback(() => {
+			this.isConfigModalOpen = false;
+		});
+		this.isConfigModalOpen = true;
 		modal.open();
 	}
 
@@ -1385,6 +1390,10 @@ export class TaskFilterComponent extends Component {
 				);
 			}
 		);
+		modal.setCloseCallback(() => {
+			this.isConfigModalOpen = false;
+		});
+		this.isConfigModalOpen = true;
 		modal.open();
 	}
 }
