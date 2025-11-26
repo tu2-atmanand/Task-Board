@@ -314,7 +314,7 @@ const en: Lang = {
 	"any": "any",
 	"all": "all",
 	"add-filter-group": "Add filter group",
-	"save-current-filter": "Save current filter",
+	"save-current-filter": "Save for future",
 	"load-saved-filter": "Load saved filter",
 	"filter-in-this-group": "filter in this group",
 	"duplicate-filter-group": "Duplicate filter group",
