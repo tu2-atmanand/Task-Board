@@ -301,7 +301,7 @@ export class FilterConfigModal extends Modal {
 			}
 
 			// Update the board filter state
-			board.boardFilter = config.filterState;
+			board.boardFilter = JSON.parse(JSON.stringify(config.filterState));
 			await this.plugin.saveSettings();
 
 			new Notice(
