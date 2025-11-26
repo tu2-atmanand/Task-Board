@@ -176,6 +176,7 @@ export class ViewTaskFilterPopover
 
 		if (
 			!this.taskFilterComponent.isMultiSuggestDropdownActive &&
+			!this.taskFilterComponent.isConfigModalOpen &&
 			this.popoverRef &&
 			!this.popoverRef.contains(e.target as Node)
 		) {
