@@ -22,13 +22,19 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			const data: string = await plugin.app.vault.adapter.read(path);
 			const parsedData = JSON.parse(data);
 
+			// Extract coreStatuses from the JSON
+			const coreStatuses =
+				parsedData?.statusSettings?.coreStatuses || [];
+
 			// Extract customStatuses from the JSON
 			const customStatuses =
 				parsedData?.statusSettings?.customStatuses || [];
 
+			const statuses = [...coreStatuses, ...customStatuses];
+
 			// Store it in the plugin settings
 			plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
-				customStatuses;
+				statuses;
 			plugin.saveSettings();
 		}
 	} catch (error) {
