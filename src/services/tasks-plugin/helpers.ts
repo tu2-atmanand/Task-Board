@@ -9,6 +9,7 @@ import {
 	getFormattedTaskContent,
 } from "src/utils/taskLine/TaskContentFormatter";
 import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskItemUtils";
+import { taskStatusConfig } from "./parse-task-fields";
 
 export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 	try {
@@ -19,18 +20,27 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
 
 			// Read the file content
-			const data: string = await plugin.app.vault.adapter.read(path);
+			const data: string = JSON.stringify(
+				await plugin.app.vault.adapter.read(path)
+			);
 			const parsedData = JSON.parse(data);
 
 			// Extract coreStatuses from the JSON
-			const coreStatuses =
+			const coreStatuses: taskStatusConfig[] =
 				parsedData?.statusSettings?.coreStatuses || [];
 
 			// Extract customStatuses from the JSON
-			const customStatuses =
+			const customStatuses: taskStatusConfig[] =
 				parsedData?.statusSettings?.customStatuses || [];
 
-			const statuses = [...coreStatuses, ...customStatuses];
+			const statusMap = new Map();
+			coreStatuses.forEach((status: taskStatusConfig) =>
+				statusMap.set(status.symbol, status)
+			);
+			customStatuses.forEach((status: taskStatusConfig) =>
+				statusMap.set(status.symbol, status)
+			);
+			const statuses = Array.from(statusMap.values());
 
 			// Store it in the plugin settings
 			plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
