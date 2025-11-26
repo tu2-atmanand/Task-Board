@@ -262,27 +262,18 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
-						name: "Can be implemented",
+						name: "Important",
 						index: 2,
-						coltag: "pending",
+						coltag: "important",
 					},
 					{
 						id: 9,
 						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
-						name: "In Progress",
+						name: "WIP",
 						index: 3,
-						coltag: "working",
-					},
-					{
-						id: 10,
-						colType: colType.namedTag,
-						active: true,
-						collapsed: false,
-						name: "Done",
-						index: 4,
-						coltag: "done",
+						coltag: "wip",
 					},
 					{
 						id: 11,
@@ -291,7 +282,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						collapsed: false,
 						name: "In Review",
 						index: 5,
-						coltag: "Test",
+						coltag: "review",
 					},
 					{
 						id: 12,
@@ -424,17 +415,22 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			tagColors: [
 				{
 					name: "bug",
-					color: "rgba(255, 0, 0, 1)",
+					color: "rgba(255, 0, 0, 0.55)",
 					priority: 1,
 				},
 				{
-					name: "working",
-					color: "rgba(0, 255, 0, 0.8)",
+					name: "important",
+					color: "rgba(246, 255, 0, 0.53)",
 					priority: 2,
 				},
 				{
-					name: "new",
-					color: "rgba(0, 0, 255, 1)",
+					name: "wip",
+					color: "rgba(0, 255, 0, 0.53)",
+					priority: 2,
+				},
+				{
+					name: "review",
+					color: "rgba(0, 0, 255, 0.49)",
 					priority: 3,
 				},
 			],
@@ -442,7 +438,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
 			tasksPluginCustomStatuses: [],
-			tagColorsType: TagColorType.Text,
+			tagColorsType: TagColorType.Background,
 			customStatuses: [
 				{
 					symbol: taskStatuses.todo,
