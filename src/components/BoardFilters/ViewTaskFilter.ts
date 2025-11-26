@@ -235,7 +235,7 @@ export class TaskFilterComponent extends Component {
 						}
 					);
 
-					this.registerDomEvent(el, "click", () => {
+					this.registerDomEvent(el, "click", async () => {
 						this.openSaveConfigModal();
 					});
 				}
@@ -259,7 +259,7 @@ export class TaskFilterComponent extends Component {
 						}
 					);
 
-					this.registerDomEvent(el, "click", () => {
+					this.registerDomEvent(el, "click", async () => {
 						this.openLoadConfigModal();
 					});
 				}
@@ -1354,13 +1354,7 @@ export class TaskFilterComponent extends Component {
 			this.plugin,
 			"save",
 			this.activeBoardIndex,
-			this.getFilterState(),
-			(config: SavedFilterConfig) => {
-				// Optional: Handle successful save
-				new Notice(
-					`${t("filter-configs-saved-successfully")} : ${config.name}`
-				);
-			}
+			this.getFilterState()
 		);
 		modal.open();
 	}
@@ -1372,18 +1366,7 @@ export class TaskFilterComponent extends Component {
 			this.app,
 			this.plugin,
 			"load",
-			this.activeBoardIndex,
-			undefined,
-			undefined,
-			(config: SavedFilterConfig) => {
-				// Load the configuration
-				this.loadFilterState(config.filterState);
-				new Notice(
-					`${t("filter-configuration-loaded-successfully")} : ${
-						config.name
-					}`
-				);
-			}
+			this.activeBoardIndex
 		);
 		modal.open();
 	}

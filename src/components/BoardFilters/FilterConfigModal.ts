@@ -11,8 +11,6 @@ export class FilterConfigModal extends Modal {
 	private plugin: TaskBoard;
 	private mode: "save" | "load";
 	private currentFilterState?: RootFilterState;
-	private onSave?: (config: SavedFilterConfig) => void;
-	private onLoad?: (config: SavedFilterConfig) => void;
 	private activeBoardIndex: number;
 
 	constructor(
@@ -21,16 +19,12 @@ export class FilterConfigModal extends Modal {
 		mode: "save" | "load",
 		activeBoardIndex: number,
 		currentFilterState?: RootFilterState,
-		onSave?: (config: SavedFilterConfig) => void,
-		onLoad?: (config: SavedFilterConfig) => void
 	) {
 		super(app);
 		this.plugin = plugin;
 		this.mode = mode;
 		this.activeBoardIndex = activeBoardIndex;
 		this.currentFilterState = currentFilterState;
-		this.onSave = onSave;
-		this.onLoad = onLoad;
 	}
 
 	onOpen() {
@@ -268,11 +262,9 @@ export class FilterConfigModal extends Modal {
 			board.filterConfig.savedConfigs.push(config);
 			await this.plugin.saveSettings();
 
-			new Notice(t("filter-configs-saved-successfully"));
-
-			if (this.onSave) {
-				this.onSave(config);
-			}
+			new Notice(
+				`${t("filter-configs-saved-successfully")} : ${config.name}`
+			);
 
 			this.close();
 		} catch (error) {
@@ -301,11 +293,22 @@ export class FilterConfigModal extends Modal {
 		}
 
 		try {
-			if (this.onLoad) {
-				this.onLoad(config);
+			if (!board.boardFilter) {
+				board.boardFilter = {
+					rootCondition: "any",
+					filterGroups: [],
+				};
 			}
 
-			new Notice(t("filter-configuration-loaded-successfully"));
+			// Update the board filter state
+			board.boardFilter = config.filterState;
+			await this.plugin.saveSettings();
+
+			new Notice(
+				`${t("filter-configuration-loaded-successfully")} : ${
+					config.name
+				}`
+			);
 			this.close();
 		} catch (error) {
 			console.error("Failed to load filter configuration:", error);
@@ -389,10 +392,7 @@ export class FilterConfigModal extends Modal {
 				this.app,
 				this.plugin,
 				"load",
-				this.activeBoardIndex,
-				undefined,
-				this.onSave,
-				this.onLoad
+				this.activeBoardIndex
 			);
 			newModal.open();
 		} catch (error) {
