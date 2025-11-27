@@ -20,9 +20,7 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
 
 			// Read the file content
-			const data: string = JSON.stringify(
-				await plugin.app.vault.adapter.read(path)
-			);
+			const data: string = await plugin.app.vault.adapter.read(path);
 			const parsedData = JSON.parse(data);
 
 			// Extract coreStatuses from the JSON
@@ -41,11 +39,19 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 				statusMap.set(status.symbol, status)
 			);
 			const statuses = Array.from(statusMap.values());
-
-			// Store it in the plugin settings
-			plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
-				statuses;
-			plugin.saveSettings();
+			
+			// Store it in the plugin settings if there is a difference
+			if (
+				JSON.stringify(
+					plugin.settings.data.globalSettings
+					.tasksPluginCustomStatuses
+				) !== JSON.stringify(statuses)
+			) {
+				console.log("Fetched new statuses from Tasks plugin:", statuses);
+				plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
+					statuses;
+				await plugin.saveSettings();
+			}
 		}
 	} catch (error) {
 		console.warn(

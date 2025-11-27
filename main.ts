@@ -860,9 +860,9 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
-	compatiblePluginsAvailabilityCheck() {
+	async compatiblePluginsAvailabilityCheck() {
 		// Check if the Tasks plugin is installed and fetch the custom statuses
-		fetchTasksPluginCustomStatuses(this.plugin);
+		await fetchTasksPluginCustomStatuses(this.plugin);
 
 		// Check if the Reminder plugin is installed
 		isReminderPluginInstalled(this.plugin);
