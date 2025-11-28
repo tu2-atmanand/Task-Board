@@ -1936,7 +1936,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-width: 111px;
 }
 
-.boardConfigModalDuplicateBoartBtn,
+.boardConfigModalDuplicateBoardBtn,
 .boardConfigModalDeleteBoardBtn {
 	margin-block-start: 1em;
 	cursor: pointer;
