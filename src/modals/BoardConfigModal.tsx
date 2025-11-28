@@ -191,6 +191,29 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
+	const handleDuplicateCurrentBoard = async () => {
+		if (selectedBoardIndex === -1) {
+			new Notice(t("no-board-selected-to-duplicate"));
+			return;
+		}
+		const boardToDuplicate = localBoards[selectedBoardIndex];
+		const duplicatedBoard: Board = {
+			...JSON.parse(JSON.stringify(boardToDuplicate)), // Deep copy
+			name: `${boardToDuplicate.name} ${t("copy-suffix")}`,
+			index: localBoards.length,
+			filterConfig: undefined,
+			taskCount: undefined,
+			boardFilter: {
+				rootCondition: "any",
+				filterGroups: [],
+			},
+		};
+		const updatedBoards = [...localBoards, duplicatedBoard];
+		setLocalBoards(updatedBoards);
+		setSelectedBoardIndex(updatedBoards.length - 1);
+		setIsEdited(true);
+	}
+
 	const handleDeleteCurrentBoard = () => {
 		const app = plugin.app;
 		const mssg = t("board-delete-confirmation-message");
@@ -688,8 +711,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t("add-column")}</button>
 				</div>
 				<hr className="boardConfigModalHr-100" />
-
-				<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentBoard}>{t("delete-this-board")}</button>
+				<div className="boardConfigModalDoubleBtnContainer">
+					<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
+					<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentBoard}>{t("delete-this-board")}</button>
+				</div>
 			</div>
 		);
 	};

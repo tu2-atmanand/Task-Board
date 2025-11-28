@@ -1936,6 +1936,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-width: 111px;
 }
 
+.boardConfigModalDuplicateBoardBtn,
 .boardConfigModalDeleteBoardBtn {
 	margin-block-start: 1em;
 	cursor: pointer;
@@ -1944,6 +1945,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .boardConfigModalDeleteBoardBtn:hover {
 	background-color: darkred;
 	color: white;
+}
+
+.boardConfigModalDoubleBtnContainer {
+	display: flex;
+	gap: .5em;
+}
+
+.boardConfigModalDoubleBtnContainer button {
+	flex: 1;
 }
 
 .boardConfigModalSaveBtn-mobile {
