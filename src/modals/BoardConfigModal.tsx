@@ -712,7 +712,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				</div>
 				<hr className="boardConfigModalHr-100" />
 				<div className="boardConfigModalDoubleBtnContainer">
-					<button className="boardConfigModalDuplicateBoartBtn" onClick={handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
+					<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
 					<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentBoard}>{t("delete-this-board")}</button>
 				</div>
 			</div>
