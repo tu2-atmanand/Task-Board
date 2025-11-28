@@ -231,8 +231,13 @@ export default class TaskBoard extends Plugin {
 		this.saveSettings();
 	}
 
-	async saveSettings() {
-		await this.saveData(this.settings);
+	async saveSettings(newSetting?: PluginDataJson) {
+		if (newSetting) {
+			this.settings = newSetting;
+			await this.saveData(newSetting);
+		} else {
+			await this.saveData(this.settings);
+		}
 	}
 
 	// getLanguage() {
