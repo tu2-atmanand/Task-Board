@@ -4,14 +4,6 @@ export type TaskStatus = typeof TASK_STATUSES extends ReadonlyArray<infer T>
 	? T
 	: never;
 
-export interface taskStatusConfig {
-	symbol: String;
-	name: String;
-	nextStatusSymbol: String;
-	availableAsCommand: boolean;
-	type: String;
-}
-
 export interface TaskLocation {
 	filePath?: string;
 	fileName?: string;
