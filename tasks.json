@@ -1,59 +1,66 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-11-29T11:38:27",
+    "Modified_at": "2025-11-29T15:27:47",
     "Pending": {
-        "Task_Board_Temp_Tasks.md": [
+        "TaskNotes/Tasks/Task Note - 2.md": [
             {
-                "id": 258,
-                "legacyId": "258",
-                "status": " ",
-                "title": "- [ ] This is a test task added without an id to see if I can import it inside the map canvas through the side pane. #working  [id:: 258] ",
+                "id": 274,
+                "legacyId": "274",
+                "title": "This task note will contain the tag in upperCase, but in settings it will be in lowerCase",
                 "body": [],
-                "time": "",
                 "createdDate": "",
                 "startDate": "",
-                "scheduledDate": "",
-                "due": "",
+                "scheduledDate": "2025-11-30",
+                "due": "2025-11-30",
                 "tags": [
-                    "#working"
+                    "task"
                 ],
                 "frontmatterTags": [],
+                "time": "",
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task_Board_Temp_Tasks.md",
+                "status": "x",
+                "filePath": "TaskNotes/Tasks/Task Note - 2.md",
                 "taskLocation": {
-                    "startLine": 2,
+                    "startLine": 1,
                     "startCharIndex": 0,
-                    "endLine": 2,
-                    "endCharIndex": 138
+                    "endLine": 10,
+                    "endCharIndex": 10
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
-            },
+            }
+        ],
+        "TaskNotes/Tasks/This is a new TaskNote with only due date.md": [
             {
-                "id": 259,
-                "legacyId": "259",
-                "status": " ",
-                "title": "- [ ] Another task without and ID on it. This #pending [id:: 259]",
-                "body": [],
-                "time": "",
+                "id": 263,
+                "legacyId": "263",
+                "title": "This is a new TaskNote with only due date",
+                "body": [
+                    "- [x] This should be the sub-task."
+                ],
                 "createdDate": "",
                 "startDate": "",
-                "scheduledDate": "",
-                "due": "",
+                "scheduledDate": "2025-11-23T10:00:00",
+                "due": "2025-11-23T10:14:00",
                 "tags": [
-                    "#pending"
+                    "task",
+                    "taskNote",
+                    "todo",
+                    "doc"
                 ],
                 "frontmatterTags": [],
+                "time": "",
                 "priority": 0,
                 "dependsOn": [],
-                "filePath": "Task_Board_Temp_Tasks.md",
+                "status": "x",
+                "filePath": "TaskNotes/Tasks/This is a new TaskNote with only due date.md",
                 "taskLocation": {
-                    "startLine": 3,
+                    "startLine": 1,
                     "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 65
+                    "endLine": 32,
+                    "endCharIndex": 0
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -100,7 +107,7 @@
                 "reminder": ""
             },
             {
-                "id": 2468123297,
+                "id": 3896118865,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] This is a first task with one level of indentation, very next to the paragraph line.",
@@ -193,66 +200,10 @@
                 "reminder": ""
             },
             {
-                "id": 671908013,
-                "legacyId": "",
+                "id": 269,
+                "legacyId": "269",
                 "status": " ",
-                "title": "> + [ ] This is task inside callout with a space at the beginning. And it starts with `+ [ ]`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#sports/football"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 43,
-                    "startCharIndex": 0,
-                    "endLine": 43,
-                    "endCharIndex": 93
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 3582484253,
-                "legacyId": "",
-                "status": " ",
-                "title": ">1. [ ] This is a task inside callout and it starts with `1.`",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#sports/football"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 44,
-                    "startCharIndex": 0,
-                    "endLine": 44,
-                    "endCharIndex": 61
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 1025605065,
-                "legacyId": "",
-                "status": " ",
-                "title": ">\t1. [ ] This is a task inside callout, but its indented. **Please note this is not a sub-task.**",
+                "title": ">\t1. [ ] This is a task inside callout, but its indented. **Please note this is not a sub-task.** [id:: 269]",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -270,14 +221,14 @@
                     "startLine": 45,
                     "startCharIndex": 0,
                     "endLine": 45,
-                    "endCharIndex": 97
+                    "endCharIndex": 108
                 },
                 "completion": "",
                 "cancelledDate": "",
                 "reminder": ""
             },
             {
-                "id": 58609512,
+                "id": 2902915313,
                 "legacyId": "",
                 "status": " ",
                 "title": ">- [ ] **Task Board** will be able to detect this task.   [due:: 2025-04-20] #todo",
@@ -307,7 +258,7 @@
                 "reminder": ""
             },
             {
-                "id": 1460878399,
+                "id": 1003091229,
                 "legacyId": "",
                 "status": " ",
                 "title": ">    - [ ] Even though this task is right after the main task and also since its been indented, still its not possible to detect this is as a sub-task of the main task. Hence this will be considered as a separate task.",
@@ -335,7 +286,7 @@
                 "reminder": ""
             },
             {
-                "id": 2956592013,
+                "id": 105308806,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] This is a first indented task, just by itself, no content before this taskLine, no content after this taskLine. ✅ 2025-08-22",
@@ -363,7 +314,7 @@
                 "reminder": ""
             },
             {
-                "id": 2711124638,
+                "id": 3410680122,
                 "legacyId": "",
                 "status": " ",
                 "title": "\t- [ ] This is an lonely indented task. Not sure why this theme is not giving it a proper task styling.",
@@ -395,7 +346,7 @@
                 "reminder": ""
             },
             {
-                "id": 2441978290,
+                "id": 1463851490,
                 "legacyId": "",
                 "status": " ",
                 "title": "    - [ ] This is a first indented task right after a normal line. (old one)",
@@ -423,7 +374,7 @@
                 "reminder": ""
             },
             {
-                "id": 2622758927,
+                "id": 3018055506,
                 "legacyId": "",
                 "status": " ",
                 "title": "    + [ ] This is second indented task which starts with `+ [ ]`",
@@ -451,35 +402,7 @@
                 "reminder": ""
             },
             {
-                "id": 262,
-                "legacyId": "262",
-                "status": " ",
-                "title": "    * [ ] This is Third indented task which starts with `* [ ]` ✅ 2025-08-22 [id:: 262]",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [
-                    "#sports/football"
-                ],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Testing Indented Task Bug.md",
-                "taskLocation": {
-                    "startLine": 73,
-                    "startCharIndex": 0,
-                    "endLine": 73,
-                    "endCharIndex": 87
-                },
-                "completion": "2025-08-22",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 4062169476,
+                "id": 3817882150,
                 "legacyId": "",
                 "status": " ",
                 "title": "2. [ ] Second numbered task.",
@@ -507,7 +430,7 @@
                 "reminder": ""
             },
             {
-                "id": 3178216398,
+                "id": 1982365119,
                 "legacyId": "",
                 "status": " ",
                 "title": "- [ ] All the below numbered tasks should be completed. 🔺 ",
@@ -538,7 +461,7 @@
                 "reminder": ""
             },
             {
-                "id": 2995781492,
+                "id": 2781821237,
                 "legacyId": "",
                 "status": " ",
                 "title": "1) [ ] Another numbered task which starts with pattern `1) [ ]`.",
@@ -566,35 +489,184 @@
                 "reminder": ""
             }
         ],
-        "TaskNotes/Tasks/This is a new TaskNote with only due date.md": [
+        "Task_Board_Temp_Tasks.md": [
             {
-                "id": 263,
-                "legacyId": "263",
-                "title": "This is a new TaskNote with only due date",
-                "body": [
-                    "- [x] This should be the sub-task."
-                ],
+                "id": 258,
+                "legacyId": "258",
+                "status": " ",
+                "title": "- [ ] This is a test task added without an id to see if I can import it inside the map canvas through the side pane. #working  [id:: 258] ",
+                "body": [],
+                "time": "",
                 "createdDate": "",
                 "startDate": "",
-                "scheduledDate": "2025-11-23T10:00:00",
-                "due": "2025-11-23T10:14:00",
+                "scheduledDate": "",
+                "due": "",
                 "tags": [
-                    "taskNote",
-                    "Task",
-                    "todo",
-                    "doc"
+                    "#working"
                 ],
                 "frontmatterTags": [],
-                "time": "",
                 "priority": 0,
                 "dependsOn": [],
-                "status": "x",
-                "filePath": "TaskNotes/Tasks/This is a new TaskNote with only due date.md",
+                "filePath": "Task_Board_Temp_Tasks.md",
                 "taskLocation": {
-                    "startLine": 1,
+                    "startLine": 2,
                     "startCharIndex": 0,
-                    "endLine": 32,
-                    "endCharIndex": 0
+                    "endLine": 2,
+                    "endCharIndex": 138
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 259,
+                "legacyId": "259",
+                "status": " ",
+                "title": "- [ ] Another task without and ID on it. This #pending [id:: 259]",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Task_Board_Temp_Tasks.md",
+                "taskLocation": {
+                    "startLine": 3,
+                    "startCharIndex": 0,
+                    "endLine": 3,
+                    "endCharIndex": 65
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "Important Note.md": [
+            {
+                "id": 222,
+                "legacyId": "222",
+                "status": " ",
+                "title": "- [ ] This is a task title, keep it short. #pending #doc 🆔 222 [dependsOn:: 254, 224]⏫ 🔁 every day 🏁 keep ➕ 2025-09-28 🛫 2025-09-28 [scheduled:: 2025-10-18] [due:: 2025-10-18] ⏰[16:00 - 17:00] ",
+                "body": [
+                    "\t- [ ] This is a first sub-task.",
+                    "\tElaborate and explain the task here. Add links, embeddings or any other resources.",
+                    "\t![[Pasted image 20250928160808.png]]",
+                    "\t- This task is dependent on two other tasks.",
+                    "\t- One of the dependency has been completed."
+                ],
+                "time": "16:00 - 17:00",
+                "createdDate": "2025-09-28",
+                "startDate": "2025-09-28",
+                "scheduledDate": "2025-10-18",
+                "due": "2025-10-18",
+                "tags": [
+                    "#pending",
+                    "#doc"
+                ],
+                "frontmatterTags": [],
+                "priority": 2,
+                "dependsOn": [
+                    "254",
+                    "224"
+                ],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 2,
+                    "startCharIndex": 0,
+                    "endLine": 7,
+                    "endCharIndex": 44
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 224,
+                "legacyId": "224",
+                "status": " ",
+                "title": "- [ ] 18:12 - 12:12 This is a child task for 222. 📅 2025-09-30 [scheduled:: 2025-10-19] 🔼 🆔 224 #working (@20:14) new",
+                "body": [],
+                "time": "18:12 - 12:12",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-10-19",
+                "due": "2025-09-30",
+                "tags": [
+                    "#working"
+                ],
+                "frontmatterTags": [],
+                "priority": 3,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 10,
+                    "startCharIndex": 0,
+                    "endLine": 10,
+                    "endCharIndex": 120
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": "2025-10-19T20:14"
+            },
+            {
+                "id": 225,
+                "legacyId": "225",
+                "status": " ",
+                "title": "- [ ] This is another child task for the image card. [id:: 225]",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 13,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 63
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 243,
+                "legacyId": "243",
+                "status": " ",
+                "title": "- [ ] This is a task which contains long links in its sub-tasks. #pending  [id:: 243] ",
+                "body": [
+                    "\t- [ ] https://forum.obsidian.md/t/new-plugin-edit-transcluded-embedded-notes-blocks-in-place/106257",
+                    "\t- [ ] https://forum.obsidian.md/t/option-to-hide-show-top-bar-s-when-note-is-scrolled-when-keyboard-appears-disappears/69610/20",
+                    "\t- [ ] https://forum.obsidian.md/t/issues-with-context-aware-embedded-base-searching-for-files-with-tags-by-this-tags/106468"
+                ],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [
+                    "#pending"
+                ],
+                "frontmatterTags": [],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Important Note.md",
+                "taskLocation": {
+                    "startLine": 17,
+                    "startCharIndex": 0,
+                    "endLine": 20,
+                    "endCharIndex": 124
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -802,132 +874,6 @@
                     "startCharIndex": 0,
                     "endLine": 5,
                     "endCharIndex": 53
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Important Note.md": [
-            {
-                "id": 222,
-                "legacyId": "222",
-                "status": " ",
-                "title": "- [ ] This is a task title, keep it short. #pending #doc 🆔 222 [dependsOn:: 254, 224]⏫ 🔁 every day 🏁 keep ➕ 2025-09-28 🛫 2025-09-28 [scheduled:: 2025-10-18] [due:: 2025-10-18] ⏰[16:00 - 17:00] ",
-                "body": [
-                    "\t- [ ] This is a first sub-task.",
-                    "\tElaborate and explain the task here. Add links, embeddings or any other resources.",
-                    "\t![[Pasted image 20250928160808.png]]",
-                    "\t- This task is dependent on two other tasks.",
-                    "\t- One of the dependency has been completed."
-                ],
-                "time": "16:00 - 17:00",
-                "createdDate": "2025-09-28",
-                "startDate": "2025-09-28",
-                "scheduledDate": "2025-10-18",
-                "due": "2025-10-18",
-                "tags": [
-                    "#pending",
-                    "#doc"
-                ],
-                "frontmatterTags": [],
-                "priority": 2,
-                "dependsOn": [
-                    "254",
-                    "224"
-                ],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 2,
-                    "startCharIndex": 0,
-                    "endLine": 7,
-                    "endCharIndex": 44
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 224,
-                "legacyId": "224",
-                "status": " ",
-                "title": "- [ ] 18:12 - 12:12 This is a child task for 222. 📅 2025-09-30 [scheduled:: 2025-10-19] 🔼 🆔 224 #working (@20:14) new",
-                "body": [],
-                "time": "18:12 - 12:12",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-10-19",
-                "due": "2025-09-30",
-                "tags": [
-                    "#working"
-                ],
-                "frontmatterTags": [],
-                "priority": 3,
-                "dependsOn": [],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 10,
-                    "startCharIndex": 0,
-                    "endLine": 10,
-                    "endCharIndex": 120
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": "2025-10-19T20:14"
-            },
-            {
-                "id": 225,
-                "legacyId": "225",
-                "status": " ",
-                "title": "- [ ] This is another child task for the image card. [id:: 225]",
-                "body": [],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 13,
-                    "startCharIndex": 0,
-                    "endLine": 13,
-                    "endCharIndex": 63
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            },
-            {
-                "id": 243,
-                "legacyId": "243",
-                "status": " ",
-                "title": "- [ ] This is a task which contains long links in its sub-tasks. #pending  [id:: 243] ",
-                "body": [
-                    "\t- [ ] https://forum.obsidian.md/t/new-plugin-edit-transcluded-embedded-notes-blocks-in-place/106257",
-                    "\t- [ ] https://forum.obsidian.md/t/option-to-hide-show-top-bar-s-when-note-is-scrolled-when-keyboard-appears-disappears/69610/20",
-                    "\t- [ ] https://forum.obsidian.md/t/issues-with-context-aware-embedded-base-searching-for-files-with-tags-by-this-tags/106468"
-                ],
-                "time": "",
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "",
-                "due": "",
-                "tags": [
-                    "#pending"
-                ],
-                "frontmatterTags": [],
-                "priority": 0,
-                "dependsOn": [],
-                "filePath": "Important Note.md",
-                "taskLocation": {
-                    "startLine": 17,
-                    "startCharIndex": 0,
-                    "endLine": 20,
-                    "endCharIndex": 124
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -1330,7 +1276,91 @@
     "Completed": {
         "Testing Indented Task Bug.md": [
             {
-                "id": 1410519710,
+                "id": 267,
+                "legacyId": "267",
+                "status": "x",
+                "title": "> + [x] This is task inside callout with a space at the beginning. And it starts with `+ [ ]` [id:: 267] ✅ 2025-11-29",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 43,
+                    "startCharIndex": 0,
+                    "endLine": 43,
+                    "endCharIndex": 117
+                },
+                "completion": "2025-11-29",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 268,
+                "legacyId": "268",
+                "status": "x",
+                "title": ">1. [x] This is a task inside callout and it starts with `1`. And updating this. [id:: 268] ✅ 2025-11-29",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 44,
+                    "startCharIndex": 0,
+                    "endLine": 44,
+                    "endCharIndex": 104
+                },
+                "completion": "2025-11-29",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 262,
+                "legacyId": "262",
+                "status": "x",
+                "title": "    * [x] This is Third indented task which starts with `* [ ]` ✅ 2025-08-22 [id:: 262] ✅ 2025-11-29",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#sports/football"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "Testing Indented Task Bug.md",
+                "taskLocation": {
+                    "startLine": 73,
+                    "startCharIndex": 0,
+                    "endLine": 73,
+                    "endCharIndex": 100
+                },
+                "completion": "2025-08-22",
+                "cancelledDate": "",
+                "reminder": ""
+            },
+            {
+                "id": 2207101641,
                 "legacyId": "",
                 "status": "x",
                 "title": "1. [x] This is a numbered task. ✅ 2025-08-22",
@@ -1528,7 +1558,6 @@
                 "reminder": ""
             }
         ],
-        "Important Note.md": [],
         "QMD Files/Another QMD file.qmd": [
             {
                 "id": 236,

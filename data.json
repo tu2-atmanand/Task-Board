@@ -71,8 +71,8 @@
           ]
         },
         "taskCount": {
-          "pending": 28,
-          "completed": 4
+          "pending": 25,
+          "completed": 7
         }
       },
       {
@@ -373,32 +373,7 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "all",
-          "filterGroups": [
-            {
-              "id": "id-1760029960520-z2a1g0ka4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1760029960521-t33fwt542",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "This"
-                }
-              ]
-            },
-            {
-              "id": "id-1764176913802-bwvk75kr4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1764176913803-1ugczxozs",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "No"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -522,12 +497,48 @@
               },
               "createdAt": "2025-11-26T17:10:13.691Z",
               "updatedAt": "2025-11-26T17:10:13.691Z"
+            },
+            {
+              "id": "filter-config-1764408506369-14p6ajfha",
+              "name": "This and No",
+              "description": "Content will contain both This and No",
+              "filterState": {
+                "rootCondition": "all",
+                "filterGroups": [
+                  {
+                    "id": "id-1760029960520-z2a1g0ka4",
+                    "groupCondition": "any",
+                    "filters": [
+                      {
+                        "id": "id-1760029960521-t33fwt542",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "This"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "id-1764176913802-bwvk75kr4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1764176913803-1ugczxozs",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "No"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-11-29T09:28:26.369Z",
+              "updatedAt": "2025-11-29T09:28:26.369Z"
             }
           ]
         },
         "taskCount": {
-          "pending": 9,
-          "completed": 1
+          "pending": 43,
+          "completed": 12
         }
       }
     ],
@@ -719,16 +730,16 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 266,
+      "uniqueIdCounter": 274,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 4
+        "settingTab": 2
       },
-      "taskNoteIdentifierTag": "taskNote",
+      "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "none",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
