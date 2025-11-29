@@ -50,29 +50,11 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1761753563955-v373astvn",
-              "groupCondition": "any",
-              "filters": [
-                {
-                  "id": "id-1761753563970-px2z8dfdl",
-                  "property": "tags",
-                  "condition": "contains"
-                },
-                {
-                  "id": "id-1761753631098-pra23ios4",
-                  "property": "tags",
-                  "condition": "contains",
-                  "value": ""
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "taskCount": {
-          "pending": 30,
-          "completed": 4
+          "pending": 67,
+          "completed": 9
         }
       },
       {
@@ -224,7 +206,7 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 3,
+          "pending": 6,
           "completed": 1
         }
       },
@@ -534,7 +516,7 @@
           ]
         },
         "taskCount": {
-          "pending": 10,
+          "pending": 12,
           "completed": 0
         }
       }
