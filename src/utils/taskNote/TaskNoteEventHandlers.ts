@@ -37,9 +37,12 @@ export const handleTaskNoteStatusChange = async (
 		// Update frontmatter with new status
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			plugin.realTimeScanning.processAllUpdatedFiles(
-				updatedTask.filePath
-			);
+			sleep(1000).then(() => {
+				// This is required to rescan the updated file and refresh the board.
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					updatedTask.filePath
+				);
+			});
 		});
 
 		new Notice(`Task note status updated to ${newStatusName}`);
@@ -64,9 +67,12 @@ export const handleTaskNotePropertyUpdate = async (
 		// Update frontmatter with all updated properties
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			plugin.realTimeScanning.processAllUpdatedFiles(
-				updatedTask.filePath
-			);
+			sleep(1000).then(() => {
+				// This is required to rescan the updated file and refresh the board.
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					updatedTask.filePath
+				);
+			});
 		});
 
 		new Notice("Task note properties updated");
@@ -165,9 +171,12 @@ export const handleTaskNoteBodyChange = async (
 			updatedLines.join("\n")
 		).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			plugin.realTimeScanning.processAllUpdatedFiles(
-				updatedTask.filePath
-			);
+			sleep(1000).then(() => {
+				// This is required to rescan the updated file and refresh the board.
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					updatedTask.filePath
+				);
+			});
 		});
 	} catch (error) {
 		console.error(

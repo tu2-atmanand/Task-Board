@@ -15,7 +15,7 @@ import {
 	getFormattedTaskContent,
 } from "src/utils/taskLine/TaskContentFormatter";
 import { t } from "src/utils/lang/helper";
-import { taskItem } from "src/interfaces/TaskItem";
+import { taskItem, UpdateTaskEventData } from "src/interfaces/TaskItem";
 import { updateFrontmatterInMarkdownFile } from "src/utils/taskNote/TaskNoteUtils";
 import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
 import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/interfaces/Constants";
@@ -266,6 +266,12 @@ export const openEditTaskNoteModal = (
 			quickAddPluginChoice: string,
 			newTaskContent: string | undefined
 		) => {
+			// This is not creating that big of a problem, Hence disabling it for now.
+			let eventData: UpdateTaskEventData = {
+				taskID: existingTask.id,
+				state: true,
+			};
+			eventEmitter.emit("UPDATE_TASK", eventData);
 			try {
 				if (!newTaskContent) {
 					// Update frontmatter with task properties
@@ -284,7 +290,7 @@ export const openEditTaskNoteModal = (
 						updatedTask.filePath,
 						newTaskContent
 					).then(() => {
-						sleep(2000).then(() => {
+						sleep(1000).then(() => {
 							// TODO : Is 2 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(
@@ -293,6 +299,12 @@ export const openEditTaskNoteModal = (
 						});
 					});
 				}
+
+				setTimeout(() => {
+					// This event emmitter will stop any loading animation of ongoing task-card.
+					// eventData.state = false;
+					eventEmitter.emit("UPDATE_TASK");
+				}, 500);
 			} catch (error) {
 				bugReporter(
 					plugin,
@@ -622,9 +634,13 @@ export const openEditTaskView = async (
 										updatedTask
 									).then(() => {
 										// This is required to rescan the updated file and refresh the board.
-										plugin.realTimeScanning.processAllUpdatedFiles(
-											updatedTask.filePath
-										);
+										sleep(1000).then(() => {
+											// TODO : Is 2 sec really required ?
+											// This is required to rescan the updated file and refresh the board.
+											plugin.realTimeScanning.processAllUpdatedFiles(
+												updatedTask.filePath
+											);
+										});
 									});
 								} else {
 									writeDataToVaultFile(
@@ -677,9 +693,12 @@ export const openEditTaskView = async (
 									updatedTask
 								).then(() => {
 									// This is required to rescan the updated file and refresh the board.
-									plugin.realTimeScanning.processAllUpdatedFiles(
-										updatedTask.filePath
-									);
+									sleep(1000).then(() => {
+										// This is required to rescan the updated file and refresh the board.
+										plugin.realTimeScanning.processAllUpdatedFiles(
+											updatedTask.filePath
+										);
+									});
 								});
 							} else {
 								writeDataToVaultFile(

@@ -21,7 +21,7 @@ import { bugReporter } from 'src/services/OpenModals';
 import { ChevronDown } from 'lucide-react';
 import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
 import { priorityEmojis } from 'src/interfaces/Mapping';
-import { taskItem } from 'src/interfaces/TaskItem';
+import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
@@ -288,16 +288,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		return highestPriorityTag?.color;
 	}
 
-	interface UpdateTaskEventData {
-		taskID: number;
-		state: boolean
-	}
-
 	useEffect(() => {
 		const setCardLoading = (eventData: UpdateTaskEventData) => {
+			if (!eventData || !eventData.taskID) setCardLoadingAnimation(false);
+
 			// Only update this specific task's loading state
-			// if (eventData.taskID !== taskIdKey) return;
-			console.log("State of the card loading animation : ", eventData.state, "\nTask ID :", eventData.taskID);
+			if (eventData.taskID !== taskIdKey) return;
+
 			setCardLoadingAnimation(eventData.state);
 		};
 		eventEmitter.on("UPDATE_TASK", setCardLoading);
@@ -649,39 +646,45 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 			if (plugin.settings.data.globalSettings.showFooter) {
 				return (
 					<>
-						<div className="taskItemFooter">
-							{/* Conditionally render task.completed or the date/time */}
-							{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
-								<div className='taskItemCompletedDate'>✅ {task.completion}</div>
-							) : (
-								<div className='taskItemFooterDateTimeContainer'>
-									{task?.reminder && task.completion && (
-										<div className='taskItemReminderContainer'>
-											🔔
-										</div>
-									)}
-									{task.time && (
-										<div className='taskItemTimeContainer'>
-											⏰ {task.time}
-										</div>
-									)}
-									{universalDate && (
+						{cardLoadingAnimation ? (
+							<div className='taskItemFooterRefreshingMssg'>Refreshing...</div>
+						) : (
+							<>
+								<div className="taskItemFooter">
+									{/* Conditionally render task.completed or the date/time */}
+									{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
+										<div className='taskItemCompletedDate'>✅ {task.completion}</div>
+									) : (
+										<div className='taskItemFooterDateTimeContainer'>
+											{task?.reminder && task.completion && (
+												<div className='taskItemReminderContainer'>
+													🔔
+												</div>
+											)}
+											{task.time && (
+												<div className='taskItemTimeContainer'>
+													⏰ {task.time}
+												</div>
+											)}
+											{universalDate && (
 
-										<div className='taskItemUniversalDateContainer'>
-											{getUniversalDateEmoji(plugin)} {universalDate}
+												<div className='taskItemUniversalDateContainer'>
+													{getUniversalDateEmoji(plugin)} {universalDate}
+												</div>
+											)}
 										</div>
 									)}
+									<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+										<div className="taskItemiconButton taskItemiconButtonEdit">
+											<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+										</div>
+										<div className="taskItemiconButton taskItemiconButtonDelete">
+											<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+										</div>
+									</div>
 								</div>
-							)}
-							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-								<div className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
-								</div>
-								<div className="taskItemiconButton taskItemiconButtonDelete">
-									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
-								</div>
-							</div>
-						</div>
+							</>
+						)}
 					</>
 				);
 			} else {

@@ -79,3 +79,8 @@ export interface cursorLocation {
 	lineNumber: number;
 	charIndex: number;
 }
+
+export interface UpdateTaskEventData {
+	taskID: number;
+	state: boolean;
+}

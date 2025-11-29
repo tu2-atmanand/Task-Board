@@ -574,7 +574,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
 				onClose();
-				sleep(2000).then(() => {
+				sleep(1000).then(() => {
 					eventEmitter.emit("SWITCH_VIEW", 'map');
 				});
 			});
