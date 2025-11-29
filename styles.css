@@ -583,7 +583,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	margin-inline-end: 0 !important;
 	transform: scale(1.1) !important;
 	border-radius: 2px !important;
-	transition: transform 0.3s;
+	transition: transform 1s;
 
 	background-color: transparent;
 	font: var(--its);
@@ -601,7 +601,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemCheckbox-checked {
 	transform: scale(1.4);
 	/* Slight animation effect */
-	transition: transform 0.3s;
+	transition: transform 1s;
 }
 
 .taskItemBodySubtaskItem {

@@ -89,6 +89,11 @@ export class RealTimeScanner {
 
 		// Reset the editorModified flag after the scan.
 		this.plugin.editorModified = false;
+
+		setTimeout(() => {
+			// This event emmitter will stop any loading animation of ongoing task-card.
+			eventEmitter.emit("UPDATE_TASK", { taskID: null, state: false });
+		}, 500);
 	}
 
 	getFileFromPath(filePath: string): TFile | null {

@@ -294,33 +294,47 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 	useEffect(() => {
 		const setCardLoading = (eventData: UpdateTaskEventData) => {
+			// Only update this specific task's loading state
+			// if (eventData.taskID !== taskIdKey) return;
 			console.log("State of the card loading animation : ", eventData.state, "\nTask ID :", eventData.taskID);
 			setCardLoadingAnimation(eventData.state);
 		};
 		eventEmitter.on("UPDATE_TASK", setCardLoading);
 		return () => eventEmitter.off("UPDATE_TASK", setCardLoading);
-	}, []);
+	}, [taskIdKey]);
 
 	// Function to handle the main checkbox click
 	const handleMainCheckBoxClick = async () => {
-		// setIsChecked(true);
+		// Prevent repeated clicks while card is loading
+		if (cardLoadingAnimation) return;
+
+		console.log("Checkbox clicked...");
 		setCardLoadingAnimation(true);
-		const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };
-		eventEmitter.emit("UPDATE_TASK", eventData); // Trigger animation
+		// setIsChecked(true);
+		// const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };
+		// eventEmitter.emit("UPDATE_TASK", eventData); // Trigger animation
 
 		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
 		if (condition) {
-			setTimeout(() => {
-				// Route to appropriate handler based on task type
-				if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-					handleTaskNoteStatusChange(plugin, task);
-				} else {
-					handleCheckboxChange(plugin, task);
-				}
-			}, 0); // 1-second delay for animation
+			// Route to appropriate handler based on task type
+			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+				handleTaskNoteStatusChange(plugin, task);
+			} else {
+				handleCheckboxChange(plugin, task);
+			}
+
+			// setTimeout(() => {
+			// 	// Route to appropriate handler based on task type
+			// 	if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+			// 		handleTaskNoteStatusChange(plugin, task);
+			// 	} else {
+			// 		handleCheckboxChange(plugin, task);
+			// 	}
+			// }, 500);
 		} else {
-			// setIsChecked(false); // Reset checkbox state
 			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
+			// Reset loading state immediately because we didn't proceed
+			setCardLoadingAnimation(false);
 		}
 	};
 
@@ -765,6 +779,32 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 			<div className={`taskItem${isChecked ? ' completed' : ''}`} key={taskIdKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 			>
+				{/* {cardLoadingAnimation && (
+					<div
+						className="taskItemLoadingOverlay"
+						role="status"
+						aria-live="polite"
+						style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							background: 'rgba(255,255,255,0.6)',
+							zIndex: 50,
+						}}
+					>
+						<svg width="36" height="36" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+							<circle cx="25" cy="25" r="20" stroke="#3b82f6" strokeWidth="5" fill="none" strokeOpacity="0.25" />
+							<path d="M45 25a20 20 0 0 1-20 20" stroke="#3b82f6" strokeWidth="5" strokeLinecap="round" fill="none">
+								<animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
+							</path>
+						</svg>
+					</div>
+				)} */}
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
 					<div className="taskItemFileNameSection">
@@ -777,17 +817,41 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 					{memoizedRenderHeader}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
-							<input
-								id={`${task.id}-checkbox`}
-								type="checkbox"
-								checked={isChecked}
-								className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
-								data-task={task.status} // Add the data-task attribute
-								// dir='auto'
-								onChange={handleMainCheckBoxClick}
-								disabled={cardLoadingAnimation}
-								aria-disabled={cardLoadingAnimation}
-							/>
+							{cardLoadingAnimation ? (
+								<input
+									id={`${task.id}-checkbox`}
+									type="checkbox"
+									checked={cardLoadingAnimation}
+									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+									data-task={task.status} // Add the data-task attribute
+									dir='auto'
+									readOnly={true}
+								/>
+							) : (
+								<input
+									id={`${task.id}-checkbox`}
+									type="checkbox"
+									checked={isChecked || cardLoadingAnimation}
+									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+									data-task={task.status} // Add the data-task attribute
+									dir='auto'
+									onChange={handleMainCheckBoxClick}
+									onClick={(e) => {
+										if (cardLoadingAnimation) {
+											e.preventDefault();
+											return;
+										}
+									}}
+									onDoubleClick={(e) => {
+										e.preventDefault();
+										return;
+									}}
+									disabled={cardLoadingAnimation}
+									aria-disabled={cardLoadingAnimation}
+									aria-busy={cardLoadingAnimation}
+									readOnly={cardLoadingAnimation}
+								/>
+							)}
 							<div className="taskItemBodyContent">
 								<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
 								<div className="taskItemBody">
