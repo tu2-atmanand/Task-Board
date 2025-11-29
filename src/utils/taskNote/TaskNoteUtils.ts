@@ -47,7 +47,9 @@ export function isTaskNotePresentInTags(
 	tags: string[]
 ): boolean {
 	return tags
-		? tags.some((tag) => tag.includes(taskNoteIdentifierTag))
+		? tags.some((tag) =>
+				tag.toLowerCase().includes(taskNoteIdentifierTag.toLowerCase())
+		  )
 		: false;
 }
 

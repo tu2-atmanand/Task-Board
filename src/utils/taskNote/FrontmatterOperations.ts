@@ -350,7 +350,13 @@ export function updateFrontmatterProperties(
 	existingTags = existingTags.filter((tag: string) => taskTags.includes(tag));
 
 	// Build final tags: identifier + all tags from taskTags (which covers common + new)
-	const finalTags = [identifierTag, ...taskTags, ...existingTags];
+	let finalTags = [...taskTags, ...existingTags];
+
+	const hasIdentifierTag = finalTags.some(
+		(tag) =>
+			tag.replace("#", "").toLowerCase() === identifierTag.toLowerCase()
+	);
+	finalTags = hasIdentifierTag ? finalTags : [...finalTags, identifierTag];
 
 	// Remove duplicates and empty entries
 	tempUpdates[tagsKey] = Array.from(

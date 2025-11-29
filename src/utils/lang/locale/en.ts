@@ -276,7 +276,7 @@ const en: Lang = {
 	"restrict-task-completion-to-child-tasks-info": "Enable this setting to restrict the completion of a parent task until all its child tasks (depends-on tasks) and sub-tasks are completed. This will help you to ensure that all related tasks are completed before marking the parent task as done.",
 	"complete-all-child-tasks-before-completing-task": "Complete all child-tasks and sub-tasks related to this task before completing it. You can turn this setting off, if you dont want this restriction.",
 	"task-note-identifier-tag": "Task note identifier tag",
-	"task-note-identifier-tag-description": "Enter the tag which will be used to indentify a normal task as a task-note. This tag will be automatically added to the tasks created through 'add new task modal'. You can change this tag, if you want to use your own custom tag.",
+	"task-note-identifier-tag-description": "Enter the tag which will be used to indentify a normal task as a task-note. This tag will be automatically added to the tasks created through 'add new task modal'. Enter without '#'.",
 	"default-location-for-new-task-notes": "Default location for new task notes",
 	"default-location-for-new-task-notes-description": "Default folder where new task-notes will be saved. You can also change the location from the 'add new task modal' while creating a new task-note.",
 	"tasks-plugin-modal": "Tasks plugin modal",
