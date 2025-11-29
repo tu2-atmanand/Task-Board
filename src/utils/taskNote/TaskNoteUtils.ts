@@ -8,7 +8,11 @@ import {
 } from "./FrontmatterOperations";
 import { taskStatuses } from "src/interfaces/Enums";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
-import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
+import {
+	CustomStatus,
+	frontmatterFormatting,
+	PluginDataJson,
+} from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
 import { bugReporter } from "src/services/OpenModals";
 
@@ -60,13 +64,16 @@ export function isTaskNotePresentInTags(
  * @returns Partial taskItem with properties mapped from frontmatter
  */
 export function extractTaskNoteProperties(
-	frontmatterFormatting: frontmatterFormatting[],
 	frontmatter: Partial<customFrontmatterCache> | undefined,
-	filePath: string
+	filePath: string,
+	settings: PluginDataJson
 ): Partial<taskItem> {
 	if (!frontmatter) {
 		return {};
 	}
+
+	const frontmatterFormatting: frontmatterFormatting[] =
+		settings.data.globalSettings.frontmatterFormatting;
 
 	return {
 		id:
@@ -127,7 +134,8 @@ export function extractTaskNoteProperties(
 		status: getStatusSymbolFromStatusName(
 			frontmatter[
 				getCustomFrontmatterKey("status", frontmatterFormatting)
-			]
+			],
+			settings
 		),
 		dependsOn:
 			frontmatter[
@@ -201,21 +209,34 @@ export function getCustomFrontmatterKey(
 /**
  * Map status string to status symbol
  * Eg. statusValue="Pending" then output will be " ".
- * @param statusValue - Status value from frontmatter
+ * @param statusName - Status value from frontmatter
  * @returns string - Status symbol
  */
 export function getStatusSymbolFromStatusName(
-	statusValue: string | undefined
+	statusName: string | undefined,
+	settings: PluginDataJson
 ): string {
-	if (!statusValue) return " ";
+	console.log("getStatusSymbolFromStatusName...\nstatusValue : ", statusName);
+	if (!statusName) return " ";
 
-	const statusStr = statusValue.trim().toLowerCase();
+	// const statusStr = statusValue.trim().toLowerCase();
 
-	// Handle both symbol and name formats
-	if (Object.prototype.hasOwnProperty.call(taskStatuses, statusStr)) {
-		return (taskStatuses as Record<string, string>)[statusStr];
-	}
-	return " ";
+	// // Handle both symbol and name formats
+	// if (Object.prototype.hasOwnProperty.call(taskStatuses, statusStr)) {
+	// 	return (taskStatuses as Record<string, string>)[statusStr];
+	// }
+	// return " ";
+
+	const tasksPluginStatusConfigs =
+		settings.data.globalSettings.tasksPluginCustomStatuses;
+	let statusSymbol = "";
+	tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
+		if (customStatus.name === statusName) {
+			statusSymbol = customStatus.symbol;
+			return true;
+		}
+	});
+	return statusSymbol;
 }
 
 /**
@@ -225,9 +246,24 @@ export function getStatusSymbolFromStatusName(
  * @returns string - Status symbol
  */
 export function getStatusNameFromStatusSymbol(
-	statusSymbol: string | undefined
+	statusSymbol: string | undefined,
+	settings: PluginDataJson
 ): string {
 	if (!statusSymbol) return "pending";
+
+	if (settings) {
+		// TODO : We need to implement the Custom Statuses mapping feature very soon and combine the `customStatuses` and `tasksPluginCustomStatuses` into one. So, it can import from the Task plugin or user can change it inside the Task Board itself.
+		const tasksPluginStatusConfigs =
+			settings.data.globalSettings.tasksPluginCustomStatuses;
+		let statusName = "";
+		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
+			if (customStatus.symbol === statusSymbol) {
+				statusName = customStatus.name;
+				return true;
+			}
+		});
+		return statusName;
+	}
 
 	// Create a reverse mapping from taskStatuses enum
 	// taskStatuses contains mappings like: { unchecked: " ", regular: "x", "in-progress": "/" }
@@ -270,6 +306,7 @@ export function formatTaskNoteContent(
 			updatedTask
 		);
 		const newFrontmatter = createYamlFromObject(updatedFrontmatter);
+		console.log("newFrontmatter from YAML :", newFrontmatter);
 
 		const frontmatterMatch = oldNoteContent.match(/^---\n([\s\S]*?)\n---/);
 		const contentWithoutFrontmatter = frontmatterMatch

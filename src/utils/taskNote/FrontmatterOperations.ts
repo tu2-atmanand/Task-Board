@@ -211,7 +211,8 @@ export function createFrontmatterFromTask(
 	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
 		task?.title || "";
 	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
-		getStatusNameFromStatusSymbol(task?.status) || "pending";
+		getStatusNameFromStatusSymbol(task?.status, plugin.settings) ||
+		"pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
 		...(task?.tags?.filter(

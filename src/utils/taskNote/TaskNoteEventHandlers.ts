@@ -3,7 +3,10 @@
 import { Notice } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
-import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils";
+import {
+	getStatusNameFromStatusSymbol,
+	updateFrontmatterInMarkdownFile,
+} from "./TaskNoteUtils";
 import { checkboxStateSwitcher } from "../CheckBoxUtils";
 import {
 	readDataOfVaultFile,
@@ -21,11 +24,15 @@ export const handleTaskNoteStatusChange = async (
 	task: taskItem
 ) => {
 	try {
-		const newStatus = checkboxStateSwitcher(plugin, task.status);
+		const newStatusSymbol = checkboxStateSwitcher(plugin, task.status);
 		const updatedTask = {
 			...task,
-			status: newStatus,
+			status: newStatusSymbol,
 		};
+		const newStatusName = getStatusNameFromStatusSymbol(
+			newStatusSymbol,
+			plugin.settings
+		);
 
 		// Update frontmatter with new status
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
@@ -35,7 +42,7 @@ export const handleTaskNoteStatusChange = async (
 			);
 		});
 
-		new Notice(`Task note status updated to ${newStatus}`);
+		new Notice(`Task note status updated to ${newStatusName}`);
 	} catch (error) {
 		console.error("Error updating task note status:", error);
 		new Notice("Error updating task note status: " + String(error));
