@@ -291,6 +291,7 @@ export function updateFrontmatterProperties(
 ): Partial<customFrontmatterCache> {
 	const frontmatterFormatting: frontmatterFormatting[] =
 		plugin.settings.data.globalSettings.frontmatterFormatting;
+	const oldFrontmatter = existingFrontmatter;
 
 	// Step 1: Build a temporary object with all the updated values
 	const tempUpdates: Record<string, any> = {};
@@ -378,12 +379,18 @@ export function updateFrontmatterProperties(
 	}
 
 	const statusKey = getCustomFrontmatterKey("status", frontmatterFormatting);
-	if (task.status && task.status !== " ") {
-		const statusKeyName = Object.keys(taskStatuses).find(
-			(key) =>
-				taskStatuses[key as keyof typeof taskStatuses] === task.status
+	if (task.status) {
+		// const statusKeyName = Object.keys(taskStatuses).find(
+		// 	(key) =>
+		// 		taskStatuses[key as keyof typeof taskStatuses] === task.status
+		// );
+		console.log("Task Note status sybmol :", task.status);
+
+		const statusName = getStatusNameFromStatusSymbol(
+			task.status,
+			plugin.settings
 		);
-		tempUpdates[statusKey] = statusKeyName ?? `"${task.status}"`;
+		tempUpdates[statusKey] = statusName ?? `"${task.status}"`;
 	}
 
 	// All the below properties are optional
@@ -394,6 +401,7 @@ export function updateFrontmatterProperties(
 		tempUpdates[timeKey] = task.time;
 	} else {
 		delete tempUpdates[timeKey];
+		delete oldFrontmatter?.[timeKey];
 	}
 
 	// Update date properties
@@ -405,6 +413,7 @@ export function updateFrontmatterProperties(
 		tempUpdates[createdDateKey] = task.createdDate;
 	} else {
 		delete tempUpdates[createdDateKey];
+		delete oldFrontmatter?.[createdDateKey];
 	}
 
 	const startDateKey = getCustomFrontmatterKey(
@@ -415,23 +424,28 @@ export function updateFrontmatterProperties(
 		tempUpdates[startDateKey] = task.startDate;
 	} else {
 		delete tempUpdates[startDateKey];
+		delete oldFrontmatter?.[startDateKey];
 	}
 
 	const scheduledDateKey = getCustomFrontmatterKey(
 		"scheduledDate",
 		frontmatterFormatting
 	);
+	console.log("Scheduled date :", task.scheduledDate);
 	if (task.scheduledDate) {
 		tempUpdates[scheduledDateKey] = task.scheduledDate;
 	} else {
 		delete tempUpdates[scheduledDateKey];
+		delete oldFrontmatter?.[scheduledDateKey];
 	}
+	console.log("Updated frontmatter :", tempUpdates);
 
 	const dueKey = getCustomFrontmatterKey("due", frontmatterFormatting);
 	if (task.due) {
 		tempUpdates[dueKey] = task.due;
 	} else {
 		delete tempUpdates[dueKey];
+		delete oldFrontmatter?.[dueKey];
 	}
 
 	const cancelledDateKey = getCustomFrontmatterKey(
@@ -442,6 +456,7 @@ export function updateFrontmatterProperties(
 		tempUpdates[cancelledDateKey] = task.cancelledDate;
 	} else {
 		delete tempUpdates[cancelledDateKey];
+		delete oldFrontmatter?.[cancelledDateKey];
 	}
 
 	const completionKey = getCustomFrontmatterKey(
@@ -452,6 +467,7 @@ export function updateFrontmatterProperties(
 		tempUpdates[completionKey] = task.completion;
 	} else {
 		delete tempUpdates[completionKey];
+		delete oldFrontmatter?.[completionKey];
 	}
 
 	const priorityKey = getCustomFrontmatterKey(
@@ -463,6 +479,7 @@ export function updateFrontmatterProperties(
 			getPriorityNameForTaskNote(task.priority) || "";
 	} else {
 		delete tempUpdates[priorityKey];
+		delete oldFrontmatter?.[priorityKey];
 	}
 
 	const reminderKey = getCustomFrontmatterKey(
@@ -473,6 +490,7 @@ export function updateFrontmatterProperties(
 		tempUpdates[reminderKey] = task.reminder;
 	} else {
 		delete tempUpdates[reminderKey];
+		delete oldFrontmatter?.[reminderKey];
 	}
 
 	const dependsOnKey = getCustomFrontmatterKey(
@@ -483,13 +501,14 @@ export function updateFrontmatterProperties(
 		tempUpdates[dependsOnKey] = task.dependsOn;
 	} else {
 		delete tempUpdates[dependsOnKey];
+		delete oldFrontmatter?.[dependsOnKey];
 	}
 
 	// Step 2: Order the frontmatter properties and add additional properties from existing frontmatter
 	const orderedFrontmatter = orderFrontmatterProperties(
 		tempUpdates,
 		frontmatterFormatting,
-		existingFrontmatter
+		oldFrontmatter
 	);
 
 	return orderedFrontmatter;
