@@ -230,7 +230,7 @@ export default class vaultScanner {
 						due: taskNoteProperties.due || "",
 						tags: taskNoteProperties.tags || [],
 						frontmatterTags: [],
-						time: "", // Task notes don't have time ranges
+						time: taskNoteProperties.time || "",
 						priority: taskNoteProperties.priority || 0,
 						dependsOn: taskNoteProperties.dependsOn || [],
 						status: taskNoteProperties.status || " ", // Default to unchecked

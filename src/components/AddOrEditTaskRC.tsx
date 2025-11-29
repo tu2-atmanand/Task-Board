@@ -2,7 +2,7 @@
 // React component for adding or editing tasks, usable in both modals and views
 
 import { Component, Keymap, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
 
@@ -243,7 +243,11 @@ export const AddOrEditTaskRC: React.FC<{
 	// Automatically update end time if only start time is provided
 	const handleCompleteTimeChange = (updatedStartTime: string, updatedEndTime: string) => {
 		let newTime = '';
-		if (updatedStartTime && !updatedEndTime) {
+		if (!updatedStartTime) {
+			setStartTime("");
+			setEndTime("");
+			setNewTime("");
+		} else if (updatedStartTime && !updatedEndTime) {
 			const [hours, minutes] = updatedStartTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
@@ -527,7 +531,10 @@ export const AddOrEditTaskRC: React.FC<{
 	// ------------------ Tab Switching and other components ------------------
 
 	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
-	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
+	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => {
+		setActiveTab(tab);
+		// setIsEditorContentChanged(true);
+	};
 
 	const filePathRef = useRef<HTMLInputElement>(null);
 	const communityPlugins = new CommunityPlugins(plugin);
@@ -1157,9 +1164,6 @@ export const AddOrEditTaskRC: React.FC<{
 									className="EditTaskModalBodyDescription"
 									value={formattedTaskContent}
 									onChange={handleTextareaChange}
-									onBlur={() => {
-										setIsEditorContentChanged(true);
-									}}
 									placeholder={t("body-content")}
 									style={{ display: activeTab === 'rawEditor' ? 'block' : 'none', width: '100%' }}
 								/>
@@ -1228,7 +1232,10 @@ export const AddOrEditTaskRC: React.FC<{
 
 						{/* Task Time Input */}
 						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
+							<div className="EditTaskModalHomeFieldTitleContainer">
+								<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
+								<FaTrash onClick={() => handleCompleteTimeChange("", "")} size={12} />
+							</div>
 							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} />
 						</div>
 						<div className="EditTaskModalHomeField">
