@@ -24,18 +24,19 @@ import { priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
+import { eventEmitter } from 'src/services/EventEmitter';
 
 export interface TaskProps {
 	key: number;
 	plugin: TaskBoard;
-	taskKey: number;
 	task: taskItem;
 	activeBoardSettings: Board;
 	columnIndex?: number;
 }
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
+const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardSettings }) => {
 	const [isChecked, setIsChecked] = useState(isCompleted(task.title));
+	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
 
@@ -286,9 +287,27 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		return highestPriorityTag?.color;
 	}
 
+	interface UpdateTaskEventData {
+		taskID: number;
+		state: boolean
+	}
+
+	useEffect(() => {
+		const setCardLoading = (eventData: UpdateTaskEventData) => {
+			console.log("State of the card loading animation : ", eventData.state, "\nTask ID :", eventData.taskID);
+			setCardLoadingAnimation(eventData.state);
+		};
+		eventEmitter.on("UPDATE_TASK", setCardLoading);
+		return () => eventEmitter.off("UPDATE_TASK", setCardLoading);
+	}, []);
+
 	// Function to handle the main checkbox click
 	const handleMainCheckBoxClick = async () => {
-		setIsChecked(true); // Trigger animation
+		// setIsChecked(true);
+		setCardLoadingAnimation(true);
+		const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };
+		eventEmitter.emit("UPDATE_TASK", eventData); // Trigger animation
+
 		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
 		if (condition) {
 			setTimeout(() => {
@@ -298,10 +317,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				} else {
 					handleCheckboxChange(plugin, task);
 				}
-				setIsChecked(false); // Reset checkbox state
-			}, 500); // 1-second delay for animation
+			}, 0); // 1-second delay for animation
 		} else {
-			setIsChecked(false); // Reset checkbox state
+			// setIsChecked(false); // Reset checkbox state
 			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
 		}
 	};
@@ -742,75 +760,79 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
-	return (<div className='taskItemContainer'>
-		<div className={`taskItem${isChecked ? ' completed' : ''}`} key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
-			onDoubleClick={handleDoubleClickOnCard}
-		>
-			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
-			<div className="taskItemMainContent">
-				<div className="taskItemFileNameSection">
-					{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
-						<div className="taskItemFileName" aria-label={task.filePath}>
-							{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
-						</div>
-					)}
-				</div>
-				{memoizedRenderHeader}
-				<div className="taskItemMainBody">
-					<div className="taskItemMainBodyTitleNsubTasks">
-						<input
-							type="checkbox"
-							checked={(isChecked) ? true : false}
-							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
-							data-task={task.status} // Add the data-task attribute
-							dir='auto'
-							onChange={handleMainCheckBoxClick}
-						/>
-						<div className="taskItemBodyContent">
-							<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
-							<div className="taskItemBody">
-								{memoizedRenderSubTasks}
-							</div>
-						</div>
-					</div>
-					{showDescriptionSection && (
-						<div className='taskItemMainBodyDescriptionSectionVisible'>
-							{renderDescriptionSection}
-						</div>
-					)}
-					{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
-						{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
-							<div
-								className='taskItemMainBodyDescriptionSectionToggler'
-								onClick={toggleDescription}
-							>
-								{isDescriptionExpanded ? t("hide-description") : t("show-description")}
+	return (
+		<div className='taskItemContainer'>
+			<div className={`taskItem${isChecked ? ' completed' : ''}`} key={taskIdKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+				onDoubleClick={handleDoubleClickOnCard}
+			>
+				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
+				<div className="taskItemMainContent">
+					<div className="taskItemFileNameSection">
+						{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
+							<div className="taskItemFileName" aria-label={task.filePath}>
+								{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
 							</div>
 						)}
-						{/* Expandable section */}
-						<div className='taskItemMainBodyDescriptionSection'>
-							<div
-								className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
-								ref={descriptionRef}
-							>
-								<div
-									className="taskItemBodyDescriptionRenderer"
-									ref={(el) => {
-										if (el) {
-											const uniqueKey = `${task.id}-desc`;
-											taskItemBodyDescriptionRef.current[uniqueKey] = el;
-										}
-									}}
-								></div>
+					</div>
+					{memoizedRenderHeader}
+					<div className="taskItemMainBody">
+						<div className="taskItemMainBodyTitleNsubTasks">
+							<input
+								id={`${task.id}-checkbox`}
+								type="checkbox"
+								checked={isChecked}
+								className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
+								data-task={task.status} // Add the data-task attribute
+								// dir='auto'
+								onChange={handleMainCheckBoxClick}
+								disabled={cardLoadingAnimation}
+								aria-disabled={cardLoadingAnimation}
+							/>
+							<div className="taskItemBodyContent">
+								<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
+								<div className="taskItemBody">
+									{memoizedRenderSubTasks}
+								</div>
 							</div>
 						</div>
-					</div>)}
-					{memoizedRenderChildTasks}
+						{showDescriptionSection && (
+							<div className='taskItemMainBodyDescriptionSectionVisible'>
+								{renderDescriptionSection}
+							</div>
+						)}
+						{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
+							{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
+								<div
+									className='taskItemMainBodyDescriptionSectionToggler'
+									onClick={toggleDescription}
+								>
+									{isDescriptionExpanded ? t("hide-description") : t("show-description")}
+								</div>
+							)}
+							{/* Expandable section */}
+							<div className='taskItemMainBodyDescriptionSection'>
+								<div
+									className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
+									ref={descriptionRef}
+								>
+									<div
+										className="taskItemBodyDescriptionRenderer"
+										ref={(el) => {
+											if (el) {
+												const uniqueKey = `${task.id}-desc`;
+												taskItemBodyDescriptionRef.current[uniqueKey] = el;
+											}
+										}}
+									></div>
+								</div>
+							</div>
+						</div>)}
+						{memoizedRenderChildTasks}
+					</div>
+					{renderFooter()}
 				</div>
-				{renderFooter()}
 			</div>
 		</div>
-	</div>
 	);
 };
 
