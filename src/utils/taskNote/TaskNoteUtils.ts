@@ -91,6 +91,10 @@ export function extractTaskNoteProperties(
 					.split(",")
 					.map((tag: string) => tag.trim())
 			: [],
+		time:
+			frontmatter[
+				getCustomFrontmatterKey("time", frontmatterFormatting)
+			] || "",
 		createdDate:
 			frontmatter[
 				getCustomFrontmatterKey("createdDate", frontmatterFormatting)
