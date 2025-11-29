@@ -180,10 +180,9 @@ export default class vaultScanner {
 			) {
 				// Extract properties from frontmatter
 				const taskNoteProperties = extractTaskNoteProperties(
-					this.plugin.settings.data.globalSettings
-						.frontmatterFormatting,
 					frontmatter,
-					fileNameWithPath
+					fileNameWithPath,
+					this.plugin.settings
 				);
 				if (
 					scanFilterForTags(
@@ -247,9 +246,11 @@ export default class vaultScanner {
 					};
 
 					// Add to appropriate cache based on completion status
-					const isTaskNoteCompleted =
-						taskNoteItem.status === "unchecked" ||
-						taskNoteItem.status === "pending";
+					const isTaskNoteCompleted = isTaskCompleted(
+						taskNoteProperties.status || "",
+						true,
+						this.plugin.settings
+					);
 					if (isTaskNoteCompleted) {
 						// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
 						const completed = this.tasksCache.Completed;
@@ -306,7 +307,11 @@ export default class vaultScanner {
 							this.tasksDetectedOrUpdated = true;
 							const legacyId = extractTaskId(line);
 							const taskStatus = extractCheckboxSymbol(line);
-							const isTaskCompleted = isCompleted(line);
+							const isThisCompletedTask = isTaskCompleted(
+								line,
+								false,
+								this.plugin.settings
+							);
 							// const title = extractTitle(line);
 							const title = line; // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
@@ -428,7 +433,7 @@ export default class vaultScanner {
 								reminder: reminder,
 							};
 
-							if (isTaskCompleted) {
+							if (isThisCompletedTask) {
 								this.tasksCache.Completed[
 									fileNameWithPath
 								].push(task);

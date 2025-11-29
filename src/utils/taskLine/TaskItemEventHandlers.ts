@@ -1,4 +1,4 @@
-import { checkboxStateSwitcher, isCompleted } from "../CheckBoxUtils";
+import { checkboxStateSwitcher, isTaskCompleted } from "../CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
@@ -35,7 +35,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	if (!tasksPlugin.isTasksPluginEnabled()) {
 		// Check if the task is completed
 		const newStatus = checkboxStateSwitcher(plugin, task.status);
-		if (isCompleted(`- [${task.status}]`)) {
+		if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
 			const taskWithUpdatedStatus = {
 				...task,
 				completion: "",
