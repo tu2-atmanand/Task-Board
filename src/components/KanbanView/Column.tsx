@@ -323,7 +323,6 @@ const Column: React.FC<ColumnProps> = ({
 										<TaskItem
 											key={index}
 											plugin={plugin}
-											taskKey={index}
 											task={task}
 											columnIndex={columnIndex}
 											activeBoardSettings={activeBoardData}

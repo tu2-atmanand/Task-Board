@@ -263,7 +263,6 @@ const MapView: React.FC<MapViewProps> = ({
 							label: <TaskItem
 								key={task.id}
 								plugin={plugin}
-								taskKey={task.id}
 								task={task}
 								activeBoardSettings={activeBoardSettings}
 							/>

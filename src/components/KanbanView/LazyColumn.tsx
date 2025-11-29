@@ -326,7 +326,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 											<TaskItem
 												key={index}
 												plugin={plugin}
-												taskKey={index}
 												task={task}
 												columnIndex={columnIndex}
 												activeBoardSettings={activeBoardData}
