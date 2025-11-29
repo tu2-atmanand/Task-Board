@@ -71,7 +71,7 @@
           ]
         },
         "taskCount": {
-          "pending": 30,
+          "pending": 28,
           "completed": 4
         }
       },
@@ -259,7 +259,11 @@
             "active": true,
             "collapsed": false,
             "name": "#Task",
-            "coltag": "#Task"
+            "coltag": "#Task",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "colType": "namedTag",
@@ -276,11 +280,24 @@
             "minimized": false
           },
           {
+            "id": 3193261849,
+            "index": 4,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "In Progress",
-            "index": 4,
+            "index": 5,
             "coltag": "working",
             "id": 908753,
             "filters": {
@@ -319,7 +336,7 @@
             "active": true,
             "collapsed": false,
             "name": "In Review",
-            "index": 5,
+            "index": 6,
             "coltag": "Test",
             "id": 396902
           },
@@ -328,43 +345,18 @@
             "active": true,
             "collapsed": false,
             "name": "Ready to publish",
-            "index": 6,
+            "index": 7,
             "coltag": "done",
             "id": 328227
           },
           {
             "id": 1936828579,
-            "index": 7,
+            "index": 8,
             "colType": "namedTag",
             "active": false,
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*"
-          },
-          {
-            "id": 3193261849,
-            "index": 8,
-            "colType": "completed",
-            "active": true,
-            "collapsed": false,
-            "name": "Completed",
-            "limit": 20,
-            "filters": {
-              "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1763878153878-2dyqv7914",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1763878153879-cc19ylpzx",
-                      "property": "completedDate",
-                      "condition": "isNotEmpty"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ],
         "filters": [
@@ -534,8 +526,8 @@
           ]
         },
         "taskCount": {
-          "pending": 10,
-          "completed": 0
+          "pending": 9,
+          "completed": 1
         }
       }
     ],
@@ -727,17 +719,17 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 265,
+      "uniqueIdCounter": 266,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 4
       },
       "taskNoteIdentifierTag": "taskNote",
-      "doubleClickCardToEdit": "noteInTab",
+      "doubleClickCardToEdit": "none",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
       "archivedTBNotesFolderPath": "TaskBoard/TBNotes/",
