@@ -36,7 +36,6 @@ import { isCompleted } from 'src/utils/CheckBoxUtils';
 
 type MapViewProps = {
 	plugin: TaskBoard;
-	boards: Board[];
 	activeBoardIndex: number;
 	allTasksArranged: taskItem[][];
 	// loading: boolean;
@@ -67,7 +66,7 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
+	plugin, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
@@ -222,6 +221,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 		const newNodes: Node[] = [];
 		const usedIds = new Set<string>();
+		const duplicateIds = new Set<string>();
 		const columnSpacing = 350;
 		const rowSpacing = 170;
 
@@ -243,7 +243,7 @@ const MapView: React.FC<MapViewProps> = ({
 					const id = task.legacyId ? task.legacyId : String(task.id);
 					if (usedIds.has(id)) {
 						console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
-						bugReporter(plugin, `Duplicate node id "${id}" detected in Map View. This may cause unexpected behavior. Please report this issue to the developer with details about the tasks involved.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+						duplicateIds.add(id);
 						return; // Skip duplicate
 					}
 					usedIds.add(id);
@@ -279,6 +279,12 @@ const MapView: React.FC<MapViewProps> = ({
 			});
 			xOffset += columnSpacing;
 		});
+
+		if (duplicateIds.size > 0) {
+			const stringOfListOfDuplicateIds = Array.from(duplicateIds).join(',');
+			bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+		}
+
 		return newNodes;
 	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey]);
 

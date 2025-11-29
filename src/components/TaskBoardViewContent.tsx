@@ -685,7 +685,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						) : (
 							<MapView
 								plugin={plugin}
-								boards={boards}
 								activeBoardIndex={activeBoardIndex}
 								allTasksArranged={allTasksArrangedPerColumn}
 								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
