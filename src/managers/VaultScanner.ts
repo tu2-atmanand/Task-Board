@@ -4,7 +4,7 @@ import { App, Notice, TAbstractFile, TFile, moment as _moment } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
-	isCompleted,
+	isTaskCompleted,
 	isTaskLine,
 } from "../utils/CheckBoxUtils";
 import {
@@ -256,11 +256,15 @@ export default class vaultScanner {
 						const completed = this.tasksCache.Completed;
 						if (completed) {
 							delete completed[fileNameWithPath];
-							this.tasksCache.Completed = {
-								[fileNameWithPath]: [taskNoteItem],
-								...completed,
-							};
 						}
+
+						this.tasksCache.Completed = {
+							[fileNameWithPath]: [taskNoteItem],
+							...completed,
+						};
+
+						if (this.tasksCache.Pending[fileNameWithPath])
+							delete this.tasksCache.Pending[fileNameWithPath];
 					} else {
 						// this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
 						const pending = this.tasksCache.Pending;
@@ -268,11 +272,14 @@ export default class vaultScanner {
 							// Remove and re-insert at the top
 							// const tasks = pending[fileNameWithPath];
 							delete pending[fileNameWithPath];
-							this.tasksCache.Pending = {
-								[fileNameWithPath]: [taskNoteItem],
-								...pending,
-							};
 						}
+						this.tasksCache.Pending = {
+							[fileNameWithPath]: [taskNoteItem],
+							...pending,
+						};
+
+						if (this.tasksCache.Completed[fileNameWithPath])
+							delete this.tasksCache.Completed[fileNameWithPath];
 					}
 
 					const pendingCacheCompare = await compareFileCache(
