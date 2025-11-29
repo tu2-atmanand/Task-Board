@@ -1641,15 +1641,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-}
-
-/* DeleteTaskConfirmationModal */
-
-.deleteConfirmationModalHome {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
 	text-align: center;
 	gap: 0.7rem;
 }
