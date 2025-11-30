@@ -16,7 +16,7 @@ import {
 	ControlButton,
 } from '@xyflow/react';
 // import '@xyflow/react/dist/style.css';
-import { taskItem } from 'src/interfaces/TaskItem';
+import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
@@ -522,7 +522,11 @@ const MapView: React.FC<MapViewProps> = ({
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
 			updatedTargetTask.dependsOn.push(sourceLegacyId);
-
+			let eventData: UpdateTaskEventData = {
+				taskID: updatedTargetTask.id,
+				state: true,
+			};
+			eventEmitter.emit("UPDATE_TASK", eventData);
 			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
 				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
 				updatedTargetTask.title = updatedTargetTaskTitle;
@@ -530,15 +534,29 @@ const MapView: React.FC<MapViewProps> = ({
 				// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
 				updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+					setTimeout(() => {
+						// This event emmitter will stop any loading animation of ongoing task-card.
+						eventEmitter.emit("UPDATE_TASK", {
+							taskID: updatedTargetTask.id,
+							state: false,
+						});
+					}, 500);
 				});
 			} else {
 				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
 					// This is required to rescan the updated file and refresh the board.
 					sleep(1000).then(() => {
-						// This is required to rescan the updated file and refresh the board.
 						plugin.realTimeScanning.processAllUpdatedFiles(
 							updatedTargetTask.filePath
 						);
+
+						setTimeout(() => {
+							// This event emmitter will stop any loading animation of ongoing task-card.
+							eventEmitter.emit("UPDATE_TASK", {
+								taskID: updatedTargetTask.id,
+								state: false,
+							});
+						}, 500);
 					});
 				});
 			}
