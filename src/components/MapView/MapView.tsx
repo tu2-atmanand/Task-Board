@@ -19,6 +19,7 @@ import {
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
 import ResizableNodeSelected from './ResizableNodeSelected';
+import MapOverlayNode from './MapOverlayNode';
 import TaskItem from '../KanbanView/TaskItem';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
 import { debounce, Menu, Notice, Platform } from 'obsidian';
@@ -33,6 +34,7 @@ import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
 import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
+import TaskImportedPortal from './TaskImpotedPortal';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -59,10 +61,16 @@ export type nodePosition = {
 	y: number;
 }
 
+// const nodeTypes = {
+// 	// CustomNodeResizer,
+// 	ResizableNodeSelected,
+// };
+
 const nodeTypes = {
-	// CustomNodeResizer,
 	ResizableNodeSelected,
+	MapOverlayNode,   // ➜ Add this
 };
+
 
 
 const MapView: React.FC<MapViewProps> = ({
@@ -230,7 +238,7 @@ const MapView: React.FC<MapViewProps> = ({
 		const getDefaultWidth = () => {
 			const columnWidth = plugin.settings.data.globalSettings.columnWidth;
 			if (columnWidth && Number.isFinite(Number(columnWidth))) {
-				return Number(columnWidth);
+				return Number(columnWidth.replace('px', ''));
 			}
 			return 300; // Fallback default width
 		};
@@ -283,9 +291,27 @@ const MapView: React.FC<MapViewProps> = ({
 
 		if (duplicateIds.size > 0) {
 			const stringOfListOfDuplicateIds = Array.from(duplicateIds).join(',');
-			bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+			// bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
 			duplicateIds.clear();
 		}
+
+		// Add overlay rectangle node (non-draggable)
+		newNodes.push({
+			id: "overlay-node",
+			type: "MapOverlayNode",
+			position: { x: -1000, y: 0 },  // ReactFlow requires a position
+			selectable: false,
+			draggable: false,
+			// zIndex: 999999,             // stays above everything
+			data: {
+				width: 500,
+				height: 1000,
+				label: <TaskImportedPortal />
+			},
+			style: {
+				// pointerEvents: "none"  // prevent interactions
+			},
+		});
 
 		return newNodes;
 	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey]);

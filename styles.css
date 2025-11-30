@@ -6070,3 +6070,22 @@ svg.react-flow__connectionline {
 .lucide {
 	margin-right: 0px !important;
 }
+
+
+.taskImportedPortal {
+	text-align: center;
+	background: hsl(var(--color-accent) * 0.5);
+	border: 2px solid var(--color-accent);
+	border-radius: 20px;
+}
+
+.taskImportedPortalNodeHeading {
+	color: var(--color-accent);
+	font-size: large;
+	align-items: center;
+	align-self: center;
+}
+
+.taskImportedPortalNodeDescription {
+	color: var(--canvas-card-label-color);
+}

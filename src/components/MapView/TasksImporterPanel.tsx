@@ -9,6 +9,8 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { applyIdToTaskInNote } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
+import { generateTaskId } from 'src/managers/VaultScanner';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
@@ -49,14 +51,29 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 
 	const handleImportTask = async (task: taskItem) => {
 		try {
-			const newId = await applyIdToTaskInNote(plugin, task);
-			if (newId !== undefined) {
-				// Add to imported set
-				setImportedTaskIds(prev => new Set(prev).add(task.id));
-				// Trigger re-scan to update the map view
-				await plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
-				// Emit event to refresh the board
-				eventEmitter.emit('REFRESH_BOARD');
+			if (!isTaskNotePresentInTags(plugin.settings.data.globalSettings.taskNoteIdentifierTag, task.tags)) {
+				const newId = await applyIdToTaskInNote(plugin, task);
+				if (newId !== undefined) {
+					// Add to imported set
+					setImportedTaskIds(prev => new Set(prev).add(task.id));
+					// Trigger re-scan to update the map view
+					await plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+					// Emit event to refresh the board
+					eventEmitter.emit('REFRESH_BOARD');
+				}
+			} else {
+				const newId = generateTaskId(plugin);
+				task.id = newId;
+				task.legacyId = newId;
+				updateFrontmatterInMarkdownFile(plugin, task).then(() => {
+					// This is required to rescan the updated file and refresh the board.
+					sleep(1000).then(() => {
+						// This is required to rescan the updated file and refresh the board.
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							task.filePath
+						);
+					});
+				});
 			}
 		} catch (error) {
 			console.error('Error importing task:', error);

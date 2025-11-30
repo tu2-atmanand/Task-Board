@@ -373,7 +373,20 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "all",
-          "filterGroups": []
+          "filterGroups": [
+            {
+              "id": "id-1764483560910-f4hr8gf7g",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1764483560913-3e3q7z3fb",
+                  "property": "content",
+                  "condition": "contains",
+                  "value": "this"
+                }
+              ]
+            }
+          ]
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -835,7 +848,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "Meta/Task_Board/New_Task_Notes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 292,
+      "uniqueIdCounter": 335,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {

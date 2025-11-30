@@ -20,7 +20,7 @@ export const MapViewMinimap: React.FC<MapViewMinimapProps> = ({ tagColors }) => 
 			return "var(--xy-minimap-node-background-color, var(--xy-minimap-node-background-color-default))";
 		}
 
-		const nodeTags = (node as CustomNode).data.label.props.task.tags;
+		const nodeTags = (node as CustomNode)?.data?.label?.props?.task?.tags;
 		if (!Array.isArray(nodeTags)) return "var(--xy-minimap-node-background-color, var(--xy-minimap-node-background-color-default))";
 
 		// Prepare a map for faster lookup
