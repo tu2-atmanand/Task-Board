@@ -228,9 +228,18 @@ const MapView: React.FC<MapViewProps> = ({
 
 		// Get default width with proper validation
 		const getDefaultWidth = () => {
-			const columnWidth = plugin.settings.data.globalSettings.columnWidth;
-			if (columnWidth && Number.isFinite(Number(columnWidth.replace('px', '')))) {
-				return Number(columnWidth);
+			try {
+				const columnWidth = plugin.settings.data.globalSettings.columnWidth;
+				if (!columnWidth || typeof columnWidth !== 'string') {
+					return 300; // Fallback if missing or not a string
+				}
+				const cleaned = columnWidth.replace('px', '').trim();
+				const parsed = Number(cleaned);
+				if (Number.isFinite(parsed) && parsed > 0) {
+					return parsed;
+				}
+			} catch (e) {
+				console.warn('Error parsing columnWidth:', e);
 			}
 			return 300; // Fallback default width
 		};
@@ -257,6 +266,14 @@ const MapView: React.FC<MapViewProps> = ({
 						nodeWidth = savedSize.width;
 					}
 
+					// Ensure positions are always valid finite numbers
+					const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
+					const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
+					
+					// Safety check: if computed offsets are somehow NaN, use fallback
+					const safeX = Number.isFinite(nodeX) ? nodeX : (colIdx * 350);
+					const safeY = Number.isFinite(nodeY) ? nodeY : (rowIdx * 170);
+
 					newNodes.push({
 						id,
 						type: 'ResizableNodeSelected',
@@ -269,8 +286,8 @@ const MapView: React.FC<MapViewProps> = ({
 							/>
 						},
 						position: {
-							x: Number.isFinite(savedPos.x) ? savedPos.x : xOffset,
-							y: Number.isFinite(savedPos.y) ? savedPos.y : yOffset
+							x: safeX,
+							y: safeY
 						},
 						width: nodeWidth,
 					});
@@ -283,7 +300,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 		if (duplicateIds.size > 0) {
 			const stringOfListOfDuplicateIds = Array.from(duplicateIds).join(',');
-			bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+			// bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
 			duplicateIds.clear();
 		}
 
@@ -377,12 +394,12 @@ const MapView: React.FC<MapViewProps> = ({
 		// const cssMax = 1.5;   // value when zoom is minZ
 
 		const vpForBoard = viewport[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
-		const zoom = Number.isFinite(vpForBoard.zoom) ? vpForBoard.zoom : 1.5;
+		const zoom = Number.isFinite(vpForBoard?.zoom) ? vpForBoard.zoom : 1.5;
 		const clamped = Math.max(0.5, Math.min(2, zoom));
 		const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 		const mapped = 1.5 - ratio * (1.5 - 1.2);
 		// Keep a compact string value suitable for CSS variable
-		const safeMarkerSize = 15 * mapped;
+		const safeMarkerSize: number = Number.isFinite(mapped) ? 15 * mapped : 15;
 
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
@@ -407,15 +424,15 @@ const MapView: React.FC<MapViewProps> = ({
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
-									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
+									height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
 								},
 								markerEnd: {
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
-									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
+									height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
 								},
 							});
 						}
@@ -886,14 +903,15 @@ const MapView: React.FC<MapViewProps> = ({
 							// const cssMax = 2;   // value when zoom is minZ
 
 							const vpForBoard = viewport[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
-							const z = Number.isFinite(vpForBoard.zoom) ? vpForBoard.zoom : 1.5;
+							const z = Number.isFinite(vpForBoard?.zoom) ? vpForBoard.zoom : 1.5;
 							const clamped = Math.max(0.5, Math.min(2, z));
 							const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 							// Map so that zoom 0.5 -> 2 and zoom 2 -> 1
 							const mapped = 2 - ratio;
+							const safeMapped = Number.isFinite(mapped) ? mapped : 1;
 
 							// Keep a compact string value suitable for CSS variable
-							return String(mapped);
+							return String(safeMapped);
 						})()
 					} as React.CSSProperties}>
 						<ReactFlow
@@ -961,10 +979,10 @@ const MapView: React.FC<MapViewProps> = ({
 								}
 								// Use current viewport if valid for this board, otherwise fall back to defaults
 								const currentVpForBoard = viewport[activeBoardIndex];
-								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom)) {
+								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom) && currentVpForBoard.zoom > 0) {
 									instance.setViewport(currentVpForBoard);
 								} else {
-									const defaultVp = { x: 10, y: 10, zoom: 1.5 };
+									const defaultVp: viewPort = { x: 10, y: 10, zoom: 1.5 };
 									instance.setViewport(defaultVp);
 									setViewport(prev => ({ ...prev, [activeBoardIndex]: defaultVp }));
 								}
