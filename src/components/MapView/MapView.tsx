@@ -1,6 +1,6 @@
 // /src/components/MapView/MapView.tsx
 
-import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import {
 	ReactFlow,
 	ReactFlowProvider,
@@ -18,7 +18,6 @@ import {
 import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
-import { Board } from 'src/interfaces/BoardConfigs';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
@@ -32,7 +31,8 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
 import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
-import { isCompleted } from 'src/utils/CheckBoxUtils';
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
+import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -70,6 +70,7 @@ const MapView: React.FC<MapViewProps> = ({
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
+	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
@@ -516,13 +517,26 @@ const MapView: React.FC<MapViewProps> = ({
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
 			updatedTargetTask.dependsOn.push(sourceLegacyId);
-			const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
-			updatedTargetTask.title = updatedTargetTaskTitle;
 
-			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-			updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
-				plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
-			});
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+				updatedTargetTask.title = updatedTargetTaskTitle;
+
+				// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
+				updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+				});
+			} else {
+				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
+					// This is required to rescan the updated file and refresh the board.
+					sleep(1000).then(() => {
+						// This is required to rescan the updated file and refresh the board.
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							updatedTargetTask.filePath
+						);
+					});
+				});
+			}
 		}
 	}
 
