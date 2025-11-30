@@ -300,11 +300,11 @@ export const openEditTaskNoteModal = (
 					});
 				}
 
-				setTimeout(() => {
-					// This event emmitter will stop any loading animation of ongoing task-card.
-					// eventData.state = false;
-					eventEmitter.emit("UPDATE_TASK");
-				}, 500);
+				// setTimeout(() => {
+				// 	// This event emmitter will stop any loading animation of ongoing task-card.
+				// 	// eventData.state = false;
+				// 	eventEmitter.emit("UPDATE_TASK");
+				// }, 500);
 			} catch (error) {
 				bugReporter(
 					plugin,

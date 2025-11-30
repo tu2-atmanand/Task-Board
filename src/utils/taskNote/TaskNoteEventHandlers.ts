@@ -38,9 +38,11 @@ export const handleTaskNoteStatusChange = async (
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
+				console.log("This should run after 1 secon...");
 				// This is required to rescan the updated file and refresh the board.
 				plugin.realTimeScanning.processAllUpdatedFiles(
-					updatedTask.filePath
+					updatedTask.filePath,
+					task.legacyId
 				);
 			});
 		});
