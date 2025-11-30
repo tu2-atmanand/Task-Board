@@ -655,7 +655,17 @@ export default class vaultScanner {
 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 				Object.values(this.tasksCache.Completed).flat().length > 0)
 		) {
-			eventEmitter.emit("REFRESH_COLUMN");
+			setTimeout(() => {
+				if (this.plugin.settings.data.globalSettings.searchQuery) {
+					console.log(
+						"Refreshing the board now after saving...\nSetting : ",
+						this.plugin.settings.data.globalSettings.searchQuery
+					);
+					eventEmitter.emit("REFRESH_BOARD");
+				} else {
+					// eventEmitter.emit("REFRESH_COLUMN");
+				}
+			}, 1000);
 		}
 		this.tasksDetectedOrUpdated = false;
 
