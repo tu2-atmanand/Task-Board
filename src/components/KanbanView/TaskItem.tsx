@@ -73,12 +73,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 			if (titleElement && task.title !== "") {
 				let cleanedTitle = cleanTaskTitleLegacy(task);
-				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-				if (searchQuery) {
-					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-					const regex = new RegExp(`(${escapedQuery})`, "gi");
-					cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
-				}
+				// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+				// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				// if (searchQuery) {
+				// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+				// 	cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
+				// }
 
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
@@ -109,12 +110,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 				element.empty(); // Clear previous content
 
-				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-				if (searchQuery) {
-					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-					const regex = new RegExp(`(${escapedQuery})`, "gi");
-					strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
-				}
+				// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+				// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				// if (searchQuery) {
+				// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+				// 	strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
+				// }
 
 				MarkdownUIRenderer.renderSubtaskText(
 					plugin.app,
@@ -141,12 +143,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 			.trim() : "";
 
 		if (descElement && descriptionContent !== "") {
-			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-			if (searchQuery) {
-				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-				const regex = new RegExp(`(${escapedQuery})`, "gi");
-				descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
-			}
+			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			// if (searchQuery) {
+			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+			// 	descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
+			// }
 
 			// Clear existing content
 			descElement.empty();
@@ -600,12 +603,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		if (!descriptionContent) return null; // If no description content, return null
 
 		if (descElement) {
-			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-			if (searchQuery) {
-				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-				const regex = new RegExp(`(${escapedQuery})`, "gi");
-				descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
-			}
+			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			// if (searchQuery) {
+			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+			// 	descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
+			// }
 
 			// Clear existing content
 			descElement.empty();
