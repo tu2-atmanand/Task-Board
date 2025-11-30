@@ -15,7 +15,7 @@ import {
 	SelectionMode,
 	ControlButton,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+// import '@xyflow/react/dist/style.css';
 import { taskItem } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
 import ResizableNodeSelected from './ResizableNodeSelected';
@@ -241,7 +241,7 @@ const MapView: React.FC<MapViewProps> = ({
 			let yOffset = 0;
 			columnTasks.forEach((task, rowIdx) => {
 				if (task.legacyId) {
-					const id = task.legacyId ? task.legacyId : String(task.id);
+					const id = task.legacyId;
 					if (usedIds.has(id)) {
 						console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
 						duplicateIds.add(id);
@@ -284,6 +284,7 @@ const MapView: React.FC<MapViewProps> = ({
 		if (duplicateIds.size > 0) {
 			const stringOfListOfDuplicateIds = Array.from(duplicateIds).join(',');
 			bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+			duplicateIds.clear();
 		}
 
 		return newNodes;
@@ -389,31 +390,35 @@ const MapView: React.FC<MapViewProps> = ({
 				task.dependsOn.forEach(depId => {
 					if (idToTask.has(depId)) {
 						const childTask = idToTask.get(depId);
-						const isChildTaskCompleted = childTask ? isCompleted(childTask.title) : false;
-						edges.push({
-							id: `${sourceId}->${depId}`,
-							source: depId,
-							target: sourceId,
-							type: mapViewSettings.edgeType,
-							animated: isChildTaskCompleted ? false : mapViewSettings.animatedEdges,
-							style: {
-								opacity: isChildTaskCompleted ? '50%' : "100%",
-							},
-							markerStart: {
-								type: MarkerType.ArrowClosed, // required property
-								// optional properties
-								// color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
-							},
-							markerEnd: {
-								type: MarkerType.ArrowClosed, // required property
-								// optional properties
-								// color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
-							},
-						});
+						if (childTask) {
+							const isChildTaskCompleted = isTaskNotePresentInTags(taskNoteIdentifierTag, childTask.tags) ?
+								isTaskCompleted(childTask.status, true, plugin.settings)
+								: isTaskCompleted(childTask.title, false, plugin.settings);
+							edges.push({
+								id: `${sourceId}->${depId}`,
+								source: depId,
+								target: sourceId,
+								type: mapViewSettings.edgeType,
+								animated: isChildTaskCompleted ? false : mapViewSettings.animatedEdges,
+								style: {
+									opacity: isChildTaskCompleted ? '50%' : "100%",
+								},
+								markerStart: {
+									type: MarkerType.ArrowClosed, // required property
+									// optional properties
+									// color: 'var(--text-normal)',
+									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
+									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
+								},
+								markerEnd: {
+									type: MarkerType.ArrowClosed, // required property
+									// optional properties
+									// color: 'var(--text-normal)',
+									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
+									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
+								},
+							});
+						}
 					}
 				});
 			}
