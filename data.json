@@ -71,8 +71,8 @@
           ]
         },
         "taskCount": {
-          "pending": 25,
-          "completed": 7
+          "pending": 32,
+          "completed": 9
         }
       },
       {
@@ -224,8 +224,8 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 3,
-          "completed": 1
+          "pending": 8,
+          "completed": 3
         }
       },
       {
@@ -537,8 +537,8 @@
           ]
         },
         "taskCount": {
-          "pending": 43,
-          "completed": 12
+          "pending": 65,
+          "completed": 14
         }
       }
     ],
@@ -639,36 +639,6 @@
       "openOnStartup": false,
       "customStatuses": [
         {
-          "symbol": "x",
-          "name": "Checked",
-          "nextStatusSymbol": " ",
-          "availableAsCommand": false,
-          "type": "DONE"
-        },
-        {
-          "symbol": "/",
-          "name": "Half Done",
-          "nextStatusSymbol": "x",
-          "availableAsCommand": true,
-          "type": "IN_PROGRESS"
-        },
-        {
-          "symbol": "-",
-          "name": "Cancelled",
-          "nextStatusSymbol": " ",
-          "availableAsCommand": true,
-          "type": "CANCELLED"
-        },
-        {
-          "symbol": " ",
-          "name": "Unchecked",
-          "nextStatusSymbol": "x",
-          "availableAsCommand": false,
-          "type": "TODO"
-        }
-      ],
-      "tasksPluginCustomStatuses": [
-        {
           "symbol": " ",
           "name": "Todo",
           "nextStatusSymbol": "x",
@@ -695,6 +665,141 @@
           "nextStatusSymbol": " ",
           "availableAsCommand": true,
           "type": "CANCELLED"
+        }
+      ],
+      "tasksPluginCustomStatuses": [
+        {
+          "symbol": " ",
+          "name": "incomplete",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "x",
+          "name": "complete",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "/",
+          "name": "in progress, or half-done",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "-",
+          "name": "cancelled",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": ">",
+          "name": "deferred",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "!",
+          "name": "Important",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "?",
+          "name": "question",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "R",
+          "name": "review",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "+",
+          "name": "Inbox / task that should be processed later",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "b",
+          "name": "bookmark",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "B",
+          "name": "brainstorm",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "D",
+          "name": "deferred or scheduled",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "I",
+          "name": "Info",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "i",
+          "name": "idea",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "N",
+          "name": "note",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "Q",
+          "name": "quote",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "W",
+          "name": "win / success / reward",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "P",
+          "name": "pro",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "C",
+          "name": "con",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
         }
       ],
       "showTaskWithoutMetadata": true,
@@ -728,22 +833,22 @@
       "cardSectionsVisibility": "hideBoth",
       "hiddenTaskProperties": [],
       "taskPropertyFormat": "3",
-      "taskNoteDefaultLocation": "TaskNotes",
+      "taskNoteDefaultLocation": "Meta/Task_Board/New_Task_Notes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 274,
+      "uniqueIdCounter": 292,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "kanban",
+        "viewedType": "map",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 2
+        "settingTab": 3
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "none",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
-      "archivedTBNotesFolderPath": "TaskBoard/TBNotes/",
+      "archivedTBNotesFolderPath": "Meta/Task_Board/Archived_Task_Notes",
       "frontmatterFormatting": [
         {
           "index": 0,
@@ -848,14 +953,14 @@
         }
       ],
       "mapView": {
-        "background": "transparent",
+        "background": "dots",
         "mapOrientation": "hor",
         "optimizedRender": false,
         "arrowDirection": "c2p",
         "animatedEdges": false,
         "scrollAction": "pan",
         "showMinimap": true,
-        "renderVisibleNodes": true,
+        "renderVisibleNodes": false,
         "edgeType": "default"
       },
       "kanbanView": {
