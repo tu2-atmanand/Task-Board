@@ -105,6 +105,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, [refreshCount]);
 
 	const allTasksArrangedPerColumn = useMemo(() => {
+		console.log("Calculating allTasksArrangedPerColumn...");
+		setFilteredTasksPerColumn([]);
 		if (allTasks && boards[activeBoardIndex]) {
 			// Apply board filters to pending tasks
 			const currentBoard = boards[activeBoardIndex];
@@ -129,12 +131,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				);
 		}
 		return [];
-	}, [allTasks, boards, activeBoardIndex]);
+	}, [allTasks, activeBoardIndex]);
 
 	useEffect(() => {
 		if (allTasksArrangedPerColumn.length > 0) {
 			setLoading(false);
 		}
+
+		if (searchQuery) handleSearchButtonClick();
 	}, [allTasksArrangedPerColumn]);
 
 	const debouncedRefreshColumn = useCallback(
@@ -204,11 +208,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}
 	}
 
-	function highlightMatch(text: string, query: string): string {
-		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-		const regex = new RegExp(`(${escapedQuery})`, "gi");
-		return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
-	}
+	// function highlightMatch(text: string, query: string): string {
+	// 	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+	// 	return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
+	// }
 
 	function handleSearchSubmit() {
 		if (!searchQuery.trim()) {
@@ -230,21 +234,25 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
-				})
-				.map((task) => {
-					const highlightedTitle = highlightMatch(task.title, searchQuery);
-					const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
-
-					return {
-						...task,
-						title: highlightedTitle,
-						body: highlightedBody.split("\n"),
-					};
 				});
+			// TODO : This highliting option also cannot work as it destroys the other functionalities of the taskItem.
+			// .map((task) => {
+			// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
+			// 	const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
+
+			// 	return {
+			// 		...task,
+			// 		title: highlightedTitle,
+			// 		body: highlightedBody.split("\n"),
+			// 	};
+			// });
 			return filteredTasks;
 		});
 
 		setFilteredTasksPerColumn(filtered);
+
+		plugin.settings.data.globalSettings.searchQuery = lowerQuery;
+		plugin.saveSettings();
 	}
 
 	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
