@@ -290,6 +290,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 	useEffect(() => {
 		const setCardLoading = (eventData: UpdateTaskEventData) => {
+			console.log("Refreshing the animation of only following ID :", eventData.taskID, "\nWith state :", eventData.state, "\nCurrent task ID :", task.legacyId, taskIdKey, "\nCondition :", eventData.taskID !== taskIdKey);
 			if (!eventData || !eventData?.taskID) setCardLoadingAnimation(false);
 
 			// Only update this specific task's loading state
@@ -306,7 +307,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		// Prevent repeated clicks while card is loading
 		if (cardLoadingAnimation) return;
 
-		console.log("Checkbox clicked...");
+		console.log("Checkbox clicked...\nID :", task.legacyId);
 		setCardLoadingAnimation(true);
 		// setIsChecked(true);
 		// const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };

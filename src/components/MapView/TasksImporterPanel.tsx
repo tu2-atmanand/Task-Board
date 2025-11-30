@@ -26,7 +26,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 	onClose
 }) => {
 	const [searchQuery, setSearchQuery] = useState('');
-	const [importedTaskIds, setImportedTaskIds] = useState<Set<number>>(new Set());
+	const [importedTaskIds, setImportedTaskIds] = useState<Set<string>>(new Set());
 
 	// Get all tasks without an ID (legacyId is empty)
 	const tasksWithoutId = useMemo(() => {
@@ -136,14 +136,14 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 						</div>
 					) : (
 						<div className="tasksImporterPanelTaskList">
-							{filteredTasks.map((task) => (
+							{filteredTasks.map((task, index) => (
 								<div
 									key={task.id}
 									className="tasksImporterPanelTaskItemWrapper"
 									onClick={() => handleImportTask(task)}
 								>
 									<TaskItem
-										key={task.id}
+										key={index}
 										plugin={plugin}
 										task={task}
 										activeBoardSettings={activeBoardSettings}

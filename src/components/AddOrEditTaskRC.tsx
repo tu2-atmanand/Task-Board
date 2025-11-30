@@ -915,14 +915,14 @@ export const AddOrEditTaskRC: React.FC<{
 			}
 			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
 				const getUpdatedDependsOnIds = (prev: string[]) => {
-					if (!prev.includes(task.legacyId ? task.legacyId : String(task.id))) {
+					if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
 						if (newId === undefined && !selectedTask?.legacyId) {
 							bugReporter(plugin, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
 							return [...prev, String(plugin.settings.data.globalSettings.uniqueIdCounter)];
 						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
 						} else if (newId) {
-							return [...prev, String(newId)];
+							return [...prev, newId];
 						}
 					}
 					return prev;
@@ -975,7 +975,7 @@ export const AddOrEditTaskRC: React.FC<{
 	// Render child task titles when childTasks changes
 	useEffect(() => {
 		childTasks.forEach((childTask, index) => {
-			const element = childTaskTitleRefs.current[childTask.legacyId ? childTask.legacyId : String(childTask.id)];
+			const element = childTaskTitleRefs.current[childTask.legacyId ? childTask.legacyId : childTask.id];
 			if (!element) return;
 
 			// Clear previous content before rendering
@@ -995,7 +995,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 	const handleOpenChildTaskModal = async (event: React.MouseEvent, taskId: string) => {
 		event.stopPropagation();
-		const childTask = childTasks.find(t => String(t.legacyId) === taskId);
+		const childTask = childTasks.find(t => t.legacyId === taskId);
 		if (!childTask) {
 			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
 			return;

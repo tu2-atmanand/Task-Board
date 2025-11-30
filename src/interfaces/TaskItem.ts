@@ -8,7 +8,7 @@ export interface taskLocation {
 }
 
 export interface taskItem {
-	id: number;
+	id: string;
 	legacyId: string; // Legacy ID to support Tasks plugin id property
 	title: string;
 	body: string[];
@@ -81,6 +81,6 @@ export interface cursorLocation {
 }
 
 export interface UpdateTaskEventData {
-	taskID: number;
+	taskID: string;
 	state: boolean;
 }

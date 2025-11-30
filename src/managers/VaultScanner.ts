@@ -215,11 +215,11 @@ export default class vaultScanner {
 
 					// Create task item for the task note
 					const taskNoteItem: taskItem = {
-						id: Number(taskNoteProperties.id)
-							? Number(taskNoteProperties.id)
+						id: taskNoteProperties.id
+							? taskNoteProperties.id
 							: generateRandomTempTaskId(),
 						legacyId: taskNoteProperties.id
-							? String(taskNoteProperties.id)
+							? taskNoteProperties.id
 							: "", // Storing the legacyId for backward compatibility
 						title: taskNoteProperties.title || file.basename,
 						body: subTasks, // Store sub-tasks in body
@@ -406,8 +406,8 @@ export default class vaultScanner {
 							}
 
 							const task: taskItem = {
-								id: Number(legacyId)
-									? Number(legacyId)
+								id: legacyId
+									? legacyId
 									: generateRandomTempTaskId(),
 								legacyId: legacyId, // Storing the legacyId for backward compatibility
 								status: taskStatus,
@@ -696,21 +696,21 @@ export function fileTypeAllowedForScanning(
 }
 
 // Generate a unique ID for each task
-export function generateRandomTempTaskId(): number {
+export function generateRandomTempTaskId(): string {
 	const array = new Uint32Array(1);
 	crypto.getRandomValues(array);
-	return array[0];
+	return String(array[0]);
 }
 
 // Generate a unique ID for each task
-export function generateTaskId(plugin: TaskBoard): number {
+export function generateTaskId(plugin: TaskBoard): string {
 	plugin.settings.data.globalSettings.uniqueIdCounter =
 		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
 
 	// Save the updated uniqueIdCounter back to settings
 	plugin.saveSettings();
 	// Return the current counter value and then increment it for the next ID
-	return plugin.settings.data.globalSettings.uniqueIdCounter;
+	return String(plugin.settings.data.globalSettings.uniqueIdCounter);
 }
 
 /**

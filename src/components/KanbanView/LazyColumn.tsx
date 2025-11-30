@@ -320,7 +320,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					>
 						{visibleTasks.length > 0 ? (
 							<>
-								{visibleTasks.map((task, index = task.id) => {
+								{visibleTasks.map((task, index) => {
 									return (
 										<div key={index} className="taskItemFadeIn">
 											<TaskItem

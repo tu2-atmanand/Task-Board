@@ -61,7 +61,7 @@ export class AddOrEditTaskModal extends Modal {
 
 		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
-		if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
+		if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
 			this.task.legacyId = String(this.task.id);
 		}
