@@ -44,12 +44,12 @@ export function isTaskCompleted(
 	isTaskNote: boolean,
 	settings: PluginDataJson
 ): boolean {
-	console.log(
-		"isTaskCompleted...\ntitleOrSymbol :",
-		titleOrSymbol,
-		"\nisTaskNote :",
-		isTaskNote
-	);
+	// console.log(
+	// 	"isTaskCompleted...\ntitleOrSymbol :",
+	// 	titleOrSymbol,
+	// 	"\nisTaskNote :",
+	// 	isTaskNote
+	// );
 	if (!isTaskNote) {
 		// const match = task.title.match(/\s\[(.)\]/); // Extract the symbol inside [ ]
 		// // console.log("CheckBoxUtils.ts : isCompleted : match :", match);
