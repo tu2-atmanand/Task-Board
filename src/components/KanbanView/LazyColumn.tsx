@@ -36,7 +36,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	columnData,
 	tasksForThisColumn,
 }) => {
-	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
+	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 
@@ -54,7 +54,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	const allTasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
 	// Memoize visible tasks based on count
 	const visibleTasks = useMemo(() => {
-		return allTasks.slice(0, visibleTaskCount);
+		if (allTasks && allTasks?.length < 1) return [];
+
+		return allTasks?.slice(0, visibleTaskCount) ?? [];
 	}, [allTasks, visibleTaskCount]);
 
 	// Reset visible count when tasks change (e.g., switching boards or filtering)
@@ -71,13 +73,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		const scrollPercentage = ((scrollTop + clientHeight) / scrollHeight) * 100;
 
 		// Load more tasks when scroll threshold is reached and there are more tasks to load
-		if (scrollPercentage >= scrollThresholdPercent && visibleTaskCount < allTasks.length) {
+		if (scrollPercentage >= scrollThresholdPercent && visibleTaskCount < allTasks?.length) {
 			setVisibleTaskCount((prevCount) => {
-				const newCount = Math.min(prevCount + loadMoreCount, allTasks.length);
+				const newCount = Math.min(prevCount + loadMoreCount, allTasks?.length);
 				return newCount;
 			});
 		}
-	}, [scrollThresholdPercent, visibleTaskCount, allTasks.length, loadMoreCount]);
+	}, [scrollThresholdPercent, visibleTaskCount, allTasks?.length, loadMoreCount]);
 
 	// Attach scroll listener
 	useEffect(() => {
@@ -296,7 +298,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				// Minimized view
 				<div className="taskBoardColumnMinimized">
 					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-						{allTasks.length}
+						{allTasks?.length ?? 0}
 					</div>
 					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
 						await handleMinimizeColumn();
@@ -311,14 +313,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
 						</div>
 						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-							{allTasks.length}
+							{allTasks?.length ?? 0}
 						</div>
 					</div>
 					<div
 						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}
 					>
-						{visibleTasks.length > 0 ? (
+						{(visibleTasks && visibleTasks?.length > 0) ? (
 							<>
 								{visibleTasks.map((task, index) => {
 									return (
@@ -333,9 +335,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 										</div>
 									);
 								})}
-								{visibleTaskCount < allTasks.length && (
+								{(allTasks && visibleTaskCount < allTasks?.length) && (
 									<div className="lazyLoadIndicator">
-										<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length})</p>
+										<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks?.length ?? 0})</p>
 									</div>
 								)}
 							</>

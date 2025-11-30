@@ -290,7 +290,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 	useEffect(() => {
 		const setCardLoading = (eventData: UpdateTaskEventData) => {
-			console.log("Refreshing the animation of only following ID :", eventData.taskID, "\nWith state :", eventData.state, "\nCurrent task ID :", task.legacyId, taskIdKey, "\nCondition :", eventData.taskID !== taskIdKey);
+			// console.log("Refreshing the animation of only following ID :", eventData.taskID, "\nWith state :", eventData.state, "\nCurrent task ID :", task.legacyId, taskIdKey, "\nCondition :", eventData.taskID !== taskIdKey);
 			if (!eventData || !eventData?.taskID) setCardLoadingAnimation(false);
 
 			// Only update this specific task's loading state
