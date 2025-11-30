@@ -227,12 +227,19 @@ export const openEditTaskModal = async (
 	const EditTaskModal = new AddOrEditTaskModal(
 		plugin,
 		(updatedTask: taskItem) => {
+			let eventData: UpdateTaskEventData = {
+				taskID: existingTask.id,
+				state: true,
+			};
+			eventEmitter.emit("UPDATE_TASK", eventData);
+
 			updatedTask.filePath = existingTask.filePath;
 			// Update the task in the file and JSON
 			updateTaskInFile(plugin, updatedTask, existingTask).then(
 				(newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
-						updatedTask.filePath
+						updatedTask.filePath,
+						existingTask.id
 					);
 				}
 			);
@@ -281,7 +288,8 @@ export const openEditTaskNoteModal = (
 					).then(() => {
 						// This is required to rescan the updated file and refresh the board.
 						plugin.realTimeScanning.processAllUpdatedFiles(
-							updatedTask.filePath
+							updatedTask.filePath,
+							existingTask.id
 						);
 					});
 				} else {
@@ -294,7 +302,8 @@ export const openEditTaskNoteModal = (
 							// TODO : Is 2 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(
-								updatedTask.filePath
+								updatedTask.filePath,
+								existingTask.id
 							);
 						});
 					});
