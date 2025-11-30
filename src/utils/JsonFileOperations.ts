@@ -288,30 +288,40 @@ export const loadTasksAndMerge = async (
 		} else {
 			allTasks = await loadJsonCacheData(plugin);
 		}
-		const pendingTasks: taskItem[] = [];
-		const completedTasks: taskItem[] = [];
+		// const pendingTasks: taskItem[] = [];
+		// const completedTasks: taskItem[] = [];
 
-		// Separate pending tasks
-		for (const [filePath, tasks] of Object.entries(
-			allTasks.Pending || {}
-		)) {
-			tasks.forEach((task: any) =>
-				pendingTasks.push({ ...task, filePath })
-			);
-		}
+		// // Separate pending tasks
+		// for (const [filePath, tasks] of Object.entries(
+		// 	allTasks.Pending || {}
+		// )) {
+		// 	tasks.forEach((task: any) =>
+		// 		pendingTasks.push({ ...task, filePath })
+		// 	);
+		// }
 
-		// Separate completed tasks
-		for (const [filePath, tasks] of Object.entries(
-			allTasks.Completed || {}
-		)) {
-			tasks.forEach((task: any) =>
-				completedTasks.push({ ...task, filePath })
+		// // Separate completed tasks
+		// for (const [filePath, tasks] of Object.entries(
+		// 	allTasks.Completed || {}
+		// )) {
+		// 	tasks.forEach((task: any) =>
+		// 		completedTasks.push({ ...task, filePath })
+		// 	);
+		// }
+
+		// const allTasksMerged: taskJsonMerged = {
+		// 	Pending: pendingTasks,
+		// 	Completed: completedTasks,
+		// };
+
+		const mergeTasks = (tasks: typeof allTasks.Pending) =>
+			Object.entries(tasks || {}).flatMap(([filePath, tasks]) =>
+				tasks.map((task: taskItem) => ({ ...task, filePath }))
 			);
-		}
 
 		const allTasksMerged: taskJsonMerged = {
-			Pending: pendingTasks,
-			Completed: completedTasks,
+			Pending: mergeTasks(allTasks.Pending),
+			Completed: mergeTasks(allTasks.Completed),
 		};
 
 		return allTasksMerged;
