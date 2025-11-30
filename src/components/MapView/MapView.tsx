@@ -229,7 +229,7 @@ const MapView: React.FC<MapViewProps> = ({
 		// Get default width with proper validation
 		const getDefaultWidth = () => {
 			const columnWidth = plugin.settings.data.globalSettings.columnWidth;
-			if (columnWidth && Number.isFinite(Number(columnWidth))) {
+			if (columnWidth && Number.isFinite(Number(columnWidth.replace('px', '')))) {
 				return Number(columnWidth);
 			}
 			return 300; // Fallback default width
