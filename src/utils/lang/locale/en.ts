@@ -467,7 +467,9 @@ const en: Lang = {
 	"no-tasks-found-for-current-board-message": "No tasks were filtered for this board. Please check your board filters and whether you are able to see tasks inside the kanban view for this board.",
 	"tasks-on-this-board-have-no-id-message-1": "Tasks filtered for this board have no ID on them. Please add id for altest one task to open the map view. Or use the below import task panel feature, to quikly import tasks.",
 	"tasks-on-this-board-have-no-id-message-2": "When you will import tasks, an ID property will be added to the task content in the note.",
-	"column-delete-confirmation-message": "Are you sure you want to delete the following column : "
+	"column-delete-confirmation-message": "Are you sure you want to delete the following column : ",
+	"enter-task-content-to-search": "Enter keyword and hit enter to search.",
+	"scroll-to-load-more": "Scroll to load more"
 };
 
 export default en;
