@@ -196,17 +196,19 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// el.currentTarget.focus();
 			setFilteredTasksPerColumn([]);
 			plugin.settings.data.globalSettings.searchQuery = "";
+
+			eventEmitter.emit("REFRESH_BOARD");
 		} else {
 			setSearchQuery(plugin.settings.data.globalSettings.searchQuery || "");
 			handleSearchSubmit();
 		}
 	}
 
-	// function highlightMatch(text: string, query: string): string {
-	// 	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
-	// 	return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
-	// }
+	function highlightMatch(text: string, query: string): string {
+		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const regex = new RegExp(`(${escapedQuery})`, "gi");
+		return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
+	}
 
 	function handleSearchSubmit() {
 		if (!searchQuery.trim()) {
@@ -214,7 +216,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			return;
 		}
 
-		plugin.settings.data.globalSettings.searchQuery = searchQuery;
+		// plugin.settings.data.globalSettings.searchQuery = searchQuery;
 
 		const lowerQuery = searchQuery.toLowerCase();
 
@@ -228,17 +230,17 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
-				});
-			// .map((task) => {
-			// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
-			// 	const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
+				})
+				.map((task) => {
+					const highlightedTitle = highlightMatch(task.title, searchQuery);
+					const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
 
-			// 	return {
-			// 		...task,
-			// 		title: highlightedTitle,
-			// 		body: highlightedBody.split("\n"),
-			// 	};
-			// });
+					return {
+						...task,
+						title: highlightedTitle,
+						body: highlightedBody.split("\n"),
+					};
+				});
 			return filteredTasks;
 		});
 
@@ -355,9 +357,16 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	function handleBoardSelection(index: number) {
 		if (index !== activeBoardIndex) {
-			setActiveBoardIndex(index);
+			setSearchQuery("");
+			setFilteredTasksPerColumn([]);
+			plugin.settings.data.globalSettings.searchQuery = "";
 			plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index;
-			plugin.saveSettings();
+			setActiveBoardIndex(index);
+			setTimeout(() => {
+				eventEmitter.emit("REFRESH_BOARD");
+				plugin.saveSettings();
+			}, 100);
+
 		}
 		closeBoardSidebar(); // Close sidebar after selection
 	}
