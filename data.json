@@ -71,8 +71,8 @@
           ]
         },
         "taskCount": {
-          "pending": 31,
-          "completed": 10
+          "pending": 32,
+          "completed": 9
         }
       },
       {
@@ -553,7 +553,7 @@
           ]
         },
         "taskCount": {
-          "pending": 64,
+          "pending": 62,
           "completed": 14
         }
       }
@@ -851,7 +851,7 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "Meta/Task_Board/New_Task_Notes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 345,
+      "uniqueIdCounter": 350,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
