@@ -18,9 +18,9 @@ export const columnSegregator = (
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoard: number,
 	columnData: ColumnData,
-	allTasks: taskJsonMerged
+	allTasks: taskJsonMerged | null
 ): taskItem[] => {
-	if (activeBoard < 0) return [];
+	if (activeBoard < 0 || !allTasks) return [];
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
