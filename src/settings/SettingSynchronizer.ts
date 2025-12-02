@@ -6,9 +6,36 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
-import { colType } from "src/interfaces/Enums";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { colType, KanbanBoardType } from "src/interfaces/Enums";
+import { Board, BoardLegacy, ColumnData, ColumnGroupData, getActiveColumns } from "src/interfaces/BoardConfigs";
 import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
+
+// Helper function to check if board has legacy structure (columns is an array)
+function isLegacyBoard(boardConfig: any): boardConfig is BoardLegacy {
+	return Array.isArray(boardConfig.columns);
+}
+
+// Helper function to migrate a column
+function migrateColumn(column: ColumnData, defaultDateType: string): ColumnData {
+	if (!column.id) {
+		column.id = Math.floor(Math.random() * 1000000);
+	}
+	if (
+		column.colType === colType.dated ||
+		(column.colType === colType.undated &&
+			!column.datedBasedColumn)
+	) {
+		column.datedBasedColumn = {
+			dateType:
+				column.datedBasedColumn?.dateType ??
+				defaultDateType,
+			from: column.datedBasedColumn?.from || 0,
+			to: column.datedBasedColumn?.to || 0,
+		};
+		delete column.range;
+	}
+	return column;
+}
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
@@ -40,61 +67,128 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 					} as any)
 			);
 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-			// This is a temporary solution to sync the boardConfigs. Will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
-			// This migration was applied since version 1.5.0.
-			settings[key].forEach((boardConfig: Board) => {
-				boardConfig.columns.forEach((column: ColumnData) => {
-					if (!column.id) {
-						column.id = Math.floor(Math.random() * 1000000);
-					}
-					if (
-						column.colType === colType.dated ||
-						(column.colType === colType.undated &&
-							!column.datedBasedColumn)
-					) {
-						column.datedBasedColumn = {
-							dateType:
-								column.datedBasedColumn?.dateType ??
-								defaults.universalDate,
-							from: column.datedBasedColumn?.from || 0,
-							to: column.datedBasedColumn?.to || 0,
-						};
-						delete column.range;
-					}
-				});
+			// Migration for boardConfigs - handles both legacy format and new format
+			settings[key] = settings[key].map((boardConfig: any) => {
+				// Check if this is a legacy board (columns is an array)
+				if (isLegacyBoard(boardConfig)) {
+					// Migrate from BoardLegacy to Board
+					const legacyColumns = boardConfig.columns as ColumnData[];
+					
+					// Migrate each column
+					legacyColumns.forEach((column: ColumnData) => {
+						migrateColumn(column, defaults.universalDate);
+					});
 
-				// Migration applied since version 1.4.0
-				if (!boardConfig.hideEmptyColumns) {
-					boardConfig.hideEmptyColumns = false;
-				}
+					// Convert to new ColumnGroupData structure
+					const newColumns: ColumnGroupData = {
+						status: legacyColumns,
+						time: [],
+					};
 
-				// Migration applied since version 1.8.0
-				if (boardConfig?.filters && boardConfig.filters.length > 0) {
-					if (
-						boardConfig?.filterPolarity &&
-						boardConfig.filterPolarity === "1"
-					) {
-						boardConfig.boardFilter = {
+					// Create the migrated board with new structure
+					const migratedBoard: Board = {
+						name: boardConfig.name,
+						description: boardConfig.description,
+						index: boardConfig.index,
+						boardType: KanbanBoardType.statusBoard, // Default to status board
+						columns: newColumns,
+						hideEmptyColumns: boardConfig.hideEmptyColumns ?? false,
+						showColumnTags: boardConfig.showColumnTags,
+						showFilteredTags: boardConfig.showFilteredTags,
+						boardFilter: boardConfig.boardFilter ?? {
 							rootCondition: "any",
-							filterGroups: [
-								{
-									id: generateIdForFilters(),
-									groupCondition: "any",
-									filters: boardConfig.filters.map(
-										(f: string) => ({
-											id: generateIdForFilters(),
-											property: "tags",
-											condition: "contains",
-											value: f,
-										})
-									),
-								},
-							],
-						};
+							filterGroups: [],
+						},
+						filterConfig: boardConfig.filterConfig,
+						taskCount: boardConfig.taskCount,
+						filters: boardConfig.filters,
+						filterPolarity: boardConfig.filterPolarity,
+					};
 
-						delete boardConfig?.filters;
-						delete boardConfig?.filterPolarity;
+					// Apply filter migration if needed (version 1.8.0)
+					if (migratedBoard.filters && migratedBoard.filters.length > 0) {
+						if (
+							migratedBoard.filterPolarity &&
+							migratedBoard.filterPolarity === "1"
+						) {
+							migratedBoard.boardFilter = {
+								rootCondition: "any",
+								filterGroups: [
+									{
+										id: generateIdForFilters(),
+										groupCondition: "any",
+										filters: migratedBoard.filters.map(
+											(f: string) => ({
+												id: generateIdForFilters(),
+												property: "tags",
+												condition: "contains",
+												value: f,
+											})
+										),
+									},
+								],
+							};
+
+							delete migratedBoard.filters;
+							delete migratedBoard.filterPolarity;
+						}
 					}
+
+					return migratedBoard;
+				} else {
+					// Board is already in new format, just migrate columns
+					const board = boardConfig as Board;
+					
+					// Migrate status columns
+					board.columns.status.forEach((column: ColumnData) => {
+						migrateColumn(column, defaults.universalDate);
+					});
+					
+					// Migrate time columns
+					board.columns.time.forEach((column: ColumnData) => {
+						migrateColumn(column, defaults.universalDate);
+					});
+
+					// Ensure boardType is set
+					if (!board.boardType) {
+						board.boardType = KanbanBoardType.statusBoard;
+					}
+
+					// Migration applied since version 1.4.0
+					if (!board.hideEmptyColumns) {
+						board.hideEmptyColumns = false;
+					}
+
+					// Migration applied since version 1.8.0
+					if (board.filters && board.filters.length > 0) {
+						if (
+							board.filterPolarity &&
+							board.filterPolarity === "1"
+						) {
+							board.boardFilter = {
+								rootCondition: "any",
+								filterGroups: [
+									{
+										id: generateIdForFilters(),
+										groupCondition: "any",
+										filters: board.filters.map(
+											(f: string) => ({
+												id: generateIdForFilters(),
+												property: "tags",
+												condition: "contains",
+												value: f,
+											})
+										),
+									},
+								],
+							};
+
+							delete board.filters;
+							delete board.filterPolarity;
+						}
+					}
+
+					return board;
 				}
 			});
 		} else if (

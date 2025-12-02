@@ -112,7 +112,8 @@ export interface FilterConfigSettings {
 	savedConfigs: SavedFilterConfig[];
 }
 
-export type Board = {
+// Legacy Board type - kept for migration purposes
+export type BoardLegacy = {
 	name: string;
 	description?: string;
 	index: number;
@@ -131,7 +132,7 @@ export type Board = {
 	filterPolarity?: string;
 };
 
-export type Boardv2 = {
+export type Board = {
 	name: string;
 	description?: string;
 	index: number;
@@ -152,3 +153,19 @@ export type Boardv2 = {
 };
 
 export type BoardConfigs = Board[];
+
+// Helper function to get active columns based on board type (defaults to status)
+export function getActiveColumns(board: Board): ColumnData[] {
+	if (board.boardType === KanbanBoardType.timeBoard) {
+		return board.columns.time;
+	}
+	return board.columns.status;
+}
+
+// Helper function to get the active column key based on board type
+export function getActiveColumnKey(board: Board): 'status' | 'time' {
+	if (board.boardType === KanbanBoardType.timeBoard) {
+		return 'time';
+	}
+	return 'status';
+}

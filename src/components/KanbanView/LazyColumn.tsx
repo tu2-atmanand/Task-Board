@@ -6,7 +6,7 @@ import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
-import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, RootFilterState, getActiveColumnKey } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
@@ -120,12 +120,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 
 		if (boardIndex !== -1) {
-			const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+			const board = plugin.settings.data.boardConfigs[boardIndex];
+			const columnKey = getActiveColumnKey(board);
+			const columnIndex = board.columns[columnKey].findIndex(
 				(col: ColumnData) => col.name === columnData.name
 			);
 
 			if (columnIndex !== -1) {
-				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
+				board.columns[columnKey][columnIndex].minimized = !board.columns[columnKey][columnIndex].minimized;
 				await plugin.saveSettings();
 				eventEmitter.emit('REFRESH_BOARD');
 			}
@@ -152,12 +154,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						);
 
 						if (boardIndex !== -1) {
-							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+							const board = plugin.settings.data.boardConfigs[boardIndex];
+							const columnKey = getActiveColumnKey(board);
+							const columnIndex = board.columns[columnKey].findIndex(
 								(col: ColumnData) => col.name === columnData.name
 							);
 
 							if (columnIndex !== -1) {
-								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
+								board.columns[columnKey][columnIndex] = updatedColumnConfiguration;
 								plugin.saveSettings();
 								eventEmitter.emit('REFRESH_BOARD');
 							}
@@ -178,7 +182,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 						(board: Board) => board.name === activeBoardData.name
 					);
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					const board = plugin.settings.data.boardConfigs[boardIndex];
+					const columnKey = getActiveColumnKey(board);
+					const columnIndex = board.columns[columnKey].findIndex(
 						(col: ColumnData) => col.name === columnData.name
 					);
 
@@ -190,7 +196,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						filterModal.filterCloseCallback = async (filterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									board.columns[columnKey][columnIndex].filters = filterState;
 									await plugin.saveSettings();
 									eventEmitter.emit('REFRESH_BOARD');
 								}
@@ -217,7 +223,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						popover.onClose = async (filterState?: RootFilterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									board.columns[columnKey][columnIndex].filters = filterState;
 									await plugin.saveSettings();
 									eventEmitter.emit('REFRESH_BOARD');
 								}
@@ -247,12 +253,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				);
 
 				if (boardIndex !== -1) {
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					const board = plugin.settings.data.boardConfigs[boardIndex];
+					const columnKey = getActiveColumnKey(board);
+					const columnIndex = board.columns[columnKey].findIndex(
 						(col: ColumnData) => col.name === columnData.name
 					);
 
 					if (columnIndex !== -1) {
-						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+						board.columns[columnKey][columnIndex].active = false;
 						await plugin.saveSettings();
 						eventEmitter.emit('REFRESH_BOARD');
 					}

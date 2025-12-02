@@ -1,6 +1,6 @@
 // src/components/TaskBoardViewContent.tsx
 
-import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
+import { Board, ColumnData, RootFilterState, getActiveColumns } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
@@ -122,7 +122,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			};
 			setFilteredTasks(filteredAllTasks);
 
-			return currentBoard.columns
+			return getActiveColumns(currentBoard)
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
 					columnSegregator(plugin, activeBoardIndex, column, filteredAllTasks)

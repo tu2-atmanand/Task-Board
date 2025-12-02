@@ -15,8 +15,8 @@ import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { colType, UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/Enums";
-import { Board } from "src/interfaces/BoardConfigs";
+import { colType, KanbanBoardType, UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/Enums";
+import { Board, ColumnData, getActiveColumns, getActiveColumnKey } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptions } from "src/interfaces/Mapping";
 import { columnDataProp, AddColumnModal } from "./AddColumnModal";
 
@@ -69,10 +69,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
 				const updatedBoards = [...localBoards];
-				// const columns = updatedBoards[selectedBoardIndex].columns;
-				const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-				updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-				updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
+				const columnKey = getActiveColumnKey(updatedBoards[selectedBoardIndex]);
+				const [movedItem] = updatedBoards[selectedBoardIndex].columns[columnKey].splice(evt.oldIndex, 1);
+				updatedBoards[selectedBoardIndex].columns[columnKey].splice(evt.newIndex, 0, movedItem);
+				updatedBoards[selectedBoardIndex].columns[columnKey].forEach((col: ColumnData, idx: number) => (col.index = idx + 1));
 
 				setLocalBoards(updatedBoards);
 				setIsEdited(true);
@@ -142,9 +142,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
 		const updatedBoards = [...localBoards];
-		updatedBoards[boardIndex].columns.push({
+		const columnKey = getActiveColumnKey(updatedBoards[boardIndex]);
+		updatedBoards[boardIndex].columns[columnKey].push({
 			id: columnData.id,
-			index: updatedBoards[boardIndex].columns.length + 1,
+			index: updatedBoards[boardIndex].columns[columnKey].length + 1,
 			colType: columnData.colType,
 			active: true,
 			collapsed: false,
@@ -177,7 +178,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const newBoard: Board = {
 			name: t("new-board"),
 			index: localBoards.length,
-			columns: [],
+			boardType: KanbanBoardType.statusBoard,
+			columns: {
+				status: [],
+				time: [],
+			},
 			hideEmptyColumns: false,
 			showColumnTags: true,
 			showFilteredTags: true,
@@ -249,7 +254,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const toggleActiveState = (boardIndex: number, columnIndex: number) => {
 		const updatedBoards = [...localBoards];
-		const column = updatedBoards[boardIndex].columns[columnIndex];
+		const columnKey = getActiveColumnKey(updatedBoards[boardIndex]);
+		const column = updatedBoards[boardIndex].columns[columnKey][columnIndex];
 		column.active = !column.active; // Toggle the active state
 		setLocalBoards(updatedBoards); // Update the state
 		// onSave(updatedBoards); // Save the updated state
@@ -280,7 +286,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 	useEffect(() => {
-		localBoards[selectedBoardIndex]?.columns.forEach((column, index) => {
+		const activeColumns = localBoards[selectedBoardIndex] ? getActiveColumns(localBoards[selectedBoardIndex]) : [];
+		activeColumns.forEach((column: ColumnData, index: number) => {
 			const fileInputElement = filePathInputRefs.current[column.id];
 			if (!fileInputElement) return;
 
@@ -312,8 +319,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// evt?.stopPropagation();
 		// console.log(`Updating column at boardIndex: ${boardIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
 		const updatedBoards = [...localBoards];
-		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
-			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
+		const columnKey = getActiveColumnKey(updatedBoards[boardIndex]);
+		if (field in updatedBoards[boardIndex].columns[columnKey][columnIndex]) {
+			(updatedBoards[boardIndex].columns[columnKey][columnIndex] as any)[field] = value;
 		}
 		setLocalBoards(updatedBoards);
 		setIsEdited(true);
@@ -363,7 +371,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// Function to delete a column from the selected board
 	const handleDeleteColumnFromBoard = (boardIndex: number, columnIndex: number) => {
 		const app = plugin.app;
-		const mssg = t("column-delete-confirmation-message") + localBoards[boardIndex].columns[columnIndex].name;
+		const columnKey = getActiveColumnKey(localBoards[boardIndex]);
+		const mssg = t("column-delete-confirmation-message") + localBoards[boardIndex].columns[columnKey][columnIndex].name;
 
 		const deleteModal = new DeleteConfirmationModal(app, {
 			app,
@@ -371,11 +380,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			onConfirm: () => {
 				if (columnIndex !== -1) {
 					const updatedBoards = [...localBoards];
-					updatedBoards[boardIndex].columns.splice(columnIndex, 1);
+					const colKey = getActiveColumnKey(updatedBoards[boardIndex]);
+					updatedBoards[boardIndex].columns[colKey].splice(columnIndex, 1);
 					setLocalBoards(updatedBoards);
 					setIsEdited(true);
 				} else {
-					bugReporter(plugin, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
+					const colKey = getActiveColumnKey(localBoards[boardIndex]);
+					bugReporter(plugin, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[colKey][columnIndex]?.name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
 				}
 			},
 			onCancel: () => {
@@ -408,9 +419,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
 					const updatedBoards = [...localBoards];
-					const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-					updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-					updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => {
+					const columnKey = getActiveColumnKey(updatedBoards[selectedBoardIndex]);
+					const [movedItem] = updatedBoards[selectedBoardIndex].columns[columnKey].splice(evt.oldIndex, 1);
+					updatedBoards[selectedBoardIndex].columns[columnKey].splice(evt.newIndex, 0, movedItem);
+					updatedBoards[selectedBoardIndex].columns[columnKey].forEach((col: ColumnData, idx: number) => {
 						col.index = idx + 1;
 					});
 
@@ -501,7 +513,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							ref={columnListRef}
 							className="boardConfigModalMainContent-Active-BodyColumnsList"
 						>
-							{board.columns.map((column, columnIndex) => (
+							{getActiveColumns(board).map((column: ColumnData, columnIndex: number) => (
 								<div key={column.id} className="boardConfigModalColumnRow">
 									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 									{column.active ? (
