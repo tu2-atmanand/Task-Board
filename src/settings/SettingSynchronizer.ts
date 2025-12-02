@@ -139,15 +139,30 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 					// Board is already in new format, just migrate columns
 					const board = boardConfig as Board;
 					
-					// Migrate status columns
-					board.columns.status.forEach((column: ColumnData) => {
-						migrateColumn(column, defaults.universalDate);
-					});
+					// Migrate status columns (with null check)
+					if (board.columns?.status) {
+						board.columns.status.forEach((column: ColumnData) => {
+							migrateColumn(column, defaults.universalDate);
+						});
+					}
 					
-					// Migrate time columns
-					board.columns.time.forEach((column: ColumnData) => {
-						migrateColumn(column, defaults.universalDate);
-					});
+					// Migrate time columns (with null check)
+					if (board.columns?.time) {
+						board.columns.time.forEach((column: ColumnData) => {
+							migrateColumn(column, defaults.universalDate);
+						});
+					}
+
+					// Ensure columns structure exists
+					if (!board.columns) {
+						board.columns = { status: [], time: [] };
+					}
+					if (!board.columns.status) {
+						board.columns.status = [];
+					}
+					if (!board.columns.time) {
+						board.columns.time = [];
+					}
 
 					// Ensure boardType is set
 					if (!board.boardType) {

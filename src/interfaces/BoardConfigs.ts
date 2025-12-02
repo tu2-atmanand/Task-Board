@@ -155,17 +155,20 @@ export type Board = {
 export type BoardConfigs = Board[];
 
 // Helper function to get active columns based on board type (defaults to status)
-export function getActiveColumns(board: Board): ColumnData[] {
-	if (board.boardType === KanbanBoardType.timeBoard) {
-		return board.columns.time;
+export function getActiveColumns(board: Board | null | undefined): ColumnData[] {
+	if (!board || !board.columns) {
+		return [];
 	}
-	return board.columns.status;
+	if (board.boardType === KanbanBoardType.timeBoard) {
+		return board.columns.time || [];
+	}
+	return board.columns.status || [];
 }
 
 // Helper function to get the active column key based on board type
-export function getActiveColumnKey(board: Board): 'status' | 'time' {
-	if (board.boardType === KanbanBoardType.timeBoard) {
-		return 'time';
+export function getActiveColumnKey(board: Board | null | undefined): 'status' | 'time' {
+	if (!board || board.boardType === KanbanBoardType.timeBoard) {
+		return board?.boardType === KanbanBoardType.timeBoard ? 'time' : 'status';
 	}
 	return 'status';
 }
