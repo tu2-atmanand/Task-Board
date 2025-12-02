@@ -244,9 +244,15 @@
             },
             "sortCriteria": [
               {
-                "criteria": "content",
-                "order": "asc",
+                "criteria": "priority",
+                "order": "desc",
                 "priority": 1,
+                "uid": "8zlitu9a"
+              },
+              {
+                "criteria": "content",
+                "order": "desc",
+                "priority": 2,
                 "uid": "k9c6hwmw"
               }
             ],
@@ -285,7 +291,15 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "priority",
+                "order": "desc",
+                "priority": 1,
+                "uid": "2dulk0dw"
+              }
+            ]
           },
           {
             "id": 3193261849,
