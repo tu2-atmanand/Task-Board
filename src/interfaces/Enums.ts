@@ -180,3 +180,8 @@ export enum mapViewEdgeType {
 	smoothstep = "smoothstep",
 	bezier = "default",
 }
+
+export enum KanbanBoardType {
+	statusBoard = "status",
+	timeBoard = "time"
+}

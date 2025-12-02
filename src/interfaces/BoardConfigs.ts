@@ -1,3 +1,5 @@
+import { KanbanBoardType } from "./Enums";
+
 export interface columnSortingCriteria {
 	criteria:
 		| "status"
@@ -89,6 +91,11 @@ export type ColumnData = {
 	};
 };
 
+export type ColumnGroupData = {
+	status: ColumnData[];
+	time: ColumnData[];
+}
+
 // Define saved filter configuration interface
 export interface SavedFilterConfig {
 	id: string;
@@ -110,6 +117,26 @@ export type Board = {
 	description?: string;
 	index: number;
 	columns: ColumnData[];
+	hideEmptyColumns: boolean;
+	showColumnTags: boolean;
+	showFilteredTags: boolean;
+	boardFilter: RootFilterState;
+	filterConfig?: FilterConfigSettings;
+	taskCount?: {
+		pending: number;
+		completed: number;
+	};
+	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
+	filters?: string[];
+	filterPolarity?: string;
+};
+
+export type Boardv2 = {
+	name: string;
+	description?: string;
+	index: number;
+	boardType: KanbanBoardType;
+	columns: ColumnGroupData;
 	hideEmptyColumns: boolean;
 	showColumnTags: boolean;
 	showFilteredTags: boolean;
