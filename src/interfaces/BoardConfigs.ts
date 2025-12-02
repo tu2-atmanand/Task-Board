@@ -94,6 +94,7 @@ export type ColumnData = {
 export type ColumnGroupData = {
 	status: ColumnData[];
 	time: ColumnData[];
+	tag: ColumnData[];
 }
 
 // Define saved filter configuration interface
@@ -155,20 +156,27 @@ export type Board = {
 export type BoardConfigs = Board[];
 
 // Helper function to get active columns based on board type (defaults to status)
-export function getActiveColumns(board: Board | null | undefined): ColumnData[] {
+export function getActiveColumns(board?: Board): ColumnData[] {
 	if (!board || !board.columns) {
 		return [];
 	}
 	if (board.boardType === KanbanBoardType.timeBoard) {
 		return board.columns.time || [];
+	} else if(board.boardType === KanbanBoardType.tagBoard) {
+		return board.columns.tag || [];
 	}
 	return board.columns.status || [];
 }
 
 // Helper function to get the active column key based on board type
-export function getActiveColumnKey(board: Board | null | undefined): 'status' | 'time' {
-	if (!board || board.boardType === KanbanBoardType.timeBoard) {
-		return board?.boardType === KanbanBoardType.timeBoard ? 'time' : 'status';
+export function getActiveColumnKey(board?: Board): 'status' | 'time' | 'tag' {
+	if(!board) return 'status'
+	switch (board.boardType) {
+		case KanbanBoardType.timeBoard:
+			return 'time';
+		case KanbanBoardType.tagBoard:
+			return 'tag';
+		default:
+			return 'status';
 	}
-	return 'status';
 }

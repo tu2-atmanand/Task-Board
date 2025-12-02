@@ -6,8 +6,8 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
-import { colType, KanbanBoardType } from "src/interfaces/Enums";
-import { Board, BoardLegacy, ColumnData, ColumnGroupData, getActiveColumns } from "src/interfaces/BoardConfigs";
+import { KanbanBoardType } from "src/interfaces/Enums";
+import { Board, BoardLegacy, ColumnData, ColumnGroupData } from "src/interfaces/BoardConfigs";
 import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
 
 // Helper function to check if board has legacy structure (columns is an array)
@@ -15,26 +15,33 @@ function isLegacyBoard(boardConfig: any): boardConfig is BoardLegacy {
 	return Array.isArray(boardConfig.columns);
 }
 
-// Helper function to migrate a column
-function migrateColumn(column: ColumnData, defaultDateType: string): ColumnData {
-	if (!column.id) {
-		column.id = Math.floor(Math.random() * 1000000);
+function cloneColumnArray(columns?: ColumnData[]): ColumnData[] {
+	if (!columns || columns.length === 0) {
+		return [];
 	}
-	if (
-		column.colType === colType.dated ||
-		(column.colType === colType.undated &&
-			!column.datedBasedColumn)
-	) {
-		column.datedBasedColumn = {
-			dateType:
-				column.datedBasedColumn?.dateType ??
-				defaultDateType,
-			from: column.datedBasedColumn?.from || 0,
-			to: column.datedBasedColumn?.to || 0,
-		};
-		delete column.range;
+	return columns.map((column) =>
+		JSON.parse(JSON.stringify(column)) as ColumnData
+	);
+}
+
+function resolveDefaultColumns(
+	defaults: any,
+): ColumnGroupData {
+	const defaultBoards = Array.isArray(defaults?.boardConfigs)
+		? (defaults.boardConfigs as Board[])
+		: [];
+
+	if (defaultBoards.length === 0) {
+		return { status: [], time: [], tag: [] };
 	}
-	return column;
+
+	const template = defaultBoards[0];
+
+	return {
+		status: cloneColumnArray(template.columns.status),
+		time: cloneColumnArray(template.columns.time),
+		tag: cloneColumnArray(template.columns.tag),
+	};
 }
 
 /**
@@ -60,32 +67,18 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 				settings[key] as Record<string, string>
 			).map(
 				([name, color], idx) =>
-					({
-						name,
-						color,
-						priority: idx + 1,
-					} as any)
+				({
+					name,
+					color,
+					priority: idx + 1,
+				} as any)
 			);
 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
 			// Migration for boardConfigs - handles both legacy format and new format
 			settings[key] = settings[key].map((boardConfig: any) => {
 				// Check if this is a legacy board (columns is an array)
 				if (isLegacyBoard(boardConfig)) {
-					// Migrate from BoardLegacy to Board
-					const legacyColumns = boardConfig.columns as ColumnData[];
-					
-					// Migrate each column
-					legacyColumns.forEach((column: ColumnData) => {
-						migrateColumn(column, defaults.universalDate);
-					});
-
-					// Convert to new ColumnGroupData structure
-					const newColumns: ColumnGroupData = {
-						status: legacyColumns,
-						time: [],
-					};
-
-					// Create the migrated board with new structure
+					const newColumns: ColumnGroupData = resolveDefaultColumns(defaults);
 					const migratedBoard: Board = {
 						name: boardConfig.name,
 						description: boardConfig.description,
@@ -136,32 +129,24 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 
 					return migratedBoard;
 				} else {
-					// Board is already in new format, just migrate columns
+					// Board is already in new format; ensure columns align with defaults
 					const board = boardConfig as Board;
-					
-					// Migrate status columns (with null check)
-					if (board.columns?.status) {
-						board.columns.status.forEach((column: ColumnData) => {
-							migrateColumn(column, defaults.universalDate);
-						});
-					}
-					
-					// Migrate time columns (with null check)
-					if (board.columns?.time) {
-						board.columns.time.forEach((column: ColumnData) => {
-							migrateColumn(column, defaults.universalDate);
-						});
-					}
 
-					// Ensure columns structure exists
+					// Ensure columns are set
 					if (!board.columns) {
-						board.columns = { status: [], time: [] };
-					}
-					if (!board.columns.status) {
-						board.columns.status = [];
-					}
-					if (!board.columns.time) {
-						board.columns.time = [];
+						board.columns = resolveDefaultColumns(defaults);
+					} else {
+						const resolvedColumns = resolveDefaultColumns(defaults);
+						// Ensure each column group exists
+						if (!board.columns.status) {
+							board.columns.status = resolvedColumns.status;
+						}
+						if (!board.columns.time) {
+							board.columns.time = resolvedColumns.time;
+						}
+						if (!board.columns.tag) {
+							board.columns.tag = resolvedColumns.tag;
+						}
 					}
 
 					// Ensure boardType is set
@@ -247,8 +232,8 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 				folderPath.endsWith("/") || folderPath.endsWith("\\")
 					? folderPath + exportFileName
 					: folderPath +
-					  (folderPath.includes("/") ? "/" : "\\") +
-					  exportFileName;
+					(folderPath.includes("/") ? "/" : "\\") +
+					exportFileName;
 			await fsPromises.writeFile(exportPath, fileContent, "utf8");
 			new Notice(`Settings exported to ${exportPath}`);
 		} else {

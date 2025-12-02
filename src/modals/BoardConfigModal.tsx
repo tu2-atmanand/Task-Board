@@ -182,6 +182,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			columns: {
 				status: [],
 				time: [],
+				tag: [],
 			},
 			hideEmptyColumns: false,
 			showColumnTags: true,
