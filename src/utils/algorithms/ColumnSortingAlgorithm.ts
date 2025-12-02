@@ -8,7 +8,7 @@ import { taskItem } from "src/interfaces/TaskItem";
  * Gets the property value from a task based on the criteria name
  */
 function getTaskPropertyValue(
-	plugin: TaskBoard,
+	startTimeConfig: string,
 	task: taskItem,
 	criteria: string
 ): any {
@@ -44,22 +44,12 @@ function getTaskPropertyValue(
 			if (task.time) {
 				return task.time;
 			}
-			if (plugin.settings.data.globalSettings.defaultStartTime) {
-				return `${
-					plugin.settings.data.globalSettings.defaultStartTime
-				} - ${
-					plugin.settings.data.globalSettings.defaultStartTime
-						.split(":")[0]
-						.trim() === "23"
+			if (startTimeConfig) {
+				return `${startTimeConfig} - ${
+					startTimeConfig.split(":")[0].trim() === "23"
 						? "00"
-						: Number(
-								plugin.settings.data.globalSettings.defaultStartTime
-									.split(":")[0]
-									.trim()
-						  ) + 1
-				}:${plugin.settings.data.globalSettings.defaultStartTime
-					.split(":")[1]
-					.trim()}`;
+						: Number(startTimeConfig.split(":")[0].trim()) + 1
+				}:${startTimeConfig.split(":")[1].trim()}`;
 			} else {
 				return "";
 			}
@@ -257,7 +247,7 @@ function compareValues(
  * @returns Sorted array of tasks
  */
 export function columnSortingAlgorithm(
-	plugin: TaskBoard,
+	startTimeConfig: string,
 	tasksToDisplay: taskItem[],
 	sortCriteria: columnSortingCriteria[]
 ): taskItem[] {
@@ -286,12 +276,12 @@ export function columnSortingAlgorithm(
 
 		sortedTasks = sortedTasks.sort((taskA, taskB) => {
 			const valueA = getTaskPropertyValue(
-				plugin,
+				startTimeConfig,
 				taskA,
 				criterion.criteria
 			);
 			const valueB = getTaskPropertyValue(
-				plugin,
+				startTimeConfig,
 				taskB,
 				criterion.criteria
 			);

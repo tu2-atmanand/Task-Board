@@ -129,13 +129,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				return currentBoard.columns
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
-						columnSegregator(plugin, activeBoardIndex, column, searchQueryFilteredTasks)
+						columnSegregator(plugin.settings, activeBoardIndex, column, searchQueryFilteredTasks)
 					);
 			} else {
 				return currentBoard.columns
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
-						columnSegregator(plugin, activeBoardIndex, column, filteredAllTasks)
+						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks)
 					);
 			}
 
