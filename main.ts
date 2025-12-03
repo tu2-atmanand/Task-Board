@@ -28,7 +28,10 @@ import vaultScanner, {
 } from "src/managers/VaultScanner";
 import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import {
+	newReleaseVersion,
+	VIEW_TYPE_TASKBOARD,
+} from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
 import { loadTranslationsOnStartup, t } from "src/utils/lang/helper";
 import { TaskBoardApi } from "src/taskboardAPIs";
@@ -949,7 +952,7 @@ export default class TaskBoard extends Plugin {
 
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed
-		const currentVersion = "1.8.3"; // Change this whenever you will going to release a new version.
+		const currentVersion = newReleaseVersion; // Change this whenever you will going to release a new version.
 		const runMandatoryScan = true; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
 		const previousVersion = this.settings.version;
 
