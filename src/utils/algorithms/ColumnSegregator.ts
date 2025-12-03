@@ -4,23 +4,26 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
-import { ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colType, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
 import { boardFilterer } from "./BoardFilterer";
+import { PluginDataJson } from "src/interfaces/GlobalSettings";
 
 // Function to refresh tasks in any column by calling this utility function
 export const columnSegregator = (
-	plugin: TaskBoard,
+	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
-	activeBoard: number,
+	activeBoardIndex: number,
 	columnData: ColumnData,
-	allTasks: taskJsonMerged
+	allTasks: taskJsonMerged | null
 ): taskItem[] => {
-	if (activeBoard < 0) return [];
+	if (activeBoardIndex < 0 || !allTasks) return [];
+
+	const boardConfigs = settings.data.boardConfigs;
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
@@ -198,16 +201,21 @@ export const columnSegregator = (
 			tasksToDisplay = [];
 		}
 	} else if (columnData.colType === colType.otherTags) {
-		// 1. Get the current board based on activeBoard index
-		const currentBoard = plugin.settings.data.boardConfigs.find(
-			(board) => board.index === activeBoard
+		// 1. Get the current board based on activeBoardIndex index
+		const currentBoard = boardConfigs.find(
+			(board: Board) => board.index === activeBoardIndex
 		);
 
 		// 2. Collect all coltags from columns where colType is 'namedTag'
 		const namedTags =
 			currentBoard?.columns
-				.filter((col) => col.colType === colType.namedTag && col.coltag)
-				.map((col) => col.coltag?.toLowerCase().replace(`#`, ""))
+				.filter(
+					(col: ColumnData) =>
+						col.colType === colType.namedTag && col.coltag
+				)
+				.map((col: ColumnData) =>
+					col.coltag?.toLowerCase().replace(`#`, "")
+				)
 				.filter(
 					(tag): tag is string =>
 						typeof tag === "string" && tag.length > 0
@@ -219,19 +227,21 @@ export const columnSegregator = (
 			if (allTaskTags.length === 0) return false;
 
 			// Check if none of the task's tags are in the namedTags list
-			return allTaskTags.every((tag) => {
+			return allTaskTags.every((tag: string) => {
 				// return !namedTags.includes(tag.replace("#", "").toLowerCase());
 				const result = matchTagsWithWildcards(namedTags, tag);
 				return result === null;
 			});
 		});
 	} else if (columnData.colType === colType.completed) {
-		const boardConfigs = plugin.settings.data.boardConfigs;
 		const completedColumnIndex = boardConfigs[
-			activeBoard
-		]?.columns.findIndex((column) => column.colType === colType.completed);
+			activeBoardIndex
+		]?.columns.findIndex(
+			(column: ColumnData) => column.colType === colType.completed
+		);
 		const tasksLimit =
-			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
+			boardConfigs[activeBoardIndex]?.columns[completedColumnIndex]
+				?.limit;
 
 		// This sorting will be done through the columnData.sortCriteria for this column if its configured
 		// const sortedCompletedTasks = completedTasks.sort((a, b): number => {
@@ -262,7 +272,7 @@ export const columnSegregator = (
 	// Apply column-specific sorting if configured
 	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
 		tasksToDisplay = columnSortingAlgorithm(
-			plugin,
+			settings.data.globalSettings.defaultStartTime,
 			tasksToDisplay,
 			columnData.sortCriteria
 		);

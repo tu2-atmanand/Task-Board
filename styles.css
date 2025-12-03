@@ -554,7 +554,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemBodyContent {
 	display: flex;
 	flex-direction: column;
-	/* min-width: 95%; */
+	min-width: 95%;
 }
 
 .taskItemTitle {
@@ -583,7 +583,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	margin-inline-end: 0 !important;
 	transform: scale(1.1) !important;
 	border-radius: 2px !important;
-	transition: transform 0.3s;
+	transition: transform 1s;
 
 	background-color: transparent;
 	font: var(--its);
@@ -601,7 +601,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemCheckbox-checked {
 	transform: scale(1.4);
 	/* Slight animation effect */
-	transition: transform 0.3s;
+	transition: transform 1s;
 }
 
 .taskItemBodySubtaskItem {
@@ -1041,6 +1041,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	transform: scale(1.1);
 }
 
+.taskItemFooterRefreshingMssg {
+	align-items: center;
+	align-self: center;
+}
+
 .taskItemFooter {
 	display: flex;
 	flex-direction: row;
@@ -1163,6 +1168,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--text-muted);
 }
 
+.EditTaskModalHomeFieldTitleContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
 .EditTaskModalHomeFieldTitleInput {
 	margin-bottom: 15px;
 }
@@ -1240,6 +1251,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	text-align: center;
 	align-content: center;
 	font-weight: 600;
+	color: var(--list-marker-color-hover);
 	/* background-color: var(--background-modifier-border-focus); */
 }
 
@@ -1489,6 +1501,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	font-size: 0.8rem;
 	border-radius: 4px;
 	border: 1px solid var(--table-border-color);
+}
+
+.clear-time-icon {
+	position: relative;
+	left: -20px;
+	cursor: pointer;
 }
 
 .EditTaskModalHome-taskItemTagsPreview {

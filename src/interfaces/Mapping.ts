@@ -72,7 +72,7 @@ export const taskStatusesDropdown = [
 ];
 
 export const taskItemEmpty: taskItem = {
-	id: 0,
+	id: "",
 	legacyId: "",
 	title: "",
 	body: [],

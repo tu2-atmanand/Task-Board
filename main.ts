@@ -958,6 +958,9 @@ export default class TaskBoard extends Plugin {
 
 			if (previousVersion === "" || runMandatoryScan) {
 				localStorage.setItem("manadatoryScan", "true");
+				const smallMessage =
+					"Even being a minor release, this new version of Task Board requires a re-scan of your vault. Kindly re-scan using the top-right button in the task board tab.";
+				new Notice(smallMessage, 0);
 			}
 
 			this.settings.version = currentVersion;

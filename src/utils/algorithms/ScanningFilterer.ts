@@ -2,7 +2,7 @@ import { TFile } from "obsidian";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { taskItem } from "src/interfaces/TaskItem";
-import { isTaskLine, isCompleted } from "../CheckBoxUtils";
+import { isTaskCompleted, isTaskLine } from "../CheckBoxUtils";
 import { getTaskFromId } from "../taskLine/TaskItemUtils";
 import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
 
@@ -311,7 +311,7 @@ export async function verifySubtasksAndChildtasksAreComplete(
 	if (subTasks.length > 0) {
 		// Check if all sub-tasks are completed
 		const allSubTasksCompleted = subTasks.every((line) =>
-			isCompleted(line)
+			isTaskCompleted(line, false, plugin.settings)
 		);
 		if (!allSubTasksCompleted) flag = false;
 	}

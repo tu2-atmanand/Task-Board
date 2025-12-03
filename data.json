@@ -71,8 +71,8 @@
           ]
         },
         "taskCount": {
-          "pending": 30,
-          "completed": 4
+          "pending": 32,
+          "completed": 9
         }
       },
       {
@@ -224,8 +224,8 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 3,
-          "completed": 1
+          "pending": 7,
+          "completed": 3
         }
       },
       {
@@ -244,10 +244,16 @@
             },
             "sortCriteria": [
               {
-                "criteria": "id",
+                "criteria": "priority",
                 "order": "desc",
                 "priority": 1,
-                "uid": "k6wjlc63"
+                "uid": "8zlitu9a"
+              },
+              {
+                "criteria": "content",
+                "order": "desc",
+                "priority": 2,
+                "uid": "k9c6hwmw"
               }
             ],
             "minimized": false
@@ -259,7 +265,19 @@
             "active": true,
             "collapsed": false,
             "name": "#Task",
-            "coltag": "#Task"
+            "coltag": "#Task",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "asc",
+                "priority": 1,
+                "uid": "0rjbvpjp"
+              }
+            ]
           },
           {
             "colType": "namedTag",
@@ -273,14 +291,43 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "priority",
+                "order": "desc",
+                "priority": 1,
+                "uid": "2dulk0dw"
+              }
+            ]
+          },
+          {
+            "id": 3193261849,
+            "index": 4,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "sortCriteria": [
+              {
+                "criteria": "completedDate",
+                "order": "desc",
+                "priority": 1,
+                "uid": "p0uinqsy"
+              }
+            ]
           },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "In Progress",
-            "index": 4,
+            "index": 5,
             "coltag": "working",
             "id": 908753,
             "filters": {
@@ -319,7 +366,7 @@
             "active": true,
             "collapsed": false,
             "name": "In Review",
-            "index": 5,
+            "index": 6,
             "coltag": "Test",
             "id": 396902
           },
@@ -328,43 +375,18 @@
             "active": true,
             "collapsed": false,
             "name": "Ready to publish",
-            "index": 6,
+            "index": 7,
             "coltag": "done",
             "id": 328227
           },
           {
             "id": 1936828579,
-            "index": 7,
+            "index": 8,
             "colType": "namedTag",
             "active": false,
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*"
-          },
-          {
-            "id": 3193261849,
-            "index": 8,
-            "colType": "completed",
-            "active": true,
-            "collapsed": false,
-            "name": "Completed",
-            "limit": 20,
-            "filters": {
-              "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1763878153878-2dyqv7914",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1763878153879-cc19ylpzx",
-                      "property": "completedDate",
-                      "condition": "isNotEmpty"
-                    }
-                  ]
-                }
-              ]
-            }
           }
         ],
         "filters": [
@@ -381,32 +403,7 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "all",
-          "filterGroups": [
-            {
-              "id": "id-1760029960520-z2a1g0ka4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1760029960521-t33fwt542",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "This"
-                }
-              ]
-            },
-            {
-              "id": "id-1764176913802-bwvk75kr4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1764176913803-1ugczxozs",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "No"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -530,12 +527,48 @@
               },
               "createdAt": "2025-11-26T17:10:13.691Z",
               "updatedAt": "2025-11-26T17:10:13.691Z"
+            },
+            {
+              "id": "filter-config-1764408506369-14p6ajfha",
+              "name": "This and No",
+              "description": "Content will contain both This and No",
+              "filterState": {
+                "rootCondition": "all",
+                "filterGroups": [
+                  {
+                    "id": "id-1760029960520-z2a1g0ka4",
+                    "groupCondition": "any",
+                    "filters": [
+                      {
+                        "id": "id-1760029960521-t33fwt542",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "This"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "id-1764176913802-bwvk75kr4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1764176913803-1ugczxozs",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "No"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-11-29T09:28:26.369Z",
+              "updatedAt": "2025-11-29T09:28:26.369Z"
             }
           ]
         },
         "taskCount": {
-          "pending": 10,
-          "completed": 0
+          "pending": 61,
+          "completed": 15
         }
       }
     ],
@@ -636,36 +669,6 @@
       "openOnStartup": false,
       "customStatuses": [
         {
-          "symbol": "x",
-          "name": "Checked",
-          "nextStatusSymbol": " ",
-          "availableAsCommand": false,
-          "type": "DONE"
-        },
-        {
-          "symbol": "/",
-          "name": "Half Done",
-          "nextStatusSymbol": "x",
-          "availableAsCommand": true,
-          "type": "IN_PROGRESS"
-        },
-        {
-          "symbol": "-",
-          "name": "Cancelled",
-          "nextStatusSymbol": " ",
-          "availableAsCommand": true,
-          "type": "CANCELLED"
-        },
-        {
-          "symbol": " ",
-          "name": "Unchecked",
-          "nextStatusSymbol": "x",
-          "availableAsCommand": false,
-          "type": "TODO"
-        }
-      ],
-      "tasksPluginCustomStatuses": [
-        {
           "symbol": " ",
           "name": "Todo",
           "nextStatusSymbol": "x",
@@ -692,6 +695,141 @@
           "nextStatusSymbol": " ",
           "availableAsCommand": true,
           "type": "CANCELLED"
+        }
+      ],
+      "tasksPluginCustomStatuses": [
+        {
+          "symbol": " ",
+          "name": "incomplete",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "x",
+          "name": "complete",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "/",
+          "name": "in progress, or half-done",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "-",
+          "name": "cancelled",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": ">",
+          "name": "deferred",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "!",
+          "name": "Important",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "?",
+          "name": "question",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "R",
+          "name": "review",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "+",
+          "name": "Inbox / task that should be processed later",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "b",
+          "name": "bookmark",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "B",
+          "name": "brainstorm",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "D",
+          "name": "deferred or scheduled",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "I",
+          "name": "Info",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "i",
+          "name": "idea",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "N",
+          "name": "note",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "Q",
+          "name": "quote",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "W",
+          "name": "win / success / reward",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "P",
+          "name": "pro",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "C",
+          "name": "con",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
         }
       ],
       "showTaskWithoutMetadata": true,
@@ -724,23 +862,23 @@
       ],
       "cardSectionsVisibility": "hideBoth",
       "hiddenTaskProperties": [],
-      "taskPropertyFormat": "3",
-      "taskNoteDefaultLocation": "TaskNotes",
+      "taskPropertyFormat": "2",
+      "taskNoteDefaultLocation": "Meta/Task_Board/New_Task_Notes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 265,
+      "uniqueIdCounter": 350,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 5
       },
-      "taskNoteIdentifierTag": "taskNote",
-      "doubleClickCardToEdit": "noteInTab",
+      "taskNoteIdentifierTag": "task",
+      "doubleClickCardToEdit": "none",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
-      "archivedTBNotesFolderPath": "TaskBoard/TBNotes/",
+      "archivedTBNotesFolderPath": "Meta/Task_Board/Archived_Task_Notes",
       "frontmatterFormatting": [
         {
           "index": 0,
@@ -845,14 +983,14 @@
         }
       ],
       "mapView": {
-        "background": "transparent",
+        "background": "dots",
         "mapOrientation": "hor",
         "optimizedRender": false,
         "arrowDirection": "c2p",
         "animatedEdges": false,
         "scrollAction": "pan",
         "showMinimap": true,
-        "renderVisibleNodes": true,
+        "renderVisibleNodes": false,
         "edgeType": "default"
       },
       "kanbanView": {

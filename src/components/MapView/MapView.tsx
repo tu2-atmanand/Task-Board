@@ -1,6 +1,6 @@
 // /src/components/MapView/MapView.tsx
 
-import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import {
 	ReactFlow,
 	ReactFlowProvider,
@@ -15,10 +15,9 @@ import {
 	SelectionMode,
 	ControlButton,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { taskItem } from 'src/interfaces/TaskItem';
+// import '@xyflow/react/dist/style.css';
+import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
-import { Board } from 'src/interfaces/BoardConfigs';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
@@ -32,11 +31,11 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
 import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
-import { isCompleted } from 'src/utils/CheckBoxUtils';
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
+import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
 
 type MapViewProps = {
 	plugin: TaskBoard;
-	boards: Board[];
 	activeBoardIndex: number;
 	allTasksArranged: taskItem[][];
 	// loading: boolean;
@@ -67,10 +66,11 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, boards, activeBoardIndex, allTasksArranged, focusOnTaskId
+	plugin, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
+	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
@@ -222,14 +222,24 @@ const MapView: React.FC<MapViewProps> = ({
 
 		const newNodes: Node[] = [];
 		const usedIds = new Set<string>();
+		const duplicateIds = new Set<string>();
 		const columnSpacing = 350;
 		const rowSpacing = 170;
 
 		// Get default width with proper validation
 		const getDefaultWidth = () => {
-			const columnWidth = plugin.settings.data.globalSettings.columnWidth;
-			if (columnWidth && Number.isFinite(Number(columnWidth))) {
-				return Number(columnWidth);
+			try {
+				const columnWidth = plugin.settings.data.globalSettings.columnWidth;
+				if (!columnWidth || typeof columnWidth !== 'string') {
+					return 300; // Fallback if missing or not a string
+				}
+				const cleaned = columnWidth.replace('px', '').trim();
+				const parsed = Number(cleaned);
+				if (Number.isFinite(parsed) && parsed > 0) {
+					return parsed;
+				}
+			} catch (e) {
+				console.warn('Error parsing columnWidth:', e);
 			}
 			return 300; // Fallback default width
 		};
@@ -240,10 +250,10 @@ const MapView: React.FC<MapViewProps> = ({
 			let yOffset = 0;
 			columnTasks.forEach((task, rowIdx) => {
 				if (task.legacyId) {
-					const id = task.legacyId ? task.legacyId : String(task.id);
+					const id = task.legacyId;
 					if (usedIds.has(id)) {
 						console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
-						bugReporter(plugin, `Duplicate node id "${id}" detected in Map View. This may cause unexpected behavior. Please report this issue to the developer with details about the tasks involved.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+						duplicateIds.add(id);
 						return; // Skip duplicate
 					}
 					usedIds.add(id);
@@ -256,21 +266,28 @@ const MapView: React.FC<MapViewProps> = ({
 						nodeWidth = savedSize.width;
 					}
 
+					// Ensure positions are always valid finite numbers
+					const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
+					const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
+					
+					// Safety check: if computed offsets are somehow NaN, use fallback
+					const safeX = Number.isFinite(nodeX) ? nodeX : (colIdx * 350);
+					const safeY = Number.isFinite(nodeY) ? nodeY : (rowIdx * 170);
+
 					newNodes.push({
 						id,
 						type: 'ResizableNodeSelected',
 						data: {
 							label: <TaskItem
-								key={task.id}
+								key={colIdx + rowIdx}
 								plugin={plugin}
-								taskKey={task.id}
 								task={task}
 								activeBoardSettings={activeBoardSettings}
 							/>
 						},
 						position: {
-							x: Number.isFinite(savedPos.x) ? savedPos.x : xOffset,
-							y: Number.isFinite(savedPos.y) ? savedPos.y : yOffset
+							x: safeX,
+							y: safeY
 						},
 						width: nodeWidth,
 					});
@@ -280,6 +297,13 @@ const MapView: React.FC<MapViewProps> = ({
 			});
 			xOffset += columnSpacing;
 		});
+
+		if (duplicateIds.size > 0) {
+			const stringOfListOfDuplicateIds = Array.from(duplicateIds).join(',');
+			// bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+			duplicateIds.clear();
+		}
+
 		return newNodes;
 	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey]);
 
@@ -370,12 +394,12 @@ const MapView: React.FC<MapViewProps> = ({
 		// const cssMax = 1.5;   // value when zoom is minZ
 
 		const vpForBoard = viewport[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
-		const zoom = Number.isFinite(vpForBoard.zoom) ? vpForBoard.zoom : 1.5;
+		const zoom = Number.isFinite(vpForBoard?.zoom) ? vpForBoard.zoom : 1.5;
 		const clamped = Math.max(0.5, Math.min(2, zoom));
 		const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 		const mapped = 1.5 - ratio * (1.5 - 1.2);
 		// Keep a compact string value suitable for CSS variable
-		const safeMarkerSize = 15 * mapped;
+		const safeMarkerSize: number = Number.isFinite(mapped) ? 15 * mapped : 15;
 
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
@@ -383,31 +407,35 @@ const MapView: React.FC<MapViewProps> = ({
 				task.dependsOn.forEach(depId => {
 					if (idToTask.has(depId)) {
 						const childTask = idToTask.get(depId);
-						const isChildTaskCompleted = childTask ? isCompleted(childTask.title) : false;
-						edges.push({
-							id: `${sourceId}->${depId}`,
-							source: depId,
-							target: sourceId,
-							type: mapViewSettings.edgeType,
-							animated: isChildTaskCompleted ? false : mapViewSettings.animatedEdges,
-							style: {
-								opacity: isChildTaskCompleted ? '50%' : "100%",
-							},
-							markerStart: {
-								type: MarkerType.ArrowClosed, // required property
-								// optional properties
-								// color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? safeMarkerSize : 0,
-							},
-							markerEnd: {
-								type: MarkerType.ArrowClosed, // required property
-								// optional properties
-								// color: 'var(--text-normal)',
-								height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
-								width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? safeMarkerSize : 0,
-							},
-						});
+						if (childTask) {
+							const isChildTaskCompleted = isTaskNotePresentInTags(taskNoteIdentifierTag, childTask.tags) ?
+								isTaskCompleted(childTask.status, true, plugin.settings)
+								: isTaskCompleted(childTask.title, false, plugin.settings);
+							edges.push({
+								id: `${sourceId}->${depId}`,
+								source: depId,
+								target: sourceId,
+								type: mapViewSettings.edgeType,
+								animated: isChildTaskCompleted ? false : mapViewSettings.animatedEdges,
+								style: {
+									opacity: isChildTaskCompleted ? '50%' : "100%",
+								},
+								markerStart: {
+									type: MarkerType.ArrowClosed, // required property
+									// optional properties
+									// color: 'var(--text-normal)',
+									height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+								},
+								markerEnd: {
+									type: MarkerType.ArrowClosed, // required property
+									// optional properties
+									// color: 'var(--text-normal)',
+									height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+								},
+							});
+						}
 					}
 				});
 			}
@@ -511,13 +539,44 @@ const MapView: React.FC<MapViewProps> = ({
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
 			updatedTargetTask.dependsOn.push(sourceLegacyId);
-			const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
-			updatedTargetTask.title = updatedTargetTaskTitle;
+			let eventData: UpdateTaskEventData = {
+				taskID: updatedTargetTask.id,
+				state: true,
+			};
+			eventEmitter.emit("UPDATE_TASK", eventData);
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+				updatedTargetTask.title = updatedTargetTaskTitle;
 
-			// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-			updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
-				plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
-			});
+				// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
+				updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
+					plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+					setTimeout(() => {
+						// This event emmitter will stop any loading animation of ongoing task-card.
+						eventEmitter.emit("UPDATE_TASK", {
+							taskID: updatedTargetTask.id,
+							state: false,
+						});
+					}, 500);
+				});
+			} else {
+				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
+					// This is required to rescan the updated file and refresh the board.
+					sleep(1000).then(() => {
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							updatedTargetTask.filePath
+						);
+
+						setTimeout(() => {
+							// This event emmitter will stop any loading animation of ongoing task-card.
+							eventEmitter.emit("UPDATE_TASK", {
+								taskID: updatedTargetTask.id,
+								state: false,
+							});
+						}, 500);
+					});
+				});
+			}
 		}
 	}
 
@@ -844,14 +903,15 @@ const MapView: React.FC<MapViewProps> = ({
 							// const cssMax = 2;   // value when zoom is minZ
 
 							const vpForBoard = viewport[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
-							const z = Number.isFinite(vpForBoard.zoom) ? vpForBoard.zoom : 1.5;
+							const z = Number.isFinite(vpForBoard?.zoom) ? vpForBoard.zoom : 1.5;
 							const clamped = Math.max(0.5, Math.min(2, z));
 							const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
 							// Map so that zoom 0.5 -> 2 and zoom 2 -> 1
 							const mapped = 2 - ratio;
+							const safeMapped = Number.isFinite(mapped) ? mapped : 1;
 
 							// Keep a compact string value suitable for CSS variable
-							return String(mapped);
+							return String(safeMapped);
 						})()
 					} as React.CSSProperties}>
 						<ReactFlow
@@ -919,10 +979,10 @@ const MapView: React.FC<MapViewProps> = ({
 								}
 								// Use current viewport if valid for this board, otherwise fall back to defaults
 								const currentVpForBoard = viewport[activeBoardIndex];
-								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom)) {
+								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom) && currentVpForBoard.zoom > 0) {
 									instance.setViewport(currentVpForBoard);
 								} else {
-									const defaultVp = { x: 10, y: 10, zoom: 1.5 };
+									const defaultVp: viewPort = { x: 10, y: 10, zoom: 1.5 };
 									instance.setViewport(defaultVp);
 									setViewport(prev => ({ ...prev, [activeBoardIndex]: defaultVp }));
 								}

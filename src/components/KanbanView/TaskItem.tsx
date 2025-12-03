@@ -2,7 +2,7 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
+import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isTaskCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
@@ -21,26 +21,28 @@ import { bugReporter } from 'src/services/OpenModals';
 import { ChevronDown } from 'lucide-react';
 import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
 import { priorityEmojis } from 'src/interfaces/Mapping';
-import { taskItem } from 'src/interfaces/TaskItem';
+import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
+import { eventEmitter } from 'src/services/EventEmitter';
 
 export interface TaskProps {
 	key: number;
 	plugin: TaskBoard;
-	taskKey: number;
 	task: taskItem;
 	activeBoardSettings: Board;
 	columnIndex?: number;
 }
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, activeBoardSettings }) => {
-	const [isChecked, setIsChecked] = useState(isCompleted(task.title));
+const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardSettings }) => {
+	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
+	const [isChecked, setIsChecked] = useState(isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings));
+	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
 
 	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
-	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 
 
 	let universalDate = getUniversalDateFromTask(task, plugin);
@@ -71,12 +73,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 
 			if (titleElement && task.title !== "") {
 				let cleanedTitle = cleanTaskTitleLegacy(task);
-				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-				if (searchQuery) {
-					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-					const regex = new RegExp(`(${escapedQuery})`, "gi");
-					cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
-				}
+				// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+				// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				// if (searchQuery) {
+				// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+				// 	cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
+				// }
 
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
@@ -107,12 +110,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 				element.empty(); // Clear previous content
 
-				const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-				if (searchQuery) {
-					const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-					const regex = new RegExp(`(${escapedQuery})`, "gi");
-					strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
-				}
+				// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+				// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+				// if (searchQuery) {
+				// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+				// 	strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
+				// }
 
 				MarkdownUIRenderer.renderSubtaskText(
 					plugin.app,
@@ -139,12 +143,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			.trim() : "";
 
 		if (descElement && descriptionContent !== "") {
-			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-			if (searchQuery) {
-				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-				const regex = new RegExp(`(${escapedQuery})`, "gi");
-				descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
-			}
+			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			// if (searchQuery) {
+			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+			// 	descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
+			// }
 
 			// Clear existing content
 			descElement.empty();
@@ -286,23 +291,58 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		return highestPriorityTag?.color;
 	}
 
+	useEffect(() => {
+		const setCardLoading = (eventData: UpdateTaskEventData) => {
+			// console.log("Refreshing the animation of only following ID :", eventData.taskID, "\nWith state :", eventData.state, "\nCurrent task ID :", task.legacyId, taskIdKey, "\nCondition :", eventData.taskID !== taskIdKey);
+			if (!eventData || !eventData?.taskID) setCardLoadingAnimation(false);
+
+			// Only update this specific task's loading state
+			if (eventData.taskID !== taskIdKey) return;
+
+			setCardLoadingAnimation(eventData.state);
+		};
+		eventEmitter.on("UPDATE_TASK", setCardLoading);
+		return () => eventEmitter.off("UPDATE_TASK", setCardLoading);
+	}, [taskIdKey]);
+
 	// Function to handle the main checkbox click
 	const handleMainCheckBoxClick = async () => {
-		setIsChecked(true); // Trigger animation
+		// Prevent repeated clicks while card is loading
+		if (cardLoadingAnimation) return;
+
+		setCardLoadingAnimation(true);
+		// setIsChecked(true);
+		// const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };
+		// eventEmitter.emit("UPDATE_TASK", eventData); // Trigger animation
+
 		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
 		if (condition) {
-			setTimeout(() => {
+			// if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+			// 	handleTaskNoteStatusChange(plugin, task);
+			// } else {
+			// 	handleCheckboxChange(plugin, task);
+			// }
+
+			// The task update functions trigger a re-render, but we should ensure
+			// the loading state is reset in case the component instance is reused.
+			try {
 				// Route to appropriate handler based on task type
 				if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-					handleTaskNoteStatusChange(plugin, task);
+					await handleTaskNoteStatusChange(plugin, task);
 				} else {
 					handleCheckboxChange(plugin, task);
 				}
-				setIsChecked(false); // Reset checkbox state
-			}, 500); // 1-second delay for animation
+			} finally {
+				// The component might be unmounted by the time this runs, but this is a safeguard.
+				// The event-based system should ideally handle the final state.
+				// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
+				setTimeout(() => setCardLoadingAnimation(false), 1000);
+			}
+
 		} else {
-			setIsChecked(false); // Reset checkbox state
 			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
+			// Reset loading state immediately because we didn't proceed
+			setCardLoadingAnimation(false);
 		}
 	};
 
@@ -478,7 +518,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			// if (allSubTasks.length === 0) return null;
 
 			const total = allSubTasks.length;
-			const completed = allSubTasks.filter(line => isCompleted(line)).length;
+			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
 
 			const showSubTaskSummaryBar = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
 
@@ -513,7 +553,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 					<div className={showSubtasks ? 'taskItemBodySubtaskSection-show' : 'taskItemBodySubtaskSection-hide'}>
 						{allSubTasks.map((line, index) => {
 							// console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
-							const isSubTaskCompleted = isCompleted(line);
+							const isSubTaskCompleted = isTaskCompleted(line, false, plugin.settings);
 
 							// Calculate padding based on the number of tabs
 							const tabString = getObsidianIndentationSetting(plugin);
@@ -569,12 +609,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 		if (!descriptionContent) return null; // If no description content, return null
 
 		if (descElement) {
-			const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-			if (searchQuery) {
-				const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-				const regex = new RegExp(`(${escapedQuery})`, "gi");
-				descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
-			}
+			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+			// if (searchQuery) {
+			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+			// 	descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
+			// }
 
 			// Clear existing content
 			descElement.empty();
@@ -616,39 +656,45 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 			if (plugin.settings.data.globalSettings.showFooter) {
 				return (
 					<>
-						<div className="taskItemFooter">
-							{/* Conditionally render task.completed or the date/time */}
-							{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
-								<div className='taskItemCompletedDate'>✅ {task.completion}</div>
-							) : (
-								<div className='taskItemFooterDateTimeContainer'>
-									{task?.reminder && task.completion && (
-										<div className='taskItemReminderContainer'>
-											🔔
-										</div>
-									)}
-									{task.time && (
-										<div className='taskItemTimeContainer'>
-											⏰ {task.time}
-										</div>
-									)}
-									{universalDate && (
+						{cardLoadingAnimation ? (
+							<div className='taskItemFooterRefreshingMssg'>Refreshing...</div>
+						) : (
+							<>
+								<div className="taskItemFooter">
+									{/* Conditionally render task.completed or the date/time */}
+									{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
+										<div className='taskItemCompletedDate'>✅ {task.completion}</div>
+									) : (
+										<div className='taskItemFooterDateTimeContainer'>
+											{task?.reminder && task.completion && (
+												<div className='taskItemReminderContainer'>
+													🔔
+												</div>
+											)}
+											{task.time && (
+												<div className='taskItemTimeContainer'>
+													⏰ {task.time}
+												</div>
+											)}
+											{universalDate && (
 
-										<div className='taskItemUniversalDateContainer'>
-											{getUniversalDateEmoji(plugin)} {universalDate}
+												<div className='taskItemUniversalDateContainer'>
+													{getUniversalDateEmoji(plugin)} {universalDate}
+												</div>
+											)}
 										</div>
 									)}
+									<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+										<div className="taskItemiconButton taskItemiconButtonEdit">
+											<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+										</div>
+										<div className="taskItemiconButton taskItemiconButtonDelete">
+											<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+										</div>
+									</div>
 								</div>
-							)}
-							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-								<div className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
-								</div>
-								<div className="taskItemiconButton taskItemiconButtonDelete">
-									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
-								</div>
-							</div>
-						</div>
+							</>
+						)}
 					</>
 				);
 			} else {
@@ -742,75 +788,129 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
-	return (<div className='taskItemContainer'>
-		<div className={`taskItem${isChecked ? ' completed' : ''}`} key={taskKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
-			onDoubleClick={handleDoubleClickOnCard}
-		>
-			<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
-			<div className="taskItemMainContent">
-				<div className="taskItemFileNameSection">
-					{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
-						<div className="taskItemFileName" aria-label={task.filePath}>
-							{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
-						</div>
-					)}
-				</div>
-				{memoizedRenderHeader}
-				<div className="taskItemMainBody">
-					<div className="taskItemMainBodyTitleNsubTasks">
-						<input
-							type="checkbox"
-							checked={(isChecked) ? true : false}
-							className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
-							data-task={task.status} // Add the data-task attribute
-							dir='auto'
-							onChange={handleMainCheckBoxClick}
-						/>
-						<div className="taskItemBodyContent">
-							<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
-							<div className="taskItemBody">
-								{memoizedRenderSubTasks}
-							</div>
-						</div>
+	return (
+		<div className='taskItemContainer'>
+			<div className={`taskItem${isChecked ? ' completed' : ''}`} key={taskIdKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+				onDoubleClick={handleDoubleClickOnCard}
+			>
+				{/* {cardLoadingAnimation && (
+					<div
+						className="taskItemLoadingOverlay"
+						role="status"
+						aria-live="polite"
+						style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							background: 'rgba(255,255,255,0.6)',
+							zIndex: 50,
+						}}
+					>
+						<svg width="36" height="36" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+							<circle cx="25" cy="25" r="20" stroke="#3b82f6" strokeWidth="5" fill="none" strokeOpacity="0.25" />
+							<path d="M45 25a20 20 0 0 1-20 20" stroke="#3b82f6" strokeWidth="5" strokeLinecap="round" fill="none">
+								<animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
+							</path>
+						</svg>
 					</div>
-					{showDescriptionSection && (
-						<div className='taskItemMainBodyDescriptionSectionVisible'>
-							{renderDescriptionSection}
-						</div>
-					)}
-					{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
-						{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
-							<div
-								className='taskItemMainBodyDescriptionSectionToggler'
-								onClick={toggleDescription}
-							>
-								{isDescriptionExpanded ? t("hide-description") : t("show-description")}
+				)} */}
+				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
+				<div className="taskItemMainContent">
+					<div className="taskItemFileNameSection">
+						{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
+							<div className="taskItemFileName" aria-label={task.filePath}>
+								{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
 							</div>
 						)}
-						{/* Expandable section */}
-						<div className='taskItemMainBodyDescriptionSection'>
-							<div
-								className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
-								ref={descriptionRef}
-							>
-								<div
-									className="taskItemBodyDescriptionRenderer"
-									ref={(el) => {
-										if (el) {
-											const uniqueKey = `${task.id}-desc`;
-											taskItemBodyDescriptionRef.current[uniqueKey] = el;
+					</div>
+					{memoizedRenderHeader}
+					<div className="taskItemMainBody">
+						<div className="taskItemMainBodyTitleNsubTasks">
+							{cardLoadingAnimation ? (
+								<input
+									id={`${task.id}-checkbox`}
+									type="checkbox"
+									checked={cardLoadingAnimation}
+									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+									data-task={task.status} // Add the data-task attribute
+									dir='auto'
+									readOnly={true}
+								/>
+							) : (
+								<input
+									id={`${task.id}-checkbox`}
+									type="checkbox"
+									checked={isChecked || cardLoadingAnimation}
+									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+									data-task={task.status} // Add the data-task attribute
+									dir='auto'
+									onChange={handleMainCheckBoxClick}
+									onClick={(e) => {
+										if (cardLoadingAnimation) {
+											e.preventDefault();
+											return;
 										}
 									}}
-								></div>
+									onDoubleClick={(e) => {
+										e.preventDefault();
+										return;
+									}}
+									disabled={cardLoadingAnimation}
+									aria-disabled={cardLoadingAnimation}
+									aria-busy={cardLoadingAnimation}
+									readOnly={cardLoadingAnimation}
+								/>
+							)}
+							<div className="taskItemBodyContent">
+								<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
+								<div className="taskItemBody">
+									{memoizedRenderSubTasks}
+								</div>
 							</div>
 						</div>
-					</div>)}
-					{memoizedRenderChildTasks}
+						{showDescriptionSection && (
+							<div className='taskItemMainBodyDescriptionSectionVisible'>
+								{renderDescriptionSection}
+							</div>
+						)}
+						{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
+							{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
+								<div
+									className='taskItemMainBodyDescriptionSectionToggler'
+									onClick={toggleDescription}
+								>
+									{isDescriptionExpanded ? t("hide-description") : t("show-description")}
+								</div>
+							)}
+							{/* Expandable section */}
+							<div className='taskItemMainBodyDescriptionSection'>
+								<div
+									className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
+									ref={descriptionRef}
+								>
+									<div
+										className="taskItemBodyDescriptionRenderer"
+										ref={(el) => {
+											if (el) {
+												const uniqueKey = `${task.id}-desc`;
+												taskItemBodyDescriptionRef.current[uniqueKey] = el;
+											}
+										}}
+									></div>
+								</div>
+							</div>
+						</div>)}
+						{memoizedRenderChildTasks}
+					</div>
+					{renderFooter()}
 				</div>
-				{renderFooter()}
 			</div>
 		</div>
-	</div>
 	);
 };
 
