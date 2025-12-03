@@ -6,7 +6,7 @@ import {
 	updateTaskInFile,
 } from "src/utils/taskLine/TaskItemUtils";
 import { AddOrEditTaskView } from "src/views/AddOrEditTaskView";
-import { Board } from "../interfaces/BoardConfigs";
+import { Board, getActiveColumns } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
 import { CommunityPlugins } from "./CommunityPlugins";
@@ -459,9 +459,10 @@ export const openTaskBoardActionsModal = (
 	plugin: TaskBoard,
 	activeBoardIndex: number
 ) => {
+	const board = plugin.settings.data.boardConfigs[activeBoardIndex];
 	const actionModal = new TaskBoardActionsModal(
 		plugin,
-		plugin.settings.data.boardConfigs[activeBoardIndex].columns
+		getActiveColumns(board)
 	);
 	actionModal.open();
 };

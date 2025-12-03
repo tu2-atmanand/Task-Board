@@ -4,7 +4,7 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
-import { ColumnData } from "src/interfaces/BoardConfigs";
+import { ColumnData, getActiveColumns } from "src/interfaces/BoardConfigs";
 import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
@@ -204,8 +204,9 @@ export const columnSegregator = (
 		);
 
 		// 2. Collect all coltags from columns where colType is 'namedTag'
+		const activeColumns = currentBoard ? getActiveColumns(currentBoard) : [];
 		const namedTags =
-			currentBoard?.columns
+			activeColumns
 				.filter((col) => col.colType === colType.namedTag && col.coltag)
 				.map((col) => col.coltag?.toLowerCase().replace(`#`, ""))
 				.filter(
@@ -227,11 +228,10 @@ export const columnSegregator = (
 		});
 	} else if (columnData.colType === colType.completed) {
 		const boardConfigs = plugin.settings.data.boardConfigs;
-		const completedColumnIndex = boardConfigs[
-			activeBoard
-		]?.columns.findIndex((column) => column.colType === colType.completed);
+		const activeColumns = getActiveColumns(boardConfigs[activeBoard]);
+		const completedColumnIndex = activeColumns.findIndex((column) => column.colType === colType.completed);
 		const tasksLimit =
-			boardConfigs[activeBoard]?.columns[completedColumnIndex]?.limit;
+			activeColumns[completedColumnIndex]?.limit;
 
 		// This sorting will be done through the columnData.sortCriteria for this column if its configured
 		// const sortedCompletedTasks = completedTasks.sort((a, b): number => {

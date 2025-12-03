@@ -13,7 +13,7 @@ import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { getTaskFromId, parseUniversalDate } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
-import { Board } from 'src/interfaces/BoardConfigs';
+import { Board, getActiveColumns } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
@@ -409,7 +409,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, taskKey, task, columnIndex, act
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
-										const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
+										const activeColumns = activeBoardSettings ? getActiveColumns(activeBoardSettings) : [];
+										const columnData = columnIndex !== undefined ? activeColumns[columnIndex - 1] : undefined;
 										if (
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&
