@@ -1,6 +1,6 @@
 {
 	"name": "task-board",
-	"version": "1.8.2",
+	"version": "1.8.3",
 	"description": "An Obsidian plugin to manage small to large projects using tasks from the whole vault on a centralized board using various kinds of views like Kanban, map, list, etc.",
 	"main": "main.js",
 	"type": "module",

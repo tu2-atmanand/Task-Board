@@ -325,13 +325,12 @@ const Column: React.FC<ColumnProps> = ({
 					</div>
 					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 						{tasks.length > 0 ? (
-							tasks.map((task, index = task.id) => {
+							tasks.map((task, index) => {
 								return (
 									<div key={index} className="taskItemFadeIn">
 										<TaskItem
 											key={index}
 											plugin={plugin}
-											taskKey={index}
 											task={task}
 											columnIndex={columnIndex}
 											activeBoardSettings={activeBoardData}

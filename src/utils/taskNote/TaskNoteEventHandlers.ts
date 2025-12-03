@@ -3,7 +3,10 @@
 import { Notice } from "obsidian";
 import { taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
-import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils";
+import {
+	getStatusNameFromStatusSymbol,
+	updateFrontmatterInMarkdownFile,
+} from "./TaskNoteUtils";
 import { checkboxStateSwitcher } from "../CheckBoxUtils";
 import {
 	readDataOfVaultFile,
@@ -21,21 +24,29 @@ export const handleTaskNoteStatusChange = async (
 	task: taskItem
 ) => {
 	try {
-		const newStatus = checkboxStateSwitcher(plugin, task.status);
+		const newStatusSymbol = checkboxStateSwitcher(plugin, task.status);
 		const updatedTask = {
 			...task,
-			status: newStatus,
+			status: newStatusSymbol,
 		};
+		const newStatusName = getStatusNameFromStatusSymbol(
+			newStatusSymbol,
+			plugin.settings
+		);
 
 		// Update frontmatter with new status
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			plugin.realTimeScanning.processAllUpdatedFiles(
-				updatedTask.filePath
-			);
+			sleep(1000).then(() => {
+				// This is required to rescan the updated file and refresh the board.
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					updatedTask.filePath,
+					task.legacyId
+				);
+			});
 		});
 
-		new Notice(`Task note status updated to ${newStatus}`);
+		new Notice(`Task note status updated to ${newStatusName}`);
 	} catch (error) {
 		console.error("Error updating task note status:", error);
 		new Notice("Error updating task note status: " + String(error));
@@ -57,9 +68,12 @@ export const handleTaskNotePropertyUpdate = async (
 		// Update frontmatter with all updated properties
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			plugin.realTimeScanning.processAllUpdatedFiles(
-				updatedTask.filePath
-			);
+			sleep(1000).then(() => {
+				// This is required to rescan the updated file and refresh the board.
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					updatedTask.filePath
+				);
+			});
 		});
 
 		new Notice("Task note properties updated");
@@ -158,9 +172,12 @@ export const handleTaskNoteBodyChange = async (
 			updatedLines.join("\n")
 		).then(() => {
 			// This is required to rescan the updated file and refresh the board.
-			plugin.realTimeScanning.processAllUpdatedFiles(
-				updatedTask.filePath
-			);
+			sleep(1000).then(() => {
+				// This is required to rescan the updated file and refresh the board.
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					updatedTask.filePath
+				);
+			});
 		});
 	} catch (error) {
 		console.error(

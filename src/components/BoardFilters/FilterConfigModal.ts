@@ -110,7 +110,7 @@ export class FilterConfigModal extends Modal {
 				text: t("no-saved-filter-configurations"),
 			});
 			new Setting(contentEl).addButton((btn) => {
-				btn.setButtonText(t("Close")).onClick(() => {
+				btn.setButtonText(t("close")).onClick(() => {
 					this.close();
 				});
 			});

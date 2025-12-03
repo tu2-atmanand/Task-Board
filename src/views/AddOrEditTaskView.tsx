@@ -66,7 +66,7 @@ export class AddOrEditTaskView extends ItemView {
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
-		if (!this.isTaskNote && this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
+		if (!this.isTaskNote && this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
 			this.task.legacyId = String(this.task.id);
 		}
@@ -88,7 +88,7 @@ export class AddOrEditTaskView extends ItemView {
 
 			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
 
-			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id || this.task.id === 0)) {
+			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 				this.task.id = generateTaskId(this.plugin);
 			}
 		}

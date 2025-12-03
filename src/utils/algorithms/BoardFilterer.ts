@@ -19,6 +19,7 @@ export function boardFilterer(
 	tasks: taskItem[],
 	filterState: RootFilterState | undefined
 ): taskItem[] {
+	// TODO : This function runs more number of times than it should be running.
 	// If no filter state or no filter groups, return all tasks
 	if (
 		!filterState ||

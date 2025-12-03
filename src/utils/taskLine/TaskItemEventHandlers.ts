@@ -1,4 +1,4 @@
-import { checkboxStateSwitcher, isCompleted } from "../CheckBoxUtils";
+import { checkboxStateSwitcher, isTaskCompleted } from "../CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
@@ -35,7 +35,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	if (!tasksPlugin.isTasksPluginEnabled()) {
 		// Check if the task is completed
 		const newStatus = checkboxStateSwitcher(plugin, task.status);
-		if (isCompleted(`- [${task.status}]`)) {
+		if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
 			const taskWithUpdatedStatus = {
 				...task,
 				completion: "",
@@ -44,7 +44,8 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 				(newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
-						task.filePath
+						task.filePath,
+						task.legacyId
 					);
 
 					// // Move from Completed to Pending
@@ -102,7 +103,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	} else {
 		useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 			.then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath, task.legacyId);
 
 				// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 				// 	// Move from Pending to Completed

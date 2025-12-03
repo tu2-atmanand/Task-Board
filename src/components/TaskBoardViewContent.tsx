@@ -4,7 +4,7 @@ import { Board, ColumnData, RootFilterState, getActiveColumns } from "../interfa
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
-import { taskJsonMerged } from "src/interfaces/TaskItem";
+import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App, debounce, Platform, Menu, Notice, addIcon } from "obsidian";
 import type TaskBoard from "main";
@@ -25,6 +25,7 @@ import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
+	const [activeBoardType, setActiveBoardType] = useState(KanbanBoardType.statusBoard);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
@@ -33,8 +34,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
-	const [showSearchInput, setShowSearchInput] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
+	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.globalSettings.searchQuery ? true : false);
+	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.globalSettings.searchQuery ?? "");
 
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
 
@@ -105,6 +106,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, [refreshCount]);
 
 	const allTasksArrangedPerColumn = useMemo(() => {
+		// console.log("Calculating allTasksArrangedPerColumn...");
+		setFilteredTasksPerColumn([]);
 		if (allTasks && boards[activeBoardIndex]) {
 			// Apply board filters to pending tasks
 			const currentBoard = boards[activeBoardIndex];
@@ -122,14 +125,24 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			};
 			setFilteredTasks(filteredAllTasks);
 
-			return getActiveColumns(currentBoard)
-				.filter((column) => column.active)
-				.map((column: ColumnData) =>
-					columnSegregator(plugin, activeBoardIndex, column, filteredAllTasks)
-				);
+			if (searchQuery.trim() !== "") {
+				const searchQueryFilteredTasks = handleSearchSubmit(filteredAllTasks);
+				return getActiveColumns(currentBoard)
+					.filter((column) => column.active)
+					.map((column: ColumnData) =>
+						columnSegregator(plugin.settings, activeBoardIndex, column, searchQueryFilteredTasks)
+				);						
+			} else {
+				return getActiveColumns(currentBoard)
+					.filter((column) => column.active)
+					.map((column: ColumnData) =>
+						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks)
+				);					
+			}
+
 		}
 		return [];
-	}, [allTasks, boards, activeBoardIndex]);
+	}, [allTasks, activeBoardIndex, activeBoardType]);
 
 	useEffect(() => {
 		if (allTasksArrangedPerColumn.length > 0) {
@@ -179,7 +192,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}
 		eventEmitter.emit("REFRESH_BOARD");
 
-	}, [plugin]);
+	}, []);
 
 	function handleOpenAddNewTaskModal() {
 		openAddNewTaskModal(app, plugin);
@@ -190,15 +203,19 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}
 
 	function handleSearchButtonClick() {
-		setShowSearchInput((prev) => !prev);
 		if (showSearchInput) {
 			setSearchQuery("");
 			// el.currentTarget.focus();
 			setFilteredTasksPerColumn([]);
 			plugin.settings.data.globalSettings.searchQuery = "";
+
+			eventEmitter.emit("REFRESH_COLUMN");
+			plugin.saveSettings();
+			setShowSearchInput(false);
 		} else {
 			setSearchQuery(plugin.settings.data.globalSettings.searchQuery || "");
 			handleSearchSubmit();
+			setShowSearchInput(true);
 		}
 	}
 
@@ -208,19 +225,20 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	// 	return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
 	// }
 
-	function handleSearchSubmit() {
+	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | null {
 		if (!searchQuery.trim()) {
 			setFilteredTasksPerColumn([]);
-			return;
+			return null;
 		}
 
-		plugin.settings.data.globalSettings.searchQuery = searchQuery;
+		// plugin.settings.data.globalSettings.searchQuery = searchQuery;
 
 		const lowerQuery = searchQuery.toLowerCase();
+		let searchFilteredTasks: taskJsonMerged | null = null;
 
-		const filtered = allTasksArrangedPerColumn.map((column) => {
-			const filteredTasks = column
-				.filter((task) => {
+		if (fileteredAllTasks) {
+			searchFilteredTasks = {
+				Pending: fileteredAllTasks.Pending.filter((task) => {
 					if (lowerQuery.startsWith("file:")) {
 						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
 					} else {
@@ -228,21 +246,53 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
-				});
-			// .map((task) => {
-			// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
-			// 	const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
+				}),
+				Completed: fileteredAllTasks.Completed.filter((task) => {
+					if (lowerQuery.startsWith("file:")) {
+						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+					} else {
+						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
+						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						return titleMatch || bodyMatch;
+					}
+				})
+			};
+		}
+		else {
+			const filtered = allTasksArrangedPerColumn.map((column) => {
+				const filteredTasks = column
+					.filter((task) => {
+						if (lowerQuery.startsWith("file:")) {
+							return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+						} else {
+							const titleMatch = task.title.toLowerCase().includes(lowerQuery);
+							const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+							return titleMatch || bodyMatch;
+						}
+					});
+				// TODO : This highliting option also cannot work as it destroys the other functionalities of the taskItem.
+				// .map((task) => {
+				// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
+				// 	const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
 
-			// 	return {
-			// 		...task,
-			// 		title: highlightedTitle,
-			// 		body: highlightedBody.split("\n"),
-			// 	};
-			// });
-			return filteredTasks;
-		});
+				// 	return {
+				// 		...task,
+				// 		title: highlightedTitle,
+				// 		body: highlightedBody.split("\n"),
+				// 	};
+				// });
+				return filteredTasks;
+			});
+			setFilteredTasksPerColumn(filtered);
 
-		setFilteredTasksPerColumn(filtered);
+			setTimeout(() => {
+				plugin.settings.data.globalSettings.searchQuery = lowerQuery;
+				plugin.saveSettings();
+			}, 100);
+		}
+
+
+		return searchFilteredTasks;
 	}
 
 	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -355,9 +405,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	function handleBoardSelection(index: number) {
 		if (index !== activeBoardIndex) {
-			setActiveBoardIndex(index);
+			setSearchQuery("");
+			setFilteredTasksPerColumn([]);
+			plugin.settings.data.globalSettings.searchQuery = "";
 			plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index;
-			plugin.saveSettings();
+			setActiveBoardIndex(index);
+			setTimeout(() => {
+				eventEmitter.emit("REFRESH_BOARD");
+				plugin.saveSettings();
+			}, 100);			
 		} else if (viewType === viewTypeNames.kanban) {
 			// toggle kanban board type
 			const updatedBoards = [...boards];
@@ -367,6 +423,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			const nextBoardType = boardTypes[nextIndex];
 			updatedBoards[activeBoardIndex].boardType = nextBoardType;
 			setBoards(updatedBoards);
+			setActiveBoardType(nextBoardType);
 			new Notice(`${t("changed-kanban-board-type")}: ${nextBoardType.valueOf()}`);
 		}
 		closeBoardSidebar(); // Close sidebar after selection
@@ -695,9 +752,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						) : (
 							<MapView
 								plugin={plugin}
-								boards={boards}
 								activeBoardIndex={activeBoardIndex}
-								allTasksArranged={allTasksArrangedPerColumn}
+								allTasksArranged={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
 								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
 							/>
 						)

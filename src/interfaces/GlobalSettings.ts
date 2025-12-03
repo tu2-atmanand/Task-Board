@@ -92,8 +92,8 @@ export interface globalSettingsData {
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
 	universalDate: string;
-	tasksPluginCustomStatuses: CustomStatus[];
 	customStatuses: CustomStatus[];
+	tasksPluginCustomStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
 	preDefinedNote: string;
