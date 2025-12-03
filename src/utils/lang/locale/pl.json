@@ -57,6 +57,7 @@
 	"add-board": "Dodaj tablicę",
 	"confirm-delete": "Potwierdź Usuń",
 	"confirm-task-delete-description": "Czy na pewno chcesz usunąć to zadanie?",
+	"changed-kanban-board-type": "Zmiana typu tablicy Kanban",
 	"vault-scanning-complete": "Kompletne skanowanie skanowania skarbca.",
 	"scan-tasks-from-the-vault": "Zadania ze skanowania ze sklepienia",
 	"scan-tasks-from-the-vault-description-1": "Uruchom tę funkcję tylko wtedy, gdy twoje zadania nie zostały właściwie wykryte/zeskanowane lub płyta działa.",

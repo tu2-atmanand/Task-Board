@@ -53,6 +53,7 @@ const en: Lang = {
 	"enter-path-pattern": "Enter complete file paths seperated by comma",
 	"path-filter-description": "Shows tasks from files whose path contains the specified pattern. Use this to group tasks by folder or file location.",
 	"confirm-task-delete-description": "Are you sure you want to delete this task?",
+	"changed-kanban-board-type": "Changed Kanban board type",
 	"yes": "Yes",
 	"no": "No",
 	"scan-tasks-from-the-vault": "Scan tasks from the vault",

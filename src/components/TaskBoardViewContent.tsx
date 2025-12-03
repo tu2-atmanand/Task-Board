@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform, Menu, addIcon } from "obsidian";
+import { App, debounce, Platform, Menu, Notice, addIcon } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
@@ -19,7 +19,7 @@ import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Con
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
-import { viewTypeNames } from "src/interfaces/Enums";
+import { viewTypeNames, KanbanBoardType } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
@@ -358,6 +358,16 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			setActiveBoardIndex(index);
 			plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index;
 			plugin.saveSettings();
+		} else if (viewType === viewTypeNames.kanban) {
+			// toggle kanban board type
+			const updatedBoards = [...boards];
+			const boardTypes = Object.values(KanbanBoardType);
+			const currentIndex = boardTypes.indexOf(updatedBoards[activeBoardIndex].boardType);
+			const nextIndex = (currentIndex + 1) % boardTypes.length;
+			const nextBoardType = boardTypes[nextIndex];
+			updatedBoards[activeBoardIndex].boardType = nextBoardType;
+			setBoards(updatedBoards);
+			new Notice(`${t("changed-kanban-board-type")}: ${nextBoardType.valueOf()}`);
 		}
 		closeBoardSidebar(); // Close sidebar after selection
 	}

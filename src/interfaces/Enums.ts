@@ -182,7 +182,7 @@ export enum mapViewEdgeType {
 }
 
 export enum KanbanBoardType {
-	statusBoard = "status",
-	timeBoard = "time",
-	tagBoard = "tag"
+	statusBoard = "Status Based Board",
+	timeBoard = "Time Based Board",
+	tagBoard = "Tag Based Board",
 }
