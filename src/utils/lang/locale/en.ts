@@ -57,7 +57,7 @@ const en: Lang = {
 	"yes": "Yes",
 	"no": "No",
 	"scan-tasks-from-the-vault": "Scan tasks from the vault",
-	"scan-tasks-from-the-vault-description-1":"Run this feature only on the fresh install or if your tasks has not been properly detected/scanned or the board is acting weired.",
+	"scan-tasks-from-the-vault-description-1": "Run this feature only on the fresh install or if your tasks has not been properly detected/scanned or the board is acting weired.",
 	"scan-tasks-from-the-vault-description-2": "You dont have to run this feature often. The plugin will auto detect newly added/edited tasks from your notes.",
 	"scan-tasks-from-the-vault-description-3": "You might first want to check the scanning filters you have applied in setting to avoid any confusion.",
 	"vault-scanning-complete": "Vault scanning complete.",
@@ -223,7 +223,7 @@ const en: Lang = {
 	"quickadd-plugin-compatibility-description": "If you have installed the quickadd plugin, you can now use its 'choices' from the 'add new task modal' to directly add the task wherever you want.",
 	"quickadd-plugin-choice": "Quickadd choice",
 	"show-error": "Show error",
-	"bug-report-notice-message":"Task board encountered an issue while completing the operation. Click on the show error button to read more and report.",
+	"bug-report-notice-message": "Task board encountered an issue while completing the operation. Click on the show error button to read more and report.",
 	"push-notification-compatibility": "Push notification compatibility",
 	"push-notification-compatibility-description": "Select which plugin or external service you want to use for integrating the push notification feature and its format for your reminders.",
 	"frontmatter-property-for-reminder": "Frontmatter property for reminder",
@@ -471,7 +471,12 @@ const en: Lang = {
 	"no-tasks-found-for-current-board-message": "No tasks were filtered for this board. Please check your board filters and whether you are able to see tasks inside the kanban view for this board.",
 	"tasks-on-this-board-have-no-id-message-1": "Tasks filtered for this board have no ID on them. Please add id for altest one task to open the map view. Or use the below import task panel feature, to quikly import tasks.",
 	"tasks-on-this-board-have-no-id-message-2": "When you will import tasks, an ID property will be added to the task content in the note.",
-	"column-delete-confirmation-message": "Are you sure you want to delete the following column : "
+	"column-delete-confirmation-message": "Are you sure you want to delete the following column : ",
+	"board-type": "Board type",
+	"board-type-info": "Select the type of the Kanban board you want to edit columns for. You can switch between different types at any time.",
+	"status-board": "Status Based Board",
+	"tag-board": "Tag Based Board",
+	"time-board": "Time Based Board"
 };
 
 export default en;

@@ -510,6 +510,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 					<div className="boardConfigModalMainContent-Active-BodyColumnSec">
 						<h3>{t("columns")}</h3>
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+								<div className="boardConfigModalSettingName">{t("board-type")}</div>
+								<div className="boardConfigModalSettingDescription">{t("board-type-info")}</div>
+							</div>
+							<select
+								aria-label="Select board type"
+								value={board.boardType}
+								onChange={(e) => {
+									const updatedBoards = [...localBoards];
+									updatedBoards[boardIndex].boardType = e.target.value as KanbanBoardType;
+									setLocalBoards(updatedBoards);
+									setIsEdited(true);
+								}}
+								className="boardConfigModalColumnRowContentColDatedVal"
+							>
+								<option value={KanbanBoardType.statusBoard}>{t("status-board")}</option>
+								<option value={KanbanBoardType.timeBoard}>{t("time-board")}</option>
+								<option value={KanbanBoardType.tagBoard}>{t("tag-board")}</option>
+							</select>
+						</div>						
 						<div
 							ref={columnListRef}
 							className="boardConfigModalMainContent-Active-BodyColumnsList"
