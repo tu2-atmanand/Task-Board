@@ -259,8 +259,8 @@ export default class vaultScanner {
 						}
 
 						this.tasksCache.Completed = {
-							[fileNameWithPath]: [taskNoteItem],
-							...completed,
+						    [fileNameWithPath]: [taskNoteItem],
+						    ...(completed || {}),
 						};
 
 						if (this.tasksCache.Pending[fileNameWithPath])
