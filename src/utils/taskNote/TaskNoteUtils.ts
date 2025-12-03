@@ -216,7 +216,6 @@ export function getStatusSymbolFromStatusName(
 	statusName: string | undefined,
 	settings: PluginDataJson
 ): string {
-	console.log("getStatusSymbolFromStatusName...\nstatusValue : ", statusName);
 	if (!statusName) return " ";
 
 	// const statusStr = statusValue.trim().toLowerCase();
@@ -306,7 +305,6 @@ export function formatTaskNoteContent(
 			updatedTask
 		);
 		const newFrontmatter = createYamlFromObject(updatedFrontmatter);
-		console.log("newFrontmatter from YAML :", newFrontmatter);
 
 		const frontmatterMatch = oldNoteContent.match(/^---\n([\s\S]*?)\n---/);
 		const contentWithoutFrontmatter = frontmatterMatch

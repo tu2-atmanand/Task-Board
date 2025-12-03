@@ -310,7 +310,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		// Prevent repeated clicks while card is loading
 		if (cardLoadingAnimation) return;
 
-		console.log("Checkbox clicked...\nID :", task.legacyId);
 		setCardLoadingAnimation(true);
 		// setIsChecked(true);
 		// const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };

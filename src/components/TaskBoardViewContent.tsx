@@ -105,7 +105,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, [refreshCount]);
 
 	const allTasksArrangedPerColumn = useMemo(() => {
-		console.log("Calculating allTasksArrangedPerColumn...");
+		// console.log("Calculating allTasksArrangedPerColumn...");
 		setFilteredTasksPerColumn([]);
 		if (allTasks && boards[activeBoardIndex]) {
 			// Apply board filters to pending tasks
@@ -202,7 +202,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}
 
 	function handleSearchButtonClick() {
-		console.log("State of the showSearchInput : ", showSearchInput);
 		if (showSearchInput) {
 			setSearchQuery("");
 			// el.currentTarget.focus();
@@ -237,7 +236,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		let searchFilteredTasks: taskJsonMerged | null = null;
 
 		if (fileteredAllTasks) {
-			console.log("First part...");
 			searchFilteredTasks = {
 				Pending: fileteredAllTasks.Pending.filter((task) => {
 					if (lowerQuery.startsWith("file:")) {
@@ -260,7 +258,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			};
 		}
 		else {
-			console.log("Second part...");
 			const filtered = allTasksArrangedPerColumn.map((column) => {
 				const filteredTasks = column
 					.filter((task) => {

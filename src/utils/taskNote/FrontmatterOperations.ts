@@ -380,12 +380,6 @@ export function updateFrontmatterProperties(
 
 	const statusKey = getCustomFrontmatterKey("status", frontmatterFormatting);
 	if (task.status) {
-		// const statusKeyName = Object.keys(taskStatuses).find(
-		// 	(key) =>
-		// 		taskStatuses[key as keyof typeof taskStatuses] === task.status
-		// );
-		console.log("Task Note status sybmol :", task.status);
-
 		const statusName = getStatusNameFromStatusSymbol(
 			task.status,
 			plugin.settings
@@ -431,14 +425,12 @@ export function updateFrontmatterProperties(
 		"scheduledDate",
 		frontmatterFormatting
 	);
-	console.log("Scheduled date :", task.scheduledDate);
 	if (task.scheduledDate) {
 		tempUpdates[scheduledDateKey] = task.scheduledDate;
 	} else {
 		delete tempUpdates[scheduledDateKey];
 		delete oldFrontmatter?.[scheduledDateKey];
 	}
-	console.log("Updated frontmatter :", tempUpdates);
 
 	const dueKey = getCustomFrontmatterKey("due", frontmatterFormatting);
 	if (task.due) {
