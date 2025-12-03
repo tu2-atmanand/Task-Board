@@ -156,10 +156,10 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 			<h2>{t("scan-tasks-from-the-vault")}</h2>
 			{localStorage.getItem("manadatoryScan") === "true" ?
 				(<>
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} 1.6.0</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} 1.8.3</div>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
 					<br />
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href="https://github.com/tu2-atmanand/Task-Board/releases/tag/1.8.0">Task Board v1.8.0</a>.</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href="https://github.com/tu2-atmanand/Task-Board/releases/tag/1.8.3">Task Board v1.8.3</a>.</div>
 				</>
 				) :
 				(<>
