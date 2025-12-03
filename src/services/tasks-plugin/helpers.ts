@@ -9,7 +9,7 @@ import {
 	getFormattedTaskContent,
 } from "src/utils/taskLine/TaskContentFormatter";
 import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskItemUtils";
-import { taskStatusConfig } from "./parse-task-fields";
+import { CustomStatus } from "src/interfaces/GlobalSettings";
 
 export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 	try {
@@ -24,33 +24,32 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			const parsedData = JSON.parse(data);
 
 			// Extract coreStatuses from the JSON
-			const coreStatuses: taskStatusConfig[] =
+			const coreStatuses: CustomStatus[] =
 				parsedData?.statusSettings?.coreStatuses || [];
 
 			// Extract customStatuses from the JSON
-			const customStatuses: taskStatusConfig[] =
+			const customStatuses: CustomStatus[] =
 				parsedData?.statusSettings?.customStatuses || [];
 
 			const statusMap = new Map();
-			coreStatuses.forEach((status: taskStatusConfig) =>
+			coreStatuses.forEach((status: CustomStatus) =>
 				statusMap.set(status.symbol, status)
 			);
-			customStatuses.forEach((status: taskStatusConfig) =>
+			customStatuses.forEach((status: CustomStatus) =>
 				statusMap.set(status.symbol, status)
 			);
-			const statuses = Array.from(statusMap.values());
-			
+			const statuses: CustomStatus[] = Array.from(statusMap.values());
+
 			// Store it in the plugin settings if there is a difference
 			if (
 				JSON.stringify(
 					plugin.settings.data.globalSettings
-					.tasksPluginCustomStatuses
+						.tasksPluginCustomStatuses
 				) !== JSON.stringify(statuses)
 			) {
-				console.log("Fetched new statuses from Tasks plugin:", statuses);
 				plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
 					statuses;
-				await plugin.saveSettings();
+				await plugin.saveSettings(plugin.settings);
 			}
 		}
 	} catch (error) {
