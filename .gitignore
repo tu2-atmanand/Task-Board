@@ -28,3 +28,4 @@ locales/
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
 
+update_pl_locale.js
