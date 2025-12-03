@@ -96,6 +96,8 @@ export default class TaskBoard extends Plugin {
 
 		await this.vaultScanner.initializeTasksCache();
 
+		await this.compatiblePluginsAvailabilityCheck();
+
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
 			//Creates a Icon on Ribbon Bar (after i18n is initialized)
@@ -123,8 +125,6 @@ export default class TaskBoard extends Plugin {
 
 			// Register status bar element
 			this.registerTaskBoardStatusBar();
-
-			this.compatiblePluginsAvailabilityCheck();
 
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
@@ -231,8 +231,13 @@ export default class TaskBoard extends Plugin {
 		this.saveSettings();
 	}
 
-	async saveSettings() {
-		await this.saveData(this.settings);
+	async saveSettings(newSetting?: PluginDataJson) {
+		if (newSetting) {
+			this.settings = newSetting;
+			await this.saveData(newSetting);
+		} else {
+			await this.saveData(this.settings);
+		}
 	}
 
 	// getLanguage() {
