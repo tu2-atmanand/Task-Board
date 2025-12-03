@@ -317,21 +317,28 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
 		if (condition) {
-			// Route to appropriate handler based on task type
-			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-				handleTaskNoteStatusChange(plugin, task);
-			} else {
-				handleCheckboxChange(plugin, task);
+			// if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+			// 	handleTaskNoteStatusChange(plugin, task);
+			// } else {
+			// 	handleCheckboxChange(plugin, task);
+			// }
+
+			// The task update functions trigger a re-render, but we should ensure
+			// the loading state is reset in case the component instance is reused.
+			try {
+				// Route to appropriate handler based on task type
+				if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+					await handleTaskNoteStatusChange(plugin, task);
+				} else {
+					handleCheckboxChange(plugin, task);
+				}
+			} finally {
+				// The component might be unmounted by the time this runs, but this is a safeguard.
+				// The event-based system should ideally handle the final state.
+				// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
+				setTimeout(() => setCardLoadingAnimation(false), 1000);
 			}
 
-			// setTimeout(() => {
-			// 	// Route to appropriate handler based on task type
-			// 	if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-			// 		handleTaskNoteStatusChange(plugin, task);
-			// 	} else {
-			// 		handleCheckboxChange(plugin, task);
-			// 	}
-			// }, 500);
 		} else {
 			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
 			// Reset loading state immediately because we didn't proceed
