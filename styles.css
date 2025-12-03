@@ -1849,6 +1849,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	justify-content: space-between;
 }
 
+.boardConfigModalMainContent-Active-Body-InputItems select {
+	min-width: 150px;
+}
+
 .boardConfigModalMainContent-Active-Body-boardNameTag,
 .boardConfigModalMainContent-Active-Body-boardDescriptionTag {
 	display: flex;
