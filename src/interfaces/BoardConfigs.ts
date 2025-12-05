@@ -1,3 +1,5 @@
+import { KanbanBoardType } from "./Enums";
+
 export interface columnSortingCriteria {
 	criteria:
 		| "status"
@@ -89,6 +91,12 @@ export type ColumnData = {
 	};
 };
 
+export type ColumnGroupData = {
+	status: ColumnData[];
+	time: ColumnData[];
+	tag: ColumnData[];
+}
+
 // Define saved filter configuration interface
 export interface SavedFilterConfig {
 	id: string;
@@ -105,7 +113,8 @@ export interface FilterConfigSettings {
 	savedConfigs: SavedFilterConfig[];
 }
 
-export type Board = {
+// Legacy Board type - kept for migration purposes
+export type BoardLegacy = {
 	name: string;
 	description?: string;
 	index: number;
@@ -124,4 +133,50 @@ export type Board = {
 	filterPolarity?: string;
 };
 
+export type Board = {
+	name: string;
+	description?: string;
+	index: number;
+	boardType: KanbanBoardType;
+	columns: ColumnGroupData;
+	hideEmptyColumns: boolean;
+	showColumnTags: boolean;
+	showFilteredTags: boolean;
+	boardFilter: RootFilterState;
+	filterConfig?: FilterConfigSettings;
+	taskCount?: {
+		pending: number;
+		completed: number;
+	};
+	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
+	filters?: string[];
+	filterPolarity?: string;
+};
+
 export type BoardConfigs = Board[];
+
+// Helper function to get active columns based on board type (defaults to status)
+export function getActiveColumns(board?: Board): ColumnData[] {
+	if (!board || !board.columns) {
+		return [];
+	}
+	if (board.boardType === KanbanBoardType.timeBoard) {
+		return board.columns.time || [];
+	} else if(board.boardType === KanbanBoardType.tagBoard) {
+		return board.columns.tag || [];
+	}
+	return board.columns.status || [];
+}
+
+// Helper function to get the active column key based on board type
+export function getActiveColumnKey(board?: Board): 'status' | 'time' | 'tag' {
+	if(!board) return 'status'
+	switch (board.boardType) {
+		case KanbanBoardType.timeBoard:
+			return 'time';
+		case KanbanBoardType.tagBoard:
+			return 'tag';
+		default:
+			return 'status';
+	}
+}

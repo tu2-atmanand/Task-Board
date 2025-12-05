@@ -6,7 +6,7 @@ import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
-import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, RootFilterState, getActiveColumns, getActiveColumnKey } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
@@ -81,13 +81,15 @@ const Column: React.FC<ColumnProps> = ({
 		);
 
 		if (boardIndex !== -1) {
-			const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+			const board = plugin.settings.data.boardConfigs[boardIndex];
+			const columnKey = getActiveColumnKey(board);
+			const columnIndex = board.columns[columnKey].findIndex(
 				(col: ColumnData) => col.name === columnData.name
 			);
 
 			if (columnIndex !== -1) {
 				// Set the minimized property to true
-				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
+				board.columns[columnKey][columnIndex].minimized = !board.columns[columnKey][columnIndex].minimized;
 
 				// Save the settings
 				await plugin.saveSettings();
@@ -120,13 +122,15 @@ const Column: React.FC<ColumnProps> = ({
 						);
 
 						if (boardIndex !== -1) {
-							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+							const board = plugin.settings.data.boardConfigs[boardIndex];
+							const columnKey = getActiveColumnKey(board);
+							const columnIndex = board.columns[columnKey].findIndex(
 								(col: ColumnData) => col.name === columnData.name
 							);
 
 							if (columnIndex !== -1) {
 								// Update the column configuration
-								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
+								board.columns[columnKey][columnIndex] = updatedColumnConfiguration;
 
 								// Save the settings
 								plugin.saveSettings();
@@ -152,7 +156,9 @@ const Column: React.FC<ColumnProps> = ({
 					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 						(board: Board) => board.name === activeBoardData.name
 					);
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					const board = plugin.settings.data.boardConfigs[boardIndex];
+					const columnKey = getActiveColumnKey(board);
+					const columnIndex = board.columns[columnKey].findIndex(
 						(col: ColumnData) => col.name === columnData.name
 					);
 
@@ -167,7 +173,7 @@ const Column: React.FC<ColumnProps> = ({
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									board.columns[columnKey][columnIndex].filters = filterState;
 
 									// Save the settings
 									await plugin.saveSettings();
@@ -204,7 +210,7 @@ const Column: React.FC<ColumnProps> = ({
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									board.columns[columnKey][columnIndex].filters = filterState;
 
 									// Save the settings
 									await plugin.saveSettings();
@@ -240,13 +246,15 @@ const Column: React.FC<ColumnProps> = ({
 				);
 
 				if (boardIndex !== -1) {
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					const board = plugin.settings.data.boardConfigs[boardIndex];
+					const columnKey = getActiveColumnKey(board);
+					const columnIndex = board.columns[columnKey].findIndex(
 						(col: ColumnData) => col.name === columnData.name
 					);
 
 					if (columnIndex !== -1) {
 						// Set the active property to false
-						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+						board.columns[columnKey][columnIndex].active = false;
 
 						// Save the settings
 						await plugin.saveSettings();

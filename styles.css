@@ -1867,6 +1867,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	justify-content: space-between;
 }
 
+.boardConfigModalMainContent-Active-Body-InputItems select {
+	min-width: 150px;
+}
+
 .boardConfigModalMainContent-Active-Body-boardNameTag,
 .boardConfigModalMainContent-Active-Body-boardDescriptionTag {
 	display: flex;
@@ -1954,6 +1958,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-width: 111px;
 }
 
+.boardConfigModalDuplicateBoardBtn,
 .boardConfigModalDeleteBoardBtn {
 	margin-block-start: 1em;
 	cursor: pointer;
@@ -1962,6 +1967,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .boardConfigModalDeleteBoardBtn:hover {
 	background-color: darkred;
 	color: white;
+}
+
+.boardConfigModalDoubleBtnContainer {
+	display: flex;
+	gap: .5em;
+}
+
+.boardConfigModalDoubleBtnContainer button {
+	flex: 1;
 }
 
 .boardConfigModalSaveBtn-mobile {

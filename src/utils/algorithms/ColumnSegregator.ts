@@ -4,7 +4,7 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, getActiveColumns } from "src/interfaces/BoardConfigs";
 import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
@@ -207,19 +207,26 @@ export const columnSegregator = (
 		);
 
 		// 2. Collect all coltags from columns where colType is 'namedTag'
+		const activeColumns = currentBoard ? getActiveColumns(currentBoard) : [];
 		const namedTags =
-			currentBoard?.columns
-				.filter(
-					(col: ColumnData) =>
-						col.colType === colType.namedTag && col.coltag
-				)
-				.map((col: ColumnData) =>
-					col.coltag?.toLowerCase().replace(`#`, "")
-				)
-				.filter(
+			activeColumns
+				.filter((col: ColumnData) => col.colType === colType.namedTag && col.coltag)
+				.map((col: ColumnData) => col.coltag?.toLowerCase().replace(`#`, "")).filter(
 					(tag): tag is string =>
 						typeof tag === "string" && tag.length > 0
 				) || [];
+		// currentBoard?.columns
+		// 	.filter(
+		// 		(col: ColumnData) =>
+		// 			col.colType === colType.namedTag && col.coltag
+		// 	)
+		// 	.map((col: ColumnData) =>
+		// 		col.coltag?.toLowerCase().replace(`#`, "")
+		// 	)
+		// 	.filter(
+		// 		(tag): tag is string =>
+		// 			typeof tag === "string" && tag.length > 0
+		// 	) || [];
 
 		// 3. Now filter tasks
 		tasksToDisplay = pendingTasks.filter((task) => {
@@ -234,14 +241,10 @@ export const columnSegregator = (
 			});
 		});
 	} else if (columnData.colType === colType.completed) {
-		const completedColumnIndex = boardConfigs[
-			activeBoardIndex
-		]?.columns.findIndex(
-			(column: ColumnData) => column.colType === colType.completed
-		);
+		const activeColumns = getActiveColumns(boardConfigs[activeBoardIndex]);
+		const completedColumnIndex = activeColumns.findIndex((column: ColumnData) => column.colType === colType.completed);
 		const tasksLimit =
-			boardConfigs[activeBoardIndex]?.columns[completedColumnIndex]
-				?.limit;
+			activeColumns[completedColumnIndex]?.limit;
 
 		// This sorting will be done through the columnData.sortCriteria for this column if its configured
 		// const sortedCompletedTasks = completedTasks.sort((a, b): number => {
