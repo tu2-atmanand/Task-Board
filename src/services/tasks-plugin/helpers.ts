@@ -10,6 +10,7 @@ import {
 } from "src/utils/taskLine/TaskContentFormatter";
 import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskItemUtils";
 import { CustomStatus } from "src/interfaces/GlobalSettings";
+import { eventEmitter } from "../EventEmitter";
 
 export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 	try {
@@ -146,6 +147,15 @@ export async function openTasksPluginEditModal(
 				);
 				return;
 			}
+
+			plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath);
+			setTimeout(() => {
+				// This event emmitter will stop any loading animation of ongoing task-card.
+				eventEmitter.emit("UPDATE_TASK", {
+					taskID: oldTask.id,
+					state: false,
+				});
+			}, 500);
 
 			// Just to scan the file after updating.
 			// plugin.fileUpdatedUsingModal = "";
