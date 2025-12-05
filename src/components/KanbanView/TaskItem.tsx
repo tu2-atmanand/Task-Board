@@ -45,10 +45,11 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
 
-	let universalDate = getUniversalDateFromTask(task, plugin);
+	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, plugin));
 	useEffect(() => {
-		universalDate = getUniversalDateFromTask(task, plugin);
+		setUniversalDate(getUniversalDateFromTask(task, plugin));
 	}, [task.due, task.startDate, task.scheduledDate]);
+
 
 	// const handleTaskInteraction = useCallback(
 	// 	(task: taskItem, type: string) => {
@@ -111,9 +112,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 	// ========================================
 	// MAIN TITLE RENDERING WITH STABLE useLayoutEffect
 	// ========================================
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const el = taskTitleRendererRef.current;
 		if (!el || !componentRef.current) return;
+
+		new Promise(requestAnimationFrame);
+
 
 		let cancelled = false;
 
@@ -143,9 +147,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 			}
 		})();
 
-		// return () => {
-		// 	cancelled = true;
-		// };
+		return () => {
+			cancelled = true;
+		};
 	}, [task.id, task.title, task.filePath, plugin.settings.data.globalSettings.searchQuery]);
 
 	// useEffect(() => {
@@ -185,7 +189,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 	// ========================================
 	// SUBTASKS RENDERING WITH STABLE useLayoutEffect
 	// ========================================
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (!componentRef.current) return;
 
 		const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
@@ -224,16 +228,16 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 			}
 		})();
 
-		// return () => {
-		// 	cancelled = true;
-		// };
+		return () => {
+			cancelled = true;
+		};
 	}, [task.id, task.body, task.filePath]);
 
 
 	// ========================================
 	// DESCRIPTION RENDERING WITH STABLE useLayoutEffect
 	// ========================================
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const uniqueKey = `${taskIdKey}-desc`;
 		const container = taskItemBodyDescriptionRef.current[uniqueKey];
 		// const container =
