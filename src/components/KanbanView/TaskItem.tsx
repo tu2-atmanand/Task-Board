@@ -70,7 +70,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 	const taskTitleRendererRef = useRef<HTMLDivElement | null>(null);
 	const subtaskTextRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 	const descriptionRef = useRef<HTMLDivElement | null>(null);
-	const descriptionContentRef = useRef<HTMLDivElement | null>(null);
+	// const descriptionContentRefExpanded = useRef<HTMLDivElement | null>(null);
+	// const descriptionContentRefCollapsed = useRef<HTMLDivElement | null>(null);
+	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
 	// useEffect(() => {
 	// 	if (taskTitleRendererRef.current && componentRef.current) {
 	// 		const titleElement = taskTitleRendererRef.current[taskIdKey];
@@ -229,72 +232,102 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 	// DESCRIPTION RENDERING WITH STABLE useLayoutEffect
 	// ========================================
 	useLayoutEffect(() => {
-		const el = descriptionContentRef.current;
-		if (!el || !componentRef.current || !isDescriptionExpanded) return;
+		const uniqueKey = `${taskIdKey}-desc`;
+		const container = taskItemBodyDescriptionRef.current[uniqueKey];
+		// const container =
+		// 	showDescriptionSection
+		// 		? descriptionContentRefExpanded.current
+		// 		: descriptionContentRefCollapsed.current;
 
-		let cancelled = false;
 
-		(async () => {
-			try {
-				const descriptionContent = task.body
-					? task.body
-						.filter((line) => !isTaskLine(line.trim()))
-						.join("\n")
-						.trim()
-					: "";
+		if (!container) return;
 
-				if (descriptionContent === "") return;
+		let descriptionContent = task.body
+			?.filter((line) => !isTaskLine(line))
+			.join("\n")
+			.trim();
 
-				// Clear previous content
-				el.innerHTML = '';
+		if (!descriptionContent) {
+			container.empty();
+			return;
+		}
 
-				console.log("Rendering description for task:", task.id);
+		container.empty();
 
-				// Render markdown
-				await MarkdownUIRenderer.renderTaskDisc(
-					plugin.app,
-					descriptionContent,
-					el,
-					task.filePath,
-					componentRef.current
-				);
+		MarkdownUIRenderer.renderTaskDisc(
+			plugin.app,
+			descriptionContent,
+			container,
+			task.filePath,
+			componentRef.current
+		);
 
-				if (cancelled) {
-					el.innerHTML = '';
-					return;
-				}
+		hookMarkdownLinkMouseEventHandlers(
+			plugin.app,
+			plugin,
+			container,
+			task.filePath,
+			task.filePath
+		);
+	}, [
+		task.body?.join("\n"),
+		showDescriptionSection,
+		isDescriptionExpanded
+	]);
 
-				// Attach event handlers
-				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
+	// ========================================
+	// RENDER DESCRIPTION SECTION (NO MEMO, NO DOM MANIPULATION)
+	// ========================================
+	const renderDescriptionSection = () => {
+		// const uniqueKey = `${taskIdKey}-desc`;
+		// const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+		const descriptionContent = task.body
+			? task.body.filter((line) => !isTaskLine(line)).join("\n").trim()
+			: "";
 
-				// Animate height after content is rendered
-				if (descriptionRef.current) {
-					descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
-					descriptionRef.current.style.opacity = "1";
-				}
-			} catch (err) {
-				console.error('Error rendering task description:', err);
-			}
-		})();
+		if (!descriptionContent) return null;
 
-		// return () => {
-		// 	cancelled = true;
-		// };
-	}, [task.id, task.body, task.filePath, isDescriptionExpanded]);
+		if (showDescriptionSection) {
+			return (
+				<div className="taskItemBodyDescriptionSection">
+					<div
+						className={`taskItemBodyDescription${isDescriptionExpanded ? '' : '-collapsed'}`}
+						ref={descriptionRef}
+					>
+						<div
+							className='taskItemBodyDescriptionRenderer'
+							ref={(el) => { taskItemBodyDescriptionRef.current[`${task.id}-desc`] = el; }}
+						/>
+					</div>
+				</div>
+			);
+		}
+		return null;
+	};
+
 
 	// ========================================
 	// TOGGLE DESCRIPTION FUNCTION
 	// ========================================
-	const toggleDescription = () => {
+	const toggleDescription = async () => {
 		const status = isDescriptionExpanded;
 		setIsDescriptionExpanded((prev) => !prev);
 
-		if (status && descriptionRef.current) {
-			// Collapsing
-			descriptionRef.current.style.height = "0";
-			descriptionRef.current.style.opacity = "0";
+		if (!status) {
+			await renderDescriptionSection();
+			if (descriptionRef.current) {
+				descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
+				descriptionRef.current.style.opacity = "1"; // Add fade-in effect
+			}
+		} else {
+			if (descriptionRef.current) {
+				descriptionRef.current.style.height = "0";
+				descriptionRef.current.style.opacity = "0"; // Add fade-out effect
+			}
+			const uniqueKey = `${task.id}-desc`;
+			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+			descElement?.empty();
 		}
-		// Expansion is handled by useLayoutEffect above
 	};
 
 	// const renderDescriptionByDefault = async () => {
@@ -420,7 +453,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		if (cardLoadingAnimation) return;
 
 		setCardLoadingAnimation(true);
-		// setIsChecked(true);
+		setIsChecked(true);
 		// const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };
 		// eventEmitter.emit("UPDATE_TASK", eventData); // Trigger animation
 
@@ -432,26 +465,41 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 			// 	handleCheckboxChange(plugin, task);
 			// }
 
+			const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
+
 			// The task update functions trigger a re-render, but we should ensure
 			// the loading state is reset in case the component instance is reused.
 			try {
 				// Route to appropriate handler based on task type
-				if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+				if (isTaskNote) {
 					await handleTaskNoteStatusChange(plugin, task);
 				} else {
 					handleCheckboxChange(plugin, task);
 				}
-			} finally {
-				// The component might be unmounted by the time this runs, but this is a safeguard.
-				// The event-based system should ideally handle the final state.
-				// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
-				setTimeout(() => setCardLoadingAnimation(false), 2000);
+			} catch (error) {
+				console.error("Error updating task:", error);
 			}
+
+			console.log("IS this running....");
+			// The component might be unmounted by the time this runs, but this is a safeguard.
+			// The event-based system should ideally handle the final state.
+			// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
+			setTimeout(() => {
+				setCardLoadingAnimation(false);
+				const isTaskCompletedNow = isTaskNote
+					? isTaskCompleted(task.status, true, plugin.settings)
+					: isTaskCompleted(task.title, false, plugin.settings);
+				setIsChecked(isTaskCompletedNow);
+			}, 2000);
 
 		} else {
 			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
 			// Reset loading state immediately because we didn't proceed
 			setCardLoadingAnimation(false);
+			const isTaskCompletedNow = isTaskNote
+				? isTaskCompleted(task.status, true, plugin.settings)
+				: isTaskCompleted(task.title, false, plugin.settings);
+			setIsChecked(isTaskCompletedNow);
 		}
 	};
 
@@ -476,12 +524,21 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		// Update the task with the modified body content
 		const updatedTask: taskItem = { ...task, body: updatedBody };
 
-		if (!isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-			// onSubTasksChange(updatedTask); // Notify parent of the change
-			handleSubTasksChange(plugin, task, updatedTask);
-		} else {
-			// If it's a task note, open the note for editing
-			handleTaskNoteBodyChange(plugin, task, updatedTask);
+		setCardLoadingAnimation(true);
+
+		try {
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+				// onSubTasksChange(updatedTask); // Notify parent of the change
+				handleSubTasksChange(plugin, task, updatedTask);
+			} else {
+				// If it's a task note, open the note for editing
+				handleTaskNoteBodyChange(plugin, task, updatedTask);
+			}
+		} finally {
+			// The component might be unmounted by the time this runs, but this is a safeguard.
+			// The event-based system should ideally handle the final state.
+			// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
+			setTimeout(() => setCardLoadingAnimation(false), 2000);
 		}
 	};
 
@@ -713,34 +770,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		}
 	};
 
-	// ========================================
-	// RENDER DESCRIPTION SECTION (NO MEMO, NO DOM MANIPULATION)
-	// ========================================
-	const renderDescriptionSection = () => {
-		const descriptionContent = task.body
-			? task.body.filter((line) => !isTaskLine(line)).join("\n").trim()
-			: "";
-
-		if (!descriptionContent) return null;
-
-		if (showDescriptionSection) {
-			return (
-				<div className="taskItemBodyDescriptionSection">
-					<div
-						className={`taskItemBodyDescription${isDescriptionExpanded ? '' : '-collapsed'}`}
-						ref={descriptionRef}
-					>
-						<div
-							className='taskItemBodyDescriptionRenderer'
-							ref={descriptionContentRef}
-						/>
-					</div>
-				</div>
-			);
-		}
-		return null;
-	};
-
 
 	// Render Footer based on the settings
 	const renderFooter = () => {
@@ -905,8 +934,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 							<input
 								id={`${task.id}-checkbox`}
 								type="checkbox"
-								checked={isChecked || cardLoadingAnimation}
-								className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+								checked={isChecked}
+								className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
 								data-task={task.status}
 								dir='auto'
 								onChange={handleMainCheckBoxClick}
@@ -953,8 +982,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 									>
 										<div
 											className="taskItemBodyDescriptionRenderer"
-											ref={descriptionContentRef}
-										/>
+											ref={(el) => {
+												if (el) {
+													const uniqueKey = `${task.id}-desc`;
+													taskItemBodyDescriptionRef.current[uniqueKey] = el;
+												}
+											}}
+										></div>
 									</div>
 								</div>
 							</div>
