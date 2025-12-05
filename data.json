@@ -1,5 +1,5 @@
 {
-  "version": "1.8.3",
+  "version": "1.8.4",
   "data": {
     "boardConfigs": [
       {
@@ -849,12 +849,12 @@
           "targetColumn": "6"
         }
       ],
-      "cardSectionsVisibility": "showSubTasksOnly",
+      "cardSectionsVisibility": "showBoth",
       "hiddenTaskProperties": [],
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "Meta/Task_Board/New_Task_Notes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 355,
+      "uniqueIdCounter": 356,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
