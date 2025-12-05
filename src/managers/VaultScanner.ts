@@ -319,11 +319,6 @@ export default class vaultScanner {
 								false,
 								this.plugin.settings
 							);
-							console.log(
-								"Scanning : isThisCompletedTas :",
-								isThisCompletedTask
-							);
-							// const title = extractTitle(line);
 							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
 							const createdDate = extractCreatedDate(line);
