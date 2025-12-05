@@ -27,7 +27,6 @@ import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/
 import { eventEmitter } from 'src/services/EventEmitter';
 
 export interface TaskProps {
-	key: number;
 	plugin: TaskBoard;
 	task: taskItem;
 	activeBoardSettings: Board;

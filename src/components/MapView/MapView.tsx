@@ -279,7 +279,7 @@ const MapView: React.FC<MapViewProps> = ({
 						type: 'ResizableNodeSelected',
 						data: {
 							label: <TaskItem
-								key={colIdx + rowIdx}
+								key={task.id}
 								plugin={plugin}
 								task={task}
 								activeBoardSettings={activeBoardSettings}
