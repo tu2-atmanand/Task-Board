@@ -36,7 +36,9 @@ export interface TaskProps {
 const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardSettings }) => {
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
-	const [isChecked, setIsChecked] = useState(isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings));
+	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
+
+	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
@@ -480,26 +482,26 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 				console.error("Error updating task:", error);
 			}
 
-			console.log("IS this running....");
 			// The component might be unmounted by the time this runs, but this is a safeguard.
 			// The event-based system should ideally handle the final state.
 			// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
 			setTimeout(() => {
 				setCardLoadingAnimation(false);
-				const isTaskCompletedNow = isTaskNote
-					? isTaskCompleted(task.status, true, plugin.settings)
-					: isTaskCompleted(task.title, false, plugin.settings);
-				setIsChecked(isTaskCompletedNow);
+				// const isTaskCompletedNow = isTaskNote
+				// 	? isTaskCompleted(task.status, true, plugin.settings)
+				// 	: isTaskCompleted(task.title, false, plugin.settings);
+				// console.log("IsTaskNOte :", isTaskNote, "\nIsTaskCompletedNow : ", isTaskCompletedNow);
+				// setIsChecked(isTaskCompletedNow);
 			}, 2000);
 
 		} else {
 			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
 			// Reset loading state immediately because we didn't proceed
 			setCardLoadingAnimation(false);
-			const isTaskCompletedNow = isTaskNote
-				? isTaskCompleted(task.status, true, plugin.settings)
-				: isTaskCompleted(task.title, false, plugin.settings);
-			setIsChecked(isTaskCompletedNow);
+			// const isTaskCompletedNow = isTaskNote
+			// 	? isTaskCompleted(task.status, true, plugin.settings)
+			// 	: isTaskCompleted(task.title, false, plugin.settings);
+			setIsChecked(isThistaskCompleted);
 		}
 	};
 
@@ -915,7 +917,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 	return (
 		<div className='taskItemContainer'>
 			<div
-				className={`taskItem${isChecked ? ' completed' : ''}`}
+				className={`taskItem${isThistaskCompleted ? ' completed' : ''}`}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 			>
@@ -934,8 +936,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 							<input
 								id={`${task.id}-checkbox`}
 								type="checkbox"
-								checked={isChecked}
-								className={`taskItemCheckbox${isChecked ? '-checked' : ''}`}
+								checked={isThistaskCompleted}
+								className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
 								data-task={task.status}
 								dir='auto'
 								onChange={handleMainCheckBoxClick}
