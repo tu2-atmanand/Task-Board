@@ -67,12 +67,13 @@ export function isTaskCompleted(
 			settings.data.globalSettings.tasksPluginCustomStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
+			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
 			if (
 				customStatus.symbol === symbol &&
 				customStatus.type === "DONE"
 			) {
 				flag = true;
-				return;
+				return true;
 			}
 		});
 		return flag;
@@ -86,7 +87,7 @@ export function isTaskCompleted(
 				customStatus.type === "DONE"
 			) {
 				flag = true;
-				return;
+				return true;
 			}
 		});
 		return flag;

@@ -71,6 +71,8 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		if (taskTitleRendererRef.current && componentRef.current) {
 			const titleElement = taskTitleRendererRef.current[taskIdKey];
 
+			console.log("Task titleElement :", titleElement, "\nTask title content :", task.title);
+
 			if (titleElement && task.title !== "") {
 				let cleanedTitle = cleanTaskTitleLegacy(task);
 				// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
@@ -83,6 +85,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 				titleElement.empty();
 				// Call the MarkdownUIRenderer to render the description
+				console.log("Obsidian Renderer : Will render following task : ", cleanedTitle);
 				MarkdownUIRenderer.renderTaskDisc(
 					plugin.app,
 					cleanedTitle,
