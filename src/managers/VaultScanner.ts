@@ -259,8 +259,8 @@ export default class vaultScanner {
 						}
 
 						this.tasksCache.Completed = {
-						    [fileNameWithPath]: [taskNoteItem],
-						    ...(completed || {}),
+							[fileNameWithPath]: [taskNoteItem],
+							...(completed || {}),
 						};
 
 						if (this.tasksCache.Pending[fileNameWithPath])
@@ -319,8 +319,12 @@ export default class vaultScanner {
 								false,
 								this.plugin.settings
 							);
+							console.log(
+								"Scanning : isThisCompletedTas :",
+								isThisCompletedTask
+							);
 							// const title = extractTitle(line);
-							const title = line; // we will be storing the taskLine as it is inside the title property
+							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
 							const createdDate = extractCreatedDate(line);
 							let startDate = extractStartDate(line);

@@ -334,7 +334,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 									return (
 										<div key={index} className="taskItemFadeIn">
 											<TaskItem
-												key={index}
+												key={task.id}
 												plugin={plugin}
 												task={task}
 												columnIndex={columnIndex}

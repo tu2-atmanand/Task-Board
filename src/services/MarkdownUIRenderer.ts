@@ -91,7 +91,7 @@ export class MarkdownUIRenderer {
 	public static async renderTaskDisc(
 		app: App,
 		taskDescText: string,
-		element: HTMLSpanElement,
+		element: HTMLDivElement,
 		path: string,
 		obsidianComponent: Component | null
 	) {

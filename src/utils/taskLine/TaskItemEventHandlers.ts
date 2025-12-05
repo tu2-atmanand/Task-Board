@@ -103,7 +103,10 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	} else {
 		useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 			.then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath, task.legacyId);
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					task.filePath,
+					task.legacyId
+				);
 
 				// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 				// 	// Move from Pending to Completed
@@ -132,7 +135,10 @@ export const handleSubTasksChange = (
 ) => {
 	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated in the note.
 	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
-		plugin.realTimeScanning.processAllUpdatedFiles(updatedTask.filePath);
+		plugin.realTimeScanning.processAllUpdatedFiles(
+			updatedTask.filePath,
+			oldTask.id
+		);
 	});
 };
 

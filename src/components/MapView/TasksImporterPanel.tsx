@@ -143,7 +143,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 									onClick={() => handleImportTask(task)}
 								>
 									<TaskItem
-										key={index}
+										key={task.id}
 										plugin={plugin}
 										task={task}
 										activeBoardSettings={activeBoardSettings}
