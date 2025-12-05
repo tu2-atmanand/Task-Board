@@ -613,15 +613,15 @@ export const useTasksPluginToUpdateInFile = async (
 					oldTask.filePath
 				);
 
-			if (!tasksPluginApiOutput) {
-				bugReporter(
-					plugin,
-					"Tasks plugin API did not return any output.",
-					"Tasks plugin API did not return any output.",
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
-				);
-				return;
-			}
+			// if (!tasksPluginApiOutput) {
+			// 	bugReporter(
+			// 		plugin,
+			// 		"Tasks plugin API did not return any output.",
+			// 		"Tasks plugin API did not return any output.",
+			// 		"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+			// 	);
+			// 	return;
+			// }
 
 			const twoTaskTitles = tasksPluginApiOutput.split("\n");
 			// console.log(
