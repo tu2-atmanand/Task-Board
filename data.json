@@ -1,5 +1,5 @@
 {
-  "version": "1.8.2",
+  "version": "1.8.3",
   "data": {
     "boardConfigs": [
       {
@@ -184,7 +184,15 @@
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
-            }
+            },
+            "sortCriteria": [
+              {
+                "criteria": "completedDate",
+                "order": "desc",
+                "priority": 1,
+                "uid": "c0inus4e"
+              }
+            ]
           }
         ],
         "filters": [
@@ -201,31 +209,12 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1763871967163-8a21jnuiq",
-              "groupCondition": "any",
-              "filters": [
-                {
-                  "id": "id-1763871967165-lct3l84v6",
-                  "property": "tags",
-                  "condition": "contains",
-                  "value": "#task"
-                },
-                {
-                  "id": "id-1763871980225-nbzhu6dnv",
-                  "property": "tags",
-                  "condition": "contains",
-                  "value": "#taskNote"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 7,
-          "completed": 3
+          "pending": 57,
+          "completed": 15
         }
       },
       {
@@ -567,8 +556,8 @@
           ]
         },
         "taskCount": {
-          "pending": 61,
-          "completed": 15
+          "pending": 63,
+          "completed": 13
         }
       }
     ],
@@ -860,19 +849,19 @@
           "targetColumn": "6"
         }
       ],
-      "cardSectionsVisibility": "hideBoth",
+      "cardSectionsVisibility": "showSubTasksOnly",
       "hiddenTaskProperties": [],
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "Meta/Task_Board/New_Task_Notes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 350,
+      "uniqueIdCounter": 355,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 1,
         "taskId": "",
-        "settingTab": 5
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "none",
