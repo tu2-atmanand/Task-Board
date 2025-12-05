@@ -175,7 +175,8 @@ export const handleTaskNoteBodyChange = async (
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
 				plugin.realTimeScanning.processAllUpdatedFiles(
-					updatedTask.filePath
+					updatedTask.filePath,
+					oldTask.id
 				);
 			});
 		});
