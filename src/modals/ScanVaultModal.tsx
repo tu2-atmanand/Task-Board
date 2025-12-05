@@ -50,7 +50,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [progress, setProgress] = useState(0);
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
-		VaultName: plugin.app.vault.getName(),
+		VaultName: app.vault.getName(),
 		Modified_at: getCurrentLocalTimeString(),
 		Pending: {},
 		Completed: {},
@@ -63,6 +63,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		// Reset terminal output and collected tasks
 		vaultScanner.tasksCache.Pending = {};
 		vaultScanner.tasksCache.Completed = {};
+		vaultScanner.tasksCache.VaultName = app.vault.getName();
+		vaultScanner.tasksCache.Modified_at = getCurrentLocalTimeString();
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
