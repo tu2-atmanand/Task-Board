@@ -1,7 +1,7 @@
 // /src/components/TaskItem.tsx
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isTaskCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
@@ -43,7 +43,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 
 	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
 
-
 	let universalDate = getUniversalDateFromTask(task, plugin);
 	useEffect(() => {
 		universalDate = getUniversalDateFromTask(task, plugin);
@@ -57,6 +56,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 	// 	},
 	// 	[handleEditTask, handleDeleteTask, handleCheckboxChange, plugin]
 	// );
+	const taskIdKey = task.id; // for rendering unique title
 
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
@@ -64,130 +64,237 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		componentRef.current = plugin.view;
 	}, []);
 
-	const taskIdKey = task.id; // for rendering unique title
-	const taskTitleRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
-	useEffect(() => {
-		if (taskTitleRendererRef.current && componentRef.current) {
-			const titleElement = taskTitleRendererRef.current[taskIdKey];
+	// ========================================
+	// COMPONENT-LOCAL REFS FOR DESCRIPTION
+	// ========================================
+	const taskTitleRendererRef = useRef<HTMLDivElement | null>(null);
+	const subtaskTextRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+	const descriptionRef = useRef<HTMLDivElement | null>(null);
+	const descriptionContentRef = useRef<HTMLDivElement | null>(null);
+	// useEffect(() => {
+	// 	if (taskTitleRendererRef.current && componentRef.current) {
+	// 		const titleElement = taskTitleRendererRef.current[taskIdKey];
 
-			console.log("Task titleElement :", titleElement, "\nTask title content :", task.title);
+	// 		console.log("Task titleElement :", titleElement, "\nTask title content :", task.title);
 
-			if (titleElement && task.title !== "") {
-				let cleanedTitle = cleanTaskTitleLegacy(task);
-				// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
-				// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-				// if (searchQuery) {
-				// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-				// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
-				// 	cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
-				// }
+	// 		if (titleElement && task.title !== "") {
+	// 			let cleanedTitle = cleanTaskTitleLegacy(task);
+	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+	// 			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+	// 			// if (searchQuery) {
+	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// 			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+	// 			// 	cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
+	// 			// }
 
-				titleElement.empty();
-				// Call the MarkdownUIRenderer to render the description
-				console.log("Obsidian Renderer : Will render following task : ", cleanedTitle);
-				MarkdownUIRenderer.renderTaskDisc(
+	// 			titleElement.empty();
+	// 			// Call the MarkdownUIRenderer to render the description
+	// 			console.log("Obsidian Renderer : Will render following task : ", cleanedTitle);
+	// MarkdownUIRenderer.renderTaskDisc(
+	// 	plugin.app,
+	// 	cleanedTitle,
+	// 	titleElement,
+	// 	task.filePath,
+	// 	componentRef.current
+	// );
+
+	// hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, titleElement, task.filePath, task.filePath);
+	// 		}
+	// 	}
+	// }, [task.title, task.filePath]);
+
+	// ========================================
+	// MAIN TITLE RENDERING WITH STABLE useLayoutEffect
+	// ========================================
+	useLayoutEffect(() => {
+		const el = taskTitleRendererRef.current;
+		if (!el || !componentRef.current) return;
+
+		let cancelled = false;
+
+		(async () => {
+			try {
+				el.innerHTML = '';
+				if (task.title === "") return;
+
+				const cleanedTitle = cleanTaskTitleLegacy(task);
+
+				await MarkdownUIRenderer.renderTaskDisc(
 					plugin.app,
 					cleanedTitle,
-					titleElement,
+					el,
 					task.filePath,
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, titleElement, task.filePath, task.filePath);
-			}
-		}
-	}, [task.title, task.filePath]);
+				if (cancelled) {
+					el.innerHTML = '';
+					return;
+				}
 
-	const subtaskTextRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-	useEffect(() => {
+				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
+			} catch (err) {
+				console.error('Error rendering task title:', err);
+			}
+		})();
+
+		// return () => {
+		// 	cancelled = true;
+		// };
+	}, [task.id, task.title, task.filePath, plugin.settings.data.globalSettings.searchQuery]);
+
+	// useEffect(() => {
+	// 	const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
+	// 	// Render subtasks after componentRef is initialized
+	// 	allSubTasks.forEach((subtaskText, index) => {
+	// 		const uniqueKey = `${task.id}-${index}`;
+	// 		const element = subtaskTextRefs.current[uniqueKey];
+	// 		const match = subtaskText.match(TaskRegularExpressions.taskRegex);
+	// let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
+
+	// 		if (element && strippedSubtaskText !== "") {
+	// 			// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
+	// 			element.empty(); // Clear previous content
+
+	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+	// 			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+	// 			// if (searchQuery) {
+	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// 			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+	// 			// 	strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
+	// 			// }
+
+	// MarkdownUIRenderer.renderSubtaskText(
+	// 	plugin.app,
+	// 	strippedSubtaskText,
+	// 	element,
+	// 	task.filePath,
+	// 	componentRef.current
+	// );
+
+	// 			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
+	// 		}
+	// 	});
+	// }, [task.body, task.filePath]);
+
+	// ========================================
+	// SUBTASKS RENDERING WITH STABLE useLayoutEffect
+	// ========================================
+	useLayoutEffect(() => {
+		if (!componentRef.current) return;
+
 		const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
-		// Render subtasks after componentRef is initialized
-		allSubTasks.forEach((subtaskText, index) => {
-			const uniqueKey = `${task.id}-${index}`;
-			const element = subtaskTextRefs.current[uniqueKey];
-			const match = subtaskText.match(TaskRegularExpressions.taskRegex);
-			let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
+		let cancelled = false;
 
-			if (element && strippedSubtaskText !== "") {
-				// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
-				element.empty(); // Clear previous content
+		(async () => {
+			for (const [index, subtaskText] of allSubTasks.entries()) {
+				if (cancelled) break;
 
-				// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
-				// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-				// if (searchQuery) {
-				// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-				// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
-				// 	strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
-				// }
+				const uniqueKey = `${task.id}-${index}`;
+				const element = subtaskTextRefs.current.get(uniqueKey);
+				if (!element) continue;
 
-				MarkdownUIRenderer.renderSubtaskText(
+
+				try {
+					element.innerHTML = '';
+					const match = subtaskText.match(TaskRegularExpressions.taskRegex);
+					let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
+					await MarkdownUIRenderer.renderSubtaskText(
+						plugin.app,
+						strippedSubtaskText,
+						element,
+						task.filePath,
+						componentRef.current
+					);
+
+					hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
+
+					if (cancelled) {
+						element.innerHTML = '';
+						break;
+					}
+				} catch (err) {
+					console.error('Error rendering subtask:', err);
+				}
+			}
+		})();
+
+		// return () => {
+		// 	cancelled = true;
+		// };
+	}, [task.id, task.body, task.filePath]);
+
+
+	// ========================================
+	// DESCRIPTION RENDERING WITH STABLE useLayoutEffect
+	// ========================================
+	useLayoutEffect(() => {
+		const el = descriptionContentRef.current;
+		if (!el || !componentRef.current || !isDescriptionExpanded) return;
+
+		let cancelled = false;
+
+		(async () => {
+			try {
+				const descriptionContent = task.body
+					? task.body
+						.filter((line) => !isTaskLine(line.trim()))
+						.join("\n")
+						.trim()
+					: "";
+
+				if (descriptionContent === "") return;
+
+				// Clear previous content
+				el.innerHTML = '';
+
+				console.log("Rendering description for task:", task.id);
+
+				// Render markdown
+				await MarkdownUIRenderer.renderTaskDisc(
 					plugin.app,
-					strippedSubtaskText,
-					element,
+					descriptionContent,
+					el,
 					task.filePath,
 					componentRef.current
 				);
 
-				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
+				if (cancelled) {
+					el.innerHTML = '';
+					return;
+				}
+
+				// Attach event handlers
+				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
+
+				// Animate height after content is rendered
+				if (descriptionRef.current) {
+					descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
+					descriptionRef.current.style.opacity = "1";
+				}
+			} catch (err) {
+				console.error('Error rendering task description:', err);
 			}
-		});
-	}, [task.body, task.filePath]);
+		})();
 
-	// Render the task description only when the description section is expanded
-	const descriptionRef = useRef<HTMLDivElement | null>(null);
-	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
-	const renderTaskDescriptionWithObsidianAPI = async () => {
-		const uniqueKey = `${task.id}-desc`;
-		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		let descriptionContent = task.body ? task.body
-			.filter((line) => !isTaskLine(line.trim()))
-			.join("\n")
-			.trim() : "";
+		// return () => {
+		// 	cancelled = true;
+		// };
+	}, [task.id, task.body, task.filePath, isDescriptionExpanded]);
 
-		if (descElement && descriptionContent !== "") {
-			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
-			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-			// if (searchQuery) {
-			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
-			// 	descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
-			// }
-
-			// Clear existing content
-			descElement.empty();
-			// Use Obsidian's rendering API
-			MarkdownUIRenderer.renderTaskDisc(
-				plugin.app,
-				descriptionContent,
-				descElement,
-				task.filePath,
-				componentRef.current
-			);
-			// Attach event handlers
-			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, descElement, task.filePath, task.filePath);
-		}
-	};
-
-	// Toggle function to expand/collapse the description
-	const toggleDescription = async () => {
+	// ========================================
+	// TOGGLE DESCRIPTION FUNCTION
+	// ========================================
+	const toggleDescription = () => {
 		const status = isDescriptionExpanded;
 		setIsDescriptionExpanded((prev) => !prev);
 
-		if (!status) {
-			await renderTaskDescriptionWithObsidianAPI();
-			if (descriptionRef.current) {
-				descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
-				descriptionRef.current.style.opacity = "1"; // Add fade-in effect
-			}
-		} else {
-			if (descriptionRef.current) {
-				descriptionRef.current.style.height = "0";
-				descriptionRef.current.style.opacity = "0"; // Add fade-out effect
-			}
-			const uniqueKey = `${task.id}-desc`;
-			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-			descElement?.empty();
+		if (status && descriptionRef.current) {
+			// Collapsing
+			descriptionRef.current.style.height = "0";
+			descriptionRef.current.style.opacity = "0";
 		}
+		// Expansion is handled by useLayoutEffect above
 	};
 
 	// const renderDescriptionByDefault = async () => {
@@ -338,7 +445,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 				// The component might be unmounted by the time this runs, but this is a safeguard.
 				// The event-based system should ideally handle the final state.
 				// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
-				setTimeout(() => setCardLoadingAnimation(false), 1000);
+				setTimeout(() => setCardLoadingAnimation(false), 2000);
 			}
 
 		} else {
@@ -584,7 +691,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 									{/* Render each subtask separately */}
 									<div
 										className={isSubTaskCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
-										ref={(el) => { subtaskTextRefs.current[uniqueKey] = el; }}
+										ref={(el) => {
+											if (el) {
+												subtaskTextRefs.current.set(uniqueKey, el);
+											} else {
+												subtaskTextRefs.current.delete(uniqueKey);
+											}
+										}}
 									/>
 								</div>
 							);
@@ -600,37 +713,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		}
 	};
 
-	const renderDescriptionSection = useMemo(() => {
-		const uniqueKey = `${task.id}-desc`;
-		const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		let descriptionContent = task.body ? task.body
-			.filter((line) => !isTaskLine(line))
-			.join("\n")
-			.trim() : "";
+	// ========================================
+	// RENDER DESCRIPTION SECTION (NO MEMO, NO DOM MANIPULATION)
+	// ========================================
+	const renderDescriptionSection = () => {
+		const descriptionContent = task.body
+			? task.body.filter((line) => !isTaskLine(line)).join("\n").trim()
+			: "";
 
-		if (!descriptionContent) return null; // If no description content, return null
-
-		if (descElement) {
-			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
-			// if (searchQuery) {
-			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
-			// 	descriptionContent = searchQuery ? descriptionContent.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : descriptionContent;
-			// }
-
-			// Clear existing content
-			descElement.empty();
-			// Use Obsidian's rendering API
-			MarkdownUIRenderer.renderTaskDisc(
-				plugin.app,
-				descriptionContent,
-				descElement,
-				task.filePath,
-				componentRef.current
-			);
-			// Attach event handlers
-			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, descElement, task.filePath, task.filePath);
-		}
+		if (!descriptionContent) return null;
 
 		if (showDescriptionSection) {
 			return (
@@ -641,15 +732,14 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 					>
 						<div
 							className='taskItemBodyDescriptionRenderer'
-							ref={(el) => { taskItemBodyDescriptionRef.current[`${task.id}-desc`] = el; }}
+							ref={descriptionContentRef}
 						/>
 					</div>
 				</div>
 			);
-		} else {
-			return null;
 		}
-	}, [showDescriptionSection, isDescriptionExpanded, task.body]);
+		return null;
+	};
 
 
 	// Render Footer based on the settings
@@ -790,37 +880,16 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
+	// ========================================
+	// RETURN STATEMENT (UPDATED)
+	// ========================================
 	return (
 		<div className='taskItemContainer'>
-			<div className={`taskItem${isChecked ? ' completed' : ''}`} key={taskIdKey} style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+			<div
+				className={`taskItem${isChecked ? ' completed' : ''}`}
+				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 			>
-				{/* {cardLoadingAnimation && (
-					<div
-						className="taskItemLoadingOverlay"
-						role="status"
-						aria-live="polite"
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							background: 'rgba(255,255,255,0.6)',
-							zIndex: 50,
-						}}
-					>
-						<svg width="36" height="36" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-							<circle cx="25" cy="25" r="20" stroke="#3b82f6" strokeWidth="5" fill="none" strokeOpacity="0.25" />
-							<path d="M45 25a20 20 0 0 1-20 20" stroke="#3b82f6" strokeWidth="5" strokeLinecap="round" fill="none">
-								<animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
-							</path>
-						</svg>
-					</div>
-				)} */}
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
 					<div className="taskItemFileNameSection">
@@ -833,43 +902,29 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 					{memoizedRenderHeader}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
-							{cardLoadingAnimation ? (
-								<input
-									id={`${task.id}-checkbox`}
-									type="checkbox"
-									checked={cardLoadingAnimation}
-									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
-									data-task={task.status} // Add the data-task attribute
-									dir='auto'
-									readOnly={true}
-								/>
-							) : (
-								<input
-									id={`${task.id}-checkbox`}
-									type="checkbox"
-									checked={isChecked || cardLoadingAnimation}
-									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
-									data-task={task.status} // Add the data-task attribute
-									dir='auto'
-									onChange={handleMainCheckBoxClick}
-									onClick={(e) => {
-										if (cardLoadingAnimation) {
-											e.preventDefault();
-											return;
-										}
-									}}
-									onDoubleClick={(e) => {
+							<input
+								id={`${task.id}-checkbox`}
+								type="checkbox"
+								checked={isChecked || cardLoadingAnimation}
+								className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+								data-task={task.status}
+								dir='auto'
+								onChange={handleMainCheckBoxClick}
+								onClick={(e) => {
+									if (cardLoadingAnimation) {
 										e.preventDefault();
-										return;
-									}}
-									disabled={cardLoadingAnimation}
-									aria-disabled={cardLoadingAnimation}
-									aria-busy={cardLoadingAnimation}
-									readOnly={cardLoadingAnimation}
-								/>
-							)}
+									}
+								}}
+								onDoubleClick={(e) => {
+									e.preventDefault();
+								}}
+								disabled={cardLoadingAnimation}
+								aria-disabled={cardLoadingAnimation}
+								aria-busy={cardLoadingAnimation}
+								readOnly={cardLoadingAnimation}
+							/>
 							<div className="taskItemBodyContent">
-								<div className="taskItemTitle" ref={(titleEL) => { if (titleEL) taskTitleRendererRef.current[taskIdKey] = titleEL; }} />
+								<div className="taskItemTitle" ref={taskTitleRendererRef} />
 								<div className="taskItemBody">
 									{memoizedRenderSubTasks}
 								</div>
@@ -877,36 +932,33 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 						</div>
 						{showDescriptionSection && (
 							<div className='taskItemMainBodyDescriptionSectionVisible'>
-								{renderDescriptionSection}
+								{renderDescriptionSection()}
 							</div>
 						)}
-						{!showDescriptionSection && (<div className="taskItemMainBodyDescription">
-							{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
-								<div
-									className='taskItemMainBodyDescriptionSectionToggler'
-									onClick={toggleDescription}
-								>
-									{isDescriptionExpanded ? t("hide-description") : t("show-description")}
-								</div>
-							)}
-							{/* Expandable section */}
-							<div className='taskItemMainBodyDescriptionSection'>
-								<div
-									className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
-									ref={descriptionRef}
-								>
+						{!showDescriptionSection && (
+							<div className="taskItemMainBodyDescription">
+								{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
 									<div
-										className="taskItemBodyDescriptionRenderer"
-										ref={(el) => {
-											if (el) {
-												const uniqueKey = `${task.id}-desc`;
-												taskItemBodyDescriptionRef.current[uniqueKey] = el;
-											}
-										}}
-									></div>
+										className='taskItemMainBodyDescriptionSectionToggler'
+										onClick={toggleDescription}
+									>
+										{isDescriptionExpanded ? t("hide-description") : t("show-description")}
+									</div>
+								)}
+								{/* Expandable section */}
+								<div className='taskItemMainBodyDescriptionSection'>
+									<div
+										className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
+										ref={descriptionRef}
+									>
+										<div
+											className="taskItemBodyDescriptionRenderer"
+											ref={descriptionContentRef}
+										/>
+									</div>
 								</div>
 							</div>
-						</div>)}
+						)}
 						{memoizedRenderChildTasks}
 					</div>
 					{renderFooter()}
