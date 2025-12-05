@@ -35,8 +35,10 @@ export function checkboxStateSwitcher(
 }
 
 /**
- * Checks if a given task string is marked as completed.
- * @param task - The task string in the format '- [symbol]'.
+ * Determines if a task is completed based on its title or symbol.
+ * @param titleOrSymbol - The title or symbol (task.status) of the task.
+ * @param isTaskNote - A boolean indicating whether the task is a task note.
+ * @param settings - The plugin settings.
  * @returns True if the symbol represents a completed state, otherwise false.
  */
 export function isTaskCompleted(
