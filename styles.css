@@ -799,6 +799,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemMainBodyDescriptionSectionVisible {
 	margin-top: 5px;
+	margin-inline: -5px;
 }
 
 .taskItemMainBodyDescriptionSectionToggler {
