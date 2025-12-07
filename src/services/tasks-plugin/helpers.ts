@@ -41,6 +41,18 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			);
 			const statuses: CustomStatus[] = Array.from(statusMap.values());
 
+			// console.log(
+			// 	"Fetched custom statuses from tasks plugin:",
+			// 	statuses,
+			// 	"\nTask Board old statuses:",
+			// 	plugin.settings.data.globalSettings.tasksPluginCustomStatuses,
+			// 	"\nCondition :",
+			// 	JSON.stringify(
+			// 		plugin.settings.data.globalSettings
+			// 			.tasksPluginCustomStatuses
+			// 	) !== JSON.stringify(statuses)
+			// );
+
 			// Store it in the plugin settings if there is a difference
 			if (
 				JSON.stringify(

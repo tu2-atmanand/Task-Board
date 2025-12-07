@@ -72,7 +72,8 @@ export function isTaskCompleted(
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
 			if (
 				customStatus.symbol === symbol &&
-				customStatus.type === "DONE"
+				(customStatus.type === "DONE" ||
+					customStatus.type === "CANCELLED")
 			) {
 				flag = true;
 				return true;
@@ -86,7 +87,8 @@ export function isTaskCompleted(
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (
 				customStatus.symbol === titleOrSymbol &&
-				customStatus.type === "DONE"
+				(customStatus.type === "DONE" ||
+					customStatus.type === "CANCELLED")
 			) {
 				flag = true;
 				return true;

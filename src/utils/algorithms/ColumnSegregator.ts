@@ -255,7 +255,8 @@ export const columnSegregator = (
 
 		tasksToDisplay = completedTasks.slice(0, tasksLimit);
 	} else if (columnData.colType === colType.taskStatus) {
-		tasksToDisplay = pendingTasks.filter(
+		const allTasks = [...pendingTasks, ...completedTasks];
+		tasksToDisplay = allTasks.filter(
 			(task) => task.status === columnData.taskStatus
 		);
 	} else if (columnData.colType === colType.taskPriority) {

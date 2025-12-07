@@ -3146,6 +3146,9 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked p>input[type=checkbox]:checke
 	font-family: "its";
 }
 
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=x]::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x]>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x] p>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=X]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X] p>input[type=checkbox]:checked::after {
@@ -3406,7 +3409,9 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	color: rgb(var(--chbx-d));
 }
 
-.taskItemCheckbox:is([data-task="X"],
+.taskItemCheckbox:is(
+	[data-task="x"],
+	[data-task="X"],
 	[data-task=">"],
 	[data-task="-"],
 	[data-task="D"],
