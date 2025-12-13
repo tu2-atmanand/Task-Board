@@ -1,7 +1,7 @@
 // /src/components/TaskItem.tsx
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isTaskCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
@@ -33,7 +33,7 @@ export interface TaskProps {
 	columnIndex?: number;
 }
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardSettings }) => {
+const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, columnIndex }) => {
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
