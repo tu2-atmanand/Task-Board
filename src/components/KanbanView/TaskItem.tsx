@@ -464,7 +464,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 		// eventEmitter.emit("UPDATE_TASK", eventData); // Trigger animation
 
 		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
-		if (condition) {
+		if (condition || isThistaskCompleted) {
 			// if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
 			// 	handleTaskNoteStatusChange(plugin, task);
 			// } else {
