@@ -269,7 +269,7 @@ const MapView: React.FC<MapViewProps> = ({
 					// Ensure positions are always valid finite numbers
 					const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
 					const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
-					
+
 					// Safety check: if computed offsets are somehow NaN, use fallback
 					const safeX = Number.isFinite(nodeX) ? nodeX : (colIdx * 350);
 					const safeY = Number.isFinite(nodeY) ? nodeY : (rowIdx * 170);
@@ -279,7 +279,6 @@ const MapView: React.FC<MapViewProps> = ({
 						type: 'ResizableNodeSelected',
 						data: {
 							label: <TaskItem
-								key={task.id}
 								plugin={plugin}
 								task={task}
 								activeBoardSettings={activeBoardSettings}
@@ -562,7 +561,7 @@ const MapView: React.FC<MapViewProps> = ({
 			} else {
 				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
 					// This is required to rescan the updated file and refresh the board.
-					sleep(1000).then(() => {
+					sleep(500).then(() => {
 						plugin.realTimeScanning.processAllUpdatedFiles(
 							updatedTargetTask.filePath
 						);
@@ -802,15 +801,50 @@ const MapView: React.FC<MapViewProps> = ({
 					...targetTask,
 					dependsOn: updatedDependsOn
 				};
-				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
-				updatedTargetTask.title = updatedTargetTaskTitle;
+
+				let eventData: UpdateTaskEventData = {
+					taskID: updatedTargetTask.id,
+					state: true,
+				};
+				eventEmitter.emit("UPDATE_TASK", eventData);
 
 				try {
-					await updateTaskInFile(plugin, updatedTargetTask, targetTask);
-					sleep(100);
-					plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
-					new Notice(t("dependency-deleted"));
-					eventEmitter.emit('REFRESH_BOARD');
+					if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
+						const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+						updatedTargetTask.title = updatedTargetTaskTitle;
+
+						await updateTaskInFile(plugin, updatedTargetTask, targetTask);
+						sleep(100).then(() => {
+							plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+							new Notice(t("dependency-deleted"));
+
+							setTimeout(() => {
+								// This event emmitter will stop any loading animation of ongoing task-card.
+								eventEmitter.emit("UPDATE_TASK", {
+									taskID: updatedTargetTask.id,
+									state: false,
+								});
+							}, 500);
+						})
+						// eventEmitter.emit('REFRESH_BOARD');
+					} else {
+						updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
+							// This is required to rescan the updated file and refresh the board.
+							sleep(500).then(() => {
+								plugin.realTimeScanning.processAllUpdatedFiles(
+									updatedTargetTask.filePath
+								);
+								new Notice(t("dependency-deleted"));
+								setTimeout(() => {
+									// This event emmitter will stop any loading animation of ongoing task-card.
+									eventEmitter.emit("UPDATE_TASK", {
+										taskID: updatedTargetTask.id,
+										state: false,
+									});
+								}, 500);
+							});
+						});
+					}
 				} catch (err) {
 					bugReporter(plugin, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
 				}
