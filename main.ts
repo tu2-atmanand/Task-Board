@@ -953,7 +953,7 @@ export default class TaskBoard extends Plugin {
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed
 		const currentVersion = newReleaseVersion; // Change this whenever you will going to release a new version.
-		const runMandatoryScan = true; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
+		const runMandatoryScan = false; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
 		const previousVersion = this.settings.version;
 
 		if (previousVersion == "" || currentVersion !== previousVersion) {
