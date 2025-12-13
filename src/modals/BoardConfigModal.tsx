@@ -551,10 +551,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														boardIndex,
 														columnIndex,
 														colType.taskPriority,
-														e.target.value
+														Number(e.target.value)
 													)
 												}
-												className="boardConfigModalColumnRowContentColDatedVal"
+												className="boardConfigModalColumnRowContentPriorityDropdown"
 											>
 												{getPriorityOptionsForDropdown().map((option) => (
 													<option key={option.value} value={option.value}>{option.text}</option>
