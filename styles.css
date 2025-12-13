@@ -1955,6 +1955,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-width: 111px;
 }
 
+.boardConfigModalColumnRowContentPriorityDropdown {
+	min-width: 120px;
+	max-width: 130px;
+	padding-inline: 8px;
+}
+
 .boardConfigModalDeleteBoardBtn {
 	margin-block-start: 1em;
 	cursor: pointer;
@@ -3409,8 +3415,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	color: rgb(var(--chbx-d));
 }
 
-.taskItemCheckbox:is(
-	[data-task="x"],
+.taskItemCheckbox:is([data-task="x"],
 	[data-task="X"],
 	[data-task=">"],
 	[data-task="-"],
@@ -5528,6 +5533,7 @@ svg.react-flow__connectionline {
 	white-space: nowrap;
 	flex-direction: column;
 	align-items: flex-start;
+	text-wrap: auto;
 }
 
 .boardSidebarCard:hover {
@@ -5559,6 +5565,11 @@ svg.react-flow__connectionline {
 	width: 100%;
 	font-size: 0.9rem;
 	padding-block-start: 0.7rem;
+	color: var(--background-modifier-border-focus) !important;
+}
+
+.boardSidebarCard--active .boardSidebarCardDescription {
+	color: var(--background-mod-left-CSS-light) !important;
 }
 
 .taskCountContainerProgress {
