@@ -1,6 +1,7 @@
 import { t } from "src/utils/lang/helper";
 import { taskStatuses } from "./Enums";
 import { taskItem } from "./TaskItem";
+import { CustomStatus } from "./GlobalSettings";
 
 export const priorityEmojis: { [key: number]: string } = {
 	0: "0",
@@ -11,25 +12,39 @@ export const priorityEmojis: { [key: number]: string } = {
 	5: "⏬", // Lowest
 };
 
+export interface dropDownOption {
+	value: number | string;
+	text: string;
+}
+
 // Helper function to get priority emoji
 export const getPriorityEmoji = (priority: number): string => {
 	return priorityEmojis[priority] || "";
 };
 
 // Priority Options - function to ensure translations are loaded
-export const getPriorityOptions = () => [
-	{ value: 0, text: t("none") },
-	{ value: 1, text: t("highest") + " : 🔺" },
-	{ value: 2, text: t("high") + " : ⏫" },
-	{ value: 3, text: t("medium") + " : 🔼" },
-	{ value: 4, text: t("low") + " : 🔽" },
-	{ value: 5, text: t("lowest") + " : ⏬" },
+export const getPriorityOptionsForDropdown = (): dropDownOption[] => [
+	{ value: 0, text: "0 - " + t("none") },
+	{ value: 1, text: "1 - " + t("highest") + " : 🔺" },
+	{ value: 2, text: "2 - " + t("high") + " : ⏫" },
+	{ value: 3, text: "3 - " + t("medium") + " : 🔼" },
+	{ value: 4, text: "4 - " + t("low") + " : 🔽" },
+	{ value: 5, text: "5 - " + t("lowest") + " : ⏬" },
 ];
 
 // Legacy export for backward compatibility
-export const priorityOptions = getPriorityOptions();
+export const priorityOptions = getPriorityOptionsForDropdown();
 
-// TODO : From the following values I am only going to display the ones that are selected by user in the tasks plugin settings.
+export const getCustomStatusOptionsForDropdown = (
+	statusConfigs: CustomStatus[]
+): dropDownOption[] => {
+	return statusConfigs.map(({ symbol, name }) => ({
+		value: symbol,
+		text: `${name} : [${symbol}]`,
+	}));
+};
+
+// NOTE : Dont use the below array for dropdowns directly. Use it from the settings configured by the user.
 export const taskStatusesDropdown = [
 	{ value: taskStatuses.unchecked, text: "Unchecked [ ]" },
 	{ value: taskStatuses.regular, text: "Regular [x]" },

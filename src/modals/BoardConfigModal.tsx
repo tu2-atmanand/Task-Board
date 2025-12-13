@@ -17,7 +17,7 @@ import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colType, UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/Enums";
 import { Board } from "src/interfaces/BoardConfigs";
-import { columnTypeAndNameMapping, getPriorityOptions } from "src/interfaces/Mapping";
+import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { columnDataProp, AddColumnModal } from "./AddColumnModal";
 
 interface ConfigModalProps {
@@ -545,7 +545,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === colType.taskPriority && (
 											<select
 												aria-label="Select priority"
-												value={column.taskPriority || getPriorityOptions()[0].value}
+												value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
@@ -556,7 +556,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												}
 												className="boardConfigModalColumnRowContentColDatedVal"
 											>
-												{getPriorityOptions().map((option) => (
+												{getPriorityOptionsForDropdown().map((option) => (
 													<option key={option.value} value={option.value}>{option.text}</option>
 												))}
 											</select>

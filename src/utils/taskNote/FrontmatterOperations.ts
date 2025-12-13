@@ -6,7 +6,6 @@ import {
 	getPriorityNameForTaskNote,
 	getStatusNameFromStatusSymbol,
 } from "./TaskNoteUtils";
-import { taskStatuses } from "src/interfaces/Enums";
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 import { generateTaskId } from "src/managers/VaultScanner";
 
@@ -202,10 +201,6 @@ export function createFrontmatterFromTask(
 	task: taskItem,
 	frontmatterFormatting: frontmatterFormatting[]
 ): string {
-	const statusKey = Object.keys(taskStatuses).find(
-		(key) => taskStatuses[key as keyof typeof taskStatuses] === task.status
-	);
-
 	const frontmatterObj: Partial<customFrontmatterCache> = {};
 
 	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =

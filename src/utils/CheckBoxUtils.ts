@@ -1,5 +1,4 @@
 import type TaskBoard from "main";
-import { taskStatuses } from "src/interfaces/Enums";
 import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
 import { taskItem } from "src/interfaces/TaskItem";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
