@@ -940,7 +940,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 							<input
 								id={`${task.id}-checkbox`}
 								type="checkbox"
-								checked={isThistaskCompleted}
+								checked={false}
 								className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
 								data-task={task.status}
 								dir='auto'
