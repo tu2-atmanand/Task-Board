@@ -97,7 +97,6 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 
 	// Evaluate based on condition
 	switch (condition) {
-		case "isSet":
 		case "isNotEmpty":
 			if (Array.isArray(taskValue && taskValue.length > 0)) return true;
 			else if (taskValue && taskValue !== "") return true;
@@ -111,7 +110,6 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 		// 	taskValue?.length > 0
 		// );
 		case "isEmpty":
-		case "isNotSet":
 			return (
 				taskValue === "" ||
 				taskValue === null ||
@@ -120,6 +118,8 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			);
 		case "equals":
 		case "is":
+			if (filter.property === "priority")
+				console.log("value :", value, "\ntaskValue :", taskValue);
 			return taskValue === value;
 		case "notEquals":
 		case "isNot":
@@ -241,7 +241,7 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "cancelledDate":
 			return task?.cancelledDate || "";
 		case "priority":
-			return String(task.priority) || "";
+			return task.priority || 0;
 		case "status":
 			return task.status || "";
 		case "tags":
