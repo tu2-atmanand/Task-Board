@@ -750,6 +750,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, columnIndex, activeBoardS
 										className="taskItemBodySubtaskItemCheckbox"
 										checked={isSubTaskCompleted}
 										onChange={() => handleSubtaskCheckboxChange(line, isSubTaskCompleted)}
+										onDoubleClick={(e) => {
+											e.preventDefault();
+										}}
 									/>
 									{/* Render each subtask separately */}
 									<div
