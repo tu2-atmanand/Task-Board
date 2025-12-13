@@ -1,5 +1,5 @@
 {
-  "version": "1.8.4",
+  "version": "1.8.5",
   "data": {
     "boardConfigs": [
       {
@@ -109,13 +109,9 @@
             "sortCriteria": [
               {
                 "criteria": "scheduledDate",
-                "order": "asc",
-                "priority": 1
-              },
-              {
-                "criteria": "time",
-                "order": "asc",
-                "priority": 2
+                "order": "desc",
+                "priority": 1,
+                "uid": "39hvp5gi"
               }
             ],
             "filters": {
@@ -174,13 +170,22 @@
             }
           },
           {
+            "id": 3437374025,
+            "index": 6,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "Cancelled",
+            "taskStatus": "-"
+          },
+          {
             "id": 3497,
             "colType": "completed",
             "active": true,
             "collapsed": false,
             "limit": 20,
             "name": "Completed, updated",
-            "index": 6,
+            "index": 7,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -213,8 +218,8 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 57,
-          "completed": 15
+          "pending": 52,
+          "completed": 20
         }
       },
       {
@@ -229,7 +234,26 @@
             "sortCriterias": [],
             "filters": {
               "rootCondition": "any",
-              "filterGroups": []
+              "filterGroups": [
+                {
+                  "id": "id-1765098072675-eqikcrxun",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1765463679895-aa08h40zn",
+                      "property": "priority",
+                      "condition": "<=",
+                      "value": 1
+                    },
+                    {
+                      "id": "id-1765604285533-s9v3r8kb6",
+                      "property": "status",
+                      "condition": "is",
+                      "value": "/"
+                    }
+                  ]
+                }
+              ]
             },
             "sortCriteria": [
               {
@@ -556,8 +580,74 @@
           ]
         },
         "taskCount": {
-          "pending": 63,
-          "completed": 13
+          "pending": 53,
+          "completed": 19
+        }
+      },
+      {
+        "name": "Priority Board",
+        "index": 3,
+        "columns": [
+          {
+            "id": 1675876297,
+            "index": 1,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlog",
+            "taskStatus": " ",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "id": 2516178057,
+            "index": 2,
+            "colType": "taskPriority",
+            "active": true,
+            "collapsed": false,
+            "name": "1",
+            "taskPriority": 1
+          },
+          {
+            "id": 2800489862,
+            "index": 3,
+            "colType": "taskPriority",
+            "active": true,
+            "collapsed": false,
+            "name": "2",
+            "taskPriority": 2
+          },
+          {
+            "id": 2565387213,
+            "index": 4,
+            "colType": "taskPriority",
+            "active": true,
+            "collapsed": false,
+            "name": "3",
+            "taskPriority": 3
+          },
+          {
+            "id": 3818460478,
+            "index": 5,
+            "colType": "taskPriority",
+            "active": true,
+            "collapsed": false,
+            "name": "4",
+            "taskPriority": 4
+          }
+        ],
+        "hideEmptyColumns": false,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        },
+        "taskCount": {
+          "pending": 53,
+          "completed": 19
         }
       }
     ],
@@ -703,16 +793,16 @@
         },
         {
           "symbol": "/",
-          "name": "in progress, or half-done",
+          "name": "In Progress",
           "nextStatusSymbol": "x",
-          "availableAsCommand": false,
+          "availableAsCommand": true,
           "type": "IN_PROGRESS"
         },
         {
           "symbol": "-",
-          "name": "cancelled",
+          "name": "Cancelled",
           "nextStatusSymbol": " ",
-          "availableAsCommand": false,
+          "availableAsCommand": true,
           "type": "CANCELLED"
         },
         {
@@ -745,7 +835,7 @@
         },
         {
           "symbol": "+",
-          "name": "Inbox / task that should be processed later",
+          "name": "Inbox",
           "nextStatusSymbol": "x",
           "availableAsCommand": false,
           "type": "TODO"
@@ -828,7 +918,7 @@
         "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": true,
-        "quickAddPlugin": true
+        "quickAddPlugin": false
       },
       "preDefinedNote": "Task_Board_Temp_Tasks.md",
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
@@ -854,17 +944,17 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "Meta/Task_Board/New_Task_Notes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 356,
+      "uniqueIdCounter": 361,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 2,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 4
       },
       "taskNoteIdentifierTag": "task",
-      "doubleClickCardToEdit": "none",
+      "doubleClickCardToEdit": "noteInSplit",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
       "archivedTBNotesFolderPath": "Meta/Task_Board/Archived_Task_Notes",
