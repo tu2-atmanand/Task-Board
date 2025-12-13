@@ -1,6 +1,6 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2025-12-13T11:17:43",
+    "Modified_at": "2025-12-13T19:49:36",
     "Pending": {
         "Task_Board_Temp_Tasks.md": [
             {
@@ -35,7 +35,7 @@
                 "id": "259",
                 "legacyId": "259",
                 "status": "/",
-                "title": "- [/] Another task without and ID on it. #pending [id:: 259] 🔽",
+                "title": "- [/] 1. Another task without and ID on it. #pending [id:: 259] 🔽",
                 "body": [],
                 "time": "",
                 "createdDate": "",
@@ -53,7 +53,38 @@
                     "startLine": 3,
                     "startCharIndex": 0,
                     "endLine": 3,
-                    "endCharIndex": 63
+                    "endCharIndex": 66
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
+        "TaskNotes/2025-09-23T00_15.md": [
+            {
+                "id": "1264832547",
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] A small sub-task.",
+                "body": [],
+                "time": "",
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "",
+                "due": "",
+                "tags": [],
+                "frontmatterTags": [
+                    "#Test",
+                    "#working"
+                ],
+                "priority": 0,
+                "dependsOn": [],
+                "filePath": "TaskNotes/2025-09-23T00_15.md",
+                "taskLocation": {
+                    "startLine": 24,
+                    "startCharIndex": 0,
+                    "endLine": 24,
+                    "endCharIndex": 23
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -886,40 +917,6 @@
                 "reminder": ""
             }
         ],
-        "TaskNotes/2025-09-23T00_15.md": [
-            {
-                "id": "334",
-                "legacyId": "334",
-                "title": "2025-09-23T00_15",
-                "body": [
-                    "- [ ] A small sub-task."
-                ],
-                "createdDate": "",
-                "startDate": "2025-10-16",
-                "scheduledDate": "2025-12-05",
-                "due": "2025-09-23",
-                "tags": [
-                    "Test",
-                    "working",
-                    "task"
-                ],
-                "frontmatterTags": [],
-                "time": "",
-                "priority": 0,
-                "dependsOn": [],
-                "status": " ",
-                "filePath": "TaskNotes/2025-09-23T00_15.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 25,
-                    "endCharIndex": 23
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
         "TaskNotes/Tasks/Task Note - 2.md": [
             {
                 "id": 274,
@@ -1566,6 +1563,37 @@
         "A/x/y/Second Note in Y.md": []
     },
     "Completed": {
+        "Meta/Task_Board/New_Task_Notes/2025-11-29T18_01.md": [
+            {
+                "id": "276",
+                "legacyId": "276",
+                "title": "2025-11-29T18_01, updated",
+                "body": [],
+                "createdDate": "",
+                "startDate": "",
+                "scheduledDate": "2025-11-29",
+                "due": "2025-11-29",
+                "tags": [
+                    "task",
+                    "pending"
+                ],
+                "frontmatterTags": [],
+                "time": "",
+                "priority": 1,
+                "dependsOn": [],
+                "status": "x",
+                "filePath": "Meta/Task_Board/New_Task_Notes/2025-11-29T18_01.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 14,
+                    "endCharIndex": 18
+                },
+                "completion": "",
+                "cancelledDate": "",
+                "reminder": ""
+            }
+        ],
         "Destinatio/Task Source 1.md": [
             {
                 "id": "1",
@@ -1596,37 +1624,6 @@
                     "startCharIndex": 0,
                     "endLine": 14,
                     "endCharIndex": 0
-                },
-                "completion": "",
-                "cancelledDate": "",
-                "reminder": ""
-            }
-        ],
-        "Meta/Task_Board/New_Task_Notes/2025-11-29T18_01.md": [
-            {
-                "id": "276",
-                "legacyId": "276",
-                "title": "2025-11-29T18_01, updated",
-                "body": [],
-                "createdDate": "",
-                "startDate": "",
-                "scheduledDate": "2025-11-29",
-                "due": "2025-11-29",
-                "tags": [
-                    "task",
-                    "pending"
-                ],
-                "frontmatterTags": [],
-                "time": "",
-                "priority": 1,
-                "dependsOn": [],
-                "status": "x",
-                "filePath": "Meta/Task_Board/New_Task_Notes/2025-11-29T18_01.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 14,
-                    "endCharIndex": 18
                 },
                 "completion": "",
                 "cancelledDate": "",
@@ -2153,7 +2150,8 @@
                 "cancelledDate": "",
                 "reminder": ""
             }
-        ]
+        ],
+        "TaskNotes/2025-09-23T00_15.md": []
     },
     "Notes": []
 }
