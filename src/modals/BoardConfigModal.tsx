@@ -755,7 +755,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							))}
 						</div>
 					</div>
-					<div className="boardConfigModalSidebarBtnArea">
+					<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
 						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
 
 						<hr className="boardConfigModalHr-100" />
