@@ -156,7 +156,7 @@ const Column: React.FC<ColumnProps> = ({
 						(col: ColumnData) => col.name === columnData.name
 					);
 
-					if (Platform.isMobile) {
+					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new ViewTaskFilterModal(
 							plugin, true, undefined, boardIndex, columnData.name, columnData.filters

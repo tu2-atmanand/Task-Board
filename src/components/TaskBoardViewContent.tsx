@@ -304,7 +304,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
 		try {
 			const currentBoardConfig = boards[activeBoardIndex];
-			if (Platform.isMobile) {
+			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
 				const filterModal = new ViewTaskFilterModal(
 					plugin, false, undefined, activeBoardIndex, currentBoardConfig.name
