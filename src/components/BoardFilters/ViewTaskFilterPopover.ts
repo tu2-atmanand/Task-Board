@@ -86,9 +86,9 @@ export class ViewTaskFilterPopover
 		// Create metadata editor, use compact mode
 		this.taskFilterComponent = new TaskFilterComponent(
 			taskFilterContainer,
+			this.plugin,
 			this.app,
 			this.leafId,
-			this.plugin,
 			this.activeBoardIndex,
 			this.initialFilterState
 		);
