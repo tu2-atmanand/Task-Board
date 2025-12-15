@@ -9,7 +9,7 @@ import {
 	setTooltip,
 	Notice,
 } from "obsidian";
-import Sortable from "sortablejs";
+import Sortable, { get } from "sortablejs";
 import { FilterConfigModal } from "./FilterConfigModal";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
@@ -24,15 +24,21 @@ import {
 	getTagSuggestions,
 	getFileSuggestions,
 	getStatusSuggestions,
-	getPrioritySuggestions,
 } from "src/services/MultiSuggest";
+import {
+	getPriorityOptionsForDropdown,
+	dropDownOption,
+	getCustomStatusOptionsForDropdown,
+} from "src/interfaces/Mapping";
+import { PluginDataJson } from "src/interfaces/GlobalSettings";
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;
 	private rootFilterState!: RootFilterState;
+	private plugin: TaskBoard;
 	private app: App;
+	private pluginSettings: PluginDataJson;
 	private filterGroupsContainerEl!: HTMLElement;
-	private plugin?: TaskBoard;
 	private activeBoardIndex?: number;
 
 	// Sortable instances
@@ -48,16 +54,17 @@ export class TaskFilterComponent extends Component {
 
 	constructor(
 		hostEl: HTMLElement,
+		plugin: TaskBoard,
 		app: App,
 		private leafId?: string | undefined,
-		plugin?: TaskBoard,
 		activeBoardIndex?: number,
 		private initialFilterState?: RootFilterState
 	) {
 		super();
 		this.hostEl = hostEl;
-		this.app = app;
 		this.plugin = plugin;
+		this.app = app;
+		this.pluginSettings = plugin.settings;
 		this.activeBoardIndex = activeBoardIndex;
 	}
 
@@ -585,17 +592,27 @@ export class TaskFilterComponent extends Component {
 		valueInput.addEventListener("click", () => {
 			this.isMultiSuggestDropdownActive = true;
 		});
+		const dropdownInputContainer = newFilterEl.createEl("div", {
+			cls: ["filter-value-input-container"],
+		});
+		const valueSelect = new DropdownComponent(dropdownInputContainer);
+		valueSelect.selectEl.addClasses([
+			"filter-value-select",
+			"compact-select",
+		]);
 
 		propertySelect.onChange((value) => {
 			filterData.property = value;
-			this.saveStateToLocalStorage(false);
-			setTimeout(() => this.saveStateToLocalStorage(true), 300);
+			// this.saveStateToLocalStorage(false);
+			// setTimeout(() => this.saveStateToLocalStorage(true), 300);
 			this.updateFilterPropertyOptions(
 				newFilterEl,
 				filterData,
 				propertySelect,
 				conditionSelect,
-				valueInput
+				valueInput,
+				valueSelect,
+				dropdownInputContainer
 			);
 		});
 
@@ -629,7 +646,19 @@ export class TaskFilterComponent extends Component {
 				valueActuallyNeeded = false;
 			}
 
-			valueInput.style.display = valueActuallyNeeded ? "block" : "none";
+			const propertyValue = propertySelect.getValue();
+			if (propertyValue === "priority" || propertyValue === "status") {
+				valueInput.style.display = "none";
+				dropdownInputContainer.style.display = valueActuallyNeeded
+					? "block"
+					: "none";
+			} else {
+				valueInput.style.display = valueActuallyNeeded
+					? "block"
+					: "none";
+				dropdownInputContainer.style.display = "none";
+			}
+
 			if (!valueActuallyNeeded && filterData.value !== undefined) {
 				filterData.value = undefined;
 				this.saveStateToLocalStorage();
@@ -690,7 +719,9 @@ export class TaskFilterComponent extends Component {
 			filterData,
 			propertySelect,
 			conditionSelect,
-			valueInput
+			valueInput,
+			valueSelect,
+			dropdownInputContainer
 		);
 
 		return newFilterEl;
@@ -724,7 +755,9 @@ export class TaskFilterComponent extends Component {
 		filterData: Filter,
 		propertySelect: DropdownComponent,
 		conditionSelect: DropdownComponent,
-		valueInput: HTMLInputElement
+		valueInput: HTMLInputElement,
+		valueSelect: DropdownComponent,
+		dropdownInputContainer: HTMLElement
 	): void {
 		const property = filterData.property;
 
@@ -751,10 +784,19 @@ export class TaskFilterComponent extends Component {
 		propertySelect.setValue(property);
 
 		let conditionOptions: { value: string; text: string }[] = [];
-		valueInput.type = "text";
+
+		// let dropdownInput: DropdownComponent | null = null;
+		// filterItemEl.removeChild(dropdownInputContainer);
+		if (valueSelect) {
+			console.log("Removing dropdown input");
+			// dropdownInput.disabled = true;
+			// dropdownInput.type = "text";
+			// dropdownInput = null;
+		}
 
 		switch (property) {
 			case "content":
+				valueInput.type = "text";
 				conditionOptions = [
 					{
 						value: "contains",
@@ -780,6 +822,7 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "filePath":
+				valueInput.type = "text";
 				conditionOptions = [
 					{
 						value: "contains",
@@ -805,6 +848,38 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "status":
+				// valueInput.type = "text";
+
+				valueInput.style.display = "none";
+				// // First remove the older dropdown options present inside valueSelect
+				// if(valueSelect.selectEl.options.length > 0) {
+				// 	valueSelect.
+				// }
+				valueSelect.addOptions(
+					getCustomStatusOptionsForDropdown(
+						this.plugin.settings.data.globalSettings
+							.tasksPluginCustomStatuses
+					).reduce(
+						(
+							acc: Record<number | string, string>,
+							opt: dropDownOption
+						) => {
+							acc[opt.value] = opt.text;
+							return acc;
+						},
+						{}
+					)
+				);
+				valueSelect.setValue(
+					filterData.value ||
+						getPriorityOptionsForDropdown()[0].value.toString()
+				);
+				valueSelect.onChange((newValue) => {
+					filterData.value = newValue;
+					// this.saveStateToLocalStorage(false);
+					// setTimeout(() => this.saveStateToLocalStorage(true), 300);
+				});
+
 				conditionOptions = [
 					{ value: "is", text: t("is") },
 					{
@@ -814,6 +889,7 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "project":
+				valueInput.type = "text";
 				conditionOptions = [
 					{
 						value: "contains",
@@ -847,6 +923,48 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "priority":
+				// valueSelect = new DropdownComponent(dropdownInputContainer);
+				// // valueInput.type = "dropdown";
+				// valueSelect.selectEl.addClasses([
+				// 	"filter-value-input",
+				// 	"compact-select",
+				// ]);
+				// valueInput.replaceWith(dropdownInput.selectEl);
+				valueInput.style.display = "none";
+				valueSelect.addOptions(
+					getPriorityOptionsForDropdown().reduce(
+						(
+							acc: Record<number | string, string>,
+							opt: dropDownOption
+						) => {
+							acc[opt.value] = opt.text;
+							return acc;
+						},
+						{}
+					)
+				);
+				valueSelect.setValue(
+					filterData.value ||
+						getPriorityOptionsForDropdown()[0].value.toString()
+				);
+				valueSelect.onChange((newValue) => {
+					filterData.value = Number(newValue);
+					// this.saveStateToLocalStorage(false);
+					// setTimeout(() => this.saveStateToLocalStorage(true), 300);
+				});
+				// valueInput = dropdownInput;
+				// if (
+				// 	valueInput instanceof DropdownComponent &&
+				// 	valueInput.selectEl.options.length === 0
+				// ) {
+				// 	valueInput.addOptions(
+				// 		getPriorityOptionsForDropdown().map((opt) => ({
+				// 			value: String(opt.value),
+				// 			text: opt.text,
+				// 		}))
+				// 	);
+				// 	valueInput.setValue(property);
+				// }
 				conditionOptions = [
 					{
 						value: "is",
@@ -855,6 +973,14 @@ export class TaskFilterComponent extends Component {
 					{
 						value: "isNot",
 						text: t("is-not"),
+					},
+					{
+						value: ">=",
+						text: ">=",
+					},
+					{
+						value: "<=",
+						text: "<=",
 					},
 					{
 						value: "isEmpty",
@@ -867,6 +993,7 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "id":
+				valueInput.type = "text";
 				conditionOptions = [
 					{ value: "is", text: t("is") },
 					{
@@ -904,6 +1031,7 @@ export class TaskFilterComponent extends Component {
 			case "startDate":
 			case "scheduledDate":
 			case "completedDate":
+			case "cancelledDate":
 				valueInput.type = "date";
 				conditionOptions = [
 					{ value: "is", text: t("is") },
@@ -972,6 +1100,7 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "tags":
+				valueInput.type = "text";
 				conditionOptions = [
 					{
 						value: "contains",
@@ -992,15 +1121,8 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			default:
+				valueInput.type = "text";
 				conditionOptions = [
-					{
-						value: "isSet",
-						text: t("is-set"),
-					},
-					{
-						value: "isNotSet",
-						text: t("is-not-set"),
-					},
 					{
 						value: "is",
 						text: t("is"),
@@ -1016,6 +1138,14 @@ export class TaskFilterComponent extends Component {
 					{
 						value: "doesNotContain",
 						text: t("does-not-contains"),
+					},
+					{
+						value: "isEmpty",
+						text: t("is-empty"),
+					},
+					{
+						value: "isNotEmpty",
+						text: t("is-not-empty"),
 					},
 				];
 		}
@@ -1055,12 +1185,12 @@ export class TaskFilterComponent extends Component {
 		];
 		let valueActuallyNeeded =
 			conditionsRequiringValue.includes(finalConditionVal);
-		if (
-			property === "completed" &&
-			(finalConditionVal === "isTrue" || finalConditionVal === "isFalse")
-		) {
-			valueActuallyNeeded = false;
-		}
+		// if (
+		// 	property === "completed" &&
+		// 	(finalConditionVal === "isTrue" || finalConditionVal === "isFalse")
+		// ) {
+		// 	valueActuallyNeeded = false;
+		// }
 		if (
 			finalConditionVal === "isEmpty" ||
 			finalConditionVal === "isNotEmpty"
@@ -1069,7 +1199,31 @@ export class TaskFilterComponent extends Component {
 		}
 
 		let valueChanged = false;
-		valueInput.style.display = valueActuallyNeeded ? "block" : "none";
+
+		// if (valueSelect) {
+		// 	console.log("Removing dropdown input");
+		// 	valueInput.style.display = "none";
+		// 	// if (valueActuallyNeeded) {
+		// 	// } else {
+		// 	// 	console.log("Removing dropdown input - 2");
+		// 	// 	filterItemEl.removeChild(dropdownInputContainer);
+		// 	// 	// dropdownInput.disabled = true;
+		// 	// 	dropdownInput.type = "text";
+		// 	// 	dropdownInput = null;
+		// 	// }
+		// }
+
+		const propertyValue = propertySelect.getValue();
+		if (propertyValue === "priority" || propertyValue === "status") {
+			valueInput.style.display = "none";
+			dropdownInputContainer.style.display = valueActuallyNeeded
+				? "block"
+				: "none";
+		} else {
+			dropdownInputContainer.style.display = "none";
+			valueInput.style.display = valueActuallyNeeded ? "block" : "none";
+		}
+
 		if (valueActuallyNeeded) {
 			if (filterData.value !== undefined) {
 				valueInput.value = filterData.value;
@@ -1090,8 +1244,10 @@ export class TaskFilterComponent extends Component {
 			this.saveStateToLocalStorage();
 		}
 
-		// Setup MultiSuggest for appropriate properties
-		this.setupMultiSuggest(property, valueInput, filterData);
+		if (valueInput instanceof HTMLInputElement) {
+			// Setup MultiSuggest for appropriate properties
+			this.setupMultiSuggest(property, valueInput, filterData);
+		}
 	}
 
 	private setupMultiSuggest(
@@ -1100,12 +1256,7 @@ export class TaskFilterComponent extends Component {
 		filterData: Filter
 	): void {
 		// Only setup suggestions for specific properties
-		const propertiesWithSuggestions = [
-			"status",
-			"priority",
-			"tags",
-			"filePath",
-		];
+		const propertiesWithSuggestions = ["tags", "filePath"];
 
 		// Clean up existing MultiSuggest instance if it exists
 		const existingInstance = this.multiSuggestInstances.get(valueInput);
@@ -1121,12 +1272,12 @@ export class TaskFilterComponent extends Component {
 		let suggestions: string[] = [];
 
 		switch (property) {
-			case "status":
-				suggestions = getStatusSuggestions();
-				break;
-			case "priority":
-				suggestions = getPrioritySuggestions();
-				break;
+			// case "status":
+			// 	suggestions = getStatusSuggestions(
+			// 		this.pluginSettings.data.globalSettings
+			// 			.tasksPluginCustomStatuses
+			// 	);
+			// 	break;
 			case "tags":
 				suggestions = getTagSuggestions(this.app);
 				break;

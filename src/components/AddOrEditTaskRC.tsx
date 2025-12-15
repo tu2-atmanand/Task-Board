@@ -2,7 +2,7 @@
 // React component for adding or editing tasks, usable in both modals and views
 
 import { Component, Keymap, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
 
@@ -26,7 +26,7 @@ import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPrevi
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
-import { getPriorityOptions, taskItemEmpty } from "src/interfaces/Mapping";
+import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
 
 export interface filterOptions {
 	value: string;
@@ -243,7 +243,11 @@ export const AddOrEditTaskRC: React.FC<{
 	// Automatically update end time if only start time is provided
 	const handleCompleteTimeChange = (updatedStartTime: string, updatedEndTime: string) => {
 		let newTime = '';
-		if (updatedStartTime && !updatedEndTime) {
+		if (!updatedStartTime) {
+			setStartTime("");
+			setEndTime("");
+			setNewTime("");
+		} else if (updatedStartTime && !updatedEndTime) {
 			const [hours, minutes] = updatedStartTime.split(':');
 			const newEndTime = `${String(Number(hours) + 1).padStart(2, '0')}:${minutes}`;
 			setEndTime(newEndTime);
@@ -527,7 +531,10 @@ export const AddOrEditTaskRC: React.FC<{
 	// ------------------ Tab Switching and other components ------------------
 
 	const [activeTab, setActiveTab] = useState<'liveEditor' | 'rawEditor'>('liveEditor');
-	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => setActiveTab(tab);
+	const handleTabSwitch = (tab: 'liveEditor' | 'rawEditor') => {
+		setActiveTab(tab);
+		// setIsEditorContentChanged(true);
+	};
 
 	const filePathRef = useRef<HTMLInputElement>(null);
 	const communityPlugins = new CommunityPlugins(plugin);
@@ -567,7 +574,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
 				onClose();
-				sleep(2000).then(() => {
+				sleep(1000).then(() => {
 					eventEmitter.emit("SWITCH_VIEW", 'map');
 				});
 			});
@@ -908,14 +915,14 @@ export const AddOrEditTaskRC: React.FC<{
 			}
 			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
 				const getUpdatedDependsOnIds = (prev: string[]) => {
-					if (!prev.includes(task.legacyId ? task.legacyId : String(task.id))) {
+					if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
 						if (newId === undefined && !selectedTask?.legacyId) {
 							bugReporter(plugin, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
 							return [...prev, String(plugin.settings.data.globalSettings.uniqueIdCounter)];
 						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
 						} else if (newId) {
-							return [...prev, String(newId)];
+							return [...prev, newId];
 						}
 					}
 					return prev;
@@ -968,7 +975,7 @@ export const AddOrEditTaskRC: React.FC<{
 	// Render child task titles when childTasks changes
 	useEffect(() => {
 		childTasks.forEach((childTask, index) => {
-			const element = childTaskTitleRefs.current[childTask.legacyId ? childTask.legacyId : String(childTask.id)];
+			const element = childTaskTitleRefs.current[childTask.legacyId ? childTask.legacyId : childTask.id];
 			if (!element) return;
 
 			// Clear previous content before rendering
@@ -988,7 +995,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 	const handleOpenChildTaskModal = async (event: React.MouseEvent, taskId: string) => {
 		event.stopPropagation();
-		const childTask = childTasks.find(t => String(t.legacyId) === taskId);
+		const childTask = childTasks.find(t => t.legacyId === taskId);
 		if (!childTask) {
 			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
 			return;
@@ -1157,9 +1164,6 @@ export const AddOrEditTaskRC: React.FC<{
 									className="EditTaskModalBodyDescription"
 									value={formattedTaskContent}
 									onChange={handleTextareaChange}
-									onBlur={() => {
-										setIsEditorContentChanged(true);
-									}}
 									placeholder={t("body-content")}
 									style={{ display: activeTab === 'rawEditor' ? 'block' : 'none', width: '100%' }}
 								/>
@@ -1228,7 +1232,10 @@ export const AddOrEditTaskRC: React.FC<{
 
 						{/* Task Time Input */}
 						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
+							<div className="EditTaskModalHomeFieldTitleContainer">
+								<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
+								<FaTrash onClick={() => handleCompleteTimeChange("", "")} size={12} />
+							</div>
 							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} />
 						</div>
 						<div className="EditTaskModalHomeField">
@@ -1289,7 +1296,7 @@ export const AddOrEditTaskRC: React.FC<{
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
 							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => handlePriorityChange(parseInt(e.target.value))}>
-								{getPriorityOptions().map((option) => (
+								{getPriorityOptionsForDropdown().map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
 								))}
 							</select>

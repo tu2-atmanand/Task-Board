@@ -8,7 +8,7 @@ import { taskItem } from "src/interfaces/TaskItem";
  * Gets the property value from a task based on the criteria name
  */
 function getTaskPropertyValue(
-	plugin: TaskBoard,
+	startTimeConfig: string,
 	task: taskItem,
 	criteria: string
 ): any {
@@ -44,22 +44,12 @@ function getTaskPropertyValue(
 			if (task.time) {
 				return task.time;
 			}
-			if (plugin.settings.data.globalSettings.defaultStartTime) {
-				return `${
-					plugin.settings.data.globalSettings.defaultStartTime
-				} - ${
-					plugin.settings.data.globalSettings.defaultStartTime
-						.split(":")[0]
-						.trim() === "23"
+			if (startTimeConfig) {
+				return `${startTimeConfig} - ${
+					startTimeConfig.split(":")[0].trim() === "23"
 						? "00"
-						: Number(
-								plugin.settings.data.globalSettings.defaultStartTime
-									.split(":")[0]
-									.trim()
-						  ) + 1
-				}:${plugin.settings.data.globalSettings.defaultStartTime
-					.split(":")[1]
-					.trim()}`;
+						: Number(startTimeConfig.split(":")[0].trim()) + 1
+				}:${startTimeConfig.split(":")[1].trim()}`;
 			} else {
 				return "";
 			}
@@ -179,6 +169,28 @@ function compareValues(
 
 	// Handle priority - special case where lower numbers are higher priority
 	// Priority scale: 1 (highest) -> 5 (lowest) -> 0 (none)
+	// if (criteria === "priority") {
+	// 	const hasValue1 = value1 !== undefined && value1 !== null;
+	// 	const hasValue2 = value2 !== undefined && value2 !== null;
+
+	// 	if (!hasValue1 && !hasValue2) return 0;
+
+	// 	const isNone1 = value1 === 0;
+	// 	const isNone2 = value2 === 0;
+
+	// 	if (isNone1 && isNone2) return 0;
+	// 	// Place none (0) at the bottom always for both orders
+	// 	if (isNone1) return 1;
+	// 	if (isNone2) return -1;
+
+	// 	// if (order === "asc") {
+	// 	// 	return value1 - value2; // lower number higher priority first
+	// 	// } else {
+	// 	// 	return value2 - value1; // higher number lower priority first
+	// 	// }
+	// 	return value2 - value1; // lower number higher priority first
+	// }
+
 	if (criteria === "priority") {
 		const hasValue1 = value1 !== undefined && value1 !== null;
 		const hasValue2 = value2 !== undefined && value2 !== null;
@@ -190,17 +202,18 @@ function compareValues(
 		const isNone2 = value2 === 0;
 
 		if (isNone1 && isNone2) return 0;
-		// For ascending (High->Low->None): none goes to end
-		if (isNone1) return order === "asc" ? 1 : -1;
-		if (isNone2) return order === "asc" ? -1 : 1;
+		// None always goes to the end regardless of order
+		if (isNone1) return 1;
+		if (isNone2) return -1;
 
 		// For non-zero priorities: 1 (highest) to 5 (lowest)
 		// For ascending (High->Low->None): lower numbers (1) come before higher numbers (5)
+		// Return negative if value1 should come before value2
 		if (order === "asc") {
-			return value1 - value2; // 1 before 5
+			return value2 - value1; // 5 before 1 (Low to High)
 		} else {
-			// For descending (None->Low->High): higher numbers (5) come before lower numbers (1)
-			return value2 - value1; // 5 before 1
+			// For descending (Low->High->None): higher numbers (5) come before lower numbers (1)
+			return value1 - value2; // 1 before 5 (High to Low)
 		}
 	}
 
@@ -257,7 +270,7 @@ function compareValues(
  * @returns Sorted array of tasks
  */
 export function columnSortingAlgorithm(
-	plugin: TaskBoard,
+	startTimeConfig: string,
 	tasksToDisplay: taskItem[],
 	sortCriteria: columnSortingCriteria[]
 ): taskItem[] {
@@ -286,12 +299,12 @@ export function columnSortingAlgorithm(
 
 		sortedTasks = sortedTasks.sort((taskA, taskB) => {
 			const valueA = getTaskPropertyValue(
-				plugin,
+				startTimeConfig,
 				taskA,
 				criterion.criteria
 			);
 			const valueB = getTaskPropertyValue(
-				plugin,
+				startTimeConfig,
 				taskB,
 				criterion.criteria
 			);
@@ -307,8 +320,29 @@ export function columnSortingAlgorithm(
 				criterion.order
 			);
 
+			// For priority and other criteria that already handle order internally,
+			// return the comparison directly
+			// For other criteria, apply the order
+			if (
+				criterion.criteria === "priority"
+				// ||
+				// [
+				// 	"dueDate",
+				// 	"startDate",
+				// 	"scheduledDate",
+				// 	"createdDate",
+				// 	"completedDate",
+				// 	"completed",
+				// 	"time",
+				// ].includes(criterion.criteria)
+			) {
+				// These criteria already handle order in compareValues
+				return comparison;
+			}
+
 			// Apply the order (ascending or descending)
 			return criterion.order === "asc" ? comparison : -comparison;
+			// return comparison;
 		});
 	}
 

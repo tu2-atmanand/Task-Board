@@ -446,6 +446,12 @@ declare module "obsidian" {
 		};
 	}
 
+	interface DropdownComponent {
+		type: string;
+		style: any;
+		value: string;
+	}
+
 	interface ExternalPlugins {
 		app: App;
 		enabledPlugins: any;

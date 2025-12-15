@@ -156,7 +156,7 @@ const Column: React.FC<ColumnProps> = ({
 						(col: ColumnData) => col.name === columnData.name
 					);
 
-					if (Platform.isMobile) {
+					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new ViewTaskFilterModal(
 							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
@@ -317,13 +317,12 @@ const Column: React.FC<ColumnProps> = ({
 					</div>
 					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
 						{tasks.length > 0 ? (
-							tasks.map((task, index = task.id) => {
+							tasks.map((task, index) => {
 								return (
 									<div key={index} className="taskItemFadeIn">
 										<TaskItem
-											key={index}
+											key={task.id}
 											plugin={plugin}
-											taskKey={index}
 											task={task}
 											columnIndex={columnIndex}
 											activeBoardSettings={activeBoardData}

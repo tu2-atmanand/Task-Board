@@ -48,7 +48,10 @@ export class RealTimeScanner {
 		}
 	}
 
-	async processAllUpdatedFiles(currentFile?: TFile | string | undefined) {
+	async processAllUpdatedFiles(
+		currentFile?: TFile | string | undefined,
+		updatedTaskId?: string | undefined
+	) {
 		// If a current file is provided, ensure it's included in the processing
 		let newFile: TFile | null | undefined = null;
 		if (currentFile && typeof currentFile === "string") {
@@ -89,6 +92,14 @@ export class RealTimeScanner {
 
 		// Reset the editorModified flag after the scan.
 		this.plugin.editorModified = false;
+
+		setTimeout(() => {
+			// This event emmitter will stop any loading animation of ongoing task-card.
+			eventEmitter.emit("UPDATE_TASK", {
+				taskID: updatedTaskId,
+				state: false,
+			});
+		}, 500);
 	}
 
 	getFileFromPath(filePath: string): TFile | null {

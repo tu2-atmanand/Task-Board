@@ -47,9 +47,9 @@ export class ViewTaskFilterModal extends Modal {
 
 		this.taskFilterComponent = new TaskFilterComponent(
 			this.contentEl,
+			this.plugin,
 			this.app,
 			this.leafId,
-			this.plugin,
 			this.activeBoardIndex,
 			this.initialFilterState
 		);

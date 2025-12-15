@@ -4,7 +4,7 @@ import { App, Notice, TAbstractFile, TFile, moment as _moment } from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
-	isCompleted,
+	isTaskCompleted,
 	isTaskLine,
 } from "../utils/CheckBoxUtils";
 import {
@@ -180,10 +180,9 @@ export default class vaultScanner {
 			) {
 				// Extract properties from frontmatter
 				const taskNoteProperties = extractTaskNoteProperties(
-					this.plugin.settings.data.globalSettings
-						.frontmatterFormatting,
 					frontmatter,
-					fileNameWithPath
+					fileNameWithPath,
+					this.plugin.settings
 				);
 				if (
 					scanFilterForTags(
@@ -216,11 +215,11 @@ export default class vaultScanner {
 
 					// Create task item for the task note
 					const taskNoteItem: taskItem = {
-						id: Number(taskNoteProperties.id)
-							? Number(taskNoteProperties.id)
+						id: taskNoteProperties.id
+							? taskNoteProperties.id
 							: generateRandomTempTaskId(),
 						legacyId: taskNoteProperties.id
-							? String(taskNoteProperties.id)
+							? taskNoteProperties.id
 							: "", // Storing the legacyId for backward compatibility
 						title: taskNoteProperties.title || file.basename,
 						body: subTasks, // Store sub-tasks in body
@@ -230,7 +229,7 @@ export default class vaultScanner {
 						due: taskNoteProperties.due || "",
 						tags: taskNoteProperties.tags || [],
 						frontmatterTags: [],
-						time: "", // Task notes don't have time ranges
+						time: taskNoteProperties.time || "",
 						priority: taskNoteProperties.priority || 0,
 						dependsOn: taskNoteProperties.dependsOn || [],
 						status: taskNoteProperties.status || " ", // Default to unchecked
@@ -247,19 +246,25 @@ export default class vaultScanner {
 					};
 
 					// Add to appropriate cache based on completion status
-					const isTaskNoteCompleted =
-						taskNoteItem.status === "unchecked" ||
-						taskNoteItem.status === "pending";
+					const isTaskNoteCompleted = isTaskCompleted(
+						taskNoteProperties.status || "",
+						true,
+						this.plugin.settings
+					);
 					if (isTaskNoteCompleted) {
 						// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
 						const completed = this.tasksCache.Completed;
 						if (completed) {
 							delete completed[fileNameWithPath];
-							this.tasksCache.Completed = {
-								[fileNameWithPath]: [taskNoteItem],
-								...completed,
-							};
 						}
+
+						this.tasksCache.Completed = {
+							[fileNameWithPath]: [taskNoteItem],
+							...(completed || {}),
+						};
+
+						if (this.tasksCache.Pending[fileNameWithPath])
+							delete this.tasksCache.Pending[fileNameWithPath];
 					} else {
 						// this.tasksCache.Pending[fileNameWithPath].push(taskNoteItem);
 						const pending = this.tasksCache.Pending;
@@ -267,11 +272,14 @@ export default class vaultScanner {
 							// Remove and re-insert at the top
 							// const tasks = pending[fileNameWithPath];
 							delete pending[fileNameWithPath];
-							this.tasksCache.Pending = {
-								[fileNameWithPath]: [taskNoteItem],
-								...pending,
-							};
 						}
+						this.tasksCache.Pending = {
+							[fileNameWithPath]: [taskNoteItem],
+							...pending,
+						};
+
+						if (this.tasksCache.Completed[fileNameWithPath])
+							delete this.tasksCache.Completed[fileNameWithPath];
 					}
 
 					const pendingCacheCompare = await compareFileCache(
@@ -306,9 +314,12 @@ export default class vaultScanner {
 							this.tasksDetectedOrUpdated = true;
 							const legacyId = extractTaskId(line);
 							const taskStatus = extractCheckboxSymbol(line);
-							const isTaskCompleted = isCompleted(line);
-							// const title = extractTitle(line);
-							const title = line; // we will be storing the taskLine as it is inside the title property
+							const isThisCompletedTask = isTaskCompleted(
+								line,
+								false,
+								this.plugin.settings
+							);
+							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
 							const createdDate = extractCreatedDate(line);
 							let startDate = extractStartDate(line);
@@ -394,8 +405,8 @@ export default class vaultScanner {
 							}
 
 							const task: taskItem = {
-								id: Number(legacyId)
-									? Number(legacyId)
+								id: legacyId
+									? legacyId
 									: generateRandomTempTaskId(),
 								legacyId: legacyId, // Storing the legacyId for backward compatibility
 								status: taskStatus,
@@ -428,7 +439,7 @@ export default class vaultScanner {
 								reminder: reminder,
 							};
 
-							if (isTaskCompleted) {
+							if (isThisCompletedTask) {
 								this.tasksCache.Completed[
 									fileNameWithPath
 								].push(task);
@@ -643,7 +654,18 @@ export default class vaultScanner {
 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 				Object.values(this.tasksCache.Completed).flat().length > 0)
 		) {
-			eventEmitter.emit("REFRESH_COLUMN");
+			setTimeout(() => {
+				eventEmitter.emit("REFRESH_COLUMN");
+				// 	if (this.plugin.settings.data.globalSettings.searchQuery) {
+				// 		console.log(
+				// 			"Refreshing the board now after saving...\nSetting : ",
+				// 			this.plugin.settings.data.globalSettings.searchQuery
+				// 		);
+				// 		eventEmitter.emit("REFRESH_BOARD");
+				// 	} else {
+				// 		eventEmitter.emit("REFRESH_COLUMN");
+				// 	}
+			}, 200);
 		}
 		this.tasksDetectedOrUpdated = false;
 
@@ -684,21 +706,21 @@ export function fileTypeAllowedForScanning(
 }
 
 // Generate a unique ID for each task
-export function generateRandomTempTaskId(): number {
+export function generateRandomTempTaskId(): string {
 	const array = new Uint32Array(1);
 	crypto.getRandomValues(array);
-	return array[0];
+	return String(array[0]);
 }
 
 // Generate a unique ID for each task
-export function generateTaskId(plugin: TaskBoard): number {
+export function generateTaskId(plugin: TaskBoard): string {
 	plugin.settings.data.globalSettings.uniqueIdCounter =
 		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
 
 	// Save the updated uniqueIdCounter back to settings
 	plugin.saveSettings();
 	// Return the current counter value and then increment it for the next ID
-	return plugin.settings.data.globalSettings.uniqueIdCounter;
+	return String(plugin.settings.data.globalSettings.uniqueIdCounter);
 }
 
 /**

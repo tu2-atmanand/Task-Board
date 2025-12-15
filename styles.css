@@ -554,7 +554,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemBodyContent {
 	display: flex;
 	flex-direction: column;
-	/* min-width: 95%; */
+	min-width: 95%;
 }
 
 .taskItemTitle {
@@ -583,7 +583,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	margin-inline-end: 0 !important;
 	transform: scale(1.1) !important;
 	border-radius: 2px !important;
-	transition: transform 0.3s;
+	transition: transform 1s;
 
 	background-color: transparent;
 	font: var(--its);
@@ -601,7 +601,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemCheckbox-checked {
 	transform: scale(1.4);
 	/* Slight animation effect */
-	transition: transform 0.3s;
+	transition: transform 1s;
 }
 
 .taskItemBodySubtaskItem {
@@ -799,6 +799,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemMainBodyDescriptionSectionVisible {
 	margin-top: 5px;
+	margin-inline: -5px;
 }
 
 .taskItemMainBodyDescriptionSectionToggler {
@@ -1041,6 +1042,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	transform: scale(1.1);
 }
 
+.taskItemFooterRefreshingMssg {
+	align-items: center;
+	align-self: center;
+}
+
 .taskItemFooter {
 	display: flex;
 	flex-direction: row;
@@ -1163,6 +1169,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--text-muted);
 }
 
+.EditTaskModalHomeFieldTitleContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
 .EditTaskModalHomeFieldTitleInput {
 	margin-bottom: 15px;
 }
@@ -1240,6 +1252,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	text-align: center;
 	align-content: center;
 	font-weight: 600;
+	color: var(--list-marker-color-hover);
 	/* background-color: var(--background-modifier-border-focus); */
 }
 
@@ -1491,6 +1504,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: 1px solid var(--table-border-color);
 }
 
+.clear-time-icon {
+	position: relative;
+	left: -20px;
+	cursor: pointer;
+}
+
 .EditTaskModalHome-taskItemTagsPreview {
 	display: flex;
 	gap: 2px;
@@ -1716,12 +1735,13 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	justify-content: space-between;
 	padding: 1em;
 	border-radius: 4px;
-	max-height: calc(var(--dialog-max-height) - 5vh);
+	max-height: calc(var(--dialog-max-height) - 5dvh);
 	position: sticky;
 	top: 0;
 	overflow: hidden;
 	min-width: 180px;
 	max-width: 250px;
+	gap: .5em;
 	transition: transform 0.3s ease-in-out;
 }
 
@@ -1751,6 +1771,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .boardConfigModalSidebarBtnAreaBoardBtnsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	width: 100%;
+	overflow-y: scroll;
+	max-height: calc(var(--dialog-max-height) - 30dvh);
+}
+
+.boardConfigModalSidebarBtnAreaConfigBtnsSection {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5em;
@@ -1925,6 +1954,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .boardConfigModalColumnRowContentColDatedVal {
 	min-width: 105px;
 	max-width: 111px;
+}
+
+.boardConfigModalColumnRowContentPriorityDropdown {
+	min-width: 120px;
+	max-width: 130px;
+	padding-inline: 8px;
 }
 
 .boardConfigModalDuplicateBoardBtn,
@@ -3128,6 +3163,9 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked p>input[type=checkbox]:checke
 	font-family: "its";
 }
 
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=x]::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x]>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x] p>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=X]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X] p>input[type=checkbox]:checked::after {
@@ -3388,7 +3426,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	color: rgb(var(--chbx-d));
 }
 
-.taskItemCheckbox:is([data-task="X"],
+.taskItemCheckbox:is([data-task="x"],
+	[data-task="X"],
 	[data-task=">"],
 	[data-task="-"],
 	[data-task="D"],
@@ -5505,6 +5544,7 @@ svg.react-flow__connectionline {
 	white-space: nowrap;
 	flex-direction: column;
 	align-items: flex-start;
+	text-wrap: auto;
 }
 
 .boardSidebarCard:hover {
@@ -5536,6 +5576,11 @@ svg.react-flow__connectionline {
 	width: 100%;
 	font-size: 0.9rem;
 	padding-block-start: 0.7rem;
+	color: var(--background-modifier-border-focus) !important;
+}
+
+.boardSidebarCard--active .boardSidebarCardDescription {
+	color: var(--background-mod-left-CSS-light) !important;
 }
 
 .taskCountContainerProgress {

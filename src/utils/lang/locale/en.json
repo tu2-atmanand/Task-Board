@@ -279,7 +279,7 @@
 	"restrict-task-completion-to-child-tasks-info": "Enable this setting to restrict the completion of a parent task until all its child tasks (depends-on tasks) and sub-tasks are completed. This will help you to ensure that all related tasks are completed before marking the parent task as done.",
 	"complete-all-child-tasks-before-completing-task": "Complete all child-tasks and sub-tasks related to this task before completing it. You can turn this setting off, if you dont want this restriction.",
 	"task-note-identifier-tag": "Task note identifier tag",
-	"task-note-identifier-tag-description": "Enter the tag which will be used to indentify a normal task as a task-note. This tag will be automatically added to the tasks created through 'add new task modal'. You can change this tag, if you want to use your own custom tag.",
+	"task-note-identifier-tag-description": "Enter the tag which will be used to indentify a normal task as a task-note. This tag will be automatically added to the tasks created through 'add new task modal'. Enter without '#'.",
 	"default-location-for-new-task-notes": "Default location for new task notes",
 	"default-location-for-new-task-notes-description": "Default folder where new task-notes will be saved. You can also change the location from the 'add new task modal' while creating a new task-note.",
 	"tasks-plugin-modal": "Tasks plugin modal",
@@ -317,7 +317,7 @@
 	"any": "any",
 	"all": "all",
 	"add-filter-group": "Add filter group",
-	"save-current-filter": "Save current filter",
+	"save-current-filter": "Save for future",
 	"load-saved-filter": "Load saved filter",
 	"filter-in-this-group": "filter in this group",
 	"duplicate-filter-group": "Duplicate filter group",
@@ -470,5 +470,7 @@
 	"no-tasks-found-for-current-board-message": "No tasks were filtered for this board. Please check your board filters and whether you are able to see tasks inside the kanban view for this board.",
 	"tasks-on-this-board-have-no-id-message-1": "Tasks filtered for this board have no ID on them. Please add id for altest one task to open the map view. Or use the below import task panel feature, to quikly import tasks.",
 	"tasks-on-this-board-have-no-id-message-2": "When you will import tasks, an ID property will be added to the task content in the note.",
-	"column-delete-confirmation-message": "Are you sure you want to delete the following column : "
+	"column-delete-confirmation-message": "Are you sure you want to delete the following column : ",
+	"enter-task-content-to-search": "Enter keyword and hit enter to search.",
+	"scroll-to-load-more": "Scroll to load more"
 }

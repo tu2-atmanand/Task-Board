@@ -10,7 +10,7 @@ import vaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScan
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { getCurrentLocalTimeString } from "src/utils/TimeCalculations";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -50,7 +50,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [progress, setProgress] = useState(0);
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
-		VaultName: plugin.app.vault.getName(),
+		VaultName: app.vault.getName(),
 		Modified_at: getCurrentLocalTimeString(),
 		Pending: {},
 		Completed: {},
@@ -63,6 +63,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		// Reset terminal output and collected tasks
 		vaultScanner.tasksCache.Pending = {};
 		vaultScanner.tasksCache.Completed = {};
+		vaultScanner.tasksCache.VaultName = app.vault.getName();
+		vaultScanner.tasksCache.Modified_at = getCurrentLocalTimeString();
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
@@ -156,10 +158,10 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 			<h2>{t("scan-tasks-from-the-vault")}</h2>
 			{localStorage.getItem("manadatoryScan") === "true" ?
 				(<>
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} 1.6.0</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
 					<br />
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href="https://github.com/tu2-atmanand/Task-Board/releases/tag/1.8.0">Task Board v1.8.0</a>.</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href={`https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`}>Task Board v{newReleaseVersion}</a>.</div>
 				</>
 				) :
 				(<>

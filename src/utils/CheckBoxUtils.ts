@@ -1,5 +1,6 @@
 import type TaskBoard from "main";
-import { taskStatuses } from "src/interfaces/Enums";
+import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
+import { taskItem } from "src/interfaces/TaskItem";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**
@@ -8,7 +9,10 @@ import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegula
  * @param symbol - The current checkbox symbol.
  * @returns The next checkbox state symbol.
  */
-export function checkboxStateSwitcher(plugin: TaskBoard, symbol: string): string {
+export function checkboxStateSwitcher(
+	plugin: TaskBoard,
+	symbol: string
+): string {
 	const { tasksPluginCustomStatuses, customStatuses } =
 		plugin.settings.data.globalSettings;
 
@@ -30,21 +34,67 @@ export function checkboxStateSwitcher(plugin: TaskBoard, symbol: string): string
 }
 
 /**
- * Checks if a given task string is marked as completed.
- * @param task - The task string in the format '- [symbol]'.
+ * Determines if a task is completed based on its title or symbol.
+ * @param titleOrSymbol - The title or symbol (task.status) of the task.
+ * @param isTaskNote - A boolean indicating whether the task is a task note.
+ * @param settings - The plugin settings.
  * @returns True if the symbol represents a completed state, otherwise false.
  */
-export function isCompleted(task: string): boolean {
-	const match = task.match(/\s\[(.)\]/); // Extract the symbol inside [ ]
-	// console.log("CheckBoxUtils.ts : isCompleted : match :", match);
-	if (!match || match.length < 2) return false;
+export function isTaskCompleted(
+	titleOrSymbol: string,
+	isTaskNote: boolean,
+	settings: PluginDataJson
+): boolean {
+	// console.log(
+	// 	"isTaskCompleted...\ntitleOrSymbol :",
+	// 	titleOrSymbol,
+	// 	"\nisTaskNote :",
+	// 	isTaskNote
+	// );
+	if (!isTaskNote) {
+		// const match = task.title.match(/\s\[(.)\]/); // Extract the symbol inside [ ]
+		// // console.log("CheckBoxUtils.ts : isCompleted : match :", match);
+		// if (!match || match.length < 2) return false;
 
-	const symbol = match[1];
-	return (
-		symbol === taskStatuses.regular ||
-		symbol === taskStatuses.checked ||
-		symbol === taskStatuses.dropped
-	);
+		const symbol = extractCheckboxSymbol(titleOrSymbol);
+		// return (
+		// 	symbol === taskStatuses.regular ||
+		// 	symbol === taskStatuses.checked ||
+		// 	symbol === taskStatuses.done ||
+		// 	symbol === taskStatuses.dropped
+		// );
+
+		const tasksPluginStatusConfigs =
+			settings.data.globalSettings.tasksPluginCustomStatuses;
+		let flag = false;
+		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
+			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
+			if (
+				customStatus.symbol === symbol &&
+				(customStatus.type === "DONE" ||
+					customStatus.type === "CANCELLED")
+			) {
+				flag = true;
+				return true;
+			}
+		});
+		return flag;
+	} else {
+		const tasksPluginStatusConfigs =
+			settings.data.globalSettings.tasksPluginCustomStatuses;
+		let flag = false;
+		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
+			if (
+				customStatus.symbol === titleOrSymbol &&
+				(customStatus.type === "DONE" ||
+					customStatus.type === "CANCELLED")
+			) {
+				flag = true;
+				return true;
+			}
+		});
+		return flag;
+	}
 }
 
 /**

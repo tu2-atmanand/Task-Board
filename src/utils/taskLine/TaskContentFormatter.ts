@@ -64,7 +64,7 @@ export const addIdToTaskContent = async (
 	Plugin: TaskBoard,
 	formattedTaskContent: string,
 	forcefullyAddId?: boolean
-): Promise<{ formattedTaskContent: string; newId: number | undefined }> => {
+): Promise<{ formattedTaskContent: string; newId: string | undefined }> => {
 	const taskId = extractTaskId(formattedTaskContent);
 	let newId = undefined;
 	if (

@@ -99,7 +99,10 @@ export const moveFromCompletedToPending = async (
 
 // For handleDeleteTask
 
-export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
+export const deleteTaskFromFile = async (
+	plugin: TaskBoard,
+	task: taskItem
+): Promise<boolean> => {
 	try {
 		const oldTaskContent = await getFormattedTaskContent(task);
 		if (oldTaskContent === "")
@@ -166,6 +169,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 		// 		"TaskItemUtils.ts/deleteTaskFromFile"
 		// 	);
 		// }
+		return true;
 	} catch (error) {
 		bugReporter(
 			plugin,
@@ -173,6 +177,7 @@ export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
 			String(error),
 			"TaskItemUtils.ts/deleteTaskFromFile"
 		);
+		return false;
 	}
 };
 
@@ -305,7 +310,6 @@ export const archiveTask = async (
 			});
 
 			// await deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
-			eventEmitter.emit("REFRESH_COLUMN");
 		} catch (error) {
 			bugReporter(
 				plugin,
@@ -322,7 +326,9 @@ export const archiveTask = async (
 				task,
 				oldTaskContent,
 				`%%${oldTaskContent}%%`
-			);
+			).then(() => {
+				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+			});
 
 			// const newContet = fileContent.replace(
 			// 	completeTask,
@@ -377,7 +383,7 @@ export const updateTaskInFile = async (
 	updatedTask: taskItem,
 	oldTask: taskItem,
 	forceAddId?: boolean
-): Promise<number | undefined> => {
+): Promise<string | undefined> => {
 	try {
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
 		if (oldTaskContent === "")
@@ -607,15 +613,15 @@ export const useTasksPluginToUpdateInFile = async (
 					oldTask.filePath
 				);
 
-			if (!tasksPluginApiOutput) {
-				bugReporter(
-					plugin,
-					"Tasks plugin API did not return any output.",
-					"Tasks plugin API did not return any output.",
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
-				);
-				return;
-			}
+			// if (!tasksPluginApiOutput) {
+			// 	bugReporter(
+			// 		plugin,
+			// 		"Tasks plugin API did not return any output.",
+			// 		"Tasks plugin API did not return any output.",
+			// 		"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+			// 	);
+			// 	return;
+			// }
 
 			const twoTaskTitles = tasksPluginApiOutput.split("\n");
 			// console.log(
@@ -743,7 +749,7 @@ export const useTasksPluginToUpdateInFile = async (
 export const applyIdToTaskInNote = async (
 	plugin: TaskBoard,
 	task: taskItem
-): Promise<number | undefined> => {
+): Promise<string | undefined> => {
 	if (task.legacyId) {
 		return undefined;
 	} else {
@@ -805,7 +811,7 @@ export const addTaskInNote = async (
 	newTask: taskItem,
 	editorActive: boolean,
 	cursorPosition?: { line: number; ch: number } | undefined
-): Promise<number | undefined> => {
+): Promise<string | undefined> => {
 	const filePath = allowedFileExtensionsRegEx.test(newTask.filePath)
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
@@ -1039,7 +1045,7 @@ export const replaceOldTaskWithNewTask = async (
 							newContent
 						);
 					}
-					// If user chooses "old", do nothing
+					// If user chooses "new", do nothing
 				}
 			);
 		}
@@ -1067,15 +1073,15 @@ export const getTaskFromId = async (
 	id: string | number
 ): Promise<taskItem | null> => {
 	try {
-		let foundTask: taskItem | undefined;
+		let foundTask: taskItem | undefined | null;
 
 		// Search in Pending tasks
 		const pendingTasksObj = plugin.vaultScanner.tasksCache?.Pending ?? {};
 		for (const tasks of Object.values(pendingTasksObj)) {
-			if (typeof id === "string") {
-				foundTask = tasks.find((task) => task.legacyId === id);
-			} else if (typeof id === "number") {
-				foundTask = tasks.find((task) => task.id === id);
+			if (id) {
+				foundTask = tasks.find(
+					(task) => task.legacyId === id || task.id === id
+				);
 			}
 			if (foundTask) return foundTask;
 		}
@@ -1084,10 +1090,10 @@ export const getTaskFromId = async (
 		const completedTasksObj =
 			plugin.vaultScanner.tasksCache?.Completed ?? {};
 		for (const tasks of Object.values(completedTasksObj)) {
-			if (typeof id === "string") {
-				foundTask = tasks.find((task) => task.legacyId === id);
-			} else if (typeof id === "number") {
-				foundTask = tasks.find((task) => task.id === id);
+			if (id) {
+				foundTask = tasks.find(
+					(task) => task.legacyId === id || task.id === id
+				);
 			}
 			if (foundTask) return foundTask;
 		}

@@ -26,7 +26,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 	onClose
 }) => {
 	const [searchQuery, setSearchQuery] = useState('');
-	const [importedTaskIds, setImportedTaskIds] = useState<Set<number>>(new Set());
+	const [importedTaskIds, setImportedTaskIds] = useState<Set<string>>(new Set());
 
 	// Get all tasks without an ID (legacyId is empty)
 	const tasksWithoutId = useMemo(() => {
@@ -56,7 +56,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 				// Trigger re-scan to update the map view
 				await plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 				// Emit event to refresh the board
-				eventEmitter.emit('REFRESH_BOARD');
+				eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with REFRESH_COLUMN only.
 			}
 		} catch (error) {
 			console.error('Error importing task:', error);
@@ -136,7 +136,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 						</div>
 					) : (
 						<div className="tasksImporterPanelTaskList">
-							{filteredTasks.map((task) => (
+							{filteredTasks.map((task, index) => (
 								<div
 									key={task.id}
 									className="tasksImporterPanelTaskItemWrapper"
@@ -145,7 +145,6 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 									<TaskItem
 										key={task.id}
 										plugin={plugin}
-										taskKey={task.id}
 										task={task}
 										activeBoardSettings={activeBoardSettings}
 									/>
