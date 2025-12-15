@@ -1744,12 +1744,13 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	justify-content: space-between;
 	padding: 1em;
 	border-radius: 4px;
-	max-height: calc(var(--dialog-max-height) - 5vh);
+	max-height: calc(var(--dialog-max-height) - 5dvh);
 	position: sticky;
 	top: 0;
 	overflow: hidden;
 	min-width: 180px;
 	max-width: 250px;
+	gap: .5em;
 	transition: transform 0.3s ease-in-out;
 }
 
@@ -1779,6 +1780,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .boardConfigModalSidebarBtnAreaBoardBtnsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	width: 100%;
+	overflow-y: scroll;
+	max-height: calc(var(--dialog-max-height) - 30dvh);
+}
+
+.boardConfigModalSidebarBtnAreaConfigBtnsSection {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5em;
