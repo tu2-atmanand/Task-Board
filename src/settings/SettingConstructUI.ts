@@ -267,6 +267,7 @@ export class SettingsManager {
 			preDefinedNote,
 			autoAddUniqueID,
 			experimentalFeatures,
+			safeGuardFeature,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -576,6 +577,29 @@ export class SettingsManager {
 			.addButton((button) =>
 				button.setButtonText(t("export")).onClick(async () => {
 					await exportConfigurations(this.plugin);
+				})
+			);
+
+		new Setting(contentEl)
+			.setName("Safeguard feature")
+			.setDesc(
+				createFragmentWithHTML(
+					"This feature helps to ensure that this plugin wont temper the conte of other tasks. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+						"<br/>" +
+						"<b>" +
+						"NOTE :" +
+						"</b>" +
+						"Disabling this feature will by-pass the security check which might lead to unwanted behavior. Example in case where there are multiple inline tasks one after the another. Only disable this feature if you feel this modal is poppin-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but ensure you take care of you data manually." +
+						"<br/>" +
+						"This is a temporary solution to the problem few users are facing right now. This will be the default behavior moving forward and you will not require to disable this feature moving forward."
+				)
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(safeGuardFeature).onChange(async (value) => {
+					this.globalSettings!.safeGuardFeature = value;
+					await this.saveSettings();
+
+					this.openReloadNoticeIfNeeded();
 				})
 			);
 

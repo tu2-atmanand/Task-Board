@@ -2635,6 +2635,10 @@ li:hover .taskboard-hidden-property {
 	min-width: 90vw;
 }
 
+.taskboard-diff-content-compare-modal h2 {
+	text-align: center;
+}
+
 .taskboard-diff-content-compare-modal-container {
 	display: flex;
 	flex-direction: row;

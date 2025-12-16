@@ -118,8 +118,6 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			);
 		case "equals":
 		case "is":
-			if (filter.property === "priority")
-				console.log("value :", value, "\ntaskValue :", taskValue);
 			return taskValue === value;
 		case "notEquals":
 		case "isNot":
@@ -133,6 +131,7 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			if (Array.isArray(taskValue)) {
 				return taskValue.some((item) =>
 					String(item)
+						.replace("#", "")
 						.toLowerCase()
 						.includes(String(value).replace("#", "").toLowerCase())
 				);
@@ -147,8 +146,9 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			if (Array.isArray(taskValue)) {
 				return !taskValue.some((item) =>
 					String(item)
+						.replace("#", "")
 						.toLowerCase()
-						.includes(String(value).toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase())
 				);
 			}
 			return true;

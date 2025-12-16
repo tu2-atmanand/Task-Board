@@ -173,8 +173,8 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								plugin.realTimeScanning.onFileModified(
 									newTask.filePath
 								);
-								sleep(2000).then(() => {
-									// TODO : Is 2 seconds really required ?
+								sleep(1000).then(() => {
+									// TODO : Is 1 seconds really required ?
 									plugin.realTimeScanning.processAllUpdatedFiles();
 								});
 							});
@@ -194,7 +194,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								plugin.realTimeScanning.onFileModified(
 									`Copy-${newTask.filePath}`
 								);
-								sleep(2000).then(() => {
+								sleep(1000).then(() => {
 									plugin.realTimeScanning.processAllUpdatedFiles();
 								});
 							});
@@ -299,7 +299,7 @@ export const openEditTaskNoteModal = (
 						newTaskContent
 					).then(() => {
 						sleep(1000).then(() => {
-							// TODO : Is 2 sec really required ?
+							// TODO : Is 1 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanning.processAllUpdatedFiles(
 								updatedTask.filePath,
@@ -431,6 +431,14 @@ export const bugReporter = (
 	// };
 };
 
+/**
+ * Opens a modal to compare the task content in the cache and the edited task content in the file.
+ * @param {Taskboard} plugin - The taskboard plugin
+ * @param {string} cachedTaskContent - The task content in the cache
+ * @param {string} EditedTaskContent - The task content user has edited in the modal
+ * @param {string} taskContentFromFile - The task content which is right now present in the file
+ * @param {(which: "old" | "new") => void} onSelect - The function to call when the user selects one of the options
+ */
 export const openDiffContentCompareModal = (
 	plugin: TaskBoard,
 	cachedTaskContent: string,
@@ -644,7 +652,7 @@ export const openEditTaskView = async (
 									).then(() => {
 										// This is required to rescan the updated file and refresh the board.
 										sleep(1000).then(() => {
-											// TODO : Is 2 sec really required ?
+											// TODO : Is 1 sec really required ?
 											// This is required to rescan the updated file and refresh the board.
 											plugin.realTimeScanning.processAllUpdatedFiles(
 												updatedTask.filePath
@@ -657,8 +665,8 @@ export const openEditTaskView = async (
 										updatedTask.filePath,
 										updatedNoteContent
 									).then(() => {
-										sleep(2000).then(() => {
-											// TODO : Is 2 sec really required ?
+										sleep(1000).then(() => {
+											// TODO : Is 1 sec really required ?
 											// This is required to rescan the updated file and refresh the board.
 											plugin.realTimeScanning.processAllUpdatedFiles(
 												updatedTask.filePath
@@ -715,8 +723,8 @@ export const openEditTaskView = async (
 									updatedTask.filePath,
 									updatedNoteContent
 								).then(() => {
-									sleep(2000).then(() => {
-										// TODO : Is 2 sec really required ?
+									sleep(1000).then(() => {
+										// TODO : Is 1 sec really required ?
 										// This is required to rescan the updated file and refresh the board.
 										plugin.realTimeScanning.processAllUpdatedFiles(
 											updatedTask.filePath

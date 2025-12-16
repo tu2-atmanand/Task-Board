@@ -42,11 +42,11 @@ export class DiffContentCompareModal extends Modal {
 			text: "Looks like the task content in your file is a little different from the content you just edited through Task Board. Choose which version of content you would like to keep:",
 		});
 
-		const container = contentEl.createDiv({
+		const comparisonContainer = contentEl.createDiv({
 			cls: "taskboard-diff-content-compare-modal-container",
 		});
 
-		const rightDiv = container.createDiv({
+		const rightDiv = comparisonContainer.createDiv({
 			cls: "taskboard-diff-content-compare-modal-side",
 		});
 		rightDiv.createEl("h3", { text: "Current content in your note" });
@@ -66,7 +66,7 @@ export class DiffContentCompareModal extends Modal {
 				this.close();
 			});
 
-		const leftDiv = container.createDiv({
+		const leftDiv = comparisonContainer.createDiv({
 			cls: "taskboard-diff-content-compare-modal-side",
 		});
 		leftDiv.createEl("h3", { text: "Content you just edited" });
@@ -86,6 +86,11 @@ export class DiffContentCompareModal extends Modal {
 				this.close();
 			});
 
+		const noteOnSetting = contentEl.createEl("p", {
+			text: "NOTE : If you think this safe guard modal shown is irrelevant and its also popping-up too many times, you can by-pass it and disable this from the settings under the 'general' tab.",
+		});
+		noteOnSetting.style.color = "red";
+
 		const infoDiv = contentEl.createDiv({
 			cls: "taskboard-diff-content-compare-modal-info",
 		});
@@ -100,7 +105,7 @@ export class DiffContentCompareModal extends Modal {
 				text: "Select the version of content you want Task Board to write in your note.",
 			});
 			ul.createEl("li", {
-				text: "If the content shown on left-side is completely different from the content of the task you just edited. This probably means, that Task Board couldnt able to find the task you are looking for inside the current file at stored line. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below or close this modal, to avoid updating any data. And manually scan the file or update the task.",
+				text: "If the content shown on left-side is completely different from the content of the task you just edited. This probably means that, Task Board couldnt able to find the task you just edited through its cache inside the current file at the particular line. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below to close this modal, to avoid updating any data. And scan the file using file-menu option or update the task manually.",
 			});
 		});
 
@@ -110,6 +115,59 @@ export class DiffContentCompareModal extends Modal {
 			.onClick(() => {
 				this.close();
 			});
+
+		// Below section is a temporary fix to show the debug info.
+		// TODO: Remove this section once the issue is fixed.
+
+		contentEl.createEl("hr");
+
+		contentEl.createEl("h2", { text: "Debug Info" });
+		contentEl.createEl("p", {
+			text: "Here is why this modal was shown in the first place. If you think this modal shown was unnecessary and if possible kindly share this information with the developer to improve the plugin.",
+		});
+		const debuInfoComparisonContainer = contentEl.createDiv({
+			cls: "taskboard-diff-content-compare-modal-container",
+		});
+
+		const debuInfoComparisonContainerLefttDiv =
+			debuInfoComparisonContainer.createDiv({
+				cls: "taskboard-diff-content-compare-modal-side",
+			});
+		debuInfoComparisonContainerLefttDiv.createEl("h3", {
+			text: "Task Board Cache",
+		});
+		const debuInfoComparisonContainerLefttDivContent =
+			debuInfoComparisonContainerLefttDiv.createDiv({
+				cls: "taskboard-diff-content-compare-modal-content",
+			});
+		debuInfoComparisonContainerLefttDivContent.innerHTML =
+			this.getHighlightedDiff(
+				this.cachedTaskContent,
+				this.taskContentFromFile,
+				"left"
+			);
+
+		const debuInfoComparisonContainerRightDiv =
+			debuInfoComparisonContainer.createDiv({
+				cls: "taskboard-diff-content-compare-modal-side",
+			});
+		debuInfoComparisonContainerRightDiv.createEl("h3", {
+			text: "Current content in your note",
+		});
+		const debuInfoComparisonContainerRightDivContent =
+			debuInfoComparisonContainerRightDiv.createDiv({
+				cls: "taskboard-diff-content-compare-modal-content",
+			});
+		debuInfoComparisonContainerRightDivContent.innerHTML =
+			this.getHighlightedDiff(
+				this.taskContentFromFile,
+				this.cachedTaskContent,
+				"right"
+			);
+
+		contentEl.createEl("p", {
+			text: "This is temporary, this section will be removed once I get enough feedback that this modal is not shown unnecessarily.",
+		});
 	}
 
 	onClose() {
@@ -201,6 +259,11 @@ export class DiffContentCompareModal extends Modal {
 	}
 }
 
+/**
+ * Returns true if the content diff is only due to space differences.
+ * @param oldContent The content of the task before the user made the changes.
+ * @param newContent The content of the task after the user made the changes.
+ */
 export function isTheContentDiffAreOnlySpaces(
 	oldContent: string,
 	newContent: string
@@ -222,5 +285,34 @@ export function isTheContentDiffAreOnlySpaces(
 			}
 		}
 	}
+	return true;
+}
+
+/**
+ * Returns true if the content diff is only due to space differences.
+ * @param oldContent The content of the task before the user made the changes.
+ * @param newContent The content of the task after the user made the changes.
+ */
+export function isTheContentDiffAreOnlySpaces_V2(
+	oldContent: string,
+	newContent: string
+): boolean {
+	const removeSpacesAndNewLines = (content: string) =>
+		content.replace(/[\s\n\t]+/g, "");
+	const updatedOldContent = removeSpacesAndNewLines(oldContent);
+	const updatedNewContent = removeSpacesAndNewLines(newContent);
+
+	if (updatedOldContent.length !== updatedNewContent.length) {
+		return false;
+	}
+
+	for (let i = 0; i < updatedOldContent.length; i++) {
+		const charOld = updatedOldContent[i];
+		const charNew = updatedNewContent[i];
+		if (charOld !== charNew) {
+			return false;
+		}
+	}
+
 	return true;
 }

@@ -29,7 +29,7 @@ import {
 import { generateTaskId } from "../../managers/VaultScanner";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { getCurrentLocalTimeString } from "../TimeCalculations";
-import { isTheContentDiffAreOnlySpaces } from "src/modals/DiffContentCompareModal";
+import { isTheContentDiffAreOnlySpaces_V2 } from "src/modals/DiffContentCompareModal";
 
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
@@ -1001,7 +1001,7 @@ export const replaceOldTaskWithNewTask = async (
 			);
 			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else if (
-			isTheContentDiffAreOnlySpaces(
+			isTheContentDiffAreOnlySpaces_V2(
 				oldTaskContent,
 				oldTaskContentFromFile
 			)
@@ -1020,34 +1020,50 @@ export const replaceOldTaskWithNewTask = async (
 			// Replace the old task block with the updated content
 			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else {
-			// Ask user to choose between old and new content
-			openDiffContentCompareModal(
-				plugin,
-				oldTaskContent,
-				newTaskContent,
-				oldTaskContentFromFile,
-				async (userChoice) => {
-					if (userChoice === "old") {
-						const before = linesBefore.join("\n");
-						const after = lines
-							.slice(endLine - 1)
-							.join("\n")
-							.slice(endCharIndex);
-						const newContent = joinFinalNoteContent(
-							before,
-							newTaskContent,
-							after
-						);
-						// Replace the old task block with the updated content
-						await writeDataToVaultFile(
-							plugin,
-							filePath,
-							newContent
-						);
+			if (plugin.settings.data.globalSettings.safeGuardFeature) {
+				// Ask user to choose between old and new content
+				openDiffContentCompareModal(
+					plugin,
+					oldTaskContent,
+					newTaskContent,
+					oldTaskContentFromFile,
+					async (userChoice) => {
+						if (userChoice === "old") {
+							const before = linesBefore.join("\n");
+							const after = lines
+								.slice(endLine - 1)
+								.join("\n")
+								.slice(endCharIndex);
+							const newContent = joinFinalNoteContent(
+								before,
+								newTaskContent,
+								after
+							);
+							// Replace the old task block with the updated content
+							await writeDataToVaultFile(
+								plugin,
+								filePath,
+								newContent
+							);
+						}
+						// If user chooses "new", do nothing
 					}
-					// If user chooses "new", do nothing
-				}
-			);
+				);
+			} else {
+				// If safeguard feature has been disabled by the user. We will by-pass this check and instead of asking the user will directly go-ahead and replace the old content with the new content user has edited.
+				const before = linesBefore.join("\n");
+				const after = lines
+					.slice(endLine - 1)
+					.join("\n")
+					.slice(endCharIndex);
+				const newContent = joinFinalNoteContent(
+					before,
+					newTaskContent,
+					after
+				);
+				// Replace the old task block with the updated content
+				await writeDataToVaultFile(plugin, filePath, newContent);
+			}
 		}
 
 		return true; // Indicate success
