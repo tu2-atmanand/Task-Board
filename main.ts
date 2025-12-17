@@ -121,13 +121,14 @@ export default class TaskBoard extends Plugin {
 			// Register the Kanban view
 			this.registerTaskBoardView();
 
-			// Register editor extensions
-			this.registerEditorExtensions();
-
+			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
-
+			
 			// Register status bar element
 			this.registerTaskBoardStatusBar();
+			
+			// Register editor extensions
+			this.registerEditorExtensions();
 
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
