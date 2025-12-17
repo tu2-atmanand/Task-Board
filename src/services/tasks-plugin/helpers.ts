@@ -15,6 +15,12 @@ import { eventEmitter } from "../EventEmitter";
 export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 	try {
 		const tasksPluginO = new TasksPluginApi(plugin);
+		console.log(
+			"Tasks Plugin API:",
+			tasksPluginO,
+			"\nIs tasks plugin enabled?",
+			tasksPluginO.isTasksPluginEnabled()
+		);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
 			// Define the path to the tasks plugin data.json file

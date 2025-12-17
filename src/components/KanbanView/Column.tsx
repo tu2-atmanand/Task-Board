@@ -1,6 +1,6 @@
 // /src/components/Column.tsx
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
@@ -44,6 +44,9 @@ const Column: React.FC<ColumnProps> = ({
 	// Local tasks state, initially set from external tasks
 	// const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
 	const tasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
+	const [isDragOver, setIsDragOver] = useState(false);
+	// Local tasks state, initially set from external tasks
+	const [localTasks, setLocalTasks] = useState(tasksForThisColumn);
 	// console.log("Column.tsx : Data in tasks :", tasks);
 
 	// // Sync local tasks state with external tasks when they change
@@ -283,15 +286,100 @@ const Column: React.FC<ColumnProps> = ({
 		);
 	}
 
+	// Detect external changes in tasksForThisColumn
+	useEffect(() => {
+		setLocalTasks(tasksForThisColumn);
+	}, [tasksForThisColumn]);
+
+	// Drag and drop handlers to reorder within the column
+	const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, dragIndex: number) => {
+		e.dataTransfer.setData('text/plain', dragIndex.toString());
+		e.dataTransfer.effectAllowed = 'move';
+	};
+
+	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+		e.preventDefault();
+		setIsDragOver(false);
+		const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+		if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+		const updated = [...localTasks];
+		const [moved] = updated.splice(dragIndex, 1);
+		updated.splice(dropIndex, 0, moved);
+		setLocalTasks(updated);
+		// Persistir el nuevo orden
+		console.log("Need to implement the function to persist the new order");
+		// const { updateTaskOrderInColumn } = await import('../../utils/DragDropTaskManager');
+		// await updateTaskOrderInColumn(plugin, columnData, updated);
+	};
+
+	// Handler for when a task is dropped onto this column
+	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		setIsDragOver(false);
+
+		if (columnData.colType !== 'namedTag') return;
+
+		try {
+			// Get the data of the dragged task
+			const taskData = e.dataTransfer.getData('application/json');
+			if (taskData) {
+				const { task, sourceColumnData } = JSON.parse(taskData);
+
+				// Ensure we have valid data
+				if (!task || !sourceColumnData) return;
+
+				// If the source column is not of type "namedTag", cancel
+				if (sourceColumnData.colType !== 'namedTag') return;
+
+				// If it is the same lane (coltag), DO NOT change tags, just reorder
+				if (sourceColumnData.coltag === columnData.coltag) {
+					// Do nothing here, the reordering is already handled by handleTaskDrop
+					return;
+				}
+
+				// If it is between different tagged columns, change tags normally
+				import('../../managers/DragDropTaskManager').then(async ({ updateTaskTagsForColumnMove, updateTaskAfterDragDrop }) => {
+					const updatedTask = await updateTaskTagsForColumnMove(
+						plugin,
+						task,
+						sourceColumnData,
+						columnData
+					);
+					await updateTaskAfterDragDrop(plugin, updatedTask, task);
+				});
+			}
+		} catch (error) {
+			console.error('Error handling task drop:', error);
+		}
+	}, [columnData, plugin]);
+
+	// Handle the dragover event to allow the drop
+	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// Only allow drop if this column is of type "namedTag"
+		if (columnData.colType === 'namedTag') {
+			e.preventDefault();
+			setIsDragOver(true);
+		}
+	}, [columnData]);
+
+	// Handle the dragleave event to remove the visual effect
+	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		setIsDragOver(false);
+	}, []);
+
 	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
 
 	return (
 		<div
-			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}`}
+			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''} ${isDragOver ? 'dragover' : ''}`}
 			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
 			data-column-type={columnData.colType}
 			data-column-tag-name={tagData?.name}
 			data-column-tag-color={tagData?.color}
+			onDrop={handleDrop}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDragEnd={() => setIsDragOver(false)}
 		>
 			{columnData.minimized ? (
 				// Minimized view - vertical bar with count and rotated text
@@ -319,7 +407,14 @@ const Column: React.FC<ColumnProps> = ({
 						{tasks.length > 0 ? (
 							tasks.map((task, index) => {
 								return (
-									<div key={index} className="taskItemFadeIn">
+									<div
+										key={index}
+										className="taskItemFadeIn"
+										draggable={true}
+										onDragStart={e => handleTaskDragStart(e, index)}
+										onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+										onDrop={e => handleTaskDrop(e, index)}
+									>
 										<TaskItem
 											key={task.id}
 											plugin={plugin}
