@@ -1,5 +1,5 @@
 {
-  "version": "1.8.2",
+  "version": "1.8.6",
   "data": {
     "boardConfigs": [
       {
@@ -191,13 +191,13 @@
                 {
                   "id": "id-1763871967165-lct3l84v6",
                   "property": "tags",
-                  "condition": "contains",
+                  "condition": "doesNotContain",
                   "value": "#task"
                 },
                 {
                   "id": "id-1763871980225-nbzhu6dnv",
                   "property": "tags",
-                  "condition": "contains",
+                  "condition": "doesNotContain",
                   "value": "#taskNote"
                 }
               ]
@@ -206,8 +206,8 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 6,
-          "completed": 1
+          "pending": 54,
+          "completed": 18
         }
       },
       {
@@ -516,8 +516,8 @@
           ]
         },
         "taskCount": {
-          "pending": 12,
-          "completed": 0
+          "pending": 11,
+          "completed": 1
         }
       }
     ],
@@ -646,7 +646,141 @@
           "type": "TODO"
         }
       ],
-      "tasksPluginCustomStatuses": [],
+      "tasksPluginCustomStatuses": [
+        {
+          "symbol": " ",
+          "name": "incomplete",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "x",
+          "name": "complete",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "/",
+          "name": "In Progress",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": true,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "-",
+          "name": "Cancelled",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": true,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": ">",
+          "name": "deferred",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "!",
+          "name": "Important",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "?",
+          "name": "question",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "R",
+          "name": "review",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "+",
+          "name": "Inbox",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "b",
+          "name": "bookmark",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "B",
+          "name": "brainstorm",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "D",
+          "name": "deferred or scheduled",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "I",
+          "name": "Info",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "i",
+          "name": "idea",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "N",
+          "name": "note",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "Q",
+          "name": "quote",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "W",
+          "name": "win / success / reward",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "P",
+          "name": "pro",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "C",
+          "name": "con",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        }
+      ],
       "showTaskWithoutMetadata": true,
       "tagColorsType": "background",
       "compatiblePlugins": {
@@ -680,16 +814,16 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 265,
+      "uniqueIdCounter": 362,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 1,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 0
       },
-      "taskNoteIdentifierTag": "taskNote",
+      "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",

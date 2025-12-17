@@ -121,6 +121,7 @@ export interface globalSettingsData {
 	autoAddUniqueID: boolean;
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
+	safeGuardFeature: boolean;
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
@@ -620,6 +621,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			autoAddUniqueID: false,
 			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 			experimentalFeatures: false,
+			safeGuardFeature: true,
 			lastViewHistory: {
 				viewedType: "kanban",
 				boardIndex: 0,

@@ -48,6 +48,12 @@ export class RealTimeScanner {
 		}
 	}
 
+	/**
+	 * Process all updated files and update tasks if necessary.
+	 * @param {TFile | string | undefined} currentFile - The file that was modified, or undefined if no file was modified.
+	 * @param {string | undefined} updatedTaskId - The ID of the task that was updated, or undefined if no task was updated.
+	 * @returns {Promise<boolean>} True if the process was successful, false otherwise.
+	 */
 	async processAllUpdatedFiles(
 		currentFile?: TFile | string | undefined,
 		updatedTaskId?: string | undefined
@@ -88,10 +94,10 @@ export class RealTimeScanner {
 			this.taskBoardFileStack = [];
 			// Save updated stack (which should now be empty)
 			this.saveStack();
-		}
 
-		// Reset the editorModified flag after the scan.
-		this.plugin.editorModified = false;
+			// Reset the editorModified flag after the scan.
+			this.plugin.editorModified = false;
+		}
 
 		setTimeout(() => {
 			// This event emmitter will stop any loading animation of ongoing task-card.
@@ -120,6 +126,13 @@ export class RealTimeScanner {
 		}
 	}
 
+	/**
+	 * Finds the oldPath inside the plugin.vaultScanner.tasksCache and replaces it with the new file path.
+	 * This function does not update the taskBoardFileStack.
+	 * @param file - The file that was renamed (TAbstractFile)
+	 * @param oldPath - The old path of the file (string)
+	 * @param archivedTaskNotesPath - The path of the archived task notes folder (string)
+	 */
 	onFileRenamed(
 		file: TAbstractFile,
 		oldPath: string,
@@ -214,6 +227,10 @@ export class RealTimeScanner {
 		}
 	}
 
+	/**
+	 * This function is called when a file is deleted. It removes the file from the taskBoardFileStack and the tasks cache.
+	 * @param file - The file that was deleted (TAbstractFile)
+	 */
 	onFileDeleted(file: TAbstractFile) {
 		let foundFlag = false;
 		// Remove the file from the stack if it exists
