@@ -37,7 +37,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
+	const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
 
+	const [isDragging, setIsDragging] = useState(false);
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -66,6 +68,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		// Initialize TaskBoardView Component on mount
 		componentRef.current = plugin.view;
 	}, []);
+
+
+	// Ref to access the DOM element of the task item
+	const taskItemRef = useRef<HTMLDivElement>(null);
 
 	// ========================================
 	// COMPONENT-LOCAL REFS FOR DESCRIPTION
@@ -345,6 +351,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 	// 	}
 	// };
 
+	// ========================================
+	// ALL UTIL FUNCTIONS
+	// ========================================
+
 	const getColorIndicator = useCallback(() => {
 		const today = new Date();
 		const taskUniversalDate = parseUniversalDate(universalDate) || new Date(universalDate);
@@ -438,6 +448,10 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 
 		return highestPriorityTag?.color;
 	}
+
+	// ========================================
+	// ALL EVENTS HANDLING
+	// ========================================
 
 	useEffect(() => {
 		const setCardLoading = (eventData: UpdateTaskEventData) => {
@@ -602,6 +616,42 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		}
 	}
 
+	// Handlers for drag and drop
+	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// Only allow dragging if this column is of type "namedTag"
+		if (columnData?.colType !== 'namedTag') {
+			e.preventDefault();
+			return;
+		}
+
+		// Add task data and source column to the dataTransfer object
+		e.dataTransfer.setData('application/json', JSON.stringify({
+			task,
+			sourceColumnData: columnData
+		}));
+
+		// Set visual effect for dragging
+		e.dataTransfer.effectAllowed = 'move';
+
+		// Add dragging class for visual effects
+		setIsDragging(true);
+
+		// Define the drag image (optional)
+		if (taskItemRef.current) {
+			// Create a copy of the element for the drag image
+			const rect = taskItemRef.current.getBoundingClientRect();
+			e.dataTransfer.setDragImage(taskItemRef.current, rect.width / 2, 20);
+		}
+	}, [task, columnData]);
+
+	const handleDragEnd = useCallback(() => {
+		setIsDragging(false);
+	}, []);
+
+	// ========================================
+	// ALL RENDERING CODE
+	// ========================================
+
 	const renderHeader = () => {
 		try {
 			if (plugin.settings.data.globalSettings?.showHeader) {
@@ -621,7 +671,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
-										const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
 										if (
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&
@@ -779,7 +828,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		}
 	};
 
-
 	// Render Footer based on the settings
 	const renderFooter = () => {
 		try {
@@ -924,8 +972,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 	return (
 		<div className='taskItemContainer'>
 			<div
-				className={`taskItem${isThistaskCompleted ? ' completed' : ''}`}
+				ref={taskItemRef}
+				className={`taskItem ${isThistaskCompleted ? 'completed' : ''} ${isDragging ? 'taskItem-dragging' : ''}`}
+				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+				draggable={columnData?.colType === 'namedTag'}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
 				onDoubleClick={handleDoubleClickOnCard}
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
