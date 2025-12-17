@@ -1,5 +1,5 @@
 {
-  "version": "1.8.6",
+  "version": "1.8.7",
   "data": {
     "boardConfigs": [
       {
@@ -517,7 +517,7 @@
         },
         "taskCount": {
           "pending": 11,
-          "completed": 1
+          "completed": 2
         }
       }
     ],
@@ -814,12 +814,12 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 362,
+      "uniqueIdCounter": 363,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 2,
         "taskId": "",
         "settingTab": 0
       },
@@ -947,7 +947,8 @@
         "initialTaskCount": 20,
         "loadMoreCount": 10,
         "scrollThresholdPercent": 80
-      }
+      },
+      "safeGuardFeature": true
     }
   }
 }

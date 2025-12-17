@@ -3,7 +3,7 @@
 import { ColumnData } from "src/interfaces/BoardConfigs";
 import TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { taskItem } from "src/interfaces/TaskItemProps";
+import { taskItem } from "src/interfaces/TaskItem";
 
 /**
  * Updates the tags of a task when moved between columns of type "namedTag"
@@ -35,7 +35,9 @@ export const updateTaskTagsForColumnMove = async (
 		const sourceTag = sourceColumn.coltag.startsWith("#")
 			? sourceColumn.coltag
 			: `#${sourceColumn.coltag}`;
-		updatedTask.tags = updatedTask.tags.filter((tag) => tag !== sourceTag);
+		updatedTask.tags = updatedTask.tags.filter(
+			(tag: string) => tag !== sourceTag
+		);
 	}
 
 	// Add the target column tag if it doesn't exist
