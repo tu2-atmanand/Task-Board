@@ -91,7 +91,7 @@ export class MarkdownUIRenderer {
 	public static async renderTaskDisc(
 		app: App,
 		taskDescText: string,
-		element: HTMLSpanElement,
+		element: HTMLDivElement,
 		path: string,
 		obsidianComponent: Component | null
 	) {
@@ -117,10 +117,8 @@ export class MarkdownUIRenderer {
 	) {
 		try {
 			// console.log("renderSubtaskText : Received following text : ", subtaskText);
-			if (!taskItemComponent) {
-				console.warn(
-					"taskItemComponent is null, cannot render subtask."
-				);
+			let componentEl = taskItemComponent ?? new Component();
+			if (!componentEl) {
 				return;
 			}
 			// Call Obsidian's MarkdownRenderer to render the subtaskText as markdown
@@ -129,10 +127,10 @@ export class MarkdownUIRenderer {
 				subtaskText,
 				el,
 				path,
-				taskItemComponent
+				componentEl
 			);
 		} catch (error) {
-			console.error("Error rendering subtask text:", error, {
+			console.warn("Error rendering subtask text:", error, {
 				subtaskText,
 				path,
 			});
