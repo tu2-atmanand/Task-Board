@@ -365,42 +365,68 @@ const sanitizePriority = (
 };
 
 /**
- * Function to sanitize the tags inside the task title.
+ * Function to sanitize tags inside the task title.
+ * @param title - The title of the task.
+ * @param oldTagsList - The list of old tags to be sanitized.
+ * @param newTag - The new tag to be added to the title. Pass it along with the hash symbol. Eg. "#newTag".
+ * @param cursorLocation - (Optional) The cursor location to insert the tag at a specific position.
+ * @returns The sanitized tags string to be used in the task title.
  */
-const sanitizeTags = (title: string, newTags: string[]): string => {
+export const sanitizeTags = (
+	title: string,
+	oldTagsList: string[],
+	newTag: string,
+	cursorLocation?: cursorLocation
+): string => {
 	// Remove the <mark> and <font> tags from the title first before processing
+	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
-	
-	const tagsRegex = /#[^\s]+/g;
+
+	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
 	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
 
 	// Create a set for quick lookup of newTags
-	const newTagsSet = new Set(newTags);
+	const oldTagSet = new Set(oldTagsList);
 
-	if (newTagsSet.size === 0) {
+	if (oldTagSet.size === 0) {
 		// If no tags are present, remove all existing tags
 		extractedTagsMatch.forEach((tag) => {
-			title = title.replace(tag, "").trim();
+			updatedTitle = title.replace(tag.trim(), "").trim();
 		});
-		return title;
 	}
 
 	// Remove tags from the title that are not in newTags
-	let updatedTitle = title;
 	for (const tag of extractedTagsMatch) {
-		if (!newTagsSet.has(tag)) {
+		if (!oldTagSet.has(tag.trim())) {
 			updatedTitle = updatedTitle.replace(tag, "").trim();
 		}
 	}
 
-	// Append tags from newTags that are not already in the title
-	const updatedTagsMatch =
-		updatedTitle.match(tagsRegex)?.map((tag) => tag.trim()) || [];
+	// // Append tags from newTags that are not already in the title
+	// const updatedTagsMatch =
+	// 	updatedTitle.match(tagsRegex)?.map((tag) => tag.trim()) || [];
+	// const updatedTagsSet = new Set(updatedTagsMatch);
+	// for (const tag of newTags) {
+	// 	if (!updatedTagsSet.has(tag)) {
+	// 		updatedTitle += ` ${tag}`;
+	// 	}
+	// }
 
-	const tagsToAdd = newTags.filter((tag) => !updatedTagsMatch.includes(tag));
+	if (cursorLocation?.lineNumber === 1) {
+		// Insert newTag at the specified charIndex with spaces
+		const spaceBefore =
+			updatedTitle.slice(0, cursorLocation.charIndex).trim() + " ";
+		const spaceAfter =
+			" " + updatedTitle.slice(cursorLocation.charIndex).trim();
+		return `${spaceBefore}${newTag}${spaceAfter}`;
+	} else {
+		// Append newTag at the end of the title
+		if (newTag && !updatedTitle.includes(newTag)) {
+			updatedTitle += ` ${newTag}`;
+		}
+	}
 
-	return `${updatedTitle}${tagsToAdd.length > 0 ? ` ${tagsToAdd.join(" ")}` : ""
-		}`.trim();
+	return updatedTitle.trim();
 };
 
 
@@ -503,87 +529,164 @@ const sanitizeTags = (title: string, newTags: string[]): string => {
 
 // For handleCheckboxChange
 
+/**
+ * Function to clean the task title by removing metadata.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param task - The task item to clean.
+ * @returns The cleaned task title without metadata.
+ */
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
-	if (!plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+	// Get the list of properties to hide
+	const hiddenProperties =
+		plugin.settings.data.globalSettings.hiddenTaskProperties || [];
+
+	// If no properties are configured to hide and the legacy setting is false, return original title
+	if (
+		hiddenProperties.length === 0 &&
+		!plugin.settings.data.globalSettings.showTaskWithoutMetadata
+	) {
 		return task.title;
 	}
 
 	let cleanedTitle = task.title;
 
-	// Remove tags
-	// TODO: Thing a better way to do this
-	// 	task.tags.forEach((tag) => {
-	// 	const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
-	// 	const tagsMatch = cleanedTitle.match(tagRegex);
-	// 	if (tagsMatch) {
-	// 		cleanedTitle = cleanedTitle.replace(tagsMatch[0], "");
-	// 	}
-	// });
+	// Remove the initial indentation and checkbox markdown
+	cleanedTitle = cleanedTitle
+		.replace(
+			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
+			""
+		)
+		.trim();
 
-	cleanedTitle = cleanedTitle.replace(/#[\w\u00C0-\u00FF-]+/g, '');
+	// If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
+	if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+		return cleanTaskTitleLegacy(task);
+	}
 
-	// Remove time (handles both formats)
-	if (task.time) {
-		const timeRegex =
-			/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|\@time\(.*?\))/g;
-		const timeMatch = cleanedTitle.match(timeRegex);
-		if (timeMatch) {
-			cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
+	// Hide only selected properties
+	hiddenProperties.forEach((property) => {
+		switch (property) {
+			case HideableTaskProperty.Tags:
+				// Remove tags
+				task.tags.forEach((tag) => {
+					const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
+					const tagsMatch = cleanedTitle.match(tagRegex);
+					if (tagsMatch) {
+						cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");
+					}
+				});
+				break;
+
+			case HideableTaskProperty.Time:
+				// Remove time (handles both formats)
+				if (task.time) {
+					const timeRegex =
+						/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|\@time\(.*?\))/g;
+					const timeMatch = cleanedTitle.match(timeRegex);
+					if (timeMatch) {
+						cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
+					}
+				}
+				break;
+
+			case HideableTaskProperty.DueDate:
+				// Remove due date in various formats
+				if (task.due) {
+					const dueDateRegex =
+						/\s*(📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::.*?\]|@due\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.CreatedDate:
+				// Remove Created date in various formats
+				if (task.createdDate) {
+					const createdDateRegex =
+						/\s*(➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::.*?\]|@created\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(createdDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.StartDate:
+				// Remove start date in various formats
+				if (task.startDate) {
+					const startDateRegex =
+						/\s*(🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::.*?\]|@start\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(startDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.ScheduledDate:
+				// Remove scheduled date in various formats
+				if (task.scheduledDate) {
+					const scheduledDateRegex =
+						/\s*(⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::.*?\]|@scheduled\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(scheduledDateRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.CompletionDate:
+				// Remove completion date in various formats
+				if (task.completion) {
+					const completionRegex =
+						/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
+					cleanedTitle = cleanedTitle.replace(completionRegex, "");
+				}
+				break;
+
+			case HideableTaskProperty.Priority:
+				// Remove priority in various formats
+				if (task.priority > 0) {
+					let match = cleanedTitle.match(
+						/\[priority::\s*(\d{1,2})\]/
+					);
+					if (match) {
+						cleanedTitle = cleanedTitle.replace(match[0], "");
+					}
+
+					match = cleanedTitle.match(/@priority\(\s*(\d{1,2})\s*\)/);
+					if (match) {
+						cleanedTitle = cleanedTitle.replace(match[0], "");
+					}
+
+					const priorityIcon = priorityEmojis[task.priority];
+
+					if (priorityIcon) {
+						// Create a regex pattern to match any priority emoji in text
+						const priorityRegex = new RegExp(
+							`(${Object.values(priorityEmojis)
+								.map((emoji) => `\\s*${emoji}\\s*`)
+								.join("|")})`,
+							"g"
+						);
+
+						// Replace the first valid priority emoji found
+						cleanedTitle = cleanedTitle.replace(
+							priorityRegex,
+							(match) => {
+								return match.trim() === priorityIcon
+									? " "
+									: match;
+							}
+						);
+					}
+				}
+				break;
+		}
+	});
+
+	// Remove reminder if it's in the hidden properties list
+	if (
+		hiddenProperties.includes(HideableTaskProperty.Dependencies) ||
+		plugin.settings.data.globalSettings.showTaskWithoutMetadata
+	) {
+		const reminderRegex =
+			/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
+		const reminderMatch = cleanedTitle.match(reminderRegex);
+		if (reminderMatch) {
+			cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
 		}
 	}
-
-	// Remove due date in various formats
-	if (task.due) {
-		const dueDateRegex =
-			/\s*(📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::.*?\]|@due\(.*?\))/g;
-		cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
-	}
-
-	// Remove completion date in various formats
-	if (task.completion) {
-		const completionRegex =
-			/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
-		cleanedTitle = cleanedTitle.replace(completionRegex, "");
-	}
-
-	// Remove priority in various formats
-	if (task.priority > 0) {
-		let match = cleanedTitle.match(/\[priority::\s*(\d{1,2})\]/);
-		if (match) {
-			cleanedTitle = cleanedTitle.replace(match[0], "");
-		}
-
-		match = cleanedTitle.match(/@priority\(\s*(\d{1,2})\s*\)/);
-		if (match) {
-			cleanedTitle = cleanedTitle.replace(match[0], "");
-		}
-
-		const priorityIcon = priorityEmojis[task.priority];
-
-		if (priorityIcon) {
-			// Create a regex pattern to match any priority emoji in text
-			const priorityRegex = new RegExp(
-				`(${Object.values(priorityEmojis)
-					.map((emoji) => `\\s*${emoji}\\s*`)
-					.join("|")})`,
-				"g"
-			);
-
-			// Replace the first valid priority emoji found
-			cleanedTitle = cleanedTitle.replace(priorityRegex, (match) => {
-				return match.trim() === priorityIcon ? "" : match;
-			});
-		}
-	}
-
-	// Remove reminder if it exists
-	const reminderRegex = /(\(@\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?\))/;
-	const reminderMatch = cleanedTitle.match(reminderRegex);
-	if (reminderMatch) {
-		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "");
-	}
-
-	// console.log("cleanedTitle", cleanedTitle.trim());
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();
