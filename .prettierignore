@@ -1,1 +1,2 @@
 src/utils/lang/locale/*.ts
+src/services/tasks-plugin/api.ts

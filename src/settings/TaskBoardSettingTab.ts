@@ -2,7 +2,7 @@
 
 import { App, PluginSettingTab } from "obsidian";
 
-import { SettingsManager } from "src/settings/TaskBoardSettingConstructUI";
+import { SettingsManager } from "src/settings/SettingConstructUI";
 import type TaskBoard from "../../main";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";

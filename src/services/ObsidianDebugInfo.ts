@@ -7,7 +7,7 @@ export async function getObsidianDebugInfo(app: App) {
 	// This is an empty string if it's the default theme
 	const themeName = app.customCss.theme;
 	const themeManifest = app.customCss.themes[themeName];
-	const numSnippets = app.customCss.snippets.filter((snippet) =>
+	const numSnippets = app.customCss.snippets.filter((snippet: any) =>
 		app.customCss.enabledSnippets.has(snippet)
 	).length;
 	const plugins = app.plugins.plugins;

@@ -1,13 +1,17 @@
 import TaskBoard from "main";
 import { App } from "obsidian";
-import { AddOrEditTaskModal } from "./modal/AddOrEditTaskModal";
-import { taskContentFormatter } from "./utils/TaskContentFormatter";
+import { AddOrEditTaskModal } from "./modals/AddOrEditTaskModal";
 
 export class TaskBoardApi {
 	public static GetApi(app: App, plugin: TaskBoard) {
 		return {
-			addNewTask: (filePath?: string) => {
-				return this.openAddNewTaskModal(app, plugin, filePath);
+			addNewTask: (isTaskNote: boolean, filePath?: string) => {
+				return this.openAddNewTaskModal(
+					app,
+					plugin,
+					isTaskNote,
+					filePath
+				);
 			},
 		};
 	}
@@ -15,15 +19,16 @@ export class TaskBoardApi {
 	public static async openAddNewTaskModal(
 		app: App,
 		plugin: TaskBoard,
+		isTaskNote: boolean,
 		filePath?: string
 	) {
 		try {
 			const AddTaskModal = new AddOrEditTaskModal(
-				app,
 				plugin,
 				(newTask, quickAddPluginChoice) => {
-					// return taskContentFormatter(plugin, newTask);
+					// return getSanitizedTaskContent(plugin, newTask);
 				},
+				isTaskNote,
 				true,
 				false,
 				undefined,
@@ -32,8 +37,9 @@ export class TaskBoardApi {
 			AddTaskModal.open();
 			// return await AddTaskModal.returnTask();
 			return await AddTaskModal.waitForClose;
-		} catch {
-			return undefined;
+		} catch (error) {
+			console.error("Error opening add new task modal:", error);
+			return String(error);
 		}
 	}
 }

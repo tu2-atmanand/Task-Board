@@ -1,10 +1,13 @@
 import TaskBoard from "main";
 import { TaskBoardSubmodule } from "./subModules";
-import { Plugin } from "obsidian";
 
 export class CommunityPlugins extends TaskBoardSubmodule {
 	get reminderPlugin() {
-		return this.app.plugins.plugins["obsidian-reminder-plugin"] ?? null;
+		this.app
+		return (
+			this.app.plugins.plugins["obsidian-reminder-plugin"] ??
+			null
+		);
 	}
 
 	isReminderPluginEnabled() {

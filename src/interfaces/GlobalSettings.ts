@@ -1,4 +1,23 @@
+import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 import { BoardConfigs } from "./BoardConfigs";
+import {
+	EditButtonMode,
+	TagColorType,
+	HideableTaskProperty,
+	taskPropertyFormatOptions,
+	UniversalDateOptions,
+	NotificationService,
+	cardSectionsVisibilityOptions,
+	colType,
+	taskStatuses,
+	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
+	mapViewBackgrounVariantTypes,
+	mapViewNodeMapOrientation,
+	mapViewScrollAction,
+	mapViewArrowDirection,
+	mapViewEdgeType,
+} from "./Enums";
+import { taskItemKeyToNameMapping } from "./Mapping";
 
 export interface scanFilters {
 	files: {
@@ -6,6 +25,10 @@ export interface scanFilters {
 		values: string[];
 	};
 	folders: {
+		polarity: number;
+		values: string[];
+	};
+	frontMatter: {
 		polarity: number;
 		values: string[];
 	};
@@ -21,31 +44,26 @@ export interface TagColor {
 	priority: number;
 }
 
-export enum EditButtonMode {
-	PopUp = "popUp",
-	NoteInTab = "noteInTab",
-	NoteInSplit = "noteInSplit",
-	NoteInWindow = "noteInWindow",
-	NoteInHover = "noteInHover",
-}
-
-export enum UniversalDateOptions {
-	startDate = "startDate",
-	scheduledDate = "scheduledDate",
-	dueDate = "due",
-}
-
-export enum TagColorType {
-	Text = "text",
-	Background = "background",
-}
-
-interface CustomStatus {
+export interface CustomStatus {
 	symbol: string; // The symbol representing the status (e.g., "/", "-")
 	name: string; // The human-readable name of the status (e.g., "In Progress")
 	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
 	type: string; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+}
+
+export interface TaskBoardAction {
+	enabled: boolean;
+	trigger: "Complete" | "Incomplete";
+	type: "move" | "copy";
+	targetColumn: string;
+}
+
+export interface frontmatterFormatting {
+	index: number;
+	property: string;
+	key: string;
+	taskItemKey: string;
 }
 
 export interface globalSettingsData {
@@ -54,10 +72,11 @@ export interface globalSettingsData {
 	scanFilters: scanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
-	taskCompletionFormat: string;
+	taskPropertyFormat: string;
 	taskCompletionDateTimePattern: string;
 	dailyNotesPluginComp: boolean;
 	universalDateFormat: string;
+	defaultStartTime: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
 	autoAddCreatedDate: boolean;
@@ -70,12 +89,15 @@ export interface globalSettingsData {
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
-	universalDate: UniversalDateOptions;
-	tasksPluginCustomStatuses: CustomStatus[];
+	doubleClickCardToEdit: EditButtonMode;
+	universalDate: string;
 	customStatuses: CustomStatus[];
+	tasksPluginCustomStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
 	preDefinedNote: string;
+	taskNoteIdentifierTag: string;
+	taskNoteDefaultLocation: string;
 	quickAddPluginDefaultChoice: string;
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
@@ -85,8 +107,45 @@ export interface globalSettingsData {
 		quickAddPlugin: boolean;
 	};
 	archivedTasksFilePath: string;
+	archivedTBNotesFolderPath: string;
+	frontmatterFormatting: frontmatterFormatting[];
 	showFileNameInCard: boolean;
 	showFrontmatterTagsOnCards: boolean;
+	tasksCacheFilePath: string;
+	notificationService: string;
+	frontmatterPropertyForReminder: string;
+	actions: TaskBoardAction[];
+	searchQuery?: string;
+	cardSectionsVisibility: string;
+	hiddenTaskProperties: HideableTaskProperty[];
+	autoAddUniqueID: boolean;
+	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
+	experimentalFeatures: boolean;
+	safeGuardFeature: boolean;
+	lastViewHistory: {
+		viewedType: string;
+		boardIndex: number;
+		settingTab: number;
+		taskId?: string;
+	};
+	boundTaskCompletionToChildTasks: boolean;
+	kanbanView: {
+		lazyLoadingEnabled: boolean;
+		initialTaskCount: number;
+		loadMoreCount: number;
+		scrollThresholdPercent: number;
+	};
+	mapView: {
+		background: string;
+		mapOrientation: string;
+		optimizedRender: boolean;
+		arrowDirection: mapViewArrowDirection;
+		animatedEdges: boolean;
+		scrollAction: mapViewScrollAction;
+		showMinimap: boolean;
+		renderVisibleNodes: boolean;
+		edgeType: mapViewEdgeType;
+	};
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -99,22 +158,27 @@ export interface PluginDataJson {
 }
 
 export const DEFAULT_SETTINGS: PluginDataJson = {
-	version: "1.4.2",
+	version: "", // Keep this empty only. Change the version number in the runOnPluginUpdate function inside main.ts file whenever you will going to release a new version.
 	data: {
 		boardConfigs: [
 			{
 				columns: [
 					{
 						id: 1,
-						colType: "undated",
+						colType: colType.undated,
 						active: true,
 						collapsed: false,
 						name: "Undated Tasks",
 						index: 1,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
+						},
 					},
 					{
 						id: 2,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Over Due",
@@ -127,7 +191,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 3,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Today",
@@ -140,7 +204,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 4,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Tomorrow",
@@ -153,7 +217,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 5,
-						colType: "dated",
+						colType: colType.dated,
 						active: true,
 						collapsed: false,
 						name: "Future",
@@ -166,7 +230,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 6,
-						colType: "completed",
+						colType: colType.completed,
 						active: true,
 						collapsed: false,
 						limit: 20,
@@ -174,19 +238,21 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 6,
 					},
 				],
-				filters: [],
-				filterPolarity: "0",
-				filterScope: "Both",
 				name: "Time Based Workflow",
-				index: 1,
+				index: 0,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
+				boardFilter: {
+					rootCondition: "any",
+					filterGroups: [],
+				},
 			},
 			{
 				columns: [
 					{
 						id: 7,
-						colType: "untagged",
+						colType: colType.untagged,
 						active: true,
 						collapsed: false,
 						name: "Backlogs",
@@ -194,57 +260,117 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 8,
-						colType: "namedTag",
+						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
-						name: "Can be implemented",
+						name: "Important",
 						index: 2,
-						coltag: "pending",
+						coltag: "important",
 					},
 					{
 						id: 9,
-						colType: "namedTag",
+						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
-						name: "In Progress",
+						name: "WIP",
 						index: 3,
-						coltag: "working",
-					},
-					{
-						id: 10,
-						colType: "namedTag",
-						active: true,
-						collapsed: false,
-						name: "Done",
-						index: 4,
-						coltag: "done",
+						coltag: "wip",
 					},
 					{
 						id: 11,
-						colType: "namedTag",
+						colType: colType.namedTag,
 						active: true,
 						collapsed: false,
 						name: "In Review",
 						index: 5,
-						coltag: "Test",
+						coltag: "review",
 					},
 					{
 						id: 12,
-						colType: "Completed",
+						colType: colType.completed,
 						active: true,
 						collapsed: false,
 						index: 6,
-						limit: 10,
+						limit: 20,
 						name: "Completed",
 					},
 				],
-				filters: [],
-				filterPolarity: "0",
-				filterScope: "Both",
-				name: "Static Kanban",
-				index: 2,
+				name: "Tag Based Workflow",
+				index: 1,
 				showColumnTags: false,
 				showFilteredTags: true,
+				hideEmptyColumns: false,
+				boardFilter: {
+					rootCondition: "any",
+					filterGroups: [],
+				},
+			},
+			{
+				columns: [
+					{
+						id: 7,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.unchecked,
+						active: true,
+						collapsed: false,
+						name: "Backlogs",
+						index: 1,
+					},
+					{
+						id: 8,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.scheduled,
+						active: true,
+						collapsed: false,
+						name: "Ready to start",
+						index: 2,
+					},
+					{
+						id: 9,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.inprogress,
+						active: true,
+						collapsed: false,
+						name: "In Progress",
+						index: 3,
+					},
+					{
+						id: 11,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.question,
+						active: true,
+						collapsed: false,
+						name: "In Review",
+						index: 5,
+					},
+					{
+						id: 12,
+						colType: colType.completed,
+						active: true,
+						collapsed: false,
+						index: 6,
+						limit: 20,
+						name: "Completed",
+					},
+					{
+						id: 13,
+						colType: colType.taskStatus,
+						taskStatus: taskStatuses.dropped,
+						active: true,
+						collapsed: false,
+						name: "Cancelled",
+						index: 7,
+					},
+				],
+				name: "Status Based Workflow",
+				index: 1,
+				showColumnTags: false,
+				showFilteredTags: true,
+				hideEmptyColumns: false,
+				boardFilter: {
+					rootCondition: "any",
+					filterGroups: [],
+				},
 			},
 		],
 		globalSettings: {
@@ -259,6 +385,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					polarity: 3,
 					values: [],
 				},
+				frontMatter: {
+					polarity: 3,
+					values: [],
+				},
 				tags: {
 					polarity: 3,
 					values: [],
@@ -267,67 +397,89 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			firstDayOfWeek: "Mon",
 			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
-			taskCompletionFormat: "1",
-			taskCompletionDateTimePattern: "yyyy-MM-DD/HH:mm",
+			taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
+			taskCompletionDateTimePattern:
+				TaskRegularExpressions.dateTimeFormat,
 			dailyNotesPluginComp: false,
-			universalDateFormat: "yyyy-MM-DD",
+			universalDateFormat: TaskRegularExpressions.dateFormat,
+			defaultStartTime: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
 			autoAddCreatedDate: false,
 			autoAddUniversalDate: true,
 			scanVaultAtStartup: false,
 			realTimeScanning: true,
-			columnWidth: "273px",
+			columnWidth: "300px",
 			showHeader: true,
 			showFooter: true,
-			showVerticalScroll: false,
+			showVerticalScroll: true,
 			tagColors: [
 				{
 					name: "bug",
-					color: "rgba(255, 0, 0, 1)",
+					color: "rgba(255, 0, 0, 0.55)",
 					priority: 1,
 				},
 				{
-					name: "working",
-					color: "rgba(0, 255, 0, 0.8)",
+					name: "important",
+					color: "rgba(246, 255, 0, 0.53)",
 					priority: 2,
 				},
 				{
-					name: "new",
-					color: "rgba(0, 0, 255, 1)",
+					name: "wip",
+					color: "rgba(0, 255, 0, 0.53)",
+					priority: 2,
+				},
+				{
+					name: "review",
+					color: "rgba(0, 0, 255, 0.49)",
 					priority: 3,
 				},
 			],
-			editButtonAction: EditButtonMode.PopUp,
+			editButtonAction: EditButtonMode.Modal,
+			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
 			tasksPluginCustomStatuses: [],
-			tagColorsType: TagColorType.Text,
+			tagColorsType: TagColorType.Background,
 			customStatuses: [
 				{
-					symbol: " ",
-					name: "Unchecked",
-					nextStatusSymbol: "x",
+					symbol: taskStatuses.todo,
+					name: "Todo",
+					nextStatusSymbol: taskStatuses.done,
 					availableAsCommand: false,
 					type: "TODO",
 				},
 				{
-					symbol: "/",
+					symbol: taskStatuses.scheduled,
+					name: "Ready to start",
+					nextStatusSymbol: taskStatuses.done,
+					availableAsCommand: false,
+					type: "TODO",
+				},
+				{
+					symbol: taskStatuses.question,
+					name: "In Review",
+					nextStatusSymbol: taskStatuses.done,
+					availableAsCommand: false,
+					type: "TODO",
+				},
+				{
+					symbol: taskStatuses.inprogress,
 					name: "In Progress",
-					nextStatusSymbol: "x",
+					nextStatusSymbol: taskStatuses.done,
 					availableAsCommand: true,
 					type: "IN_PROGRESS",
 				},
 				{
-					symbol: "-",
+					symbol: taskStatuses.dropped,
 					name: "Cancelled",
-					nextStatusSymbol: "x",
+					nextStatusSymbol: taskStatuses.done,
 					availableAsCommand: true,
 					type: "CANCELLED",
 				},
 				{
-					symbol: "x",
+					symbol: taskStatuses.done,
 					name: "Done",
-					nextStatusSymbol: " ",
+					nextStatusSymbol: taskStatuses.todo,
 					availableAsCommand: true,
 					type: "DONE",
 				},
@@ -339,11 +491,160 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				reminderPlugin: false,
 				quickAddPlugin: false,
 			},
-			preDefinedNote: "Task_board_note.md",
+			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
+			taskNoteIdentifierTag: "taskNote",
+			taskNoteDefaultLocation: "Meta/Task_Board/New_Task_Notes",
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
+			archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",
+			frontmatterFormatting: [
+				{
+					index: 0,
+					property: taskItemKeyToNameMapping["id"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
+					taskItemKey: "id",
+				},
+				{
+					index: 1,
+					property: taskItemKeyToNameMapping["title"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.title,
+					taskItemKey: "title",
+				},
+				{
+					index: 2,
+					property: taskItemKeyToNameMapping["status"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.status,
+					taskItemKey: "status",
+				},
+				{
+					index: 3,
+					property: taskItemKeyToNameMapping["priority"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.priority,
+					taskItemKey: "priority",
+				},
+				{
+					index: 4,
+					property: taskItemKeyToNameMapping["tags"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.tags,
+					taskItemKey: "tags",
+				},
+				{
+					index: 5,
+					property: taskItemKeyToNameMapping["time"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.time,
+					taskItemKey: "time",
+				},
+				{
+					index: 6,
+					property: taskItemKeyToNameMapping["reminder"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.reminder,
+					taskItemKey: "reminder",
+				},
+				{
+					index: 7,
+					property: taskItemKeyToNameMapping["createdDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.createdDate,
+					taskItemKey: "createdDate",
+				},
+				{
+					index: 8,
+					property: taskItemKeyToNameMapping["startDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.startDate,
+					taskItemKey: "startDate",
+				},
+				{
+					index: 9,
+					property: taskItemKeyToNameMapping["scheduledDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.scheduledDate,
+					taskItemKey: "scheduledDate",
+				},
+				{
+					index: 10,
+					property: taskItemKeyToNameMapping["due"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.due,
+					taskItemKey: "due",
+				},
+				{
+					index: 11,
+					property: taskItemKeyToNameMapping["dependsOn"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dependsOn,
+					taskItemKey: "dependsOn",
+				},
+				{
+					index: 12,
+					property: taskItemKeyToNameMapping["cancelledDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
+					taskItemKey: "cancelledDate",
+				},
+				{
+					index: 13,
+					property: taskItemKeyToNameMapping["completionDate"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.completionDate,
+					taskItemKey: "completionDate",
+				},
+				// TODO : The below properties will be available once the TBNote feature has been implemented. The filePath will be actually the path of the task-note or the tb-note. A new property will be required to be added inside the taskItem interface to store the sourcePath.
+				// {
+				// 	index: 14,
+				// 	property: taskItemKeyToNameMapping["filePath"],
+				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.filePath,
+				// 	taskItemKey: "filePath",
+				// },
+				// {
+				// 	index: 15,
+				// 	property: taskItemKeyToNameMapping["taskLocation"],
+				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.taskLocation,
+				// 	taskItemKey: "taskLocation",
+				// },
+				{
+					index: 14,
+					property: taskItemKeyToNameMapping["dateModified"],
+					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
+					taskItemKey: "",
+				},
+			],
 			showFileNameInCard: false,
 			showFrontmatterTagsOnCards: false,
+			tasksCacheFilePath: "",
+			notificationService: NotificationService.None,
+			frontmatterPropertyForReminder: "reminder",
+			actions: [
+				{
+					enabled: true,
+					trigger: "Complete",
+					type: "move",
+					targetColumn: "Completed",
+				},
+			],
+			cardSectionsVisibility:
+				cardSectionsVisibilityOptions.showSubTasksOnly,
+			hiddenTaskProperties: [],
+			autoAddUniqueID: false,
+			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
+			experimentalFeatures: false,
+			safeGuardFeature: true,
+			lastViewHistory: {
+				viewedType: "kanban",
+				boardIndex: 0,
+				settingTab: 0,
+			},
+			boundTaskCompletionToChildTasks: false,
+			kanbanView: {
+				lazyLoadingEnabled: true,
+				initialTaskCount: 20,
+				loadMoreCount: 10,
+				scrollThresholdPercent: 80,
+			},
+			mapView: {
+				background: mapViewBackgrounVariantTypes.none,
+				mapOrientation: mapViewNodeMapOrientation.horizontal,
+				optimizedRender: false,
+				arrowDirection: mapViewArrowDirection.childToParent,
+				animatedEdges: true,
+				scrollAction: mapViewScrollAction.zoom,
+				showMinimap: true,
+				renderVisibleNodes: false,
+				edgeType: mapViewEdgeType.bezier,
+			},
 		},
 	},
 };
