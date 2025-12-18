@@ -4,7 +4,7 @@ import {
 	deleteTaskFromFile,
 	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
-} from "./TaskItemUtils";
+} from "./TaskLineUtils";
 import TaskBoard from "main";
 import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
 import { t } from "../lang/helper";
@@ -27,6 +27,11 @@ import { EditButtonMode } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 import { eventEmitter } from "src/services/EventEmitter";
 
+/**
+ * Handle the checkbox change event for the task-line and update the task in the file.
+ * @param plugin - Taskboard plugin instance
+ * @param task - TaskItem to update
+ */
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
@@ -48,7 +53,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 						task.legacyId
 					);
 
-					// // Move from Completed to Pending
+					// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 					// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
 				}
 			);
@@ -70,8 +75,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 							taskWithUpdatedStatus.filePath
 						);
 
-						// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
-						// Move from Pending to Completed
+						// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 						// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
 					}
 				);
@@ -125,15 +129,23 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				);
 			});
 	}
-	// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
+	// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 };
 
+/**
+ * Handle subtasks change event. This function is basically updating the content in the file using the `updateTaskInFile` function.
+ * @param plugin - Taskboard plugin instance
+ * @param oldTask - TaskItem to update
+ * @param updatedTask - TaskItem with updated subtasks
+ */
 export const handleSubTasksChange = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
 	updatedTask: taskItem
 ) => {
-	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated in the note.
+	// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+	// updateTaskInJson(plugin, updatedTask);
+
 	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
 		plugin.realTimeScanning.processAllUpdatedFiles(
 			updatedTask.filePath,
@@ -142,6 +154,12 @@ export const handleSubTasksChange = (
 	});
 };
 
+/**
+ * Handle task deletion event.
+ * @param plugin - Taskboard plugin instance
+ * @param task - Task note to delete
+ * @param isTaskNote - Boolean indicating if the task is deleted
+ */
 export const handleDeleteTask = (
 	plugin: TaskBoard,
 	task: taskItem,
@@ -162,7 +180,8 @@ export const handleDeleteTask = (
 					);
 				});
 
-				// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
+				// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+				// deleteTaskFromJson(plugin, task);
 				// Remove the task from state after deletion
 				// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
 			}
@@ -183,6 +202,12 @@ export const handleDeleteTask = (
 	deleteModal.open();
 };
 
+/**
+ * Handle edit task modal open
+ * @param plugin - Taskboard plugin instance
+ * @param task - Task note to edit
+ * @param settingOption - Edit button mode setting value
+ */
 export const handleEditTask = (
 	plugin: TaskBoard,
 	task: taskItem,
@@ -244,6 +269,15 @@ export const handleEditTask = (
 	}
 };
 
+/**
+ * Opens a file and highlights the task in the given leaf/tab.
+ * If the file path is invalid, it will not open the file and will log an error message.
+ * If the leaf initialization fails, it will log an error message.
+ * If the file exists and the leaf is valid, it will open the file and highlight the task content.
+ * @param plugin - The Taskboard plugin instance
+ * @param task - The task item to open
+ * @param mode - The edit button mode setting value
+ */
 export const openFileAndHighlightTask = async (
 	plugin: TaskBoard,
 	task: taskItem,

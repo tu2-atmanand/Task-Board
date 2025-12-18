@@ -4,7 +4,7 @@ import { App, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	addTaskInNote,
 	updateTaskInFile,
-} from "src/utils/taskLine/TaskItemUtils";
+} from "src/utils/taskLine/TaskLineUtils";
 import { AddOrEditTaskView } from "src/views/AddOrEditTaskView";
 import { Board } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
@@ -59,7 +59,7 @@ export const openAddNewTaskInCurrentFileModal = (
 				}
 			);
 
-			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
+			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 			// if (
 			// 	activeFile &&
 			// 	scanFilterForFilesNFolders(activeFile, scanFilters) &&
@@ -116,7 +116,7 @@ export const openAddNewTaskModal = (
 				});
 			}
 
-			// NOTE : The below code is not required anymore, as I am already scanning the file if its updated using above function.
+			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 			// if (
 			// 	activeTFile instanceof TFile &&
 			// 	scanFilterForFilesNFolders(activeTFile, scanFilters) &&
@@ -244,14 +244,15 @@ export const openEditTaskModal = async (
 				}
 			);
 
-			// updateTaskInJson(plugin, updatedTask); // NOTE : This is not necessary any more as I am scanning the file after it has been updated.
+			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+			// updateTaskInJson(plugin, updatedTask);
 
 			// setTasks((prevTasks) =>
 			// 	prevTasks.map((task) =>
 			// 		task.id === updatedTask.id ? { ...task, ...updatedTask } : task
 			// 	)
 			// );
-			// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the updateTaskInJson function, because if i add that here, then all the things are getting executed parallely instead of sequential.
+			// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 		},
 		false,
 		false,

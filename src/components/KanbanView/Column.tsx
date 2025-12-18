@@ -102,13 +102,13 @@ const Column: React.FC<ColumnProps> = ({
 	}
 
 	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
-		const sortMenu = new Menu();
+		const columnMenu = new Menu();
 
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("sort-and-filter"));
 			item.setIsLabel(true);
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("configure-column-sorting"));
 			item.setIcon("arrow-up-down");
 			item.onClick(async () => {
@@ -145,7 +145,7 @@ const Column: React.FC<ColumnProps> = ({
 				modal.open();
 			});
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("configure-column-filtering"));
 			item.setIcon("list-filter");
 			item.onClick(async () => {
@@ -227,13 +227,13 @@ const Column: React.FC<ColumnProps> = ({
 			});
 		});
 
-		sortMenu.addSeparator();
+		columnMenu.addSeparator();
 
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("quick-actions"));
 			item.setIsLabel(true);
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("hide-column"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
@@ -263,7 +263,7 @@ const Column: React.FC<ColumnProps> = ({
 
 		// Show minimize or maximize option based on current state
 		if (columnData.minimized) {
-			sortMenu.addItem((item) => {
+			columnMenu.addItem((item) => {
 				item.setTitle(t("maximize-column"));
 				item.setIcon("panel-left-open");
 				item.onClick(async () => {
@@ -271,7 +271,7 @@ const Column: React.FC<ColumnProps> = ({
 				});
 			});
 		} else {
-			sortMenu.addItem((item) => {
+			columnMenu.addItem((item) => {
 				item.setTitle(t("minimize-column"));
 				item.setIcon("panel-left-close");
 				item.onClick(async () => {
@@ -281,7 +281,7 @@ const Column: React.FC<ColumnProps> = ({
 		}
 
 		// Use native event if available (React event has nativeEvent property)
-		sortMenu.showAtMouseEvent(
+		columnMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)
 		);
 	}

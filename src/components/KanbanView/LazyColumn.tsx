@@ -134,21 +134,29 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		}
 	}
 
+	/**
+	 * Opens the column menu, which allows the user to sort and filter the tasks in the column,
+	 * configure the column's sorting and filtering, and hide the column.
+	 *
+	 * @param {MouseEvent | React.MouseEvent} event - The event that triggered the menu
+	 */
 	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
-		const sortMenu = new Menu();
+		const columnMenu = new Menu();
 
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("sort-and-filter"));
 			item.setIsLabel(true);
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("configure-column-sorting"));
 			item.setIcon("arrow-up-down");
 			item.onClick(async () => {
+				// open sorting modal
 				const modal = new ConfigureColumnSortingModal(
 					plugin,
 					columnData,
 					(updatedColumnConfiguration: ColumnData) => {
+						// Update the column configuration in the board data
 						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 							(board: Board) => board.name === activeBoardData.name
 						);
@@ -159,24 +167,30 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							);
 
 							if (columnIndex !== -1) {
+								// Update the column configuration
 								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
+
+								// Save the settings
 								plugin.saveSettings();
+
 								eventEmitter.emit('REFRESH_BOARD');
 							}
 						}
 					},
 					() => {
-						// onCancel callback
+						// onCancel callback - nothing to do
 					}
 				);
 				modal.open();
 			});
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("configure-column-filtering"));
 			item.setIcon("list-filter");
 			item.onClick(async () => {
 				try {
+					// TODO : The indexes are finding using the name, this might create issues if there are duplicate names. Use the id to find the indexes.
+					// Find board index once
 					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 						(board: Board) => board.name === activeBoardData.name
 					);
@@ -184,16 +198,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						(col: ColumnData) => col.name === columnData.name
 					);
 
-					if (Platform.isMobile) {
+					if (Platform.isMobile || Platform.isMacOS) {
+						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new ViewTaskFilterModal(
 							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
 						);
 
+						// Set the close callback - mainly used for handling cancel actions
 						filterModal.filterCloseCallback = async (filterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
+									// Update the column filters
 									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+
+									// Save the settings
 									await plugin.saveSettings();
+
+									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
 								}
 							}
@@ -201,26 +222,36 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 						filterModal.open();
 					} else {
+						// Get the position of the menu (approximate column position)
+						// Use CSS.escape to properly escape the selector value
 						const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
 						const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
 						const position = columnElement
 							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
-							: { x: 100, y: 100 };
+							: { x: 100, y: 100 }; // Fallback position
 
+						// Create and show filter popover
+						// leafId is undefined for column filters (not tied to a specific leaf)
 						const popover = new ViewTaskFilterPopover(
 							plugin,
-							true,
+							true, // forColumn is true
 							undefined,
 							boardIndex,
 							columnData.name,
 							columnData.filters
 						);
 
+						// Set up close callback to save filter state
 						popover.onClose = async (filterState?: RootFilterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
+									// Update the column filters
 									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+
+									// Save the settings
 									await plugin.saveSettings();
+
+									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
 								}
 							}
@@ -229,21 +260,22 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						popover.showAtPosition(position);
 					}
 				} catch (error) {
-					bugReporter(plugin, "Error showing filter popover", String(error), "LazyColumn.tsx/column-menu/configure-column-filters");
+					bugReporter(plugin, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
 				}
 			});
 		});
 
-		sortMenu.addSeparator();
+		columnMenu.addSeparator();
 
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("quick-actions"));
 			item.setIsLabel(true);
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("hide-column"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
+				// Find the board and column indices
 				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 					(board: Board) => board.name === activeBoardData.name
 				);
@@ -254,8 +286,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					);
 
 					if (columnIndex !== -1) {
+						// Set the active property to false
 						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+
+						// Save the settings
 						await plugin.saveSettings();
+
+						// Refresh the board view
 						eventEmitter.emit('REFRESH_BOARD');
 					}
 				}
@@ -264,7 +301,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 		// Show minimize or maximize option based on current state
 		if (columnData.minimized) {
-			sortMenu.addItem((item) => {
+			columnMenu.addItem((item) => {
 				item.setTitle(t("maximize-column"));
 				item.setIcon("panel-left-open");
 				item.onClick(async () => {
@@ -272,7 +309,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				});
 			});
 		} else {
-			sortMenu.addItem((item) => {
+			columnMenu.addItem((item) => {
 				item.setTitle(t("minimize-column"));
 				item.setIcon("panel-left-close");
 				item.onClick(async () => {
@@ -281,7 +318,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			});
 		}
 
-		sortMenu.showAtMouseEvent(
+		// Use native event if available (React event has nativeEvent property)
+		columnMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)
 		);
 	}

@@ -26,3 +26,23 @@ export const getCurrentLocalTimeString = (): string => {
 
 	return currentTime;
 };
+
+/**
+ * Parses a date string and returns a Date object if valid, otherwise returns null.
+ * @param dateStr - The date string to parse.
+ * @returns A Date object if valid, otherwise null.
+ */
+export const parseUniversalDate = (dateStr: string): Date | null => {
+	// Regular expression to check if dueStr starts with a two-digit day
+	const ddMmYyyyPattern = /^\d{2}-\d{2}-\d{4}$/;
+
+	if (ddMmYyyyPattern.test(dateStr)) {
+		// Convert "DD-MM-YYYY" → "YYYY-MM-DD"
+		const [day, month, year] = dateStr.split("-");
+		dateStr = `${year}-${month}-${day}`;
+	}
+
+	// Parse the date
+	const parsedDate = new Date(dateStr);
+	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+};

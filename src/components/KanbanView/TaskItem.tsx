@@ -6,11 +6,10 @@ import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSet
 import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component, Notice } from 'obsidian';
+import { Component, Notice, Platform, Menu } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { getTaskFromId, parseUniversalDate } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
@@ -18,13 +17,16 @@ import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regula
 import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, EllipsisVertical } from 'lucide-react';
 import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
 import { priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { RxDragHandleDots2 } from 'react-icons/rx';
+import { parseUniversalDate } from 'src/utils/DateTimeCalculations';
+import { getTaskFromId } from 'src/utils/TaskItemUtils';
 
 export interface TaskProps {
 	plugin: TaskBoard;
@@ -616,6 +618,59 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		}
 	}
 
+	const handleMenuButtonClicked = (event: React.MouseEvent) => {
+		event.stopPropagation();
+		const taskItemMenu = new Menu();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("sort-and-filter"));
+			item.setIsLabel(true);
+		});
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("configure-column-sorting"));
+			item.setIcon("arrow-up-down");
+			item.onClick(async () => {
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("quick-actions"));
+			item.setIsLabel(true);
+		});
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("hide-column"));
+			item.setIcon("eye-off");
+			item.onClick(async () => {
+			});
+		});
+
+		// // Show minimize or maximize option based on current state
+		// if (columnData.minimized) {
+		// 	taskItemMenu.addItem((item) => {
+		// 		item.setTitle(t("maximize-column"));
+		// 		item.setIcon("panel-left-open");
+		// 		item.onClick(async () => {
+		// 			await handleMinimizeColumn();
+		// 		});
+		// 	});
+		// } else {
+		// 	taskItemMenu.addItem((item) => {
+		// 		item.setTitle(t("minimize-column"));
+		// 		item.setIcon("panel-left-close");
+		// 		item.onClick(async () => {
+		// 			await handleMinimizeColumn();
+		// 		});
+		// 	});
+		// }
+
+		// Use native event if available (React event has nativeEvent property)
+		taskItemMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		// Only allow dragging if this column is of type "namedTag"
@@ -714,8 +769,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 								</div>
 
 							</div>
-							{/* Drag Handle */}
-							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} /></div> */}
 						</div>
 					</>);
 			} else {
@@ -991,6 +1044,17 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 						)}
 					</div>
 					{memoizedRenderHeader}
+					{/* Drag Handle */}
+					{Platform.isPhone && (
+						<>
+							<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+						</>
+					)}
+					{!Platform.isPhone && (
+						<>
+							<div className="taskItemDragBtn" aria-label={t("drag-task-card")}><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} /></div>
+						</>
+					)}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
 							<input

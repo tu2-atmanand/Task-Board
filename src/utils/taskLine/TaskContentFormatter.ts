@@ -5,7 +5,6 @@ import {
 	extractDependsOn,
 	extractPriority,
 	extractTaskId,
-	generateTaskId,
 } from "../../managers/VaultScanner";
 import {
 	TaskRegularExpressions,
@@ -22,6 +21,7 @@ import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
 import { cursorLocation } from "src/interfaces/TaskItem";
+import { generateTaskId } from "../TaskItemUtils";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -60,6 +60,15 @@ export const getFormattedTaskContent = async (
 	return completeTask;
 };
 
+/**
+ * Add a unique ID to the task content if it doesn't already have one.
+ * This function will check if the task content already has an ID. If it does, it will return the same formatted task content.
+ * If it doesn't, it will generate a new ID and add it to the task content based on the task format user has configured and return the new formatted task content.
+ * @param Plugin - The Taskboard plugin instance.
+ * @param formattedTaskContent - The formatted task content to add the ID to.
+ * @param forceAddId - If true, force the addition of a new ID even if the task content already has one.
+ * @returns A promise that resolves with an object containing the formatted task content and the new ID.
+ */
 export const addIdToTaskContent = async (
 	Plugin: TaskBoard,
 	formattedTaskContent: string,
@@ -107,6 +116,14 @@ export const addIdToTaskContent = async (
 	return { formattedTaskContent, newId };
 };
 
+/**
+ * Returns a formatted task content as a string.
+ * If the task is null or has no title, returns an empty string.
+ * Replaces the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
+ * Adds the body content, indent each line with a tab (or 4 spaces) for proper formatting.
+ * @param task - The taskItem object representing the task to format.
+ * @returns A string containing the formatted task content.
+ */
 export const getFormattedTaskContentSync = (task: taskItem): string => {
 	if (!task || !task.title) {
 		return "";

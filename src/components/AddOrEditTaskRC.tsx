@@ -18,7 +18,6 @@ import { bugReporter, openEditTaskView } from "src/services/OpenModals";
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/taskNote/TaskNoteUtils";
-import { applyIdToTaskInNote, getTaskFromId } from "src/utils/taskLine/TaskItemUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { handleEditTask } from "src/utils/taskLine/TaskItemEventHandlers";
@@ -27,6 +26,7 @@ import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
 import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
+import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 
 export interface filterOptions {
 	value: string;
@@ -566,7 +566,7 @@ export const AddOrEditTaskRC: React.FC<{
 		// 	return;
 		// }
 
-		applyIdToTaskInNote(plugin, task).then((newId) => {
+		applyIdToTaskItem(plugin, task).then((newId) => {
 			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
 			plugin.settings.data.globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter));
 
@@ -913,7 +913,7 @@ export const AddOrEditTaskRC: React.FC<{
 				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
 				return;
 			}
-			applyIdToTaskInNote(plugin, selectedTask).then((newId) => {
+			applyIdToTaskItem(plugin, selectedTask).then((newId) => {
 				const getUpdatedDependsOnIds = (prev: string[]) => {
 					if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
 						if (newId === undefined && !selectedTask?.legacyId) {

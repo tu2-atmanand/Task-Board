@@ -3,8 +3,8 @@ import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskCompleted, isTaskLine } from "../CheckBoxUtils";
-import { getTaskFromId } from "../taskLine/TaskItemUtils";
 import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
+import { getTaskFromId } from "../TaskItemUtils";
 
 /**
  * Scans a file and its front-matter for specific filters.

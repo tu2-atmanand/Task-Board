@@ -8,7 +8,7 @@ import {
 	addIdToTaskContent,
 	getFormattedTaskContent,
 } from "src/utils/taskLine/TaskContentFormatter";
-import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskItemUtils";
+import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskLineUtils";
 import { CustomStatus } from "src/interfaces/GlobalSettings";
 import { eventEmitter } from "../EventEmitter";
 

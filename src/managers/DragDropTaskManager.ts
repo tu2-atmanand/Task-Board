@@ -55,7 +55,7 @@ export const updateTaskTagsForColumnMove = async (
 };
 
 /**
- * Updates the task in both the tasks.json file and the original markdown file
+ * Updates the task in the file after drag and drop
  * @param plugin TaskBoard plugin instance
  * @param updatedTask The modified task
  * @param originalTask The original task before modification
