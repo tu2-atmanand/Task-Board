@@ -21,9 +21,10 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { isTheContentDiffAreOnlySpaces_V2 } from "src/modals/DiffContentCompareModal";
 
 /**
+ * Adds a new task to a note file.
  * @param {plugin} plugin - plugin instance
  * @param {newTask} newTask - taskItem object that needs to be added to the file
- * @param {editorActive} editorActive - Whether to add the task to the file active or not
+ * @param {boolean} editorActive - Whether to add the task to the file active or not
  * @param {cursorPosition} cursorPosition - The position at which the task should be added
  * @returns A promise that resolves with a string representing the ID of the task
  */
@@ -92,72 +93,15 @@ export const addTaskInNote = async (
 	}
 };
 
-// export const updateTaskInFile_V0 = async (
-// 	plugin: TaskBoard,
-// 	updatedTask: taskItem,
-// 	oldTask: taskItem
-// ) => {
-// 	const filePath = updatedTask.filePath;
-
-// 	try {
-// 		// Read the file content using Obsidian's API
-// 		const fileContent = await readDataOfVaultFile(plugin, filePath);
-// 		console.log("updateTaskInFile : Old file content :\n", fileContent);
-
-// 		console.log("updateTaskInFile : updatedTask :\n", updatedTask);
-// 		const completeTask = getSanitizedTaskContent(plugin, updatedTask);
-// 		console.log("updateTaskInFile : completeTask :\n", completeTask);
-
-// 		if (completeTask) {
-// 			let taskRegex = "";
-
-// 			const startRegex = new RegExp(
-// 				`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
-// 				"gm"
-// 			);
-// 			console.log("updateTaskInFile : startRegex :\n", startRegex);
-
-// 			const startIndex = fileContent.search(startRegex);
-// 			console.log("updateTaskInFile : startIndex :\n", startIndex);
-
-// 			if (startIndex !== -1) {
-// 				const lines = fileContent.substring(startIndex).split("\n");
-// 				console.log("updateTaskInFile : lines :\n", lines);
-// 				const taskContent = [];
-
-// 				for (const line of lines) {
-// 					if (line.trim() === "") {
-// 						break;
-// 					}
-// 					taskContent.push(line);
-// 				}
-
-// 				taskRegex = taskContent.join("\n");
-// 				console.log("updateTaskInFile : taskRegex :\n", taskRegex);
-// 			}
-
-// 			// Replace the old task with the updated formatted task in the file
-// 			const newContent = fileContent.replace(taskRegex, completeTask);
-
-// 			// Write the updated content back to the file using Obsidian's API
-// 			await writeDataToVaultFile(plugin, filePath, newContent);
-// 		}
-// 	} catch (error) {
-// 		console.error("Error updating task in file:", error);
-// 	}
-// };
-
-/*
+/**
  * Replaces an old task in a file with new task content.
  * If the new task content is an empty string, it deletes the old task from the file.
  * If there are differences in whitespace only, it prompts the user for confirmation before proceeding.
- *
- * @param plugin - The TaskBoard plugin instance used to access settings and perform file operations.
- * @param task - The taskItem object representing the task to be replaced.
- * @param oldTaskContent - The original content of the task to be replaced.
- * @param newTaskContent - The new content to replace the old task with. If empty, the old task will be deleted.
- *
- * @throws Will throw an error if there are issues reading or writing to the file.
+ * @param {plugin} plugin - The Taskboard plugin instance.
+ * @param {taskItem} updatedTask - The updated task item.
+ * @param {taskItem} oldTask - The old task item to update.
+ * @param {boolean} forceAddId - Whether to add the updated task to the file content.
+ * @returns A promise that resolves to the ID of the updated task if successful, undefined otherwise.
  */
 export const updateTaskInFile = async (
 	plugin: TaskBoard,

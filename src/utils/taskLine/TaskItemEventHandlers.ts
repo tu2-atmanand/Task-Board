@@ -28,7 +28,7 @@ import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 import { eventEmitter } from "src/services/EventEmitter";
 
 /**
- * Handle the checkbox change event for the task-line and update the task in the file.
+ * Handle the checkbox change event for the inline-tasks and update the task in the file.
  * @param plugin - Taskboard plugin instance
  * @param task - TaskItem to update
  */
@@ -155,7 +155,7 @@ export const handleSubTasksChange = (
 };
 
 /**
- * Handle task deletion event.
+ * Handle task deletion event by showing a confirmation modal where user can select whether to remove the task content from the file, comment it out or archive it into another file.
  * @param plugin - Taskboard plugin instance
  * @param task - Task note to delete
  * @param isTaskNote - Boolean indicating if the task is deleted
@@ -200,157 +200,4 @@ export const handleDeleteTask = (
 		},
 	});
 	deleteModal.open();
-};
-
-/**
- * Handle edit task modal open
- * @param plugin - Taskboard plugin instance
- * @param task - Task note to edit
- * @param settingOption - Edit button mode setting value
- */
-export const handleEditTask = (
-	plugin: TaskBoard,
-	task: taskItem,
-	settingOption: string
-) => {
-	const taskNoteIdentifierTag =
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag;
-	switch (settingOption) {
-		case EditButtonMode.Modal:
-			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-				openEditTaskNoteModal(plugin, task);
-			} else {
-				openEditTaskModal(plugin, task);
-			}
-			break;
-		case EditButtonMode.View:
-			const isTaskNote = isTaskNotePresentInTags(
-				taskNoteIdentifierTag,
-				task.tags
-			);
-			openEditTaskView(
-				plugin,
-				isTaskNote,
-				false,
-				true,
-				task,
-				task.filePath,
-				"window"
-			);
-			break;
-		case EditButtonMode.TasksPluginModal:
-			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-				openEditTaskNoteModal(plugin, task);
-			} else {
-				openTasksPluginEditModal(plugin, task);
-			}
-			break;
-		case EditButtonMode.NoteInTab: {
-			openFileAndHighlightTask(plugin, task, settingOption);
-			break;
-		}
-		case EditButtonMode.NoteInSplit: {
-			openFileAndHighlightTask(plugin, task, settingOption);
-			break;
-		}
-		case EditButtonMode.NoteInWindow: {
-			openFileAndHighlightTask(plugin, task, settingOption);
-			break;
-		}
-		default:
-			bugReporter(
-				plugin,
-				"This should never happen, looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
-				"NA",
-				"TaskItemEventHandlers.ts/handleEditTask"
-			);
-			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
-			break;
-	}
-};
-
-/**
- * Opens a file and highlights the task in the given leaf/tab.
- * If the file path is invalid, it will not open the file and will log an error message.
- * If the leaf initialization fails, it will log an error message.
- * If the file exists and the leaf is valid, it will open the file and highlight the task content.
- * @param plugin - The Taskboard plugin instance
- * @param task - The task item to open
- * @param mode - The edit button mode setting value
- */
-export const openFileAndHighlightTask = async (
-	plugin: TaskBoard,
-	task: taskItem,
-	mode: string
-) => {
-	const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
-	let leaf: WorkspaceLeaf | null = null;
-
-	switch (mode) {
-		case EditButtonMode.NoteInTab: {
-			leaf = plugin.app.workspace.getLeaf("tab");
-			break;
-		}
-		case EditButtonMode.NoteInSplit: {
-			leaf = plugin.app.workspace.getLeaf("split");
-			break;
-		}
-		case EditButtonMode.NoteInWindow: {
-			leaf = plugin.app.workspace.getLeaf("window");
-
-			break;
-		}
-		case EditButtonMode.Modal:
-		default:
-			bugReporter(
-				plugin,
-				"This is a low priority error and it should never happen. Looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
-				"NA",
-				"TaskItemEventHandlers.ts/handleEditTask"
-			);
-			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
-			break;
-	}
-
-	if (file && file instanceof TFile && leaf) {
-		await leaf.openFile(file, {
-			eState: { line: task.taskLocation.startLine - 1 },
-		});
-	} else {
-		bugReporter(
-			plugin,
-			"Either file not found or Leaf initialization failed. Please check below details for more information. First try to find if the file exists as per the below path. If the issue is critical, report it to developer.",
-			`Trying to open the following file: ${task.filePath}.\nLeaf type: ${
-				leaf ? leaf.constructor.name : "undefined"
-			}`,
-			"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
-		);
-	}
-
-	// if (newWindow) {
-	// 	// plugin.app.workspace.openLinkText('', newFilePath, 'window')
-	// 	const leaf = plugin.app.workspace.getLeaf("window");
-	// } else {
-	// await plugin.app.workspace.openLinkText('', newFilePath, false);
-	// const activeEditor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
-	// console.log("Note View:", activeEditor);
-	// activeEditor?.scrollIntoView({
-	// 	from: { line: 5, ch: 0 },
-	// 	to: { line: 5, ch: 5 },
-	// }, true);
-	// const leaf = plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
-	// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-	// if (file && file instanceof TFile) {
-	// 	await leaf.openFile(file, {
-	// 		eState: { line: task.taskLocation.startLine - 1 },
-	// 	});
-	// } else {
-	// 	bugReporter(
-	// 		plugin,
-	// 		"File not found",
-	// 		`The file at path ${newFilePath} could not be found.`,
-	// 		"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
-	// 	);
-	// }
-	// }
 };

@@ -20,13 +20,13 @@ import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUti
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/taskNote/TaskNoteUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { handleEditTask } from "src/utils/taskLine/TaskItemEventHandlers";
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
 import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
 import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
 import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
+import { handleEditTask } from "src/utils/UserTaskEvents";
 
 export interface filterOptions {
 	value: string;

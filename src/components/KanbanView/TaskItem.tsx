@@ -3,7 +3,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isTaskCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
-import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
+import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
 import { Component, Notice, Platform, Menu } from 'obsidian';
@@ -19,7 +19,7 @@ import { allowedFileExtensionsRegEx } from 'src/regularExpressions/Miscelleneous
 import { bugReporter } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical } from 'lucide-react';
 import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
-import { priorityEmojis } from 'src/interfaces/Mapping';
+import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
@@ -27,6 +27,7 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { RxDragHandleDots2 } from 'react-icons/rx';
 import { parseUniversalDate } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
+import { handleEditTask, updateTaskItemStatus } from 'src/utils/UserTaskEvents';
 
 export interface TaskProps {
 	plugin: TaskBoard;
@@ -623,14 +624,24 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("sort-and-filter"));
+			item.setTitle(t("properties"));
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("configure-column-sorting"));
-			item.setIcon("arrow-up-down");
-			item.onClick(async () => {
-			});
+			item.setTitle(t("status"));
+			item.setIcon("info");
+			const statusMenu = item.setSubmenu()
+
+			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.tasksPluginCustomStatuses);
+			customStatues.forEach((status) => {
+				statusMenu.addItem((item) => {
+					item.setTitle(status.text);
+					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
+					item.onClick(() => {
+						updateTaskItemStatus(plugin, task, status.value);
+					})
+				});
+			})
 		});
 
 		taskItemMenu.addSeparator();
@@ -1052,7 +1063,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 					)}
 					{!Platform.isPhone && (
 						<>
-							<div className="taskItemDragBtn" aria-label={t("drag-task-card")}><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} /></div>
+							<div className="taskItemDragBtn" aria-label={t("drag-task-card")}><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
 						</>
 					)}
 					<div className="taskItemMainBody">

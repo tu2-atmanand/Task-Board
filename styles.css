@@ -1024,17 +1024,21 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	background-color: var(--background-primary-alt);
 	border: none;
 	cursor: grab;
-	padding-block: 2px;
-	padding-inline: 4px;
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 1.2rem;
+	min-width: 1.2rem;
+	/* padding-block: 2px; */
+	/* padding-inline: 4px; */
 	border-radius: 5px;
 	/* margin: 0 5px; */
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	/* display: flex
+	; */
+	/* align-items: center; */
+	/* justify-content: center; */
 	font-size: 1.2em;
-	/* Adjust size as needed */
 	transition: transform 0.2s;
-	/* Animation for hover effect */
 }
 
 .taskItemDragBtn:hover {

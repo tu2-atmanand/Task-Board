@@ -274,7 +274,6 @@ export const openEditTaskNoteModal = (
 			quickAddPluginChoice: string,
 			newTaskContent: string | undefined
 		) => {
-			// This is not creating that big of a problem, Hence disabling it for now.
 			let eventData: UpdateTaskEventData = {
 				taskID: existingTask.id,
 				state: true,
@@ -287,11 +286,14 @@ export const openEditTaskNoteModal = (
 						plugin,
 						updatedTask
 					).then(() => {
-						// This is required to rescan the updated file and refresh the board.
-						plugin.realTimeScanning.processAllUpdatedFiles(
-							updatedTask.filePath,
-							existingTask.id
-						);
+						sleep(1000).then(() => {
+							// TODO : Is 1 sec really required ?
+							// This is required to rescan the updated file and refresh the board.
+							plugin.realTimeScanning.processAllUpdatedFiles(
+								updatedTask.filePath,
+								existingTask.id
+							);
+						});
 					});
 				} else {
 					writeDataToVaultFile(
