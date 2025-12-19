@@ -503,6 +503,30 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
 }
 
+/* Drag and Drop Styling */
+
+/* Dragged task item dimming effect */
+.taskItem.task-item-dragging-dimmed {
+	opacity: 0.45;
+	transition: opacity 0.2s ease-in-out;
+}
+
+/* Target column allowed drop styling */
+.TaskBoardColumnsSection.drag-over-allowed {
+	border: 2px solid var(--color-green);
+	box-shadow: 0 0 12px 0 rgba(76, 175, 80, 0.4), inset 0 0 12px 0 rgba(76, 175, 80, 0.1);
+	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+	background-color: var(--background-secondary);
+}
+
+/* Target column not allowed drop styling */
+.TaskBoardColumnsSection.drag-over-not-allowed {
+	border: 2px solid var(--color-red);
+	box-shadow: 0 0 12px 0 rgba(244, 67, 54, 0.4), inset 0 0 12px 0 rgba(244, 67, 54, 0.1);
+	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+	background-color: var(--background-secondary);
+}
+
 
 /* /src/components/TaskItem.tsx */
 

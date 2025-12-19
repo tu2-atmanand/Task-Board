@@ -28,6 +28,7 @@ import { RxDragHandleDots2 } from 'react-icons/rx';
 import { parseUniversalDate } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
 import { handleEditTask, updateTaskItemStatus } from 'src/utils/UserTaskEvents';
+import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
 
 export interface TaskProps {
 	plugin: TaskBoard;
@@ -156,9 +157,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			}
 		})();
 
-		return () => {
-			cancelled = true;
-		};
+		// return () => {
+		// 	cancelled = true;
+		// };
 	}, [task.id, task.title, task.filePath, plugin.settings.data.globalSettings.searchQuery]);
 
 	// useEffect(() => {
@@ -684,6 +685,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		console.log('handleDragStart');
 		// Only allow dragging if this column is of type "namedTag"
 		if (columnData?.colType !== 'namedTag') {
 			e.preventDefault();
@@ -702,16 +704,59 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		// Add dragging class for visual effects
 		setIsDragging(true);
 
-		// Define the drag image (optional)
+		// Define the drag image for better visual feedback
 		if (taskItemRef.current) {
-			// Create a copy of the element for the drag image
-			const rect = taskItemRef.current.getBoundingClientRect();
-			e.dataTransfer.setDragImage(taskItemRef.current, rect.width / 2, 20);
+			// Save current drag payload so dragover handlers can access it reliably
+			dragDropTasksManagerInsatance.setCurrentDragData({ task, sourceColumnData: columnData });
+			// Create a custom drag image
+			const dragImage = document.createElement('div');
+			dragImage.style.position = 'absolute';
+			dragImage.style.top = '-9999px';
+			dragImage.style.left = '-9999px';
+			dragImage.style.width = taskItemRef.current.offsetWidth + 'px';
+			dragImage.style.height = taskItemRef.current.offsetHeight + 'px';
+			dragImage.style.backgroundColor = getComputedStyle(taskItemRef.current).backgroundColor;
+			dragImage.style.border = getComputedStyle(taskItemRef.current).border;
+			dragImage.style.borderRadius = getComputedStyle(taskItemRef.current).borderRadius;
+			dragImage.style.boxShadow = '0px 8px 16px 0 rgba(0, 0, 0, 0.5), 0px 2px 4px 0 rgba(0, 0, 0, 0.3)';
+			dragImage.style.opacity = '0.95';
+			dragImage.style.zIndex = '10000';
+			dragImage.style.padding = getComputedStyle(taskItemRef.current).padding;
+			dragImage.style.display = 'flex';
+			dragImage.style.alignItems = 'center';
+			dragImage.style.justifyContent = 'center';
+			dragImage.style.fontWeight = 'bold';
+			dragImage.style.color = getComputedStyle(taskItemRef.current).color;
+			dragImage.style.overflow = 'hidden';
+			dragImage.textContent = cleanTaskTitleLegacy(task);
+			
+			document.body.appendChild(dragImage);
+			e.dataTransfer.setDragImage(dragImage, dragImage.offsetWidth / 2, dragImage.offsetHeight / 2);
+
+			// Clean up the drag image element shortly after set (some environments remove automatically)
+			setTimeout(() => {
+				try { document.body.removeChild(dragImage); } catch {};
+			}, 0);
+
+			// Dim the dragged task item itself
+			if (taskItemRef.current) {
+				dragDropTasksManagerInsatance.dimDraggedTaskItem(taskItemRef.current);
+			}
 		}
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
 		setIsDragging(false);
+
+		// Remove dim effect from this dragged task and clear manager state
+		if (taskItemRef.current) {
+			dragDropTasksManagerInsatance.removeDimFromDraggedTaskItem(taskItemRef.current);
+		}
+
+		// Clear manager drag payload and any styling on columns/task-items
+		const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+		dragDropTasksManagerInsatance.clearAllDragStyling(allColumnContainers);
+		dragDropTasksManagerInsatance.clearCurrentDragData();
 	}, []);
 
 	// ========================================
@@ -1040,7 +1085,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 				className={`taskItem ${isThistaskCompleted ? 'completed' : ''} ${isDragging ? 'taskItem-dragging' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
-				draggable={columnData?.colType === 'namedTag'}
+				draggable={true}
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 				onDoubleClick={handleDoubleClickOnCard}

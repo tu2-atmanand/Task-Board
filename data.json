@@ -821,7 +821,7 @@
         "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
@@ -943,7 +943,7 @@
         "edgeType": "default"
       },
       "kanbanView": {
-        "lazyLoadingEnabled": true,
+        "lazyLoadingEnabled": false,
         "initialTaskCount": 20,
         "loadMoreCount": 10,
         "scrollThresholdPercent": 80

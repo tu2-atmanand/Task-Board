@@ -16,6 +16,9 @@ import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
+import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
+import { columnTypeAndNameMapping } from 'src/interfaces/Mapping';
+import { colType } from 'src/interfaces/Enums';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -328,27 +331,29 @@ const Column: React.FC<ColumnProps> = ({
 				// Ensure we have valid data
 				if (!task || !sourceColumnData) return;
 
-				// TODO : Instead of below code, will make use of the new dragDropManager instance and its functions to make the decisions and provide CSS styling when the task has been dropped.
+				// Get the target column container
+				const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+				// Get the source column container
+				const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+				const sourceColumnContainer = allColumnContainers.find(container => {
+					const containerTag = container.getAttribute('data-column-tag-name');
+					return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+				}) || targetColumnContainer;
 
-				// // If the source column is not of type "namedTag", cancel
-				// if (sourceColumnData.colType !== 'namedTag') return;
+				// Use the DragDropTasksManager to handle the drop
+				dragDropTasksManagerInsatance.handleDrop(
+					e.nativeEvent,
+					sourceColumnData,
+					sourceColumnContainer,
+					columnData,
+					targetColumnContainer
+				);
 
-				// // If it is the same lane (coltag), DO NOT change tags, just reorder
-				// if (sourceColumnData.coltag === columnData.coltag) {
-				// 	// Do nothing here, the reordering is already handled by handleTaskDrop
-				// 	return;
-				// }
+				// Clear manager payload (drag finished)
+				dragDropTasksManagerInsatance.clearCurrentDragData();
 
-				// // If it is between different tagged columns, change tags normally
-				// import('../../managers/DragDropTaskManager').then(async ({ updateTaskTagsForColumnMove, updateTaskAfterDragDrop }) => {
-				// 	const updatedTask = await updateTaskTagsForColumnMove(
-				// 		plugin,
-				// 		task,
-				// 		sourceColumnData,
-				// 		columnData
-				// 	);
-				// 	await updateTaskAfterDragDrop(plugin, updatedTask, task);
-				// });
+				// TODO : Implement the actual task property update logic based on source and target column data
+				// This will be called after validation passes
 			}
 		} catch (error) {
 			console.error('Error handling task drop:', error);
@@ -358,9 +363,58 @@ const Column: React.FC<ColumnProps> = ({
 	// Handle the dragover event to allow the drop
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		// Only allow drop if this column is of type "namedTag"
-		if (columnData.colType === 'namedTag') {
+		if (columnData.colType === colType.namedTag) {
+			// Always prevent default to indicate drop is allowed unless we explicitly set otherwise
 			e.preventDefault();
 			setIsDragOver(true);
+			try {
+				// Try to read payload from the DataTransfer first
+				let taskDataStr = '';
+				try {
+					taskDataStr = e.dataTransfer.getData('application/json');
+				} catch (err) {
+					// ignore - some environments restrict access
+				}
+
+				let payload: any = null;
+				if (taskDataStr) {
+					try { payload = JSON.parse(taskDataStr); } catch {}
+				}
+
+				// Fallback to manager-stored payload if dataTransfer is empty
+				if (!payload) {
+					payload = dragDropTasksManagerInsatance.getCurrentDragData();
+				}
+
+				if (!payload) return;
+
+				const { task, sourceColumnData } = payload;
+				if (!task || !sourceColumnData) return;
+
+				// Get the target column container
+				const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+				// Get the source column container (best-effort by matching tag)
+				const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+				const sourceColumnContainer = allColumnContainers.find(container => {
+					const containerTag = container.getAttribute('data-column-tag-name');
+					return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+				}) || targetColumnContainer;
+
+				// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
+				dragDropTasksManagerInsatance.handleDragOver(
+					e.nativeEvent,
+					sourceColumnData,
+					sourceColumnContainer,
+					columnData,
+					targetColumnContainer
+				);
+
+				// Ensure cursor reflects allowed/not-allowed (best-effort fallback)
+				const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
+				e.dataTransfer.dropEffect = allowed ? 'move' : 'none';
+			} catch (error) {
+				console.error('Error handling drag over:', error);
+			}
 		}
 	}, [columnData]);
 

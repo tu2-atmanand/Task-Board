@@ -6,6 +6,9 @@ import { ColumnData } from 'src/interfaces/BoardConfigs';
  */
 class DragDropTasksManager {
 	private static instance: DragDropTasksManager;
+ 
+ 	// Hold the current drag payload so dragover handlers can access it reliably
+ 	private currentDragData: any | null = null;
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -20,6 +23,40 @@ class DragDropTasksManager {
 			DragDropTasksManager.instance = new DragDropTasksManager();
 		}
 		return DragDropTasksManager.instance;
+	}
+
+	/**
+	 * Dims the dragged task item to provide visual feedback
+	 *
+	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
+	 */
+	dimDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
+		draggedTaskItem.classList.add('task-item-dragging-dimmed');
+	}
+
+	/**
+	 * Removes the dim effect from the dragged task item
+	 *
+	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
+	 */
+	removeDimFromDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
+		draggedTaskItem.classList.remove('task-item-dragging-dimmed');
+	}
+
+	/**
+	 * Clears all drag-related styling from all task items and columns
+	 *
+	 * @param {HTMLDivElement[]} allColumnContainers - Array of all column DOM containers
+	 */
+	clearAllDragStyling(allColumnContainers: HTMLDivElement[]): void {
+		allColumnContainers.forEach((container) => {
+			container.classList.remove('drag-over-allowed', 'drag-over-not-allowed');
+		});
+		// Also clear dimming from all task items
+		const allTaskItems = Array.from(document.querySelectorAll('.taskItem')) as HTMLDivElement[];
+		allTaskItems.forEach((item) => {
+			item.classList.remove('task-item-dragging-dimmed');
+		});
 	}
 
 	/**
@@ -48,6 +85,27 @@ class DragDropTasksManager {
 	}
 
 	/**
+	 * Store current drag payload (called from dragstart)
+	 */
+	setCurrentDragData(data: any) {
+		this.currentDragData = data;
+	}
+
+	/**
+	 * Read current drag payload
+	 */
+	getCurrentDragData() {
+		return this.currentDragData;
+	}
+
+	/**
+	 * Clear current drag payload (called from dragend / drop)
+	 */
+	clearCurrentDragData() {
+		this.currentDragData = null;
+	}
+
+	/**
 	 * Handles the drag over event and applies CSS styling to the target column container
 	 * based on whether the task is allowed to be dropped
 	 *
@@ -68,6 +126,7 @@ class DragDropTasksManager {
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(sourceColumnData, targetColumnData);
+		console.log('isDropAllowed', isDropAllowed);
 
 		if (isDropAllowed) {
 			// Apply CSS styling for allowed drop
@@ -101,8 +160,11 @@ class DragDropTasksManager {
 	): void {
 		e.preventDefault();
 
-		// Remove drag-over styling
+		// Remove drag-over styling from target
 		targetColumnContainer.classList.remove('drag-over-allowed', 'drag-over-not-allowed');
+
+		// Remove dim from source column
+		sourceColumnContainer.classList.remove('drag-source-dimmed');
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(sourceColumnData, targetColumnData);
