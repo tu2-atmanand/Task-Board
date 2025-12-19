@@ -527,6 +527,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	background-color: var(--background-secondary);
 }
 
+/* Insertion placeholder shown when reordering within a manual-order column */
+.task-insert-placeholder {
+	height: 3rem; /* approx 3 rem high as requested */
+	border-radius: 6px;
+	background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));
+	margin: 6px 0;
+	transition: all 0.12s ease-in-out;
+}
+
 
 /* /src/components/TaskItem.tsx */
 

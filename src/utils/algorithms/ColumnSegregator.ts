@@ -278,11 +278,45 @@ export const columnSegregator = (
 
 	// Apply column-specific sorting if configured
 	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
-		tasksToDisplay = columnSortingAlgorithm(
-			settings.data.globalSettings.defaultStartTime,
-			tasksToDisplay,
-			columnData.sortCriteria
-		);
+		// TODO : This code can be moved inside the ColumnSortingAlgorithm function.
+		// If manualOrder is one of the sorting criteria, apply manual ordering using columnData.tasksIdManualOrder
+		const hasManualOrder = columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+		if (hasManualOrder) {
+			// Ensure tasksIdManualOrder exists
+			if (!Array.isArray(columnData.tasksIdManualOrder)) {
+				columnData.tasksIdManualOrder = [];
+			}
+
+			// Add any new tasks (not present in manual order) to the TOP of the manual order array
+			const currentIds = tasksToDisplay.map((t) => t.id);
+			const missingIds = currentIds.filter((id) => !columnData.tasksIdManualOrder!.includes(id));
+			if (missingIds.length > 0) {
+				// Prepend missing ids so newest appear on top
+				columnData.tasksIdManualOrder = [...missingIds, ...columnData.tasksIdManualOrder!];
+			}
+
+			// Build sorted list based on manual order
+			const idToTask = new Map(tasksToDisplay.map((t) => [t.id, t]));
+			const sorted: taskItem[] = [];
+			for (const id of columnData.tasksIdManualOrder) {
+				const task = idToTask.get(id);
+				if (task) sorted.push(task);
+			}
+
+			// Append any remaining tasks that aren't in manual order for safety
+			for (const t of tasksToDisplay) {
+				if (!columnData.tasksIdManualOrder.includes(t.id)) sorted.push(t);
+			}
+
+			tasksToDisplay = sorted;
+		} else {
+			// Default algorithm for other criteria
+			tasksToDisplay = columnSortingAlgorithm(
+				settings.data.globalSettings.defaultStartTime,
+				tasksToDisplay,
+				columnData.sortCriteria
+			);
+		}
 	}
 
 	return tasksToDisplay;

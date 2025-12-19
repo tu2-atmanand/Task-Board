@@ -48,6 +48,7 @@ const Column: React.FC<ColumnProps> = ({
 	// const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
 	const tasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
 	const [isDragOver, setIsDragOver] = useState(false);
+	const [insertIndex, setInsertIndex] = useState<number | null>(null);
 	// Local tasks state, initially set from external tasks
 	const [localTasks, setLocalTasks] = useState(tasksForThisColumn);
 	// console.log("Column.tsx : Data in tasks :", tasks);
@@ -303,14 +304,18 @@ const Column: React.FC<ColumnProps> = ({
 	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
 		e.preventDefault();
 		setIsDragOver(false);
+		setInsertIndex(null);
 		const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
 		if (isNaN(dragIndex) || dragIndex === dropIndex) return;
 		const updated = [...localTasks];
 		const [moved] = updated.splice(dragIndex, 1);
 		updated.splice(dropIndex, 0, moved);
 		setLocalTasks(updated);
-		// Persistir el nuevo orden
-		console.log("Need to implement the function to persist the new order");
+		// If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
+		const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+		if (hasManualOrder) {
+			columnData.tasksIdManualOrder = updated.map(t => t.id);
+		}
 		// const { updateTaskOrderInColumn } = await import('../../utils/DragDropTaskManager');
 		// await updateTaskOrderInColumn(plugin, columnData, updated);
 	};
@@ -340,7 +345,39 @@ const Column: React.FC<ColumnProps> = ({
 					return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
 				}) || targetColumnContainer;
 
+				// If target column uses manualOrder, disallow cross-column drops (only allow intra-column reordering)
+				const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+				if (hasManualOrder && sourceColumnData.coltag !== columnData.coltag) {
+					// Not allowed: ignore drop
+					dragDropTasksManagerInsatance.clearCurrentDragData();
+					return;
+				}
+
 				// Use the DragDropTasksManager to handle the drop
+				// If this is an intra-column reorder (same column) and we have an insertIndex, handle locally
+				try {
+					const dragIdxStr = e.dataTransfer.getData('text/plain');
+					const dragIdx = dragIdxStr ? parseInt(dragIdxStr) : NaN;
+					if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndex !== null) {
+						// Reorder locally
+						const updated = [...localTasks];
+						const [moved] = updated.splice(dragIdx, 1);
+						updated.splice(insertIndex, 0, moved);
+						setLocalTasks(updated);
+						setInsertIndex(null);
+						// Update manual order if applicable
+						const hasManualOrderLocal = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+						if (hasManualOrderLocal) {
+							columnData.tasksIdManualOrder = updated.map(t => t.id);
+						}
+						// Clear manager payload and skip default handling
+						dragDropTasksManagerInsatance.clearCurrentDragData();
+						return;
+					}
+				} catch (err) {
+					// ignore and continue to default handling
+				}
+
 				dragDropTasksManagerInsatance.handleDrop(
 					e.nativeEvent,
 					sourceColumnData,
@@ -421,6 +458,7 @@ const Column: React.FC<ColumnProps> = ({
 	// Handle the dragleave event to remove the visual effect
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		setIsDragOver(false);
+		setInsertIndex(null);
 	}, []);
 
 	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
@@ -435,7 +473,7 @@ const Column: React.FC<ColumnProps> = ({
 			onDrop={handleDrop}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
-			onDragEnd={() => setIsDragOver(false)}
+				onDragEnd={() => { setIsDragOver(false); setInsertIndex(null); }}
 		>
 			{columnData.minimized ? (
 				// Minimized view - vertical bar with count and rotated text
@@ -460,27 +498,54 @@ const Column: React.FC<ColumnProps> = ({
 						{/* <RxDotsVertical /> */}
 					</div>
 					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
-						{tasks.length > 0 ? (
-							tasks.map((task, index) => {
-								return (
-									<div
-										key={index}
-										className="taskItemFadeIn"
-										draggable={true}
-										onDragStart={e => handleTaskDragStart(e, index)}
-										onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
-										onDrop={e => handleTaskDrop(e, index)}
-									>
-										<TaskItem
+						{localTasks.length > 0 ? (
+							(() => {
+								const elements: React.ReactNode[] = [];
+								for (let i = 0; i < localTasks.length; i++) {
+									// If insertIndex points to this position, render placeholder
+									if (insertIndex === i) {
+										elements.push(
+											<div key={`placeholder-${i}`} className="task-insert-placeholder" />
+										);
+									}
+									const task = localTasks[i];
+									elements.push(
+										<div
 											key={task.id}
-											plugin={plugin}
-											task={task}
-											columnIndex={columnIndex}
-											activeBoardSettings={activeBoardData}
-										/>
-									</div>
-								);
-							})
+											className="taskItemFadeIn"
+											draggable={true}
+											onDragStart={e => handleTaskDragStart(e, i)}
+											onDragOver={e => {
+												e.preventDefault();
+												setIsDragOver(true);
+												// Determine insertion position based on mouse Y
+												const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+												const offset = e.clientY - rect.top;
+												const position = offset > rect.height / 2 ? i + 1 : i;
+												setInsertIndex(position);
+												// prefer move effect
+												e.dataTransfer.dropEffect = 'move';
+											}}
+											onDrop={e => handleTaskDrop(e, i)}
+										>
+											<TaskItem
+												key={task.id}
+												plugin={plugin}
+												task={task}
+												columnIndex={columnIndex}
+												activeBoardSettings={activeBoardData}
+											/>
+										</div>
+									);
+								}
+								// If insertIndex points to end (after last item)
+								if (insertIndex === tasks.length) {
+									elements.push(
+										<div key={`placeholder-end`} className="task-insert-placeholder" />
+									);
+								}
+								return elements;
+							})()
 						) : (
 							<p>{t("no-tasks-available")}</p>
 						)}
