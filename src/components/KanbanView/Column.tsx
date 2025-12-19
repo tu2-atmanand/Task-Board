@@ -328,25 +328,27 @@ const Column: React.FC<ColumnProps> = ({
 				// Ensure we have valid data
 				if (!task || !sourceColumnData) return;
 
-				// If the source column is not of type "namedTag", cancel
-				if (sourceColumnData.colType !== 'namedTag') return;
+				// TODO : Instead of below code, will make use of the new dragDropManager instance and its functions to make the decisions and provide CSS styling when the task has been dropped.
 
-				// If it is the same lane (coltag), DO NOT change tags, just reorder
-				if (sourceColumnData.coltag === columnData.coltag) {
-					// Do nothing here, the reordering is already handled by handleTaskDrop
-					return;
-				}
+				// // If the source column is not of type "namedTag", cancel
+				// if (sourceColumnData.colType !== 'namedTag') return;
 
-				// If it is between different tagged columns, change tags normally
-				import('../../managers/DragDropTaskManager').then(async ({ updateTaskTagsForColumnMove, updateTaskAfterDragDrop }) => {
-					const updatedTask = await updateTaskTagsForColumnMove(
-						plugin,
-						task,
-						sourceColumnData,
-						columnData
-					);
-					await updateTaskAfterDragDrop(plugin, updatedTask, task);
-				});
+				// // If it is the same lane (coltag), DO NOT change tags, just reorder
+				// if (sourceColumnData.coltag === columnData.coltag) {
+				// 	// Do nothing here, the reordering is already handled by handleTaskDrop
+				// 	return;
+				// }
+
+				// // If it is between different tagged columns, change tags normally
+				// import('../../managers/DragDropTaskManager').then(async ({ updateTaskTagsForColumnMove, updateTaskAfterDragDrop }) => {
+				// 	const updatedTask = await updateTaskTagsForColumnMove(
+				// 		plugin,
+				// 		task,
+				// 		sourceColumnData,
+				// 		columnData
+				// 	);
+				// 	await updateTaskAfterDragDrop(plugin, updatedTask, task);
+				// });
 			}
 		} catch (error) {
 			console.error('Error handling task drop:', error);
