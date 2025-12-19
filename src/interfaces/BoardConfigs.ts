@@ -16,6 +16,7 @@ export interface columnSortingCriteria {
 		| "recurrence"
 		| "filePath"
 		| "lineNumber"
+		| "manualOrder"
 		| "id"; // Fields to sort by
 	order: "asc" | "desc"; // Sort order
 	priority: number;
@@ -78,6 +79,7 @@ export type ColumnData = {
 	taskPriority?: number;
 	limit?: number;
 	sortCriteria?: columnSortingCriteria[];
+	tasksIdManualOrder?: string[];
 	filters?: RootFilterState;
 	range?: {
 		// Keep it for few versions, this is required while settings migrations
