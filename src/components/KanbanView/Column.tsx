@@ -420,7 +420,7 @@ const Column: React.FC<ColumnProps> = ({
 
 	// Handle the dragover event to allow the drop
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		// Only allow drop if this column is of type "namedTag"
+		// Only allow drop if this column is of type colType.namedTag
 		if (columnData.colType === colType.namedTag) {
 			// Always prevent default to indicate drop is allowed unless we explicitly set otherwise
 			e.preventDefault();

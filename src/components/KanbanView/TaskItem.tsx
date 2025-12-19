@@ -901,7 +901,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		console.log('handleDragStart');
-		// Only allow dragging if this column is of type "namedTag"
+		// Only allow dragging if this column is of type colType.namedTag
 		if (columnData?.colType !== 'namedTag') {
 			e.preventDefault();
 			return;
