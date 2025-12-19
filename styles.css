@@ -531,9 +531,31 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .task-insert-placeholder {
 	height: 3rem; /* approx 3 rem high as requested */
 	border-radius: 6px;
-	background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));
+	background: linear-gradient(90deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
 	margin: 6px 0;
-	transition: all 0.12s ease-in-out;
+	transition: height 0.12s ease-in-out, margin 0.12s ease-in-out, opacity 0.12s ease-in-out, transform 0.12s ease-in-out;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px dashed var(--interactive-accent);
+	opacity: 0.98;
+}
+
+.task-insert-placeholder .task-insert-text {
+	color: var(--text-muted);
+	font-weight: 600;
+	font-size: 0.95rem;
+	letter-spacing: 0.2px;
+	padding-inline: 0.6rem;
+}
+
+/* Smooth movement for task items when placeholder is inserted */
+.taskItemFadeIn {
+	transition: transform 0.12s ease-in-out, margin 0.12s ease-in-out;
+}
+
+.tasksContainer .taskItemFadeIn {
+	will-change: transform, margin;
 }
 
 

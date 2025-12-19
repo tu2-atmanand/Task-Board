@@ -1,6 +1,6 @@
 // /src/components/Column.tsx
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
@@ -49,6 +49,21 @@ const Column: React.FC<ColumnProps> = ({
 	const tasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
 	const [isDragOver, setIsDragOver] = useState(false);
 	const [insertIndex, setInsertIndex] = useState<number | null>(null);
+	const insertIndexRef = useRef<number | null>(null);
+	const rafRef = useRef<number | null>(null);
+
+	const scheduleSetInsertIndex = (pos: number | null) => {
+		if (insertIndexRef.current === pos) return;
+		if (rafRef.current) {
+			cancelAnimationFrame(rafRef.current);
+			rafRef.current = null;
+		}
+		rafRef.current = requestAnimationFrame(() => {
+			insertIndexRef.current = pos;
+			setInsertIndex(pos);
+			rafRef.current = null;
+		});
+	};
 	// Local tasks state, initially set from external tasks
 	const [localTasks, setLocalTasks] = useState(tasksForThisColumn);
 	// console.log("Column.tsx : Data in tasks :", tasks);
@@ -316,6 +331,11 @@ const Column: React.FC<ColumnProps> = ({
 		if (hasManualOrder) {
 			columnData.tasksIdManualOrder = updated.map(t => t.id);
 		}
+		// clear any pending raf
+		if (rafRef.current) {
+			cancelAnimationFrame(rafRef.current);
+			rafRef.current = null;
+		}
 		// const { updateTaskOrderInColumn } = await import('../../utils/DragDropTaskManager');
 		// await updateTaskOrderInColumn(plugin, columnData, updated);
 	};
@@ -354,17 +374,18 @@ const Column: React.FC<ColumnProps> = ({
 				}
 
 				// Use the DragDropTasksManager to handle the drop
-				// If this is an intra-column reorder (same column) and we have an insertIndex, handle locally
+					// If this is an intra-column reorder (same column) and we have an insertIndex, handle locally
 				try {
 					const dragIdxStr = e.dataTransfer.getData('text/plain');
 					const dragIdx = dragIdxStr ? parseInt(dragIdxStr) : NaN;
-					if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndex !== null) {
+						if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndexRef.current !== null) {
 						// Reorder locally
 						const updated = [...localTasks];
-						const [moved] = updated.splice(dragIdx, 1);
-						updated.splice(insertIndex, 0, moved);
+							const [moved] = updated.splice(dragIdx, 1);
+							updated.splice(insertIndexRef.current!, 0, moved);
 						setLocalTasks(updated);
-						setInsertIndex(null);
+							setInsertIndex(null);
+							insertIndexRef.current = null;
 						// Update manual order if applicable
 						const hasManualOrderLocal = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
 						if (hasManualOrderLocal) {
@@ -455,6 +476,16 @@ const Column: React.FC<ColumnProps> = ({
 		}
 	}, [columnData]);
 
+	// Cleanup any pending RAF on unmount
+	useEffect(() => {
+		return () => {
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+		};
+	}, []);
+
 	// Handle the dragleave event to remove the visual effect
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		setIsDragOver(false);
@@ -505,7 +536,7 @@ const Column: React.FC<ColumnProps> = ({
 									// If insertIndex points to this position, render placeholder
 									if (insertIndex === i) {
 										elements.push(
-											<div key={`placeholder-${i}`} className="task-insert-placeholder" />
+											<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
 										);
 									}
 									const task = localTasks[i];
@@ -522,7 +553,8 @@ const Column: React.FC<ColumnProps> = ({
 												const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
 												const offset = e.clientY - rect.top;
 												const position = offset > rect.height / 2 ? i + 1 : i;
-												setInsertIndex(position);
+												// Throttle updates to avoid reflow flicker
+												scheduleSetInsertIndex(position);
 												// prefer move effect
 												e.dataTransfer.dropEffect = 'move';
 											}}
@@ -539,9 +571,9 @@ const Column: React.FC<ColumnProps> = ({
 									);
 								}
 								// If insertIndex points to end (after last item)
-								if (insertIndex === tasks.length) {
+								if (insertIndex === localTasks.length) {
 									elements.push(
-										<div key={`placeholder-end`} className="task-insert-placeholder" />
+										<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
 									);
 								}
 								return elements;
