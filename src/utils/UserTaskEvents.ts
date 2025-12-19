@@ -217,3 +217,122 @@ export const updateTaskItemStatus = (
 		});
 	}
 };
+
+export const updateTaskItemPriority = (
+    plugin: TaskBoard,
+    oldTask: taskItem,
+    newPriority: number
+) => {
+    const newTask = { ...oldTask } as taskItem;
+    newTask.priority = newPriority;
+
+    let eventData = {
+        taskID: oldTask.id,
+        state: true,
+    } as any;
+    eventEmitter.emit('UPDATE_TASK', eventData);
+
+    const isThisTaskNote = isTaskNotePresentInTags(
+        plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+        oldTask.tags
+    );
+
+    if (isThisTaskNote) {
+        updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+            sleep(1000).then(() => {
+                plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+            });
+        });
+    } else {
+        updateTaskInFile(plugin, newTask, oldTask).then(() => {
+            plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+        });
+    }
+};
+
+export const updateTaskItemDate = (
+    plugin: TaskBoard,
+    oldTask: taskItem,
+    dateType: 'startDate' | 'scheduledDate' | 'due',
+    newDate: string
+) => {
+    const newTask = { ...oldTask } as taskItem;
+    if (dateType === 'startDate') newTask.startDate = newDate;
+    if (dateType === 'scheduledDate') newTask.scheduledDate = newDate;
+    if (dateType === 'due') newTask.due = newDate;
+
+    eventEmitter.emit('UPDATE_TASK', { taskID: oldTask.id, state: true });
+
+    const isThisTaskNote = isTaskNotePresentInTags(
+        plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+        oldTask.tags
+    );
+
+    if (isThisTaskNote) {
+        updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+            sleep(1000).then(() => {
+                plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+            });
+        });
+    } else {
+        updateTaskInFile(plugin, newTask, oldTask).then(() => {
+            plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+        });
+    }
+};
+
+export const updateTaskItemReminder = (
+    plugin: TaskBoard,
+    oldTask: taskItem,
+    newReminder: string
+) => {
+    const newTask = { ...oldTask } as taskItem;
+    newTask.reminder = newReminder;
+
+    eventEmitter.emit('UPDATE_TASK', { taskID: oldTask.id, state: true });
+
+    const isThisTaskNote = isTaskNotePresentInTags(
+        plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+        oldTask.tags
+    );
+
+    if (isThisTaskNote) {
+        updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+            sleep(1000).then(() => {
+                plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+            });
+        });
+    } else {
+        updateTaskInFile(plugin, newTask, oldTask).then(() => {
+            plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+        });
+    }
+};
+
+export const updateTaskItemTags = (
+    plugin: TaskBoard,
+    oldTask: taskItem,
+    newTags: string[]
+) => {
+    const newTask = { ...oldTask } as taskItem;
+    newTask.tags = newTags;
+
+    eventEmitter.emit('UPDATE_TASK', { taskID: oldTask.id, state: true });
+
+    const isThisTaskNote = isTaskNotePresentInTags(
+        plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+        oldTask.tags
+    );
+
+    if (isThisTaskNote) {
+        updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+            sleep(1000).then(() => {
+                plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+            });
+        });
+    } else {
+        updateTaskInFile(plugin, newTask, oldTask).then(() => {
+            plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath, oldTask.id);
+        });
+    }
+};

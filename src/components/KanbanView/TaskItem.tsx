@@ -6,7 +6,7 @@ import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSet
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component, Notice, Platform, Menu } from 'obsidian';
+import { Component, Notice, Platform, Menu, TFile } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
@@ -27,7 +27,12 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { RxDragHandleDots2 } from 'react-icons/rx';
 import { parseUniversalDate } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus } from 'src/utils/UserTaskEvents';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder, updateTaskItemTags } from 'src/utils/UserTaskEvents';
+import EditTagsModal from 'src/modals/EditTagsModal';
+
+// Helper modal functions may be provided elsewhere; declare them for TypeScript
+declare function showTextInputModal(app: any, options: { title?: string; placeholder?: string; initialValue?: string }): Promise<string | null>;
+declare function showConfirmationModal(app: any, options: any): Promise<boolean>;
 import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
 
 export interface TaskProps {
@@ -652,10 +657,220 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("hide-column"));
+			item.setTitle(t("copy-task-title"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
 			});
+
+			// Priority submenu
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("priority"));
+				item.setIcon("flag");
+				const priMenu = item.setSubmenu();
+				const priorities = [
+					{ label: t("none"), value: 0 },
+					{ label: t("low"), value: 1 },
+					{ label: t("medium"), value: 2 },
+					{ label: t("high"), value: 3 },
+				];
+				priorities.forEach((p) => {
+					priMenu.addItem((it) => {
+						it.setTitle(p.label);
+						it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
+					});
+				});
+			});
+
+			// Dates submenu
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("dates"));
+				item.setIcon("calendar");
+				const dateMenu = item.setSubmenu();
+				dateMenu.addItem((it) => {
+					it.setTitle(t("start-date"));
+					it.onClick(async () => {
+						const newDate = await showTextInputModal(plugin.app, { title: t("set-start-date"), placeholder: 'YYYY-MM-DD', initialValue: task.startDate || '' });
+						if (newDate) updateTaskItemDate(plugin, task, 'startDate', newDate);
+					});
+				});
+				dateMenu.addItem((it) => {
+					it.setTitle(t("scheduled-date"));
+					it.onClick(async () => {
+						const newDate = await showTextInputModal(plugin.app, { title: t("set-scheduled-date"), placeholder: 'YYYY-MM-DD', initialValue: task.scheduledDate || '' });
+						if (newDate) updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
+					});
+				});
+				dateMenu.addItem((it) => {
+					it.setTitle(t("due-date"));
+					it.onClick(async () => {
+						const newDate = await showTextInputModal(plugin.app, { title: t("set-due-date"), placeholder: 'YYYY-MM-DD', initialValue: task.due || '' });
+						if (newDate) updateTaskItemDate(plugin, task, 'due', newDate);
+					});
+				});
+			});
+
+			// Reminder item - open prompt for date/time
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("reminder"));
+				item.setIcon("clock");
+				item.onClick(async () => {
+					const newReminder = await showTextInputModal(plugin.app, { title: t("set-reminder"), placeholder: 'YYYY-MM-DD HH:mm', initialValue: task.reminder || '' });
+					if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+				});
+			});
+
+			// Tags editor modal
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("tags"));
+				item.setIcon("tag");
+				item.onClick(() => {
+					const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
+						updateTaskItemTags(plugin, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
+					});
+					modal.open();
+				});
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("open-note"));
+			item.setIcon("eye-off");
+			item.onClick(async () => {
+			});
+		});
+		// Note actions submenu
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("contextMenus.task.noteActions"));
+			item.setIcon("file-text");
+
+			const submenu = (item as any).setSubmenu();
+
+			// Get the file for the task
+			const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
+			if (file instanceof TFile) {
+				// Try to populate with Obsidian's native file menu
+				try {
+					// Trigger the file-menu event to populate with default actions
+					plugin.app.workspace.trigger("file-menu", submenu, file, "file-explorer");
+				} catch (error) {
+					console.debug("Native file menu not available, using fallback");
+				}
+
+				// Add common file actions (these will either supplement or replace the native menu)
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.rename"));
+					subItem.setIcon("pencil");
+					subItem.onClick(async () => {
+						try {
+							// Modal-based rename
+							const currentName = file.basename;
+							const newName = await showTextInputModal(plugin.app, {
+								title: t("contextMenus.task.renameTitle"),
+								placeholder: t("contextMenus.task.renamePlaceholder"),
+								initialValue: currentName,
+							});
+
+							if (newName && newName.trim() !== "" && newName !== currentName) {
+								// Ensure the new name has the correct extension
+								const extension = file.extension;
+								const finalName = newName.endsWith(`.${extension}`)
+									? newName
+									: `${newName}.${extension}`;
+
+								// Construct the new path
+								const newPath = file.parent
+									? `${file.parent.path}/${finalName}`
+									: finalName;
+
+								// Rename the file
+								await plugin.app.vault.rename(file, newPath);
+								new Notice(
+									t("contextMenus.task.notices.renameSuccess") + finalName,
+
+								);
+
+								// // Trigger update callback
+								// if (options.onUpdate) {
+								// 	options.onUpdate();
+								// }
+							}
+						} catch (error) {
+							console.error("Error renaming file:", error);
+							new Notice(t("contextMenus.task.notices.renameFailure"));
+						}
+					});
+				});
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("delete-note"));
+					subItem.setIcon("trash");
+					subItem.onClick(async () => {
+						// Show confirmation and delete
+						const confirmed = await showConfirmationModal(plugin.app, {
+							title: t("contextMenus.task.deleteTitle"),
+							message: t("contextMenus.task.deleteMessage") + file.name,
+							confirmText: t("contextMenus.task.deleteConfirm"),
+							cancelText: t("common.cancel"),
+							isDestructive: true,
+						});
+						if (confirmed) {
+							plugin.app.vault.trash(file, true);
+						}
+					});
+				});
+
+				submenu.addSeparator();
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.copyPath"));
+					subItem.setIcon("copy");
+					subItem.onClick(async () => {
+						try {
+							await navigator.clipboard.writeText(file.path);
+							new Notice(t("contextMenus.task.notices.copyPathSuccess"));
+						} catch (error) {
+							new Notice(t("contextMenus.task.notices.copyFailure"));
+						}
+					});
+				});
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.copyUrl"));
+					subItem.setIcon("link");
+					subItem.onClick(async () => {
+						try {
+							const url = `obsidian://open?vault=${encodeURIComponent(plugin.app.vault.getName())}&file=${encodeURIComponent(file.path)}`;
+							await navigator.clipboard.writeText(url);
+							new Notice(t("contextMenus.task.notices.copyUrlSuccess"));
+						} catch (error) {
+							new Notice(t("contextMenus.task.notices.copyFailure"));
+						}
+					});
+				});
+
+				submenu.addSeparator();
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.showInExplorer"));
+					subItem.setIcon("folder-open");
+					subItem.onClick(() => {
+						// Reveal file in file explorer
+						plugin.app.workspace
+							.getLeaf()
+							.setViewState({
+								type: "file-explorer",
+								state: {},
+							})
+							.then(() => {
+								// Focus the file in the explorer
+								const fileExplorer =
+									plugin.app.workspace.getLeavesOfType("file-explorer")[0];
+								if (fileExplorer?.view && "revealInFolder" in fileExplorer.view) {
+									(fileExplorer.view as any).revealInFolder(file);
+								}
+							});
+					});
+				});
+			}
 		});
 
 		// // Show minimize or maximize option based on current state
@@ -729,13 +944,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			dragImage.style.color = getComputedStyle(taskItemRef.current).color;
 			dragImage.style.overflow = 'hidden';
 			dragImage.textContent = cleanTaskTitleLegacy(task);
-			
+
 			document.body.appendChild(dragImage);
 			e.dataTransfer.setDragImage(dragImage, dragImage.offsetWidth / 2, dragImage.offsetHeight / 2);
 
 			// Clean up the drag image element shortly after set (some environments remove automatically)
 			setTimeout(() => {
-				try { document.body.removeChild(dragImage); } catch {};
+				try { document.body.removeChild(dragImage); } catch { };
 			}, 0);
 
 			// Dim the dragged task item itself

@@ -1302,7 +1302,7 @@ export const AddOrEditTaskRC: React.FC<{
 							</select>
 						</div>
 
-						{/* Task Body */}
+						{/* Tags input field */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("tag")}</label>
 							<input
