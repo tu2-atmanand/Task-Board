@@ -370,22 +370,23 @@ const Column: React.FC<ColumnProps> = ({
 				if (hasManualOrder && sourceColumnData.coltag !== columnData.coltag) {
 					// Not allowed: ignore drop
 					dragDropTasksManagerInsatance.clearCurrentDragData();
+					dragDropTasksManagerInsatance.clearDesiredDropIndex();
 					return;
 				}
 
 				// Use the DragDropTasksManager to handle the drop
-					// If this is an intra-column reorder (same column) and we have an insertIndex, handle locally
+				// If this is an intra-column reorder (same column) and we have an insertIndex, handle locally
 				try {
 					const dragIdxStr = e.dataTransfer.getData('text/plain');
 					const dragIdx = dragIdxStr ? parseInt(dragIdxStr) : NaN;
-						if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndexRef.current !== null) {
+					if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndexRef.current !== null) {
 						// Reorder locally
 						const updated = [...localTasks];
-							const [moved] = updated.splice(dragIdx, 1);
-							updated.splice(insertIndexRef.current!, 0, moved);
+						const [moved] = updated.splice(dragIdx, 1);
+						updated.splice(insertIndexRef.current!, 0, moved);
 						setLocalTasks(updated);
-							setInsertIndex(null);
-							insertIndexRef.current = null;
+						setInsertIndex(null);
+						insertIndexRef.current = null;
 						// Update manual order if applicable
 						const hasManualOrderLocal = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
 						if (hasManualOrderLocal) {
@@ -393,6 +394,7 @@ const Column: React.FC<ColumnProps> = ({
 						}
 						// Clear manager payload and skip default handling
 						dragDropTasksManagerInsatance.clearCurrentDragData();
+						dragDropTasksManagerInsatance.clearDesiredDropIndex();
 						return;
 					}
 				} catch (err) {
@@ -409,6 +411,7 @@ const Column: React.FC<ColumnProps> = ({
 
 				// Clear manager payload (drag finished)
 				dragDropTasksManagerInsatance.clearCurrentDragData();
+				dragDropTasksManagerInsatance.clearDesiredDropIndex();
 
 				// TODO : Implement the actual task property update logic based on source and target column data
 				// This will be called after validation passes
@@ -436,7 +439,7 @@ const Column: React.FC<ColumnProps> = ({
 
 				let payload: any = null;
 				if (taskDataStr) {
-					try { payload = JSON.parse(taskDataStr); } catch {}
+					try { payload = JSON.parse(taskDataStr); } catch { }
 				}
 
 				// Fallback to manager-stored payload if dataTransfer is empty
@@ -476,6 +479,35 @@ const Column: React.FC<ColumnProps> = ({
 		}
 	}, [columnData]);
 
+	// Compute insertion index based on mouse Y relative to task items inside the container
+	const handleTasksContainerDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		setIsDragOver(true);
+		try {
+			const container = e.currentTarget as HTMLDivElement;
+			const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
+			const clientY = e.clientY;
+			let pos = children.length; // default to end
+			for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				const rect = child.getBoundingClientRect();
+				const midpoint = rect.top + rect.height / 2;
+				if (clientY < midpoint) {
+					pos = i;
+					break;
+				}
+			}
+			// Throttle updates via RAF
+			scheduleSetInsertIndex(pos);
+			// Store desired drop index in manager
+			dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+			// prefer move effect when dragging
+			e.dataTransfer!.dropEffect = 'move';
+		} catch (error) {
+			console.error('Error computing insert index:', error);
+		}
+	}, [scheduleSetInsertIndex]);
+
 	// Cleanup any pending RAF on unmount
 	useEffect(() => {
 		return () => {
@@ -490,6 +522,7 @@ const Column: React.FC<ColumnProps> = ({
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		setIsDragOver(false);
 		setInsertIndex(null);
+		dragDropTasksManagerInsatance.clearDesiredDropIndex();
 	}, []);
 
 	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
@@ -504,7 +537,7 @@ const Column: React.FC<ColumnProps> = ({
 			onDrop={handleDrop}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
-				onDragEnd={() => { setIsDragOver(false); setInsertIndex(null); }}
+			onDragEnd={() => { setIsDragOver(false); setInsertIndex(null); }}
 		>
 			{columnData.minimized ? (
 				// Minimized view - vertical bar with count and rotated text
@@ -528,7 +561,7 @@ const Column: React.FC<ColumnProps> = ({
 						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
 						{/* <RxDotsVertical /> */}
 					</div>
-					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
+					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`} onDragOver={handleTasksContainerDragOver}>
 						{localTasks.length > 0 ? (
 							(() => {
 								const elements: React.ReactNode[] = [];
@@ -546,18 +579,6 @@ const Column: React.FC<ColumnProps> = ({
 											className="taskItemFadeIn"
 											draggable={true}
 											onDragStart={e => handleTaskDragStart(e, i)}
-											onDragOver={e => {
-												e.preventDefault();
-												setIsDragOver(true);
-												// Determine insertion position based on mouse Y
-												const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-												const offset = e.clientY - rect.top;
-												const position = offset > rect.height / 2 ? i + 1 : i;
-												// Throttle updates to avoid reflow flicker
-												scheduleSetInsertIndex(position);
-												// prefer move effect
-												e.dataTransfer.dropEffect = 'move';
-											}}
 											onDrop={e => handleTaskDrop(e, i)}
 										>
 											<TaskItem

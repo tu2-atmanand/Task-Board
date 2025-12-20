@@ -4,6 +4,7 @@ import { ColumnData } from "src/interfaces/BoardConfigs";
 import { colType } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import { updateTaskItemTags } from "src/utils/UserTaskEvents";
+import { eventEmitter } from 'src/services/EventEmitter';
 
 /**
  * DragDropTasksManager - A singleton manager class that handles drag and drop functionality
@@ -14,6 +15,7 @@ class DragDropTasksManager {
 
 	// Hold the current drag payload so dragover handlers can access it reliably
 	private currentDragData: any | null = null;
+	private desiredDropIndex: number | null = null;
 	private plugin: TaskBoard | null = null;
 
 	private constructor() {
@@ -112,6 +114,18 @@ class DragDropTasksManager {
 	 */
 	setCurrentDragData(data: any) {
 		this.currentDragData = data;
+	}
+
+	setDesiredDropIndex(index: number | null) {
+		this.desiredDropIndex = index;
+	}
+
+	getDesiredDropIndex(): number | null {
+		return this.desiredDropIndex;
+	}
+
+	clearDesiredDropIndex() {
+		this.desiredDropIndex = null;
 	}
 
 	/**
@@ -381,15 +395,34 @@ class DragDropTasksManager {
 	 * @param task The task being moved
 	 * @param column The column data with manualOrder sorting
 	 */
-	handleTasksOrderChange = (
+	handleTasksOrderChange = async (
 		plugin: TaskBoard,
 		task: taskItem,
-		column: ColumnData
-	): void => {
-		// This operation is handled by the Column component's drag handlers
-		// The Column component manages the local state reordering and updates tasksIdManualOrder
-		// This is a placeholder to maintain consistency with the blueprint pattern
-		console.log("Task order change handled by Column component for task:", task.id);
+		column: ColumnData,
+		desiredIndex?: number | null
+	): Promise<void> => {
+		// Ensure manual order array exists
+		if (!column.tasksIdManualOrder) {
+			column.tasksIdManualOrder = [];
+		}
+
+		// Remove any existing occurrence of the task id
+		column.tasksIdManualOrder = column.tasksIdManualOrder.filter((id) => id !== task.id);
+
+		// Insert at desired index or push to end
+		if (typeof desiredIndex === 'number' && desiredIndex >= 0 && desiredIndex <= column.tasksIdManualOrder.length) {
+			column.tasksIdManualOrder.splice(desiredIndex, 0, task.id);
+		} else {
+			column.tasksIdManualOrder.push(task.id);
+		}
+
+		// Persist settings and refresh the board
+		try {
+			await plugin.saveSettings();
+			eventEmitter.emit('REFRESH_BOARD');
+		} catch (err) {
+			console.error('Error saving settings after task reorder:', err);
+		}
 	};
 
 	/**
@@ -496,7 +529,8 @@ class DragDropTasksManager {
 					this.handleTasksOrderChange(
 						this.plugin!,
 						this.currentDragData,
-						sourceColumnData
+						sourceColumnData,
+						this.getDesiredDropIndex()
 					);
 				} else {
 					new Notice(
