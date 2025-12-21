@@ -19,6 +19,7 @@ import { colType, UniversalDateOptions, universalDateOptionsNames } from "src/in
 import { Board } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { columnDataProp, AddColumnModal } from "./AddColumnModal";
+import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -140,6 +141,36 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsAddColumnModalOpen(false);
 	};
 
+	const handleSwimlanesConfigureBtnClick = () => {
+		if (selectedBoardIndex === -1) {
+			new Notice(t("no-board-selected"));
+			return;
+		}
+
+		const board = localBoards[selectedBoardIndex];
+		const currentSwimlaneConfig = board.swimlanes || {
+			enabled: false,
+			showEmptySwimlanes: false,
+			property: 'tags',
+			customValue: '',
+			sortCriteria: 'asc',
+			customSortOrder: [],
+		};
+
+		const swimlaneModal = new SwimlanesConfigModal(
+			plugin.app,
+			currentSwimlaneConfig,
+			(updatedConfig) => {
+				const updatedBoards = [...localBoards];
+				updatedBoards[selectedBoardIndex].swimlanes = updatedConfig;
+				setLocalBoards(updatedBoards);
+				setIsEdited(true);
+			}
+		);
+
+		swimlaneModal.open();
+	};
+
 	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
@@ -185,6 +216,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				rootCondition: "any",
 				filterGroups: [],
 			},
+			swimlanes: {
+				enabled: false,
+				showEmptySwimlanes: false,
+				property: 'tags',
+				sortCriteria: 'asc',
+			},
 		};
 		setLocalBoards([...oldBoards, newBoard]);
 		setSelectedBoardIndex(localBoards.length);
@@ -206,6 +243,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			boardFilter: {
 				rootCondition: "any",
 				filterGroups: [],
+			},
+			swimlanes: boardToDuplicate.swimlanes || {
+				enabled: false,
+				showEmptySwimlanes: false,
+				property: 'tags',
+				sortCriteria: 'asc',
 			},
 		};
 		const updatedBoards = [...localBoards, duplicatedBoard];
@@ -490,6 +533,17 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							type="checkbox"
 							checked={board.hideEmptyColumns}
 							onChange={(e) => handleToggleChange(boardIndex, "hideEmptyColumns", e.target.checked)}
+						/>
+					</div>
+
+					<div className="boardConfigModalMainContent-Active-Body-InputItems">
+						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+							<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
+							<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes")}</div>
+						</div>
+						<button
+							className="boardConfigModalMainContentConfigureSwimlanesBtn"
+							onClick={handleSwimlanesConfigureBtnClick}
 						/>
 					</div>
 
