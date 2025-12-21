@@ -13,7 +13,24 @@
             "active": true,
             "collapsed": false,
             "name": "TaskNotes",
-            "filePaths": "TaskNotes/"
+            "filePaths": "TaskNotes/",
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "ur7dguyt"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "3077781059",
+              "4184100420",
+              "3052793295",
+              "1506909345",
+              274,
+              "4031700447",
+              "362"
+            ]
           },
           {
             "id": 1312742179,
@@ -53,8 +70,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 67,
-          "completed": 9
+          "pending": 59,
+          "completed": 18
         }
       },
       {
@@ -241,7 +258,20 @@
             "active": true,
             "collapsed": false,
             "name": "#Task",
-            "coltag": "#Task"
+            "coltag": "#Task",
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "bmlpsogj"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              274,
+              "362"
+            ]
           },
           {
             "colType": "namedTag",
