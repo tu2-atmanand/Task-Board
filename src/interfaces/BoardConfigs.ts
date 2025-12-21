@@ -121,6 +121,17 @@ export type Board = {
 		pending: number;
 		completed: number;
 	};
+	swimlanes: {
+		enabled: boolean;
+		showEmptySwimlanes: boolean;
+		property: string; // e.g., 'tags', 'priority'
+		customValue?: string; // This is only if user selects "custom" as the property. This is also only applicable in case of dataview format properties or for task-notes, where user can use their custom key-value from frontmatter.
+		sortCriteria: string; // e.g., 'asc', 'desc', 'custom'
+		customSortOrder?: {
+			value: string;
+			index: number;
+		}[]; // This is only if user selects "custom" as the sort criteria.
+	};
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
 	filterPolarity?: string;
