@@ -580,21 +580,21 @@ const Column: React.FC<ColumnProps> = ({
 											<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
 										);
 									}
-										const task = localTasks[i];
-										elements.push(
-											<div
+									const task = localTasks[i];
+									elements.push(
+										<div
+											key={task.id}
+											className="taskItemFadeIn"
+											onDrop={e => handleTaskDrop(e, i)}
+										>
+											<TaskItem
 												key={task.id}
-												className="taskItemFadeIn"
-												onDrop={e => handleTaskDrop(e, i)}
-											>
-												<TaskItem
-													key={task.id}
-													plugin={plugin}
-													task={task}
-													columnIndex={columnIndex}
-													activeBoardSettings={activeBoardData}
-												/>
-											</div>
+												plugin={plugin}
+												task={task}
+												columnIndex={columnIndex}
+												activeBoardSettings={activeBoardData}
+											/>
+										</div>
 									);
 								}
 								// If insertIndex points to end (after last item)
@@ -606,7 +606,7 @@ const Column: React.FC<ColumnProps> = ({
 								return elements;
 							})()
 						) : (
-							<p>{t("no-tasks-available")}</p>
+							<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
 						)}
 					</div>
 				</>

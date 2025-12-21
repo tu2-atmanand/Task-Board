@@ -384,7 +384,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 								)}
 							</>
 						) : (
-							<p>{t("no-tasks-available")}</p>
+							<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
 						)}
 					</div>
 				</>

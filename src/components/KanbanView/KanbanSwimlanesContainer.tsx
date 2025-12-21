@@ -7,6 +7,7 @@ import Column from './Column';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
+import { Menu } from 'obsidian';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -20,6 +21,7 @@ interface SwimlaneRow {
 	swimlaneName: string;
 	swimlaneValue: string;
 	tasks: taskItem[][];
+	minimized: boolean;
 }
 
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
@@ -37,7 +39,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			return [];
 		}
 
-		const { property, sortCriteria, customSortOrder, customValue } = board.swimlanes;
+		const { property, sortCriteria, customSortOrder, customValue, minimized } = board.swimlanes;
 
 		// Get all active columns
 		const activeColumns = board.columns.filter((col) => col.active);
@@ -108,6 +110,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				swimlaneName: swimlaneItem.value,
 				swimlaneValue: swimlaneItem.value,
 				tasks: tasksByColumn,
+				minimized: minimized,
 			};
 		});
 
@@ -129,6 +132,39 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		);
 	}
 
+	function openSwimlaneMenu(event: MouseEvent | React.MouseEvent, rowIndex: number) {
+		const swimlaneMenu = new Menu();
+
+		swimlaneMenu.addItem((item) => {
+			item.setTitle(t("quick-actions"));
+			item.setIsLabel(true);
+		});
+
+		// Show minimize or maximize option based on current state
+		if (swimlanes[rowIndex].minimized) {
+			swimlaneMenu.addItem((item) => {
+				item.setTitle(t("maximize-column"));
+				item.setIcon("panel-left-open");
+				item.onClick(async () => {
+					await handleMinimizeSwimlane();
+				});
+			});
+		} else {
+			swimlaneMenu.addItem((item) => {
+				item.setTitle(t("minimize-column"));
+				item.setIcon("panel-left-close");
+				item.onClick(async () => {
+					await handleMinimizeSwimlane();
+				});
+			});
+		}
+
+		// Use native event if available (React event has nativeEvent property)
+		swimlaneMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
 	const activeColumns = board.columns.filter((col) => col.active);
 
 	return (
@@ -138,8 +174,15 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				{swimlanes.map((swimlane, rowIndex) => (
 					<div key={swimlane.swimlaneValue} className="swimlaneRow">
 						{/* Swimlane Label */}
-						<div className="swimlaneLabel" title={swimlane.swimlaneName}>
-							{swimlane.swimlaneName}
+						<div className='swimlaneHeaderContainer'>
+							<div className='swimlaneHeader'>
+								<div className="swimlaneLabel" title={swimlane.swimlaneName}>
+									{swimlane.swimlaneName}
+								</div>
+								<div className='swimlaneHeaderSwimlaneCount' onClick={(evt) => openSwimlaneMenu(evt, rowIndex)} aria-label={t("open-column-menu")}>
+									{swimlane.tasks.flat().length ?? 0}
+								</div>
+							</div>
 						</div>
 
 						{/* Columns for this Swimlane */}
@@ -248,32 +291,6 @@ function getPropertyValues(
 	}
 
 	return values.filter((v) => v && v.trim());
-}
-
-/**
- * Filter tasks for a specific swimlane value
- */
-// Note: tasks are filtered per-column inside the main useMemo using getPropertyValues().
-
-/**
- * Filter tasks for a specific column (delegated to column's own filtering logic)
- * This uses the existing column filtering to maintain consistency
- */
-function filterTasksForColumn(
-	plugin: TaskBoard,
-	columnIndex: number,
-	column: any,
-	swimlaneTasks: any[]
-): taskItem[] {
-	// Import columnSegregator to use existing filtering logic
-	try {
-		// This would use the same filtering logic as the column filtering
-		// For now, we'll return swimlaneTasks as they should already be filtered by swimlane
-		// In a production scenario, you'd want to apply column-specific filtering here
-		return swimlaneTasks as taskItem[];
-	} catch (error) {
-		return [];
-	}
 }
 
 /**
