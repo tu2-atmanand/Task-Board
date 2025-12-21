@@ -334,7 +334,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			data-column-tag-name={tagData?.name}
 			data-column-tag-color={tagData?.color}
 		>
-			{columnData.minimized ? (
+			{columnData.minimized && !hideColumnHeader ? (
 				// Minimized view
 				<div className="taskBoardColumnMinimized">
 					<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
@@ -362,30 +362,28 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}
 					>
-						{(visibleTasks && visibleTasks?.length > 0) ? (
+						{visibleTasks && visibleTasks.length > 0 ? (
 							<>
-								{visibleTasks.map((task, index) => {
-									return (
-										<div key={index} className="taskItemFadeIn">
-											<TaskItem
-												key={task.id}
-												plugin={plugin}
-												task={task}
-												columnIndex={columnIndex}
-												activeBoardSettings={activeBoardData}
-											/>
-										</div>
-									);
-								})}
-								{(allTasks && visibleTaskCount < allTasks?.length) && (
+								{visibleTasks.map((task, index) => (
+									<div key={index} className="taskItemFadeIn">
+										<TaskItem
+											key={task.id}
+											plugin={plugin}
+											task={task}
+											columnIndex={columnIndex}
+											activeBoardSettings={activeBoardData}
+										/>
+									</div>
+								))}
+								{allTasks && visibleTaskCount < allTasks.length && (
 									<div className="lazyLoadIndicator">
-										<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks?.length ?? 0})</p>
+										<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
 									</div>
 								)}
 							</>
-						) : (
+						) : (!columnData.minimized ? (
 							<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
-						)}
+						) : null)}
 					</div>
 				</>
 			)}

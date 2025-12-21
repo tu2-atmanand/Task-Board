@@ -492,7 +492,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskBoardColumnMinimizedTitle {
 	writing-mode: vertical-rl;
 	text-orientation: mixed;
-	transform: rotate(0deg);
+	transform: rotate(180deg);
 	color: var(--foreground-primary);
 	font-size: 1.1em;
 	font-weight: 600;
@@ -500,7 +500,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex: 1;
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: center;
 }
 
 .TaskBoardColumnsSection:not(.minimized) {
@@ -6612,7 +6612,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	left: 0;
 	z-index: 5;
 	min-width: 2rem;
-	max-width: 3rem;
+	max-width: 2rem;
 	padding-block: 1rem;
 }
 

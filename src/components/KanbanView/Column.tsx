@@ -545,7 +545,7 @@ const Column: React.FC<ColumnProps> = ({
 			onDragLeave={handleDragLeave}
 			onDragEnd={() => { setIsDragOver(false); setInsertIndex(null); }}
 		>
-			{columnData.minimized ? (
+			{columnData.minimized && !hideColumnHeader ? (
 				// Minimized view - vertical bar with count and rotated text
 				<div className="taskBoardColumnMinimized">
 					<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
@@ -570,44 +570,49 @@ const Column: React.FC<ColumnProps> = ({
 						</div>
 					)}
 					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`} onDragOver={handleTasksContainerDragOver}>
-						{localTasks.length > 0 ? (
-							(() => {
-								const elements: React.ReactNode[] = [];
-								for (let i = 0; i < localTasks.length; i++) {
-									// If insertIndex points to this position, render placeholder
-									if (insertIndex === i) {
-										elements.push(
-											<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-										);
-									}
-									const task = localTasks[i];
-									elements.push(
-										<div
-											key={task.id}
-											className="taskItemFadeIn"
-											onDrop={e => handleTaskDrop(e, i)}
-										>
-											<TaskItem
-												key={task.id}
-												plugin={plugin}
-												task={task}
-												columnIndex={columnIndex}
-												activeBoardSettings={activeBoardData}
-											/>
-										</div>
-									);
-								}
-								// If insertIndex points to end (after last item)
-								if (insertIndex === localTasks.length) {
-									elements.push(
-										<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-									);
-								}
-								return elements;
-							})()
-						) : (
-							<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
-						)}
+						{columnData.minimized ? <></> : (
+							<>
+								{localTasks.length > 0 ? (
+									(() => {
+										const elements: React.ReactNode[] = [];
+										for (let i = 0; i < localTasks.length; i++) {
+											// If insertIndex points to this position, render placeholder
+											if (insertIndex === i) {
+												elements.push(
+													<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+												);
+											}
+											const task = localTasks[i];
+											elements.push(
+												<div
+													key={task.id}
+													className="taskItemFadeIn"
+													onDrop={e => handleTaskDrop(e, i)}
+												>
+													<TaskItem
+														key={task.id}
+														plugin={plugin}
+														task={task}
+														columnIndex={columnIndex}
+														activeBoardSettings={activeBoardData}
+													/>
+												</div>
+											);
+										}
+										// If insertIndex points to end (after last item)
+										if (insertIndex === localTasks.length) {
+											elements.push(
+												<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+											);
+										}
+										return elements;
+									})()
+								) : (
+									<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
+								)}
+							</>
+						)
+						}
 					</div>
 				</>
 			)}
