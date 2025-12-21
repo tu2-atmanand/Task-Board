@@ -133,20 +133,6 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 	return (
 		<div className="kanbanSwimlanesGrid">
-			{/* Column Headers (Fixed Row) */}
-			<div className="swimlanesHeaderRow">
-				<div className="swimlanesRowLabel"></div>
-				{activeColumns.map((column) => (
-					<div
-						key={column.id}
-						className="swimlanesColumnHeader"
-						title={column.name}
-					>
-						{column.name}
-					</div>
-				))}
-			</div>
-
 			{/* Swimlane Rows */}
 			<div className="swimlanesContainer">
 				{swimlanes.map((swimlane, rowIndex) => (
@@ -167,6 +153,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									columnData={column}
 									tasksForThisColumn={swimlane.tasks[colIndex] || []}
 									Component={ColumnComponent}
+									hideColumnHeader={rowIndex !== 0}
 								/>
 							))}
 						</div>
@@ -299,13 +286,15 @@ const MemoizedSwimlanColumn = memo<{
 	columnData: any;
 	tasksForThisColumn: taskItem[];
 	Component: typeof Column | typeof LazyColumn;
+	hideColumnHeader?: boolean;
 }>(({ Component, ...props }) => {
 	return <Component {...props} />;
 }, (prevProps, nextProps) => {
 	return (
 		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
 		prevProps.columnData === nextProps.columnData &&
-		prevProps.Component === nextProps.Component
+		prevProps.Component === nextProps.Component &&
+		prevProps.hideColumnHeader === nextProps.hideColumnHeader
 	);
 });
 

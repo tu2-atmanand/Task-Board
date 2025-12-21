@@ -27,6 +27,7 @@ export interface LazyColumnProps {
 	collapsed?: boolean;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
+	hideColumnHeader?: boolean;
 }
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
@@ -35,6 +36,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	activeBoardData,
 	columnData,
 	tasksForThisColumn,
+	hideColumnHeader = false,
 }) => {
 	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
@@ -346,14 +348,16 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			) : (
 				// Normal view
 				<>
-					<div className="taskBoardColumnSecHeader">
-						<div className="taskBoardColumnSecHeaderTitleSec">
-							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+					{!hideColumnHeader && (
+						<div className="taskBoardColumnSecHeader">
+							<div className="taskBoardColumnSecHeaderTitleSec">
+								<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+							</div>
+							<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+								{allTasks?.length ?? 0}
+							</div>
 						</div>
-						<div className='taskBoardColumnSecHeaderTitleSecColumnCount' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-							{allTasks?.length ?? 0}
-						</div>
-					</div>
+					)}
 					<div
 						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}

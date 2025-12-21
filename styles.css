@@ -6526,18 +6526,9 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	background-color: var(--background-primary);
 }
 
-/* Header row with column names */
+/* Header row with column names - HIDDEN (using first swimlane headers instead) */
 .swimlanesHeaderRow {
-	display: flex;
-	gap: var(--swimlane-gap, 1px);
-	padding: 0;
-	background-color: var(--background-secondary);
-	border-bottom: 2px solid var(--divider-color);
-	position: sticky;
-	top: 0;
-	z-index: 10;
-	min-height: 50px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	display: none;
 }
 
 .swimlanesRowLabel {
@@ -6596,6 +6587,15 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	min-height: 200px;
 	padding: 0;
 	transition: background-color 0.15s ease;
+}
+
+/* First swimlane row - make headers sticky */
+.swimlaneRow:first-of-type .taskBoardColumnSecHeader {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: var(--background-secondary);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .swimlaneRow:hover {

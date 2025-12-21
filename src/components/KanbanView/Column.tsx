@@ -31,6 +31,7 @@ export interface ColumnProps {
 	collapsed?: boolean;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
+	hideColumnHeader?: boolean;
 }
 
 
@@ -40,6 +41,7 @@ const Column: React.FC<ColumnProps> = ({
 	activeBoardData,
 	columnData,
 	tasksForThisColumn,
+	hideColumnHeader = false,
 }) => {
 	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
@@ -557,14 +559,16 @@ const Column: React.FC<ColumnProps> = ({
 			) : (
 				// Normal view
 				<>
-					<div className="taskBoardColumnSecHeader">
-						<div className="taskBoardColumnSecHeaderTitleSec">
-							{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
-							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+					{!hideColumnHeader && (
+						<div className="taskBoardColumnSecHeader">
+							<div className="taskBoardColumnSecHeaderTitleSec">
+								{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
+								<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+							</div>
+							<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
+							{/* <RxDotsVertical /> */}
 						</div>
-						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
-						{/* <RxDotsVertical /> */}
-					</div>
+					)}
 					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`} onDragOver={handleTasksContainerDragOver}>
 						{localTasks.length > 0 ? (
 							(() => {
