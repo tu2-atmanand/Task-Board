@@ -529,9 +529,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 /* Insertion placeholder shown when reordering within a manual-order column */
 .task-insert-placeholder {
-	height: 3rem; /* approx 3 rem high as requested */
+	height: 3rem;
+	/* approx 3 rem high as requested */
 	border-radius: 6px;
-	background: linear-gradient(90deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+	background: linear-gradient(90deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
 	margin: 6px 0;
 	transition: height 0.12s ease-in-out, margin 0.12s ease-in-out, opacity 0.12s ease-in-out, transform 0.12s ease-in-out;
 	display: flex;
@@ -6225,9 +6226,9 @@ svg.react-flow__connectionline {
 	line-height: 1.4;
 }
 
-.swimlanesConfigLabel + input[type="checkbox"],
-.swimlanesConfigLabel + select,
-.swimlanesConfigLabel + input[type="text"] {
+.swimlanesConfigLabel+input[type="checkbox"],
+.swimlanesConfigLabel+select,
+.swimlanesConfigLabel+input[type="text"] {
 	flex-shrink: 0;
 	align-self: center;
 }
@@ -6462,55 +6463,55 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	border-color: var(--interactive-accent);
 }
 
-	.swimlanesConfigBtnCancel:active {
-		transform: scale(0.98);
+.swimlanesConfigBtnCancel:active {
+	transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.swimlanes-config-modal {
+		max-width: 90vw;
 	}
 
-	/* Responsive adjustments */
-	@media (max-width: 768px) {
-		.swimlanes-config-modal {
-			max-width: 90vw;
-		}
-
-		.swimlanesConfigSection {
-			padding: 15px;
-		}
-
-		.swimlanesConfigButtonsContainer {
-			padding: 12px 15px;
-			flex-direction: column-reverse;
-		}
-
-		.swimlanesConfigBtn {
-			width: 100%;
-		}
-
-		.swimlanesConfigSelect,
-		.swimlanesConfigInput,
-		.swimlanesConfigSortRowInput {
-			min-width: auto;
-			width: 100%;
-		}
-
-		.swimlanesConfigItem {
-			flex-direction: column;
-			align-items: stretch;
-		}
-
-		.swimlanesConfigItem input[type="checkbox"] {
-			align-self: flex-start;
-			margin-top: 5px;
-		}
-
-		.swimlanesConfigSortRow {
-			flex-wrap: wrap;
-		}
-
-		.swimlanesConfigSortRowInput {
-			order: 3;
-			width: 100%;
-		}
+	.swimlanesConfigSection {
+		padding: 15px;
 	}
+
+	.swimlanesConfigButtonsContainer {
+		padding: 12px 15px;
+		flex-direction: column-reverse;
+	}
+
+	.swimlanesConfigBtn {
+		width: 100%;
+	}
+
+	.swimlanesConfigSelect,
+	.swimlanesConfigInput,
+	.swimlanesConfigSortRowInput {
+		min-width: auto;
+		width: 100%;
+	}
+
+	.swimlanesConfigItem {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.swimlanesConfigItem input[type="checkbox"] {
+		align-self: flex-start;
+		margin-top: 5px;
+	}
+
+	.swimlanesConfigSortRow {
+		flex-wrap: wrap;
+	}
+
+	.swimlanesConfigSortRowInput {
+		order: 3;
+		width: 100%;
+	}
+}
 
 /* ============================================
    KANBAN SWIMLANES VIEW STYLES
@@ -6527,8 +6528,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 /* Header row with column names */
 .swimlanesHeaderRow {
-	display: grid;
-	grid-template-columns: var(--swimlane-label-width, 120px) repeat(auto-fit, minmax(250px, 1fr));
+	display: flex;
 	gap: var(--swimlane-gap, 1px);
 	padding: 0;
 	background-color: var(--background-secondary);
@@ -6588,8 +6588,8 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 /* Individual swimlane row */
 .swimlaneRow {
-	display: grid;
-	grid-template-columns: var(--swimlane-label-width, 120px) repeat(auto-fit, minmax(250px, 1fr));
+	display: flex;
+	flex-direction: row;
 	gap: var(--swimlane-gap, 1px);
 	background-color: var(--background-primary);
 	border-bottom: 2px solid var(--divider-color);
@@ -6636,7 +6636,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: contents;
 }
 
-.swimlaneRow > .column {
+.swimlaneRow>.column {
 	border-right: 1px solid var(--divider-color);
 	border-bottom: none;
 	min-height: 200px;
@@ -6645,7 +6645,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	background-color: var(--background-primary);
 }
 
-.swimlaneRow > .column:hover {
+.swimlaneRow>.column:hover {
 	background-color: rgba(var(--interactive-accent-rgb), 0.02);
 }
 
@@ -6667,6 +6667,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 /* Responsive adjustments for swimlanes */
 @media (max-width: 1200px) {
+
 	.swimlanesHeaderRow,
 	.swimlaneRow {
 		grid-template-columns: var(--swimlane-label-width, 100px) repeat(auto-fit, minmax(200px, 1fr));
@@ -6701,7 +6702,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 		font-size: 0.75em;
 	}
 
-	.swimlaneRow > .column {
+	.swimlaneRow>.column {
 		min-height: 150px;
 	}
 }

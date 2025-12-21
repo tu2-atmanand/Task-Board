@@ -31,26 +31,24 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 }) => {
 	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
 
-	// Extract and organize swimlanes
+	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
 	const swimlanes = useMemo(() => {
-		if (!board.swimlanes?.enabled || !allTasks) {
+		if (!board.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
 		}
 
 		const { property, sortCriteria, customSortOrder, customValue } = board.swimlanes;
-		console.log("board.swimlanes:", board.swimlanes, "\nproperty:", property, "\nsortCriteria:", sortCriteria, "\ncustomSortOrder:", customSortOrder, "\ncustomValue:", customValue);
 
 		// Get all active columns
 		const activeColumns = board.columns.filter((col) => col.active);
 		if (activeColumns.length === 0) return [];
 
-		// Extract unique values for the swimlane property
-		const uniqueSwimlanValues = extractUniquePropertyValues(
-			allTasks,
+		// Extract unique values for the swimlane property from tasksPerColumn
+		const uniqueSwimlanValues = extractUniquePropertyValuesFromColumns(
+			tasksPerColumn,
 			property,
 			customValue
 		);
-		console.log("uniqueSwimlanValues:", uniqueSwimlanValues);
 
 		// Sort the swimlane values
 		let sortedSwimlaneValues: { value: string; index: number }[] = [];
@@ -96,25 +94,14 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 		// Create swimlane rows with tasks organized by column
 		const swimlaneRows: SwimlaneRow[] = sortedSwimlaneValues.map((swimlaneItem) => {
-			const tasksForSwimlane = filterTasksForSwimlane(
-				allTasks,
-				swimlaneItem.value,
-				property,
-				customValue
-			);
-
-			// Organize tasks into columns
-			const tasksByColumn = activeColumns.map((column) => {
-				const columnIndex = board.columns.findIndex((c) => c.id === column.id);
-				if (columnIndex === -1) return [];
-
-				// Filter tasks that match this column's criteria and swimlane
-				return filterTasksForColumn(
-					plugin,
-					board.columns.indexOf(column),
-					column,
-					tasksForSwimlane
-				);
+			const tasksByColumn = activeColumns.map((column, colIdx) => {
+				// tasksPerColumn is expected to align with active columns order
+				const columnTasks = tasksPerColumn[colIdx] || [];
+				// Filter tasks in this column that match the swimlane value for the selected property
+				return columnTasks.filter((task) => {
+					const values = getPropertyValues(task as taskItem, property, customValue);
+					return values.includes(swimlaneItem.value);
+				});
 			});
 
 			return {
@@ -132,7 +119,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		}
 
 		return swimlaneRows;
-	}, [board, allTasks, plugin]);
+	}, [board, tasksPerColumn, plugin]);
 
 	if (swimlanes.length === 0) {
 		return (
@@ -191,19 +178,20 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 };
 
 /**
- * Extract unique values for a given property from all tasks
+ * Extract unique values for a given property from tasks already grouped per column
  */
-function extractUniquePropertyValues(
-	allTasks: taskJsonMerged,
+function extractUniquePropertyValuesFromColumns(
+	tasksPerColumn: taskItem[][],
 	property: string,
 	customValue?: string
 ): string[] {
 	const uniqueValues = new Set<string>();
 
-	Object.values(allTasks).forEach((task: taskItem) => {
-		const values = getPropertyValues(task, property, customValue);
-		console.log("extractUniquePropertyValues...", "\ntask:", task, "\nproperty", property, "\ncustomValue:", customValue, "\nvalues:", values);
-		values.forEach((val) => uniqueValues.add(val));
+	tasksPerColumn.forEach((columnTasks) => {
+		columnTasks.forEach((task) => {
+			const values = getPropertyValues(task, property, customValue);
+			values.forEach((v) => uniqueValues.add(v));
+		});
 	});
 
 	return Array.from(uniqueValues).sort();
@@ -278,18 +266,7 @@ function getPropertyValues(
 /**
  * Filter tasks for a specific swimlane value
  */
-function filterTasksForSwimlane(
-	allTasks: taskJsonMerged,
-	swimlaneValue: string,
-	property: string,
-	customValue?: string
-): any[] {
-	return Object.values(allTasks).filter((task) => {
-		const values = getPropertyValues(task, property, customValue);
-		console.log("values", values, "\nswimlaneValue:", swimlaneValue, "\ncondition:", values.includes(swimlaneValue));
-		return values.includes(swimlaneValue);
-	});
-}
+// Note: tasks are filtered per-column inside the main useMemo using getPropertyValues().
 
 /**
  * Filter tasks for a specific column (delegated to column's own filtering logic)
