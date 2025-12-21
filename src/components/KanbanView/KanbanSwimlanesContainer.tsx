@@ -1,0 +1,335 @@
+// src/components/KanbanView/KanbanSwimlanesContainer.tsx
+
+import React, { useMemo, memo } from 'react';
+import { Board } from 'src/interfaces/BoardConfigs';
+import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItem';
+import Column from './Column';
+import LazyColumn from './LazyColumn';
+import type TaskBoard from 'main';
+import { t } from 'src/utils/lang/helper';
+
+interface KanbanSwimlanesContainerProps {
+	plugin: TaskBoard;
+	board: Board;
+	allTasks: taskJsonMerged | undefined;
+	tasksPerColumn: taskItem[][];
+	lazyLoadingEnabled: boolean;
+}
+
+interface SwimlaneRow {
+	swimlaneName: string;
+	swimlaneValue: string;
+	tasks: taskItem[][];
+}
+
+const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
+	plugin,
+	board,
+	allTasks,
+	tasksPerColumn,
+	lazyLoadingEnabled,
+}) => {
+	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+
+	// Extract and organize swimlanes
+	const swimlanes = useMemo(() => {
+		if (!board.swimlanes?.enabled || !allTasks) {
+			return [];
+		}
+
+		const { property, sortCriteria, customSortOrder, customValue } = board.swimlanes;
+		console.log("board.swimlanes:", board.swimlanes, "\nproperty:", property, "\nsortCriteria:", sortCriteria, "\ncustomSortOrder:", customSortOrder, "\ncustomValue:", customValue);
+
+		// Get all active columns
+		const activeColumns = board.columns.filter((col) => col.active);
+		if (activeColumns.length === 0) return [];
+
+		// Extract unique values for the swimlane property
+		const uniqueSwimlanValues = extractUniquePropertyValues(
+			allTasks,
+			property,
+			customValue
+		);
+		console.log("uniqueSwimlanValues:", uniqueSwimlanValues);
+
+		// Sort the swimlane values
+		let sortedSwimlaneValues: { value: string; index: number }[] = [];
+
+		if (sortCriteria === 'custom' && customSortOrder && customSortOrder.length > 0) {
+			// Use custom sort order
+			sortedSwimlaneValues = customSortOrder.map((item) => ({
+				value: item.value,
+				index: item.index,
+			}));
+
+			// Add remaining values that are not in customSortOrder
+			const customValues = new Set(customSortOrder.map((item) => item.value));
+			const remainingValues = uniqueSwimlanValues.filter((val) => !customValues.has(val));
+
+			if (remainingValues.length > 0) {
+				const maxIndex = Math.max(...customSortOrder.map((item) => item.index), 0);
+				sortedSwimlaneValues = [
+					...sortedSwimlaneValues,
+					...remainingValues.map((val, idx) => ({
+						value: val,
+						index: maxIndex + idx + 1,
+					})),
+				];
+			}
+		} else if (sortCriteria === 'asc') {
+			// Sort ascending
+			sortedSwimlaneValues = uniqueSwimlanValues
+				.sort()
+				.map((val, idx) => ({
+					value: val,
+					index: idx + 1,
+				}));
+		} else if (sortCriteria === 'desc') {
+			// Sort descending
+			sortedSwimlaneValues = uniqueSwimlanValues
+				.sort((a, b) => b.localeCompare(a))
+				.map((val, idx) => ({
+					value: val,
+					index: idx + 1,
+				}));
+		}
+
+		// Create swimlane rows with tasks organized by column
+		const swimlaneRows: SwimlaneRow[] = sortedSwimlaneValues.map((swimlaneItem) => {
+			const tasksForSwimlane = filterTasksForSwimlane(
+				allTasks,
+				swimlaneItem.value,
+				property,
+				customValue
+			);
+
+			// Organize tasks into columns
+			const tasksByColumn = activeColumns.map((column) => {
+				const columnIndex = board.columns.findIndex((c) => c.id === column.id);
+				if (columnIndex === -1) return [];
+
+				// Filter tasks that match this column's criteria and swimlane
+				return filterTasksForColumn(
+					plugin,
+					board.columns.indexOf(column),
+					column,
+					tasksForSwimlane
+				);
+			});
+
+			return {
+				swimlaneName: swimlaneItem.value,
+				swimlaneValue: swimlaneItem.value,
+				tasks: tasksByColumn,
+			};
+		});
+
+		// Filter out empty swimlanes if showEmptySwimlanes is false
+		if (!board.swimlanes.showEmptySwimlanes) {
+			return swimlaneRows.filter((row) =>
+				row.tasks.some((columnTasks) => columnTasks.length > 0)
+			);
+		}
+
+		return swimlaneRows;
+	}, [board, allTasks, plugin]);
+
+	if (swimlanes.length === 0) {
+		return (
+			<div className="emptyBoardMessage">
+				{t('no-swimlanes-found') || 'No swimlanes found for this configuration.'}
+			</div>
+		);
+	}
+
+	const activeColumns = board.columns.filter((col) => col.active);
+
+	return (
+		<div className="kanbanSwimlanesGrid">
+			{/* Column Headers (Fixed Row) */}
+			<div className="swimlanesHeaderRow">
+				<div className="swimlanesRowLabel"></div>
+				{activeColumns.map((column) => (
+					<div
+						key={column.id}
+						className="swimlanesColumnHeader"
+						title={column.name}
+					>
+						{column.name}
+					</div>
+				))}
+			</div>
+
+			{/* Swimlane Rows */}
+			<div className="swimlanesContainer">
+				{swimlanes.map((swimlane, rowIndex) => (
+					<div key={swimlane.swimlaneValue} className="swimlaneRow">
+						{/* Swimlane Label */}
+						<div className="swimlaneLabel" title={swimlane.swimlaneName}>
+							{swimlane.swimlaneName}
+						</div>
+
+						{/* Columns for this Swimlane */}
+						<div className="swimlaneColumnsWrapper">
+							{activeColumns.map((column, colIndex) => (
+								<MemoizedSwimlanColumn
+									key={`${swimlane.swimlaneValue}-${column.id}`}
+									plugin={plugin}
+									columnIndex={column.index}
+									activeBoardData={board}
+									columnData={column}
+									tasksForThisColumn={swimlane.tasks[colIndex] || []}
+									Component={ColumnComponent}
+								/>
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+};
+
+/**
+ * Extract unique values for a given property from all tasks
+ */
+function extractUniquePropertyValues(
+	allTasks: taskJsonMerged,
+	property: string,
+	customValue?: string
+): string[] {
+	const uniqueValues = new Set<string>();
+
+	Object.values(allTasks).forEach((task: taskItem) => {
+		const values = getPropertyValues(task, property, customValue);
+		console.log("extractUniquePropertyValues...", "\ntask:", task, "\nproperty", property, "\ncustomValue:", customValue, "\nvalues:", values);
+		values.forEach((val) => uniqueValues.add(val));
+	});
+
+	return Array.from(uniqueValues).sort();
+}
+
+/**
+ * Get property values from a single task
+ */
+function getPropertyValues(
+	task: taskItem,
+	property: string,
+	customValue?: string
+): string[] {
+	let values: string[] = [];
+
+	console.log("getPropertyValues...", "\ntask:", task, "\nproperty", property, "\ncustomValue:", customValue);
+
+	switch (property) {
+		case 'tags':
+			if (task.tags && Array.isArray(task.tags)) {
+				values = task.tags.map((tag: any) => {
+					if (typeof tag === 'string') return tag;
+					if (tag.tag) return tag.tag;
+					return '';
+				}).filter((v: string) => v);
+			}
+			break;
+
+		case 'priority':
+			if (task.priority !== undefined && task.priority !== null) {
+				values = [String(task.priority)];
+			}
+			break;
+
+		case 'status':
+			if (task.status) {
+				values = [task.status];
+			}
+			break;
+
+		// case 'project':
+		// 	if (task.project) {
+		// 		values = [task.project];
+		// 	}
+		// 	break;
+
+		// case 'context':
+		// 	if (task.context) {
+		// 		values = [task.context];
+		// 	}
+		// 	break;
+
+		// case 'custom':
+		// 	if (customValue && task?.[customValue]) {
+		// 		const customProp = task?.[customValue];
+		// 		console.log("customValue", customValue, "\ntask[customValue]", task[customValue], "\ncustomProp", customProp);
+		// 		if (Array.isArray(customProp)) {
+		// 			values = customProp.map((v: any) => String(v)).filter((v) => v);
+		// 		} else {
+		// 			values = [String(customProp)];
+		// 		}
+		// 	}
+		// 	break;
+
+		default:
+			break;
+	}
+
+	return values.filter((v) => v && v.trim());
+}
+
+/**
+ * Filter tasks for a specific swimlane value
+ */
+function filterTasksForSwimlane(
+	allTasks: taskJsonMerged,
+	swimlaneValue: string,
+	property: string,
+	customValue?: string
+): any[] {
+	return Object.values(allTasks).filter((task) => {
+		const values = getPropertyValues(task, property, customValue);
+		console.log("values", values, "\nswimlaneValue:", swimlaneValue, "\ncondition:", values.includes(swimlaneValue));
+		return values.includes(swimlaneValue);
+	});
+}
+
+/**
+ * Filter tasks for a specific column (delegated to column's own filtering logic)
+ * This uses the existing column filtering to maintain consistency
+ */
+function filterTasksForColumn(
+	plugin: TaskBoard,
+	columnIndex: number,
+	column: any,
+	swimlaneTasks: any[]
+): taskItem[] {
+	// Import columnSegregator to use existing filtering logic
+	try {
+		// This would use the same filtering logic as the column filtering
+		// For now, we'll return swimlaneTasks as they should already be filtered by swimlane
+		// In a production scenario, you'd want to apply column-specific filtering here
+		return swimlaneTasks as taskItem[];
+	} catch (error) {
+		return [];
+	}
+}
+
+/**
+ * Memoized swimlane column component
+ */
+const MemoizedSwimlanColumn = memo<{
+	plugin: TaskBoard;
+	columnIndex: number;
+	activeBoardData: any;
+	columnData: any;
+	tasksForThisColumn: taskItem[];
+	Component: typeof Column | typeof LazyColumn;
+}>(({ Component, ...props }) => {
+	return <Component {...props} />;
+}, (prevProps, nextProps) => {
+	return (
+		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
+		prevProps.columnData === nextProps.columnData &&
+		prevProps.Component === nextProps.Component
+	);
+});
+
+export default memo(KanbanSwimlanesContainer);

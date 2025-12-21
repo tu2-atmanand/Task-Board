@@ -123,8 +123,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 		{ value: 'tags', label: t('tags') || 'Tags' },
 		{ value: 'priority', label: t('priority') || 'Priority' },
 		{ value: 'status', label: t('status') || 'Status' },
-		{ value: 'project', label: t('project') || 'Project' },
-		{ value: 'context', label: t('context') || 'Context' },
+		{ value: 'scheduledDate', label: t('scheduledDate') || 'Status' },
 		{ value: 'custom', label: t('custom') || 'Custom' },
 	];
 

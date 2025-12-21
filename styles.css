@@ -6462,53 +6462,264 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	border-color: var(--interactive-accent);
 }
 
-.swimlanesConfigBtnCancel:active {
-	transform: scale(0.98);
+	.swimlanesConfigBtnCancel:active {
+		transform: scale(0.98);
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 768px) {
+		.swimlanes-config-modal {
+			max-width: 90vw;
+		}
+
+		.swimlanesConfigSection {
+			padding: 15px;
+		}
+
+		.swimlanesConfigButtonsContainer {
+			padding: 12px 15px;
+			flex-direction: column-reverse;
+		}
+
+		.swimlanesConfigBtn {
+			width: 100%;
+		}
+
+		.swimlanesConfigSelect,
+		.swimlanesConfigInput,
+		.swimlanesConfigSortRowInput {
+			min-width: auto;
+			width: 100%;
+		}
+
+		.swimlanesConfigItem {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.swimlanesConfigItem input[type="checkbox"] {
+			align-self: flex-start;
+			margin-top: 5px;
+		}
+
+		.swimlanesConfigSortRow {
+			flex-wrap: wrap;
+		}
+
+		.swimlanesConfigSortRowInput {
+			order: 3;
+			width: 100%;
+		}
+	}
+
+/* ============================================
+   KANBAN SWIMLANES VIEW STYLES
+   ============================================ */
+
+.kanbanSwimlanesGrid {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	gap: 0;
+	background-color: var(--background-primary);
 }
 
-/* Responsive adjustments */
+/* Header row with column names */
+.swimlanesHeaderRow {
+	display: grid;
+	grid-template-columns: var(--swimlane-label-width, 120px) repeat(auto-fit, minmax(250px, 1fr));
+	gap: var(--swimlane-gap, 1px);
+	padding: 0;
+	background-color: var(--background-secondary);
+	border-bottom: 2px solid var(--divider-color);
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	min-height: 50px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.swimlanesRowLabel {
+	background-color: var(--background-tertiary);
+	border-right: 1px solid var(--divider-color);
+	padding: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	font-size: 0.85em;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesColumnHeader {
+	background-color: var(--background-secondary);
+	border-right: 1px solid var(--divider-color);
+	padding: 12px;
+	font-weight: 600;
+	color: var(--text-normal);
+	font-size: 0.95em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: background-color 0.15s ease;
+}
+
+.swimlanesColumnHeader:hover {
+	background-color: var(--background-tertiary);
+}
+
+/* Container for all swimlane rows */
+.swimlanesContainer {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow-y: auto;
+	gap: 2px;
+	padding: 2px;
+	background-color: var(--background-primary);
+}
+
+/* Individual swimlane row */
+.swimlaneRow {
+	display: grid;
+	grid-template-columns: var(--swimlane-label-width, 120px) repeat(auto-fit, minmax(250px, 1fr));
+	gap: var(--swimlane-gap, 1px);
+	background-color: var(--background-primary);
+	border-bottom: 2px solid var(--divider-color);
+	min-height: 200px;
+	padding: 0;
+	transition: background-color 0.15s ease;
+}
+
+.swimlaneRow:hover {
+	background-color: rgba(var(--interactive-accent-rgb), 0.02);
+}
+
+/* Swimlane label on the left */
+.swimlaneLabel {
+	background-color: var(--background-tertiary);
+	border-right: 1px solid var(--divider-color);
+	padding: 15px 12px;
+	font-weight: 600;
+	color: var(--text-normal);
+	font-size: 0.9em;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-word;
+	position: sticky;
+	left: 0;
+	z-index: 5;
+	min-height: inherit;
+	border-bottom: none;
+	line-height: 1.3;
+}
+
+/* Wrapper for all columns in a swimlane */
+.swimlaneColumnsWrapper {
+	display: contents;
+}
+
+/* Column within swimlane - applies to Column component */
+.swimlaneRow .columnsContainer {
+	display: contents;
+}
+
+.swimlaneRow > .column {
+	border-right: 1px solid var(--divider-color);
+	border-bottom: none;
+	min-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background-color: var(--background-primary);
+}
+
+.swimlaneRow > .column:hover {
+	background-color: rgba(var(--interactive-accent-rgb), 0.02);
+}
+
+/* Empty swimlane message */
+.emptyBoardMessage {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 300px;
+	color: var(--text-muted);
+	font-size: 1em;
+	padding: 20px;
+	text-align: center;
+	background-color: var(--background-secondary);
+	border-radius: 6px;
+	margin: 20px;
+}
+
+/* Responsive adjustments for swimlanes */
+@media (max-width: 1200px) {
+	.swimlanesHeaderRow,
+	.swimlaneRow {
+		grid-template-columns: var(--swimlane-label-width, 100px) repeat(auto-fit, minmax(200px, 1fr));
+	}
+
+	.swimlanesColumnHeader,
+	.swimlaneLabel {
+		padding: 10px 8px;
+		font-size: 0.85em;
+	}
+}
+
 @media (max-width: 768px) {
-	.swimlanes-config-modal {
-		max-width: 90vw;
+	.kanbanSwimlanesGrid {
+		--swimlane-label-width: 80px;
+		--swimlane-gap: 0px;
 	}
 
-	.swimlanesConfigSection {
-		padding: 15px;
+	.swimlanesHeaderRow,
+	.swimlaneRow {
+		grid-template-columns: var(--swimlane-label-width, 80px) repeat(auto-fit, minmax(150px, 1fr));
+		min-height: 150px;
 	}
 
-	.swimlanesConfigButtonsContainer {
-		padding: 12px 15px;
-		flex-direction: column-reverse;
+	.swimlaneRow {
+		min-height: 150px;
 	}
 
-	.swimlanesConfigBtn {
-		width: 100%;
+	.swimlanesColumnHeader,
+	.swimlaneLabel {
+		padding: 8px 6px;
+		font-size: 0.75em;
 	}
 
-	.swimlanesConfigSelect,
-	.swimlanesConfigInput,
-	.swimlanesConfigSortRowInput {
-		min-width: auto;
-		width: 100%;
-	}
-
-	.swimlanesConfigItem {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.swimlanesConfigItem input[type="checkbox"] {
-		align-self: flex-start;
-		margin-top: 5px;
-	}
-
-	.swimlanesConfigSortRow {
-		flex-wrap: wrap;
-	}
-
-	.swimlanesConfigSortRowInput {
-		order: 3;
-		width: 100%;
+	.swimlaneRow > .column {
+		min-height: 150px;
 	}
 }
 
+@media (max-width: 480px) {
+	.kanbanSwimlanesGrid {
+		--swimlane-label-width: 70px;
+	}
+
+	.swimlanesHeaderRow,
+	.swimlaneRow {
+		grid-template-columns: var(--swimlane-label-width, 70px) repeat(auto-fit, minmax(120px, 1fr));
+	}
+
+	.swimlanesColumnHeader,
+	.swimlaneLabel {
+		padding: 6px 4px;
+		font-size: 0.7em;
+		word-break: break-word;
+	}
+}
