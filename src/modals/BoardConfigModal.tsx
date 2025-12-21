@@ -155,6 +155,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			customValue: '',
 			sortCriteria: 'asc',
 			customSortOrder: [],
+			minimized: false,
+			maxHeight: 300,
 		};
 
 		const swimlaneModal = new SwimlanesConfigModal(
@@ -221,6 +223,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				showEmptySwimlanes: false,
 				property: 'tags',
 				sortCriteria: 'asc',
+				minimized: false,
+				maxHeight: 300,
 			},
 		};
 		setLocalBoards([...oldBoards, newBoard]);

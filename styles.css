@@ -356,6 +356,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: var(--border-width) solid var(--background-modifier-border);
 }
 
+.swimlaneColumnsWrapper .TaskBoardColumnsSection {
+	margin-right: 0px;
+}
+
 .taskBoardColumnSecHeader {
 	display: flex;
 	flex-direction: row;

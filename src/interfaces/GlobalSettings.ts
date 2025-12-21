@@ -250,8 +250,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				swimlanes: {
 					enabled: false,
 					showEmptySwimlanes: false,
-					property: 'tags',
-					sortCriteria: 'asc',
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: false,
+					maxHeight: 300,
 				},
 			},
 			{
@@ -313,8 +315,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				swimlanes: {
 					enabled: false,
 					showEmptySwimlanes: false,
-					property: 'tags',
-					sortCriteria: 'asc',
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: false,
+					maxHeight: 300,
 				},
 			},
 			{
@@ -386,8 +390,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				swimlanes: {
 					enabled: false,
 					showEmptySwimlanes: false,
-					property: 'tags',
-					sortCriteria: 'asc',
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: false,
+					maxHeight: 300,
 				},
 			},
 		],

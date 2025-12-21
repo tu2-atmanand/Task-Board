@@ -1,7 +1,7 @@
 // /src/modals/SwimlanesConfigModal.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, App } from 'obsidian';
+import { Modal, App, BooleanValue } from 'obsidian';
 import ReactDOM from "react-dom/client";
 import TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
@@ -13,6 +13,8 @@ interface SwimlaneConfig {
 	enabled: boolean;
 	showEmptySwimlanes: boolean;
 	property: string;
+	minimized: boolean,
+	maxHeight: number;
 	customValue?: string;
 	sortCriteria: string;
 	customSortOrder?: { value: string; index: number }[];
@@ -87,6 +89,8 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 			enabled,
 			showEmptySwimlanes,
 			property,
+			minimized: false,
+			maxHeight: 300,
 			customValue: customValue || undefined,
 			sortCriteria,
 			customSortOrder: sortCriteria === 'custom' ? customSortOrder : undefined,

@@ -613,51 +613,56 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						ref={tasksContainerRef}
 						onDragOver={handleTasksContainerDragOver}
 					>
-						{visibleTasks && visibleTasks.length > 0 ? (
+						{columnData.minimized ? <></> : (
 							<>
-								{(() => {
-									const elements: React.ReactNode[] = [];
-									for (let i = 0; i < visibleTasks.length; i++) {
-										// If insertIndex points to this position, render placeholder
-										if (insertIndex === i) {
-											elements.push(
-												<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-											);
-										}
-										const task = visibleTasks[i];
-										elements.push(
-											<div
-												key={task.id}
-												className="taskItemFadeIn"
-												onDrop={e => handleTaskDrop(e, i)}
-											>
-												<TaskItem
-													key={task.id}
-													plugin={plugin}
-													task={task}
-													columnIndex={columnIndex}
-													activeBoardSettings={activeBoardData}
-												/>
+								{visibleTasks && visibleTasks.length > 0 ? (
+									<>
+										{(() => {
+											const elements: React.ReactNode[] = [];
+											for (let i = 0; i < visibleTasks.length; i++) {
+												// If insertIndex points to this position, render placeholder
+												if (insertIndex === i) {
+													elements.push(
+														<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+													);
+												}
+												const task = visibleTasks[i];
+												elements.push(
+													<div
+														key={task.id}
+														className="taskItemFadeIn"
+														onDrop={e => handleTaskDrop(e, i)}
+													>
+														<TaskItem
+															key={task.id}
+															plugin={plugin}
+															task={task}
+															columnIndex={columnIndex}
+															activeBoardSettings={activeBoardData}
+														/>
+													</div>
+												);
+											}
+											// If insertIndex points to end (after last item)
+											if (insertIndex === visibleTasks.length) {
+												elements.push(
+													<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+												);
+											}
+											return elements;
+										})()}
+										{allTasks && visibleTaskCount < allTasks.length && (
+											<div className="lazyLoadIndicator">
+												<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
 											</div>
-										);
-									}
-									// If insertIndex points to end (after last item)
-									if (insertIndex === visibleTasks.length) {
-										elements.push(
-											<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-										);
-									}
-									return elements;
-								})()}
-								{allTasks && visibleTaskCount < allTasks.length && (
-									<div className="lazyLoadIndicator">
-										<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
-									</div>
+										)}
+									</>
+								) : (
+									<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
 								)}
 							</>
-						) : (!columnData.minimized ? (
-							<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
-						) : null)}
+						)
+						}
 					</div>
 				</>
 			)}

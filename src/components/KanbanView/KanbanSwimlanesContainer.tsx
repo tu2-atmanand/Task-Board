@@ -146,7 +146,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				item.setTitle(t("maximize-column"));
 				item.setIcon("panel-left-open");
 				item.onClick(async () => {
-					await handleMinimizeSwimlane();
+					// await handleMinimizeSwimlane(); // TODO : Implementation pending
 				});
 			});
 		} else {
@@ -154,7 +154,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				item.setTitle(t("minimize-column"));
 				item.setIcon("panel-left-close");
 				item.onClick(async () => {
-					await handleMinimizeSwimlane();
+					// await handleMinimizeSwimlane(); // TODO : Implementation pending
 				});
 			});
 		}
