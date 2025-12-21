@@ -1300,9 +1300,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 				className={`taskItem ${isThistaskCompleted ? 'completed' : ''} ${isDragging ? 'taskItem-dragging' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
-				draggable={true}
-				onDragStart={handleDragStart}
-				onDragEnd={handleDragEnd}
 				onDoubleClick={handleDoubleClickOnCard}
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
@@ -1323,7 +1320,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 					)}
 					{!Platform.isPhone && (
 						<>
-							<div className="taskItemDragBtn" aria-label={t("drag-task-card")}><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+							<div className="taskItemDragBtn" aria-label={t("drag-task-card")} draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+								<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} />
+							</div>
 						</>
 					)}
 					<div className="taskItemMainBody">

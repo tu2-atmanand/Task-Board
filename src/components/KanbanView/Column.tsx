@@ -345,8 +345,6 @@ const Column: React.FC<ColumnProps> = ({
 		e.preventDefault();
 		setIsDragOver(false);
 
-		if (columnData.colType !== 'namedTag') return;
-
 		try {
 			// Get the data of the dragged task
 			const taskData = e.dataTransfer.getData('application/json');
@@ -367,7 +365,7 @@ const Column: React.FC<ColumnProps> = ({
 
 				// If target column uses manualOrder, disallow cross-column drops (only allow intra-column reordering)
 				const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-				if (hasManualOrder && sourceColumnData.coltag !== columnData.coltag) {
+				if (hasManualOrder && sourceColumnData.id !== columnData.id) {
 					// Not allowed: ignore drop
 					dragDropTasksManagerInsatance.clearCurrentDragData();
 					dragDropTasksManagerInsatance.clearDesiredDropIndex();
@@ -423,59 +421,55 @@ const Column: React.FC<ColumnProps> = ({
 
 	// Handle the dragover event to allow the drop
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		// Only allow drop if this column is of type colType.namedTag
-		if (columnData.colType === colType.namedTag) {
-			// Always prevent default to indicate drop is allowed unless we explicitly set otherwise
-			e.preventDefault();
-			setIsDragOver(true);
+		e.preventDefault();
+		setIsDragOver(true);
+		try {
+			// Try to read payload from the DataTransfer first
+			let taskDataStr = '';
 			try {
-				// Try to read payload from the DataTransfer first
-				let taskDataStr = '';
-				try {
-					taskDataStr = e.dataTransfer.getData('application/json');
-				} catch (err) {
-					// ignore - some environments restrict access
-				}
-
-				let payload: any = null;
-				if (taskDataStr) {
-					try { payload = JSON.parse(taskDataStr); } catch { }
-				}
-
-				// Fallback to manager-stored payload if dataTransfer is empty
-				if (!payload) {
-					payload = dragDropTasksManagerInsatance.getCurrentDragData();
-				}
-
-				if (!payload) return;
-
-				const { task, sourceColumnData } = payload;
-				if (!task || !sourceColumnData) return;
-
-				// Get the target column container
-				const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
-				// Get the source column container (best-effort by matching tag)
-				const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
-				const sourceColumnContainer = allColumnContainers.find(container => {
-					const containerTag = container.getAttribute('data-column-tag-name');
-					return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
-				}) || targetColumnContainer;
-
-				// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
-				dragDropTasksManagerInsatance.handleDragOver(
-					e.nativeEvent,
-					sourceColumnData,
-					sourceColumnContainer,
-					columnData,
-					targetColumnContainer
-				);
-
-				// Ensure cursor reflects allowed/not-allowed (best-effort fallback)
-				const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
-				e.dataTransfer.dropEffect = allowed ? 'move' : 'none';
-			} catch (error) {
-				console.error('Error handling drag over:', error);
+				taskDataStr = e.dataTransfer.getData('application/json');
+			} catch (err) {
+				// ignore - some environments restrict access
 			}
+
+			let payload: any = null;
+			if (taskDataStr) {
+				try { payload = JSON.parse(taskDataStr); } catch { }
+			}
+
+			// Fallback to manager-stored payload if dataTransfer is empty
+			if (!payload) {
+				payload = dragDropTasksManagerInsatance.getCurrentDragData();
+			}
+
+			if (!payload) return;
+
+			const { task, sourceColumnData } = payload;
+			if (!task || !sourceColumnData) return;
+
+			// Get the target column container
+			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+			// Get the source column container (best-effort by matching tag)
+			const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+			const sourceColumnContainer = allColumnContainers.find(container => {
+				const containerTag = container.getAttribute('data-column-tag-name');
+				return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+			}) || targetColumnContainer;
+
+			// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
+			dragDropTasksManagerInsatance.handleDragOver(
+				e.nativeEvent,
+				sourceColumnData,
+				sourceColumnContainer,
+				columnData,
+				targetColumnContainer
+			);
+
+			// Ensure cursor reflects allowed/not-allowed (best-effort fallback)
+			const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
+			e.dataTransfer!.dropEffect = allowed ? 'move' : 'none';
+		} catch (error) {
+			console.error('Error handling drag over:', error);
 		}
 	}, [columnData]);
 
@@ -484,6 +478,16 @@ const Column: React.FC<ColumnProps> = ({
 		e.preventDefault();
 		setIsDragOver(true);
 		try {
+			// Only compute insertion index for columns that use manualOrder
+			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			if (!hasManualOrder) {
+				// Clear any visual placeholder and desired index
+				if (insertIndexRef.current !== null) {
+					scheduleSetInsertIndex(null);
+				}
+				dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				return;
+			}
 			const container = e.currentTarget as HTMLDivElement;
 			const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
 			const clientY = e.clientY;
@@ -506,7 +510,7 @@ const Column: React.FC<ColumnProps> = ({
 		} catch (error) {
 			console.error('Error computing insert index:', error);
 		}
-	}, [scheduleSetInsertIndex]);
+	}, [scheduleSetInsertIndex, columnData]);
 
 	// Cleanup any pending RAF on unmount
 	useEffect(() => {
@@ -572,23 +576,21 @@ const Column: React.FC<ColumnProps> = ({
 											<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
 										);
 									}
-									const task = localTasks[i];
-									elements.push(
-										<div
-											key={task.id}
-											className="taskItemFadeIn"
-											draggable={true}
-											onDragStart={e => handleTaskDragStart(e, i)}
-											onDrop={e => handleTaskDrop(e, i)}
-										>
-											<TaskItem
+										const task = localTasks[i];
+										elements.push(
+											<div
 												key={task.id}
-												plugin={plugin}
-												task={task}
-												columnIndex={columnIndex}
-												activeBoardSettings={activeBoardData}
-											/>
-										</div>
+												className="taskItemFadeIn"
+												onDrop={e => handleTaskDrop(e, i)}
+											>
+												<TaskItem
+													key={task.id}
+													plugin={plugin}
+													task={task}
+													columnIndex={columnIndex}
+													activeBoardSettings={activeBoardData}
+												/>
+											</div>
 									);
 								}
 								// If insertIndex points to end (after last item)
