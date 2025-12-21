@@ -6161,3 +6161,354 @@ svg.react-flow__connectionline {
 .lucide {
 	margin-right: 0px !important;
 }
+
+/* Swimlanes Configuration Modal Styles */
+.swimlanes-config-modal {
+	width: auto;
+	min-height: auto;
+	max-width: 600px;
+	border-radius: var(--modal-radius);
+}
+
+.swimlanesConfigContent {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 0;
+}
+
+.swimlanesConfigSection {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.swimlanesConfigSection h2 {
+	margin: 0;
+	font-size: 1.5em;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.swimlanesConfigItem {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 15px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--divider-color);
+}
+
+.swimlanesConfigItem:last-of-type {
+	border-bottom: none;
+}
+
+.swimlanesConfigLabel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.swimlanesConfigLabel label {
+	font-weight: 500;
+	color: var(--text-normal);
+	font-size: 0.95em;
+}
+
+.swimlanesConfigDescription {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	line-height: 1.4;
+}
+
+.swimlanesConfigLabel + input[type="checkbox"],
+.swimlanesConfigLabel + select,
+.swimlanesConfigLabel + input[type="text"] {
+	flex-shrink: 0;
+	align-self: center;
+}
+
+input[type="checkbox"].swimlanesConfigCheckbox {
+	cursor: pointer;
+	width: 18px;
+	height: 18px;
+}
+
+.swimlanesConfigSelect,
+.swimlanesConfigInput,
+.swimlanesConfigSortRowInput {
+	padding: 8px 12px;
+	border: 1px solid var(--input-border-color);
+	border-radius: 4px;
+	background-color: var(--input-background-color);
+	color: var(--text-normal);
+	font-size: 0.9em;
+	font-family: inherit;
+	min-width: 200px;
+	transition: border-color 0.15s ease;
+}
+
+.swimlanesConfigSelect:hover,
+.swimlanesConfigInput:hover,
+.swimlanesConfigSortRowInput:hover {
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigSelect:focus,
+.swimlanesConfigInput:focus,
+.swimlanesConfigSortRowInput:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+/* Manual Sorting Mapping Section */
+.swimlanesConfigManualSortSection {
+	margin-top: 10px;
+	padding: 15px;
+	background-color: var(--background-secondary);
+	border-radius: 6px;
+	border: 1px solid var(--divider-color);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.swimlanesConfigManualSortHeading {
+	margin: 0;
+	font-size: 1.1em;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.swimlanesConfigManualSortDescription {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	line-height: 1.5;
+	margin: 0;
+}
+
+/* Sortable List */
+.swimlanesConfigSortRowsList {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 40px;
+}
+
+.swimlanesConfigSortRow {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--input-border-color);
+	border-radius: 4px;
+	transition: all 0.15s ease;
+	cursor: move;
+}
+
+.swimlanesConfigSortRow:hover {
+	border-color: var(--interactive-accent);
+	background-color: var(--background-secondary);
+}
+
+.swimlanesConfigSortRowDragHandle {
+	flex-shrink: 0;
+	cursor: grab;
+	color: var(--text-muted);
+	transition: color 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesConfigSortRowDragHandle:hover {
+	color: var(--interactive-accent);
+}
+
+.swimlanesConfigSortRow:active .swimlanesConfigSortRowDragHandle {
+	cursor: grabbing;
+	color: var(--interactive-accent);
+}
+
+.swimlanesConfigSortRowIndex {
+	flex-shrink: 0;
+	min-width: 35px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--background-secondary);
+	border-radius: 3px;
+	font-weight: 600;
+	color: var(--text-accent);
+	font-size: 0.9em;
+	border: 1px solid var(--divider-color);
+}
+
+.swimlanesConfigSortRowInput {
+	flex: 1;
+	min-width: 0;
+	padding: 8px 10px;
+	min-height: 32px;
+}
+
+.swimlanesConfigSortRowDeleteBtn {
+	flex-shrink: 0;
+	cursor: pointer;
+	color: var(--text-muted);
+	transition: color 0.15s ease;
+	padding: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesConfigSortRowDeleteBtn:hover {
+	color: var(--text-error);
+}
+
+/* Sortable Ghost/Drag States */
+.swimlanesConfigSortRowGhost {
+	opacity: 0.5;
+	background-color: var(--background-tertiary);
+}
+
+.swimlanesConfigSortRowChosen {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigSortRowDrag {
+	opacity: 0.7;
+	transform: scale(0.98);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Add Row Button */
+.swimlanesConfigAddSortRowBtn {
+	padding: 10px 14px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: 1px solid var(--interactive-accent);
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 0.9em;
+	transition: all 0.15s ease;
+	align-self: flex-start;
+	margin-top: 4px;
+}
+
+.swimlanesConfigAddSortRowBtn:hover {
+	opacity: 0.9;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigAddSortRowBtn:active {
+	transform: scale(0.98);
+}
+
+/* Action Buttons Container */
+.swimlanesConfigButtonsContainer {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+	padding: 15px 20px;
+	border-top: 1px solid var(--divider-color);
+	background-color: var(--background-secondary);
+	border-radius: 0 0 var(--modal-radius) var(--modal-radius);
+}
+
+.swimlanesConfigBtn {
+	padding: 10px 20px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 0.9em;
+	border: 1px solid var(--input-border-color);
+	transition: all 0.15s ease;
+	font-family: inherit;
+}
+
+.swimlanesConfigBtnSave {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigBtnSave:hover {
+	opacity: 0.9;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigBtnSave:active {
+	transform: scale(0.98);
+}
+
+.swimlanesConfigBtnCancel {
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border-color: var(--input-border-color);
+}
+
+.swimlanesConfigBtnCancel:hover {
+	background-color: var(--background-secondary);
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigBtnCancel:active {
+	transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.swimlanes-config-modal {
+		max-width: 90vw;
+	}
+
+	.swimlanesConfigSection {
+		padding: 15px;
+	}
+
+	.swimlanesConfigButtonsContainer {
+		padding: 12px 15px;
+		flex-direction: column-reverse;
+	}
+
+	.swimlanesConfigBtn {
+		width: 100%;
+	}
+
+	.swimlanesConfigSelect,
+	.swimlanesConfigInput,
+	.swimlanesConfigSortRowInput {
+		min-width: auto;
+		width: 100%;
+	}
+
+	.swimlanesConfigItem {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.swimlanesConfigItem input[type="checkbox"] {
+		align-self: flex-start;
+		margin-top: 5px;
+	}
+
+	.swimlanesConfigSortRow {
+		flex-wrap: wrap;
+	}
+
+	.swimlanesConfigSortRowInput {
+		order: 3;
+		width: 100%;
+	}
+}
+
