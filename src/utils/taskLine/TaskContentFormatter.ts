@@ -213,7 +213,7 @@ export const getSanitizedTaskContent = (
 	updatedTitle = sanitizeTags(
 		updatedTitle,
 		updatedTask.tags,
-		updatedTask.tags.pop() || ""
+		updatedTask.tags || []
 	);
 
 	updatedTitle = sanitizeReminder(
@@ -886,66 +886,74 @@ export const sanitizePriority = (
 /**
  * Function to sanitize tags inside the task title.
  * @param title - The title of the task.
- * @param oldTagsList - The list of old tags to be sanitized.
- * @param newTag - The new tag to be added to the title. Pass it along with the hash symbol. Eg. "#newTag".
- * @param cursorLocation - (Optional) The cursor location to insert the tag at a specific position.
- * @returns The sanitized tags string to be used in the task title.
+ * @param oldTagsList - The list of old tags currently present (with #).
+ * @param newTagsList - The updated list of tags that should exist (with #).
+ * @param cursorLocation - (Optional) Cursor location for insertion.
+ * @returns The sanitized title with correct tags.
  */
 export const sanitizeTags = (
 	title: string,
 	oldTagsList: string[],
-	newTag: string,
+	newTagsList: string[],
 	cursorLocation?: cursorLocation
 ): string => {
-	// Remove the <mark> and <font> tags from the title first before processing
+	// Remove <mark> and <font> tags before processing
 	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 
+	// Regex to extract tags from title
 	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
-	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
+	const extractedTags = (tempTitle.match(tagsRegex) || []).map((t) =>
+		t.trim()
+	);
 
-	// Create a set for quick lookup of newTags
-	const oldTagSet = new Set(oldTagsList);
+	const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
+	const newTagSet = new Set(newTagsList.map((t) => t.trim()));
 
-	if (oldTagSet.size === 0) {
-		// If no tags are present, remove all existing tags
-		extractedTagsMatch.forEach((tag) => {
-			updatedTitle = title.replace(tag.trim(), "").trim();
-		});
-	}
-
-	// Remove tags from the title that are not in newTags
-	for (const tag of extractedTagsMatch) {
-		if (!oldTagSet.has(tag.trim())) {
+	// --------------------------------------------------
+	// 1. REMOVE TAGS THAT NO LONGER EXIST
+	// --------------------------------------------------
+	for (const tag of extractedTags) {
+		if (!newTagSet.has(tag)) {
 			updatedTitle = updatedTitle.replace(tag, "").trim();
 		}
 	}
 
-	// // Append tags from newTags that are not already in the title
-	// const updatedTagsMatch =
-	// 	updatedTitle.match(tagsRegex)?.map((tag) => tag.trim()) || [];
-	// const updatedTagsSet = new Set(updatedTagsMatch);
-	// for (const tag of newTags) {
-	// 	if (!updatedTagsSet.has(tag)) {
-	// 		updatedTitle += ` ${tag}`;
-	// 	}
-	// }
-
-	if (cursorLocation?.lineNumber === 1) {
-		// Insert newTag at the specified charIndex with spaces
-		const spaceBefore =
-			updatedTitle.slice(0, cursorLocation.charIndex).trim() + " ";
-		const spaceAfter =
-			" " + updatedTitle.slice(cursorLocation.charIndex).trim();
-		return `${spaceBefore}${newTag}${spaceAfter}`;
-	} else {
-		// Append newTag at the end of the title
-		if (newTag && !updatedTitle.includes(newTag)) {
-			updatedTitle += ` ${newTag}`;
+	// --------------------------------------------------
+	// 2. FIND TAGS THAT NEED TO BE ADDED
+	// --------------------------------------------------
+	const tagsToAdd: string[] = [];
+	for (const tag of newTagSet) {
+		if (!oldTagSet.has(tag)) {
+			tagsToAdd.push(tag);
 		}
 	}
 
-	return updatedTitle.trim();
+	// --------------------------------------------------
+	// 3. INSERT / APPEND NEW TAGS
+	// --------------------------------------------------
+	if (tagsToAdd.length > 0) {
+		if (cursorLocation?.lineNumber === 1) {
+			// Insert at cursor position (preserves your original behavior)
+			const before = updatedTitle
+				.slice(0, cursorLocation.charIndex)
+				.trim();
+			const after = updatedTitle.slice(cursorLocation.charIndex).trim();
+
+			updatedTitle = [before, ...tagsToAdd, after]
+				.filter(Boolean)
+				.join(" ");
+		} else {
+			// Append all new tags at the end
+			for (const tag of tagsToAdd) {
+				if (!updatedTitle.includes(tag)) {
+					updatedTitle += ` ${tag}`;
+				}
+			}
+		}
+	}
+
+	return updatedTitle.replace(/\s+/g, " ").trim();
 };
 
 /**

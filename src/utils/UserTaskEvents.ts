@@ -15,6 +15,7 @@ import {
 } from "./taskNote/TaskNoteUtils";
 import { updateTaskInFile } from "./taskLine/TaskLineUtils";
 import { eventEmitter } from "src/services/EventEmitter";
+import { sanitizeTags } from "./taskLine/TaskContentFormatter";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -372,7 +373,7 @@ export const updateTaskItemTags = (
 	oldTask: taskItem,
 	newTags: string[]
 ) => {
-	const newTask = { ...oldTask } as taskItem;
+	let newTask = { ...oldTask } as taskItem;
 	newTask.tags = newTags;
 
 	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
@@ -392,6 +393,8 @@ export const updateTaskItemTags = (
 			});
 		});
 	} else {
+		newTask.title = sanitizeTags(newTask.title, oldTask.tags, newTags);
+		console.log("Sanitized title after tag update:", newTask.title);
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				oldTask.filePath,

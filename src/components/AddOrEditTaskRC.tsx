@@ -334,9 +334,10 @@ export const AddOrEditTaskRC: React.FC<{
 	const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Enter') {
 			const input = e.currentTarget.value.trim().startsWith("#") ? e.currentTarget.value.trim() : `#${e.currentTarget.value.trim()}`;
+			const newTagsList = tags.concat(input);
 
 			if (!isTaskNote) {
-				const newTitle = sanitizeTags(title, tags, input, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(title, tags, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -367,7 +368,8 @@ export const AddOrEditTaskRC: React.FC<{
 			const currentTags = tagsRef.current;
 
 			if (!isTaskNote) {
-				const newTitle = sanitizeTags(currentTitle, currentTags, choice, cursorLocationRef.current ?? undefined);
+				const newTagsList = currentTags.concat(choice);
+				const newTitle = sanitizeTags(currentTitle, currentTags, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -389,12 +391,12 @@ export const AddOrEditTaskRC: React.FC<{
 	// Function to remove a tag
 	const removeTag = (tagToRemove: string) => {
 		const newTags = tags.filter(tag => tag !== tagToRemove);
-		setTags(newTags);
 
 		if (!isTaskNote) {
-			const newTitle = sanitizeTags(title, newTags, '', cursorLocationRef.current ?? undefined);
+			const newTitle = sanitizeTags(title, tags, newTags, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 		}
+		setTags(newTags);
 
 		setIsEdited(true);
 		setIsEditorContentChanged(true);
