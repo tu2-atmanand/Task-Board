@@ -4,7 +4,12 @@ import { ColumnData } from "src/interfaces/BoardConfigs";
 import { colType } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import { updateTaskItemTags } from "src/utils/UserTaskEvents";
-import { eventEmitter } from 'src/services/EventEmitter';
+import { eventEmitter } from "src/services/EventEmitter";
+
+export interface currentDragDataPayload {
+	task: taskItem;
+	sourceColumnData: ColumnData;
+}
 
 /**
  * DragDropTasksManager - A singleton manager class that handles drag and drop functionality
@@ -14,7 +19,7 @@ class DragDropTasksManager {
 	private static instance: DragDropTasksManager;
 
 	// Hold the current drag payload so dragover handlers can access it reliably
-	private currentDragData: any | null = null;
+	private currentDragData: currentDragDataPayload | null = null;
 	private desiredDropIndex: number | null = null;
 	private plugin: TaskBoard | null = null;
 
@@ -112,7 +117,8 @@ class DragDropTasksManager {
 	/**
 	 * Store current drag payload (called from dragstart)
 	 */
-	setCurrentDragData(data: any) {
+	setCurrentDragData(data: currentDragDataPayload) {
+		console.log("setCurrentDragData", data);
 		this.currentDragData = data;
 	}
 
@@ -150,12 +156,13 @@ class DragDropTasksManager {
 	 * @param targetColumn Target column data
 	 * @returns Updated task with modified tags
 	 */
-	handleTaskMove_namedTag_to_namedTag = async (
+	handleTaskMove_namedTag_to_namedTag = (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
-	): Promise<void> => {
+	): void => {
+		const task = currentDragData.task;
 		// Create a modified copy of the task
 		// const updatedTask: taskItem = { ...task };
 		let newTags: string[] = task.tags;
@@ -163,9 +170,16 @@ class DragDropTasksManager {
 		// Remove the source column tag if it exists
 		if (sourceColumn.coltag) {
 			const sourceTag = sourceColumn.coltag;
+			console.log(
+				"handleTaskMove_namedTag_to_namedTag...\nsourceTag=",
+				sourceTag,
+				"\ntask=",
+				task
+			);
 			newTags = task.tags.filter(
 				(tag: string) =>
-					tag.replace("#", "") !== sourceTag.replace("#", "")
+					tag.replace("#", "").toLowerCase() !==
+					sourceTag.replace("#", "").toLowerCase()
 			);
 		}
 
@@ -175,16 +189,16 @@ class DragDropTasksManager {
 				? targetColumn.coltag
 				: `#${targetColumn.coltag}`;
 			// Make sure we don't have duplicates
-			if (!task.tags.includes(targetTag)) {
-				newTags.push(targetTag);
-			}
+			newTags.push(targetTag);
+			newTags = Array.from(new Set(newTags));
 		}
 
 		// Before updating the task, first check if this target column has "manualOrder" sorting criteria.
 		// If yes, we need to update the tasksIdManualOrder array to include this task's id whereever user has dropped it.
 		// This will ensure that the task appears in the correct order in the target column after the move.
 		if (
-			targetColumn?.sortCriteria && targetColumn.sortCriteria.length > 0 &&
+			targetColumn?.sortCriteria &&
+			targetColumn.sortCriteria.length > 0 &&
 			targetColumn.sortCriteria[0].criteria === "manualOrder"
 		) {
 			// Update tasksIdManualOrder array
@@ -210,16 +224,26 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_dated_to_dated = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentDragData: currentDragDataPayload | null,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
-		const { updateTaskItemDate } = await import('src/utils/UserTaskEvents');
-		
+		if (!currentDragData) {
+			console.error("No current drag data available for reordering.");
+			return;
+		}
+		const task = currentDragData.task;
+
+		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
+
 		// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-		const dateType = (sourceColumn.datedBasedColumn?.dateType as 'startDate' | 'scheduledDate' | 'due') || 'due';
-		const currentDate = (task as any)[dateType] || '';
-		
+		const dateType =
+			(sourceColumn.datedBasedColumn?.dateType as
+				| "startDate"
+				| "scheduledDate"
+				| "due") || "due";
+		const currentDate = (task as taskItem)[dateType] || "";
+
 		// For dated columns, we'll keep the same date from source
 		if (currentDate) {
 			updateTaskItemDate(plugin, task, dateType, currentDate);
@@ -235,15 +259,19 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_priority_to_priority = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
-		const { updateTaskItemPriority } = await import('src/utils/UserTaskEvents');
-		
+		const { updateTaskItemPriority } = await import(
+			"src/utils/UserTaskEvents"
+		);
+
+		const task = currentDragData.task;
+
 		// Extract the priority value from the source column
 		const sourcePriority = (sourceColumn.taskPriority as number) || 0;
-		
+
 		updateTaskItemPriority(plugin, task, sourcePriority);
 	};
 
@@ -256,15 +284,19 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_status_to_status = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentBoardData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
-		const { updateTaskItemStatus } = await import('src/utils/UserTaskEvents');
-		
+		const { updateTaskItemStatus } = await import(
+			"src/utils/UserTaskEvents"
+		);
+
+		const task = currentBoardData.task;
+
 		// Extract the status value from the source column
-		const sourceStatus = (sourceColumn.taskStatus as string) || '';
-		
+		const sourceStatus = (sourceColumn.taskStatus as string) || "";
+
 		if (sourceStatus) {
 			updateTaskItemStatus(plugin, task, sourceStatus);
 		}
@@ -279,15 +311,19 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_to_completed = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentBoardData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
-		const { updateTaskItemStatus } = await import('src/utils/UserTaskEvents');
-		
+		const { updateTaskItemStatus } = await import(
+			"src/utils/UserTaskEvents"
+		);
+
+		const task = currentBoardData.task;
+
 		// Mark task as completed - typically with status symbol 'x'
-		const completedStatus = 'x';
-		
+		const completedStatus = "x";
+
 		updateTaskItemStatus(plugin, task, completedStatus);
 	};
 
@@ -300,19 +336,25 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_to_dated = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentBoardData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
-		const { updateTaskItemDate } = await import('src/utils/UserTaskEvents');
-		
+		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
+
+		const task = currentBoardData.task;
+
 		// Determine which date type the target column uses
-		const dateType = (targetColumn.datedBasedColumn?.dateType as 'startDate' | 'scheduledDate' | 'due') || 'due';
-		
+		const dateType =
+			(targetColumn.datedBasedColumn?.dateType as
+				| "startDate"
+				| "scheduledDate"
+				| "due") || "due";
+
 		// Use today's date if no date is currently set
-		const today = new Date().toISOString().split('T')[0];
+		const today = new Date().toISOString().split("T")[0];
 		const dateToSet = (task as any)[dateType] || today;
-		
+
 		updateTaskItemDate(plugin, task, dateType, dateToSet);
 	};
 
@@ -325,23 +367,24 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_to_namedTag = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentBoardData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
+		const task = currentBoardData.task;
 		let newTags: string[] = [...task.tags];
-		
+
 		// Add the target column tag if it doesn't already exist
 		if (targetColumn.coltag) {
 			const targetTag = targetColumn.coltag.startsWith("#")
 				? targetColumn.coltag
 				: `#${targetColumn.coltag}`;
-			
+
 			if (!newTags.includes(targetTag)) {
 				newTags.push(targetTag);
 			}
 		}
-		
+
 		updateTaskItemTags(plugin, task, newTags);
 	};
 
@@ -354,15 +397,19 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_to_priority = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentBoardData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
-		const { updateTaskItemPriority } = await import('src/utils/UserTaskEvents');
-		
+		const { updateTaskItemPriority } = await import(
+			"src/utils/UserTaskEvents"
+		);
+
+		const task = currentBoardData.task;
+
 		// Extract the priority value from the target column
 		const targetPriority = (targetColumn.taskPriority as number) || 0;
-		
+
 		updateTaskItemPriority(plugin, task, targetPriority);
 	};
 
@@ -375,15 +422,19 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_to_status = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentBoardData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
 	): Promise<void> => {
-		const { updateTaskItemStatus } = await import('src/utils/UserTaskEvents');
-		
+		const { updateTaskItemStatus } = await import(
+			"src/utils/UserTaskEvents"
+		);
+
+		const task = currentBoardData.task;
+
 		// Extract the status value from the target column
-		const targetStatus = (targetColumn.taskStatus as string) || '';
-		
+		const targetStatus = (targetColumn.taskStatus as string) || "";
+
 		if (targetStatus) {
 			updateTaskItemStatus(plugin, task, targetStatus);
 		}
@@ -397,20 +448,28 @@ class DragDropTasksManager {
 	 */
 	handleTasksOrderChange = async (
 		plugin: TaskBoard,
-		task: taskItem,
+		currentDragData: currentDragDataPayload,
 		column: ColumnData,
 		desiredIndex?: number | null
 	): Promise<void> => {
+		const task = currentDragData.task;
+
 		// Ensure manual order array exists
 		if (!column.tasksIdManualOrder) {
 			column.tasksIdManualOrder = [];
 		}
 
 		// Remove any existing occurrence of the task id
-		column.tasksIdManualOrder = column.tasksIdManualOrder.filter((id) => id !== task.id);
+		column.tasksIdManualOrder = column.tasksIdManualOrder.filter(
+			(id) => id !== task.id
+		);
 
 		// Insert at desired index or push to end
-		if (typeof desiredIndex === 'number' && desiredIndex >= 0 && desiredIndex <= column.tasksIdManualOrder.length) {
+		if (
+			typeof desiredIndex === "number" &&
+			desiredIndex >= 0 &&
+			desiredIndex <= column.tasksIdManualOrder.length
+		) {
 			column.tasksIdManualOrder.splice(desiredIndex, 0, task.id);
 		} else {
 			column.tasksIdManualOrder.push(task.id);
@@ -419,9 +478,9 @@ class DragDropTasksManager {
 		// Persist settings and refresh the board
 		try {
 			await plugin.saveSettings();
-			eventEmitter.emit('REFRESH_BOARD');
+			eventEmitter.emit("REFRESH_BOARD");
 		} catch (err) {
-			console.error('Error saving settings after task reorder:', err);
+			console.error("Error saving settings after task reorder:", err);
 		}
 	};
 
@@ -449,7 +508,7 @@ class DragDropTasksManager {
 			sourceColumnData,
 			targetColumnData
 		);
-		console.log("isDropAllowed", isDropAllowed);
+		// console.log("isDropAllowed", isDropAllowed);
 
 		if (isDropAllowed) {
 			// Apply CSS styling for allowed drop
@@ -516,6 +575,14 @@ class DragDropTasksManager {
 		console.log("Task drop allowed. Updating task properties...");
 		console.log("Source column:", sourceColumnData);
 		console.log("Target column:", targetColumnData);
+		console.log("Current drag data:", this.currentDragData);
+
+		if (!this.currentDragData) {
+			console.error("No current drag data available for drop operation.");
+			return;
+		}
+
+		// Determine the operation based on source and target column types
 
 		if (targetColumnData.colType === sourceColumnData.colType) {
 			if (targetColumnData.id === sourceColumnData.id) {
@@ -523,7 +590,8 @@ class DragDropTasksManager {
 				// But we need to check first if this column has sorting.criteria = "manualOrder".
 				// If not will show a notice.
 				if (
-					sourceColumnData?.sortCriteria && sourceColumnData.sortCriteria.length > 0 &&
+					sourceColumnData?.sortCriteria &&
+					sourceColumnData.sortCriteria.length > 0 &&
 					sourceColumnData.sortCriteria[0].criteria === "manualOrder"
 				) {
 					this.handleTasksOrderChange(

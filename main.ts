@@ -43,6 +43,7 @@ import {
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 import { HideableTaskProperty } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
+import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -123,15 +124,17 @@ export default class TaskBoard extends Plugin {
 
 			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
-			
+
 			// Register status bar element
 			this.registerTaskBoardStatusBar();
-			
+
 			// Register editor extensions
 			this.registerEditorExtensions();
 
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
+
+			dragDropTasksManagerInsatance.setPlugin(this);
 		});
 	}
 
