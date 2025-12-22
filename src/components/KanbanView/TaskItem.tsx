@@ -901,9 +901,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		console.log('handleDragStart');
-		// Only allow dragging if this column is of type colType.namedTag
-		if (columnData?.colType !== 'namedTag') {
+		// // Only allow dragging if this column is of type colType.namedTag
+		// if (columnData?.colType !== 'namedTag') {
+		// 	e.preventDefault();
+		// 	return;
+		// }
+
+		if (!columnData) {
 			e.preventDefault();
+			console.log('---------------ERROR : columnData is undefined------------------');
 			return;
 		}
 
@@ -926,15 +932,15 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			// Create a custom drag image
 			const dragImage = document.createElement('div');
 			dragImage.style.position = 'absolute';
-			dragImage.style.top = '-9999px';
-			dragImage.style.left = '-9999px';
+			// dragImage.style.top = '-9999px';
+			// dragImage.style.left = '-9999px';
 			dragImage.style.width = taskItemRef.current.offsetWidth + 'px';
 			dragImage.style.height = taskItemRef.current.offsetHeight + 'px';
 			dragImage.style.backgroundColor = getComputedStyle(taskItemRef.current).backgroundColor;
 			dragImage.style.border = getComputedStyle(taskItemRef.current).border;
 			dragImage.style.borderRadius = getComputedStyle(taskItemRef.current).borderRadius;
 			dragImage.style.boxShadow = '0px 8px 16px 0 rgba(0, 0, 0, 0.5), 0px 2px 4px 0 rgba(0, 0, 0, 0.3)';
-			dragImage.style.opacity = '0.95';
+			dragImage.style.opacity = '0.5';
 			dragImage.style.zIndex = '10000';
 			dragImage.style.padding = getComputedStyle(taskItemRef.current).padding;
 			dragImage.style.display = 'flex';

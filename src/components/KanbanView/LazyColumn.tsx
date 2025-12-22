@@ -353,12 +353,26 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 	}
 
-	// Drag and drop handlers to reorder within the column
+
+	/**
+	 * Handle the start of a drag event on a task.
+	 * Sets the dataTransfer's data to the task index and effectAllowed to 'move'.
+	 * @param {React.DragEvent<HTMLDivElement>} e - The drag event.
+	 * @param {number} dragIndex - The index of the task being dragged.
+	 */
 	const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, dragIndex: number) => {
 		e.dataTransfer.setData('text/plain', dragIndex.toString());
 		e.dataTransfer.effectAllowed = 'move';
 	};
 
+	/**
+	 * Handles the drop event of a task in this column.
+	 * Moves the task from its original position (dragIndex) to the new position (dropIndex).
+	 * Updates the localTasks state and the columnData.tasksIdManualOrder if the column uses manualOrder.
+	 * Clears the raf timer to prevent any pending raf calls.
+	 * @param {React.DragEvent<HTMLDivElement>} e - The drag event.
+	 * @param {number} dropIndex - The index at which to drop the task.
+	 */
 	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
 		e.preventDefault();
 		setIsDragOver(false);
@@ -381,7 +395,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		}
 	};
 
-	// Handler for when a task is dropped onto this column
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(false);
@@ -397,12 +410,25 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 				// Get the target column container
 				const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
-				// Get the source column container
-				const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
-				const sourceColumnContainer = allColumnContainers.find(container => {
-					const containerTag = container.getAttribute('data-column-tag-name');
-					return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
-				}) || targetColumnContainer;
+				// Try to locate the source container by stable column id first (works for all colTypes)
+				let sourceColumnContainer: HTMLDivElement | null = null;
+				if (sourceColumnData?.id) {
+					try {
+						const escapedId = CSS.escape(String(sourceColumnData.id));
+						sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
+					} catch (err) {
+						// fallback to tag-based lookup below
+					}
+				}
+				if (!sourceColumnContainer) {
+					// Fallback: find by tag name (legacy behavior)
+					console.log("------------- I hope this fall-back mechanism is never running -------------");
+					const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+					sourceColumnContainer = allColumnContainers.find(container => {
+						const containerTag = container.getAttribute('data-column-tag-name');
+						return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+					}) || targetColumnContainer;
+				}
 
 				// If target column uses manualOrder, disallow cross-column drops (only allow intra-column reordering)
 				const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
@@ -460,7 +486,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		}
 	}, [columnData, plugin]);
 
-	// Handle the dragover event to allow the drop
+
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(true);
@@ -490,12 +516,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 			// Get the target column container
 			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
-			// Get the source column container (best-effort by matching tag)
-			const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
-			const sourceColumnContainer = allColumnContainers.find(container => {
-				const containerTag = container.getAttribute('data-column-tag-name');
-				return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
-			}) || targetColumnContainer;
+			// Try id-based lookup first
+			let sourceColumnContainer: HTMLDivElement | null = null;
+			if (sourceColumnData?.id) {
+				try {
+					const escapedId = CSS.escape(String(sourceColumnData.id));
+					sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
+				} catch (err) {
+					// ignore and fall back to tag-based lookup
+				}
+			}
+			if (!sourceColumnContainer) {
+				const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+				sourceColumnContainer = allColumnContainers.find(container => {
+					const containerTag = container.getAttribute('data-column-tag-name');
+					return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+				}) || targetColumnContainer;
+			}
 
 			// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
 			dragDropTasksManagerInsatance.handleDragOver(
@@ -575,6 +612,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	return (
 		<div
 			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''} ${isDragOver ? 'dragover' : ''}`}
+			data-column-id={columnData.id}
 			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
 			data-column-type={columnData.colType}
 			data-column-tag-name={tagData?.name}
@@ -632,6 +670,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 														key={task.id}
 														className="taskItemFadeIn"
 														onDrop={e => handleTaskDrop(e, i)}
+														onDragStart={e => handleTaskDragStart(e, i)}
 													>
 														<TaskItem
 															key={task.id}
