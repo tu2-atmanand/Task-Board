@@ -144,7 +144,8 @@
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
-            }
+            },
+            "minimized": true
           },
           {
             "id": 3493,
@@ -249,7 +250,7 @@
                 "uid": "k6wjlc63"
               }
             ],
-            "minimized": false
+            "minimized": true
           },
           {
             "id": 2485661779,
@@ -271,7 +272,8 @@
               "365",
               274,
               "362"
-            ]
+            ],
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -285,7 +287,7 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -324,7 +326,7 @@
                 }
               ]
             },
-            "minimized": false
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -333,7 +335,8 @@
             "name": "In Review",
             "index": 5,
             "coltag": "Test",
-            "id": 396902
+            "id": 396902,
+            "minimized": false
           },
           {
             "colType": "namedTag",
@@ -342,7 +345,8 @@
             "name": "Ready to publish",
             "index": 6,
             "coltag": "done",
-            "id": 328227
+            "id": 328227,
+            "minimized": false
           },
           {
             "id": 1936828579,
@@ -363,20 +367,9 @@
             "limit": 20,
             "filters": {
               "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1763878153878-2dyqv7914",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1763878153879-cc19ylpzx",
-                      "property": "completedDate",
-                      "condition": "isNotEmpty"
-                    }
-                  ]
-                }
-              ]
-            }
+              "filterGroups": []
+            },
+            "minimized": true
           }
         ],
         "filters": [
@@ -548,6 +541,26 @@
         "taskCount": {
           "pending": 11,
           "completed": 2
+        },
+        "swimlanes": {
+          "enabled": true,
+          "showEmptySwimlanes": true,
+          "property": "tags",
+          "sortCriteria": "custom",
+          "customSortOrder": [
+            {
+              "value": "#first",
+              "index": 1
+            },
+            {
+              "value": "#second",
+              "index": 2
+            },
+            {
+              "value": "#third",
+              "index": 3
+            }
+          ]
         }
       }
     ],
@@ -851,7 +864,7 @@
         "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 0
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
@@ -973,7 +986,7 @@
         "edgeType": "default"
       },
       "kanbanView": {
-        "lazyLoadingEnabled": false,
+        "lazyLoadingEnabled": true,
         "initialTaskCount": 20,
         "loadMoreCount": 10,
         "scrollThresholdPercent": 80

@@ -237,7 +237,7 @@ function getPropertyValues(
 ): string[] {
 	let values: string[] = [];
 
-	console.log("getPropertyValues...", "\ntask:", task, "\nproperty", property, "\ncustomValue:", customValue);
+	// console.log("getPropertyValues...", "\ntask:", task, "\nproperty", property, "\ncustomValue:", customValue);
 
 	switch (property) {
 		case 'tags':
