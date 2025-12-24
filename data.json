@@ -273,7 +273,7 @@
               274,
               "362"
             ],
-            "minimized": true
+            "minimized": false
           },
           {
             "colType": "namedTag",
@@ -287,7 +287,7 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": true
+            "minimized": false
           },
           {
             "colType": "namedTag",
@@ -326,7 +326,7 @@
                 }
               ]
             },
-            "minimized": true
+            "minimized": false
           },
           {
             "colType": "namedTag",
@@ -539,25 +539,27 @@
           ]
         },
         "taskCount": {
-          "pending": 11,
-          "completed": 2
+          "pending": 2,
+          "completed": 3
         },
         "swimlanes": {
           "enabled": true,
           "showEmptySwimlanes": true,
           "property": "tags",
+          "minimized": false,
+          "maxHeight": 300,
           "sortCriteria": "custom",
           "customSortOrder": [
             {
-              "value": "#first",
+              "value": "#test",
               "index": 1
             },
             {
-              "value": "#second",
+              "value": "#pending",
               "index": 2
             },
             {
-              "value": "#third",
+              "value": "#new",
               "index": 3
             }
           ]
@@ -864,7 +866,7 @@
         "viewedType": "kanban",
         "boardIndex": 2,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
