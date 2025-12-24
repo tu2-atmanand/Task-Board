@@ -913,6 +913,25 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			const el = taskItemRef.current as HTMLDivElement;
 			const payload = { task, sourceColumnData: columnData } as currentDragDataPayload;
 			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
+
+			// Also set a drag image from the whole task element so the preview is the full card
+			try {
+				if (taskItemRef.current && e.dataTransfer) {
+					const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
+					clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+					clone.style.opacity = '0.95';
+					clone.style.position = 'absolute';
+					clone.style.top = '-9999px';
+					document.body.appendChild(clone);
+					const rect = taskItemRef.current.getBoundingClientRect();
+					e.dataTransfer.setDragImage(clone, rect.width / 2, rect.height / 2);
+					setTimeout(() => {
+						try { document.body.removeChild(clone); } catch { }
+					}, 0);
+				}
+			} catch (imgErr) {
+				// ignore drag image errors
+			}
 		} catch (err) {
 			// fallback minimal behavior
 			try {

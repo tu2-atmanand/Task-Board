@@ -360,20 +360,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 * @param {React.DragEvent<HTMLDivElement>} e - The drag event.
 	 * @param {number} dragIndex - The index of the task being dragged.
 	 */
-	const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, dragIndex: number) => {
-		console.log('LazyColumn : handleTaskDragStart', dragIndex);
-		try {
-			const el = e.currentTarget as HTMLDivElement;
-			const payload = { task: localTasks?.[dragIndex], sourceColumnData: columnData } as currentDragDataPayload;
-			// Delegate to manager to centralize behavior and visuals
-			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, dragIndex);
-		} catch (err) {
-			if (e.dataTransfer) {
-				e.dataTransfer.setData('text/plain', dragIndex.toString());
-				e.dataTransfer.effectAllowed = 'move';
-			}
-		}
-	};
+	// NOTE: dragstart is handled by the TaskItem's drag handle; we no longer start drag from the wrapper
 
 	/**
 	 * Handles the drop event of a task in this column.
@@ -641,10 +628,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			data-column-type={columnData.colType}
 			data-column-tag-name={tagData?.name}
 			data-column-tag-color={tagData?.color}
-			onDrop={handleDrop}
-			onDragOver={handleDragOver}
-			onDragLeave={handleDragLeave}
-			onDragEnd={() => { setIsDragOver(false); setInsertIndex(null); }}
 		>
 			{columnData.minimized && !hideColumnHeader ? (
 				// Minimized view
@@ -673,7 +656,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					<div
 						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}
-						onDragOver={handleTasksContainerDragOver}
+						onDragOver={(e) => { handleDragOver(e); handleTasksContainerDragOver(e); }}
+						onDrop={handleDrop}
+						onDragLeave={handleDragLeave}
+						onDragEnd={() => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.handleDragLeaveEvent(); }}
 					>
 						{columnData.minimized ? <></> : (
 							<>
@@ -688,7 +674,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 														key={task.id}
 														className="taskItemFadeIn"
 														onDrop={e => handleTaskDrop(e, i)}
-														onDragStart={e => handleTaskDragStart(e, i)}
 													>
 														<TaskItem
 															key={task.id}
