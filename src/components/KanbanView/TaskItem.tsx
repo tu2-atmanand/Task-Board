@@ -33,7 +33,7 @@ import EditTagsModal from 'src/modals/EditTagsModal';
 // Helper modal functions may be provided elsewhere; declare them for TypeScript
 declare function showTextInputModal(app: any, options: { title?: string; placeholder?: string; initialValue?: string }): Promise<string | null>;
 declare function showConfirmationModal(app: any, options: any): Promise<boolean>;
-import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
+import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 
 export interface TaskProps {
 	plugin: TaskBoard;
@@ -900,69 +900,24 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log('handleDragStart');
-		// // Only allow dragging if this column is of type colType.namedTag
-		// if (columnData?.colType !== 'namedTag') {
-		// 	e.preventDefault();
-		// 	return;
-		// }
-
 		if (!columnData) {
 			e.preventDefault();
-			console.log('---------------ERROR : columnData is undefined------------------');
+			console.warn('handleDragStart: columnData is undefined');
 			return;
 		}
 
-		// Add task data and source column to the dataTransfer object
-		e.dataTransfer.setData('application/json', JSON.stringify({
-			task,
-			sourceColumnData: columnData
-		}));
-
-		// Set visual effect for dragging
-		e.dataTransfer.effectAllowed = 'move';
-
-		// Add dragging class for visual effects
 		setIsDragging(true);
-
-		// Define the drag image for better visual feedback
-		if (taskItemRef.current) {
-			// Save current drag payload so dragover handlers can access it reliably
-			dragDropTasksManagerInsatance.setCurrentDragData({ task, sourceColumnData: columnData });
-			// Create a custom drag image
-			const dragImage = document.createElement('div');
-			dragImage.style.position = 'absolute';
-			// dragImage.style.top = '-9999px';
-			// dragImage.style.left = '-9999px';
-			dragImage.style.width = taskItemRef.current.offsetWidth + 'px';
-			dragImage.style.height = taskItemRef.current.offsetHeight + 'px';
-			dragImage.style.backgroundColor = getComputedStyle(taskItemRef.current).backgroundColor;
-			dragImage.style.border = getComputedStyle(taskItemRef.current).border;
-			dragImage.style.borderRadius = getComputedStyle(taskItemRef.current).borderRadius;
-			dragImage.style.boxShadow = '0px 8px 16px 0 rgba(0, 0, 0, 0.5), 0px 2px 4px 0 rgba(0, 0, 0, 0.3)';
-			dragImage.style.opacity = '0.5';
-			dragImage.style.zIndex = '10000';
-			dragImage.style.padding = getComputedStyle(taskItemRef.current).padding;
-			dragImage.style.display = 'flex';
-			dragImage.style.alignItems = 'center';
-			dragImage.style.justifyContent = 'center';
-			dragImage.style.fontWeight = 'bold';
-			dragImage.style.color = getComputedStyle(taskItemRef.current).color;
-			dragImage.style.overflow = 'hidden';
-			dragImage.textContent = cleanTaskTitleLegacy(task);
-
-			document.body.appendChild(dragImage);
-			e.dataTransfer.setDragImage(dragImage, dragImage.offsetWidth / 2, dragImage.offsetHeight / 2);
-
-			// Clean up the drag image element shortly after set (some environments remove automatically)
-			setTimeout(() => {
-				try { document.body.removeChild(dragImage); } catch { };
-			}, 0);
-
-			// Dim the dragged task item itself
-			if (taskItemRef.current) {
-				dragDropTasksManagerInsatance.dimDraggedTaskItem(taskItemRef.current);
-			}
+		// Delegate to manager for standardized behavior (sets current payload and dims element)
+		try {
+			const el = taskItemRef.current as HTMLDivElement;
+			const payload = { task, sourceColumnData: columnData } as currentDragDataPayload;
+			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
+		} catch (err) {
+			// fallback minimal behavior
+			try {
+				e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
+				e.dataTransfer.effectAllowed = 'move';
+			} catch (ex) {/* ignore */}
 		}
 	}, [task, columnData]);
 

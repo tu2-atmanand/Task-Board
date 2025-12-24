@@ -16,7 +16,7 @@ import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
-import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
+import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -361,8 +361,17 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 * @param {number} dragIndex - The index of the task being dragged.
 	 */
 	const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, dragIndex: number) => {
-		e.dataTransfer.setData('text/plain', dragIndex.toString());
-		e.dataTransfer.effectAllowed = 'move';
+		try {
+			const el = e.currentTarget as HTMLDivElement;
+			const payload = { task: localTasks?.[dragIndex], sourceColumnData: columnData } as currentDragDataPayload;
+			// Delegate to manager to centralize behavior and visuals
+			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, dragIndex);
+		} catch (err) {
+			if (e.dataTransfer) {
+				e.dataTransfer.setData('text/plain', dragIndex.toString());
+				e.dataTransfer.effectAllowed = 'move';
+			}
+		}
 	};
 
 	/**
@@ -543,6 +552,16 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				targetColumnContainer
 			);
 
+			// If hovering over an actual card element, show card drop indicator
+			try {
+				const hovered = (e.target as HTMLElement).closest('.taskItem') as HTMLElement | null;
+				if (hovered) {
+					dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, hovered);
+				}
+			} catch (err) {
+				// ignore
+			}
+
 			// Ensure cursor reflects allowed/not-allowed (best-effort fallback)
 			const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
 			e.dataTransfer!.dropEffect = allowed ? 'move' : 'none';
@@ -605,6 +624,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		setIsDragOver(false);
 		setInsertIndex(null);
 		dragDropTasksManagerInsatance.clearDesiredDropIndex();
+		// Let manager clean up indicators and dimming
+		dragDropTasksManagerInsatance.handleDragLeaveEvent();
 	}, []);
 
 	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);

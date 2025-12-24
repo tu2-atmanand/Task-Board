@@ -21,12 +21,116 @@ class DragDropTasksManager {
 	// Hold the current drag payload so dragover handlers can access it reliably
 	private currentDragData: currentDragDataPayload | null = null;
 	private desiredDropIndex: number | null = null;
+	private dropIndicator: HTMLElement | null = null;
 	private plugin: TaskBoard | null = null;
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
 	}
 
+	/**
+	 * Handle card drag start called from React components.
+	 * Sets current drag payload, dims the source element and prepares dataTransfer payload.
+	 */
+	public handleCardDragStartEvent(
+		e: DragEvent,
+		draggedTaskItem: HTMLDivElement,
+		currentDragData: currentDragDataPayload,
+		dragIndex: number
+	): void {
+		if (!e.dataTransfer) return;
+
+		// prevent column drag from also starting
+		e.stopPropagation();
+
+		this.setCurrentDragData(currentDragData);
+
+		e.dataTransfer.effectAllowed = 'move';
+		// provide a JSON payload so drop handlers can inspect
+		try {
+			e.dataTransfer.setData('application/json', JSON.stringify({
+				taskId: currentDragData.task.id,
+				sourceColumnId: currentDragData.sourceColumnData?.id,
+				sourceIndex: dragIndex,
+			}));
+		} catch (err) {
+			// some browsers may throw on setData for complex types
+			console.warn('Could not set JSON dataTransfer payload', err);
+			try {
+				e.dataTransfer.setData('text/plain', currentDragData.task.id);
+			} catch {}
+		}
+
+		// Visual dim / dragging class
+		this.dimDraggedTaskItem(draggedTaskItem);
+		draggedTaskItem.classList.add('task-item-dragging');
+	}
+
+	/**
+	 * Show a card drop indicator (above or below a card element)
+	 */
+	public showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
+		if (!this.plugin) return;
+		if (!cardEl || !cardEl.parentElement) return;
+
+		// Create indicator if not already created
+		if (!this.dropIndicator) {
+			this.dropIndicator = document.createElement('div');
+			this.dropIndicator.className = 'taskboard-drop-indicator is-visible';
+			this.dropIndicator.style.position = 'absolute';
+			this.dropIndicator.style.pointerEvents = 'none';
+			this.dropIndicator.style.zIndex = '9999';
+			this.dropIndicator.style.background = 'var(--interactive-accent, #5b8cff)';
+			this.dropIndicator.style.borderRadius = '4px';
+			// default height; adjusted below
+			this.dropIndicator.style.height = '4px';
+		}
+
+		const rect = cardEl.getBoundingClientRect();
+		const parentRect = cardEl.parentElement.getBoundingClientRect();
+		const topPos = isAbove
+			? `${rect.top - parentRect.top - 6}px`
+			: `${rect.bottom - parentRect.top + 2}px`;
+
+		this.dropIndicator.style.width = `${rect.width}px`;
+		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
+		this.dropIndicator.style.top = topPos;
+
+		cardEl.parentElement.appendChild(this.dropIndicator);
+	}
+
+	/**
+	 * Handle dragover events when hovering a card element
+	 */
+	public handleCardDragOverEvent(e: DragEvent, cardEl: HTMLElement): void {
+		if (!this.getCurrentDragData() || this.getCurrentDragData() === null) return;
+		e.preventDefault();
+		e.stopPropagation();
+		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+		const rect = cardEl.getBoundingClientRect();
+		const midY = rect.top + rect.height / 2;
+		const isAbove = (e.clientY || 0) < midY;
+		this.showCardDropIndicator(cardEl, isAbove);
+	}
+
+	/**
+	 * Handle leaving a drop area - clear indicators and styling
+	 */
+	public handleDragLeaveEvent(): void {
+		this.clearDesiredDropIndex();
+		// remove indicator if present
+		if (this.dropIndicator && this.dropIndicator.parentElement) {
+			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		}
+		this.dropIndicator = null;
+		// clear dimming from any dragged items
+		const allTaskItems = Array.from(document.querySelectorAll('.taskItem.task-item-dragging')) as HTMLDivElement[];
+		allTaskItems.forEach((item) => {
+			item.classList.remove('task-item-dragging');
+			this.removeDimFromDraggedTaskItem(item);
+		});
+	}
 	/**
 	 * Gets the singleton instance of DragDropTasksManager
 	 * @returns {DragDropTasksManager} The singleton instance
