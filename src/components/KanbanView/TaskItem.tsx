@@ -919,9 +919,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 				if (taskItemRef.current && e.dataTransfer) {
 					const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
 					clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
-					clone.style.opacity = '0.95';
+					clone.style.opacity = '0.5';
 					clone.style.position = 'absolute';
-					clone.style.top = '-9999px';
+					// clone.style.top = '-9999px';
 					document.body.appendChild(clone);
 					const rect = taskItemRef.current.getBoundingClientRect();
 					e.dataTransfer.setDragImage(clone, rect.width / 2, rect.height / 2);
@@ -1283,6 +1283,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
+				onContextMenu={handleMenuButtonClicked}
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
@@ -1302,8 +1303,13 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 					)}
 					{!Platform.isPhone && (
 						<>
-							<div className="taskItemDragBtn" aria-label={t("drag-task-card")} draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-								<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} />
+							<div className="taskItemDragBtn"
+								aria-label={t("drag-task-card")}
+								draggable={true}
+								onDragStart={handleDragStart}
+								onDragEnd={handleDragEnd}
+							>
+								<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} />
 							</div>
 						</>
 					)}

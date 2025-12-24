@@ -611,6 +611,7 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement
 	): void {
+		console.log("DragDropTasksManager : handleDragOver called...");
 		e.preventDefault();
 
 		// Check if drop is allowed

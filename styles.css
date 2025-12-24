@@ -6769,51 +6769,36 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 /* ==================== Drag & Drop Styles (adapted from ewerx/obsidian-bases-kanban) ==================== */
 
 /* Drag handle in column header */
-.bases-kanban-drag-handle,
 .taskboard-drag-handle {
 	display: flex;
 }
 
 /* Draggable elements */
-.bases-kanban-draggable,
 .taskboard-draggable,
 .taskItem {
 	cursor: grab;
 }
 
-.bases-kanban-draggable:active,
 .taskboard-draggable:active {
 	cursor: grabbing;
 }
 
 /* Element being dragged: dim / scale */
-.bases-kanban-dragging,
 .task-item-dragging,
 .taskItem.task-item-dragging {
 	opacity: 0.5;
 	transform: scale(0.98);
-	box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
 /* Column drag-over visual */
-.bases-kanban-column.bases-kanban-drag-over,
 .TaskBoardColumnsSection.dragover {
 	background-color: var(--background-modifier-hover);
 	outline: 2px dashed var(--interactive-accent);
 	outline-offset: -2px;
 }
 
-/* Cards container drop zone active */
-.bases-kanban-cards.bases-kanban-drop-zone-active,
-.TaskBoardColumnsSection .taskBoardColumnsCards.bases-kanban-drop-zone-active {
-	background-color: var(--background-modifier-hover);
-	outline: 2px dashed var(--interactive-accent);
-	outline-offset: -4px;
-	border-radius: var(--radius-s);
-}
-
 /* Drop indicator (card) - rectangular indicator positioned absolutely inside cards container */
-.bases-kanban-drop-indicator,
 .taskboard-drop-indicator {
 	position: absolute;
 	background-color: var(--interactive-accent);
@@ -6824,48 +6809,46 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: none;
 }
 
-.bases-kanban-drop-indicator.is-visible,
 .taskboard-drop-indicator.is-visible {
 	display: block;
 }
 
 /* Card drop indicator horizontal */
-.bases-kanban-drop-indicator-card,
 .taskboard-drop-indicator {
 	height: 6px;
 	box-shadow: 0 0 8px var(--interactive-accent);
 }
 
 /* Board and cards containers should be positioning contexts */
-.bases-kanban-board,
 .TaskBoardColumnsSection {
 	position: relative;
 }
 
 /* Prevent text selection while dragging */
-.bases-kanban-board.dragging-active,
 .TaskBoardColumnsSection.dragging-active {
 	user-select: none;
 }
 
 /* Smooth transitions for columns/cards */
-.bases-kanban-column,
 .TaskBoardColumnsSection {
 	transition: transform 0.18s ease, opacity 0.18s ease;
 }
 
-.bases-kanban-card,
 .taskItem {
 	transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 
 /* Highlight effect when dropped */
 @keyframes kanban-drop-highlight {
-0% { box-shadow: 0 0 0 3px var(--interactive-accent); }
-100% { box-shadow: none; }
+	0% {
+		box-shadow: 0 0 0 3px var(--interactive-accent);
+	}
+
+	100% {
+		box-shadow: none;
+	}
 }
 
-.bases-kanban-just-dropped,
 .taskboard-just-dropped {
 	animation: kanban-drop-highlight 0.45s ease-out;
 }

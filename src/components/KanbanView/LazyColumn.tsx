@@ -622,7 +622,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	return (
 		<div
-			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''} ${isDragOver ? 'dragover' : ''}`}
+			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}}`}
 			data-column-id={columnData.id}
 			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
 			data-column-type={columnData.colType}
