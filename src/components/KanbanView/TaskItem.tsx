@@ -900,6 +900,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		console.log("TaskItem : handleDragStart...");
 		if (!columnData) {
 			e.preventDefault();
 			console.warn('handleDragStart: columnData is undefined');
@@ -917,11 +918,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			try {
 				e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
 				e.dataTransfer.effectAllowed = 'move';
-			} catch (ex) {/* ignore */}
+			} catch (ex) {/* ignore */ }
 		}
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
+		console.log("TaskItem : handleDragEnd...");
 		setIsDragging(false);
 
 		// Remove dim effect from this dragged task and clear manager state

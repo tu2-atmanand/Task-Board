@@ -361,6 +361,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 * @param {number} dragIndex - The index of the task being dragged.
 	 */
 	const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, dragIndex: number) => {
+		console.log('LazyColumn : handleTaskDragStart', dragIndex);
 		try {
 			const el = e.currentTarget as HTMLDivElement;
 			const payload = { task: localTasks?.[dragIndex], sourceColumnData: columnData } as currentDragDataPayload;
@@ -383,6 +384,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 * @param {number} dropIndex - The index at which to drop the task.
 	 */
 	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+		console.log('LazyColumn : handleTaskDrop');
 		e.preventDefault();
 		setIsDragOver(false);
 		setInsertIndex(null);
@@ -405,6 +407,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	};
 
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		console.log('LazyColumn : handleDrop');
 		e.preventDefault();
 		setIsDragOver(false);
 
@@ -439,14 +442,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					}) || targetColumnContainer;
 				}
 
-				// If target column uses manualOrder, disallow cross-column drops (only allow intra-column reordering)
-				const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-				if (hasManualOrder && sourceColumnData.id !== columnData.id) {
-					// Not allowed: ignore drop
-					dragDropTasksManagerInsatance.clearCurrentDragData();
-					dragDropTasksManagerInsatance.clearDesiredDropIndex();
-					return;
-				}
+				// we will allow cross-column drops now with target column having manualOrder sortCriteria. Disabling below code.
+				// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+				// if (hasManualOrder && sourceColumnData.id !== columnData.id) {
+				// 	// Not allowed: ignore drop
+				// 	dragDropTasksManagerInsatance.clearCurrentDragData();
+				// 	dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				// 	return;
+				// }
 
 				// Use the DragDropTasksManager to handle the drop
 				// If this is an intra-column reorder (same column) and we have an insertIndex, handle locally
@@ -486,9 +489,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				// Clear manager payload (drag finished)
 				dragDropTasksManagerInsatance.clearCurrentDragData();
 				dragDropTasksManagerInsatance.clearDesiredDropIndex();
-
-				// TODO : Implement the actual task property update logic based on source and target column data
-				// This will be called after validation passes
 			}
 		} catch (error) {
 			console.error('Error handling task drop:', error);
@@ -497,6 +497,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		console.log('LazyColumn : handleDragOver');
 		e.preventDefault();
 		setIsDragOver(true);
 		try {
@@ -572,6 +573,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	// Compute insertion index based on mouse Y relative to task items inside the container
 	const handleTasksContainerDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		console.log('LazyColumn : handleTasksContainerDragOver');
 		e.preventDefault();
 		setIsDragOver(true);
 		try {
@@ -621,6 +623,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	// Handle the dragleave event to remove the visual effect
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		console.log("LazyColumn : handleDragLeave ...");
 		setIsDragOver(false);
 		setInsertIndex(null);
 		dragDropTasksManagerInsatance.clearDesiredDropIndex();
@@ -679,12 +682,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 										{(() => {
 											const elements: React.ReactNode[] = [];
 											for (let i = 0; i < visibleTasks.length; i++) {
-												// If insertIndex points to this position, render placeholder
-												if (insertIndex === i) {
-													elements.push(
-														<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-													);
-												}
 												const task = visibleTasks[i];
 												elements.push(
 													<div
@@ -701,12 +698,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 															activeBoardSettings={activeBoardData}
 														/>
 													</div>
-												);
-											}
-											// If insertIndex points to end (after last item)
-											if (insertIndex === visibleTasks.length) {
-												elements.push(
-													<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
 												);
 											}
 											return elements;

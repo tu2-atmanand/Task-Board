@@ -45,25 +45,28 @@ class DragDropTasksManager {
 
 		this.setCurrentDragData(currentDragData);
 
-		e.dataTransfer.effectAllowed = 'move';
+		e.dataTransfer.effectAllowed = "move";
 		// provide a JSON payload so drop handlers can inspect
 		try {
-			e.dataTransfer.setData('application/json', JSON.stringify({
-				taskId: currentDragData.task.id,
-				sourceColumnId: currentDragData.sourceColumnData?.id,
-				sourceIndex: dragIndex,
-			}));
+			e.dataTransfer.setData(
+				"application/json",
+				JSON.stringify({
+					taskId: currentDragData.task.id,
+					sourceColumnId: currentDragData.sourceColumnData?.id,
+					sourceIndex: dragIndex,
+				})
+			);
 		} catch (err) {
 			// some browsers may throw on setData for complex types
-			console.warn('Could not set JSON dataTransfer payload', err);
+			console.warn("Could not set JSON dataTransfer payload", err);
 			try {
-				e.dataTransfer.setData('text/plain', currentDragData.task.id);
+				e.dataTransfer.setData("text/plain", currentDragData.task.id);
 			} catch {}
 		}
 
 		// Visual dim / dragging class
 		this.dimDraggedTaskItem(draggedTaskItem);
-		draggedTaskItem.classList.add('task-item-dragging');
+		// draggedTaskItem.classList.add('task-item-dragging');
 	}
 
 	/**
@@ -75,15 +78,17 @@ class DragDropTasksManager {
 
 		// Create indicator if not already created
 		if (!this.dropIndicator) {
-			this.dropIndicator = document.createElement('div');
-			this.dropIndicator.className = 'taskboard-drop-indicator is-visible';
-			this.dropIndicator.style.position = 'absolute';
-			this.dropIndicator.style.pointerEvents = 'none';
-			this.dropIndicator.style.zIndex = '9999';
-			this.dropIndicator.style.background = 'var(--interactive-accent, #5b8cff)';
-			this.dropIndicator.style.borderRadius = '4px';
+			this.dropIndicator = document.createElement("div");
+			this.dropIndicator.className =
+				"taskboard-drop-indicator is-visible";
+			this.dropIndicator.style.position = "absolute";
+			this.dropIndicator.style.pointerEvents = "none";
+			this.dropIndicator.style.zIndex = "9999";
+			this.dropIndicator.style.background =
+				"var(--interactive-accent, #5b8cff)";
+			this.dropIndicator.style.borderRadius = "4px";
 			// default height; adjusted below
-			this.dropIndicator.style.height = '4px';
+			this.dropIndicator.style.height = "4px";
 		}
 
 		const rect = cardEl.getBoundingClientRect();
@@ -103,10 +108,11 @@ class DragDropTasksManager {
 	 * Handle dragover events when hovering a card element
 	 */
 	public handleCardDragOverEvent(e: DragEvent, cardEl: HTMLElement): void {
-		if (!this.getCurrentDragData() || this.getCurrentDragData() === null) return;
+		if (!this.getCurrentDragData() || this.getCurrentDragData() === null)
+			return;
 		e.preventDefault();
 		e.stopPropagation();
-		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
 
 		const rect = cardEl.getBoundingClientRect();
 		const midY = rect.top + rect.height / 2;
@@ -125,11 +131,11 @@ class DragDropTasksManager {
 		}
 		this.dropIndicator = null;
 		// clear dimming from any dragged items
-		const allTaskItems = Array.from(document.querySelectorAll('.taskItem.task-item-dragging')) as HTMLDivElement[];
-		allTaskItems.forEach((item) => {
-			item.classList.remove('task-item-dragging');
-			this.removeDimFromDraggedTaskItem(item);
-		});
+		// const allTaskItems = Array.from(document.querySelectorAll('.taskItem.task-item-dragging')) as HTMLDivElement[];
+		// allTaskItems.forEach((item) => {
+		// 	item.classList.remove('task-item-dragging');
+		// 	this.removeDimFromDraggedTaskItem(item);
+		// });
 	}
 	/**
 	 * Gets the singleton instance of DragDropTasksManager
@@ -644,6 +650,7 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement
 	): void {
+		console.log("DragDropTasksManager : handleDrop called...");
 		e.preventDefault();
 
 		// Remove drag-over styling from target
