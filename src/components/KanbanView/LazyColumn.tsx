@@ -353,15 +353,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 	}
 
-
-	/**
-	 * Handle the start of a drag event on a task.
-	 * Sets the dataTransfer's data to the task index and effectAllowed to 'move'.
-	 * @param {React.DragEvent<HTMLDivElement>} e - The drag event.
-	 * @param {number} dragIndex - The index of the task being dragged.
-	 */
-	// NOTE: dragstart is handled by the TaskItem's drag handle; we no longer start drag from the wrapper
-
 	/**
 	 * Handles the drop event of a task in this column.
 	 * Moves the task from its original position (dragIndex) to the new position (dropIndex).
@@ -566,6 +557,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		try {
 			// Only compute insertion index for columns that use "manualOrder" as the sorting criteria.
 			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			console.log('hasManualOrder', hasManualOrder);
 			if (!hasManualOrder) {
 				// Clear any visual placeholder and desired index
 				if (insertIndexRef.current !== null) {
@@ -573,40 +565,40 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				}
 				dragDropTasksManagerInsatance.clearDesiredDropIndex();
 				return;
-			}
-
-			// TODO : Try to find if there is a better algorithm to compute insertion index
-			// Else will proceed with finding the insertion index
-			const container = e.currentTarget.parentElement as HTMLDivElement;
-			const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
-			const clientY = e.clientY;
-			let pos = children.length; // default to end
-			for (let i = 0; i < children.length; i++) {
-				const child = children[i];
-				const rect = child.getBoundingClientRect();
-				const midpoint = rect.top + rect.height / 2;
-				if (clientY < midpoint) {
-					pos = i;
-					break;
+			} else {
+				// TODO : Try to find if there is a better algorithm to compute insertion index
+				// Else will proceed with finding the insertion index
+				const container = e.currentTarget.parentElement as HTMLDivElement;
+				const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
+				const clientY = e.clientY;
+				let pos = children.length; // default to end
+				for (let i = 0; i < children.length; i++) {
+					const child = children[i];
+					const rect = child.getBoundingClientRect();
+					const midpoint = rect.top + rect.height / 2;
+					if (clientY < midpoint) {
+						pos = i;
+						break;
+					}
 				}
+				// Throttle updates via RAF
+				scheduleSetInsertIndex(pos);
+				// Store desired drop index in manager
+				dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+
+				// prefer move effect when dragging
+				e.dataTransfer!.dropEffect = 'move';
+
+				// // Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
+				// dragDropTasksManagerInsatance.handleDragOver(
+				// 	e.nativeEvent,
+				// 	columnData,
+				// 	container
+				// );
+
+				const targetColumnContainer = tasksContainerRef.current as HTMLDivElement;
+				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
 			}
-			// Throttle updates via RAF
-			scheduleSetInsertIndex(pos);
-			// Store desired drop index in manager
-			dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
-
-			// prefer move effect when dragging
-			e.dataTransfer!.dropEffect = 'move';
-
-			// // Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
-			// dragDropTasksManagerInsatance.handleDragOver(
-			// 	e.nativeEvent,
-			// 	columnData,
-			// 	container
-			// );
-
-			const targetColumnContainer = tasksContainerRef.current as HTMLDivElement;
-			dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
 		} catch (error) {
 			console.error('Error computing insert index:', error);
 		}
