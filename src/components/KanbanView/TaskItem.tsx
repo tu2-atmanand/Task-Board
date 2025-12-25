@@ -911,7 +911,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
-			const payload = { task, sourceColumnData: columnData } as currentDragDataPayload;
+			const payload: currentDragDataPayload = { task, sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index };
 			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Also set a drag image from the whole task element so the preview is the full card

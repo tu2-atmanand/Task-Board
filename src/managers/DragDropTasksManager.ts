@@ -9,6 +9,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 export interface currentDragDataPayload {
 	task: taskItem;
 	sourceColumnData: ColumnData;
+	currentBoardIndex: number;
 }
 
 /**
@@ -26,114 +27,6 @@ class DragDropTasksManager {
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
-	}
-
-	/**
-	 * Handle card drag start called from React components.
-	 * Sets current drag payload, dims the source element and prepares dataTransfer payload.
-	 */
-	public handleCardDragStartEvent(
-		e: DragEvent,
-		draggedTaskItem: HTMLDivElement,
-		currentDragData: currentDragDataPayload,
-		dragIndex: number
-	): void {
-		if (!e.dataTransfer) return;
-
-		// prevent column drag from also starting
-		e.stopPropagation();
-
-		this.setCurrentDragData(currentDragData);
-
-		e.dataTransfer.effectAllowed = "move";
-		// provide a JSON payload so drop handlers can inspect
-		try {
-			e.dataTransfer.setData(
-				"application/json",
-				JSON.stringify({
-					taskId: currentDragData.task.id,
-					sourceColumnId: currentDragData.sourceColumnData?.id,
-					sourceIndex: dragIndex,
-				})
-			);
-		} catch (err) {
-			// some browsers may throw on setData for complex types
-			console.warn("Could not set JSON dataTransfer payload", err);
-			try {
-				e.dataTransfer.setData("text/plain", currentDragData.task.id);
-			} catch {}
-		}
-
-		// Visual dim / dragging class
-		this.dimDraggedTaskItem(draggedTaskItem);
-		// draggedTaskItem.classList.add('task-item-dragging');
-	}
-
-	/**
-	 * Show a card drop indicator (above or below a card element)
-	 */
-	public showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
-		if (!this.plugin) return;
-		if (!cardEl || !cardEl.parentElement) return;
-
-		// Create indicator if not already created
-		if (!this.dropIndicator) {
-			this.dropIndicator = document.createElement("div");
-			this.dropIndicator.className =
-				"taskboard-drop-indicator is-visible";
-			this.dropIndicator.style.position = "absolute";
-			this.dropIndicator.style.pointerEvents = "none";
-			this.dropIndicator.style.zIndex = "9999";
-			this.dropIndicator.style.background =
-				"var(--interactive-accent, #5b8cff)";
-			this.dropIndicator.style.borderRadius = "4px";
-			// default height; adjusted below
-			this.dropIndicator.style.height = "4px";
-		}
-
-		const rect = cardEl.getBoundingClientRect();
-		const parentRect = cardEl.parentElement.getBoundingClientRect();
-		const topPos = isAbove
-			? `${rect.top - parentRect.top - 6}px`
-			: `${rect.bottom - parentRect.top + 2}px`;
-
-		this.dropIndicator.style.width = `${rect.width}px`;
-		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
-		this.dropIndicator.style.top = topPos;
-
-		cardEl.parentElement.appendChild(this.dropIndicator);
-	}
-
-	/**
-	 * Handle dragover events when hovering a card element
-	 */
-	public handleCardDragOverEvent(
-		e: DragEvent,
-		cardEl: HTMLElement,
-		columnContainerEl: HTMLDivElement,
-		ColumnData: ColumnData
-	): void {
-		if (!this.getCurrentDragData() || this.getCurrentDragData() === null)
-			return;
-		e.preventDefault();
-		e.stopPropagation();
-
-		// From here we should call below function to handle dragover styling on the column container.
-		// The below function will return true or false based on whether drop is allowed or not.
-		const dropAllowed = this.handleDragOver(
-			e,
-			ColumnData,
-			columnContainerEl
-		);
-
-		if (!dropAllowed) return;
-
-		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-
-		const rect = cardEl.getBoundingClientRect();
-		const midY = rect.top + rect.height / 2;
-		const isAbove = (e.clientY || 0) < midY;
-		this.showCardDropIndicator(cardEl, isAbove);
 	}
 
 	/**
@@ -199,42 +92,6 @@ class DragDropTasksManager {
 		// });
 	}
 
-	/**
-	 * Checks if a task is allowed to be dropped in the target column
-	 * Rules:
-	 * - If source and target column types are the same, allow drop
-	 * - If target column type is 'completed', allow drop
-	 *
-	 * @param {ColumnData} sourceColumnData - The source column data
-	 * @param {ColumnData} targetColumnData - The target column data
-	 * @returns {boolean} True if drop is allowed, false otherwise
-	 */
-	isTaskDropAllowed(
-		sourceColumnData: ColumnData,
-		targetColumnData: ColumnData
-	): boolean {
-		// Allow drop if source and target column types are the same
-		if (sourceColumnData.colType === targetColumnData.colType) {
-			return true;
-		}
-
-		// Allow drop if target column type is 'completed'
-		if (targetColumnData.colType === "completed") {
-			return true;
-		}
-
-		// Otherwise, drop is not allowed
-		return false;
-	}
-
-	/**
-	 * Store current drag payload (called from dragstart)
-	 */
-	setCurrentDragData(data: currentDragDataPayload) {
-		console.log("setCurrentDragData", data);
-		this.currentDragData = data;
-	}
-
 	setDesiredDropIndex(index: number | null) {
 		this.desiredDropIndex = index;
 	}
@@ -245,6 +102,14 @@ class DragDropTasksManager {
 
 	clearDesiredDropIndex() {
 		this.desiredDropIndex = null;
+	}
+
+	/**
+	 * Store current drag payload (called from dragstart)
+	 */
+	setCurrentDragData(data: currentDragDataPayload) {
+		console.log("setCurrentDragData", data);
+		this.currentDragData = data;
 	}
 
 	/**
@@ -269,12 +134,12 @@ class DragDropTasksManager {
 	 * @param targetColumn Target column data
 	 * @returns Updated task with modified tags
 	 */
-	handleTaskMove_namedTag_to_namedTag = (
+	handleTaskMove_namedTag_to_namedTag = async (
 		plugin: TaskBoard,
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData
-	): void => {
+	): Promise<void> => {
 		const task = currentDragData.task;
 		// Create a modified copy of the task
 		// const updatedTask: taskItem = { ...task };
@@ -309,20 +174,12 @@ class DragDropTasksManager {
 		// Before updating the task, first check if this target column has "manualOrder" sorting criteria.
 		// If yes, we need to update the tasksIdManualOrder array to include this task's id whereever user has dropped it.
 		// This will ensure that the task appears in the correct order in the target column after the move.
-		if (
-			targetColumn?.sortCriteria &&
-			targetColumn.sortCriteria.length > 0 &&
-			targetColumn.sortCriteria[0].criteria === "manualOrder"
-		) {
-			// Update tasksIdManualOrder array
-			if (!targetColumn.tasksIdManualOrder) {
-				targetColumn.tasksIdManualOrder = [];
-			}
-			// Add the task id to the end of the manual order array
-			if (!targetColumn.tasksIdManualOrder.includes(task.id)) {
-				targetColumn.tasksIdManualOrder.push(task.id);
-			}
-		}
+		this.handleTasksOrderChange(
+			plugin,
+			currentDragData,
+			targetColumn,
+			this.desiredDropIndex
+		);
 
 		// Finally, update the task in the note which will refresh the view.
 		updateTaskItemTags(plugin, task, newTags);
@@ -557,45 +414,210 @@ class DragDropTasksManager {
 	 * Handles reordering of tasks within the same column with manualOrder sorting
 	 * @param plugin TaskBoard plugin instance
 	 * @param task The task being moved
-	 * @param column The column data with manualOrder sorting
+	 * @param targetColumnData The column data with manualOrder sorting
+	 * @param desiredIndex The desired index to insert the task at
 	 */
-	handleTasksOrderChange = async (
+	handleTasksOrderChange = (
 		plugin: TaskBoard,
 		currentDragData: currentDragDataPayload,
-		column: ColumnData,
-		desiredIndex?: number | null
-	): Promise<void> => {
+		targetColumnData: ColumnData,
+		desiredIndex: number | null
+	): void => {
+		console.log(
+			"handleTasksOrderChange called...\ncurrentDragData=",
+			currentDragData,
+			"\ntargetColumnData=",
+			targetColumnData,
+			"\ndesiredIndex=",
+			desiredIndex
+		);
+		if (
+			!(
+				targetColumnData?.sortCriteria &&
+				targetColumnData.sortCriteria.length > 0 &&
+				targetColumnData.sortCriteria[0].criteria === "manualOrder"
+			)
+		)
+			return; // If not manualOrder sorting, exit
+
 		const task = currentDragData.task;
 
 		// Ensure manual order array exists
-		if (!column.tasksIdManualOrder) {
-			column.tasksIdManualOrder = [];
+		if (!targetColumnData.tasksIdManualOrder) {
+			targetColumnData.tasksIdManualOrder = [];
 		}
 
 		// Remove any existing occurrence of the task id
-		column.tasksIdManualOrder = column.tasksIdManualOrder.filter(
-			(id) => id !== task.id
-		);
+		targetColumnData.tasksIdManualOrder =
+			targetColumnData.tasksIdManualOrder.filter((id) => id !== task.id);
 
 		// Insert at desired index or push to end
 		if (
 			typeof desiredIndex === "number" &&
 			desiredIndex >= 0 &&
-			desiredIndex <= column.tasksIdManualOrder.length
+			desiredIndex <= targetColumnData.tasksIdManualOrder.length
 		) {
-			column.tasksIdManualOrder.splice(desiredIndex, 0, task.id);
+			targetColumnData.tasksIdManualOrder.splice(
+				desiredIndex,
+				0,
+				task.id
+			);
 		} else {
-			column.tasksIdManualOrder.push(task.id);
+			targetColumnData.tasksIdManualOrder.push(task.id);
 		}
+
+		let newSettings = plugin.settings;
+		newSettings.data.boardConfigs[
+			currentDragData.currentBoardIndex
+		].columns[targetColumnData.index] = targetColumnData;
 
 		// Persist settings and refresh the board
 		try {
-			await plugin.saveSettings();
-			eventEmitter.emit("REFRESH_BOARD");
+			plugin.saveSettings(newSettings);
+			// No need to refresh here, the view will auto-refresh on task update
+			// eventEmitter.emit("REFRESH_BOARD");
 		} catch (err) {
 			console.error("Error saving settings after task reorder:", err);
 		}
 	};
+
+	/**
+	 * Checks if a task is allowed to be dropped in the target column
+	 * Rules:
+	 * - If source and target column types are the same, allow drop
+	 * - If target column type is 'completed', allow drop
+	 *
+	 * @param {ColumnData} sourceColumnData - The source column data
+	 * @param {ColumnData} targetColumnData - The target column data
+	 * @returns {boolean} True if drop is allowed, false otherwise
+	 */
+	isTaskDropAllowed(
+		sourceColumnData: ColumnData,
+		targetColumnData: ColumnData
+	): boolean {
+		// Allow drop if source and target column types are the same
+		if (sourceColumnData.colType === targetColumnData.colType) {
+			return true;
+		}
+
+		// Allow drop if target column type is 'completed'
+		if (targetColumnData.colType === "completed") {
+			return true;
+		}
+
+		// Otherwise, drop is not allowed
+		return false;
+	}
+
+	/**
+	 * Handle card drag start called from React components.
+	 * Sets current drag payload, dims the source element and prepares dataTransfer payload.
+	 */
+	public handleCardDragStartEvent(
+		e: DragEvent,
+		draggedTaskItem: HTMLDivElement,
+		currentDragData: currentDragDataPayload,
+		dragIndex: number
+	): void {
+		if (!e.dataTransfer) return;
+
+		// prevent column drag from also starting
+		e.stopPropagation();
+
+		this.setCurrentDragData(currentDragData);
+
+		e.dataTransfer.effectAllowed = "move";
+
+		// TODO : I probably wont need this anymore since I am using the singleton manager to hold the current drag data.
+		// provide a JSON payload so drop handlers can inspect
+		try {
+			e.dataTransfer.setData(
+				"application/json",
+				JSON.stringify({
+					taskId: currentDragData.task.id,
+					sourceColumnId: currentDragData.sourceColumnData?.id,
+					sourceIndex: dragIndex,
+				})
+			);
+		} catch (err) {
+			// some browsers may throw on setData for complex types
+			console.warn("Could not set JSON dataTransfer payload", err);
+			try {
+				e.dataTransfer.setData("text/plain", currentDragData.task.id);
+			} catch {}
+		}
+
+		// Visual dim / dragging class
+		this.dimDraggedTaskItem(draggedTaskItem);
+		// draggedTaskItem.classList.add('task-item-dragging');
+	}
+
+	/**
+	 * Show a card drop indicator (above or below a card element)
+	 */
+	public showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
+		if (!this.plugin) return;
+		if (!cardEl || !cardEl.parentElement) return;
+
+		// Create indicator if not already created
+		if (!this.dropIndicator) {
+			this.dropIndicator = document.createElement("div");
+			this.dropIndicator.className =
+				"taskboard-drop-indicator is-visible";
+			this.dropIndicator.style.position = "absolute";
+			this.dropIndicator.style.pointerEvents = "none";
+			this.dropIndicator.style.zIndex = "9999";
+			this.dropIndicator.style.background =
+				"var(--interactive-accent, #5b8cff)";
+			this.dropIndicator.style.borderRadius = "4px";
+			// default height; adjusted below
+			this.dropIndicator.style.height = "4px";
+		}
+
+		const rect = cardEl.getBoundingClientRect();
+		const parentRect = cardEl.parentElement.getBoundingClientRect();
+		const topPos = isAbove
+			? `${rect.top - parentRect.top - 6}px`
+			: `${rect.bottom - parentRect.top + 2}px`;
+
+		this.dropIndicator.style.width = `${rect.width}px`;
+		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
+		this.dropIndicator.style.top = topPos;
+
+		cardEl.parentElement.appendChild(this.dropIndicator);
+	}
+
+	/**
+	 * Handle dragover events when hovering a card element
+	 */
+	public handleCardDragOverEvent(
+		e: DragEvent,
+		cardEl: HTMLElement,
+		columnContainerEl: HTMLDivElement,
+		ColumnData: ColumnData
+	): void {
+		if (!this.getCurrentDragData() || this.getCurrentDragData() === null)
+			return;
+		e.preventDefault();
+		e.stopPropagation();
+
+		// From here we should call below function to handle dragover styling on the column container.
+		// The below function will return true or false based on whether drop is allowed or not.
+		const dropAllowed = this.handleDragOver(
+			e,
+			ColumnData,
+			columnContainerEl
+		);
+
+		if (!dropAllowed) return;
+
+		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+
+		const rect = cardEl.getBoundingClientRect();
+		const midY = rect.top + rect.height / 2;
+		const isAbove = (e.clientY || 0) < midY;
+		this.showCardDropIndicator(cardEl, isAbove);
+	}
 
 	/**
 	 * Handles the drag over event and applies CSS styling to the target column container
@@ -656,8 +678,6 @@ class DragDropTasksManager {
 	 * based on source and target column data
 	 *
 	 * @param {DragEvent} e - The drop event object
-	 * @param {ColumnData} sourceColumnData - The source column data
-	 * @param {HTMLDivElement} sourceColumnContainer - The source column DOM container
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
 	 */
@@ -720,23 +740,15 @@ class DragDropTasksManager {
 			if (targetColumnData.id === sourceColumnData.id) {
 				// This means user wants to change the order of the tasks in the same column
 				// But we need to check first if this column has sorting.criteria = "manualOrder".
-				// If not will show a notice.
-				if (
-					sourceColumnData?.sortCriteria &&
-					sourceColumnData.sortCriteria.length > 0 &&
-					sourceColumnData.sortCriteria[0].criteria === "manualOrder"
-				) {
-					this.handleTasksOrderChange(
-						this.plugin!,
-						this.currentDragData,
-						sourceColumnData,
-						this.getDesiredDropIndex()
-					);
-				} else {
-					new Notice(
-						"This current column doesnt have sorting criteria set to 'manualOrder'. You can't change the order of tasks in this column."
-					);
-				}
+				this.handleTasksOrderChange(
+					this.plugin!,
+					this.currentDragData,
+					sourceColumnData,
+					this.desiredDropIndex
+				);
+
+				eventEmitter.emit("REFRESH_BOARD");
+				return;
 			} else if (targetColumnData.colType === colType.namedTag) {
 				this.handleTaskMove_namedTag_to_namedTag(
 					this.plugin!,
