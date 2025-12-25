@@ -262,7 +262,7 @@
             "coltag": "#Task",
             "sortCriteria": [
               {
-                "criteria": "manualOrder",
+                "criteria": "content",
                 "order": "asc",
                 "priority": 1,
                 "uid": "bmlpsogj"
@@ -273,7 +273,11 @@
               274,
               "362"
             ],
-            "minimized": false
+            "minimized": false,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "colType": "namedTag",
@@ -299,32 +303,7 @@
             "id": 908753,
             "filters": {
               "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1760365709344-buyyxwhhh",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1760365709345-8uyz54hm3",
-                      "property": "content",
-                      "condition": "contains",
-                      "value": "This"
-                    }
-                  ]
-                },
-                {
-                  "id": "id-1760365717816-lfhxidsw4",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1760365717817-fjsotu7dy",
-                      "property": "content",
-                      "condition": "contains",
-                      "value": "is"
-                    }
-                  ]
-                }
-              ]
+              "filterGroups": []
             },
             "minimized": false
           },
