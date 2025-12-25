@@ -107,11 +107,27 @@ class DragDropTasksManager {
 	/**
 	 * Handle dragover events when hovering a card element
 	 */
-	public handleCardDragOverEvent(e: DragEvent, cardEl: HTMLElement): void {
+	public handleCardDragOverEvent(
+		e: DragEvent,
+		cardEl: HTMLElement,
+		columnContainerEl: HTMLDivElement,
+		ColumnData: ColumnData
+	): void {
 		if (!this.getCurrentDragData() || this.getCurrentDragData() === null)
 			return;
 		e.preventDefault();
 		e.stopPropagation();
+
+		// From here we should call below function to handle dragover styling on the column container.
+		// The below function will return true or false based on whether drop is allowed or not.
+		const dropAllowed = this.handleDragOver(
+			e,
+			ColumnData,
+			columnContainerEl
+		);
+
+		if (!dropAllowed) return;
+
 		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
 
 		const rect = cardEl.getBoundingClientRect();
@@ -120,23 +136,6 @@ class DragDropTasksManager {
 		this.showCardDropIndicator(cardEl, isAbove);
 	}
 
-	/**
-	 * Handle leaving a drop area - clear indicators and styling
-	 */
-	public handleDragLeaveEvent(): void {
-		this.clearDesiredDropIndex();
-		// remove indicator if present
-		if (this.dropIndicator && this.dropIndicator.parentElement) {
-			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
-		}
-		this.dropIndicator = null;
-		// clear dimming from any dragged items
-		// const allTaskItems = Array.from(document.querySelectorAll('.taskItem.task-item-dragging')) as HTMLDivElement[];
-		// allTaskItems.forEach((item) => {
-		// 	item.classList.remove('task-item-dragging');
-		// 	this.removeDimFromDraggedTaskItem(item);
-		// });
-	}
 	/**
 	 * Gets the singleton instance of DragDropTasksManager
 	 * @returns {DragDropTasksManager} The singleton instance
@@ -178,22 +177,26 @@ class DragDropTasksManager {
 	/**
 	 * Clears all drag-related styling from all task items and columns
 	 *
-	 * @param {HTMLDivElement[]} allColumnContainers - Array of all column DOM containers
 	 */
-	clearAllDragStyling(allColumnContainers: HTMLDivElement[]): void {
+	clearAllDragStyling(): void {
+		const allColumnContainers = Array.from(
+			document.querySelectorAll(".TaskBoardColumnsSection")
+		) as HTMLDivElement[];
 		allColumnContainers.forEach((container) => {
 			container.classList.remove(
 				"drag-over-allowed",
 				"drag-over-not-allowed"
 			);
 		});
+
+		// TODO : This feels like overkill, because I am only dimming the single .taskItem which I will be dragging. Optimize later.
 		// Also clear dimming from all task items
-		const allTaskItems = Array.from(
-			document.querySelectorAll(".taskItem")
-		) as HTMLDivElement[];
-		allTaskItems.forEach((item) => {
-			item.classList.remove("task-item-dragging-dimmed");
-		});
+		// const allTaskItems = Array.from(
+		// 	document.querySelectorAll(".taskItem")
+		// ) as HTMLDivElement[];
+		// allTaskItems.forEach((item) => {
+		// 	item.classList.remove("task-item-dragging-dimmed");
+		// });
 	}
 
 	/**
@@ -599,20 +602,24 @@ class DragDropTasksManager {
 	 * based on whether the task is allowed to be dropped
 	 *
 	 * @param {DragEvent} e - The drag event object
-	 * @param {ColumnData} sourceColumnData - The source column data
-	 * @param {HTMLDivElement} sourceColumnContainer - The source column DOM container
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
 	 */
 	handleDragOver(
 		e: DragEvent,
-		sourceColumnData: ColumnData,
-		sourceColumnContainer: HTMLDivElement,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement
-	): void {
-		console.log("DragDropTasksManager : handleDragOver called...");
+	): boolean {
+		// console.log("DragDropTasksManager : handleDragOver called...");
 		e.preventDefault();
+
+		const sourceColumnData = this.currentDragData
+			? this.currentDragData.sourceColumnData
+			: null;
+		if (!sourceColumnData) {
+			console.error("No source column data available for dragover.");
+			return false;
+		}
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(
@@ -622,15 +629,25 @@ class DragDropTasksManager {
 		// console.log("isDropAllowed", isDropAllowed);
 
 		if (isDropAllowed) {
+			console.log(
+				"Task drop allowed from column:",
+				sourceColumnData.name
+			);
 			// Apply CSS styling for allowed drop
 			targetColumnContainer.classList.add("drag-over-allowed");
 			targetColumnContainer.classList.remove("drag-over-not-allowed");
 			e.dataTransfer!.dropEffect = "move";
+			return true;
 		} else {
+			console.log(
+				"Task drop not allowed from column:",
+				sourceColumnData.name
+			);
 			// Apply CSS styling for not allowed drop
 			targetColumnContainer.classList.add("drag-over-not-allowed");
 			targetColumnContainer.classList.remove("drag-over-allowed");
 			e.dataTransfer!.dropEffect = "none";
+			return false;
 		}
 	}
 
@@ -646,22 +663,25 @@ class DragDropTasksManager {
 	 */
 	handleDrop(
 		e: DragEvent,
-		sourceColumnData: ColumnData,
-		sourceColumnContainer: HTMLDivElement,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement
 	): void {
 		console.log("DragDropTasksManager : handleDrop called...");
 		e.preventDefault();
 
+		const sourceColumnData = this.currentDragData
+			? this.currentDragData.sourceColumnData
+			: null;
+		if (!sourceColumnData) {
+			console.error("No source column data available for drop.");
+			return;
+		}
+
 		// Remove drag-over styling from target
 		targetColumnContainer.classList.remove(
 			"drag-over-allowed",
 			"drag-over-not-allowed"
 		);
-
-		// Remove dim from source column
-		sourceColumnContainer.classList.remove("drag-source-dimmed");
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(
@@ -800,6 +820,41 @@ class DragDropTasksManager {
 				"This operation is not possible in the current version. Please request this idea to the developer."
 			);
 		}
+	}
+
+	/**
+	 * Handle leaving a drop area - clear indicators and styling
+	 */
+	public handleDragLeaveEvent(columnContainerEl: HTMLDivElement): void {
+		this.clearDesiredDropIndex();
+		// remove indicator if present
+		if (this.dropIndicator && this.dropIndicator.parentElement) {
+			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		}
+		this.dropIndicator = null;
+
+		columnContainerEl.classList.remove(
+			"drag-over-allowed",
+			"drag-over-not-allowed"
+		);
+
+		// Clear drag-over styling from all columns
+		// const allColumnContainers = Array.from(
+		// 	document.querySelectorAll(".TaskBoardColumnsSection")
+		// ) as HTMLDivElement[];
+		// allColumnContainers.forEach((container) => {
+		// 	container.classList.remove(
+		// 		"drag-over-allowed",
+		// 		"drag-over-not-allowed"
+		// 	);
+		// });
+
+		// clear dimming from any dragged items
+		// const allTaskItems = Array.from(document.querySelectorAll('.taskItem.task-item-dragging')) as HTMLDivElement[];
+		// allTaskItems.forEach((item) => {
+		// 	item.classList.remove('task-item-dragging');
+		// 	this.removeDimFromDraggedTaskItem(item);
+		// });
 	}
 }
 

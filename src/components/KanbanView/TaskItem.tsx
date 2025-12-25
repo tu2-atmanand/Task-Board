@@ -916,9 +916,11 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 
 			// Also set a drag image from the whole task element so the preview is the full card
 			try {
+				// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
 				if (taskItemRef.current && e.dataTransfer) {
+					console.log("TaskItemRef.current", taskItemRef.current);
 					const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
-					clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+					// clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
 					clone.style.opacity = '0.5';
 					clone.style.position = 'absolute';
 					// clone.style.top = '-9999px';
@@ -951,8 +953,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		}
 
 		// Clear manager drag payload and any styling on columns/task-items
-		const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
-		dragDropTasksManagerInsatance.clearAllDragStyling(allColumnContainers);
+		dragDropTasksManagerInsatance.clearAllDragStyling();
 		dragDropTasksManagerInsatance.clearCurrentDragData();
 	}, []);
 

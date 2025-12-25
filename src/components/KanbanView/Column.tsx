@@ -416,8 +416,6 @@ const Column: React.FC<ColumnProps> = ({
 
 				dragDropTasksManagerInsatance.handleDrop(
 					e.nativeEvent,
-					sourceColumnData,
-					sourceColumnContainer,
 					columnData,
 					targetColumnContainer
 				);
@@ -485,8 +483,6 @@ const Column: React.FC<ColumnProps> = ({
 			// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
 			dragDropTasksManagerInsatance.handleDragOver(
 				e.nativeEvent,
-				sourceColumnData,
-				sourceColumnContainer,
 				columnData,
 				targetColumnContainer
 			);
