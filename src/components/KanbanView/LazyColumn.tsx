@@ -366,17 +366,35 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		e.preventDefault();
 		setIsDragOver(false);
 		setInsertIndex(null);
-		const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-		if (isNaN(dragIndex) || dragIndex === dropIndex) return;
-		const updated = [...localTasks];
-		const [moved] = updated.splice(dragIndex, 1);
-		updated.splice(dropIndex, 0, moved);
-		setLocalTasks(updated);
-		// If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
-		const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-		if (hasManualOrder) {
-			columnData.tasksIdManualOrder = updated.map(t => t.id);
+
+		const targetColumnContainer = tasksContainerRef.current;
+		if (!targetColumnContainer) {
+			return;
 		}
+
+		// We are basically doing same thing from the handleDrop function below.
+		dragDropTasksManagerInsatance.handleDrop(
+			e.nativeEvent,
+			columnData,
+			targetColumnContainer
+		);
+
+		// Clear manager payload (drag finished)
+		dragDropTasksManagerInsatance.clearCurrentDragData();
+		dragDropTasksManagerInsatance.clearDesiredDropIndex();
+
+		// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+		// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+		// const updated = [...localTasks];
+		// const [moved] = updated.splice(dragIndex, 1);
+		// updated.splice(dropIndex, 0, moved);
+		// setLocalTasks(updated);
+		// // If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
+		// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+		// if (hasManualOrder) {
+		// 	columnData.tasksIdManualOrder = updated.map(t => t.id);
+		// }
+
 		// clear any pending raf
 		if (rafRef.current) {
 			cancelAnimationFrame(rafRef.current);
@@ -472,9 +490,78 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		}
 	}, [columnData, plugin]);
 
+	// This function will be only run when user will drag the taskItem on another taskItem.
+	// Compute insertion index based on mouse Y relative to task items inside the container.
+	const handleTaskItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		console.log('LazyColumn : handleTaskItemDragOver');
+		e.preventDefault();
+		setIsDragOver(true);
+		try {
+			// Only compute insertion index for columns that use "manualOrder" as the sorting criteria.
+			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			console.log('hasManualOrder', hasManualOrder);
+			if (!hasManualOrder) {
+				// Clear any visual placeholder and desired index
+				if (insertIndexRef.current !== null) {
+					scheduleSetInsertIndex(null);
+				}
+				dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				return;
+			} else {
+				// APPROACH 1 - COMPUTE INSERTION INDEX BASED ON MOUSE Y POSITION BY COMPARING WITH TASK ITEM BOUNDING RECTANGLES
+				// Else will proceed with finding the insertion index
+				// const container = e.currentTarget.parentElement as HTMLDivElement;
+				// const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
+				// let pos = children.length; // default to end
+				// const clientY = e.clientY;
+				// for (let i = 0; i < children.length; i++) {
+				// 	const child = children[i];
+				// 	const rect = child.getBoundingClientRect();
+				// 	const midpoint = rect.top + rect.height / 2;
+				// 	if (clientY < midpoint) {
+				// 		pos = i;
+				// 		break;
+				// 	}
+				// }
+
+				// APPROACH 2 - DIRECTLY FETCH THE INDEX FROM THE DATA ATTRIBUTE OF THE HOVERED ELEMENT
+				let pos = 0 // Default to top of the column
+				const hoveredElement = e.currentTarget;
+				const dataAttribute = hoveredElement.getAttribute('data-taskItem-index');
+				console.log('dataAttribute', dataAttribute);
+				if (dataAttribute) {
+					const clientY = e.clientY;
+					const rect = hoveredElement.getBoundingClientRect();
+					const midpoint = rect.top + rect.height / 2;
+					if (clientY < midpoint) {
+						pos = parseInt(dataAttribute, 10);
+					} else {
+						pos = parseInt(dataAttribute, 10) + 1;
+					}
+				}
+
+
+				// Throttle updates via RAF
+				scheduleSetInsertIndex(pos);
+				// Store desired drop index in manager
+				dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+
+				// // Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
+				// dragDropTasksManagerInsatance.handleDragOver(
+				// 	e.nativeEvent,
+				// 	columnData,
+				// 	container
+				// );
+
+				const targetColumnContainer = tasksContainerRef.current as HTMLDivElement;
+				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
+			}
+		} catch (error) {
+			console.error('Error computing insert index:', error);
+		}
+	}, [scheduleSetInsertIndex, columnData]);
 
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log('LazyColumn : handleDragOver');
 		e.preventDefault();
 		setIsDragOver(true);
 		try {
@@ -547,62 +634,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			console.error('Error handling drag over:', error);
 		}
 	}, [columnData]);
-
-	// This function will be only run when user will drag the taskItem on another taskItem.
-	// Compute insertion index based on mouse Y relative to task items inside the container.
-	const handleTaskItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log('LazyColumn : handleTaskItemDragOver');
-		e.preventDefault();
-		setIsDragOver(true);
-		try {
-			// Only compute insertion index for columns that use "manualOrder" as the sorting criteria.
-			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-			console.log('hasManualOrder', hasManualOrder);
-			if (!hasManualOrder) {
-				// Clear any visual placeholder and desired index
-				if (insertIndexRef.current !== null) {
-					scheduleSetInsertIndex(null);
-				}
-				dragDropTasksManagerInsatance.clearDesiredDropIndex();
-				return;
-			} else {
-				// TODO : Try to find if there is a better algorithm to compute insertion index
-				// Else will proceed with finding the insertion index
-				const container = e.currentTarget.parentElement as HTMLDivElement;
-				const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
-				const clientY = e.clientY;
-				let pos = children.length; // default to end
-				for (let i = 0; i < children.length; i++) {
-					const child = children[i];
-					const rect = child.getBoundingClientRect();
-					const midpoint = rect.top + rect.height / 2;
-					if (clientY < midpoint) {
-						pos = i;
-						break;
-					}
-				}
-				// Throttle updates via RAF
-				scheduleSetInsertIndex(pos);
-				// Store desired drop index in manager
-				dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
-
-				// prefer move effect when dragging
-				e.dataTransfer!.dropEffect = 'move';
-
-				// // Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
-				// dragDropTasksManagerInsatance.handleDragOver(
-				// 	e.nativeEvent,
-				// 	columnData,
-				// 	container
-				// );
-
-				const targetColumnContainer = tasksContainerRef.current as HTMLDivElement;
-				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
-			}
-		} catch (error) {
-			console.error('Error computing insert index:', error);
-		}
-	}, [scheduleSetInsertIndex, columnData]);
 
 	// Cleanup any pending RAF on unmount
 	useEffect(() => {
@@ -689,6 +720,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 															task={task}
 															columnIndex={columnIndex}
 															activeBoardSettings={activeBoardData}
+															data-taskItem-index={i}
 														/>
 													</div>
 												);
@@ -702,7 +734,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 										)}
 									</>
 								) : (
-									<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
+									<div onDragOver={(e) => { e.preventDefault(); }}>
+										<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
+									</div>
 								)}
 							</>
 						)

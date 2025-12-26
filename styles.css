@@ -6768,6 +6768,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 /* Element being dragged: dim / scale */
 .task-item-dragging,
+.taskItemContainer.task-item-dragging,
 .taskItem.task-item-dragging {
 	opacity: 0.5;
 	transform: scale(0.98);

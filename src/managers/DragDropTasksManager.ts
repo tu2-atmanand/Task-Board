@@ -72,6 +72,7 @@ class DragDropTasksManager {
 	 *
 	 */
 	clearAllDragStyling(): void {
+		// For column its acceptable, since there will be less columns, so querySelecting them all is not so big issue.
 		const allColumnContainers = Array.from(
 			document.querySelectorAll(".TaskBoardColumnsSection")
 		) as HTMLDivElement[];
@@ -530,22 +531,28 @@ class DragDropTasksManager {
 
 		// TODO : I probably wont need this anymore since I am using the singleton manager to hold the current drag data.
 		// provide a JSON payload so drop handlers can inspect
-		try {
-			e.dataTransfer.setData(
-				"application/json",
-				JSON.stringify({
-					taskId: currentDragData.task.id,
-					sourceColumnId: currentDragData.sourceColumnData?.id,
-					sourceIndex: dragIndex,
-				})
-			);
-		} catch (err) {
-			// some browsers may throw on setData for complex types
-			console.warn("Could not set JSON dataTransfer payload", err);
-			try {
-				e.dataTransfer.setData("text/plain", currentDragData.task.id);
-			} catch {}
-		}
+		// try {
+		// 	e.dataTransfer.setData(
+		// 		"application/json",
+		// 		JSON.stringify({
+		// 			taskId: currentDragData.task.id,
+		// 			sourceColumnId: currentDragData.sourceColumnData?.id,
+		// 			sourceIndex: dragIndex,
+		// 		})
+		// 	);
+		// } catch (err) {
+		// 	// some browsers may throw on setData for complex types
+		// 	console.warn("Could not set JSON dataTransfer payload", err);
+		// 	try {
+		// 		e.dataTransfer.setData("text/plain", currentDragData.task.id);
+		// 	} catch {}
+		// }
+
+		// Add dragging class after a small delay to not affect the drag image
+		requestAnimationFrame(() => {
+			e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
+			draggedTaskItem.classList.add("task-item-dragging");
+		});
 
 		// Visual dim / dragging class
 		this.dimDraggedTaskItem(draggedTaskItem);
@@ -651,10 +658,6 @@ class DragDropTasksManager {
 		// console.log("isDropAllowed", isDropAllowed);
 
 		if (isDropAllowed) {
-			console.log(
-				"Task drop allowed from column:",
-				sourceColumnData.name
-			);
 			// Apply CSS styling for allowed drop
 			targetColumnContainer.classList.add("drag-over-allowed");
 			targetColumnContainer.classList.remove("drag-over-not-allowed");

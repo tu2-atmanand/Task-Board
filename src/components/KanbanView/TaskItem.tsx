@@ -914,32 +914,38 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			const payload: currentDragDataPayload = { task, sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index };
 			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
+			// Add dragging class after a small delay to not affect the drag image
+			const clone = el.cloneNode(true) as HTMLDivElement;
+			e.dataTransfer?.setDragImage(el, 0, 0);
+			requestAnimationFrame(() => {
+				clone.classList.add("task-item-dragging");
+				console.log("TaskItem : handleDragStart... done : ", el);
+			});
+
 			// Also set a drag image from the whole task element so the preview is the full card
-			try {
-				// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
-				if (taskItemRef.current && e.dataTransfer) {
-					console.log("TaskItemRef.current", taskItemRef.current);
-					const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
-					// clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
-					clone.style.opacity = '0.5';
-					clone.style.position = 'absolute';
-					// clone.style.top = '-9999px';
-					document.body.appendChild(clone);
-					const rect = taskItemRef.current.getBoundingClientRect();
-					e.dataTransfer.setDragImage(clone, rect.width / 2, rect.height / 2);
-					setTimeout(() => {
-						try { document.body.removeChild(clone); } catch { }
-					}, 0);
-				}
-			} catch (imgErr) {
-				// ignore drag image errors
-			}
+			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
+			// if (taskItemRef.current && e.dataTransfer) {
+			// 	console.log("TaskItemRef.current", taskItemRef.current);
+			// 	const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
+			// 	// clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+			// 	clone.style.opacity = '0.5';
+			// 	clone.style.position = 'absolute';
+			// 	// clone.style.top = '-9999px';
+			// 	// document.body.appendChild(clone);
+			// 	const rect = taskItemRef.current.getBoundingClientRect();
+			// 	e.dataTransfer.setDragImage(clone, rect.width, rect.height);
+			// 	setTimeout(() => {
+			// 		try { document.body.removeChild(clone); } catch { }
+			// 	}, 0);
+			// }
 		} catch (err) {
 			// fallback minimal behavior
-			try {
-				e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
-				e.dataTransfer.effectAllowed = 'move';
-			} catch (ex) {/* ignore */ }
+			// try {
+			// 	e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
+			// 	e.dataTransfer.effectAllowed = 'move';
+			// } catch (ex) {/* ignore */ }
+
+			console.error(err);
 		}
 	}, [task, columnData]);
 
