@@ -21,6 +21,23 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { isTheContentDiffAreOnlySpaces_V2 } from "src/modals/DiffContentCompareModal";
 
 /**
+ * This function will simpy check if the task title contains the recurring tag: 
+ * If the task title contains the recurring tag, it will return true.
+ * If the task title does not contain the recurring tag, it will return false.
+ * @param taskTitle - The title of the task to check.
+ * @returns Returns true if the task title contains the recurring tag, otherwise false.
+ */
+export const isTaskRecurring = (taskTitle: string): boolean => {
+	// This function will simly check if the task title contatins the recurring tag: 🔁
+	const recurringTagRegex = /🔁/u;
+	if (recurringTagRegex.test(taskTitle)) {
+		return true;
+	}
+	// If the recurring tag is not found, return false
+	return false;
+};
+
+/**
  * Adds a new task to a note file.
  * @param {plugin} plugin - plugin instance
  * @param {newTask} newTask - taskItem object that needs to be added to the file

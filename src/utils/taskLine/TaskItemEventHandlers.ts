@@ -4,12 +4,12 @@ import {
 	deleteTaskFromFile,
 	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
+	isTaskRecurring,
 } from "./TaskLineUtils";
 import TaskBoard from "main";
 import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
-import { isTaskRecurring } from "./TaskContentFormatter";
 import {
 	bugReporter,
 	openEditTaskModal,

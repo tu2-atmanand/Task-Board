@@ -8,7 +8,7 @@ import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } f
 
 import { Component, Notice, Platform, Menu, TFile } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
+import { cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
@@ -25,7 +25,7 @@ import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { RxDragHandleDots2 } from 'react-icons/rx';
-import { parseUniversalDate } from 'src/utils/DateTimeCalculations';
+import { getUniversalDateEmoji, getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder, updateTaskItemTags } from 'src/utils/UserTaskEvents';
 import EditTagsModal from 'src/modals/EditTagsModal';
