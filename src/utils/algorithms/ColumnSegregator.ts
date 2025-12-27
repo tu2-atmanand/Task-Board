@@ -1,19 +1,25 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-
-import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
-import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colType, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
 import { boardFilterer } from "./BoardFilterer";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
+import { getAllTaskTags } from "../TaskItemUtils";
 
-// Function to refresh tasks in any column by calling this utility function
+/**
+ * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
+ *
+ * @param {PluginDataJson} settings - The plugin settings object.
+ * @param {number} activeBoardIndex - The index of the active board.
+ * @param {ColumnData} columnData - The single column configs.
+ * @param {taskJsonMerged | null} allTasks - The collection of all tasks to segregate.
+ * @returns {taskItem[]} - The tasks to display in the column.
+ */
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
@@ -272,11 +278,45 @@ export const columnSegregator = (
 
 	// Apply column-specific sorting if configured
 	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
-		tasksToDisplay = columnSortingAlgorithm(
-			settings.data.globalSettings.defaultStartTime,
-			tasksToDisplay,
-			columnData.sortCriteria
-		);
+		// TODO : This code can be moved inside the ColumnSortingAlgorithm function.
+		// If manualOrder is one of the sorting criteria, apply manual ordering using columnData.tasksIdManualOrder
+		const hasManualOrder = columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+		if (hasManualOrder) {
+			// Ensure tasksIdManualOrder exists
+			if (!Array.isArray(columnData.tasksIdManualOrder)) {
+				columnData.tasksIdManualOrder = [];
+			}
+
+			// Add any new tasks (not present in manual order) to the TOP of the manual order array
+			const currentIds = tasksToDisplay.map((t) => t.id);
+			const missingIds = currentIds.filter((id) => !columnData.tasksIdManualOrder!.includes(id));
+			if (missingIds.length > 0) {
+				// Prepend missing ids so newest appear on top
+				columnData.tasksIdManualOrder = [...missingIds, ...columnData.tasksIdManualOrder!];
+			}
+
+			// Build sorted list based on manual order
+			const idToTask = new Map(tasksToDisplay.map((t) => [t.id, t]));
+			const sorted: taskItem[] = [];
+			for (const id of columnData.tasksIdManualOrder) {
+				const task = idToTask.get(id);
+				if (task) sorted.push(task);
+			}
+
+			// Append any remaining tasks that aren't in manual order for safety
+			for (const t of tasksToDisplay) {
+				if (!columnData.tasksIdManualOrder.includes(t.id)) sorted.push(t);
+			}
+
+			tasksToDisplay = sorted;
+		} else {
+			// Default algorithm for other criteria
+			tasksToDisplay = columnSortingAlgorithm(
+				settings.data.globalSettings.defaultStartTime,
+				tasksToDisplay,
+				columnData.sortCriteria
+			);
+		}
 	}
 
 	return tasksToDisplay;

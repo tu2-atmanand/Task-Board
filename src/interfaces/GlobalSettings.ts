@@ -247,6 +247,14 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					rootCondition: "any",
 					filterGroups: [],
 				},
+				swimlanes: {
+					enabled: false,
+					showEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: false,
+					maxHeight: 300,
+				},
 			},
 			{
 				columns: [
@@ -303,6 +311,14 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				boardFilter: {
 					rootCondition: "any",
 					filterGroups: [],
+				},
+				swimlanes: {
+					enabled: false,
+					showEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: false,
+					maxHeight: 300,
 				},
 			},
 			{
@@ -370,6 +386,14 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				boardFilter: {
 					rootCondition: "any",
 					filterGroups: [],
+				},
+				swimlanes: {
+					enabled: false,
+					showEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: false,
+					maxHeight: 300,
 				},
 			},
 		],

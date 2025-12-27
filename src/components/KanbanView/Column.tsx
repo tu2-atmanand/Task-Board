@@ -1,6 +1,6 @@
 // /src/components/Column.tsx
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import { CSSProperties } from 'react';
 import TaskItem from './TaskItem';
@@ -16,6 +16,9 @@ import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
+import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
+import { columnTypeAndNameMapping } from 'src/interfaces/Mapping';
+import { colType } from 'src/interfaces/Enums';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -28,6 +31,7 @@ export interface ColumnProps {
 	collapsed?: boolean;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
+	hideColumnHeader?: boolean;
 }
 
 
@@ -37,6 +41,7 @@ const Column: React.FC<ColumnProps> = ({
 	activeBoardData,
 	columnData,
 	tasksForThisColumn,
+	hideColumnHeader = false,
 }) => {
 	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
@@ -45,6 +50,22 @@ const Column: React.FC<ColumnProps> = ({
 	// const [tasks, setTasks] = useState<taskItem[]>(tasksForThisColumn);
 	const tasks = useMemo(() => tasksForThisColumn, [tasksForThisColumn]);
 	const [isDragOver, setIsDragOver] = useState(false);
+	const [insertIndex, setInsertIndex] = useState<number | null>(null);
+	const insertIndexRef = useRef<number | null>(null);
+	const rafRef = useRef<number | null>(null);
+
+	const scheduleSetInsertIndex = (pos: number | null) => {
+		if (insertIndexRef.current === pos) return;
+		if (rafRef.current) {
+			cancelAnimationFrame(rafRef.current);
+			rafRef.current = null;
+		}
+		rafRef.current = requestAnimationFrame(() => {
+			insertIndexRef.current = pos;
+			setInsertIndex(pos);
+			rafRef.current = null;
+		});
+	};
 	// Local tasks state, initially set from external tasks
 	const [localTasks, setLocalTasks] = useState(tasksForThisColumn);
 	// console.log("Column.tsx : Data in tasks :", tasks);
@@ -102,13 +123,13 @@ const Column: React.FC<ColumnProps> = ({
 	}
 
 	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
-		const sortMenu = new Menu();
+		const columnMenu = new Menu();
 
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("sort-and-filter"));
 			item.setIsLabel(true);
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("configure-column-sorting"));
 			item.setIcon("arrow-up-down");
 			item.onClick(async () => {
@@ -145,7 +166,7 @@ const Column: React.FC<ColumnProps> = ({
 				modal.open();
 			});
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("configure-column-filtering"));
 			item.setIcon("list-filter");
 			item.onClick(async () => {
@@ -227,13 +248,13 @@ const Column: React.FC<ColumnProps> = ({
 			});
 		});
 
-		sortMenu.addSeparator();
+		columnMenu.addSeparator();
 
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("quick-actions"));
 			item.setIsLabel(true);
 		});
-		sortMenu.addItem((item) => {
+		columnMenu.addItem((item) => {
 			item.setTitle(t("hide-column"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
@@ -263,7 +284,7 @@ const Column: React.FC<ColumnProps> = ({
 
 		// Show minimize or maximize option based on current state
 		if (columnData.minimized) {
-			sortMenu.addItem((item) => {
+			columnMenu.addItem((item) => {
 				item.setTitle(t("maximize-column"));
 				item.setIcon("panel-left-open");
 				item.onClick(async () => {
@@ -271,7 +292,7 @@ const Column: React.FC<ColumnProps> = ({
 				});
 			});
 		} else {
-			sortMenu.addItem((item) => {
+			columnMenu.addItem((item) => {
 				item.setTitle(t("minimize-column"));
 				item.setIcon("panel-left-close");
 				item.onClick(async () => {
@@ -281,7 +302,7 @@ const Column: React.FC<ColumnProps> = ({
 		}
 
 		// Use native event if available (React event has nativeEvent property)
-		sortMenu.showAtMouseEvent(
+		columnMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)
 		);
 	}
@@ -300,14 +321,23 @@ const Column: React.FC<ColumnProps> = ({
 	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
 		e.preventDefault();
 		setIsDragOver(false);
+		setInsertIndex(null);
 		const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
 		if (isNaN(dragIndex) || dragIndex === dropIndex) return;
 		const updated = [...localTasks];
 		const [moved] = updated.splice(dragIndex, 1);
 		updated.splice(dropIndex, 0, moved);
 		setLocalTasks(updated);
-		// Persistir el nuevo orden
-		console.log("Need to implement the function to persist the new order");
+		// If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
+		const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+		if (hasManualOrder) {
+			columnData.tasksIdManualOrder = updated.map(t => t.id);
+		}
+		// clear any pending raf
+		if (rafRef.current) {
+			cancelAnimationFrame(rafRef.current);
+			rafRef.current = null;
+		}
 		// const { updateTaskOrderInColumn } = await import('../../utils/DragDropTaskManager');
 		// await updateTaskOrderInColumn(plugin, columnData, updated);
 	};
@@ -316,8 +346,6 @@ const Column: React.FC<ColumnProps> = ({
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(false);
-
-		if (columnData.colType !== 'namedTag') return;
 
 		try {
 			// Get the data of the dragged task
@@ -328,25 +356,76 @@ const Column: React.FC<ColumnProps> = ({
 				// Ensure we have valid data
 				if (!task || !sourceColumnData) return;
 
-				// If the source column is not of type "namedTag", cancel
-				if (sourceColumnData.colType !== 'namedTag') return;
+				// Get the target column container
+				const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+				// Try to locate the source container by stable column id first (works for all colTypes)
+				let sourceColumnContainer: HTMLDivElement | null = null;
+				if (sourceColumnData?.id) {
+					try {
+						const escapedId = CSS.escape(String(sourceColumnData.id));
+						sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
+					} catch (err) {
+						// fallback to tag-based lookup below
+					}
+				}
+				if (!sourceColumnContainer) {
+					// Fallback: find by tag name (legacy behavior)
+					console.log("------------- I hope this fall-back mechanism is never running -------------");
+					const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+					sourceColumnContainer = allColumnContainers.find(container => {
+						const containerTag = container.getAttribute('data-column-tag-name');
+						return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+					}) || targetColumnContainer;
+				}
 
-				// If it is the same lane (coltag), DO NOT change tags, just reorder
-				if (sourceColumnData.coltag === columnData.coltag) {
-					// Do nothing here, the reordering is already handled by handleTaskDrop
+				// If target column uses manualOrder, disallow cross-column drops (only allow intra-column reordering)
+				const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+				if (hasManualOrder && sourceColumnData.id !== columnData.id) {
+					// Not allowed: ignore drop
+					dragDropTasksManagerInsatance.clearCurrentDragData();
+					dragDropTasksManagerInsatance.clearDesiredDropIndex();
 					return;
 				}
 
-				// If it is between different tagged columns, change tags normally
-				import('../../managers/DragDropTaskManager').then(async ({ updateTaskTagsForColumnMove, updateTaskAfterDragDrop }) => {
-					const updatedTask = await updateTaskTagsForColumnMove(
-						plugin,
-						task,
-						sourceColumnData,
-						columnData
-					);
-					await updateTaskAfterDragDrop(plugin, updatedTask, task);
-				});
+				// Use the DragDropTasksManager to handle the drop
+				// If this is an intra-column reorder (same column) and we have an insertIndex, handle locally
+				try {
+					const dragIdxStr = e.dataTransfer.getData('text/plain');
+					const dragIdx = dragIdxStr ? parseInt(dragIdxStr) : NaN;
+					if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndexRef.current !== null) {
+						// Reorder locally
+						const updated = [...localTasks];
+						const [moved] = updated.splice(dragIdx, 1);
+						updated.splice(insertIndexRef.current!, 0, moved);
+						setLocalTasks(updated);
+						setInsertIndex(null);
+						insertIndexRef.current = null;
+						// Update manual order if applicable
+						const hasManualOrderLocal = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+						if (hasManualOrderLocal) {
+							columnData.tasksIdManualOrder = updated.map(t => t.id);
+						}
+						// Clear manager payload and skip default handling
+						dragDropTasksManagerInsatance.clearCurrentDragData();
+						dragDropTasksManagerInsatance.clearDesiredDropIndex();
+						return;
+					}
+				} catch (err) {
+					// ignore and continue to default handling
+				}
+
+				dragDropTasksManagerInsatance.handleDrop(
+					e.nativeEvent,
+					columnData,
+					targetColumnContainer
+				);
+
+				// Clear manager payload (drag finished)
+				dragDropTasksManagerInsatance.clearCurrentDragData();
+				dragDropTasksManagerInsatance.clearDesiredDropIndex();
+
+				// TODO : Implement the actual task property update logic based on source and target column data
+				// This will be called after validation passes
 			}
 		} catch (error) {
 			console.error('Error handling task drop:', error);
@@ -355,16 +434,121 @@ const Column: React.FC<ColumnProps> = ({
 
 	// Handle the dragover event to allow the drop
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		// Only allow drop if this column is of type "namedTag"
-		if (columnData.colType === 'namedTag') {
-			e.preventDefault();
-			setIsDragOver(true);
+		e.preventDefault();
+		setIsDragOver(true);
+		try {
+			// Try to read payload from the DataTransfer first
+			let taskDataStr = '';
+			try {
+				taskDataStr = e.dataTransfer.getData('application/json');
+			} catch (err) {
+				// ignore - some environments restrict access
+			}
+
+			let payload: any = null;
+			if (taskDataStr) {
+				try { payload = JSON.parse(taskDataStr); } catch { }
+			}
+
+			// Fallback to manager-stored payload if dataTransfer is empty
+			if (!payload) {
+				payload = dragDropTasksManagerInsatance.getCurrentDragData();
+			}
+
+			if (!payload) return;
+
+			const { task, sourceColumnData } = payload;
+			if (!task || !sourceColumnData) return;
+
+			// Get the target column container
+			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+			// Try id-based lookup first
+			let sourceColumnContainer: HTMLDivElement | null = null;
+			if (sourceColumnData?.id) {
+				try {
+					const escapedId = CSS.escape(String(sourceColumnData.id));
+					sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
+				} catch (err) {
+					// ignore and fall back to tag-based lookup
+				}
+			}
+			if (!sourceColumnContainer) {
+				const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+				sourceColumnContainer = allColumnContainers.find(container => {
+					const containerTag = container.getAttribute('data-column-tag-name');
+					return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+				}) || targetColumnContainer;
+			}
+
+			// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
+			dragDropTasksManagerInsatance.handleDragOver(
+				e.nativeEvent,
+				columnData,
+				targetColumnContainer
+			);
+
+			// Ensure cursor reflects allowed/not-allowed (best-effort fallback)
+			const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
+			e.dataTransfer!.dropEffect = allowed ? 'move' : 'none';
+		} catch (error) {
+			console.error('Error handling drag over:', error);
 		}
 	}, [columnData]);
+
+	// Compute insertion index based on mouse Y relative to task items inside the container
+	const handleTasksContainerDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		setIsDragOver(true);
+		try {
+			// Only compute insertion index for columns that use manualOrder
+			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			if (!hasManualOrder) {
+				// Clear any visual placeholder and desired index
+				if (insertIndexRef.current !== null) {
+					scheduleSetInsertIndex(null);
+				}
+				dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				return;
+			}
+			const container = e.currentTarget as HTMLDivElement;
+			const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
+			const clientY = e.clientY;
+			let pos = children.length; // default to end
+			for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				const rect = child.getBoundingClientRect();
+				const midpoint = rect.top + rect.height / 2;
+				if (clientY < midpoint) {
+					pos = i;
+					break;
+				}
+			}
+			// Throttle updates via RAF
+			scheduleSetInsertIndex(pos);
+			// Store desired drop index in manager
+			dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+			// prefer move effect when dragging
+			e.dataTransfer!.dropEffect = 'move';
+		} catch (error) {
+			console.error('Error computing insert index:', error);
+		}
+	}, [scheduleSetInsertIndex, columnData]);
+
+	// Cleanup any pending RAF on unmount
+	useEffect(() => {
+		return () => {
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+		};
+	}, []);
 
 	// Handle the dragleave event to remove the visual effect
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		setIsDragOver(false);
+		setInsertIndex(null);
+		dragDropTasksManagerInsatance.clearDesiredDropIndex();
 	}, []);
 
 	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
@@ -372,6 +556,7 @@ const Column: React.FC<ColumnProps> = ({
 	return (
 		<div
 			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''} ${isDragOver ? 'dragover' : ''}`}
+			data-column-id={columnData.id}
 			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
 			data-column-type={columnData.colType}
 			data-column-tag-name={tagData?.name}
@@ -379,9 +564,9 @@ const Column: React.FC<ColumnProps> = ({
 			onDrop={handleDrop}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
-			onDragEnd={() => setIsDragOver(false)}
+			onDragEnd={() => { setIsDragOver(false); setInsertIndex(null); }}
 		>
-			{columnData.minimized ? (
+			{columnData.minimized && !hideColumnHeader ? (
 				// Minimized view - vertical bar with count and rotated text
 				<div className="taskBoardColumnMinimized">
 					<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
@@ -395,39 +580,60 @@ const Column: React.FC<ColumnProps> = ({
 			) : (
 				// Normal view
 				<>
-					<div className="taskBoardColumnSecHeader">
-						<div className="taskBoardColumnSecHeaderTitleSec">
-							{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
-							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+					{!hideColumnHeader && (
+						<div className="taskBoardColumnSecHeader">
+							<div className="taskBoardColumnSecHeaderTitleSec">
+								{/* <button className="columnDragIcon" aria-label='More Column Options' ><RxDragHandleDots2 /></button> */}
+								<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+							</div>
+							<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
+							{/* <RxDotsVertical /> */}
 						</div>
-						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{tasksForThisColumn.length}</div>
-						{/* <RxDotsVertical /> */}
-					</div>
-					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}>
-						{tasks.length > 0 ? (
-							tasks.map((task, index) => {
-								return (
-									<div
-										key={index}
-										className="taskItemFadeIn"
-										draggable={true}
-										onDragStart={e => handleTaskDragStart(e, index)}
-										onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
-										onDrop={e => handleTaskDrop(e, index)}
-									>
-										<TaskItem
-											key={task.id}
-											plugin={plugin}
-											task={task}
-											columnIndex={columnIndex}
-											activeBoardSettings={activeBoardData}
-										/>
-									</div>
-								);
-							})
-						) : (
-							<p>{t("no-tasks-available")}</p>
-						)}
+					)}
+					<div className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`} onDragOver={handleTasksContainerDragOver}>
+						{columnData.minimized ? <></> : (
+							<>
+								{localTasks.length > 0 ? (
+									(() => {
+										const elements: React.ReactNode[] = [];
+										for (let i = 0; i < localTasks.length; i++) {
+											// If insertIndex points to this position, render placeholder
+											if (insertIndex === i) {
+												elements.push(
+													<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+												);
+											}
+											const task = localTasks[i];
+											elements.push(
+												<div
+													key={task.id}
+													className="taskItemFadeIn"
+													onDrop={e => handleTaskDrop(e, i)}
+												>
+													<TaskItem
+														key={task.id}
+														plugin={plugin}
+														task={task}
+														columnIndex={columnIndex}
+														activeBoardSettings={activeBoardData}
+													/>
+												</div>
+											);
+										}
+										// If insertIndex points to end (after last item)
+										if (insertIndex === localTasks.length) {
+											elements.push(
+												<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+											);
+										}
+										return elements;
+									})()
+								) : (
+									<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
+								)}
+							</>
+						)
+						}
 					</div>
 				</>
 			)}

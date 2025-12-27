@@ -36,13 +36,14 @@ import {
 	notAllowedFileExtensionsRegEx,
 } from "src/regularExpressions/MiscelleneousRegExpr";
 import { bugReporter } from "src/services/OpenModals";
-import { getCurrentLocalTimeString } from "../utils/TimeCalculations";
+import { getCurrentLocalTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { UniversalDateOptions } from "src/interfaces/Enums";
 import {
 	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,
 } from "src/utils/algorithms/ScanningFilterer";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -703,24 +704,6 @@ export function fileTypeAllowedForScanning(
 	}
 
 	return true;
-}
-
-// Generate a unique ID for each task
-export function generateRandomTempTaskId(): string {
-	const array = new Uint32Array(1);
-	crypto.getRandomValues(array);
-	return String(array[0]);
-}
-
-// Generate a unique ID for each task
-export function generateTaskId(plugin: TaskBoard): string {
-	plugin.settings.data.globalSettings.uniqueIdCounter =
-		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
-
-	// Save the updated uniqueIdCounter back to settings
-	plugin.saveSettings();
-	// Return the current counter value and then increment it for the next ID
-	return String(plugin.settings.data.globalSettings.uniqueIdCounter);
 }
 
 /**

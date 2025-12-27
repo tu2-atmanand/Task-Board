@@ -7,7 +7,7 @@ import {
 	getStatusNameFromStatusSymbol,
 } from "./TaskNoteUtils";
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
-import { generateTaskId } from "src/managers/VaultScanner";
+import { generateTaskId } from "../TaskItemUtils";
 
 /**
  * Extract frontmatter from file content

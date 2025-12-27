@@ -7,12 +7,12 @@ import type TaskBoard from "../../main";
 import { t } from "src/utils/lang/helper";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { generateTaskId } from "src/managers/VaultScanner";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getLocalDateTimeString } from "src/utils/TimeCalculations";
+import { getLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { taskItemEmpty } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
+import { generateTaskId } from "src/utils/TaskItemUtils";
 
 
 export class AddOrEditTaskView extends ItemView {
