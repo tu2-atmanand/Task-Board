@@ -8,6 +8,7 @@ import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
 import { Menu } from 'obsidian';
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -182,98 +183,114 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 	const activeColumns = board.columns.filter((col) => col.active);
 
-	return (
-		<div className="kanbanSwimlanesGrid">
-			{/* Swimlane Rows */}
-			<div className="swimlanesContainer">
-				{swimlanes.map((swimlane, rowIndex) => (
-					<>
-						{verticalHeaderUI ? (
-							<div key={swimlane.swimlaneValue} className="swimlaneRow vertical">
-								{/* Swimlane Label */}
-								<div className='swimlaneHeaderContainer-vertical'>
-									<div className='swimlaneHeader-vertical'>
-										<div className="swimlaneLabel-vertical" title={swimlane.swimlaneName}>
-											{swimlane.swimlaneName}
-										</div>
-										<div className='swimlaneHeaderSwimlaneCount'
-										// onClick={(evt) => openSwimlaneMenu(evt, rowIndex)}
-										>
-											{swimlane.tasks.flat().length ?? 0}
-										</div>
-									</div>
-								</div>
+		// Render a sticky header row of column headers across swimlanes
+		return (
+			<div className="kanbanSwimlanesGrid">
+				{/* Top header showing column headers and counts */}
+				<div className="swimlanesHeaderContainer">
+					<div className="swimlanesHeaderRow">
+						{activeColumns.map((column, colIndex) => (
+							<MemoizedSwimlanColumn
+								key={`header-${column.id}`}
+								plugin={plugin}
+								columnIndex={column.index}
+								activeBoardData={board}
+								columnData={column}
+								tasksForThisColumn={tasksPerColumn?.[colIndex] || []}
+								Component={ColumnComponent}
+								hideColumnHeader={false}
+								headerOnly={true}
+							/>
+						))}
+					</div>
+				</div>
 
-								{/* Columns for this Swimlane */}
-								<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
-									{activeColumns.map((column, colIndex) => {
-										const swimlaneData = {
-											property: board.swimlanes.property,
-											value: swimlane.swimlaneValue,
-										};
-
-										return (
-											<MemoizedSwimlanColumn
-												key={`${swimlane.swimlaneValue}-${column.id}`}
-												plugin={plugin}
-												columnIndex={column.index}
-												activeBoardData={board}
-												columnData={column}
-												tasksForThisColumn={swimlane.tasks[colIndex] || []}
-												Component={ColumnComponent}
-												hideColumnHeader={rowIndex !== 0}
-												swimlaneData={swimlaneData}
-											/>
-										);
-									})}
-								</div>
-							</div>
-						) : (
-							<div key={swimlane.swimlaneValue} className="swimlaneRow">
-								{/* Swimlane Label */}
-								<div className='swimlaneHeaderContainer'>
-									<div className='swimlaneHeader'>
-										<div className="swimlaneLabel" title={swimlane.swimlaneName}>
-											{swimlane.swimlaneName}
-										</div>
-										<div className='swimlaneHeaderSwimlaneCount'
-										// onClick={(evt) => openSwimlaneMenu(evt, rowIndex)}
-										>
-											{swimlane.tasks.flat().length ?? 0}
+				{/* Swimlane Rows */}
+				<div className="swimlanesContainer">
+					{swimlanes.map((swimlane, rowIndex) => (
+						<React.Fragment key={swimlane.swimlaneValue}>
+							{verticalHeaderUI ? (
+								<div className="swimlaneRow vertical">
+									{/* Swimlane Label */}
+									<div className='swimlaneHeaderContainer-vertical'>
+										<div className='swimlaneHeader-vertical'>
+											<div className="swimlaneLabel-vertical" title={swimlane.swimlaneName}>
+												{swimlane.swimlaneName}
+											</div>
+											<div className='swimlaneHeaderSwimlaneCount'>
+												{swimlane.tasks.flat().length ?? 0}
+											</div>
 										</div>
 									</div>
-								</div>
 
-								{/* Columns for this Swimlane */}
-								<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
-									{activeColumns.map((column, colIndex) => {
-										const swimlaneData = {
-											property: board.swimlanes.property,
-											value: swimlane.swimlaneValue,
-										};
+									{/* Columns for this Swimlane */}
+									<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
+										{activeColumns.map((column, colIndex) => {
+											const swimlaneData = {
+												property: board.swimlanes.property,
+												value: swimlane.swimlaneValue,
+											};
 
-										return (
-											<MemoizedSwimlanColumn
-												key={`${swimlane.swimlaneValue}-${column.id}`}
-												plugin={plugin}
-												columnIndex={column.index}
-												activeBoardData={board}
-												columnData={column}
-												tasksForThisColumn={swimlane.tasks[colIndex] || []}
-												Component={ColumnComponent}
-												hideColumnHeader={rowIndex !== 0}
-												swimlaneData={swimlaneData}
-											/>
-										);
-									})}
+											return (
+												<MemoizedSwimlanColumn
+													key={`${swimlane.swimlaneValue}-${column.id}`}
+													plugin={plugin}
+													columnIndex={column.index}
+													activeBoardData={board}
+													columnData={column}
+													tasksForThisColumn={swimlane.tasks[colIndex] || []}
+													Component={ColumnComponent}
+													hideColumnHeader={rowIndex !== 0}
+													swimlaneData={swimlaneData}
+												/>
+											);
+										})}
+									</div>
 								</div>
-							</div>
-						)}
-					</>
-				))}
+							) : (
+								<div className="swimlaneRow">
+									{/* Swimlane Label */}
+									<div className='swimlaneHeaderContainer'>
+										<div className='swimlaneHeader'>
+											<div className="swimlaneLabel" title={swimlane.swimlaneName}>
+												{swimlane.swimlaneName}
+											</div>
+											<div className='swimlaneHeaderSwimlaneCount'>
+												{swimlane.tasks.flat().length ?? 0}
+											</div>
+										</div>
+									</div>
+
+									{/* Columns for this Swimlane */}
+									<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
+										{activeColumns.map((column, colIndex) => {
+											const swimlaneData = {
+												property: board.swimlanes.property,
+												value: swimlane.swimlaneValue,
+											};
+
+											return (
+												<MemoizedSwimlanColumn
+													key={`${swimlane.swimlaneValue}-${column.id}`}
+													plugin={plugin}
+													columnIndex={column.index}
+													activeBoardData={board}
+													columnData={column}
+													tasksForThisColumn={swimlane.tasks[colIndex] || []}
+													Component={ColumnComponent}
+													hideColumnHeader={rowIndex !== 0}
+													swimlaneData={swimlaneData}
+												/>
+											);
+										})}
+									</div>
+								</div>
+							)}
+						</React.Fragment>
+					))}
+				</div>
 			</div>
-		</div>
-	);
+		);
 };
 
 /**
