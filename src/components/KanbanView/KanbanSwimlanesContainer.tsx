@@ -1,7 +1,7 @@
 // src/components/KanbanView/KanbanSwimlanesContainer.tsx
 
 import React, { useMemo, memo } from 'react';
-import { Board } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItem';
 import Column from './Column';
 import LazyColumn from './LazyColumn';
@@ -101,13 +101,13 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				const columnTasks = tasksPerColumn[colIdx] || [];
 				// Filter tasks in this column that match the swimlane value for the selected property
 				return columnTasks.filter((task) => {
-					const values = getPropertyValues(task as taskItem, property, customValue);
+					const values = getPropertyValues(task, property, customValue);
 					return values.includes(swimlaneItem.value);
 				});
 			});
 
 			return {
-				swimlaneName: swimlaneItem.value,
+				swimlaneName: t(property) + ': ' + swimlaneItem.value,
 				swimlaneValue: swimlaneItem.value,
 				tasks: tasksByColumn,
 				minimized: minimized,
@@ -187,18 +187,26 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 						{/* Columns for this Swimlane */}
 						<div className="swimlaneColumnsWrapper">
-							{activeColumns.map((column, colIndex) => (
-								<MemoizedSwimlanColumn
-									key={`${swimlane.swimlaneValue}-${column.id}`}
-									plugin={plugin}
-									columnIndex={column.index}
-									activeBoardData={board}
-									columnData={column}
-									tasksForThisColumn={swimlane.tasks[colIndex] || []}
-									Component={ColumnComponent}
-									hideColumnHeader={rowIndex !== 0}
-								/>
-							))}
+							{activeColumns.map((column, colIndex) => {
+								const swimlaneData = {
+									property: board.swimlanes.property,
+									value: swimlane.swimlaneValue,
+								};
+
+								return (
+									<MemoizedSwimlanColumn
+										key={`${swimlane.swimlaneValue}-${column.id}`}
+										plugin={plugin}
+										columnIndex={column.index}
+										activeBoardData={board}
+										columnData={column}
+										tasksForThisColumn={swimlane.tasks[colIndex] || []}
+										Component={ColumnComponent}
+										hideColumnHeader={rowIndex !== 0}
+										swimlaneData={swimlaneData}
+									/>
+								);
+							})}
 						</div>
 					</div>
 				))}
@@ -299,11 +307,12 @@ function getPropertyValues(
 const MemoizedSwimlanColumn = memo<{
 	plugin: TaskBoard;
 	columnIndex: number;
-	activeBoardData: any;
-	columnData: any;
+	activeBoardData: Board;
+	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
 	Component: typeof Column | typeof LazyColumn;
 	hideColumnHeader?: boolean;
+	swimlaneData: { property: string, value: string };
 }>(({ Component, ...props }) => {
 	return <Component {...props} />;
 }, (prevProps, nextProps) => {

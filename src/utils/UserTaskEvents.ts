@@ -15,7 +15,14 @@ import {
 } from "./taskNote/TaskNoteUtils";
 import { updateTaskInFile } from "./taskLine/TaskLineUtils";
 import { eventEmitter } from "src/services/EventEmitter";
-import { sanitizeTags } from "./taskLine/TaskContentFormatter";
+import {
+	sanitizePriority,
+	sanitizeTags,
+} from "./taskLine/TaskContentFormatter";
+import {
+	globalSettingsData,
+	PluginDataJson,
+} from "src/interfaces/GlobalSettings";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -402,4 +409,85 @@ export const updateTaskItemTags = (
 			);
 		});
 	}
+};
+
+/**
+ * Updates a property of a task item and returns the updated task item.
+ * @param {taskItem} task - The task item to update.
+ * @param {globalSettingsData} globalSettings - The global settings data of the Taskboard plugin.
+ * @param {string} property - The property of the task item to update.
+ * @param {string | number | string[]} oldValue - The old value of the property to update.
+ * @param {string | number | string[]} newValue - The new value of the property to update.
+ * @returns {taskItem} The updated task item.
+ */
+export const updateTaskItemProperty = (
+	task: taskItem,
+	globalSettings: globalSettingsData,
+	property: string,
+	oldValue: string | number | string[],
+	newValue: string | number | string[]
+): taskItem => {
+	const updatedTask: taskItem = { ...task };
+	const isThisTaskNote = isTaskNotePresentInTags(
+		globalSettings.taskNoteIdentifierTag,
+		task.tags
+	);
+
+	switch (property) {
+		case "tags":
+			updatedTask.tags = newValue as string[];
+			if (isThisTaskNote) {
+				updatedTask.title = sanitizeTags(
+					task.title,
+					oldValue as string[],
+					newValue as string[]
+				);
+			}
+			break;
+		case "status":
+			updatedTask.status = newValue as string;
+			break;
+		case "priority":
+			updatedTask.priority = newValue as number;
+			if (isThisTaskNote) {
+				updatedTask.title = sanitizePriority(
+					globalSettings,
+					task.title,
+					newValue as number
+				);
+			}
+			break;
+		case "reminder":
+			updatedTask.reminder = newValue as string;
+			break;
+		case "startDate":
+			updatedTask.startDate = newValue as string;
+			break;
+		case "scheduledDate":
+			updatedTask.scheduledDate = newValue as string;
+			break;
+		case "due":
+			updatedTask.due = newValue as string;
+			break;
+		case "completion":
+			updatedTask.completion = newValue as string;
+			break;
+		case "cancelledDate":
+			updatedTask.cancelledDate = newValue as string;
+			break;
+		case "time":
+			updatedTask.time = newValue as string;
+			break;
+		case "dependsOn":
+			updatedTask.dependsOn = newValue as string[];
+			break;
+		case "filePath":
+			updatedTask.filePath = newValue as string;
+			break;
+		case "title":
+			updatedTask.title = newValue as string;
+			break;
+	}
+
+	return updatedTask;
 };

@@ -3,13 +3,24 @@ import { Notice } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
 import { colType } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
-import { updateTaskItemTags } from "src/utils/UserTaskEvents";
+import {
+	updateTaskItemProperty,
+	updateTaskItemTags,
+} from "src/utils/UserTaskEvents";
 import { eventEmitter } from "src/services/EventEmitter";
+import { swimlaneDataProp } from "src/components/KanbanView/TaskItem";
+import {
+	isTaskNotePresentInTags,
+	updateFrontmatterInMarkdownFile,
+} from "src/utils/taskNote/TaskNoteUtils";
+import { sanitizeTags } from "src/utils/taskLine/TaskContentFormatter";
+import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
 
 export interface currentDragDataPayload {
 	task: taskItem;
 	sourceColumnData: ColumnData;
 	currentBoardIndex: number;
+	swimlaneData: swimlaneDataProp | null | undefined;
 }
 
 /**
@@ -139,42 +150,23 @@ class DragDropTasksManager {
 		plugin: TaskBoard,
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
-		targetColumn: ColumnData
+		targetColumn: ColumnData,
+		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
 	): Promise<void> => {
-		const task = currentDragData.task;
-		// Create a modified copy of the task
-		// const updatedTask: taskItem = { ...task };
-		let newTags: string[] = task.tags;
+		if (
+			sourceColumn.coltag == undefined ||
+			targetColumn.coltag == undefined
+		)
+			return;
 
-		// Remove the source column tag if it exists
-		if (sourceColumn.coltag) {
-			const sourceTag = sourceColumn.coltag;
-			console.log(
-				"handleTaskMove_namedTag_to_namedTag...\nsourceTag=",
-				sourceTag,
-				"\ntask=",
-				task
-			);
-			newTags = task.tags.filter(
-				(tag: string) =>
-					tag.replace("#", "").toLowerCase() !==
-					sourceTag.replace("#", "").toLowerCase()
-			);
-		}
+		const oldTask = currentDragData.task;
+		let newTask = { ...oldTask } as taskItem;
 
-		// Add the target column tag if it doesn't exist
-		if (targetColumn.coltag) {
-			const targetTag = targetColumn.coltag.startsWith("#")
-				? targetColumn.coltag
-				: `#${targetColumn.coltag}`;
-			// Make sure we don't have duplicates
-			newTags.push(targetTag);
-			newTags = Array.from(new Set(newTags));
-		}
-
-		// Before updating the task, first check if this target column has "manualOrder" sorting criteria.
-		// If yes, we need to update the tasksIdManualOrder array to include this task's id whereever user has dropped it.
-		// This will ensure that the task appears in the correct order in the target column after the move.
+		// -----------------------------------------------
+		// STEP 2 - If the target column has "manualOrder" sorting criteria, update the task-order-config in the target column.
+		// This is moved above STEP-1 because, the parent function is async.
+		// ----------------------------------------------
 		this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
@@ -182,8 +174,110 @@ class DragDropTasksManager {
 			this.desiredDropIndex
 		);
 
-		// Finally, update the task in the note which will refresh the view.
-		updateTaskItemTags(plugin, task, newTags);
+		// -----------------------------------------------
+		// STEP 1 - Will first update the properties of the task which should make it move from source column to target column.
+		// -----------------------------------------------
+		let newTags: string[] = oldTask.tags;
+
+		// Remove the source column tag if it exists
+		const sourceTag = sourceColumn.coltag;
+		console.log(
+			"handleTaskMove_namedTag_to_namedTag...\nsourceTag=",
+			sourceTag,
+			"\ntask=",
+			oldTask
+		);
+		newTags = oldTask.tags.filter(
+			(tag: string) =>
+				tag.replace("#", "").toLowerCase() !==
+				sourceTag.replace("#", "").toLowerCase()
+		);
+
+		// Add the target column tag if it doesn't exist
+		const targetTag = targetColumn.coltag.startsWith("#")
+			? targetColumn.coltag
+			: `#${targetColumn.coltag}`;
+		// Make sure we don't have duplicates
+		newTags.push(targetTag);
+		newTags = Array.from(new Set(newTags));
+
+		newTask.tags = newTags;
+		newTask = updateTaskItemProperty(
+			oldTask,
+			plugin.settings.data.globalSettings,
+			"tags",
+			oldTask.tags,
+			newTask.tags
+		);
+
+		// -----------------------------------------------
+		// STEP 3 - Update the task properties so that it moves from source swimlane to target swilane
+		// -----------------------------------------------
+		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
+			const property = sourceColumnSwimlaneData.property;
+			const oldValue = sourceColumnSwimlaneData.value;
+			const newValue = targetColumnSwimlaneData.value;
+
+			if (property === "tags") {
+				const oldTags = newTags;
+				// Remove old tag of source swimlane
+				newTags = newTags.filter(
+					(tag) =>
+						tag.replace("#", "").toLowerCase() !==
+						oldValue.replace("#", "").toLowerCase()
+				);
+
+				// Add new tag of target swimlane
+				newTags.push(newValue);
+				newTags = Array.from(new Set(newTags));
+
+				newTask = updateTaskItemProperty(
+					newTask,
+					plugin.settings.data.globalSettings,
+					property,
+					oldTags,
+					newTags
+				);
+			} else {
+				newTask = updateTaskItemProperty(
+					newTask,
+					plugin.settings.data.globalSettings,
+					property,
+					oldValue,
+					newValue
+				);
+			}
+		}
+
+		// -----------------------------------------------
+		// STEP 4 - Finally update the task in the note, so that its automatically scanned again. Which will trigger screen refresh.
+		// -----------------------------------------------
+		eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
+
+		const isThisTaskNote = isTaskNotePresentInTags(
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			oldTask.tags
+		);
+
+		if (isThisTaskNote) {
+			updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+				sleep(1000).then(() => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						oldTask.filePath,
+						oldTask.id
+					);
+				});
+			});
+		} else {
+			newTask.title = sanitizeTags(newTask.title, oldTask.tags, newTags);
+			console.log("Sanitized title after tag update:", newTask.title);
+			updateTaskInFile(plugin, newTask, oldTask).then(() => {
+				plugin.realTimeScanning.processAllUpdatedFiles(
+					oldTask.filePath,
+					oldTask.id
+				);
+			});
+		}
 	};
 
 	/**
@@ -687,14 +781,19 @@ class DragDropTasksManager {
 	handleDrop(
 		e: DragEvent,
 		targetColumnData: ColumnData,
-		targetColumnContainer: HTMLDivElement
+		targetColumnContainer: HTMLDivElement,
+		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
 	): void {
 		console.log("DragDropTasksManager : handleDrop called...");
 		e.preventDefault();
 
-		const sourceColumnData = this.currentDragData
-			? this.currentDragData.sourceColumnData
-			: null;
+		if (!this.currentDragData) {
+			console.error("No current drag data available for drop operation.");
+			return;
+		}
+
+		const sourceColumnData = this.currentDragData.sourceColumnData;
+		const sourceColumnSwimlaneData = this.currentDragData.swimlaneData;
 		if (!sourceColumnData) {
 			console.error("No source column data available for drop.");
 			return;
@@ -731,11 +830,8 @@ class DragDropTasksManager {
 		console.log("Source column:", sourceColumnData);
 		console.log("Target column:", targetColumnData);
 		console.log("Current drag data:", this.currentDragData);
-
-		if (!this.currentDragData) {
-			console.error("No current drag data available for drop operation.");
-			return;
-		}
+		console.log("Current drag index:", this.desiredDropIndex);
+		console.log("targetSwimilaneData", targetColumnSwimlaneData);
 
 		// Determine the operation based on source and target column types
 
@@ -757,7 +853,9 @@ class DragDropTasksManager {
 					this.plugin!,
 					this.currentDragData,
 					sourceColumnData,
-					targetColumnData
+					targetColumnData,
+					sourceColumnSwimlaneData,
+					targetColumnSwimlaneData
 				);
 			} else if (targetColumnData.colType === colType.dated) {
 				this.handleTaskMove_dated_to_dated(

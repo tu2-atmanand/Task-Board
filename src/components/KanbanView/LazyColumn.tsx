@@ -3,7 +3,7 @@
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 import { CSSProperties } from 'react';
-import TaskItem from './TaskItem';
+import TaskItem, { swimlaneDataProp } from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
@@ -30,6 +30,7 @@ export interface LazyColumnProps {
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
 	hideColumnHeader?: boolean;
+	swimlaneData?: swimlaneDataProp;
 }
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
@@ -39,6 +40,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	columnData,
 	tasksForThisColumn,
 	hideColumnHeader = false,
+	swimlaneData
 }) => {
 	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
@@ -376,7 +378,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		dragDropTasksManagerInsatance.handleDrop(
 			e.nativeEvent,
 			columnData,
-			targetColumnContainer
+			targetColumnContainer,
+			swimlaneData
 		);
 
 		// Clear manager payload (drag finished)
@@ -478,7 +481,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			dragDropTasksManagerInsatance.handleDrop(
 				e.nativeEvent,
 				columnData,
-				targetColumnContainer
+				targetColumnContainer,
+				swimlaneData
 			);
 
 			// Clear manager payload (drag finished)
@@ -710,6 +714,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 													<div
 														key={task.id}
 														className="taskItemFadeIn"
+														data-taskItem-index={i}
 														onDragOver={(e) => { handleTaskItemDragOver(e); }
 														}
 														onDrop={e => handleTaskDrop(e, i)}
@@ -718,9 +723,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 															key={task.id}
 															plugin={plugin}
 															task={task}
-															columnIndex={columnIndex}
 															activeBoardSettings={activeBoardData}
-															data-taskItem-index={i}
+															columnIndex={columnIndex}
+															swimlaneData={swimlaneData}
 														/>
 													</div>
 												);

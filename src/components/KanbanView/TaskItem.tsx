@@ -35,14 +35,20 @@ declare function showTextInputModal(app: any, options: { title?: string; placeho
 declare function showConfirmationModal(app: any, options: any): Promise<boolean>;
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 
+export interface swimlaneDataProp {
+	property: string;
+	value: string;
+}
+
 export interface TaskProps {
 	plugin: TaskBoard;
 	task: taskItem;
 	activeBoardSettings: Board;
 	columnIndex?: number;
+	swimlaneData?: swimlaneDataProp;
 }
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, columnIndex }) => {
+const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, columnIndex, swimlaneData }) => {
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
@@ -911,7 +917,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
-			const payload: currentDragDataPayload = { task, sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index };
+			const payload: currentDragDataPayload = { task, sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index, swimlaneData: swimlaneData };
 			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Add dragging class after a small delay to not affect the drag image
