@@ -250,7 +250,7 @@
                 "uid": "k6wjlc63"
               }
             ],
-            "minimized": true
+            "minimized": false
           },
           {
             "id": 2485661779,
@@ -305,7 +305,7 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -315,7 +315,7 @@
             "index": 5,
             "coltag": "Test",
             "id": 396902,
-            "minimized": false
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -325,16 +325,17 @@
             "index": 6,
             "coltag": "done",
             "id": 328227,
-            "minimized": false
+            "minimized": true
           },
           {
             "id": 1936828579,
             "index": 7,
             "colType": "namedTag",
-            "active": false,
+            "active": true,
             "collapsed": false,
             "name": "*/seeding/*",
-            "coltag": "*/seeding/*"
+            "coltag": "*/seeding/*",
+            "minimized": true
           },
           {
             "id": 3193261849,
@@ -348,7 +349,7 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": true
+            "minimized": false
           }
         ],
         "filters": [
@@ -500,23 +501,191 @@
           "enabled": true,
           "showEmptySwimlanes": true,
           "property": "tags",
-          "minimized": false,
-          "maxHeight": 300,
+          "maxHeight": "500px",
           "sortCriteria": "custom",
           "customSortOrder": [
             {
-              "value": "#test",
+              "value": "first",
               "index": 1
             },
             {
-              "value": "#pending",
+              "value": "second",
               "index": 2
             },
             {
-              "value": "#new",
+              "value": "third",
               "index": 3
             }
-          ]
+          ],
+          "groupAllRest": true,
+          "verticalHeaderUI": false
+        }
+      },
+      {
+        "columns": [
+          {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "index": 1,
+            "id": 226119,
+            "sortCriterias": [],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "sortCriteria": [
+              {
+                "criteria": "id",
+                "order": "desc",
+                "priority": 1,
+                "uid": "k6wjlc63"
+              }
+            ],
+            "minimized": false
+          },
+          {
+            "id": 2485661779,
+            "index": 2,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "#Task",
+            "coltag": "#Task",
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "asc",
+                "priority": 1,
+                "uid": "bmlpsogj"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              274,
+              "362"
+            ],
+            "minimized": false,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Can be implemented",
+            "index": 3,
+            "coltag": "#pending",
+            "id": 47626,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Progress",
+            "index": 4,
+            "coltag": "working",
+            "id": 908753,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Review",
+            "index": 5,
+            "coltag": "Test",
+            "id": 396902,
+            "minimized": false
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Ready to publish",
+            "index": 6,
+            "coltag": "done",
+            "id": 328227,
+            "minimized": false
+          },
+          {
+            "id": 1936828579,
+            "index": 7,
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "*/seeding/*",
+            "coltag": "*/seeding/*"
+          },
+          {
+            "id": 3193261849,
+            "index": 8,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false
+          }
+        ],
+        "filters": [
+          "#Test",
+          "#working",
+          "*/seeding/*"
+        ],
+        "filterPolarity": "0",
+        "filterScope": "Both",
+        "name": "Tag based board (copy)",
+        "index": 3,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        },
+        "taskCount": {
+          "pending": 63,
+          "completed": 18
+        },
+        "swimlanes": {
+          "enabled": false,
+          "showEmptySwimlanes": true,
+          "property": "tags",
+          "maxHeight": "500px",
+          "sortCriteria": "custom",
+          "customSortOrder": [
+            {
+              "value": "first",
+              "index": 1
+            },
+            {
+              "value": "second",
+              "index": 2
+            },
+            {
+              "value": "third",
+              "index": 3
+            }
+          ],
+          "groupAllRest": true,
+          "verticalHeaderUI": false
         }
       }
     ],
@@ -570,7 +739,7 @@
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,
-      "showVerticalScroll": false,
+      "showVerticalScroll": true,
       "tagColors": [
         {
           "name": "Bug",
@@ -813,7 +982,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 366,
+      "uniqueIdCounter": 368,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
