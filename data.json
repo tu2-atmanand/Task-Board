@@ -224,7 +224,7 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 59,
+          "pending": 63,
           "completed": 17
         }
       },
@@ -256,7 +256,7 @@
             "id": 2485661779,
             "index": 2,
             "colType": "namedTag",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "#Task",
             "coltag": "#Task",
@@ -291,7 +291,7 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": true
           },
           {
             "colType": "namedTag",
@@ -365,32 +365,7 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "all",
-          "filterGroups": [
-            {
-              "id": "id-1760029960520-z2a1g0ka4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1760029960521-t33fwt542",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "This"
-                }
-              ]
-            },
-            {
-              "id": "id-1764176913802-bwvk75kr4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1764176913803-1ugczxozs",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "No"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -518,8 +493,8 @@
           ]
         },
         "taskCount": {
-          "pending": 2,
-          "completed": 3
+          "pending": 63,
+          "completed": 18
         },
         "swimlanes": {
           "enabled": true,
@@ -838,7 +813,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 365,
+      "uniqueIdCounter": 366,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
