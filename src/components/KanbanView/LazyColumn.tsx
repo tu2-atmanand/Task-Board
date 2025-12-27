@@ -531,7 +531,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				// APPROACH 2 - DIRECTLY FETCH THE INDEX FROM THE DATA ATTRIBUTE OF THE HOVERED ELEMENT
 				let pos = 0 // Default to top of the column
 				const hoveredElement = e.currentTarget;
-				const dataAttribute = hoveredElement.getAttribute('data-taskItem-index');
+				const dataAttribute = hoveredElement.getAttribute('data-taskitem-index');
 				console.log('dataAttribute', dataAttribute);
 				if (dataAttribute) {
 					const clientY = e.clientY;
@@ -714,7 +714,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 													<div
 														key={task.id}
 														className="taskItemFadeIn"
-														data-taskItem-index={i}
+														data-taskitem-index={i}
 														onDragOver={(e) => { handleTaskItemDragOver(e); }
 														}
 														onDrop={e => handleTaskDrop(e, i)}

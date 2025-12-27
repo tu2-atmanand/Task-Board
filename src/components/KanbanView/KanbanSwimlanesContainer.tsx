@@ -21,7 +21,7 @@ interface SwimlaneRow {
 	swimlaneName: string;
 	swimlaneValue: string;
 	tasks: taskItem[][];
-	minimized: boolean;
+	// minimized: boolean;
 }
 
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
@@ -34,12 +34,12 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
 
 	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
+	const { property, sortCriteria, customSortOrder, customValue, groupAllRest, maxHeight: maxSwimlaneHeight, verticalHeaderUI } = board.swimlanes;
 	const swimlanes = useMemo(() => {
 		if (!board.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
 		}
 
-		const { property, sortCriteria, customSortOrder, customValue, minimized } = board.swimlanes;
 
 		// Get all active columns
 		const activeColumns = board.columns.filter((col) => col.active);
@@ -58,23 +58,39 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		if (sortCriteria === 'custom' && customSortOrder && customSortOrder.length > 0) {
 			// Use custom sort order
 			sortedSwimlaneValues = customSortOrder.map((item) => ({
-				value: item.value,
+				value: item.value.replace('#', ''),
 				index: item.index,
 			}));
 
 			// Add remaining values that are not in customSortOrder
-			const customValues = new Set(customSortOrder.map((item) => item.value));
+			const customValues = new Set(customSortOrder.map((item) => item.value.replace('#', '')));
 			const remainingValues = uniqueSwimlanValues.filter((val) => !customValues.has(val));
+			console.log("KanbanSwimlanesContainer...\ncustomValues", customValues, "\nremainingValues", remainingValues);
 
-			if (remainingValues.length > 0) {
-				const maxIndex = Math.max(...customSortOrder.map((item) => item.index), 0);
-				sortedSwimlaneValues = [
-					...sortedSwimlaneValues,
-					...remainingValues.map((val, idx) => ({
-						value: val,
-						index: maxIndex + idx + 1,
-					})),
-				];
+			if (!groupAllRest) {
+				if (remainingValues.length > 0) {
+					const maxIndex = Math.max(...customSortOrder.map((item) => item.index), 0);
+					sortedSwimlaneValues = [
+						...sortedSwimlaneValues,
+						...remainingValues.map((val, idx) => ({
+							value: val,
+							index: maxIndex + idx + 1,
+						})),
+					];
+				}
+			} else {
+				// If user has set to group all the remaining values into a single swimlane...
+				// Then will create only a single swimlane at the bottom of all the custom ones and name it as "All rest".
+				if (remainingValues.length > 0) {
+					const maxIndex = Math.max(...customSortOrder.map((item) => item.index), 0);
+					sortedSwimlaneValues = [
+						...sortedSwimlaneValues,
+						{
+							value: 'All rest',
+							index: maxIndex + 1,
+						},
+					];
+				}
 			}
 		} else if (sortCriteria === 'asc') {
 			// Sort ascending
@@ -110,7 +126,6 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				swimlaneName: t(property) + ': ' + swimlaneItem.value,
 				swimlaneValue: swimlaneItem.value,
 				tasks: tasksByColumn,
-				minimized: minimized,
 			};
 		});
 
@@ -132,38 +147,38 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		);
 	}
 
-	function openSwimlaneMenu(event: MouseEvent | React.MouseEvent, rowIndex: number) {
-		const swimlaneMenu = new Menu();
+	// function openSwimlaneMenu(event: MouseEvent | React.MouseEvent, rowIndex: number) {
+	// 	const swimlaneMenu = new Menu();
 
-		swimlaneMenu.addItem((item) => {
-			item.setTitle(t("quick-actions"));
-			item.setIsLabel(true);
-		});
+	// 	swimlaneMenu.addItem((item) => {
+	// 		item.setTitle(t("quick-actions"));
+	// 		item.setIsLabel(true);
+	// 	});
 
-		// Show minimize or maximize option based on current state
-		if (swimlanes[rowIndex].minimized) {
-			swimlaneMenu.addItem((item) => {
-				item.setTitle(t("maximize-column"));
-				item.setIcon("panel-left-open");
-				item.onClick(async () => {
-					// await handleMinimizeSwimlane(); // TODO : Implementation pending
-				});
-			});
-		} else {
-			swimlaneMenu.addItem((item) => {
-				item.setTitle(t("minimize-column"));
-				item.setIcon("panel-left-close");
-				item.onClick(async () => {
-					// await handleMinimizeSwimlane(); // TODO : Implementation pending
-				});
-			});
-		}
+	// 	// Show minimize or maximize option based on current state
+	// 	if (swimlanes[rowIndex].minimized) {
+	// 		swimlaneMenu.addItem((item) => {
+	// 			item.setTitle(t("maximize-column"));
+	// 			item.setIcon("panel-left-open");
+	// 			item.onClick(async () => {
+	// 				// await handleMinimizeSwimlane(); // TODO : Implementation pending
+	// 			});
+	// 		});
+	// 	} else {
+	// 		swimlaneMenu.addItem((item) => {
+	// 			item.setTitle(t("minimize-column"));
+	// 			item.setIcon("panel-left-close");
+	// 			item.onClick(async () => {
+	// 				// await handleMinimizeSwimlane(); // TODO : Implementation pending
+	// 			});
+	// 		});
+	// 	}
 
-		// Use native event if available (React event has nativeEvent property)
-		swimlaneMenu.showAtMouseEvent(
-			(event instanceof MouseEvent ? event : event.nativeEvent)
-		);
-	}
+	// 	// Use native event if available (React event has nativeEvent property)
+	// 	swimlaneMenu.showAtMouseEvent(
+	// 		(event instanceof MouseEvent ? event : event.nativeEvent)
+	// 	);
+	// }
 
 	const activeColumns = board.columns.filter((col) => col.active);
 
@@ -172,43 +187,89 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			{/* Swimlane Rows */}
 			<div className="swimlanesContainer">
 				{swimlanes.map((swimlane, rowIndex) => (
-					<div key={swimlane.swimlaneValue} className="swimlaneRow">
-						{/* Swimlane Label */}
-						<div className='swimlaneHeaderContainer'>
-							<div className='swimlaneHeader'>
-								<div className="swimlaneLabel" title={swimlane.swimlaneName}>
-									{swimlane.swimlaneName}
+					<>
+						{verticalHeaderUI ? (
+							<div key={swimlane.swimlaneValue} className="swimlaneRow vertical">
+								{/* Swimlane Label */}
+								<div className='swimlaneHeaderContainer-vertical'>
+									<div className='swimlaneHeader-vertical'>
+										<div className="swimlaneLabel-vertical" title={swimlane.swimlaneName}>
+											{swimlane.swimlaneName}
+										</div>
+										<div className='swimlaneHeaderSwimlaneCount'
+										// onClick={(evt) => openSwimlaneMenu(evt, rowIndex)}
+										>
+											{swimlane.tasks.flat().length ?? 0}
+										</div>
+									</div>
 								</div>
-								<div className='swimlaneHeaderSwimlaneCount' onClick={(evt) => openSwimlaneMenu(evt, rowIndex)} aria-label={t("open-column-menu")}>
-									{swimlane.tasks.flat().length ?? 0}
+
+								{/* Columns for this Swimlane */}
+								<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
+									{activeColumns.map((column, colIndex) => {
+										const swimlaneData = {
+											property: board.swimlanes.property,
+											value: swimlane.swimlaneValue,
+										};
+
+										return (
+											<MemoizedSwimlanColumn
+												key={`${swimlane.swimlaneValue}-${column.id}`}
+												plugin={plugin}
+												columnIndex={column.index}
+												activeBoardData={board}
+												columnData={column}
+												tasksForThisColumn={swimlane.tasks[colIndex] || []}
+												Component={ColumnComponent}
+												hideColumnHeader={rowIndex !== 0}
+												swimlaneData={swimlaneData}
+											/>
+										);
+									})}
 								</div>
 							</div>
-						</div>
+						) : (
+							<div key={swimlane.swimlaneValue} className="swimlaneRow">
+								{/* Swimlane Label */}
+								<div className='swimlaneHeaderContainer'>
+									<div className='swimlaneHeader'>
+										<div className="swimlaneLabel" title={swimlane.swimlaneName}>
+											{swimlane.swimlaneName}
+										</div>
+										<div className='swimlaneHeaderSwimlaneCount'
+										// onClick={(evt) => openSwimlaneMenu(evt, rowIndex)}
+										>
+											{swimlane.tasks.flat().length ?? 0}
+										</div>
+									</div>
+								</div>
 
-						{/* Columns for this Swimlane */}
-						<div className="swimlaneColumnsWrapper">
-							{activeColumns.map((column, colIndex) => {
-								const swimlaneData = {
-									property: board.swimlanes.property,
-									value: swimlane.swimlaneValue,
-								};
+								{/* Columns for this Swimlane */}
+								<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
+									{activeColumns.map((column, colIndex) => {
+										const swimlaneData = {
+											property: board.swimlanes.property,
+											value: swimlane.swimlaneValue,
+										};
 
-								return (
-									<MemoizedSwimlanColumn
-										key={`${swimlane.swimlaneValue}-${column.id}`}
-										plugin={plugin}
-										columnIndex={column.index}
-										activeBoardData={board}
-										columnData={column}
-										tasksForThisColumn={swimlane.tasks[colIndex] || []}
-										Component={ColumnComponent}
-										hideColumnHeader={rowIndex !== 0}
-										swimlaneData={swimlaneData}
-									/>
-								);
-							})}
-						</div>
-					</div>
+										return (
+											<MemoizedSwimlanColumn
+												key={`${swimlane.swimlaneValue}-${column.id}`}
+												plugin={plugin}
+												columnIndex={column.index}
+												activeBoardData={board}
+												columnData={column}
+												tasksForThisColumn={swimlane.tasks[colIndex] || []}
+												Component={ColumnComponent}
+												hideColumnHeader={rowIndex !== 0}
+												swimlaneData={swimlaneData}
+											/>
+										);
+									})}
+								</div>
+							</div>
+						)}
+					</>
 				))}
 			</div>
 		</div>
@@ -250,9 +311,8 @@ function getPropertyValues(
 	switch (property) {
 		case 'tags':
 			if (task.tags && Array.isArray(task.tags)) {
-				values = task.tags.map((tag: any) => {
-					if (typeof tag === 'string') return tag;
-					if (tag.tag) return tag.tag;
+				values = task.tags.map((tag: string) => {
+					if (typeof tag === 'string') return tag.replace('#', '');
 					return '';
 				}).filter((v: string) => v);
 			}

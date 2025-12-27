@@ -12,12 +12,13 @@ import { FaTrash } from 'react-icons/fa';
 interface SwimlaneConfig {
 	enabled: boolean;
 	showEmptySwimlanes: boolean;
+	maxHeight: string;
 	property: string;
-	minimized: boolean,
-	maxHeight: number;
 	customValue?: string;
 	sortCriteria: string;
 	customSortOrder?: { value: string; index: number }[];
+	groupAllRest?: boolean;
+	verticalHeaderUI: boolean;
 }
 
 interface SwimlanesConfigModalProps {
@@ -41,6 +42,9 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 	const [customSortOrder, setCustomSortOrder] = useState<{ value: string; index: number }[]>(
 		swimlaneConfig.customSortOrder || []
 	);
+	const [maxHeight, setmaxHeight] = useState(swimlaneConfig.maxHeight || '300px');
+	const [groupAllRest, setGroupAllRest] = useState(swimlaneConfig.groupAllRest);
+	const [verticalHeaderUI, setVerticalHeaderUI] = useState(swimlaneConfig.verticalHeaderUI || false);
 
 	const sortableListRef = useRef<HTMLDivElement | null>(null);
 	const sortableInstanceRef = useRef<any>(null);
@@ -89,11 +93,12 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 			enabled,
 			showEmptySwimlanes,
 			property,
-			minimized: false,
-			maxHeight: 300,
+			maxHeight,
 			customValue: customValue || undefined,
 			sortCriteria,
 			customSortOrder: sortCriteria === 'custom' ? customSortOrder : undefined,
+			groupAllRest,
+			verticalHeaderUI
 		};
 		onSave(updatedConfig);
 	};
@@ -221,6 +226,23 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 							/>
 						</div>
 
+						{/* Set custom min swimlane height */}
+						<div className="swimlanesConfigItem">
+							<div className="swimlanesConfigLabel">
+								<label>
+									{t('Set minimum swimlane height')}
+								</label>
+								<div className="swimlanesConfigDescription">
+									{t('Enter the value along with units. For example "300px" or "10rem", etc.')}
+								</div>
+							</div>
+							<input
+								type="text"
+								value={maxHeight}
+								onChange={(e) => setmaxHeight(e.target.value)}
+							/>
+						</div>
+
 						{/* Sort Criteria */}
 						<div className="swimlanesConfigItem">
 							<div className="swimlanesConfigLabel">
@@ -254,55 +276,87 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 										'Enter the value of property and arrange their order to have a custom sorting. Note: All the rest of the tasks will be placed in a new swimlane at the last.'}
 								</div>
 
-								{/* Sortable List */}
-								<div
-									ref={sortableListRef}
-									className="swimlanesConfigSortRowsList"
-								>
-									{customSortOrder.map((sortRow, rowIndex) => (
-										<div
-											key={rowIndex}
-											className="swimlanesConfigSortRow"
-										>
-											<RxDragHandleDots2
-												className="swimlanesConfigSortRowDragHandle"
-												size={16}
-												title={t('drag-to-reorder') || 'Drag to reorder'}
-											/>
-											<div className="swimlanesConfigSortRowIndex">
-												{sortRow.index}
+								<div className='swimlaneConfigsManualSortContainer'>
+									{/* Sortable List */}
+									<div
+										ref={sortableListRef}
+										className="swimlanesConfigSortRowsList"
+									>
+										{customSortOrder.map((sortRow, rowIndex) => (
+											<div
+												key={rowIndex}
+												className="swimlanesConfigSortRow"
+											>
+												<RxDragHandleDots2
+													className="swimlanesConfigSortRowDragHandle"
+													size={16}
+													title={t('drag-to-reorder') || 'Drag to reorder'}
+												/>
+												<div className="swimlanesConfigSortRowIndex">
+													{sortRow.index}
+												</div>
+												<input
+													type="text"
+													placeholder={t('enter-property-value') || 'Enter property value'}
+													value={sortRow.value}
+													onChange={(e) =>
+														handleSortRowValueChange(
+															rowIndex,
+															e.target.value
+														)
+													}
+													className="swimlanesConfigSortRowInput"
+												/>
+												<FaTrash
+													className="swimlanesConfigSortRowDeleteBtn"
+													size={14}
+													onClick={() => handleRemoveSortRow(rowIndex)}
+													title={t('delete-row') || 'Delete'}
+												/>
 											</div>
-											<input
-												type="text"
-												placeholder={t('enter-property-value') || 'Enter property value'}
-												value={sortRow.value}
-												onChange={(e) =>
-													handleSortRowValueChange(
-														rowIndex,
-														e.target.value
-													)
-												}
-												className="swimlanesConfigSortRowInput"
-											/>
-											<FaTrash
-												className="swimlanesConfigSortRowDeleteBtn"
-												size={14}
-												onClick={() => handleRemoveSortRow(rowIndex)}
-												title={t('delete-row') || 'Delete'}
-											/>
-										</div>
-									))}
+										))}
+									</div>
+
+									{/* Add Row Button */}
+									<button
+										className="swimlanesConfigAddSortRowBtn"
+										onClick={handleAddSortRow}
+									>
+										{t('add-row') || '+ Add Row'}
+									</button>
 								</div>
 
-								{/* Add Row Button */}
-								<button
-									className="swimlanesConfigAddSortRowBtn"
-									onClick={handleAddSortRow}
-								>
-									{t('add-row') || '+ Add Row'}
-								</button>
+								{/* Enable/Disable groupAllRest */}
+								<div className="swimlanesConfigItem">
+									<div className="swimlanesConfigLabel">
+										<label>{t('group-all-rest-swimlanes')}</label>
+										<div className="swimlanesConfigDescription">
+											{t('group-all-rest-swimlanes-info')}
+										</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={groupAllRest}
+										onChange={(e) => setGroupAllRest(e.target.checked)}
+									/>
+								</div>
 							</div>
 						)}
+
+						{/* Enable/Disable verticalSwimlaneHeader UI */}
+						<div className="swimlanesConfigItem">
+							<div className="swimlanesConfigLabel">
+								<label>{t('UI type : Vertical swimlane header on left')}</label>
+								<div className="swimlanesConfigDescription">
+									{t('This is an experimental setting to get user feedback. This setting will be removed in the future by default.') || ('This is an experimental setting to get user feedback. This setting will be removed in the future by deciding a single type of UI based on user feedback.')}
+								</div>
+							</div>
+							<input
+								type="checkbox"
+								checked={verticalHeaderUI}
+								onChange={(e) => setVerticalHeaderUI(e.target.checked)}
+							/>
+						</div>
 					</>
 				)}
 			</div>

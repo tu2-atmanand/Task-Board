@@ -428,7 +428,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 12px;
 	display: flex;
 	flex-direction: column;
-	height: auto;
+	/* height: auto; */
 	max-height: 80vh;
 
 	/* Firefox */
@@ -6594,12 +6594,19 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 /* Individual swimlane row */
 .swimlaneRow {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	gap: var(--swimlane-gap, 1px);
 	background-color: var(--background-primary);
-	min-height: 200px;
 	padding: 0;
 	transition: background-color 0.15s ease;
+	width: max-content;
+	margin-bottom: 5px;
+}
+
+.swimlaneRow.vertical {
+	display: flex;
+	flex-direction: row;
+	min-height: 200px;
 }
 
 /* First swimlane row - make headers sticky */
@@ -6617,16 +6624,46 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 .swimlaneHeaderContainer {
 	position: sticky;
+	display: flex;
 	background-color: var(--background-modifier-border-hover);
 	border-right: 1px solid var(--divider-color);
 	left: 0;
 	z-index: 5;
-	min-width: 2rem;
-	max-width: 2rem;
+	width: 100%;
+	flex-direction: row;
+	height: 2rem;
+}
+
+.swimlaneHeaderContainer-vertical {
+	position: sticky;
+	background-color: var(--background-modifier-border-hover);
+	border-bottom: 1px solid var(--divider-color);
+	left: 0;
+	z-index: 5;
+	min-height: 2rem;
+	max-height: 2rem;
 	padding-block: 1rem;
 }
 
 .swimlaneHeader {
+	position: sticky;
+	left: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 600;
+	padding-block: 1rem;
+	color: var(--text-normal);
+	font-size: 0.9em;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-height: 100%;
+	flex-direction: row;
+}
+
+.swimlaneHeader-vertical {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -6643,7 +6680,19 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 }
 
 /* Swimlane label on the left */
-.swimlaneLabel {
+.swimlaneLabel-vertical {
+	font-weight: 600;
+	color: var(--text-normal);
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-word;
+	z-index: 5;
+}
+
+.swimlaneLabel-vertical {
 	font-weight: 600;
 	color: var(--text-normal);
 	justify-content: center;
@@ -6662,14 +6711,14 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	font-weight: 500;
 	padding-block: 3px;
 	border: 1px solid var(--text-muted);
-	border-radius: 5px;
+	border-radius: 1rem;
 	padding-inline: 7px;
-	cursor: pointer;
 }
 
 /* Wrapper for all columns in a swimlane */
 .swimlaneColumnsWrapper {
-	display: contents;
+	display: flex;
+	flex-direction: row;
 }
 
 /* Column within swimlane - applies to Column component */

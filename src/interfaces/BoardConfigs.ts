@@ -110,7 +110,6 @@ export interface FilterConfigSettings {
 export interface swimlaneConfigs {
 	enabled: boolean;
 	showEmptySwimlanes: boolean;
-	minimized: boolean;
 	maxHeight: number;
 	property: string; // e.g., 'tags', 'priority'
 	customValue?: string; // This is only if user selects "custom" as the property. This is also only applicable in case of dataview format properties or for task-notes, where user can use their custom key-value from frontmatter.
@@ -119,6 +118,8 @@ export interface swimlaneConfigs {
 		value: string;
 		index: number;
 	}[]; // This is only if user selects "custom" as the sort criteria.
+	groupAllRest?: boolean; // This will be only visible for customSortOrder. It will help user to decide if they want to group all the rest of the task below the custom sort order.
+	verticalHeaderUI: boolean; // This is a temporary setting for user telemetry. Later will remove it based on user feedback.
 }
 
 export type Board = {
