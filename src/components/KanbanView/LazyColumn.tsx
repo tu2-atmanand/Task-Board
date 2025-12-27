@@ -29,8 +29,9 @@ export interface LazyColumnProps {
 	collapsed?: boolean;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
-	hideColumnHeader?: boolean;
 	swimlaneData?: swimlaneDataProp;
+	hideColumnHeader?: boolean;
+	headerOnly?: boolean;
 }
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
@@ -39,10 +40,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	activeBoardData,
 	columnData,
 	tasksForThisColumn,
+	swimlaneData,
 	hideColumnHeader = false,
-	swimlaneData
+	headerOnly = false,
 }) => {
-	if (activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
+	if (!headerOnly && activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 
@@ -145,6 +147,36 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const result = matchTagsWithWildcards(tagNameKey, columnData?.coltag || '');
 			if (result) tagData = tagColor;
 		});
+	}
+
+	// Determine whether an advanced filter is applied (used by header count UI)
+	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
+
+	// If this column is requested to render header-only (used by swimlane top header), return just the header UI
+	if (headerOnly) {
+		return (
+			<div
+				className={`TaskBoardColumnsSection swimlaneMode${columnData.minimized ? ' minimized' : ''}`}
+				data-column-id={columnData.id}
+				style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
+				data-column-type={columnData.colType}
+				data-column-tag-name={tagData?.name}
+				data-column-tag-color={tagData?.color}
+			>
+				{columnData.minimized ? (
+					<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>{allTasks?.length ?? 0}</div>
+				) : (
+					<div className="taskBoardColumnSecHeader">
+						<div className="taskBoardColumnSecHeaderTitleSec">
+							<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+						</div>
+						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+							{allTasks?.length ?? 0}
+						</div>
+					</div>
+				)}
+			</div>
+		);
 	}
 
 	async function handleMinimizeColumn() {
@@ -659,11 +691,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget as HTMLDivElement);
 	}, []);
 
-	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
 
 	return (
 		<div
-			className={`TaskBoardColumnsSection ${columnData.minimized ? 'minimized' : ''}}`}
+			className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
 			data-column-id={columnData.id}
 			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
 			data-column-type={columnData.colType}
