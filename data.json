@@ -224,8 +224,8 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 63,
-          "completed": 17
+          "pending": 65,
+          "completed": 19
         }
       },
       {
@@ -291,31 +291,20 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": true
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "name": "In Progress",
-            "index": 4,
-            "coltag": "working",
-            "id": 908753,
-            "filters": {
-              "rootCondition": "any",
-              "filterGroups": []
-            },
-            "minimized": true
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "name": "In Review",
-            "index": 5,
-            "coltag": "Test",
-            "id": 396902,
-            "minimized": true
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "285zohor"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              "243",
+              "259"
+            ]
           },
           {
             "colType": "namedTag",
@@ -325,7 +314,7 @@
             "index": 6,
             "coltag": "done",
             "id": 328227,
-            "minimized": true
+            "minimized": false
           },
           {
             "id": 1936828579,
@@ -335,7 +324,7 @@
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*",
-            "minimized": true
+            "minimized": false
           },
           {
             "id": 3193261849,
@@ -494,8 +483,8 @@
           ]
         },
         "taskCount": {
-          "pending": 63,
-          "completed": 18
+          "pending": 65,
+          "completed": 19
         },
         "swimlanes": {
           "enabled": true,
@@ -518,7 +507,10 @@
             }
           ],
           "groupAllRest": true,
-          "verticalHeaderUI": false
+          "verticalHeaderUI": true,
+          "minimized": [
+            "Tags: first"
+          ]
         }
       },
       {
@@ -661,8 +653,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 63,
-          "completed": 18
+          "pending": 65,
+          "completed": 19
         },
         "swimlanes": {
           "enabled": false,
@@ -982,7 +974,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 368,
+      "uniqueIdCounter": 369,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
