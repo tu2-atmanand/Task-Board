@@ -231,11 +231,20 @@
       {
         "columns": [
           {
+            "id": 3187486162,
+            "index": 1,
+            "colType": "otherTags",
+            "active": true,
+            "collapsed": false,
+            "name": "Other tags",
+            "minimized": false
+          },
+          {
             "colType": "untagged",
             "active": true,
             "collapsed": false,
             "name": "Backlogs",
-            "index": 1,
+            "index": 2,
             "id": 226119,
             "sortCriterias": [],
             "filters": {
@@ -250,11 +259,11 @@
                 "uid": "k6wjlc63"
               }
             ],
-            "minimized": false
+            "minimized": true
           },
           {
             "id": 2485661779,
-            "index": 2,
+            "index": 3,
             "colType": "namedTag",
             "active": false,
             "collapsed": false,
@@ -284,7 +293,7 @@
             "active": true,
             "collapsed": false,
             "name": "Can be implemented",
-            "index": 3,
+            "index": 4,
             "coltag": "#pending",
             "id": 47626,
             "filters": {
@@ -301,10 +310,24 @@
               }
             ],
             "tasksIdManualOrder": [
+              "27",
+              "371",
+              "374",
               "365",
+              "375",
               "243",
-              "259"
+              "259",
+              "247"
             ]
+          },
+          {
+            "id": 3130768414,
+            "index": 5,
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Progress",
+            "coltag": "wip"
           },
           {
             "colType": "namedTag",
@@ -320,7 +343,7 @@
             "id": 1936828579,
             "index": 7,
             "colType": "namedTag",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*",
@@ -483,8 +506,8 @@
           ]
         },
         "taskCount": {
-          "pending": 65,
-          "completed": 19
+          "pending": 60,
+          "completed": 20
         },
         "swimlanes": {
           "enabled": true,
@@ -508,9 +531,7 @@
           ],
           "groupAllRest": true,
           "verticalHeaderUI": true,
-          "minimized": [
-            "Tags: first"
-          ]
+          "minimized": []
         }
       },
       {
@@ -974,7 +995,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 369,
+      "uniqueIdCounter": 376,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
