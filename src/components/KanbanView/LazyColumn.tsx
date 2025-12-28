@@ -643,7 +643,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			// }
 
 			// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
-			dragDropTasksManagerInsatance.handleDragOver(
+			dragDropTasksManagerInsatance.handleColumnDragOverEvent(
 				e.nativeEvent,
 				columnData,
 				targetColumnContainer

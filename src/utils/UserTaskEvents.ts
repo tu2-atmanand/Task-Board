@@ -401,7 +401,6 @@ export const updateTaskItemTags = (
 		});
 	} else {
 		newTask.title = sanitizeTags(newTask.title, oldTask.tags, newTags);
-		console.log("Sanitized title after tag update:", newTask.title);
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				oldTask.filePath,
@@ -420,13 +419,13 @@ export const updateTaskItemTags = (
  * @param {string | number | string[]} newValue - The new value of the property to update.
  * @returns {taskItem} The updated task item.
  */
-export const updateTaskItemProperty = (
+export const updateTaskItemProperty = async (
 	task: taskItem,
 	globalSettings: globalSettingsData,
 	property: string,
 	oldValue: string | number | string[],
 	newValue: string | number | string[]
-): taskItem => {
+): Promise<taskItem> => {
 	const updatedTask: taskItem = { ...task };
 	const isThisTaskNote = isTaskNotePresentInTags(
 		globalSettings.taskNoteIdentifierTag,
@@ -436,7 +435,7 @@ export const updateTaskItemProperty = (
 	switch (property) {
 		case "tags":
 			updatedTask.tags = newValue as string[];
-			if (isThisTaskNote) {
+			if (!isThisTaskNote) {
 				updatedTask.title = sanitizeTags(
 					task.title,
 					oldValue as string[],
@@ -449,7 +448,7 @@ export const updateTaskItemProperty = (
 			break;
 		case "priority":
 			updatedTask.priority = newValue as number;
-			if (isThisTaskNote) {
+			if (!isThisTaskNote) {
 				updatedTask.title = sanitizePriority(
 					globalSettings,
 					task.title,

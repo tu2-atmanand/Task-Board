@@ -897,6 +897,16 @@ export const sanitizeTags = (
 	newTagsList: string[],
 	cursorLocation?: cursorLocation
 ): string => {
+	console.log(
+		"sanitizeTags...\ntitle: ",
+		title,
+		"\noldTagsList: ",
+		oldTagsList,
+		"\nnewTagsList: ",
+		newTagsList,
+		"\ncursorLocation: ",
+		cursorLocation
+	);
 	// Remove <mark> and <font> tags before processing
 	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
@@ -907,8 +917,9 @@ export const sanitizeTags = (
 		t.trim()
 	);
 
-	const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
+	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
 	const newTagSet = new Set(newTagsList.map((t) => t.trim()));
+	const extractedTagsSet = new Set(extractedTags.map((t) => t.trim()));
 
 	// --------------------------------------------------
 	// 1. REMOVE TAGS THAT NO LONGER EXIST
@@ -924,7 +935,7 @@ export const sanitizeTags = (
 	// --------------------------------------------------
 	const tagsToAdd: string[] = [];
 	for (const tag of newTagSet) {
-		if (!oldTagSet.has(tag)) {
+		if (!extractedTagsSet.has(tag)) {
 			tagsToAdd.push(tag);
 		}
 	}

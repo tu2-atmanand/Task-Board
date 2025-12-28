@@ -70,7 +70,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			// Add remaining values that are not in customSortOrder
 			const customValues = new Set(customSortOrder.map((item) => item.value.replace('#', '')));
 			const remainingValues = uniqueSwimlanValues.filter((val) => !customValues.has(val));
-			console.log("KanbanSwimlanesContainer...\ncustomValues", customValues, "\nremainingValues", remainingValues);
+			// console.log("KanbanSwimlanesContainer...\ncustomValues", customValues, "\nremainingValues", remainingValues);
 
 			if (!groupAllRest) {
 				if (remainingValues.length > 0) {

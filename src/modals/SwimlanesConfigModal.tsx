@@ -8,22 +8,11 @@ import { t } from 'src/utils/lang/helper';
 import Sortable from 'sortablejs';
 import { RxDragHandleDots2 } from 'react-icons/rx';
 import { FaTrash } from 'react-icons/fa';
-
-interface SwimlaneConfig {
-	enabled: boolean;
-	showEmptySwimlanes: boolean;
-	maxHeight: string;
-	property: string;
-	customValue?: string;
-	sortCriteria: string;
-	customSortOrder?: { value: string; index: number }[];
-	groupAllRest?: boolean;
-	verticalHeaderUI: boolean;
-}
+import { swimlaneConfigs } from 'src/interfaces/BoardConfigs';
 
 interface SwimlanesConfigModalProps {
-	swimlaneConfig: SwimlaneConfig;
-	onSave: (config: SwimlaneConfig) => void;
+	swimlaneConfig: swimlaneConfigs;
+	onSave: (config: swimlaneConfigs) => void;
 	onCancel: () => void;
 }
 
@@ -89,7 +78,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 	}, [sortCriteria, customSortOrder.length]);
 
 	const handleSave = () => {
-		const updatedConfig: SwimlaneConfig = {
+		const updatedConfig: swimlaneConfigs = {
 			enabled,
 			showEmptySwimlanes,
 			property,
@@ -98,7 +87,8 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 			sortCriteria,
 			customSortOrder: sortCriteria === 'custom' ? customSortOrder : undefined,
 			groupAllRest,
-			verticalHeaderUI
+			verticalHeaderUI,
+			minimized: []
 		};
 		onSave(updatedConfig);
 	};
@@ -382,13 +372,13 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 
 export class SwimlanesConfigModal extends Modal {
 	root: ReactDOM.Root | null = null;
-	swimlaneConfig: SwimlaneConfig;
-	onSave: (config: SwimlaneConfig) => void;
+	swimlaneConfig: swimlaneConfigs;
+	onSave: (config: swimlaneConfigs) => void;
 
 	constructor(
 		app: App,
-		swimlaneConfig: SwimlaneConfig,
-		onSave: (config: SwimlaneConfig) => void
+		swimlaneConfig: swimlaneConfigs,
+		onSave: (config: swimlaneConfigs) => void
 	) {
 		super(app);
 		this.swimlaneConfig = swimlaneConfig;

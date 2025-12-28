@@ -18,7 +18,7 @@ import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical } from 'lucide-react';
-import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
+import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colTypeNames } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -918,7 +918,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
 			const payload: currentDragDataPayload = { task, sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index, swimlaneData: swimlaneData };
-			dragDropTasksManagerInsatance.handleCardDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
+			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Add dragging class after a small delay to not affect the drag image
 			const clone = el.cloneNode(true) as HTMLDivElement;
@@ -995,7 +995,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 										if (
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&
-											columnData?.colType === colType.namedTag &&
+											columnData?.colType === colTypeNames.namedTag &&
 											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
 										) {
 											return null;

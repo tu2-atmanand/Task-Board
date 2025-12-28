@@ -1,7 +1,7 @@
 import TaskBoard from "main";
 import { Notice } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
-import { colType } from "src/interfaces/Enums";
+import { colTypeNames } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
 	updateTaskItemProperty,
@@ -15,6 +15,7 @@ import {
 } from "src/utils/taskNote/TaskNoteUtils";
 import { sanitizeTags } from "src/utils/taskLine/TaskContentFormatter";
 import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
 
 export interface currentDragDataPayload {
 	task: taskItem;
@@ -40,6 +41,10 @@ class DragDropTasksManager {
 		// Private constructor to enforce singleton pattern
 	}
 
+	// --------------------------------------
+	// Basic GET/SET functions
+	// --------------------------------------
+
 	/**
 	 * Gets the singleton instance of DragDropTasksManager
 	 * @returns {DragDropTasksManager} The singleton instance
@@ -57,51 +62,6 @@ class DragDropTasksManager {
 	 */
 	setPlugin(plugin: TaskBoard): void {
 		this.plugin = plugin;
-	}
-
-	/**
-	 * Dims the dragged task item in the sourceColumnContainer to provide visual feedback
-	 * This also helps when the drop operation has failed and in this case the sourceContainer is not refreshed unnecessarily. Only the dim effect is removed.
-	 *
-	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
-	 */
-	dimDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
-		draggedTaskItem.classList.add("task-item-dragging-dimmed");
-	}
-
-	/**
-	 * Removes the dim effect from the dragged task item
-	 *
-	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
-	 */
-	removeDimFromDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
-		draggedTaskItem.classList.remove("task-item-dragging-dimmed");
-	}
-
-	/**
-	 * Clears all drag-related styling from all task items and columns
-	 *
-	 */
-	clearAllDragStyling(): void {
-		// For column its acceptable, since there will be less columns, so querySelecting them all is not so big issue.
-		const allColumnContainers = Array.from(
-			document.querySelectorAll(".TaskBoardColumnsSection")
-		) as HTMLDivElement[];
-		allColumnContainers.forEach((container) => {
-			container.classList.remove(
-				"drag-over-allowed",
-				"drag-over-not-allowed"
-			);
-		});
-
-		// TODO : This feels like overkill, because I am only dimming the single .taskItem which I will be dragging. Optimize later.
-		// Also clear dimming from all task items
-		// const allTaskItems = Array.from(
-		// 	document.querySelectorAll(".taskItem")
-		// ) as HTMLDivElement[];
-		// allTaskItems.forEach((item) => {
-		// 	item.classList.remove("task-item-dragging-dimmed");
-		// });
 	}
 
 	setDesiredDropIndex(index: number | null) {
@@ -138,8 +98,77 @@ class DragDropTasksManager {
 		this.currentDragData = null;
 	}
 
+	// --------------------------------------
+	// All utils to update task in the file, based on the column move action.
+	// --------------------------------------
+
+	handleTaskMove_same_column = async (
+		plugin: TaskBoard,
+		currentDragData: currentDragDataPayload,
+		sourceColumnData: ColumnData,
+		targetColumnData: ColumnData,
+		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+	): Promise<void> => {
+		// This means, user either wants to change the order of the taskItems within the column or is changing the swimlanes.
+		this.handleTasksOrderChange(
+			this.plugin!,
+			currentDragData,
+			sourceColumnData,
+			this.desiredDropIndex
+		);
+
+		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
+			const oldTask = currentDragData.task;
+			let newTask: taskItem = { ...oldTask };
+			newTask = await this.updateTaskItemOnSwimlaneChange(
+				newTask,
+				sourceColumnSwimlaneData,
+				targetColumnSwimlaneData,
+				plugin.settings.data.globalSettings
+			);
+			eventEmitter.emit("UPDATE_TASK", {
+				taskID: oldTask.id,
+				state: true,
+			});
+
+			const isThisTaskNote = isTaskNotePresentInTags(
+				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+				oldTask.tags
+			);
+
+			if (isThisTaskNote) {
+				updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+					sleep(1000).then(() => {
+						plugin.realTimeScanning.processAllUpdatedFiles(
+							oldTask.filePath,
+							oldTask.id
+						);
+					});
+				});
+			} else {
+				newTask.title = sanitizeTags(
+					newTask.title,
+					oldTask.tags,
+					newTask.tags
+				);
+				console.log("Sanitized title after tag update:", newTask.title);
+				updateTaskInFile(plugin, newTask, oldTask).then(() => {
+					plugin.realTimeScanning.processAllUpdatedFiles(
+						oldTask.filePath,
+						oldTask.id
+					);
+				});
+			}
+		} else {
+			setTimeout(() => {
+				eventEmitter.emit("REFRESH_BOARD");
+			}, 200);
+		}
+	};
+
 	/**
-	 * Updates the tags of a task when moved between columns of type colType.namedTag
+	 * Updates the tags of a task when moved between columns of type colTypeNames.namedTag
 	 * @param plugin TaskBoard plugin instance
 	 * @param task The task being moved
 	 * @param sourceColumn Source column data
@@ -157,8 +186,12 @@ class DragDropTasksManager {
 		if (
 			sourceColumn.coltag == undefined ||
 			targetColumn.coltag == undefined
-		)
+		) {
+			console.error(
+				"handleTaskMove_namedTag_to_namedTag: coltag undefined"
+			);
 			return;
+		}
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -177,7 +210,6 @@ class DragDropTasksManager {
 		// -----------------------------------------------
 		// STEP 1 - Will first update the properties of the task which should make it move from source column to target column.
 		// -----------------------------------------------
-		let newTags: string[] = oldTask.tags;
 
 		// Remove the source column tag if it exists
 		const sourceTag = sourceColumn.coltag;
@@ -187,7 +219,7 @@ class DragDropTasksManager {
 			"\ntask=",
 			oldTask
 		);
-		newTags = oldTask.tags.filter(
+		let newTags = oldTask.tags.filter(
 			(tag: string) =>
 				tag.replace("#", "").toLowerCase() !==
 				sourceTag.replace("#", "").toLowerCase()
@@ -202,7 +234,7 @@ class DragDropTasksManager {
 		newTags = Array.from(new Set(newTags));
 
 		newTask.tags = newTags;
-		newTask = updateTaskItemProperty(
+		newTask = await updateTaskItemProperty(
 			oldTask,
 			plugin.settings.data.globalSettings,
 			"tags",
@@ -210,43 +242,22 @@ class DragDropTasksManager {
 			newTask.tags
 		);
 
+		console.log(
+			"handleTaskMove_namedTag_to_namedTag...\nnewTask=",
+			newTask
+		);
+
 		// -----------------------------------------------
 		// STEP 3 - Update the task properties so that it moves from source swimlane to target swilane
 		// -----------------------------------------------
 		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			const property = sourceColumnSwimlaneData.property;
-			const oldValue = sourceColumnSwimlaneData.value;
-			const newValue = targetColumnSwimlaneData.value;
-
-			if (property === "tags") {
-				const oldTags = newTags;
-				// Remove old tag of source swimlane
-				newTags = newTags.filter(
-					(tag) =>
-						tag.replace("#", "").toLowerCase() !==
-						oldValue.replace("#", "").toLowerCase()
-				);
-
-				// Add new tag of target swimlane
-				newTags.push(newValue);
-				newTags = Array.from(new Set(newTags));
-
-				newTask = updateTaskItemProperty(
-					newTask,
-					plugin.settings.data.globalSettings,
-					property,
-					oldTags,
-					newTags
-				);
-			} else {
-				newTask = updateTaskItemProperty(
-					newTask,
-					plugin.settings.data.globalSettings,
-					property,
-					oldValue,
-					newValue
-				);
-			}
+			newTask = await this.updateTaskItemOnSwimlaneChange(
+				newTask,
+				sourceColumnSwimlaneData,
+				targetColumnSwimlaneData,
+				plugin.settings.data.globalSettings
+			);
+			console.log("newTask after swimlane change:", newTask);
 		}
 
 		// -----------------------------------------------
@@ -269,7 +280,12 @@ class DragDropTasksManager {
 				});
 			});
 		} else {
-			newTask.title = sanitizeTags(newTask.title, oldTask.tags, newTags);
+			newTask.title = sanitizeTags(
+				newTask.title,
+				oldTask.tags,
+				newTask.tags
+			);
+			console.log("Sanitized title :", newTask.title);
 			console.log("Sanitized title after tag update:", newTask.title);
 			updateTaskInFile(plugin, newTask, oldTask).then(() => {
 				plugin.realTimeScanning.processAllUpdatedFiles(
@@ -564,23 +580,78 @@ class DragDropTasksManager {
 		let newSettings = plugin.settings;
 		newSettings.data.boardConfigs[
 			currentDragData.currentBoardIndex
-		].columns[targetColumnData.index] = targetColumnData;
+		].columns[targetColumnData.index - 1] = targetColumnData;
 
 		// Persist settings and refresh the board
 		try {
 			plugin.saveSettings(newSettings);
-			// No need to refresh here, the view will auto-refresh on task update
-			// eventEmitter.emit("REFRESH_BOARD");
 		} catch (err) {
 			console.error("Error saving settings after task reorder:", err);
 		}
 	};
 
+	updateTaskItemOnSwimlaneChange = async (
+		task: taskItem,
+		sourceColumnSwimlaneData: swimlaneDataProp,
+		targetColumnSwimlaneData: swimlaneDataProp,
+		globalSettings: globalSettingsData
+	): Promise<taskItem> => {
+		const property = sourceColumnSwimlaneData.property;
+		const oldValue = sourceColumnSwimlaneData.value;
+		const newValue = targetColumnSwimlaneData.value;
+
+		let newTask: taskItem = { ...task };
+
+		if (property === "tags") {
+			const oldTags = task.tags ?? [];
+			let newTags: string[] = oldTags;
+			// Remove old tag of source swimlane
+			if (oldValue !== "All rest") {
+				newTags = newTags.filter(
+					(tag) =>
+						tag.replace("#", "").toLowerCase() !==
+						oldValue.replace("#", "").toLowerCase()
+				);
+			}
+
+			// Add new tag of target swimlane
+			newTags.push(newValue.startsWith("#") ? newValue : `#${newValue}`);
+			newTags = Array.from(new Set(newTags));
+
+			newTask = await updateTaskItemProperty(
+				newTask,
+				globalSettings,
+				property,
+				oldTags,
+				newTags
+			);
+		} else {
+			newTask = await updateTaskItemProperty(
+				newTask,
+				globalSettings,
+				property,
+				oldValue,
+				newValue
+			);
+		}
+
+		return newTask;
+	};
+
 	/**
-	 * Checks if a task is allowed to be dropped in the target column
-	 * Rules:
-	 * - If source and target column types are the same, allow drop
-	 * - If target column type is 'completed', allow drop
+	 * This is the rule-checker of this drag and drop manager.
+	 * Checks if a task is allowed to be dropped in the target column.
+	 *
+	 * Allow Drop Rules:
+	 * - If source and target column types are the same
+	 * - If target column type is "completed", allow drop
+	 * - Docs pending...
+	 *
+	 * Dont Allow Drop Rules:
+	 * - If the source column is of any other type, but the target column is of type dated and the 'to' and 'from' values are different.
+	 * - If the source column is of any other type, but the target column is of type "undated".
+	 * - If the source column is of any other type, but the target column is of type "untagged".
+	 * - If the source column is of any other type, but the target column is of type "otherTags".
 	 *
 	 * @param {ColumnData} sourceColumnData - The source column data
 	 * @param {ColumnData} targetColumnData - The target column data
@@ -590,25 +661,142 @@ class DragDropTasksManager {
 		sourceColumnData: ColumnData,
 		targetColumnData: ColumnData
 	): boolean {
-		// Allow drop if source and target column types are the same
-		if (sourceColumnData.colType === targetColumnData.colType) {
-			return true;
-		}
+		// Since there are more positive rules then negative ones.
+		// Hence this function will only mention the negative ones and return false.
+		// For all other cases it will return true.
 
-		// Allow drop if target column type is 'completed'
-		if (targetColumnData.colType === "completed") {
-			return true;
+		switch (targetColumnData.colType) {
+			case colTypeNames.dated:
+				if (
+					targetColumnData.datedBasedColumn &&
+					targetColumnData.datedBasedColumn?.to !==
+						targetColumnData.datedBasedColumn?.from
+				) {
+					return false;
+				} else {
+					return true;
+				}
+			case colTypeNames.undated:
+				return false;
+			case colTypeNames.untagged:
+				return false;
+			case colTypeNames.otherTags:
+				if (sourceColumnData.colType === colTypeNames.otherTags)
+					return true;
+				else return false;
+			default:
+				return true;
 		}
-
-		// Otherwise, drop is not allowed
-		return false;
 	}
+
+	// --------------------------------------
+	// Few utils to change the styling of the UI elements depending on the various drag and drop triggers.
+	// --------------------------------------
+
+	/**
+	 * Dims the dragged task item in the sourceColumnContainer to provide visual feedback
+	 * This also helps when the drop operation has failed and in this case the sourceContainer is not refreshed unnecessarily. Only the dim effect is removed.
+	 *
+	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
+	 */
+	dimDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
+		draggedTaskItem.classList.add("task-item-dragging-dimmed");
+	}
+
+	/**
+	 * Removes the dim effect from the dragged task item
+	 *
+	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
+	 */
+	removeDimFromDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
+		draggedTaskItem.classList.remove("task-item-dragging-dimmed");
+	}
+
+	/**
+	 * Show a card drop indicator (above or below a card element)
+	 *
+	 * @param {HTMLElement} cardEl - The card element
+	 * @param {boolean} isAbove - True if the indicator should be shown above the card, false otherwise
+	 */
+	showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
+		if (!this.plugin) return;
+		if (!cardEl || !cardEl.parentElement) return;
+
+		// Create indicator if not already created
+		if (!this.dropIndicator) {
+			this.dropIndicator = document.createElement("div");
+			this.dropIndicator.className =
+				"taskboard-drop-indicator is-visible";
+			this.dropIndicator.style.position = "absolute";
+			this.dropIndicator.style.pointerEvents = "none";
+			this.dropIndicator.style.zIndex = "9999";
+			this.dropIndicator.style.background =
+				"var(--interactive-accent, #5b8cff)";
+			this.dropIndicator.style.borderRadius = "4px";
+			// default height; adjusted below
+			this.dropIndicator.style.height = "4px";
+		}
+
+		const rect = cardEl.getBoundingClientRect();
+		const parentRect = cardEl.parentElement.getBoundingClientRect();
+		const topPos = isAbove
+			? `${rect.top - parentRect.top - 6}px`
+			: `${rect.bottom - parentRect.top + 2}px`;
+
+		this.dropIndicator.style.width = `${rect.width}px`;
+		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
+		this.dropIndicator.style.top = topPos;
+
+		cardEl.parentElement.appendChild(this.dropIndicator);
+	}
+
+	/**
+	 * Clears all drag-related styling from all task items and columns
+	 *
+	 */
+	clearAllDragStyling(): void {
+		// For column we can do this kind of heavy DOM traversing,
+		// since there will be less columns, so querySelecting them all is not so big issue.
+		const allColumnContainers = Array.from(
+			document.querySelectorAll(".TaskBoardColumnsSection")
+		) as HTMLDivElement[];
+		allColumnContainers.forEach((container) => {
+			container.classList.remove(
+				"drag-over-allowed",
+				"drag-over-not-allowed"
+			);
+		});
+
+		// Removes the drop indicator, if the target column had manualOrder sorting and if the dropIndicator was visible.
+		if (this.dropIndicator && this.dropIndicator.parentElement) {
+			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		}
+
+		// TODO : This feels like overkill, because I am only dimming the single .taskItem which I will be dragging. Optimize this later.
+		// Also clear dimming from all task items
+		// const allTaskItems = Array.from(
+		// 	document.querySelectorAll(".taskItem")
+		// ) as HTMLDivElement[];
+		// allTaskItems.forEach((item) => {
+		// 	item.classList.remove("task-item-dragging-dimmed");
+		// });
+	}
+
+	// --------------------------------------
+	// Main manager functions to handle various drag and drop related triggers.
+	// --------------------------------------
 
 	/**
 	 * Handle card drag start called from React components.
 	 * Sets current drag payload, dims the source element and prepares dataTransfer payload.
+	 *
+	 * @param {DragEvent} e - The drag event.
+	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element.
+	 * @param {currentDragDataPayload} currentDragData - The current drag data payload.
+	 * @param {number} dragIndex (Optional) - The index of the task item being dragged.
+	 *
 	 */
-	public handleCardDragStartEvent(
+	public handleDragStartEvent(
 		e: DragEvent,
 		draggedTaskItem: HTMLDivElement,
 		currentDragData: currentDragDataPayload,
@@ -654,42 +842,13 @@ class DragDropTasksManager {
 	}
 
 	/**
-	 * Show a card drop indicator (above or below a card element)
-	 */
-	public showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
-		if (!this.plugin) return;
-		if (!cardEl || !cardEl.parentElement) return;
-
-		// Create indicator if not already created
-		if (!this.dropIndicator) {
-			this.dropIndicator = document.createElement("div");
-			this.dropIndicator.className =
-				"taskboard-drop-indicator is-visible";
-			this.dropIndicator.style.position = "absolute";
-			this.dropIndicator.style.pointerEvents = "none";
-			this.dropIndicator.style.zIndex = "9999";
-			this.dropIndicator.style.background =
-				"var(--interactive-accent, #5b8cff)";
-			this.dropIndicator.style.borderRadius = "4px";
-			// default height; adjusted below
-			this.dropIndicator.style.height = "4px";
-		}
-
-		const rect = cardEl.getBoundingClientRect();
-		const parentRect = cardEl.parentElement.getBoundingClientRect();
-		const topPos = isAbove
-			? `${rect.top - parentRect.top - 6}px`
-			: `${rect.bottom - parentRect.top + 2}px`;
-
-		this.dropIndicator.style.width = `${rect.width}px`;
-		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
-		this.dropIndicator.style.top = topPos;
-
-		cardEl.parentElement.appendChild(this.dropIndicator);
-	}
-
-	/**
-	 * Handle dragover events when hovering a card element
+	 * Handles the drag over event and applies CSS styling to the target column container
+	 * based on whether the task is allowed to be dropped.
+	 *
+	 * @param {DragEvent} e - The drag event.
+	 * @param {HTMLElement} cardEl - The dragged task item DOM element.
+	 * @param {HTMLDivElement} columnContainerEl - The target column container DOM element.
+	 * @param {ColumnData} ColumnData - The column data for the target column.
 	 */
 	public handleCardDragOverEvent(
 		e: DragEvent,
@@ -704,7 +863,7 @@ class DragDropTasksManager {
 
 		// From here we should call below function to handle dragover styling on the column container.
 		// The below function will return true or false based on whether drop is allowed or not.
-		const dropAllowed = this.handleDragOver(
+		const dropAllowed = this.handleColumnDragOverEvent(
 			e,
 			ColumnData,
 			columnContainerEl
@@ -728,7 +887,7 @@ class DragDropTasksManager {
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
 	 */
-	handleDragOver(
+	public handleColumnDragOverEvent(
 		e: DragEvent,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement
@@ -771,6 +930,44 @@ class DragDropTasksManager {
 	}
 
 	/**
+	 * Handle drag leave event.
+	 * Clear desired drop index, remove indicator if present, and clear drag-over styling from all columns.
+	 * Also clear dimming from any dragged items.
+	 * @param {HTMLDivElement} columnContainerEl - The column container element
+	 */
+	public handleDragLeaveEvent(columnContainerEl: HTMLDivElement): void {
+		this.clearDesiredDropIndex();
+		// remove indicator if present
+		if (this.dropIndicator && this.dropIndicator.parentElement) {
+			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		}
+		this.dropIndicator = null;
+
+		columnContainerEl.classList.remove(
+			"drag-over-allowed",
+			"drag-over-not-allowed"
+		);
+
+		// Clear drag-over styling from all columns
+		// const allColumnContainers = Array.from(
+		// 	document.querySelectorAll(".TaskBoardColumnsSection")
+		// ) as HTMLDivElement[];
+		// allColumnContainers.forEach((container) => {
+		// 	container.classList.remove(
+		// 		"drag-over-allowed",
+		// 		"drag-over-not-allowed"
+		// 	);
+		// });
+
+		// clear dimming from any dragged items
+		// const allTaskItems = Array.from(document.querySelectorAll('.taskItem.task-item-dragging')) as HTMLDivElement[];
+		// allTaskItems.forEach((item) => {
+		// 	item.classList.remove('task-item-dragging');
+		// 	this.removeDimFromDraggedTaskItem(item);
+		// });
+	}
+
+	/**
 	 * Handles the drop event and performs required operations to update task properties
 	 * based on source and target column data
 	 *
@@ -778,7 +975,7 @@ class DragDropTasksManager {
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
 	 */
-	handleDrop(
+	public handleDrop(
 		e: DragEvent,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
@@ -787,6 +984,7 @@ class DragDropTasksManager {
 		console.log("DragDropTasksManager : handleDrop called...");
 		e.preventDefault();
 
+		// All checks before proceeding with the calculations...
 		if (!this.currentDragData) {
 			console.error("No current drag data available for drop operation.");
 			return;
@@ -795,7 +993,9 @@ class DragDropTasksManager {
 		const sourceColumnData = this.currentDragData.sourceColumnData;
 		const sourceColumnSwimlaneData = this.currentDragData.swimlaneData;
 		if (!sourceColumnData) {
-			console.error("No source column data available for drop.");
+			console.error(
+				"There was an error while capturing the source column data."
+			);
 			return;
 		}
 
@@ -837,18 +1037,16 @@ class DragDropTasksManager {
 
 		if (targetColumnData.colType === sourceColumnData.colType) {
 			if (targetColumnData.id === sourceColumnData.id) {
-				// This means user wants to change the order of the tasks in the same column
-				// But we need to check first if this column has sorting.criteria = "manualOrder".
-				this.handleTasksOrderChange(
+				this.handleTaskMove_same_column(
 					this.plugin!,
 					this.currentDragData,
 					sourceColumnData,
-					this.desiredDropIndex
+					targetColumnData,
+					sourceColumnSwimlaneData,
+					targetColumnSwimlaneData
 				);
-
-				eventEmitter.emit("REFRESH_BOARD");
 				return;
-			} else if (targetColumnData.colType === colType.namedTag) {
+			} else if (targetColumnData.colType === colTypeNames.namedTag) {
 				this.handleTaskMove_namedTag_to_namedTag(
 					this.plugin!,
 					this.currentDragData,
@@ -857,21 +1055,21 @@ class DragDropTasksManager {
 					sourceColumnSwimlaneData,
 					targetColumnSwimlaneData
 				);
-			} else if (targetColumnData.colType === colType.dated) {
+			} else if (targetColumnData.colType === colTypeNames.dated) {
 				this.handleTaskMove_dated_to_dated(
 					this.plugin!,
 					this.currentDragData,
 					sourceColumnData,
 					targetColumnData
 				);
-			} else if (targetColumnData.colType === colType.taskPriority) {
+			} else if (targetColumnData.colType === colTypeNames.taskPriority) {
 				this.handleTaskMove_priority_to_priority(
 					this.plugin!,
 					this.currentDragData,
 					sourceColumnData,
 					targetColumnData
 				);
-			} else if (targetColumnData.colType === colType.taskStatus) {
+			} else if (targetColumnData.colType === colTypeNames.taskStatus) {
 				this.handleTaskMove_status_to_status(
 					this.plugin!,
 					this.currentDragData,
@@ -883,7 +1081,7 @@ class DragDropTasksManager {
 					"This operation is not possible in the current version. Please request this idea to the developer."
 				);
 			}
-		} else if (targetColumnData.colType === colType.completed) {
+		} else if (targetColumnData.colType === colTypeNames.completed) {
 			// This means user is moving task to completed column from any other type of column.
 			// This operation should basically mark the task as completed
 			this.handleTaskMove_to_completed(
@@ -892,7 +1090,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData
 			);
-		} else if (targetColumnData.colType === colType.dated) {
+		} else if (targetColumnData.colType === colTypeNames.dated) {
 			// This means user is moving task to a dated column from any other type of column.
 			// This operation should basically add a date property to the task based on the target column's dateType
 			this.handleTaskMove_to_dated(
@@ -901,7 +1099,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData
 			);
-		} else if (targetColumnData.colType === colType.namedTag) {
+		} else if (targetColumnData.colType === colTypeNames.namedTag) {
 			// This means user is moving task to a namedTag column from any other type of column.
 			// This operation should basically add the target column's tag to the task
 			this.handleTaskMove_to_namedTag(
@@ -910,7 +1108,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData
 			);
-		} else if (targetColumnData.colType === colType.taskPriority) {
+		} else if (targetColumnData.colType === colTypeNames.taskPriority) {
 			// This means user is moving task to a priority column from any other type of column.
 			// This operation should basically update the task's priority based on the target column's taskPriority
 			this.handleTaskMove_to_priority(
@@ -919,7 +1117,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData
 			);
-		} else if (targetColumnData.colType === colType.taskStatus) {
+		} else if (targetColumnData.colType === colTypeNames.taskStatus) {
 			// This means user is moving task to a status column from any other type of column.
 			// This operation should basically update the task's status based on the target column's taskStatus
 			this.handleTaskMove_to_status(
@@ -933,41 +1131,6 @@ class DragDropTasksManager {
 				"This operation is not possible in the current version. Please request this idea to the developer."
 			);
 		}
-	}
-
-	/**
-	 * Handle leaving a drop area - clear indicators and styling
-	 */
-	public handleDragLeaveEvent(columnContainerEl: HTMLDivElement): void {
-		this.clearDesiredDropIndex();
-		// remove indicator if present
-		if (this.dropIndicator && this.dropIndicator.parentElement) {
-			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
-		}
-		this.dropIndicator = null;
-
-		columnContainerEl.classList.remove(
-			"drag-over-allowed",
-			"drag-over-not-allowed"
-		);
-
-		// Clear drag-over styling from all columns
-		// const allColumnContainers = Array.from(
-		// 	document.querySelectorAll(".TaskBoardColumnsSection")
-		// ) as HTMLDivElement[];
-		// allColumnContainers.forEach((container) => {
-		// 	container.classList.remove(
-		// 		"drag-over-allowed",
-		// 		"drag-over-not-allowed"
-		// 	);
-		// });
-
-		// clear dimming from any dragged items
-		// const allTaskItems = Array.from(document.querySelectorAll('.taskItem.task-item-dragging')) as HTMLDivElement[];
-		// allTaskItems.forEach((item) => {
-		// 	item.classList.remove('task-item-dragging');
-		// 	this.removeDimFromDraggedTaskItem(item);
-		// });
 	}
 }
 
