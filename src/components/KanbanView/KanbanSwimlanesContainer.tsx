@@ -7,8 +7,8 @@ import Column from './Column';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
-import { Menu } from 'obsidian';
-import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { ChevronDown, ChevronLast, ChevronLeft, ChevronRight } from 'lucide-react';
+import { eventEmitter } from 'src/services/EventEmitter';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -22,7 +22,7 @@ interface SwimlaneRow {
 	swimlaneName: string;
 	swimlaneValue: string;
 	tasks: taskItem[][];
-	// minimized: boolean;
+	minimized: boolean;
 }
 
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
@@ -35,8 +35,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
 
 	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
-	const { property, sortCriteria, customSortOrder, customValue, groupAllRest, maxHeight: maxSwimlaneHeight, verticalHeaderUI } = board.swimlanes;
-	const swimlanes = useMemo(() => {
+	const { property, sortCriteria, customSortOrder, customValue, groupAllRest, maxHeight: maxSwimlaneHeight, verticalHeaderUI, minimized } = board.swimlanes;
+	const swimlanes: SwimlaneRow[] = useMemo(() => {
 		if (!board.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
 		}
@@ -150,10 +150,14 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				});
 			});
 
+			const swimlaneName = t(property) + ': ' + swimlaneItem.value;
+			const isSwimlaneMinimized = minimized?.includes(swimlaneName) ?? false;
+
 			return {
-				swimlaneName: t(property) + ': ' + swimlaneItem.value,
+				swimlaneName: swimlaneName,
 				swimlaneValue: swimlaneItem.value,
 				tasks: tasksByColumn,
+				minimized: isSwimlaneMinimized,
 			};
 		});
 
@@ -210,6 +214,24 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 	const activeColumns = board.columns.filter((col) => col.active);
 
+	async function handleSwimlaneMinimize(rowIndex: number) {
+		try {
+			const swimlaneName = swimlanes[rowIndex]?.swimlaneName;
+			if (!swimlaneName) return;
+			const boardIndex = plugin.settings.data.boardConfigs.findIndex((b) => b.name === board.name);
+			if (boardIndex === -1) return;
+			const swimCfg = plugin.settings.data.boardConfigs[boardIndex].swimlanes || { minimized: [] };
+			const arr = Array.isArray(swimCfg.minimized) ? [...swimCfg.minimized] : [];
+			const idx = arr.indexOf(swimlaneName);
+			if (idx === -1) arr.push(swimlaneName); else arr.splice(idx, 1);
+			plugin.settings.data.boardConfigs[boardIndex].swimlanes.minimized = arr;
+			await plugin.saveSettings();
+			eventEmitter.emit('REFRESH_BOARD');
+		} catch (err) {
+			console.error('Error toggling swimlane minimize:', err);
+		}
+	}
+
 	// Render a sticky header row of column headers across swimlanes
 	return (
 		<div className="kanbanSwimlanesGrid">
@@ -236,7 +258,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				{swimlanes.map((swimlane, rowIndex) => (
 					<React.Fragment key={swimlane.swimlaneValue}>
 						{verticalHeaderUI ? (
-							<div className="swimlaneRow verticalUI">
+							<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`}>
 								{/* Swimlane Label */}
 								<div className='swimlaneHeaderContainer-vertical'>
 									<div className='swimlaneHeader-vertical'>
@@ -246,12 +268,15 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 										<div className="swimlaneLabel-vertical" title={swimlane.swimlaneName}>
 											{swimlane.swimlaneName}
 										</div>
+										<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
+											{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
+										</div>
 									</div>
 								</div>
 
 								{/* Columns for this Swimlane */}
-								<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
-									{activeColumns.map((column, colIndex) => {
+								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
 										const swimlaneData = {
 											property: board.swimlanes.property,
 											value: swimlane.swimlaneValue,
@@ -274,10 +299,13 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								</div>
 							</div>
 						) : (
-							<div className="swimlaneRow">
+							<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`}>
 								{/* Swimlane Label */}
 								<div className='swimlaneHeaderContainer'>
 									<div className='swimlaneHeader'>
+										<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
+											{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
+										</div>
 										<div className="swimlaneLabel" title={swimlane.swimlaneName}>
 											{swimlane.swimlaneName}
 										</div>
@@ -288,8 +316,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								</div>
 
 								{/* Columns for this Swimlane */}
-								<div className="swimlaneColumnsWrapper" style={{ maxHeight: maxSwimlaneHeight }}>
-									{activeColumns.map((column, colIndex) => {
+								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
 										const swimlaneData = {
 											property: board.swimlanes.property,
 											value: swimlane.swimlaneValue,

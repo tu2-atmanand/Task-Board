@@ -6631,9 +6631,30 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	margin-bottom: 5px;
 }
 
+.swimlaneRow.minimized {
+	display: flex;
+	flex-direction: column;
+	gap: var(--swimlane-gap, 1px);
+	background-color: var(--background-primary);
+	padding: 0;
+	margin-bottom: 5px;
+	position: sticky;
+	left: 0;
+	z-index: 5;
+	width: 100%;
+	transition: background-color 0.15s ease;
+}
+
 .swimlaneRow.verticalUI {
 	display: flex;
 	flex-direction: row;
+}
+
+.swimlaneRow.verticalUI.minimized {
+	min-height: 2rem;
+	min-width: 100%;
+	position: sticky;
+	left: 0;
 }
 
 /* First swimlane row - make headers sticky */
@@ -6673,6 +6694,16 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	min-height: 200px;
 }
 
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical {
+	min-width: 100%;
+	max-width: max-content;
+	padding-block: 0;
+	min-height: 2rem;
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+}
+
 .swimlaneHeader {
 	position: sticky;
 	left: 1rem;
@@ -6693,10 +6724,11 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 .swimlaneHeader-vertical {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: space-between;
 	font-weight: 600;
-	margin-block: 1rem;
+	/* margin-block: 1rem; */
 	color: var(--text-normal);
 	font-size: 0.9em;
 	text-align: center;
@@ -6704,7 +6736,13 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	/* overflow: hidden; */
 	text-overflow: ellipsis;
 	min-height: 100%;
-	flex-direction: column;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 1rem;
 }
 
 /* Swimlane label on the left */
@@ -6731,6 +6769,12 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	word-break: break-word;
 	z-index: 5;
 	transform: rotate(270deg);
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneLabel-vertical {
+	transform: rotate(0deg);
+
+	transition: transform 0.3s ease-in-out;
 }
 
 .swimlaneHeaderSwimlaneCount {
@@ -6865,4 +6909,25 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	cursor: grab;
 }
 
-/* End Drag & Drop Styles */
+/* Swimlane minimize/expand animations */
+.swimlaneColumnsWrapper {
+	overflow: hidden;
+	transition: max-height 260ms ease;
+}
+
+.swimlaneRow.minimized .swimlaneColumnsWrapper {
+	max-height: 0px !important;
+	max-width: 0px !important;
+}
+
+.swimlaneHeaderContainerMinimizICon {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	padding: 0 6px;
+}
+
+.swimlaneHeaderContainerMinimizICon svg {
+	width: 14px;
+	height: 14px;
+}
