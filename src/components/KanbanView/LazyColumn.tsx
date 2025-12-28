@@ -396,7 +396,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 * @param {number} dropIndex - The index at which to drop the task.
 	 */
 	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
-		console.log('LazyColumn : handleTaskDrop');
 		e.preventDefault();
 		setIsDragOver(false);
 		setInsertIndex(null);
@@ -438,7 +437,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	};
 
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log('LazyColumn : handleDrop');
 		e.preventDefault();
 		setIsDragOver(false);
 
@@ -529,7 +527,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// This function will be only run when user will drag the taskItem on another taskItem.
 	// Compute insertion index based on mouse Y relative to task items inside the container.
 	const handleTaskItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log('LazyColumn : handleTaskItemDragOver');
 		e.preventDefault();
 		setIsDragOver(true);
 		try {
@@ -683,7 +680,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	// Handle the dragleave event to remove the visual effect
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log("LazyColumn : handleDragLeave ...");
+		// Avoid flicker: if the drag event indicates the pointer is still within the container bounds,
+		// ignore this dragleave (this happens when moving between child elements).
+		try {
+			const container = e.currentTarget as HTMLElement;
+			const x = e.clientX;
+			const y = e.clientY;
+			if (typeof x === 'number' && typeof y === 'number') {
+				const rect = container.getBoundingClientRect();
+				if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+					// still inside container — ignore to prevent CSS flicker
+					return;
+				}
+			}
+		} catch (err) {
+			// ignore and continue cleanup
+		}
+
 		setIsDragOver(false);
 		setInsertIndex(null);
 		dragDropTasksManagerInsatance.clearDesiredDropIndex();
@@ -729,8 +742,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}
 						onDragOver={(e) => { handleDragOver(e); }}
-						onDrop={handleDrop}
 						onDragLeave={handleDragLeave}
+						onDrop={handleDrop}
 						onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
 					>
 						{columnData.minimized ? <></> : (
