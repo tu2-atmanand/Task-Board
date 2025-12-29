@@ -9,6 +9,7 @@ import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
 import { ChevronDown, ChevronLast, ChevronLeft, ChevronRight } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { colTypeNames } from 'src/interfaces/Enums';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -35,7 +36,17 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
 
 	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
-	const { property, sortCriteria, customSortOrder, customValue, groupAllRest, maxHeight: maxSwimlaneHeight, verticalHeaderUI, minimized } = board.swimlanes;
+	const {
+		property,
+		sortCriteria,
+		customSortOrder,
+		customValue,
+		groupAllRest,
+		maxHeight: maxSwimlaneHeight,
+		verticalHeaderUI,
+		minimized
+	} = board.swimlanes;
+
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
 		if (!board.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
@@ -58,6 +69,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 		// When grouping remaining values into a single "All rest" swimlane,
 		// keep the remaining values so we can aggregate tasks later.
+		let customValues: Set<string> = new Set();
 		let remainingValuesForAllRest: string[] = [];
 
 		if (sortCriteria === 'custom' && customSortOrder && customSortOrder.length > 0) {
@@ -68,7 +80,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			}));
 
 			// Add remaining values that are not in customSortOrder
-			const customValues = new Set(customSortOrder.map((item) => item.value.replace('#', '')));
+			customValues = new Set(customSortOrder.map((item) => item.value.replace('#', '').toLocaleLowerCase()));
 			const remainingValues = uniqueSwimlanValues.filter((val) => !customValues.has(val));
 			// console.log("KanbanSwimlanesContainer...\ncustomValues", customValues, "\nremainingValues", remainingValues);
 
@@ -127,11 +139,12 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				// property values are in the remainingValuesForAllRest list.
 				if (swimlaneItem.value === 'All rest') {
 					if (!remainingValuesForAllRest || remainingValuesForAllRest.length === 0) return [];
-					return columnTasks.filter((task) => {
+					return columnTasks.filter((task: taskItem) => {
 						const values = getPropertyValues(task, property, customValue);
 						if (property === "tags") {
 							values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
-							return values.some((v) => remainingValuesForAllRest.includes(v.replace('#', '').toLocaleLowerCase())) || values.length === 0;
+							const doesValuesHaveCustomValues = values.some((v: string) => customValues.has(v));
+							return values.some((v: string) => remainingValuesForAllRest.includes(v) && !doesValuesHaveCustomValues) || values.length === 0;
 						}
 
 						return values.some((v) => remainingValuesForAllRest.includes(v));
