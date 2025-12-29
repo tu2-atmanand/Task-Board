@@ -506,8 +506,8 @@
           ]
         },
         "taskCount": {
-          "pending": 60,
-          "completed": 20
+          "pending": 65,
+          "completed": 19
         },
         "swimlanes": {
           "enabled": true,
@@ -995,7 +995,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 376,
+      "uniqueIdCounter": 377,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
