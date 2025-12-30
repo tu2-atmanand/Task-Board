@@ -414,7 +414,7 @@ const Column: React.FC<ColumnProps> = ({
 					// ignore and continue to default handling
 				}
 
-				dragDropTasksManagerInsatance.handleDrop(
+				dragDropTasksManagerInsatance.handleDropEvent(
 					e.nativeEvent,
 					columnData,
 					targetColumnContainer

@@ -1,6 +1,6 @@
 import TaskBoard from "main";
 import { WorkspaceLeaf, TFile } from "obsidian";
-import { EditButtonMode } from "src/interfaces/Enums";
+import { EditButtonMode, UniversalDateOptions } from "src/interfaces/Enums";
 import { taskItem, UpdateTaskEventData } from "src/interfaces/TaskItem";
 import {
 	openEditTaskNoteModal,
@@ -16,7 +16,10 @@ import {
 import { updateTaskInFile } from "./taskLine/TaskLineUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import {
+	sanitizeDueDate,
 	sanitizePriority,
+	sanitizeScheduledDate,
+	sanitizeStartDate,
 	sanitizeTags,
 } from "./taskLine/TaskContentFormatter";
 import {
@@ -290,11 +293,23 @@ export const updateTaskItemDate = (
 	oldTask: taskItem,
 	dateType: "startDate" | "scheduledDate" | "due",
 	newDate: string
-) => {
-	const newTask = { ...oldTask } as taskItem;
-	if (dateType === "startDate") newTask.startDate = newDate;
-	if (dateType === "scheduledDate") newTask.scheduledDate = newDate;
-	if (dateType === "due") newTask.due = newDate;
+): void => {
+	let newTask = { ...oldTask } as taskItem;
+	switch (dateType) {
+		case UniversalDateOptions.startDate:
+			newTask.startDate = newDate;
+			break;
+		case UniversalDateOptions.scheduledDate:
+			newTask.scheduledDate = newDate;
+			break;
+		case UniversalDateOptions.dueDate:
+			newTask.due = newDate;
+			break;
+		default:
+			console.log(
+				"error while updating the date value. Date type unknown."
+			);
+	}
 
 	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
 
@@ -313,6 +328,34 @@ export const updateTaskItemDate = (
 			});
 		});
 	} else {
+		switch (dateType) {
+			case UniversalDateOptions.startDate:
+				newTask.title = sanitizeStartDate(
+					plugin.settings.data.globalSettings,
+					newTask.title,
+					newDate
+				);
+				break;
+			case UniversalDateOptions.scheduledDate:
+				newTask.title = sanitizeScheduledDate(
+					plugin.settings.data.globalSettings,
+					newTask.title,
+					newDate
+				);
+				break;
+			case UniversalDateOptions.dueDate:
+				newTask.title = sanitizeDueDate(
+					plugin.settings.data.globalSettings,
+					newTask.title,
+					newDate
+				);
+				break;
+			default:
+				console.log(
+					"error while updating the date value. Date type unknown."
+				);
+		}
+
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				oldTask.filePath,

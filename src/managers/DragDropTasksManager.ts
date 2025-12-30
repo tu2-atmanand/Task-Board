@@ -1,7 +1,7 @@
 import TaskBoard from "main";
 import { Notice } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
-import { colTypeNames } from "src/interfaces/Enums";
+import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
 	updateTaskItemProperty,
@@ -16,6 +16,9 @@ import {
 import { sanitizeTags } from "src/utils/taskLine/TaskContentFormatter";
 import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
+import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
+import { bugReporter } from "src/services/OpenModals";
+import { DatePickerModal } from "src/modals/date_picker";
 
 export interface currentDragDataPayload {
 	task: taskItem;
@@ -305,29 +308,97 @@ class DragDropTasksManager {
 	 */
 	handleTaskMove_dated_to_dated = async (
 		plugin: TaskBoard,
-		currentDragData: currentDragDataPayload | null,
+		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
-		targetColumn: ColumnData
+		targetColumn: ColumnData,
+		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
 	): Promise<void> => {
-		if (!currentDragData) {
-			console.error("No current drag data available for reordering.");
+		if (!currentDragData || !targetColumn.datedBasedColumn) {
+			console.error(
+				"No current drag data available for reordering : ",
+				JSON.stringify(currentDragData),
+				"\nOr the target column data : ",
+				JSON.stringify(targetColumn)
+			);
 			return;
 		}
-		const task = currentDragData.task;
 
 		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
 
-		// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-		const dateType =
-			(sourceColumn.datedBasedColumn?.dateType as
-				| "startDate"
-				| "scheduledDate"
-				| "due") || "due";
-		const currentDate = (task as taskItem)[dateType] || "";
+		const oldTask = currentDragData.task;
+		let newTask = { ...oldTask } as taskItem;
 
-		// For dated columns, we'll keep the same date from source
-		if (currentDate) {
-			updateTaskItemDate(plugin, task, dateType, currentDate);
+		this.handleTasksOrderChange(
+			plugin,
+			currentDragData,
+			targetColumn,
+			this.desiredDropIndex
+		);
+
+		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
+			newTask = await this.updateTaskItemOnSwimlaneChange(
+				newTask,
+				sourceColumnSwimlaneData,
+				targetColumnSwimlaneData,
+				plugin.settings.data.globalSettings
+			);
+			console.log("newTask after swimlane change:", newTask);
+		}
+
+		if (
+			targetColumn.datedBasedColumn &&
+			targetColumn.datedBasedColumn.from ===
+				targetColumn.datedBasedColumn.to
+		) {
+			// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
+			const dateType =
+				(targetColumn.datedBasedColumn?.dateType as
+					| UniversalDateOptions.startDate
+					| UniversalDateOptions.scheduledDate
+					| UniversalDateOptions.dueDate) ||
+				UniversalDateOptions.dueDate;
+
+			const oldDateValueOfTheTask = newTask[dateType] || "";
+
+			const newDateValue = getAllDatesInRelativeRange(
+				targetColumn.datedBasedColumn?.from,
+				targetColumn.datedBasedColumn?.to
+			)[0];
+
+			// newTask[dateType] = newDateValue;
+
+			updateTaskItemDate(plugin, newTask, dateType, newDateValue);
+		} else if (
+			targetColumn.datedBasedColumn &&
+			targetColumn.datedBasedColumn.from <=
+				targetColumn.datedBasedColumn.to
+		) {
+			const dateType =
+				(targetColumn.datedBasedColumn?.dateType as
+					| UniversalDateOptions.startDate
+					| UniversalDateOptions.scheduledDate
+					| UniversalDateOptions.dueDate) ||
+				UniversalDateOptions.dueDate;
+
+			// Call the date input modal, to take new date from user.
+			const datePicker = new DatePickerModal(plugin.app, plugin);
+			datePicker.onDateSelected = async (date: string | null) => {
+				if (date) {
+					// newTask[dateType] = date;
+					updateTaskItemDate(plugin, newTask, dateType, date);
+				}
+			};
+
+			datePicker.open();
+		} else {
+			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
+			bugReporter(
+				plugin,
+				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
+				`Column configuration :	${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated"
+			);
 		}
 	};
 
@@ -342,7 +413,9 @@ class DragDropTasksManager {
 		plugin: TaskBoard,
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
-		targetColumn: ColumnData
+		targetColumn: ColumnData,
+		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
 	): Promise<void> => {
 		const { updateTaskItemPriority } = await import(
 			"src/utils/UserTaskEvents"
@@ -676,16 +749,16 @@ class DragDropTasksManager {
 		// For all other cases it will return true.
 
 		switch (targetColumnData.colType) {
-			case colTypeNames.dated:
-				if (
-					targetColumnData.datedBasedColumn &&
-					targetColumnData.datedBasedColumn?.to !==
-						targetColumnData.datedBasedColumn?.from
-				) {
-					return false;
-				} else {
-					return true;
-				}
+			// case colTypeNames.dated:
+			// 	if (
+			// 		targetColumnData.datedBasedColumn &&
+			// 		targetColumnData.datedBasedColumn?.to !==
+			// 			targetColumnData.datedBasedColumn?.from
+			// 	) {
+			// 		return false;
+			// 	} else {
+			// 		return true;
+			// 	}
 			case colTypeNames.undated:
 				return false;
 			case colTypeNames.untagged:
@@ -1070,14 +1143,18 @@ class DragDropTasksManager {
 					this.plugin!,
 					this.currentDragData,
 					sourceColumnData,
-					targetColumnData
+					targetColumnData,
+					sourceColumnSwimlaneData,
+					targetColumnSwimlaneData
 				);
 			} else if (targetColumnData.colType === colTypeNames.taskPriority) {
 				this.handleTaskMove_priority_to_priority(
 					this.plugin!,
 					this.currentDragData,
 					sourceColumnData,
-					targetColumnData
+					targetColumnData,
+					sourceColumnSwimlaneData,
+					targetColumnSwimlaneData
 				);
 			} else if (targetColumnData.colType === colTypeNames.taskStatus) {
 				this.handleTaskMove_status_to_status(

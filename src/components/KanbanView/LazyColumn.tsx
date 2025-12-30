@@ -406,7 +406,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		}
 
 		// We are basically doing same thing from the handleDrop function below.
-		dragDropTasksManagerInsatance.handleDrop(
+		dragDropTasksManagerInsatance.handleDropEvent(
 			e.nativeEvent,
 			columnData,
 			targetColumnContainer,
@@ -508,7 +508,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			// 	// ignore and continue to default handling
 			// }
 
-			dragDropTasksManagerInsatance.handleDrop(
+			dragDropTasksManagerInsatance.handleDropEvent(
 				e.nativeEvent,
 				columnData,
 				targetColumnContainer,

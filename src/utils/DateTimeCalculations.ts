@@ -106,3 +106,40 @@ export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
 	}
 	return "";
 };
+
+
+// import { DateTime } from "luxon";
+
+// function getDates(fromDate: number, toDate: number): string[] {
+// 	const now = DateTime.now();
+// 	const startDate = now.plusDays(fromDate);
+// 	const endDate = now.plusDays(toDate);
+// 	const dates: string[] = [];
+// 	let currentDate = startDate;
+// 	while (currentDate <= endDate) {
+// 		dates.push(currentDate.toISODate());
+// 		currentDate = currentDate.plusDays(1);
+// 	}
+// 	return dates;
+// }
+
+
+/**
+ * Returns an array of dates in the format "YYYY-MM-DD" from the given fromDate to toDate.
+ * The fromDate and toDate are the number of days from the current date.
+ * @param fromDate - The number of days from the current date to start the date range.
+ * @param toDate - The number of days from the current date to end the date range.
+ * @returns An array of dates in the format "YYYY-MM-DD".
+ */
+export function getAllDatesInRelativeRange(fromDate: number, toDate: number): string[] {
+	const now = new Date();
+	const startDate = new Date(now.getTime() + fromDate * 24 * 60 * 60 * 1000);
+	const endDate = new Date(now.getTime() + toDate * 24 * 60 * 60 * 1000);
+	const dates: string[] = [];
+	let currentDate = new Date(startDate.getTime());
+	while (currentDate <= endDate) {
+		dates.push(currentDate.toISOString().split("T")[0]);
+		currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
+	}
+	return dates;
+}
