@@ -590,6 +590,13 @@ class DragDropTasksManager {
 		}
 	};
 
+	/**
+	 * Handles reordering of tasks within the same column with swimlane sorting
+	 * @param plugin TaskBoard plugin instance
+	 * @param task The task being moved
+	 * @param targetColumnData The column data with swimlane sorting
+	 * @param desiredIndex The desired index to insert the task at
+	 */
 	updateTaskItemOnSwimlaneChange = async (
 		task: taskItem,
 		sourceColumnSwimlaneData: swimlaneDataProp,
@@ -615,7 +622,10 @@ class DragDropTasksManager {
 			}
 
 			// Add new tag of target swimlane
-			newTags.push(newValue.startsWith("#") ? newValue : `#${newValue}`);
+			if (newValue !== "All rest")
+				newTags.push(
+					newValue.startsWith("#") ? newValue : `#${newValue}`
+				);
 			newTags = Array.from(new Set(newTags));
 
 			newTask = await updateTaskItemProperty(
@@ -975,7 +985,7 @@ class DragDropTasksManager {
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
 	 */
-	public handleDrop(
+	public handleDropEvent(
 		e: DragEvent,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
