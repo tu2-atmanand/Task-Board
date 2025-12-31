@@ -257,6 +257,28 @@ export const getSanitizedTaskContent = (
 };
 
 /**
+ * Sanitizes the status value of a task by replacing the old status value with a new one.
+ * If there is an issue with extracting the old status value, the old title value is returned as it is.
+ * @param {string} oldTitle - The old task title.
+ * @param {string} newStatusValue - The new status value to replace with.
+ * @returns {string} The sanitized task title with the new status value.
+ */
+export const sanitizeStatus = (
+	oldTitle: string,
+	newStatusValue: string
+): string => {
+	const oldStatusValuematch = oldTitle.match(/\[(.)\]/); // Extract the symbol inside [ ]
+
+	if (!oldStatusValuematch || oldStatusValuematch.length < 2) {
+		console.warn(
+			"There was an issue while extracting the old status value from the old title. Old title value has been returned as it is."
+		);
+		return oldTitle;
+	}
+	return oldTitle.replace(oldStatusValuematch[0], `[${newStatusValue}]`);
+};
+
+/**
  * Function to sanitize the created date inside the task title.
  * @param globalSettings - The global settings data.
  * @param title  - The title of the task.
