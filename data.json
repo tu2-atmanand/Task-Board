@@ -23,6 +23,11 @@
               }
             ],
             "tasksIdManualOrder": [
+              "367",
+              "372",
+              "398696308",
+              "373",
+              "370",
               "3077781059",
               "4184100420",
               "3052793295",
@@ -70,8 +75,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 59,
-          "completed": 18
+          "pending": 65,
+          "completed": 19
         }
       },
       {
@@ -310,14 +315,14 @@
               }
             ],
             "tasksIdManualOrder": [
-              "27",
-              "371",
               "374",
+              "371",
               "365",
-              "375",
               "243",
               "259",
-              "247"
+              "247",
+              "27",
+              "375"
             ]
           },
           {
@@ -1000,7 +1005,7 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 2,
         "taskId": "",
         "settingTab": 1
       },
