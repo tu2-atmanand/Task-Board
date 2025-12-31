@@ -573,7 +573,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					}
 				}
 
-
+				console.log("Setting desired drop index to:", pos);
 				// Throttle updates via RAF
 				scheduleSetInsertIndex(pos);
 				// Store desired drop index in manager

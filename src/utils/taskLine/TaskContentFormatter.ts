@@ -685,7 +685,7 @@ export const sanitizeCancellationDate = (
  * @param title - The title of the task.
  * @param newTime - The new time to be sanitized and added to the title.
  * @param cursorLocation - (Optional) The cursor location to insert the time at a specific position.
- * @returns The sanitized time string to be used in the task title.
+ * @returns The sanitized title with updated time value.
  */
 export const sanitizeTime = (
 	globalSettings: globalSettingsData,

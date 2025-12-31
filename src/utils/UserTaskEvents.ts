@@ -20,6 +20,7 @@ import {
 	sanitizePriority,
 	sanitizeScheduledDate,
 	sanitizeStartDate,
+	sanitizeStatus,
 	sanitizeTags,
 } from "./taskLine/TaskContentFormatter";
 import {
@@ -195,7 +196,7 @@ export const updateTaskItemStatus = (
 	oldTask: taskItem,
 	newStatus: string
 ) => {
-	const newTask = { ...oldTask };
+	let newTask = { ...oldTask };
 	newTask.status = newStatus;
 
 	let eventData: UpdateTaskEventData = {
@@ -220,6 +221,7 @@ export const updateTaskItemStatus = (
 			});
 		});
 	} else {
+		newTask.title = sanitizeStatus(newTask.title, newTask.status);
 		updateTaskInFile(plugin, newTask, oldTask).then((newId) => {
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				oldTask.filePath,
@@ -244,13 +246,13 @@ export const updateTaskItemPriority = (
 	oldTask: taskItem,
 	newPriority: number
 ) => {
-	const newTask = { ...oldTask } as taskItem;
+	let newTask = { ...oldTask } as taskItem;
 	newTask.priority = newPriority;
 
 	let eventData = {
 		taskID: oldTask.id,
 		state: true,
-	} as any;
+	} as UpdateTaskEventData;
 	eventEmitter.emit("UPDATE_TASK", eventData);
 
 	const isThisTaskNote = isTaskNotePresentInTags(
@@ -268,6 +270,11 @@ export const updateTaskItemPriority = (
 			});
 		});
 	} else {
+		newTask.title = sanitizePriority(
+			plugin.settings.data.globalSettings,
+			newTask.title,
+			newPriority
+		);
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				oldTask.filePath,

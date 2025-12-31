@@ -771,11 +771,21 @@ export function buildTaskFromRawContent(
 // 	}
 // }
 
-// Extract title from task line
+/**
+ * Extracts the title from a task string by removing the time at the start (if exists).
+ * @param {string} text - The task string.
+ * @returns {string} The title of the task.
+ */
 export function extractTitle(text: string): string {
 	return text.replace(/^- \[.\]\s*/, "");
 }
 
+/**
+ * Extracts the task id from a task string by matching the id regex.
+ * Supports both plugin and Dataview id formats.
+ * @param {string} text - The task string.
+ * @returns {string} The task id.
+ */
 export function extractTaskId(text: string): string {
 	// const combinedIdRegex = new RegExp(
 	// 	`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
@@ -809,7 +819,14 @@ export function extractTaskId(text: string): string {
 	return "";
 }
 
-// New function to extract task body
+/**
+ * Extracts the body of a task from an array of lines. The body is considered as the lines
+ * that have indentation (either with '>' or '\t'), and the extraction stops when an empty line is encountered.
+ * @param {string[]} lines - The array of lines to extract the body from.
+ * @param {number} startLineIndex - The index of the line where the body starts.
+ * @param {string} indentationString - The string used to indent the lines.
+ * @returns {string[]} An array of strings representing the body of the task. If the body is empty, an empty array is returned.
+ */
 export function extractBody(
 	lines: string[],
 	startLineIndex: number,
@@ -869,7 +886,13 @@ export function extractBody(
 	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
 }
 
-// Extract time from task line
+/**
+ * Extracts the time from a task string.
+ * Supports three formats: [time:: 12:00-13:00], @time(12:00-13:00) and ⏰ 12:00-13:00.
+ * If time is at the start of the task, it is also extracted.
+ * @param {string} text - The task string.
+ * @returns {string} The extracted time string, or an empty string if no match.
+ */
 export function extractTime(text: string): string {
 	let match = text.match(/\[time::\s*(.*?)\]/);
 	if (match) {
