@@ -22,6 +22,7 @@ import { DatePickerModal } from "src/modals/date_picker";
 
 export interface currentDragDataPayload {
 	task: taskItem;
+	taskIndex: string;
 	sourceColumnData: ColumnData;
 	currentBoardIndex: number;
 	swimlaneData: swimlaneDataProp | null | undefined;
@@ -90,7 +91,7 @@ class DragDropTasksManager {
 	/**
 	 * Read current drag payload
 	 */
-	getCurrentDragData() {
+	getCurrentDragData(): currentDragDataPayload | null {
 		return this.currentDragData;
 	}
 
@@ -1055,6 +1056,8 @@ class DragDropTasksManager {
 		if (!this.plugin) return;
 		if (!cardEl || !cardEl.parentElement) return;
 
+		console.log("cardEl", cardEl, "\nparentEl", cardEl.parentElement);
+
 		// Create indicator if not already created
 		if (!this.dropIndicator) {
 			this.dropIndicator = document.createElement("div");
@@ -1075,6 +1078,15 @@ class DragDropTasksManager {
 		const topPos = isAbove
 			? `${rect.top - parentRect.top - 6}px`
 			: `${rect.bottom - parentRect.top + 2}px`;
+
+		// A proof of concept to show a box instead of a simple line and to move the adjacent cards up or down.
+		// cardEl.style.marginBottom = "0px";
+		// cardEl.style.marginTop = "0px";
+		// if (isAbove) {
+		// 	cardEl.style.marginTop = "40px";
+		// } else {
+		// 	cardEl.style.marginBottom = "40px";
+		// }
 
 		this.dropIndicator.style.width = `${rect.width}px`;
 		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
@@ -1194,6 +1206,19 @@ class DragDropTasksManager {
 		e.preventDefault();
 		e.stopPropagation();
 
+		console.log(
+			"Value of the found attribute",
+			cardEl.getAttribute("data-taskitem-index")
+		);
+		// Dont show the drop indicator for the same dragged task card.
+		if (
+			this.currentDragData &&
+			cardEl.getAttribute("data-taskitem-index") ===
+				this.currentDragData.taskIndex
+		) {
+			return;
+		}
+
 		// From here we should call below function to handle dragover styling on the column container.
 		// The below function will return true or false based on whether drop is allowed or not.
 		const dropAllowed = this.handleColumnDragOverEvent(
@@ -1206,10 +1231,11 @@ class DragDropTasksManager {
 
 		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
 
-		const rect = cardEl.getBoundingClientRect();
-		const midY = rect.top + rect.height / 2;
-		const isAbove = (e.clientY || 0) < midY;
-		this.showCardDropIndicator(cardEl, isAbove);
+		// We are now showing a custom and better drop indicator in the LazyColumn component itself.
+		// const rect = cardEl.getBoundingClientRect();
+		// const midY = rect.top + rect.height / 2;
+		// const isAbove = (e.clientY || 0) < midY;
+		// this.showCardDropIndicator(cardEl, isAbove);
 	}
 
 	/**

@@ -16,7 +16,7 @@ import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
-import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
+import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -532,7 +532,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		try {
 			// Only compute insertion index for columns that use "manualOrder" as the sorting criteria.
 			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-			console.log('hasManualOrder', hasManualOrder);
 			if (!hasManualOrder) {
 				// Clear any visual placeholder and desired index
 				if (insertIndexRef.current !== null) {
@@ -560,24 +559,32 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				// APPROACH 2 - DIRECTLY FETCH THE INDEX FROM THE DATA ATTRIBUTE OF THE HOVERED ELEMENT
 				let pos = 0 // Default to top of the column
 				const hoveredElement = e.currentTarget;
-				const dataAttribute = hoveredElement.getAttribute('data-taskitem-index');
-				console.log('dataAttribute', dataAttribute);
-				if (dataAttribute) {
+				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
+				const draggedItemIndex = dragDropTasksManagerInsatance.getCurrentDragData()?.taskIndex;
+				console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
+				if (draggedOverItemIndex && draggedOverItemIndex !== draggedItemIndex) {
 					const clientY = e.clientY;
 					const rect = hoveredElement.getBoundingClientRect();
 					const midpoint = rect.top + rect.height / 2;
 					if (clientY < midpoint) {
-						pos = parseInt(dataAttribute, 10);
+						pos = parseInt(draggedOverItemIndex, 10);
 					} else {
-						pos = parseInt(dataAttribute, 10) + 1;
+						pos = parseInt(draggedOverItemIndex, 10) + 1;
 					}
+
+					console.log("Setting desired drop index to:", pos);
+					// Throttle updates via RAF
+					scheduleSetInsertIndex(pos);
+					// Store desired drop index in manager
+					dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+				} else {
+					// Clear any visual placeholder and desired index
+					if (insertIndexRef.current !== null) {
+						scheduleSetInsertIndex(null);
+					}
+					dragDropTasksManagerInsatance.clearDesiredDropIndex();
 				}
 
-				console.log("Setting desired drop index to:", pos);
-				// Throttle updates via RAF
-				scheduleSetInsertIndex(pos);
-				// Store desired drop index in manager
-				dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
 
 				// // Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
 				// dragDropTasksManagerInsatance.handleDragOver(
@@ -753,6 +760,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 										{(() => {
 											const elements: React.ReactNode[] = [];
 											for (let i = 0; i < visibleTasks.length; i++) {
+												// If insertIndex points to this position, render placeholder
+												if (insertIndex === i) {
+													elements.push(
+														<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+													);
+												}
 												const task = visibleTasks[i];
 												elements.push(
 													<div
@@ -765,6 +778,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 													>
 														<TaskItem
 															key={task.id}
+															dataAttributeIndex={i}
 															plugin={plugin}
 															task={task}
 															activeBoardSettings={activeBoardData}
@@ -772,6 +786,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 															swimlaneData={swimlaneData}
 														/>
 													</div>
+												);
+											}
+											// If insertIndex points to end (after last item)
+											if (insertIndex === localTasks.length) {
+												elements.push(
+													<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
 												);
 											}
 											return elements;
