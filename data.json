@@ -316,12 +316,12 @@
             ],
             "tasksIdManualOrder": [
               "374",
-              "371",
               "365",
               "243",
               "259",
               "247",
               "27",
+              "371",
               "375"
             ]
           },
@@ -602,7 +602,21 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "pn3wvwal"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              "247",
+              "375",
+              "371"
+            ]
           },
           {
             "colType": "namedTag",
@@ -1005,7 +1019,7 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 3,
         "taskId": "",
         "settingTab": 1
       },
