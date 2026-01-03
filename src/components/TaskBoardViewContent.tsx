@@ -135,7 +135,19 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				return currentBoard.columns
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks)
+						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks, (updatedBoardData: Board) => {
+							// I think this below code is not required as we simply want to update the data on the disk.
+							// setBoards((prevBoards) => {
+							// 	const updatedBoards = [...prevBoards];
+							// 	updatedBoards[activeBoardIndex] = updatedBoardData;
+							// 	return updatedBoards;
+							// });
+
+							plugin.settings.data.boardConfigs[activeBoardIndex] = updatedBoardData;
+							// Technically, at later point in time, when user will make any changes, the latest data will be updated on the disk, so we need not have to update it everytime during this column seggregation.
+							// const newSettings = plugin.settings;
+							// plugin.saveSettings(newSettings);
+						})
 					);
 			}
 

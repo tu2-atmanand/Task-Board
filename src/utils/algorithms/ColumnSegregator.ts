@@ -25,7 +25,8 @@ export const columnSegregator = (
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoardIndex: number,
 	columnData: ColumnData,
-	allTasks: taskJsonMerged | null
+	allTasks: taskJsonMerged | null,
+	onBoardDataChange?: (boardData: Board) => void
 ): taskItem[] => {
 	if (activeBoardIndex < 0 || !allTasks) return [];
 
@@ -302,18 +303,38 @@ export const columnSegregator = (
 				];
 			}
 
+			let newTasksIdManualOrder = columnData.tasksIdManualOrder;
+			let currentBoardData = settings.data.boardConfigs[activeBoardIndex];
+
+			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
 			const idToTask = new Map(tasksToDisplay.map((t) => [t.id, t]));
 			const sorted: taskItem[] = [];
 			for (const id of columnData.tasksIdManualOrder) {
 				const task = idToTask.get(id);
-				if (task) sorted.push(task);
+				if (task) {
+					sorted.push(task);
+				} else {
+					newTasksIdManualOrder.splice(
+						newTasksIdManualOrder.indexOf(id),
+						1
+					);
+					didTasksIdManualOrderChange = true;
+				}
 			}
 
-			// Append any remaining tasks that aren't in manual order for safety
-			for (const t of tasksToDisplay) {
-				if (!columnData.tasksIdManualOrder.includes(t.id))
-					sorted.push(t);
+			// Update the newTasksIdManualOrder inside board data.
+			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
+			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
+				newTasksIdManualOrder;
+			console.log(
+				"columnSegregator...\nNew manual order :",
+				newTasksIdManualOrder,
+				"\nOld manual order :",
+				columnData.tasksIdManualOrder
+			);
+			if (onBoardDataChange && didTasksIdManualOrderChange) {
+				onBoardDataChange(currentBoardData);
 			}
 
 			tasksToDisplay = sorted;
