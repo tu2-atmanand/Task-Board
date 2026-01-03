@@ -560,9 +560,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				let pos = 0 // Default to top of the column
 				const hoveredElement = e.currentTarget;
 				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
-				const draggedItemIndex = dragDropTasksManagerInsatance.getCurrentDragData()?.taskIndex;
+				const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
+				const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
 				// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
-				if (draggedOverItemIndex && draggedOverItemIndex !== draggedItemIndex) {
+				if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
 					const clientY = e.clientY;
 					const rect = hoveredElement.getBoundingClientRect();
 					const midpoint = rect.top + rect.height / 2;
@@ -771,6 +772,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 														key={task.id}
 														className="taskItemFadeIn"
 														data-taskitem-index={i}
+														data-taskitem-id={task.id}
 														onDragOver={(e) => { handleTaskItemDragOver(e); }
 														}
 														onDrop={e => handleTaskDrop(e, i)}

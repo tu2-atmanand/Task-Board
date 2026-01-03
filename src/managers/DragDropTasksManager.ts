@@ -1207,14 +1207,14 @@ class DragDropTasksManager {
 		e.stopPropagation();
 
 		// console.log(
-		// 	"Value of the found attribute",
-		// 	cardEl.getAttribute("data-taskitem-index")
+		// 	"Value of the found attribute : ",
+		// 	cardEl.getAttribute("data-taskitem-id")
 		// );
 		// Dont show the drop indicator for the same dragged task card.
 		if (
 			this.currentDragData &&
-			cardEl.getAttribute("data-taskitem-index") ===
-				this.currentDragData.taskIndex
+			cardEl.getAttribute("data-taskitem-id") ===
+				this.currentDragData.task.id
 		) {
 			return;
 		}
