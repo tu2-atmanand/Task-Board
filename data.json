@@ -315,13 +315,11 @@
               }
             ],
             "tasksIdManualOrder": [
-              "374",
-              "365",
-              "243",
-              "259",
-              "247",
-              "27",
               "371",
+              "378",
+              "247",
+              "258",
+              "355",
               "375"
             ]
           },
@@ -535,7 +533,7 @@
             }
           ],
           "groupAllRest": true,
-          "verticalHeaderUI": true,
+          "verticalHeaderUI": false,
           "minimized": []
         }
       },
@@ -612,10 +610,12 @@
               }
             ],
             "tasksIdManualOrder": [
-              "365",
-              "247",
+              "258",
+              "371",
+              "355",
               "375",
-              "371"
+              "378",
+              "247"
             ]
           },
           {
@@ -1014,12 +1014,12 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 377,
+      "uniqueIdCounter": 378,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 3,
+        "boardIndex": 2,
         "taskId": "",
         "settingTab": 1
       },
