@@ -1310,12 +1310,11 @@ const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activ
 					</div>
 					{memoizedRenderHeader}
 					{/* Drag Handle */}
-					{Platform.isPhone && (
+					{Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
 						<>
 							<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
 						</>
-					)}
-					{!Platform.isPhone && (
+					) : (
 						<>
 							<div className="taskItemDragBtn"
 								aria-label={t("drag-task-card")}
