@@ -12,8 +12,13 @@ export const priorityEmojis: { [key: number]: string } = {
 	5: "⏬", // Lowest
 };
 
-export interface dropDownOption {
-	value: number | string;
+export interface statusDropDownOption {
+	value: string;
+	text: string;
+}
+
+export interface priorityDropDownOption {
+	value: number;
 	text: string;
 }
 
@@ -23,7 +28,7 @@ export const getPriorityEmoji = (priority: number): string => {
 };
 
 // Priority Options - function to ensure translations are loaded
-export const getPriorityOptionsForDropdown = (): dropDownOption[] => [
+export const getPriorityOptionsForDropdown = (): priorityDropDownOption[] => [
 	{ value: 0, text: "0 - " + t("none") },
 	{ value: 1, text: "1 - " + t("highest") + " : 🔺" },
 	{ value: 2, text: "2 - " + t("high") + " : ⏫" },
@@ -37,7 +42,7 @@ export const priorityOptions = getPriorityOptionsForDropdown();
 
 export const getCustomStatusOptionsForDropdown = (
 	statusConfigs: CustomStatus[]
-): dropDownOption[] => {
+): statusDropDownOption[] => {
 	return statusConfigs.map(({ symbol, name }) => ({
 		value: symbol,
 		text: `${name} : [${symbol}]`,

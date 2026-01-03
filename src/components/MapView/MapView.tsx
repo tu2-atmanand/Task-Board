@@ -20,7 +20,7 @@ import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
-import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
+import { updateTaskInFile } from 'src/utils/taskLine/TaskLineUtils';
 import { debounce, Menu, Notice, Platform } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/interfaces/Constants';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
@@ -279,6 +279,7 @@ const MapView: React.FC<MapViewProps> = ({
 						type: 'ResizableNodeSelected',
 						data: {
 							label: <TaskItem
+								dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
 								plugin={plugin}
 								task={task}
 								activeBoardSettings={activeBoardSettings}

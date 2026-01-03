@@ -126,6 +126,12 @@ export const handleTaskNoteDelete = async (
 	}
 };
 
+/**
+ * Handle task note body change (old task body -> new task body)
+ * @param plugin - Taskboard plugin instance
+ * @param oldTask - Task note to update
+ * @param updatedTask - Task note with updated body
+ */
 export const handleTaskNoteBodyChange = async (
 	plugin: TaskBoard,
 	oldTask: taskItem,

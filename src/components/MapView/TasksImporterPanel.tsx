@@ -6,9 +6,9 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import TaskItem from '../KanbanView/TaskItem';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
-import { applyIdToTaskInNote } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { applyIdToTaskItem } from 'src/utils/TaskItemUtils';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
@@ -49,14 +49,17 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 
 	const handleImportTask = async (task: taskItem) => {
 		try {
-			const newId = await applyIdToTaskInNote(plugin, task);
+			const newId = await applyIdToTaskItem(plugin, task);
 			if (newId !== undefined) {
 				// Add to imported set
 				setImportedTaskIds(prev => new Set(prev).add(task.id));
-				// Trigger re-scan to update the map view
-				await plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
-				// Emit event to refresh the board
-				eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with REFRESH_COLUMN only.
+				// Trigger re-scan to update the map view, adding delay for task-note
+				sleep(500).then(async() => {
+					await plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+
+					// Emit event to refresh the board
+					eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with REFRESH_COLUMN only.
+				})
 			}
 		} catch (error) {
 			console.error('Error importing task:', error);

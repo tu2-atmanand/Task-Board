@@ -4,12 +4,12 @@ import {
 	deleteTaskFromFile,
 	useTasksPluginToUpdateInFile,
 	updateTaskInFile,
-} from "./TaskItemUtils";
+	isTaskRecurring,
+} from "./TaskLineUtils";
 import TaskBoard from "main";
 import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
-import { isTaskRecurring } from "./TaskContentFormatter";
 import {
 	bugReporter,
 	openEditTaskModal,
@@ -27,6 +27,11 @@ import { EditButtonMode } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 import { eventEmitter } from "src/services/EventEmitter";
 
+/**
+ * Handle the checkbox change event for the inline-tasks and update the task in the file.
+ * @param plugin - Taskboard plugin instance
+ * @param task - TaskItem to update
+ */
 export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
@@ -48,7 +53,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 						task.legacyId
 					);
 
-					// // Move from Completed to Pending
+					// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 					// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
 				}
 			);
@@ -70,8 +75,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 							taskWithUpdatedStatus.filePath
 						);
 
-						// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
-						// Move from Pending to Completed
+						// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 						// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
 					}
 				);
@@ -125,15 +129,23 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				);
 			});
 	}
-	// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted and moveFromCompletedToPending functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
+	// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 };
 
+/**
+ * Handle subtasks change event. This function is basically updating the content in the file using the `updateTaskInFile` function.
+ * @param plugin - Taskboard plugin instance
+ * @param oldTask - TaskItem to update
+ * @param updatedTask - TaskItem with updated subtasks
+ */
 export const handleSubTasksChange = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
 	updatedTask: taskItem
 ) => {
-	// updateTaskInJson(plugin, updatedTask); // TODO : This is not necessary any more as I am scanning the file after it has been updated in the note.
+	// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+	// updateTaskInJson(plugin, updatedTask);
+
 	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
 		plugin.realTimeScanning.processAllUpdatedFiles(
 			updatedTask.filePath,
@@ -142,6 +154,12 @@ export const handleSubTasksChange = (
 	});
 };
 
+/**
+ * Handle task deletion event by showing a confirmation modal where user can select whether to remove the task content from the file, comment it out or archive it into another file.
+ * @param plugin - Taskboard plugin instance
+ * @param task - Task note to delete
+ * @param isTaskNote - Boolean indicating if the task is deleted
+ */
 export const handleDeleteTask = (
 	plugin: TaskBoard,
 	task: taskItem,
@@ -162,7 +180,8 @@ export const handleDeleteTask = (
 					);
 				});
 
-				// deleteTaskFromJson(plugin, task); // NOTE : No need to run any more as I am scanning the file after it has been updated.
+				// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+				// deleteTaskFromJson(plugin, task);
 				// Remove the task from state after deletion
 				// setTasks((prevTasks) => prevTasks.filter(t => t.id !== task.id)); // This line were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
 			}
@@ -181,142 +200,4 @@ export const handleDeleteTask = (
 		},
 	});
 	deleteModal.open();
-};
-
-export const handleEditTask = (
-	plugin: TaskBoard,
-	task: taskItem,
-	settingOption: string
-) => {
-	const taskNoteIdentifierTag =
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag;
-	switch (settingOption) {
-		case EditButtonMode.Modal:
-			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-				openEditTaskNoteModal(plugin, task);
-			} else {
-				openEditTaskModal(plugin, task);
-			}
-			break;
-		case EditButtonMode.View:
-			const isTaskNote = isTaskNotePresentInTags(
-				taskNoteIdentifierTag,
-				task.tags
-			);
-			openEditTaskView(
-				plugin,
-				isTaskNote,
-				false,
-				true,
-				task,
-				task.filePath,
-				"window"
-			);
-			break;
-		case EditButtonMode.TasksPluginModal:
-			if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
-				openEditTaskNoteModal(plugin, task);
-			} else {
-				openTasksPluginEditModal(plugin, task);
-			}
-			break;
-		case EditButtonMode.NoteInTab: {
-			openFileAndHighlightTask(plugin, task, settingOption);
-			break;
-		}
-		case EditButtonMode.NoteInSplit: {
-			openFileAndHighlightTask(plugin, task, settingOption);
-			break;
-		}
-		case EditButtonMode.NoteInWindow: {
-			openFileAndHighlightTask(plugin, task, settingOption);
-			break;
-		}
-		default:
-			bugReporter(
-				plugin,
-				"This should never happen, looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
-				"NA",
-				"TaskItemEventHandlers.ts/handleEditTask"
-			);
-			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
-			break;
-	}
-};
-
-export const openFileAndHighlightTask = async (
-	plugin: TaskBoard,
-	task: taskItem,
-	mode: string
-) => {
-	const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
-	let leaf: WorkspaceLeaf | null = null;
-
-	switch (mode) {
-		case EditButtonMode.NoteInTab: {
-			leaf = plugin.app.workspace.getLeaf("tab");
-			break;
-		}
-		case EditButtonMode.NoteInSplit: {
-			leaf = plugin.app.workspace.getLeaf("split");
-			break;
-		}
-		case EditButtonMode.NoteInWindow: {
-			leaf = plugin.app.workspace.getLeaf("window");
-
-			break;
-		}
-		case EditButtonMode.Modal:
-		default:
-			bugReporter(
-				plugin,
-				"This is a low priority error and it should never happen. Looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
-				"NA",
-				"TaskItemEventHandlers.ts/handleEditTask"
-			);
-			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
-			break;
-	}
-
-	if (file && file instanceof TFile && leaf) {
-		await leaf.openFile(file, {
-			eState: { line: task.taskLocation.startLine - 1 },
-		});
-	} else {
-		bugReporter(
-			plugin,
-			"Either file not found or Leaf initialization failed. Please check below details for more information. First try to find if the file exists as per the below path. If the issue is critical, report it to developer.",
-			`Trying to open the following file: ${task.filePath}.\nLeaf type: ${
-				leaf ? leaf.constructor.name : "undefined"
-			}`,
-			"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
-		);
-	}
-
-	// if (newWindow) {
-	// 	// plugin.app.workspace.openLinkText('', newFilePath, 'window')
-	// 	const leaf = plugin.app.workspace.getLeaf("window");
-	// } else {
-	// await plugin.app.workspace.openLinkText('', newFilePath, false);
-	// const activeEditor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
-	// console.log("Note View:", activeEditor);
-	// activeEditor?.scrollIntoView({
-	// 	from: { line: 5, ch: 0 },
-	// 	to: { line: 5, ch: 5 },
-	// }, true);
-	// const leaf = plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
-	// const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
-	// if (file && file instanceof TFile) {
-	// 	await leaf.openFile(file, {
-	// 		eState: { line: task.taskLocation.startLine - 1 },
-	// 	});
-	// } else {
-	// 	bugReporter(
-	// 		plugin,
-	// 		"File not found",
-	// 		`The file at path ${newFilePath} could not be found.`,
-	// 		"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
-	// 	);
-	// }
-	// }
 };
