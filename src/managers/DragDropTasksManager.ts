@@ -1206,10 +1206,10 @@ class DragDropTasksManager {
 		e.preventDefault();
 		e.stopPropagation();
 
-		console.log(
-			"Value of the found attribute",
-			cardEl.getAttribute("data-taskitem-index")
-		);
+		// console.log(
+		// 	"Value of the found attribute",
+		// 	cardEl.getAttribute("data-taskitem-index")
+		// );
 		// Dont show the drop indicator for the same dragged task card.
 		if (
 			this.currentDragData &&

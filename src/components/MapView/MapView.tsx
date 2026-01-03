@@ -279,6 +279,7 @@ const MapView: React.FC<MapViewProps> = ({
 						type: 'ResizableNodeSelected',
 						data: {
 							label: <TaskItem
+								dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
 								plugin={plugin}
 								task={task}
 								activeBoardSettings={activeBoardSettings}

@@ -561,7 +561,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				const hoveredElement = e.currentTarget;
 				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
 				const draggedItemIndex = dragDropTasksManagerInsatance.getCurrentDragData()?.taskIndex;
-				console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
+				// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
 				if (draggedOverItemIndex && draggedOverItemIndex !== draggedItemIndex) {
 					const clientY = e.clientY;
 					const rect = hoveredElement.getBoundingClientRect();
@@ -572,7 +572,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						pos = parseInt(draggedOverItemIndex, 10) + 1;
 					}
 
-					console.log("Setting desired drop index to:", pos);
 					// Throttle updates via RAF
 					scheduleSetInsertIndex(pos);
 					// Store desired drop index in manager
