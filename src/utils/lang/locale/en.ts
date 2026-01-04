@@ -267,7 +267,7 @@ const en: Lang = {
 	"enable-experimental-features-message": "This is an experimental feature released in this version. Please enable experimental feature from setting if you want to test it out.",
 	"enable-experimental-features": "Enable experimental features",
 	"enable-experimental-features-info-1": "Enable this setting to test out the experimental features present in this version.",
-	"enable-experimental-features-info-2": "Although these features have been completely developed, I need to make sure that they are working fine in different environments and setups. Hence, if you are willing to help in testing, enable this setting and test out these features and share whatever bugs you find or any suggestions you have in mind. After thorough testing, these features will be released for normal use in the next version. These experimental features includes :",
+	"enable-experimental-features-info-2": "Although these features are fully-functional, they can still produce issues in different environments and setups. Hence, if you are willing to help in testing, enable this setting and test out these features and share whatever bugs you find or any suggestions you have to improve them. After thorough testing, these features will be released for normal use in the upcoming versions.",
 	"map-view": "Map view",
 	"reading-mode-preview": "Reading mode preview",
 	"source-mode-preview": "Source mode preview",
@@ -499,6 +499,12 @@ const en: Lang = {
 	"manual-order": "Manual order",
 	"manual-order-notice": "The manual sorting will only work as expected if all the tasks within the column or any new added task in the column have unique id on them. This feature might look like it is working for tasks with no id, but eventually the data wont be persisted. Hence unique is must for this feature to work properly.",
 	"cannot-add-more-sorting-criteria-with-manual-order": "Cannot add more sorting criteria with manual order",
+	"drag-and-drop": "Drag and drop tasks",
+	"drag-and-drop-feature-info": "This feature will help you to move tasks between columns.",
+	"kanban-swimlanes": "Kanban swimlanes",
+	"kanban-swimlanes-feature-info": "This feature will help you to group tasks based on their various properties. Additionally, this plugin has its first of kind implementation of swimlanes, to have custom sorting and aggregation of tasks.",
+	"manual-sorting": "Manual sorting",
+	"manual-sorting-feature-info": "This feature will help you to drag and re-order the tasks within a column..",
 };
 
 export default en;

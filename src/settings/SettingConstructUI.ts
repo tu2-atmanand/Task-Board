@@ -71,10 +71,10 @@ export class SettingsManager {
 			[HideableTaskProperty.CancelledDate]:
 				"Cancelled Date (❌ 2024-01-01)",
 			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
-			[HideableTaskProperty.Reminder]: "Reminder ((@12:30))",
+			[HideableTaskProperty.Reminder]: "Reminder (@(12:30))",
 			[HideableTaskProperty.Recurring]: "Recurring (🔁 every 2 weeks)",
 			[HideableTaskProperty.OnCompletion]: "On-completion (🏁 delete)",
-			[HideableTaskProperty.Dependencies]: "Dependens-on ⛔ fa4sm9",
+			[HideableTaskProperty.Dependencies]: "Dependens-on (⛔ fa4sm9)",
 		};
 		return displayNames[property] || property;
 	}
@@ -581,14 +581,15 @@ export class SettingsManager {
 			.setName("Safeguard feature")
 			.setDesc(
 				createFragmentWithHTML(
-					"This feature helps to ensure that this plugin wont temper the conte of other tasks. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+					"This feature helps to ensure that task board should only update the task content in the note. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+						"<br/>" +
 						"<br/>" +
 						"<b>" +
-						"NOTE :" +
+						"NOTE : " +
 						"</b>" +
-						"Disabling this feature will by-pass the security check which might lead to unwanted behavior. Example in case where there are multiple inline tasks one after the another. Only disable this feature if you feel this modal is poppin-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but ensure you take care of you data manually." +
+						"Disabling this feature will by-pass the security check which might lead to unwanted behavior like tempering the content of other inline-tasks right below the intended task. Only disable this feature if you feel this modal is popping-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but also ensure you are taking care of you data." +
 						"<br/>" +
-						"This is a temporary solution to the problem few users are facing right now. This will be the default behavior moving forward and you will not require to disable this feature moving forward."
+						"This setting was provided on the request of few users to tempararily disable safe-guard. In upcoming releasing, will remove this setting if everything is working as expected and safe-guard will be always doing the security checks."
 				)
 			)
 			.addToggle((toggle) =>
@@ -606,26 +607,32 @@ export class SettingsManager {
 				createFragmentWithHTML(
 					t("enable-experimental-features-info-1") +
 						"<br/>" +
+						"<br/>" +
+						"<br/>" +
 						t("enable-experimental-features-info-2") +
+						"<br/>" +
 						"<br/>" +
 						"<ul>" +
 						"<li>" +
 						"<b>" +
 						t("drag-and-drop") +
+						" : " +
 						"</b>" +
-						t("drag-and-drop-feature-description") +
+						t("drag-and-drop-feature-info") +
 						"</li>" +
 						"<li>" +
 						"<b>" +
 						t("kanban-swimlanes") +
+						" : " +
 						"</b>" +
-						t("kanban-swimlanes-feature-description") +
+						t("kanban-swimlanes-feature-info") +
 						"</li>" +
 						"<li>" +
 						"<b>" +
 						t("manual-sorting") +
+						" : " +
 						"</b>" +
-						t("manual-sorting-feature-description") +
+						t("manual-sorting-feature-info") +
 						"</li>" +
 						"</ul>"
 				)
