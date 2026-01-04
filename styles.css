@@ -998,16 +998,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-wrap: wrap;
 }
 
-.taskItemTagFrontmatter {
-	background-color: var(--background-modifier-border) !important;
-	border: var(--pill-border-width) solid var(--pill-border-color) !important;
-	border-radius: var(--pill-radius) !important;
-	color: var(--pill-color) !important;
-	cursor: var(--cursor);
-	font-weight: var(--pill-weight);
-	padding: 0 var(--pill-padding-x) !important;
-}
-
 .taskItemTag {
 	/* background-color: var(--tag-background); */
 	/* border: var(--tag-border-width) solid var(--tag-border-color); */
@@ -1023,6 +1013,18 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	margin-right: 2px;
 	display: inline-block;
 	white-space: nowrap;
+}
+
+.taskItemTagFrontmatter {
+	font-size: 0.7rem;
+	text-decoration: var(--tag-decoration);
+	background-color: var(--background-modifier-border) !important;
+	border: var(--pill-border-width) solid var(--pill-border-color) !important;
+	border-radius: var(--pill-radius) !important;
+	color: var(--pill-color) !important;
+	cursor: var(--cursor);
+	font-weight: var(--pill-weight);
+	padding: 0 var(--pill-padding-x) !important;
 }
 
 .taskItemUniversalDate {
@@ -1990,10 +1992,16 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding: 4px;
 }
 
+.boardConfigModalColumnRow.Hidden {
+	opacity: 50%;
+}
+
 .boardConfigModalColumnRowDragButton {
 	cursor: grab;
 	align-self: center;
-	min-width: 25px;
+	min-width: 30px;
+	min-height: max-content;
+	opacity: 50%;
 }
 
 .boardConfigModalColumnRowEyeButton,
@@ -2001,6 +2009,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	cursor: pointer;
 	min-width: fit-content;
 	align-self: center !important;
+}
+
+.boardConfigModalColumnRowDeleteButton:hover {
+	color: var(--text-error);
 }
 
 .boardConfigModalAddColumnButton {
@@ -5478,6 +5490,10 @@ svg.react-flow__connectionline {
 	padding-inline: 5px !important;
 }
 
+.configureColumnSortingModalHomeSortingCriteriaListItemNotice .setting-item-description {
+	color: var(--background-modifier-error);
+}
+
 .configureColumnSortingModalHomeAddSortingBtn {
 	width: 100%;
 	margin-top: 1rem;
@@ -6182,7 +6198,10 @@ svg.react-flow__connectionline {
 	margin-right: 0px !important;
 }
 
-/* Swimlanes Configuration Modal Styles */
+/* ===================================================
+   Swimlanes Config Modal Styles
+=================================================== */
+
 .swimlanes-config-modal {
 	width: auto;
 	min-height: auto;
@@ -6310,6 +6329,11 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	color: var(--text-muted);
 	line-height: 1.5;
 	margin: 0;
+}
+
+.swimlaneConfigsManualSortContainer {
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--divider-color);
 }
 
 /* Sortable List */
