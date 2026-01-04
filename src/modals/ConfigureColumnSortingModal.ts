@@ -1,7 +1,7 @@
 // src/modal/ConfigureColumnSortingModal.ts
 
 import type TaskBoard from "main";
-import { Modal, Setting } from "obsidian";
+import { Modal, Notice, Setting } from "obsidian";
 import Sortable from "sortablejs";
 import { ColumnData, columnSortingCriteria } from "src/interfaces/BoardConfigs";
 import { t } from "src/utils/lang/helper";
@@ -139,8 +139,17 @@ export class ConfigureColumnSortingModal extends Modal {
 								)
 						)
 						.addDropdown((dropdown) => {
+							if (
+								this.plugin.settings.data.globalSettings
+									.experimentalFeatures
+							) {
+								dropdown.addOption(
+									"manualOrder",
+									t("manual-order")
+								);
+							}
+
 							dropdown
-								.addOption("manualOrder", t("manual-order"))
 								.addOption("content", t("title"))
 								.addOption("id", t("id"))
 								.addOption("status", t("status"))
@@ -158,15 +167,22 @@ export class ConfigureColumnSortingModal extends Modal {
 								// .addOption("lineNumber", t("line Number"))
 								.setValue(sortCriteria.criteria)
 								.onChange((value: string) => {
-									if (this.columnConfiguration.sortCriteria) {
-										this.columnConfiguration.sortCriteria[
-											index
-										].criteria =
-											value as columnSortingCriteria["criteria"];
-									}
 									this.isEdited = true;
-									if (value === "manualOrder") {
-										renderSortingCriterias(); // Re-render if manualOrder is selected
+									if (this.columnConfiguration.sortCriteria) {
+										if (value === "manualOrder") {
+											renderSortingCriterias(); // Re-render if manualOrder is selected
+											// Remove all the other sort criteria
+											this.columnConfiguration.sortCriteria =
+												[];
+											// Add manualOrder sort criteria
+											this.columnConfiguration.sortCriteria[0].criteria =
+												value as columnSortingCriteria["criteria"];
+										} else {
+											this.columnConfiguration.sortCriteria[
+												index
+											].criteria =
+												value as columnSortingCriteria["criteria"];
+										}
 									}
 								});
 						})
@@ -236,6 +252,19 @@ export class ConfigureColumnSortingModal extends Modal {
 								})
 						);
 				});
+
+			if (
+				this.columnConfiguration.sortCriteria.some(
+					(c) => c.criteria === "manualOrder"
+				)
+			) {
+				new Setting(sortingCriteriaList)
+					.setClass(
+						"configureColumnSortingModalHomeSortingCriteriaListItemNotice"
+					)
+					.setName(t("note"))
+					.setDesc(t("manual-order-notice"));
+			}
 		};
 
 		// Initial render
@@ -246,19 +275,30 @@ export class ConfigureColumnSortingModal extends Modal {
 			cls: "configureColumnSortingModalHomeAddSortingBtn",
 		});
 		addNewSortingButton.addEventListener("click", async () => {
-			this.isEdited = true;
-			const newCriteria: any = {
-				criteria: "content",
-				order: "asc",
-				priority:
-					(this.columnConfiguration.sortCriteria?.length || 0) + 1,
-				uid: Math.random().toString(36).slice(2, 10),
-			};
-			if (!this.columnConfiguration.sortCriteria) {
-				this.columnConfiguration.sortCriteria = [];
+			if (
+				this.columnConfiguration.sortCriteria?.some(
+					(c) => c.criteria === "manualOrder"
+				)
+			) {
+				new Notice(
+					t("cannot-add-more-sorting-criteria-with-manual-order")
+				);
+			} else {
+				this.isEdited = true;
+				const newCriteria: any = {
+					criteria: "content",
+					order: "asc",
+					priority:
+						(this.columnConfiguration.sortCriteria?.length || 0) +
+						1,
+					uid: Math.random().toString(36).slice(2, 10),
+				};
+				if (!this.columnConfiguration.sortCriteria) {
+					this.columnConfiguration.sortCriteria = [];
+				}
+				this.columnConfiguration.sortCriteria.push(newCriteria);
+				renderSortingCriterias();
 			}
-			this.columnConfiguration.sortCriteria.push(newCriteria);
-			renderSortingCriterias();
 		});
 
 		// Button container at bottom

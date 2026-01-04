@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
-import { RxDragHandleDots2 } from "react-icons/rx";
+import { RxDragHandleDots2, RxDragHandleHorizontal } from "react-icons/rx";
 import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
@@ -541,16 +541,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
-					<div className="boardConfigModalMainContent-Active-Body-InputItems">
-						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
-							<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes")}</div>
+					{plugin.settings.data.globalSettings.experimentalFeatures && (
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+								<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
+								<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
+							</div>
+							<button
+								className="boardConfigModalMainContentConfigureSwimlanesBtn"
+								onClick={handleSwimlanesConfigureBtnClick}
+							>{t("configure")}</button>
 						</div>
-						<button
-							className="boardConfigModalMainContentConfigureSwimlanesBtn"
-							onClick={handleSwimlanesConfigureBtnClick}
-						/>
-					</div>
+					)}
 
 					<hr className="boardConfigModalHr-100" />
 
@@ -561,8 +563,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							className="boardConfigModalMainContent-Active-BodyColumnsList"
 						>
 							{board.columns.map((column, columnIndex) => (
-								<div key={column.id} className="boardConfigModalColumnRow">
-									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
+								<div key={column.id} className={`boardConfigModalColumnRow${column.active ? "" : " Hidden"}`}>
+									<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 									{column.active ? (
 										<EyeIcon
 											onClick={() => toggleActiveState(boardIndex, columnIndex)}

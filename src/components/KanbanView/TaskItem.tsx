@@ -1301,6 +1301,7 @@ const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activ
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
+					{/* File Name Section */}
 					<div className="taskItemFileNameSection">
 						{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
 							<div className="taskItemFileName" aria-label={task.filePath}>
@@ -1308,24 +1309,35 @@ const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activ
 							</div>
 						)}
 					</div>
+
 					{memoizedRenderHeader}
-					{/* Drag Handle */}
-					{Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
+
+					{/* Drag Handle and Task Menu button */}
+					{plugin.settings.data.globalSettings.experimentalFeatures && (
 						<>
-							<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-						</>
-					) : (
-						<>
-							<div className="taskItemDragBtn"
-								aria-label={t("drag-task-card")}
-								draggable={true}
-								onDragStart={handleDragStart}
-								onDragEnd={handleDragEnd}
-							>
-								<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} />
-							</div>
+							{
+								Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
+									<>
+										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+									</>
+								) : (
+									<>
+										{/* Drag Handle */}
+										<div className="taskItemDragBtn"
+											aria-label={t("drag-task-card")}
+											draggable={true}
+											onDragStart={handleDragStart}
+											onDragEnd={handleDragEnd}
+										>
+											<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} />
+										</div>
+									</>
+								)
+							}
 						</>
 					)}
+
+					{/* Task Body */}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
 							<input
@@ -1392,7 +1404,9 @@ const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activ
 						)}
 						{memoizedRenderChildTasks}
 					</div>
+
 					{renderFooter()}
+
 				</div>
 			</div>
 		</div>
