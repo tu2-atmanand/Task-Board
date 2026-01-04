@@ -150,7 +150,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const board = localBoards[selectedBoardIndex];
 		const currentSwimlaneConfig = board.swimlanes || {
 			enabled: false,
-			showEmptySwimlanes: false,
+			hideEmptySwimlanes: false,
 			property: 'tags',
 			customValue: '',
 			sortCriteria: 'asc',
@@ -220,7 +220,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			},
 			swimlanes: {
 				enabled: false,
-				showEmptySwimlanes: false,
+				hideEmptySwimlanes: false,
 				property: 'tags',
 				sortCriteria: 'asc',
 				minimized: [],
@@ -251,7 +251,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			},
 			swimlanes: boardToDuplicate.swimlanes || {
 				enabled: false,
-				showEmptySwimlanes: false,
+				hideEmptySwimlanes: false,
 				property: 'tags',
 				sortCriteria: 'asc',
 			},

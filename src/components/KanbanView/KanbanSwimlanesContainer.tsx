@@ -174,8 +174,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			};
 		});
 
-		// Filter out empty swimlanes if showEmptySwimlanes is false
-		if (!board.swimlanes.showEmptySwimlanes) {
+		// Filter out empty swimlanes if hideEmptySwimlanes is false
+		if (board.swimlanes.hideEmptySwimlanes) {
 			return swimlaneRows.filter((row) =>
 				row.tasks.some((columnTasks) => columnTasks.length > 0)
 			);

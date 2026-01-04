@@ -249,7 +249,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 				swimlanes: {
 					enabled: false,
-					showEmptySwimlanes: false,
+					hideEmptySwimlanes: false,
 					property: "tags",
 					sortCriteria: "asc",
 					minimized: [],
@@ -315,7 +315,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 				swimlanes: {
 					enabled: false,
-					showEmptySwimlanes: false,
+					hideEmptySwimlanes: false,
 					property: "tags",
 					sortCriteria: "asc",
 					minimized: [],
@@ -391,7 +391,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 				swimlanes: {
 					enabled: false,
-					showEmptySwimlanes: false,
+					hideEmptySwimlanes: false,
 					property: "tags",
 					sortCriteria: "asc",
 					minimized: [],
@@ -506,6 +506,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				{
 					symbol: taskStatuses.done,
 					name: "Done",
+					nextStatusSymbol: taskStatuses.todo,
+					availableAsCommand: true,
+					type: "DONE",
+				},
+				{
+					symbol: taskStatuses.checked,
+					name: "Completed",
 					nextStatusSymbol: taskStatuses.todo,
 					availableAsCommand: true,
 					type: "DONE",

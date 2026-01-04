@@ -25,8 +25,8 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 	const [property, setProperty] = useState(swimlaneConfig.property || 'tags');
 	const [customValue, setCustomValue] = useState(swimlaneConfig.customValue || '');
 	const [sortCriteria, setSortCriteria] = useState(swimlaneConfig.sortCriteria || 'asc');
-	const [showEmptySwimlanes, setShowEmptySwimlanes] = useState(
-		swimlaneConfig.showEmptySwimlanes ?? true
+	const [hideEmptySwimlanes, setHideEmptySwimlanes] = useState(
+		swimlaneConfig.hideEmptySwimlanes ?? false
 	);
 	const [customSortOrder, setCustomSortOrder] = useState<{ value: string; index: number }[]>(
 		swimlaneConfig.customSortOrder || []
@@ -80,7 +80,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 	const handleSave = () => {
 		const updatedConfig: swimlaneConfigs = {
 			enabled,
-			showEmptySwimlanes,
+			hideEmptySwimlanes,
 			property,
 			maxHeight,
 			customValue: customValue || undefined,
@@ -198,24 +198,6 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 							</div>
 						)}
 
-						{/* Show Empty Swimlanes */}
-						<div className="swimlanesConfigItem">
-							<div className="swimlanesConfigLabel">
-								<label>
-									{t('show-empty-swimlanes') || 'Show Empty Swimlanes'}
-								</label>
-								<div className="swimlanesConfigDescription">
-									{t('show-empty-swimlanes-info') ||
-										'Display swimlanes even if they have no tasks'}
-								</div>
-							</div>
-							<input
-								type="checkbox"
-								checked={showEmptySwimlanes}
-								onChange={(e) => setShowEmptySwimlanes(e.target.checked)}
-							/>
-						</div>
-
 						{/* Set custom min swimlane height */}
 						<div className="swimlanesConfigItem">
 							<div className="swimlanesConfigLabel">
@@ -314,6 +296,23 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 									>
 										{t('add-row') || '+ Add Row'}
 									</button>
+								</div>
+
+								{/* Hide Empty Swimlanes */}
+								<div className="swimlanesConfigItem">
+									<div className="swimlanesConfigLabel">
+										<label>
+											{t('hide-empty-swimlanes')}
+										</label>
+										<div className="swimlanesConfigDescription">
+											{t('hide-empty-swimlanes-info')}
+										</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={hideEmptySwimlanes}
+										onChange={(e) => setHideEmptySwimlanes(e.target.checked)}
+									/>
 								</div>
 
 								{/* Enable/Disable groupAllRest */}

@@ -109,7 +109,7 @@ export interface FilterConfigSettings {
 
 export interface swimlaneConfigs {
 	enabled: boolean;
-	showEmptySwimlanes: boolean;
+	hideEmptySwimlanes: boolean;
 	maxHeight: string;
 	property: string; // e.g., 'tags', 'priority'
 	customValue?: string; // This is only if user selects "custom" as the property. This is also only applicable in case of dataview format properties or for task-notes, where user can use their custom key-value from frontmatter.
