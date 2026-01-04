@@ -119,30 +119,32 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 
 	// Available swimlane properties
 	const propertyOptions = [
-		{ value: 'tags', label: t('tags') || 'Tags' },
-		{ value: 'priority', label: t('priority') || 'Priority' },
-		{ value: 'status', label: t('status') || 'Status' },
-		{ value: 'scheduledDate', label: t('scheduledDate') || 'Status' },
-		{ value: 'custom', label: t('custom') || 'Custom' },
+		{ value: 'tags', label: t('tags') },
+		{ value: 'priority', label: t('priority') },
+		{ value: 'status', label: t('status') },
+		// { value: 'scheduledDate', label: t('scheduled-date')},
+		{ value: 'custom', label: t('custom-property') },
 	];
 
 	const sortOptions = [
-		{ value: 'asc', label: t('ascending') || 'Ascending' },
-		{ value: 'desc', label: t('descending') || 'Descending' },
-		{ value: 'custom', label: t('custom') || 'Custom' },
+		{ value: 'asc', label: t('ascending') },
+		{ value: 'desc', label: t('descending') },
+		{ value: 'custom', label: t('custom-sorting') },
 	];
 
 	return (
 		<div className="swimlanesConfigContent">
 			<div className="swimlanesConfigSection">
-				<h2>{t('configure-kanban-swimlanes') || 'Configure Kanban Swimlanes'}</h2>
+				<h2>{t("configure-kanban-swimlanes")}</h2>
 
 				{/* Enable/Disable Swimlanes */}
 				<div className="swimlanesConfigItem">
 					<div className="swimlanesConfigLabel">
-						<label>{t('enable-swimlanes') || 'Enable Swimlanes'}</label>
+						<label>{t("enable-swimlanes")}</label>
 						<div className="swimlanesConfigDescription">
-							{t('enable-swimlanes-info') || 'Divide the board into horizontal sections'}
+							{t("enable-swimlanes-info-1")}
+							<br />
+							{t("enable-swimlanes-info-2")}
 						</div>
 					</div>
 					<input
@@ -157,10 +159,9 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 						{/* Property Selection */}
 						<div className="swimlanesConfigItem">
 							<div className="swimlanesConfigLabel">
-								<label>{t('swimlane-property') || 'Swimlane Property'}</label>
+								<label>{t('task-property')}</label>
 								<div className="swimlanesConfigDescription">
-									{t('swimlane-property-info') ||
-										'Select the property to group tasks by'}
+									{t('task-property-info')}
 								</div>
 							</div>
 							<select
@@ -181,16 +182,15 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 							<div className="swimlanesConfigItem">
 								<div className="swimlanesConfigLabel">
 									<label>
-										{t('custom-property-key') || 'Custom Property Key'}
+										{t('custom-property-key')}
 									</label>
 									<div className="swimlanesConfigDescription">
-										{t('custom-property-key-info') ||
-											'Enter the custom frontmatter key to use for swimlanes'}
+										{t('custom-property-key-info')}
 									</div>
 								</div>
 								<input
 									type="text"
-									placeholder={t('e-g-custom-key') || 'e.g., custom-key'}
+									placeholder={'e.g.: project'}
 									value={customValue}
 									onChange={(e) => setCustomValue(e.target.value)}
 									className="swimlanesConfigInput"
@@ -202,15 +202,16 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 						<div className="swimlanesConfigItem">
 							<div className="swimlanesConfigLabel">
 								<label>
-									{t('Set minimum swimlane height')}
+									{t('max-swimlane-height')}
 								</label>
 								<div className="swimlanesConfigDescription">
-									{t('Enter the value along with units. For example "300px" or "10rem", etc.')}
+									{t('max-swimlane-height-info')}
 								</div>
 							</div>
 							<input
 								type="text"
-								value={maxHeight}
+								placeholder={'Default is 300px'}
+								value={maxHeight || '300px'}
 								onChange={(e) => setmaxHeight(e.target.value)}
 							/>
 						</div>
@@ -218,10 +219,9 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 						{/* Sort Criteria */}
 						<div className="swimlanesConfigItem">
 							<div className="swimlanesConfigLabel">
-								<label>{t('swimlane-sort-order') || 'Sort Order'}</label>
+								<label>{t('swimlane-sort-order')}</label>
 								<div className="swimlanesConfigDescription">
-									{t('swimlane-sort-order-info') ||
-										'How to sort the swimlanes'}
+									{t('swimlane-sort-order-info')}
 								</div>
 							</div>
 							<select
@@ -241,11 +241,10 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 						{sortCriteria === 'custom' && (
 							<div className="swimlanesConfigManualSortSection">
 								<h3 className="swimlanesConfigManualSortHeading">
-									{t('manual-sorting-mapping') || 'Manual Sorting Mapping'}
+									{t('manual-sorting-mapping')}
 								</h3>
 								<div className="swimlanesConfigManualSortDescription">
-									{t('manual-sorting-mapping-info') ||
-										'Enter the value of property and arrange their order to have a custom sorting. Note: All the rest of the tasks will be placed in a new swimlane at the last.'}
+									{t('manual-sorting-mapping-info')}
 								</div>
 
 								<div className='swimlaneConfigsManualSortContainer'>
@@ -262,14 +261,13 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 												<RxDragHandleDots2
 													className="swimlanesConfigSortRowDragHandle"
 													size={16}
-													title={t('drag-to-reorder') || 'Drag to reorder'}
 												/>
 												<div className="swimlanesConfigSortRowIndex">
 													{sortRow.index}
 												</div>
 												<input
 													type="text"
-													placeholder={t('enter-property-value') || 'Enter property value'}
+													placeholder={t('enter-property-value')}
 													value={sortRow.value}
 													onChange={(e) =>
 														handleSortRowValueChange(
@@ -281,9 +279,9 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 												/>
 												<FaTrash
 													className="swimlanesConfigSortRowDeleteBtn"
-													size={14}
+													size={20}
 													onClick={() => handleRemoveSortRow(rowIndex)}
-													title={t('delete-row') || 'Delete'}
+													title={t('delete')}
 												/>
 											</div>
 										))}
@@ -294,7 +292,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 										className="swimlanesConfigAddSortRowBtn"
 										onClick={handleAddSortRow}
 									>
-										{t('add-row') || '+ Add Row'}
+										{t('add-row')}
 									</button>
 								</div>
 
@@ -318,9 +316,9 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 								{/* Enable/Disable groupAllRest */}
 								<div className="swimlanesConfigItem">
 									<div className="swimlanesConfigLabel">
-										<label>{t('group-all-rest-swimlanes')}</label>
+										<label>{t('aggregator-swimlane')}</label>
 										<div className="swimlanesConfigDescription">
-											{t('group-all-rest-swimlanes-info')}
+											{t('aggregator-swimlane-info')}
 										</div>
 									</div>
 									<input
@@ -335,9 +333,9 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 						{/* Enable/Disable verticalSwimlaneHeader UI */}
 						<div className="swimlanesConfigItem">
 							<div className="swimlanesConfigLabel">
-								<label>{t('UI type : Vertical swimlane header on left')}</label>
+								<label>{'UI type : vertical swimlane header on left'}</label>
 								<div className="swimlanesConfigDescription">
-									{t('This is an experimental setting to get user feedback. This setting will be removed in the future by default.') || ('This is an experimental setting to get user feedback. This setting will be removed in the future by deciding a single type of UI based on user feedback.')}
+									{'Enable this setting to display the swimlane header as vertical bar on left.This is an experimental setting to get user feedback. This setting will be removed in the future and a common UI type will be selected based on the better ergonomic design and majority votes from the community.'}
 								</div>
 							</div>
 							<input
@@ -365,7 +363,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 					{t('save') || 'Save'}
 				</button>
 			</div>
-		</div>
+		</div >
 	);
 };
 

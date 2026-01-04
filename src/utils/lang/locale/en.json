@@ -260,7 +260,6 @@
 	"hide-specific-properties-in-notes-description": "Select which task properties should be hidden in live-editor and in reading mode. These properties will be present in the notes, reveal them by hovering over the task or moving the cursor within the task line.",
 	"auto-add-unique-id": "Auto add unique id",
 	"auto-add-unique-id-description": "When enabled, a unique id will be automatically added to the task line whenever you will add a new task or interact with an existing task. This setting is compulsory to enable, if you want to use the below features :",
-	"link-parent-child-tasks": "Link parent-child tasks",
 	"pin-tasks-on-top-in-each-column-upcoming": "Pin tasks on top in each column (upcoming)",
 	"manual-sorting-inside-each-column-upcoming": "Manual sorting inside each column (upcoming)",
 	"map-view-upcoming": "Map view (upcoming)",

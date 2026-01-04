@@ -393,16 +393,13 @@ export class SettingsManager {
 						"<br/>" +
 						"<ul>" +
 						"<li>" +
-						t("link-parent-child-tasks") +
-						"</li>" +
-						"<li>" +
-						t("pin-tasks-on-top-in-each-column-upcoming") +
+						t("map-view-feature") +
 						"</li>" +
 						"<li>" +
 						t("manual-sorting-inside-each-column-upcoming") +
 						"</li>" +
 						"<li>" +
-						t("map-view-upcoming") +
+						t("pin-tasks-on-top-in-each-column-upcoming") +
 						"</li>" +
 						"</ul>"
 				)
@@ -603,34 +600,46 @@ export class SettingsManager {
 				})
 			);
 
-		// new Setting(contentEl)
-		// 	.setName(t("enable-experimental-features"))
-		// 	.setDesc(
-		// 		createFragmentWithHTML(
-		// 			t("enable-experimental-features-info-1") +
-		// 				"<br/>" +
-		// 				t("enable-experimental-features-info-2") +
-		// 				"<br/>" +
-		// 				"<ul>" +
-		// 				"<li>" +
-		// 				"<b>" +
-		// 				t("drag-and-drop") +
-		// 				"</b>" +
-		// 				t("drag-and-drop-feature-description") +
-		// 				"</li>" +
-		// 				"</ul>" +
-		// 		)
-		// 	)
-		// 	.addToggle((toggle) =>
-		// 		toggle
-		// 			.setValue(experimentalFeatures)
-		// 			.onChange(async (value) => {
-		// 				this.globalSettings!.experimentalFeatures = value;
-		// 				await this.saveSettings();
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						t("enable-experimental-features-info-2") +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("drag-and-drop") +
+						"</b>" +
+						t("drag-and-drop-feature-description") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("kanban-swimlanes") +
+						"</b>" +
+						t("kanban-swimlanes-feature-description") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("manual-sorting") +
+						"</b>" +
+						t("manual-sorting-feature-description") +
+						"</li>" +
+						"</ul>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(experimentalFeatures)
+					.onChange(async (value) => {
+						this.globalSettings!.experimentalFeatures = value;
+						await this.saveSettings();
 
-		// 				this.openReloadNoticeIfNeeded();
-		// 			})
-		// 	);
+						this.openReloadNoticeIfNeeded();
+					})
+			);
 
 		// // Helper to add filter rows
 		// const addFilterRow = (
