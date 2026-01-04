@@ -387,6 +387,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 	}
 
+	// -------------------------------------------------
+	// ALL DRAG AND DROP RELATED FUNCTIONS
+	// -------------------------------------------------
+
 	/**
 	 * Handles the drop event of a task in this column.
 	 * Moves the task from its original position (dragIndex) to the new position (dropIndex).
@@ -711,6 +715,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget as HTMLDivElement);
 	}, []);
 
+
+	// -------------------------------------------------
+	// Render
+	// -------------------------------------------------
 
 	return (
 		<div

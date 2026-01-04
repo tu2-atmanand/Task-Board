@@ -54,7 +54,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 				// Add to imported set
 				setImportedTaskIds(prev => new Set(prev).add(task.id));
 				// Trigger re-scan to update the map view, adding delay for task-note
-				sleep(500).then(async() => {
+				sleep(500).then(async () => {
 					await plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
 
 					// Emit event to refresh the board
@@ -150,6 +150,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 										plugin={plugin}
 										task={task}
 										activeBoardSettings={activeBoardSettings}
+										dataAttributeIndex={0} // TODO : No need of this data in this case.
 									/>
 								</div>
 							))}
