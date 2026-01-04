@@ -63,7 +63,7 @@ export class AddOrEditTaskModal extends Modal {
 
 		if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
-			this.task.legacyId = String(this.task.id);
+			this.task.legacyId = this.task.id;
 		}
 
 		// Some processing, if this is a Task-Note

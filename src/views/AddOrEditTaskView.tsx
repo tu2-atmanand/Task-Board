@@ -88,8 +88,9 @@ export class AddOrEditTaskView extends ItemView {
 
 			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
 
-			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
+			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.legacyId)) {
 				this.task.id = generateTaskId(this.plugin);
+				this.task.legacyId = this.task.id;
 			}
 		}
 
