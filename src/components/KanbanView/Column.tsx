@@ -1,5 +1,13 @@
 // /src/components/Column.tsx
 
+/**
+ * Column component - DEPRECATED
+ * This component has been now deprecated, since the LazyColum.tsx component is performing its intended functionality of lazy-loading without any issue in all the tested environments.
+ * Will still keep this file in the project and update it with the changes from LazyColumn.tsx, just to have a fallback backup ready. And for other testing.
+ * @kind component
+ * @deprecated
+ */
+
 import React, { memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import { CSSProperties } from 'react';
