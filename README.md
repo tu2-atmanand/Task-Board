@@ -51,7 +51,7 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 **Step 3 :** Click on the **Scan vault modal** button from the top-right corner in the Task Board view header. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters](https://tu2-atmanand.github.io/task-board-docs/docs/Features/Filters_for_Scanning/) to exclude certain files from scanning.
 
-**Step 4 :** There are already three predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/docs/How_To/HowToCreateNewBoard/) from the [Board configure modal](https://tu2-atmanand.github.io/docs/How_To/HowToUseBoardSettings/). 
+**Step 4 :** There are already three predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToCreateNewBoard/) from the [Board configure modal](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToUseBoardSettings/).
 
 Enjoy !
 
