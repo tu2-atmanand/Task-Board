@@ -1,5 +1,8 @@
 # vscode
-.vscode 
+.vscode
+
+# devcontainer
+.devcontainer
 
 # Intellij
 *.iml
@@ -16,11 +19,11 @@ main.js
 *.map
 
 # obsidian
+main.css
+MyStuff/
+data.json
+tasks.json
+locales/
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
-
-MyStuff/
-docs/MyReadme.md
-data.json
-tasks.json

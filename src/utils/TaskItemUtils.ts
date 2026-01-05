@@ -1,415 +1,150 @@
-// /src/utils/TaskItemUtils.ts
-
-import { cleanTaskTitle, taskContentFormatter } from "./TaskContentFormatter";
-import {
-	loadTasksJsonFromDisk,
-	writeTasksJsonToDisk,
-} from "./JsonFileOperations";
-import {
-	priorityEmojis,
-	taskItem,
-	tasksJson,
-} from "src/interfaces/TaskItemProps";
-import {
-	readDataOfVaultFiles,
-	writeDataToVaultFiles,
-} from "./MarkdownFileOperations";
-
-import { App } from "obsidian";
 import TaskBoard from "main";
-import { eventEmitter } from "src/services/EventEmitter";
+import { taskItem } from "src/interfaces/TaskItem";
+import { bugReporter } from "src/services/OpenModals";
+import { updateTaskInFile } from "./taskLine/TaskLineUtils";
+import {
+	isTaskNotePresentInTags,
+	updateFrontmatterInMarkdownFile,
+} from "./taskNote/TaskNoteUtils";
 
-export const moveFromPendingToCompleted = async (
+/**
+ * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
+ * @param task - Task item with updated properties
+ * @returns string[] - Array of tags
+ */
+export const getAllTaskTags = (task: taskItem): string[] => {
+	const lineTags = task.tags || [];
+	const frontmatterTags = task.frontmatterTags || [];
+	return [...lineTags, ...frontmatterTags];
+};
+
+/**
+ * Retrieves a task from the TaskBoard plugin's task cache using its ID.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param id - The ID of the task to retrieve. Can be a string (legacyId) or a number (id).
+ * @returns The task item if found, or null if not found.
+ */
+export const getTaskFromId = async (
 	plugin: TaskBoard,
-	task: taskItem
-) => {
+	id: string | number
+): Promise<taskItem | null> => {
 	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
+		let foundTask: taskItem | undefined | null;
 
-		// Move task from Pending to Completed
-		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = allTasks.Pending[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
-
-			if (!allTasks.Completed[task.filePath]) {
-				allTasks.Completed[task.filePath] = [];
+		// Search in Pending tasks
+		const pendingTasksObj = plugin.vaultScanner.tasksCache?.Pending ?? {};
+		for (const tasks of Object.values(pendingTasksObj)) {
+			if (id) {
+				foundTask = tasks.find(
+					(task) => task.legacyId === id || task.id === id
+				);
 			}
-			allTasks.Completed[task.filePath].push(task);
+			if (foundTask) return foundTask;
 		}
 
-		// Write the updated data back to the JSON file
-		await writeTasksJsonToDisk(plugin, allTasks);
+		// Search in Completed tasks
+		const completedTasksObj =
+			plugin.vaultScanner.tasksCache?.Completed ?? {};
+		for (const tasks of Object.values(completedTasksObj)) {
+			if (id) {
+				foundTask = tasks.find(
+					(task) => task.legacyId === id || task.id === id
+				);
+			}
+			if (foundTask) return foundTask;
+		}
+
+		return null; // Return null if the task is not found
 	} catch (error) {
-		console.error("Error updating task in tasks.json:", error);
-	}
-
-	eventEmitter.emit("REFRESH_COLUMN");
-};
-
-export const moveFromCompletedToPending = async (
-	plugin: TaskBoard,
-	task: taskItem
-) => {
-	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
-
-		// Move task from Completed to Pending
-		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = allTasks.Completed[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
-
-			if (!allTasks.Pending[task.filePath]) {
-				allTasks.Pending[task.filePath] = [];
-			}
-			allTasks.Pending[task.filePath].push(task);
-		}
-
-		// Write the updated data back to the JSON file
-		await writeTasksJsonToDisk(plugin, allTasks);
-	} catch (error) {
-		console.error("Error updating task in tasks.json:", error);
-	}
-
-	eventEmitter.emit("REFRESH_COLUMN");
-};
-
-// For handleDeleteTask
-
-export const deleteTaskFromFile = async (plugin: TaskBoard, task: taskItem) => {
-	const filePath = task.filePath;
-
-	try {
-		// Step 1: Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
-
-		// Step 3: Split the file content into lines
-		const lines = fileContent.split("\n");
-		const taskLines: string[] = [];
-		let isTaskFound = false;
-		let taskStartIndex = -1;
-
-		// Step 4: Locate the main task line and subsequent lines
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-
-			// Check for the task starting line (e.g., "- [ ] Title...")
-			if (
-				!isTaskFound &&
-				line.match(/^- \[.{1}\]/) &&
-				line.includes(task.title)
-			) {
-				isTaskFound = true;
-				taskStartIndex = i;
-				taskLines.push(line);
-				continue;
-			}
-
-			// If task is found, keep adding non-empty lines
-			if (isTaskFound) {
-				if (line.trim() === "") break; // Stop at the first empty line
-				taskLines.push(line);
-			}
-		}
-
-		// Step 5: Replace the found task block with the new one
-		if (isTaskFound && taskStartIndex !== -1) {
-			const taskBlock = taskLines.join("\n");
-
-			// Replace the old task block with the updated content
-			const newContent = fileContent.replace(taskBlock, "");
-
-			// Step 6: Write the updated content back to the file
-			await writeDataToVaultFiles(plugin, filePath, newContent);
-		} else {
-			console.warn(
-				"deleteTaskFromFile : Task not found in file content."
-			);
-		}
-	} catch (error) {
-		console.error("Error deleting task from file:", error);
+		bugReporter(
+			plugin,
+			"Error retrieving task from tasksCache using ID",
+			String(error),
+			"TaskItemUtils.ts/getTaskFromId"
+		);
+		return null;
 	}
 };
 
-export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
-	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
-
-		// Remove task from Pending or Completed in tasks.json
-		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = allTasks.Pending[
-				task.filePath
-			].filter((t: any) => t.id !== task.id);
-		}
-		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = allTasks.Completed[
-				task.filePath
-			].filter((t: any) => t.id !== task.id);
-		}
-
-		await writeTasksJsonToDisk(plugin, allTasks);
-
-		eventEmitter.emit("REFRESH_COLUMN");
-	} catch (error) {
-		console.error("Error deleting task from tasks.json:", error);
-	}
-};
-
-// For handleEditTask and for handleSubTasksChange, when task is edited from Modal
-
-export const updateTaskInFile = async (
-	plugin: TaskBoard,
-	updatedTask: taskItem,
-	oldTask: taskItem
-) => {
-	const filePath = updatedTask.filePath;
-
-	try {
-		// Step 1: Read the file content
-		const fileContent = await readDataOfVaultFiles(plugin, filePath);
-
-		// Step 2: Prepare the updated task block
-		const completeTask = taskContentFormatter(plugin, updatedTask);
-		if (completeTask === "")
-			throw "taskContentFormatter returned empty string";
-
-		// Step 3: Split the file content into lines
-		const lines = fileContent.split("\n");
-		const taskLines: string[] = [];
-		let isTaskFound = false;
-		let taskStartIndex = -1;
-
-		// Step 4: Locate the main task line and subsequent lines
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-
-			// Check for the task starting line (e.g., "- [ ] Title...")
-			if (
-				!isTaskFound &&
-				line.match(/^- \[.{1}\]/) &&
-				line.includes(cleanTaskTitle(plugin, oldTask))
-			) {
-				isTaskFound = true;
-				taskStartIndex = i;
-				taskLines.push(line);
-				continue;
-			}
-
-			// If task is found, keep adding non-empty lines
-			if (isTaskFound) {
-				if (line.startsWith("\t") || line.startsWith("    ")) {
-					taskLines.push(line);
-				} else {
-					break; // Stop at the first line which is either empty or doesn't start with a tab
-				}
-			}
-		}
-
-		// Step 5: Replace the found task block with the new one
-		if (isTaskFound && taskStartIndex !== -1) {
-			const taskBlock = taskLines.join("\n");
-
-			// Replace the old task block with the updated content
-			const newContent = fileContent.replace(taskBlock, completeTask);
-
-			// Step 6: Write the updated content back to the file
-			await writeDataToVaultFiles(plugin, filePath, newContent);
-		} else {
-			console.warn("updateTaskInFile : Task not found in file content.");
-		}
-	} catch (error) {
-		console.error("Error updating task in file:", error);
-	}
-};
-
-// export const updateTaskInFile = async (
-// 	plugin: TaskBoard,
-// 	updatedTask: taskItem,
-// 	oldTask: taskItem
-// ) => {
-// 	const filePath = updatedTask.filePath;
-
-// 	try {
-// 		// Read the file content using Obsidian's API
-// 		const fileContent = await readDataOfVaultFiles(plugin, filePath);
-// 		console.log("updateTaskInFile : Old file content :\n", fileContent);
-
-// 		console.log("updateTaskInFile : updatedTask :\n", updatedTask);
-// 		const completeTask = taskContentFormatter(plugin, updatedTask);
-// 		console.log("updateTaskInFile : completeTask :\n", completeTask);
-
-// 		if (completeTask) {
-// 			let taskRegex = "";
-
-// 			const startRegex = new RegExp(
-// 				`^- \\[.{1}\\] .*?${oldTask.title}.*$`,
-// 				"gm"
-// 			);
-// 			console.log("updateTaskInFile : startRegex :\n", startRegex);
-
-// 			const startIndex = fileContent.search(startRegex);
-// 			console.log("updateTaskInFile : startIndex :\n", startIndex);
-
-// 			if (startIndex !== -1) {
-// 				const lines = fileContent.substring(startIndex).split("\n");
-// 				console.log("updateTaskInFile : lines :\n", lines);
-// 				const taskContent = [];
-
-// 				for (const line of lines) {
-// 					if (line.trim() === "") {
-// 						break;
-// 					}
-// 					taskContent.push(line);
-// 				}
-
-// 				taskRegex = taskContent.join("\n");
-// 				console.log("updateTaskInFile : taskRegex :\n", taskRegex);
-// 			}
-
-// 			// Replace the old task with the updated formatted task in the file
-// 			const newContent = fileContent.replace(taskRegex, completeTask);
-
-// 			// Write the updated content back to the file using Obsidian's API
-// 			await writeDataToVaultFiles(plugin, filePath, newContent);
-// 		}
-// 	} catch (error) {
-// 		console.error("Error updating task in file:", error);
-// 	}
+// // Generate a unique ID for each task
+// export const generateTaskId = (): number => {
+// 	const array = new Uint32Array(1);
+// 	crypto.getRandomValues(array);
+// 	return array[0];
 // };
 
-export const updateTaskInJson = async (
-	plugin: TaskBoard,
-	updatedTask: taskItem
-) => {
-	try {
-		const allTasks = await loadTasksJsonFromDisk(plugin);
-
-		// Function to update a task in a given task category (Pending or Completed)
-		const updateTasksInCategory = (taskCategory: {
-			[filePath: string]: taskItem[];
-		}) => {
-			return Object.entries(taskCategory).reduce(
-				(
-					acc: { [filePath: string]: taskItem[] },
-					[filePath, tasks]: [string, taskItem[]]
-				) => {
-					acc[filePath] = tasks.map((task: taskItem) =>
-						task.id === updatedTask.id ? updatedTask : task
-					);
-					return acc;
-				},
-				{} as { [filePath: string]: taskItem[] } // Set the initial accumulator type
-			);
-		};
-
-		// Update tasks in both Pending and Completed categories
-		const updatedPendingTasks = updateTasksInCategory(allTasks.Pending);
-		const updatedCompletedTasks = updateTasksInCategory(allTasks.Completed);
-
-		// Create the updated data object with both updated Pending and Completed tasks
-		const updatedData: tasksJson = {
-			Pending: updatedPendingTasks,
-			Completed: updatedCompletedTasks,
-		};
-		// Write the updated data back to the JSON file using the new function
-		await writeTasksJsonToDisk(plugin, updatedData);
-
-		eventEmitter.emit("REFRESH_COLUMN");
-	} catch (error) {
-		console.error(
-			"updateTaskInJson : Error updating task in tasks.json:",
-			error
-		);
-	}
-};
-
-// For Adding New Task from Modal
-
-// Generate a unique ID for each task
-export const generateTaskId = (): number => {
+/**
+ * Generates a random unique ID using the Web Crypto API.
+ * @return {string} a random unique ID for a task
+ */
+export function generateRandomTempTaskId(): string {
 	const array = new Uint32Array(1);
 	crypto.getRandomValues(array);
-	return array[0];
-};
+	return String(array[0]);
+}
 
-export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
-	const allTasks = await loadTasksJsonFromDisk(plugin);
+/**
+ * Generates a unique ID for a task based on the plugin's settings.
+ * It increments the plugin's settings data globalSettings.uniqueIdCounter by 1 and then saves the updated settings.
+ * The current counter value is returned as a string and will be used as the ID for the next task.
+ * If the uniqueIdCounter is not set, it will be set to 0 before incrementing.
+ * @param plugin - The TaskBoard plugin instance
+ * @returns A string representing the unique ID for the task
+ */
+export function generateTaskId(plugin: TaskBoard): string {
+	plugin.settings.data.globalSettings.uniqueIdCounter =
+		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
 
-	const newTaskWithId = {
-		...newTask,
-		id: generateTaskId(),
-		filePath: newTask.filePath,
-		completed: "", // This will be updated when task is marked as complete
-	};
+	// Save the updated uniqueIdCounter back to settings
+	plugin.saveSettings();
+	// Return the current counter value and then increment it for the next ID
+	return String(plugin.settings.data.globalSettings.uniqueIdCounter);
+}
 
-	// Update the task list (assuming it's a file-based task structure)
-	if (!allTasks.Pending[newTask.filePath]) {
-		allTasks.Pending[newTask.filePath] = [];
-	}
-
-	allTasks.Pending[newTask.filePath].push(newTaskWithId);
-
-	await writeTasksJsonToDisk(plugin, allTasks);
-
-	eventEmitter.emit("REFRESH_COLUMN");
-};
-
-export const addTaskInActiveEditor = async (
-	app: App,
+/**
+ * Applies a new id to the task in a file if it does not have one already. This function will force an id to be added to the task.
+ * @param plugin - The TaskBoard plugin instance.
+ * @param task - The taskItem object representing the task to which an id needs to be applied.
+ * @returns A promise that resolves to the new id if applied, or undefined if the task already has an id or if an error occurs.
+ *
+ * @throws Will throw an error if there are issues updating the task in the file.
+ */
+export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
-	newTask: taskItem
-) => {
-	const filePath = newTask.filePath;
+	task: taskItem
+): Promise<string | undefined> => {
+	// if (task.legacyId) { // ----- Sometimes the cache object contains a legacyId but the content in the file dont have it. To handle this situation we will not add this if condition and proceed with cross-checking the id.
+	// 	return undefined;
+	// } else {
+	let newIdToReturn: string | undefined;
+	if (
+		isTaskNotePresentInTags(
+			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			task.tags
+		)
+	) {
+		const newId = generateTaskId(plugin);
+		task.legacyId = newId;
+		newIdToReturn = newId;
+		updateFrontmatterInMarkdownFile(plugin, task, true);
 
-	try {
-		const completeTask = taskContentFormatter(plugin, newTask);
-		if (completeTask === "")
-			throw "taskContentFormatter returned empty string";
-
-		// Get the active editor and the current cursor position
-		const activeEditor = app.workspace.activeEditor?.editor;
-		if (!activeEditor) {
-			console.error(
-				"No active editor found. Please place your cursor in markdown file"
-			);
-		}
-
-		if (completeTask && activeEditor) {
-			const cursorPosition = activeEditor.getCursor();
-
-			// Read the file content
-			const fileContent = await readDataOfVaultFiles(plugin, filePath);
-
-			// Split file content into an array of lines
-			const fileLines = fileContent.split("\n");
-
-			// Insert the new task at the cursor line position
-			fileLines.splice(cursorPosition.line, 0, completeTask);
-
-			// Join the lines back into a single string
-			const newContent = fileLines.join("\n");
-
-			// Write the updated content back to the file
-			await writeDataToVaultFiles(plugin, filePath, newContent);
-		}
-	} catch (error) {
-		console.error("Error updating task in file:", error);
+		return newId;
+	} else {
+		newIdToReturn = await updateTaskInFile(plugin, task, task, true);
+		return newIdToReturn;
 	}
-};
-
-// Function to parse due date correctly
-export const parseDueDate = (dueStr: string): Date | null => {
-	// Regular expression to check if dueStr starts with a two-digit day
-	const ddMmYyyyPattern = /^\d{2}-\d{2}-\d{4}$/;
-
-	if (ddMmYyyyPattern.test(dueStr)) {
-		// Convert "DD-MM-YYYY" → "YYYY-MM-DD"
-		const [day, month, year] = dueStr.split("-");
-		dueStr = `${year}-${month}-${day}`;
-	}
-
-	// Parse the date
-	const parsedDate = new Date(dueStr);
-	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+	// .then((newId) => {
+	// 	newIdToReturn = newId;
+	// })
+	// .catch((error) => {
+	// 	bugReporter(
+	// 		plugin,
+	// 		"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
+	// 		String(error),
+	// 		"TaskItemUtils.ts/applyIdToTaskItem"
+	// 	);
+	// 	return undefined;
+	// });
+	// return newIdToReturn;
+	// }
 };

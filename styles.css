@@ -6,36 +6,147 @@
 	padding-inline: 8px !important;
 } */
 
+/* leaf (tabs) */
 
 .workspace-leaf-content[data-type="task-board-view"] .view-content {
 	overflow: unset;
 	padding-block-start: 0 !important;
+	padding-inline: 5px !important;
 }
 
-.modal[data-type="task-board-view"] {
+/* modals */
+
+.modal-close-button {
+	z-index: 20;
+}
+
+.modal[modal-type="task-board-bug-reporter-modal"],
+.modal[modal-type="task-board-scan-vault-modal"] {
 	width: auto;
-	min-height: fit-content;
+	min-height: auto;
+	max-width: 100vw;
 }
 
-/* src/KanbanView.tsx */
+.modal-container[modal-type='task-board-edit-task'] {
+	justify-content: flex-end;
+}
+
+@keyframes slideInRightModal {
+	from {
+		transform: translateX(100%);
+		opacity: 0.2;
+	}
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideOutRightModal {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateX(100%);
+		opacity: 0.2;
+	}
+}
+
+.modal[modal-type="task-board-edit-task"] {
+	width: 75vw;
+	max-width: 1100px;
+	height: 100%;
+	min-height: 92%;
+	border-radius: var(--modal-radius) 0 0 var(--modal-radius);
+	/* Animation for sliding in */
+	animation: slideInRightModal 0.35s cubic-bezier(0.4, 0.2, 0.2, 1) both;
+}
+
+/* To animate sliding out, add a class like .slide-out to the modal when closing */
+.modal[modal-type="task-board-edit-task"].slide-out {
+	animation: slideOutRightModal 0.3s cubic-bezier(0.4, 0.2, 0.2, 1) both;
+}
+
+.modal-content[modal-type="task-board-edit-task"] {
+	position: relative;
+	height: 95%;
+}
+
+.modal[modal-type="task-board-config"] {
+	width: auto;
+	max-width: none;
+	min-height: auto;
+}
+
+.is-phone .modal[modal-type="task-board-config"] {
+	width: 100vw;
+	max-width: 100vw;
+	min-width: 100vw;
+	overflow: auto;
+	/* min-height: fit-content; */
+	max-height: 80vh;
+}
+
+@media screen and (max-width: 768px) {
+
+	.modal[modal-type="task-board-edit-task"],
+	.modal[modal-type="task-board-config"] {
+		width: 100vw;
+		max-width: 100vw;
+		min-width: 100vw;
+		overflow: auto;
+		min-height: fit-content;
+		max-height: 80vh;
+	}
+}
+
+/* src/TaskBoardView.tsx */
 
 .task-board-ribbon-class {
 	color: var(--color-orange);
 }
 
-/* src/KanbanBoard.tsx */
-.kanbanBoard {
-	display: flex;
-	flex-direction: column;
-	height: 99%;
+button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
+	background-color: var(--color-yellow) !important;
+	color: black !important;
+	cursor: pointer;
 }
 
-.kanbanHeader {
+/* // src/components/TaskBoardViewContent.tsx*/
+.taskBoardView {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.taskBoardHeader {
 	display: flex;
 	justify-content: space-between;
 	padding: 4px;
 	padding-block-end: 8px;
 	border-bottom: 1px solid var(--text-normal);
+}
+
+.taskBoardViewSection {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 3.4rem;
+}
+
+.taskBoardViewSection-mobile {
+	height: 100%;
+	/* max-height: 93%; */
+	/* margin-block-end: 20px; */
+	padding-block-end: 4.2rem;
+}
+
+.kanbanBoard {
+	height: 100%;
+	/* max-height: 90%; */
 }
 
 .boardTitles {
@@ -59,17 +170,80 @@
 	border: var(--border-width) solid var(--interactive-accent);
 }
 
-.kanbanHeaderBtns {
+.taskBoardHeaderBtns {
 	display: flex;
 	flex-direction: row;
+	margin-inline-start: 8px;
+	align-content: center;
+	align-items: center;
+}
+
+.taskBoardHeaderBtns .is-mobile input[type='text'] {
+	min-width: 14rem;
+}
+
+.taskCountContainer {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	align-items: center;
+	/* border: 1px solid #ddd; */
+	border-radius: 5px;
+	/* min-width: 12rem; */
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.taskCountContainerProgressBar {
+	width: 100%;
+	min-width: 9rem;
+	height: 8px;
+	background-color: #4f99467a;
+	border-radius: 5px;
+	overflow: hidden;
+	/* margin-bottom: 10px;*/
+}
+
+.taskCountContainerProgressBar-hidden {
+	width: 0 !important;
+}
+
+.taskCountContainerProgressBarProgress {
+	height: 100%;
+	background-color: #4CAF50;
+	transition: width 0.5s ease-in-out;
+}
+
+.taskCountContainerTaskCount {
+	font-size: 14px;
+	font-weight: bold;
+	color: var(--text-muted);
+	text-wrap: nowrap;
 }
 
 .kanbanHeaderBtnsSeparator {
 	padding-inline: 0;
 }
 
-.addTaskBtn,
+.taskBoardSearchInput {
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	margin-inline-start: 8px;
+	margin-inline-end: 4px !important;
+	font-size: 14px;
+	min-width: 12rem;
+	max-width: 20rem;
+	transition: width 0.3s ease-in-out;
+}
+
+.searchTaskBtn,
+.filterTaskBtn,
+.AddNewTaskBtn,
 .ConfigureBtn,
+.taskboardActionshBtn,
+.taskBoardViewHeaderOptionsBtn,
 .RefreshBtn {
 	background-color: transparent !important;
 	background: none;
@@ -82,11 +256,44 @@
 	/* font-size: 14px; */
 }
 
-.addTaskBtn:hover,
+.searchTaskBtn:hover,
+.filterTaskBtn:hover,
+.AddNewTaskBtn:hover,
 .ConfigureBtn:hover,
-.RefreshBtn:hover {
-	border: var(--border-width) solid olive;
+.taskboardActionshBtn:hover,
+.RefreshBtn:hover,
+.taskBoardViewHeaderOptionsBtn:hover,
+.taskboardActionshBtn:hover {
+	/* border: var(--border-width) solid olive; */
+	box-shadow: 0px 0px 1px 1px var(--color-accent);
 }
+
+.taskBoardViewHeaderHideElements {
+	display: none !important;
+	width: 0 !important;
+	height: 0 !important;
+}
+
+.taskBoardViewSection {}
+
+@media screen and (max-width: 768px) {
+
+	.taskCountContainer {
+		display: none !important;
+	}
+
+}
+
+.emptyBoardMessage {
+	padding: 2rem;
+	align-self: center;
+	text-align: center;
+	color: #888;
+}
+
+/* // src/components/KanbanBoard.tsx */
+
+.kanbanBoard {}
 
 .columnsContainer {
 	display: flex;
@@ -134,23 +341,35 @@
 
 /* src/styles/Column.tsx */
 .TaskBoardColumnsSection {
-	background: transparent !important;
+	/* background: transparent !important; */
 	/* backdrop-filter: blur(10px) saturate(300%) contrast(80%) brightness(60%); */
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
-	border-radius: 15px;
+	/* border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8)); */
 	margin-right: 8px;
 	border-radius: 5px;
 	display: flex;
 	flex-direction: column;
-	min-width: var(--column-width) !important;
-	width: var(--column-width) !important;
+	min-width: var(--task-board-column-width) !important;
+	width: var(--task-board-column-width) !important;
+
+	/* New UI */
+	background-color: var(--background-secondary);
+	border: var(--border-width) solid var(--background-modifier-border);
+}
+
+.swimlaneColumnsWrapper .TaskBoardColumnsSection {
+	margin-right: 0px;
+}
+
+.TaskBoardColumnsSection.swimlaneMode.minimized {
+	justify-content: center;
+	align-items: center;
 }
 
 .taskBoardColumnSecHeader {
 	display: flex;
 	flex-direction: row;
 	padding-block: 5px;
-	background: var(--background-secondary-alt);
+	background: var(--background-modifier-border-hover);
 	justify-content: space-between;
 	align-items: center;
 	padding-inline: 10px;
@@ -163,11 +382,28 @@
 	gap: 0.5em;
 }
 
-.columnTitle {
+.taskBoardColumnSecHeaderTitleSecColumnTitle {
 	color: var(--foreground-primary);
 	text-align: center;
+	align-content: center;
 	font-size: 1.1em;
 	font-weight: 600;
+}
+
+.taskBoardColumnSecHeaderTitleSecColumnCount {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 5px;
+	padding-inline: 7px;
+	cursor: pointer;
+}
+
+.taskBoardColumnSecHeaderTitleSecColumnCount.active {
+	color: var(--color-purple);
+	border: 1px solid var(--color-purple);
 }
 
 .columnDragIcon {
@@ -185,34 +421,181 @@
 	gap: 7px;
 	display: flex;
 	flex-direction: column;
+	height: auto;
+	max-height: 80vh;
 }
 
 .tasksContainer-SH {
-	padding: 7px;
+	padding-inline: 7px;
+	padding-block: 12px;
 	flex: 1;
 	overflow-y: auto;
-	gap: 7px;
+	gap: 12px;
 	display: flex;
 	flex-direction: column;
+	/* height: auto; */
+	max-height: 80vh;
 
 	/* Firefox */
 	scrollbar-width: none;
 
+	/* Chrome, Safari, Opera */
 	&::-webkit-scrollbar {
-		/* Chrome, Safari, Opera */
 		display: none;
 	}
+}
+
+.tasksContainerNoTasks {
+	color: var(--background-modifier-border-focus) !important;
+}
+
+.taskItemFadeIn {
+	opacity: 0;
+	transform: translateY(10px);
+	animation: fadeInTask 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeInTask {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.lazyLoadIndicator {
+	padding: 1rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-style: italic;
+	opacity: 0.7;
+	border-top: 1px solid var(--background-modifier-border);
+	margin-top: 0.5rem;
+}
+
+.lazyLoadIndicator p {
+	margin: 0;
+}
+
+/* Minimized column styles */
+.TaskBoardColumnsSection.minimized {
+	min-width: 2.2rem !important;
+	width: 2.2rem !important;
+	transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
+}
+
+.taskBoardColumnMinimized {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 10px 5px;
+	height: 100%;
+	gap: 10px;
+}
+
+.taskBoardColumnMinimizedTitle {
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	transform: rotate(180deg);
+	color: var(--foreground-primary);
+	font-size: 1.1em;
+	font-weight: 600;
+	text-align: center;
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.TaskBoardColumnsSection:not(.minimized) {
+	transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
+}
+
+/* Drag and Drop Styling */
+
+/* Dragged task item dimming effect */
+.taskItem.task-item-dragging-dimmed {
+	opacity: 0.45;
+	transition: opacity 0.2s ease-in-out;
+}
+
+/* Target column allowed drop styling */
+.TaskBoardColumnsSection .drag-over-allowed {
+	border: 2px solid var(--color-green);
+	box-shadow: 0 0 12px 0 rgba(76, 175, 80, 0.4), inset 0 0 12px 0 rgba(76, 175, 80, 0.1);
+	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+	background-color: var(--background-secondary);
+}
+
+/* Target column not allowed drop styling */
+.TaskBoardColumnsSection .drag-over-not-allowed {
+	border: 2px solid var(--color-red);
+	box-shadow: 0 0 12px 0 rgba(244, 67, 54, 0.4), inset 0 0 12px 0 rgba(244, 67, 54, 0.1);
+	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+	background-color: var(--background-secondary);
+}
+
+/* Insertion placeholder shown when reordering within a manual-order column */
+.task-insert-placeholder {
+	height: 3rem;
+	/* approx 3 rem high as requested */
+	border-radius: 6px;
+	background: linear-gradient(90deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+	margin: 6px 0;
+	transition: height 0.12s ease-in-out, margin 0.12s ease-in-out, opacity 0.12s ease-in-out, transform 0.12s ease-in-out;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px dashed var(--interactive-accent);
+	opacity: 0.98;
+}
+
+.task-insert-placeholder .task-insert-text {
+	color: var(--text-muted);
+	font-weight: 600;
+	font-size: 0.95rem;
+	letter-spacing: 0.2px;
+	padding-inline: 0.6rem;
+}
+
+/* Smooth movement for task items when placeholder is inserted */
+.taskItemFadeIn {
+	transition: transform 0.12s ease-in-out, margin 0.12s ease-in-out;
+}
+
+.tasksContainer .taskItemFadeIn {
+	will-change: transform, margin;
 }
 
 
 /* /src/components/TaskItem.tsx */
 
-.taskItem {
+.taskItemContainer {
 	background: var(--background-primary-alt);
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 1), calc(var(--accent-l) * 0.7));
+}
+
+.taskItem {
+	/* border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 1), calc(var(--accent-l) * 0.7)); */
 	border-radius: 5px;
 	display: flex;
 	flex-direction: row;
+	/* box-shadow: 3px 4px 1px -1px rgb(82 52 102 / 48%), -1px 4px 10px 0 rgba(209, 144, 255, 0.2); */
+
+	/* New UI */
+	border: var(--border-width) solid var(--background-modifier-border-focus);
+	box-shadow: 0px 4px 10px 0 rgba(0, 0, 0, 0.3);
+	transition: box-shadow 0.3s ease-in-out;
+}
+
+.taskItem .taskItem-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	box-shadow: var(--shadow-l);
 }
 
 .colorIndicator {
@@ -228,7 +611,7 @@
 	margin-inline-end: 0.3em;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
+	width: 95%;
 }
 
 .taskItemMainBody {
@@ -240,6 +623,13 @@
 .taskItemMainBodyTitleNsubTasks {
 	display: flex;
 	flex-direction: row;
+	min-width: 100%;
+}
+
+.taskItemBodyContent {
+	display: flex;
+	flex-direction: column;
+	min-width: 95%;
 }
 
 .taskItemTitle {
@@ -247,10 +637,18 @@
 	padding-inline-start: 0.4em;
 	font-weight: 500;
 	overflow-wrap: anywhere;
-	color: var(--accent-strong);
 }
 
 .taskItemTitle p {
+	margin-block: 0 !important;
+}
+
+.taskItemBody {
+	font-size: 0.85rem;
+}
+
+.taskItem ol {
+	padding-inline-start: 18px !important;
 	margin-block: 0 !important;
 }
 
@@ -260,7 +658,7 @@
 	margin-inline-end: 0 !important;
 	transform: scale(1.1) !important;
 	border-radius: 2px !important;
-	transition: transform 0.3s;
+	transition: transform 1s;
 
 	background-color: transparent;
 	font: var(--its);
@@ -270,13 +668,15 @@
 	text-align: center;
 	border: 0;
 	cursor: pointer;
+	mask-image: unset;
 	-webkit-mask-image: unset;
+	margin-block-start: 3px !important;
 }
 
 .taskItemCheckbox-checked {
 	transform: scale(1.4);
 	/* Slight animation effect */
-	transition: transform 0.3s;
+	transition: transform 1s;
 }
 
 .taskItemBodySubtaskItem {
@@ -293,14 +693,174 @@
 	margin-top: 4px !important;
 }
 
+.subtaskTextRenderer {
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	word-break: break-all;
+	align-self: end;
+}
+
 .subtaskTextRenderer p {
 	margin-block: 0 !important;
 }
+
+/* .subtaskTextRenderer p>a {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+} */
 
 .subtaskTextRenderer strong {
 	color: var(--text-normal) !important;
 	font-size: unset !important;
 	font-weight: 600 !important;
+}
+
+.subtaskTextRenderer-checked {
+	text-decoration: line-through !important;
+	opacity: 50% !important;
+}
+
+/* /src/components/MapView/MapView.tsx */
+
+.taskBoardMapViewWrapper {
+	opacity: 0;
+	animation: mapViewFadeIn 0.5s ease-in forwards;
+}
+
+.taskBoardMapViewContainer {
+	width: 100%;
+	height: 80vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.taskBoardMapViewContainerNodeResizerTaskItem .taskItemContainer .taskItem.completed {
+	opacity: 60%;
+}
+
+.taskBoardMapViewContainerInitialMessage {
+	max-width: 80vw;
+	margin-top: 1rem;
+	text-align-last: center;
+}
+
+.taskBoardMapViewContainerNodeResizerHandle {
+	display: none !important;
+	/* background-color: var(--white); */
+}
+
+.taskBoardMapViewContainerNodeResizerTaskItem-selected .taskItemContainer .taskItem {
+	border: 1px solid var(--color-accent);
+}
+
+/* .taskBoardMapViewContainerNodeResizerHandle:hover {
+	background-color: var(--red);
+} */
+
+.taskBoardMapViewContainerNodeResizerEdges {
+	background-color: #007bff;
+}
+
+.taskBoardMapViewContainerNodeResizerEdges:hover {
+	background-color: red;
+}
+
+@keyframes mapViewFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Subtask Summary */
+.subtask-summary-container {
+	margin-top: 8px;
+	padding: 0px 0px;
+	padding-inline-end: 7px;
+	/* background-color: var(--background-secondary-alt); */
+	border-radius: 6px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-left: -10px;
+}
+
+.subtask-progress-bar-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+}
+
+.subtask-progress-bar-bg {
+	position: relative;
+	width: 100%;
+	height: 6px;
+	background-color: var(--background-modifier-box-shadow);
+	border: 1px solid var(--color-base-40);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.subtask-progress-bar-fill {
+	height: 100%;
+	background-color: var(--interactive-accent);
+	transition: width 0.3s ease-in-out;
+}
+
+/* Count display */
+.subtask-progress-count {
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+/* Expand button */
+.subtask-toggle-btn {
+	background: none;
+	border: none;
+	font-size: 1rem;
+	cursor: pointer;
+	color: var(--text-accent);
+	transition: transform 0.2s ease-in-out;
+}
+
+.subtask-toggle-btn:hover {
+	transform: scale(1.2);
+}
+
+/* Subtask expand/collapse animations */
+.taskItemBodySubtaskSection-show {
+	max-height: 1000px;
+	/* large max to accommodate many subtasks */
+	opacity: 1;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.taskItemBodySubtaskSection-hide {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.subtask-toggle-icon {
+	display: inline-block;
+	transition: transform 0.3s ease;
+	cursor: pointer;
+}
+
+.subtask-toggle-icon.rotated {
+	transform: rotate(180deg);
 }
 
 .taskItemMainBodyDescription {
@@ -309,6 +869,12 @@
 
 .taskItemMainBodyDescriptionSection {
 	width: 100%;
+	font-size: 0.9rem;
+}
+
+.taskItemMainBodyDescriptionSectionVisible {
+	margin-top: 5px;
+	margin-inline: -5px;
 }
 
 .taskItemMainBodyDescriptionSectionToggler {
@@ -324,15 +890,16 @@
 	height: 0;
 	opacity: 0;
 	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	margin-inline: -5px;
 }
 
 .taskItemBodyDescription-expanded {
 	transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	margin-inline: -5px;
 }
 
 .taskItemBodyDescriptionRenderer {
 	padding: 2px;
-	border-radius: 4px;
 	background: var(--background-modifier-box-shadow);
 	margin: 0 !important;
 }
@@ -343,7 +910,18 @@
 
 .taskItemBodyDescriptionRenderer ul {
 	margin-block: 4px !important;
-	padding-inline-start: 25px !important;
+	padding-inline-start: 5px !important;
+	overflow: auto;
+}
+
+.taskItemBodyDescriptionRenderer li {
+	overflow: auto;
+}
+
+.taskItemBodyDescriptionRenderer ul>li>ul {
+	margin-block: 0px !important;
+	padding-inline-start: 0px !important;
+	overflow: auto;
 }
 
 .taskItemBodyDescriptionRenderer blockquote {
@@ -353,6 +931,66 @@
 	margin-inline-start: 15px;
 }
 
+.taskItemBodyDescriptionRenderer img {
+	max-width: -webkit-fill-available !important;
+	padding-inline-end: 4px !important;
+}
+
+.taskItemChildTasksSection {
+	margin-top: 0.5rem;
+	margin-inline-start: 5px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+	font-size: 0.9rem;
+}
+
+.taskItemChildTasks {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.5rem;
+}
+
+.taskItemChildTask {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	cursor: pointer;
+}
+
+.taskItemChildTaskContent {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 4px;
+}
+
+.taskItemChildTaskSymbol {
+	opacity: 50% !important;
+}
+
+.taskItemChildTaskTitleText {
+	font-weight: 400;
+	max-width: calc(var(--task-board-column-width) - 70px);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+}
+
+.taskItemChildTaskTitleText-completed {
+	text-decoration: line-through;
+	max-width: calc(var(--task-board-column-width) - 70px);
+	opacity: 50%;
+}
+
+.taskItemChildTaskNavigateBtn {
+	margin-inline: 7px;
+	cursor: pointer;
+}
 
 .taskItemTags {
 	display: flex;
@@ -365,26 +1003,80 @@
 	/* border: var(--tag-border-width) solid var(--tag-border-color); */
 	border-radius: var(--tag-radius);
 	/* color: var(--tag-color); */
-	font-size: var(--tag-size);
+	font-size: 0.7rem;
 	font-weight: var(--tag-weight);
 	text-decoration: var(--tag-decoration);
 	padding: var(--tag-padding-y) var(--tag-padding-x);
-	line-height: 1;
+	/* line-height: 1; */
 	border-radius: 1em;
-	padding: 2px 8px;
+	padding: 1px 6px;
 	margin-right: 2px;
 	display: inline-block;
 	white-space: nowrap;
 }
 
-.taskItemDate {
+.taskItemTagFrontmatter {
+	font-size: 0.7rem;
+	text-decoration: var(--tag-decoration);
+	background-color: var(--background-modifier-border) !important;
+	border: var(--pill-border-width) solid var(--pill-border-color) !important;
+	border-radius: var(--pill-radius) !important;
+	color: var(--pill-color) !important;
+	cursor: var(--cursor);
+	font-weight: var(--pill-weight);
+	padding: 0 var(--pill-padding-x) !important;
+}
+
+.taskItemUniversalDate {
 	color: rgb(185, 125, 13);
 	font-size: small;
 }
 
-.taskItemDateCompleted {
+.taskItemCompletedDate {
 	color: var(--text-success);
 	font-size: small;
+}
+
+.taskItemFooterDateTimeContainer {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: center;
+	align-items: center;
+	gap: 2px;
+	font-size: 0.75rem;
+}
+
+.taskItemTimeContainer,
+.taskItemUniversalDateContainer {
+	background-color: var(--background-modifier-box-shadow);
+	padding-inline: 6px;
+	border: 1px solid var(--graph-line);
+	padding-block: 2px;
+	color: var(--icon-color);
+	border-radius: var(--pill-radius);
+	opacity: 75%;
+}
+
+.taskItemFileNameSection {
+	background-color: var(--background-modifier-box-shadow);
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0 4px 0 0;
+	margin: -4px;
+	opacity: 0.8;
+	margin-bottom: 5px;
+	margin-inline-start: -5px;
+}
+
+.taskItemFileName {
+	font-weight: 450;
+	font-size: 0.8rem;
+	opacity: 0.7;
+	color: var(--bases-table-header-color);
+	padding-inline: 5px;
 }
 
 .taskItemHeader {
@@ -400,22 +1092,30 @@
 	gap: 0.5em;
 }
 
+.taskItemPrio {
+	margin-inline-start: -5px;
+}
+
 .taskItemDragBtn {
 	opacity: 0;
 	background-color: var(--background-primary-alt);
 	border: none;
 	cursor: grab;
-	padding-block: 2px;
-	padding-inline: 4px;
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 1.2rem;
+	min-width: 1.2rem;
+	/* padding-block: 2px; */
+	/* padding-inline: 4px; */
 	border-radius: 5px;
 	/* margin: 0 5px; */
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	/* display: flex
+	; */
+	/* align-items: center; */
+	/* justify-content: center; */
 	font-size: 1.2em;
-	/* Adjust size as needed */
 	transition: transform 0.2s;
-	/* Animation for hover effect */
 }
 
 .taskItemDragBtn:hover {
@@ -423,11 +1123,17 @@
 	transform: scale(1.1);
 }
 
+.taskItemFooterRefreshingMssg {
+	align-items: center;
+	align-self: center;
+}
+
 .taskItemFooter {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: flex-end;
+	margin-top: 0.7rem;
 }
 
 .taskItemFooterHidden {
@@ -479,9 +1185,10 @@
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	max-height: calc(var(--dialog-max-height) - 5vh);
+	/* max-height: calc(var(--dialog-max-height) - 11vh); */
 	box-sizing: border-box;
 	position: relative;
+	height: 100%;
 }
 
 .EditTaskModalHomeTitle {
@@ -491,9 +1198,13 @@
 }
 
 .EditTaskModalHomeModalTitle {
-	font-size: 1.5em;
+	font-size: 1.2em;
 	font-weight: bold;
-	text-align: center;
+	margin-bottom: 0.5em;
+}
+
+.EditTaskModalHomeModalTitleInput {
+	margin-bottom: 2rem !important;
 }
 
 .EditTaskModalHomeBody {
@@ -510,9 +1221,9 @@
 .EditTaskModalHomeLeftSec {
 	display: flex;
 	flex-direction: column;
-	min-width: 500px;
-	width: 45vw;
-	max-width: 40vw;
+	width: 100%;
+	/* max-width: 40vw;
+	min-width: 500px; */
 	flex-grow: 1;
 	max-height: 100%;
 	justify-content: space-between;
@@ -526,22 +1237,137 @@
 	padding-inline-end: 8px;
 }
 
+.markdown-source-view.mod-cm6 .cm-content>[contenteditable=false] {
+	max-width: 100% !important;
+}
+
 
 .EditTaskModalHomeFieldTitle {
-	font-size: 1em;
+	font-size: 0.8em;
 	/* text-align: center; */
-	font-weight: 700;
+	/* font-weight: 400; */
 	margin-bottom: 5px;
+	color: var(--text-muted);
+}
+
+.EditTaskModalHomeFieldTitleContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
 }
 
 .EditTaskModalHomeFieldTitleInput {
 	margin-bottom: 15px;
 }
 
-.EditTaskModalsubTasksContainer {
+.EditTaskModalChildTasksContainer {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
+	margin-block-end: 1.5rem;
+}
+
+.EditTaskModalChildTaskInput {
+	width: 100%;
+}
+
+.EditTaskModalChildTasksList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	overflow-y: auto;
+	margin-top: 0.5em;
+	padding-right: 5px;
+}
+
+.EditTaskModalChildTasksListItem {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: space-between;
+	background: var(--background-secondary);
+	/* padding: 2px 10px; */
+	border-radius: 5px;
+	border: 1px solid var(--background-modifier-border-focus);
+}
+
+.EditTaskModalChildTasksListItemTitle {
+	font-weight: 500;
+	overflow-wrap: anywhere;
+	flex: 1;
+	padding-inline-end: 0.8rem;
+	/* padding-block: 14px;
+	margin-inline: 1rem; */
+}
+
+.EditTaskModalChildTasksListItemFooter {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5em;
+	background-color: var(--bases-embed-border-color);
+	padding-inline: 5px;
+}
+
+.EditTaskModalChildTasksListItemIdSec {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding-inline: 5px;
+	padding-block: 2px;
+	gap: 2px;
+}
+
+.EditTaskModalChildTasksListItemIdLabel {
+	font-size: 0.8em;
+	opacity: 70%;
+}
+
+.EditTaskModalChildTasksListItemIdValue {
+	padding-inline: 5px;
+	padding-block: 0px;
+	width: 2.5rem;
+	text-wrap: auto;
+	text-align: center;
+	align-content: center;
+	font-weight: 600;
+	color: var(--list-marker-color-hover);
+	/* background-color: var(--background-modifier-border-focus); */
+}
+
+.EditTaskModalChildTasksListItemFooterBtns {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5em;
+}
+
+.EditTaskModalChildTasksListItemEditBtn,
+.EditTaskModalChildTasksListItemDeleteBtn {
+	/* color: var(--background-modifier-error) !important; */
+	background: none !important;
+	background-color: none !important;
+	border: none;
+	cursor: pointer;
+	color: var(--text-danger);
+	font-size: 1.2em;
+	padding: 2px;
+	display: flex;
+	align-items: stretch;
+	height: 100%;
+	justify-content: center;
+	align-self: anchor-center;
+}
+
+.EditTaskModalChildTasksListItemDeleteBtn {
+	color: var(--background-modifier-error) !important;
+}
+
+.EditTaskModalActivityContainer {
+	opacity: 0.4;
 }
 
 .EditTaskModalsubTaskItem {
@@ -563,9 +1389,17 @@
 .EditTaskModalTabHeader {
 	display: flex;
 	gap: 5px;
-	width: fit-content;
+	width: 100%;
 	flex-direction: row;
 	/* background: var(--background-modifier-message); */
+	justify-content: space-between;
+	align-items: center;
+}
+
+.EditTaskModalTabHeaderLeftBtnSec {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
 .EditTaskModalTabHeaderBtn {
@@ -575,11 +1409,18 @@
 }
 
 .EditTaskModalTabHeaderBtn-active {
-	padding-block: 5px;
+	padding-block: 6px;
 	padding-inline: 15px;
 	font-weight: 500;
 	border-radius: 10px 10px 0 0;
 	background: var(--table-header-border-color);
+}
+
+.EditTaskModalTabHeaderRightBtnSec {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5em;
 }
 
 .EditTaskModalTabContent {
@@ -589,7 +1430,10 @@
 
 .EditTaskModalTabContent.show {
 	opacity: 1;
-	height: 100%;
+	/* height: 100%; */
+	border: 2px solid var(--table-header-border-color);
+	border-radius: 0px 0px 10px 10px;
+	margin-bottom: 2em;
 }
 
 .EditTaskModalTabContent.hide {
@@ -599,6 +1443,7 @@
 
 .EditTaskModalHomePreviewHeader {
 	display: flex;
+	gap: 1rem;
 	padding: 5px;
 	flex-direction: row;
 	/* border-radius: 10px 0 5px 0; */
@@ -611,17 +1456,20 @@
 	font-weight: 400;
 	display: flex;
 	flex-direction: row;
+	align-items: center;
+	width: 100%;
 }
 
 .EditTaskModalHomePreviewHeaderFilenameValue {
 	font-weight: 500;
-	padding-inline: 10px
+	padding-inline: 10px;
+	width: 85%;
 }
 
 .EditTaskModalHomePreview ul {
-	padding-inline-start: 30px;
+	/* padding-inline-start: 30px;
 	margin-top: 0.7em;
-	padding-inline-end: 10px;
+	padding-inline-end: 10px; */
 }
 
 .EditTaskModalHomePreviewContainer {
@@ -631,6 +1479,7 @@
 	border-radius: 4px;
 	background-color: var(--background-primary-alt);
 	position: relative;
+	padding-bottom: 1em;
 }
 
 .EditTaskModalHomePreviewContainer h6 {
@@ -652,16 +1501,26 @@
 	overflow-y: auto;
 }
 
-.EditTaskModalHomeOpenFileBtn {
-	padding: 4px 8px !important;
-	border: none;
+.EditTaskModalHomePreviewHeaderBtnSec {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+	justify-content: flex-end;
+}
+
+.EditTaskModalHomeLiveEditorRefreshBtn,
+.EditTaskModalHomeOpenFileBtn,
+.EditTaskModalTabHeaderOpenMapBtn {
+	padding: 4px 4px !important;
+	border: 1px solid var(--bold-color);
 	border-radius: 4px;
 	cursor: pointer;
 	width: auto;
 }
 
-.EditTaskModalHomeOpenFileBtn:hover {
-	background-color: var(--text-accent-hover);
+.EditTaskModalHomeOpenFileBtn:hover,
+.EditTaskModalTabHeaderOpenMapBtn:hover {
+	border: 1px solid var(--text-accent-hover);
 }
 
 .EditTaskModalHomePreviewBody {
@@ -670,8 +1529,25 @@
 	border: var(--border-width) solid var(--table-header-border-color);
 }
 
+.EditTaskModalHomePreviewBody ol {
+	padding-inline-start: 20px;
+	margin-block: 0 !important;
+}
+
 .taskItemCheckbox {
 	vertical-align: middle;
+}
+
+.EditTaskModalLiveEditor {
+	min-height: 20vh;
+	/* max-height: 40vh; */
+}
+
+.EditTaskModalLiveEditor .markdown-source-view.mod-cm6 {
+	/* max-height: 40vh; */
+	padding-block: 1rem;
+	padding-inline-end: 1rem;
+	padding-inline-start: 0.5rem;
 }
 
 .EditTaskModalBodyDescription {
@@ -687,9 +1563,11 @@
 	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
 	border-radius: 5px;
 	padding: 0.5em;
-	min-width: 8vw;
-	max-width: 14vw;
+	min-width: 14vw;
+	max-width: 15vw;
 	box-sizing: border-box;
+	transition: transform 0.3s ease-in-out;
+	overflow: auto;
 }
 
 .EditTaskModalHomeField {
@@ -707,6 +1585,12 @@
 	border: 1px solid var(--table-border-color);
 }
 
+.clear-time-icon {
+	position: relative;
+	left: -20px;
+	cursor: pointer;
+}
+
 .EditTaskModalHome-taskItemTagsPreview {
 	display: flex;
 	gap: 2px;
@@ -720,33 +1604,135 @@
 	font-size: small;
 }
 
-.EditTaskModalHomeSaveBtn {
+.EditTaskModalHomeFooterBtnSec {
 	position: sticky;
 	bottom: 0;
-	background-color: green !important;
-	color: white !important;
-	font-weight: 600;
-	/* width: 100%; */
 	padding: 10px;
-	border: none;
-	cursor: pointer;
 	margin-inline: 1em 2.5em;
 	margin-block-start: 1em;
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.EditTaskModalHomeSaveBtn {
+	bottom: 0;
+	/* border: 2px solid #54f72275 !important;
+	color: #60ff2fbd !important; */
+	font-weight: 600;
+	width: 100%;
+	border: none;
+	cursor: pointer;
 }
 
 .EditTaskModalHomeSaveBtn:hover {
 	background-color: green;
+	color: white !important;
 }
 
-
-/* DeleteTaskConfirmationModal */
-
-.deleteConfirmationModalHome {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+.EditTaskModalHomeToggleBtn {
+	display: none;
 }
+
+/* Mobile-specific styles */
+@media (max-width: 1100px) {
+	.EditTaskModalHomeBody {
+		flex-direction: column;
+		position: relative;
+	}
+
+	.EditTaskModalHomeLeftSec {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		/* max-width: 100%;
+		min-width: 75vw; */
+		flex-grow: 1;
+		max-height: 100%;
+		justify-content: space-between;
+	}
+
+	.EditTaskModalHomeLeftSecScrollable {
+		display: flex;
+		flex-direction: column;
+		max-width: 100%;
+		height: 100%;
+		max-height: 100%;
+		overflow-y: auto;
+		padding-inline-end: 0px;
+	}
+
+	.EditTaskModalHomeFooterBtnSec {
+		padding-top: 5px;
+		margin-top: 5px;
+	}
+
+	/* .EditTaskModalHomePreviewBody {
+		height: 30vh;
+	}
+
+	.EditTaskModalTabContent.show {
+		height: 30vh;
+	} */
+
+	/* Initially hide the right section on small screens */
+	.EditTaskModalHomeRightSec {
+		position: absolute;
+		top: 0;
+		right: 0;
+		min-width: 200px;
+		height: 100%;
+		transform: translateX(100%);
+		overflow: auto;
+
+		border: none;
+		box-shadow: none;
+		background: transparent;
+	}
+
+	/* Show when toggled */
+	.EditTaskModalHomeRightSec.visible {
+		transform: translateX(0);
+
+		border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
+		background: var(--color-base-30);
+		backdrop-filter: blur(10px);
+		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Button to toggle right section */
+	.EditTaskModalFooter {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+	}
+
+	.EditTaskModalHomeSaveBtn {
+		background-color: green !important;
+		color: white !important;
+		font-weight: 600;
+		/* width: 100%; */
+		border: none;
+		cursor: pointer;
+		width: 75%;
+	}
+
+	.EditTaskModalHomeToggleBtn {
+		background-color: var(--accent-color, blue);
+		color: white;
+		border: none;
+		padding: 8px 12px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: block;
+	}
+
+	.EditTaskModalHomeToggleBtn:hover {
+		background-color: darkblue;
+	}
+}
+
 
 /* DeleteTaskConfirmationModal */
 
@@ -771,6 +1757,12 @@
 	cursor: pointer;
 }
 
+.archiveTaskCancelmBtn {
+	padding-block: 4px;
+	padding-inline: 25px;
+	cursor: pointer;
+}
+
 .deleteTaskCancelmBtn {
 	padding-block: 4px;
 	padding-inline: 25px;
@@ -780,6 +1772,11 @@
 .deleteTaskConfirmBtn:hover {
 	background-color: red !important;
 	/* Change background to green on hover */
+}
+
+.archiveTaskCancelmBtn:hover {
+	background-color: #818108 !important;
+	/* Change background to red on hover */
 }
 
 .deleteTaskCancelmBtn:hover {
@@ -793,8 +1790,9 @@
 .boardConfigModalHome {
 	display: flex;
 	flex-direction: row;
-	width: 100%;
-	height: 100%;
+	height: auto;
+	/* max-height: 90vh; */
+	overflow-y: auto;
 }
 
 .boardConfigModalHr-50 {
@@ -818,12 +1816,14 @@
 	justify-content: space-between;
 	padding: 1em;
 	border-radius: 4px;
-	max-height: calc(var(--dialog-max-height) - 5vh);
+	max-height: calc(var(--dialog-max-height) - 5dvh);
 	position: sticky;
 	top: 0;
 	overflow: hidden;
 	min-width: 180px;
 	max-width: 250px;
+	gap: .5em;
+	transition: transform 0.3s ease-in-out;
 }
 
 .boardConfigModalSidebarBtnArea {
@@ -851,11 +1851,32 @@
 	cursor: pointer;
 }
 
+.boardConfigModalSidebarBtnAreaBoardBtnsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	width: 100%;
+	overflow-y: scroll;
+	max-height: calc(var(--dialog-max-height) - 30dvh);
+}
+
+.boardConfigModalSidebarBtnAreaConfigBtnsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	width: 100%;
+}
+
 .boardConfigModalSidebarBtnArea-btn {
 	border-radius: var(--button-radius);
 	border: var(--border-width) solid var(--table-header-border-color);
 	padding: 8px;
 	cursor: pointer;
+	display: flex;
+	align-content: center;
+	justify-content: space-between;
+	flex-direction: row;
+	gap: 0.5rem;
 }
 
 .boardConfigModalSidebarBtnArea-btn-active {
@@ -865,25 +1886,41 @@
 	border: var(--border-width) solid var(--interactive-accent);
 	padding: 8px;
 	cursor: pointer;
+	display: flex;
+	align-content: center;
+	justify-content: space-between;
+	flex-direction: row;
+	gap: 0.5rem;
+}
+
+.boardConfigModalSidebarBtnArea-btn-drag-handle {
+	cursor: grab;
+	align-self: center;
+	min-width: 20px;
 }
 
 .boardConfigModalSidebarSaveBtn {
 	width: 100%;
-	background-color: var(--color-green) !important;
-	color: white !important;
+	/* border: 2px solid #54f72275 !important;
+	color: #60ff2fbd !important; */
 	cursor: pointer;
 }
 
 .boardConfigModalSidebarSaveBtn:hover {
-	background-color: var(--color-accent) !important
+	background-color: green;
+	color: white !important;
 }
 
 .boardConfigModalMainContent {
 	flex: 1;
 	padding-left: 1em;
-	overflow-y: auto;
+	/* overflow-y: auto; */
 	max-width: 50vw;
-	/* Allow scrolling for main content */
+	max-height: calc(var(--dialog-max-height) - 6vh);
+}
+
+.boardConfigModalSidebarToggleBtn {
+	display: none;
 }
 
 .boardConfigModalMainContentBoardSettingTab,
@@ -913,7 +1950,8 @@
 	justify-content: space-between;
 }
 
-.boardConfigModalMainContent-Active-Body-boardNameTag {
+.boardConfigModalMainContent-Active-Body-boardNameTag,
+.boardConfigModalMainContent-Active-Body-boardDescriptionTag {
 	display: flex;
 	flex-direction: column;
 }
@@ -940,7 +1978,6 @@
 .boardConfigModalMainContent-Active-BodyColumnsList {
 	display: flex;
 	flex-direction: column;
-	gap: 1em;
 }
 
 .boardConfigModalColumnRow {
@@ -950,10 +1987,32 @@
 	gap: 0.5em;
 	margin-block: 0.5em;
 	cursor: default;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	padding: 4px;
+}
+
+.boardConfigModalColumnRow.Hidden {
+	opacity: 50%;
 }
 
 .boardConfigModalColumnRowDragButton {
 	cursor: grab;
+	align-self: center;
+	min-width: 30px;
+	min-height: max-content;
+	opacity: 50%;
+}
+
+.boardConfigModalColumnRowEyeButton,
+.boardConfigModalColumnRowDeleteButton {
+	cursor: pointer;
+	min-width: fit-content;
+	align-self: center !important;
+}
+
+.boardConfigModalColumnRowDeleteButton:hover {
+	color: var(--text-error);
 }
 
 .boardConfigModalAddColumnButton {
@@ -968,6 +2027,8 @@
 	flex-direction: row;
 	justify-content: flex-start;
 	gap: 0.5em;
+	max-width: 55vw;
+	flex-wrap: wrap;
 }
 
 .boardConfigModalColumnRowContentColumnType button {
@@ -982,10 +2043,17 @@
 }
 
 .boardConfigModalColumnRowContentColDatedVal {
-	min-width: 70px;
-	max-width: 75px;
+	min-width: 105px;
+	max-width: 111px;
 }
 
+.boardConfigModalColumnRowContentPriorityDropdown {
+	min-width: 120px;
+	max-width: 130px;
+	padding-inline: 8px;
+}
+
+.boardConfigModalDuplicateBoardBtn,
 .boardConfigModalDeleteBoardBtn {
 	margin-block-start: 1em;
 	cursor: pointer;
@@ -996,6 +2064,19 @@
 	color: white;
 }
 
+.boardConfigModalDoubleBtnContainer {
+	display: flex;
+	gap: .5em;
+}
+
+.boardConfigModalDoubleBtnContainer button {
+	flex: 1;
+}
+
+.boardConfigModalSaveBtn-mobile {
+	display: none;
+}
+
 [data-rbd-drag-handle-context-id="0"] {
 	cursor: auto !important;
 }
@@ -1004,6 +2085,120 @@
 	min-width: fit-content;
 	min-height: fit-content;
 } */
+
+
+/* Responsive styles for small screens */
+@media (max-width: 768px) {
+
+	.modal[modal-type="task-board-board-config"] {
+		min-width: 100vw;
+		min-height: auto;
+	}
+
+	.boardConfigModalHome {
+		/* flex-direction: column; */
+		/* width: 100vw; */
+		padding-top: 1em;
+		overflow: auto;
+		max-height: 80vh;
+	}
+
+	/* Hide sidebar by default */
+	.boardConfigModalSidebar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 40vw;
+		height: 100%;
+		background: var(--background-secondary);
+		box-shadow: 4px 0px 10px rgba(0, 0, 0, 0.2);
+		transform: translateX(-100%);
+		z-index: 100;
+	}
+
+	.boardConfigModalMainContent {
+		max-width: 95vw;
+		width: 95vw;
+		padding-left: 0 !important;
+		overflow-y: unset !important;
+	}
+
+	.boardConfigModalMainContentBoardSettingTab,
+	.pluginGlobalSettingsTab {
+		max-width: 95vw !important;
+		overflow: auto;
+	}
+
+	/* Show when toggled */
+	.boardConfigModalSidebar.visible {
+		transform: translateX(0);
+	}
+
+	/* Toggle button */
+	.boardConfigModalSidebarToggleBtn {
+		position: sticky !important;
+		top: 1em;
+		left: 1em;
+		width: 4.2em !important;
+		height: 2.5em !important;
+		color: white;
+		border: none;
+		padding: 9px 20px !important;
+		border-radius: 4px;
+		cursor: pointer;
+		display: block;
+	}
+
+	.boardConfigModalSidebarToggleBtn:hover {
+		background-color: darkblue;
+	}
+
+	.boardConfigModalColumnRowContent {
+		max-width: 75vw;
+	}
+
+	.boardConfigModalColumnRowContentColName {
+		min-width: 70px !important;
+		max-width: 150px !important;
+	}
+
+	.boardConfigModalColumnRow {
+		align-items: center;
+	}
+
+	.boardConfigModalColumnRowDragButton {
+		min-width: 2em !important;
+	}
+
+	.boardConfigModalDeleteBoardBtn {
+		background-color: darkred !important;
+		color: white !important;
+		max-width: 50%;
+		align-self: end;
+		margin-bottom: 1.5em;
+	}
+
+	.boardConfigModalSidebarSaveBtn {
+		display: none;
+		height: 0;
+	}
+
+	.boardConfigModalSaveBtn-mobile {
+		display: block !important;
+		position: sticky;
+		bottom: 1px;
+		/* right: 1px; */
+		/* left: 1px; */
+		align-self: center;
+		background-color: var(--color-green) !important;
+		cursor: pointer;
+		width: 90%;
+	}
+
+	.addColumnModalOverlayContent {
+		width: auto !important;
+	}
+}
 
 
 /* /src/modal/AddColumnModal.tsx */
@@ -1072,20 +2267,25 @@
 	flex-direction: row;
 	position: sticky;
 	z-index: 1;
+	overflow-x: scroll;
 	top: calc(-1 * var(--size-4-8));
-	box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
+	/* box-shadow: 0px 10px 15px -10px var(--background-modifier-success); */
 	backdrop-filter: blur(5px);
+	justify-content: space-evenly;
+	margin-block: 5px;
 }
 
 .taskBoard-settings-tab-button {
-	flex: 1;
+	min-width: fit-content;
+	width: -webkit-fill-available;
 	background-color: var(--background-secondary);
 	align-content: center;
 	text-align-last: center;
-	font-size: large;
+	font-size: 0.9rem;
 	font-weight: 700;
 	border: solid 1px var(--checkbox-color-hover);
 	border-radius: 4px;
+	padding-inline: 1rem;
 	color: var(--color-base-60);
 }
 
@@ -1098,6 +2298,56 @@
 	margin-top: 1.2em;
 }
 
+/* Hidden Properties Settings */
+.taskboard-hidden-properties-setting .setting-item-description {
+	margin-bottom: 0.75em;
+}
+
+.taskboard-hidden-properties-container {
+	margin-left: 1em;
+	margin-block-end: 1em;
+	border-inline: 2px solid var(--color-accent-2);
+	padding-left: 1em;
+	background-color: var(--background-secondary);
+	border-radius: 5px;
+	padding: 0.75em;
+}
+
+.taskboard-compact-setting {
+	padding: 0.25em 0 !important;
+	border-bottom: none !important;
+}
+
+.taskboard-compact-setting .setting-item-name {
+	font-size: 0.9em;
+}
+
+.taskboard-compact-setting .setting-item-control {
+	min-width: auto;
+}
+
+/* Hidden Properties in Live Editor and Reading Mode */
+/* .taskboard-hidden-property {
+	display: none !important;
+	opacity: 0.3;
+	font-size: 0.8em;
+	color: var(--text-muted);
+	background-color: var(--background-modifier-hover);
+	padding: 1px 3px;
+	border-radius: 3px;
+	cursor: help;
+} */
+
+/* Show hidden properties on line hover for easier editing */
+li:hover .taskboard-hidden-property {
+	display: inline !important;
+}
+
+/* Alternative: show on focus for better accessibility */
+/* li:focus-within .taskboard-hidden-property {
+	display: inline !important;
+} */
+
 .taskBoard-tab-section-desc {
 	text-align: center;
 }
@@ -1105,22 +2355,76 @@
 .taskBoard-filter-row {
 	display: flex;
 	align-items: center;
-	margin-bottom: 10px;
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-content: center;
+	border: 1px solid var(--checkbox-border-color);
+	padding: 5px;
+	border-radius: 5px;
+	flex-direction: column;
+}
+
+.taskBoard-filter-row-heading {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.taskBoard-filter-row-body {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	gap: 0.75rem;
 }
 
 .taskBoard-filter-label {
-	width: 80px;
-	font-weight: bold;
-	color: var(--color-red);
+	width: 70px;
+	font-weight: 500;
+	color: var(--blockquote-border-color);
+	align-content: center;
 }
 
-.taskBoard-filter-input {
-	flex-grow: 1;
-	margin-right: 10px;
+.taskBoard-filter-values {
+	background-color: var(--background-modifier-form-field);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	min-width: 100px;
+	width: -webkit-fill-available;
+	padding: 7px;
+	border-radius: 5px;
+}
+
+.taskBoard-filter-tag {
+	background-color: var(--color-base-40);
+	padding: 2px 8px;
+	border-radius: 8px;
+	font-size: 0.875em;
+	border: 1px solid var(--text-highlight-bg);
+}
+
+.taskBoard-filter-configure-button {
+	padding: 3px 10px;
+	cursor: pointer;
+	font-size: 0.875em;
+	border: 1px solid var(--interactive-accent);
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border-radius: 6px;
+}
+
+.taskBoard-filter-configure-button:hover {
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
 }
 
 .taskBoard-filter-dropdown {
 	text-align: center;
+	max-width: fit-content;
 }
 
 .taskBoard-global-settings-tab-tag-color-preview {
@@ -1128,28 +2432,150 @@
 	padding: 1px 10px;
 }
 
+/* Container for all tag rows */
+.tag-colors-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 1em;
+}
+
+/* Each draggable tag color row */
+.tag-color-row {
+	display: flex;
+	align-items: center;
+	padding: 8px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background-color: var(--background-primary);
+	transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tag-color-row-element .setting-item-info {
+	display: none !important;
+}
+
+.tag-color-row .setting-item-control {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap !important;
+}
+
+/* Highlighted row while dragging */
+.task-board-sortable-ghost {
+	opacity: 0.5;
+	background-color: var(--background-secondary-alt);
+}
+
+.task-board-sortable-chosen {
+	box-shadow: 0 0 8px var(--interactive-accent);
+}
+
+/* Inside setting layout (small tweak to better align) */
+.tag-color-row-element {
+	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-bottom: 0 !important;
+	flex-wrap: wrap;
+}
+
+.taskboard-setting-tag-color-row-element-drag-handle {
+	max-width: max-content !important;
+}
+
+/* Make the grip icon and buttons smaller and draggable looking */
+/* .tag-color-row-element .setting-item-control button {
+	background: none;
+	border: none;
+	cursor: grab;
+} */
+
+/* Tag name input */
+.tag-color-row-element input[type="text"] {
+	flex: 1;
+	min-width: 10em;
+	padding: 4px 6px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+}
+
+/* Color value input */
+.tag-color-row-element input[type="text"]:last-of-type {
+	width: 140px;
+	text-align: center;
+	font-family: monospace;
+}
+
+/* Pickr color button */
+.tag-color-row-element .pickr {
+	width: 28px;
+	height: 28px;
+	margin-left: 4px;
+	cursor: pointer !important;
+}
+
+.tag-color-row-element .pickr .pcr-button::after {
+	cursor: pointer !important;
+	min-width: 28px !important;
+	min-height: 28px !important;
+	width: 28px;
+	height: 28px;
+}
+
+/* Delete button */
+.tag-color-row-element .mod-cta {
+	background-color: var(--color-red);
+	color: white;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+}
+
+.taskboard-setting-tag-color-row-element-delete {
+	background-color: var(--color-red) !important;
+	cursor: pointer !important;
+	max-width: max-content !important;
+}
+
+.taskboard-setting-tag-color-row-element-color-picker {
+	cursor: pointer !important;
+}
+
 .global-setting-tab-live-preview {
 	padding: 5px;
 	padding-block: 1em;
 	border-radius: var(--radius-m);
-	background-color: var(--background-primary-alt);
-}
-
-.global-setting-tab-live-preview {
+	/* background-color: var(--background-primary-alt); */
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
 
-.global-setting-tab-live-preview-label {
+.global-setting-tab-source-mode-preview-label,
+.global-setting-tab-reading-mode-preview-label {
 	background-color: var(--background-primary);
 	text-align: center;
 }
 
-.settingTabFooterSection {
-	margin-top: 2em;
-	align-items: center;
-	text-align: center;
+.global-setting-tab-reading-mode-preview-markdown,
+.global-setting-tab-source-mode-preview-data {
+	background-color: var(--background-modifier-border);
+	padding: 10px;
+	border-radius: var(--radius-m);
+	font-family: monospace;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	max-height: 150px;
+	overflow-y: auto;
+}
+
+.global-setting-tab-reading-mode-preview-markdown ul {
+	margin: 0 !important;
+	padding-inline-start: 22px !important;
 }
 
 .settingTabFooterDonationsSec {
@@ -1159,7 +2585,8 @@
 	margin-top: 1em;
 	align-items: center;
 	justify-content: center;
-	max-height: 60px;
+	max-height: unset;
+	flex-wrap: wrap;
 }
 
 .taskBoard-docs-section {
@@ -1168,6 +2595,25 @@
 	margin-block: 0 !important;
 	padding-block: 1em;
 	border-radius: var(--radius-m);
+}
+
+.taskBoard-settings-wide-input {
+	width: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+}
+
+@media (max-width: 768px) {
+	.settingTabFooterDonationsSec {
+		display: flex;
+		flex-direction: row;
+		gap: 1em;
+		margin-top: 1em;
+		align-items: center;
+		justify-content: center;
+		/* max-height: 150px; */
+		flex-wrap: wrap;
+	}
 }
 
 
@@ -1268,6 +2714,170 @@
 
 .scanVaultModalHomeToggleButton {
 	margin-top: 20px;
+}
+
+
+/* /src/modal/DiffContentCompareModal.ts */
+
+.modal[data-type="task-board-diff-content-compare"] {
+	min-width: 100vw !important;
+}
+
+.taskboard-diff-content-compare-modal {
+	min-width: 90vw;
+}
+
+.taskboard-diff-content-compare-modal h2 {
+	text-align: center;
+}
+
+.taskboard-diff-content-compare-modal-container {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+}
+
+.taskboard-diff-content-compare-modal-side {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	overflow-y: auto;
+	max-height: calc(var(--dialog-max-height) - 6vh);
+	padding: 1em;
+	border-radius: 4px;
+	background-color: var(--background-primary-alt);
+}
+
+.taskboard-diff-content-compare-modal-content {
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	font-family: monospace;
+	padding: 0.5em;
+	border-radius: 4px;
+	background-color: var(--background-secondary);
+	max-height: calc(var(--dialog-max-height) - 10vh);
+	overflow: auto;
+}
+
+.taskboard-diff-content-compare-modal-old-content-button {
+	background-color: #68671569 !important;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: none;
+}
+
+.taskboard-diff-content-compare-modal-new-content-button {
+	background-color: #30639c6b !important;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: none;
+}
+
+.taskboard-diff-content-compare-modal-info {
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	margin-bottom: 1em;
+}
+
+.taskboard-diff-content-compare-modal-abort-button {
+	background-color: #78141469 !important;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: none;
+}
+
+@media (max-width: 650px) {
+	.taskboard-diff-content-compare-modal-container {
+		flex-direction: column;
+	}
+}
+
+/* /src/components/KanbanBoard.tsx */
+
+.modal[data-type="task-board-actions-modal"] {
+	min-width: 80vw !important;
+	min-height: 80vh !important;
+}
+
+.modal-content[data-type="task-board-actions-modal"] {
+	/* min-width: 80vw;
+	min-height: 80vh; */
+}
+
+.taskboard-actions-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.taskboard-actions-add-button {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	padding: 4px 10px;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.taskboard-actions-add-button:hover {
+	background-color: var(--interactive-accent-hover);
+}
+
+.taskboard-active-actions-section,
+.taskboard-inactive-actions-section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.taskboard-inactive-actions-section {
+	margin-top: 10rem;
+}
+
+.taskboard-action-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	background-color: var(--background-secondary-alt);
+	padding: 8px 12px;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* /src/modal/ScanFilterModal.ts */
+
+.scan-filter-input {
+	width: 100% !important;
+}
+
+.scan-filter-list {
+	margin-top: 1em;
+	padding-left: 5px;
+}
+
+.scan-filter-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 10px;
+	margin-bottom: 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	font-weight: 500;
+	background-color: var(--background-primary-alt);
+}
+
+.scan-filter-remove-btn {
+	background-color: transparent !important;
+	color: var(--color-red) !important;
+	cursor: pointer;
 }
 
 
@@ -1476,6 +3086,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox.taskItemCheckbox-checked:is([data-tas
 	border: 0;
 	border: none !important;
 	cursor: pointer;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 }
 
@@ -1634,11 +3245,22 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 	background-color: transparent;
 	top: -4px;
 	left: 0px;
+	mask-image: unset;
 	-webkit-mask-image: unset;
 	border: none !important;
 }
 
 /*--Checkbox Type Icons--*/
+/* Apply ITS font family to all checkbox icons */
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked p>input[type=checkbox]:checked::after {
+	font-family: "its";
+}
+
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=x]::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x]>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x] p>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=X]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X] p>input[type=checkbox]:checked::after {
@@ -1797,8 +3419,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=A] p>input[type=che
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=r]::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r] p>input[type=checkbox]:checked::after {
-	content: "\ec22";
-	color: rgb(var(--chbx-r));
+	content: "\ec22" !important;
+	color: rgb(var(--chbx-r)) !important;
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=c]::after,
@@ -1899,7 +3521,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	color: rgb(var(--chbx-d));
 }
 
-.taskItemCheckbox:is([data-task="X"],
+.taskItemCheckbox:is([data-task="x"],
+	[data-task="X"],
 	[data-task=">"],
 	[data-task="-"],
 	[data-task="D"],
@@ -1939,4 +3562,3632 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	[data-task="<"]) {
 	border: 0 !important;
 	/* This will remove the border of the checkbox so only the icon is visible*/
+}
+
+
+/* BugReporterModal.ts */
+
+.reloadNowButton,
+.reportBugButton {
+	border: 1px solid var(--text-accent);
+}
+
+.ignoreButton,
+.ignoreBugButton {
+	margin-left: 1.5rem;
+}
+
+.taskBoardBugReporterModal {
+	min-width: 40vw;
+	max-width: 50vw;
+}
+
+@media (max-width: 768px) {
+	.taskBoardBugReporterModal {
+		width: auto;
+		max-width: 100%;
+	}
+}
+
+.taskBoardBugReporterModal h2 {
+	font-size: 1.5rem;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.bugReportContent {
+	background: var(--background-modifier-border-hover);
+	padding: 0.5rem;
+	border-radius: 10px;
+	border: 2px solid var(--text-accent);
+	overflow-wrap: anywhere;
+	text-wrap-mode: wrap;
+}
+
+.bugReporterActions {
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+}
+
+.bugReporterCloseButton,
+.bugReporterCancelButton {
+	cursor: pointer;
+}
+
+
+/* Pickr library modifications */
+
+.pcr-app .pcr-swatches>button {
+	padding: 0;
+}
+
+.pickr .pcr-button {
+	margin-right: 0;
+}
+
+/*----------------------------------------------------------------
+PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
+----------------------------------------------------------------*/
+.pickr {
+	position: relative;
+	overflow: visible;
+	transform: translateY(0);
+}
+
+.pickr * {
+	box-sizing: border-box;
+	outline: none;
+	border: none;
+	appearance: none;
+	-webkit-appearance: none;
+}
+
+.pickr .pcr-button {
+	position: relative;
+	height: 2em;
+	width: 2em;
+	padding: 0.5em;
+	cursor: pointer;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+		"Helvetica Neue", Arial, sans-serif;
+	border-radius: 0.15em;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" stroke="%2342445A" stroke-width="5px" stroke-linecap="round"><path d="M45,45L5,5"></path><path d="M45,5L5,45"></path></svg>') no-repeat center;
+	background-size: 0;
+	transition: all 0.3s;
+}
+
+.pickr .pcr-button::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 0.5em;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pickr .pcr-button::before {
+	z-index: initial;
+}
+
+.pickr .pcr-button::after {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	transition: background 0.3s;
+	background: var(--pcr-color);
+	border-radius: 0.15em;
+}
+
+.pickr .pcr-button.clear {
+	background-size: 70%;
+}
+
+.pickr .pcr-button.clear::before {
+	opacity: 0;
+}
+
+.pickr .pcr-button.clear:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px var(--pcr-color);
+}
+
+.pickr .pcr-button.disabled {
+	cursor: not-allowed;
+}
+
+.pickr *,
+.pcr-app * {
+	box-sizing: border-box;
+	outline: none;
+	border: none;
+	appearance: none;
+	-webkit-appearance: none;
+}
+
+.pickr input:focus,
+.pickr input.pcr-active,
+.pickr button:focus,
+.pickr button.pcr-active,
+.pcr-app input:focus,
+.pcr-app input.pcr-active,
+.pcr-app button:focus,
+.pcr-app button.pcr-active {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px var(--pcr-color);
+}
+
+.pickr .pcr-palette,
+.pickr .pcr-slider,
+.pcr-app .pcr-palette,
+.pcr-app .pcr-slider {
+	transition: box-shadow 0.3s;
+}
+
+.pickr .pcr-palette:focus,
+.pickr .pcr-slider:focus,
+.pcr-app .pcr-palette:focus,
+.pcr-app .pcr-slider:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px rgba(0, 0, 0, 0.25);
+}
+
+.pcr-app {
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	z-index: 10000;
+	border-radius: 0.1em;
+	background: #fff;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s, visibility 0s 0.3s;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+		"Helvetica Neue", Arial, sans-serif;
+	box-shadow: 0 0.15em 1.5em 0 rgba(0, 0, 0, 0.1), 0 0 1em 0 rgba(0, 0, 0, 0.03);
+	left: 0;
+	top: 0;
+}
+
+.pcr-app.visible {
+	transition: opacity 0.3s;
+	visibility: visible;
+	opacity: 1;
+}
+
+.pcr-app .pcr-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 0.75em;
+}
+
+.pcr-app .pcr-swatches.pcr-last {
+	margin: 0;
+}
+
+@supports (display: grid) {
+	.pcr-app .pcr-swatches {
+		display: grid;
+		align-items: center;
+		grid-template-columns: repeat(auto-fit, 1.75em);
+	}
+}
+
+.pcr-app .pcr-swatches>button {
+	font-size: 1em;
+	position: relative;
+	width: calc(1.75em - 5px);
+	height: calc(1.75em - 5px);
+	border-radius: 0.15em;
+	cursor: pointer;
+	margin: 2.5px;
+	flex-shrink: 0;
+	justify-self: center;
+	transition: all 0.15s;
+	overflow: hidden;
+	background: transparent;
+	z-index: 1;
+}
+
+.pcr-app .pcr-swatches>button::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 6px;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pcr-app .pcr-swatches>button::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--pcr-color);
+	border: 1px solid rgba(0, 0, 0, 0.05);
+	border-radius: 0.15em;
+	box-sizing: border-box;
+}
+
+.pcr-app .pcr-swatches>button:hover {
+	filter: brightness(1.05);
+}
+
+.pcr-app .pcr-swatches>button:not(.pcr-active) {
+	box-shadow: none;
+}
+
+.pcr-app .pcr-interaction {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin: 0 -0.2em 0 -0.2em;
+}
+
+.pcr-app .pcr-interaction>* {
+	margin: 0 0.2em;
+}
+
+.pcr-app .pcr-interaction input {
+	letter-spacing: 0.07em;
+	font-size: 0.75em;
+	text-align: center;
+	cursor: pointer;
+	color: #75797e;
+	background: #f1f3f4;
+	border-radius: 0.15em;
+	transition: all 0.15s;
+	padding: 0.45em 0.5em;
+	margin-top: 0.75em;
+}
+
+.pcr-app .pcr-interaction input:hover {
+	filter: brightness(0.975);
+}
+
+.pcr-app .pcr-interaction input:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85),
+		0 0 0 3px rgba(66, 133, 244, 0.75);
+}
+
+.pcr-app .pcr-interaction .pcr-result {
+	color: #75797e;
+	text-align: left;
+	flex: 1 1 8em;
+	min-width: 8em;
+	transition: all 0.2s;
+	border-radius: 0.15em;
+	background: #f1f3f4;
+	cursor: text;
+}
+
+.pcr-app .pcr-interaction .pcr-result::-moz-selection {
+	background: #4285f4;
+	color: #fff;
+}
+
+.pcr-app .pcr-interaction .pcr-result::selection {
+	background: #4285f4;
+	color: #fff;
+}
+
+.pcr-app .pcr-interaction .pcr-type.active {
+	color: #fff;
+	background: #4285f4;
+}
+
+.pcr-app .pcr-interaction .pcr-save,
+.pcr-app .pcr-interaction .pcr-cancel,
+.pcr-app .pcr-interaction .pcr-clear {
+	color: #fff;
+	width: auto;
+}
+
+.pcr-app .pcr-interaction .pcr-save,
+.pcr-app .pcr-interaction .pcr-cancel,
+.pcr-app .pcr-interaction .pcr-clear {
+	color: #fff;
+}
+
+.pcr-app .pcr-interaction .pcr-save:hover,
+.pcr-app .pcr-interaction .pcr-cancel:hover,
+.pcr-app .pcr-interaction .pcr-clear:hover {
+	filter: brightness(0.925);
+}
+
+.pcr-app .pcr-interaction .pcr-save {
+	background: #4285f4;
+}
+
+.pcr-app .pcr-interaction .pcr-clear,
+.pcr-app .pcr-interaction .pcr-cancel {
+	background: #f44250;
+}
+
+.pcr-app .pcr-interaction .pcr-clear:focus,
+.pcr-app .pcr-interaction .pcr-cancel:focus {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85),
+		0 0 0 3px rgba(244, 66, 80, 0.75);
+}
+
+.pcr-app .pcr-selection .pcr-picker {
+	position: absolute;
+	height: 18px;
+	width: 18px;
+	border: 2px solid #fff;
+	border-radius: 100%;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.pcr-app .pcr-selection .pcr-color-palette,
+.pcr-app .pcr-selection .pcr-color-chooser,
+.pcr-app .pcr-selection .pcr-color-opacity {
+	position: relative;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	display: flex;
+	flex-direction: column;
+	cursor: grab;
+	cursor: -webkit-grab;
+}
+
+.pcr-app .pcr-selection .pcr-color-palette:active,
+.pcr-app .pcr-selection .pcr-color-chooser:active,
+.pcr-app .pcr-selection .pcr-color-opacity:active {
+	cursor: grabbing;
+	cursor: -webkit-grabbing;
+}
+
+.pcr-app[data-theme="nano"] {
+	width: 14.25em;
+	max-width: 95vw;
+}
+
+.pcr-app[data-theme="nano"] .pcr-swatches {
+	margin-top: 0.6em;
+	padding: 0 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-interaction {
+	padding: 0 0.6em 0.6em 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection {
+	display: grid;
+	grid-gap: 0.6em;
+	grid-template-columns: 1fr 4fr;
+	grid-template-rows: 5fr auto auto;
+	align-items: center;
+	height: 10.5em;
+	width: 100%;
+	align-self: flex-start;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview {
+	grid-area: 2 / 1 / 4 / 1;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	margin-left: 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview .pcr-last-color {
+	display: none;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview .pcr-current-color {
+	position: relative;
+	background: var(--pcr-color);
+	width: 2em;
+	height: 2em;
+	border-radius: 50em;
+	overflow: hidden;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-preview .pcr-current-color::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 0.5em;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-palette {
+	grid-area: 1 / 1 / 2 / 3;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-palette .pcr-palette {
+	border-radius: 0.15em;
+	width: 100%;
+	height: 100%;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-palette .pcr-palette::before {
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+	background-size: 0.5em;
+	border-radius: 0.15em;
+	z-index: -1;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser {
+	grid-area: 2 / 2 / 2 / 2;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity {
+	grid-area: 3 / 2 / 3 / 2;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser,
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity {
+	height: 0.5em;
+	margin: 0 0.6em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser .pcr-picker,
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity .pcr-picker {
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser .pcr-slider,
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity .pcr-slider {
+	flex-grow: 1;
+	border-radius: 50em;
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-chooser .pcr-slider {
+	background: linear-gradient(to right, red, #ff0, lime, cyan, blue, #f0f, red);
+}
+
+.pcr-app[data-theme="nano"] .pcr-selection .pcr-color-opacity .pcr-slider {
+	background: linear-gradient(to right, transparent, black),
+		url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');
+
+	background-size: 100%, 0.25em;
+}
+
+/* ReactFlow necessary CSS from its bundle */
+.react-flow {
+	direction: ltr;
+
+	--xy-edge-stroke-default: #b1b1b7;
+	--xy-edge-stroke-width-default: 1;
+	--xy-edge-stroke-selected-default: #555;
+
+	--xy-connectionline-stroke-default: #b1b1b7;
+	--xy-connectionline-stroke-width-default: 1;
+
+	--xy-attribution-background-color-default: rgba(255, 255, 255, 0.5);
+
+	--xy-minimap-background-color-default: #fff;
+	--xy-minimap-mask-background-color-default: var(--background-modifier-box-shadow);
+	--xy-minimap-mask-stroke-color-default: transparent;
+	--xy-minimap-mask-stroke-width-default: 1;
+	--xy-minimap-node-background-color-default: #e2e2e2;
+	--xy-minimap-node-stroke-color-default: transparent;
+	--xy-minimap-node-stroke-width-default: 2;
+
+	--xy-background-color-default: transparent;
+	--xy-background-pattern-dots-color-default: #91919a;
+	--xy-background-pattern-lines-color-default: #eee;
+	--xy-background-pattern-cross-color-default: #e2e2e2;
+	background-color: var(--xy-background-color, var(--xy-background-color-default));
+	--xy-node-color-default: inherit;
+	--xy-node-border-default: 1px solid #1a192b;
+	--xy-node-background-color-default: #fff;
+	--xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);
+	--xy-node-boxshadow-hover-default: 0 1px 4px 1px rgba(0, 0, 0, 0.08);
+	--xy-node-boxshadow-selected-default: 0 0 0 0.5px #1a192b;
+	--xy-node-border-radius-default: 3px;
+
+	--xy-handle-background-color-default: #1a192b;
+	--xy-handle-border-color-default: #fff;
+
+	--xy-selection-background-color-default: rgba(0, 89, 220, 0.08);
+	--xy-selection-border-default: 1px dotted rgba(0, 89, 220, 0.8);
+
+	--xy-controls-button-background-color-default: #fefefe;
+	--xy-controls-button-background-color-hover-default: #f4f4f4;
+	--xy-controls-button-color-default: inherit;
+	--xy-controls-button-color-hover-default: inherit;
+	--xy-controls-button-border-color-default: #eee;
+	--xy-controls-box-shadow-default: 0 0 2px 1px rgba(0, 0, 0, 0.08);
+
+	--xy-edge-label-background-color-default: #ffffff;
+	--xy-edge-label-color-default: inherit;
+	--xy-resize-background-color-default: #3367d9;
+}
+
+.react-flow.dark {
+	--xy-edge-stroke-default: #3e3e3e;
+	--xy-edge-stroke-width-default: 1;
+	--xy-edge-stroke-selected-default: #727272;
+
+	--xy-connectionline-stroke-default: #b1b1b7;
+	--xy-connectionline-stroke-width-default: 1;
+
+	--xy-attribution-background-color-default: rgba(150, 150, 150, 0.25);
+
+	--xy-minimap-background-color-default: #141414;
+	--xy-minimap-mask-background-color-default: var(--background-modifier-box-shadow);
+	--xy-minimap-mask-stroke-color-default: transparent;
+	--xy-minimap-mask-stroke-width-default: 1;
+	--xy-minimap-node-background-color-default: #2b2b2b;
+	--xy-minimap-node-stroke-color-default: transparent;
+	--xy-minimap-node-stroke-width-default: 2;
+
+	--xy-background-color-default: #141414;
+	--xy-background-pattern-dots-color-default: #777;
+	--xy-background-pattern-lines-color-default: #777;
+	--xy-background-pattern-cross-color-default: #777;
+	--xy-node-color-default: #f8f8f8;
+	--xy-node-border-default: 1px solid #3c3c3c;
+	--xy-node-background-color-default: #1e1e1e;
+	--xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);
+	--xy-node-boxshadow-hover-default: 0 1px 4px 1px rgba(255, 255, 255, 0.08);
+	--xy-node-boxshadow-selected-default: 0 0 0 0.5px #999;
+
+	--xy-handle-background-color-default: #bebebe;
+	--xy-handle-border-color-default: #1e1e1e;
+
+	--xy-selection-background-color-default: rgba(200, 200, 220, 0.08);
+	--xy-selection-border-default: 1px dotted rgba(200, 200, 220, 0.8);
+
+	--xy-controls-button-background-color-default: #2b2b2b;
+	--xy-controls-button-background-color-hover-default: #3e3e3e;
+	--xy-controls-button-color-default: #f8f8f8;
+	--xy-controls-button-color-hover-default: #fff;
+	--xy-controls-button-border-color-default: #5b5b5b;
+	--xy-controls-box-shadow-default: 0 0 2px 1px rgba(0, 0, 0, 0.08);
+
+	--xy-edge-label-background-color-default: #141414;
+	--xy-edge-label-color-default: #f8f8f8;
+}
+
+.react-flow__background {
+	background-color: var(--xy-background-color-props, var(--xy-background-color, var(--xy-background-color-default)));
+	pointer-events: none;
+	z-index: -1;
+}
+
+.react-flow__container {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+
+.react-flow__pane {
+	z-index: 1;
+}
+
+.react-flow__pane.draggable {
+	cursor: grab;
+}
+
+.react-flow__pane.dragging {
+	cursor: grabbing;
+}
+
+.react-flow__pane.selection {
+	cursor: pointer;
+}
+
+.react-flow__viewport {
+	transform-origin: 0 0;
+	z-index: 2;
+	pointer-events: none;
+}
+
+.react-flow__renderer {
+	z-index: 4;
+}
+
+.react-flow__selection {
+	z-index: 6;
+}
+
+.react-flow__nodesselection-rect:focus,
+.react-flow__nodesselection-rect:focus-visible {
+	outline: none;
+}
+
+.react-flow__edge-path {
+	stroke: rgb(var(--canvas-color));
+	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
+	stroke-width: calc(1.5px * var(--task-board-map-zoom));
+	fill: none;
+	transition: stroke-width 100ms ease-out;
+}
+
+.react-flow__connection-path {
+	stroke: rgb(var(--canvas-color));
+	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
+	stroke-width: calc(1.5px * var(--task-board-map-zoom));
+	fill: none;
+	transition: stroke-width 100ms ease-out;
+}
+
+.react-flow .react-flow__edges {
+	position: absolute;
+}
+
+.react-flow .react-flow__edges svg {
+	overflow: visible;
+	position: absolute;
+	pointer-events: none;
+}
+
+.react-flow__edge {
+	pointer-events: visibleStroke;
+}
+
+.react-flow__edge.selectable {
+	cursor: pointer;
+}
+
+.react-flow__edge.animated path {
+	stroke-dasharray: 5;
+	animation: dashdraw 0.5s linear infinite;
+}
+
+.react-flow__edge.animated path.react-flow__edge-interaction {
+	stroke-dasharray: none;
+	animation: none;
+}
+
+.react-flow__edge.inactive {
+	pointer-events: none;
+}
+
+.react-flow__edge.selected,
+.react-flow__edge:focus,
+.react-flow__edge:focus-visible {
+	outline: none;
+}
+
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge.selectable:focus .react-flow__edge-path,
+.react-flow__edge.selectable:focus-visible .react-flow__edge-path {
+	stroke: var(--xy-edge-stroke-selected, var(--xy-edge-stroke-selected-default));
+}
+
+.react-flow__edge-textwrapper {
+	pointer-events: all;
+}
+
+.react-flow__edge .react-flow__edge-text {
+	pointer-events: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+.react-flow__connection {
+	pointer-events: none;
+}
+
+.react-flow__connection .animated {
+	stroke-dasharray: 5;
+	animation: dashdraw 0.5s linear infinite;
+}
+
+svg.react-flow__connectionline {
+	z-index: 1001;
+	overflow: visible;
+	position: absolute;
+}
+
+.react-flow__nodes {
+	pointer-events: none;
+	transform-origin: 0 0;
+}
+
+.react-flow__node {
+	position: absolute;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	pointer-events: all;
+	transform-origin: 0 0;
+	box-sizing: border-box;
+	cursor: default;
+}
+
+.react-flow__node.selectable {
+	cursor: pointer;
+}
+
+.react-flow__node.draggable {
+	cursor: grab;
+	pointer-events: all;
+}
+
+.react-flow__node.draggable.dragging {
+	cursor: grabbing;
+}
+
+.react-flow__nodesselection {
+	z-index: 3;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.react-flow__nodesselection-rect {
+	position: absolute;
+	pointer-events: all;
+	cursor: grab;
+}
+
+.react-flow__handle {
+	position: absolute;
+	pointer-events: none;
+	min-width: 8px;
+	min-height: 8px;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
+	/* background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default)); */
+	background-color: transparent;
+	/* border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default)); */
+	border-radius: 100%;
+	opacity: 0;
+	/* transform: scale(calc(1 / var(--task-board-map-zoom, 1))); */
+	transform-origin: center;
+	transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.react-flow__node:hover .react-flow__handle {
+	opacity: 1;
+}
+
+.react-flow__handle.connectingfrom {
+	pointer-events: all;
+}
+
+.react-flow__handle.connectionindicator {
+	pointer-events: all;
+	cursor: crosshair;
+}
+
+.react-flow__handle-bottom {
+	top: auto;
+	left: 50%;
+	bottom: 0;
+	transform: translate(-50%, 50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
+}
+
+.react-flow__handle-top {
+	top: 0;
+	left: 50%;
+	transform: translate(-50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
+}
+
+.react-flow__handle-left {
+	top: 50%;
+	left: 0;
+	transform: translate(-50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
+}
+
+.react-flow__handle-right {
+	top: 50%;
+	right: 0;
+	transform: translate(50%, -50%);
+
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
+}
+
+.taskBoardMapViewContainerNodeHandleIconLeft,
+.taskBoardMapViewContainerNodeHandleIconRight,
+.taskBoardMapViewContainerNodeHandleIconTop,
+.taskBoardMapViewContainerNodeHandleIconBottom {
+	min-width: 8px;
+	min-height: 8px;
+	border-radius: 15px;
+	/* width: calc(10px / var(--task-board-map-zoom, 1), 8px) !important;
+	height: calc(10px / var(--task-board-map-zoom, 1), 8px) !important; */
+	pointer-events: none !important;
+}
+
+.taskBoardMapViewControlsBtnContainer {
+	margin-top: 1rem;
+}
+
+.taskBoardMapViewControlsBtnContainer .react-flow__controls-button svg {
+	fill: none !important;
+}
+
+.react-flow__edgeupdater {
+	cursor: move;
+	pointer-events: all;
+}
+
+.react-flow__pane.selection .react-flow__panel {
+	pointer-events: none;
+}
+
+.react-flow__panel {
+	position: absolute;
+	z-index: 5;
+	margin: 15px;
+}
+
+.react-flow__panel.top {
+	top: 0;
+}
+
+.react-flow__panel.bottom {
+	bottom: 0;
+}
+
+.react-flow__panel.top.center,
+.react-flow__panel.bottom.center {
+	left: 50%;
+	transform: translateX(-15px) translateX(-50%);
+}
+
+.react-flow__panel.left {
+	left: 0;
+}
+
+.react-flow__panel.right {
+	right: 0;
+}
+
+.react-flow__panel.left.center,
+.react-flow__panel.right.center {
+	top: 50%;
+	transform: translateY(-15px) translateY(-50%);
+}
+
+.react-flow__attribution {
+	font-size: 10px;
+	background: var(--xy-attribution-background-color, var(--xy-attribution-background-color-default));
+	padding: 2px 3px;
+	margin: 0;
+}
+
+.react-flow__attribution a {
+	text-decoration: none;
+	color: #999;
+}
+
+@keyframes dashdraw {
+	from {
+		stroke-dashoffset: 10;
+	}
+}
+
+.react-flow__edgelabel-renderer {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	left: 0;
+	top: 0;
+}
+
+.react-flow__viewport-portal {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+.react-flow__minimap {
+	background: var(--xy-minimap-background-color-props,
+			var(--xy-minimap-background-color, var(--xy-minimap-background-color-default)));
+	border: 1px solid var(--color-accent);
+	border-radius: 8px;
+}
+
+.react-flow__minimap-svg {
+	display: block;
+	border: 1px solid var(--color-accent);
+	border-radius: 8px;
+}
+
+.react-flow__minimap-mask {
+	fill: var(--xy-minimap-mask-background-color-props,
+			var(--xy-minimap-mask-background-color, var(--xy-minimap-mask-background-color-default)));
+	stroke: var(--xy-minimap-mask-stroke-color-props,
+			var(--xy-minimap-mask-stroke-color, var(--xy-minimap-mask-stroke-color-default)));
+	stroke-width: var(--xy-minimap-mask-stroke-width-props,
+			var(--xy-minimap-mask-stroke-width, var(--xy-minimap-mask-stroke-width-default)));
+}
+
+.react-flow__minimap-node {
+	fill: var(--xy-minimap-node-background-color-props,
+			var(--xy-minimap-node-background-color, var(--xy-minimap-node-background-color-default)));
+	stroke: var(--xy-minimap-node-stroke-color-props,
+			var(--xy-minimap-node-stroke-color, var(--xy-minimap-node-stroke-color-default)));
+	stroke-width: var(--xy-minimap-node-stroke-width-props,
+			var(--xy-minimap-node-stroke-width, var(--xy-minimap-node-stroke-width-default)));
+}
+
+.react-flow__background-pattern.dots {
+	fill: var(--xy-background-pattern-color-props,
+			var(--xy-background-pattern-color, var(--xy-background-pattern-dots-color-default)));
+}
+
+.react-flow__background-pattern.lines {
+	stroke: var(--xy-background-pattern-color-props,
+			var(--xy-background-pattern-color, var(--xy-background-pattern-lines-color-default)));
+}
+
+.react-flow__background-pattern.cross {
+	stroke: var(--xy-background-pattern-color-props,
+			var(--xy-background-pattern-color, var(--xy-background-pattern-cross-color-default)));
+}
+
+.react-flow__controls {
+	display: flex;
+	flex-direction: column;
+	box-shadow: var(--xy-controls-box-shadow, var(--xy-controls-box-shadow-default));
+}
+
+.react-flow__controls.horizontal {
+	flex-direction: row;
+}
+
+.react-flow__controls-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 30px;
+	width: 30px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+	/* height: auto; */
+	line-height: 1;
+	font-size: inherit;
+	cursor: var(--cursor);
+	padding: 0px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	--icon-size: var(--icon-s);
+	--icon-stroke: var(--icon-s-stroke-width);
+
+	border-radius: var(--radius-s);
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: var(--input-shadow);
+}
+
+.react-flow__controls-button svg {
+	width: 100%;
+	max-width: 12px;
+	max-height: 12px;
+	fill: currentColor;
+}
+
+.react-flow__edge.updating .react-flow__edge-path {
+	stroke: #777;
+}
+
+.react-flow__edge-text {
+	font-size: 10px;
+}
+
+.react-flow__node.selectable:focus,
+.react-flow__node.selectable:focus-visible {
+	outline: none;
+}
+
+.react-flow__node-input,
+.react-flow__node-default,
+.react-flow__node-output,
+.react-flow__node-group {
+	padding: 10px;
+	border-radius: var(--xy-node-border-radius, var(--xy-node-border-radius-default));
+	width: 150px;
+	font-size: 12px;
+	color: var(--xy-node-color, var(--xy-node-color-default));
+	text-align: center;
+	border: var(--xy-node-border, var(--xy-node-border-default));
+	/* background-color: var(--xy-node-background-color, var(--xy-node-background-color-default)); */
+}
+
+.react-flow__node-input.selectable:hover,
+.react-flow__node-default.selectable:hover,
+.react-flow__node-output.selectable:hover,
+.react-flow__node-group.selectable:hover {
+	box-shadow: var(--xy-node-boxshadow-hover, var(--xy-node-boxshadow-hover-default));
+}
+
+.react-flow__node-input.selectable.selected,
+.react-flow__node-input.selectable:focus,
+.react-flow__node-input.selectable:focus-visible,
+.react-flow__node-default.selectable.selected,
+.react-flow__node-default.selectable:focus,
+.react-flow__node-default.selectable:focus-visible,
+.react-flow__node-output.selectable.selected,
+.react-flow__node-output.selectable:focus,
+.react-flow__node-output.selectable:focus-visible,
+.react-flow__node-group.selectable.selected,
+.react-flow__node-group.selectable:focus,
+.react-flow__node-group.selectable:focus-visible {
+	box-shadow: var(--xy-node-boxshadow-selected, var(--xy-node-boxshadow-selected-default));
+}
+
+.react-flow__node-group {
+	background-color: var(--xy-node-group-background-color, var(--xy-node-group-background-color-default));
+}
+
+.react-flow__nodesselection-rect,
+.react-flow__selection {
+	background: var(--xy-selection-background-color, var(--xy-selection-background-color-default));
+	border: var(--xy-selection-border, var(--xy-selection-border-default));
+}
+
+.react-flow__nodesselection-rect:focus,
+.react-flow__nodesselection-rect:focus-visible,
+.react-flow__selection:focus,
+.react-flow__selection:focus-visible {
+	outline: none;
+}
+
+.react-flow__controls-button:hover {
+	color: var(--text-normal);
+	background-color: var(--interactive-hover);
+}
+
+.react-flow__controls-button:disabled {
+	pointer-events: none;
+}
+
+.react-flow__controls-button:disabled svg {
+	fill-opacity: 0.4;
+}
+
+.react-flow__controls-button:last-child {
+	border-bottom: none;
+}
+
+.react-flow__controls.horizontal .react-flow__controls-button {
+	border-bottom: none;
+	border-right: 1px solid var(--xy-controls-button-border-color-props,
+			var(--xy-controls-button-border-color, var(--xy-controls-button-border-color-default)));
+}
+
+.react-flow__controls.horizontal .react-flow__controls-button:last-child {
+	border-right: none;
+}
+
+.react-flow__resize-control {
+	position: absolute;
+}
+
+.react-flow__resize-control.left,
+.react-flow__resize-control.right {
+	cursor: ew-resize;
+}
+
+.react-flow__resize-control.top,
+.react-flow__resize-control.bottom {
+	/* Keep the cursor normal, since height resizing is not allowed */
+	cursor: default;
+}
+
+.react-flow__resize-control.top.left,
+.react-flow__resize-control.bottom.right {
+	cursor: nwse-resize;
+}
+
+.react-flow__resize-control.bottom.left,
+.react-flow__resize-control.top.right {
+	cursor: nesw-resize;
+}
+
+/* handle styles */
+.react-flow__resize-control.handle {
+	/* width: 5px;
+	height: 5px;
+	border: 1px solid #fff;
+	border-radius: 1px;
+	background-color: var(--xy-resize-background-color, var(--xy-resize-background-color-default));
+	translate: -50% -50%; */
+	display: none !important;
+}
+
+.react-flow__resize-control.handle.left {
+	left: 0;
+	top: 50%;
+}
+
+.react-flow__resize-control.handle.right {
+	left: 100%;
+	top: 50%;
+}
+
+.react-flow__resize-control.handle.top {
+	left: 50%;
+	top: 0;
+}
+
+.react-flow__resize-control.handle.bottom {
+	left: 50%;
+	top: 100%;
+}
+
+.react-flow__resize-control.handle.top.left {
+	left: 0;
+}
+
+.react-flow__resize-control.handle.bottom.left {
+	left: 0;
+}
+
+.react-flow__resize-control.handle.top.right {
+	left: 100%;
+}
+
+.react-flow__resize-control.handle.bottom.right {
+	left: 100%;
+}
+
+/* line styles */
+.react-flow__resize-control.line {
+	border-color: var(--xy-resize-background-color, var(--xy-resize-background-color-default));
+	border-width: 0;
+	border-style: solid;
+}
+
+.react-flow__resize-control.line.left,
+.react-flow__resize-control.line.right {
+	width: 5px;
+	transform: translate(-50%, 0);
+	top: 0;
+	height: 100%;
+}
+
+.react-flow__resize-control.line.left {
+	left: 0;
+	border-left-width: 0px !important;
+}
+
+.react-flow__resize-control.line.right {
+	left: 100%;
+	border-right-width: 0px !important;
+}
+
+.react-flow__resize-control.line.top,
+.react-flow__resize-control.line.bottom {
+	height: 5px;
+	transform: translate(0, -50%);
+	left: 0;
+	width: 100%;
+}
+
+.react-flow__resize-control.line.top {
+	top: 0;
+	border-top-width: 0px !important;
+}
+
+.react-flow__resize-control.line.bottom {
+	border-bottom-width: 0px !important;
+	top: 100%;
+}
+
+.react-flow__edge-textbg {
+	fill: var(--xy-edge-label-background-color, var(--xy-edge-label-background-color-default));
+}
+
+.react-flow__edge-text {
+	fill: var(--xy-edge-label-color, var(--xy-edge-label-color-default));
+}
+
+/* Task Board Editor Extensions Styles */
+
+/* Gutter marker styles */
+.task-board-task-gutter {
+	/* background: var(--background-secondary); */
+	/* border-right: 1px solid var(--background-modifier-border); */
+	width: 20px;
+}
+
+.task-board-task-gutter-marker {
+	opacity: 0.3;
+	transition: opacity 0.2s;
+	padding: 2px !important;
+	margin: 0 !important;
+	font-size: 12px !important;
+	line-height: 1 !important;
+	height: auto !important;
+	min-height: auto !important;
+	color: var(--text-accent) !important;
+}
+
+.task-board-task-gutter-marker:hover {
+	opacity: 1;
+	background-color: var(--background-modifier-hover) !important;
+}
+
+/* Task property hiding styles for Live Editor */
+.taskboard-hidden-property-editor {
+	opacity: 0 !important;
+	font-size: 0 !important;
+	display: none !important;
+}
+
+.taskboard-hidden-property-placeholder {
+	opacity: 0.3;
+	font-size: 0.8em;
+	font-style: italic;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.taskboard-hidden-property-placeholder:hover {
+	opacity: 0.6;
+}
+
+
+/* /src/components/BoardFilters */
+
+.filter-group-separator {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: var(--size-2-2) 0;
+	/* Use Obsidian size variable */
+	color: var(--text-muted);
+	/* Use Obsidian secondary text color */
+	font-size: var(--font-ui-smaller);
+	/* Use Obsidian font size variable */
+}
+
+.filter-group-separator::before,
+.filter-group-separator::after {
+	content: "";
+	flex-grow: 1;
+	height: 1px;
+	background-color: var(--background-modifier-border);
+	/* Use Obsidian border color */
+	margin: 0 var(--size-2-1);
+	/* Use Obsidian size variable */
+}
+
+.drag-handle {
+	cursor: grab;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Smaller text and padding for buttons and inputs */
+.compact-btn {
+	padding: var(--size-2-1) var(--size-2-2);
+	/* Use Obsidian size variable */
+	box-shadow: unset !important;
+	border: unset !important;
+	--icon-size: var(--size-4-4);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-2-2);
+
+	-webkit-app-region: no-drag;
+	display: inline-flex;
+	overflow: hidden;
+	align-items: center;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	border-radius: var(--button-radius);
+	padding: var(--size-2-2);
+	font-weight: var(--input-font-weight);
+	cursor: var(--cursor);
+	font-family: inherit;
+	gap: var(--size-2-2);
+
+	min-height: 30px;
+}
+
+.compact-btn:hover {
+	box-shadow: none;
+	opacity: var(--icon-opacity-hover);
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.compact-input,
+.compact-select {
+	font-size: var(--font-ui-smaller);
+	/* Use Obsidian font size variable */
+	height: var(--input-height);
+	/* Use Obsidian input height variable */
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: none;
+}
+
+.compact-select:hover {
+	box-shadow: none;
+}
+
+.compact-text {
+	font-size: var(--font-ui-smaller);
+	/* Use Obsidian font size variable */
+}
+
+/* Placeholder while dragging */
+.dragging-placeholder {
+	opacity: 0.5;
+	background-color: var(--background-modifier-hover);
+	/* Use Obsidian hover background color */
+}
+
+/* If needed, set styles for the root container of the filter component */
+.task-filter-root-container.task-popover-content {
+	padding: var(--size-2-2);
+	/* Use Obsidian size variable */
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.task-popover-content.task-popover-content-header {
+	padding: var(--size-2-2);
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	align-items: center;
+}
+
+.task-popover-content-header-heading {
+	margin: 1rem;
+	padding: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.task-popover-content hr {
+	margin: 0 !important;
+}
+
+.task-filter-main-panel {
+	max-width: 100%;
+	padding: var(--size-2-2);
+	/* Use Obsidian size variable */
+	border-radius: var(--radius-m);
+	/* Use Obsidian border radius variable */
+}
+
+.filter-menu {
+	z-index: 50;
+	min-width: 600px;
+	background-color: var(--background-primary);
+	border-radius: var(--radius-m);
+	box-shadow: var(--shadow-s);
+	border: 1px solid var(--background-modifier-border);
+}
+
+
+/* rootFilterSetupSection in TS, corresponds to HTML's #root-filter-container */
+.root-filter-setup-section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	/* space-y-3 from HTML, Tailwind var(--space-3) */
+}
+
+/* Root Condition Section (div.flex.items-center.space-x-2.p-2.bg-slate-100.rounded-md.border.border-slate-200) */
+.root-condition-section {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	/* space-x-2 from HTML, Tailwind var(--space-2) */
+	padding: 0.5rem;
+	/* p-2 from HTML, Tailwind var(--space-2) */
+	background-color: var(--background-secondary-alt,
+			var(--background-modifier-hover));
+	/* bg-slate-100 */
+	border-radius: var(--radius-m);
+	/* rounded-md */
+	border: 1px solid var(--background-modifier-border);
+	/* border border-slate-200 */
+}
+
+.root-condition-label {
+	/* compact-text already provides font-size */
+	font-weight: 500;
+	/* font-medium */
+	color: var(--text-normal);
+	/* text-slate-600 */
+}
+
+.root-condition-select {
+	/* compact-select already provides base styling */
+	width: auto;
+	border: 1px solid var(--input-border-color, var(--background-modifier-border));
+	/* border border-slate-300 */
+	/* box-shadow: var(--shadow-s); /* shadow-sm */
+	/* Consider if needed */
+}
+
+.root-condition-select:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 1px var(--interactive-accent);
+}
+
+.root-condition-span {
+	/* compact-text already provides font-size */
+	color: var(--text-normal);
+	/* text-slate-600 */
+}
+
+/* Filter Groups Container (#filter-groups-container) */
+.filter-groups-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-3);
+	/* space-y-3 from HTML */
+
+	max-height: 50vh;
+	overflow: auto;
+}
+
+/* Filter Group (#filter-group-template) */
+.filter-group {
+	padding: var(--size-2-3);
+	/* p-3 from HTML */
+	border: 1px solid var(--background-modifier-border);
+	/* border border-slate-300 */
+	border-radius: var(--radius-m);
+	/* rounded-md */
+	background-color: var(--background-primary);
+	/* bg-white */
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+	/* space-y-2 from HTML */
+}
+
+.filter-group-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.filter-group-header-left {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	/* space-x-1.5 from HTML */
+}
+
+.filter-group-header-left .drag-handle-container .svg-icon {
+	color: var(--text-faint);
+	/* text-slate-400 */
+}
+
+.filter-group-header-left .drag-handle-container:hover .svg-icon {
+	color: var(--text-muted);
+	/* hover:text-slate-500 */
+}
+
+.filter-group-header-left .drag-handle-container {
+	padding-right: var(--size-2-1);
+}
+
+.filter-group-header-left>.compact-text,
+.filter-group-header-left>span.compact-text {
+	font-weight: 500;
+	/* font-medium */
+	color: var(--text-normal);
+	/* text-slate-600 */
+}
+
+.filter-group-header-left .group-condition-select.compact-select {
+	border: 1px solid var(--input-border-color, var(--background-modifier-border));
+}
+
+.filter-group-header-left .group-condition-select.compact-select:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 1px var(--interactive-accent);
+}
+
+.filter-group-header-right {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	/* space-x-1 from HTML */
+}
+
+.filter-group-header-right .duplicate-group-btn.compact-icon-btn,
+.filter-group-header-right .remove-group-btn.compact-icon-btn {
+	border-radius: var(--radius-s);
+	/* rounded-md from Tailwind */
+}
+
+.filter-group-header-right .duplicate-group-btn.compact-icon-btn .svg-icon {
+	color: var(--text-muted);
+	/* text-slate-500 */
+}
+
+.filter-group-header-right .duplicate-group-btn.compact-icon-btn:hover .svg-icon {
+	color: var(--interactive-accent);
+	/* hover:text-indigo-600 */
+}
+
+.filter-group-header-right .duplicate-group-btn.compact-icon-btn:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.filter-group-header-right .remove-group-btn.compact-icon-btn .svg-icon {
+	color: var(--text-muted);
+	/* text-slate-500 */
+}
+
+.filter-group-header-right .remove-group-btn.compact-icon-btn:hover .svg-icon {
+	color: var(--text-error);
+	/* hover:text-red-600 */
+}
+
+.filter-group-header-right .remove-group-btn.compact-icon-btn:hover {
+	background-color: var(--background-error-hover,
+			var(--background-modifier-error-hover));
+}
+
+/* Filters List (.filters-list) */
+.filters-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-2);
+	/* space-y-1.5 from HTML */
+	padding-left: 1rem;
+	/* pl-4 from HTML */
+	border-left: 2px solid var(--background-modifier-border);
+	/* border-l-2 border-slate-200 */
+	margin-left: var(--size-4-2);
+	/* ml-1.5 from HTML */
+}
+
+.filters-list:empty {
+	display: none;
+}
+
+/* Group Footer (.group-footer) */
+.group-footer {
+	/* HTML: <div class="pl-4 mt-1.5"> containing button */
+	/* TS creates .group-footer, then adds ButtonComponent to it. */
+	padding-left: 0.375rem;
+	/* Corresponds to pl-1.5 effectively if items inside .filters-list have margin/padding */
+	margin-top: 0.375rem;
+	/* mt-1.5 */
+}
+
+.add-filter-btn-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Filter Item (#filter-item-template) */
+.filter-item {
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-2);
+	padding: var(--size-4-2);
+	/* border: 1px solid var(--background-modifier-border); */
+	/* border-radius: var(--radius-m); */
+	padding-top: 0;
+	padding-bottom: 0;
+	width: max-content !important;
+}
+
+.filter-item .filter-conjunction {
+	font-size: var(--font-ui-smaller);
+	/* text-2xs */
+	font-weight: 600;
+	/* font-semibold */
+	color: var(--text-faint);
+	/* text-slate-400 */
+	align-self: center;
+}
+
+.filter-item .filter-property-select.compact-select {
+	flex-basis: 30%;
+	/* w-1/3 */
+	flex-grow: 0;
+	flex-shrink: 0;
+	border: 1px solid var(--input-border-color, var(--background-modifier-border));
+	/* border: unset !important; */
+	box-shadow: none;
+}
+
+.filter-item .filter-property-select.compact-select:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 1px var(--interactive-accent);
+}
+
+.filter-item .filter-condition-select.compact-select {
+	width: auto;
+	/* w-auto */
+	border: 1px solid var(--input-border-color, var(--background-modifier-border));
+	/* border: unset !important; */
+	box-shadow: none;
+}
+
+.filter-item .filter-condition-select.compact-select:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 1px var(--interactive-accent);
+}
+
+.filter-item .filter-value-input.compact-input {
+	flex-grow: 1;
+	/* flex-grow */
+	border: 1px solid var(--input-border-color, var(--background-modifier-border));
+	width: 100%;
+	min-width: 10rem !important;
+}
+
+.filter-item .filter-value-input.compact-input:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 1px var(--interactive-accent);
+}
+
+.filter-item .remove-filter-btn.compact-icon-btn .svg-icon {
+	color: var(--text-muted);
+	/* text-slate-500 */
+}
+
+.filter-item .remove-filter-btn.compact-icon-btn:hover .svg-icon {
+	color: var(--text-error);
+	/* hover:text-red-600 */
+}
+
+.filter-item .remove-filter-btn.compact-icon-btn:hover {
+	background-color: var(--background-error-hover,
+			var(--background-modifier-error-hover));
+}
+
+/* Add Filter Group Button Section */
+.add-group-section {
+	margin-top: var(--size-2-1);
+	margin-bottom: var(--size-2-1);
+	margin-left: var(--size-2-1);
+	display: flex;
+	justify-content: space-between;
+}
+
+.add-filter-group-btn-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Filter Configuration Section */
+.filter-config-section {
+	display: flex;
+	gap: var(--size-4-2);
+	/* margin-top: var(--size-2-1); */
+	/* margin-bottom: var(--size-2-1); */
+	/* margin-left: var(--size-2-1); */
+	/* padding-top: var(--size-2-2); */
+	/* border-top: 1px solid var(--background-modifier-border); */
+}
+
+.save-filter-config-btn,
+.load-filter-config-btn {
+	flex: 1;
+}
+
+.save-filter-config-btn-icon,
+.load-filter-config-btn-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.save-filter-config-btn:hover {
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
+}
+
+.load-filter-config-btn:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* Filter Config Modal Styles */
+.filter-config-details {
+	margin-top: var(--size-4-3);
+	padding: var(--size-4-3);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-l);
+	background: linear-gradient(135deg,
+			var(--background-secondary) 0%,
+			var(--background-primary-alt) 100%);
+	box-shadow: var(--shadow-s);
+	transition: all 0.2s ease-in-out;
+}
+
+.filter-config-details:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transform: translateY(-1px);
+}
+
+.filter-config-details h3 {
+	margin: 0 0 var(--size-4-2) 0;
+	font-size: var(--font-ui-medium);
+	font-weight: 600;
+	color: var(--text-accent);
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-2);
+}
+
+.filter-config-details p {
+	margin: var(--size-2-2) 0;
+	line-height: 1.5;
+	color: var(--text-normal);
+}
+
+.filter-config-meta {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	margin: var(--size-2-1) 0;
+	padding: var(--size-2-1) var(--size-2-2);
+	background-color: var(--background-modifier-form-field);
+	border-radius: var(--radius-s);
+	border-left: 3px solid var(--interactive-accent);
+}
+
+.filter-config-summary {
+	margin-top: var(--size-4-3);
+	padding: var(--size-4-2) 0 0 0;
+	border-top: 2px solid var(--background-modifier-border);
+}
+
+.filter-config-summary h4 {
+	margin: 0 0 var(--size-2-3) 0;
+	font-size: var(--font-ui-small);
+	font-weight: 600;
+	color: var(--text-normal);
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-1);
+}
+
+.filter-config-summary p {
+	margin: var(--size-2-1) 0;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	padding: var(--size-2-1) var(--size-2-2);
+	background-color: var(--background-primary-alt);
+	border-radius: var(--radius-s);
+}
+
+.filter-config-buttons {
+	margin-top: var(--size-4-3);
+	padding-top: var(--size-4-2);
+}
+
+.filter-config-name-highlight {
+	background-color: var(--text-accent);
+	color: var(--text-on-accent);
+	padding: 0.125rem 0.25rem;
+	border-radius: var(--radius-s);
+	font-weight: 500;
+}
+
+/* Advanced filter container styles for ViewConfigModal */
+.advanced-filter-container {
+	margin-top: var(--size-4-2);
+	padding: var(--size-4-3);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background-color: var(--background-secondary);
+}
+
+.advanced-filter-container .task-filter-root-container {
+	background-color: transparent;
+	border: none;
+	padding: 0;
+}
+
+.advanced-filter-container .task-filter-main-panel {
+	background-color: transparent;
+	border: none;
+	padding: 0;
+}
+
+/* Smaller styling for filters in modal */
+.task-board-view-config-modal .advanced-filter-container .filter-group {
+	padding: var(--size-4-2);
+	margin-bottom: var(--size-4-2);
+}
+
+.task-board-view-config-modal .advanced-filter-container .filter-item {
+	padding: var(--size-2-2);
+	gap: var(--size-2-2);
+}
+
+.task-board-view-config-modal .advanced-filter-container .compact-btn {
+	padding: var(--size-2-1) var(--size-2-2);
+	min-height: 26px;
+}
+
+.task-board-view-config-modal .advanced-filter-container .compact-select,
+.task-board-view-config-modal .advanced-filter-container .compact-input {
+	font-size: var(--font-ui-smaller);
+	height: 28px;
+}
+
+
+/* src/modal/ConfigureColumnSortingModal.ts */
+
+.configureColumnSortingModalHome {}
+
+.configureColumnSortingModalHomeSortingCriteriaList {}
+
+.configureColumnSortingModalHomeSortingCriteriaListItemRow {
+	display: flex;
+}
+
+.configureColumnSortingModalHomeSortingCriteriaListItem {
+	padding-inline: 5px !important;
+}
+
+.configureColumnSortingModalHomeSortingCriteriaListItemNotice .setting-item-description {
+	color: var(--background-modifier-error);
+}
+
+.configureColumnSortingModalHomeAddSortingBtn {
+	width: 100%;
+	margin-top: 1rem;
+	background: var(--background-activated-tab-header-dark);
+}
+
+.configureColumnSortingModalHomeButtonContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 1rem;
+	padding-block-start: 2rem;
+	padding-block-end: 1rem;
+}
+
+/* Mobile Responsive Board Navigation */
+.mobileBoardHeader {
+	display: flex;
+	align-items: center;
+	flex: 1;
+}
+
+.hamburgerMenuButton {
+	align-items: center;
+	padding: 8px 12px;
+	border: none !important;
+	box-shadow: none !important;
+	background: transparent !important;
+	cursor: pointer;
+	color: var(--text-normal);
+	transition: background-color 0.2s ease;
+}
+
+.hamburgerMenuButton:hover {
+	background: var(--background-modifier-active);
+}
+
+.currentBoardName {
+	font-weight: 500;
+	/* max-width: 150px; */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Board Sidebar Overlay */
+.boardSidebarOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1000;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+/* Board Sidebar */
+.boardSidebar {
+	background: var(--background-primary);
+	width: 280px;
+	max-width: 80vw;
+	height: 100vh;
+	border-right: 1px solid var(--background-modifier-border);
+	box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+	display: flex;
+	flex-direction: column;
+	transform: translateX(-100%);
+	height: 100%;
+}
+
+.boardSidebar--slide-in {
+	animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.boardSidebar--slide-out {
+	animation: slideOutToLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.boardSidebar--open {
+	transform: translateX(0);
+}
+
+/* Board Sidebar Header */
+.boardSidebarHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-primary-alt);
+}
+
+.boardSidebarHeader h3 {
+	margin: 0;
+	font-size: var(--font-size-large);
+	color: var(--text-normal);
+	font-weight: 600;
+	color: var(--background-mod-left-CSS-light) !important;
+}
+
+/* Board Sidebar Content */
+.boardSidebarContent {
+	padding: 8px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	height: 100%;
+}
+
+.boardSidebarContentBtnContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	margin-block: 1rem;
+}
+
+.boardSidebarCard {
+	display: flex;
+	width: 100%;
+	padding: 0.5rem;
+	gap: 0.3rem;
+	background: transparent;
+	border: 1px solid var(--background-modifier-border-focus);
+	text-align: left;
+	border-radius: var(--radius-m);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex-direction: column;
+	align-items: flex-start;
+	text-wrap: auto;
+}
+
+.boardSidebarCard:hover {
+	background: var(--background-modifier-hover);
+}
+
+.boardSidebarCard--active {
+	border: 1px solid var(--text-accent) !important;
+	cursor: default;
+}
+
+.boardSidebarCardTitle {
+	font-weight: 500;
+	font-size: 1rem !important;
+	color: var(--background-modifier-border-focus) !important;
+	font-size: var(--font-size-default);
+}
+
+.boardSidebarCard--active .boardSidebarCardTitle {
+	color: var(--background-mod-left-CSS-light) !important;
+}
+
+.boardSidebarCardDescription {
+	/* white-space: nowrap; */
+	/* overflow: hidden; */
+	/* text-overflow: ellipsis; */
+	/* display: block; */
+	text-wrap: auto;
+	width: 100%;
+	font-size: 0.9rem;
+	padding-block-start: 0.7rem;
+	color: var(--background-modifier-border-focus) !important;
+}
+
+.boardSidebarCard--active .boardSidebarCardDescription {
+	color: var(--background-mod-left-CSS-light) !important;
+}
+
+.taskCountContainerProgress {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+}
+
+.taskCountContainerProgressBar {
+	width: 100%;
+	min-width: 9rem;
+	height: 8px;
+	background-color: var(--background-modifier-border);
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.taskCountContainerProgressBarIndicator {
+	height: 100%;
+	background-color: var(--canvas-card-label-color);
+	transition: width 0.5s ease-in-out;
+}
+
+.boardSidebarCard--active .taskCountContainerProgressBar {
+	width: 100%;
+	min-width: 9rem;
+	height: 8px;
+	background-color: var(--background-modifier-border);
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.boardSidebarCard--active .taskCountContainerProgressBarIndicator {
+	height: 100%;
+	background-color: #4CAF50;
+	transition: width 0.5s ease-in-out;
+}
+
+.taskCountContainerProgressCount {
+	font-size: 0.8rem;
+	/* font-weight: bold; */
+	color: var(--text-muted);
+	text-wrap: nowrap;
+}
+
+.boardSidebarCard--active:hover {
+	background: var(--background-modifier-active);
+}
+
+/* Animation classes for smooth transitions */
+@keyframes slideInFromLeft {
+	from {
+		transform: translateX(-100%);
+	}
+
+	to {
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideOutToLeft {
+	from {
+		transform: translateX(0);
+	}
+
+	to {
+		transform: translateX(-100%);
+	}
+}
+
+/* ==================== Frontmatter UI Styles ==================== */
+
+/* Wrapper for the frontmatter UI inside the editor container */
+.taskboard-frontmatter-wrapper {
+	margin-bottom: 0.75em;
+}
+
+/* Wrapper for the entire frontmatter UI */
+.taskboard-frontmatter-ui-wrapper {
+	margin-bottom: 0.5em;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-primary-alt);
+}
+
+/* Frontmatter section container */
+.taskboard-frontmatter-section {
+	padding: 0;
+}
+
+/* Collapsible header */
+.taskboard-frontmatter-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.5em 0.75em;
+	cursor: pointer;
+	user-select: none;
+	background-color: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	transition: background-color 0.15s ease;
+}
+
+.taskboard-frontmatter-header:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* Collapse icon */
+.taskboard-frontmatter-collapse-icon {
+	display: flex;
+	align-items: center;
+	transition: transform 0.2s ease;
+	color: var(--text-muted);
+}
+
+.taskboard-frontmatter-section.is-collapsed .taskboard-frontmatter-collapse-icon {
+	transform: rotate(-90deg);
+}
+
+/* Header text */
+.taskboard-frontmatter-header-text {
+	font-weight: 500;
+	color: var(--text-normal);
+	flex-grow: 1;
+}
+
+/* Property count badge */
+.taskboard-frontmatter-property-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.5em;
+	height: 1.5em;
+	padding: 0 0.4em;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 10px;
+	font-size: 0.85em;
+	font-weight: 500;
+}
+
+/* Properties container */
+.taskboard-frontmatter-properties {
+	padding: 0.75em;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+/* Individual property row */
+.taskboard-frontmatter-property-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: flex-start;
+	transition: background-color 0.15s ease;
+}
+
+.taskboard-frontmatter-property-row:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.taskboard-frontmatter-property-row:last-child {
+	margin-bottom: 0;
+}
+
+/* Property key */
+.taskboard-frontmatter-property-key {
+	font-weight: 500;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	width: 10rem;
+	word-wrap: break-word;
+	word-break: break-word;
+}
+
+/* Property value */
+.taskboard-frontmatter-property-value {
+	color: var(--text-normal);
+	display: flex;
+	align-items: center;
+	/* word-wrap: break-word; */
+	/* word-break: break-word; */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Property list (for array values) */
+.taskboard-frontmatter-property-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3em;
+}
+
+.taskboard-frontmatter-property-list li {
+	background-color: var(--tag-background);
+	border: var(--tag-border-width) solid var(--tag-border-color);
+	border-radius: var(--tag-radius);
+	color: var(--tag-color);
+	font-size: var(--tag-size);
+	font-weight: var(--tag-weight);
+	text-decoration: var(--tag-decoration);
+	padding: var(--tag-padding-y) var(--tag-padding-x);
+	line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.taskboard-frontmatter-property-row {
+		grid-template-columns: 1fr;
+		gap: 0.5em;
+	}
+
+	.taskboard-frontmatter-property-key {
+		font-size: 0.9em;
+	}
+}
+
+/* Smooth collapse animation */
+.taskboard-frontmatter-properties {
+	transition: max-height 0.3s ease, opacity 0.2s ease;
+	opacity: 1;
+}
+
+.taskboard-frontmatter-section.is-collapsed .taskboard-frontmatter-properties {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+}
+
+/* Frontmatter Hiding Extension Styles */
+/* Hide frontmatter content in markdown editor when using the frontmatter hiding extension */
+.task-board-frontmatter-hidden {
+	display: none !important;
+	visibility: hidden !important;
+}
+
+/* Alternative approach for better performance - can be toggled */
+.task-board-frontmatter-hidden-collapsed {
+	height: 0 !important;
+	overflow: hidden !important;
+	opacity: 0 !important;
+	transition: opacity 0.2s ease;
+}
+
+/* Tasks Importer Panel Styles */
+.tasksImporterPanelOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1001;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	animation: fadeIn 0.2s ease-out;
+}
+
+.tasksImporterPanel {
+	background: var(--background-primary);
+	width: 320px;
+	max-width: 90vw;
+	height: 100%;
+	border-right: 1px solid var(--background-modifier-border);
+	box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
+	display: flex;
+	flex-direction: column;
+	transform: translateX(-100%);
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tasksImporterPanel--visible {
+	transform: translateX(0);
+}
+
+.tasksImporterPanelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+}
+
+.tasksImporterPanelTitle {
+	margin: 0;
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelCloseBtn {
+	background: transparent;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 0.25rem;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.tasksImporterPanelCloseBtn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelSearchContainer {
+	position: relative;
+	padding: 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.tasksImporterPanelSearchInput {
+	width: 100%;
+	padding: 0.5rem 2rem 0.5rem 2.5rem;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 0.9rem;
+	transition: border-color 0.2s;
+}
+
+.tasksImporterPanelSearchInput:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+}
+
+.tasksImporterPanelSearchInput::placeholder {
+	color: var(--text-muted);
+}
+
+.tasksImporterPanelSearchClear {
+	position: absolute;
+	right: 1.5rem;
+	top: 50%;
+	transform: translateY(-50%);
+	background: transparent;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 0.25rem;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.tasksImporterPanelSearchClear:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.tasksImporterPanelContent {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.tasksImporterPanelTaskList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.5rem;
+}
+
+.tasksImporterPanelTaskItemWrapper {
+	cursor: pointer;
+	border-radius: 6px;
+	transition: background-color 0.2s, transform 0.1s;
+	padding: 0.25rem;
+}
+
+.tasksImporterPanelTaskItemWrapper:hover {
+	background: var(--background-modifier-hover);
+	transform: translateX(4px);
+}
+
+.tasksImporterPanelTaskItemWrapper:active {
+	transform: translateX(2px);
+}
+
+.tasksImporterPanelEmptyState {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3rem 2rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.tasksImporterPanelEmptyState p {
+	margin: 0;
+}
+
+/* Edge Toolbar Styles */
+.edge-toolbar-container {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 6px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	animation: edgeToolbarFadeIn 0.2s ease-out;
+	transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.edge-toolbar-container:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	transform: translateY(-1px);
+}
+
+.edge-toolbar-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 6px;
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	padding: 0;
+}
+
+.edge-toolbar-button:hover {
+	background: var(--background-modifier-hover);
+	transform: scale(1.1);
+}
+
+.edge-toolbar-button:active {
+	transform: scale(0.95);
+}
+
+.edge-toolbar-delete {
+	color: var(--text-error);
+}
+
+.edge-toolbar-delete:hover {
+	background: var(--background-modifier-error-hover);
+	color: var(--text-on-accent);
+}
+
+.edge-toolbar-color:hover {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.edge-toolbar-animation:hover {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+/* Edge Toolbar Fade In Animation */
+@keyframes edgeToolbarFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-10px) scale(0.9);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* Edge Toolbar Fade Out Animation */
+.edge-toolbar-container.hiding {
+	animation: edgeToolbarFadeOut 0.2s ease-in;
+}
+
+@keyframes edgeToolbarFadeOut {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(-10px) scale(0.9);
+	}
+}
+
+/* Make edges more interactive */
+.react-flow__edge.selected .react-flow__edge-path {
+	stroke: var(--interactive-accent);
+	stroke-width: 2;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+	stroke: var(--text-normal);
+	stroke-width: 2;
+}
+
+/* FIX : Recent lucide added some weired margin on right */
+.lucide {
+	margin-right: 0px !important;
+}
+
+/* ===================================================
+   Swimlanes Config Modal Styles
+=================================================== */
+
+.swimlanes-config-modal {
+	width: auto;
+	min-height: auto;
+	max-width: 600px;
+	border-radius: var(--modal-radius);
+}
+
+.swimlanesConfigContent {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 0;
+}
+
+.swimlanesConfigSection {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.swimlanesConfigSection h2 {
+	margin: 0;
+	font-size: 1.5em;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.swimlanesConfigItem {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 15px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--divider-color);
+}
+
+.swimlanesConfigItem:last-of-type {
+	border-bottom: none;
+}
+
+.swimlanesConfigLabel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.swimlanesConfigLabel label {
+	font-weight: 500;
+	color: var(--text-normal);
+	font-size: 0.95em;
+}
+
+.swimlanesConfigDescription {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	line-height: 1.4;
+}
+
+.swimlanesConfigLabel+input[type="checkbox"],
+.swimlanesConfigLabel+select,
+.swimlanesConfigLabel+input[type="text"] {
+	flex-shrink: 0;
+	align-self: center;
+}
+
+input[type="checkbox"].swimlanesConfigCheckbox {
+	cursor: pointer;
+	width: 18px;
+	height: 18px;
+}
+
+.swimlanesConfigSelect,
+.swimlanesConfigInput,
+.swimlanesConfigSortRowInput {
+	padding: 8px 12px;
+	border: 1px solid var(--input-border-color);
+	border-radius: 4px;
+	background-color: var(--input-background-color);
+	color: var(--text-normal);
+	font-size: 0.9em;
+	font-family: inherit;
+	min-width: 200px;
+	transition: border-color 0.15s ease;
+}
+
+.swimlanesConfigSelect:hover,
+.swimlanesConfigInput:hover,
+.swimlanesConfigSortRowInput:hover {
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigSelect:focus,
+.swimlanesConfigInput:focus,
+.swimlanesConfigSortRowInput:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+/* Manual Sorting Mapping Section */
+.swimlanesConfigManualSortSection {
+	margin-top: 10px;
+	padding: 15px;
+	background-color: var(--background-secondary);
+	border-radius: 6px;
+	border: 1px solid var(--divider-color);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.swimlanesConfigManualSortHeading {
+	margin: 0;
+	font-size: 1.1em;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.swimlanesConfigManualSortDescription {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	line-height: 1.5;
+	margin: 0;
+}
+
+.swimlaneConfigsManualSortContainer {
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--divider-color);
+}
+
+/* Sortable List */
+.swimlanesConfigSortRowsList {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 40px;
+}
+
+.swimlanesConfigSortRow {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--input-border-color);
+	border-radius: 4px;
+	transition: all 0.15s ease;
+	cursor: move;
+}
+
+.swimlanesConfigSortRow:hover {
+	border-color: var(--interactive-accent);
+	background-color: var(--background-secondary);
+}
+
+.swimlanesConfigSortRowDragHandle {
+	flex-shrink: 0;
+	cursor: grab;
+	color: var(--text-muted);
+	transition: color 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesConfigSortRowDragHandle:hover {
+	color: var(--interactive-accent);
+}
+
+.swimlanesConfigSortRow:active .swimlanesConfigSortRowDragHandle {
+	cursor: grabbing;
+	color: var(--interactive-accent);
+}
+
+.swimlanesConfigSortRowIndex {
+	flex-shrink: 0;
+	min-width: 35px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--background-secondary);
+	border-radius: 3px;
+	font-weight: 600;
+	color: var(--text-accent);
+	font-size: 0.9em;
+	border: 1px solid var(--divider-color);
+}
+
+.swimlanesConfigSortRowInput {
+	flex: 1;
+	min-width: 0;
+	padding: 8px 10px;
+	min-height: 32px;
+}
+
+.swimlanesConfigSortRowDeleteBtn {
+	flex-shrink: 0;
+	cursor: pointer;
+	color: var(--text-muted);
+	transition: color 0.15s ease;
+	padding: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesConfigSortRowDeleteBtn:hover {
+	color: var(--text-error);
+}
+
+/* Sortable Ghost/Drag States */
+.swimlanesConfigSortRowGhost {
+	opacity: 0.5;
+	background-color: var(--background-tertiary);
+}
+
+.swimlanesConfigSortRowChosen {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigSortRowDrag {
+	opacity: 0.7;
+	transform: scale(0.98);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Add Row Button */
+.swimlanesConfigAddSortRowBtn {
+	padding: 10px 14px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: 1px solid var(--interactive-accent);
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 0.9em;
+	transition: all 0.15s ease;
+	align-self: flex-start;
+	margin-top: 4px;
+}
+
+.swimlanesConfigAddSortRowBtn:hover {
+	opacity: 0.9;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigAddSortRowBtn:active {
+	transform: scale(0.98);
+}
+
+/* Action Buttons Container */
+.swimlanesConfigButtonsContainer {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+	padding: 15px 20px;
+	border-top: 1px solid var(--divider-color);
+	background-color: var(--background-secondary);
+	border-radius: 0 0 var(--modal-radius) var(--modal-radius);
+}
+
+.swimlanesConfigBtn {
+	padding: 10px 20px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 0.9em;
+	border: 1px solid var(--input-border-color);
+	transition: all 0.15s ease;
+	font-family: inherit;
+}
+
+.swimlanesConfigBtnSave {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigBtnSave:hover {
+	opacity: 0.9;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigBtnSave:active {
+	transform: scale(0.98);
+}
+
+.swimlanesConfigBtnCancel {
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border-color: var(--input-border-color);
+}
+
+.swimlanesConfigBtnCancel:hover {
+	background-color: var(--background-secondary);
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigBtnCancel:active {
+	transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.swimlanes-config-modal {
+		max-width: 90vw;
+	}
+
+	.swimlanesConfigSection {
+		padding: 15px;
+	}
+
+	.swimlanesConfigButtonsContainer {
+		padding: 12px 15px;
+		flex-direction: column-reverse;
+	}
+
+	.swimlanesConfigBtn {
+		width: 100%;
+	}
+
+	.swimlanesConfigSelect,
+	.swimlanesConfigInput,
+	.swimlanesConfigSortRowInput {
+		min-width: auto;
+		width: 100%;
+	}
+
+	.swimlanesConfigItem {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.swimlanesConfigItem input[type="checkbox"] {
+		align-self: flex-start;
+		margin-top: 5px;
+	}
+
+	.swimlanesConfigSortRow {
+		flex-wrap: wrap;
+	}
+
+	.swimlanesConfigSortRowInput {
+		order: 3;
+		width: 100%;
+	}
+}
+
+/* ============================================
+   KANBAN SWIMLANES VIEW STYLES
+   ============================================ */
+
+.kanbanSwimlanesGrid {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	gap: 0;
+	background-color: var(--background-primary);
+}
+
+.swimlanesHeaderContainer {
+	width: fit-content;
+	height: 2rem;
+	margin-bottom: 5px;
+	position: sticky;
+	top: 0;
+	z-index: 20;
+}
+
+.swimlanesHeaderContainer.verticalUI {
+	margin-left: 2rem;
+}
+
+.swimlanesHeaderRow {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+}
+
+.swimlanesHeaderRow .TaskBoardColumnsSection {
+	margin-right: 0px;
+}
+
+.swimlanesHeaderRow .TaskBoardColumnsSection .taskBoardColumnSecHeader {
+	background: transparent;
+	border: 1px solid var(--background-modifier-border-focus);
+}
+
+.swimlanesRowLabel {
+	background-color: var(--background-tertiary);
+	border-right: 1px solid var(--divider-color);
+	padding: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	font-size: 0.85em;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesColumnHeader {
+	background-color: var(--background-secondary);
+	border-right: 1px solid var(--divider-color);
+	padding: 12px;
+	font-weight: 600;
+	color: var(--text-normal);
+	font-size: 0.95em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: background-color 0.15s ease;
+}
+
+.swimlanesColumnHeader:hover {
+	background-color: var(--background-tertiary);
+}
+
+/* Container for all swimlane rows */
+.swimlanesContainer {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow-y: auto;
+	gap: 2px;
+	padding: 2px;
+	background-color: var(--background-primary);
+}
+
+/* Individual swimlane row */
+.swimlaneRow {
+	display: flex;
+	flex-direction: column;
+	gap: var(--swimlane-gap, 1px);
+	background-color: var(--background-primary);
+	padding: 0;
+	transition: background-color 0.15s ease;
+	width: max-content;
+	margin-bottom: 5px;
+}
+
+.swimlaneRow.minimized {
+	display: flex;
+	flex-direction: column;
+	gap: var(--swimlane-gap, 1px);
+	background-color: var(--background-primary);
+	padding: 0;
+	margin-bottom: 5px;
+	position: sticky;
+	left: 0;
+	z-index: 5;
+	width: 100%;
+	transition: background-color 0.15s ease;
+}
+
+.swimlaneRow.verticalUI {
+	display: flex;
+	flex-direction: row;
+}
+
+.swimlaneRow.verticalUI.minimized {
+	min-height: 2rem;
+	min-width: 100%;
+	position: sticky;
+	left: 0;
+}
+
+/* First swimlane row - make headers sticky */
+.swimlaneRow:first-of-type .taskBoardColumnSecHeader {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: var(--background-secondary);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.swimlaneRow:hover {
+	background-color: rgba(var(--interactive-accent-rgb), 0.02);
+}
+
+.swimlaneHeaderContainer {
+	position: sticky;
+	display: flex;
+	background-color: var(--background-modifier-border-hover);
+	border-right: 1px solid var(--divider-color);
+	left: 0;
+	z-index: 5;
+	width: 100%;
+	flex-direction: row;
+	height: 2rem;
+}
+
+.swimlaneHeaderContainer-vertical {
+	position: sticky;
+	background-color: var(--background-modifier-border-hover);
+	border-bottom: 1px solid var(--divider-color);
+	left: 0;
+	z-index: 5;
+	min-width: 2rem;
+	max-width: 2rem;
+	padding-block: 1rem;
+	min-height: 200px;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical {
+	min-width: 100%;
+	max-width: max-content;
+	padding-block: 0;
+	min-height: 2rem;
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+}
+
+.swimlaneHeader {
+	position: sticky;
+	left: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 600;
+	padding-block: 1rem;
+	color: var(--text-normal);
+	font-size: 0.9em;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-height: 100%;
+	flex-direction: row;
+}
+
+.swimlaneHeader-vertical {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 600;
+	/* margin-block: 1rem; */
+	color: var(--text-normal);
+	font-size: 0.9em;
+	text-align: center;
+	white-space: nowrap;
+	/* overflow: hidden; */
+	text-overflow: ellipsis;
+	min-height: 100%;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 1rem;
+}
+
+/* Swimlane label on the left */
+.swimlaneLabel {
+	font-weight: 600;
+	color: var(--text-normal);
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-word;
+	z-index: 5;
+}
+
+.swimlaneLabel-vertical {
+	font-weight: 600;
+	color: var(--text-normal);
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-word;
+	z-index: 5;
+	transform: rotate(270deg);
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneLabel-vertical {
+	transform: rotate(0deg);
+
+	transition: transform 0.3s ease-in-out;
+}
+
+.swimlaneHeaderSwimlaneCount {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 1rem;
+	padding-inline: 7px;
+	margin-left: 1rem;
+}
+
+.swimlaneHeaderSwimlaneCount-vertical {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 1rem;
+	padding-inline: 7px;
+}
+
+/* Wrapper for all columns in a swimlane */
+.swimlaneColumnsWrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 5px
+}
+
+/* Column within swimlane - applies to Column component */
+.swimlaneRow .columnsContainer {
+	display: contents;
+}
+
+.swimlaneRow>.column {
+	border-right: 1px solid var(--divider-color);
+	border-bottom: none;
+	min-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background-color: var(--background-primary);
+}
+
+.swimlaneRow>.column:hover {
+	background-color: rgba(var(--interactive-accent-rgb), 0.02);
+}
+
+/* Empty swimlane message */
+.emptyBoardMessage {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 300px;
+	color: var(--text-muted);
+	font-size: 1em;
+	padding: 20px;
+	text-align: center;
+	background-color: var(--background-secondary);
+	border-radius: 6px;
+	margin: 20px;
+}
+
+/* Element being dragged: dim / scale */
+.task-item-dragging,
+.taskItemContainer.task-item-dragging,
+.taskItem.task-item-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Drop indicator (card) - rectangular indicator positioned absolutely inside cards container */
+.taskboard-drop-indicator {
+	position: absolute;
+	background-color: var(--interactive-accent);
+	border-radius: 4px;
+	pointer-events: none;
+	z-index: 10000;
+	transition: top 0.08s ease, left 0.08s ease, width 0.08s ease;
+	display: none;
+}
+
+.taskboard-drop-indicator.is-visible {
+	display: block;
+}
+
+/* Card drop indicator horizontal */
+.taskboard-drop-indicator {
+	height: 6px;
+	box-shadow: 0 0 8px var(--interactive-accent);
+}
+
+/* Board and cards containers should be positioning contexts */
+.TaskBoardColumnsSection {
+	position: relative;
+}
+
+/* Smooth transitions for columns/cards */
+.TaskBoardColumnsSection {
+	transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.taskItem {
+	transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+/* Highlight effect when dropped */
+@keyframes kanban-drop-highlight {
+	0% {
+		box-shadow: 0 0 0 3px var(--interactive-accent);
+	}
+
+	100% {
+		box-shadow: none;
+	}
+}
+
+.taskboard-just-dropped {
+	animation: kanban-drop-highlight 0.45s ease-out;
+}
+
+/* Dimming helper used by manager */
+.task-item-dragging-dimmed {
+	opacity: 0.45 !important;
+	filter: blur(0.0px);
+}
+
+/* Slightly different visual for task item drag handle */
+.taskItemDragBtn {
+	cursor: grab;
+}
+
+/* Swimlane minimize/expand animations */
+.swimlaneColumnsWrapper {
+	overflow: hidden;
+	transition: max-height 260ms ease;
+}
+
+.swimlaneRow.minimized .swimlaneColumnsWrapper {
+	max-height: 0px !important;
+	max-width: 0px !important;
+}
+
+.swimlaneHeaderContainerMinimizICon {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	padding: 0 6px;
+}
+
+.swimlaneHeaderContainerMinimizICon svg {
+	width: 14px;
+	height: 14px;
+}
+
+
+/* -----------------------------------------------------
+Date picker modal styles 
+-------------------------------------------------------*/
+
+
+/* Date Picker Component Styles */
+.date-picker-root-container {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-width: 500px;
+	max-width: 600px;
+}
+
+.date-picker-root-container .date-picker-main-panel {
+	display: flex;
+	gap: var(--size-2-3);
+	padding: var(--size-2-3);
+}
+
+.date-picker-root-container .date-picker-left-panel {
+	flex: 1;
+	min-width: 200px;
+	border-right: 1px solid var(--background-modifier-border);
+}
+
+.date-picker-root-container .date-picker-right-panel {
+	flex: 1;
+	min-width: 250px;
+}
+
+.date-picker-root-container .date-picker-section-title {
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-bold);
+	margin-bottom: var(--size-4-2);
+	color: var(--text-normal);
+}
+
+/* Quick Options Styles */
+.date-picker-root-container .quick-options-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-1);
+	max-height: 195px;
+	overflow: auto;
+	overflow-x: hidden;
+}
+
+.date-picker-root-container .quick-option-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--size-2-2) var(--size-4-2);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.date-picker-root-container .quick-option-item:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.date-picker-root-container .quick-option-item.selected {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.date-picker-root-container .quick-option-item.clear-option {
+	border-top: 1px solid var(--background-modifier-border);
+	margin-top: var(--size-2-2);
+	padding-top: var(--size-2-3);
+	color: var(--text-error);
+}
+
+.date-picker-root-container .quick-option-item.clear-option:hover {
+	color: var(--text-on-accent);
+	background-color: var(--background-modifier-error-hover);
+}
+
+.date-picker-root-container .quick-option-label {
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
+}
+
+.date-picker-root-container .quick-option-date {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	font-family: var(--font-monospace);
+}
+
+.date-picker-root-container .quick-option-item.selected .quick-option-date {
+	color: var(--text-on-accent);
+}
+
+/* Calendar Styles */
+.date-picker-root-container .calendar-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.date-picker-root-container .calendar-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: var(--size-4-2);
+	padding: 0 var(--size-2-2);
+}
+
+.date-picker-root-container .calendar-nav-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--radius-s);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.date-picker-root-container .calendar-nav-btn:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.date-picker-root-container .calendar-month-year {
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-bold);
+	color: var(--text-normal);
+}
+
+.date-picker-root-container .calendar-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 1px;
+	background-color: var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	overflow: hidden;
+}
+
+.date-picker-root-container .calendar-day-header {
+	background-color: var(--background-secondary);
+	padding: var(--size-2-2);
+	text-align: center;
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-bold);
+	color: var(--text-muted);
+}
+
+.date-picker-root-container .calendar-day {
+	background-color: var(--background-primary);
+	padding: var(--size-2-2);
+	text-align: center;
+	font-size: var(--font-ui-small);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+	min-height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.date-picker-root-container .calendar-day:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.date-picker-root-container .calendar-day.other-month {
+	color: var(--text-faint);
+	background-color: var(--background-secondary);
+}
+
+.date-picker-root-container .calendar-day.today {
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
+	font-weight: var(--font-bold);
+}
+
+.date-picker-root-container .calendar-day.selected {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-weight: var(--font-bold);
+}
+
+.date-picker-root-container .calendar-day.today.selected {
+	background-color: var(--interactive-accent);
+	box-shadow: inset 0 0 0 2px var(--text-on-accent);
+}
+
+/* Popover Styles */
+.date-picker-popover.tg-menu {
+	z-index: 20;
+	position: fixed;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	box-shadow: var(--shadow-l);
+	max-height: 80vh;
+	overflow: auto;
+}
+
+.date-picker-popover.tg-menu .date-picker-popover-content {
+	padding: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+	.date-picker-root-container .date-picker-main-panel {
+		flex-direction: column;
+		gap: var(--size-4-2);
+	}
+
+	.date-picker-root-container .date-picker-left-panel {
+		border-right: none;
+		border-bottom: 1px solid var(--background-modifier-border);
+		padding-right: 0;
+		padding-bottom: var(--size-4-2);
+	}
+
+	.date-picker-root-container {
+		min-width: 300px;
+		max-width: 400px;
+	}
+
+	.date-picker-root-container .calendar-day {
+		min-height: 40px;
+		font-size: var(--font-ui-medium);
+	}
+}
+
+/* Widget Error Styles */
+.date-picker-root-container .date-picker-widget-error {
+	color: var(--text-error);
+	background-color: var(--background-modifier-error);
+	padding: var(--size-2-1) var(--size-2-2);
+	border-radius: var(--radius-s);
+	font-size: var(--font-ui-smaller);
 }

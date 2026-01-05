@@ -21,12 +21,14 @@
 			"DOM",
 			"ES5",
 			"ES6",
-			"ES7"
+			"ES7",
+			"ES2017",
+			"es2022"
 		],
 		"forceConsistentCasingInFileNames": true,
 		"types": [
 			"obsidian-typings"
-		]
+		],
 	},
 	"include": [
 		"src"

@@ -1,9 +1,16 @@
-import { Notice, TFile } from "obsidian";
+// /src/utils/MarkdownFileOperations.ts
 
-import TaskBoard from "main";
-import { t } from "./lang/helper";
+import { TFile } from "obsidian";
+import type TaskBoard from "main";
+import { bugReporter } from "src/services/OpenModals";
 
-export const readDataOfVaultFiles = async (
+/**
+ * Read data from a file in the vault
+ * @param plugin - TaskBoard plugin instance
+ * @param filePath - Path of the file to read from
+ * @returns Promise<string> - Raw content of the file
+ */
+export const readDataOfVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string
 ): Promise<string> => {
@@ -13,17 +20,35 @@ export const readDataOfVaultFiles = async (
 			const fileData = await plugin.app.vault.cachedRead(file);
 			return fileData; // Return the raw content of the file
 		} else {
-			new Notice(`${t("file-not-found-at-path")} ${filePath}`);
-			console.error(`File not found at path: ${filePath}`);
+			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
+			// console.error(`File not found at path: ${filePath}`);
+			bugReporter(
+				plugin,
+				"File not found in vault.",
+				`File not found at path: ${filePath}`,
+				"MarkdownFileOperations.ts/readDataOfVaultFile"
+			);
 			throw `File not found at path: ${filePath}`;
 		}
 	} catch (error) {
-		console.error("Error reading file from vault:", error);
+		bugReporter(
+			plugin,
+			"Error reading data from vault files.",
+			String(error),
+			"MarkdownFileOperations.ts/readDataOfVaultFile"
+		);
 		throw error;
 	}
 };
 
-export const writeDataToVaultFiles = async (
+/**
+ * Write data to a file in the vault
+ * @param plugin - TaskBoard plugin instance
+ * @param filePath - Path of the file to write to
+ * @param newContent - New content to write to the file
+ * @returns Promise<void>
+ */
+export const writeDataToVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string,
 	newContent: string
@@ -32,18 +57,25 @@ export const writeDataToVaultFiles = async (
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
 			await plugin.app.vault.modify(file, newContent);
-			plugin.fileUpdatedUsingModal = file.path;
+			// plugin.fileUpdatedUsingModal = file.path;
 		} else {
-			new Notice(`${t("file-not-found-at-path")} ${filePath}`);
+			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
 			console.error(`File not found at path: ${filePath}`);
+			throw `File not found at path: ${filePath}`;
 		}
+		return;
 	} catch (error) {
-		console.error("Error writing to file in vault:", error);
-		throw error;
+		bugReporter(
+			plugin,
+			"Error writing to file in vault.",
+			String(error),
+			"MarkdownFileOperations.ts/writeDataToVaultFile"
+		);
+		// throw error;
 	}
 };
 
-// export const writeDataToVaultFiles = async (
+// export const writeDataToVaultFile = async (
 // 	plugin: TaskBoard,
 // 	filePath: string,
 // 	newContent: string
