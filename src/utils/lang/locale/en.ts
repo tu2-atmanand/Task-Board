@@ -505,6 +505,13 @@ const en: Lang = {
 	"kanban-swimlanes-feature-info": "This feature will help you to group tasks based on their various properties. Additionally, this plugin has its first of kind implementation of swimlanes, to have custom sorting and aggregation of tasks.",
 	"manual-sorting": "Manual sorting",
 	"manual-sorting-feature-info": "This feature will help you to drag and re-order the tasks within a column..",
+	"status-name": "Status name",
+	"status-symbol": "Status symbol",
+	"status-action": "Status action",
+	"add-new-status": "Add new status",
+	"import-from-tasks-plugin": "Import from tasks plugin",
+	"custom-statuses": "Custom statuses",
+	"custom-statuses-info": "Add custom statuses, their mapped symbol and name to work for both inline-tasks and task-notes. Also, configure the next symbol it should cycle to."
 };
 
 export default en;

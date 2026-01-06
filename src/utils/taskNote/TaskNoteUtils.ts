@@ -6,7 +6,6 @@ import {
 	createYamlFromObject,
 	extractFrontmatterFromContent,
 } from "./FrontmatterOperations";
-import { taskStatuses } from "src/interfaces/Enums";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import {
 	CustomStatus,
@@ -15,6 +14,7 @@ import {
 } from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
 import { bugReporter } from "src/services/OpenModals";
+import { defaultTaskStatuses } from "src/interfaces/Enums";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -227,7 +227,7 @@ export function getStatusSymbolFromStatusName(
 	// return " ";
 
 	const tasksPluginStatusConfigs =
-		settings.data.globalSettings.tasksPluginCustomStatuses;
+		settings.data.globalSettings.customStatuses;
 	let statusSymbol = "";
 	tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 		if (customStatus.name === statusName) {
@@ -251,9 +251,8 @@ export function getStatusNameFromStatusSymbol(
 	if (!statusSymbol) return "pending";
 
 	if (settings) {
-		// TODO : We need to implement the Custom Statuses mapping feature very soon and combine the `customStatuses` and `tasksPluginCustomStatuses` into one. So, it can import from the Task plugin or user can change it inside the Task Board itself.
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+			settings.data.globalSettings.customStatuses;
 		let statusName = "";
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (customStatus.symbol === statusSymbol) {
@@ -268,7 +267,7 @@ export function getStatusNameFromStatusSymbol(
 	// taskStatuses contains mappings like: { unchecked: " ", regular: "x", "in-progress": "/" }
 	const statusMapping: { [symbol: string]: string } = {};
 
-	for (const [statusName, symbol] of Object.entries(taskStatuses)) {
+	for (const [statusName, symbol] of Object.entries(defaultTaskStatuses)) {
 		statusMapping[symbol] = statusName;
 	}
 

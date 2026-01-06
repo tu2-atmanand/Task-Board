@@ -2433,6 +2433,112 @@ li:hover .taskboard-hidden-property {
 }
 
 /* Container for all tag rows */
+/* Custom Statuses Container and Rows */
+.custom-statuses-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.custom-statuses-empty-message {
+	padding: 12px;
+	text-align: center;
+	color: var(--text-muted);
+	font-style: italic;
+	background-color: var(--background-secondary);
+	border-radius: 4px;
+	border: 1px dashed var(--background-modifier-border);
+}
+
+.custom-status-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 4px 12px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background-color: var(--background-primary);
+	transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-status-row:hover {
+	background-color: var(--background-secondary-alt);
+}
+
+.custom-status-info-container {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	flex-grow: 1;
+	padding-block: 8px;
+}
+
+.custom-status-field-element {
+	display: flex;
+	flex-direction: row;
+}
+
+.custom-status-field-label {
+	min-width: 5.7rem;
+	word-break: break-word;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.custom-status-field-value {
+	font-size: 1.1em;
+	color: var(--text-normal);
+	word-break: break-word;
+	font-weight: 500;
+}
+
+.custom-status-right-side {
+	display: flex;
+	flex-direction: column;
+	min-height: -webkit-fill-available;
+	justify-content: space-between;
+}
+
+.custom-status-field-status-pill {
+	font-size: 0.7rem;
+	text-decoration: var(--tag-decoration);
+	background-color: var(--background-modifier-border) !important;
+	border: var(--pill-border-width) solid var(--pill-border-color) !important;
+	border-radius: var(--pill-radius) !important;
+	color: var(--pill-color) !important;
+	cursor: var(--cursor);
+	font-weight: var(--pill-weight);
+	padding: 0 var(--pill-padding-x) !important;
+	align-self: end;
+}
+
+.custom-status-buttons {
+	display: flex;
+	gap: 8px;
+	flex-shrink: 0;
+	margin-left: 12px;
+	min-height: -webkit-fill-available;
+	align-items: flex-end;
+	justify-content: flex-end;
+}
+
+.custom-status-buttons .edit-btn svg.svg-icon:hover {
+	opacity: 0.8;
+	color: var(--blockquote-border-color)
+}
+
+.custom-status-buttons .delete-btn svg.svg-icon:hover {
+	opacity: 0.8;
+	color: var(--background-modifier-error);
+}
+
+.import-from-tasks-plugin-btn {
+	background-color: var(--background-modifier-border) !important;
+}
+
+/* Tag Colors Container */
 .tag-colors-container {
 	display: flex;
 	flex-direction: column;

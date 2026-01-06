@@ -1,4 +1,5 @@
 import type TaskBoard from "main";
+import { Notice } from "obsidian";
 import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
 import { taskItem } from "src/interfaces/TaskItem";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
@@ -13,20 +14,18 @@ export function checkboxStateSwitcher(
 	plugin: TaskBoard,
 	symbol: string
 ): string {
-	const { tasksPluginCustomStatuses, customStatuses } =
-		plugin.settings.data.globalSettings;
+	const { customStatuses } = plugin.settings.data.globalSettings;
 
-	// Check if tasksPluginCustomStatuses is available and has entries
-	if (tasksPluginCustomStatuses?.length > 0) {
-		const foundStatus = tasksPluginCustomStatuses.find(
-			(status: { symbol: string }) => status.symbol === symbol
-		);
-		if (foundStatus) return foundStatus.nextStatusSymbol;
-	} else if (customStatuses?.length > 0) {
+	// Check if customStatuses is available and has entries
+	if (customStatuses?.length > 0) {
 		const foundStatus = customStatuses.find(
 			(status: { symbol: string }) => status.symbol === symbol
 		);
 		if (foundStatus) return foundStatus.nextStatusSymbol;
+	} else {
+		new Notice(
+			"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
+		);
 	}
 
 	// Default fallback behavior
@@ -70,7 +69,7 @@ export function isTaskCompleted(
 		// );
 
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+			settings.data.globalSettings.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
@@ -86,7 +85,7 @@ export function isTaskCompleted(
 		return flag;
 	} else {
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+			settings.data.globalSettings.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (

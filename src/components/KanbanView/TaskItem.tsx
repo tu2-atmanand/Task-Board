@@ -645,7 +645,7 @@ const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activ
 			item.setIcon("info");
 			const statusMenu = item.setSubmenu()
 
-			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.tasksPluginCustomStatuses);
+			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
 					item.setTitle(status.text);

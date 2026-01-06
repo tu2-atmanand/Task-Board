@@ -1,30 +1,37 @@
 import { Modal, Notice, Setting, TextComponent } from "obsidian";
 import type { Plugin } from "obsidian";
 import { statusTypeNames } from "src/interfaces/Enums";
-import { StatusConfiguration } from "src/interfaces/StatusConfiguration";
+import { StatusConfiguration, StatusType } from "src/interfaces/StatusConfiguration";
 import { t } from "src/utils/lang/helper";
+import type { CustomStatus } from "src/interfaces/GlobalSettings";
 
 export class CustomStatusModal extends Modal {
 	statusSymbol: string;
 	statusName: string;
 	statusNextSymbol: string;
 	statusAvailableAsCommand: boolean;
-	type: string;
+	type: StatusType;
 
 	saved: boolean = false;
 	error: boolean = false;
 	private isCoreStatus: boolean;
 	constructor(
 		public plugin: Plugin,
-		statusType: StatusConfiguration,
+		statusType: CustomStatus | StatusConfiguration,
 		isCoreStatus: boolean
 	) {
 		super(plugin.app);
-		this.statusSymbol = statusType.symbol;
-		this.statusName = statusType.name;
-		this.statusNextSymbol = statusType.nextStatusSymbol;
-		this.statusAvailableAsCommand = statusType.availableAsCommand;
-		this.type = statusType.type;
+		const status = statusType as any;
+		this.statusSymbol = status.symbol;
+		this.statusName = status.name;
+		this.statusNextSymbol = status.nextStatusSymbol;
+		this.statusAvailableAsCommand = status.availableAsCommand;
+		// Ensure type is a valid StatusType enum value
+		if (typeof status.type === 'string') {
+			this.type = status.type as StatusType;
+		} else {
+			this.type = status.type;
+		}
 		this.isCoreStatus = isCoreStatus;
 		this.setTitle(t("Configure status entry"));
 	}
@@ -105,7 +112,7 @@ export class CustomStatusModal extends Modal {
 					dropdown.addOption(s, s);
 				});
 				dropdown.setValue(this.type).onChange((v) => {
-					this.type = v;
+					this.type = v as StatusType;
 				});
 			});
 

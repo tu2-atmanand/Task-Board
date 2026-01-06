@@ -100,19 +100,14 @@ export const AddOrEditTaskRC: React.FC<{
 	// Load statuses dynamically
 	let filteredStatusesDropdown: filterOptions[] = [];
 
-	// Check if tasksPluginCustomStatuses is available and use it
-	if (plugin.settings.data.globalSettings.tasksPluginCustomStatuses?.length > 0) {
-		filteredStatusesDropdown = plugin.settings.data.globalSettings.tasksPluginCustomStatuses.map((customStatus) => ({
-			value: customStatus.symbol,
-			text: `${customStatus.name} [${customStatus.symbol}]`,
-		}));
-	}
-	// Fallback to customStatuses if tasksPluginCustomStatuses is empty
-	else if (plugin.settings.data.globalSettings.customStatuses?.length > 0) {
+	// Fetch all the custom statuses and add them to the dropdown
+	if (plugin.settings.data.globalSettings.customStatuses?.length > 0) {
 		filteredStatusesDropdown = plugin.settings.data.globalSettings.customStatuses.map((customStatus) => ({
 			value: customStatus.symbol,
 			text: `${customStatus.name} [${customStatus.symbol}]`,
 		}));
+	} else {
+		console.error("No custom statuses found.");
 	}
 
 	// ------------ Handle task property values changes ------------

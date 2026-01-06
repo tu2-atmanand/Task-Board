@@ -92,7 +92,6 @@ export interface globalSettingsData {
 	doubleClickCardToEdit: EditButtonMode;
 	universalDate: string;
 	customStatuses: CustomStatus[];
-	tasksPluginCustomStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
 	preDefinedNote: string;
@@ -465,7 +464,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			editButtonAction: EditButtonMode.Modal,
 			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
-			tasksPluginCustomStatuses: [],
 			tagColorsType: TagColorType.Background,
 			customStatuses: [
 				{

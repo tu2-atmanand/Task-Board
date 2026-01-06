@@ -1,6 +1,6 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Notice, Setting, normalizePath } from "obsidian";
+import { App, Notice, Setting, normalizePath, setIcon } from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
@@ -14,6 +14,7 @@ import {
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
+import { CustomStatusModal } from "src/modals/CustomStatusConfigurator";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 import {
 	exportConfigurations,
@@ -39,8 +40,11 @@ import {
 import {
 	frontmatterFormatting,
 	globalSettingsData,
+	type CustomStatus,
 } from "src/interfaces/GlobalSettings";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
+import { StatusType } from "src/interfaces/StatusConfiguration";
+import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 
 export class SettingsManager {
 	win: Window;
@@ -810,7 +814,6 @@ export class SettingsManager {
 			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
 			hiddenTaskProperties,
-			customStatuses
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -1001,20 +1004,210 @@ export class SettingsManager {
 		});
 
 		new Setting(contentEl).setName(t("custom-statuses")).setHeading();
-		new Setting(contentEl).setDesc(
-			t(
-				"Add custom statuses, their mapped symbol and name to work for both inline-tasks and task-notes. Also, configure the next symbol it should cycle to."
+		new Setting(contentEl).setDesc(t("custom-statuses-info"));
+
+		// Container for custom statuses list
+		const customStatusesContainer = contentEl.createDiv({
+			cls: "custom-statuses-container",
+		});
+
+		const renderCustomStatuses = () => {
+			customStatusesContainer.empty(); // Clear existing rendered rows
+
+			const customStatuses =
+				this.plugin.settings.data.globalSettings.customStatuses;
+
+			if (!customStatuses || customStatuses.length === 0) {
+				customStatusesContainer.createDiv({
+					cls: "custom-statuses-empty-message",
+					text: t("no-custom-statuses-configured"),
+				});
+				return;
+			}
+
+			customStatuses.forEach((status, index) => {
+				const row = customStatusesContainer.createDiv({
+					cls: "custom-status-row",
+				});
+
+				const statusInfoContainer = row.createDiv({
+					cls: "custom-status-info-container",
+				});
+
+				// Status Name
+				const statusInfoName = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-name")}:`,
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-value",
+					text: status.name,
+				});
+
+				// Status Symbol
+				const statusInfoSymbol = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-symbol")}:`,
+				});
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-value",
+					text: `[${status.symbol}]`,
+				});
+
+				// Next Status Symbol
+				const statusInfoAction = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoAction.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-action")}:`,
+				});
+				statusInfoAction.createDiv({
+					cls: "custom-status-field",
+					text: `When you will click on the checkbox [${status.symbol}] it will change to [${status.nextStatusSymbol}]`,
+				});
+
+				const rightSideContainer = row.createDiv({
+					cls: "custom-status-right-side",
+				});
+
+				// Status Type
+				rightSideContainer.createDiv({
+					cls: "custom-status-field-status-pill",
+					text: status.type,
+				});
+
+				// Buttons container
+				const buttonsContainer = rightSideContainer.createDiv({
+					cls: "custom-status-buttons",
+				});
+
+				// Edit button
+				const editButton = buttonsContainer.createEl("span", {
+					cls: "edit-btn",
+					text: t("edit"),
+					title: t("edit"),
+				});
+				setIcon(editButton, "pencil");
+				editButton.onclick = async () => {
+					const modal = new CustomStatusModal(
+						this.plugin,
+						status,
+						false
+					);
+					modal.onClose = async () => {
+						if (modal.saved) {
+							const updatedStatus = modal.statusConfiguration();
+							const customStatus: CustomStatus = {
+								symbol: updatedStatus.symbol,
+								name: updatedStatus.name,
+								nextStatusSymbol:
+									updatedStatus.nextStatusSymbol,
+								availableAsCommand:
+									updatedStatus.availableAsCommand,
+								type: updatedStatus.type,
+							};
+							this.plugin.settings.data.globalSettings!.customStatuses[
+								index
+							] = customStatus;
+							await this.saveSettings();
+							renderCustomStatuses();
+						}
+					};
+					modal.open();
+				};
+
+				// Delete button
+				const deleteButton = buttonsContainer.createEl("span", {
+					cls: "delete-btn",
+					text: t("delete"),
+					title: t("delete"),
+				});
+				setIcon(deleteButton, "trash");
+				deleteButton.onclick = async () => {
+					this.globalSettings!.customStatuses.splice(index, 1);
+					await this.saveSettings();
+					renderCustomStatuses();
+				};
+			});
+		};
+
+		// Initial render
+		renderCustomStatuses();
+
+		const isTasksPluginEnabled =
+			this.plugin.settings.data.globalSettings.compatiblePlugins
+				.tasksPlugin;
+		// Add "Add New Status" button
+		new Setting(contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("import-from-tasks-plugin"))
+					.setClass("import-from-tasks-plugin-btn")
+					.setCta()
+					.onClick(async () => {
+						const flag = await fetchTasksPluginCustomStatuses(
+							this.plugin
+						);
+						if (flag) {
+							renderCustomStatuses();
+						}
+					})
+					.setDisabled(
+						!this.plugin.settings.data.globalSettings
+							.compatiblePlugins.tasksPlugin
+					)
 			)
-		);
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-new-status"))
+					.setCta()
+					.onClick(async () => {
+						const newStatus: CustomStatus = {
+							symbol: "",
+							name: "",
+							nextStatusSymbol: "",
+							availableAsCommand: false,
+							type: StatusType.TODO,
+						};
+						const modal = new CustomStatusModal(
+							this.plugin,
+							newStatus,
+							false
+						);
+						modal.onClose = async () => {
+							if (modal.saved) {
+								const statusConfig =
+									modal.statusConfiguration();
+								const customStatus: CustomStatus = {
+									symbol: statusConfig.symbol,
+									name: statusConfig.name,
+									nextStatusSymbol:
+										statusConfig.nextStatusSymbol,
+									availableAsCommand:
+										statusConfig.availableAsCommand,
+									type: statusConfig.type,
+								};
+								if (!this.globalSettings!.customStatuses) {
+									this.globalSettings!.customStatuses = [];
+								}
+								this.globalSettings!.customStatuses.push(
+									customStatus
+								);
+								await this.saveSettings();
+								renderCustomStatuses();
+							}
+						};
 
-		// Here all the elements from this.settings.customStatuses will be rendered as list. The list will contain the following elements:
-		// - Name of the status
-		// - Symbol of the status
-		// - Type of the status
-		// - Next symbol of the status
-		// On right of this list elements will be a Edit button (will open the CustomStatusModal) and a Delete button (remove this status from the CustomStatuses list).
-		// And at the bottom of this whole list container, there will be a button to add a new status, which will open the CustomStatusModal.
-
+						modal.open();
+					})
+			);
 
 		new Setting(contentEl).setName(t("tag-colors")).setHeading();
 

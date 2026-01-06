@@ -40,7 +40,10 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
-import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
+import {
+	fetchTasksPluginCustomStatuses,
+	isTasksPluginEnabled,
+} from "src/services/tasks-plugin/helpers";
 import { HideableTaskProperty } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
@@ -874,7 +877,10 @@ export default class TaskBoard extends Plugin {
 
 	async compatiblePluginsAvailabilityCheck() {
 		// Check if the Tasks plugin is installed and fetch the custom statuses
-		await fetchTasksPluginCustomStatuses(this.plugin);
+		// await fetchTasksPluginCustomStatuses(this.plugin);
+		const tasksPlug = await isTasksPluginEnabled(this.plugin);
+		this.plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin =
+			tasksPlug;
 
 		// Check if the Reminder plugin is installed
 		isReminderPluginInstalled(this.plugin);
