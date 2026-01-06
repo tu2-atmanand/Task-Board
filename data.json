@@ -318,9 +318,9 @@
               "378",
               "247",
               "258",
-              "371",
               "355",
-              "375"
+              "375",
+              "371"
             ]
           },
           {
@@ -514,7 +514,7 @@
         },
         "swimlanes": {
           "enabled": true,
-          "showEmptySwimlanes": true,
+          "hideEmptySwimlanes": false,
           "property": "tags",
           "maxHeight": "500px",
           "sortCriteria": "custom",
@@ -533,8 +533,10 @@
             }
           ],
           "groupAllRest": true,
-          "verticalHeaderUI": false,
-          "minimized": []
+          "verticalHeaderUI": true,
+          "minimized": [
+            "Tags: All rest"
+          ]
         }
       },
       {
@@ -553,7 +555,7 @@
             },
             "sortCriteria": [
               {
-                "criteria": "id",
+                "criteria": "content",
                 "order": "desc",
                 "priority": 1,
                 "uid": "k6wjlc63"
@@ -610,10 +612,9 @@
               }
             ],
             "tasksIdManualOrder": [
-              "258",
-              "371",
-              "355",
               "375",
+              "258",
+              "355",
               "378",
               "247"
             ]
@@ -1019,7 +1020,7 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 1,
         "taskId": "",
         "settingTab": 1
       },
