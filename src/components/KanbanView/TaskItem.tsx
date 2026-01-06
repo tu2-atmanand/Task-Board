@@ -18,7 +18,7 @@ import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical } from 'lucide-react';
-import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colTypeNames } from 'src/interfaces/Enums';
+import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, colTypeNames } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -1250,8 +1250,9 @@ const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activ
 								const childTask = childTasksData[dependsOnId];
 								if (!childTask) return null; // Skip if child task not found in cache
 
+								const isThisATaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 								// Render each child task with a link to open it in the modal
-								const isChildTaskCompleted = childTask.status === taskStatuses.checked || childTask.status === taskStatuses.regular || childTask.status === taskStatuses.dropped;
+								const isChildTaskCompleted = isThisATaskNote ? isTaskCompleted(childTask.status, true, plugin.settings) : isTaskCompleted(childTask.status, false, plugin.settings);
 								const depTaskTitle = childTask.title || `There was an error fetching the task with ID: ${dependsOnId}`;
 
 								// Simple version just showing the ID and a symbol

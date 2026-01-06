@@ -810,6 +810,7 @@ export class SettingsManager {
 			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
 			hiddenTaskProperties,
+			customStatuses
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -999,11 +1000,21 @@ export class SettingsManager {
 			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
 		});
 
-		// Tag Colors settings
-		// Setting to show/Hide the Header of the task card
-		// new Setting(contentEl)
-		// 	.setName(t("tag-colors"))
-		// 	.setDesc(t("tag-colors-info"));
+		new Setting(contentEl).setName(t("custom-statuses")).setHeading();
+		new Setting(contentEl).setDesc(
+			t(
+				"Add custom statuses, their mapped symbol and name to work for both inline-tasks and task-notes. Also, configure the next symbol it should cycle to."
+			)
+		);
+
+		// Here all the elements from this.settings.customStatuses will be rendered as list. The list will contain the following elements:
+		// - Name of the status
+		// - Symbol of the status
+		// - Type of the status
+		// - Next symbol of the status
+		// On right of this list elements will be a Edit button (will open the CustomStatusModal) and a Delete button (remove this status from the CustomStatuses list).
+		// And at the bottom of this whole list container, there will be a button to add a new status, which will open the CustomStatusModal.
+
 
 		new Setting(contentEl).setName(t("tag-colors")).setHeading();
 

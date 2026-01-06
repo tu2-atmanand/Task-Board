@@ -2,7 +2,6 @@
 
 import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
-import { taskStatuses } from "src/interfaces/Enums";
 import { CustomStatus } from "src/interfaces/GlobalSettings";
 import { taskItem } from "src/interfaces/TaskItem";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";

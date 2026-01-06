@@ -90,7 +90,7 @@ export enum viewTypeNames {
 	map = "map",
 }
 
-export enum taskStatuses {
+export enum defaultTaskStatuses {
 	unchecked = " ",
 	incomplete = " ",
 	pending = " ",
@@ -136,6 +136,16 @@ export enum taskStatuses {
 	favorite = "H",
 	symbolism = "&",
 	secret = "s",
+}
+
+export enum statusTypeNames {
+	TODO = "TODO",
+	DONE = "DONE",
+	IN_PROGRESS = "IN_PROGRESS",
+	ON_HOLD = "ON_HOLD",
+	CANCELLED = "CANCELLED",
+	NON_TASK = "NON_TASK",
+	EMPTY = "EMPTY",
 }
 
 export enum colTypeNames {

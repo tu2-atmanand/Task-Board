@@ -35,7 +35,7 @@ export function checkboxStateSwitcher(
 
 /**
  * Determines if a task is completed based on its title or symbol.
- * @param titleOrSymbol - The title or symbol (task.status) of the task.
+ * @param titleOrSymbol - The title if its a inline-task, or the symbol (task.status) if its a task-note.
  * @param isTaskNote - A boolean indicating whether the task is a task note.
  * @param settings - The plugin settings.
  * @returns True if the symbol represents a completed state, otherwise false.
@@ -56,12 +56,17 @@ export function isTaskCompleted(
 		// // console.log("CheckBoxUtils.ts : isCompleted : match :", match);
 		// if (!match || match.length < 2) return false;
 
-		const symbol = extractCheckboxSymbol(titleOrSymbol);
+		let symbol = " ";
+		if (titleOrSymbol.trim().length === 1) {
+			symbol = titleOrSymbol;
+		} else {
+			symbol = extractCheckboxSymbol(titleOrSymbol);
+		}
 		// return (
-		// 	symbol === taskStatuses.regular ||
-		// 	symbol === taskStatuses.checked ||
-		// 	symbol === taskStatuses.done ||
-		// 	symbol === taskStatuses.dropped
+		// 	symbol === defaultTaskStatuses.regular ||
+		// 	symbol === defaultTaskStatuses.checked ||
+		// 	symbol === defaultTaskStatuses.done ||
+		// 	symbol === defaultTaskStatuses.dropped
 		// );
 
 		const tasksPluginStatusConfigs =
