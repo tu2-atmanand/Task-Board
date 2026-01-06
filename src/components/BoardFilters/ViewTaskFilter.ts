@@ -27,8 +27,9 @@ import {
 } from "src/services/MultiSuggest";
 import {
 	getPriorityOptionsForDropdown,
-	dropDownOption,
 	getCustomStatusOptionsForDropdown,
+	statusDropDownOption,
+	priorityDropDownOption,
 } from "src/interfaces/Mapping";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
 
@@ -862,7 +863,7 @@ export class TaskFilterComponent extends Component {
 					).reduce(
 						(
 							acc: Record<number | string, string>,
-							opt: dropDownOption
+							opt: statusDropDownOption
 						) => {
 							acc[opt.value] = opt.text;
 							return acc;
@@ -935,7 +936,7 @@ export class TaskFilterComponent extends Component {
 					getPriorityOptionsForDropdown().reduce(
 						(
 							acc: Record<number | string, string>,
-							opt: dropDownOption
+							opt: priorityDropDownOption
 						) => {
 							acc[opt.value] = opt.text;
 							return acc;

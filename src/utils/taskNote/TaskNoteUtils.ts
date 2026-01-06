@@ -328,11 +328,13 @@ export function formatTaskNoteContent(
  * Update frontmatter properties from task item
  * @param plugin - TaskBoard plugin instance
  * @param task - Task item with updated properties
+ * @param forceId (Optional) - Whether to forcefully add ID property in frontmatter
  * @returns Promise<void>
  */
 export async function updateFrontmatterInMarkdownFile(
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
+	forceId?: boolean
 ): Promise<void> {
 	try {
 		const file = plugin.app.vault.getFileByPath(task.filePath);
@@ -342,7 +344,18 @@ export async function updateFrontmatterInMarkdownFile(
 
 		// Method 1 - Using Obsidian's filemanager API.
 		await plugin.app.fileManager.processFrontMatter(file, (existing) => {
-			const updated = updateFrontmatterProperties(plugin, existing, task);
+			const updated = updateFrontmatterProperties(
+				plugin,
+				existing,
+				task,
+				forceId
+			);
+			console.log(
+				"updateFrontmatterInMarkdownFile...\nUpdated frontmatter",
+				updated,
+				"\nold frontmatter",
+				existing
+			);
 			for (const key of Object.keys(updated)) {
 				existing[key] = updated[key];
 			}

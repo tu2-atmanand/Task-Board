@@ -13,7 +13,29 @@
             "active": true,
             "collapsed": false,
             "name": "TaskNotes",
-            "filePaths": "TaskNotes/"
+            "filePaths": "TaskNotes/",
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "ur7dguyt"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "367",
+              "372",
+              "398696308",
+              "373",
+              "370",
+              "3077781059",
+              "4184100420",
+              "3052793295",
+              "1506909345",
+              274,
+              "4031700447",
+              "362"
+            ]
           },
           {
             "id": 1312742179,
@@ -53,8 +75,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 67,
-          "completed": 9
+          "pending": 65,
+          "completed": 19
         }
       },
       {
@@ -127,7 +149,8 @@
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
-            }
+            },
+            "minimized": true
           },
           {
             "id": 3493,
@@ -206,18 +229,27 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 54,
-          "completed": 18
+          "pending": 65,
+          "completed": 19
         }
       },
       {
         "columns": [
           {
+            "id": 3187486162,
+            "index": 1,
+            "colType": "otherTags",
+            "active": true,
+            "collapsed": false,
+            "name": "Other tags",
+            "minimized": false
+          },
+          {
             "colType": "untagged",
             "active": true,
             "collapsed": false,
             "name": "Backlogs",
-            "index": 1,
+            "index": 2,
             "id": 226119,
             "sortCriterias": [],
             "filters": {
@@ -232,78 +264,73 @@
                 "uid": "k6wjlc63"
               }
             ],
-            "minimized": false
+            "minimized": true
           },
           {
             "id": 2485661779,
-            "index": 2,
+            "index": 3,
             "colType": "namedTag",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "#Task",
-            "coltag": "#Task"
+            "coltag": "#Task",
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "asc",
+                "priority": 1,
+                "uid": "bmlpsogj"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              274,
+              "362"
+            ],
+            "minimized": false,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
           },
           {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Can be implemented",
-            "index": 3,
+            "index": 4,
             "coltag": "#pending",
             "id": 47626,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "285zohor"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "378",
+              "247",
+              "258",
+              "355",
+              "375",
+              "371"
+            ]
           },
           {
+            "id": 3130768414,
+            "index": 5,
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "In Progress",
-            "index": 4,
-            "coltag": "working",
-            "id": 908753,
-            "filters": {
-              "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1760365709344-buyyxwhhh",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1760365709345-8uyz54hm3",
-                      "property": "content",
-                      "condition": "contains",
-                      "value": "This"
-                    }
-                  ]
-                },
-                {
-                  "id": "id-1760365717816-lfhxidsw4",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1760365717817-fjsotu7dy",
-                      "property": "content",
-                      "condition": "contains",
-                      "value": "is"
-                    }
-                  ]
-                }
-              ]
-            },
-            "minimized": false
-          },
-          {
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "name": "In Review",
-            "index": 5,
-            "coltag": "Test",
-            "id": 396902
+            "coltag": "wip"
           },
           {
             "colType": "namedTag",
@@ -312,7 +339,8 @@
             "name": "Ready to publish",
             "index": 6,
             "coltag": "done",
-            "id": 328227
+            "id": 328227,
+            "minimized": false
           },
           {
             "id": 1936828579,
@@ -321,7 +349,8 @@
             "active": false,
             "collapsed": false,
             "name": "*/seeding/*",
-            "coltag": "*/seeding/*"
+            "coltag": "*/seeding/*",
+            "minimized": false
           },
           {
             "id": 3193261849,
@@ -333,20 +362,9 @@
             "limit": 20,
             "filters": {
               "rootCondition": "any",
-              "filterGroups": [
-                {
-                  "id": "id-1763878153878-2dyqv7914",
-                  "groupCondition": "all",
-                  "filters": [
-                    {
-                      "id": "id-1763878153879-cc19ylpzx",
-                      "property": "completedDate",
-                      "condition": "isNotEmpty"
-                    }
-                  ]
-                }
-              ]
-            }
+              "filterGroups": []
+            },
+            "minimized": false
           }
         ],
         "filters": [
@@ -363,32 +381,7 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "all",
-          "filterGroups": [
-            {
-              "id": "id-1760029960520-z2a1g0ka4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1760029960521-t33fwt542",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "This"
-                }
-              ]
-            },
-            {
-              "id": "id-1764176913802-bwvk75kr4",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1764176913803-1ugczxozs",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "No"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -516,8 +509,216 @@
           ]
         },
         "taskCount": {
-          "pending": 11,
-          "completed": 2
+          "pending": 65,
+          "completed": 19
+        },
+        "swimlanes": {
+          "enabled": true,
+          "hideEmptySwimlanes": false,
+          "property": "tags",
+          "maxHeight": "500px",
+          "sortCriteria": "custom",
+          "customSortOrder": [
+            {
+              "value": "first",
+              "index": 1
+            },
+            {
+              "value": "second",
+              "index": 2
+            },
+            {
+              "value": "third",
+              "index": 3
+            }
+          ],
+          "groupAllRest": true,
+          "verticalHeaderUI": true,
+          "minimized": [
+            "Tags: All rest"
+          ]
+        }
+      },
+      {
+        "columns": [
+          {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "index": 1,
+            "id": 226119,
+            "sortCriterias": [],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "desc",
+                "priority": 1,
+                "uid": "k6wjlc63"
+              }
+            ],
+            "minimized": false
+          },
+          {
+            "id": 2485661779,
+            "index": 2,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "#Task",
+            "coltag": "#Task",
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "asc",
+                "priority": 1,
+                "uid": "bmlpsogj"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              274,
+              "362"
+            ],
+            "minimized": false,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Can be implemented",
+            "index": 3,
+            "coltag": "#pending",
+            "id": 47626,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "pn3wvwal"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "375",
+              "258",
+              "355",
+              "378",
+              "247"
+            ]
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Progress",
+            "index": 4,
+            "coltag": "working",
+            "id": 908753,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Review",
+            "index": 5,
+            "coltag": "Test",
+            "id": 396902,
+            "minimized": false
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Ready to publish",
+            "index": 6,
+            "coltag": "done",
+            "id": 328227,
+            "minimized": false
+          },
+          {
+            "id": 1936828579,
+            "index": 7,
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "*/seeding/*",
+            "coltag": "*/seeding/*"
+          },
+          {
+            "id": 3193261849,
+            "index": 8,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false
+          }
+        ],
+        "filters": [
+          "#Test",
+          "#working",
+          "*/seeding/*"
+        ],
+        "filterPolarity": "0",
+        "filterScope": "Both",
+        "name": "Tag based board (copy)",
+        "index": 3,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        },
+        "taskCount": {
+          "pending": 65,
+          "completed": 19
+        },
+        "swimlanes": {
+          "enabled": false,
+          "showEmptySwimlanes": true,
+          "property": "tags",
+          "maxHeight": "500px",
+          "sortCriteria": "custom",
+          "customSortOrder": [
+            {
+              "value": "first",
+              "index": 1
+            },
+            {
+              "value": "second",
+              "index": 2
+            },
+            {
+              "value": "third",
+              "index": 3
+            }
+          ],
+          "groupAllRest": true,
+          "verticalHeaderUI": false
         }
       }
     ],
@@ -571,7 +772,7 @@
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,
-      "showVerticalScroll": false,
+      "showVerticalScroll": true,
       "tagColors": [
         {
           "name": "Bug",
@@ -814,14 +1015,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 363,
+      "uniqueIdCounter": 378,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 1,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",

@@ -1,5 +1,12 @@
 // Originally from the PDF++ plugin (https://github.com/RyotaUshio/obsidian-pdf-plus)
 
+/**
+ * A util function to extract various system and application related information for building debug logs.
+ *
+ * This code has been inspired from the obsidian-pdf-plus project by RyotaUshio.
+ * @see https://github.com/RyotaUshio/obsidian-pdf-plus
+ */
+
 import { App, Platform, apiVersion } from "obsidian";
 
 /** Selected subset of the "Show debug info" command's result with some additional entries. */

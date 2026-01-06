@@ -3,14 +3,13 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSetting, isTaskCompleted, isTaskLine } from 'src/utils/CheckBoxUtils';
-import { handleCheckboxChange, handleDeleteTask, handleEditTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
+import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component, Notice } from 'obsidian';
+import { Component, Notice, Platform, Menu, TFile } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
-import { getUniversalDateFromTask, getUniversalDateEmoji, cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
+import { cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
-import { getTaskFromId, parseUniversalDate } from 'src/utils/taskLine/TaskItemUtils';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
@@ -18,22 +17,39 @@ import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regula
 import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
-import { ChevronDown } from 'lucide-react';
-import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colType } from 'src/interfaces/Enums';
-import { priorityEmojis } from 'src/interfaces/Mapping';
+import { ChevronDown, EllipsisVertical } from 'lucide-react';
+import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, taskStatuses, colTypeNames } from 'src/interfaces/Enums';
+import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { RxDragHandleDots2 } from 'react-icons/rx';
+import { getUniversalDateEmoji, getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
+import { getTaskFromId } from 'src/utils/TaskItemUtils';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder, updateTaskItemTags } from 'src/utils/UserTaskEvents';
+import EditTagsModal from 'src/modals/EditTagsModal';
+
+// Helper modal functions may be provided elsewhere; declare them for TypeScript
+declare function showTextInputModal(app: any, options: { title?: string; placeholder?: string; initialValue?: string }): Promise<string | null>;
+declare function showConfirmationModal(app: any, options: any): Promise<boolean>;
+import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
+
+export interface swimlaneDataProp {
+	property: string;
+	value: string;
+}
 
 export interface TaskProps {
+	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
 	activeBoardSettings: Board;
 	columnIndex?: number;
+	swimlaneData?: swimlaneDataProp;
 }
 
-const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, columnIndex }) => {
+const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, columnIndex, swimlaneData }) => {
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
@@ -153,9 +169,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 			}
 		})();
 
-		return () => {
-			cancelled = true;
-		};
+		// return () => {
+		// 	cancelled = true;
+		// };
 	}, [task.id, task.title, task.filePath, plugin.settings.data.globalSettings.searchQuery]);
 
 	// useEffect(() => {
@@ -616,36 +632,342 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 		}
 	}
 
+	const handleMenuButtonClicked = (event: React.MouseEvent) => {
+		event.stopPropagation();
+		const taskItemMenu = new Menu();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("properties"));
+			item.setIsLabel(true);
+		});
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("status"));
+			item.setIcon("info");
+			const statusMenu = item.setSubmenu()
+
+			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.tasksPluginCustomStatuses);
+			customStatues.forEach((status) => {
+				statusMenu.addItem((item) => {
+					item.setTitle(status.text);
+					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
+					item.onClick(() => {
+						updateTaskItemStatus(plugin, task, status.value);
+					})
+				});
+			})
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("quick-actions"));
+			item.setIsLabel(true);
+		});
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("copy-task-title"));
+			item.setIcon("eye-off");
+			item.onClick(async () => {
+			});
+
+			// Priority submenu
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("priority"));
+				item.setIcon("flag");
+				const priMenu = item.setSubmenu();
+				const priorities = [
+					{ label: t("none"), value: 0 },
+					{ label: t("low"), value: 1 },
+					{ label: t("medium"), value: 2 },
+					{ label: t("high"), value: 3 },
+				];
+				priorities.forEach((p) => {
+					priMenu.addItem((it) => {
+						it.setTitle(p.label);
+						it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
+					});
+				});
+			});
+
+			// Dates submenu
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("dates"));
+				item.setIcon("calendar");
+				const dateMenu = item.setSubmenu();
+				dateMenu.addItem((it) => {
+					it.setTitle(t("start-date"));
+					it.onClick(async () => {
+						const newDate = await showTextInputModal(plugin.app, { title: t("set-start-date"), placeholder: 'YYYY-MM-DD', initialValue: task.startDate || '' });
+						if (newDate) updateTaskItemDate(plugin, task, 'startDate', newDate);
+					});
+				});
+				dateMenu.addItem((it) => {
+					it.setTitle(t("scheduled-date"));
+					it.onClick(async () => {
+						const newDate = await showTextInputModal(plugin.app, { title: t("set-scheduled-date"), placeholder: 'YYYY-MM-DD', initialValue: task.scheduledDate || '' });
+						if (newDate) updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
+					});
+				});
+				dateMenu.addItem((it) => {
+					it.setTitle(t("due-date"));
+					it.onClick(async () => {
+						const newDate = await showTextInputModal(plugin.app, { title: t("set-due-date"), placeholder: 'YYYY-MM-DD', initialValue: task.due || '' });
+						if (newDate) updateTaskItemDate(plugin, task, 'due', newDate);
+					});
+				});
+			});
+
+			// Reminder item - open prompt for date/time
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("reminder"));
+				item.setIcon("clock");
+				item.onClick(async () => {
+					const newReminder = await showTextInputModal(plugin.app, { title: t("set-reminder"), placeholder: 'YYYY-MM-DD HH:mm', initialValue: task.reminder || '' });
+					if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+				});
+			});
+
+			// Tags editor modal
+			taskItemMenu.addItem((item) => {
+				item.setTitle(t("tags"));
+				item.setIcon("tag");
+				item.onClick(() => {
+					const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
+						updateTaskItemTags(plugin, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
+					});
+					modal.open();
+				});
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("open-note"));
+			item.setIcon("eye-off");
+			item.onClick(async () => {
+			});
+		});
+		// Note actions submenu
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("contextMenus.task.noteActions"));
+			item.setIcon("file-text");
+
+			const submenu = (item as any).setSubmenu();
+
+			// Get the file for the task
+			const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
+			if (file instanceof TFile) {
+				// Try to populate with Obsidian's native file menu
+				try {
+					// Trigger the file-menu event to populate with default actions
+					plugin.app.workspace.trigger("file-menu", submenu, file, "file-explorer");
+				} catch (error) {
+					console.debug("Native file menu not available, using fallback");
+				}
+
+				// Add common file actions (these will either supplement or replace the native menu)
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.rename"));
+					subItem.setIcon("pencil");
+					subItem.onClick(async () => {
+						try {
+							// Modal-based rename
+							const currentName = file.basename;
+							const newName = await showTextInputModal(plugin.app, {
+								title: t("contextMenus.task.renameTitle"),
+								placeholder: t("contextMenus.task.renamePlaceholder"),
+								initialValue: currentName,
+							});
+
+							if (newName && newName.trim() !== "" && newName !== currentName) {
+								// Ensure the new name has the correct extension
+								const extension = file.extension;
+								const finalName = newName.endsWith(`.${extension}`)
+									? newName
+									: `${newName}.${extension}`;
+
+								// Construct the new path
+								const newPath = file.parent
+									? `${file.parent.path}/${finalName}`
+									: finalName;
+
+								// Rename the file
+								await plugin.app.vault.rename(file, newPath);
+								new Notice(
+									t("contextMenus.task.notices.renameSuccess") + finalName,
+
+								);
+
+								// // Trigger update callback
+								// if (options.onUpdate) {
+								// 	options.onUpdate();
+								// }
+							}
+						} catch (error) {
+							console.error("Error renaming file:", error);
+							new Notice(t("contextMenus.task.notices.renameFailure"));
+						}
+					});
+				});
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("delete-note"));
+					subItem.setIcon("trash");
+					subItem.onClick(async () => {
+						// Show confirmation and delete
+						const confirmed = await showConfirmationModal(plugin.app, {
+							title: t("contextMenus.task.deleteTitle"),
+							message: t("contextMenus.task.deleteMessage") + file.name,
+							confirmText: t("contextMenus.task.deleteConfirm"),
+							cancelText: t("common.cancel"),
+							isDestructive: true,
+						});
+						if (confirmed) {
+							plugin.app.vault.trash(file, true);
+						}
+					});
+				});
+
+				submenu.addSeparator();
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.copyPath"));
+					subItem.setIcon("copy");
+					subItem.onClick(async () => {
+						try {
+							await navigator.clipboard.writeText(file.path);
+							new Notice(t("contextMenus.task.notices.copyPathSuccess"));
+						} catch (error) {
+							new Notice(t("contextMenus.task.notices.copyFailure"));
+						}
+					});
+				});
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.copyUrl"));
+					subItem.setIcon("link");
+					subItem.onClick(async () => {
+						try {
+							const url = `obsidian://open?vault=${encodeURIComponent(plugin.app.vault.getName())}&file=${encodeURIComponent(file.path)}`;
+							await navigator.clipboard.writeText(url);
+							new Notice(t("contextMenus.task.notices.copyUrlSuccess"));
+						} catch (error) {
+							new Notice(t("contextMenus.task.notices.copyFailure"));
+						}
+					});
+				});
+
+				submenu.addSeparator();
+
+				submenu.addItem((subItem: any) => {
+					subItem.setTitle(t("contextMenus.task.showInExplorer"));
+					subItem.setIcon("folder-open");
+					subItem.onClick(() => {
+						// Reveal file in file explorer
+						plugin.app.workspace
+							.getLeaf()
+							.setViewState({
+								type: "file-explorer",
+								state: {},
+							})
+							.then(() => {
+								// Focus the file in the explorer
+								const fileExplorer =
+									plugin.app.workspace.getLeavesOfType("file-explorer")[0];
+								if (fileExplorer?.view && "revealInFolder" in fileExplorer.view) {
+									(fileExplorer.view as any).revealInFolder(file);
+								}
+							});
+					});
+				});
+			}
+		});
+
+		// // Show minimize or maximize option based on current state
+		// if (columnData.minimized) {
+		// 	taskItemMenu.addItem((item) => {
+		// 		item.setTitle(t("maximize-column"));
+		// 		item.setIcon("panel-left-open");
+		// 		item.onClick(async () => {
+		// 			await handleMinimizeColumn();
+		// 		});
+		// 	});
+		// } else {
+		// 	taskItemMenu.addItem((item) => {
+		// 		item.setTitle(t("minimize-column"));
+		// 		item.setIcon("panel-left-close");
+		// 		item.onClick(async () => {
+		// 			await handleMinimizeColumn();
+		// 		});
+		// 	});
+		// }
+
+		// Use native event if available (React event has nativeEvent property)
+		taskItemMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		// Only allow dragging if this column is of type "namedTag"
-		if (columnData?.colType !== 'namedTag') {
+		console.log("TaskItem : handleDragStart...");
+		if (!columnData) {
 			e.preventDefault();
+			console.warn('handleDragStart: columnData is undefined');
 			return;
 		}
 
-		// Add task data and source column to the dataTransfer object
-		e.dataTransfer.setData('application/json', JSON.stringify({
-			task,
-			sourceColumnData: columnData
-		}));
-
-		// Set visual effect for dragging
-		e.dataTransfer.effectAllowed = 'move';
-
-		// Add dragging class for visual effects
 		setIsDragging(true);
+		// Delegate to manager for standardized behavior (sets current payload and dims element)
+		try {
+			const el = taskItemRef.current as HTMLDivElement;
+			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index, swimlaneData: swimlaneData };
+			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
-		// Define the drag image (optional)
-		if (taskItemRef.current) {
-			// Create a copy of the element for the drag image
-			const rect = taskItemRef.current.getBoundingClientRect();
-			e.dataTransfer.setDragImage(taskItemRef.current, rect.width / 2, 20);
+			// Add dragging class after a small delay to not affect the drag image
+			const clone = el.cloneNode(true) as HTMLDivElement;
+			e.dataTransfer?.setDragImage(el, 0, 0);
+			requestAnimationFrame(() => {
+				clone.classList.add("task-item-dragging");
+				console.log("TaskItem : handleDragStart... done : ", el);
+			});
+
+			// Also set a drag image from the whole task element so the preview is the full card
+			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
+			// if (taskItemRef.current && e.dataTransfer) {
+			// 	console.log("TaskItemRef.current", taskItemRef.current);
+			// 	const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
+			// 	// clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+			// 	clone.style.opacity = '0.5';
+			// 	clone.style.position = 'absolute';
+			// 	// clone.style.top = '-9999px';
+			// 	// document.body.appendChild(clone);
+			// 	const rect = taskItemRef.current.getBoundingClientRect();
+			// 	e.dataTransfer.setDragImage(clone, rect.width, rect.height);
+			// 	setTimeout(() => {
+			// 		try { document.body.removeChild(clone); } catch { }
+			// 	}, 0);
+			// }
+		} catch (err) {
+			// fallback minimal behavior
+			// try {
+			// 	e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
+			// 	e.dataTransfer.effectAllowed = 'move';
+			// } catch (ex) {/* ignore */ }
+
+			console.error(err);
 		}
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
+		console.log("TaskItem : handleDragEnd...");
 		setIsDragging(false);
+
+		// Remove dim effect from this dragged task and clear manager state
+		if (taskItemRef.current) {
+			dragDropTasksManagerInsatance.removeDimFromDraggedTaskItem(taskItemRef.current);
+		}
+
+		// Clear manager drag payload and any styling on columns/task-items
+		dragDropTasksManagerInsatance.clearAllDragStyling();
+		dragDropTasksManagerInsatance.clearCurrentDragData();
 	}, []);
 
 	// ========================================
@@ -674,7 +996,7 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 										if (
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&
-											columnData?.colType === colType.namedTag &&
+											columnData?.colType === colTypeNames.namedTag &&
 											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
 										) {
 											return null;
@@ -714,8 +1036,6 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 								</div>
 
 							</div>
-							{/* Drag Handle */}
-							{/* <div className="taskItemDragBtn" aria-label='Drag the Task Item'><RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} /></div> */}
 						</div>
 					</>);
 			} else {
@@ -976,13 +1296,12 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 				className={`taskItem ${isThistaskCompleted ? 'completed' : ''} ${isDragging ? 'taskItem-dragging' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
-				draggable={columnData?.colType === 'namedTag'}
-				onDragStart={handleDragStart}
-				onDragEnd={handleDragEnd}
 				onDoubleClick={handleDoubleClickOnCard}
+				onContextMenu={handleMenuButtonClicked}
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
+					{/* File Name Section */}
 					<div className="taskItemFileNameSection">
 						{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
 							<div className="taskItemFileName" aria-label={task.filePath}>
@@ -990,7 +1309,35 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 							</div>
 						)}
 					</div>
+
 					{memoizedRenderHeader}
+
+					{/* Drag Handle and Task Menu button */}
+					{plugin.settings.data.globalSettings.experimentalFeatures && (
+						<>
+							{
+								Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
+									<>
+										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+									</>
+								) : (
+									<>
+										{/* Drag Handle */}
+										<div className="taskItemDragBtn"
+											aria-label={t("drag-task-card")}
+											draggable={true}
+											onDragStart={handleDragStart}
+											onDragEnd={handleDragEnd}
+										>
+											<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} />
+										</div>
+									</>
+								)
+							}
+						</>
+					)}
+
+					{/* Task Body */}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
 							<input
@@ -1057,7 +1404,9 @@ const TaskItem: React.FC<TaskProps> = ({ plugin, task, activeBoardSettings, colu
 						)}
 						{memoizedRenderChildTasks}
 					</div>
+
 					{renderFooter()}
+
 				</div>
 			</div>
 		</div>

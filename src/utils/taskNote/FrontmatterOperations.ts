@@ -7,7 +7,7 @@ import {
 	getStatusNameFromStatusSymbol,
 } from "./TaskNoteUtils";
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
-import { generateTaskId } from "src/managers/VaultScanner";
+import { generateTaskId } from "../TaskItemUtils";
 
 /**
  * Extract frontmatter from file content
@@ -282,7 +282,8 @@ export function createFrontmatterFromTask(
 export function updateFrontmatterProperties(
 	plugin: TaskBoard,
 	existingFrontmatter: customFrontmatterCache | undefined,
-	task: taskItem
+	task: taskItem,
+	forceId?: boolean
 ): Partial<customFrontmatterCache> {
 	const frontmatterFormatting: frontmatterFormatting[] =
 		plugin.settings.data.globalSettings.frontmatterFormatting;
@@ -361,16 +362,16 @@ export function updateFrontmatterProperties(
 	);
 
 	// Update or add unique ID
-	if (plugin.settings.data.globalSettings.autoAddUniqueID) {
-		const idKey = getCustomFrontmatterKey("id", frontmatterFormatting);
-		if (!existingFrontmatter?.[idKey]) {
+	const idKey = getCustomFrontmatterKey("id", frontmatterFormatting);
+	if (!existingFrontmatter?.[idKey]) {
+		if (forceId || plugin.settings.data.globalSettings.autoAddUniqueID) {
 			tempUpdates[idKey] = task.legacyId
 				? task.legacyId
 				: generateTaskId(plugin);
-		} else {
-			// Preserve existing ID
-			tempUpdates[idKey] = existingFrontmatter[idKey];
 		}
+	} else {
+		// Preserve existing ID
+		tempUpdates[idKey] = existingFrontmatter[idKey];
 	}
 
 	const statusKey = getCustomFrontmatterKey("status", frontmatterFormatting);

@@ -138,7 +138,7 @@ export enum taskStatuses {
 	secret = "s",
 }
 
-export enum colType {
+export enum colTypeNames {
 	undated = "undated",
 	dated = "dated",
 	namedTag = "namedTag",

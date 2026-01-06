@@ -8,7 +8,6 @@ import {
 	UniversalDateOptions,
 	NotificationService,
 	cardSectionsVisibilityOptions,
-	colType,
 	taskStatuses,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	mapViewBackgrounVariantTypes,
@@ -16,6 +15,7 @@ import {
 	mapViewScrollAction,
 	mapViewArrowDirection,
 	mapViewEdgeType,
+	colTypeNames,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -165,7 +165,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				columns: [
 					{
 						id: 1,
-						colType: colType.undated,
+						colType: colTypeNames.undated,
 						active: true,
 						collapsed: false,
 						name: "Undated Tasks",
@@ -178,7 +178,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 2,
-						colType: colType.dated,
+						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
 						name: "Over Due",
@@ -191,7 +191,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 3,
-						colType: colType.dated,
+						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
 						name: "Today",
@@ -204,7 +204,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 4,
-						colType: colType.dated,
+						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
 						name: "Tomorrow",
@@ -217,7 +217,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 5,
-						colType: colType.dated,
+						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
 						name: "Future",
@@ -230,7 +230,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 6,
-						colType: colType.completed,
+						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
 						limit: 20,
@@ -247,12 +247,21 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					rootCondition: "any",
 					filterGroups: [],
 				},
+				swimlanes: {
+					enabled: false,
+					hideEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: [],
+					maxHeight: "300px",
+					verticalHeaderUI: false,
+				},
 			},
 			{
 				columns: [
 					{
 						id: 7,
-						colType: colType.untagged,
+						colType: colTypeNames.untagged,
 						active: true,
 						collapsed: false,
 						name: "Backlogs",
@@ -260,7 +269,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 8,
-						colType: colType.namedTag,
+						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
 						name: "Important",
@@ -269,7 +278,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 9,
-						colType: colType.namedTag,
+						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
 						name: "WIP",
@@ -278,7 +287,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 11,
-						colType: colType.namedTag,
+						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
 						name: "In Review",
@@ -287,7 +296,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 12,
-						colType: colType.completed,
+						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
 						index: 6,
@@ -304,12 +313,21 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					rootCondition: "any",
 					filterGroups: [],
 				},
+				swimlanes: {
+					enabled: false,
+					hideEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: [],
+					maxHeight: "300px",
+					verticalHeaderUI: false,
+				},
 			},
 			{
 				columns: [
 					{
 						id: 7,
-						colType: colType.taskStatus,
+						colType: colTypeNames.taskStatus,
 						taskStatus: taskStatuses.unchecked,
 						active: true,
 						collapsed: false,
@@ -318,7 +336,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 8,
-						colType: colType.taskStatus,
+						colType: colTypeNames.taskStatus,
 						taskStatus: taskStatuses.scheduled,
 						active: true,
 						collapsed: false,
@@ -327,7 +345,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 9,
-						colType: colType.taskStatus,
+						colType: colTypeNames.taskStatus,
 						taskStatus: taskStatuses.inprogress,
 						active: true,
 						collapsed: false,
@@ -336,7 +354,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 11,
-						colType: colType.taskStatus,
+						colType: colTypeNames.taskStatus,
 						taskStatus: taskStatuses.question,
 						active: true,
 						collapsed: false,
@@ -345,7 +363,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 12,
-						colType: colType.completed,
+						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
 						index: 6,
@@ -354,7 +372,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 					{
 						id: 13,
-						colType: colType.taskStatus,
+						colType: colTypeNames.taskStatus,
 						taskStatus: taskStatuses.dropped,
 						active: true,
 						collapsed: false,
@@ -370,6 +388,15 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				boardFilter: {
 					rootCondition: "any",
 					filterGroups: [],
+				},
+				swimlanes: {
+					enabled: false,
+					hideEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: [],
+					maxHeight: "300px",
+					verticalHeaderUI: false,
 				},
 			},
 		],
@@ -479,6 +506,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				{
 					symbol: taskStatuses.done,
 					name: "Done",
+					nextStatusSymbol: taskStatuses.todo,
+					availableAsCommand: true,
+					type: "DONE",
+				},
+				{
+					symbol: taskStatuses.checked,
+					name: "Completed",
 					nextStatusSymbol: taskStatuses.todo,
 					availableAsCommand: true,
 					type: "DONE",

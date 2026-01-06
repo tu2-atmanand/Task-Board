@@ -3,77 +3,8 @@ import { scanFilters } from "src/interfaces/GlobalSettings";
 import TaskBoard from "main";
 import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskCompleted, isTaskLine } from "../CheckBoxUtils";
-import { getTaskFromId } from "../taskLine/TaskItemUtils";
 import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
-
-/**
- * Scans a file and its front-matter for specific filters.
- * @param plugin The main plugin instance.
- * @param file The file to scan.
- * @param scanFilters The filters to apply.
- * @returns True if the file and its front-matter match the filters for scanning, false otherwise.
- */
-export function scanFilterForFilesNFoldersNFrontmatter(
-	plugin: TaskBoard,
-	file: TFile,
-	scanFilters: scanFilters
-): boolean {
-	// if (allowedFileExtensionsRegEx.test(file.path) === false) {
-	// 	return false; // Only process markdown files
-	// }
-
-	if (
-		scanFilters.files.polarity === 3 &&
-		scanFilters.frontMatter.polarity === 3 &&
-		scanFilters.folders.polarity === 3
-	) {
-		return true;
-	}
-
-	const fileName = file.path; // Extract file name along with the path
-	const parentFolder = file.parent?.path || "";
-
-	if (
-		scanFilters.files.polarity !== 3 &&
-		scanFilters.files.values.length > 0
-	) {
-		const result = checkFileFilters(fileName, scanFilters);
-		if (result !== undefined) {
-			return result;
-		} else {
-			// console.log("This comment should not run");
-			// return false; // If no specific filter matches, default to true
-		}
-	}
-
-	if (
-		scanFilters.frontMatter.polarity !== 3 &&
-		scanFilters.frontMatter.values.length > 0
-	) {
-		const result = checkFrontMatterFilters(plugin, file, scanFilters);
-		if (result !== undefined) {
-			return result;
-		} else {
-			// console.log("This comment should not run");
-			// return false; // If no specific filter matches, default to true
-		}
-	}
-
-	if (
-		scanFilters.folders.polarity !== 3 &&
-		scanFilters.folders.values.length > 0
-	) {
-		const result = checkFolderFilters(parentFolder, scanFilters);
-		if (result !== undefined) {
-			return result;
-		} else {
-			// console.log("This comment should not run");
-			// return false; // If no specific filter matches, default to true
-		}
-	}
-
-	return true;
-}
+import { getTaskFromId } from "../TaskItemUtils";
 
 export function checkFileFilters(
 	fileName: string,
@@ -220,6 +151,81 @@ export function checkFolderFilters(
 	}
 }
 
+/**
+ * Scans a file and its front-matter for specific filters.
+ * @param plugin The main plugin instance.
+ * @param file The file to scan.
+ * @param scanFilters The filters to apply.
+ * @returns True if the file and its front-matter match the filters for scanning, false otherwise.
+ */
+export function scanFilterForFilesNFoldersNFrontmatter(
+	plugin: TaskBoard,
+	file: TFile,
+	scanFilters: scanFilters
+): boolean {
+	// if (allowedFileExtensionsRegEx.test(file.path) === false) {
+	// 	return false; // Only process markdown files
+	// }
+
+	if (
+		scanFilters.files.polarity === 3 &&
+		scanFilters.frontMatter.polarity === 3 &&
+		scanFilters.folders.polarity === 3
+	) {
+		return true;
+	}
+
+	const fileName = file.path; // Extract file name along with the path
+	const parentFolder = file.parent?.path || "";
+
+	if (
+		scanFilters.files.polarity !== 3 &&
+		scanFilters.files.values.length > 0
+	) {
+		const result = checkFileFilters(fileName, scanFilters);
+		if (result !== undefined) {
+			return result;
+		} else {
+			// console.log("This comment should not run");
+			// return false; // If no specific filter matches, default to true
+		}
+	}
+
+	if (
+		scanFilters.frontMatter.polarity !== 3 &&
+		scanFilters.frontMatter.values.length > 0
+	) {
+		const result = checkFrontMatterFilters(plugin, file, scanFilters);
+		if (result !== undefined) {
+			return result;
+		} else {
+			// console.log("This comment should not run");
+			// return false; // If no specific filter matches, default to true
+		}
+	}
+
+	if (
+		scanFilters.folders.polarity !== 3 &&
+		scanFilters.folders.values.length > 0
+	) {
+		const result = checkFolderFilters(parentFolder, scanFilters);
+		if (result !== undefined) {
+			return result;
+		} else {
+			// console.log("This comment should not run");
+			// return false; // If no specific filter matches, default to true
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Check if a task matches the tag filters
+ * @param tags - Array of task tags
+ * @param scanFilters - Object containing filter values
+ * @returns boolean - true if the task matches the filter, false otherwise
+ */
 export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
 	const tagPolarity = scanFilters.tags.polarity;
 	if (tagPolarity === 3) return true;
@@ -294,8 +300,11 @@ export function matchTagsWithWildcards(
 }
 
 /**
- * Verifies if all sub-tasks and child-tasks (dependsOn) of a task are complete.
- * Returns true if no sub-tasks/child-tasks, or all are complete; otherwise false.
+ * Verifies that all sub-tasks in the task body and all child-tasks (dependsOn)
+ * are completed.
+ * @param plugin - The TaskBoard plugin instance
+ * @param task - The task item to verify
+ * @returns A promise that resolves to true if all sub-tasks and child-tasks are completed, false otherwise
  */
 export async function verifySubtasksAndChildtasksAreComplete(
 	plugin: TaskBoard,

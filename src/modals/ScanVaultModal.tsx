@@ -11,7 +11,7 @@ import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
 import { newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { getCurrentLocalTimeString } from "src/utils/TimeCalculations";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
 

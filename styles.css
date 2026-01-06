@@ -356,11 +356,20 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: var(--border-width) solid var(--background-modifier-border);
 }
 
+.swimlaneColumnsWrapper .TaskBoardColumnsSection {
+	margin-right: 0px;
+}
+
+.TaskBoardColumnsSection.swimlaneMode.minimized {
+	justify-content: center;
+	align-items: center;
+}
+
 .taskBoardColumnSecHeader {
 	display: flex;
 	flex-direction: row;
 	padding-block: 5px;
-	background: var(--background-secondary-alt);
+	background: var(--background-modifier-border-hover);
 	justify-content: space-between;
 	align-items: center;
 	padding-inline: 10px;
@@ -424,7 +433,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 12px;
 	display: flex;
 	flex-direction: column;
-	height: auto;
+	/* height: auto; */
 	max-height: 80vh;
 
 	/* Firefox */
@@ -434,6 +443,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	&::-webkit-scrollbar {
 		display: none;
 	}
+}
+
+.tasksContainerNoTasks {
+	color: var(--background-modifier-border-focus) !important;
 }
 
 .taskItemFadeIn {
@@ -488,7 +501,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskBoardColumnMinimizedTitle {
 	writing-mode: vertical-rl;
 	text-orientation: mixed;
-	transform: rotate(0deg);
+	transform: rotate(180deg);
 	color: var(--foreground-primary);
 	font-size: 1.1em;
 	font-weight: 600;
@@ -496,11 +509,67 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex: 1;
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: center;
 }
 
 .TaskBoardColumnsSection:not(.minimized) {
 	transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
+}
+
+/* Drag and Drop Styling */
+
+/* Dragged task item dimming effect */
+.taskItem.task-item-dragging-dimmed {
+	opacity: 0.45;
+	transition: opacity 0.2s ease-in-out;
+}
+
+/* Target column allowed drop styling */
+.TaskBoardColumnsSection .drag-over-allowed {
+	border: 2px solid var(--color-green);
+	box-shadow: 0 0 12px 0 rgba(76, 175, 80, 0.4), inset 0 0 12px 0 rgba(76, 175, 80, 0.1);
+	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+	background-color: var(--background-secondary);
+}
+
+/* Target column not allowed drop styling */
+.TaskBoardColumnsSection .drag-over-not-allowed {
+	border: 2px solid var(--color-red);
+	box-shadow: 0 0 12px 0 rgba(244, 67, 54, 0.4), inset 0 0 12px 0 rgba(244, 67, 54, 0.1);
+	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+	background-color: var(--background-secondary);
+}
+
+/* Insertion placeholder shown when reordering within a manual-order column */
+.task-insert-placeholder {
+	height: 3rem;
+	/* approx 3 rem high as requested */
+	border-radius: 6px;
+	background: linear-gradient(90deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+	margin: 6px 0;
+	transition: height 0.12s ease-in-out, margin 0.12s ease-in-out, opacity 0.12s ease-in-out, transform 0.12s ease-in-out;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px dashed var(--interactive-accent);
+	opacity: 0.98;
+}
+
+.task-insert-placeholder .task-insert-text {
+	color: var(--text-muted);
+	font-weight: 600;
+	font-size: 0.95rem;
+	letter-spacing: 0.2px;
+	padding-inline: 0.6rem;
+}
+
+/* Smooth movement for task items when placeholder is inserted */
+.taskItemFadeIn {
+	transition: transform 0.12s ease-in-out, margin 0.12s ease-in-out;
+}
+
+.tasksContainer .taskItemFadeIn {
+	will-change: transform, margin;
 }
 
 
@@ -521,6 +590,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: var(--border-width) solid var(--background-modifier-border-focus);
 	box-shadow: 0px 4px 10px 0 rgba(0, 0, 0, 0.3);
 	transition: box-shadow 0.3s ease-in-out;
+}
+
+.taskItem .taskItem-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	box-shadow: var(--shadow-l);
 }
 
 .colorIndicator {
@@ -923,16 +998,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-wrap: wrap;
 }
 
-.taskItemTagFrontmatter {
-	background-color: var(--background-modifier-border) !important;
-	border: var(--pill-border-width) solid var(--pill-border-color) !important;
-	border-radius: var(--pill-radius) !important;
-	color: var(--pill-color) !important;
-	cursor: var(--cursor);
-	font-weight: var(--pill-weight);
-	padding: 0 var(--pill-padding-x) !important;
-}
-
 .taskItemTag {
 	/* background-color: var(--tag-background); */
 	/* border: var(--tag-border-width) solid var(--tag-border-color); */
@@ -948,6 +1013,18 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	margin-right: 2px;
 	display: inline-block;
 	white-space: nowrap;
+}
+
+.taskItemTagFrontmatter {
+	font-size: 0.7rem;
+	text-decoration: var(--tag-decoration);
+	background-color: var(--background-modifier-border) !important;
+	border: var(--pill-border-width) solid var(--pill-border-color) !important;
+	border-radius: var(--pill-radius) !important;
+	color: var(--pill-color) !important;
+	cursor: var(--cursor);
+	font-weight: var(--pill-weight);
+	padding: 0 var(--pill-padding-x) !important;
 }
 
 .taskItemUniversalDate {
@@ -1024,17 +1101,21 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	background-color: var(--background-primary-alt);
 	border: none;
 	cursor: grab;
-	padding-block: 2px;
-	padding-inline: 4px;
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 1.2rem;
+	min-width: 1.2rem;
+	/* padding-block: 2px; */
+	/* padding-inline: 4px; */
 	border-radius: 5px;
 	/* margin: 0 5px; */
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	/* display: flex
+	; */
+	/* align-items: center; */
+	/* justify-content: center; */
 	font-size: 1.2em;
-	/* Adjust size as needed */
 	transition: transform 0.2s;
-	/* Animation for hover effect */
 }
 
 .taskItemDragBtn:hover {
@@ -1911,10 +1992,16 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding: 4px;
 }
 
+.boardConfigModalColumnRow.Hidden {
+	opacity: 50%;
+}
+
 .boardConfigModalColumnRowDragButton {
 	cursor: grab;
 	align-self: center;
-	min-width: 25px;
+	min-width: 30px;
+	min-height: max-content;
+	opacity: 50%;
 }
 
 .boardConfigModalColumnRowEyeButton,
@@ -1922,6 +2009,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	cursor: pointer;
 	min-width: fit-content;
 	align-self: center !important;
+}
+
+.boardConfigModalColumnRowDeleteButton:hover {
+	color: var(--text-error);
 }
 
 .boardConfigModalAddColumnButton {
@@ -5399,6 +5490,10 @@ svg.react-flow__connectionline {
 	padding-inline: 5px !important;
 }
 
+.configureColumnSortingModalHomeSortingCriteriaListItemNotice .setting-item-description {
+	color: var(--background-modifier-error);
+}
+
 .configureColumnSortingModalHomeAddSortingBtn {
 	width: 100%;
 	margin-top: 1rem;
@@ -6101,4 +6196,998 @@ svg.react-flow__connectionline {
 /* FIX : Recent lucide added some weired margin on right */
 .lucide {
 	margin-right: 0px !important;
+}
+
+/* ===================================================
+   Swimlanes Config Modal Styles
+=================================================== */
+
+.swimlanes-config-modal {
+	width: auto;
+	min-height: auto;
+	max-width: 600px;
+	border-radius: var(--modal-radius);
+}
+
+.swimlanesConfigContent {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 0;
+}
+
+.swimlanesConfigSection {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.swimlanesConfigSection h2 {
+	margin: 0;
+	font-size: 1.5em;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.swimlanesConfigItem {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 15px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--divider-color);
+}
+
+.swimlanesConfigItem:last-of-type {
+	border-bottom: none;
+}
+
+.swimlanesConfigLabel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.swimlanesConfigLabel label {
+	font-weight: 500;
+	color: var(--text-normal);
+	font-size: 0.95em;
+}
+
+.swimlanesConfigDescription {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	line-height: 1.4;
+}
+
+.swimlanesConfigLabel+input[type="checkbox"],
+.swimlanesConfigLabel+select,
+.swimlanesConfigLabel+input[type="text"] {
+	flex-shrink: 0;
+	align-self: center;
+}
+
+input[type="checkbox"].swimlanesConfigCheckbox {
+	cursor: pointer;
+	width: 18px;
+	height: 18px;
+}
+
+.swimlanesConfigSelect,
+.swimlanesConfigInput,
+.swimlanesConfigSortRowInput {
+	padding: 8px 12px;
+	border: 1px solid var(--input-border-color);
+	border-radius: 4px;
+	background-color: var(--input-background-color);
+	color: var(--text-normal);
+	font-size: 0.9em;
+	font-family: inherit;
+	min-width: 200px;
+	transition: border-color 0.15s ease;
+}
+
+.swimlanesConfigSelect:hover,
+.swimlanesConfigInput:hover,
+.swimlanesConfigSortRowInput:hover {
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigSelect:focus,
+.swimlanesConfigInput:focus,
+.swimlanesConfigSortRowInput:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+/* Manual Sorting Mapping Section */
+.swimlanesConfigManualSortSection {
+	margin-top: 10px;
+	padding: 15px;
+	background-color: var(--background-secondary);
+	border-radius: 6px;
+	border: 1px solid var(--divider-color);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.swimlanesConfigManualSortHeading {
+	margin: 0;
+	font-size: 1.1em;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.swimlanesConfigManualSortDescription {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	line-height: 1.5;
+	margin: 0;
+}
+
+.swimlaneConfigsManualSortContainer {
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--divider-color);
+}
+
+/* Sortable List */
+.swimlanesConfigSortRowsList {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 40px;
+}
+
+.swimlanesConfigSortRow {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--input-border-color);
+	border-radius: 4px;
+	transition: all 0.15s ease;
+	cursor: move;
+}
+
+.swimlanesConfigSortRow:hover {
+	border-color: var(--interactive-accent);
+	background-color: var(--background-secondary);
+}
+
+.swimlanesConfigSortRowDragHandle {
+	flex-shrink: 0;
+	cursor: grab;
+	color: var(--text-muted);
+	transition: color 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesConfigSortRowDragHandle:hover {
+	color: var(--interactive-accent);
+}
+
+.swimlanesConfigSortRow:active .swimlanesConfigSortRowDragHandle {
+	cursor: grabbing;
+	color: var(--interactive-accent);
+}
+
+.swimlanesConfigSortRowIndex {
+	flex-shrink: 0;
+	min-width: 35px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--background-secondary);
+	border-radius: 3px;
+	font-weight: 600;
+	color: var(--text-accent);
+	font-size: 0.9em;
+	border: 1px solid var(--divider-color);
+}
+
+.swimlanesConfigSortRowInput {
+	flex: 1;
+	min-width: 0;
+	padding: 8px 10px;
+	min-height: 32px;
+}
+
+.swimlanesConfigSortRowDeleteBtn {
+	flex-shrink: 0;
+	cursor: pointer;
+	color: var(--text-muted);
+	transition: color 0.15s ease;
+	padding: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesConfigSortRowDeleteBtn:hover {
+	color: var(--text-error);
+}
+
+/* Sortable Ghost/Drag States */
+.swimlanesConfigSortRowGhost {
+	opacity: 0.5;
+	background-color: var(--background-tertiary);
+}
+
+.swimlanesConfigSortRowChosen {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigSortRowDrag {
+	opacity: 0.7;
+	transform: scale(0.98);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Add Row Button */
+.swimlanesConfigAddSortRowBtn {
+	padding: 10px 14px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: 1px solid var(--interactive-accent);
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 0.9em;
+	transition: all 0.15s ease;
+	align-self: flex-start;
+	margin-top: 4px;
+}
+
+.swimlanesConfigAddSortRowBtn:hover {
+	opacity: 0.9;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigAddSortRowBtn:active {
+	transform: scale(0.98);
+}
+
+/* Action Buttons Container */
+.swimlanesConfigButtonsContainer {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+	padding: 15px 20px;
+	border-top: 1px solid var(--divider-color);
+	background-color: var(--background-secondary);
+	border-radius: 0 0 var(--modal-radius) var(--modal-radius);
+}
+
+.swimlanesConfigBtn {
+	padding: 10px 20px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 0.9em;
+	border: 1px solid var(--input-border-color);
+	transition: all 0.15s ease;
+	font-family: inherit;
+}
+
+.swimlanesConfigBtnSave {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigBtnSave:hover {
+	opacity: 0.9;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.swimlanesConfigBtnSave:active {
+	transform: scale(0.98);
+}
+
+.swimlanesConfigBtnCancel {
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border-color: var(--input-border-color);
+}
+
+.swimlanesConfigBtnCancel:hover {
+	background-color: var(--background-secondary);
+	border-color: var(--interactive-accent);
+}
+
+.swimlanesConfigBtnCancel:active {
+	transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.swimlanes-config-modal {
+		max-width: 90vw;
+	}
+
+	.swimlanesConfigSection {
+		padding: 15px;
+	}
+
+	.swimlanesConfigButtonsContainer {
+		padding: 12px 15px;
+		flex-direction: column-reverse;
+	}
+
+	.swimlanesConfigBtn {
+		width: 100%;
+	}
+
+	.swimlanesConfigSelect,
+	.swimlanesConfigInput,
+	.swimlanesConfigSortRowInput {
+		min-width: auto;
+		width: 100%;
+	}
+
+	.swimlanesConfigItem {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.swimlanesConfigItem input[type="checkbox"] {
+		align-self: flex-start;
+		margin-top: 5px;
+	}
+
+	.swimlanesConfigSortRow {
+		flex-wrap: wrap;
+	}
+
+	.swimlanesConfigSortRowInput {
+		order: 3;
+		width: 100%;
+	}
+}
+
+/* ============================================
+   KANBAN SWIMLANES VIEW STYLES
+   ============================================ */
+
+.kanbanSwimlanesGrid {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	gap: 0;
+	background-color: var(--background-primary);
+}
+
+.swimlanesHeaderContainer {
+	width: fit-content;
+	height: 2rem;
+	margin-bottom: 5px;
+	position: sticky;
+	top: 0;
+	z-index: 20;
+}
+
+.swimlanesHeaderContainer.verticalUI {
+	margin-left: 2rem;
+}
+
+.swimlanesHeaderRow {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+}
+
+.swimlanesHeaderRow .TaskBoardColumnsSection {
+	margin-right: 0px;
+}
+
+.swimlanesHeaderRow .TaskBoardColumnsSection .taskBoardColumnSecHeader {
+	background: transparent;
+	border: 1px solid var(--background-modifier-border-focus);
+}
+
+.swimlanesRowLabel {
+	background-color: var(--background-tertiary);
+	border-right: 1px solid var(--divider-color);
+	padding: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	font-size: 0.85em;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.swimlanesColumnHeader {
+	background-color: var(--background-secondary);
+	border-right: 1px solid var(--divider-color);
+	padding: 12px;
+	font-weight: 600;
+	color: var(--text-normal);
+	font-size: 0.95em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: background-color 0.15s ease;
+}
+
+.swimlanesColumnHeader:hover {
+	background-color: var(--background-tertiary);
+}
+
+/* Container for all swimlane rows */
+.swimlanesContainer {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow-y: auto;
+	gap: 2px;
+	padding: 2px;
+	background-color: var(--background-primary);
+}
+
+/* Individual swimlane row */
+.swimlaneRow {
+	display: flex;
+	flex-direction: column;
+	gap: var(--swimlane-gap, 1px);
+	background-color: var(--background-primary);
+	padding: 0;
+	transition: background-color 0.15s ease;
+	width: max-content;
+	margin-bottom: 5px;
+}
+
+.swimlaneRow.minimized {
+	display: flex;
+	flex-direction: column;
+	gap: var(--swimlane-gap, 1px);
+	background-color: var(--background-primary);
+	padding: 0;
+	margin-bottom: 5px;
+	position: sticky;
+	left: 0;
+	z-index: 5;
+	width: 100%;
+	transition: background-color 0.15s ease;
+}
+
+.swimlaneRow.verticalUI {
+	display: flex;
+	flex-direction: row;
+}
+
+.swimlaneRow.verticalUI.minimized {
+	min-height: 2rem;
+	min-width: 100%;
+	position: sticky;
+	left: 0;
+}
+
+/* First swimlane row - make headers sticky */
+.swimlaneRow:first-of-type .taskBoardColumnSecHeader {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: var(--background-secondary);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.swimlaneRow:hover {
+	background-color: rgba(var(--interactive-accent-rgb), 0.02);
+}
+
+.swimlaneHeaderContainer {
+	position: sticky;
+	display: flex;
+	background-color: var(--background-modifier-border-hover);
+	border-right: 1px solid var(--divider-color);
+	left: 0;
+	z-index: 5;
+	width: 100%;
+	flex-direction: row;
+	height: 2rem;
+}
+
+.swimlaneHeaderContainer-vertical {
+	position: sticky;
+	background-color: var(--background-modifier-border-hover);
+	border-bottom: 1px solid var(--divider-color);
+	left: 0;
+	z-index: 5;
+	min-width: 2rem;
+	max-width: 2rem;
+	padding-block: 1rem;
+	min-height: 200px;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical {
+	min-width: 100%;
+	max-width: max-content;
+	padding-block: 0;
+	min-height: 2rem;
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+}
+
+.swimlaneHeader {
+	position: sticky;
+	left: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 600;
+	padding-block: 1rem;
+	color: var(--text-normal);
+	font-size: 0.9em;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-height: 100%;
+	flex-direction: row;
+}
+
+.swimlaneHeader-vertical {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 600;
+	/* margin-block: 1rem; */
+	color: var(--text-normal);
+	font-size: 0.9em;
+	text-align: center;
+	white-space: nowrap;
+	/* overflow: hidden; */
+	text-overflow: ellipsis;
+	min-height: 100%;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 1rem;
+}
+
+/* Swimlane label on the left */
+.swimlaneLabel {
+	font-weight: 600;
+	color: var(--text-normal);
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-word;
+	z-index: 5;
+}
+
+.swimlaneLabel-vertical {
+	font-weight: 600;
+	color: var(--text-normal);
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-word;
+	z-index: 5;
+	transform: rotate(270deg);
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneLabel-vertical {
+	transform: rotate(0deg);
+
+	transition: transform 0.3s ease-in-out;
+}
+
+.swimlaneHeaderSwimlaneCount {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 1rem;
+	padding-inline: 7px;
+	margin-left: 1rem;
+}
+
+.swimlaneHeaderSwimlaneCount-vertical {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 1rem;
+	padding-inline: 7px;
+}
+
+/* Wrapper for all columns in a swimlane */
+.swimlaneColumnsWrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 5px
+}
+
+/* Column within swimlane - applies to Column component */
+.swimlaneRow .columnsContainer {
+	display: contents;
+}
+
+.swimlaneRow>.column {
+	border-right: 1px solid var(--divider-color);
+	border-bottom: none;
+	min-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background-color: var(--background-primary);
+}
+
+.swimlaneRow>.column:hover {
+	background-color: rgba(var(--interactive-accent-rgb), 0.02);
+}
+
+/* Empty swimlane message */
+.emptyBoardMessage {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 300px;
+	color: var(--text-muted);
+	font-size: 1em;
+	padding: 20px;
+	text-align: center;
+	background-color: var(--background-secondary);
+	border-radius: 6px;
+	margin: 20px;
+}
+
+/* Element being dragged: dim / scale */
+.task-item-dragging,
+.taskItemContainer.task-item-dragging,
+.taskItem.task-item-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Drop indicator (card) - rectangular indicator positioned absolutely inside cards container */
+.taskboard-drop-indicator {
+	position: absolute;
+	background-color: var(--interactive-accent);
+	border-radius: 4px;
+	pointer-events: none;
+	z-index: 10000;
+	transition: top 0.08s ease, left 0.08s ease, width 0.08s ease;
+	display: none;
+}
+
+.taskboard-drop-indicator.is-visible {
+	display: block;
+}
+
+/* Card drop indicator horizontal */
+.taskboard-drop-indicator {
+	height: 6px;
+	box-shadow: 0 0 8px var(--interactive-accent);
+}
+
+/* Board and cards containers should be positioning contexts */
+.TaskBoardColumnsSection {
+	position: relative;
+}
+
+/* Smooth transitions for columns/cards */
+.TaskBoardColumnsSection {
+	transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.taskItem {
+	transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+/* Highlight effect when dropped */
+@keyframes kanban-drop-highlight {
+	0% {
+		box-shadow: 0 0 0 3px var(--interactive-accent);
+	}
+
+	100% {
+		box-shadow: none;
+	}
+}
+
+.taskboard-just-dropped {
+	animation: kanban-drop-highlight 0.45s ease-out;
+}
+
+/* Dimming helper used by manager */
+.task-item-dragging-dimmed {
+	opacity: 0.45 !important;
+	filter: blur(0.0px);
+}
+
+/* Slightly different visual for task item drag handle */
+.taskItemDragBtn {
+	cursor: grab;
+}
+
+/* Swimlane minimize/expand animations */
+.swimlaneColumnsWrapper {
+	overflow: hidden;
+	transition: max-height 260ms ease;
+}
+
+.swimlaneRow.minimized .swimlaneColumnsWrapper {
+	max-height: 0px !important;
+	max-width: 0px !important;
+}
+
+.swimlaneHeaderContainerMinimizICon {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	padding: 0 6px;
+}
+
+.swimlaneHeaderContainerMinimizICon svg {
+	width: 14px;
+	height: 14px;
+}
+
+
+/* -----------------------------------------------------
+Date picker modal styles 
+-------------------------------------------------------*/
+
+
+/* Date Picker Component Styles */
+.date-picker-root-container {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-width: 500px;
+	max-width: 600px;
+}
+
+.date-picker-root-container .date-picker-main-panel {
+	display: flex;
+	gap: var(--size-2-3);
+	padding: var(--size-2-3);
+}
+
+.date-picker-root-container .date-picker-left-panel {
+	flex: 1;
+	min-width: 200px;
+	border-right: 1px solid var(--background-modifier-border);
+}
+
+.date-picker-root-container .date-picker-right-panel {
+	flex: 1;
+	min-width: 250px;
+}
+
+.date-picker-root-container .date-picker-section-title {
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-bold);
+	margin-bottom: var(--size-4-2);
+	color: var(--text-normal);
+}
+
+/* Quick Options Styles */
+.date-picker-root-container .quick-options-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-1);
+	max-height: 195px;
+	overflow: auto;
+	overflow-x: hidden;
+}
+
+.date-picker-root-container .quick-option-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--size-2-2) var(--size-4-2);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.date-picker-root-container .quick-option-item:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.date-picker-root-container .quick-option-item.selected {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.date-picker-root-container .quick-option-item.clear-option {
+	border-top: 1px solid var(--background-modifier-border);
+	margin-top: var(--size-2-2);
+	padding-top: var(--size-2-3);
+	color: var(--text-error);
+}
+
+.date-picker-root-container .quick-option-item.clear-option:hover {
+	color: var(--text-on-accent);
+	background-color: var(--background-modifier-error-hover);
+}
+
+.date-picker-root-container .quick-option-label {
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
+}
+
+.date-picker-root-container .quick-option-date {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	font-family: var(--font-monospace);
+}
+
+.date-picker-root-container .quick-option-item.selected .quick-option-date {
+	color: var(--text-on-accent);
+}
+
+/* Calendar Styles */
+.date-picker-root-container .calendar-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.date-picker-root-container .calendar-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: var(--size-4-2);
+	padding: 0 var(--size-2-2);
+}
+
+.date-picker-root-container .calendar-nav-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--radius-s);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.date-picker-root-container .calendar-nav-btn:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.date-picker-root-container .calendar-month-year {
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-bold);
+	color: var(--text-normal);
+}
+
+.date-picker-root-container .calendar-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 1px;
+	background-color: var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	overflow: hidden;
+}
+
+.date-picker-root-container .calendar-day-header {
+	background-color: var(--background-secondary);
+	padding: var(--size-2-2);
+	text-align: center;
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-bold);
+	color: var(--text-muted);
+}
+
+.date-picker-root-container .calendar-day {
+	background-color: var(--background-primary);
+	padding: var(--size-2-2);
+	text-align: center;
+	font-size: var(--font-ui-small);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+	min-height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.date-picker-root-container .calendar-day:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.date-picker-root-container .calendar-day.other-month {
+	color: var(--text-faint);
+	background-color: var(--background-secondary);
+}
+
+.date-picker-root-container .calendar-day.today {
+	background-color: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
+	font-weight: var(--font-bold);
+}
+
+.date-picker-root-container .calendar-day.selected {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-weight: var(--font-bold);
+}
+
+.date-picker-root-container .calendar-day.today.selected {
+	background-color: var(--interactive-accent);
+	box-shadow: inset 0 0 0 2px var(--text-on-accent);
+}
+
+/* Popover Styles */
+.date-picker-popover.tg-menu {
+	z-index: 20;
+	position: fixed;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	box-shadow: var(--shadow-l);
+	max-height: 80vh;
+	overflow: auto;
+}
+
+.date-picker-popover.tg-menu .date-picker-popover-content {
+	padding: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+	.date-picker-root-container .date-picker-main-panel {
+		flex-direction: column;
+		gap: var(--size-4-2);
+	}
+
+	.date-picker-root-container .date-picker-left-panel {
+		border-right: none;
+		border-bottom: 1px solid var(--background-modifier-border);
+		padding-right: 0;
+		padding-bottom: var(--size-4-2);
+	}
+
+	.date-picker-root-container {
+		min-width: 300px;
+		max-width: 400px;
+	}
+
+	.date-picker-root-container .calendar-day {
+		min-height: 40px;
+		font-size: var(--font-ui-medium);
+	}
+}
+
+/* Widget Error Styles */
+.date-picker-root-container .date-picker-widget-error {
+	color: var(--text-error);
+	background-color: var(--background-modifier-error);
+	padding: var(--size-2-1) var(--size-2-2);
+	border-radius: var(--radius-s);
+	font-size: var(--font-ui-smaller);
 }
