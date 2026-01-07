@@ -495,13 +495,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					type: "IN_PROGRESS",
 				},
 				{
-					symbol: defaultTaskStatuses.dropped,
-					name: "Cancelled",
-					nextStatusSymbol: defaultTaskStatuses.done,
-					availableAsCommand: true,
-					type: "CANCELLED",
-				},
-				{
 					symbol: defaultTaskStatuses.done,
 					name: "Done",
 					nextStatusSymbol: defaultTaskStatuses.todo,
@@ -514,6 +507,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					nextStatusSymbol: defaultTaskStatuses.todo,
 					availableAsCommand: true,
 					type: "DONE",
+				},
+				{
+					symbol: defaultTaskStatuses.dropped,
+					name: "Cancelled",
+					nextStatusSymbol: defaultTaskStatuses.done,
+					availableAsCommand: true,
+					type: "CANCELLED",
 				},
 			],
 			compatiblePlugins: {

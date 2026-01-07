@@ -264,7 +264,7 @@
                 "uid": "k6wjlc63"
               }
             ],
-            "minimized": true
+            "minimized": false
           },
           {
             "id": 2485661779,
@@ -317,10 +317,9 @@
             "tasksIdManualOrder": [
               "378",
               "247",
-              "258",
               "355",
-              "375",
-              "371"
+              "258",
+              "375"
             ]
           },
           {
@@ -510,7 +509,7 @@
         },
         "taskCount": {
           "pending": 65,
-          "completed": 19
+          "completed": 20
         },
         "swimlanes": {
           "enabled": true,
@@ -534,9 +533,7 @@
           ],
           "groupAllRest": true,
           "verticalHeaderUI": true,
-          "minimized": [
-            "Tags: All rest"
-          ]
+          "minimized": []
         }
       },
       {
@@ -611,13 +608,7 @@
                 "uid": "pn3wvwal"
               }
             ],
-            "tasksIdManualOrder": [
-              "375",
-              "258",
-              "355",
-              "378",
-              "247"
-            ]
+            "tasksIdManualOrder": []
           },
           {
             "colType": "namedTag",
@@ -694,8 +685,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 65,
-          "completed": 19
+          "pending": 8,
+          "completed": 1
         },
         "swimlanes": {
           "enabled": false,
@@ -819,25 +810,53 @@
       "openOnStartup": false,
       "customStatuses": [
         {
-          "symbol": "P",
-          "name": "pro",
+          "symbol": " ",
+          "name": "incomplete",
           "nextStatusSymbol": "x",
           "availableAsCommand": false,
           "type": "TODO"
         },
         {
-          "symbol": "C",
-          "name": "con",
-          "nextStatusSymbol": "x",
-          "availableAsCommand": false,
-          "type": "TODO"
-        },
-        {
-          "symbol": "|",
-          "name": "temp",
+          "symbol": "X",
+          "name": "complete",
           "nextStatusSymbol": " ",
           "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "/",
+          "name": "In Progress",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": true,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "-",
+          "name": "Cancelled",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": true,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": ">",
+          "name": "deferred",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
           "type": "TODO"
+        },
+        {
+          "symbol": "!",
+          "name": "Important",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "x",
+          "name": "Finished",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
         }
       ],
       "showTaskWithoutMetadata": true,
@@ -873,14 +892,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 378,
+      "uniqueIdCounter": 380,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 1,
+        "boardIndex": 2,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 0
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
