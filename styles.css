@@ -2514,6 +2514,18 @@ li:hover .taskboard-hidden-property {
 	align-self: end;
 }
 
+.custom-status-field-status-pill.done {
+	background-color: var(--color-green) !important;
+	border-color: var(--color-green) !important;
+	color: var(--color-base-10) !important;
+}
+
+.custom-status-field-status-pill.cancelled {
+	background-color: var(--color-red) !important;
+	border-color: var(--color-red) !important;
+	color: var(--color-base-10) !important;
+}
+
 .custom-status-buttons {
 	display: flex;
 	gap: 8px;

@@ -495,13 +495,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					type: "IN_PROGRESS",
 				},
 				{
-					symbol: defaultTaskStatuses.dropped,
-					name: "Cancelled",
-					nextStatusSymbol: defaultTaskStatuses.done,
-					availableAsCommand: true,
-					type: "CANCELLED",
-				},
-				{
 					symbol: defaultTaskStatuses.done,
 					name: "Done",
 					nextStatusSymbol: defaultTaskStatuses.todo,
@@ -514,6 +507,13 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					nextStatusSymbol: defaultTaskStatuses.todo,
 					availableAsCommand: true,
 					type: "DONE",
+				},
+				{
+					symbol: defaultTaskStatuses.dropped,
+					name: "Cancelled",
+					nextStatusSymbol: defaultTaskStatuses.done,
+					availableAsCommand: true,
+					type: "CANCELLED",
 				},
 			],
 			compatiblePlugins: {
@@ -604,7 +604,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 				{
 					index: 12,
-					property: taskItemKeyToNameMapping["cancelledDate"],
+					property: taskItemKeyToNameMapping["completion"],
 					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
 					taskItemKey: "cancelledDate",
 				},
@@ -627,12 +627,12 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.taskLocation,
 				// 	taskItemKey: "taskLocation",
 				// },
-				{
-					index: 14,
-					property: taskItemKeyToNameMapping["dateModified"],
-					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
-					taskItemKey: "",
-				},
+				// {
+				// 	index: 14,
+				// 	property: taskItemKeyToNameMapping["dateModified"],
+				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
+				// 	taskItemKey: "",
+				// },
 			],
 			showFileNameInCard: false,
 			showFrontmatterTagsOnCards: false,

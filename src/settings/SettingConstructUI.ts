@@ -36,6 +36,8 @@ import {
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
+	defaultTaskStatuses,
+	statusTypeNames,
 } from "src/interfaces/Enums";
 import {
 	frontmatterFormatting,
@@ -1079,7 +1081,9 @@ export class SettingsManager {
 
 				// Status Type
 				rightSideContainer.createDiv({
-					cls: "custom-status-field-status-pill",
+					cls: `custom-status-field-status-pill${
+						status.type === statusTypeNames.DONE ? " done" : ""
+					}${status.type === statusTypeNames.CANCELLED ? " cancelled" : ""}`,
 					text: status.type,
 				});
 
