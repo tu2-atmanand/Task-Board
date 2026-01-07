@@ -398,7 +398,7 @@ const en: Lang = {
 	"folder-for-archived-task-notes": "Folder for archived task notes",
 	"folder-for-archived-task-notes-description": "Enter the folder path where all your archived task note or tb notes should be moved.",
 	"frontmatter-formatting": "Frontmatter formatting",
-	"frontmatter-formatting-description": "The default properties which you see below are the supported properties for a task. You are free to ",
+	"frontmatter-formatting-description": "Below is the mapping of the task properties supported by this plugin and the frontmatter key name for the corresponding property. This is useful, if you already have task-notes created by other plugin or normal notes with existing properties, which you want task board to pick up as tasks properties. Some of this properties like 'task location' will be available after the 'tb notes' feature has been implemented.",
 	"add-sticky-note": "Add sticky note",
 	"under-development-feature-message": "This feature is under development and will be released in the next version.",
 	"background-style": "Background style",

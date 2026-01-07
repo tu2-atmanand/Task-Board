@@ -1325,7 +1325,7 @@ const TaskItem: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activ
 									<>
 										{/* Drag Handle */}
 										<div className="taskItemDragBtn"
-											aria-label={t("drag-task-card")}
+											// aria-label={t("drag-task-card")}
 											draggable={true}
 											onDragStart={handleDragStart}
 											onDragEnd={handleDragEnd}
