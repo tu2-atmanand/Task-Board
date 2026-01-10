@@ -316,7 +316,6 @@
             ],
             "tasksIdManualOrder": [
               "378",
-              "247",
               "355",
               "258",
               "375"
@@ -508,8 +507,8 @@
           ]
         },
         "taskCount": {
-          "pending": 65,
-          "completed": 20
+          "pending": 61,
+          "completed": 18
         },
         "swimlanes": {
           "enabled": true,
@@ -608,7 +607,13 @@
                 "uid": "pn3wvwal"
               }
             ],
-            "tasksIdManualOrder": []
+            "tasksIdManualOrder": [
+              "375",
+              "378",
+              "258",
+              "355",
+              "365"
+            ]
           },
           {
             "colType": "namedTag",
@@ -685,8 +690,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 8,
-          "completed": 1
+          "pending": 55,
+          "completed": 18
         },
         "swimlanes": {
           "enabled": false,
@@ -767,43 +772,48 @@
       "tagColors": [
         {
           "name": "Bug",
-          "color": "rgba(253, 17, 33, 0.75)",
+          "color": "rgba(131, 10, 18, 0.84)",
           "priority": 1
         },
         {
           "name": "feat",
-          "color": "#b50df2f2",
+          "color": "rgba(115, 15, 151, 0.9490196078431372)",
           "priority": 3
         },
         {
           "name": "Test",
-          "color": "rgba(134, 150, 14, 1)",
+          "color": "rgba(142, 157, 24, 1)",
           "priority": 4
         },
         {
           "name": "working",
-          "color": "rgba(34, 149, 25, 1)",
+          "color": "rgba(22, 85, 17, 1)",
           "priority": 5
         },
         {
           "name": "New",
-          "color": "#2e74ff",
+          "color": "rgba(16, 50, 117, 1)",
           "priority": 6
         },
         {
           "name": "pending",
-          "color": "#955cff",
+          "color": "rgba(64, 20, 144, 1)",
           "priority": 7
         },
         {
           "name": "done",
-          "color": "rgba(6, 255, 173, 1)",
+          "color": "rgba(14, 117, 84, 1)",
           "priority": 7
         },
         {
           "name": "*/seeding/*",
-          "color": "rgba(47, 147, 137, 1)",
+          "color": "rgba(15, 121, 110, 1)",
           "priority": 8
+        },
+        {
+          "name": "first",
+          "color": "rgba(13, 103, 37, 1)",
+          "priority": 9
         }
       ],
       "editButtonAction": "popUp",
@@ -859,8 +869,8 @@
           "type": "DONE"
         }
       ],
-      "showTaskWithoutMetadata": true,
-      "tagColorsType": "background",
+      "showTaskWithoutMetadata": false,
+      "tagColorsType": "text",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": true,
@@ -892,14 +902,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 380,
+      "uniqueIdCounter": 387,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 3,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
@@ -1026,7 +1036,9 @@
         "loadMoreCount": 10,
         "scrollThresholdPercent": 80
       },
-      "safeGuardFeature": true
+      "safeGuardFeature": true,
+      "visiblePropertiesList": [],
+      "taskCardStyle": "Bases"
     }
   }
 }
