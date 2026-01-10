@@ -47,21 +47,35 @@ export enum cardSectionsVisibilityOptions {
 	hideBoth = "hideBoth",
 }
 
-export enum HideableTaskProperty {
+export enum taskPropertiesNames {
+	// These are the main properties stored inside the cache with the exact key name.
 	ID = "id",
+	Title = "title",
+	Body = "body",
+	SubTasks = "subTasks",
+	Description = "description",
+	Status = "status",
+	Priority = "priority",
 	Tags = "tags",
+	Time = "time",
+	Reminder = "reminder",
 	CreatedDate = "createdDate",
 	StartDate = "startDate",
 	ScheduledDate = "scheduledDate",
 	DueDate = "dueDate",
 	CompletionDate = "completionDate",
 	CancelledDate = "cancelledDate",
-	OnCompletion = "on-completion",
-	Priority = "priority",
+	Dependencies = "dependsOn",
+	FilePath = "filePath",
+
+	// These two properties are not stored inside the cache yet.
+	OnCompletion = "onCompletion",
 	Recurring = "recurring",
-	Time = "time",
-	Dependencies = "dependencies",
-	Reminder = "reminder",
+
+	// These are specially added for the UI hide/show properties setting.
+	Checkbox = "checkbox",
+	SubTasksMinimized = "subTasksMinimized",
+	DescriptionMinimized = "descriptionMinimized",
 }
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
@@ -90,7 +104,7 @@ export enum viewTypeNames {
 	map = "map",
 }
 
-export enum taskStatuses {
+export enum defaultTaskStatuses {
 	unchecked = " ",
 	incomplete = " ",
 	pending = " ",
@@ -138,7 +152,17 @@ export enum taskStatuses {
 	secret = "s",
 }
 
-export enum colType {
+export enum statusTypeNames {
+	TODO = "TODO",
+	DONE = "DONE",
+	IN_PROGRESS = "IN_PROGRESS",
+	ON_HOLD = "ON_HOLD",
+	CANCELLED = "CANCELLED",
+	NON_TASK = "NON_TASK",
+	EMPTY = "EMPTY",
+}
+
+export enum colTypeNames {
 	undated = "undated",
 	dated = "dated",
 	namedTag = "namedTag",

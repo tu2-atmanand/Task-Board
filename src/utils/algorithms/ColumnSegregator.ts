@@ -1,25 +1,32 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-
-import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
-import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
-import { colType, UniversalDateOptions } from "src/interfaces/Enums";
+import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
 import { boardFilterer } from "./BoardFilterer";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
+import { getAllTaskTags } from "../TaskItemUtils";
 
-// Function to refresh tasks in any column by calling this utility function
+/**
+ * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
+ *
+ * @param {PluginDataJson} settings - The plugin settings object.
+ * @param {number} activeBoardIndex - The index of the active board.
+ * @param {ColumnData} columnData - The single column configs.
+ * @param {taskJsonMerged | null} allTasks - The collection of all tasks to segregate.
+ * @returns {taskItem[]} - The tasks to display in the column.
+ */
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeBoardIndex: number,
 	columnData: ColumnData,
-	allTasks: taskJsonMerged | null
+	allTasks: taskJsonMerged | null,
+	onBoardDataChange?: (boardData: Board) => void
 ): taskItem[] => {
 	if (activeBoardIndex < 0 || !allTasks) return [];
 
@@ -30,7 +37,7 @@ export const columnSegregator = (
 	const pendingTasks = allTasks.Pending;
 	const completedTasks = allTasks.Completed;
 
-	if (columnData.colType === colType.undated) {
+	if (columnData.colType === colTypeNames.undated) {
 		tasksToDisplay = pendingTasks.filter((task) => {
 			if (
 				columnData.datedBasedColumn?.dateType ===
@@ -49,7 +56,7 @@ export const columnSegregator = (
 				return !task.scheduledDate;
 			}
 		});
-	} else if (columnData.colType === colType.dated) {
+	} else if (columnData.colType === colTypeNames.dated) {
 		const { dateType, from, to } = columnData.datedBasedColumn || {
 			dateType: "due",
 			from: 0,
@@ -147,11 +154,11 @@ export const columnSegregator = (
 
 			return diffDays >= from && diffDays <= to;
 		});
-	} else if (columnData.colType === colType.untagged) {
+	} else if (columnData.colType === colTypeNames.untagged) {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => getAllTaskTags(task).length === 0
 		);
-	} else if (columnData.colType === colType.namedTag) {
+	} else if (columnData.colType === colTypeNames.namedTag) {
 		tasksToDisplay = pendingTasks.filter((task) =>
 			getAllTaskTags(task).some((tag) => {
 				// return (
@@ -166,7 +173,7 @@ export const columnSegregator = (
 				return result !== null;
 			})
 		);
-	} else if (columnData.colType === colType.pathFiltered) {
+	} else if (columnData.colType === colTypeNames.pathFiltered) {
 		// Filter tasks based on their file path
 		if (columnData.filePaths) {
 			// Split the path patterns by comma and trim whitespace
@@ -200,7 +207,7 @@ export const columnSegregator = (
 		} else {
 			tasksToDisplay = [];
 		}
-	} else if (columnData.colType === colType.otherTags) {
+	} else if (columnData.colType === colTypeNames.otherTags) {
 		// 1. Get the current board based on activeBoardIndex index
 		const currentBoard = boardConfigs.find(
 			(board: Board) => board.index === activeBoardIndex
@@ -211,7 +218,7 @@ export const columnSegregator = (
 			currentBoard?.columns
 				.filter(
 					(col: ColumnData) =>
-						col.colType === colType.namedTag && col.coltag
+						col.colType === colTypeNames.namedTag && col.coltag
 				)
 				.map((col: ColumnData) =>
 					col.coltag?.toLowerCase().replace(`#`, "")
@@ -233,11 +240,11 @@ export const columnSegregator = (
 				return result === null;
 			});
 		});
-	} else if (columnData.colType === colType.completed) {
+	} else if (columnData.colType === colTypeNames.completed) {
 		const completedColumnIndex = boardConfigs[
 			activeBoardIndex
 		]?.columns.findIndex(
-			(column: ColumnData) => column.colType === colType.completed
+			(column: ColumnData) => column.colType === colTypeNames.completed
 		);
 		const tasksLimit =
 			boardConfigs[activeBoardIndex]?.columns[completedColumnIndex]
@@ -254,12 +261,12 @@ export const columnSegregator = (
 		// });
 
 		tasksToDisplay = completedTasks.slice(0, tasksLimit);
-	} else if (columnData.colType === colType.taskStatus) {
+	} else if (columnData.colType === colTypeNames.taskStatus) {
 		const allTasks = [...pendingTasks, ...completedTasks];
 		tasksToDisplay = allTasks.filter(
 			(task) => task.status === columnData.taskStatus
 		);
-	} else if (columnData.colType === colType.taskPriority) {
+	} else if (columnData.colType === colTypeNames.taskPriority) {
 		tasksToDisplay = pendingTasks.filter(
 			(task) => task.priority === columnData.taskPriority
 		);
@@ -272,11 +279,73 @@ export const columnSegregator = (
 
 	// Apply column-specific sorting if configured
 	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
-		tasksToDisplay = columnSortingAlgorithm(
-			settings.data.globalSettings.defaultStartTime,
-			tasksToDisplay,
-			columnData.sortCriteria
+		// TODO : This code can be moved inside the ColumnSortingAlgorithm function.
+		// If manualOrder is one of the sorting criteria, apply manual ordering using columnData.tasksIdManualOrder
+		const hasManualOrder = columnData.sortCriteria.some(
+			(c) => c.criteria === "manualOrder"
 		);
+		if (hasManualOrder) {
+			// Ensure tasksIdManualOrder exists
+			if (!Array.isArray(columnData.tasksIdManualOrder)) {
+				columnData.tasksIdManualOrder = [];
+			}
+
+			// Add any new tasks (not present in manual order) to the TOP of the manual order array
+			const currentIds = tasksToDisplay.map((t) => t.id);
+			const missingIds = currentIds.filter(
+				(id) => !columnData.tasksIdManualOrder!.includes(id)
+			);
+			if (missingIds.length > 0) {
+				// Prepend missing ids so newest appear on top
+				columnData.tasksIdManualOrder = [
+					...missingIds,
+					...columnData.tasksIdManualOrder!,
+				];
+			}
+
+			let newTasksIdManualOrder = columnData.tasksIdManualOrder;
+			let currentBoardData = settings.data.boardConfigs[activeBoardIndex];
+
+			let didTasksIdManualOrderChange = false;
+			// Build sorted list based on manual order
+			const idToTask = new Map(tasksToDisplay.map((t) => [t.id, t]));
+			const sorted: taskItem[] = [];
+			for (const id of columnData.tasksIdManualOrder) {
+				const task = idToTask.get(id);
+				if (task) {
+					sorted.push(task);
+				} else {
+					newTasksIdManualOrder.splice(
+						newTasksIdManualOrder.indexOf(id),
+						1
+					);
+					didTasksIdManualOrderChange = true;
+				}
+			}
+
+			// Update the newTasksIdManualOrder inside board data.
+			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
+			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
+				newTasksIdManualOrder;
+			console.log(
+				"columnSegregator...\nNew manual order :",
+				newTasksIdManualOrder,
+				"\nOld manual order :",
+				columnData.tasksIdManualOrder
+			);
+			if (onBoardDataChange && didTasksIdManualOrderChange) {
+				onBoardDataChange(currentBoardData);
+			}
+
+			tasksToDisplay = sorted;
+		} else {
+			// Default algorithm for other criteria
+			tasksToDisplay = columnSortingAlgorithm(
+				settings.data.globalSettings.defaultStartTime,
+				tasksToDisplay,
+				columnData.sortCriteria
+			);
+		}
 	}
 
 	return tasksToDisplay;

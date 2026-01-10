@@ -8,15 +8,36 @@ import {
 	addIdToTaskContent,
 	getFormattedTaskContent,
 } from "src/utils/taskLine/TaskContentFormatter";
-import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskItemUtils";
+import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskLineUtils";
 import { CustomStatus } from "src/interfaces/GlobalSettings";
 import { eventEmitter } from "../EventEmitter";
 
-export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
+export async function isTasksPluginEnabled(plugin: TaskBoard) {
 	try {
 		const tasksPluginO = new TasksPluginApi(plugin);
+		return tasksPluginO.isTasksPluginEnabled();
+	} catch (err) {
+		console.error("Error checking tasks plugin status:", err);
+		return false;
+	}
+}
+
+export async function fetchTasksPluginCustomStatuses(
+	plugin: TaskBoard
+): Promise<boolean> {
+	try {
+		const tasksPluginO = new TasksPluginApi(plugin);
+		console.log(
+			"Tasks Plugin API:",
+			tasksPluginO,
+			"\nIs tasks plugin enabled?",
+			tasksPluginO.isTasksPluginEnabled()
+		);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
+			plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin =
+				true;
+
 			// Define the path to the tasks plugin data.json file
 			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
 
@@ -45,23 +66,21 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			// 	"Fetched custom statuses from tasks plugin:",
 			// 	statuses,
 			// 	"\nTask Board old statuses:",
-			// 	plugin.settings.data.globalSettings.tasksPluginCustomStatuses,
+			// 	plugin.settings.data.globalSettings.customStatuses,
 			// 	"\nCondition :",
 			// 	JSON.stringify(
 			// 		plugin.settings.data.globalSettings
-			// 			.tasksPluginCustomStatuses
+			// 			.customStatuses
 			// 	) !== JSON.stringify(statuses)
 			// );
 
 			// Store it in the plugin settings if there is a difference
 			if (
 				JSON.stringify(
-					plugin.settings.data.globalSettings
-						.tasksPluginCustomStatuses
+					plugin.settings.data.globalSettings.customStatuses
 				) !== JSON.stringify(statuses)
 			) {
-				plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
-					statuses;
+				plugin.settings.data.globalSettings.customStatuses = statuses;
 				await plugin.saveSettings(plugin.settings);
 			}
 		}
@@ -70,7 +89,10 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			"Error fetching custom statuses from tasks plugin:",
 			error
 		);
+
+		return false;
 	}
+	return true;
 }
 
 export async function openTasksPluginEditModal(

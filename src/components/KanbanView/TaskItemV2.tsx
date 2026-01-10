@@ -14,11 +14,11 @@ import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
-import { isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
+import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical } from 'lucide-react';
-import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, colTypeNames } from 'src/interfaces/Enums';
+import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -40,7 +40,7 @@ export interface swimlaneDataProp {
 	value: string;
 }
 
-export interface TaskCardComponentProps {
+export interface TaskProps {
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
@@ -49,19 +49,26 @@ export interface TaskCardComponentProps {
 	swimlaneData?: swimlaneDataProp;
 }
 
-const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, columnIndex, swimlaneData }) => {
+const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, columnIndex, swimlaneData }) => {
+	const globalSettings = plugin.settings.data.globalSettings;
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
 	const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
+	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
 
 	const [isDragging, setIsDragging] = useState(false);
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? false : true);
-
-	const showDescriptionSection = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
+	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
+	useEffect(() => {
+		if (plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks)) {
+			setShowSubtasks(true);
+		} else {
+			setShowSubtasks(false);
+		}
+	}, [plugin.settings.data.globalSettings]);
 
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, plugin));
 	useEffect(() => {
@@ -333,10 +340,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		return null;
 	};
 
-
-	// ========================================
-	// TOGGLE DESCRIPTION FUNCTION
-	// ========================================
 	const toggleDescription = async () => {
 		const status = isDescriptionExpanded;
 		setIsDescriptionExpanded((prev) => !prev);
@@ -981,60 +984,78 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					<>
 						<div className="taskItemHeader">
 							<div className="taskItemHeaderLeft">
-								<div className="taskItemPrio">{task.priority > 0 ? priorityEmojis[task.priority as number] : ''}</div>
+								{/* Render priority */}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
+									<div className="taskItemPriority">
+										<div className={`prioirtyCircle p${task.priority}`}>{task.priority}
+										</div>
+									</div>
+								)}
+
 								{/* Render tags individually */}
-								<div className="taskItemTags">
-									{/* Render line tags (editable) */}
-									{task.tags.map((tag: string) => {
-										const tagName = tag.replace('#', '');
-										const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
-										const tagColor = customTag?.color || `var(--tag-color)`;
-										const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-										const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
+									<div className="taskItemTags">
+										{/* Render line tags (editable) */}
+										{task.tags.map((tag: string) => {
+											const tagName = tag.replace('#', '');
+											const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
+											const tagColor = customTag?.color || null;
+											// const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+											// const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
 
-										// If columnIndex is defined, proceed to get the column
-										if (
-											(!activeBoardSettings?.showColumnTags) &&
-											columnData &&
-											columnData?.colType === colTypeNames.namedTag &&
-											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
-										) {
-											return null;
-										}
+											// If columnIndex is defined, proceed to get the column
+											if (
+												(!activeBoardSettings?.showColumnTags) &&
+												columnData &&
+												columnData?.colType === colTypeNames.namedTag &&
+												tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+											) {
+												return null;
+											}
 
-										const tagKey = `${task.id}-${tag}`;
-										// Render the remaining tags
-										return (
-											<div
-												key={tagKey}
-												className="taskItemTag"
-												style={{
-													color: tagColor,
-													// border: `1px solid ${borderColor}`,
-													backgroundColor: backgroundColor
-												}}
-											>
-												{tag}
-											</div>
-										);
-									})}
+											const tagKey = `${task.id}-${tag}`;
+											// Render the remaining tags
+											return (
+												<div
+													key={tagKey}
+													className="taskItemTag"
+													style={{
+														color: `${tagColor ? 'white' : ''}`,
+														backgroundColor: `${tagColor ? tagColor : ''}`,
+														opacity: `${tagColor ? '0.8' : ''}`
+														// border: `1px solid ${borderColor}`,
+														// backgroundColor: backgroundColor
+													}}
+												>
+													{tag}
+												</div>
+											);
+										})}
 
-									{/* Render frontmatter tags (read-only) */}
-									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
-										const tagKey = `${task.id}-fm-${tag}`;
-										// Render frontmatter tags with different styling
-										return (
-											<div
-												key={tagKey}
-												className="taskItemTagFrontmatter"
-												title="Tag from note frontmatter (read-only)"
-											>
-												{tag}
-											</div>
-										);
-									})}
-								</div>
+										{/* Render frontmatter tags (read-only) */}
+										{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+											const tagKey = `${task.id}-fm-${tag}`;
+											// Render frontmatter tags with different styling
+											return (
+												<div
+													key={tagKey}
+													className="taskItemTagFrontmatter"
+													title="Tag from note frontmatter (read-only)"
+												>
+													{tag}
+												</div>
+											);
+										})}
+									</div>
+								)}
+							</div>
 
+							<div className='taskItemHeaderRight'>
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
+									<div className='taskItemPropertyID'>
+										<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
+									</div>
+								)}
 							</div>
 						</div>
 					</>);
@@ -1061,7 +1082,8 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			const total = allSubTasks.length;
 			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
 
-			const showSubTaskSummaryBar = plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.hideBoth || plugin.settings.data.globalSettings.cardSectionsVisibility === cardSectionsVisibilityOptions.showDescriptionOnly ? true : false;
+			const showSubTaskSummaryBar = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized);
+			console.log("Show subtasks :", showSubtasks, "\nShow subtasks summary :", showSubTaskSummaryBar);
 
 			return (
 				<>
@@ -1155,41 +1177,71 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				return (
 					<>
 						{cardLoadingAnimation ? (
-							<div className='taskItemFooterRefreshingMssg'>Refreshing...</div>
+							<div className='taskItemFooterRefreshingMssg'>{t("refreshing")}</div>
 						) : (
 							<>
-								<div className="taskItemFooter">
-									{/* Conditionally render task.completed or the date/time */}
-									{(task.status === "X" || task.status === "x") && task.completion !== "" ? (
-										<div className='taskItemCompletedDate'>✅ {task.completion}</div>
-									) : (
-										<div className='taskItemFooterDateTimeContainer'>
-											{task?.reminder && task.completion && (
-												<div className='taskItemReminderContainer'>
-													🔔
-												</div>
-											)}
-											{task.time && (
-												<div className='taskItemTimeContainer'>
-													⏰ {task.time}
-												</div>
-											)}
-											{universalDate && (
-
-												<div className='taskItemUniversalDateContainer'>
-													{getUniversalDateEmoji(plugin)} {universalDate}
-												</div>
-											)}
+								<div className="taskItemFooterPropertiesContainer">
+									{/* Conditionally render each property of the task */}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status) && task?.status && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("status")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{getStatusNameFromStatusSymbol(task.status, globalSettings)}</div>
 										</div>
 									)}
-									<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-										<div className="taskItemiconButton taskItemiconButtonEdit">
-											<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time) && task?.time && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("time")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.time}</div>
 										</div>
-										<div className="taskItemiconButton taskItemiconButtonDelete">
-											<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Reminder) && task?.reminder && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("reminder")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.reminder}</div>
 										</div>
-									</div>
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate) && task?.createdDate && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("created")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.createdDate}</div>
+										</div>
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.StartDate) && task?.startDate && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("start")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.startDate}</div>
+										</div>
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate) && task?.scheduledDate && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("scheduled")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.scheduledDate}</div>
+										</div>
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DueDate) && task?.due && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("due")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.due}</div>
+										</div>
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate) && task?.completion && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("completed")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.completion}</div>
+										</div>
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate) && task?.cancelledDate && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("cancelled")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.cancelledDate}</div>
+										</div>
+									)}
+									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
+										<div className="taskItemFooterPropertyContainer">
+											<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
+											<div className='taskItemFooterPropertyContainerValue'>{task.filePath}</div>
+										</div>
+									)}
 								</div>
 							</>
 						)}
@@ -1282,8 +1334,8 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.showHeader, task.tags, activeBoardSettings]);
-	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [task.body, showSubtasks]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.priority, task.tags, activeBoardSettings]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
@@ -1338,43 +1390,51 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 						</>
 					)}
 
-					{/* Task Body */}
+					{/* Task Content */}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
-							<input
-								id={`${task.id}-checkbox`}
-								type="checkbox"
-								checked={false}
-								className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
-								data-task={task.status}
-								dir='auto'
-								onChange={handleMainCheckBoxClick}
-								onClick={(e) => {
-									if (cardLoadingAnimation) {
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox) && (
+								<input
+									id={`${task.id}-checkbox`}
+									type="checkbox"
+									checked={false}
+									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+									data-task={task.status}
+									dir='auto'
+									onChange={handleMainCheckBoxClick}
+									onClick={(e) => {
+										if (cardLoadingAnimation) {
+											e.preventDefault();
+										}
+									}}
+									onDoubleClick={(e) => {
 										e.preventDefault();
-									}
-								}}
-								onDoubleClick={(e) => {
-									e.preventDefault();
-								}}
-								disabled={cardLoadingAnimation}
-								aria-disabled={cardLoadingAnimation}
-								aria-busy={cardLoadingAnimation}
-								readOnly={cardLoadingAnimation}
-							/>
+									}}
+									disabled={cardLoadingAnimation}
+									aria-disabled={cardLoadingAnimation}
+									aria-busy={cardLoadingAnimation}
+									readOnly={cardLoadingAnimation}
+								/>
+							)}
 							<div className="taskItemBodyContent">
 								<div className="taskItemTitle" ref={taskTitleRendererRef} />
-								<div className="taskItemSubTasksSection">
-									{memoizedRenderSubTasks}
-								</div>
+
+								{/* Sub-tasks section */}
+								{(globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) || globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized)) && (
+									<div className="taskItemSubTasksSection">
+										{memoizedRenderSubTasks}
+									</div>
+								)}
 							</div>
 						</div>
+
+
 						{showDescriptionSection && (
 							<div className='taskItemMainBodyDescriptionSectionVisible'>
 								{renderDescriptionSection()}
 							</div>
 						)}
-						{!showDescriptionSection && (
+						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized) && (
 							<div className="taskItemMainBodyDescription">
 								{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
 									<div
@@ -1403,10 +1463,24 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 								</div>
 							</div>
 						)}
-						{memoizedRenderChildTasks}
+
+						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies) && (
+							<>
+								{memoizedRenderChildTasks}
+							</>
+						)}
 					</div>
 
 					{renderFooter()}
+
+					<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+						<div className="taskItemiconButton taskItemiconButtonEdit">
+							<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+						</div>
+						<div className="taskItemiconButton taskItemiconButtonDelete">
+							<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+						</div>
+					</div>
 
 				</div>
 			</div>
@@ -1429,4 +1503,4 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 // 	);
 // });
 
-export default memo(TaskItem);
+export default memo(TaskItemV2);

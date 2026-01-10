@@ -40,9 +40,13 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
-import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
-import { HideableTaskProperty } from "src/interfaces/Enums";
+import {
+	fetchTasksPluginCustomStatuses,
+	isTasksPluginEnabled,
+} from "src/services/tasks-plugin/helpers";
+import { taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
+import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -121,16 +125,19 @@ export default class TaskBoard extends Plugin {
 			// Register the Kanban view
 			this.registerTaskBoardView();
 
-			// Register editor extensions
-			this.registerEditorExtensions();
-
+			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
 
 			// Register status bar element
 			this.registerTaskBoardStatusBar();
 
+			// Register editor extensions
+			this.registerEditorExtensions();
+
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
+
+			dragDropTasksManagerInsatance.setPlugin(this);
 		});
 	}
 
@@ -355,7 +362,7 @@ export default class TaskBoard extends Plugin {
 			// 	"@keyframes task-board-fade-out { from { display: inline !important; opacity: 1; transform: scaleX(1); } to { display: none !important; opacity: 0; transform: scaleX(0.8); } }";
 			hiddenProperties.forEach((property) => {
 				switch (property) {
-					case HideableTaskProperty.ID:
+					case taskPropertiesNames.ID:
 						css += ".task-id{ display: none !important; }";
 						css +=
 							"span:hover .task-id { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -364,7 +371,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-id { animation: task-board-fade-out 0.5s ease-in-out 0.5s; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Tags:
+					case taskPropertiesNames.Tags:
 						css +=
 							".task-description>span>a.tag { display: none !important; }";
 						css +=
@@ -373,7 +380,7 @@ export default class TaskBoard extends Plugin {
 					// css +=
 					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 					// css += fadeOutCSS;
-					case HideableTaskProperty.CreatedDate:
+					case taskPropertiesNames.CreatedDate:
 						css += ".task-created { display: none !important; }";
 						css +=
 							"span:hover .task-created { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -382,7 +389,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.StartDate:
+					case taskPropertiesNames.StartDate:
 						css += ".task-start { display: none !important; }";
 						css +=
 							"span:hover .task-start { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -391,7 +398,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.ScheduledDate:
+					case taskPropertiesNames.ScheduledDate:
 						css += ".task-scheduled { display: none !important; }";
 						css +=
 							"span:hover .task-scheduled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -400,7 +407,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.DueDate:
+					case taskPropertiesNames.DueDate:
 						css += ".task-due { display: none !important; }";
 						css +=
 							"span:hover .task-due { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -409,7 +416,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.CompletionDate:
+					case taskPropertiesNames.CompletionDate:
 						css += ".task-completion { display: none !important; }";
 						css +=
 							"span:hover .task-completion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -418,7 +425,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.CancelledDate:
+					case taskPropertiesNames.CancelledDate:
 						css += ".task-cancelled { display: none !important; }";
 						css +=
 							"span:hover .task-cancelled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -427,7 +434,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Priority:
+					case taskPropertiesNames.Priority:
 						css += ".task-priority { display: none !important; }";
 						css +=
 							"span:hover .task-priority { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -436,7 +443,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Time:
+					case taskPropertiesNames.Time:
 						css += ".task-time { display: none !important; }";
 						css +=
 							"span:hover .task-time { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -445,7 +452,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Dependencies:
+					case taskPropertiesNames.Dependencies:
 						css += ".task-dependsOn { display: none !important; }";
 						css +=
 							"span:hover .task-dependsOn { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -454,7 +461,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.OnCompletion:
+					case taskPropertiesNames.OnCompletion:
 						css +=
 							".task-onCompletion{ display: none !important; }";
 						css +=
@@ -464,7 +471,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Recurring:
+					case taskPropertiesNames.Recurring:
 						css += ".task-recurring{ display: none !important; }";
 						css +=
 							"span:hover .task-recurring { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -483,7 +490,7 @@ export default class TaskBoard extends Plugin {
 
 	private hidePropertiesInElement(
 		element: HTMLElement,
-		hiddenProperties: HideableTaskProperty[]
+		hiddenProperties: taskPropertiesNames[]
 	) {
 		// Process text nodes to find and hide specific patterns
 		const walker = document.createTreeWalker(
@@ -870,7 +877,10 @@ export default class TaskBoard extends Plugin {
 
 	async compatiblePluginsAvailabilityCheck() {
 		// Check if the Tasks plugin is installed and fetch the custom statuses
-		await fetchTasksPluginCustomStatuses(this.plugin);
+		// await fetchTasksPluginCustomStatuses(this.plugin);
+		const tasksPlug = await isTasksPluginEnabled(this.plugin);
+		this.plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin =
+			tasksPlug;
 
 		// Check if the Reminder plugin is installed
 		isReminderPluginInstalled(this.plugin);

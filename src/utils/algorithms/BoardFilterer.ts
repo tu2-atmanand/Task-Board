@@ -2,12 +2,12 @@
 
 import { taskItem } from "src/interfaces/TaskItem";
 import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter";
-import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import {
 	RootFilterState,
 	FilterGroup,
 	Filter,
 } from "src/interfaces/BoardConfigs";
+import { getAllTaskTags } from "../TaskItemUtils";
 
 /**
  * Filters tasks based on the board's filter configuration

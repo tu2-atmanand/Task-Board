@@ -36,13 +36,14 @@ import {
 	notAllowedFileExtensionsRegEx,
 } from "src/regularExpressions/MiscelleneousRegExpr";
 import { bugReporter } from "src/services/OpenModals";
-import { getCurrentLocalTimeString } from "../utils/TimeCalculations";
+import { getCurrentLocalTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { UniversalDateOptions } from "src/interfaces/Enums";
 import {
 	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,
 } from "src/utils/algorithms/ScanningFilterer";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -326,7 +327,7 @@ export default class vaultScanner {
 							let scheduledDate = extractScheduledDate(line);
 							let dueDate = extractDueDate(line);
 							const priority = extractPriority(line);
-							const dependsOn = extractDependsOn(line)[1];
+							const dependsOn = extractDependsOn(line);
 							const reminder = extractReminder(
 								line,
 								startDate,
@@ -421,7 +422,9 @@ export default class vaultScanner {
 								frontmatterTags: frontmatterTags,
 								priority: priority,
 								dependsOn: dependsOn
-									? dependsOn.split(",").map((d) => d.trim())
+									? dependsOn[1]
+											.split(",")
+											.map((id) => id.trim())
 									: [],
 								filePath: fileNameWithPath,
 								taskLocation: {
@@ -705,24 +708,6 @@ export function fileTypeAllowedForScanning(
 	return true;
 }
 
-// Generate a unique ID for each task
-export function generateRandomTempTaskId(): string {
-	const array = new Uint32Array(1);
-	crypto.getRandomValues(array);
-	return String(array[0]);
-}
-
-// Generate a unique ID for each task
-export function generateTaskId(plugin: TaskBoard): string {
-	plugin.settings.data.globalSettings.uniqueIdCounter =
-		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
-
-	// Save the updated uniqueIdCounter back to settings
-	plugin.saveSettings();
-	// Return the current counter value and then increment it for the next ID
-	return String(plugin.settings.data.globalSettings.uniqueIdCounter);
-}
-
 /**
  * Function to build a task from raw content
  * @param rawTaskContent - The raw content of the task ONLY.
@@ -788,11 +773,21 @@ export function buildTaskFromRawContent(
 // 	}
 // }
 
-// Extract title from task line
+/**
+ * Extracts the title from a task string by removing the time at the start (if exists).
+ * @param {string} text - The task string.
+ * @returns {string} The title of the task.
+ */
 export function extractTitle(text: string): string {
 	return text.replace(/^- \[.\]\s*/, "");
 }
 
+/**
+ * Extracts the task id from a task string by matching the id regex.
+ * Supports both plugin and Dataview id formats.
+ * @param {string} text - The task string.
+ * @returns {string} The task id.
+ */
 export function extractTaskId(text: string): string {
 	// const combinedIdRegex = new RegExp(
 	// 	`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
@@ -826,7 +821,14 @@ export function extractTaskId(text: string): string {
 	return "";
 }
 
-// New function to extract task body
+/**
+ * Extracts the body of a task from an array of lines. The body is considered as the lines
+ * that have indentation (either with '>' or '\t'), and the extraction stops when an empty line is encountered.
+ * @param {string[]} lines - The array of lines to extract the body from.
+ * @param {number} startLineIndex - The index of the line where the body starts.
+ * @param {string} indentationString - The string used to indent the lines.
+ * @returns {string[]} An array of strings representing the body of the task. If the body is empty, an empty array is returned.
+ */
 export function extractBody(
 	lines: string[],
 	startLineIndex: number,
@@ -886,7 +888,13 @@ export function extractBody(
 	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
 }
 
-// Extract time from task line
+/**
+ * Extracts the time from a task string.
+ * Supports three formats: [time:: 12:00-13:00], @time(12:00-13:00) and ⏰ 12:00-13:00.
+ * If time is at the start of the task, it is also extracted.
+ * @param {string} text - The task string.
+ * @returns {string} The extracted time string, or an empty string if no match.
+ */
 export function extractTime(text: string): string {
 	let match = text.match(/\[time::\s*(.*?)\]/);
 	if (match) {
@@ -1010,6 +1018,7 @@ export function extractPriority(text: string): number {
 		.map((match) => match.trim()) // Trim spaces
 		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
 
+	console.log("What is the priority emoji : ", validMatches);
 	// Find the first match in the priorityEmojis mapping
 	for (const emoji of validMatches) {
 		const priorityMatch = Object.entries(priorityEmojis).find(
@@ -1088,11 +1097,21 @@ export function extractReminder(
 	return "";
 }
 
-export function extractDependsOn(text: string): string[] {
+/**
+ * Extract the dependsOn value from the task title.
+ * It will first try to match the regex defined in the Tasks plugin.
+ * If not found, it will try to match the [dependsOn:: ...] format.
+ * If not found, it will try to match the @dependsOn ... format.
+ * If none of the above are found, it will return null.
+ * @param {string} text - The task title from which to extract the dependsOn value.
+ * @returns {RegExpMatchArray | null} - The extracted dependsOn value, or null if not found.
+ */
+export function extractDependsOn(text: string): RegExpMatchArray | null {
 	let match = text.match(
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex
 	);
 	if (match && match[1]) {
+		console.log("What is the match : ", match);
 		return match;
 	}
 
@@ -1106,7 +1125,7 @@ export function extractDependsOn(text: string): string[] {
 		return match;
 	}
 
-	return [];
+	return null;
 }
 
 // Extract completion date-time value
