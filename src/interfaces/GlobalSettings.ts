@@ -66,6 +66,12 @@ export interface frontmatterFormatting {
 	taskItemKey: string;
 }
 
+export enum taskCardStyleNames {
+	DEFAULT = "default",
+	BASES = "bases",
+	DATAVIEW = "custom",
+}
+
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
@@ -86,6 +92,8 @@ export interface globalSettingsData {
 	columnWidth: string;
 	showHeader: boolean;
 	showFooter: boolean;
+	visiblePropertiesList: string[];
+	taskCardStyle: string;
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
@@ -438,6 +446,24 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			columnWidth: "300px",
 			showHeader: true,
 			showFooter: true,
+			visiblePropertiesList: [
+				taskPropertiesNames.ID,
+				taskPropertiesNames.Title,
+				taskPropertiesNames.SubTasks,
+				taskPropertiesNames.Description,
+				taskPropertiesNames.Status,
+				taskPropertiesNames.Tags,
+				taskPropertiesNames.Priority,
+				taskPropertiesNames.CreatedDate,
+				taskPropertiesNames.StartDate,
+				taskPropertiesNames.ScheduledDate,
+				taskPropertiesNames.DueDate,
+				taskPropertiesNames.CompletionDate,
+				taskPropertiesNames.CancelledDate,
+				taskPropertiesNames.Reminder,
+				taskPropertiesNames.FilePath,
+			],
+			taskCardStyle: taskCardStyleNames.DEFAULT,
 			showVerticalScroll: true,
 			tagColors: [
 				{

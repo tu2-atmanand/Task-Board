@@ -352,7 +352,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	width: var(--task-board-column-width) !important;
 
 	/* New UI */
-	background-color: var(--background-secondary);
+	/* background-color: var(--background-modifier-message); */
 	border: var(--border-width) solid var(--background-modifier-border);
 }
 
@@ -369,7 +369,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: row;
 	padding-block: 5px;
-	background: var(--background-modifier-border-hover);
+	background: var(--background-primary-alt);
 	justify-content: space-between;
 	align-items: center;
 	padding-inline: 10px;
@@ -573,10 +573,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 
-/* /src/components/TaskItem.tsx */
+/* ------------------------------------------------
+	/src/components/TaskItem.tsx 
+-------------------------------------------------*/
 
 .taskItemContainer {
-	background: var(--background-primary-alt);
+	background: var(--background-primary);
 }
 
 .taskItem {
@@ -635,15 +637,19 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemTitle {
 	padding: 0;
 	padding-inline-start: 0.4em;
-	font-weight: 500;
-	overflow-wrap: anywhere;
+	font-weight: 400;
+	font-size: 0.875 rem;
+	font-size: 0.875rem;
+	word-wrap: break-word;
+	word-break: break-word;
+	white-space: normal;
 }
 
 .taskItemTitle p {
 	margin-block: 0 !important;
 }
 
-.taskItemBody {
+.taskItemSubTasksSection {
 	font-size: 0.85rem;
 }
 
@@ -720,65 +726,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .subtaskTextRenderer-checked {
 	text-decoration: line-through !important;
 	opacity: 50% !important;
-}
-
-/* /src/components/MapView/MapView.tsx */
-
-.taskBoardMapViewWrapper {
-	opacity: 0;
-	animation: mapViewFadeIn 0.5s ease-in forwards;
-}
-
-.taskBoardMapViewContainer {
-	width: 100%;
-	height: 80vh;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-}
-
-.taskBoardMapViewContainerNodeResizerTaskItem .taskItemContainer .taskItem.completed {
-	opacity: 60%;
-}
-
-.taskBoardMapViewContainerInitialMessage {
-	max-width: 80vw;
-	margin-top: 1rem;
-	text-align-last: center;
-}
-
-.taskBoardMapViewContainerNodeResizerHandle {
-	display: none !important;
-	/* background-color: var(--white); */
-}
-
-.taskBoardMapViewContainerNodeResizerTaskItem-selected .taskItemContainer .taskItem {
-	border: 1px solid var(--color-accent);
-}
-
-/* .taskBoardMapViewContainerNodeResizerHandle:hover {
-	background-color: var(--red);
-} */
-
-.taskBoardMapViewContainerNodeResizerEdges {
-	background-color: #007bff;
-}
-
-.taskBoardMapViewContainerNodeResizerEdges:hover {
-	background-color: red;
-}
-
-@keyframes mapViewFadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(20px);
-	}
-
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
 }
 
 /* Subtask Summary */
@@ -869,7 +816,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemMainBodyDescriptionSection {
 	width: 100%;
-	font-size: 0.9rem;
+	font-size: 0.85rem;
 }
 
 .taskItemMainBodyDescriptionSectionVisible {
@@ -902,6 +849,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding: 2px;
 	background: var(--background-modifier-box-shadow);
 	margin: 0 !important;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
 }
 
 .taskItemBodyDescriptionRenderer p {
@@ -943,7 +892,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: column;
 	gap: 4px;
 	width: 100%;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 }
 
 .taskItemChildTasks {
@@ -999,20 +948,23 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskItemTag {
-	/* background-color: var(--tag-background); */
-	/* border: var(--tag-border-width) solid var(--tag-border-color); */
-	border-radius: var(--tag-radius);
-	/* color: var(--tag-color); */
+	/* Custom tag styling */
 	font-size: 0.7rem;
-	font-weight: var(--tag-weight);
-	text-decoration: var(--tag-decoration);
-	padding: var(--tag-padding-y) var(--tag-padding-x);
+	/* font-weight: 500; */
 	/* line-height: 1; */
-	border-radius: 1em;
-	padding: 1px 6px;
 	margin-right: 2px;
 	display: inline-block;
 	white-space: nowrap;
+
+	/* Default tag styling */
+	background-color: var(--tag-background);
+	border: var(--tag-border-width) solid var(--tag-border-color);
+	border-radius: var(--tag-radius);
+	color: var(--tag-color);
+	font-weight: var(--tag-weight);
+	text-decoration: var(--tag-decoration);
+	padding: var(--tag-padding-y) var(--tag-padding-x);
+	line-height: 1;
 }
 
 .taskItemTagFrontmatter {
@@ -1092,10 +1044,64 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 0.5em;
 }
 
-.taskItemPrio {
-	margin-inline-start: -5px;
+.taskItemPropertyID {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+	border: 1px solid var(--canvas-card-label-color);
+	border-radius: 5px;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
 }
 
+.taskItemPropertyIDLabel {
+	background-color: var(--background-modifier-border-hover);
+	border-right: 1px solid var(--canvas-card-label-color);
+	padding-inline: 5px;
+	border-radius: 5px 0 0 5px;
+}
+
+.taskItemPropertyIDValue {
+	padding-right: 5px;
+}
+
+.taskItemPriority {
+	margin-inline-start: -2px;
+}
+
+.prioirtyCircle {
+	min-width: 1.1rem;
+	min-height: 1.1rem;
+	border-radius: 0.4rem;
+	font-weight: 600;
+	font-size: 0.8rem;
+	color: white;
+	text-align: center;
+	align-content: center;
+	opacity: 0.7;
+}
+
+.prioirtyCircle.p1 {
+	background-color: var(--background-modifier-error-hover);
+}
+
+.prioirtyCircle.p2 {
+	background-color: var(--status-in-progress-color);
+}
+
+.prioirtyCircle.p3 {
+	background-color: var(--status-in-progress-color);
+}
+
+.prioirtyCircle.p4 {
+	background-color: var(--status-in-progress-color);
+}
+
+.prioirtyCircle.p5 {
+	background-color: var(--color-green);
+}
+
+.taskItemMenuBtn,
 .taskItemDragBtn {
 	opacity: 0;
 	background-color: var(--background-primary-alt);
@@ -1118,6 +1124,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	transition: transform 0.2s;
 }
 
+.taskItemDragBtn {
+	cursor: grab;
+}
+
+.taskItemMenuBtn:hover,
 .taskItemDragBtn:hover {
 	opacity: 1;
 	transform: scale(1.1);
@@ -1146,9 +1157,20 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskItemFooterBtns {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
 	display: flex;
 	flex-direction: row;
 	gap: 0.5em;
+	background-color: var(--background-modifier-border);
+	padding-inline: 0.4rem;
+	border-radius: 1rem;
+	padding-block: 2px;
+
+	opacity: 0;
+	transform: scale(0.9);
+	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .taskItem .taskItemiconButton {
@@ -1162,13 +1184,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	align-items: center;
 	justify-content: center;
 	font-size: 1.2em;
-
-	opacity: 0;
-	transform: scale(0.9);
-	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.taskItem:hover .taskItemiconButton {
+.taskItem:hover .taskItemFooterBtns {
 	opacity: 1;
 	transform: scale(1);
 }
@@ -1179,7 +1197,100 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 
-/* /src/components/AddOrEditTaskModal.tsx */
+/* ------------------------------------------------
+	/src/components/TaskItemV2.tsx 
+-------------------------------------------------*/
+
+.taskItemFooterPropertiesContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-top: 0.7rem;
+	gap: 0.4rem;
+	margin-inline-start: 5px;
+}
+
+.taskItemFooterPropertyContainer {
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+	align-items: center;
+	font-size: var(--font-ui-smaller);
+}
+
+.taskItemFooterPropertyContainerLabel {
+	color: var(--text-muted);
+}
+
+.taskItemFooterPropertyContainerValue {
+	font-style: italic;
+}
+
+/*-----------------------------------------------------------
+	 /src/components/MapView/MapView.tsx 
+-----------------------------------------------------------*/
+
+.taskBoardMapViewWrapper {
+	opacity: 0;
+	animation: mapViewFadeIn 0.5s ease-in forwards;
+}
+
+.taskBoardMapViewContainer {
+	width: 100%;
+	height: 80vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.taskBoardMapViewContainerNodeResizerTaskItem .taskItemContainer .taskItem.completed {
+	opacity: 60%;
+}
+
+.taskBoardMapViewContainerInitialMessage {
+	max-width: 80vw;
+	margin-top: 1rem;
+	text-align-last: center;
+}
+
+.taskBoardMapViewContainerNodeResizerHandle {
+	display: none !important;
+	/* background-color: var(--white); */
+}
+
+.taskBoardMapViewContainerNodeResizerTaskItem-selected .taskItemContainer .taskItem {
+	border: 1px solid var(--color-accent);
+}
+
+/* .taskBoardMapViewContainerNodeResizerHandle:hover {
+	background-color: var(--red);
+} */
+
+.taskBoardMapViewContainerNodeResizerEdges {
+	background-color: #007bff;
+}
+
+.taskBoardMapViewContainerNodeResizerEdges:hover {
+	background-color: red;
+}
+
+@keyframes mapViewFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/*------------------------------------------------------------
+	 /src/components/AddOrEditTaskModal.tsx 
+------------------------------------------------------------*/
 
 .EditTaskModalHome {
 	display: flex;
@@ -1298,6 +1409,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-inline-end: 0.8rem;
 	/* padding-block: 14px;
 	margin-inline: 1rem; */
+}
+
+.EditTaskModalChildTasksListItemTitle ul>li>ol {
+	padding-inline: 10px;
+	display: inline-block;
+	vertical-align: super;
 }
 
 .EditTaskModalChildTasksListItemFooter {
@@ -7044,11 +7161,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 .task-item-dragging-dimmed {
 	opacity: 0.45 !important;
 	filter: blur(0.0px);
-}
-
-/* Slightly different visual for task item drag handle */
-.taskItemDragBtn {
-	cursor: grab;
 }
 
 /* Swimlane minimize/expand animations */

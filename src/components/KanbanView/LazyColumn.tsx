@@ -3,7 +3,7 @@
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 import { CSSProperties } from 'react';
-import TaskItem, { swimlaneDataProp } from './TaskItem';
+import TaskItem, { swimlaneDataProp, TaskCardComponentProps } from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
@@ -17,6 +17,8 @@ import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingMo
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
 import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
+import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
+import TaskItemV2 from './TaskItemV2';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -720,6 +722,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// Render
 	// -------------------------------------------------
 
+	const taskItemComponent = plugin.settings.data.globalSettings.taskCardStyle === taskCardStyleNames.DEFAULT ? TaskItem : TaskItemV2;
+
 	return (
 		<div
 			className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
@@ -785,7 +789,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 														}
 														onDrop={e => handleTaskDrop(e, i)}
 													>
-														<TaskItem
+														<MemoizedTaskItem
+															Component={taskItemComponent}
 															key={task.id}
 															dataAttributeIndex={i}
 															plugin={plugin}
@@ -826,5 +831,25 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		</div >
 	);
 };
+
+const MemoizedTaskItem = memo<{
+	Component: typeof TaskItem | typeof TaskItemV2;
+	dataAttributeIndex: number;
+	plugin: TaskBoard;
+	task: taskItem;
+	activeBoardSettings: Board;
+	columnIndex?: number;
+	swimlaneData?: swimlaneDataProp;
+}>(({ Component, ...props }) => {
+	return <Component {...props} />;
+}, (prevProps, nextProps) => {
+	return (
+		prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
+		prevProps.task === nextProps.task &&
+		prevProps.activeBoardSettings === nextProps.activeBoardSettings &&
+		prevProps.columnIndex === nextProps.columnIndex &&
+		prevProps.swimlaneData === nextProps.swimlaneData
+	);
+});
 
 export default memo(LazyColumn);
