@@ -10,6 +10,7 @@ import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import {
 	CustomStatus,
 	frontmatterFormatting,
+	globalSettingsData,
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
@@ -246,13 +247,12 @@ export function getStatusSymbolFromStatusName(
  */
 export function getStatusNameFromStatusSymbol(
 	statusSymbol: string | undefined,
-	settings: PluginDataJson
+	globalSettings: globalSettingsData
 ): string {
 	if (!statusSymbol) return "pending";
 
-	if (settings) {
-		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.customStatuses;
+	if (globalSettings) {
+		const tasksPluginStatusConfigs = globalSettings.customStatuses;
 		let statusName = "";
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (customStatus.symbol === statusSymbol) {

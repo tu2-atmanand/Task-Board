@@ -24,7 +24,7 @@ import {
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 import {
-	HideableTaskProperty,
+	taskPropertiesNames,
 	cardSectionsVisibilityOptions,
 	TagColorType,
 	EditButtonMode,
@@ -62,27 +62,45 @@ export class SettingsManager {
 		this.win = window;
 	}
 
-	private getPropertyDisplayName(property: HideableTaskProperty): string {
-		const displayNames: Record<HideableTaskProperty, string> = {
-			[HideableTaskProperty.ID]: "ID (🆔 fpyvkz)",
-			[HideableTaskProperty.Tags]: "Tags (#tag)",
-			[HideableTaskProperty.Priority]: "Priority (🔺)",
-			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
-			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)",
-			[HideableTaskProperty.ScheduledDate]:
+	private getPropertyDisplayName(property: taskPropertiesNames): string {
+		type PartialDisplayNames = Pick<
+			Record<taskPropertiesNames, string>,
+			| taskPropertiesNames.ID
+			| taskPropertiesNames.Tags
+			| taskPropertiesNames.Priority
+			| taskPropertiesNames.Time
+			| taskPropertiesNames.Reminder
+			| taskPropertiesNames.CreatedDate
+			| taskPropertiesNames.StartDate
+			| taskPropertiesNames.ScheduledDate
+			| taskPropertiesNames.DueDate
+			| taskPropertiesNames.CompletionDate
+			| taskPropertiesNames.CancelledDate
+			| taskPropertiesNames.Dependencies
+			| taskPropertiesNames.OnCompletion
+			| taskPropertiesNames.Recurring
+		>;
+
+		const displayNames: PartialDisplayNames = {
+			[taskPropertiesNames.ID]: "ID (🆔 fpyvkz)",
+			[taskPropertiesNames.Tags]: "Tags (#tag)",
+			[taskPropertiesNames.Priority]: "Priority (🔺)",
+			[taskPropertiesNames.CreatedDate]: "Created Date (➕ 2024-01-01)",
+			[taskPropertiesNames.StartDate]: "Start Date (🛫 2024-01-01)",
+			[taskPropertiesNames.ScheduledDate]:
 				"Scheduled Date (⏳ 2024-01-01)",
-			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
-			[HideableTaskProperty.CompletionDate]:
+			[taskPropertiesNames.DueDate]: "Due Date (📅 2024-01-01)",
+			[taskPropertiesNames.CompletionDate]:
 				"Completion Date (✅ 2024-01-01)",
-			[HideableTaskProperty.CancelledDate]:
+			[taskPropertiesNames.CancelledDate]:
 				"Cancelled Date (❌ 2024-01-01)",
-			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
-			[HideableTaskProperty.Reminder]: "Reminder (@(12:30))",
-			[HideableTaskProperty.Recurring]: "Recurring (🔁 every 2 weeks)",
-			[HideableTaskProperty.OnCompletion]: "On-completion (🏁 delete)",
-			[HideableTaskProperty.Dependencies]: "Dependens-on (⛔ fa4sm9)",
+			[taskPropertiesNames.Time]: "Time (⏰ 09:00-10:00)",
+			[taskPropertiesNames.Reminder]: "Reminder (@(12:30))",
+			[taskPropertiesNames.Recurring]: "Recurring (🔁 every 2 weeks)",
+			[taskPropertiesNames.OnCompletion]: "On-completion (🏁 delete)",
+			[taskPropertiesNames.Dependencies]: "Dependens-on (⛔ fa4sm9)",
 		};
-		return displayNames[property] || property;
+		return displayNames[property as keyof typeof displayNames] || property;
 	}
 
 	private openReloadNoticeIfNeeded() {
@@ -968,7 +986,7 @@ export class SettingsManager {
 		);
 
 		// Create checkboxes for each hideable property
-		Object.values(HideableTaskProperty).forEach((property) => {
+		Object.values(taskPropertiesNames).forEach((property) => {
 			const displayName = this.getPropertyDisplayName(property);
 
 			const checkboxSetting = new Setting(checkboxContainer)
@@ -1083,7 +1101,11 @@ export class SettingsManager {
 				rightSideContainer.createDiv({
 					cls: `custom-status-field-status-pill${
 						status.type === statusTypeNames.DONE ? " done" : ""
-					}${status.type === statusTypeNames.CANCELLED ? " cancelled" : ""}`,
+					}${
+						status.type === statusTypeNames.CANCELLED
+							? " cancelled"
+							: ""
+					}`,
 					text: status.type,
 				});
 

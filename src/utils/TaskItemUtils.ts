@@ -6,6 +6,7 @@ import {
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,
 } from "./taskNote/TaskNoteUtils";
+import { extractTaskId } from "src/managers/VaultScanner";
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
@@ -113,9 +114,6 @@ export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
 	task: taskItem
 ): Promise<string | undefined> => {
-	// if (task.legacyId) { // ----- Sometimes the cache object contains a legacyId but the content in the file dont have it. To handle this situation we will not add this if condition and proceed with cross-checking the id.
-	// 	return undefined;
-	// } else {
 	let newIdToReturn: string | undefined;
 	if (
 		isTaskNotePresentInTags(
@@ -130,6 +128,8 @@ export const applyIdToTaskItem = async (
 
 		return newId;
 	} else {
+		if (extractTaskId(task.title) === "") return undefined;
+
 		newIdToReturn = await updateTaskInFile(plugin, task, task, true);
 		return newIdToReturn;
 	}

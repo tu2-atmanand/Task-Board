@@ -327,7 +327,7 @@ export default class vaultScanner {
 							let scheduledDate = extractScheduledDate(line);
 							let dueDate = extractDueDate(line);
 							const priority = extractPriority(line);
-							const dependsOn = extractDependsOn(line)[1];
+							const dependsOn = extractDependsOn(line);
 							const reminder = extractReminder(
 								line,
 								startDate,
@@ -422,7 +422,9 @@ export default class vaultScanner {
 								frontmatterTags: frontmatterTags,
 								priority: priority,
 								dependsOn: dependsOn
-									? dependsOn.split(",").map((d) => d.trim())
+									? dependsOn[1]
+											.split(",")
+											.map((id) => id.trim())
 									: [],
 								filePath: fileNameWithPath,
 								taskLocation: {
@@ -1016,6 +1018,7 @@ export function extractPriority(text: string): number {
 		.map((match) => match.trim()) // Trim spaces
 		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
 
+	console.log("What is the priority emoji : ", validMatches);
 	// Find the first match in the priorityEmojis mapping
 	for (const emoji of validMatches) {
 		const priorityMatch = Object.entries(priorityEmojis).find(
@@ -1094,11 +1097,21 @@ export function extractReminder(
 	return "";
 }
 
-export function extractDependsOn(text: string): string[] {
+/**
+ * Extract the dependsOn value from the task title.
+ * It will first try to match the regex defined in the Tasks plugin.
+ * If not found, it will try to match the [dependsOn:: ...] format.
+ * If not found, it will try to match the @dependsOn ... format.
+ * If none of the above are found, it will return null.
+ * @param {string} text - The task title from which to extract the dependsOn value.
+ * @returns {RegExpMatchArray | null} - The extracted dependsOn value, or null if not found.
+ */
+export function extractDependsOn(text: string): RegExpMatchArray | null {
 	let match = text.match(
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex
 	);
 	if (match && match[1]) {
+		console.log("What is the match : ", match);
 		return match;
 	}
 
@@ -1112,7 +1125,7 @@ export function extractDependsOn(text: string): string[] {
 		return match;
 	}
 
-	return [];
+	return null;
 }
 
 // Extract completion date-time value

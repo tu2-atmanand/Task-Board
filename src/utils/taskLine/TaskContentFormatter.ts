@@ -14,7 +14,7 @@ import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/Dataview
 import {
 	taskPropertyFormatOptions,
 	NotificationService,
-	HideableTaskProperty,
+	taskPropertiesNames,
 	UniversalDateOptions,
 } from "src/interfaces/Enums";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
@@ -1072,7 +1072,7 @@ export const sanitizeReminder = (
  * @param title - The title of the task.
  * @param dependesOnIds - The IDs of the tasks that this task depends on.
  * @param cursorLocation - (Optional) The cursor location to insert the dependsOn at a specific position.
- * @returns The sanitized dependsOn string to be used in the task title.
+ * @returns The sanitized title string with the updated "dependsOn" section.
  */
 export const sanitizeDependsOn = (
 	globalSettings: globalSettingsData,
@@ -1088,40 +1088,44 @@ export const sanitizeDependsOn = (
 			return title.replace(extractedDependsOnMatch[0], "").trim();
 		}
 		return title;
-	}
-
-	let dependsOnFormat: string = "";
-	if (globalSettings?.taskPropertyFormat === "1") {
-		dependsOnFormat =
-			dependesOnIds.length > 0 ? `⛔${dependesOnIds.join(", ")}` : "";
-	} else if (globalSettings?.taskPropertyFormat === "2") {
-		dependsOnFormat =
-			dependesOnIds.length > 0 ? `⛔ ${dependesOnIds.join(", ")}` : "";
-	} else if (globalSettings?.taskPropertyFormat === "3") {
-		dependsOnFormat =
-			dependesOnIds.length > 0
-				? `[dependsOn:: ${dependesOnIds.join(", ")}]`
-				: "";
 	} else {
-		dependsOnFormat =
-			dependesOnIds.length > 0
-				? `@dependsOn(${dependesOnIds.join(", ")})`
-				: "";
-	}
+		let dependsOnFormat: string = "";
+		if (globalSettings?.taskPropertyFormat === "1") {
+			dependsOnFormat =
+				dependesOnIds.length > 0 ? `⛔${dependesOnIds.join(", ")}` : "";
+		} else if (globalSettings?.taskPropertyFormat === "2") {
+			dependsOnFormat =
+				dependesOnIds.length > 0
+					? `⛔ ${dependesOnIds.join(", ")}`
+					: "";
+		} else if (globalSettings?.taskPropertyFormat === "3") {
+			dependsOnFormat =
+				dependesOnIds.length > 0
+					? `[dependsOn:: ${dependesOnIds.join(", ")}]`
+					: "";
+		} else {
+			dependsOnFormat =
+				dependesOnIds.length > 0
+					? `@dependsOn(${dependesOnIds.join(", ")})`
+					: "";
+		}
 
-	if (extractedDependsOnMatch.length > 0) {
-		return title.replace(extractedDependsOnMatch[0], dependsOnFormat);
-	}
+		if (extractedDependsOnMatch && extractedDependsOnMatch.length > 0) {
+			return title.replace(extractedDependsOnMatch[0], dependsOnFormat);
+		}
 
-	if (cursorLocation?.lineNumber === 1) {
-		// Insert newDependsOn at the specified charIndex with spaces
-		const spaceBefore =
-			title.slice(0, cursorLocation.charIndex).trim() + " ";
-		const spaceAfter = " " + title.slice(cursorLocation.charIndex).trim();
-		return `${spaceBefore}${dependsOnFormat}${spaceAfter}`;
+		if (cursorLocation?.lineNumber === 1) {
+			// Insert newDependsOn at the specified charIndex with spaces
+			const spaceBefore =
+				title.slice(0, cursorLocation.charIndex).trim() + " ";
+			const spaceAfter =
+				" " + title.slice(cursorLocation.charIndex).trim();
+			return `${spaceBefore}${dependsOnFormat}${spaceAfter}`;
+		}
+
+		// If no existing dependsOn found, append new one at the end
+		return `${title} ${dependsOnFormat}`;
 	}
-	// If no existing dependsOn found, append new one at the end
-	return `${title} ${dependsOnFormat}`;
 };
 
 // export const getSanitizedTaskContent = (
@@ -1260,7 +1264,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Hide only selected properties
 	hiddenProperties.forEach((property) => {
 		switch (property) {
-			case HideableTaskProperty.Tags:
+			case taskPropertiesNames.Tags:
 				// Remove tags
 				task.tags.forEach((tag) => {
 					const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
@@ -1271,7 +1275,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				});
 				break;
 
-			case HideableTaskProperty.Time:
+			case taskPropertiesNames.Time:
 				// Remove time (handles both formats)
 				if (task.time) {
 					const timeRegex =
@@ -1283,7 +1287,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.DueDate:
+			case taskPropertiesNames.DueDate:
 				// Remove due date in various formats
 				if (task.due) {
 					const dueDateRegex =
@@ -1292,7 +1296,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.CreatedDate:
+			case taskPropertiesNames.CreatedDate:
 				// Remove Created date in various formats
 				if (task.createdDate) {
 					const createdDateRegex =
@@ -1301,7 +1305,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.StartDate:
+			case taskPropertiesNames.StartDate:
 				// Remove start date in various formats
 				if (task.startDate) {
 					const startDateRegex =
@@ -1310,7 +1314,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.ScheduledDate:
+			case taskPropertiesNames.ScheduledDate:
 				// Remove scheduled date in various formats
 				if (task.scheduledDate) {
 					const scheduledDateRegex =
@@ -1319,7 +1323,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.CompletionDate:
+			case taskPropertiesNames.CompletionDate:
 				// Remove completion date in various formats
 				if (task.completion) {
 					const completionRegex =
@@ -1328,7 +1332,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.Priority:
+			case taskPropertiesNames.Priority:
 				// Remove priority in various formats
 				if (task.priority > 0) {
 					let match = cleanedTitle.match(
@@ -1371,7 +1375,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	// Remove reminder if it's in the hidden properties list
 	if (
-		hiddenProperties.includes(HideableTaskProperty.Dependencies) ||
+		hiddenProperties.includes(taskPropertiesNames.Dependencies) ||
 		plugin.settings.data.globalSettings.showTaskWithoutMetadata
 	) {
 		const reminderRegex =
@@ -1419,12 +1423,9 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
 			"g" // add the 'g' flag if you want to match all occurrences
 		);
-
-		if (task.legacyId) {
-			const idMatch = cleanedTitle.match(combinedIdRegex);
-			if (idMatch) {
-				cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
-			}
+		const idMatch = cleanedTitle.match(combinedIdRegex);
+		if (idMatch) {
+			cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
 		}
 	}
 
@@ -1512,10 +1513,11 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 	// Remove dependsOn in various formats
 	if (task.dependsOn && task.dependsOn.length > 0) {
-		const match = cleanedTitle.match(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-				.dependsOnRegex
+		const combinedDependsOnRegex = new RegExp(
+			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dependsOnRegex.source})`,
+			"g" // add the 'g' flag if you want to match all occurrences
 		);
+		const match = cleanedTitle.match(combinedDependsOnRegex);
 		if (match) {
 			cleanedTitle = cleanedTitle.replace(match[0], "");
 		}

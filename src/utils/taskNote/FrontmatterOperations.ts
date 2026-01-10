@@ -206,7 +206,7 @@ export function createFrontmatterFromTask(
 	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
 		task?.title || "";
 	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
-		getStatusNameFromStatusSymbol(task?.status, plugin.settings) ||
+		getStatusNameFromStatusSymbol(task?.status, plugin.settings.data.globalSettings) ||
 		"pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
@@ -378,7 +378,7 @@ export function updateFrontmatterProperties(
 	if (task.status) {
 		const statusName = getStatusNameFromStatusSymbol(
 			task.status,
-			plugin.settings
+			plugin.settings.data.globalSettings
 		);
 		tempUpdates[statusKey] = statusName ?? `"${task.status}"`;
 	}

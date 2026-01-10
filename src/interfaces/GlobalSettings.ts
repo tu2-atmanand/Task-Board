@@ -3,7 +3,7 @@ import { BoardConfigs } from "./BoardConfigs";
 import {
 	EditButtonMode,
 	TagColorType,
-	HideableTaskProperty,
+	taskPropertiesNames,
 	taskPropertyFormatOptions,
 	UniversalDateOptions,
 	NotificationService,
@@ -116,7 +116,7 @@ export interface globalSettingsData {
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	cardSectionsVisibility: string;
-	hiddenTaskProperties: HideableTaskProperty[];
+	hiddenTaskProperties: taskPropertiesNames[];
 	autoAddUniqueID: boolean;
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
