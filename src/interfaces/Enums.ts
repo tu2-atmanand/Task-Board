@@ -40,13 +40,6 @@ export enum NotificationService {
 	ObsidApp = "obsiApp",
 }
 
-export enum cardSectionsVisibilityOptions {
-	showSubTasksOnly = "showSubTasksOnly",
-	showDescriptionOnly = "showDescriptionOnly",
-	showBoth = "showBoth",
-	hideBoth = "hideBoth",
-}
-
 export enum taskPropertiesNames {
 	// These are the main properties stored inside the cache with the exact key name.
 	ID = "id",
@@ -203,4 +196,11 @@ export enum mapViewEdgeType {
 	step = "step",
 	smoothstep = "smoothstep",
 	bezier = "default",
+}
+
+export enum taskCardStyleNames {
+	EMOJI = "emoji",
+	ICONS = "icons",
+	BASES = "bases",
+	DATAVIEW = "custom",
 }

@@ -7,7 +7,6 @@ import {
 	taskPropertyFormatOptions,
 	UniversalDateOptions,
 	NotificationService,
-	cardSectionsVisibilityOptions,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	mapViewBackgrounVariantTypes,
 	mapViewNodeMapOrientation,
@@ -16,6 +15,7 @@ import {
 	mapViewEdgeType,
 	colTypeNames,
 	defaultTaskStatuses,
+	taskCardStyleNames,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -66,13 +66,6 @@ export interface frontmatterFormatting {
 	taskItemKey: string;
 }
 
-export enum taskCardStyleNames {
-	EMOJI = "emoji",
-	ICONS = "icons",
-	BASES = "bases",
-	DATAVIEW = "custom",
-}
-
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
@@ -91,8 +84,6 @@ export interface globalSettingsData {
 	scanVaultAtStartup: boolean;
 	realTimeScanning: boolean;
 	columnWidth: string;
-	showHeader: boolean;
-	showFooter: boolean;
 	visiblePropertiesList: string[];
 	taskCardStyle: string;
 	showVerticalScroll: boolean;
@@ -117,14 +108,12 @@ export interface globalSettingsData {
 	archivedTasksFilePath: string;
 	archivedTBNotesFolderPath: string;
 	frontmatterFormatting: frontmatterFormatting[];
-	showFileNameInCard: boolean;
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
 	notificationService: string;
 	frontmatterPropertyForReminder: string;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
-	cardSectionsVisibility: string;
 	hiddenTaskProperties: taskPropertiesNames[];
 	autoAddUniqueID: boolean;
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
@@ -445,8 +434,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			scanVaultAtStartup: false,
 			realTimeScanning: true,
 			columnWidth: "300px",
-			showHeader: true,
-			showFooter: true,
 			visiblePropertiesList: [
 				taskPropertiesNames.ID,
 				taskPropertiesNames.Title,
@@ -661,7 +648,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				// 	taskItemKey: "",
 				// },
 			],
-			showFileNameInCard: false,
 			showFrontmatterTagsOnCards: false,
 			tasksCacheFilePath: "",
 			notificationService: NotificationService.None,
@@ -674,8 +660,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					targetColumn: "Completed",
 				},
 			],
-			cardSectionsVisibility:
-				cardSectionsVisibilityOptions.showSubTasksOnly,
 			hiddenTaskProperties: [],
 			autoAddUniqueID: false,
 			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
@@ -734,3 +718,5 @@ export const langCodes: { [key: string]: string } = {
 	zh: "简体中文",
 	"zh-TW": "繁體中文",
 };
+export { taskCardStyleNames };
+

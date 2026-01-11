@@ -25,7 +25,6 @@ import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 import {
 	taskPropertiesNames,
-	cardSectionsVisibilityOptions,
 	TagColorType,
 	EditButtonMode,
 	NotificationService,
@@ -826,41 +825,15 @@ export class SettingsManager {
 		// 	});
 
 		const {
-			showHeader,
-			showFooter,
 			columnWidth,
 			showVerticalScroll,
 			tagColors,
 			tagColorsType,
 			showTaskWithoutMetadata,
-			showFileNameInCard,
-			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
 			hiddenTaskProperties,
 			taskCardStyle,
 		} = this.globalSettings!;
-
-		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl)
-			.setName(t("show-header-of-the-task-card"))
-			.setDesc(t("enable-this-to-see-the-header-in-the-task-card"))
-			.addToggle((toggle) =>
-				toggle.setValue(showHeader).onChange(async (value) => {
-					this.globalSettings!.showHeader = value;
-					await this.saveSettings();
-				})
-			);
-
-		// Setting to show/Hide the Footer of the task card
-		new Setting(contentEl)
-			.setName(t("show-footer-of-the-task-card"))
-			.setDesc(t("enable-this-to-see-the-footer-in-the-task-card"))
-			.addToggle((toggle) =>
-				toggle.setValue(showFooter).onChange(async (value) => {
-					this.globalSettings!.showFooter = value;
-					await this.saveSettings();
-				})
-			);
 
 		new Setting(contentEl)
 			.setName(t("task-card-style"))
@@ -892,40 +865,6 @@ export class SettingsManager {
 						this.globalSettings!.showFrontmatterTagsOnCards = value;
 						await this.saveSettings();
 					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("customize-card-sections"))
-			.setDesc(t("customize-card-sections-info"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[cardSectionsVisibilityOptions.showDescriptionOnly]: t(
-							"show-description-only"
-						),
-						[cardSectionsVisibilityOptions.showSubTasksOnly]:
-							t("show-subtasks-only"),
-						[cardSectionsVisibilityOptions.showBoth]:
-							t("show-both"),
-						[cardSectionsVisibilityOptions.hideBoth]:
-							t("hide-both"),
-					})
-					.setValue(cardSectionsVisibility)
-					.onChange(async (value) => {
-						this.globalSettings!.cardSectionsVisibility = value;
-						await this.saveSettings();
-					})
-			);
-
-		// Setting to show/Hide the Footer of the task card
-		new Setting(contentEl)
-			.setName(t("show-note-name-in-task-header"))
-			.setDesc(t("show-note-name-in-task-header-description"))
-			.addToggle((toggle) =>
-				toggle.setValue(showFileNameInCard).onChange(async (value) => {
-					this.globalSettings!.showFileNameInCard = value;
-					await this.saveSettings();
-				})
 			);
 
 		// Setting to show/Hide the Footer of the task card
