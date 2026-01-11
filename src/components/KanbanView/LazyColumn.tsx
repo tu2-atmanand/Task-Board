@@ -722,7 +722,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// Render
 	// -------------------------------------------------
 
-	const taskItemComponent = plugin.settings.data.globalSettings.taskCardStyle === taskCardStyleNames.DEFAULT ? TaskItem : TaskItemV2;
+	const taskItemComponent = plugin.settings.data.globalSettings.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
 
 	return (
 		<div

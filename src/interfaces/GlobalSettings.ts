@@ -67,7 +67,8 @@ export interface frontmatterFormatting {
 }
 
 export enum taskCardStyleNames {
-	DEFAULT = "default",
+	EMOJI = "emoji",
+	ICONS = "icons",
 	BASES = "bases",
 	DATAVIEW = "custom",
 }
@@ -463,7 +464,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				taskPropertiesNames.Reminder,
 				taskPropertiesNames.FilePath,
 			],
-			taskCardStyle: taskCardStyleNames.DEFAULT,
+			taskCardStyle: taskCardStyleNames.EMOJI,
 			showVerticalScroll: true,
 			tagColors: [
 				{

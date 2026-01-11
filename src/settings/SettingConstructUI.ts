@@ -42,6 +42,7 @@ import {
 import {
 	frontmatterFormatting,
 	globalSettingsData,
+	taskCardStyleNames,
 	type CustomStatus,
 } from "src/interfaces/GlobalSettings";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
@@ -62,7 +63,9 @@ export class SettingsManager {
 		this.win = window;
 	}
 
-	private getPropertyDisplayName(property: taskPropertiesNames): string {
+	private getPropertyDisplayName(
+		property: taskPropertiesNames
+	): string | null {
 		type PartialDisplayNames = Pick<
 			Record<taskPropertiesNames, string>,
 			| taskPropertiesNames.ID
@@ -100,7 +103,7 @@ export class SettingsManager {
 			[taskPropertiesNames.OnCompletion]: "On-completion (🏁 delete)",
 			[taskPropertiesNames.Dependencies]: "Dependens-on (⛔ fa4sm9)",
 		};
-		return displayNames[property as keyof typeof displayNames] || property;
+		return displayNames[property as keyof typeof displayNames] || null;
 	}
 
 	private openReloadNoticeIfNeeded() {
@@ -834,6 +837,7 @@ export class SettingsManager {
 			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
 			hiddenTaskProperties,
+			taskCardStyle,
 		} = this.globalSettings!;
 
 		// Setting to show/Hide the Header of the task card
@@ -856,6 +860,25 @@ export class SettingsManager {
 					this.globalSettings!.showFooter = value;
 					await this.saveSettings();
 				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("task-card-style"))
+			.setDesc(t("task-card-style"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[taskCardStyleNames.EMOJI]: t("tasks-plugin-emoji"),
+						// [taskCardStyleNames.ICONS]: t("lucide-icons"),
+						[taskCardStyleNames.BASES]: t("bases-cards-style"),
+						// [taskCardStyleNames.DATAVIEW]: t("dataview-style"),
+					})
+					.setValue(taskCardStyle)
+					.onChange(async (value) => {
+						this.globalSettings!.taskCardStyle =
+							value as taskCardStyleNames;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
@@ -989,38 +1012,41 @@ export class SettingsManager {
 		Object.values(taskPropertiesNames).forEach((property) => {
 			const displayName = this.getPropertyDisplayName(property);
 
-			const checkboxSetting = new Setting(checkboxContainer)
-				.setName(displayName)
-				.setClass("taskboard-property-checkbox-setting")
-				.addToggle((toggle) => {
-					const isSelected = hiddenTaskProperties.includes(property);
-					toggle.setValue(isSelected).onChange(async (value) => {
-						if (value) {
-							// Add property if not already included
-							if (
-								!this.globalSettings!.hiddenTaskProperties.includes(
-									property
-								)
-							) {
-								this.globalSettings!.hiddenTaskProperties.push(
-									property
-								);
+			if (displayName) {
+				const checkboxSetting = new Setting(checkboxContainer)
+					.setName(displayName)
+					.setClass("taskboard-property-checkbox-setting")
+					.addToggle((toggle) => {
+						const isSelected =
+							hiddenTaskProperties.includes(property);
+						toggle.setValue(isSelected).onChange(async (value) => {
+							if (value) {
+								// Add property if not already included
+								if (
+									!this.globalSettings!.hiddenTaskProperties.includes(
+										property
+									)
+								) {
+									this.globalSettings!.hiddenTaskProperties.push(
+										property
+									);
+								}
+							} else {
+								// Remove property
+								this.globalSettings!.hiddenTaskProperties =
+									this.globalSettings!.hiddenTaskProperties.filter(
+										(p) => p !== property
+									);
 							}
-						} else {
-							// Remove property
-							this.globalSettings!.hiddenTaskProperties =
-								this.globalSettings!.hiddenTaskProperties.filter(
-									(p) => p !== property
-								);
-						}
-						await this.saveSettings();
+							await this.saveSettings();
 
-						this.openReloadNoticeIfNeeded();
+							this.openReloadNoticeIfNeeded();
+						});
 					});
-				});
 
-			// Style the checkbox setting to be more compact
-			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+				// Style the checkbox setting to be more compact
+				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+			}
 		});
 
 		new Setting(contentEl).setName(t("custom-statuses")).setHeading();
