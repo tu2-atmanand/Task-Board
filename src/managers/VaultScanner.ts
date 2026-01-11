@@ -137,38 +137,43 @@ export default class vaultScanner {
 			// Extract frontmatter from the file
 			const frontmatter = extractFrontmatterFromFile(this.plugin, file);
 
-			// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
-			if (
-				this.plugin.settings.data.globalSettings
-					.frontmatterPropertyForReminder &&
-				frontmatter &&
-				frontmatter[
-					this.plugin.settings.data.globalSettings
-						.frontmatterPropertyForReminder
-				]
-			) {
-				const note: noteItem = {
-					filePath: fileNameWithPath,
-					frontmatter: frontmatter,
-					reminder:
-						frontmatter[
-							this.plugin.settings.data.globalSettings
-								.frontmatterPropertyForReminder
-						],
-				};
+			/**
+			 * @deprecated v1.9.0
+			 * @note - Below feature has been removed now, since users can simply convert any note into a task-note. So, it doesnt make sense to store simply the note name inside the cache seperately. Also, this note, to which user has added a 'reminder' will not appear on the Task Board. Hence this feature will not be used anymore.
+			 *
+			 */
+			// Below code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
+			// if (
+			// 	this.plugin.settings.data.globalSettings
+			// 		.frontmatterPropertyForReminder &&
+			// 	frontmatter &&
+			// 	frontmatter[
+			// 		this.plugin.settings.data.globalSettings
+			// 			.frontmatterPropertyForReminder
+			// 	]
+			// ) {
+			// 	const note: noteItem = {
+			// 		filePath: fileNameWithPath,
+			// 		frontmatter: frontmatter,
+			// 		reminder:
+			// 			frontmatter[
+			// 				this.plugin.settings.data.globalSettings
+			// 					.frontmatterPropertyForReminder
+			// 			],
+			// 	};
 
-				// Check if the note already exists
-				const existingNoteIndex = this.tasksCache.Notes.findIndex(
-					(n) => n.filePath === fileNameWithPath
-				);
-				if (existingNoteIndex !== -1) {
-					// Replace the existing note
-					this.tasksCache.Notes[existingNoteIndex] = note;
-				} else {
-					// Add the new note
-					this.tasksCache.Notes.push(note);
-				}
-			}
+			// 	// Check if the note already exists
+			// 	const existingNoteIndex = this.tasksCache.Notes.findIndex(
+			// 		(n) => n.filePath === fileNameWithPath
+			// 	);
+			// 	if (existingNoteIndex !== -1) {
+			// 		// Replace the existing note
+			// 		this.tasksCache.Notes[existingNoteIndex] = note;
+			// 	} else {
+			// 		// Add the new note
+			// 		this.tasksCache.Notes.push(note);
+			// 	}
+			// }
 
 			// Task Note Detection: Check if this note is marked as a task note
 			if (

@@ -111,7 +111,6 @@ export interface globalSettingsData {
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
 	notificationService: string;
-	frontmatterPropertyForReminder: string;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	hiddenTaskProperties: taskPropertiesNames[];
@@ -651,7 +650,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			showFrontmatterTagsOnCards: false,
 			tasksCacheFilePath: "",
 			notificationService: NotificationService.None,
-			frontmatterPropertyForReminder: "reminder",
 			actions: [
 				{
 					enabled: true,

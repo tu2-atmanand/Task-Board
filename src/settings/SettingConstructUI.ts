@@ -1880,7 +1880,6 @@ export class SettingsManager {
 			dailyNotesPluginComp,
 			quickAddPluginDefaultChoice,
 			notificationService,
-			frontmatterPropertyForReminder,
 			boundTaskCompletionToChildTasks,
 		} = this.globalSettings!;
 
@@ -2109,40 +2108,6 @@ export class SettingsManager {
 					this.globalSettings!.notificationService = value;
 					await this.saveSettings();
 				});
-			});
-
-		new Setting(contentEl)
-			.setName(t("frontmatter-property-for-reminder"))
-			.setDesc(t("frontmatter-property-for-reminder-description"))
-			.addText((text) => {
-				text.setValue(frontmatterPropertyForReminder)
-					.onChange((value) => {
-						if (this.globalSettings)
-							this.globalSettings.frontmatterPropertyForReminder =
-								value;
-						this.saveSettings();
-					})
-					.setPlaceholder("eg.: reminder");
-
-				// const inputEl = text.inputEl;
-				// const suggestionContent = getFrontmatterPropertyNames(
-				// 	this.plugin
-				// );
-				// const onSelectCallback = async (selectedPath: string) => {
-				// 	if (this.globalSettings) {
-				// 		this.globalSettings.quickAddPluginDefaultChoice =
-				// 			selectedPath;
-				// 	}
-				// 	text.setValue(selectedPath);
-				// 	await this.saveSettings();
-				// };
-
-				// new MultiSuggest(
-				// 	inputEl,
-				// 	new Set(suggestionContent),
-				// 	onSelectCallback,
-				// 	this.app
-				// );
 			});
 	}
 
