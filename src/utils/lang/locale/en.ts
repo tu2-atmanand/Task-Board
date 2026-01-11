@@ -520,7 +520,11 @@ const en: Lang = {
 	"show-hide-properties": "Show/Hide properties",
 	"visible": "Visible",
 	"minimized": "Minimized",
-	"checkbox": "Checkbox"
+	"checkbox": "Checkbox",
+	"task-card-style": "Task card style",
+	"task-card-style-info": "Select the UI of the task card. With the 'bases card style' option you may also use an additional CSS snippet to get more dataview properties look. Get the CSS snippet from here : ",
+	"tasks-plugin-emoji": "Tasks plugin emoji",
+	"bases-cards-style": "Bases card style",
 };
 
 export default en;

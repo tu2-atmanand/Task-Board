@@ -837,7 +837,7 @@ export class SettingsManager {
 
 		new Setting(contentEl)
 			.setName(t("task-card-style"))
-			.setDesc(t("task-card-style"))
+			.setDesc(t("task-card-style-info"))
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({

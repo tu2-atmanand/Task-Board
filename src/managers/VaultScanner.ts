@@ -595,7 +595,7 @@ export default class vaultScanner {
 			let result = false;
 			if (isFileScanned === "true") {
 				if (showNotice) {
-					new Notice("tasks-refreshed-successfully");
+					new Notice(t("tasks-refreshed-successfully"));
 				}
 
 				if (this.tasksDetectedOrUpdated) {
@@ -1162,7 +1162,10 @@ export function extractCompletionDate(text: string): string {
 }
 
 export function extractCancelledDate(text: string): string {
-	let match = text.match(/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.cancelledDateRegex
+	);
 
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {
@@ -1177,8 +1180,9 @@ export function extractCancelledDate(text: string): string {
 			/\@cancelled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
 		);
 	}
+
 	// Return the matched date or date-time, or an empty string if no match
-	return match ? match[0].trim() : "";
+	return match ? match[1].trim() : "";
 }
 
 /**

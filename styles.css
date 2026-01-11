@@ -969,7 +969,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemTagFrontmatter {
 	font-size: 0.7rem;
 	text-decoration: var(--tag-decoration);
-	background-color: var(--background-modifier-border) !important;
+	background-color: var(--tag-background) !important;
 	border: var(--pill-border-width) solid var(--pill-border-color) !important;
 	border-radius: var(--pill-radius) !important;
 	color: var(--pill-color) !important;
@@ -1006,7 +1006,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	background-color: var(--background-modifier-box-shadow);
 	padding-inline: 6px;
-	border: 1px solid var(--graph-line);
+	border: 1px solid var(--background-modifier-border-focus);
 	padding-block: 2px;
 	color: var(--icon-color);
 	border-radius: var(--pill-radius);
