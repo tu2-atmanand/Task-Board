@@ -22,12 +22,6 @@ export enum UniversalDateOptions {
 	dueDate = "due",
 }
 
-export enum universalDateOptionsNames {
-	startDate = "Start Date",
-	scheduledDate = "Scheduled Date",
-	dueDate = "Due Date",
-}
-
 export enum TagColorType {
 	Text = "text",
 	Background = "background",

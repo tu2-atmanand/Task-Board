@@ -15,7 +15,7 @@ import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { colTypeNames, UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/Enums";
+import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { Board, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { columnDataProp, AddColumnModal } from "./AddColumnModal";
@@ -645,7 +645,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												))}
 											</select>
 										)}
-										{column.colType === "completed" && (
+										{column.colType === colTypeNames.completed && (
 											<input
 												type="number"
 												placeholder={t("max-items")}
@@ -732,9 +732,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+													<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+													<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
 												</select>
 											</>
 										)}
@@ -757,9 +757,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+													<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+													<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
 												</select>
 											</>
 										)}
