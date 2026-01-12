@@ -159,6 +159,7 @@ export enum colTypeNames {
 	taskPriority = "taskPriority",
 	pathFiltered = "pathFiltered",
 	completed = "completed",
+	allPending = "allPending"
 }
 
 export enum mapViewBackgrounVariantTypes {

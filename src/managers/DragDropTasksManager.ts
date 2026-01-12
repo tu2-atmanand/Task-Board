@@ -1018,6 +1018,8 @@ class DragDropTasksManager {
 				if (sourceColumnData.colType === colTypeNames.otherTags)
 					return true;
 				else return false;
+			case colTypeNames.allPending:
+				return false;
 			default:
 				return true;
 		}

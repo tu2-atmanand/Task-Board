@@ -17,7 +17,7 @@ import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regula
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
-import { ChevronDown, EllipsisVertical } from 'lucide-react';
+import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
@@ -1339,21 +1339,23 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					{plugin.settings.data.globalSettings.experimentalFeatures && (
 						<>
 							{
-								Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
+								Platform.isPhone ? (
 									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
 									</>
 								) : (
 									<>
 										{/* Drag Handle */}
-										<div className="taskItemDragBtn"
-											// aria-label={t("drag-task-card")}
-											draggable={true}
-											onDragStart={handleDragStart}
-											onDragEnd={handleDragEnd}
-										>
-											<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} />
-										</div>
+										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+											<div className="taskItemDragBtn"
+												// aria-label={t("drag-task-card")}
+												draggable={true}
+												onDragStart={handleDragStart}
+												onDragEnd={handleDragEnd}
+											>
+												<Grip size={18} enableBackground={0} opacity={0.4} />
+											</div>
+										)}
 									</>
 								)
 							}

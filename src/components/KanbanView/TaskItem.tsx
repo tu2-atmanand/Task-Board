@@ -1335,14 +1335,16 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 								) : (
 									<>
 										{/* Drag Handle */}
-										<div className="taskItemDragBtn"
-											// aria-label={t("drag-task-card")}
-											draggable={true}
-											onDragStart={handleDragStart}
-											onDragEnd={handleDragEnd}
-										>
-											<Grip size={18} enableBackground={0} opacity={0.4} />
-										</div>
+										{columnData?.colType !== colTypeNames.allPending && (
+											<div className="taskItemDragBtn"
+												// aria-label={t("drag-task-card")}
+												draggable={true}
+												onDragStart={handleDragStart}
+												onDragEnd={handleDragEnd}
+											>
+												<Grip size={18} enableBackground={0} opacity={0.4} />
+											</div>
+										)}
 									</>
 								)
 							}
