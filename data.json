@@ -609,6 +609,7 @@
               }
             ],
             "tasksIdManualOrder": [
+              "276",
               "389",
               "375",
               "378",
@@ -691,8 +692,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 55,
-          "completed": 18
+          "pending": 56,
+          "completed": 17
         },
         "swimlanes": {
           "enabled": false,
@@ -854,8 +855,8 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 55,
-          "completed": 18
+          "pending": 56,
+          "completed": 17
         }
       }
     ],
@@ -1043,7 +1044,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 390,
+      "uniqueIdCounter": 395,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
