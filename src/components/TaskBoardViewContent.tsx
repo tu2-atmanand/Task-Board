@@ -692,7 +692,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}, 300); // Match animation duration
 	}
 
-	function openHeaderMoreOptionsMenu(event: MouseEvent | React.MouseEvent) {
+	function openHeaderMoreOptionsMenu(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
 		const sortMenu = new Menu();
 
 		sortMenu.addItem((item) => {
@@ -707,12 +707,17 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			});
 		});
 		sortMenu.addItem((item) => {
+			item.setTitle(t("show-hide-properties"));
+			item.setIcon("list");
+			item.onClick(async () => {
+				handlePropertiesBtnClick(event);
+			});
+		});
+		sortMenu.addItem((item) => {
 			item.setTitle(t("open-board-filters-modal"));
 			item.setIcon(funnelIcon);
-			item.onClick(async (event) => {
-				if (event instanceof MouseEvent) {
-					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
-				}
+			item.onClick(async () => {
+				handleFilterButtonClick(event);
 			});
 		});
 		sortMenu.addItem((item) => {
@@ -857,18 +862,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 					<button
 						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						aria-label={t("apply-advanced-board-filters")}
-						onClick={handleFilterButtonClick}
-					>
-						<Filter size={18} />
-					</button>
-
-					<button
-						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("show-hide-properties")}
 						onClick={handlePropertiesBtnClick}
 					>
 						<List size={18} />
+					</button>
+
+					<button
+						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+						aria-label={t("apply-advanced-board-filters")}
+						onClick={handleFilterButtonClick}
+					>
+						<Filter size={18} />
 					</button>
 
 					<button
@@ -901,6 +906,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
+
 					{(isMobileView || Platform.isMobile) && (
 						<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
 							<EllipsisVertical size={20} />
