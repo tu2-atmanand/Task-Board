@@ -1050,7 +1050,7 @@
         "viewedType": "kanban",
         "boardIndex": 4,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 5
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
@@ -1176,7 +1176,9 @@
         "filePath",
         "status"
       ],
-      "taskCardStyle": "emoji"
+      "taskCardStyle": "emoji",
+      "autoAddCompletedDate": true,
+      "autoAddCancelledDate": false
     }
   }
 }
