@@ -114,23 +114,24 @@ export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
 	task: taskItem
 ): Promise<string | undefined> => {
-	let newIdToReturn: string | undefined;
 	if (
 		isTaskNotePresentInTags(
 			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
 			task.tags
 		)
 	) {
-		const newId = generateTaskId(plugin);
-		task.legacyId = newId;
-		newIdToReturn = newId;
+		let newId;
+		if (task.legacyId === "") {
+			newId = generateTaskId(plugin);
+			task.legacyId = newId;
+		}
 		updateFrontmatterInMarkdownFile(plugin, task, true);
 
 		return newId;
 	} else {
-		if (extractTaskId(task.title) === "") return undefined;
+		if (extractTaskId(task.title) !== "") return undefined;
 
-		newIdToReturn = await updateTaskInFile(plugin, task, task, true);
+		const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
 		return newIdToReturn;
 	}
 	// .then((newId) => {
