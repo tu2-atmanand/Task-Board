@@ -79,8 +79,10 @@ export interface globalSettingsData {
 	defaultStartTime: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
-	autoAddCreatedDate: boolean;
 	autoAddUniversalDate: boolean;
+	autoAddCreatedDate: boolean;
+	autoAddCompletedDate: boolean;
+	autoAddCancelledDate: boolean;
 	scanVaultAtStartup: boolean;
 	realTimeScanning: boolean;
 	columnWidth: string;
@@ -428,8 +430,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			defaultStartTime: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
-			autoAddCreatedDate: false,
 			autoAddUniversalDate: true,
+			autoAddCreatedDate: false,
+			autoAddCompletedDate: false,
+			autoAddCancelledDate: false,
 			scanVaultAtStartup: false,
 			realTimeScanning: true,
 			columnWidth: "300px",
@@ -717,4 +721,3 @@ export const langCodes: { [key: string]: string } = {
 	"zh-TW": "繁體中文",
 };
 export { taskCardStyleNames };
-

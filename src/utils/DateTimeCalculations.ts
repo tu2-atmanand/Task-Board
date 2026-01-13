@@ -5,6 +5,8 @@ import { taskItem } from "src/interfaces/TaskItem";
 /**
  * Returns local time in ISO-like format (YYYY-MM-DDTHH:MM) without milliseconds or timezone
  * @returns Current local time in ISO format string (YYYY-MM-DDTHH:MM)
+ *
+ * @todo - Update this function and the below one and their names. And take input as the format from the setting and return the value as per the format.
  */
 export const getLocalDateTimeString = (): string => {
 	const now = new Date();
@@ -13,6 +15,7 @@ export const getLocalDateTimeString = (): string => {
 	const day = String(now.getDate()).padStart(2, "0");
 	const hours = String(now.getHours()).padStart(2, "0");
 	const minutes = String(now.getMinutes()).padStart(2, "0");
+
 	return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
@@ -107,7 +110,6 @@ export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
 	return "";
 };
 
-
 // import { DateTime } from "luxon";
 
 // function getDates(fromDate: number, toDate: number): string[] {
@@ -123,7 +125,6 @@ export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
 // 	return dates;
 // }
 
-
 /**
  * Returns an array of dates in the format "YYYY-MM-DD" from the given fromDate to toDate.
  * The fromDate and toDate are the number of days from the current date.
@@ -131,7 +132,10 @@ export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
  * @param toDate - The number of days from the current date to end the date range.
  * @returns An array of dates in the format "YYYY-MM-DD".
  */
-export function getAllDatesInRelativeRange(fromDate: number, toDate: number): string[] {
+export function getAllDatesInRelativeRange(
+	fromDate: number,
+	toDate: number
+): string[] {
 	const now = new Date();
 	const startDate = new Date(now.getTime() + fromDate * 24 * 60 * 60 * 1000);
 	const endDate = new Date(now.getTime() + toDate * 24 * 60 * 60 * 1000);

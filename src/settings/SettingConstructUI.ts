@@ -1881,6 +1881,8 @@ export class SettingsManager {
 			quickAddPluginDefaultChoice,
 			notificationService,
 			boundTaskCompletionToChildTasks,
+			autoAddCancelledDate,
+			autoAddCompletedDate,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -1980,6 +1982,32 @@ export class SettingsManager {
 					this.globalSettings!.autoAddCreatedDate = value;
 					await this.saveSettings();
 				})
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-completed-date-to-tasks"))
+			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(autoAddCompletedDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddCompletedDate = value;
+						await this.saveSettings();
+					})
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-cancelled-date-to-tasks"))
+			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(autoAddCancelledDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddCancelledDate = value;
+						await this.saveSettings();
+					})
 			);
 
 		// contentEl.createEl("h4", { text: t("compatible-plugins") });

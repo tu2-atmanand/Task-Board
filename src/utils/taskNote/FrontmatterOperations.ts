@@ -8,6 +8,9 @@ import {
 } from "./TaskNoteUtils";
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 import { generateTaskId } from "../TaskItemUtils";
+import { statusTypeNames } from "src/interfaces/Enums";
+import { moment as _moment } from "obsidian";
+import { getCurrentLocalTimeString } from "../DateTimeCalculations";
 
 /**
  * Extract frontmatter from file content
@@ -206,8 +209,10 @@ export function createFrontmatterFromTask(
 	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
 		task?.title || "";
 	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
-		getStatusNameFromStatusSymbol(task?.status, plugin.settings.data.globalSettings) ||
-		"pending";
+		getStatusNameFromStatusSymbol(
+			task?.status,
+			plugin.settings.data.globalSettings
+		) || "pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
 		...(task?.tags?.filter(
@@ -436,12 +441,28 @@ export function updateFrontmatterProperties(
 		delete oldFrontmatter?.[dueKey];
 	}
 
+	const statusConfig =
+		plugin.settings.data.globalSettings.customStatuses.find(
+			(status) => status.symbol === task.status
+		);
+	const statusType = statusConfig ? statusConfig.type : undefined;
+
 	const cancelledDateKey = getCustomFrontmatterKey(
 		"cancelledDate",
 		frontmatterFormatting
 	);
-	if (task?.cancelledDate) {
-		tempUpdates[cancelledDateKey] = task.cancelledDate;
+	if (statusType === statusTypeNames.CANCELLED) {
+		if (task.cancelledDate) {
+			tempUpdates[cancelledDateKey] = task.cancelledDate;
+		} else {
+			const globalSettings = plugin.settings.data.globalSettings;
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern
+			);
+
+			tempUpdates[cancelledDateKey] = currentDateValue;
+		}
 	} else {
 		delete tempUpdates[cancelledDateKey];
 		delete oldFrontmatter?.[cancelledDateKey];
@@ -451,8 +472,18 @@ export function updateFrontmatterProperties(
 		"completion",
 		frontmatterFormatting
 	);
-	if (task?.completion) {
-		tempUpdates[completionKey] = task.completion;
+	if (statusType === statusTypeNames.DONE) {
+		if (task.cancelledDate) {
+			tempUpdates[completionKey] = task.completion;
+		} else {
+			const globalSettings = plugin.settings.data.globalSettings;
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern
+			);
+
+			tempUpdates[completionKey] = currentDateValue;
+		}
 	} else {
 		delete tempUpdates[completionKey];
 		delete oldFrontmatter?.[completionKey];

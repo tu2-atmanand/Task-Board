@@ -11,10 +11,7 @@ import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
-	bugReporter,
-	openEditTaskModal,
-	openEditTaskNoteModal,
-	openEditTaskView,
+	bugReporter
 } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import {
@@ -23,9 +20,14 @@ import {
 	isTaskNotePresentInTags,
 } from "../taskNote/TaskNoteUtils";
 import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
-import { EditButtonMode } from "src/interfaces/Enums";
+import { EditButtonMode, statusTypeNames } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 import { eventEmitter } from "src/services/EventEmitter";
+import {
+	sanitizeCancelledDate,
+	sanitizeCompletionDate,
+	sanitizeStatus,
+} from "./TaskContentFormatter";
 
 /**
  * Handle the checkbox change event for the inline-tasks and update the task in the file.
@@ -41,11 +43,15 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 		// Check if the task is completed
 		const newStatus = checkboxStateSwitcher(plugin, task.status);
 		if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
+			let newTitle = sanitizeStatus(task.title, newStatus.newSymbol);
+
 			const taskWithUpdatedStatus = {
 				...task,
+				title: newTitle,
 				completion: "",
-				status: newStatus,
+				status: newStatus.newSymbol,
 			};
+
 			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 				(newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
@@ -60,12 +66,28 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 		} else {
 			const globalSettings = plugin.settings.data.globalSettings;
 			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern
+			);
+			let newTitle = "";
+			if (newStatus.type === statusTypeNames.DONE) {
+				newTitle = sanitizeCompletionDate(
+					globalSettings,
+					task.title,
+					currentDateValue
+				);
+			} else if (newStatus.type === statusTypeNames.CANCELLED) {
+				newTitle = sanitizeCancelledDate(
+					globalSettings,
+					task.title,
+					currentDateValue
+				);
+			}
+
 			const taskWithUpdatedStatus = {
 				...task,
-				completion: moment().format(
-					globalSettings?.taskCompletionDateTimePattern
-				),
-				status: newStatus,
+				title: newTitle,
+				status: newStatus.newSymbol,
 			};
 
 			if (!isTaskRecurring(task.title)) {

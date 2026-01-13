@@ -5,11 +5,11 @@ import { Component, Keymap, Platform, TFile, UserEvent, debounce, normalizePath 
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
-
+import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
+import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCancelledDate, sanitizeCompletionDate, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
 import { buildTaskFromRawContent } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
@@ -23,7 +23,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
-import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
+import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNames } from "src/interfaces/Enums";
 import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
 import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
@@ -155,6 +155,45 @@ export const AddOrEditTaskRC: React.FC<{
 	const handleStatusChange = (symbol: string) => {
 		setStatus(symbol);
 		setIsEdited(true);
+
+		const statusConfig =
+			plugin.settings.data.globalSettings.customStatuses.find(
+				(status) => status.symbol === symbol
+			);
+		const statusType = statusConfig ? statusConfig.type : undefined;
+		if (statusType === statusTypeNames.DONE) {
+			const globalSettings = plugin.settings.data.globalSettings;
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern
+			);
+			const newTitle = sanitizeCompletionDate(
+				globalSettings,
+				task.title,
+				currentDateValue
+			);
+			setTitle(newTitle);
+		} else if (statusType === statusTypeNames.CANCELLED) {
+			const globalSettings = plugin.settings.data.globalSettings;
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern
+			);
+			const newTitle = sanitizeCancelledDate(
+				globalSettings,
+				task.title,
+				currentDateValue
+			);
+			setTitle(newTitle);
+		} else {
+			let newTitle = task.title;
+			const globalSettings = plugin.settings.data.globalSettings;
+			newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
+			newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
+			setTitle(newTitle);
+		}
+
+
 		setIsEditorContentChanged(true);
 	}
 
@@ -873,8 +912,7 @@ export const AddOrEditTaskRC: React.FC<{
 				setFormattedTaskContent(newFormattedTaskNoteContent);
 				frontmatterContentRef.current = newFrontmatter;
 				setIsEditorContentChanged(false);
-			}
-			else {
+			} else {
 				const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
 				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 				setFormattedTaskContent(newFormattedTaskNoteContent);

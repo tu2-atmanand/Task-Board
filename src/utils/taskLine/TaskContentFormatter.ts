@@ -228,7 +228,7 @@ export const getSanitizedTaskContent = (
 		updatedTask.completion || ""
 	);
 
-	updatedTitle = sanitizeCancellationDate(
+	updatedTitle = sanitizeCancelledDate(
 		globalSettings,
 		updatedTitle,
 		updatedTask.cancelledDate || ""
@@ -620,7 +620,7 @@ export const sanitizeCompletionDate = (
  * @param cursorLocation - (Optional) The cursor location to insert the cancellation date at a specific position.
  * @returns The sanitized cancellation date string to be used in the task title.
  */
-export const sanitizeCancellationDate = (
+export const sanitizeCancelledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	cancelledDate: string,
