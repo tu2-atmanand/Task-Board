@@ -4,6 +4,7 @@
 import { Component, Keymap, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
+import Sortable from "sortablejs";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
 import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
@@ -27,6 +28,7 @@ import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNa
 import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
 import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
+import { RxDragHandleHorizontal } from "react-icons/rx";
 
 export interface filterOptions {
 	value: string;
@@ -935,6 +937,7 @@ export const AddOrEditTaskRC: React.FC<{
 	// ------------------ Child Tasks Management -----------------
 
 	const childTaskInputRef = useRef<HTMLInputElement>(null);
+	const childTasksListRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		if (!childTaskInputRef.current) return;
 
@@ -943,6 +946,13 @@ export const AddOrEditTaskRC: React.FC<{
 		);
 		const suggestionContent = pendingTaskItems.filter(t => t.title !== title).map(t => t.title && t.title !== undefined ? t.title : ""); // Exclude self from suggestions
 		const onSelectCallback = (choice: string) => {
+			// Clear the input field after MultiSuggest has finished processing
+			setTimeout(() => {
+				if (childTaskInputRef.current) {
+					childTaskInputRef.current.value = '';
+				}
+			}, 0);
+
 			let selectedTask = pendingTaskItems.find(t => t.title === choice);
 			if (!selectedTask) {
 				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
@@ -1098,6 +1108,50 @@ export const AddOrEditTaskRC: React.FC<{
 		setIsEditorContentChanged(true);
 	};
 
+	// Initialize Sortable for child tasks reordering
+	useEffect(() => {
+		if (!childTasksListRef.current || dependsOn.length === 0) return;
+
+		const sortable = Sortable.create(childTasksListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: (evt) => {
+				try {
+					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+					// Reorder the dependsOn array based on the drag and drop
+					const updatedDependsOn = [...dependsOn];
+					const [movedItem] = updatedDependsOn.splice(evt.oldIndex, 1);
+					updatedDependsOn.splice(evt.newIndex, 0, movedItem);
+
+					setDependsOn(updatedDependsOn);
+
+					// Update the title with the new dependsOn order if not a task note
+					if (!isTaskNote) {
+						const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, updatedDependsOn, cursorLocationRef.current ?? undefined);
+						setTitle(newTitle);
+					}
+
+					setIsEdited(true);
+					setIsEditorContentChanged(true);
+				} catch (error) {
+					bugReporter(plugin, "Error in Sortable onSort for child tasks", error as string, "AddOrEditTaskRC.tsx/childTasksListRef useEffect");
+				}
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [dependsOn, title, isTaskNote, plugin]);
+
 	// ------------------ Rendering the component ------------------
 
 	return (
@@ -1215,11 +1269,12 @@ export const AddOrEditTaskRC: React.FC<{
 									onChange={(e) => { e.preventDefault(); }}
 								/>
 								{/* Here I want to show all the depends on tasks */}
-								<div className="EditTaskModalChildTasksList">
+								<div className="EditTaskModalChildTasksList" ref={childTasksListRef}>
 									{dependsOn.map((taskId) => (
 										<div key={taskId} className="EditTaskModalChildTasksListItem">
 											<div className="EditTaskModalChildTasksListItemFooter">
 												<div className="EditTaskModalChildTasksListItemIdSec">
+													<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 													<div className="EditTaskModalChildTasksListItemIdLabel">Task Id : </div>
 													<span className="EditTaskModalChildTasksListItemIdValue">{taskId}</span>
 												</div>

@@ -7,20 +7,13 @@ import {
 	isTaskRecurring,
 } from "./TaskLineUtils";
 import TaskBoard from "main";
-import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
+import { moment as _moment } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
-import {
-	bugReporter
-} from "src/services/OpenModals";
+import { bugReporter } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import {
-	archiveTaskNote,
-	deleteTaskNote,
-	isTaskNotePresentInTags,
-} from "../taskNote/TaskNoteUtils";
-import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
-import { EditButtonMode, statusTypeNames } from "src/interfaces/Enums";
+import { archiveTaskNote, deleteTaskNote } from "../taskNote/TaskNoteUtils";
+import { statusTypeNames } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 import { eventEmitter } from "src/services/EventEmitter";
 import {
