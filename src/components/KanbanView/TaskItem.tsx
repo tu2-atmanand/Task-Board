@@ -553,9 +553,9 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				// Toggle the checkbox status only for the specific line
 
 				const symbol = extractCheckboxSymbol(line);
-				const nextSymbol = checkboxStateSwitcher(plugin, symbol);
+				const nextStatus = checkboxStateSwitcher(plugin, symbol);
 
-				return line.replace(`[${symbol}]`, `[${nextSymbol}]`);
+				return line.replace(`[${symbol}]`, `[${nextStatus.newSymbol}]`);
 			}
 			return line;
 		});
