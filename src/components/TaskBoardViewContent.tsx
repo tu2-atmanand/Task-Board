@@ -363,10 +363,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				}
 
 				// Get button position
-				const buttonRect = event.currentTarget.getBoundingClientRect();
+				const buttonRect = event.currentTarget?.getBoundingClientRect();
 				const position = {
-					x: buttonRect.left,
-					y: buttonRect.bottom
+					x: buttonRect?.left ?? 100,
+					y: buttonRect?.bottom ?? 100
 				};
 
 				// Create and show popover
