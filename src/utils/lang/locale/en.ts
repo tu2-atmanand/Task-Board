@@ -525,6 +525,9 @@ const en: Lang = {
 	"task-card-style-info": "Select the UI of the task card. With the 'bases card style' option you may also use an additional CSS snippet to get more dataview properties look. Get the CSS snippet from here : ",
 	"tasks-plugin-emoji": "Tasks plugin emoji",
 	"bases-cards-style": "Bases card style",
+	"work-limit": "Work limit",
+	"work-limit-info": "Enter the number of maximum tasks you should work parallely in this column. This is an optional property and its just for reminder.",
+	"work-limit-alert": "Click me!",
 };
 
 export default en;

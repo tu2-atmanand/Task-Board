@@ -390,6 +390,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	font-weight: 600;
 }
 
+.taskBoardColumnSecHeaderTitleSecWorkLimitAlert {
+	display: flex;
+	align-items: center;
+	color: var(--background-modifier-error);
+}
+
 .taskBoardColumnSecHeaderTitleSecColumnCount {
 	color: var(--text-muted);
 	font-size: 0.9em;

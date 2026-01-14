@@ -8,7 +8,7 @@ import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
-import { Menu, Platform } from 'obsidian';
+import { Menu, Notice, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporter } from 'src/services/OpenModals';
@@ -19,6 +19,7 @@ import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
 import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
 import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
 import TaskItemV2 from './TaskItemV2';
+import { AlertOctagon } from 'lucide-react';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -197,6 +198,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				eventEmitter.emit('REFRESH_BOARD');
 			}
 		}
+	}
+
+	async function handleAlertButtonClick() {
+		const message = "You have set a work limit of " + columnData.workLimit + " for this column. Dont be so hard on yourself. Limit your work to reduce workload burden.";
+		new Notice(message, 0);
 	}
 
 	/**
@@ -751,6 +757,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						<div className="taskBoardColumnSecHeader">
 							<div className="taskBoardColumnSecHeaderTitleSec">
 								<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+								{columnData?.workLimit && tasksForThisColumn.length > columnData.workLimit && (
+									<div className='taskBoardColumnSecHeaderTitleSecWorkLimitAlert' aria-label={t("work-limit-alert")} onClick={handleAlertButtonClick}>
+										<AlertOctagon size={20} />
+									</div>
+								)}
 							</div>
 							<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
 								{allTasks?.length ?? 0}
