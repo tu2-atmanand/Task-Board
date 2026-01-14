@@ -735,7 +735,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				item.setIcon("tag");
 				item.onClick(() => {
 					const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
-						updateTaskItemTags(plugin, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
+						updateTaskItemTags(plugin, task, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
 					});
 					modal.open();
 				});

@@ -432,6 +432,7 @@ export const updateTaskItemReminder = (
 /** * Update the tags of a task item.
  * @param plugin - Taskboard plugin instance
  * @param oldTask - Task item with old properties
+ * @param newTask - This task may have other properties updated or it may be exact same copy of oldTask.
  * @param newTags - New tags array of the task item
  * @returns void
  * @description This function updates the tags of a task item and triggers an event to update the real-time data.
@@ -441,9 +442,10 @@ export const updateTaskItemReminder = (
 export const updateTaskItemTags = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
+	newTask: taskItem,
 	newTags: string[]
 ) => {
-	let newTask = { ...oldTask } as taskItem;
+	// let newTask = { ...oldTask };
 	newTask.tags = newTags;
 
 	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });

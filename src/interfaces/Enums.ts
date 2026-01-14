@@ -159,7 +159,7 @@ export enum colTypeNames {
 	taskPriority = "taskPriority",
 	pathFiltered = "pathFiltered",
 	completed = "completed",
-	allPending = "allPending"
+	allPending = "allPending",
 }
 
 export enum mapViewBackgrounVariantTypes {
@@ -198,4 +198,11 @@ export enum taskCardStyleNames {
 	ICONS = "icons",
 	BASES = "bases",
 	DATAVIEW = "custom",
+}
+
+export enum onCompletionOptions {
+	NONE = 0,
+	keep = 1,
+	delete = 2,
+	archive = 3,
 }
