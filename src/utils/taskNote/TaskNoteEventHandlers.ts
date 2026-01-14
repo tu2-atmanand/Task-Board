@@ -40,13 +40,13 @@ export const handleTaskNoteStatusChange = async (
 		};
 		if (
 			globalSettings.autoAddCompletedDate &&
-			newStatus.type === statusTypeNames.DONE
+			newStatus.newSymbolType === statusTypeNames.DONE
 		) {
 			updatedTask.completion = currentDateValue;
 			updatedTask.cancelledDate = "";
 		} else if (
 			globalSettings.autoAddCancelledDate &&
-			newStatus.type === statusTypeNames.CANCELLED
+			newStatus.newSymbolType === statusTypeNames.CANCELLED
 		) {
 			updatedTask.cancelledDate = currentDateValue;
 			updatedTask.completion = "";

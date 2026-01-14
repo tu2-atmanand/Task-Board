@@ -3,7 +3,7 @@
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 import { CSSProperties } from 'react';
-import TaskItem, { swimlaneDataProp, TaskCardComponentProps } from './TaskItem';
+import TaskItem, { swimlaneDataProp } from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
 import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';

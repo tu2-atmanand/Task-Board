@@ -47,6 +47,7 @@ import {
 import { taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
+import { eventEmitter } from "src/services/EventEmitter";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -56,13 +57,26 @@ export default class TaskBoard extends Plugin {
 	vaultScanner: vaultScanner;
 	realTimeScanning: RealTimeScanner;
 	taskBoardFileStack: string[] = [];
-	editorModified: boolean;
+	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
 	// fileUpdatedUsingModal: string;
 	IstasksJsonDataChanged: boolean;
 	isI18nInitialized: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
+
+	// Public getter/setter for editorModified that emits events
+	get editorModified(): boolean {
+		return this._editorModified;
+	}
+
+	set editorModified(value: boolean) {
+		if (this._editorModified !== value) {
+			this._editorModified = value;
+			// Emit event whenever the value changes so React components can update
+			eventEmitter.emit("EDITOR_MODIFIED_CHANGED", value);
+		}
+	}
 
 	// Queue management for bulk file operations
 	private renameQueue: Array<{ file: TAbstractFile; oldPath: string }> = [];
@@ -864,6 +878,7 @@ export default class TaskBoard extends Plugin {
 	registerEvents() {
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
+				console.log("Modify event is fired...");
 				if (fileTypeAllowedForScanning(this.plugin, file)) {
 					if (file instanceof TFile) {
 						// 	this.taskBoardFileStack.push(file.path);

@@ -256,6 +256,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* font-size: 14px; */
 }
 
+.RefreshBtn.needrefresh {
+	background-color: var(--color-accent) !important;
+	color: white;
+}
+
 .searchTaskBtn:hover,
 .filterTaskBtn:hover,
 .AddNewTaskBtn:hover,

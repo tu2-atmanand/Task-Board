@@ -43,6 +43,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [isMobileView, setIsMobileView] = useState(false);
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
+	const [editorModified, setEditorModified] = useState(plugin.editorModified);
 
 	// plugin.registerEvent(
 	// 	plugin.app.workspace.on("resize", () => {
@@ -192,6 +193,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);
 		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
+	}, []);
+
+	// Listen to editor modified state changes
+	useEffect(() => {
+		const handleEditorModifiedChange = (modified: boolean) => {
+			setEditorModified(modified);
+		};
+		eventEmitter.on("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+		return () => eventEmitter.off("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
 	}, []);
 
 	const refreshBoardButton = useCallback(async () => {
@@ -903,7 +913,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<option value={viewTypeNames.map}>{t("map")}</option>
 					</select>
 
-					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
+<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
 
