@@ -315,6 +315,8 @@
               }
             ],
             "tasksIdManualOrder": [
+              "276",
+              "389",
               "378",
               "355",
               "258",
@@ -507,8 +509,8 @@
           ]
         },
         "taskCount": {
-          "pending": 61,
-          "completed": 18
+          "pending": 56,
+          "completed": 17
         },
         "swimlanes": {
           "enabled": true,
@@ -609,10 +611,12 @@
             ],
             "tasksIdManualOrder": [
               "375",
-              "378",
-              "258",
+              "389",
+              "224",
               "355",
-              "365"
+              "276",
+              "258",
+              "378"
             ]
           },
           {
@@ -627,7 +631,8 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": false,
+            "workLimit": 5
           },
           {
             "colType": "namedTag",
@@ -637,7 +642,8 @@
             "index": 5,
             "coltag": "Test",
             "id": 396902,
-            "minimized": false
+            "minimized": false,
+            "workLimit": 3
           },
           {
             "colType": "namedTag",
@@ -653,7 +659,7 @@
             "id": 1936828579,
             "index": 7,
             "colType": "namedTag",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*"
@@ -690,8 +696,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 55,
-          "completed": 18
+          "pending": 57,
+          "completed": 16
         },
         "swimlanes": {
           "enabled": false,
@@ -715,6 +721,147 @@
           ],
           "groupAllRest": true,
           "verticalHeaderUI": false
+        }
+      },
+      {
+        "name": "Only column filters",
+        "index": 4,
+        "columns": [
+          {
+            "id": 2050194674,
+            "index": 1,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140055334-efs743ce1",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1768140055335-r98019pcb",
+                      "property": "tags",
+                      "condition": "isEmpty"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": 850996788,
+            "index": 2,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "Important",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140070366-ymlrpxfd5",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1768140070367-26fzfh3fi",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#important"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": 3370807172,
+            "index": 3,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "WIP",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140095718-9u02uoxai",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1768140095719-sfcnddjpj",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#wip"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": 1957870296,
+            "index": 4,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "In Review",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140118917-x50nyv0rm",
+                  "groupCondition": "any",
+                  "filters": [
+                    {
+                      "id": "id-1768140118918-q6snn1uk7",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#Test"
+                    },
+                    {
+                      "id": "id-1768140126093-wn5bwcpwz",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#working"
+                    }
+                  ]
+                }
+              ]
+            },
+            "workLimit": 3
+          },
+          {
+            "id": 4265650565,
+            "index": 5,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20
+          }
+        ],
+        "hideEmptyColumns": false,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        },
+        "swimlanes": {
+          "enabled": false,
+          "hideEmptySwimlanes": false,
+          "property": "tags",
+          "sortCriteria": "asc",
+          "minimized": [],
+          "maxHeight": "300px",
+          "verticalHeaderUI": false
+        },
+        "taskCount": {
+          "pending": 56,
+          "completed": 17
         }
       }
     ],
@@ -821,14 +968,14 @@
       "customStatuses": [
         {
           "symbol": " ",
-          "name": "incomplete",
+          "name": "Incomplete",
           "nextStatusSymbol": "x",
           "availableAsCommand": false,
           "type": "TODO"
         },
         {
           "symbol": "X",
-          "name": "complete",
+          "name": "Complete",
           "nextStatusSymbol": " ",
           "availableAsCommand": false,
           "type": "DONE"
@@ -849,7 +996,7 @@
         },
         {
           "symbol": ">",
-          "name": "deferred",
+          "name": "Deferred",
           "nextStatusSymbol": "x",
           "availableAsCommand": false,
           "type": "TODO"
@@ -884,7 +1031,7 @@
       "autoAddUniversalDate": true,
       "universalDate": "scheduledDate",
       "archivedTasksFilePath": "",
-      "showFileNameInCard": false,
+      "showFileNameInCard": true,
       "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": ".obsidian/plugins/task-board/tasks.json",
       "notificationService": "obsiApp",
@@ -902,14 +1049,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 387,
+      "uniqueIdCounter": 395,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 3,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 4
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
@@ -999,24 +1146,6 @@
           "index": 13,
           "key": "completed-date",
           "taskItemKey": "completionDate"
-        },
-        {
-          "index": 14,
-          "property": "Source file",
-          "key": "source-file",
-          "taskItemKey": "filePath"
-        },
-        {
-          "index": 15,
-          "property": "Task location",
-          "key": "task-location",
-          "taskItemKey": "taskLocation"
-        },
-        {
-          "index": 16,
-          "property": "Last modified",
-          "key": "last-modified",
-          "taskItemKey": ""
         }
       ],
       "mapView": {
@@ -1037,8 +1166,26 @@
         "scrollThresholdPercent": 80
       },
       "safeGuardFeature": true,
-      "visiblePropertiesList": [],
-      "taskCardStyle": "Bases"
+      "visiblePropertiesList": [
+        "id",
+        "priority",
+        "tags",
+        "time",
+        "reminder",
+        "createdDate",
+        "startDate",
+        "scheduledDate",
+        "dueDate",
+        "completionDate",
+        "cancelledDate",
+        "dependsOn",
+        "filePath",
+        "status",
+        "checkbox"
+      ],
+      "taskCardStyle": "emoji",
+      "autoAddCompletedDate": true,
+      "autoAddCancelledDate": true
     }
   }
 }

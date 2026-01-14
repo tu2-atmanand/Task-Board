@@ -77,6 +77,7 @@ export type ColumnData = {
 	};
 	taskStatus?: string;
 	taskPriority?: number;
+	workLimit?: number;
 	limit?: number;
 	sortCriteria?: columnSortingCriteria[];
 	tasksIdManualOrder?: string[];

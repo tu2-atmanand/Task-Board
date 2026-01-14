@@ -1,7 +1,7 @@
 import type TaskBoard from "main";
 import { Notice } from "obsidian";
+import { statusTypeNames } from "src/interfaces/Enums";
 import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
-import { taskItem } from "src/interfaces/TaskItem";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**
@@ -13,23 +13,40 @@ import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegula
 export function checkboxStateSwitcher(
 	plugin: TaskBoard,
 	symbol: string
-): string {
+): { newSymbol: string; newSymbolType: string } {
 	const { customStatuses } = plugin.settings.data.globalSettings;
 
 	// Check if customStatuses is available and has entries
 	if (customStatuses?.length > 0) {
-		const foundStatus = customStatuses.find(
-			(status: { symbol: string }) => status.symbol === symbol
+		const oldStatus = customStatuses.find(
+			(status) => status.symbol === symbol
 		);
-		if (foundStatus) return foundStatus.nextStatusSymbol;
-	} else {
-		new Notice(
-			"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
-		);
+		if (oldStatus) {
+			const nextStatus = customStatuses.find(
+				(status) => status.symbol === oldStatus?.nextStatusSymbol
+			);
+			if (nextStatus) {
+				return {
+					newSymbol: oldStatus.nextStatusSymbol,
+					newSymbolType: nextStatus?.type,
+				};
+			}
+		}
 	}
 
+	new Notice(
+		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
+	);
 	// Default fallback behavior
-	return symbol === "x" || symbol === "X" ? " " : "x";
+	return symbol === "x" || symbol === "X"
+		? {
+				newSymbol: " ",
+				newSymbolType: statusTypeNames.TODO,
+		  }
+		: {
+				newSymbol: "x",
+				newSymbolType: statusTypeNames.DONE,
+		  };
 }
 
 /**

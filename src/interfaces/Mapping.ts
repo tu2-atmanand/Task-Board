@@ -149,4 +149,5 @@ export const columnTypeAndNameMapping: { [key: string]: string } = {
 	taskPriority: "Priority",
 	pathFiltered: "Path filtered",
 	completed: "Completed",
+	allPending: "All pending tasks"
 };

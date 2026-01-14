@@ -137,38 +137,43 @@ export default class vaultScanner {
 			// Extract frontmatter from the file
 			const frontmatter = extractFrontmatterFromFile(this.plugin, file);
 
-			// This code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
-			if (
-				this.plugin.settings.data.globalSettings
-					.frontmatterPropertyForReminder &&
-				frontmatter &&
-				frontmatter[
-					this.plugin.settings.data.globalSettings
-						.frontmatterPropertyForReminder
-				]
-			) {
-				const note: noteItem = {
-					filePath: fileNameWithPath,
-					frontmatter: frontmatter,
-					reminder:
-						frontmatter[
-							this.plugin.settings.data.globalSettings
-								.frontmatterPropertyForReminder
-						],
-				};
+			/**
+			 * @deprecated v1.9.0
+			 * @note - Below feature has been removed now, since users can simply convert any note into a task-note. So, it doesnt make sense to store simply the note name inside the cache seperately. Also, this note, to which user has added a 'reminder' will not appear on the Task Board. Hence this feature will not be used anymore.
+			 *
+			 */
+			// Below code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
+			// if (
+			// 	this.plugin.settings.data.globalSettings
+			// 		.frontmatterPropertyForReminder &&
+			// 	frontmatter &&
+			// 	frontmatter[
+			// 		this.plugin.settings.data.globalSettings
+			// 			.frontmatterPropertyForReminder
+			// 	]
+			// ) {
+			// 	const note: noteItem = {
+			// 		filePath: fileNameWithPath,
+			// 		frontmatter: frontmatter,
+			// 		reminder:
+			// 			frontmatter[
+			// 				this.plugin.settings.data.globalSettings
+			// 					.frontmatterPropertyForReminder
+			// 			],
+			// 	};
 
-				// Check if the note already exists
-				const existingNoteIndex = this.tasksCache.Notes.findIndex(
-					(n) => n.filePath === fileNameWithPath
-				);
-				if (existingNoteIndex !== -1) {
-					// Replace the existing note
-					this.tasksCache.Notes[existingNoteIndex] = note;
-				} else {
-					// Add the new note
-					this.tasksCache.Notes.push(note);
-				}
-			}
+			// 	// Check if the note already exists
+			// 	const existingNoteIndex = this.tasksCache.Notes.findIndex(
+			// 		(n) => n.filePath === fileNameWithPath
+			// 	);
+			// 	if (existingNoteIndex !== -1) {
+			// 		// Replace the existing note
+			// 		this.tasksCache.Notes[existingNoteIndex] = note;
+			// 	} else {
+			// 		// Add the new note
+			// 		this.tasksCache.Notes.push(note);
+			// 	}
+			// }
 
 			// Task Note Detection: Check if this note is marked as a task note
 			if (
@@ -590,7 +595,7 @@ export default class vaultScanner {
 			let result = false;
 			if (isFileScanned === "true") {
 				if (showNotice) {
-					new Notice("tasks-refreshed-successfully");
+					new Notice(t("tasks-refreshed-successfully"));
 				}
 
 				if (this.tasksDetectedOrUpdated) {
@@ -1157,7 +1162,10 @@ export function extractCompletionDate(text: string): string {
 }
 
 export function extractCancelledDate(text: string): string {
-	let match = text.match(/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.cancelledDateRegex
+	);
 
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {
@@ -1172,8 +1180,9 @@ export function extractCancelledDate(text: string): string {
 			/\@cancelled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
 		);
 	}
+
 	// Return the matched date or date-time, or an empty string if no match
-	return match ? match[0].trim() : "";
+	return match ? match[1].trim() : "";
 }
 
 /**

@@ -1,7 +1,11 @@
 import TaskBoard from "main";
 import { Notice } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
-import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
+import {
+	colTypeNames,
+	statusTypeNames,
+	UniversalDateOptions,
+} from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
 	updateTaskItemProperty,
@@ -10,10 +14,14 @@ import {
 import { eventEmitter } from "src/services/EventEmitter";
 import { swimlaneDataProp } from "src/components/KanbanView/TaskItem";
 import {
+	getStatusNameFromStatusSymbol,
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,
 } from "src/utils/taskNote/TaskNoteUtils";
-import { sanitizeTags } from "src/utils/taskLine/TaskContentFormatter";
+import {
+	sanitizeStatus,
+	sanitizeTags,
+} from "src/utils/taskLine/TaskContentFormatter";
 import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
@@ -217,7 +225,7 @@ class DragDropTasksManager {
 		let newTask = { ...oldTask } as taskItem;
 
 		// -----------------------------------------------
-		// STEP 2 - If the target column has "manualOrder" sorting criteria, update the task-order-config in the target column.
+		// STEP 1 - If the target column has "manualOrder" sorting criteria, update the task-order-config in the target column.
 		// This is moved above STEP-1 because, the parent function is async.
 		// ----------------------------------------------
 		this.handleTasksOrderChange(
@@ -228,47 +236,7 @@ class DragDropTasksManager {
 		);
 
 		// -----------------------------------------------
-		// STEP 1 - Will first update the properties of the task which should make it move from source column to target column.
-		// -----------------------------------------------
-
-		// Remove the source column tag if it exists
-		const sourceTag = sourceColumn.coltag;
-		console.log(
-			"handleTaskMove_namedTag_to_namedTag...\nsourceTag=",
-			sourceTag,
-			"\ntask=",
-			oldTask
-		);
-		let newTags = oldTask.tags.filter(
-			(tag: string) =>
-				tag.replace("#", "").toLowerCase() !==
-				sourceTag.replace("#", "").toLowerCase()
-		);
-
-		// Add the target column tag if it doesn't exist
-		const targetTag = targetColumn.coltag.startsWith("#")
-			? targetColumn.coltag
-			: `#${targetColumn.coltag}`;
-		// Make sure we don't have duplicates
-		newTags.push(targetTag);
-		newTags = Array.from(new Set(newTags));
-
-		newTask.tags = newTags;
-		newTask = await updateTaskItemProperty(
-			oldTask,
-			plugin.settings.data.globalSettings,
-			"tags",
-			oldTask.tags,
-			newTask.tags
-		);
-
-		console.log(
-			"handleTaskMove_namedTag_to_namedTag...\nnewTask=",
-			newTask
-		);
-
-		// -----------------------------------------------
-		// STEP 3 - Update the task properties so that it moves from source swimlane to target swilane
+		// STEP 2 - Update the task properties so that it moves from source swimlane to target swilane
 		// -----------------------------------------------
 		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
 			newTask = await this.updateTaskItemOnSwimlaneChange(
@@ -281,39 +249,73 @@ class DragDropTasksManager {
 		}
 
 		// -----------------------------------------------
-		// STEP 4 - Finally update the task in the note, so that its automatically scanned again. Which will trigger screen refresh.
+		// STEP 3 - Will first update the properties of the task which should make it move from source column to target column.
 		// -----------------------------------------------
-		eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
 
-		const isThisTaskNote = isTaskNotePresentInTags(
-			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-			oldTask.tags
+		// Remove the source column tag if it exists
+		const sourceTag = sourceColumn.coltag;
+		let newTags = newTask.tags.filter(
+			(tag: string) =>
+				tag.replace("#", "").toLowerCase() !==
+				sourceTag.replace("#", "").toLowerCase()
 		);
 
-		if (isThisTaskNote) {
-			updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
-				sleep(1000).then(() => {
-					plugin.realTimeScanning.processAllUpdatedFiles(
-						oldTask.filePath,
-						oldTask.id
-					);
-				});
-			});
-		} else {
-			newTask.title = sanitizeTags(
-				newTask.title,
-				oldTask.tags,
-				newTask.tags
-			);
-			console.log("Sanitized title :", newTask.title);
-			console.log("Sanitized title after tag update:", newTask.title);
-			updateTaskInFile(plugin, newTask, oldTask).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
-					oldTask.filePath,
-					oldTask.id
-				);
-			});
-		}
+		// Add the target column tag if it doesn't exist
+		const targetTag = targetColumn.coltag.replace("#", "");
+		// Make sure we don't have duplicates
+		newTags.push(targetTag);
+		newTags = Array.from(new Set(newTags));
+
+		// newTask.tags = newTags;
+		// newTask = await updateTaskItemProperty(
+		// 	oldTask,
+		// 	plugin.settings.data.globalSettings,
+		// 	"tags",
+		// 	oldTask.tags,
+		// 	newTask.tags
+		// );
+
+		console.log(
+			"handleTaskMove_namedTag_to_namedTag...\nnewTask=",
+			newTask
+		);
+
+		// -----------------------------------------------
+		// STEP 4 - Finally update the task in the note, so that its automatically scanned again. Which will trigger screen refresh.
+		// -----------------------------------------------
+		updateTaskItemTags(plugin, oldTask, newTask, newTags);
+
+		// eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
+
+		// const isThisTaskNote = isTaskNotePresentInTags(
+		// 	plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		// 	oldTask.tags
+		// );
+
+		// if (isThisTaskNote) {
+		// 	updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+		// 		sleep(1000).then(() => {
+		// 			plugin.realTimeScanning.processAllUpdatedFiles(
+		// 				oldTask.filePath,
+		// 				oldTask.id
+		// 			);
+		// 		});
+		// 	});
+		// } else {
+		// 	newTask.title = sanitizeTags(
+		// 		newTask.title,
+		// 		oldTask.tags,
+		// 		newTask.tags
+		// 	);
+		// 	console.log("Sanitized title :", newTask.title);
+		// 	console.log("Sanitized title after tag update:", newTask.title);
+		// 	updateTaskInFile(plugin, newTask, oldTask).then(() => {
+		// 		plugin.realTimeScanning.processAllUpdatedFiles(
+		// 			oldTask.filePath,
+		// 			oldTask.id
+		// 		);
+		// 	});
+		// }
 	};
 
 	/**
@@ -322,7 +324,8 @@ class DragDropTasksManager {
 	 * @param task The task being moved
 	 * @param sourceColumn Source column data
 	 * @param targetColumn Target column data
-	 * @todo - This is a duplicate of handleTaskMove_to_dated, need to deprecate this function.
+	 *
+	 * @todo - This is a duplicate of handleTaskMove_to_priority. But both these functions have only one difference. So, not sure whether to remove this one or not.
 	 */
 	handleTaskMove_dated_to_dated = async (
 		plugin: TaskBoard,
@@ -426,7 +429,8 @@ class DragDropTasksManager {
 	 * @param task The task being moved
 	 * @param sourceColumn Source column data
 	 * @param targetColumn Target column data
-	 * @todo - This is a duplicate of handleTaskMove_to_priority, need to deprecate this function.
+	 *
+	 * @todo - This is a duplicate of handleTaskMove_to_priority. But both these functions have only one difference. So, not sure whether to remove this one or not.
 	 */
 	handleTaskMove_priority_to_priority = async (
 		plugin: TaskBoard,
@@ -480,7 +484,8 @@ class DragDropTasksManager {
 	 * @param task The task being moved
 	 * @param sourceColumn Source column data
 	 * @param targetColumn Target column data
-	 * @todo - This is a duplicate of handleTaskMove_to_status, need to deprecate this function.
+	 *
+	 * @todo - This is a duplicate of handleTaskMove_to_priority. But both these functions have only one difference. So, not sure whether to remove this one or not.
 	 */
 	handleTaskMove_status_to_status = async (
 		plugin: TaskBoard,
@@ -529,6 +534,34 @@ class DragDropTasksManager {
 		updateTaskItemStatus(plugin, newTask, targetColumnStatusValue);
 	};
 
+	handleTaskMove_DONE_to_TODO = (
+		plugin: TaskBoard,
+		task: taskItem
+	): taskItem => {
+		const newTitle = task.title;
+		let newTask: taskItem = {
+			...task,
+			status: " ",
+			completion: "",
+			cancelledDate: "",
+		};
+		if (
+			!isTaskNotePresentInTags(
+				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+				task.tags
+			)
+		) {
+			newTask.title = sanitizeStatus(
+				plugin.settings.data.globalSettings,
+				task.title,
+				" ",
+				statusTypeNames.TODO
+			);
+		}
+
+		return newTask;
+	};
+
 	/**
 	 * Adds a date to a task when moved to a dated column from a different column type
 	 * @param plugin TaskBoard plugin instance
@@ -574,6 +607,10 @@ class DragDropTasksManager {
 				plugin.settings.data.globalSettings
 			);
 			console.log("newTask after swimlane change:", newTask);
+		}
+
+		if (sourceColumn.colType === colTypeNames.completed) {
+			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
 		}
 
 		if (
@@ -631,7 +668,7 @@ class DragDropTasksManager {
 	};
 
 	/**
-	 * Adds a tag to a task when moved to a namedTag column from a different column type
+	 * Adds a tag to a task when moved to a namedTag column from a different column type.
 	 * @param plugin TaskBoard plugin instance
 	 * @param task The task being moved
 	 * @param sourceColumn Source column data
@@ -645,7 +682,7 @@ class DragDropTasksManager {
 		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
 		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
 	): Promise<void> => {
-		if (targetColumn.coltag == undefined) {
+		if (!targetColumn?.coltag) {
 			console.error(
 				"handleTaskMove_to_namedTag: coltag undefined in the target column configs"
 			);
@@ -674,6 +711,11 @@ class DragDropTasksManager {
 			console.log("newTask after swimlane change:", newTask);
 		}
 
+		console.log("Should hit this one...");
+		if (sourceColumn.colType === colTypeNames.completed) {
+			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
+		}
+
 		// STEP 3 - Add the target column tag if it doesn't already exist
 		let newTags = oldTask.tags ?? [];
 		if (targetColumn.coltag) {
@@ -687,7 +729,7 @@ class DragDropTasksManager {
 		}
 
 		// FINALLY - Update the task in the note which will trigger to refresh the view.
-		updateTaskItemTags(plugin, oldTask, newTags);
+		updateTaskItemTags(plugin, oldTask, newTask, newTags);
 	};
 
 	/**
@@ -735,6 +777,10 @@ class DragDropTasksManager {
 				plugin.settings.data.globalSettings
 			);
 			console.log("newTask after swimlane change:", newTask);
+		}
+
+		if (sourceColumn.colType === colTypeNames.completed) {
+			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
 		}
 
 		// Extract the priority value from the source column
@@ -790,6 +836,10 @@ class DragDropTasksManager {
 			console.log("newTask after swimlane change:", newTask);
 		}
 
+		if (sourceColumn.colType === colTypeNames.completed) {
+			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
+		}
+
 		// Extract the status value from the source column
 		const targetColumnStatusValue =
 			(targetColumn.taskStatus as string) || "";
@@ -838,11 +888,13 @@ class DragDropTasksManager {
 			console.log("newTask after swimlane change:", newTask);
 		}
 
-		// STEP 3 - Mark task as completed - typically with status symbol 'x'
-		const completedStatus = "x";
+		const newStatus =
+			plugin.settings.data.globalSettings.customStatuses.find(
+				(status) => status.type === statusTypeNames.DONE
+			);
 
 		// FINALLY - Update the task in the note.
-		updateTaskItemStatus(plugin, newTask, completedStatus);
+		updateTaskItemStatus(plugin, newTask, newStatus?.symbol ?? "x");
 	};
 
 	/**
@@ -1018,6 +1070,8 @@ class DragDropTasksManager {
 				if (sourceColumnData.colType === colTypeNames.otherTags)
 					return true;
 				else return false;
+			case colTypeNames.allPending:
+				return false;
 			default:
 				return true;
 		}

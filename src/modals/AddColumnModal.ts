@@ -106,6 +106,10 @@ export class AddColumnModal extends Modal {
 				text: columnTypeAndNameMapping.pathFiltered,
 			},
 			{
+				value: colTypeNames.allPending,
+				text: columnTypeAndNameMapping.allPending,
+			},
+			{
 				value: colTypeNames.completed,
 				text: columnTypeAndNameMapping.completed,
 			},

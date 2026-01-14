@@ -9,7 +9,6 @@ import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
 import { ChevronDown, ChevronLast, ChevronLeft, ChevronRight } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { colTypeNames } from 'src/interfaces/Enums';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;

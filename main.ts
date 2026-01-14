@@ -47,6 +47,7 @@ import {
 import { taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
+import { eventEmitter } from "src/services/EventEmitter";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -56,13 +57,37 @@ export default class TaskBoard extends Plugin {
 	vaultScanner: vaultScanner;
 	realTimeScanning: RealTimeScanner;
 	taskBoardFileStack: string[] = [];
-	editorModified: boolean;
+	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
 	// fileUpdatedUsingModal: string;
 	IstasksJsonDataChanged: boolean;
 	isI18nInitialized: boolean;
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
+
+	// Public getter/setter for editorModified that emits events
+	get editorModified(): boolean {
+		return this._editorModified;
+	}
+
+	set editorModified(value: boolean) {
+		if (this._editorModified !== value) {
+			this._editorModified = value;
+			// Emit event whenever the value changes so React components can update
+			eventEmitter.emit("EDITOR_MODIFIED_CHANGED", value);
+		}
+	}
+
+	// Queue management for bulk file operations
+	private renameQueue: Array<{ file: TAbstractFile; oldPath: string }> = [];
+	private deleteQueue: TAbstractFile[] = [];
+	private createQueue: TFile[] = [];
+	private renameProcessingTimer: NodeJS.Timeout | null = null;
+	private deleteProcessingTimer: NodeJS.Timeout | null = null;
+	private createProcessingTimer: NodeJS.Timeout | null = null;
+	private currentProgressNotice: Notice | null = null;
+	private readonly QUEUE_DELAY = 1000; // Delay in ms before starting to process queue
+	private readonly PROCESSING_INTERVAL = 100; // Delay between processing each file
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
@@ -628,9 +653,232 @@ export default class TaskBoard extends Plugin {
 		// });
 	}
 
+	// ==================== Queue Management for Bulk File Operations ====================
+
+	/**
+	 * Add a file to the rename queue and schedule processing
+	 */
+	private queueFileForRename(file: TAbstractFile, oldPath: string) {
+		// Only queue TFile objects (not folders) that are allowed for scanning
+		if (
+			file instanceof TFile &&
+			fileTypeAllowedForScanning(this.plugin, file)
+		) {
+			this.renameQueue.push({ file, oldPath });
+
+			// Clear existing timer and set a new one
+			if (this.renameProcessingTimer) {
+				clearTimeout(this.renameProcessingTimer);
+			}
+
+			this.renameProcessingTimer = setTimeout(() => {
+				this.processRenameQueue();
+			}, this.QUEUE_DELAY);
+		}
+	}
+
+	/**
+	 * Process all files in the rename queue one by one
+	 */
+	private async processRenameQueue() {
+		if (this.renameQueue.length === 0) {
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			return;
+		}
+
+		const archivedPath =
+			this.settings.data.globalSettings.archivedTBNotesFolderPath;
+		const totalFiles = this.renameQueue.length;
+
+		// Show progress notice
+		this.currentProgressNotice = new Notice(
+			`Processing renamed files: 0/${totalFiles}`,
+			0
+		);
+
+		let processed = 0;
+		while (this.renameQueue.length > 0) {
+			const { file, oldPath } = this.renameQueue.shift()!;
+
+			try {
+				this.realTimeScanning.onFileRenamed(
+					file,
+					oldPath,
+					archivedPath
+				);
+				processed++;
+
+				// Update progress notice
+				this.currentProgressNotice.messageEl.textContent = `Processing renamed files: ${processed}/${totalFiles}`;
+			} catch (error) {
+				console.error(
+					`Error processing renamed file ${file.path}:`,
+					error
+				);
+			}
+
+			// Add delay between processing each file to prevent blocking UI
+			if (this.renameQueue.length > 0) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, this.PROCESSING_INTERVAL)
+				);
+			}
+		}
+
+		// Hide progress notice after completion
+		this.currentProgressNotice?.hide();
+		this.currentProgressNotice = null;
+		new Notice(`✓ Finished processing ${totalFiles} renamed file(s)`);
+	}
+
+	/**
+	 * Add a file to the delete queue and schedule processing
+	 */
+	private queueFileForDeletion(file: TAbstractFile) {
+		// Only queue TFile objects (not folders) that are allowed for scanning
+		if (
+			file instanceof TFile &&
+			fileTypeAllowedForScanning(this.plugin, file)
+		) {
+			this.deleteQueue.push(file);
+
+			// Clear existing timer and set a new one
+			if (this.deleteProcessingTimer) {
+				clearTimeout(this.deleteProcessingTimer);
+			}
+
+			this.deleteProcessingTimer = setTimeout(() => {
+				this.processDeleteQueue();
+			}, this.QUEUE_DELAY);
+		}
+	}
+
+	/**
+	 * Process all files in the delete queue one by one
+	 */
+	private async processDeleteQueue() {
+		if (this.deleteQueue.length === 0) {
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			return;
+		}
+
+		const totalFiles = this.deleteQueue.length;
+
+		// Show progress notice
+		this.currentProgressNotice = new Notice(
+			`Processing deleted files: 0/${totalFiles}`,
+			0
+		);
+
+		let processed = 0;
+		while (this.deleteQueue.length > 0) {
+			const file = this.deleteQueue.shift()!;
+
+			try {
+				this.realTimeScanning.onFileDeleted(file);
+				processed++;
+
+				// Update progress notice
+				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
+			} catch (error) {
+				console.error(
+					`Error processing deleted file ${file.path}:`,
+					error
+				);
+			}
+
+			// Add delay between processing each file to prevent blocking UI
+			if (this.deleteQueue.length > 0) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, this.PROCESSING_INTERVAL)
+				);
+			}
+		}
+
+		// Hide progress notice after completion
+		this.currentProgressNotice?.hide();
+		this.currentProgressNotice = null;
+		new Notice(
+			`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`
+		);
+	}
+
+	/**
+	 * Add a file to the create queue and schedule processing
+	 */
+	private queueFileForCreation(file: TFile) {
+		// Only queue files that are allowed for scanning
+		if (fileTypeAllowedForScanning(this.plugin, file)) {
+			this.createQueue.push(file);
+
+			// Clear existing timer and set a new one
+			if (this.createProcessingTimer) {
+				clearTimeout(this.createProcessingTimer);
+			}
+
+			this.createProcessingTimer = setTimeout(() => {
+				this.processCreateQueue();
+			}, this.QUEUE_DELAY);
+		}
+	}
+
+	/**
+	 * Process all files in the create queue one by one
+	 */
+	private async processCreateQueue() {
+		if (this.createQueue.length === 0) {
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			return;
+		}
+
+		const totalFiles = this.createQueue.length;
+
+		// Show progress notice
+		this.currentProgressNotice = new Notice(
+			`Task Board : Processing created files: 0/${totalFiles}`,
+			0
+		);
+
+		let processed = 0;
+		while (this.createQueue.length > 0) {
+			const file = this.createQueue.shift()!;
+
+			try {
+				await this.realTimeScanning.processAllUpdatedFiles(file);
+				processed++;
+
+				// Update progress notice
+				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
+			} catch (error) {
+				console.error(
+					`Error processing created file ${file.path}:`,
+					error
+				);
+			}
+
+			// Add delay between processing each file to prevent blocking UI
+			if (this.createQueue.length > 0) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, this.PROCESSING_INTERVAL)
+				);
+			}
+		}
+
+		// Hide progress notice after completion
+		this.currentProgressNotice?.hide();
+		this.currentProgressNotice = null;
+		new Notice(
+			`✓ Task Board : Finished processing ${totalFiles} created file(s)`
+		);
+	}
+
 	registerEvents() {
 		this.registerEvent(
 			this.app.vault.on("modify", (file: TAbstractFile) => {
+				console.log("Modify event is fired...");
 				if (fileTypeAllowedForScanning(this.plugin, file)) {
 					if (file instanceof TFile) {
 						// 	this.taskBoardFileStack.push(file.path);
@@ -640,50 +888,48 @@ export default class TaskBoard extends Plugin {
 				}
 			})
 		);
+		this.registerEvent(
+			this.app.vault.on("rename", (file, oldPath) => {
+				console.log("Rename event is fired...");
+				// Queue the file for processing instead of processing immediately
+				this.queueFileForRename(file, oldPath);
+			})
+		);
+		this.registerEvent(
+			this.app.vault.on("delete", (file) => {
+				console.log("Delete event is fired...");
+				// Queue the file for processing instead of processing immediately
+				this.queueFileForDeletion(file);
+			})
+		);
+		this.registerEvent(
+			this.app.vault.on("create", (file) => {
+				console.log("Create event is fired...");
+				if (file instanceof TFile) {
+					// Queue the file for processing instead of processing immediately
+					this.queueFileForCreation(file);
+				}
+			})
+		);
+
 		// Listen for editor-blur event and trigger scanning if the editor was modified
 		this.registerEvent(
 			this.app.workspace.on(
 				"active-leaf-change",
 				(leaf: WorkspaceLeaf | null) => {
+					console.log("On Active Leaf Change...\nLeaf =", leaf);
 					this.onFileModifiedAndLostFocus();
 				}
 			)
 		);
 		this.registerDomEvent(window, "blur", () => {
 			this.onFileModifiedAndLostFocus();
+			console.log("Focusing out of the window...");
 		});
-
-		this.registerEvent(
-			this.app.vault.on("rename", (file, oldPath) => {
-				if (file instanceof TFile) {
-					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
-					this.realTimeScanning.onFileRenamed(
-						file,
-						oldPath,
-						this.plugin.settings.data.globalSettings
-							.archivedTBNotesFolderPath
-					);
-				}
-			})
-		);
-		this.registerEvent(
-			this.app.vault.on("delete", (file) => {
-				if (file instanceof TFile) {
-					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
-					this.realTimeScanning.onFileDeleted(file);
-				}
-			})
-		);
-
-		this.registerEvent(
-			this.app.vault.on("create", (file) => {
-				if (file instanceof TFile) {
-					setTimeout(() => {
-						this.realTimeScanning.processAllUpdatedFiles(file);
-					}, 400);
-				}
-			})
-		);
+		this.registerDomEvent(window, "focus", () => {
+			this.onFileModifiedAndLostFocus();
+			console.log("Focusing in the window...");
+		});
 
 		// const closeButton = document.querySelector<HTMLElement>(
 		// 	".titlebar-button.mod-close"

@@ -15,7 +15,7 @@ import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { colTypeNames, UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/Enums";
+import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { Board, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { columnDataProp, AddColumnModal } from "./AddColumnModal";
@@ -360,9 +360,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// evt?.stopPropagation();
 		// console.log(`Updating column at boardIndex: ${boardIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
 		const updatedBoards = [...localBoards];
-		if (field in updatedBoards[boardIndex].columns[columnIndex]) {
-			(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
-		}
+		(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
+
 		setLocalBoards(updatedBoards);
 		setIsEdited(true);
 	};
@@ -591,61 +590,129 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											}
 											className="boardConfigModalColumnRowContentColName"
 										/>
-										{column.colType === colTypeNames.namedTag && (
+										{column.colType === colTypeNames.allPending && (
 											<input
-												type="text"
-												ref={(el) => {
-													filePathInputRefs.current[column.id] = el;
-												}}
-												placeholder={t("enter-tag")}
-												value={column.coltag || ""}
+												type="number"
+												placeholder={t("work-limit")}
+												aria-label={t("work-limit-info")}
+												value={column.workLimit ?? 0}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
-														"coltag",
-														e.target.value
-													)
-												}
-												className="boardConfigModalColumnRowContentColName"
-											/>
-										)}
-										{column.colType === colTypeNames.taskStatus && (
-											<input
-												type="text"
-												placeholder={t("enter-status-placeholder")}
-												value={column.taskStatus || ""}
-												onChange={(e) =>
-													handleColumnChange(
-														boardIndex,
-														columnIndex,
-														colTypeNames.taskStatus,
-														e.target.value
-													)
-												}
-												className="boardConfigModalColumnRowContentColName"
-											/>
-										)}
-										{column.colType === colTypeNames.taskPriority && (
-											<select
-												aria-label="Select priority"
-												value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
-												onChange={(e) =>
-													handleColumnChange(
-														boardIndex,
-														columnIndex,
-														colTypeNames.taskPriority,
+														"workLimit",
 														Number(e.target.value)
 													)
 												}
-												className="boardConfigModalColumnRowContentPriorityDropdown"
-											>
-												{getPriorityOptionsForDropdown().map((option) => (
-													<option key={option.value} value={option.value}>{option.text}</option>
-												))}
-											</select>
+												className="boardConfigModalColumnRowContentColName"
+											/>
 										)}
-										{column.colType === "completed" && (
+										{column.colType === colTypeNames.namedTag && (
+											<>
+												<input
+													type="text"
+													ref={(el) => {
+														filePathInputRefs.current[column.id] = el;
+													}}
+													placeholder={t("enter-tag")}
+													value={column.coltag || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"coltag",
+															e.target.value
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
+										)}
+										{column.colType === colTypeNames.taskStatus && (
+											<>
+												<input
+													type="text"
+													placeholder={t("enter-status-placeholder")}
+													value={column.taskStatus || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															colTypeNames.taskStatus,
+															e.target.value
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
+										)}
+										{column.colType === colTypeNames.taskPriority && (
+											<>
+												<select
+													aria-label="Select priority"
+													value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															colTypeNames.taskPriority,
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentPriorityDropdown"
+												>
+													{getPriorityOptionsForDropdown().map((option) => (
+														<option key={option.value} value={option.value}>{option.text}</option>
+													))}
+												</select>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
+										)}
+										{column.colType === colTypeNames.completed && (
 											<input
 												type="number"
 												placeholder={t("max-items")}
@@ -685,7 +752,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("from")}
-													value={column.datedBasedColumn?.from || ""}
+													value={column.datedBasedColumn?.from || 0}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -702,7 +769,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("to")}
-													value={column.datedBasedColumn?.to || ""}
+													value={column.datedBasedColumn?.to || 0}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -732,10 +799,25 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+													<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+													<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
 												</select>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
 											</>
 										)}
 										{column.colType === colTypeNames.undated && (
@@ -757,9 +839,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+													<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+													<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
 												</select>
 											</>
 										)}

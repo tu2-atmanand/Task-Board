@@ -22,12 +22,6 @@ export enum UniversalDateOptions {
 	dueDate = "due",
 }
 
-export enum universalDateOptionsNames {
-	startDate = "Start Date",
-	scheduledDate = "Scheduled Date",
-	dueDate = "Due Date",
-}
-
 export enum TagColorType {
 	Text = "text",
 	Background = "background",
@@ -38,13 +32,6 @@ export enum NotificationService {
 	ReminderPlugin = "reminderPlugin",
 	NotifianApp = "notifianApp",
 	ObsidApp = "obsiApp",
-}
-
-export enum cardSectionsVisibilityOptions {
-	showSubTasksOnly = "showSubTasksOnly",
-	showDescriptionOnly = "showDescriptionOnly",
-	showBoth = "showBoth",
-	hideBoth = "hideBoth",
 }
 
 export enum taskPropertiesNames {
@@ -172,6 +159,7 @@ export enum colTypeNames {
 	taskPriority = "taskPriority",
 	pathFiltered = "pathFiltered",
 	completed = "completed",
+	allPending = "allPending",
 }
 
 export enum mapViewBackgrounVariantTypes {
@@ -203,4 +191,18 @@ export enum mapViewEdgeType {
 	step = "step",
 	smoothstep = "smoothstep",
 	bezier = "default",
+}
+
+export enum taskCardStyleNames {
+	EMOJI = "emoji",
+	ICONS = "icons",
+	BASES = "bases",
+	DATAVIEW = "custom",
+}
+
+export enum onCompletionOptions {
+	NONE = 0,
+	keep = 1,
+	delete = 2,
+	archive = 3,
 }

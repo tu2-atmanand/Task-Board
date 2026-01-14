@@ -7,25 +7,20 @@ import {
 	isTaskRecurring,
 } from "./TaskLineUtils";
 import TaskBoard from "main";
-import { moment as _moment, TFile, WorkspaceLeaf } from "obsidian";
+import { moment as _moment } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
-import {
-	bugReporter,
-	openEditTaskModal,
-	openEditTaskNoteModal,
-	openEditTaskView,
-} from "src/services/OpenModals";
+import { bugReporter } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import {
-	archiveTaskNote,
-	deleteTaskNote,
-	isTaskNotePresentInTags,
-} from "../taskNote/TaskNoteUtils";
-import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
-import { EditButtonMode } from "src/interfaces/Enums";
+import { archiveTaskNote, deleteTaskNote } from "../taskNote/TaskNoteUtils";
+import { statusTypeNames } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 import { eventEmitter } from "src/services/EventEmitter";
+import {
+	sanitizeCancelledDate,
+	sanitizeCompletionDate,
+	sanitizeStatus,
+} from "./TaskContentFormatter";
 
 /**
  * Handle the checkbox change event for the inline-tasks and update the task in the file.
@@ -37,15 +32,23 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
 	const tasksPlugin = new TasksPluginApi(plugin);
 
+	console.log("handleCheckboxChange...\nTask =", task);
 	if (!tasksPlugin.isTasksPluginEnabled()) {
-		// Check if the task is completed
-		const newStatus = checkboxStateSwitcher(plugin, task.status);
-		if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
+		if (!isTaskRecurring(task.title)) {
+			// Check if the task is completed
+			const newStatus = checkboxStateSwitcher(plugin, task.status);
+			const newTitle = sanitizeStatus(
+				plugin.settings.data.globalSettings,
+				task.title,
+				newStatus.newSymbol,
+				newStatus.newSymbolType
+			);
 			const taskWithUpdatedStatus = {
 				...task,
-				completion: "",
-				status: newStatus,
+				title: newTitle,
+				status: newStatus.newSymbol,
 			};
+
 			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 				(newId) => {
 					plugin.realTimeScanning.processAllUpdatedFiles(
@@ -57,53 +60,94 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 					// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
 				}
 			);
+
+			// if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
+			// 	const newStatusType =
+			// 		plugin.settings.data.globalSettings.customStatuses.find(
+			// 			(status) => status.symbol === newStatus
+			// 		)?.type ?? statusTypeNames.TODO;
+			// 	let newTitle = sanitizeStatus(task.title, newStatus.newSymbol);
+
+			// 	const taskWithUpdatedStatus = {
+			// 		...task,
+			// 		title: newTitle,
+			// 		completion: "",
+			// 		status: newStatus.newSymbol,
+			// 	};
+
+			// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+			// 		(newId) => {
+			// 			plugin.realTimeScanning.processAllUpdatedFiles(
+			// 				task.filePath,
+			// 				task.legacyId
+			// 			);
+
+			// 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+			// 			// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+			// 		}
+			// 	);
+			// } else {
+			// 	const globalSettings = plugin.settings.data.globalSettings;
+			// 	const moment = _moment as unknown as typeof _moment.default;
+			// 	const currentDateValue = moment().format(
+			// 		globalSettings?.taskCompletionDateTimePattern
+			// 	);
+			// 	let newTitle = "";
+			// 	if (newStatus.type === statusTypeNames.DONE) {
+			// 		newTitle = sanitizeCompletionDate(
+			// 			globalSettings,
+			// 			task.title,
+			// 			currentDateValue
+			// 		);
+			// 	} else if (newStatus.type === statusTypeNames.CANCELLED) {
+			// 		newTitle = sanitizeCancelledDate(
+			// 			globalSettings,
+			// 			task.title,
+			// 			currentDateValue
+			// 		);
+			// 	}
+
+			// 	const taskWithUpdatedStatus = {
+			// 		...task,
+			// 		title: newTitle,
+			// 		status: newStatus.newSymbol,
+			// 	};
+
+			// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+			// 		(newId) => {
+			// 			plugin.realTimeScanning.processAllUpdatedFiles(
+			// 				taskWithUpdatedStatus.filePath
+			// 			);
+
+			// 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+			// 			// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+			// 		}
+			// 	);
+			// }
 		} else {
-			const globalSettings = plugin.settings.data.globalSettings;
-			const moment = _moment as unknown as typeof _moment.default;
-			const taskWithUpdatedStatus = {
-				...task,
-				completion: moment().format(
-					globalSettings?.taskCompletionDateTimePattern
-				),
-				status: newStatus,
-			};
+			bugReporter(
+				plugin,
+				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
+				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
+				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+			);
 
-			if (!isTaskRecurring(task.title)) {
-				updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
-					(newId) => {
-						plugin.realTimeScanning.processAllUpdatedFiles(
-							taskWithUpdatedStatus.filePath
-						);
-
-						// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
-						// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
-					}
-				);
-			} else {
-				bugReporter(
-					plugin,
-					"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
-					`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
-				);
-
-				// useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
-				// 	.then(() => {
-				// 		plugin.realTimeScanning.processAllUpdatedFiles(
-				// 			task.filePath
-				// 		);
-				// 	})
-				// 	.catch((error) => {
-				// 		console.error(
-				// 			"TaskItemEventHandlers.ts : Error updating recurring task in file",
-				// 			error
-				// 		);
-				// 	});
-			}
-
-			// // Move from Pending to Completed
-			// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+			// useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
+			// 	.then(() => {
+			// 		plugin.realTimeScanning.processAllUpdatedFiles(
+			// 			task.filePath
+			// 		);
+			// 	})
+			// 	.catch((error) => {
+			// 		console.error(
+			// 			"TaskItemEventHandlers.ts : Error updating recurring task in file",
+			// 			error
+			// 		);
+			// 	});
 		}
+
+		// // Move from Pending to Completed
+		// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
 	} else {
 		useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 			.then(() => {

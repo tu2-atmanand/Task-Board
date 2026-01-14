@@ -4,12 +4,13 @@
 import { Component, Keymap, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
+import Sortable from "sortablejs";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
-
+import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
+import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCancelledDate, sanitizeCompletionDate, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeStatus, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
 import { buildTaskFromRawContent } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
@@ -23,10 +24,11 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
-import { UniversalDateOptions, EditButtonMode, NotificationService } from "src/interfaces/Enums";
+import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNames, onCompletionOptions } from "src/interfaces/Enums";
 import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
 import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
+import { RxDragHandleHorizontal } from "react-icons/rx";
 
 export interface filterOptions {
 	value: string;
@@ -155,6 +157,48 @@ export const AddOrEditTaskRC: React.FC<{
 	const handleStatusChange = (symbol: string) => {
 		setStatus(symbol);
 		setIsEdited(true);
+
+		const statusConfig =
+			plugin.settings.data.globalSettings.customStatuses.find(
+				(status) => status.symbol === symbol
+			);
+		const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
+		// if (statusType === statusTypeNames.DONE) {
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	const moment = _moment as unknown as typeof _moment.default;
+		// 	const currentDateValue = moment().format(
+		// 		globalSettings?.taskCompletionDateTimePattern
+		// 	);
+		// 	const newTitle = sanitizeCompletionDate(
+		// 		globalSettings,
+		// 		task.title,
+		// 		currentDateValue
+		// 	);
+		// 	setTitle(newTitle);
+		// } else if (statusType === statusTypeNames.CANCELLED) {
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	const moment = _moment as unknown as typeof _moment.default;
+		// 	const currentDateValue = moment().format(
+		// 		globalSettings?.taskCompletionDateTimePattern
+		// 	);
+		// 	const newTitle = sanitizeCancelledDate(
+		// 		globalSettings,
+		// 		task.title,
+		// 		currentDateValue
+		// 	);
+		// 	setTitle(newTitle);
+		// } else {
+		// 	let newTitle = task.title;
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
+		// 	newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
+		// 	setTitle(newTitle);
+		// }
+
+		const globalSettings = plugin.settings.data.globalSettings;
+		const newTitle = sanitizeStatus(globalSettings, task.title, symbol, statusType);
+		setTitle(newTitle);
+
 		setIsEditorContentChanged(true);
 	}
 
@@ -396,6 +440,10 @@ export const AddOrEditTaskRC: React.FC<{
 		setIsEdited(true);
 		setIsEditorContentChanged(true);
 	};
+
+	// const handleOnCompletionChange = (value: number) => {
+	// 	task.onCompletion = value;
+	// }
 
 
 	// ------------ Handle save task ------------
@@ -873,8 +921,7 @@ export const AddOrEditTaskRC: React.FC<{
 				setFormattedTaskContent(newFormattedTaskNoteContent);
 				frontmatterContentRef.current = newFrontmatter;
 				setIsEditorContentChanged(false);
-			}
-			else {
+			} else {
 				const newFormattedTaskNoteContent = getFormattedTaskContentSync(modifiedTask);
 				updateEmbeddableMarkdownEditor(newFormattedTaskNoteContent);
 				setFormattedTaskContent(newFormattedTaskNoteContent);
@@ -897,6 +944,7 @@ export const AddOrEditTaskRC: React.FC<{
 	// ------------------ Child Tasks Management -----------------
 
 	const childTaskInputRef = useRef<HTMLInputElement>(null);
+	const childTasksListRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		if (!childTaskInputRef.current) return;
 
@@ -905,6 +953,13 @@ export const AddOrEditTaskRC: React.FC<{
 		);
 		const suggestionContent = pendingTaskItems.filter(t => t.title !== title).map(t => t.title && t.title !== undefined ? t.title : ""); // Exclude self from suggestions
 		const onSelectCallback = (choice: string) => {
+			// Clear the input field after MultiSuggest has finished processing
+			setTimeout(() => {
+				if (childTaskInputRef.current) {
+					childTaskInputRef.current.value = '';
+				}
+			}, 0);
+
 			let selectedTask = pendingTaskItems.find(t => t.title === choice);
 			if (!selectedTask) {
 				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
@@ -1060,6 +1115,50 @@ export const AddOrEditTaskRC: React.FC<{
 		setIsEditorContentChanged(true);
 	};
 
+	// Initialize Sortable for child tasks reordering
+	useEffect(() => {
+		if (!childTasksListRef.current || dependsOn.length === 0) return;
+
+		const sortable = Sortable.create(childTasksListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: (evt) => {
+				try {
+					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+					// Reorder the dependsOn array based on the drag and drop
+					const updatedDependsOn = [...dependsOn];
+					const [movedItem] = updatedDependsOn.splice(evt.oldIndex, 1);
+					updatedDependsOn.splice(evt.newIndex, 0, movedItem);
+
+					setDependsOn(updatedDependsOn);
+
+					// Update the title with the new dependsOn order if not a task note
+					if (!isTaskNote) {
+						const newTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, title, updatedDependsOn, cursorLocationRef.current ?? undefined);
+						setTitle(newTitle);
+					}
+
+					setIsEdited(true);
+					setIsEditorContentChanged(true);
+				} catch (error) {
+					bugReporter(plugin, "Error in Sortable onSort for child tasks", error as string, "AddOrEditTaskRC.tsx/childTasksListRef useEffect");
+				}
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [dependsOn, title, isTaskNote, plugin]);
+
 	// ------------------ Rendering the component ------------------
 
 	return (
@@ -1177,11 +1276,12 @@ export const AddOrEditTaskRC: React.FC<{
 									onChange={(e) => { e.preventDefault(); }}
 								/>
 								{/* Here I want to show all the depends on tasks */}
-								<div className="EditTaskModalChildTasksList">
+								<div className="EditTaskModalChildTasksList" ref={childTasksListRef}>
 									{dependsOn.map((taskId) => (
 										<div key={taskId} className="EditTaskModalChildTasksListItem">
 											<div className="EditTaskModalChildTasksListItemFooter">
 												<div className="EditTaskModalChildTasksListItemIdSec">
+													<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 													<div className="EditTaskModalChildTasksListItemIdLabel">Task Id : </div>
 													<span className="EditTaskModalChildTasksListItemIdValue">{taskId}</span>
 												</div>
@@ -1337,6 +1437,23 @@ export const AddOrEditTaskRC: React.FC<{
 								})}
 							</div>
 						</div>
+
+						{/* On Completion property */}
+						{/* <div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("on-completion")}</label>
+							<select
+								value={task?.onCompletion ?? 0}
+								onChange={(e) =>
+									handleOnCompletionChange(Number(e.target.value))
+								}
+								className="boardConfigModalColumnRowContentColDatedVal"
+							>
+								<option value={onCompletionOptions.NONE}>{t("none")}</option>
+								<option value={onCompletionOptions.keep}>{t("keep")}</option>
+								<option value={onCompletionOptions.delete}>{t("delete")}</option>
+								<option value={onCompletionOptions.archive}>{t("archive")}</option>
+							</select>
+						</div> */}
 					</div>
 				</div>
 			</div >

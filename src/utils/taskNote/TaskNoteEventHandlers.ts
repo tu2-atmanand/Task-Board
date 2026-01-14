@@ -12,6 +12,8 @@ import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
 } from "../MarkdownFileOperations";
+import { moment as _moment } from "obsidian";
+import { statusTypeNames } from "src/interfaces/Enums";
 
 /**
  * Handle task note status change (checkbox change)
@@ -24,13 +26,36 @@ export const handleTaskNoteStatusChange = async (
 	task: taskItem
 ) => {
 	try {
-		const newStatusSymbol = checkboxStateSwitcher(plugin, task.status);
+		const newStatus = checkboxStateSwitcher(plugin, task.status);
+		const globalSettings = plugin.settings.data.globalSettings;
+		const moment = _moment as unknown as typeof _moment.default;
+		const currentDateValue = moment().format(
+			globalSettings?.taskCompletionDateTimePattern
+		);
+
+		console.log("handleTaskNoteStatusChange..\nnewStatus = ", newStatus);
 		const updatedTask = {
 			...task,
-			status: newStatusSymbol,
+			status: newStatus.newSymbol,
 		};
+		if (
+			globalSettings.autoAddCompletedDate &&
+			newStatus.newSymbolType === statusTypeNames.DONE
+		) {
+			updatedTask.completion = currentDateValue;
+			updatedTask.cancelledDate = "";
+		} else if (
+			globalSettings.autoAddCancelledDate &&
+			newStatus.newSymbolType === statusTypeNames.CANCELLED
+		) {
+			updatedTask.cancelledDate = currentDateValue;
+			updatedTask.completion = "";
+		} else {
+			updatedTask.completion = "";
+			updatedTask.cancelledDate = "";
+		}
 		const newStatusName = getStatusNameFromStatusSymbol(
-			newStatusSymbol,
+			newStatus.newSymbol,
 			plugin.settings.data.globalSettings
 		);
 

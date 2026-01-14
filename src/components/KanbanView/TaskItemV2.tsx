@@ -17,8 +17,8 @@ import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regula
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter } from 'src/services/OpenModals';
-import { ChevronDown, EllipsisVertical } from 'lucide-react';
-import { cardSectionsVisibilityOptions, EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames } from 'src/interfaces/Enums';
+import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -553,9 +553,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				// Toggle the checkbox status only for the specific line
 
 				const symbol = extractCheckboxSymbol(line);
-				const nextSymbol = checkboxStateSwitcher(plugin, symbol);
+				const nextStatus = checkboxStateSwitcher(plugin, symbol);
 
-				return line.replace(`[${symbol}]`, `[${nextSymbol}]`);
+				return line.replace(`[${symbol}]`, `[${nextStatus.newSymbol}]`);
 			}
 			return line;
 		});
@@ -735,7 +735,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				item.setIcon("tag");
 				item.onClick(() => {
 					const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
-						updateTaskItemTags(plugin, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
+						updateTaskItemTags(plugin, task, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
 					});
 					modal.open();
 				});
@@ -979,89 +979,84 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 	const renderHeader = () => {
 		try {
-			if (plugin.settings.data.globalSettings?.showHeader) {
-				return (
-					<>
-						<div className="taskItemHeader">
-							<div className="taskItemHeaderLeft">
-								{/* Render priority */}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
-									<div className="taskItemPriority">
-										<div className={`prioirtyCircle p${task.priority}`}>{task.priority}
+			return (
+				<div className="taskItemHeader">
+					<div className="taskItemHeaderLeft">
+						{/* Render priority */}
+						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
+							<div className="taskItemPriority">
+								<div className={`prioirtyCircle p${task.priority}`}>{task.priority}
+								</div>
+							</div>
+						)}
+
+						{/* Render tags individually */}
+						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
+							<div className="taskItemTags">
+								{/* Render line tags (editable) */}
+								{task.tags.map((tag: string) => {
+									const tagName = tag.replace('#', '');
+									const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
+									const tagColor = customTag?.color || null;
+									// const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+									// const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
+
+									// If columnIndex is defined, proceed to get the column
+									if (
+										(!activeBoardSettings?.showColumnTags) &&
+										columnData &&
+										columnData?.colType === colTypeNames.namedTag &&
+										tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+									) {
+										return null;
+									}
+
+									const tagKey = `${task.id}-${tag}`;
+									// Render the remaining tags
+									return (
+										<div
+											key={tagKey}
+											className="taskItemTag"
+											style={{
+												color: `${tagColor ? 'white' : ''}`,
+												backgroundColor: `${tagColor ? tagColor : ''}`,
+												opacity: `${tagColor ? '0.8' : ''}`
+												// border: `1px solid ${borderColor}`,
+												// backgroundColor: backgroundColor
+											}}
+										>
+											{tag}
 										</div>
-									</div>
-								)}
+									);
+								})}
 
-								{/* Render tags individually */}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
-									<div className="taskItemTags">
-										{/* Render line tags (editable) */}
-										{task.tags.map((tag: string) => {
-											const tagName = tag.replace('#', '');
-											const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
-											const tagColor = customTag?.color || null;
-											// const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-											// const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
-
-											// If columnIndex is defined, proceed to get the column
-											if (
-												(!activeBoardSettings?.showColumnTags) &&
-												columnData &&
-												columnData?.colType === colTypeNames.namedTag &&
-												tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
-											) {
-												return null;
-											}
-
-											const tagKey = `${task.id}-${tag}`;
-											// Render the remaining tags
-											return (
-												<div
-													key={tagKey}
-													className="taskItemTag"
-													style={{
-														color: `${tagColor ? 'white' : ''}`,
-														backgroundColor: `${tagColor ? tagColor : ''}`,
-														opacity: `${tagColor ? '0.8' : ''}`
-														// border: `1px solid ${borderColor}`,
-														// backgroundColor: backgroundColor
-													}}
-												>
-													{tag}
-												</div>
-											);
-										})}
-
-										{/* Render frontmatter tags (read-only) */}
-										{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
-											const tagKey = `${task.id}-fm-${tag}`;
-											// Render frontmatter tags with different styling
-											return (
-												<div
-													key={tagKey}
-													className="taskItemTagFrontmatter"
-													title="Tag from note frontmatter (read-only)"
-												>
-													{tag}
-												</div>
-											);
-										})}
-									</div>
-								)}
+								{/* Render frontmatter tags (read-only) */}
+								{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+									const tagKey = `${task.id}-fm-${tag}`;
+									// Render frontmatter tags with different styling
+									return (
+										<div
+											key={tagKey}
+											className="taskItemTagFrontmatter"
+											title="Tag from note frontmatter (read-only)"
+										>
+											{tag}
+										</div>
+									);
+								})}
 							</div>
+						)}
+					</div>
 
-							<div className='taskItemHeaderRight'>
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
-									<div className='taskItemPropertyID'>
-										<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
-									</div>
-								)}
+					<div className='taskItemHeaderRight'>
+						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
+							<div className='taskItemPropertyID'>
+								<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
 							</div>
-						</div>
-					</>);
-			} else {
-				return null;
-			}
+						)}
+					</div>
+				</div>
+			);
 		} catch (error) {
 			// bugReporter(plugin, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
 			console.warn("TaskItem.tsx/renderHeader : Error while rendering task header", error);
@@ -1173,96 +1168,79 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	// Render Footer based on the settings
 	const renderFooter = () => {
 		try {
-			if (plugin.settings.data.globalSettings.showFooter) {
-				return (
-					<>
-						{cardLoadingAnimation ? (
-							<div className='taskItemFooterRefreshingMssg'>{t("refreshing")}</div>
-						) : (
-							<>
-								<div className="taskItemFooterPropertiesContainer">
-									{/* Conditionally render each property of the task */}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status) && task?.status && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("status")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{getStatusNameFromStatusSymbol(task.status, globalSettings)}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time) && task?.time && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("time")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.time}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Reminder) && task?.reminder && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("reminder")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.reminder}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate) && task?.createdDate && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("created")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.createdDate}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.StartDate) && task?.startDate && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("start")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.startDate}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate) && task?.scheduledDate && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("scheduled")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.scheduledDate}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DueDate) && task?.due && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("due")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.due}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate) && task?.completion && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("completed")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.completion}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate) && task?.cancelledDate && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("cancelled")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.cancelledDate}</div>
-										</div>
-									)}
-									{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
-										<div className="taskItemFooterPropertyContainer">
-											<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
-											<div className='taskItemFooterPropertyContainerValue'>{task.filePath}</div>
-										</div>
-									)}
-								</div>
-							</>
-						)}
-					</>
-				);
-			} else {
-				return (
-					<>
-						<div className="taskItemFooterHidden">
-							<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
-								<div className="taskItemiconButton taskItemiconButtonEdit">
-									<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
-								</div>
-								<div className="taskItemiconButton taskItemiconButtonDelete">
-									<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
-								</div>
+			return (
+				<>
+					{cardLoadingAnimation ? (
+						<div className='taskItemFooterRefreshingMssg'>{t("refreshing")}</div>
+					) : (
+						<>
+							<div className="taskItemFooterPropertiesContainer">
+								{/* Conditionally render each property of the task */}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status) && task?.status && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("status")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{getStatusNameFromStatusSymbol(task.status, globalSettings)}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time) && task?.time && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("time")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.time}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Reminder) && task?.reminder && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("reminder")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.reminder}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate) && task?.createdDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("created")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.createdDate}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.StartDate) && task?.startDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("start")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.startDate}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate) && task?.scheduledDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("scheduled")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.scheduledDate}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DueDate) && task?.due && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("due")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.due}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate) && task?.completion && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("completed")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.completion}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate) && task?.cancelledDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("cancelled")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.cancelledDate}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.filePath}</div>
+									</div>
+								)}
 							</div>
-						</div>
-					</>
-				);
-			}
+						</>
+					)}
+				</>
+			);
 		} catch (error) {
 			// bugReporter(plugin, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
 			console.warn("TaskItem.tsx/renderFooter : Error while rendering task footer", error);
@@ -1354,14 +1332,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
-					{/* File Name Section */}
-					<div className="taskItemFileNameSection">
-						{plugin.settings.data.globalSettings.showFileNameInCard && task.filePath && (
-							<div className="taskItemFileName" aria-label={task.filePath}>
-								{task.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, '')}
-							</div>
-						)}
-					</div>
 
 					{memoizedRenderHeader}
 
@@ -1369,21 +1339,23 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					{plugin.settings.data.globalSettings.experimentalFeatures && (
 						<>
 							{
-								Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
+								Platform.isPhone ? (
 									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={14} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
 									</>
 								) : (
 									<>
 										{/* Drag Handle */}
-										<div className="taskItemDragBtn"
-											// aria-label={t("drag-task-card")}
-											draggable={true}
-											onDragStart={handleDragStart}
-											onDragEnd={handleDragEnd}
-										>
-											<RxDragHandleDots2 size={14} enableBackground={0} opacity={0.4} />
-										</div>
+										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+											<div className="taskItemDragBtn"
+												// aria-label={t("drag-task-card")}
+												draggable={true}
+												onDragStart={handleDragStart}
+												onDragEnd={handleDragEnd}
+											>
+												<Grip size={18} enableBackground={0} opacity={0.4} />
+											</div>
+										)}
 									</>
 								)
 							}

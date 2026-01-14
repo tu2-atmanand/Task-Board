@@ -16,12 +16,14 @@ import {
 	NotificationService,
 	taskPropertiesNames,
 	UniversalDateOptions,
+	statusTypeNames,
 } from "src/interfaces/Enums";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
 import { cursorLocation } from "src/interfaces/TaskItem";
 import { generateTaskId } from "../TaskItemUtils";
+import { moment as _moment } from "obsidian";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -228,7 +230,7 @@ export const getSanitizedTaskContent = (
 		updatedTask.completion || ""
 	);
 
-	updatedTitle = sanitizeCancellationDate(
+	updatedTitle = sanitizeCancelledDate(
 		globalSettings,
 		updatedTitle,
 		updatedTask.cancelledDate || ""
@@ -260,22 +262,53 @@ export const getSanitizedTaskContent = (
  * Sanitizes the status value of a task by replacing the old status value with a new one.
  * If there is an issue with extracting the old status value, the old title value is returned as it is.
  * @param {string} oldTitle - The old task title.
- * @param {string} newStatusValue - The new status value to replace with.
+ * @param {string} newStatusSymbol - The new status value to replace with.
+ * @param {string} newStatusType - Based on this type, will decide whether to add a completion and cancelled date or remove it from the title.
  * @returns {string} The sanitized task title with the new status value.
  */
 export const sanitizeStatus = (
+	globalSettings: globalSettingsData,
 	oldTitle: string,
-	newStatusValue: string
+	newStatusSymbol: string,
+	newStatusType: string
 ): string => {
 	const oldStatusValuematch = oldTitle.match(/\[(.)\]/); // Extract the symbol inside [ ]
-
+	let newTitle = oldTitle;
 	if (!oldStatusValuematch || oldStatusValuematch.length < 2) {
 		console.warn(
 			"There was an issue while extracting the old status value from the old title. Old title value has been returned as it is."
 		);
 		return oldTitle;
 	}
-	return oldTitle.replace(oldStatusValuematch[0], `[${newStatusValue}]`);
+
+	newTitle = oldTitle.replace(oldStatusValuematch[0], `[${newStatusSymbol}]`);
+
+	if (newStatusType === statusTypeNames.DONE) {
+		const moment = _moment as unknown as typeof _moment.default;
+		const currentDateValue = moment().format(
+			globalSettings?.taskCompletionDateTimePattern
+		);
+		newTitle = sanitizeCompletionDate(
+			globalSettings,
+			newTitle,
+			currentDateValue
+		);
+	} else if (newStatusType === statusTypeNames.CANCELLED) {
+		const moment = _moment as unknown as typeof _moment.default;
+		const currentDateValue = moment().format(
+			globalSettings?.taskCompletionDateTimePattern
+		);
+		newTitle = sanitizeCancelledDate(
+			globalSettings,
+			newTitle,
+			currentDateValue
+		);
+	} else {
+		newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
+		newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
+	}
+
+	return newTitle;
 };
 
 /**
@@ -620,7 +653,7 @@ export const sanitizeCompletionDate = (
  * @param cursorLocation - (Optional) The cursor location to insert the cancellation date at a specific position.
  * @returns The sanitized cancellation date string to be used in the task title.
  */
-export const sanitizeCancellationDate = (
+export const sanitizeCancelledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	cancelledDate: string,

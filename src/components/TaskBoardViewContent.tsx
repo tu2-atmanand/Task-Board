@@ -43,6 +43,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [isMobileView, setIsMobileView] = useState(false);
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
+	const [editorModified, setEditorModified] = useState(plugin.editorModified);
 
 	// plugin.registerEvent(
 	// 	plugin.app.workspace.on("resize", () => {
@@ -192,6 +193,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);
 		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
+	}, []);
+
+	// Listen to editor modified state changes
+	useEffect(() => {
+		const handleEditorModifiedChange = (modified: boolean) => {
+			setEditorModified(modified);
+		};
+		eventEmitter.on("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+		return () => eventEmitter.off("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
 	}, []);
 
 	const refreshBoardButton = useCallback(async () => {
@@ -363,10 +373,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				}
 
 				// Get button position
-				const buttonRect = event.currentTarget.getBoundingClientRect();
+				const buttonRect = event.currentTarget?.getBoundingClientRect();
 				const position = {
-					x: buttonRect.left,
-					y: buttonRect.bottom
+					x: buttonRect?.left ?? 100,
+					y: buttonRect?.bottom ?? 100
 				};
 
 				// Create and show popover
@@ -692,7 +702,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}, 300); // Match animation duration
 	}
 
-	function openHeaderMoreOptionsMenu(event: MouseEvent | React.MouseEvent) {
+	function openHeaderMoreOptionsMenu(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
 		const sortMenu = new Menu();
 
 		sortMenu.addItem((item) => {
@@ -707,12 +717,17 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			});
 		});
 		sortMenu.addItem((item) => {
+			item.setTitle(t("show-hide-properties"));
+			item.setIcon("list");
+			item.onClick(async () => {
+				handlePropertiesBtnClick(event);
+			});
+		});
+		sortMenu.addItem((item) => {
 			item.setTitle(t("open-board-filters-modal"));
 			item.setIcon(funnelIcon);
-			item.onClick(async (event) => {
-				if (event instanceof MouseEvent) {
-					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
-				}
+			item.onClick(async () => {
+				handleFilterButtonClick(event);
 			});
 		});
 		sortMenu.addItem((item) => {
@@ -857,18 +872,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 					<button
 						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						aria-label={t("apply-advanced-board-filters")}
-						onClick={handleFilterButtonClick}
-					>
-						<Filter size={18} />
-					</button>
-
-					<button
-						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("show-hide-properties")}
 						onClick={handlePropertiesBtnClick}
 					>
 						<List size={18} />
+					</button>
+
+					<button
+						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+						aria-label={t("apply-advanced-board-filters")}
+						onClick={handleFilterButtonClick}
+					>
+						<Filter size={18} />
 					</button>
 
 					<button
@@ -898,9 +913,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<option value={viewTypeNames.map}>{t("map")}</option>
 					</select>
 
-					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
+<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
+
 					{(isMobileView || Platform.isMobile) && (
 						<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
 							<EllipsisVertical size={20} />

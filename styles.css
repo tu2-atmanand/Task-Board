@@ -256,6 +256,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* font-size: 14px; */
 }
 
+.RefreshBtn.needrefresh {
+	background-color: var(--color-accent) !important;
+	color: white;
+}
+
 .searchTaskBtn:hover,
 .filterTaskBtn:hover,
 .AddNewTaskBtn:hover,
@@ -388,6 +393,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	align-content: center;
 	font-size: 1.1em;
 	font-weight: 600;
+}
+
+.taskBoardColumnSecHeaderTitleSecWorkLimitAlert {
+	display: flex;
+	align-items: center;
+	color: var(--background-modifier-error);
 }
 
 .taskBoardColumnSecHeaderTitleSecColumnCount {
@@ -738,7 +749,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-left: -10px;
 }
 
 .subtask-progress-bar-wrapper {
@@ -970,7 +980,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemTagFrontmatter {
 	font-size: 0.7rem;
 	text-decoration: var(--tag-decoration);
-	background-color: var(--background-modifier-border) !important;
+	background-color: var(--tag-background) !important;
 	border: var(--pill-border-width) solid var(--pill-border-color) !important;
 	border-radius: var(--pill-radius) !important;
 	color: var(--pill-color) !important;
@@ -999,15 +1009,22 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	font-size: 0.75rem;
 }
 
+.taskItemReminderContainer,
+.taskItemFooterPropertyContainerEmoji,
 .taskItemTimeContainer,
 .taskItemUniversalDateContainer {
+	font-size: var(--font-ui-smaller);
+	display: flex;
 	background-color: var(--background-modifier-box-shadow);
 	padding-inline: 6px;
-	border: 1px solid var(--graph-line);
+	border: 1px solid var(--background-modifier-border-focus);
 	padding-block: 2px;
 	color: var(--icon-color);
 	border-radius: var(--pill-radius);
 	opacity: 75%;
+	flex-direction: row;
+	align-content: center;
+	align-items: center;
 }
 
 .taskItemFileNameSection {
@@ -1104,23 +1121,14 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemMenuBtn,
 .taskItemDragBtn {
 	opacity: 0;
-	background-color: var(--background-primary-alt);
-	border: none;
-	cursor: grab;
+	background-color: var(--bases-embed-border-color);
 	position: absolute;
 	top: 5px;
 	right: 5px;
-	width: 1.2rem;
-	min-width: 1.2rem;
-	/* padding-block: 2px; */
-	/* padding-inline: 4px; */
+	padding: 5px;
 	border-radius: 5px;
-	/* margin: 0 5px; */
-	/* display: flex
-	; */
-	/* align-items: center; */
-	/* justify-content: center; */
-	font-size: 1.2em;
+	display: flex;
+	align-items: center;
 	transition: transform 0.2s;
 }
 
@@ -1141,10 +1149,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemFooter {
 	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: flex-end;
+	justify-content: flex-start;
+	align-items: center;
 	margin-top: 0.7rem;
+	flex-wrap: wrap;
+	gap: 0.25rem;
 }
 
 .taskItemFooterHidden {
@@ -1225,6 +1234,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemFooterPropertyContainerValue {
 	font-style: italic;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: calc(var(--task-board-column-width) - 4rem);
 }
 
 /*-----------------------------------------------------------
