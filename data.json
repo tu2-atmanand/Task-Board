@@ -610,12 +610,13 @@
               }
             ],
             "tasksIdManualOrder": [
-              "276",
-              "389",
               "375",
-              "378",
+              "389",
+              "224",
+              "355",
+              "276",
               "258",
-              "355"
+              "378"
             ]
           },
           {
@@ -695,8 +696,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 56,
-          "completed": 17
+          "pending": 57,
+          "completed": 16
         },
         "swimlanes": {
           "enabled": false,
