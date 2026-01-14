@@ -315,6 +315,7 @@
               }
             ],
             "tasksIdManualOrder": [
+              "276",
               "389",
               "378",
               "355",
@@ -508,8 +509,8 @@
           ]
         },
         "taskCount": {
-          "pending": 55,
-          "completed": 18
+          "pending": 56,
+          "completed": 17
         },
         "swimlanes": {
           "enabled": true,
@@ -629,7 +630,8 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": false
+            "minimized": false,
+            "workLimit": 5
           },
           {
             "colType": "namedTag",
@@ -639,7 +641,8 @@
             "index": 5,
             "coltag": "Test",
             "id": 396902,
-            "minimized": false
+            "minimized": false,
+            "workLimit": 3
           },
           {
             "colType": "namedTag",
@@ -655,7 +658,7 @@
             "id": 1936828579,
             "index": 7,
             "colType": "namedTag",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "*/seeding/*",
             "coltag": "*/seeding/*"
@@ -826,7 +829,8 @@
                   ]
                 }
               ]
-            }
+            },
+            "workLimit": 3
           },
           {
             "id": 4265650565,
@@ -1049,9 +1053,9 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 4,
+        "boardIndex": 3,
         "taskId": "",
-        "settingTab": 5
+        "settingTab": 4
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
@@ -1175,11 +1179,12 @@
         "cancelledDate",
         "dependsOn",
         "filePath",
-        "status"
+        "status",
+        "checkbox"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
-      "autoAddCancelledDate": false
+      "autoAddCancelledDate": true
     }
   }
 }
