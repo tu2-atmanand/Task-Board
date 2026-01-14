@@ -1,6 +1,10 @@
 import TaskBoard from "main";
 import { WorkspaceLeaf, TFile } from "obsidian";
-import { EditButtonMode, UniversalDateOptions } from "src/interfaces/Enums";
+import {
+	EditButtonMode,
+	statusTypeNames,
+	UniversalDateOptions,
+} from "src/interfaces/Enums";
 import { taskItem, UpdateTaskEventData } from "src/interfaces/TaskItem";
 import {
 	openEditTaskNoteModal,
@@ -221,7 +225,16 @@ export const updateTaskItemStatus = (
 			});
 		});
 	} else {
-		newTask.title = sanitizeStatus(newTask.title, newTask.status);
+		const newStatusType =
+			plugin.settings.data.globalSettings.customStatuses.find(
+				(status) => status.symbol === newStatus
+			)?.type ?? statusTypeNames.TODO;
+		newTask.title = sanitizeStatus(
+			plugin.settings.data.globalSettings,
+			newTask.title,
+			newStatus,
+			newStatusType
+		);
 		updateTaskInFile(plugin, newTask, oldTask).then((newId) => {
 			plugin.realTimeScanning.processAllUpdatedFiles(
 				oldTask.filePath,

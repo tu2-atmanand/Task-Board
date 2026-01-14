@@ -10,7 +10,7 @@ import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCancelledDate, sanitizeCompletionDate, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
+import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCancelledDate, sanitizeCompletionDate, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeStatus, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
 import { buildTaskFromRawContent } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon, RefreshCcw } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
@@ -24,7 +24,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
-import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNames } from "src/interfaces/Enums";
+import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNames, onCompletionOptions } from "src/interfaces/Enums";
 import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
 import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
@@ -162,39 +162,42 @@ export const AddOrEditTaskRC: React.FC<{
 			plugin.settings.data.globalSettings.customStatuses.find(
 				(status) => status.symbol === symbol
 			);
-		const statusType = statusConfig ? statusConfig.type : undefined;
-		if (statusType === statusTypeNames.DONE) {
-			const globalSettings = plugin.settings.data.globalSettings;
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern
-			);
-			const newTitle = sanitizeCompletionDate(
-				globalSettings,
-				task.title,
-				currentDateValue
-			);
-			setTitle(newTitle);
-		} else if (statusType === statusTypeNames.CANCELLED) {
-			const globalSettings = plugin.settings.data.globalSettings;
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern
-			);
-			const newTitle = sanitizeCancelledDate(
-				globalSettings,
-				task.title,
-				currentDateValue
-			);
-			setTitle(newTitle);
-		} else {
-			let newTitle = task.title;
-			const globalSettings = plugin.settings.data.globalSettings;
-			newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
-			newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
-			setTitle(newTitle);
-		}
+		const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
+		// if (statusType === statusTypeNames.DONE) {
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	const moment = _moment as unknown as typeof _moment.default;
+		// 	const currentDateValue = moment().format(
+		// 		globalSettings?.taskCompletionDateTimePattern
+		// 	);
+		// 	const newTitle = sanitizeCompletionDate(
+		// 		globalSettings,
+		// 		task.title,
+		// 		currentDateValue
+		// 	);
+		// 	setTitle(newTitle);
+		// } else if (statusType === statusTypeNames.CANCELLED) {
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	const moment = _moment as unknown as typeof _moment.default;
+		// 	const currentDateValue = moment().format(
+		// 		globalSettings?.taskCompletionDateTimePattern
+		// 	);
+		// 	const newTitle = sanitizeCancelledDate(
+		// 		globalSettings,
+		// 		task.title,
+		// 		currentDateValue
+		// 	);
+		// 	setTitle(newTitle);
+		// } else {
+		// 	let newTitle = task.title;
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
+		// 	newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
+		// 	setTitle(newTitle);
+		// }
 
+		const globalSettings = plugin.settings.data.globalSettings;
+		const newTitle = sanitizeStatus(globalSettings, task.title, symbol, statusType);
+		setTitle(newTitle);
 
 		setIsEditorContentChanged(true);
 	}
@@ -437,6 +440,10 @@ export const AddOrEditTaskRC: React.FC<{
 		setIsEdited(true);
 		setIsEditorContentChanged(true);
 	};
+
+	// const handleOnCompletionChange = (value: number) => {
+	// 	task.onCompletion = value;
+	// }
 
 
 	// ------------ Handle save task ------------
@@ -1430,6 +1437,23 @@ export const AddOrEditTaskRC: React.FC<{
 								})}
 							</div>
 						</div>
+
+						{/* On Completion property */}
+						{/* <div className="EditTaskModalHomeField">
+							<label className="EditTaskModalHomeFieldTitle">{t("on-completion")}</label>
+							<select
+								value={task?.onCompletion ?? 0}
+								onChange={(e) =>
+									handleOnCompletionChange(Number(e.target.value))
+								}
+								className="boardConfigModalColumnRowContentColDatedVal"
+							>
+								<option value={onCompletionOptions.NONE}>{t("none")}</option>
+								<option value={onCompletionOptions.keep}>{t("keep")}</option>
+								<option value={onCompletionOptions.delete}>{t("delete")}</option>
+								<option value={onCompletionOptions.archive}>{t("archive")}</option>
+							</select>
+						</div> */}
 					</div>
 				</div>
 			</div >
