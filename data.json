@@ -589,11 +589,20 @@
             }
           },
           {
+            "id": 1936828579,
+            "index": 3,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "*/seeding/*",
+            "coltag": "*/seeding/*"
+          },
+          {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "Can be implemented",
-            "index": 3,
+            "index": 4,
             "coltag": "#pending",
             "id": 47626,
             "filters": {
@@ -624,7 +633,7 @@
             "active": true,
             "collapsed": false,
             "name": "In Progress",
-            "index": 4,
+            "index": 5,
             "coltag": "working",
             "id": 908753,
             "filters": {
@@ -639,7 +648,7 @@
             "active": true,
             "collapsed": false,
             "name": "In Review",
-            "index": 5,
+            "index": 6,
             "coltag": "Test",
             "id": 396902,
             "minimized": false,
@@ -650,19 +659,10 @@
             "active": true,
             "collapsed": false,
             "name": "Ready to publish",
-            "index": 6,
+            "index": 7,
             "coltag": "done",
             "id": 328227,
             "minimized": false
-          },
-          {
-            "id": 1936828579,
-            "index": 7,
-            "colType": "namedTag",
-            "active": false,
-            "collapsed": false,
-            "name": "*/seeding/*",
-            "coltag": "*/seeding/*"
           },
           {
             "id": 3193261849,
@@ -696,8 +696,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 57,
-          "completed": 16
+          "pending": 58,
+          "completed": 15
         },
         "swimlanes": {
           "enabled": false,
