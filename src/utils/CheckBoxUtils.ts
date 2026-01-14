@@ -13,34 +13,39 @@ import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegula
 export function checkboxStateSwitcher(
 	plugin: TaskBoard,
 	symbol: string
-): { newSymbol: string; type: string } {
+): { newSymbol: string; newSymbolType: string } {
 	const { customStatuses } = plugin.settings.data.globalSettings;
 
 	// Check if customStatuses is available and has entries
 	if (customStatuses?.length > 0) {
-		const foundStatus = customStatuses.find(
-			(status: { symbol: string }) => status.symbol === symbol
+		const oldStatus = customStatuses.find(
+			(status) => status.symbol === symbol
 		);
-		if (foundStatus)
-			return {
-				newSymbol: foundStatus.nextStatusSymbol,
-				type: foundStatus.type,
-			};
-	} else {
-		new Notice(
-			"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
-		);
+		if (oldStatus) {
+			const nextStatus = customStatuses.find(
+				(status) => status.symbol === oldStatus?.nextStatusSymbol
+			);
+			if (nextStatus) {
+				return {
+					newSymbol: oldStatus.nextStatusSymbol,
+					newSymbolType: nextStatus?.type,
+				};
+			}
+		}
 	}
 
+	new Notice(
+		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
+	);
 	// Default fallback behavior
 	return symbol === "x" || symbol === "X"
 		? {
 				newSymbol: " ",
-				type: statusTypeNames.TODO,
+				newSymbolType: statusTypeNames.TODO,
 		  }
 		: {
 				newSymbol: "x",
-				type: statusTypeNames.DONE,
+				newSymbolType: statusTypeNames.DONE,
 		  };
 }
 
