@@ -21,6 +21,7 @@ import {
 	sanitizeCompletionDate,
 	sanitizeStatus,
 } from "./TaskContentFormatter";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Handle the checkbox change event for the inline-tasks and update the task in the file.
@@ -125,8 +126,8 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			// 	);
 			// }
 		} else {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				45,
 				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
 				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
@@ -161,8 +162,8 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				// 	moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
 			})
 			.catch((error) => {
-				// bugReporter(
-				// 	plugin,
+				// bugReporterManagerInsatance.showNotice(
+				// 	46,
 				// 	"Error updating recurring task in file",
 				// 	error as string,
 				// 	"TaskItemEventHandlers.ts/handleCheckboxChange"

@@ -1,3 +1,5 @@
+// /src/services/ObsidianDebugInfo.ts
+
 // Originally from the PDF++ plugin (https://github.com/RyotaUshio/obsidian-pdf-plus)
 
 /**

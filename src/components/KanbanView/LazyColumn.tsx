@@ -20,6 +20,7 @@ import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager
 import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
 import TaskItemV2 from './TaskItemV2';
 import { AlertOctagon } from 'lucide-react';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -335,7 +336,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						popover.showAtPosition(position);
 					}
 				} catch (error) {
-					bugReporter(plugin, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
+					bugReporterManagerInsatance.showNotice(4, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
 				}
 			});
 		});

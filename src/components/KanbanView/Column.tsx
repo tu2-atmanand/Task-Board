@@ -19,12 +19,12 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { bugReporter } from 'src/services/OpenModals';
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
 import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -295,7 +295,7 @@ const Column: React.FC<ColumnProps> = ({
 						popover.showAtPosition(position);
 					}
 				} catch (error) {
-					bugReporter(plugin, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
+					bugReporterManagerInsatance.showNotice(1, "Error showing filter popover", String(error), "Column.tsx/column-menu/configure-conlum-filters");
 				}
 			});
 		});

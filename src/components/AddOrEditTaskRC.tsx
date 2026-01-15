@@ -29,6 +29,7 @@ import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Map
 import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
 import { RxDragHandleHorizontal } from "react-icons/rx";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export interface filterOptions {
 	value: string;
@@ -665,7 +666,7 @@ export const AddOrEditTaskRC: React.FC<{
 			if (file && file instanceof TFile) {
 				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
 			} else {
-				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+				bugReporterManagerInsatance.showNotice(21, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 			}
 		} else {
 			// await plugin.app.workspace.openLinkText('', newFilePath, false);
@@ -682,7 +683,7 @@ export const AddOrEditTaskRC: React.FC<{
 			if (file && file instanceof TFile) {
 				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
 			} else {
-				bugReporter(plugin, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+				bugReporterManagerInsatance.showNotice(22, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 			}
 		}
 		onClose();
@@ -962,14 +963,14 @@ export const AddOrEditTaskRC: React.FC<{
 
 			let selectedTask = pendingTaskItems.find(t => t.title === choice);
 			if (!selectedTask) {
-				bugReporter(plugin, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
+				bugReporterManagerInsatance.showNotice(23, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
 				return;
 			}
 			applyIdToTaskItem(plugin, selectedTask).then((newId) => {
 				const getUpdatedDependsOnIds = (prev: string[]) => {
 					if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
 						if (newId === undefined && !selectedTask?.legacyId) {
-							bugReporter(plugin, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
+							bugReporterManagerInsatance.showNotice(24, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
 							return [...prev, String(plugin.settings.data.globalSettings.uniqueIdCounter)];
 						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
@@ -1002,7 +1003,7 @@ export const AddOrEditTaskRC: React.FC<{
 					return updated;
 				});
 			}).catch(err => {
-				bugReporter(plugin, "Error updating task in file", `An error occurred while updating the task in file: ${err.message}`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
+				bugReporterManagerInsatance.showNotice(25, "Error updating task in file", `An error occurred while updating the task in file: ${err.message}`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect");
 			});
 		};
 		new MultiSuggest(childTaskInputRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
@@ -1049,7 +1050,7 @@ export const AddOrEditTaskRC: React.FC<{
 		event.stopPropagation();
 		const childTask = childTasks.find(t => t.legacyId === taskId);
 		if (!childTask) {
-			bugReporter(plugin, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
+			bugReporterManagerInsatance.showNotice(26, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "AddOrEditTaskModal.tsx/EditTaskContent/handleOpenChildTaskModal");
 			return;
 		}
 
@@ -1131,6 +1132,7 @@ export const AddOrEditTaskRC: React.FC<{
 			easing: "cubic-bezier(1, 0, 0, 1)",
 			onSort: (evt) => {
 				try {
+					console.log("Lets go...");
 					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
 					// Reorder the dependsOn array based on the drag and drop
@@ -1149,7 +1151,7 @@ export const AddOrEditTaskRC: React.FC<{
 					setIsEdited(true);
 					setIsEditorContentChanged(true);
 				} catch (error) {
-					bugReporter(plugin, "Error in Sortable onSort for child tasks", error as string, "AddOrEditTaskRC.tsx/childTasksListRef useEffect");
+					bugReporterManagerInsatance.showNotice(27, "Error in Sortable onSort for child tasks", error as string, "AddOrEditTaskRC.tsx/childTasksListRef useEffect");
 				}
 			},
 		});

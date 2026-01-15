@@ -19,6 +19,7 @@ import {
 } from "src/services/OpenModals";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { isTheContentDiffAreOnlySpaces_V2 } from "src/modals/DiffContentCompareModal";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * This function will simpy check if the task title contains the recurring tag: 
@@ -101,8 +102,8 @@ export const addTaskInNote = async (
 		cursorPosition = undefined;
 		return newId;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			47,
 			"Error while adding the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/addTaskInNote"
@@ -129,8 +130,8 @@ export const updateTaskInFile = async (
 	try {
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
 		if (oldTaskContent === "")
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				48,
 				"getSanitizedTaskContent returned empty string for old task",
 				"getSanitizedTaskContent returned empty string",
 				"TaskItemUtils.ts/updateTaskInFile"
@@ -144,8 +145,8 @@ export const updateTaskInFile = async (
 		);
 		updatedTaskContent = formattedTaskContent;
 		if (updatedTaskContent === "")
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				49,
 				"getSanitizedTaskContent returned empty string for old task",
 				"getSanitizedTaskContent returned empty string",
 				"TaskItemUtils.ts/updateTaskInFile"
@@ -208,16 +209,16 @@ export const updateTaskInFile = async (
 		// 	// Step 6: Write the updated content back to the file
 		// 	await writeDataToVaultFile(plugin, filePath, newContent);
 		// } else {
-		// 	bugReporter(
-		// 		plugin,
+		// 	bugReporterManagerInsatance.showNotice(
+		// 		50,
 		// 		"Looks like the task you are trying to update is not present in the file. Or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
 		// 		"updateTaskInFile : Task not found in file content.",
 		// 		"TaskItemUtils.ts/updateTaskInFile"
 		// 	);
 		// }
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			51,
 			"Error while updating the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/updateTaskInFile"
@@ -258,8 +259,8 @@ export const useTasksPluginToUpdateInFile = async (
 				);
 
 			// if (!tasksPluginApiOutput) {
-			// 	bugReporter(
-			// 		plugin,
+			// 	bugReporterManagerInsatance.showNotice(
+			// 		52,
 			// 		"Tasks plugin API did not return any output.",
 			// 		"Tasks plugin API did not return any output.",
 			// 		"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
@@ -338,8 +339,8 @@ export const useTasksPluginToUpdateInFile = async (
 				// 	);
 				// }
 			} else {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					53,
 					"Unexpected output from tasks plugin API. Since the task you are trying to update is a recurring task, Task Board cannot handle recurring tasks as of now and Tasks plugin didnt returned an expected output. Please report this issue so developers can enhance the integration.",
 					`tasksPluginApiOutput: ${tasksPluginApiOutput}`,
 					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
@@ -364,16 +365,16 @@ export const useTasksPluginToUpdateInFile = async (
 			//fallback to normal function
 			// await updateTaskInFile(plugin, updatedTask, oldTask);
 
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				54,
 				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
 				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
 			);
 		}
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			55,
 			"Error while updating the recurring task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
@@ -396,8 +397,8 @@ export const deleteTaskFromFile = async (
 	try {
 		const oldTaskContent = await getFormattedTaskContent(task);
 		if (oldTaskContent === "")
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				56,
 				"getSanitizedTaskContent returned empty string for old task",
 				"getSanitizedTaskContent returned empty string",
 				"TaskItemUtils.ts/updateTaskInFile"
@@ -452,7 +453,7 @@ export const deleteTaskFromFile = async (
 		// 	// Step 6: Write the updated content back to the file
 		// 	await writeDataToVaultFile(plugin, filePath, newContent);
 		// } else {
-		// 	bugReporter(
+		// 	bugReporterManagerInsatance.showNotice(
 		// 		plugin,
 		// 		"Looks like the task you are trying to delete is not present in the file. Or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
 		// 		"deleteTaskFromFile : Task not found in file content.",
@@ -461,8 +462,8 @@ export const deleteTaskFromFile = async (
 		// }
 		return true;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			57,
 			"Error deleting task from file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/deleteTaskFromFile"
@@ -535,8 +536,8 @@ export const archiveTask = async (
 								(existing as any).path &&
 								!(existing as any).children
 							) {
-								bugReporter(
-									plugin,
+								bugReporterManagerInsatance.showNotice(
+									58,
 									`A file exists where a folder is expected: ${currentPath}`,
 									`Unexpected file at folder path: ${currentPath}`,
 									"TaskItemUtils.ts/archiveTask"
@@ -573,8 +574,8 @@ export const archiveTask = async (
 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 			// await deleteTaskFromJson(plugin, task);
 		} catch (error) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				59,
 				"Error archiving task",
 				error as string,
 				"TaskItemUtils.ts/archiveTask"
@@ -610,16 +611,16 @@ export const archiveTask = async (
 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 			// await deleteTaskFromJson(plugin, task);
 		} catch (error) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				60,
 				"Error archiving task in the same file. Either the task is not present in the file or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
 				error as string,
 				"TaskItemUtils.ts/archiveTask"
 			);
 		}
 	} else {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			61,
 			"Error archiving task. The below error message might help you to find the issue.",
 			"Archived file path is not set in the plugin settings.",
 			"TaskItemUtils.ts/archiveTask"
@@ -681,8 +682,8 @@ export const replaceOldTaskWithNewTask = async (
 			// 	"\n\nLine in the file at the oldTask.startLine: ",
 			// 	startLineText
 			// );
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				62,
 				`Task board couldnt able to find the task which you are trying to edit inside the file ${oldTask.filePath} at the line number : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.\n\nThis was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.`,
 				`\n\nOldTask location :${JSON.stringify(
 					oldTask.taskLocation
@@ -813,8 +814,8 @@ export const replaceOldTaskWithNewTask = async (
 
 		return true; // Indicate success
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			63,
 			"Error while updating the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/replaceOldTaskWithNewTask"

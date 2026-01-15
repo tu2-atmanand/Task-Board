@@ -76,8 +76,8 @@ export function updateRGBAOpacity(
 		if (match) {
 			return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${newOpacity})`;
 		} else {
-			// bugReporter(
-			// 	plugin,
+			// bugReporterManagerInsatance.showNotice(
+			// 	84,
 			// 	"Invalid RGBA color string",
 			// 	`Invalid RGBA color string: ${rgba}`,
 			// 	"updateRGBAOpacity function"

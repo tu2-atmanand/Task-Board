@@ -20,6 +20,7 @@ import { Board, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { columnDataProp, AddColumnModal } from "./AddColumnModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -44,7 +45,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		try {
 			return boards ? JSON.parse(JSON.stringify(boards)) : [];
 		} catch (e) {
-			bugReporter(plugin, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
+			bugReporterManagerInsatance.showNotice(34, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
 			return [];
 		}
 	});
@@ -422,7 +423,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					setLocalBoards(updatedBoards);
 					setIsEdited(true);
 				} else {
-					bugReporter(plugin, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
+					bugReporterManagerInsatance.showNotice(35, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
 				}
 			},
 			onCancel: () => {
@@ -470,7 +471,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
 					// }
 				} catch (error) {
-					bugReporter(plugin, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
+					bugReporterManagerInsatance.showNotice(36, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
 				}
 			},
 		});

@@ -21,6 +21,7 @@ import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -168,7 +169,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				const allTasks = await loadTasksAndMerge(plugin, false);
 				setAllTasks(allTasks);
 			} catch (error) {
-				bugReporter(plugin, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
+				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
 			}
 		}, 500),
 		[plugin]
@@ -420,7 +421,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				filterPopoverRef.current = popover;
 			}
 		} catch (error) {
-			bugReporter(plugin, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+			bugReporterManagerInsatance.showNotice(29, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
 		}
 	}
 

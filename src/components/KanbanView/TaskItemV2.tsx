@@ -34,6 +34,7 @@ import EditTagsModal from 'src/modals/EditTagsModal';
 declare function showTextInputModal(app: any, options: { title?: string; placeholder?: string; initialValue?: string }): Promise<string | null>;
 declare function showConfirmationModal(app: any, options: any): Promise<boolean>;
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 export interface swimlaneDataProp {
 	property: string;
@@ -617,7 +618,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		try {
 			const childTask = await getTaskFromId(plugin, childTaskId);
 			if (!childTask) {
-				bugReporter(plugin, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "TaskItem.tsx/handleOpenChildTaskModal");
+				bugReporterManagerInsatance.showNotice(11, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "TaskItem.tsx/handleOpenChildTaskModal");
 				return;
 			}
 
@@ -631,7 +632,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			}
 		} catch (error) {
 			console.error("Error opening child task modal:", error);
-			bugReporter(plugin, "Error opening child task modal", String(error), "TaskItem.tsx/handleOpenChildTaskModal");
+			bugReporterManagerInsatance.showNotice(12, "Error opening child task modal", String(error), "TaskItem.tsx/handleOpenChildTaskModal");
 		}
 	}
 
@@ -1058,7 +1059,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				</div>
 			);
 		} catch (error) {
-			// bugReporter(plugin, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
+			// bugReporterManagerInsatance.showNotice(13, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
 			console.warn("TaskItem.tsx/renderHeader : Error while rendering task header", error);
 			return null;
 		}
@@ -1159,7 +1160,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			);
 
 		} catch (error) {
-			// bugReporter(plugin, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
+			// bugReporterManagerInsatance.showNotice(14, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
 			console.warn("TaskItem.tsx/renderSubTasks : Error while rendering sub-tasks", error);
 			return null;
 		}
@@ -1242,7 +1243,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				</>
 			);
 		} catch (error) {
-			// bugReporter(plugin, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
+			// bugReporterManagerInsatance.showNotice(15, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
 			console.warn("TaskItem.tsx/renderFooter : Error while rendering task footer", error);
 			return null;
 		}
@@ -1305,7 +1306,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				return null;
 			}
 		} catch (error) {
-			// bugReporter(plugin, "Error while rendering child-tasks", error as string, "TaskItem.tsx/renderChildTasks");
+			// bugReporterManagerInsatance.showNotice(16, "Error while rendering child-tasks", error as string, "TaskItem.tsx/renderChildTasks");
 			console.warn("TaskItem.tsx/renderChildTasks : Error while rendering child-tasks", error);
 			return null;
 		}

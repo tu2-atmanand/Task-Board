@@ -44,6 +44,7 @@ import {
 	scanFilterForTags,
 } from "src/utils/algorithms/ScanningFilterer";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { bugReporterManagerInsatance } from "./BugReporter";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -611,8 +612,8 @@ export default class vaultScanner {
 				return result;
 			}
 		} catch (error) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				33,
 				`There was an error while scanning tasks from the file(s): ${files
 					.map((f) => f?.path)
 					.join("\n")}`,

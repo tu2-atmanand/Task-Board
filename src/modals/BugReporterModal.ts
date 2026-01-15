@@ -161,28 +161,28 @@ export class BugReporterModal extends Modal {
 		return { finalContentForHTMLDom, finalContentForMarkdown };
 	}
 
-	getSystemInfo() {
-		// Get system information like OS, Obsidian version, etc.
-		const obsidianVersion =
-			this.plugin.app.title.split(" ").pop() || "Unknown Version";
-		const appVersion = navigator.appVersion || "Unknown App Version";
-		const enabledPlugins = this.plugin.app.plugins.enabledPlugins;
-		const manifests = Object.values(
-			this.plugin.app.plugins.manifests
-		) as PluginManifest[];
-		const enabledPluginsWithVersionMap = manifests
-			.filter((plugin) => enabledPlugins.has(plugin.id))
-			.map((plugin) => ({
-				id: plugin.id,
-				version: plugin.version,
-			}));
+	// getSystemInfo() {
+	// 	// Get system information like OS, Obsidian version, etc.
+	// 	const obsidianVersion =
+	// 		this.plugin.app.title.split(" ").pop() || "Unknown Version";
+	// 	const appVersion = navigator.appVersion || "Unknown App Version";
+	// 	const enabledPlugins = this.plugin.app.plugins.enabledPlugins;
+	// 	const manifests = Object.values(
+	// 		this.plugin.app.plugins.manifests
+	// 	) as PluginManifest[];
+	// 	const enabledPluginsWithVersionMap = manifests
+	// 		.filter((plugin) => enabledPlugins.has(plugin.id))
+	// 		.map((plugin) => ({
+	// 			id: plugin.id,
+	// 			version: plugin.version,
+	// 		}));
 
-		const stringifyEnabledPlugins = enabledPluginsWithVersionMap
-			.map((plugin) => `${plugin.id} = ${plugin.version}`)
-			.join("    <br/>");
+	// 	const stringifyEnabledPlugins = enabledPluginsWithVersionMap
+	// 		.map((plugin) => `${plugin.id} = ${plugin.version}`)
+	// 		.join("    <br/>");
 
-		return `<b>App version</b>: ${appVersion}<br/><br/><b>Obsidian Version</b>: ${obsidianVersion}<br/><br/><b>Enabled Plugins</b>:<br/>${stringifyEnabledPlugins}`;
-	}
+	// 	return `<b>App version</b>: ${appVersion}<br/><br/><b>Obsidian Version</b>: ${obsidianVersion}<br/><br/><b>Enabled Plugins</b>:<br/>${stringifyEnabledPlugins}`;
+	// }
 
 	handleCopyBtnEvent(bugReportContent: string) {
 		// Copy the bug report content to clipboard

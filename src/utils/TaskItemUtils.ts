@@ -7,6 +7,7 @@ import {
 	updateFrontmatterInMarkdownFile,
 } from "./taskNote/TaskNoteUtils";
 import { extractTaskId } from "src/managers/VaultScanner";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
@@ -57,8 +58,8 @@ export const getTaskFromId = async (
 
 		return null; // Return null if the task is not found
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			82,
 			"Error retrieving task from tasksCache using ID",
 			String(error),
 			"TaskItemUtils.ts/getTaskFromId"
@@ -138,8 +139,8 @@ export const applyIdToTaskItem = async (
 	// 	newIdToReturn = newId;
 	// })
 	// .catch((error) => {
-	// 	bugReporter(
-	// 		plugin,
+	// 	bugReporterManagerInsatance.showNotice(
+	// 		83,
 	// 		"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 	// 		String(error),
 	// 		"TaskItemUtils.ts/applyIdToTaskItem"

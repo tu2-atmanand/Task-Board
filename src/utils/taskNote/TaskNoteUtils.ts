@@ -16,6 +16,7 @@ import {
 import { Notice, normalizePath } from "obsidian";
 import { bugReporter } from "src/services/OpenModals";
 import { defaultTaskStatuses } from "src/interfaces/Enums";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -411,8 +412,8 @@ export async function deleteTaskNote(
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
 		if (!file) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				64,
 				"There was an issue while deleting the task note.",
 				`File not found at path: ${filePath}`,
 				"deleteTaskNote"
@@ -424,8 +425,8 @@ export async function deleteTaskNote(
 		new Notice(`Task note deleted: ${file.name}`);
 	} catch (error) {
 		console.error("Error deleting task note:", error);
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			65,
 			"There was an issue while deleting the task note.",
 			String(error),
 			"deleteTaskNote"
@@ -446,8 +447,8 @@ export async function archiveTaskNote(
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
 		if (!file) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				66,
 				"There was an issue while archiving the task note.",
 				`File not found at path: ${filePath}`,
 				"archiveTaskNote"
@@ -502,8 +503,8 @@ export async function archiveTaskNote(
 			delete plugin.vaultScanner.tasksCache.Completed[filePath];
 	} catch (error) {
 		console.error("Error archiving task note:", error);
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			67,
 			"There was an issue while archiving the task note.",
 			String(error),
 			"archiveTaskNote"

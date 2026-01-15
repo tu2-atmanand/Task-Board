@@ -21,6 +21,7 @@ import {
 	extractFrontmatterTags,
 } from "./taskNote/FrontmatterOperations";
 import { generateTaskId } from "./TaskItemUtils";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Move a task from Pending to Completed in the tasks.json file (cache file).
@@ -50,8 +51,8 @@ export const moveFromPendingToCompleted = async (
 		// Write the updated data back to the JSON file
 		await writeJsonCacheDataToDisk(plugin, allTasks);
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			78,
 			"Error updating task in tasks.json",
 			error as string,
 			"TaskItemUtils.ts/moveFromPendingToCompleted"
@@ -89,8 +90,8 @@ export const moveFromCompletedToPending = async (
 		// Write the updated data back to the JSON file
 		await writeJsonCacheDataToDisk(plugin, allTasks);
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			79,
 			"Error updating task in tasks.json",
 			error as string,
 			"TaskItemUtils.ts/moveFromCompletedToPending"
@@ -180,8 +181,8 @@ export const updateTaskInJson = async (
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			80,
 			"Error updating task in tasks.json",
 			String(error),
 			"TaskItemUtils.ts/updateTaskInJson"
@@ -215,8 +216,8 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 
 		eventEmitter.emit("REFRESH_COLUMN");
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			81,
 			"Error deleting task from tasks.json",
 			String(error),
 			"TaskItemUtils.ts/deleteTaskFromJson"

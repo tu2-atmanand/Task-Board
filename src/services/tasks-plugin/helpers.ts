@@ -11,6 +11,7 @@ import {
 import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskLineUtils";
 import { CustomStatus } from "src/interfaces/GlobalSettings";
 import { eventEmitter } from "../EventEmitter";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export async function isTasksPluginEnabled(plugin: TaskBoard) {
 	try {
@@ -112,8 +113,8 @@ export async function openTasksPluginEditModal(
 			);
 
 			if (!tasksPluginApiOutput) {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					37,
 					"Tasks plugin API did not return any output.",
 					"Tasks plugin API did not return any output.",
 					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
@@ -173,8 +174,8 @@ export async function openTasksPluginEditModal(
 					newContent
 				);
 			} else {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					38,
 					"Unexpected output from tasks plugin API. Since the task you are trying to update is a recurring task, Task Board cannot handle recurring tasks as of now and Tasks plugin didnt returned an expected output. Please report this issue so developers can enhance the integration.",
 					`Input to tasksPluginApi : ${completeOldTaskContent}\n Output of tasksPluginApi: ${tasksPluginApiOutput}`,
 					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
@@ -202,16 +203,16 @@ export async function openTasksPluginEditModal(
 			//fallback to normal function
 			// await updateTaskInFile(plugin, updatedTask, oldTask);
 
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				39,
 				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
 				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
 			);
 		}
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			40,
 			"Error while updating the recurring task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
 			"TaskItemUtils.ts/useTasksPluginToUpdateInFile"

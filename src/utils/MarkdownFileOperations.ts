@@ -3,6 +3,7 @@
 import { TFile } from "obsidian";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Read data from a file in the vault
@@ -22,8 +23,8 @@ export const readDataOfVaultFile = async (
 		} else {
 			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
 			// console.error(`File not found at path: ${filePath}`);
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				75,
 				"File not found in vault.",
 				`File not found at path: ${filePath}`,
 				"MarkdownFileOperations.ts/readDataOfVaultFile"
@@ -31,8 +32,8 @@ export const readDataOfVaultFile = async (
 			throw `File not found at path: ${filePath}`;
 		}
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			76,
 			"Error reading data from vault files.",
 			String(error),
 			"MarkdownFileOperations.ts/readDataOfVaultFile"
@@ -65,8 +66,8 @@ export const writeDataToVaultFile = async (
 		}
 		return;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			77,
 			"Error writing to file in vault.",
 			String(error),
 			"MarkdownFileOperations.ts/writeDataToVaultFile"

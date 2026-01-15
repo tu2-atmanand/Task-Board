@@ -47,6 +47,7 @@ import {
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { StatusType } from "src/interfaces/StatusConfiguration";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class SettingsManager {
 	win: Window;
@@ -122,8 +123,8 @@ export class SettingsManager {
 			const settingsData = this.plugin.settings.data.globalSettings;
 			this.globalSettings = settingsData;
 		} catch (err) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				42,
 				"Failed to load settings",
 				err as string,
 				"TaskBoardSettingConstructUI.ts/SettingsManager/loadSettings"
@@ -139,8 +140,8 @@ export class SettingsManager {
 			this.plugin.settings.data.globalSettings = this.globalSettings;
 			this.plugin.saveSettings();
 		} catch (err) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				43,
 				"Failed to save settings",
 				err as string,
 				"TaskBoardSettingConstructUI.ts/SettingsManager/saveSettings"
@@ -600,6 +601,15 @@ export class SettingsManager {
 			.addButton((button) =>
 				button.setButtonText(t("export")).onClick(async () => {
 					await exportConfigurations(this.plugin);
+				})
+			);
+
+		new Setting(contentEl)
+			.setName(t("export-logs"))
+			.setDesc(t("export-logs-info"))
+			.addButton((button) =>
+				button.setButtonText(t("export")).onClick(async () => {
+					await bugReporterManagerInsatance.exportLogFile();
 				})
 			);
 

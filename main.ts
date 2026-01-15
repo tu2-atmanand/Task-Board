@@ -48,6 +48,7 @@ import { taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -117,6 +118,10 @@ export default class TaskBoard extends Plugin {
 	async onload() {
 		console.log("Task Board : Loading...");
 
+		// NOTE : I feel, if these singleton instances needs the latest version of 'this', then they might show some unexpected behavior as I am not updating the 'this' inside those singleton instances latest during the plugin life-cycle.
+		dragDropTasksManagerInsatance.setPlugin(this);
+		bugReporterManagerInsatance.setPlugin(this);
+
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.runOnPluginUpdate();
@@ -161,8 +166,6 @@ export default class TaskBoard extends Plugin {
 
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
-
-			dragDropTasksManagerInsatance.setPlugin(this);
 		});
 	}
 
@@ -710,7 +713,7 @@ export default class TaskBoard extends Plugin {
 				processed++;
 
 				// Update progress notice
-				this.currentProgressNotice.messageEl.textContent = `Processing renamed files: ${processed}/${totalFiles}`;
+				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
 			} catch (error) {
 				console.error(
 					`Error processing renamed file ${file.path}:`,
@@ -729,7 +732,9 @@ export default class TaskBoard extends Plugin {
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
-		new Notice(`✓ Finished processing ${totalFiles} renamed file(s)`);
+		new Notice(
+			`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`
+		);
 	}
 
 	/**

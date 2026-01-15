@@ -27,6 +27,7 @@ import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
 import { bugReporter } from "src/services/OpenModals";
 import { DatePickerModal } from "src/modals/date_picker";
+import { bugReporterManagerInsatance } from "./BugReporter";
 
 export interface currentDragDataPayload {
 	task: taskItem;
@@ -414,8 +415,8 @@ class DragDropTasksManager {
 			datePicker.open();
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				30,
 				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
 				`Column configuration :	${JSON.stringify(targetColumn)}`,
 				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated"
@@ -658,8 +659,8 @@ class DragDropTasksManager {
 			datePicker.open();
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				31,
 				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
 				`Column configuration :	${JSON.stringify(targetColumn)}`,
 				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated"

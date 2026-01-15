@@ -31,6 +31,7 @@ import {
 	globalSettingsData,
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -88,8 +89,8 @@ export const handleEditTask = (
 			break;
 		}
 		default:
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				85,
 				"This should never happen, looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
 				"NA",
 				"TaskItemEventHandlers.ts/handleEditTask"
@@ -132,8 +133,8 @@ export const openFileAndHighlightTask = async (
 		}
 		case EditButtonMode.Modal:
 		default:
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				86,
 				"This is a low priority error and it should never happen. Looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
 				"NA",
 				"TaskItemEventHandlers.ts/handleEditTask"
@@ -147,8 +148,8 @@ export const openFileAndHighlightTask = async (
 			eState: { line: task.taskLocation.startLine - 1 },
 		});
 	} else {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			87,
 			"Either file not found or Leaf initialization failed. Please check below details for more information. First try to find if the file exists as per the below path. If the issue is critical, report it to developer.",
 			`Trying to open the following file: ${task.filePath}.\nLeaf type: ${
 				leaf ? leaf.constructor.name : "undefined"
@@ -175,8 +176,8 @@ export const openFileAndHighlightTask = async (
 	// 		eState: { line: task.taskLocation.startLine - 1 },
 	// 	});
 	// } else {
-	// 	bugReporter(
-	// 		plugin,
+	// 	bugReporterManagerInsatance.showNotice(
+	// 		88,
 	// 		"File not found",
 	// 		`The file at path ${newFilePath} could not be found.`,
 	// 		"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"

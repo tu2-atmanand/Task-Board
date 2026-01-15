@@ -149,7 +149,7 @@ export default memo(KanbanBoard);
 // 				}
 // 			} catch (error) {
 // 				setFreshInstall(true);
-// 				// bugReporter(plugin, "Error loading boards or tasks data", error as string, "KanbanBoard.tsx/useEffect");
+// 				// bugReporterManagerInsatance.showNotice(2, "Error loading boards or tasks data", error as string, "KanbanBoard.tsx/useEffect");
 // 			}
 // 		};
 
@@ -208,7 +208,7 @@ export default memo(KanbanBoard);
 // 			const allTasks = await loadTasksAndMerge(plugin);
 // 			setAllTasks(allTasks);
 // 		} catch (error) {
-// 			bugReporter(plugin, "Error loading tasks on column refresh", error as string, "KanbanBoard.tsx/debouncedRefreshColumn");
+// 			bugReporterManagerInsatance.showNotice(3, "Error loading tasks on column refresh", error as string, "KanbanBoard.tsx/debouncedRefreshColumn");
 // 		}
 // 	}, 300), [plugin]);
 

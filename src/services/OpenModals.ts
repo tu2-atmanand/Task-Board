@@ -26,6 +26,7 @@ import { DiffContentCompareModal } from "src/modals/DiffContentCompareModal";
 import { ScanFilterModal } from "src/modals/ScanFilterModal";
 import { ScanVaultModal } from "src/modals/ScanVaultModal";
 import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -318,8 +319,8 @@ export const openEditTaskNoteModal = (
 				// 	eventEmitter.emit("UPDATE_TASK");
 				// }, 500);
 			} catch (error) {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					41,
 					"Error updating task note",
 					error as string,
 					"TaskNoteEventHandlers.ts/handleTaskNoteEdit"
@@ -335,6 +336,16 @@ export const openEditTaskNoteModal = (
 	EditTaskModal.open();
 };
 
+/**
+ * Open an Obsidian notice first to indicate a bug has been encountered and then allows user to
+ * open the Bug reporter modal.
+ * @param plugin - The plugin instance
+ * @param message - The short message of the bug, shown to the user.
+ * @param bugContent - The detailed information related to the bug.
+ * @param context - The location where the bug was generated and some other context.
+ * 
+ * @deprecated v1.9.0
+ */
 export const bugReporter = (
 	plugin: TaskBoard,
 	message: string,
