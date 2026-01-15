@@ -1,9 +1,13 @@
 // /src/services/FrontmatterRenderer.ts
 
 /**
+ * @module FrontmatterRenderer
  * Utility class for rendering frontmatter properties using Obsidian's PropertyWidget API
+ * The below code has been referenced from the following sources : 
  * @see https://github.com/Fevol/obsidian-typings/blob/release/obsidian-public/1.9.14/src/obsidian/internals/PropertyWidget.d.ts
  * @see https://github.com/unxok/obsidian-better-properties/blob/main/src/classes/PropertyComponent/index.ts
+ * 
+ * In the current version, this FrontmatterRenderer is using a simple custom styling method to render the properties.
  */
 
 import type TaskBoard from "main";

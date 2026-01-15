@@ -1,6 +1,7 @@
 import type TaskBoard from "main";
+import { Notice } from "obsidian";
+import { statusTypeNames } from "src/interfaces/Enums";
 import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
-import { taskItem } from "src/interfaces/TaskItem";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**
@@ -12,30 +13,45 @@ import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegula
 export function checkboxStateSwitcher(
 	plugin: TaskBoard,
 	symbol: string
-): string {
-	const { tasksPluginCustomStatuses, customStatuses } =
-		plugin.settings.data.globalSettings;
+): { newSymbol: string; newSymbolType: string } {
+	const { customStatuses } = plugin.settings.data.globalSettings;
 
-	// Check if tasksPluginCustomStatuses is available and has entries
-	if (tasksPluginCustomStatuses?.length > 0) {
-		const foundStatus = tasksPluginCustomStatuses.find(
-			(status: { symbol: string }) => status.symbol === symbol
+	// Check if customStatuses is available and has entries
+	if (customStatuses?.length > 0) {
+		const oldStatus = customStatuses.find(
+			(status) => status.symbol === symbol
 		);
-		if (foundStatus) return foundStatus.nextStatusSymbol;
-	} else if (customStatuses?.length > 0) {
-		const foundStatus = customStatuses.find(
-			(status: { symbol: string }) => status.symbol === symbol
-		);
-		if (foundStatus) return foundStatus.nextStatusSymbol;
+		if (oldStatus) {
+			const nextStatus = customStatuses.find(
+				(status) => status.symbol === oldStatus?.nextStatusSymbol
+			);
+			if (nextStatus) {
+				return {
+					newSymbol: oldStatus.nextStatusSymbol,
+					newSymbolType: nextStatus?.type,
+				};
+			}
+		}
 	}
 
+	new Notice(
+		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
+	);
 	// Default fallback behavior
-	return symbol === "x" || symbol === "X" ? " " : "x";
+	return symbol === "x" || symbol === "X"
+		? {
+				newSymbol: " ",
+				newSymbolType: statusTypeNames.TODO,
+		  }
+		: {
+				newSymbol: "x",
+				newSymbolType: statusTypeNames.DONE,
+		  };
 }
 
 /**
  * Determines if a task is completed based on its title or symbol.
- * @param titleOrSymbol - The title or symbol (task.status) of the task.
+ * @param titleOrSymbol - The title if its a inline-task, or the symbol (task.status) if its a task-note.
  * @param isTaskNote - A boolean indicating whether the task is a task note.
  * @param settings - The plugin settings.
  * @returns True if the symbol represents a completed state, otherwise false.
@@ -56,16 +72,21 @@ export function isTaskCompleted(
 		// // console.log("CheckBoxUtils.ts : isCompleted : match :", match);
 		// if (!match || match.length < 2) return false;
 
-		const symbol = extractCheckboxSymbol(titleOrSymbol);
+		let symbol = " ";
+		if (titleOrSymbol.trim().length === 1) {
+			symbol = titleOrSymbol;
+		} else {
+			symbol = extractCheckboxSymbol(titleOrSymbol);
+		}
 		// return (
-		// 	symbol === taskStatuses.regular ||
-		// 	symbol === taskStatuses.checked ||
-		// 	symbol === taskStatuses.done ||
-		// 	symbol === taskStatuses.dropped
+		// 	symbol === defaultTaskStatuses.regular ||
+		// 	symbol === defaultTaskStatuses.checked ||
+		// 	symbol === defaultTaskStatuses.done ||
+		// 	symbol === defaultTaskStatuses.dropped
 		// );
 
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+			settings.data.globalSettings.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
@@ -81,7 +102,7 @@ export function isTaskCompleted(
 		return flag;
 	} else {
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+			settings.data.globalSettings.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (

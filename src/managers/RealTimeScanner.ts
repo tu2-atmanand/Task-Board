@@ -7,6 +7,7 @@ import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
 import { PENDING_SCAN_FILE_STACK } from "src/interfaces/Constants";
+import { bugReporterManagerInsatance } from "./BugReporter";
 
 export class RealTimeScanner {
 	app: App;
@@ -39,8 +40,8 @@ export class RealTimeScanner {
 				JSON.stringify(this.taskBoardFileStack)
 			);
 		} catch (error) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				32,
 				"Error saving file stack to localStorage.",
 				String(error),
 				"RealTimeScanner.ts/saveStack"

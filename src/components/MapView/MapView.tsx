@@ -20,7 +20,7 @@ import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
-import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
+import { updateTaskInFile } from 'src/utils/taskLine/TaskLineUtils';
 import { debounce, Menu, Notice, Platform } from 'obsidian';
 import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/interfaces/Constants';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
@@ -33,6 +33,7 @@ import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
 import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -279,6 +280,7 @@ const MapView: React.FC<MapViewProps> = ({
 						type: 'ResizableNodeSelected',
 						data: {
 							label: <TaskItem
+								dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
 								plugin={plugin}
 								task={task}
 								activeBoardSettings={activeBoardSettings}
@@ -299,7 +301,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 		if (duplicateIds.size > 0) {
 			const stringOfListOfDuplicateIds = Array.from(duplicateIds).join(',');
-			// bugReporter(plugin, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+			// bugReporterManagerInsatance.showNotice(17, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
 			duplicateIds.clear();
 		}
 
@@ -787,12 +789,12 @@ const MapView: React.FC<MapViewProps> = ({
 				const allTasks = allTasksArranged.flat();
 				const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
 				if (!targetTask) {
-					bugReporter(plugin, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
+					bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
 					return;
 				}
 
 				if (!Array.isArray(targetTask.dependsOn)) {
-					bugReporter(plugin, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
+					bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
 					return;
 				}
 
@@ -846,7 +848,7 @@ const MapView: React.FC<MapViewProps> = ({
 						});
 					}
 				} catch (err) {
-					bugReporter(plugin, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
+					bugReporterManagerInsatance.showNotice(20, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
 				}
 			});
 		});

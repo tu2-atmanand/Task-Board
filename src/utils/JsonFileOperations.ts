@@ -9,6 +9,7 @@ import {
 import { Board } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 // --------------- Operations with data.json ---------------
 
@@ -19,8 +20,8 @@ export const loadGlobalSettings = async (plugin: TaskBoard) => {
 		const globalSettings = plugin.settings.data.globalSettings || {};
 		return globalSettings;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			68,
 			"Failed to load global settings from data.json",
 			String(error),
 			"JsonFileOperations.ts/loadGlobalSettings"
@@ -39,8 +40,8 @@ export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
 
 		return boardConfigs;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			69,
 			"Failed to load board configurations from data.json",
 			String(error),
 			"JsonFileOperations.ts/loadBoardsData"
@@ -64,8 +65,8 @@ export const saveBoardsData = async (
 		// Save updated settings
 		await plugin.saveSettings();
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			70,
 			"Failed to save board configurations to data.json",
 			String(error),
 			"JsonFileOperations.ts/saveBoardsData"
@@ -83,8 +84,8 @@ export const loadJsonCacheData = async (
 	try {
 		return plugin.vaultScanner.tasksCache;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			71,
 			"Failed to load tasks from tasks.json",
 			String(error),
 			"JsonFileOperations.ts/loadJsonCacheData"
@@ -221,8 +222,8 @@ export const writeJsonCacheDataToDisk = async (
 			: "Failed to write tasks to tasks.json file. Or failed to create the a new file. Maybe write permission is not granted.";
 
 		if (!isTimeoutError) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				72,
 				userMessage,
 				errorMessage,
 				"JsonFileOperations.ts/writeJsonCacheDataFromDisk"
@@ -264,8 +265,8 @@ export const moveTasksCacheFileToNewPath = (
 			// })
 			.then(() => resolve(true))
 			.catch((error) => {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					73,
 					"Failed to move tasks.json file to new path",
 					String(error),
 					"JsonFileOperations.ts/moveTasksCacheFileToNewPath"
@@ -327,12 +328,13 @@ export const loadTasksAndMerge = async (
 		return allTasksMerged;
 	} catch (error) {
 		// console.error("Failed to load tasks from tasks.json:", error);
-		// bugReporter(
-		// 	plugin,
+		// bugReporterManagerInsatance.showNotice(
+		// 	74,
 		// 	"Failed to load tasks from tasks.json file. If this is your fresh install kindly run the scan vault using the top right corner button and open the board again. If the issue persists, please report it to the developer using steps mentioned below.",
 		// 	String(error),
 		// 	"JsonFileOperations.ts/loadTasksAndMerge"
 		// );
+		console.log("Is this running..");
 		throw error;
 	}
 };

@@ -12,6 +12,7 @@ import {
 	PENDING_SCAN_FILE_STACK,
 	VIEWPORT_STORAGE_KEY,
 } from "src/interfaces/Constants";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 // --- Called Once On Plugin Load ---
 export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
@@ -140,8 +141,8 @@ export async function downloadAndApplyLanguageFile(
 		return true;
 	} catch (err) {
 		progressNotice.hide();
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			44,
 			`You have selected the following language for Obsidian application : ${langCodes[lang]} - ${lang}.\nBased on the error message below, either your internet is OFF or the language translation file is not present at the following link : https://github.com/tu2-atmanand/Task-Board/main/src/utils/lang/locale/. \nIt would be really helpful if you can contribute for your native language translation by visiting the following link : https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/`,
 			err as string,
 			"helper.ts/downloadAndApplyLanguageFile"

@@ -1,6 +1,6 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Notice, Setting, normalizePath } from "obsidian";
+import { App, Notice, Setting, normalizePath, setIcon } from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
@@ -14,6 +14,7 @@ import {
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
+import { CustomStatusModal } from "src/modals/CustomStatusConfigurator";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 import {
 	exportConfigurations,
@@ -23,8 +24,7 @@ import {
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 import {
-	HideableTaskProperty,
-	cardSectionsVisibilityOptions,
+	taskPropertiesNames,
 	TagColorType,
 	EditButtonMode,
 	NotificationService,
@@ -35,12 +35,19 @@ import {
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
+	defaultTaskStatuses,
+	statusTypeNames,
 } from "src/interfaces/Enums";
 import {
 	frontmatterFormatting,
 	globalSettingsData,
+	taskCardStyleNames,
+	type CustomStatus,
 } from "src/interfaces/GlobalSettings";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
+import { StatusType } from "src/interfaces/StatusConfiguration";
+import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class SettingsManager {
 	win: Window;
@@ -56,27 +63,47 @@ export class SettingsManager {
 		this.win = window;
 	}
 
-	private getPropertyDisplayName(property: HideableTaskProperty): string {
-		const displayNames: Record<HideableTaskProperty, string> = {
-			[HideableTaskProperty.ID]: "ID (🆔 fpyvkz)",
-			[HideableTaskProperty.Tags]: "Tags (#tag)",
-			[HideableTaskProperty.Priority]: "Priority (🔺)",
-			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
-			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)",
-			[HideableTaskProperty.ScheduledDate]:
+	private getPropertyDisplayName(
+		property: taskPropertiesNames
+	): string | null {
+		type PartialDisplayNames = Pick<
+			Record<taskPropertiesNames, string>,
+			| taskPropertiesNames.ID
+			| taskPropertiesNames.Tags
+			| taskPropertiesNames.Priority
+			| taskPropertiesNames.Time
+			| taskPropertiesNames.Reminder
+			| taskPropertiesNames.CreatedDate
+			| taskPropertiesNames.StartDate
+			| taskPropertiesNames.ScheduledDate
+			| taskPropertiesNames.DueDate
+			| taskPropertiesNames.CompletionDate
+			| taskPropertiesNames.CancelledDate
+			| taskPropertiesNames.Dependencies
+			| taskPropertiesNames.OnCompletion
+			| taskPropertiesNames.Recurring
+		>;
+
+		const displayNames: PartialDisplayNames = {
+			[taskPropertiesNames.ID]: "ID (🆔 fpyvkz)",
+			[taskPropertiesNames.Tags]: "Tags (#tag)",
+			[taskPropertiesNames.Priority]: "Priority (🔺)",
+			[taskPropertiesNames.CreatedDate]: "Created Date (➕ 2024-01-01)",
+			[taskPropertiesNames.StartDate]: "Start Date (🛫 2024-01-01)",
+			[taskPropertiesNames.ScheduledDate]:
 				"Scheduled Date (⏳ 2024-01-01)",
-			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
-			[HideableTaskProperty.CompletionDate]:
+			[taskPropertiesNames.DueDate]: "Due Date (📅 2024-01-01)",
+			[taskPropertiesNames.CompletionDate]:
 				"Completion Date (✅ 2024-01-01)",
-			[HideableTaskProperty.CancelledDate]:
+			[taskPropertiesNames.CancelledDate]:
 				"Cancelled Date (❌ 2024-01-01)",
-			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
-			[HideableTaskProperty.Reminder]: "Reminder ((@12:30))",
-			[HideableTaskProperty.Recurring]: "Recurring (🔁 every 2 weeks)",
-			[HideableTaskProperty.OnCompletion]: "On-completion (🏁 delete)",
-			[HideableTaskProperty.Dependencies]: "Dependens-on ⛔ fa4sm9",
+			[taskPropertiesNames.Time]: "Time (⏰ 09:00-10:00)",
+			[taskPropertiesNames.Reminder]: "Reminder (@(12:30))",
+			[taskPropertiesNames.Recurring]: "Recurring (🔁 every 2 weeks)",
+			[taskPropertiesNames.OnCompletion]: "On-completion (🏁 delete)",
+			[taskPropertiesNames.Dependencies]: "Dependens-on (⛔ fa4sm9)",
 		};
-		return displayNames[property] || property;
+		return displayNames[property as keyof typeof displayNames] || null;
 	}
 
 	private openReloadNoticeIfNeeded() {
@@ -96,8 +123,8 @@ export class SettingsManager {
 			const settingsData = this.plugin.settings.data.globalSettings;
 			this.globalSettings = settingsData;
 		} catch (err) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				42,
 				"Failed to load settings",
 				err as string,
 				"TaskBoardSettingConstructUI.ts/SettingsManager/loadSettings"
@@ -113,8 +140,8 @@ export class SettingsManager {
 			this.plugin.settings.data.globalSettings = this.globalSettings;
 			this.plugin.saveSettings();
 		} catch (err) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				43,
 				"Failed to save settings",
 				err as string,
 				"TaskBoardSettingConstructUI.ts/SettingsManager/saveSettings"
@@ -393,16 +420,13 @@ export class SettingsManager {
 						"<br/>" +
 						"<ul>" +
 						"<li>" +
-						t("link-parent-child-tasks") +
-						"</li>" +
-						"<li>" +
-						t("pin-tasks-on-top-in-each-column-upcoming") +
+						t("map-view-feature") +
 						"</li>" +
 						"<li>" +
 						t("manual-sorting-inside-each-column-upcoming") +
 						"</li>" +
 						"<li>" +
-						t("map-view-upcoming") +
+						t("pin-tasks-on-top-in-each-column-upcoming") +
 						"</li>" +
 						"</ul>"
 				)
@@ -581,17 +605,27 @@ export class SettingsManager {
 			);
 
 		new Setting(contentEl)
+			.setName(t("export-logs"))
+			.setDesc(t("export-logs-info"))
+			.addButton((button) =>
+				button.setButtonText(t("export")).onClick(async () => {
+					await bugReporterManagerInsatance.exportLogFile();
+				})
+			);
+
+		new Setting(contentEl)
 			.setName("Safeguard feature")
 			.setDesc(
 				createFragmentWithHTML(
-					"This feature helps to ensure that this plugin wont temper the conte of other tasks. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+					"This feature helps to ensure that task board should only update the task content in the note. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+						"<br/>" +
 						"<br/>" +
 						"<b>" +
-						"NOTE :" +
+						"NOTE : " +
 						"</b>" +
-						"Disabling this feature will by-pass the security check which might lead to unwanted behavior. Example in case where there are multiple inline tasks one after the another. Only disable this feature if you feel this modal is poppin-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but ensure you take care of you data manually." +
+						"Disabling this feature will by-pass the security check which might lead to unwanted behavior like tempering the content of other inline-tasks right below the intended task. Only disable this feature if you feel this modal is popping-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but also ensure you are taking care of you data." +
 						"<br/>" +
-						"This is a temporary solution to the problem few users are facing right now. This will be the default behavior moving forward and you will not require to disable this feature moving forward."
+						"This setting was provided on the request of few users to tempararily disable safe-guard. In upcoming releasing, will remove this setting if everything is working as expected and safe-guard will be always doing the security checks."
 				)
 			)
 			.addToggle((toggle) =>
@@ -603,34 +637,52 @@ export class SettingsManager {
 				})
 			);
 
-		// new Setting(contentEl)
-		// 	.setName(t("enable-experimental-features"))
-		// 	.setDesc(
-		// 		createFragmentWithHTML(
-		// 			t("enable-experimental-features-info-1") +
-		// 				"<br/>" +
-		// 				t("enable-experimental-features-info-2") +
-		// 				"<br/>" +
-		// 				"<ul>" +
-		// 				"<li>" +
-		// 				"<b>" +
-		// 				t("drag-and-drop") +
-		// 				"</b>" +
-		// 				t("drag-and-drop-feature-description") +
-		// 				"</li>" +
-		// 				"</ul>" +
-		// 		)
-		// 	)
-		// 	.addToggle((toggle) =>
-		// 		toggle
-		// 			.setValue(experimentalFeatures)
-		// 			.onChange(async (value) => {
-		// 				this.globalSettings!.experimentalFeatures = value;
-		// 				await this.saveSettings();
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						"<br/>" +
+						"<br/>" +
+						t("enable-experimental-features-info-2") +
+						"<br/>" +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("drag-and-drop") +
+						" : " +
+						"</b>" +
+						t("drag-and-drop-feature-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("kanban-swimlanes") +
+						" : " +
+						"</b>" +
+						t("kanban-swimlanes-feature-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("manual-sorting") +
+						" : " +
+						"</b>" +
+						t("manual-sorting-feature-info") +
+						"</li>" +
+						"</ul>"
+				)
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(experimentalFeatures)
+					.onChange(async (value) => {
+						this.globalSettings!.experimentalFeatures = value;
+						await this.saveSettings();
 
-		// 				this.openReloadNoticeIfNeeded();
-		// 			})
-		// 	);
+						this.openReloadNoticeIfNeeded();
+					})
+			);
 
 		// // Helper to add filter rows
 		// const addFilterRow = (
@@ -783,39 +835,33 @@ export class SettingsManager {
 		// 	});
 
 		const {
-			showHeader,
-			showFooter,
 			columnWidth,
 			showVerticalScroll,
 			tagColors,
 			tagColorsType,
 			showTaskWithoutMetadata,
-			showFileNameInCard,
-			cardSectionsVisibility,
 			showFrontmatterTagsOnCards,
 			hiddenTaskProperties,
+			taskCardStyle,
 		} = this.globalSettings!;
 
-		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
-			.setName(t("show-header-of-the-task-card"))
-			.setDesc(t("enable-this-to-see-the-header-in-the-task-card"))
-			.addToggle((toggle) =>
-				toggle.setValue(showHeader).onChange(async (value) => {
-					this.globalSettings!.showHeader = value;
-					await this.saveSettings();
-				})
-			);
-
-		// Setting to show/Hide the Footer of the task card
-		new Setting(contentEl)
-			.setName(t("show-footer-of-the-task-card"))
-			.setDesc(t("enable-this-to-see-the-footer-in-the-task-card"))
-			.addToggle((toggle) =>
-				toggle.setValue(showFooter).onChange(async (value) => {
-					this.globalSettings!.showFooter = value;
-					await this.saveSettings();
-				})
+			.setName(t("task-card-style"))
+			.setDesc(t("task-card-style-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[taskCardStyleNames.EMOJI]: t("tasks-plugin-emoji"),
+						// [taskCardStyleNames.ICONS]: t("lucide-icons"),
+						[taskCardStyleNames.BASES]: t("bases-cards-style"),
+						// [taskCardStyleNames.DATAVIEW]: t("dataview-style"),
+					})
+					.setValue(taskCardStyle)
+					.onChange(async (value) => {
+						this.globalSettings!.taskCardStyle =
+							value as taskCardStyleNames;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
@@ -829,40 +875,6 @@ export class SettingsManager {
 						this.globalSettings!.showFrontmatterTagsOnCards = value;
 						await this.saveSettings();
 					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("customize-card-sections"))
-			.setDesc(t("customize-card-sections-info"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[cardSectionsVisibilityOptions.showDescriptionOnly]: t(
-							"show-description-only"
-						),
-						[cardSectionsVisibilityOptions.showSubTasksOnly]:
-							t("show-subtasks-only"),
-						[cardSectionsVisibilityOptions.showBoth]:
-							t("show-both"),
-						[cardSectionsVisibilityOptions.hideBoth]:
-							t("hide-both"),
-					})
-					.setValue(cardSectionsVisibility)
-					.onChange(async (value) => {
-						this.globalSettings!.cardSectionsVisibility = value;
-						await this.saveSettings();
-					})
-			);
-
-		// Setting to show/Hide the Footer of the task card
-		new Setting(contentEl)
-			.setName(t("show-note-name-in-task-header"))
-			.setDesc(t("show-note-name-in-task-header-description"))
-			.addToggle((toggle) =>
-				toggle.setValue(showFileNameInCard).onChange(async (value) => {
-					this.globalSettings!.showFileNameInCard = value;
-					await this.saveSettings();
-				})
 			);
 
 		// Setting to show/Hide the Footer of the task card
@@ -946,48 +958,257 @@ export class SettingsManager {
 		);
 
 		// Create checkboxes for each hideable property
-		Object.values(HideableTaskProperty).forEach((property) => {
+		Object.values(taskPropertiesNames).forEach((property) => {
 			const displayName = this.getPropertyDisplayName(property);
 
-			const checkboxSetting = new Setting(checkboxContainer)
-				.setName(displayName)
-				.setClass("taskboard-property-checkbox-setting")
-				.addToggle((toggle) => {
-					const isSelected = hiddenTaskProperties.includes(property);
-					toggle.setValue(isSelected).onChange(async (value) => {
-						if (value) {
-							// Add property if not already included
-							if (
-								!this.globalSettings!.hiddenTaskProperties.includes(
-									property
-								)
-							) {
-								this.globalSettings!.hiddenTaskProperties.push(
-									property
-								);
+			if (displayName) {
+				const checkboxSetting = new Setting(checkboxContainer)
+					.setName(displayName)
+					.setClass("taskboard-property-checkbox-setting")
+					.addToggle((toggle) => {
+						const isSelected =
+							hiddenTaskProperties.includes(property);
+						toggle.setValue(isSelected).onChange(async (value) => {
+							if (value) {
+								// Add property if not already included
+								if (
+									!this.globalSettings!.hiddenTaskProperties.includes(
+										property
+									)
+								) {
+									this.globalSettings!.hiddenTaskProperties.push(
+										property
+									);
+								}
+							} else {
+								// Remove property
+								this.globalSettings!.hiddenTaskProperties =
+									this.globalSettings!.hiddenTaskProperties.filter(
+										(p) => p !== property
+									);
 							}
-						} else {
-							// Remove property
-							this.globalSettings!.hiddenTaskProperties =
-								this.globalSettings!.hiddenTaskProperties.filter(
-									(p) => p !== property
-								);
-						}
-						await this.saveSettings();
+							await this.saveSettings();
 
-						this.openReloadNoticeIfNeeded();
+							this.openReloadNoticeIfNeeded();
+						});
 					});
-				});
 
-			// Style the checkbox setting to be more compact
-			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+				// Style the checkbox setting to be more compact
+				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+			}
 		});
 
-		// Tag Colors settings
-		// Setting to show/Hide the Header of the task card
-		// new Setting(contentEl)
-		// 	.setName(t("tag-colors"))
-		// 	.setDesc(t("tag-colors-info"));
+		new Setting(contentEl).setName(t("custom-statuses")).setHeading();
+		new Setting(contentEl).setDesc(t("custom-statuses-info"));
+
+		// Container for custom statuses list
+		const customStatusesContainer = contentEl.createDiv({
+			cls: "custom-statuses-container",
+		});
+
+		const renderCustomStatuses = () => {
+			customStatusesContainer.empty(); // Clear existing rendered rows
+
+			const customStatuses =
+				this.plugin.settings.data.globalSettings.customStatuses;
+
+			if (!customStatuses || customStatuses.length === 0) {
+				customStatusesContainer.createDiv({
+					cls: "custom-statuses-empty-message",
+					text: t("no-custom-statuses-configured"),
+				});
+				return;
+			}
+
+			customStatuses.forEach((status, index) => {
+				const row = customStatusesContainer.createDiv({
+					cls: "custom-status-row",
+				});
+
+				const statusInfoContainer = row.createDiv({
+					cls: "custom-status-info-container",
+				});
+
+				// Status Name
+				const statusInfoName = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-name")}:`,
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-value",
+					text: status.name,
+				});
+
+				// Status Symbol
+				const statusInfoSymbol = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-symbol")}:`,
+				});
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-value",
+					text: `[${status.symbol}]`,
+				});
+
+				// Next Status Symbol
+				const statusInfoAction = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoAction.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-action")}:`,
+				});
+				statusInfoAction.createDiv({
+					cls: "custom-status-field",
+					text: `When you will click on the checkbox [${status.symbol}] it will change to [${status.nextStatusSymbol}]`,
+				});
+
+				const rightSideContainer = row.createDiv({
+					cls: "custom-status-right-side",
+				});
+
+				// Status Type
+				rightSideContainer.createDiv({
+					cls: `custom-status-field-status-pill${
+						status.type === statusTypeNames.DONE ? " done" : ""
+					}${
+						status.type === statusTypeNames.CANCELLED
+							? " cancelled"
+							: ""
+					}`,
+					text: status.type,
+				});
+
+				// Buttons container
+				const buttonsContainer = rightSideContainer.createDiv({
+					cls: "custom-status-buttons",
+				});
+
+				// Edit button
+				const editButton = buttonsContainer.createEl("span", {
+					cls: "edit-btn",
+					text: t("edit"),
+					title: t("edit"),
+				});
+				setIcon(editButton, "pencil");
+				editButton.onclick = async () => {
+					const modal = new CustomStatusModal(
+						this.plugin,
+						status,
+						false
+					);
+					modal.onClose = async () => {
+						if (modal.saved) {
+							const updatedStatus = modal.statusConfiguration();
+							const customStatus: CustomStatus = {
+								symbol: updatedStatus.symbol,
+								name: updatedStatus.name,
+								nextStatusSymbol:
+									updatedStatus.nextStatusSymbol,
+								availableAsCommand:
+									updatedStatus.availableAsCommand,
+								type: updatedStatus.type,
+							};
+							this.plugin.settings.data.globalSettings!.customStatuses[
+								index
+							] = customStatus;
+							await this.saveSettings();
+							renderCustomStatuses();
+						}
+					};
+					modal.open();
+				};
+
+				// Delete button
+				const deleteButton = buttonsContainer.createEl("span", {
+					cls: "delete-btn",
+					text: t("delete"),
+					title: t("delete"),
+				});
+				setIcon(deleteButton, "trash");
+				deleteButton.onclick = async () => {
+					this.globalSettings!.customStatuses.splice(index, 1);
+					await this.saveSettings();
+					renderCustomStatuses();
+				};
+			});
+		};
+
+		// Initial render
+		renderCustomStatuses();
+
+		const isTasksPluginEnabled =
+			this.plugin.settings.data.globalSettings.compatiblePlugins
+				.tasksPlugin;
+		// Add "Add New Status" button
+		new Setting(contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("import-from-tasks-plugin"))
+					.setClass("import-from-tasks-plugin-btn")
+					.setCta()
+					.onClick(async () => {
+						const flag = await fetchTasksPluginCustomStatuses(
+							this.plugin
+						);
+						if (flag) {
+							renderCustomStatuses();
+						}
+					})
+					.setDisabled(
+						!this.plugin.settings.data.globalSettings
+							.compatiblePlugins.tasksPlugin
+					)
+			)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-new-status"))
+					.setCta()
+					.onClick(async () => {
+						const newStatus: CustomStatus = {
+							symbol: "",
+							name: "",
+							nextStatusSymbol: "",
+							availableAsCommand: false,
+							type: StatusType.TODO,
+						};
+						const modal = new CustomStatusModal(
+							this.plugin,
+							newStatus,
+							false
+						);
+						modal.onClose = async () => {
+							if (modal.saved) {
+								const statusConfig =
+									modal.statusConfiguration();
+								const customStatus: CustomStatus = {
+									symbol: statusConfig.symbol,
+									name: statusConfig.name,
+									nextStatusSymbol:
+										statusConfig.nextStatusSymbol,
+									availableAsCommand:
+										statusConfig.availableAsCommand,
+									type: statusConfig.type,
+								};
+								if (!this.globalSettings!.customStatuses) {
+									this.globalSettings!.customStatuses = [];
+								}
+								this.globalSettings!.customStatuses.push(
+									customStatus
+								);
+								await this.saveSettings();
+								renderCustomStatuses();
+							}
+						};
+
+						modal.open();
+					})
+			);
 
 		new Setting(contentEl).setName(t("tag-colors")).setHeading();
 
@@ -1669,8 +1890,9 @@ export class SettingsManager {
 			dailyNotesPluginComp,
 			quickAddPluginDefaultChoice,
 			notificationService,
-			frontmatterPropertyForReminder,
 			boundTaskCompletionToChildTasks,
+			autoAddCancelledDate,
+			autoAddCompletedDate,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -1770,6 +1992,32 @@ export class SettingsManager {
 					this.globalSettings!.autoAddCreatedDate = value;
 					await this.saveSettings();
 				})
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-completed-date-to-tasks"))
+			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(autoAddCompletedDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddCompletedDate = value;
+						await this.saveSettings();
+					})
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-cancelled-date-to-tasks"))
+			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(autoAddCancelledDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddCancelledDate = value;
+						await this.saveSettings();
+					})
 			);
 
 		// contentEl.createEl("h4", { text: t("compatible-plugins") });
@@ -1898,40 +2146,6 @@ export class SettingsManager {
 					this.globalSettings!.notificationService = value;
 					await this.saveSettings();
 				});
-			});
-
-		new Setting(contentEl)
-			.setName(t("frontmatter-property-for-reminder"))
-			.setDesc(t("frontmatter-property-for-reminder-description"))
-			.addText((text) => {
-				text.setValue(frontmatterPropertyForReminder)
-					.onChange((value) => {
-						if (this.globalSettings)
-							this.globalSettings.frontmatterPropertyForReminder =
-								value;
-						this.saveSettings();
-					})
-					.setPlaceholder("eg.: reminder");
-
-				// const inputEl = text.inputEl;
-				// const suggestionContent = getFrontmatterPropertyNames(
-				// 	this.plugin
-				// );
-				// const onSelectCallback = async (selectedPath: string) => {
-				// 	if (this.globalSettings) {
-				// 		this.globalSettings.quickAddPluginDefaultChoice =
-				// 			selectedPath;
-				// 	}
-				// 	text.setValue(selectedPath);
-				// 	await this.saveSettings();
-				// };
-
-				// new MultiSuggest(
-				// 	inputEl,
-				// 	new Set(suggestionContent),
-				// 	onSelectCallback,
-				// 	this.app
-				// );
 			});
 	}
 

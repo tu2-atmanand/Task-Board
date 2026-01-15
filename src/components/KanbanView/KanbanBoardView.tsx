@@ -7,6 +7,7 @@ import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 import { App } from "obsidian";
 import Column from "./Column";
 import LazyColumn from "./LazyColumn";
+import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
@@ -20,7 +21,7 @@ interface KanbanBoardProps {
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn, loading, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, tasksPerColumn, loading, freshInstall }) => {
 	// Check if lazy loading is enabled
 	const lazyLoadingEnabled = plugin.settings.data.globalSettings.kanbanView?.lazyLoadingEnabled ?? false;
 	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
@@ -51,6 +52,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn
 					<div className="emptyBoardMessage">
 						Create columns on this board using the board config modal from top right corner button.
 					</div>
+				) : board?.swimlanes?.enabled ? (
+					<KanbanSwimlanesContainer
+						plugin={plugin}
+						board={board}
+						allTasks={allTasks}
+						tasksPerColumn={tasksPerColumn}
+						lazyLoadingEnabled={lazyLoadingEnabled}
+					/>
 				) : (
 					board?.columns
 						.filter((column) => column.active)
@@ -140,7 +149,7 @@ export default memo(KanbanBoard);
 // 				}
 // 			} catch (error) {
 // 				setFreshInstall(true);
-// 				// bugReporter(plugin, "Error loading boards or tasks data", error as string, "KanbanBoard.tsx/useEffect");
+// 				// bugReporterManagerInsatance.showNotice(2, "Error loading boards or tasks data", error as string, "KanbanBoard.tsx/useEffect");
 // 			}
 // 		};
 
@@ -199,7 +208,7 @@ export default memo(KanbanBoard);
 // 			const allTasks = await loadTasksAndMerge(plugin);
 // 			setAllTasks(allTasks);
 // 		} catch (error) {
-// 			bugReporter(plugin, "Error loading tasks on column refresh", error as string, "KanbanBoard.tsx/debouncedRefreshColumn");
+// 			bugReporterManagerInsatance.showNotice(3, "Error loading tasks on column refresh", error as string, "KanbanBoard.tsx/debouncedRefreshColumn");
 // 		}
 // 	}, 300), [plugin]);
 

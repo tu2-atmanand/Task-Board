@@ -5,7 +5,6 @@ import {
 	extractDependsOn,
 	extractPriority,
 	extractTaskId,
-	generateTaskId,
 } from "../../managers/VaultScanner";
 import {
 	TaskRegularExpressions,
@@ -15,13 +14,16 @@ import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/Dataview
 import {
 	taskPropertyFormatOptions,
 	NotificationService,
-	HideableTaskProperty,
+	taskPropertiesNames,
 	UniversalDateOptions,
+	statusTypeNames,
 } from "src/interfaces/Enums";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
 import { cursorLocation } from "src/interfaces/TaskItem";
+import { generateTaskId } from "../TaskItemUtils";
+import { moment as _moment } from "obsidian";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -60,6 +62,15 @@ export const getFormattedTaskContent = async (
 	return completeTask;
 };
 
+/**
+ * Add a unique ID to the task content if it doesn't already have one.
+ * This function will check if the task content already has an ID. If it does, it will return the same formatted task content.
+ * If it doesn't, it will generate a new ID and add it to the task content based on the task format user has configured and return the new formatted task content.
+ * @param Plugin - The Taskboard plugin instance.
+ * @param formattedTaskContent - The formatted task content to add the ID to.
+ * @param forceAddId - If true, force the addition of a new ID even if the task content already has one.
+ * @returns A promise that resolves with an object containing the formatted task content and the new ID.
+ */
 export const addIdToTaskContent = async (
 	Plugin: TaskBoard,
 	formattedTaskContent: string,
@@ -107,6 +118,14 @@ export const addIdToTaskContent = async (
 	return { formattedTaskContent, newId };
 };
 
+/**
+ * Returns a formatted task content as a string.
+ * If the task is null or has no title, returns an empty string.
+ * Replaces the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
+ * Adds the body content, indent each line with a tab (or 4 spaces) for proper formatting.
+ * @param task - The taskItem object representing the task to format.
+ * @returns A string containing the formatted task content.
+ */
 export const getFormattedTaskContentSync = (task: taskItem): string => {
 	if (!task || !task.title) {
 		return "";
@@ -196,7 +215,7 @@ export const getSanitizedTaskContent = (
 	updatedTitle = sanitizeTags(
 		updatedTitle,
 		updatedTask.tags,
-		updatedTask.tags.pop() || ""
+		updatedTask.tags || []
 	);
 
 	updatedTitle = sanitizeReminder(
@@ -211,7 +230,7 @@ export const getSanitizedTaskContent = (
 		updatedTask.completion || ""
 	);
 
-	updatedTitle = sanitizeCancellationDate(
+	updatedTitle = sanitizeCancelledDate(
 		globalSettings,
 		updatedTitle,
 		updatedTask.cancelledDate || ""
@@ -237,6 +256,59 @@ export const getSanitizedTaskContent = (
 	}`;
 
 	return completeTask;
+};
+
+/**
+ * Sanitizes the status value of a task by replacing the old status value with a new one.
+ * If there is an issue with extracting the old status value, the old title value is returned as it is.
+ * @param {string} oldTitle - The old task title.
+ * @param {string} newStatusSymbol - The new status value to replace with.
+ * @param {string} newStatusType - Based on this type, will decide whether to add a completion and cancelled date or remove it from the title.
+ * @returns {string} The sanitized task title with the new status value.
+ */
+export const sanitizeStatus = (
+	globalSettings: globalSettingsData,
+	oldTitle: string,
+	newStatusSymbol: string,
+	newStatusType: string
+): string => {
+	const oldStatusValuematch = oldTitle.match(/\[(.)\]/); // Extract the symbol inside [ ]
+	let newTitle = oldTitle;
+	if (!oldStatusValuematch || oldStatusValuematch.length < 2) {
+		console.warn(
+			"There was an issue while extracting the old status value from the old title. Old title value has been returned as it is."
+		);
+		return oldTitle;
+	}
+
+	newTitle = oldTitle.replace(oldStatusValuematch[0], `[${newStatusSymbol}]`);
+
+	if (newStatusType === statusTypeNames.DONE) {
+		const moment = _moment as unknown as typeof _moment.default;
+		const currentDateValue = moment().format(
+			globalSettings?.taskCompletionDateTimePattern
+		);
+		newTitle = sanitizeCompletionDate(
+			globalSettings,
+			newTitle,
+			currentDateValue
+		);
+	} else if (newStatusType === statusTypeNames.CANCELLED) {
+		const moment = _moment as unknown as typeof _moment.default;
+		const currentDateValue = moment().format(
+			globalSettings?.taskCompletionDateTimePattern
+		);
+		newTitle = sanitizeCancelledDate(
+			globalSettings,
+			newTitle,
+			currentDateValue
+		);
+	} else {
+		newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
+		newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
+	}
+
+	return newTitle;
 };
 
 /**
@@ -581,7 +653,7 @@ export const sanitizeCompletionDate = (
  * @param cursorLocation - (Optional) The cursor location to insert the cancellation date at a specific position.
  * @returns The sanitized cancellation date string to be used in the task title.
  */
-export const sanitizeCancellationDate = (
+export const sanitizeCancelledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	cancelledDate: string,
@@ -646,7 +718,7 @@ export const sanitizeCancellationDate = (
  * @param title - The title of the task.
  * @param newTime - The new time to be sanitized and added to the title.
  * @param cursorLocation - (Optional) The cursor location to insert the time at a specific position.
- * @returns The sanitized time string to be used in the task title.
+ * @returns The sanitized title with updated time value.
  */
 export const sanitizeTime = (
 	globalSettings: globalSettingsData,
@@ -869,66 +941,85 @@ export const sanitizePriority = (
 /**
  * Function to sanitize tags inside the task title.
  * @param title - The title of the task.
- * @param oldTagsList - The list of old tags to be sanitized.
- * @param newTag - The new tag to be added to the title. Pass it along with the hash symbol. Eg. "#newTag".
- * @param cursorLocation - (Optional) The cursor location to insert the tag at a specific position.
- * @returns The sanitized tags string to be used in the task title.
+ * @param oldTagsList - The list of old tags currently present (with #).
+ * @param newTagsList - The updated list of tags that should exist (with #).
+ * @param cursorLocation - (Optional) Cursor location for insertion.
+ * @returns The sanitized title with correct tags.
  */
 export const sanitizeTags = (
 	title: string,
 	oldTagsList: string[],
-	newTag: string,
+	newTagsList: string[],
 	cursorLocation?: cursorLocation
 ): string => {
-	// Remove the <mark> and <font> tags from the title first before processing
+	console.log(
+		"sanitizeTags...\ntitle: ",
+		title,
+		"\noldTagsList: ",
+		oldTagsList,
+		"\nnewTagsList: ",
+		newTagsList,
+		"\ncursorLocation: ",
+		cursorLocation
+	);
+	// Remove <mark> and <font> tags before processing
 	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 
+	// Regex to extract tags from title
 	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
-	const extractedTagsMatch = tempTitle.match(tagsRegex) || [];
+	const extractedTags = (tempTitle.match(tagsRegex) || []).map((t) =>
+		t.trim()
+	);
 
-	// Create a set for quick lookup of newTags
-	const oldTagSet = new Set(oldTagsList);
+	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
+	const newTagSet = new Set(newTagsList.map((t) => t.trim()));
+	const extractedTagsSet = new Set(extractedTags.map((t) => t.trim()));
 
-	if (oldTagSet.size === 0) {
-		// If no tags are present, remove all existing tags
-		extractedTagsMatch.forEach((tag) => {
-			updatedTitle = title.replace(tag.trim(), "").trim();
-		});
-	}
-
-	// Remove tags from the title that are not in newTags
-	for (const tag of extractedTagsMatch) {
-		if (!oldTagSet.has(tag.trim())) {
+	// --------------------------------------------------
+	// 1. REMOVE TAGS THAT NO LONGER EXIST
+	// --------------------------------------------------
+	for (const tag of extractedTags) {
+		if (!newTagSet.has(tag)) {
 			updatedTitle = updatedTitle.replace(tag, "").trim();
 		}
 	}
 
-	// // Append tags from newTags that are not already in the title
-	// const updatedTagsMatch =
-	// 	updatedTitle.match(tagsRegex)?.map((tag) => tag.trim()) || [];
-	// const updatedTagsSet = new Set(updatedTagsMatch);
-	// for (const tag of newTags) {
-	// 	if (!updatedTagsSet.has(tag)) {
-	// 		updatedTitle += ` ${tag}`;
-	// 	}
-	// }
-
-	if (cursorLocation?.lineNumber === 1) {
-		// Insert newTag at the specified charIndex with spaces
-		const spaceBefore =
-			updatedTitle.slice(0, cursorLocation.charIndex).trim() + " ";
-		const spaceAfter =
-			" " + updatedTitle.slice(cursorLocation.charIndex).trim();
-		return `${spaceBefore}${newTag}${spaceAfter}`;
-	} else {
-		// Append newTag at the end of the title
-		if (newTag && !updatedTitle.includes(newTag)) {
-			updatedTitle += ` ${newTag}`;
+	// --------------------------------------------------
+	// 2. FIND TAGS THAT NEED TO BE ADDED
+	// --------------------------------------------------
+	const tagsToAdd: string[] = [];
+	for (const tag of newTagSet) {
+		if (!extractedTagsSet.has(tag)) {
+			tagsToAdd.push(tag);
 		}
 	}
 
-	return updatedTitle.trim();
+	// --------------------------------------------------
+	// 3. INSERT / APPEND NEW TAGS
+	// --------------------------------------------------
+	if (tagsToAdd.length > 0) {
+		if (cursorLocation?.lineNumber === 1) {
+			// Insert at cursor position (preserves your original behavior)
+			const before = updatedTitle
+				.slice(0, cursorLocation.charIndex)
+				.trim();
+			const after = updatedTitle.slice(cursorLocation.charIndex).trim();
+
+			updatedTitle = [before, ...tagsToAdd, after]
+				.filter(Boolean)
+				.join(" ");
+		} else {
+			// Append all new tags at the end
+			for (const tag of tagsToAdd) {
+				if (!updatedTitle.includes(tag)) {
+					updatedTitle += ` ${tag}`;
+				}
+			}
+		}
+	}
+
+	return updatedTitle.replace(/\s+/g, " ").trim();
 };
 
 /**
@@ -1014,7 +1105,7 @@ export const sanitizeReminder = (
  * @param title - The title of the task.
  * @param dependesOnIds - The IDs of the tasks that this task depends on.
  * @param cursorLocation - (Optional) The cursor location to insert the dependsOn at a specific position.
- * @returns The sanitized dependsOn string to be used in the task title.
+ * @returns The sanitized title string with the updated "dependsOn" section.
  */
 export const sanitizeDependsOn = (
 	globalSettings: globalSettingsData,
@@ -1030,40 +1121,44 @@ export const sanitizeDependsOn = (
 			return title.replace(extractedDependsOnMatch[0], "").trim();
 		}
 		return title;
-	}
-
-	let dependsOnFormat: string = "";
-	if (globalSettings?.taskPropertyFormat === "1") {
-		dependsOnFormat =
-			dependesOnIds.length > 0 ? `⛔${dependesOnIds.join(", ")}` : "";
-	} else if (globalSettings?.taskPropertyFormat === "2") {
-		dependsOnFormat =
-			dependesOnIds.length > 0 ? `⛔ ${dependesOnIds.join(", ")}` : "";
-	} else if (globalSettings?.taskPropertyFormat === "3") {
-		dependsOnFormat =
-			dependesOnIds.length > 0
-				? `[dependsOn:: ${dependesOnIds.join(", ")}]`
-				: "";
 	} else {
-		dependsOnFormat =
-			dependesOnIds.length > 0
-				? `@dependsOn(${dependesOnIds.join(", ")})`
-				: "";
-	}
+		let dependsOnFormat: string = "";
+		if (globalSettings?.taskPropertyFormat === "1") {
+			dependsOnFormat =
+				dependesOnIds.length > 0 ? `⛔${dependesOnIds.join(", ")}` : "";
+		} else if (globalSettings?.taskPropertyFormat === "2") {
+			dependsOnFormat =
+				dependesOnIds.length > 0
+					? `⛔ ${dependesOnIds.join(", ")}`
+					: "";
+		} else if (globalSettings?.taskPropertyFormat === "3") {
+			dependsOnFormat =
+				dependesOnIds.length > 0
+					? `[dependsOn:: ${dependesOnIds.join(", ")}]`
+					: "";
+		} else {
+			dependsOnFormat =
+				dependesOnIds.length > 0
+					? `@dependsOn(${dependesOnIds.join(", ")})`
+					: "";
+		}
 
-	if (extractedDependsOnMatch.length > 0) {
-		return title.replace(extractedDependsOnMatch[0], dependsOnFormat);
-	}
+		if (extractedDependsOnMatch && extractedDependsOnMatch.length > 0) {
+			return title.replace(extractedDependsOnMatch[0], dependsOnFormat);
+		}
 
-	if (cursorLocation?.lineNumber === 1) {
-		// Insert newDependsOn at the specified charIndex with spaces
-		const spaceBefore =
-			title.slice(0, cursorLocation.charIndex).trim() + " ";
-		const spaceAfter = " " + title.slice(cursorLocation.charIndex).trim();
-		return `${spaceBefore}${dependsOnFormat}${spaceAfter}`;
+		if (cursorLocation?.lineNumber === 1) {
+			// Insert newDependsOn at the specified charIndex with spaces
+			const spaceBefore =
+				title.slice(0, cursorLocation.charIndex).trim() + " ";
+			const spaceAfter =
+				" " + title.slice(cursorLocation.charIndex).trim();
+			return `${spaceBefore}${dependsOnFormat}${spaceAfter}`;
+		}
+
+		// If no existing dependsOn found, append new one at the end
+		return `${title} ${dependsOnFormat}`;
 	}
-	// If no existing dependsOn found, append new one at the end
-	return `${title} ${dependsOnFormat}`;
 };
 
 // export const getSanitizedTaskContent = (
@@ -1202,7 +1297,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Hide only selected properties
 	hiddenProperties.forEach((property) => {
 		switch (property) {
-			case HideableTaskProperty.Tags:
+			case taskPropertiesNames.Tags:
 				// Remove tags
 				task.tags.forEach((tag) => {
 					const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
@@ -1213,7 +1308,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				});
 				break;
 
-			case HideableTaskProperty.Time:
+			case taskPropertiesNames.Time:
 				// Remove time (handles both formats)
 				if (task.time) {
 					const timeRegex =
@@ -1225,7 +1320,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.DueDate:
+			case taskPropertiesNames.DueDate:
 				// Remove due date in various formats
 				if (task.due) {
 					const dueDateRegex =
@@ -1234,7 +1329,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.CreatedDate:
+			case taskPropertiesNames.CreatedDate:
 				// Remove Created date in various formats
 				if (task.createdDate) {
 					const createdDateRegex =
@@ -1243,7 +1338,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.StartDate:
+			case taskPropertiesNames.StartDate:
 				// Remove start date in various formats
 				if (task.startDate) {
 					const startDateRegex =
@@ -1252,7 +1347,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.ScheduledDate:
+			case taskPropertiesNames.ScheduledDate:
 				// Remove scheduled date in various formats
 				if (task.scheduledDate) {
 					const scheduledDateRegex =
@@ -1261,7 +1356,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.CompletionDate:
+			case taskPropertiesNames.CompletionDate:
 				// Remove completion date in various formats
 				if (task.completion) {
 					const completionRegex =
@@ -1270,7 +1365,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case HideableTaskProperty.Priority:
+			case taskPropertiesNames.Priority:
 				// Remove priority in various formats
 				if (task.priority > 0) {
 					let match = cleanedTitle.match(
@@ -1313,7 +1408,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	// Remove reminder if it's in the hidden properties list
 	if (
-		hiddenProperties.includes(HideableTaskProperty.Dependencies) ||
+		hiddenProperties.includes(taskPropertiesNames.Dependencies) ||
 		plugin.settings.data.globalSettings.showTaskWithoutMetadata
 	) {
 		const reminderRegex =
@@ -1361,12 +1456,9 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
 			"g" // add the 'g' flag if you want to match all occurrences
 		);
-
-		if (task.legacyId) {
-			const idMatch = cleanedTitle.match(combinedIdRegex);
-			if (idMatch) {
-				cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
-			}
+		const idMatch = cleanedTitle.match(combinedIdRegex);
+		if (idMatch) {
+			cleanedTitle = cleanedTitle.replace(idMatch[0], " ");
 		}
 	}
 
@@ -1454,10 +1546,11 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 	// Remove dependsOn in various formats
 	if (task.dependsOn && task.dependsOn.length > 0) {
-		const match = cleanedTitle.match(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-				.dependsOnRegex
+		const combinedDependsOnRegex = new RegExp(
+			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dependsOnRegex.source})`,
+			"g" // add the 'g' flag if you want to match all occurrences
 		);
+		const match = cleanedTitle.match(combinedDependsOnRegex);
 		if (match) {
 			cleanedTitle = cleanedTitle.replace(match[0], "");
 		}
@@ -1491,58 +1584,4 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();
-};
-
-export const getUniversalDateFromTask = (
-	task: taskItem,
-	plugin: TaskBoard
-): string => {
-	// Method 1 - Comparing
-	const universalDateChoice =
-		plugin.settings.data.globalSettings.universalDate;
-
-	if (universalDateChoice === UniversalDateOptions.dueDate) {
-		return task.due;
-	} else if (universalDateChoice === UniversalDateOptions.startDate) {
-		return task.startDate || "";
-	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
-		return task.scheduledDate || "";
-	}
-	return "";
-
-	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.globalSettings.universalDate
-	// const universalDateChoice =
-	// 	plugin.settings.data.globalSettings.universalDate;
-	// if (
-	// 	!universalDateChoice ||
-	// 	!task[universalDateChoice] ||
-	// 	task[universalDateChoice] === ""
-	// ) {
-	// 	return "";
-	// }
-	// // Return the value of the universal date key from the task object
-	// return task[universalDateChoice] || "";
-};
-
-export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
-	const universalDateChoice =
-		plugin.settings.data.globalSettings.universalDate;
-	if (universalDateChoice === UniversalDateOptions.dueDate) {
-		return "📅";
-	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
-		return "⏳";
-	} else if (universalDateChoice === UniversalDateOptions.startDate) {
-		return "🛫";
-	}
-	return "";
-};
-
-export const isTaskRecurring = (taskTitle: string): boolean => {
-	// This function will simly check if the task title contatins the recurring tag: 🔁
-	const recurringTagRegex = /🔁/u;
-	if (recurringTagRegex.test(taskTitle)) {
-		return true;
-	}
-	// If the recurring tag is not found, return false
-	return false;
 };

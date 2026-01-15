@@ -6,15 +6,17 @@ import {
 	createYamlFromObject,
 	extractFrontmatterFromContent,
 } from "./FrontmatterOperations";
-import { taskStatuses } from "src/interfaces/Enums";
 import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
 import {
 	CustomStatus,
 	frontmatterFormatting,
+	globalSettingsData,
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
 import { bugReporter } from "src/services/OpenModals";
+import { defaultTaskStatuses } from "src/interfaces/Enums";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -227,7 +229,7 @@ export function getStatusSymbolFromStatusName(
 	// return " ";
 
 	const tasksPluginStatusConfigs =
-		settings.data.globalSettings.tasksPluginCustomStatuses;
+		settings.data.globalSettings.customStatuses;
 	let statusSymbol = "";
 	tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 		if (customStatus.name === statusName) {
@@ -246,14 +248,12 @@ export function getStatusSymbolFromStatusName(
  */
 export function getStatusNameFromStatusSymbol(
 	statusSymbol: string | undefined,
-	settings: PluginDataJson
+	globalSettings: globalSettingsData
 ): string {
 	if (!statusSymbol) return "pending";
 
-	if (settings) {
-		// TODO : We need to implement the Custom Statuses mapping feature very soon and combine the `customStatuses` and `tasksPluginCustomStatuses` into one. So, it can import from the Task plugin or user can change it inside the Task Board itself.
-		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+	if (globalSettings) {
+		const tasksPluginStatusConfigs = globalSettings.customStatuses;
 		let statusName = "";
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (customStatus.symbol === statusSymbol) {
@@ -268,7 +268,7 @@ export function getStatusNameFromStatusSymbol(
 	// taskStatuses contains mappings like: { unchecked: " ", regular: "x", "in-progress": "/" }
 	const statusMapping: { [symbol: string]: string } = {};
 
-	for (const [statusName, symbol] of Object.entries(taskStatuses)) {
+	for (const [statusName, symbol] of Object.entries(defaultTaskStatuses)) {
 		statusMapping[symbol] = statusName;
 	}
 
@@ -328,11 +328,13 @@ export function formatTaskNoteContent(
  * Update frontmatter properties from task item
  * @param plugin - TaskBoard plugin instance
  * @param task - Task item with updated properties
+ * @param forceId (Optional) - Whether to forcefully add ID property in frontmatter
  * @returns Promise<void>
  */
 export async function updateFrontmatterInMarkdownFile(
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
+	forceId?: boolean
 ): Promise<void> {
 	try {
 		const file = plugin.app.vault.getFileByPath(task.filePath);
@@ -342,7 +344,18 @@ export async function updateFrontmatterInMarkdownFile(
 
 		// Method 1 - Using Obsidian's filemanager API.
 		await plugin.app.fileManager.processFrontMatter(file, (existing) => {
-			const updated = updateFrontmatterProperties(plugin, existing, task);
+			const updated = updateFrontmatterProperties(
+				plugin,
+				existing,
+				task,
+				forceId
+			);
+			console.log(
+				"updateFrontmatterInMarkdownFile...\nUpdated frontmatter",
+				updated,
+				"\nold frontmatter",
+				existing
+			);
 			for (const key of Object.keys(updated)) {
 				existing[key] = updated[key];
 			}
@@ -399,8 +412,8 @@ export async function deleteTaskNote(
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
 		if (!file) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				64,
 				"There was an issue while deleting the task note.",
 				`File not found at path: ${filePath}`,
 				"deleteTaskNote"
@@ -412,8 +425,8 @@ export async function deleteTaskNote(
 		new Notice(`Task note deleted: ${file.name}`);
 	} catch (error) {
 		console.error("Error deleting task note:", error);
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			65,
 			"There was an issue while deleting the task note.",
 			String(error),
 			"deleteTaskNote"
@@ -434,8 +447,8 @@ export async function archiveTaskNote(
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
 		if (!file) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				66,
 				"There was an issue while archiving the task note.",
 				`File not found at path: ${filePath}`,
 				"archiveTaskNote"
@@ -490,8 +503,8 @@ export async function archiveTaskNote(
 			delete plugin.vaultScanner.tasksCache.Completed[filePath];
 	} catch (error) {
 		console.error("Error archiving task note:", error);
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			67,
 			"There was an issue while archiving the task note.",
 			String(error),
 			"archiveTaskNote"

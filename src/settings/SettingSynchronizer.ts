@@ -6,9 +6,9 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
-import { colType } from "src/interfaces/Enums";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
+import { colTypeNames } from "src/interfaces/Enums";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
@@ -48,8 +48,8 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 						column.id = Math.floor(Math.random() * 1000000);
 					}
 					if (
-						column.colType === colType.dated ||
-						(column.colType === colType.undated &&
+						column.colType === colTypeNames.dated ||
+						(column.colType === colTypeNames.undated &&
 							!column.datedBasedColumn)
 					) {
 						column.datedBasedColumn = {
