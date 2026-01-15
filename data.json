@@ -860,8 +860,8 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 56,
-          "completed": 17
+          "pending": 58,
+          "completed": 15
         }
       }
     ],
@@ -1020,7 +1020,7 @@
       "tagColorsType": "text",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
-        "tasksPlugin": true,
+        "tasksPlugin": false,
         "reminderPlugin": false,
         "dayPlannerPlugin": true,
         "quickAddPlugin": false
@@ -1054,9 +1054,9 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 3,
+        "boardIndex": 4,
         "taskId": "",
-        "settingTab": 4
+        "settingTab": 0
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
