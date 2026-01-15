@@ -1,7 +1,7 @@
 // /src/components/AddOrEditTaskRC.tsx
 // React component for adding or editing tasks, usable in both modals and views
 
-import { Component, Keymap, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
+import { Component, Keymap, Notice, Platform, TFile, UserEvent, debounce, normalizePath } from "obsidian";
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
@@ -683,7 +683,8 @@ export const AddOrEditTaskRC: React.FC<{
 			if (file && file instanceof TFile) {
 				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
 			} else {
-				bugReporterManagerInsatance.showNotice(22, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+				// bugReporterManagerInsatance.showNotice(22, "File not found", `The file at path ${newFilePath} could not be found.`, "AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked");
+				new Notice(`The file at path ${newFilePath} could not be found. Maybe after you click on the save button, this file will be automatically created with the task you have entered.`, 7000);
 			}
 		}
 		onClose();
