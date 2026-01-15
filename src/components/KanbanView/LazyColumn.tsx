@@ -183,14 +183,17 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	}
 
 	async function handleMinimizeColumn() {
-		const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-			(board: Board) => board.name === activeBoardData.name
-		);
+		// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+		// 	(board: Board) => board.name === activeBoardData.name
+		// );
+		const boardIndex = activeBoardData.index;
 
 		if (boardIndex !== -1) {
-			const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-				(col: ColumnData) => col.name === columnData.name
-			);
+			// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
+			// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+			// 	(col: ColumnData) => col.id === columnData.id
+			// );
+			const columnIndex = columnData.index - 1;
 
 			if (columnIndex !== -1) {
 				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
@@ -229,12 +232,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					(updatedColumnConfiguration: ColumnData) => {
 						// Update the column configuration in the board data
 						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-							(board: Board) => board.name === activeBoardData.name
+							(board: Board) => board.index === activeBoardData.index
 						);
 
 						if (boardIndex !== -1) {
 							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-								(col: ColumnData) => col.name === columnData.name
+								(col: ColumnData) => col.id === columnData.id
 							);
 
 							if (columnIndex !== -1) {
@@ -260,14 +263,15 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			item.setIcon("list-filter");
 			item.onClick(async () => {
 				try {
-					// TODO : The indexes are finding using the name, this might create issues if there are duplicate names. Use the id to find the indexes.
-					// Find board index once
-					const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-						(board: Board) => board.name === activeBoardData.name
-					);
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-						(col: ColumnData) => col.name === columnData.name
-					);
+					// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+					// 	(board: Board) => board.name === activeBoardData.name
+					// );
+					const boardIndex = activeBoardData.index;
+					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
+					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					// 	(col: ColumnData) => col.id === columnData.id
+					// );
+					const columnIndex = columnData.index - 1;
 
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
@@ -346,15 +350,17 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			item.setTitle(t("hide-column"));
 			item.setIcon("eye-off");
 			item.onClick(async () => {
-				// Find the board and column indices
-				const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-					(board: Board) => board.name === activeBoardData.name
-				);
+				// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
+				// 	(board: Board) => board.name === activeBoardData.name
+				// );
+				const boardIndex = activeBoardData.index;
 
 				if (boardIndex !== -1) {
-					const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-						(col: ColumnData) => col.name === columnData.name
-					);
+					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
+					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+					// 	(col: ColumnData) => col.id === columnData.id
+					// );
+					const columnIndex = columnData.index - 1;
 
 					if (columnIndex !== -1) {
 						// Set the active property to false

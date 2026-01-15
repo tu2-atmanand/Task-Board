@@ -230,7 +230,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		try {
 			const swimlaneName = swimlanes[rowIndex]?.swimlaneName;
 			if (!swimlaneName) return;
-			const boardIndex = plugin.settings.data.boardConfigs.findIndex((b) => b.name === board.name);
+			const boardIndex = board.index; // plugin.settings.data.boardConfigs.findIndex((b) => b.index === board.index);
 			if (boardIndex === -1) return;
 			const swimCfg = plugin.settings.data.boardConfigs[boardIndex].swimlanes || { minimized: [] };
 			const arr = Array.isArray(swimCfg.minimized) ? [...swimCfg.minimized] : [];
