@@ -860,7 +860,7 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 58,
+          "pending": 59,
           "completed": 15
         }
       }
@@ -1049,7 +1049,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "TaskNotes",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 395,
+      "uniqueIdCounter": 400,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
