@@ -52,7 +52,7 @@ import { bugReporterManagerInsatance } from "./BugReporter";
  * @param plugin The TaskBoard plugin instance
  * @description Initializes the vaultScanner with the app and plugin instances, and sets up the initial tasks cache.
  */
-export default class vaultScanner {
+export default class VaultScanner {
 	app: App;
 	plugin: TaskBoard;
 	tasksCache: jsonCacheData;

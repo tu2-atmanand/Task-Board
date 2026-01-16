@@ -6,7 +6,7 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import vaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScanner";
+import VaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScanner";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
@@ -43,7 +43,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	plugin.saveSettings();
 }
 
-const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanner: vaultScanner }> = ({ app, plugin, vaultScanner }) => {
+const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanner: VaultScanner }> = ({ app, plugin, vaultScanner }) => {
 
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
@@ -223,7 +223,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 }
 
 export class ScanVaultModal extends Modal {
-	vaultScanner: vaultScanner;
+	vaultScanner: VaultScanner;
 	plugin: TaskBoard;
 
 	constructor(app: App, plugin: TaskBoard) {

@@ -23,7 +23,7 @@ import {
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanner } from "src/managers/RealTimeScanner";
-import vaultScanner, {
+import VaultScanner, {
 	fileTypeAllowedForScanning,
 } from "src/managers/VaultScanner";
 import { TaskBoardIcon } from "src/interfaces/Icons";
@@ -55,7 +55,7 @@ export default class TaskBoard extends Plugin {
 	plugin: TaskBoard;
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
-	vaultScanner: vaultScanner;
+	vaultScanner: VaultScanner;
 	realTimeScanning: RealTimeScanner;
 	taskBoardFileStack: string[] = [];
 	private _editorModified: boolean = false; // Private backing field
@@ -96,7 +96,7 @@ export default class TaskBoard extends Plugin {
 		this.app = this.plugin.app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.vaultScanner = new vaultScanner(this.app, this.plugin);
+		this.vaultScanner = new VaultScanner(this.app, this.plugin);
 		this.realTimeScanning = new RealTimeScanner(
 			this.app,
 			this.plugin,

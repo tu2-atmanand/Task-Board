@@ -2,7 +2,7 @@
 
 import { App, TAbstractFile, TFile, TFolder } from "obsidian";
 
-import type vaultScanner from "src/managers/VaultScanner";
+import type VaultScanner from "src/managers/VaultScanner";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -13,9 +13,9 @@ export class RealTimeScanner {
 	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
-	vaultScanner: vaultScanner;
+	vaultScanner: VaultScanner;
 
-	constructor(app: App, plugin: TaskBoard, vaultScanner: vaultScanner) {
+	constructor(app: App, plugin: TaskBoard, vaultScanner: VaultScanner) {
 		this.app = app;
 		this.plugin = plugin;
 		this.vaultScanner = vaultScanner;
