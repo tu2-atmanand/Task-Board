@@ -210,7 +210,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
 
 		if (fileStack && fileStack.length > 0) {
-			await plugin.realTimeScanning.processAllUpdatedFiles().then((result) => {
+			await plugin.realTimeScanner.processAllUpdatedFiles().then((result) => {
 				eventEmitter.emit("REFRESH_BOARD");
 			})
 		}

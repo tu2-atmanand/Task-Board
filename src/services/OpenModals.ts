@@ -54,7 +54,7 @@ export const openAddNewTaskInCurrentFileModal = (
 		(newTask: taskItem, quickAddPluginChoice: string) => {
 			addTaskInNote(plugin, newTask, true, cursorPosition).then(
 				(newId) => {
-					plugin.realTimeScanning.processAllUpdatedFiles(
+					plugin.realTimeScanner.processAllUpdatedFiles(
 						newTask.filePath
 					);
 				}
@@ -111,7 +111,7 @@ export const openAddNewTaskModal = (
 				);
 			} else {
 				await addTaskInNote(plugin, newTask, false).then((newId) => {
-					plugin.realTimeScanning.processAllUpdatedFiles(
+					plugin.realTimeScanner.processAllUpdatedFiles(
 						newTask.filePath
 					);
 				});
@@ -171,12 +171,12 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							.create(newTask.filePath, noteContent)
 							.then(() => {
 								// This is required to rescan the updated file and refresh the board.
-								plugin.realTimeScanning.onFileModified(
+								plugin.realTimeScanner.onFileModified(
 									newTask.filePath
 								);
 								sleep(1000).then(() => {
 									// TODO : Is 1 seconds really required ?
-									plugin.realTimeScanning.processAllUpdatedFiles();
+									plugin.realTimeScanner.processAllUpdatedFiles();
 								});
 							});
 					} else {
@@ -192,11 +192,11 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							.create(`Copy-${newTask.filePath}`, noteContent)
 							.then(() => {
 								// This is required to rescan the updated file and refresh the board.
-								plugin.realTimeScanning.onFileModified(
+								plugin.realTimeScanner.onFileModified(
 									`Copy-${newTask.filePath}`
 								);
 								sleep(1000).then(() => {
-									plugin.realTimeScanning.processAllUpdatedFiles();
+									plugin.realTimeScanner.processAllUpdatedFiles();
 								});
 							});
 					}
@@ -238,7 +238,7 @@ export const openEditTaskModal = async (
 			// Update the task in the file and JSON
 			updateTaskInFile(plugin, updatedTask, existingTask).then(
 				(newId) => {
-					plugin.realTimeScanning.processAllUpdatedFiles(
+					plugin.realTimeScanner.processAllUpdatedFiles(
 						updatedTask.filePath,
 						existingTask.id
 					);
@@ -290,7 +290,7 @@ export const openEditTaskNoteModal = (
 						sleep(1000).then(() => {
 							// TODO : Is 1 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
-							plugin.realTimeScanning.processAllUpdatedFiles(
+							plugin.realTimeScanner.processAllUpdatedFiles(
 								updatedTask.filePath,
 								existingTask.id
 							);
@@ -305,7 +305,7 @@ export const openEditTaskNoteModal = (
 						sleep(1000).then(() => {
 							// TODO : Is 1 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
-							plugin.realTimeScanning.processAllUpdatedFiles(
+							plugin.realTimeScanner.processAllUpdatedFiles(
 								updatedTask.filePath,
 								existingTask.id
 							);
@@ -653,7 +653,7 @@ export const openEditTaskView = async (
 									updatedTask,
 									task
 								).then((newId) => {
-									plugin.realTimeScanning.processAllUpdatedFiles(
+									plugin.realTimeScanner.processAllUpdatedFiles(
 										updatedTask.filePath
 									);
 								});
@@ -668,7 +668,7 @@ export const openEditTaskView = async (
 										sleep(1000).then(() => {
 											// TODO : Is 1 sec really required ?
 											// This is required to rescan the updated file and refresh the board.
-											plugin.realTimeScanning.processAllUpdatedFiles(
+											plugin.realTimeScanner.processAllUpdatedFiles(
 												updatedTask.filePath
 											);
 										});
@@ -682,7 +682,7 @@ export const openEditTaskView = async (
 										sleep(1000).then(() => {
 											// TODO : Is 1 sec really required ?
 											// This is required to rescan the updated file and refresh the board.
-											plugin.realTimeScanning.processAllUpdatedFiles(
+											plugin.realTimeScanner.processAllUpdatedFiles(
 												updatedTask.filePath
 											);
 										});
@@ -711,7 +711,7 @@ export const openEditTaskView = async (
 							// Update the task in the file and JSON
 							updateTaskInFile(plugin, updatedTask, task).then(
 								(newId) => {
-									plugin.realTimeScanning.processAllUpdatedFiles(
+									plugin.realTimeScanner.processAllUpdatedFiles(
 										updatedTask.filePath
 									);
 								}
@@ -726,7 +726,7 @@ export const openEditTaskView = async (
 									// This is required to rescan the updated file and refresh the board.
 									sleep(1000).then(() => {
 										// This is required to rescan the updated file and refresh the board.
-										plugin.realTimeScanning.processAllUpdatedFiles(
+										plugin.realTimeScanner.processAllUpdatedFiles(
 											updatedTask.filePath
 										);
 									});
@@ -740,7 +740,7 @@ export const openEditTaskView = async (
 									sleep(1000).then(() => {
 										// TODO : Is 1 sec really required ?
 										// This is required to rescan the updated file and refresh the board.
-										plugin.realTimeScanning.processAllUpdatedFiles(
+										plugin.realTimeScanner.processAllUpdatedFiles(
 											updatedTask.filePath
 										);
 									});

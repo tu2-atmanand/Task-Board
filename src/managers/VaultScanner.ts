@@ -635,7 +635,7 @@ export default class VaultScanner {
 	// 		);
 	// 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 	// 		if (
-	// 			this.plugin.settings.data.globalSettings.realTimeScanning &&
+	// 			this.plugin.settings.data.globalSettings.realTimeScanner &&
 	// 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
 	// 		) {

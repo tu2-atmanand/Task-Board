@@ -56,7 +56,7 @@ export default class TaskBoard extends Plugin {
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: VaultScanner;
-	realTimeScanning: RealTimeScanner;
+	realTimeScanner: RealTimeScanner;
 	taskBoardFileStack: string[] = [];
 	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
@@ -97,7 +97,7 @@ export default class TaskBoard extends Plugin {
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.vaultScanner = new VaultScanner(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanner(
+		this.realTimeScanner = new RealTimeScanner(
 			this.app,
 			this.plugin,
 			this.vaultScanner
@@ -296,8 +296,8 @@ export default class TaskBoard extends Plugin {
 
 	createLocalStorageAndScanModifiedFiles() {
 		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
-		this.realTimeScanning.initializeStack();
-		this.realTimeScanning.processAllUpdatedFiles();
+		this.realTimeScanner.initializeStack();
+		this.realTimeScanner.processAllUpdatedFiles();
 	}
 
 	scanVaultAtStartup() {
@@ -705,7 +705,7 @@ export default class TaskBoard extends Plugin {
 			const { file, oldPath } = this.renameQueue.shift()!;
 
 			try {
-				this.realTimeScanning.onFileRenamed(
+				this.realTimeScanner.onFileRenamed(
 					file,
 					oldPath,
 					archivedPath
@@ -782,7 +782,7 @@ export default class TaskBoard extends Plugin {
 			const file = this.deleteQueue.shift()!;
 
 			try {
-				this.realTimeScanning.onFileDeleted(file);
+				this.realTimeScanner.onFileDeleted(file);
 				processed++;
 
 				// Update progress notice
@@ -852,7 +852,7 @@ export default class TaskBoard extends Plugin {
 			const file = this.createQueue.shift()!;
 
 			try {
-				await this.realTimeScanning.processAllUpdatedFiles(file);
+				await this.realTimeScanner.processAllUpdatedFiles(file);
 				processed++;
 
 				// Update progress notice
@@ -887,7 +887,7 @@ export default class TaskBoard extends Plugin {
 				if (fileTypeAllowedForScanning(this.plugin, file)) {
 					if (file instanceof TFile) {
 						// 	this.taskBoardFileStack.push(file.path);
-						this.realTimeScanning.onFileModified(file);
+						this.realTimeScanner.onFileModified(file);
 						this.editorModified = true;
 					}
 				}
@@ -1114,15 +1114,15 @@ export default class TaskBoard extends Plugin {
 	async onFileModifiedAndLostFocus() {
 		if (this.editorModified) {
 			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
-			// 	await this.realTimeScanning.onFileModified(
+			// 	await this.realTimeScanner.onFileModified(
 			// 		this.currentModifiedFile,
-			// 		this.settings.data.globalSettings.realTimeScanning
+			// 		this.settings.data.globalSettings.realTimeScanner
 			// 	);
 			// } else {
 			// 	this.fileUpdatedUsingModal = "";
 			// }
 
-			await this.realTimeScanning.processAllUpdatedFiles();
+			await this.realTimeScanner.processAllUpdatedFiles();
 		}
 	}
 

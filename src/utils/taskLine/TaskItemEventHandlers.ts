@@ -52,7 +52,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 				(newId) => {
-					plugin.realTimeScanning.processAllUpdatedFiles(
+					plugin.realTimeScanner.processAllUpdatedFiles(
 						task.filePath,
 						task.legacyId
 					);
@@ -78,7 +78,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 			// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 			// 		(newId) => {
-			// 			plugin.realTimeScanning.processAllUpdatedFiles(
+			// 			plugin.realTimeScanner.processAllUpdatedFiles(
 			// 				task.filePath,
 			// 				task.legacyId
 			// 			);
@@ -116,7 +116,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 			// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 			// 		(newId) => {
-			// 			plugin.realTimeScanning.processAllUpdatedFiles(
+			// 			plugin.realTimeScanner.processAllUpdatedFiles(
 			// 				taskWithUpdatedStatus.filePath
 			// 			);
 
@@ -135,7 +135,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 			// useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 			// 	.then(() => {
-			// 		plugin.realTimeScanning.processAllUpdatedFiles(
+			// 		plugin.realTimeScanner.processAllUpdatedFiles(
 			// 			task.filePath
 			// 		);
 			// 	})
@@ -152,7 +152,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	} else {
 		useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 			.then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					task.filePath,
 					task.legacyId
 				);
@@ -192,7 +192,7 @@ export const handleSubTasksChange = (
 	// updateTaskInJson(plugin, updatedTask);
 
 	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
-		plugin.realTimeScanning.processAllUpdatedFiles(
+		plugin.realTimeScanner.processAllUpdatedFiles(
 			updatedTask.filePath,
 			oldTask.id
 		);
@@ -220,7 +220,7 @@ export const handleDeleteTask = (
 				deleteTaskNote(plugin, task.filePath);
 			} else {
 				deleteTaskFromFile(plugin, task).then(() => {
-					plugin.realTimeScanning.processAllUpdatedFiles(
+					plugin.realTimeScanner.processAllUpdatedFiles(
 						task.filePath
 					);
 				});

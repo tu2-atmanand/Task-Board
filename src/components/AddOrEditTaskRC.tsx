@@ -618,7 +618,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
 
-			plugin.realTimeScanning.processAllUpdatedFiles(filePath).then(() => {
+			plugin.realTimeScanner.processAllUpdatedFiles(filePath).then(() => {
 				onClose();
 				sleep(1000).then(() => {
 					eventEmitter.emit("SWITCH_VIEW", 'map');

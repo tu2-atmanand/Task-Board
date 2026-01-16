@@ -64,7 +64,7 @@ export const handleTaskNoteStatusChange = async (
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath,
 					task.legacyId
 				);
@@ -95,7 +95,7 @@ export const handleTaskNotePropertyUpdate = async (
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath
 				);
 			});
@@ -205,7 +205,7 @@ export const handleTaskNoteBodyChange = async (
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath,
 					oldTask.id
 				);

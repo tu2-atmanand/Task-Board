@@ -568,7 +568,7 @@ export const archiveTask = async (
 
 			// Now delete the task from its original file
 			await deleteTaskFromFile(plugin, task).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+				plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 			});
 
 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
@@ -590,7 +590,7 @@ export const archiveTask = async (
 				oldTaskContent,
 				`%%${oldTaskContent}%%`
 			).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(task.filePath);
+				plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 			});
 
 			// const newContet = fileContent.replace(
@@ -604,7 +604,7 @@ export const archiveTask = async (
 			// 		const currentFile = plugin.app.vault.getFileByPath(
 			// 			task.filePath
 			// 		);
-			// 		plugin.realTimeScanning.processAllUpdatedFiles(currentFile);
+			// 		plugin.realTimeScanner.processAllUpdatedFiles(currentFile);
 			// 	}
 			// );
 

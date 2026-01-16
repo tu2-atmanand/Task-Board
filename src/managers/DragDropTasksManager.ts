@@ -167,7 +167,7 @@ class DragDropTasksManager {
 			if (isThisTaskNote) {
 				updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 					sleep(1000).then(() => {
-						plugin.realTimeScanning.processAllUpdatedFiles(
+						plugin.realTimeScanner.processAllUpdatedFiles(
 							oldTask.filePath,
 							oldTask.id
 						);
@@ -181,7 +181,7 @@ class DragDropTasksManager {
 				);
 				console.log("Sanitized title after tag update:", newTask.title);
 				updateTaskInFile(plugin, newTask, oldTask).then(() => {
-					plugin.realTimeScanning.processAllUpdatedFiles(
+					plugin.realTimeScanner.processAllUpdatedFiles(
 						oldTask.filePath,
 						oldTask.id
 					);
@@ -296,7 +296,7 @@ class DragDropTasksManager {
 		// if (isThisTaskNote) {
 		// 	updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 		// 		sleep(1000).then(() => {
-		// 			plugin.realTimeScanning.processAllUpdatedFiles(
+		// 			plugin.realTimeScanner.processAllUpdatedFiles(
 		// 				oldTask.filePath,
 		// 				oldTask.id
 		// 			);
@@ -311,7 +311,7 @@ class DragDropTasksManager {
 		// 	console.log("Sanitized title :", newTask.title);
 		// 	console.log("Sanitized title after tag update:", newTask.title);
 		// 	updateTaskInFile(plugin, newTask, oldTask).then(() => {
-		// 		plugin.realTimeScanning.processAllUpdatedFiles(
+		// 		plugin.realTimeScanner.processAllUpdatedFiles(
 		// 			oldTask.filePath,
 		// 			oldTask.id
 		// 		);

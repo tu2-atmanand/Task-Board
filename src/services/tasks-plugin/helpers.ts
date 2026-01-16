@@ -183,7 +183,7 @@ export async function openTasksPluginEditModal(
 				return;
 			}
 
-			plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath);
+			plugin.realTimeScanner.processAllUpdatedFiles(oldTask.filePath);
 			setTimeout(() => {
 				// This event emmitter will stop any loading animation of ongoing task-card.
 				eventEmitter.emit("UPDATE_TASK", {

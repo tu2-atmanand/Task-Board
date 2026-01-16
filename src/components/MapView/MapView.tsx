@@ -551,7 +551,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 				// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
 				updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
-					plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
 					setTimeout(() => {
 						// This event emmitter will stop any loading animation of ongoing task-card.
 						eventEmitter.emit("UPDATE_TASK", {
@@ -564,7 +564,7 @@ const MapView: React.FC<MapViewProps> = ({
 				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
 					// This is required to rescan the updated file and refresh the board.
 					sleep(500).then(() => {
-						plugin.realTimeScanning.processAllUpdatedFiles(
+						plugin.realTimeScanner.processAllUpdatedFiles(
 							updatedTargetTask.filePath
 						);
 
@@ -817,7 +817,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 						await updateTaskInFile(plugin, updatedTargetTask, targetTask);
 						sleep(100).then(() => {
-							plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+							plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
 							new Notice(t("dependency-deleted"));
 
 							setTimeout(() => {
@@ -833,7 +833,7 @@ const MapView: React.FC<MapViewProps> = ({
 						updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
 							// This is required to rescan the updated file and refresh the board.
 							sleep(500).then(() => {
-								plugin.realTimeScanning.processAllUpdatedFiles(
+								plugin.realTimeScanner.processAllUpdatedFiles(
 									updatedTargetTask.filePath
 								);
 								new Notice(t("dependency-deleted"));

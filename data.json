@@ -911,7 +911,7 @@
       "autoAddDue": true,
       "scanVaultAtStartup": false,
       "dayPlannerPlugin": false,
-      "realTimeScanning": true,
+      "realTimeScanner": true,
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,

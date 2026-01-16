@@ -249,13 +249,13 @@ export default memo(KanbanBoard);
 
 // 	// Memoized refreshBoardButton to avoid re-creating the function on every render
 // 	const refreshBoardButton = useCallback(async () => {
-// 		if (plugin.settings.data.globalSettings.realTimeScanning) {
+// 		if (plugin.settings.data.globalSettings.realTimeScanner) {
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		} else {
 // 			if (
 // 				localStorage.getItem(PENDING_SCAN_FILE_STACK)?.at(0) !== undefined
 // 			) {
-// 				await plugin.realTimeScanning.processAllUpdatedFiles();
+// 				await plugin.realTimeScanner.processAllUpdatedFiles();
 // 			}
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		}

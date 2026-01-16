@@ -82,7 +82,7 @@ export function EdgeWithToolbar(props: EdgeProps) {
 		// await updateTaskInFile(plugin, updatedTargetTask, targetTask);
 
 		// // Trigger real-time scanning to update the UI
-		// plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+		// plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
 
 		// // Delete the edge from the graph
 		// deleteElements({ edges: [edge] });

@@ -219,7 +219,7 @@ export const updateTaskItemStatus = (
 			sleep(1000).then(() => {
 				// TODO : Is 1 sec really required ?
 				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
 					oldTask.id
 				);
@@ -237,7 +237,7 @@ export const updateTaskItemStatus = (
 			newStatusType
 		);
 		updateTaskInFile(plugin, newTask, oldTask).then((newId) => {
-			plugin.realTimeScanning.processAllUpdatedFiles(
+			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
 				oldTask.id
 			);
@@ -277,7 +277,7 @@ export const updateTaskItemPriority = (
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
 					oldTask.id
 				);
@@ -290,7 +290,7 @@ export const updateTaskItemPriority = (
 			newPriority
 		);
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
-			plugin.realTimeScanning.processAllUpdatedFiles(
+			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
 				oldTask.id
 			);
@@ -342,7 +342,7 @@ export const updateTaskItemDate = (
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
 					oldTask.id
 				);
@@ -378,7 +378,7 @@ export const updateTaskItemDate = (
 		}
 
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
-			plugin.realTimeScanning.processAllUpdatedFiles(
+			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
 				oldTask.id
 			);
@@ -414,7 +414,7 @@ export const updateTaskItemReminder = (
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
 					oldTask.id
 				);
@@ -422,7 +422,7 @@ export const updateTaskItemReminder = (
 		});
 	} else {
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
-			plugin.realTimeScanning.processAllUpdatedFiles(
+			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
 				oldTask.id
 			);
@@ -459,7 +459,7 @@ export const updateTaskItemTags = (
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
 					oldTask.id
 				);
@@ -468,7 +468,7 @@ export const updateTaskItemTags = (
 	} else {
 		newTask.title = sanitizeTags(newTask.title, oldTask.tags, newTags);
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
-			plugin.realTimeScanning.processAllUpdatedFiles(
+			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
 				oldTask.id
 			);

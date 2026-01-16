@@ -47,7 +47,7 @@ export class TaskBoardView extends ItemView {
 				const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
 
 				if (fileStack && fileStack.length > 0) {
-					await this.plugin.realTimeScanning.processAllUpdatedFiles();
+					await this.plugin.realTimeScanner.processAllUpdatedFiles();
 				}
 				eventEmitter.emit("REFRESH_BOARD");
 			}).addClass("taskboardRefreshBtn");
