@@ -201,19 +201,21 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		const handleEditorModifiedChange = (modified: boolean) => {
 			setEditorModified(modified);
 		};
+
 		eventEmitter.on("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
 		return () => eventEmitter.off("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
 	}, []);
 
-	const refreshBoardButton = useCallback(async () => {
-		const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
-		const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
+	const refreshBoardButton = useCallback(() => {
+		plugin.realTimeScanner.processAllUpdatedFiles().then(() => console.log("Finished processing all updated files."));
+		plugin.processCreateQueue().then(() => console.log("Finished processing create queue."));
+		plugin.processDeleteQueue().then(() => console.log("Finished processing delete queue."));
+		plugin.processRenameQueue().then(() => console.log("Finished processing rename queue."));
 
-		if (fileStack && fileStack.length > 0) {
-			await plugin.realTimeScanner.processAllUpdatedFiles().then((result) => {
-				eventEmitter.emit("REFRESH_BOARD");
-			})
-		}
+		setTimeout(() => {
+			console.log("Now will emit REFRESH_BOARD event...");
+			eventEmitter.emit("REFRESH_BOARD");
+		}, 100)
 	}, []);
 
 	function handleOpenAddNewTaskModal() {
@@ -914,7 +916,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<option value={viewTypeNames.map}>{t("map")}</option>
 					</select>
 
-<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
+					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
 

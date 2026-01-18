@@ -206,3 +206,9 @@ export enum onCompletionOptions {
 	delete = 2,
 	archive = 3,
 }
+
+export enum scanModeOptions {
+	REAL_TIME = "realtime",
+	AUTOMATIC = "automatic",
+	MANUAL = "manual",
+}

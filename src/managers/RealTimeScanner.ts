@@ -51,9 +51,9 @@ export class RealTimeScanner {
 
 	/**
 	 * Process all updated files and update tasks if necessary.
-	 * @param {TFile | string | undefined} currentFile - The file that was modified, or undefined if no file was modified.
-	 * @param {string | undefined} updatedTaskId - The ID of the task that was updated, or undefined if no task was updated.
-	 * @returns {Promise<boolean>} True if the process was successful, false otherwise.
+	 * @param currentFile The file that was modified, or undefined if no file was modified.
+	 * @param updatedTaskId The ID of the task that was updated, or undefined if no task was updated.
+	 * @returns A Promise that resolves to a boolean indicating if the process was successful.
 	 */
 	async processAllUpdatedFiles(
 		currentFile?: TFile | string | undefined,
@@ -223,9 +223,7 @@ export class RealTimeScanner {
 		if (foundFlag) {
 			this.plugin.vaultScanner.tasksCache.Pending = Pending;
 			this.plugin.vaultScanner.tasksCache.Completed = Completed;
-			this.plugin.vaultScanner.tasksCache.Notes = Notes;
-			this.plugin.vaultScanner.saveTasksToJsonCache();
-			eventEmitter.emit("REFRESH_COLUMN");
+			// this.plugin.vaultScanner.tasksCache.Notes = Notes;
 		}
 	}
 
@@ -293,9 +291,7 @@ export class RealTimeScanner {
 		if (foundFlag) {
 			this.plugin.vaultScanner.tasksCache.Pending = Pending;
 			this.plugin.vaultScanner.tasksCache.Completed = Completed;
-			this.plugin.vaultScanner.tasksCache.Notes = Notes;
-			this.plugin.vaultScanner.saveTasksToJsonCache();
-			eventEmitter.emit("REFRESH_COLUMN");
+			// this.plugin.vaultScanner.tasksCache.Notes = Notes;
 		}
 	}
 }

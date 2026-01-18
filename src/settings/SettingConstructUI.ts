@@ -37,6 +37,7 @@ import {
 	mapViewEdgeType,
 	defaultTaskStatuses,
 	statusTypeNames,
+	scanModeOptions,
 } from "src/interfaces/Enums";
 import {
 	frontmatterFormatting,
@@ -287,7 +288,7 @@ export class SettingsManager {
 		const {
 			scanFilters,
 			openOnStartup,
-			realTimeScanning,
+			scanMode,
 			archivedTasksFilePath,
 			tasksCacheFilePath,
 			scanVaultAtStartup,
@@ -402,13 +403,49 @@ export class SettingsManager {
 
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
-			.setName(t("real-time-scanning"))
-			.setDesc(t("real-time-scanning-info"))
-			.addToggle((toggle) =>
-				toggle.setValue(realTimeScanning).onChange(async (value) => {
-					this.globalSettings!.realTimeScanning = value;
-					await this.saveSettings();
-				})
+			.setName(t("scanning-mode"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("scanning-mode-info") +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("balanced") +
+						"</b>" +
+						" : " +
+						t("balanced-scanning-mode-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("real-time") +
+						"</b>" +
+						" : " +
+						t("real-time-scanning-mode-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("manual") +
+						"</b>" +
+						" : " +
+						t("manual-scanning-mode-info") +
+						"</li>" +
+						"</ul>"
+				)
+			)
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[scanModeOptions.AUTOMATIC]: t("balanced"),
+						[scanModeOptions.REAL_TIME]: t("real-time"),
+						[scanModeOptions.MANUAL]: t("manual"),
+					})
+					.setValue(scanMode)
+					.onChange(async (value) => {
+						this.globalSettings!.scanMode =
+							value as scanModeOptions;
+						await this.saveSettings();
+					})
 			);
 
 		// Setting to scan the modified file in realtime

@@ -67,12 +67,13 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
-		const scanFilters = plugin.settings.data.globalSettings.scanFilters;
+		const globalSettings = plugin.settings.data.globalSettings;
+		const scanFilters = globalSettings.scanFilters;
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 
-			if (fileTypeAllowedForScanning(plugin, file)) {
+			if (fileTypeAllowedForScanning(globalSettings, file)) {
 				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 					await vaultScanner.extractTasksFromFile(file, scanFilters);

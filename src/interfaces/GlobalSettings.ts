@@ -16,6 +16,7 @@ import {
 	colTypeNames,
 	defaultTaskStatuses,
 	taskCardStyleNames,
+	scanModeOptions,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -84,7 +85,7 @@ export interface globalSettingsData {
 	autoAddCompletedDate: boolean;
 	autoAddCancelledDate: boolean;
 	scanVaultAtStartup: boolean;
-	realTimeScanning: boolean;
+	scanMode: string;
 	columnWidth: string;
 	visiblePropertiesList: string[];
 	taskCardStyle: string;
@@ -435,7 +436,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			autoAddCompletedDate: false,
 			autoAddCancelledDate: false,
 			scanVaultAtStartup: false,
-			realTimeScanning: true,
+			scanMode: scanModeOptions.AUTOMATIC,
 			columnWidth: "300px",
 			visiblePropertiesList: [
 				taskPropertiesNames.ID,

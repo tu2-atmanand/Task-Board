@@ -713,7 +713,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .subtaskTextRenderer {
 	max-width: 100%;
 	overflow-wrap: anywhere;
-	word-break: break-all;
 	align-self: end;
 }
 

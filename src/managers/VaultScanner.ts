@@ -20,7 +20,7 @@ import {
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { readDataOfVaultFile } from "../utils/MarkdownFileOperations";
-import { scanFilters } from "src/interfaces/GlobalSettings";
+import { globalSettingsData, scanFilters } from "src/interfaces/GlobalSettings";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
@@ -38,7 +38,7 @@ import {
 import { bugReporter } from "src/services/OpenModals";
 import { getCurrentLocalTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
-import { UniversalDateOptions } from "src/interfaces/Enums";
+import { scanModeOptions, UniversalDateOptions } from "src/interfaces/Enums";
 import {
 	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,
@@ -572,7 +572,6 @@ export default class VaultScanner {
 			for (const file of files) {
 				if (
 					file !== null &&
-					fileTypeAllowedForScanning(this.plugin, file) &&
 					scanFilterForFilesNFoldersNFrontmatter(
 						this.plugin,
 						file,
@@ -655,25 +654,19 @@ export default class VaultScanner {
 			this.plugin,
 			this.tasksCache
 		);
-		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
-		if (
-			this.plugin.settings.data.globalSettings.realTimeScanning &&
-			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
-				Object.values(this.tasksCache.Completed).flat().length > 0)
-		) {
-			setTimeout(() => {
-				eventEmitter.emit("REFRESH_COLUMN");
-				// 	if (this.plugin.settings.data.globalSettings.searchQuery) {
-				// 		console.log(
-				// 			"Refreshing the board now after saving...\nSetting : ",
-				// 			this.plugin.settings.data.globalSettings.searchQuery
-				// 		);
-				// 		eventEmitter.emit("REFRESH_BOARD");
-				// 	} else {
-				// 		eventEmitter.emit("REFRESH_COLUMN");
-				// 	}
-			}, 200);
-		}
+
+		setTimeout(() => {
+			eventEmitter.emit("REFRESH_COLUMN");
+			// 	if (this.plugin.settings.data.globalSettings.searchQuery) {
+			// 		console.log(
+			// 			"Refreshing the board now after saving...\nSetting : ",
+			// 			this.plugin.settings.data.globalSettings.searchQuery
+			// 		);
+			// 		eventEmitter.emit("REFRESH_BOARD");
+			// 	} else {
+			// 		eventEmitter.emit("REFRESH_COLUMN");
+			// 	}
+		}, 100);
 		this.tasksDetectedOrUpdated = false;
 
 		return result;
@@ -690,21 +683,21 @@ export default class VaultScanner {
  * @returns boolean - True if the file is allowed for scanning, false otherwise
  */
 export function fileTypeAllowedForScanning(
-	plugin: TaskBoard,
+	globalSettings: globalSettingsData,
 	file: TFile | TAbstractFile
 ): boolean {
 	// console.log("Condition 1 :", notAllowedFileExtensionsRegEx.test(file.path), "\nCondition 2 :", file.path ===
 	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
 	if (
-		notAllowedFileExtensionsRegEx.test(file.path) ||
+		// notAllowedFileExtensionsRegEx.test(file.path) ||
+		allowedFileExtensionsRegEx.test(file.path) === false ||
 		file.path
 			.toLowerCase()
 			.startsWith(
-				plugin.settings.data.globalSettings.archivedTBNotesFolderPath.toLowerCase()
+				globalSettings.archivedTBNotesFolderPath.toLowerCase()
 			) ||
 		file.path.toLowerCase() ===
-			plugin.settings.data.globalSettings.archivedTasksFilePath.toLowerCase() ||
-		allowedFileExtensionsRegEx.test(file.path) === false
+			globalSettings.archivedTasksFilePath.toLowerCase()
 	) {
 		return false;
 	}

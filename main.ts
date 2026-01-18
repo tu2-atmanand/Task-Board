@@ -44,7 +44,7 @@ import {
 	fetchTasksPluginCustomStatuses,
 	isTasksPluginEnabled,
 } from "src/services/tasks-plugin/helpers";
-import { taskPropertiesNames } from "src/interfaces/Enums";
+import { scanModeOptions, taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -57,7 +57,7 @@ export default class TaskBoard extends Plugin {
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: VaultScanner;
 	realTimeScanner: RealTimeScanner;
-	taskBoardFileStack: string[] = [];
+	// taskBoardFileStack: string[] = [];
 	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
 	// fileUpdatedUsingModal: string;
@@ -656,17 +656,19 @@ export default class TaskBoard extends Plugin {
 		// });
 	}
 
-	// ==================== Queue Management for Bulk File Operations ====================
+	// ========================================================
+	// Queue Management for Bulk File Operations - Rename, Delete, Create
+	// ========================================================
 
 	/**
 	 * Add a file to the rename queue and schedule processing
+	 * @private
+	 * @param {TAbstractFile} file - The file to add to the queue
+	 * @param {string} oldPath - The old path of the file
 	 */
 	private queueFileForRename(file: TAbstractFile, oldPath: string) {
 		// Only queue TFile objects (not folders) that are allowed for scanning
-		if (
-			file instanceof TFile &&
-			fileTypeAllowedForScanning(this.plugin, file)
-		) {
+		if (file instanceof TFile) {
 			this.renameQueue.push({ file, oldPath });
 
 			// Clear existing timer and set a new one
@@ -683,7 +685,7 @@ export default class TaskBoard extends Plugin {
 	/**
 	 * Process all files in the rename queue one by one
 	 */
-	private async processRenameQueue() {
+	async processRenameQueue() {
 		if (this.renameQueue.length === 0) {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
@@ -705,11 +707,18 @@ export default class TaskBoard extends Plugin {
 			const { file, oldPath } = this.renameQueue.shift()!;
 
 			try {
-				this.realTimeScanner.onFileRenamed(
-					file,
-					oldPath,
-					archivedPath
-				);
+				if (
+					fileTypeAllowedForScanning(
+						this.plugin.settings.data.globalSettings,
+						file
+					)
+				) {
+					this.realTimeScanner.onFileRenamed(
+						file,
+						oldPath,
+						archivedPath
+					);
+				}
 				processed++;
 
 				// Update progress notice
@@ -729,6 +738,9 @@ export default class TaskBoard extends Plugin {
 			}
 		}
 
+		this.plugin.vaultScanner.saveTasksToJsonCache();
+		eventEmitter.emit("REFRESH_BOARD");
+
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
@@ -742,10 +754,7 @@ export default class TaskBoard extends Plugin {
 	 */
 	private queueFileForDeletion(file: TAbstractFile) {
 		// Only queue TFile objects (not folders) that are allowed for scanning
-		if (
-			file instanceof TFile &&
-			fileTypeAllowedForScanning(this.plugin, file)
-		) {
+		if (file instanceof TFile) {
 			this.deleteQueue.push(file);
 
 			// Clear existing timer and set a new one
@@ -762,7 +771,7 @@ export default class TaskBoard extends Plugin {
 	/**
 	 * Process all files in the delete queue one by one
 	 */
-	private async processDeleteQueue() {
+	async processDeleteQueue() {
 		if (this.deleteQueue.length === 0) {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
@@ -782,7 +791,14 @@ export default class TaskBoard extends Plugin {
 			const file = this.deleteQueue.shift()!;
 
 			try {
-				this.realTimeScanner.onFileDeleted(file);
+				if (
+					fileTypeAllowedForScanning(
+						this.plugin.settings.data.globalSettings,
+						file
+					)
+				) {
+					this.realTimeScanner.onFileDeleted(file);
+				}
 				processed++;
 
 				// Update progress notice
@@ -802,6 +818,9 @@ export default class TaskBoard extends Plugin {
 			}
 		}
 
+		this.plugin.vaultScanner.saveTasksToJsonCache();
+		eventEmitter.emit("REFRESH_COLUMN");
+
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
@@ -815,24 +834,23 @@ export default class TaskBoard extends Plugin {
 	 */
 	private queueFileForCreation(file: TFile) {
 		// Only queue files that are allowed for scanning
-		if (fileTypeAllowedForScanning(this.plugin, file)) {
-			this.createQueue.push(file);
 
-			// Clear existing timer and set a new one
-			if (this.createProcessingTimer) {
-				clearTimeout(this.createProcessingTimer);
-			}
+		this.createQueue.push(file);
 
-			this.createProcessingTimer = setTimeout(() => {
-				this.processCreateQueue();
-			}, this.QUEUE_DELAY);
+		// Clear existing timer and set a new one
+		if (this.createProcessingTimer) {
+			clearTimeout(this.createProcessingTimer);
 		}
+
+		this.createProcessingTimer = setTimeout(() => {
+			this.processCreateQueue();
+		}, this.QUEUE_DELAY);
 	}
 
 	/**
 	 * Process all files in the create queue one by one
 	 */
-	private async processCreateQueue() {
+	async processCreateQueue() {
 		if (this.createQueue.length === 0) {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
@@ -847,12 +865,21 @@ export default class TaskBoard extends Plugin {
 			0
 		);
 
+		this.plugin.vaultScanner.refreshTasksFromFiles(this.createQueue, false);
+
 		let processed = 0;
 		while (this.createQueue.length > 0) {
 			const file = this.createQueue.shift()!;
 
 			try {
-				await this.realTimeScanner.processAllUpdatedFiles(file);
+				// if (
+				// 	fileTypeAllowedForScanning(
+				// 		this.plugin.settings.data.globalSettings,
+				// 		file
+				// 	)
+				// ) {
+				// 	await this.realTimeScanner.processAllUpdatedFiles(file);
+				// }
 				processed++;
 
 				// Update progress notice
@@ -880,15 +907,33 @@ export default class TaskBoard extends Plugin {
 		);
 	}
 
+	/**
+	 * Registers all the events that TaskBoard needs to listen to
+	 */
 	registerEvents() {
 		this.registerEvent(
-			this.app.vault.on("modify", (file: TAbstractFile) => {
+			this.app.vault.on("modify", async (file: TAbstractFile) => {
 				console.log("Modify event is fired...");
-				if (fileTypeAllowedForScanning(this.plugin, file)) {
+				if (
+					fileTypeAllowedForScanning(
+						this.plugin.settings.data.globalSettings,
+						file
+					)
+				) {
 					if (file instanceof TFile) {
-						// 	this.taskBoardFileStack.push(file.path);
-						this.realTimeScanner.onFileModified(file);
-						this.editorModified = true;
+						if (
+							this.plugin.settings.data.globalSettings
+								.scanMode === scanModeOptions.REAL_TIME
+						) {
+							this.vaultScanner.refreshTasksFromFiles(
+								[file],
+								false
+							);
+						} else {
+							// 	this.taskBoardFileStack.push(file.path);
+							this.editorModified = true;
+							this.realTimeScanner.onFileModified(file);
+						}
 					}
 				}
 			})
@@ -917,24 +962,29 @@ export default class TaskBoard extends Plugin {
 			})
 		);
 
-		// Listen for editor-blur event and trigger scanning if the editor was modified
-		this.registerEvent(
-			this.app.workspace.on(
-				"active-leaf-change",
-				(leaf: WorkspaceLeaf | null) => {
-					console.log("On Active Leaf Change...\nLeaf =", leaf);
-					this.onFileModifiedAndLostFocus();
-				}
-			)
-		);
-		this.registerDomEvent(window, "blur", () => {
-			this.onFileModifiedAndLostFocus();
-			console.log("Focusing out of the window...");
-		});
-		this.registerDomEvent(window, "focus", () => {
-			this.onFileModifiedAndLostFocus();
-			console.log("Focusing in the window...");
-		});
+		if (
+			this.plugin.settings.data.globalSettings.scanMode !==
+			scanModeOptions.MANUAL
+		) {
+			// Listen for editor-blur event and trigger scanning if the editor was modified
+			this.registerEvent(
+				this.app.workspace.on(
+					"active-leaf-change",
+					(leaf: WorkspaceLeaf | null) => {
+						console.log("On Active Leaf Change...\nLeaf =", leaf);
+						this.onFileModifiedAndLostFocus();
+					}
+				)
+			);
+			this.registerDomEvent(window, "blur", () => {
+				this.onFileModifiedAndLostFocus();
+				console.log("Focusing out of the window...");
+			});
+			this.registerDomEvent(window, "focus", () => {
+				this.onFileModifiedAndLostFocus();
+				console.log("Focusing in the window...");
+			});
+		}
 
 		// const closeButton = document.querySelector<HTMLElement>(
 		// 	".titlebar-button.mod-close"
@@ -972,10 +1022,18 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.vaultScanner.refreshTasksFromFiles(
-									[file],
-									true
-								);
+								if (
+									fileTypeAllowedForScanning(
+										this.plugin.settings.data
+											.globalSettings,
+										file
+									)
+								) {
+									this.vaultScanner.refreshTasksFromFiles(
+										[file],
+										true
+									);
+								}
 							});
 					});
 					if (
