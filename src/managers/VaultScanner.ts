@@ -79,7 +79,7 @@ export default class VaultScanner {
 		} catch (error) {
 			console.error(
 				"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
-				error
+				error,
 			);
 			this.tasksCache = {
 				VaultName: this.plugin?.app.vault.getName(),
@@ -100,7 +100,7 @@ export default class VaultScanner {
 				scanFilterForFilesNFoldersNFrontmatter(
 					this.plugin,
 					file,
-					scanFilters
+					scanFilters,
 				)
 			) {
 				await this.extractTasksFromFile(file, scanFilters);
@@ -115,13 +115,13 @@ export default class VaultScanner {
 	// Extract tasks from a specific file
 	async extractTasksFromFile(
 		file: TFile,
-		scanFilters: scanFilters
+		scanFilters: scanFilters,
 	): Promise<string> {
 		try {
 			const fileNameWithPath = file.path;
 			const fileContent = await readDataOfVaultFile(
 				this.plugin,
-				fileNameWithPath
+				fileNameWithPath,
 			);
 			const lines = fileContent.split("\n");
 
@@ -180,19 +180,19 @@ export default class VaultScanner {
 				isTaskNotePresentInFrontmatter(
 					this.plugin.settings.data.globalSettings
 						.taskNoteIdentifierTag,
-					frontmatter
+					frontmatter,
 				)
 			) {
 				// Extract properties from frontmatter
 				const taskNoteProperties = extractTaskNoteProperties(
 					frontmatter,
 					fileNameWithPath,
-					this.plugin.settings
+					this.plugin.settings,
 				);
 				if (
 					scanFilterForTags(
 						taskNoteProperties?.tags || [],
-						scanFilters
+						scanFilters,
 					)
 				) {
 					this.tasksDetectedOrUpdated = true;
@@ -200,7 +200,7 @@ export default class VaultScanner {
 					// Extract sub-tasks from the note content (excluding frontmatter)
 					const contentWithoutFrontmatter = fileContent.replace(
 						/^---[\s\S]*?---\n?/,
-						""
+						"",
 					);
 					const contentLines = contentWithoutFrontmatter.split("\n");
 					const subTasks: string[] = [];
@@ -254,7 +254,7 @@ export default class VaultScanner {
 					const isTaskNoteCompleted = isTaskCompleted(
 						taskNoteProperties.status || "",
 						true,
-						this.plugin.settings
+						this.plugin.settings,
 					);
 					if (isTaskNoteCompleted) {
 						// this.tasksCache.Completed[fileNameWithPath].push(taskNoteItem);
@@ -289,11 +289,11 @@ export default class VaultScanner {
 
 					const pendingCacheCompare = await compareFileCache(
 						this.tasksCache.Pending[fileNameWithPath],
-						oldPendingFileCache
+						oldPendingFileCache,
 					);
 					const completedCacheCompare = await compareFileCache(
 						this.tasksCache.Completed[fileNameWithPath],
-						oldCompletedFileCache
+						oldCompletedFileCache,
 					);
 					if (pendingCacheCompare && completedCacheCompare) {
 						this.tasksDetectedOrUpdated = false;
@@ -322,7 +322,7 @@ export default class VaultScanner {
 							const isThisCompletedTask = isTaskCompleted(
 								line,
 								false,
-								this.plugin.settings
+								this.plugin.settings,
 							);
 							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
@@ -336,14 +336,14 @@ export default class VaultScanner {
 								line,
 								startDate,
 								scheduledDate,
-								dueDate
+								dueDate,
 							);
 							const completionDate = extractCompletionDate(line);
 							const cancelledDate = extractCancelledDate(line);
 							const bodyLines = extractBody(
 								lines,
 								lineIndex + 1,
-								this.indentationString
+								this.indentationString,
 							);
 
 							if (
@@ -374,7 +374,7 @@ export default class VaultScanner {
 									moment(
 										basename,
 										universalDateFormat,
-										true
+										true,
 									).isValid()
 								) {
 									if (
@@ -452,7 +452,7 @@ export default class VaultScanner {
 								].push(task);
 							} else {
 								this.tasksCache.Pending[fileNameWithPath].push(
-									task
+									task,
 								);
 							}
 							lineIndex = lineIndex + bodyLines.length; // Move the lineIndex forward by the number of body lines
@@ -464,11 +464,11 @@ export default class VaultScanner {
 
 				const pendingCacheCompare = await compareFileCache(
 					this.tasksCache.Pending[fileNameWithPath],
-					oldPendingFileCache
+					oldPendingFileCache,
 				);
 				const completedCacheCompare = await compareFileCache(
 					this.tasksCache.Completed[fileNameWithPath],
-					oldCompletedFileCache
+					oldCompletedFileCache,
 				);
 
 				if (pendingCacheCompare) {
@@ -550,7 +550,7 @@ export default class VaultScanner {
 				"Error occurred while extracting tasks from file:",
 				file.path,
 				"\nERROR :",
-				error
+				error,
 			);
 			return String(error);
 		}
@@ -559,7 +559,7 @@ export default class VaultScanner {
 	// Update tasks for an array of files (overwrite existing tasks for each file)
 	async refreshTasksFromFiles(
 		files: (TFile | null)[],
-		showNotice: boolean
+		showNotice: boolean,
 	): Promise<boolean> {
 		if (!files || files.length === 0) {
 			return false;
@@ -575,13 +575,13 @@ export default class VaultScanner {
 					scanFilterForFilesNFoldersNFrontmatter(
 						this.plugin,
 						file,
-						scanFilters
+						scanFilters,
 					)
 				) {
 					// TODO : Try testing if removing the await from the below line will going to speed up the process.
 					isFileScanned = await this.extractTasksFromFile(
 						file,
-						scanFilters
+						scanFilters,
 					);
 				} else {
 					if (showNotice) {
@@ -615,11 +615,27 @@ export default class VaultScanner {
 					.map((f) => f?.path)
 					.join("\n")}`,
 				error as string,
-				"VaultScanner.tsx/refreshTasksFromFiles"
+				"VaultScanner.tsx/refreshTasksFromFiles",
 			);
 			console.error(error);
 			return false;
 		}
+	}
+
+	async deleteCacheForFiles(filepaths: string[]) {
+		const { Pending, Completed } = this.tasksCache;
+		[Pending, Completed].forEach((cache) => {
+			if (cache && typeof cache === "object") {
+				filepaths.forEach((filePath: string) => {
+					if (cache[filePath]) {
+						delete cache[filePath];
+					}
+				});
+			}
+		});
+
+		this.tasksCache.Pending = Pending;
+		this.tasksCache.Completed = Completed;
 	}
 
 	// Debounced saveTasksToJsonCache function
@@ -652,7 +668,7 @@ export default class VaultScanner {
 		this.tasksCache.Modified_at = getCurrentLocalTimeString();
 		const result = await writeJsonCacheDataToDisk(
 			this.plugin,
-			this.tasksCache
+			this.tasksCache,
 		);
 
 		setTimeout(() => {
@@ -684,7 +700,7 @@ export default class VaultScanner {
  */
 export function fileTypeAllowedForScanning(
 	globalSettings: globalSettingsData,
-	file: TFile | TAbstractFile
+	file: TFile | TAbstractFile,
 ): boolean {
 	// console.log("Condition 1 :", notAllowedFileExtensionsRegEx.test(file.path), "\nCondition 2 :", file.path ===
 	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
@@ -694,7 +710,7 @@ export function fileTypeAllowedForScanning(
 		file.path
 			.toLowerCase()
 			.startsWith(
-				globalSettings.archivedTBNotesFolderPath.toLowerCase()
+				globalSettings.archivedTBNotesFolderPath.toLowerCase(),
 			) ||
 		file.path.toLowerCase() ===
 			globalSettings.archivedTasksFilePath.toLowerCase()
@@ -714,7 +730,7 @@ export function fileTypeAllowedForScanning(
 export function buildTaskFromRawContent(
 	rawTaskContent: string,
 	indentationString: string,
-	filePath?: string
+	filePath?: string,
 ): Partial<taskItem> {
 	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
@@ -797,14 +813,14 @@ export function extractTaskId(text: string): string {
 	// }
 
 	let idMatch = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex,
 	);
 	if (idMatch && idMatch[1]) {
 		return idMatch[1].trim();
 	}
 
 	idMatch = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex,
 	);
 	if (idMatch && idMatch[1]) {
 		return idMatch[1].trim();
@@ -829,7 +845,7 @@ export function extractTaskId(text: string): string {
 export function extractBody(
 	lines: string[],
 	startLineIndex: number,
-	indentationString: string
+	indentationString: string,
 ): string[] {
 	const bodyLines = [];
 	let bodyStartIndex = startLineIndex;
@@ -910,7 +926,7 @@ export function extractTime(text: string): string {
 
 	// Check if time is at the start of the task
 	const timeAtStartMatch = text.match(
-		/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/
+		/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/,
 	);
 
 	if (timeAtStartMatch) {
@@ -920,7 +936,7 @@ export function extractTime(text: string): string {
 
 	// Otherwise, look for time elsewhere in the line
 	const timeIntitleMatch = text.match(
-		/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/
+		/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/,
 	);
 	return timeIntitleMatch ? timeIntitleMatch[1] : "";
 }
@@ -932,13 +948,13 @@ export function extractCreatedDate(text: string): string {
 	if (!match) {
 		match = text.match(
 			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.createdDateRegex
+				.createdDateRegex,
 		);
 	}
 
 	if (!match) {
 		match = text.match(
-			/\@created\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+			/\@created\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
 		);
 	}
 
@@ -951,13 +967,14 @@ export function extractStartDate(text: string): string {
 
 	if (!match) {
 		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.startDateRegex
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.startDateRegex,
 		);
 	}
 
 	if (!match) {
 		match = text.match(
-			/\@start\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+			/\@start\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
 		);
 	}
 
@@ -971,13 +988,13 @@ export function extractScheduledDate(text: string): string {
 	if (!match) {
 		match = text.match(
 			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.scheduledDateRegex
+				.scheduledDateRegex,
 		);
 	}
 
 	if (!match) {
 		match = text.match(
-			/\@scheduled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+			/\@scheduled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
 		);
 	}
 
@@ -990,7 +1007,7 @@ export function extractDueDate(text: string): string {
 
 	if (!match) {
 		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex,
 		);
 	}
 
@@ -1007,7 +1024,7 @@ export function extractPriority(text: string): number {
 	const matches =
 		text.match(
 			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-				.priorityRegex
+				.priorityRegex,
 		) || [];
 
 	// Filter out any empty or incorrect values
@@ -1019,7 +1036,7 @@ export function extractPriority(text: string): number {
 	// Find the first match in the priorityEmojis mapping
 	for (const emoji of validMatches) {
 		const priorityMatch = Object.entries(priorityEmojis).find(
-			([, value]) => value === emoji
+			([, value]) => value === emoji,
 		);
 		if (priorityMatch) {
 			return parseInt(priorityMatch[0]); // Return the first matching priority
@@ -1027,7 +1044,7 @@ export function extractPriority(text: string): number {
 	}
 
 	let match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex,
 	);
 	if (match) {
 		return parseInt(match[1]);
@@ -1053,7 +1070,7 @@ export function extractReminder(
 	text: string,
 	startDate?: string,
 	scheduledDate?: string,
-	dueDate?: string
+	dueDate?: string,
 ): string {
 	let match = text.match(/\[reminder::\s*(.*?)\]/);
 	if (match) {
@@ -1105,7 +1122,8 @@ export function extractReminder(
  */
 export function extractDependsOn(text: string): RegExpMatchArray | null {
 	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.dependsOnRegex,
 	);
 	if (match && match[1]) {
 		console.log("What is the match : ", match);
@@ -1132,7 +1150,7 @@ export function extractCompletionDate(text: string): string {
 	// If not found, try to match the [completion:: 2024-09-28] format
 	if (!match) {
 		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex,
 		);
 		if (match) {
 			return match
@@ -1156,20 +1174,20 @@ export function extractCompletionDate(text: string): string {
 export function extractCancelledDate(text: string): string {
 	let match = text.match(
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-			.cancelledDateRegex
+			.cancelledDateRegex,
 	);
 
 	// If not found, try to match the [cancelled:: 2024-09-28] format
 	if (!match) {
 		match = text.match(
 			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.cancelledDateRegex
+				.cancelledDateRegex,
 		);
 	}
 
 	if (!match) {
 		match = text.match(
-			/\@cancelled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/
+			/\@cancelled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
 		);
 	}
 
@@ -1186,7 +1204,7 @@ export function extractCancelledDate(text: string): string {
  */
 export async function compareFileCache(
 	newCache: taskItem[] | undefined,
-	oldCache: taskItem[] | undefined
+	oldCache: taskItem[] | undefined,
 ): Promise<boolean> {
 	try {
 		// Quick null/undefined checks

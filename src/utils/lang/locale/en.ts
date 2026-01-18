@@ -534,6 +534,8 @@ const en: Lang = {
 	"work-limit": "Work limit",
 	"work-limit-info": "Enter the number of maximum tasks you should work parallely in this column. This is an optional property and its just for reminder.",
 	"work-limit-alert": "Click me!",
+	"show-me": "Show me",
+	"scan-them": "Scan them"
 };
 
 export default en;

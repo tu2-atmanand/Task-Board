@@ -7433,3 +7433,101 @@ Date picker modal styles
 	border-radius: var(--radius-s);
 	font-size: var(--font-ui-smaller);
 }
+
+
+/* -----------------------------------------------------
+	ModifiedFilesModal.ts
+-------------------------------------------------------*/
+
+.modifiedFilesModalContentHeader {
+	margin-bottom: 16px;
+}
+
+.modifiedFilesButtonContainer {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: 16px;
+}
+
+.modifiedFilesSection,
+.deletedFilesSection {
+	margin-bottom: 20px;
+}
+
+.modifiedFilesSectionHeader {
+	color: var(--background-modifier-success);
+	margin-bottom: 20px;
+	font-weight: 600;
+}
+
+.deletedFilesSectionHeader {
+	margin-bottom: 20px;
+	font-weight: 600;
+	color: var(--background-modifier-error);
+}
+
+.modifiedFilesListContainer,
+.deletedFilesListContainer {
+	max-height: 250px;
+	overflow-y: auto;
+	border: 1px solid var(--divider-color);
+	border-radius: 4px;
+}
+
+.modifiedFileItem {
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--divider-color);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+}
+
+.modifiedFileInfo,
+.deletedFileInfo {
+	flex: 1;
+	min-width: 0;
+}
+
+.modifiedFileName {
+	font-weight: 500;
+	word-break: break-all;
+	margin-bottom: 4px;
+}
+
+.modifiedFilePath {
+	font-size: 12px;
+	color: var(--text-faint);
+	word-break: break-all;
+}
+
+.modifiedFileDate {
+	text-align: right;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.modifiedFileDay {
+	font-weight: 500;
+}
+
+.modifiedFileTime {
+	font-size: 12px;
+	color: var(--text-faint);
+	margin-top: 4px;
+}
+
+.deletedFileItem {
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--divider-color);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	opacity: 0.8;
+}
+
+.deletedFileIndicator {
+	min-width: 20px;
+	font-size: 16px;
+}
