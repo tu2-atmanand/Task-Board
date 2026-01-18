@@ -174,7 +174,6 @@ export const updateTaskInJson = async (
 			Modified_at: getCurrentLocalTimeString(),
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
-			Notes: allTasks.Notes,
 		};
 		// Write the updated data back to the JSON file using the new function
 		await writeJsonCacheDataToDisk(plugin, updatedData);

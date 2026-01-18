@@ -95,7 +95,6 @@ export const loadJsonCacheData = async (
 			Modified_at: "INVALID",
 			Pending: {},
 			Completed: {},
-			Notes: [],
 		};
 	}
 };

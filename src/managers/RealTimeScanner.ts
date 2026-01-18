@@ -141,7 +141,7 @@ export class RealTimeScanner {
 	) {
 		let foundFlag = false;
 		// Find the oldPath inside the plugin.vaultScanner.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
-		const { Pending, Completed, Notes } =
+		const { Pending, Completed } =
 			this.plugin.vaultScanner.tasksCache;
 
 		[Pending, Completed].forEach((cache) => {
@@ -189,24 +189,25 @@ export class RealTimeScanner {
 			}
 		});
 
-		if (file instanceof TFile) {
-			// Update the file path in the Notes cache
-			Notes.forEach((note) => {
-				if (note.filePath === oldPath) {
-					note.filePath = file.path; // Update the file path in the note
-					foundFlag = true;
-				}
-			});
-		} else if (file instanceof TFolder) {
-			// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
-			Notes.forEach((note) => {
-				if (note.filePath.startsWith(oldPath + "/")) {
-					note.filePath =
-						file.path + note.filePath.substring(oldPath.length);
-					foundFlag = true;
-				}
-			});
-		}
+		// @deprecated v1.9.0
+		// if (file instanceof TFile) {
+		// 	// Update the file path in the Notes cache
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath === oldPath) {
+		// 			note.filePath = file.path; // Update the file path in the note
+		// 			foundFlag = true;
+		// 		}
+		// 	});
+		// } else if (file instanceof TFolder) {
+		// 	// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath.startsWith(oldPath + "/")) {
+		// 			note.filePath =
+		// 				file.path + note.filePath.substring(oldPath.length);
+		// 			foundFlag = true;
+		// 		}
+		// 	});
+		// }
 
 		// Also remove the old path from the stack if it exists
 		const index = this.taskBoardFileStack.indexOf(oldPath);
@@ -242,7 +243,7 @@ export class RealTimeScanner {
 		}
 
 		// Also remove the file from the tasks cache
-		const { Pending, Completed, Notes } =
+		const { Pending, Completed } =
 			this.plugin.vaultScanner.tasksCache;
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
@@ -262,31 +263,32 @@ export class RealTimeScanner {
 			}
 		});
 
-		if (file instanceof TFile) {
-			// Update the file path in the Notes cache
-			Notes.forEach((note) => {
-				if (note.filePath === file.path) {
-					// remove this object from Notes
-					const noteIndex = Notes.indexOf(note);
-					if (noteIndex !== -1) {
-						Notes.splice(noteIndex, 1);
-						foundFlag = true;
-					}
-				}
-			});
-		} else if (file instanceof TFolder) {
-			// Actually this is not at all needed as I am only running this function when a file is deleted. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
-			Notes.forEach((note) => {
-				if (note.filePath.startsWith(file.path + "/")) {
-					// remove this object from Notes
-					const noteIndex = Notes.indexOf(note);
-					if (noteIndex !== -1) {
-						Notes.splice(noteIndex, 1);
-						foundFlag = true;
-					}
-				}
-			});
-		}
+		// @deprecated v1.9.0
+		// if (file instanceof TFile) {
+		// 	// Update the file path in the Notes cache
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath === file.path) {
+		// 			// remove this object from Notes
+		// 			const noteIndex = Notes.indexOf(note);
+		// 			if (noteIndex !== -1) {
+		// 				Notes.splice(noteIndex, 1);
+		// 				foundFlag = true;
+		// 			}
+		// 		}
+		// 	});
+		// } else if (file instanceof TFolder) {
+		// 	// Actually this is not at all needed as I am only running this function when a file is deleted. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath.startsWith(file.path + "/")) {
+		// 			// remove this object from Notes
+		// 			const noteIndex = Notes.indexOf(note);
+		// 			if (noteIndex !== -1) {
+		// 				Notes.splice(noteIndex, 1);
+		// 				foundFlag = true;
+		// 			}
+		// 		}
+		// 	});
+		// }
 
 		if (foundFlag) {
 			this.plugin.vaultScanner.tasksCache.Pending = Pending;

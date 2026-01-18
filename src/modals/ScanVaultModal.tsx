@@ -54,7 +54,6 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		Modified_at: getCurrentLocalTimeString(),
 		Pending: {},
 		Completed: {},
-		Notes: [],
 	});
 
 	const runScan = async () => {

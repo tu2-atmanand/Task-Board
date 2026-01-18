@@ -67,7 +67,6 @@ export default class VaultScanner {
 			Modified_at: getCurrentLocalTimeString(),
 			Pending: {},
 			Completed: {},
-			Notes: [],
 		}; // Reset task structure
 		this.tasksDetectedOrUpdated = false;
 		this.indentationString = getObsidianIndentationSetting(plugin);
@@ -87,7 +86,6 @@ export default class VaultScanner {
 				Modified_at: getCurrentLocalTimeString(),
 				Pending: {},
 				Completed: {},
-				Notes: [],
 			};
 		}
 	}
