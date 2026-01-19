@@ -95,9 +95,6 @@ const en: Lang = {
 	"real-time-scanning-mode-info": "You will see live changes happening on the board whenever you will be making changes to your task content in the note, with a 1 second delay.",
 	"auto-add-universal-date-to-tasks": "Auto add the selected universal date",
 	"auto-add-universal-date-to-tasks-info": "When enabled, when you will create a new task using the 'add new task' modal, then today's date will be added as the universal date you have selected.",
-	"auto-scan-the-vault-on-obsidian-startup": "Auto scan the vault on Obsidian startup",
-	"auto-scan-the-vault-on-obsidian-startup-info": "Only use this feature if you edit the vault files outside Obsidian. Usually all your newly added/edited tasks from Obsidian will be detected automatically.",
-	"auto-scan-the-vault-on-obsidian-startup-info-2": "If your vault contains lot of files with huge data, this might affect the startup time of Obsidian.",
 	"compatible-plugins": "Compatible plugins",
 	"plugin-compatibility": "plugin compatibility",
 	"day-planner-plugin-compatibility": "If you have installed 'day planner' plugin, enable this to see the time at the start of the task title, instead in the metadata. After enabling this feature, the time will be shown according to the day planner plugin inside Markdown files, but in the task card, the time will be shown in the footer as usual.",
@@ -260,8 +257,8 @@ const en: Lang = {
 	"export": "Export",
 	"import-export-configurations": "Import/Export configurations",
 	"import-export-configurations-info": "Use this feature to import or export your task board configurations. This is very useful for backing up your settings or transferring them to another device. Also in the case when you want to re-install the plugin.",
-	"hide-specific-properties-in-notes": "Hide specific properties in notes",
-	"hide-specific-properties-in-notes-description": "Select which task properties should be hidden in live-editor and in reading mode. These properties will be present in the notes, reveal them by hovering over the task or moving the cursor within the task line.",
+	"hide-specific-properties-in-notes": "Hide specific properties in inline tasks",
+	"hide-specific-properties-in-notes-description": "Select which task properties should be hidden in live-editor and in reading mode. These properties will be present in the inline task's content, but only kept hidden to reduce visual noise. Reveal them by hovering over the task or moving the cursor within the task line.",
 	"auto-add-unique-id": "Auto add unique id",
 	"auto-add-unique-id-description": "When enabled, a unique id will be automatically added to the inline-task or task-note frontmatter whenever you will add a new task or interact with an existing task. This setting is vital for the below features to work properly or to enable them :",
 	"manual-sorting-inside-each-column-upcoming": "Manual sorting inside columns (upcoming)",
@@ -535,7 +532,12 @@ const en: Lang = {
 	"work-limit-info": "Enter the number of maximum tasks you should work parallely in this column. This is an optional property and its just for reminder.",
 	"work-limit-alert": "Click me!",
 	"show-me": "Show me",
-	"scan-them": "Scan them"
+	"scan-them": "Scan them",
+	"show-modified-files-message-on-startup": "Show modified files message on Obsidian startup",
+	"show-modified-files-message-on-startup-info": "If any of the vault files has been modified when Obsidian was inactive. These modified files will be auto-detected at the application start time, after a 10 second delay. This message will provide you to provide the statistics of which files has been modified. If you disable this setting, the modified files will be auto-scanned without needing your attention.",
+	"properties": "Properties",
+	"task-notes": "Task notes",
+	"inline-tasks": "Inline tasks"
 };
 
 export default en;
