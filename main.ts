@@ -151,9 +151,6 @@ export default class TaskBoard extends Plugin {
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
 
-			// Run scanVaultForTasks if scanVaultAtStartup is true
-			this.scanVaultAtStartup();
-
 			// Register the Kanban view
 			this.registerTaskBoardView();
 
@@ -305,12 +302,6 @@ export default class TaskBoard extends Plugin {
 		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
 		this.realTimeScanner.initializeStack();
 		this.realTimeScanner.processAllUpdatedFiles();
-	}
-
-	scanVaultAtStartup() {
-		if (this.settings.data.globalSettings.scanVaultAtStartup) {
-			this.vaultScanner.scanVaultForTasks();
-		}
 	}
 
 	registerTaskBoardView() {
@@ -1327,7 +1318,7 @@ export default class TaskBoard extends Plugin {
 					createFragment((f) => {
 						f.createDiv("bugReportNotice", (el) => {
 							el.createEl("p", {
-								text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was closed.`,
+								text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
 							});
 							el.createEl("button", {
 								text: t("show-me"),

@@ -90,28 +90,6 @@ export default class VaultScanner {
 		}
 	}
 
-	async scanVaultForTasks() {
-		const files = this.app.vault.getMarkdownFiles();
-
-		for (const file of files) {
-			const scanFilters =
-				this.plugin.settings.data.globalSettings.scanFilters;
-			if (
-				scanFilterForFilesNFoldersNFrontmatter(
-					this.plugin,
-					file,
-					scanFilters,
-				)
-			) {
-				await this.extractTasksFromFile(file, scanFilters);
-			}
-		}
-
-		await this.saveTasksToJsonCache();
-		// Emit the event
-		eventEmitter.emit("REFRESH_BOARD");
-	}
-
 	// Extract tasks from a specific file
 	async extractTasksFromFile(
 		file: TFile,

@@ -2783,9 +2783,12 @@ li:hover .taskboard-hidden-property {
 }
 
 .taskboard-setting-tag-color-row-element-delete {
-	background-color: var(--color-red) !important;
 	cursor: pointer !important;
 	max-width: max-content !important;
+}
+
+.taskboard-setting-tag-color-row-element-delete:hover {
+	color: var(--color-red) !important;
 }
 
 .taskboard-setting-tag-color-row-element-color-picker {
