@@ -117,7 +117,7 @@ export async function openTasksPluginEditModal(
 					37,
 					"Tasks plugin API did not return any output.",
 					"Tasks plugin API did not return any output.",
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+					"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 				);
 				return;
 			}
@@ -178,7 +178,7 @@ export async function openTasksPluginEditModal(
 					38,
 					"Unexpected output from tasks plugin API. Since the task you are trying to update is a recurring task, Task Board cannot handle recurring tasks as of now and Tasks plugin didnt returned an expected output. Please report this issue so developers can enhance the integration.",
 					`Input to tasksPluginApi : ${completeOldTaskContent}\n Output of tasksPluginApi: ${tasksPluginApiOutput}`,
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+					"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 				);
 				return;
 			}
@@ -207,7 +207,7 @@ export async function openTasksPluginEditModal(
 				39,
 				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
-				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+				"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 			);
 		}
 	} catch (error) {
@@ -215,7 +215,7 @@ export async function openTasksPluginEditModal(
 			40,
 			"Error while updating the recurring task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
-			"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+			"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 		);
 		throw error;
 	}
