@@ -315,6 +315,7 @@
               }
             ],
             "tasksIdManualOrder": [
+              "224",
               "276",
               "389",
               "378",
@@ -509,8 +510,8 @@
           ]
         },
         "taskCount": {
-          "pending": 56,
-          "completed": 17
+          "pending": 63,
+          "completed": 14
         },
         "swimlanes": {
           "enabled": true,
@@ -860,8 +861,8 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 0,
-          "completed": 0
+          "pending": 63,
+          "completed": 14
         }
       }
     ],
@@ -915,7 +916,7 @@
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,
-      "showVerticalScroll": true,
+      "showVerticalScroll": false,
       "tagColors": [
         {
           "name": "Bug",
@@ -1049,14 +1050,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 1,
+      "uniqueIdCounter": 586,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 4,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
@@ -1181,9 +1182,7 @@
         "dependsOn",
         "filePath",
         "status",
-        "checkbox",
-        "subTasks",
-        "description"
+        "checkbox"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
