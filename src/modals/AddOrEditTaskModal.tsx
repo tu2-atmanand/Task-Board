@@ -116,7 +116,7 @@ export class AddOrEditTaskModal extends Modal {
 			mssg,
 			onDiscard: () => {
 				this.isEdited = false;
-				this.rejectPromise("Task was not submitted.")
+				this.resolvePromise("");
 				this.close();
 			},
 			onGoBack: () => {
@@ -137,7 +137,7 @@ export class AddOrEditTaskModal extends Modal {
 		} else {
 			this.modalEl.addClass(".slide-out");
 			sleep(300);
-			this.rejectPromise("Task was not submitted.")
+			this.resolvePromise("");
 			this.onClose();
 			super.close();
 		}
