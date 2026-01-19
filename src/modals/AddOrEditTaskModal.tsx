@@ -74,7 +74,7 @@ export class AddOrEditTaskModal extends Modal {
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'TaskNotes';
+				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
 				const noteName = this.task.title || getLocalDateTimeString();
 				// Sanitize filename
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');

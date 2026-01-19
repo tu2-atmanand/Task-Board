@@ -544,7 +544,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			},
 			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
 			taskNoteIdentifierTag: "taskNote",
-			taskNoteDefaultLocation: "Meta/Task_Board/New_Task_Notes",
+			taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
 			quickAddPluginDefaultChoice: "",
 			archivedTasksFilePath: "",
 			archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",

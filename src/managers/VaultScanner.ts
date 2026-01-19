@@ -682,16 +682,17 @@ export function fileTypeAllowedForScanning(
 ): boolean {
 	// console.log("Condition 1 :", notAllowedFileExtensionsRegEx.test(file.path), "\nCondition 2 :", file.path ===
 	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
+	if (!globalSettings.archivedTBNotesFolderPath.trim()) return true;
+
+	const filePath = file.path.toLocaleLowerCase();
+
 	if (
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
 		allowedFileExtensionsRegEx.test(file.path) === false ||
-		file.path
-			.toLowerCase()
-			.startsWith(
-				globalSettings.archivedTBNotesFolderPath.toLowerCase(),
-			) ||
-		file.path.toLowerCase() ===
-			globalSettings.archivedTasksFilePath.toLowerCase()
+		filePath.startsWith(
+			globalSettings.archivedTBNotesFolderPath.toLowerCase(),
+		) ||
+		filePath === globalSettings.archivedTasksFilePath.toLowerCase()
 	) {
 		return false;
 	}
