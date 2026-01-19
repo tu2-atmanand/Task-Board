@@ -39,7 +39,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	});
 
 	// Update the uniqueIdCounter in settings to be one more than the max found ID
-	plugin.settings.data.globalSettings.uniqueIdCounter = maxId + 1;
+	plugin.settings.data.uniqueIdCounter = maxId + 1;
 	plugin.saveSettings();
 }
 
@@ -67,7 +67,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
-		const globalSettings = plugin.settings.data.globalSettings;
+		const globalSettings = plugin.settings.data;
 		const scanFilters = globalSettings.scanFilters;
 
 		for (let i = 0; i < files.length; i++) {

@@ -40,7 +40,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 					} as any)
 			);
 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-			// This is a temporary solution to sync the boardConfigs. Will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
+			// This is a temporary solution to sync the boardConfigs. Will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.universalDate
 			// This migration was applied since version 1.5.0.
 			settings[key].forEach((boardConfig: Board) => {
 				boardConfig.columns.forEach((column: ColumnData) => {

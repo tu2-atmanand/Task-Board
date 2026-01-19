@@ -121,7 +121,7 @@ export class SettingsManager {
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
 		try {
-			const settingsData = this.plugin.settings.data.globalSettings;
+			const settingsData = this.plugin.settings.data;
 			this.globalSettings = settingsData;
 		} catch (err) {
 			bugReporterManagerInsatance.showNotice(
@@ -138,7 +138,7 @@ export class SettingsManager {
 		if (!this.globalSettings) return;
 
 		try {
-			this.plugin.settings.data.globalSettings = this.globalSettings;
+			this.plugin.settings.data = this.globalSettings;
 			this.plugin.saveSettings();
 		} catch (err) {
 			bugReporterManagerInsatance.showNotice(
@@ -227,7 +227,7 @@ export class SettingsManager {
 				tabContent.empty();
 				sections[tabName]();
 
-				// Store the tabIndex inside `this.plugin.settings.data.globalSettings.lastViewHistory.settingTab` and call this.saveSetting()
+				// Store the tabIndex inside `this.plugin.settings.data.lastViewHistory.settingTab` and call this.saveSetting()
 				const tabKeys = Object.keys(sections);
 				const tabIndex = tabKeys.indexOf(tabName);
 				if (this.globalSettings) {
@@ -245,7 +245,7 @@ export class SettingsManager {
 		// Set the last viewed tab
 		const defaultTab =
 			Object.keys(sections)[
-				this.plugin.settings.data.globalSettings.lastViewHistory
+				this.plugin.settings.data.lastViewHistory
 					.settingTab
 			];
 		tabs[defaultTab].click();
@@ -346,7 +346,7 @@ export class SettingsManager {
 			});
 			configureBtn.addEventListener("click", () => {
 				openScanFiltersModal(this.plugin, filterType, (newValues) => {
-					this.plugin.settings.data.globalSettings.scanFilters[
+					this.plugin.settings.data.scanFilters[
 						filterType
 					].values = newValues;
 					this.plugin.saveSettings();
@@ -400,7 +400,7 @@ export class SettingsManager {
 				const newPolarity = Number(
 					(e.target as HTMLSelectElement).value,
 				);
-				this.plugin.settings.data.globalSettings.scanFilters[
+				this.plugin.settings.data.scanFilters[
 					filterType
 				].polarity = newPolarity;
 				this.plugin.saveSettings();
@@ -1045,7 +1045,7 @@ export class SettingsManager {
 							)
 							.then(() => {
 								const colorMap =
-									this.plugin.settings.data.globalSettings.tagColors.map(
+									this.plugin.settings.data.tagColors.map(
 										(tagColor) => ({
 											color:
 												this.plugin.settings.data
@@ -1269,7 +1269,7 @@ export class SettingsManager {
 			customStatusesContainer.empty(); // Clear existing rendered rows
 
 			const customStatuses =
-				this.plugin.settings.data.globalSettings.customStatuses;
+				this.plugin.settings.data.customStatuses;
 
 			if (!customStatuses || customStatuses.length === 0) {
 				customStatusesContainer.createDiv({
@@ -1373,7 +1373,7 @@ export class SettingsManager {
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,
 							};
-							this.plugin.settings.data.globalSettings!.customStatuses[
+							this.plugin.settings.data!.customStatuses[
 								index
 							] = customStatus;
 							await this.saveSettings();
@@ -1402,7 +1402,7 @@ export class SettingsManager {
 		renderCustomStatuses();
 
 		const isTasksPluginEnabled =
-			this.plugin.settings.data.globalSettings.compatiblePlugins
+			this.plugin.settings.data.compatiblePlugins
 				.tasksPlugin;
 		// Add "Add New Status" button
 		new Setting(contentEl)
@@ -1842,7 +1842,7 @@ export class SettingsManager {
 							frontmatterItem !== null,
 					);
 
-				this.plugin.settings.data.globalSettings.frontmatterFormatting =
+				this.plugin.settings.data.frontmatterFormatting =
 					newOrder;
 			},
 		});
@@ -1882,7 +1882,7 @@ export class SettingsManager {
 							text.setValue(sortfrontmatterItem.key)
 								.setPlaceholder(t("Enter property key"))
 								.onChange((value) => {
-									this.plugin.settings.data.globalSettings.frontmatterFormatting[
+									this.plugin.settings.data.frontmatterFormatting[
 										index
 									].key = value.trim();
 								});
@@ -1897,10 +1897,10 @@ export class SettingsManager {
 					// 		.setTooltip(t("remove-sort-criterion"))
 					// 		.onClick(async () => {
 					// 			if (
-					// 				this.plugin.settings.data.globalSettings
+					// 				this.plugin.settings.data
 					// 					.frontmatterFormatting
 					// 			) {
-					// 				this.plugin.settings.data.globalSettings.frontmatterFormatting.splice(
+					// 				this.plugin.settings.data.frontmatterFormatting.splice(
 					// 					index,
 					// 					1
 					// 				);
@@ -1925,18 +1925,18 @@ export class SettingsManager {
 		// addNewSortingButton.addEventListener("click", async () => {
 		// 	const newfrontmatterItem: frontmatterFormatting = {
 		// 		index:
-		// 			(this.plugin.settings.data.globalSettings
+		// 			(this.plugin.settings.data
 		// 				.frontmatterFormatting?.length || 0) + 1,
 		// 		property: "",
 		// 		key: "",
 		// 	};
 		// 	if (
-		// 		!this.plugin.settings.data.globalSettings.frontmatterFormatting
+		// 		!this.plugin.settings.data.frontmatterFormatting
 		// 	) {
-		// 		this.plugin.settings.data.globalSettings.frontmatterFormatting =
+		// 		this.plugin.settings.data.frontmatterFormatting =
 		// 			[];
 		// 	}
-		// 	this.plugin.settings.data.globalSettings.frontmatterFormatting.push(
+		// 	this.plugin.settings.data.frontmatterFormatting.push(
 		// 		newfrontmatterItem
 		// 	);
 		// 	renderFrontmatterFormattingItems();

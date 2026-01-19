@@ -93,11 +93,11 @@ const Column: React.FC<ColumnProps> = ({
 	// 	}
 	// }, [colType, columnData, allTasksExternal]);
 
-	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
+	const columnWidth = plugin.settings.data.columnWidth || '273px';
 	// const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	// Extra code to provide special data-types for theme support.
-	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const tagColors = plugin.settings.data.tagColors;
 	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
 	let tagData = tagColorMap.get(columnData?.coltag || '');
 	if (!tagData) {
@@ -727,7 +727,7 @@ const Column: React.FC<ColumnProps> = ({
 						</div>
 					)}
 					<div
-						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
+						className={`tasksContainer${plugin.settings.data.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}
 						onDragOver={(e) => { handleDragOver(e); }}
 						onDragLeave={handleDragLeave}

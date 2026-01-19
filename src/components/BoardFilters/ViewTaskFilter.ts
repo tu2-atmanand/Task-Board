@@ -858,7 +858,7 @@ export class TaskFilterComponent extends Component {
 				// }
 				valueSelect.addOptions(
 					getCustomStatusOptionsForDropdown(
-						this.plugin.settings.data.globalSettings
+						this.plugin.settings.data
 							.customStatuses
 					).reduce(
 						(
@@ -1275,7 +1275,7 @@ export class TaskFilterComponent extends Component {
 		switch (property) {
 			// case "status":
 			// 	suggestions = getStatusSuggestions(
-			// 		this.pluginSettings.data.globalSettings
+			// 		this.pluginSettings.data
 			// 			.customStatuses
 			// 	);
 			// 	break;

@@ -12,7 +12,6 @@ import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
 interface KanbanBoardProps {
-	app: App;
 	plugin: TaskBoard;
 	board: Board;
 	allTasks: taskJsonMerged | undefined;
@@ -23,7 +22,7 @@ interface KanbanBoardProps {
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, tasksPerColumn, loading, freshInstall }) => {
 	// Check if lazy loading is enabled
-	const lazyLoadingEnabled = plugin.settings.data.globalSettings.kanbanView?.lazyLoadingEnabled ?? false;
+	const lazyLoadingEnabled = plugin.settings.data.kanbanView?.lazyLoadingEnabled ?? false;
 	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
 
 	return (
@@ -249,7 +248,7 @@ export default memo(KanbanBoard);
 
 // 	// Memoized refreshBoardButton to avoid re-creating the function on every render
 // 	const refreshBoardButton = useCallback(async () => {
-// 		if (plugin.settings.data.globalSettings.realTimeScanner) {
+// 		if (plugin.settings.data.realTimeScanner) {
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		} else {
 // 			if (

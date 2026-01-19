@@ -9,22 +9,20 @@ import { Board } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { bugReporter, openScanVaultModal } from "../services/OpenModals";
+import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
-	boards: Board[];
+	// boards: Board[];
 	root: Root | null = null;
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
 		this.app = plugin.app;
 		this.plugin = plugin;
-		this.boards = [];
+		// this.boards = [];
 		this.icon = TaskBoardIcon;
 	}
 
@@ -63,8 +61,10 @@ export class TaskBoardView extends ItemView {
 
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
-		await this.loadBoards();
+		// await this.loadBoards();
 		this.renderBoard();
+
+
 	}
 
 	async highlighgtScanvaultIcon() {
@@ -79,27 +79,25 @@ export class TaskBoardView extends ItemView {
 		}
 	}
 
-	private async loadBoards() {
-		try {
-			this.boards = await loadBoardsData(this.plugin);
-		} catch (err) {
-			bugReporterManagerInsatance.showNotice(
-				89,
-				"Failed to load board configurations from data.json",
-				String(err),
-				"TaskBoardView.tsx/loadBoards"
-			);
-		}
-	}
+	// private async loadBoards() {
+	// 	try {
+	// 		this.boards = await loadBoardsData(this.plugin);
+	// 	} catch (err) {
+	// 		bugReporterManagerInsatance.showNotice(
+	// 			89,
+	// 			"Failed to load board configurations from data.json",
+	// 			String(err),
+	// 			"TaskBoardView.tsx/loadBoards"
+	// 		);
+	// 	}
+	// }
 
 	private renderBoard() {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
 				<TaskBoardViewContent
-					app={this.app}
 					plugin={this.plugin}
-					boardConfigs={this.boards}
 				/>,
 			</StrictMode>,
 		);

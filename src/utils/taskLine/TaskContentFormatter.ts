@@ -79,11 +79,11 @@ export const addIdToTaskContent = async (
 	const taskId = extractTaskId(formattedTaskContent);
 	let newId = undefined;
 	if (
-		(!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) ||
+		(!taskId && Plugin.settings.data.autoAddUniqueID) ||
 		forcefullyAddId
 	) {
 		newId = generateTaskId(Plugin);
-		const format = Plugin.settings.data.globalSettings.taskPropertyFormat;
+		const format = Plugin.settings.data.taskPropertyFormat;
 		switch (format) {
 			case taskPropertyFormatOptions.tasksPlugin:
 			case taskPropertyFormatOptions.default:
@@ -173,7 +173,7 @@ export const getSanitizedTaskContent = (
 	// 	return "";
 	// }
 
-	const globalSettings = plugin.settings.data.globalSettings;
+	const globalSettings = plugin.settings.data;
 	const checkBoxStat = `- [${updatedTask.status}]`;
 
 	// TODO : Sanitizations not only correcting the format and replacing the old content with the latest one, but also very important is to clean if any old properties are there.
@@ -1170,8 +1170,8 @@ export const sanitizeDependsOn = (
 // 	}
 
 // 	const dayPlannerPlugin =
-// 		plugin.settings.data.globalSettings.dayPlannerPlugin;
-// 	const globalSettings = plugin.settings.data.globalSettings;
+// 		plugin.settings.data.dayPlannerPlugin;
+// 	const globalSettings = plugin.settings.data;
 
 // 	let dueDateWithFormat: string = "";
 // 	let completedWitFormat: string = "";
@@ -1269,12 +1269,12 @@ export const sanitizeDependsOn = (
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Get the list of properties to hide
 	const hiddenProperties =
-		plugin.settings.data.globalSettings.hiddenTaskProperties || [];
+		plugin.settings.data.hiddenTaskProperties || [];
 
 	// If no properties are configured to hide and the legacy setting is false, return original title
 	if (
 		hiddenProperties.length === 0 &&
-		!plugin.settings.data.globalSettings.showTaskWithoutMetadata
+		!plugin.settings.data.showTaskWithoutMetadata
 	) {
 		return task.title;
 	}
@@ -1290,7 +1290,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		.trim();
 
 	// If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
-	if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+	if (plugin.settings.data.showTaskWithoutMetadata) {
 		return cleanTaskTitleLegacy(task);
 	}
 
@@ -1409,7 +1409,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Remove reminder if it's in the hidden properties list
 	if (
 		hiddenProperties.includes(taskPropertiesNames.Dependencies) ||
-		plugin.settings.data.globalSettings.showTaskWithoutMetadata
+		plugin.settings.data.showTaskWithoutMetadata
 	) {
 		const reminderRegex =
 			/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;

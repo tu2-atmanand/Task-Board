@@ -121,11 +121,11 @@ export default class VaultScanner {
 			 */
 			// Below code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
 			// if (
-			// 	this.plugin.settings.data.globalSettings
+			// 	this.plugin.settings.data
 			// 		.frontmatterPropertyForReminder &&
 			// 	frontmatter &&
 			// 	frontmatter[
-			// 		this.plugin.settings.data.globalSettings
+			// 		this.plugin.settings.data
 			// 			.frontmatterPropertyForReminder
 			// 	]
 			// ) {
@@ -134,7 +134,7 @@ export default class VaultScanner {
 			// 		frontmatter: frontmatter,
 			// 		reminder:
 			// 			frontmatter[
-			// 				this.plugin.settings.data.globalSettings
+			// 				this.plugin.settings.data
 			// 					.frontmatterPropertyForReminder
 			// 			],
 			// 	};
@@ -156,7 +156,7 @@ export default class VaultScanner {
 			if (
 				frontmatter &&
 				isTaskNotePresentInFrontmatter(
-					this.plugin.settings.data.globalSettings
+					this.plugin.settings.data
 						.taskNoteIdentifierTag,
 					frontmatter,
 				)
@@ -325,23 +325,23 @@ export default class VaultScanner {
 							);
 
 							if (
-								this.plugin.settings.data.globalSettings
+								this.plugin.settings.data
 									.dailyNotesPluginComp &&
-								((this.plugin.settings.data.globalSettings
+								((this.plugin.settings.data
 									.universalDate ===
 									UniversalDateOptions.dueDate &&
 									dueDate === "") ||
-									(this.plugin.settings.data.globalSettings
+									(this.plugin.settings.data
 										.universalDate ===
 										UniversalDateOptions.startDate &&
 										startDate === "") ||
-									(this.plugin.settings.data.globalSettings
+									(this.plugin.settings.data
 										.universalDate ===
 										UniversalDateOptions.scheduledDate &&
 										scheduledDate === ""))
 							) {
 								const universalDateFormat =
-									this.plugin.settings.data.globalSettings
+									this.plugin.settings.data
 										.universalDateFormat;
 								const basename = file.basename;
 
@@ -356,19 +356,19 @@ export default class VaultScanner {
 									).isValid()
 								) {
 									if (
-										this.plugin.settings.data.globalSettings
+										this.plugin.settings.data
 											.universalDate ===
 										UniversalDateOptions.dueDate
 									) {
 										dueDate = basename; // If the basename matches the dueFormat, assign it to due
 									} else if (
-										this.plugin.settings.data.globalSettings
+										this.plugin.settings.data
 											.universalDate ===
 										UniversalDateOptions.startDate
 									) {
 										startDate = basename; // If the basename matches the dueFormat, assign it to startDate
 									} else if (
-										this.plugin.settings.data.globalSettings
+										this.plugin.settings.data
 											.universalDate ===
 										UniversalDateOptions.scheduledDate
 									) {
@@ -379,7 +379,7 @@ export default class VaultScanner {
 
 							let frontmatterTags: string[] = []; // Initialize frontmatterTags
 							if (
-								this.plugin.settings.data.globalSettings
+								this.plugin.settings.data
 									.showFrontmatterTagsOnCards
 							) {
 								// Extract frontmatter tags
@@ -491,7 +491,7 @@ export default class VaultScanner {
 					// 	// The second sub-condition is to check if the older file was a task-note. This second sub-condition is required in the case when user simply removes the taskNoteIdentifierTag from the frontmatter of the note, so its not longer a task-note now and also if the note doesnt have any tasks in its content, then this task-note cache should be removed.
 					// 	(oldPendingFileCache.length === 1 &&
 					// 		isTaskNotePresentInTags(
-					// 			this.plugin.settings.data.globalSettings
+					// 			this.plugin.settings.data
 					// 				.taskNoteIdentifierTag,
 					// 			oldPendingFileCache[0].tags
 					// 		));
@@ -508,7 +508,7 @@ export default class VaultScanner {
 				// 	(oldCompletedFileCache &&
 				// 		oldCompletedFileCache.length === 1 &&
 				// 		isTaskNotePresentInTags(
-				// 			this.plugin.settings.data.globalSettings
+				// 			this.plugin.settings.data
 				// 				.taskNoteIdentifierTag,
 				// 			oldCompletedFileCache[0].tags
 				// 		));
@@ -545,7 +545,7 @@ export default class VaultScanner {
 
 		try {
 			const scanFilters =
-				this.plugin.settings.data.globalSettings.scanFilters;
+				this.plugin.settings.data.scanFilters;
 			let isFileScanned: string = "";
 			for (const file of files) {
 				if (
@@ -626,7 +626,7 @@ export default class VaultScanner {
 	// 		);
 	// 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 	// 		if (
-	// 			this.plugin.settings.data.globalSettings.realTimeScanner &&
+	// 			this.plugin.settings.data.realTimeScanner &&
 	// 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
 	// 		) {
@@ -651,10 +651,10 @@ export default class VaultScanner {
 
 		setTimeout(() => {
 			eventEmitter.emit("REFRESH_COLUMN");
-			// 	if (this.plugin.settings.data.globalSettings.searchQuery) {
+			// 	if (this.plugin.settings.data.searchQuery) {
 			// 		console.log(
 			// 			"Refreshing the board now after saving...\nSetting : ",
-			// 			this.plugin.settings.data.globalSettings.searchQuery
+			// 			this.plugin.settings.data.searchQuery
 			// 		);
 			// 		eventEmitter.emit("REFRESH_BOARD");
 			// 	} else {
@@ -667,24 +667,49 @@ export default class VaultScanner {
 
 		// const result = this.saveTasksToJsonCacheDebounced();
 	}
+
+	/**
+	 * Discover all .taskboard files in the vault
+	 * This method scans through all files and identifies board configuration files
+	 * @returns Array of discovered .taskboard file paths
+	 */
+	discoverTaskboardFiles(): string[] {
+		try {
+			const allFiles = this.app.vault.getAllLoadedFiles();
+			const taskboardFiles = allFiles
+				.filter((file) => file instanceof TFile && file.extension === "taskboard")
+				.map((file) => (file as TFile).path);
+
+			console.log(`VaultScanner: Discovered ${taskboardFiles.length} .taskboard files:`, taskboardFiles);
+			return taskboardFiles;
+		} catch (error) {
+			console.error("VaultScanner: Error discovering .taskboard files:", error);
+			return [];
+		}
+	}
 }
 
 /**
  * Checks if the file is allowed for scanning based on its extension and plugin settings.
  * It also checks if the file is not the archived tasks file or inside the archived TB notes folder.
- * @param plugin - The TaskBoard plugin instance
- * @param file - The file to check (TFile)
+ * Additionally, it excludes .taskboard files from scanning as they are board configuration files.
+ * @param globalSettings - The global settings from the plugin
+ * @param file - The file to check (TFile or TAbstractFile)
  * @returns boolean - True if the file is allowed for scanning, false otherwise
  */
 export function fileTypeAllowedForScanning(
 	globalSettings: globalSettingsData,
 	file: TFile | TAbstractFile,
 ): boolean {
-	// console.log("Condition 1 :", notAllowedFileExtensionsRegEx.test(file.path), "\nCondition 2 :", file.path ===
-	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
-	if (!globalSettings.archivedTBNotesFolderPath.trim()) return true;
-
 	const filePath = file.path.toLocaleLowerCase();
+
+	// Exclude .taskboard files from task scanning (they are board configuration files, not task files)
+	if (file instanceof TFile && file.extension === "taskboard") {
+		console.log(`Excluding .taskboard file from scanning: ${file.path}`);
+		return false;
+	}
+
+	if (!globalSettings.archivedTBNotesFolderPath.trim()) return true;
 
 	if (
 		// notAllowedFileExtensionsRegEx.test(file.path) ||

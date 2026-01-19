@@ -72,7 +72,7 @@ export function EdgeWithToolbar(props: EdgeProps) {
 
 		// // Update the task title to reflect the removed dependency
 		// const updatedTaskTitle = sanitizeDependsOn(
-		// 	plugin.settings.data.globalSettings,
+		// 	plugin.settings.data,
 		// 	updatedTargetTask.title,
 		// 	updatedTargetTask.dependsOn
 		// );

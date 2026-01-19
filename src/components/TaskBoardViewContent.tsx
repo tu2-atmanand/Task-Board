@@ -3,13 +3,12 @@
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
+import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App, debounce, Platform, Menu } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { handleUpdateBoards } from "../utils/BoardOperations";
 import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
 import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
 import { t } from "src/utils/lang/helper";
@@ -23,19 +22,21 @@ import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
-	const [boards, setBoards] = useState<Board[]>(boardConfigs);
-	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
+const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
+	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
+	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
+	const [currentBoardData, setCurrentBoardData] = useState<Board>();
+	const [allBoardsData, setAllBoardsData] = useState<Board[]>();
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
-	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || viewTypeNames.kanban);
+	const [viewType, setViewType] = useState<string>(plugin.settings.data.lastViewHistory.viewedType || viewTypeNames.kanban);
 
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
-	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.globalSettings.searchQuery ? true : false);
-	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.globalSettings.searchQuery ?? "");
+	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.searchQuery ? true : false);
+	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
 
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
 
@@ -86,14 +87,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const data = await loadBoardsData(plugin);
-				setBoards(data);
+				const data = await plugin.taskBoardFileManager.loadBoard(activeBoardIndex);
+				if (!data) throw "Board data not found.";
+
+				setCurrentBoardData(data);
 
 				const allTasks = await loadTasksAndMerge(plugin, true);
 				if (allTasks) {
 					setAllTasks(allTasks);
 					setFreshInstall(false);
 				}
+
+				const allBoardsData = plugin.taskBoardFileManager.loadAllBoards();
 			} catch (error) {
 				console.error(
 					"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
@@ -109,9 +114,9 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const allTasksArrangedPerColumn = useMemo(() => {
 		// console.log("Calculating allTasksArrangedPerColumn...");
 		setFilteredTasksPerColumn([]);
-		if (allTasks && boards[activeBoardIndex]) {
+		if (allTasks && currentBoardData) {
 			// Apply board filters to pending tasks
-			const currentBoard = boards[activeBoardIndex];
+			const currentBoard = currentBoardData;
 			const boardFilter = currentBoard.boardFilter;
 
 			// Create a copy of allTasks with filtered pending tasks
@@ -120,7 +125,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				Pending: boardFilterer(allTasks.Pending, boardFilter),
 				Completed: boardFilterer(allTasks.Completed, boardFilter),
 			};
-			plugin.settings.data.boardConfigs[activeBoardIndex].taskCount = {
+			currentBoardData.taskCount = {
 				pending: filteredAllTasks.Pending.length,
 				completed: filteredAllTasks.Completed.length,
 			};
@@ -141,11 +146,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							// I think this below code is not required as we simply want to update the data on the disk.
 							// setBoards((prevBoards) => {
 							// 	const updatedBoards = [...prevBoards];
-							// 	updatedBoards[activeBoardIndex] = updatedBoardData;
+							// 	updatedcurrentBoardData = updatedBoardData;
 							// 	return updatedBoards;
 							// });
 
-							plugin.settings.data.boardConfigs[activeBoardIndex] = updatedBoardData;
+							plugin.taskBoardFileManager.saveBoard(updatedBoardData);
 							// Technically, at later point in time, when user will make any changes, the latest data will be updated on the disk, so we need not have to update it everytime during this column seggregation.
 							// const newSettings = plugin.settings;
 							// plugin.saveSettings(newSettings);
@@ -189,7 +194,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	useEffect(() => {
 		const refreshView = (viewType: string) => {
 			setViewType(viewType);
-			plugin.settings.data.globalSettings.lastViewHistory.viewedType = viewType;
+			plugin.settings.data.lastViewHistory.viewedType = viewType;
 			plugin.saveSettings();
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);
@@ -219,7 +224,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	function handleOpenAddNewTaskModal() {
-		openAddNewTaskModal(app, plugin);
+		openAddNewTaskModal(plugin);
 	}
 
 	function handleOpenTaskBoardActionsModal() {
@@ -231,13 +236,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			setSearchQuery("");
 			// el.currentTarget.focus();
 			setFilteredTasksPerColumn([]);
-			plugin.settings.data.globalSettings.searchQuery = "";
+			plugin.settings.data.searchQuery = "";
 
 			eventEmitter.emit("REFRESH_COLUMN");
 			plugin.saveSettings();
 			setShowSearchInput(false);
 		} else {
-			setSearchQuery(plugin.settings.data.globalSettings.searchQuery || "");
+			setSearchQuery(plugin.settings.data.searchQuery || "");
 			handleSearchSubmit();
 			setShowSearchInput(true);
 		}
@@ -255,7 +260,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			return null;
 		}
 
-		// plugin.settings.data.globalSettings.searchQuery = searchQuery;
+		// plugin.settings.data.searchQuery = searchQuery;
 
 		const lowerQuery = searchQuery.toLowerCase();
 		let searchFilteredTasks: taskJsonMerged | null = null;
@@ -310,7 +315,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			setFilteredTasksPerColumn(filtered);
 
 			setTimeout(() => {
-				plugin.settings.data.globalSettings.searchQuery = lowerQuery;
+				plugin.settings.data.searchQuery = lowerQuery;
 				plugin.saveSettings();
 			}, 100);
 		}
@@ -322,26 +327,26 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
 		const newViewType = e.target.value;
 		setViewType(newViewType);
-		plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
+		plugin.settings.data.lastViewHistory.viewedType = newViewType;
 		plugin.saveSettings();
 	}
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
 		try {
-			const currentBoardConfig = boards[activeBoardIndex];
+			const currentBoardConfig = currentBoardData;
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
 				const filterModal = new ViewTaskFilterModal(
-					plugin, false, undefined, activeBoardIndex, currentBoardConfig.name
+					plugin, false, undefined, activeBoardIndex, currentBoardConfig!.name
 				);
 
 				// Set initial filter state
-				if (currentBoardConfig.boardFilter) {
+				if (currentBoardConfig!.boardFilter) {
 					setTimeout(() => {
 						// Use type assertion to resolve non-null issues
 						// const filterState = filterModal.liveFilterState as RootFilterState;
 						if (filterModal.taskFilterComponent) {
-							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig.boardFilter!);
+							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.boardFilter);
 						}
 					}, 100);
 				}
@@ -350,12 +355,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				filterModal.filterCloseCallback = async (filterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedBoards = [...boards];
-						updatedBoards[activeBoardIndex].boardFilter = filterState;
-						setBoards(updatedBoards);
+						const updatedcurrentBoardData = currentBoardData;
+						updatedcurrentBoardData!.boardFilter = filterState;
+						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
+						currentBoardData!.boardFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -388,15 +393,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					false, // forColumn = false since this is for board-level filter
 					undefined,
 					activeBoardIndex,
-					boards[activeBoardIndex]?.name || "Board",
+					currentBoardData?.name || "Board",
 				);
 
 				// Load existing filter state if available
-				if (currentBoardConfig.boardFilter) {
+				if (currentBoardConfig!.boardFilter) {
 					// Wait for component to be created and loaded
 					setTimeout(() => {
 						if (popover.taskFilterComponent) {
-							popover.taskFilterComponent.loadFilterState(currentBoardConfig.boardFilter!);
+							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.boardFilter!);
 						}
 					}, 100);
 				}
@@ -405,12 +410,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				popover.onClose = async (filterState?: RootFilterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedBoards = [...boards];
-						updatedBoards[activeBoardIndex].boardFilter = filterState;
-						setBoards(updatedBoards);
+						const updatedcurrentBoardData = currentBoardData;
+						updatedcurrentBoardData!.boardFilter = filterState;
+						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
+						currentBoardData!.boardFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -428,12 +433,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}
 
 	function togglePropertyNameInSettings(propertyName: string) {
-		let visibleProperties = plugin.settings.data.globalSettings.visiblePropertiesList || [];
+		let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
 
 		console.log("Current properties list :", visibleProperties, "\nRemove following property :", propertyName, "\nWill remove from the following index :", visibleProperties.indexOf(propertyName));
 		if (visibleProperties.includes(propertyName)) {
 			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
-			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+			plugin.settings.data.visiblePropertiesList = visibleProperties;
 
 		} else {
 			console.log("Property Name:", propertyName);
@@ -462,7 +467,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			}
 			visibleProperties.push(propertyName);
 
-			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+			plugin.settings.data.visiblePropertiesList = visibleProperties;
 		}
 
 		plugin.saveSettings();
@@ -484,7 +489,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.onClick(async () => {
 				togglePropertyNameInSettings(taskPropertiesNames.ID);
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ID))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -492,7 +497,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.onClick(async () => {
 				togglePropertyNameInSettings(taskPropertiesNames.Checkbox);
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -501,7 +506,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Status);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Status))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -510,7 +515,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Priority);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Priority))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -519,7 +524,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Tags);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Tags))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("time"));
@@ -527,7 +532,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Time);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Time))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("reminder"));
@@ -535,7 +540,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Reminder);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Reminder))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Reminder))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("created-date"));
@@ -543,7 +548,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.CreatedDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("start-date"));
@@ -551,7 +556,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.StartDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.StartDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.StartDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("scheduled-date"));
@@ -559,7 +564,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.ScheduledDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("due-date"));
@@ -567,7 +572,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.DueDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DueDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DueDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("completed-date"));
@@ -575,7 +580,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.CompletionDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("cancelled-date"));
@@ -583,7 +588,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.CancelledDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("dependencies"));
@@ -591,7 +596,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Dependencies);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("file-name"));
@@ -599,7 +604,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.FilePath);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
 		});
 
 		propertyMenu.addSeparator();
@@ -614,7 +619,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
 			});
 
 			subTasksMenu.addItem((item) => {
@@ -623,7 +628,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
 			});
 
 			// subTasksMenu.addItem((item) => {
@@ -633,7 +638,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
 
 			// 	})
-			// 	item.setChecked(!plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+			// 	item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
 			// });
 		});
 
@@ -648,7 +653,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description));
 			});
 
 			subTasksMenu.addItem((item) => {
@@ -658,7 +663,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
 			});
 		});
 
@@ -672,8 +677,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		if (index !== activeBoardIndex) {
 			setSearchQuery("");
 			setFilteredTasksPerColumn([]);
-			plugin.settings.data.globalSettings.searchQuery = "";
-			plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index;
+			plugin.settings.data.searchQuery = "";
+			plugin.settings.data.lastViewHistory.boardIndex = index;
 			setActiveBoardIndex(index);
 			setTimeout(() => {
 				eventEmitter.emit("REFRESH_BOARD");
@@ -737,9 +742,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.setTitle(t("open-board-configuration-modal"));
 			item.setIcon("settings");
 			item.onClick(async () => {
-				openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
-					handleUpdateBoards(plugin, updatedBoards, setBoards)
-				);
+				openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
+					// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+					if (activeBoardIndex === boardIndex) {
+						setCurrentBoardData(updatedBoards[boardIndex]);
+					}
+					plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+				}
+				)
 			});
 		});
 		sortMenu.addItem((item) => {
@@ -811,13 +821,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							<MenuICon size={20} />
 						</button>
 						{!showSearchInput && (
-							<span className="currentBoardName">{boards[activeBoardIndex]?.name}</span>
+							<span className="currentBoardName">{currentBoardData?.name}</span>
 						)}
 					</div>
 				) : (
 					// Desktop view: Original board titles
 					<div className="boardTitles">
-						{boards.map((board, index) => (
+						{allBoardsData && allBoardsData.map((board, index) => (
 							<button
 								key={index}
 								className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
@@ -893,8 +903,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("board-configure-button")}
 						onClick={() =>
-							openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
-								handleUpdateBoards(plugin, updatedBoards, setBoards)
+							openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
+								// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+								if (activeBoardIndex === boardIndex) {
+									setCurrentBoardData(updatedBoards[boardIndex]);
+								}
+								plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+							}
 							)
 						}
 					>
@@ -940,7 +955,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						</div>
 						<div className="boardSidebarContent">
 							<div className="boardSidebarContentBtnContainer">
-								{boards.map((board, index) => (
+								{allBoardsData && allBoardsData.map((board, index) => (
 									<div
 										key={index}
 										className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
@@ -972,8 +987,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 								<button
 									className="boardConfigureBtn"
 									onClick={() =>
-										openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
-											handleUpdateBoards(plugin, updatedBoards, setBoards)
+										openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
+											// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+											if (activeBoardIndex === boardIndex) {
+												setCurrentBoardData(updatedBoards[boardIndex]);
+											}
+											plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+										}
 										)
 									}
 								>
@@ -987,12 +1007,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			}
 
 			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
-				{boards[activeBoardIndex] ? (
+				{currentBoardData ? (
 					viewType === viewTypeNames.kanban ? (
 						<KanbanBoard
-							app={app}
 							plugin={plugin}
-							board={boards[activeBoardIndex]}
+							board={currentBoardData}
 							allTasks={allTasks}
 							tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
 							loading={loading}
@@ -1023,7 +1042,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 								plugin={plugin}
 								activeBoardIndex={activeBoardIndex}
 								allTasksArranged={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
-								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
+								focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
 							/>
 						)
 					) : (

@@ -11,7 +11,6 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { bugReporter } from 'src/services/OpenModals';
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
@@ -53,7 +52,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	}
 
 	// Lazy loading settings from plugin
-	const lazySettings = plugin.settings.data.globalSettings.kanbanView;
+	const lazySettings = plugin.settings.data.kanbanView;
 	const initialTaskCount = lazySettings.initialTaskCount || 20;
 	const loadMoreCount = lazySettings.loadMoreCount || 10;
 	const scrollThresholdPercent = lazySettings.scrollThresholdPercent || 80;
@@ -140,10 +139,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		};
 	}, [handleScroll]);
 
-	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
+	const columnWidth = plugin.settings.data.columnWidth || '273px';
 
 	// Extra code to provide special data-types for theme support.
-	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const tagColors = plugin.settings.data.tagColors;
 	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
 	let tagData = tagColorMap.get(columnData?.coltag || '');
 	if (!tagData) {
@@ -197,8 +196,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const columnIndex = columnData.index - 1;
 
 			if (columnIndex !== -1) {
-				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
-				await plugin.saveSettings();
+				let newBoardData = activeBoardData;
+				newBoardData.columns[columnIndex].minimized = !newBoardData.columns[columnIndex].minimized;
+				plugin.taskBoardFileManager.saveBoard(newBoardData);
+
 				eventEmitter.emit('REFRESH_BOARD');
 			}
 		}
@@ -232,21 +233,17 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					columnData,
 					(updatedColumnConfiguration: ColumnData) => {
 						// Update the column configuration in the board data
-						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-							(board: Board) => board.index === activeBoardData.index
-						);
 
-						if (boardIndex !== -1) {
-							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+						if (activeBoardData.index !== -1) {
+							const columnIndex = activeBoardData.columns.findIndex(
 								(col: ColumnData) => col.id === columnData.id
 							);
 
 							if (columnIndex !== -1) {
 								// Update the column configuration
-								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
-
-								// Save the settings
-								plugin.saveSettings();
+								let newBoardData = activeBoardData;
+								newBoardData.columns[columnIndex] = updatedColumnConfiguration;
+								plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 								eventEmitter.emit('REFRESH_BOARD');
 							}
@@ -285,10 +282,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									let newBoardData = activeBoardData;
+									newBoardData.columns[columnIndex].filters = filterState;
 
-									// Save the settings
-									await plugin.saveSettings();
+									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
@@ -322,10 +319,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									let newBoardData = activeBoardData;
+									newBoardData.columns[columnIndex].filters = filterState;
 
-									// Save the settings
-									await plugin.saveSettings();
+									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
@@ -365,7 +362,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 					if (columnIndex !== -1) {
 						// Set the active property to false
-						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+						let newBoardData = activeBoardData;
+						newBoardData.columns[columnIndex].active = false;
+
+						plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 						// Save the settings
 						await plugin.saveSettings();
@@ -735,7 +735,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// Render
 	// -------------------------------------------------
 
-	const taskItemComponent = plugin.settings.data.globalSettings.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
+	const taskItemComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
 
 	return (
 		<div
@@ -776,7 +776,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						</div>
 					)}
 					<div
-						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
+						className={`tasksContainer${plugin.settings.data.showVerticalScroll ? '' : '-SH'}`}
 						ref={tasksContainerRef}
 						onDragOver={(e) => { handleDragOver(e); }}
 						onDragLeave={handleDragLeave}

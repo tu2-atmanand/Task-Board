@@ -66,7 +66,7 @@ export class AddOrEditTaskView extends ItemView {
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
-		if (!this.isTaskNote && this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
+		if (!this.isTaskNote && this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
 			this.task.legacyId = String(this.task.id);
 		}
@@ -79,7 +79,7 @@ export class AddOrEditTaskView extends ItemView {
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
+				const defaultLocation = this.plugin.settings.data.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
 				const noteName = this.task.title || getLocalDateTimeString();
 				// Sanitize filename
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
@@ -88,7 +88,7 @@ export class AddOrEditTaskView extends ItemView {
 
 			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
 
-			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.legacyId)) {
+			if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.legacyId)) {
 				this.task.id = generateTaskId(this.plugin);
 				this.task.legacyId = this.task.id;
 			}

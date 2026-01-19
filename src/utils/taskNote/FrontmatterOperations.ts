@@ -211,19 +211,19 @@ export function createFrontmatterFromTask(
 	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
 		getStatusNameFromStatusSymbol(
 			task?.status,
-			plugin.settings.data.globalSettings
+			plugin.settings.data
 		) || "pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		plugin.settings.data.taskNoteIdentifierTag,
 		...(task?.tags?.filter(
 			(tag) =>
 				tag.includes(
-					plugin.settings.data.globalSettings.taskNoteIdentifierTag
+					plugin.settings.data.taskNoteIdentifierTag
 				) === false
 		) ?? []),
 	];
 
-	if (task.id && plugin.settings.data.globalSettings.autoAddUniqueID)
+	if (task.id && plugin.settings.data.autoAddUniqueID)
 		frontmatterObj[getCustomFrontmatterKey("id", frontmatterFormatting)] =
 			task.legacyId ? task.legacyId : task.id;
 	if (task.priority && task.priority > 0) {
@@ -291,7 +291,7 @@ export function updateFrontmatterProperties(
 	forceId?: boolean
 ): Partial<customFrontmatterCache> {
 	const frontmatterFormatting: frontmatterFormatting[] =
-		plugin.settings.data.globalSettings.frontmatterFormatting;
+		plugin.settings.data.frontmatterFormatting;
 	const oldFrontmatter = existingFrontmatter;
 
 	// Step 1: Build a temporary object with all the updated values
@@ -344,7 +344,7 @@ export function updateFrontmatterProperties(
 		.filter(Boolean);
 
 	const identifierTag =
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+		plugin.settings.data.taskNoteIdentifierTag;
 
 	// // Step 1: Add any new tags from task.tags that are not in existingTags
 	// let newTagsToAdd = taskTags.filter((t) => !existingTags.includes(t));
@@ -369,7 +369,7 @@ export function updateFrontmatterProperties(
 	// Update or add unique ID
 	const idKey = getCustomFrontmatterKey("id", frontmatterFormatting);
 	if (!existingFrontmatter?.[idKey]) {
-		if (forceId || plugin.settings.data.globalSettings.autoAddUniqueID) {
+		if (forceId || plugin.settings.data.autoAddUniqueID) {
 			tempUpdates[idKey] = task.legacyId
 				? task.legacyId
 				: generateTaskId(plugin);
@@ -383,7 +383,7 @@ export function updateFrontmatterProperties(
 	if (task.status) {
 		const statusName = getStatusNameFromStatusSymbol(
 			task.status,
-			plugin.settings.data.globalSettings
+			plugin.settings.data
 		);
 		tempUpdates[statusKey] = statusName ?? `"${task.status}"`;
 	}
@@ -442,7 +442,7 @@ export function updateFrontmatterProperties(
 	}
 
 	const statusConfig =
-		plugin.settings.data.globalSettings.customStatuses.find(
+		plugin.settings.data.customStatuses.find(
 			(status) => status.symbol === task.status
 		);
 	const statusType = statusConfig ? statusConfig.type : undefined;
@@ -455,7 +455,7 @@ export function updateFrontmatterProperties(
 		if (task.cancelledDate) {
 			tempUpdates[cancelledDateKey] = task.cancelledDate;
 		} else {
-			const globalSettings = plugin.settings.data.globalSettings;
+			const globalSettings = plugin.settings.data;
 			const moment = _moment as unknown as typeof _moment.default;
 			const currentDateValue = moment().format(
 				globalSettings?.taskCompletionDateTimePattern
@@ -476,7 +476,7 @@ export function updateFrontmatterProperties(
 		if (task.cancelledDate) {
 			tempUpdates[completionKey] = task.completion;
 		} else {
-			const globalSettings = plugin.settings.data.globalSettings;
+			const globalSettings = plugin.settings.data;
 			const moment = _moment as unknown as typeof _moment.default;
 			const currentDateValue = moment().format(
 				globalSettings?.taskCompletionDateTimePattern

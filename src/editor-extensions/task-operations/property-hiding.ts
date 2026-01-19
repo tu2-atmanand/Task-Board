@@ -239,7 +239,7 @@ function createPropertyDecorations(
 ): DecorationSet {
 	const decorations: Range<Decoration>[] = [];
 	const hiddenProperties =
-		plugin.settings.data.globalSettings.hiddenTaskProperties || [];
+		plugin.settings.data.hiddenTaskProperties || [];
 
 	const cursorPos = view.state.selection.main.head;
 	const doc = view.state.doc;
@@ -274,7 +274,7 @@ function createPropertyDecorations(
 		hiddenProperties.forEach((property) => {
 			const pattern = getTaskPropertyRegexPatterns(
 				property,
-				plugin.settings.data.globalSettings?.taskPropertyFormat
+				plugin.settings.data?.taskPropertyFormat
 			);
 			const matches = Array.from(lineText.matchAll(pattern));
 			// console.log(

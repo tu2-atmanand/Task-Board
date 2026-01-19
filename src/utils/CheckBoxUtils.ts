@@ -14,7 +14,7 @@ export function checkboxStateSwitcher(
 	plugin: TaskBoard,
 	symbol: string
 ): { newSymbol: string; newSymbolType: string } {
-	const { customStatuses } = plugin.settings.data.globalSettings;
+	const { customStatuses } = plugin.settings.data;
 
 	// Check if customStatuses is available and has entries
 	if (customStatuses?.length > 0) {
@@ -86,7 +86,7 @@ export function isTaskCompleted(
 		// );
 
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.customStatuses;
+			settings.data.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
@@ -102,7 +102,7 @@ export function isTaskCompleted(
 		return flag;
 	} else {
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.customStatuses;
+			settings.data.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (

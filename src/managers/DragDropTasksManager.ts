@@ -152,7 +152,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			eventEmitter.emit("UPDATE_TASK", {
 				taskID: oldTask.id,
@@ -160,7 +160,7 @@ class DragDropTasksManager {
 			});
 
 			const isThisTaskNote = isTaskNotePresentInTags(
-				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+				plugin.settings.data.taskNoteIdentifierTag,
 				oldTask.tags
 			);
 
@@ -244,7 +244,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -270,7 +270,7 @@ class DragDropTasksManager {
 		// newTask.tags = newTags;
 		// newTask = await updateTaskItemProperty(
 		// 	oldTask,
-		// 	plugin.settings.data.globalSettings,
+		// 	plugin.settings.data,
 		// 	"tags",
 		// 	oldTask.tags,
 		// 	newTask.tags
@@ -289,7 +289,7 @@ class DragDropTasksManager {
 		// eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
 
 		// const isThisTaskNote = isTaskNotePresentInTags(
-		// 	plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		// 	plugin.settings.data.taskNoteIdentifierTag,
 		// 	oldTask.tags
 		// );
 
@@ -363,7 +363,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -468,7 +468,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -523,7 +523,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -548,12 +548,12 @@ class DragDropTasksManager {
 		};
 		if (
 			!isTaskNotePresentInTags(
-				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+				plugin.settings.data.taskNoteIdentifierTag,
 				task.tags
 			)
 		) {
 			newTask.title = sanitizeStatus(
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 				task.title,
 				" ",
 				statusTypeNames.TODO
@@ -605,7 +605,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -707,7 +707,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -775,7 +775,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -832,7 +832,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
@@ -884,13 +884,13 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data
 			);
 			console.log("newTask after swimlane change:", newTask);
 		}
 
 		const newStatus =
-			plugin.settings.data.globalSettings.customStatuses.find(
+			plugin.settings.data.customStatuses.find(
 				(status) => status.type === statusTypeNames.DONE
 			);
 

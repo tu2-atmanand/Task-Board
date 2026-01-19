@@ -61,7 +61,7 @@ export class AddOrEditTaskModal extends Modal {
 
 		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
-		if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
 			this.task.legacyId = this.task.id;
 		}
@@ -74,7 +74,7 @@ export class AddOrEditTaskModal extends Modal {
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
+				const defaultLocation = this.plugin.settings.data.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
 				const noteName = this.task.title || getLocalDateTimeString();
 				// Sanitize filename
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');

@@ -26,6 +26,7 @@ import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import VaultScanner, {
 	fileTypeAllowedForScanning,
 } from "src/managers/VaultScanner";
+import TaskBoardFileManager from "src/managers/TaskBoardFileManager";
 import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
@@ -58,6 +59,7 @@ export default class TaskBoard extends Plugin {
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: VaultScanner;
 	realTimeScanner: RealTimeScanner;
+	taskBoardFileManager: TaskBoardFileManager;
 	// taskBoardFileStack: string[] = [];
 	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
@@ -103,6 +105,9 @@ export default class TaskBoard extends Plugin {
 			this.plugin,
 			this.vaultScanner,
 		);
+		this.taskBoardFileManager = new TaskBoardFileManager(
+			this.plugin,
+		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -125,7 +130,7 @@ export default class TaskBoard extends Plugin {
 
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
-		this.runOnPluginUpdate();
+		await this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		// this.getLanguage();
@@ -133,6 +138,8 @@ export default class TaskBoard extends Plugin {
 		await loadTranslationsOnStartup(this);
 
 		await this.vaultScanner.initializeTasksCache();
+
+		await this.taskBoardFileManager.loadBoard();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -287,12 +294,12 @@ export default class TaskBoard extends Plugin {
 
 	// 	if (obsidianLang && obsidianLang in langCodes) {
 	// 		localStorage.setItem("taskBoardLang", obsidianLang);
-	// 		this.settings.data.globalSettings.lang = obsidianLang;
+	// 		this.settings.data.lang = obsidianLang;
 	// 		this.saveSettings();
 	// 	} else {
 	// 		localStorage.setItem(
 	// 			"taskBoardLang",
-	// 			// this.settings.data.globalSettings.lang
+	// 			// this.settings.data.lang
 	// 			"en"
 	// 		);
 	// 	}
@@ -334,16 +341,14 @@ export default class TaskBoard extends Plugin {
 		// this.registerEditorExtension(taskGutterExtension(this.app, this));
 
 		// Register task property hiding extension
-		const hiddenProperties =
-			this.settings.data.globalSettings?.hiddenTaskProperties || [];
+		const hiddenProperties = this.settings.data?.hiddenTaskProperties || [];
 		if (hiddenProperties.length > 0) {
 			this.registerEditorExtension(taskPropertyHidingExtension(this));
 		}
 	}
 
 	registerReadingModePostProcessor() {
-		const hiddenProperties =
-			this.settings.data.globalSettings?.hiddenTaskProperties || [];
+		const hiddenProperties = this.settings.data?.hiddenTaskProperties || [];
 		if (hiddenProperties.length === 0) {
 			return;
 		}
@@ -538,7 +543,7 @@ export default class TaskBoard extends Plugin {
 			hiddenProperties.forEach((property) => {
 				const pattern = getTaskPropertyRegexPatterns(
 					property,
-					this.settings.data.globalSettings?.taskPropertyFormat,
+					this.settings.data?.taskPropertyFormat,
 				);
 				if (pattern.test(content)) {
 					content = content.replace(pattern, (match) => {
@@ -566,7 +571,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	openAtStartup() {
-		if (!this.settings.data.globalSettings.openOnStartup) return;
+		if (!this.settings.data.openOnStartup) return;
 
 		this.activateView("icon");
 	}
@@ -583,7 +588,7 @@ export default class TaskBoard extends Plugin {
 			id: "add-new-task",
 			name: t("add-new-task"),
 			callback: () => {
-				openAddNewTaskModal(this.app, this.plugin);
+				openAddNewTaskModal(this.plugin);
 			},
 		});
 		this.addCommand({
@@ -690,8 +695,7 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		const archivedPath =
-			this.settings.data.globalSettings.archivedTBNotesFolderPath;
+		const archivedPath = this.settings.data.archivedTBNotesFolderPath;
 		const totalFiles = this.renameQueue.length;
 
 		// Show progress notice
@@ -706,10 +710,7 @@ export default class TaskBoard extends Plugin {
 
 			try {
 				if (
-					fileTypeAllowedForScanning(
-						this.plugin.settings.data.globalSettings,
-						file,
-					)
+					fileTypeAllowedForScanning(this.plugin.settings.data, file)
 				) {
 					this.realTimeScanner.onFileRenamed(
 						file,
@@ -790,10 +791,7 @@ export default class TaskBoard extends Plugin {
 
 			try {
 				if (
-					fileTypeAllowedForScanning(
-						this.plugin.settings.data.globalSettings,
-						file,
-					)
+					fileTypeAllowedForScanning(this.plugin.settings.data, file)
 				) {
 					this.realTimeScanner.onFileDeleted(file);
 				}
@@ -872,7 +870,7 @@ export default class TaskBoard extends Plugin {
 			try {
 				// if (
 				// 	fileTypeAllowedForScanning(
-				// 		this.plugin.settings.data.globalSettings,
+				// 		this.plugin.settings.data,
 				// 		file
 				// 	)
 				// ) {
@@ -913,15 +911,12 @@ export default class TaskBoard extends Plugin {
 			this.app.vault.on("modify", async (file: TAbstractFile) => {
 				console.log("Modify event is fired...");
 				if (
-					fileTypeAllowedForScanning(
-						this.plugin.settings.data.globalSettings,
-						file,
-					)
+					fileTypeAllowedForScanning(this.plugin.settings.data, file)
 				) {
 					if (file instanceof TFile) {
 						if (
-							this.plugin.settings.data.globalSettings
-								.scanMode === scanModeOptions.REAL_TIME
+							this.plugin.settings.data.scanMode ===
+							scanModeOptions.REAL_TIME
 						) {
 							this.vaultScanner.refreshTasksFromFiles(
 								[file],
@@ -960,10 +955,7 @@ export default class TaskBoard extends Plugin {
 			}),
 		);
 
-		if (
-			this.plugin.settings.data.globalSettings.scanMode !==
-			scanModeOptions.MANUAL
-		) {
+		if (this.plugin.settings.data.scanMode !== scanModeOptions.MANUAL) {
 			// Listen for editor-blur event and trigger scanning if the editor was modified
 			this.registerEvent(
 				this.app.workspace.on(
@@ -1022,8 +1014,7 @@ export default class TaskBoard extends Plugin {
 							.onClick(() => {
 								if (
 									fileTypeAllowedForScanning(
-										this.plugin.settings.data
-											.globalSettings,
+										this.plugin.settings.data,
 										file,
 									)
 								) {
@@ -1034,32 +1025,26 @@ export default class TaskBoard extends Plugin {
 								}
 							});
 					});
-					if (
-						this.settings.data.globalSettings.scanFilters.files
-							.polarity === 2
-					) {
+					if (this.settings.data.scanFilters.files.polarity === 2) {
 						menu.addItem((item) => {
 							item.setTitle(t("add-file-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
-									this.settings.data.globalSettings.scanFilters.files.values.push(
+									this.settings.data.scanFilters.files.values.push(
 										file.path,
 									);
 									this.saveSettings();
 								});
 						});
 					}
-					if (
-						this.settings.data.globalSettings.scanFilters.files
-							.polarity === 1
-					) {
+					if (this.settings.data.scanFilters.files.polarity === 1) {
 						menu.addItem((item) => {
 							item.setTitle(t("add-file-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
-									this.settings.data.globalSettings.scanFilters.files.values.push(
+									this.settings.data.scanFilters.files.values.push(
 										file.path,
 									);
 									this.saveSettings();
@@ -1078,32 +1063,26 @@ export default class TaskBoard extends Plugin {
 					// 		});
 					// });
 
-					if (
-						this.settings.data.globalSettings.scanFilters.folders
-							.polarity === 2
-					) {
+					if (this.settings.data.scanFilters.folders.polarity === 2) {
 						menu.addItem((item) => {
 							item.setTitle(t("add-folder-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
-									this.settings.data.globalSettings.scanFilters.folders.values.push(
+									this.settings.data.scanFilters.folders.values.push(
 										file.path,
 									);
 									this.saveSettings();
 								});
 						});
 					}
-					if (
-						this.settings.data.globalSettings.scanFilters.folders
-							.polarity === 1
-					) {
+					if (this.settings.data.scanFilters.folders.polarity === 1) {
 						menu.addItem((item) => {
 							item.setTitle(t("add-folder-in-scan-filter"))
 								.setIcon(TaskBoardIcon)
 								.setSection("action")
 								.onClick(() => {
-									this.settings.data.globalSettings.scanFilters.folders.values.push(
+									this.settings.data.scanFilters.folders.values.push(
 										file.path,
 									);
 									this.saveSettings();
@@ -1172,7 +1151,7 @@ export default class TaskBoard extends Plugin {
 			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
 			// 	await this.realTimeScanner.onFileModified(
 			// 		this.currentModifiedFile,
-			// 		this.settings.data.globalSettings.realTimeScanner
+			// 		this.settings.data.realTimeScanner
 			// 	);
 			// } else {
 			// 	this.fileUpdatedUsingModal = "";
@@ -1186,8 +1165,7 @@ export default class TaskBoard extends Plugin {
 		// Check if the Tasks plugin is installed and fetch the custom statuses
 		// await fetchTasksPluginCustomStatuses(this.plugin);
 		const tasksPlug = await isTasksPluginEnabled(this.plugin);
-		this.plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin =
-			tasksPlug;
+		this.plugin.settings.data.compatiblePlugins.tasksPlugin = tasksPlug;
 
 		// Check if the Reminder plugin is installed
 		isReminderPluginInstalled(this.plugin);
@@ -1215,7 +1193,7 @@ export default class TaskBoard extends Plugin {
 	// 					} as any)
 	// 			);
 	// 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-	// 			// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
+	// 			// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.defaultDateType.
 	// 			settings[key].forEach((boardConfig: Board) => {
 	// 				boardConfig.columns.forEach((column: ColumnData) => {
 	// 					if (!column.id) {
@@ -1228,7 +1206,7 @@ export default class TaskBoard extends Plugin {
 	// 					) {
 	// 						column.datedBasedColumn = {
 	// 							dateType:
-	// 								this.settings.data.globalSettings
+	// 								this.settings.data
 	// 									.universalDate,
 	// 							from: column.datedBasedColumn?.from || 0,
 	// 							to: column.datedBasedColumn?.to || 0,
@@ -1420,7 +1398,7 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
-	private runOnPluginUpdate() {
+	private async runOnPluginUpdate() {
 		// Check if the plugin version has changed
 		const currentVersion = newReleaseVersion; // Change this whenever you will going to release a new version.
 		const runMandatoryScan = false; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
@@ -1449,6 +1427,63 @@ export default class TaskBoard extends Plugin {
 			// 		version: currentVersion,
 			// 	})
 			// );
+		}
+
+		// Check if .taskboard files exist and create missing ones
+		await this.checkAndCreateBoardFiles();
+	}
+
+	/**
+	 * Check if configured board files exist, and create missing default board files
+	 * This is called during plugin initialization
+	 */
+	private async checkAndCreateBoardFiles() {
+		try {
+			console.log("Task Board: Checking for configured board files...");
+
+			// Get the missing board files
+			const missingFiles =
+				await this.taskBoardFileManager.validateBoardFiles();
+
+			if (missingFiles.length > 0) {
+				console.log(
+					`Task Board: Found ${missingFiles.length} missing board file(s)`,
+					missingFiles,
+				);
+
+				// Import DEFAULT_BOARDS from BoardConfigs
+				const { DEFAULT_BOARDS } =
+					await import("src/interfaces/BoardConfigs");
+
+				// Try to create missing default board files
+				const createdCount =
+					await this.taskBoardFileManager.createMissingDefaultBoardFiles(
+						DEFAULT_BOARDS,
+					);
+
+				if (createdCount > 0) {
+					new Notice(
+						`Task Board: Created ${createdCount} missing board file(s). Please restart the plugin or reload Obsidian to load the new boards.`,
+						5000,
+					);
+					console.log(
+						`Task Board: Successfully created ${createdCount} board file(s)`,
+					);
+				}
+			} else {
+				console.log("Task Board: All configured board files exist.");
+			}
+		} catch (error) {
+			console.error(
+				"Task Board: Error checking or creating board files:",
+				error,
+			);
+			bugReporterManagerInsatance.showNotice(
+				34,
+				"Error checking or creating board files",
+				error as string,
+				"main.ts/checkAndCreateBoardFiles",
+			);
 		}
 	}
 

@@ -39,7 +39,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			// Check if the task is completed
 			const newStatus = checkboxStateSwitcher(plugin, task.status);
 			const newTitle = sanitizeStatus(
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 				task.title,
 				newStatus.newSymbol,
 				newStatus.newSymbolType
@@ -64,7 +64,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 
 			// if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
 			// 	const newStatusType =
-			// 		plugin.settings.data.globalSettings.customStatuses.find(
+			// 		plugin.settings.data.customStatuses.find(
 			// 			(status) => status.symbol === newStatus
 			// 		)?.type ?? statusTypeNames.TODO;
 			// 	let newTitle = sanitizeStatus(task.title, newStatus.newSymbol);
@@ -88,7 +88,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			// 		}
 			// 	);
 			// } else {
-			// 	const globalSettings = plugin.settings.data.globalSettings;
+			// 	const globalSettings = plugin.settings.data;
 			// 	const moment = _moment as unknown as typeof _moment.default;
 			// 	const currentDateValue = moment().format(
 			// 		globalSettings?.taskCompletionDateTimePattern

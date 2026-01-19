@@ -364,7 +364,7 @@ export const columnSegregator = (
 		} else {
 			// Default algorithm for other criteria
 			tasksToDisplay = columnSortingAlgorithm(
-				settings.data.globalSettings.defaultStartTime,
+				settings.data.defaultStartTime,
 				tasksToDisplay,
 				columnData.sortCriteria
 			);

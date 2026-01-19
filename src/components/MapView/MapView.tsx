@@ -69,9 +69,9 @@ const nodeTypes = {
 const MapView: React.FC<MapViewProps> = ({
 	plugin, activeBoardIndex, allTasksArranged, focusOnTaskId
 }) => {
-	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
-	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
-	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+	plugin.settings.data.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
+	const mapViewSettings = plugin.settings.data.mapView;
+	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
@@ -85,7 +85,7 @@ const MapView: React.FC<MapViewProps> = ({
 				return undefined;
 		}
 	})();
-	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const tagColors = plugin.settings.data.tagColors;
 	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
 
 	// Loading state for localStorage data
@@ -230,7 +230,7 @@ const MapView: React.FC<MapViewProps> = ({
 		// Get default width with proper validation
 		const getDefaultWidth = () => {
 			try {
-				const columnWidth = plugin.settings.data.globalSettings.columnWidth;
+				const columnWidth = plugin.settings.data.columnWidth;
 				if (!columnWidth || typeof columnWidth !== 'string') {
 					return 300; // Fallback if missing or not a string
 				}
@@ -546,7 +546,7 @@ const MapView: React.FC<MapViewProps> = ({
 			};
 			eventEmitter.emit("UPDATE_TASK", eventData);
 			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
-				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
 				updatedTargetTask.title = updatedTargetTaskTitle;
 
 				// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
@@ -681,7 +681,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setTitle(t("transparent"));
 				item.setIcon("eye-off");
 				item.onClick(() => {
-					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.transparent;
+					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.transparent;
 					plugin.saveSettings();
 
 					// Refresh the board view
@@ -694,7 +694,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setTitle(t("dots"));
 				item.setIcon("grip");
 				item.onClick(() => {
-					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.dots;
+					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.dots;
 					plugin.saveSettings();
 
 					eventEmitter.emit('REFRESH_BOARD');
@@ -706,7 +706,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setTitle(t("lines"));
 				item.setIcon("grid-3x3");
 				item.onClick(() => {
-					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.lines;
+					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.lines;
 					plugin.saveSettings();
 
 					eventEmitter.emit('REFRESH_BOARD');
@@ -718,7 +718,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setTitle(t("cross"));
 				item.setIcon("x");
 				item.onClick(() => {
-					plugin.settings.data.globalSettings.mapView.background = mapViewBackgrounVariantTypes.cross;
+					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.cross;
 					plugin.saveSettings();
 
 					eventEmitter.emit('REFRESH_BOARD');
@@ -732,7 +732,7 @@ const MapView: React.FC<MapViewProps> = ({
 			item.setTitle(t("show-minimap"));
 			item.setIcon("map");
 			item.onClick(async () => {
-				plugin.settings.data.globalSettings.mapView.showMinimap = !plugin.settings.data.globalSettings.mapView.showMinimap;
+				plugin.settings.data.mapView.showMinimap = !plugin.settings.data.mapView.showMinimap;
 				plugin.saveSettings();
 
 				eventEmitter.emit('REFRESH_BOARD');
@@ -744,7 +744,7 @@ const MapView: React.FC<MapViewProps> = ({
 			item.setTitle(t("animate-links"));
 			item.setIcon("worm");
 			item.onClick(async () => {
-				plugin.settings.data.globalSettings.mapView.animatedEdges = !plugin.settings.data.globalSettings.mapView.animatedEdges;
+				plugin.settings.data.mapView.animatedEdges = !plugin.settings.data.mapView.animatedEdges;
 				plugin.saveSettings();
 
 				eventEmitter.emit('REFRESH_BOARD');
@@ -812,7 +812,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 				try {
 					if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
-						const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data.globalSettings, updatedTargetTask.title, updatedTargetTask.dependsOn);
+						const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
 						updatedTargetTask.title = updatedTargetTaskTitle;
 
 						await updateTaskInFile(plugin, updatedTargetTask, targetTask);

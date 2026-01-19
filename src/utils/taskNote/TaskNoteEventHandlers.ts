@@ -27,7 +27,7 @@ export const handleTaskNoteStatusChange = async (
 ) => {
 	try {
 		const newStatus = checkboxStateSwitcher(plugin, task.status);
-		const globalSettings = plugin.settings.data.globalSettings;
+		const globalSettings = plugin.settings.data;
 		const moment = _moment as unknown as typeof _moment.default;
 		const currentDateValue = moment().format(
 			globalSettings?.taskCompletionDateTimePattern
@@ -56,7 +56,7 @@ export const handleTaskNoteStatusChange = async (
 		}
 		const newStatusName = getStatusNameFromStatusSymbol(
 			newStatus.newSymbol,
-			plugin.settings.data.globalSettings
+			plugin.settings.data
 		);
 
 		// Update frontmatter with new status
@@ -134,7 +134,7 @@ export const handleTaskNoteDelete = async (
 			tags = tags.filter(
 				(tag: string) =>
 					tag.includes(
-						plugin.settings.data.globalSettings
+						plugin.settings.data
 							.taskNoteIdentifierTag
 					) === false
 			);
