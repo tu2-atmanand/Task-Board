@@ -97,9 +97,7 @@ export interface globalSettingsData {
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
-	preDefinedNote: string;
 	taskNoteIdentifierTag: string;
-	taskNoteDefaultLocation: string;
 	quickAddPluginDefaultChoice: string;
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
@@ -108,7 +106,9 @@ export interface globalSettingsData {
 		reminderPlugin: boolean;
 		quickAddPlugin: boolean;
 	};
+	preDefinedNote: string;
 	archivedTasksFilePath: string;
+	taskNoteDefaultLocation: string;
 	archivedTBNotesFolderPath: string;
 	frontmatterFormatting: frontmatterFormatting[];
 	showFrontmatterTagsOnCards: boolean;
