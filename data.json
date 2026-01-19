@@ -696,7 +696,7 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 58,
+          "pending": 60,
           "completed": 15
         },
         "swimlanes": {
@@ -860,8 +860,8 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 59,
-          "completed": 15
+          "pending": 0,
+          "completed": 0
         }
       }
     ],
@@ -1029,7 +1029,7 @@
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
       "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
-      "universalDate": "scheduledDate",
+      "universalDate": "startDate",
       "archivedTasksFilePath": "",
       "showFileNameInCard": true,
       "showFrontmatterTagsOnCards": true,
@@ -1047,9 +1047,9 @@
       "cardSectionsVisibility": "hideBoth",
       "hiddenTaskProperties": [],
       "taskPropertyFormat": "3",
-      "taskNoteDefaultLocation": "TaskNotes",
+      "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 400,
+      "uniqueIdCounter": 1,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
@@ -1062,7 +1062,7 @@
       "doubleClickCardToEdit": "noteInTab",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
-      "archivedTBNotesFolderPath": "TaskBoard/TBNotes/",
+      "archivedTBNotesFolderPath": "",
       "frontmatterFormatting": [
         {
           "index": 0,
@@ -1181,11 +1181,14 @@
         "dependsOn",
         "filePath",
         "status",
-        "checkbox"
+        "checkbox",
+        "subTasks",
+        "description"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
-      "autoAddCancelledDate": true
+      "autoAddCancelledDate": true,
+      "scanMode": "manual"
     }
   }
 }
