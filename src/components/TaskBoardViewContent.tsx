@@ -217,6 +217,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[] }> 
 		plugin.processRenameQueue().then(() => console.log("Finished processing rename queue."));
 
 		setTimeout(() => {
+			eventEmitter.emit("REFRESH_BOARD");
 			console.log("Now will emit REFRESH_BOARD event...");
 			eventEmitter.emit("REFRESH_BOARD");
 		}, 100)

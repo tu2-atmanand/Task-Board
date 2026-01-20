@@ -7,13 +7,11 @@
 import { App, TFile, Notice, normalizePath } from "obsidian";
 import { Board } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
-import { bugReporterManagerInsatance } from "./BugReporter";
 
 export default class TaskBoardFileManager {
 	private app: App;
 	private plugin: TaskBoard;
 	private currentBoardIndex: number;
-	private currentBoardData: Board | null = null;
 	private allBoardsData: Board[] | [] = [];
 
 	constructor(plugin: TaskBoard) {
@@ -38,20 +36,22 @@ export default class TaskBoardFileManager {
 			}
 
 			// Read the file
-			const file = this.app.vault.getAbstractFileByPath(filePath);
-			if (!file || !(file instanceof TFile)) {
-				console.warn(`Invalid TaskBoard file: ${filePath}`);
-				return null;
-			}
+			const file = await this.app.vault.adapter.readBinary(filePath);
+			const decodedData = new TextDecoder().decode(file);
+			console.log(
+				"Loaded file :",
+				file,
+				"\nDecoded data :\n",
+				decodedData,
+			);
 
-			const fileContent = await this.app.vault.read(file);
-			if (!fileContent || fileContent.trim() === "") {
+			if (!decodedData) {
 				console.warn(`TaskBoard file is empty: ${filePath}`);
 				return null;
 			}
 
 			// Parse JSON content
-			const boardData: Board = JSON.parse(fileContent);
+			const boardData: Board = JSON.parse(decodedData);
 			console.log(
 				`Successfully loaded board from: ${filePath}`,
 				boardData,
@@ -59,6 +59,91 @@ export default class TaskBoardFileManager {
 			return boardData;
 		} catch (error) {
 			console.error(`Error loading board from file ${filePath}:`, error);
+			return null;
+		}
+	}
+
+	/**
+	 * Loads all the boards data as per the file paths stored in the global settings.
+	 * @returns All boards data as an array or an empty array if failed to load the boards.
+	 */
+	async loadAllBoards(): Promise<Board[] | []> {
+		try {
+			const boardFilesLocations =
+				this.plugin.settings.data.boardFilesLocation || [];
+			let allBoardsData: Board[] | [] = [];
+
+			boardFilesLocations.forEach(async (boardFilePath: string) => {
+				if (!boardFilePath || boardFilePath.trim() === "") {
+					console.error(
+						`No board file path configured for index: ${this.currentBoardIndex}`,
+					);
+					return [];
+				}
+
+				// Load board from file
+				const boardData = await this.loadBoardFromFile(boardFilePath);
+
+				if (boardData) {
+					// Cache the board data in memory
+					allBoardsData[boardData.index] = boardData;
+					console.log(
+						`Loaded and cached board "${boardData.name}" (index: ${boardData.index}) from: ${boardFilePath}`,
+					);
+
+					return boardData;
+				} else {
+					new Notice(
+						`Task Board : Error loading all boards data. Following board not found : ${boardFilePath}`,
+					);
+				}
+
+				return [];
+			});
+
+			this.allBoardsData = allBoardsData;
+			return allBoardsData;
+		} catch (error) {
+			console.error(
+				`Error loading board at index ${this.currentBoardIndex}:`,
+				error,
+			);
+			return [];
+		}
+	}
+
+	/**
+	 * Loads the specific/current board data from the memory cache (allBoardsData)
+	 * @param boardIndex - The index of the board to load
+	 * @returns The board configuration object, or null if file cannot be loaded
+	 */
+	async loadBoard(boardIndex?: number): Promise<Board | null> {
+		try {
+			const currentBoardINdex = boardIndex ?? this.currentBoardIndex;
+
+			// Validate board index
+			if (
+				currentBoardINdex < 0 ||
+				currentBoardINdex > this.allBoardsData.length - 1
+			) {
+				console.error(
+					`Invalid board index: ${currentBoardINdex}. Available boards: ${this.plugin.settings.data.boardFilesLocation.length}`,
+				);
+				return null;
+			}
+
+			const boardData = this.allBoardsData[currentBoardINdex];
+			if (boardData) {
+				// Cache the board data in memory
+				this.currentBoardIndex = currentBoardINdex;
+			}
+
+			return boardData;
+		} catch (error) {
+			console.error(
+				`Error loading board at index ${this.currentBoardIndex}:`,
+				error,
+			);
 			return null;
 		}
 	}
@@ -103,6 +188,79 @@ export default class TaskBoardFileManager {
 			return true;
 		} catch (error) {
 			console.error(`Error saving board to file ${filePath}:`, error);
+			return false;
+		}
+	}
+
+	/**
+	 * Save board configuration to disk by board index passed
+	 * If no boardIndex has been passed, it will update currentBoard data
+	 * Also updates the cached board data in memory
+	 * @param updatedBoardData - The updated board configuration object
+	 * @param boardIndex - (Optional) The index of the board to save
+	 * @returns boolean - True if saved successfully, false otherwise
+	 */
+	async saveBoard(
+		updatedBoardData: Board,
+		boardIndex?: number,
+	): Promise<boolean> {
+		try {
+			const boardFilesLocation =
+				this.plugin.settings.data.boardFilesLocation || [];
+
+			let boardIndexToUse = boardIndex;
+			if (!boardIndexToUse) {
+				boardIndexToUse = this.currentBoardIndex;
+				// if (!boardIndexToUse) {
+				// 	bugReporterManagerInsatance.showNotice(
+				// 		90,
+				// 		"The TaskBoardFileManager instance dont contain an currentBoardIndex number",
+				// 		"ERROR : this.currentBoardIndex not found",
+				// 		"TaskBoardFileManager/saveCurrentBoard",
+				// 	);
+				// 	return false;
+				// }
+			}
+
+			// Validate board index
+			if (
+				boardIndexToUse < 0 ||
+				boardIndexToUse >= boardFilesLocation.length
+			) {
+				console.error(
+					`Invalid board index: ${boardIndexToUse}. Available boards: ${boardFilesLocation.length}`,
+				);
+				return false;
+			}
+
+			const boardFilePath = boardFilesLocation[boardIndexToUse];
+			if (!boardFilePath || boardFilePath.trim() === "") {
+				console.error(
+					`No board file path configured for index: ${boardIndexToUse}`,
+				);
+				return false;
+			}
+
+			// Save board to file
+			const success = await this.saveBoardToFile(
+				boardFilePath,
+				updatedBoardData,
+			);
+
+			if (success) {
+				this.allBoardsData[boardIndexToUse] = updatedBoardData;
+
+				console.log(
+					`Saved board "${updatedBoardData.name}" (index: ${boardIndexToUse}) to: ${boardFilePath}`,
+				);
+			}
+
+			return success;
+		} catch (error) {
+			console.error(
+				`Error saving board at index ${boardIndex ?? this.currentBoardIndex}:`,
+				error,
+			);
 			return false;
 		}
 	}
@@ -269,174 +427,8 @@ export default class TaskBoardFileManager {
 		return createdCount;
 	}
 
-	/**
-	 * Load board configuration from disk by board index
-	 * Reads the board file from boardFilesLocation based on the provided index
-	 * Caches the board data in memory for quick access
-	 * @param boardIndex - The index of the board to load
-	 * @returns The board configuration object, or null if file cannot be loaded
-	 */
-	async loadBoard(boardIndex?: number): Promise<Board | null> {
-		try {
-			const boardFilesLocation =
-				this.plugin.settings.data.boardFilesLocation || [];
-			const currentBoardINdex = boardIndex ?? this.currentBoardIndex;
-
-			// Validate board index
-			if (
-				currentBoardINdex < 0 ||
-				currentBoardINdex >= boardFilesLocation.length
-			) {
-				console.error(
-					`Invalid board index: ${currentBoardINdex}. Available boards: ${boardFilesLocation.length}`,
-				);
-				return null;
-			}
-
-			const boardFilePath = boardFilesLocation[currentBoardINdex];
-			if (!boardFilePath || boardFilePath.trim() === "") {
-				console.error(
-					`No board file path configured for index: ${currentBoardINdex}`,
-				);
-				return null;
-			}
-
-			// Load board from file
-			const boardData = await this.loadBoardFromFile(boardFilePath);
-
-			if (boardData) {
-				// Cache the board data in memory
-				this.currentBoardData = boardData;
-				this.currentBoardIndex = currentBoardINdex;
-				console.log(
-					`Loaded and cached board "${boardData.name}" (index: ${currentBoardINdex}) from: ${boardFilePath}`,
-				);
-			}
-
-			return boardData;
-		} catch (error) {
-			console.error(
-				`Error loading board at index ${this.currentBoardIndex}:`,
-				error,
-			);
-			return null;
-		}
-	}
-
-	/**
-	 * Save board configuration to disk by board index passed
-	 * If no boardIndex has been passed, it will update currentBoard data
-	 * Also updates the cached board data in memory
-	 * @param updatedBoardData - The updated board configuration object
-	 * @param boardIndex - (Optional) The index of the board to save
-	 * @returns boolean - True if saved successfully, false otherwise
-	 */
-	async saveBoard(
-		updatedBoardData: Board,
-		boardIndex?: number,
-	): Promise<boolean> {
-		try {
-			const boardFilesLocation =
-				this.plugin.settings.data.boardFilesLocation || [];
-
-			let boardIndexToUse = boardIndex;
-			if (!boardIndexToUse) {
-				boardIndexToUse = this.currentBoardIndex;
-				// if (!boardIndexToUse) {
-				// 	bugReporterManagerInsatance.showNotice(
-				// 		90,
-				// 		"The TaskBoardFileManager instance dont contain an currentBoardIndex number",
-				// 		"ERROR : this.currentBoardIndex not found",
-				// 		"TaskBoardFileManager/saveCurrentBoard",
-				// 	);
-				// 	return false;
-				// }
-			}
-
-			// Validate board index
-			if (
-				boardIndexToUse < 0 ||
-				boardIndexToUse >= boardFilesLocation.length
-			) {
-				console.error(
-					`Invalid board index: ${boardIndexToUse}. Available boards: ${boardFilesLocation.length}`,
-				);
-				return false;
-			}
-
-			const boardFilePath = boardFilesLocation[boardIndexToUse];
-			if (!boardFilePath || boardFilePath.trim() === "") {
-				console.error(
-					`No board file path configured for index: ${boardIndexToUse}`,
-				);
-				return false;
-			}
-
-			// Save board to file
-			const success = await this.saveBoardToFile(
-				boardFilePath,
-				updatedBoardData,
-			);
-
-			if (success) {
-				// Update cached board data if this is the currently active board
-				if (boardIndexToUse === this.currentBoardIndex) {
-					this.currentBoardData = updatedBoardData;
-				}
-
-				console.log(
-					`Saved board "${updatedBoardData.name}" (index: ${boardIndexToUse}) to: ${boardFilePath}`,
-				);
-			}
-
-			return success;
-		} catch (error) {
-			console.error(
-				`Error saving board at index ${boardIndex ?? this.currentBoardData}:`,
-				error,
-			);
-			return false;
-		}
-	}
-
-	loadAllBoards(): Board[] | [] {
-		try {
-			const boardFilesLocations =
-				this.plugin.settings.data.boardFilesLocation || [];
-			let allBoardsData: Board[] | [] = [];
-
-			boardFilesLocations.forEach(async (boardFilePath: string) => {
-				if (!boardFilePath || boardFilePath.trim() === "") {
-					console.error(
-						`No board file path configured for index: ${this.currentBoardIndex}`,
-					);
-					return [];
-				}
-
-				// Load board from file
-				const boardData = await this.loadBoardFromFile(boardFilePath);
-
-				if (boardData) {
-					// Cache the board data in memory
-					allBoardsData[boardData.index] = boardData;
-					console.log(
-						`Loaded and cached board "${boardData.name}" (index: ${boardData.index}) from: ${boardFilePath}`,
-					);
-				} else {
-					new Notice(
-						`Task Board : Error loading all boards data. Following board not found : ${boardFilePath}`,
-					);
-				}
-			});
-
-			return allBoardsData;
-		} catch (error) {
-			console.error(
-				`Error loading board at index ${this.currentBoardIndex}:`,
-				error,
-			);
-			return [];
-		}
+	async getAllBoards(): Promise<Board[]> {
+		return this.allBoardsData;
 	}
 
 	/**
@@ -445,7 +437,7 @@ export default class TaskBoardFileManager {
 	 * @returns The cached board data, or null if no board has been loaded
 	 */
 	async getCurrentBoardData(): Promise<Board | null> {
-		return this.currentBoardData;
+		return this.allBoardsData[this.currentBoardIndex];
 	}
 
 	/**
@@ -461,7 +453,6 @@ export default class TaskBoardFileManager {
 	 * Useful when switching between different boards or clearing state
 	 */
 	clearCurrentBoardCache(): void {
-		this.currentBoardData = null;
 		this.allBoardsData = [];
 		console.log("Cleared cached board data");
 	}

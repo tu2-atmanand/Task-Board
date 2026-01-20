@@ -62,7 +62,7 @@ export class TaskBoardView extends ItemView {
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
 		// await this.loadBoards();
-		const allBoardsData = this.plugin.taskBoardFileManager.loadAllBoards();
+		const allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
 		this.renderBoard(allBoardsData);
 
 

@@ -137,7 +137,7 @@ export default class TaskBoard extends Plugin {
 
 		await this.vaultScanner.initializeTasksCache();
 
-		await this.taskBoardFileManager.loadBoard();
+		await this.taskBoardFileManager.loadAllBoards();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -314,6 +314,8 @@ export default class TaskBoard extends Plugin {
 			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
+
+		this.registerExtensions(["taskboard"], VIEW_TYPE_TASKBOARD);
 
 		// Register AddOrEditTask view (can be opened in tabs or popout windows)
 		// this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {
