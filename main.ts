@@ -105,9 +105,7 @@ export default class TaskBoard extends Plugin {
 			this.plugin,
 			this.vaultScanner,
 		);
-		this.taskBoardFileManager = new TaskBoardFileManager(
-			this.plugin,
-		);
+		this.taskBoardFileManager = new TaskBoardFileManager(this.plugin);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -1279,7 +1277,9 @@ export default class TaskBoard extends Plugin {
 			);
 			const deletedFilesList = [...deletedFiles];
 
-			const changed_files = [...modifiedCreatedRenamedFiles];
+			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
+				fileTypeAllowedForScanning(this.plugin.settings.data, file),
+			);
 			console.log(
 				"Task Board : Fetching complete.\nModified files :",
 				changed_files,

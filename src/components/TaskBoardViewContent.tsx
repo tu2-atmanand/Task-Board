@@ -136,13 +136,13 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
 				return currentBoard.columns
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, searchQueryFilteredTasks)
+						columnSegregator(plugin.settings, currentBoard, column, searchQueryFilteredTasks)
 					);
 			} else {
 				return currentBoard.columns
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks, (updatedBoardData: Board) => {
+						columnSegregator(plugin.settings, currentBoard, column, filteredAllTasks, (updatedBoardData: Board) => {
 							// I think this below code is not required as we simply want to update the data on the disk.
 							// setBoards((prevBoards) => {
 							// 	const updatedBoards = [...prevBoards];
@@ -1040,7 +1040,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
 						) : (
 							<MapView
 								plugin={plugin}
-								activeBoardIndex={activeBoardIndex}
+								activeBoardData={currentBoardData}
 								allTasksArranged={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
 								focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
 							/>

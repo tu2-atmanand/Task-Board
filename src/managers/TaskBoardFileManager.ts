@@ -77,20 +77,23 @@ export default class TaskBoardFileManager {
 			// Check if file exists, if not create it
 			const fileExists = await this.app.vault.adapter.exists(filePath);
 
-			const jsonContent = JSON.stringify(boardData, null, 2);
+			// Convert board data to JSON string, then to Uint8Array for binary storage
+			const jsonString = JSON.stringify(boardData);
+			const uint8Array = new TextEncoder().encode(jsonString);
+			const arrayBuffer = uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
 
 			if (!fileExists) {
-				// Create new file
-				await this.app.vault.create(filePath, jsonContent);
+				// Create new file with binary data
+				await this.app.vault.createBinary(filePath, arrayBuffer);
 				console.log(`Created new TaskBoard file: ${filePath}`);
 			} else {
-				// Update existing file
+				// Update existing file with binary data
 				const file = this.app.vault.getAbstractFileByPath(filePath);
 				if (!file || !(file instanceof TFile)) {
 					console.error(`Cannot find file to update: ${filePath}`);
 					return false;
 				}
-				await this.app.vault.modify(file, jsonContent);
+				await this.app.vault.modifyBinary(file, arrayBuffer);
 				console.log(`Updated TaskBoard file: ${filePath}`);
 			}
 
@@ -238,6 +241,9 @@ export default class TaskBoardFileManager {
 						`Created default board file: ${filePath}`,
 						defaultBoards[i].name,
 					);
+					new Notice(
+						`Created default board file: ${filePath} : ${defaultBoards[i].name}`,
+					);
 				}
 			}
 		}
@@ -318,15 +324,15 @@ export default class TaskBoardFileManager {
 			let boardIndexToUse = boardIndex;
 			if (!boardIndexToUse) {
 				boardIndexToUse = this.currentBoardIndex;
-				if (!boardIndexToUse) {
-					bugReporterManagerInsatance.showNotice(
-						90,
-						"The TaskBoardFileManager instance dont contain an currentBoardIndex number",
-						"ERROR : this.currentBoardIndex not found",
-						"TaskBoardFileManager/saveCurrentBoard",
-					);
-					return false;
-				}
+				// if (!boardIndexToUse) {
+				// 	bugReporterManagerInsatance.showNotice(
+				// 		90,
+				// 		"The TaskBoardFileManager instance dont contain an currentBoardIndex number",
+				// 		"ERROR : this.currentBoardIndex not found",
+				// 		"TaskBoardFileManager/saveCurrentBoard",
+				// 	);
+				// 	return false;
+				// }
 			}
 
 			// Validate board index
@@ -375,7 +381,45 @@ export default class TaskBoardFileManager {
 		}
 	}
 
-	async loadAllBoards() {}
+	loadAllBoards(): Board[] | [] {
+		try {
+			const boardFilesLocations =
+				this.plugin.settings.data.boardFilesLocation || [];
+			let allBoardsData: Board[] | [] = [];
+
+			boardFilesLocations.forEach(async (boardFilePath: string) => {
+				if (!boardFilePath || boardFilePath.trim() === "") {
+					console.error(
+						`No board file path configured for index: ${this.currentBoardIndex}`,
+					);
+					return [];
+				}
+
+				// Load board from file
+				const boardData = await this.loadBoardFromFile(boardFilePath);
+
+				if (boardData) {
+					// Cache the board data in memory
+					allBoardsData[boardData.index] = boardData;
+					console.log(
+						`Loaded and cached board "${boardData.name}" (index: ${boardData.index}) from: ${boardFilePath}`,
+					);
+				} else {
+					new Notice(
+						`Task Board : Error loading all boards data. Following board not found : ${boardFilePath}`,
+					);
+				}
+			});
+
+			return allBoardsData;
+		} catch (error) {
+			console.error(
+				`Error loading board at index ${this.currentBoardIndex}:`,
+				error,
+			);
+			return [];
+		}
+	}
 
 	/**
 	 * Get the currently cached board data

@@ -232,12 +232,14 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			if (!swimlaneName) return;
 			const boardIndex = board.index; // plugin.settings.data.boardConfigs.findIndex((b) => b.index === board.index);
 			if (boardIndex === -1) return;
-			const swimCfg = plugin.settings.data.boardConfigs[boardIndex].swimlanes || { minimized: [] };
+			const swimCfg = board.swimlanes || { minimized: [] };
 			const arr = Array.isArray(swimCfg.minimized) ? [...swimCfg.minimized] : [];
 			const idx = arr.indexOf(swimlaneName);
 			if (idx === -1) arr.push(swimlaneName); else arr.splice(idx, 1);
-			plugin.settings.data.boardConfigs[boardIndex].swimlanes.minimized = arr;
-			await plugin.saveSettings();
+			board.swimlanes.minimized = arr;
+
+
+			await plugin.taskBoardFileManager.saveBoard(board, boardIndex);
 			eventEmitter.emit('REFRESH_BOARD');
 		} catch (err) {
 			console.error('Error toggling swimlane minimize:', err);

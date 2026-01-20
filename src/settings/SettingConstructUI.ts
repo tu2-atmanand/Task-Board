@@ -245,8 +245,7 @@ export class SettingsManager {
 		// Set the last viewed tab
 		const defaultTab =
 			Object.keys(sections)[
-				this.plugin.settings.data.lastViewHistory
-					.settingTab
+				this.plugin.settings.data.lastViewHistory.settingTab
 			];
 		tabs[defaultTab].click();
 
@@ -346,9 +345,8 @@ export class SettingsManager {
 			});
 			configureBtn.addEventListener("click", () => {
 				openScanFiltersModal(this.plugin, filterType, (newValues) => {
-					this.plugin.settings.data.scanFilters[
-						filterType
-					].values = newValues;
+					this.plugin.settings.data.scanFilters[filterType].values =
+						newValues;
 					this.plugin.saveSettings();
 					refreshTagList(); // Refresh the tag list after updating values
 				});
@@ -400,9 +398,8 @@ export class SettingsManager {
 				const newPolarity = Number(
 					(e.target as HTMLSelectElement).value,
 				);
-				this.plugin.settings.data.scanFilters[
-					filterType
-				].polarity = newPolarity;
+				this.plugin.settings.data.scanFilters[filterType].polarity =
+					newPolarity;
 				this.plugin.saveSettings();
 			});
 		});
@@ -1048,8 +1045,7 @@ export class SettingsManager {
 									this.plugin.settings.data.tagColors.map(
 										(tagColor) => ({
 											color:
-												this.plugin.settings.data
-													.globalSettings.tagColors[
+												this.plugin.settings.data.tagColors[
 													tagColor.priority - 1
 												]?.color || "#ff0000",
 										}),
@@ -1268,8 +1264,7 @@ export class SettingsManager {
 		const renderCustomStatuses = () => {
 			customStatusesContainer.empty(); // Clear existing rendered rows
 
-			const customStatuses =
-				this.plugin.settings.data.customStatuses;
+			const customStatuses = this.plugin.settings.data.customStatuses;
 
 			if (!customStatuses || customStatuses.length === 0) {
 				customStatusesContainer.createDiv({
@@ -1373,9 +1368,8 @@ export class SettingsManager {
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,
 							};
-							this.plugin.settings.data!.customStatuses[
-								index
-							] = customStatus;
+							this.plugin.settings.data!.customStatuses[index] =
+								customStatus;
 							await this.saveSettings();
 							renderCustomStatuses();
 						}
@@ -1402,8 +1396,7 @@ export class SettingsManager {
 		renderCustomStatuses();
 
 		const isTasksPluginEnabled =
-			this.plugin.settings.data.compatiblePlugins
-				.tasksPlugin;
+			this.plugin.settings.data.compatiblePlugins.tasksPlugin;
 		// Add "Add New Status" button
 		new Setting(contentEl)
 			.addButton((btn) =>
@@ -1842,8 +1835,7 @@ export class SettingsManager {
 							frontmatterItem !== null,
 					);
 
-				this.plugin.settings.data.frontmatterFormatting =
-					newOrder;
+				this.plugin.settings.data.frontmatterFormatting = newOrder;
 			},
 		});
 

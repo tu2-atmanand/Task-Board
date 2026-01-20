@@ -56,3 +56,39 @@ Context : Column.tsx/column-menu/configure-conlum-filters
 ```log
 Dont show popover.
 ```
+
+-------------
+
+Timestamp : 2026-01-19T17:02:54.793Z
+ID : 29
+Message : Error showing filter popover
+Context : TaskBoardViewContent.tsx/handleFilterButtonClick
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'boardFilter')
+```
+
+-------------
+
+Timestamp : 2026-01-19T17:34:31.126Z
+ID : 90
+Message : The TaskBoardFileManager instance dont contain an currentBoardIndex number
+Context : TaskBoardFileManager/saveCurrentBoard
+
+#### Bug Content
+```log
+ERROR : this.currentBoardIndex not found
+```
+
+-------------
+
+Timestamp : 2026-01-19T17:40:47.093Z
+ID : 90
+Message : The TaskBoardFileManager instance dont contain an currentBoardIndex number
+Context : TaskBoardFileManager/saveCurrentBoard
+
+#### Bug Content
+```log
+ERROR : this.currentBoardIndex not found
+```

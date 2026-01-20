@@ -34,10 +34,11 @@ import { TasksImporterPanel } from './TasksImporterPanel';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
 import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
+import { Board } from 'src/interfaces/BoardConfigs';
 
 type MapViewProps = {
 	plugin: TaskBoard;
-	activeBoardIndex: number;
+	activeBoardData: Board;
 	allTasksArranged: taskItem[][];
 	// loading: boolean;
 	// freshInstall: boolean;
@@ -67,7 +68,7 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, activeBoardIndex, allTasksArranged, focusOnTaskId
+	plugin, activeBoardData, allTasksArranged, focusOnTaskId
 }) => {
 	plugin.settings.data.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.mapView;
@@ -86,7 +87,8 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 	})();
 	const tagColors = plugin.settings.data.tagColors;
-	const activeBoardSettings = plugin.settings.data.boardConfigs[activeBoardIndex];
+	const activeBoardSettings = activeBoardData;
+	const activeBoardIndex = activeBoardSettings.index;
 
 	// Loading state for localStorage data
 	const [storageLoaded, setStorageLoaded] = useState(false);
