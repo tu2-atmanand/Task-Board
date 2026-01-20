@@ -821,7 +821,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 												);
 											}
 											// If insertIndex points to end (after last item)
-											if (insertIndex === localTasks.length) {
+											if (insertIndex === localTasks?.length) {
 												elements.push(
 													<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
 												);

@@ -22,11 +22,11 @@ import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
+const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[] }> = ({ plugin, allBoards }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
 	const [currentBoardData, setCurrentBoardData] = useState<Board>();
-	const [allBoardsData, setAllBoardsData] = useState<Board[]>();
+	const [allBoardsData, setAllBoardsData] = useState<Board[]>(allBoards);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
@@ -86,6 +86,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
 
 	useEffect(() => {
 		const fetchData = async () => {
+			console.log("TASK BOARD : Does this run while switching boards...");
 			try {
 				const data = await plugin.taskBoardFileManager.loadBoard(activeBoardIndex);
 				if (!data) throw "Board data not found.";
@@ -97,8 +98,6 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
 					setAllTasks(allTasks);
 					setFreshInstall(false);
 				}
-
-				const allBoardsData = plugin.taskBoardFileManager.loadAllBoards();
 			} catch (error) {
 				console.error(
 					"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
@@ -742,7 +741,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
 			item.setTitle(t("open-board-configuration-modal"));
 			item.setIcon("settings");
 			item.onClick(async () => {
-				openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
+				openBoardConfigModal(plugin, allBoardsData, activeBoardIndex, (updatedBoards, boardIndex) => {
 					// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
 					if (activeBoardIndex === boardIndex) {
 						setCurrentBoardData(updatedBoards[boardIndex]);
@@ -903,7 +902,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard }> = ({ plugin }) => {
 						className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("board-configure-button")}
 						onClick={() =>
-							openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
+							openBoardConfigModal(plugin, allBoardsData, activeBoardIndex, (updatedBoards, boardIndex) => {
 								// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
 								if (activeBoardIndex === boardIndex) {
 									setCurrentBoardData(updatedBoards[boardIndex]);

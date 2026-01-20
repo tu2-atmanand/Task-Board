@@ -62,7 +62,8 @@ export class TaskBoardView extends ItemView {
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
 		// await this.loadBoards();
-		this.renderBoard();
+		const allBoardsData = this.plugin.taskBoardFileManager.loadAllBoards();
+		this.renderBoard(allBoardsData);
 
 
 	}
@@ -92,12 +93,13 @@ export class TaskBoardView extends ItemView {
 	// 	}
 	// }
 
-	private renderBoard() {
+	private renderBoard(allBoardsData: Board[]) {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
 				<TaskBoardViewContent
 					plugin={this.plugin}
+					allBoards={allBoardsData}
 				/>,
 			</StrictMode>,
 		);

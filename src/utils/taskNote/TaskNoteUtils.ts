@@ -14,7 +14,6 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
-import { bugReporter } from "src/services/OpenModals";
 import { defaultTaskStatuses } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 

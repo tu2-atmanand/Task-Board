@@ -777,12 +777,6 @@ export default class TaskBoard extends Plugin {
 
 		const totalFiles = this.deleteQueue.length;
 
-		// Show progress notice
-		this.currentProgressNotice = new Notice(
-			`Processing deleted files: 0/${totalFiles}`,
-			0,
-		);
-
 		let processed = 0;
 		while (this.deleteQueue.length > 0) {
 			const file = this.deleteQueue.shift()!;
@@ -791,12 +785,18 @@ export default class TaskBoard extends Plugin {
 				if (
 					fileTypeAllowedForScanning(this.plugin.settings.data, file)
 				) {
+					// Show progress notice
+					this.currentProgressNotice = new Notice(
+						`Processing deleted files: 0/${totalFiles}`,
+						0,
+					);
+
 					this.realTimeScanner.onFileDeleted(file);
+
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
 				}
 				processed++;
-
-				// Update progress notice
-				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
 			} catch (error) {
 				console.error(
 					`Error processing deleted file ${file.path}:`,
@@ -853,12 +853,6 @@ export default class TaskBoard extends Plugin {
 
 		const totalFiles = this.createQueue.length;
 
-		// Show progress notice
-		this.currentProgressNotice = new Notice(
-			`Task Board : Processing created files: 0/${totalFiles}`,
-			0,
-		);
-
 		this.plugin.vaultScanner.refreshTasksFromFiles(this.createQueue, false);
 
 		let processed = 0;
@@ -866,18 +860,20 @@ export default class TaskBoard extends Plugin {
 			const file = this.createQueue.shift()!;
 
 			try {
-				// if (
-				// 	fileTypeAllowedForScanning(
-				// 		this.plugin.settings.data,
-				// 		file
-				// 	)
-				// ) {
-				// 	await this.realTimeScanner.processAllUpdatedFiles(file);
-				// }
-				processed++;
+				if (
+					fileTypeAllowedForScanning(this.plugin.settings.data, file)
+				) {
+					// Show progress notice
+					this.currentProgressNotice = new Notice(
+						`Task Board : Processing created files: 0/${totalFiles}`,
+						0,
+					);
+					// 	await this.realTimeScanner.processAllUpdatedFiles(file);
 
-				// Update progress notice
-				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
+				}
+				processed++;
 			} catch (error) {
 				console.error(
 					`Error processing created file ${file.path}:`,

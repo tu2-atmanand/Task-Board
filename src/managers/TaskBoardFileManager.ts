@@ -4,7 +4,7 @@
  * This replaces the previous approach of storing all board data in data.json
  */
 
-import { App, TFile, Notice } from "obsidian";
+import { App, TFile, Notice, normalizePath } from "obsidian";
 import { Board } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { bugReporterManagerInsatance } from "./BugReporter";
@@ -80,7 +80,10 @@ export default class TaskBoardFileManager {
 			// Convert board data to JSON string, then to Uint8Array for binary storage
 			const jsonString = JSON.stringify(boardData);
 			const uint8Array = new TextEncoder().encode(jsonString);
-			const arrayBuffer = uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
+			const arrayBuffer = uint8Array.buffer.slice(
+				uint8Array.byteOffset,
+				uint8Array.byteOffset + uint8Array.byteLength,
+			);
 
 			if (!fileExists) {
 				// Create new file with binary data
@@ -134,6 +137,21 @@ export default class TaskBoardFileManager {
 			if (exists) {
 				console.warn(`TaskBoard file already exists: ${filePath}`);
 				return false;
+			}
+
+			const normalizedFilePath = normalizePath(filePath);
+			console.log(
+				"Original path :",
+				filePath,
+				"\nNormalized file path :",
+				normalizedFilePath,
+			);
+
+			const parts = normalizedFilePath.split("/");
+			parts.pop();
+			const folderPath = parts.join("/");
+			if (!(await this.plugin.app.vault.adapter.exists(folderPath))) {
+				await this.plugin.app.vault.createFolder(folderPath);
 			}
 
 			return await this.saveBoardToFile(filePath, boardData);

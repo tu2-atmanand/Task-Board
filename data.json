@@ -253,7 +253,7 @@
     ],
     "lastViewHistory": {
       "viewedType": "kanban",
-      "boardIndex": 0,
+      "boardIndex": 1,
       "settingTab": 0,
       "taskId": ""
     },
@@ -274,6 +274,7 @@
       "showMinimap": true,
       "renderVisibleNodes": false,
       "edgeType": "default"
-    }
+    },
+    "searchQuery": ""
   }
 }
