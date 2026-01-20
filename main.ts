@@ -393,6 +393,12 @@ export default class TaskBoard extends Plugin {
 			// For all other view types, proceed normally
 			return originalSetViewState.call(this, state, eState);
 		};
+
+		// Register cleanup handler to restore the original prototype when plugin unloads
+		// This prevents memory leaks and ensures the patch is properly removed
+		this.register(
+			() => (WorkspaceLeaf.prototype.setViewState = originalSetViewState),
+		);
 	}
 
 	registerEditorExtensions() {
