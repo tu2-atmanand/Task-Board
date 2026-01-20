@@ -1,5 +1,6 @@
 // main.ts
 
+import { around } from "monkey-around";
 import {
 	App,
 	Notice,
@@ -346,59 +347,32 @@ export default class TaskBoard extends Plugin {
 	 * while preserving the file path in the view state
 	 */
 	private registerMonkeyPatchForTaskboardFiles() {
-		const originalSetViewState = WorkspaceLeaf.prototype.setViewState;
+		// Use monkey-around to safely patch WorkspaceLeaf.prototype.setViewState
+		// This allows multiple plugins to patch the same method without conflicts
+		const unregisterPatch = around(WorkspaceLeaf.prototype, {
+			setViewState: (next) =>
+				function (this: WorkspaceLeaf, state: any, eState?: any) {
+					const isTaskBoardView = state.type === VIEW_TYPE_TASKBOARD;
+					const filePath = state.state?.file as string | undefined;
+					const isTaskboardFile =
+						filePath && filePath.endsWith(".taskboard");
 
-		WorkspaceLeaf.prototype.setViewState = function (
-			state: any,
-			eState?: any,
-		) {
-			console.log("WorkspaceLeaf.setViewState called with state:", state);
-			// Check if this is a markdown view being opened for a .taskboard file
-			// const isMarkdownView = state.type === "markdown";
-			const isTaskBoardView = state.type === VIEW_TYPE_TASKBOARD;
-			const filePath = state.state?.file as string | undefined;
-			const isTaskboardFile = filePath && filePath.endsWith(".taskboard");
+					if (isTaskBoardView && isTaskboardFile) {
+						// Store the file path directly on the leaf instance for immediate access
+						(this as any).taskboardFilePath = filePath;
 
-			console.log(
-				`Checking: isMarkdownView=${isTaskBoardView}, filePath=${filePath}, isTaskboardFile=${isTaskboardFile}`,
-			);
+						// Also set ephemeral state for safety
+						this.setEphemeralState({ taskboardFilePath: filePath });
+					}
 
-			if (isTaskBoardView && isTaskboardFile) {
-				// Replace the view type with our custom TaskBoard view
-				const newState = {
-					...state,
-					type: VIEW_TYPE_TASKBOARD,
-				};
-				console.log(
-					`TaskBoard: Intercepted .taskboard file click: ${filePath}`,
-				);
+					// Call the next method in the chain (original or other patches)
+					return next.call(this, state, eState);
+				},
+		});
 
-				// Store the file path directly on the leaf instance for immediate access
-				(this as any).taskboardFilePath = filePath;
-				console.log(`TaskBoard: Stored file path on leaf: ${filePath}`);
-
-				// Call the original setViewState with the new state
-				const result = originalSetViewState.call(
-					this,
-					newState,
-					eState,
-				);
-
-				// Also set ephemeral state for safety
-				this.setEphemeralState({ taskboardFilePath: filePath });
-
-				return result;
-			}
-
-			// For all other view types, proceed normally
-			return originalSetViewState.call(this, state, eState);
-		};
-
-		// Register cleanup handler to restore the original prototype when plugin unloads
+		// Register cleanup handler to unregister the patch when plugin unloads
 		// This prevents memory leaks and ensures the patch is properly removed
-		this.register(
-			() => (WorkspaceLeaf.prototype.setViewState = originalSetViewState),
-		);
+		this.register(unregisterPatch);
 	}
 
 	registerEditorExtensions() {
