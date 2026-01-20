@@ -311,11 +311,15 @@ export default class TaskBoard extends Plugin {
 
 	registerTaskBoardView() {
 		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
+			console.log("Leaf :", leaf);
 			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
 
 		this.registerExtensions(["taskboard"], VIEW_TYPE_TASKBOARD);
+
+		// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
+		this.registerMonkeyPatchForTaskboardFiles();
 
 		// Register AddOrEditTask view (can be opened in tabs or popout windows)
 		// this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {
@@ -333,6 +337,49 @@ export default class TaskBoard extends Plugin {
 		// 		false
 		// 	);
 		// });
+	}
+
+	/**
+	 * Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
+	 * When a user clicks on a .taskboard file in the File Navigator, this intercepts
+	 * the default markdown view and opens it in the TaskBoard custom view instead,
+	 * while preserving the file path in the view state
+	 */
+	private registerMonkeyPatchForTaskboardFiles() {
+		const originalSetViewState = WorkspaceLeaf.prototype.setViewState;
+
+		WorkspaceLeaf.prototype.setViewState = function (
+			state: any,
+			eState?: any,
+		) {
+			console.log("WorkspaceLeaf.setViewState called with state:", state);
+			// Check if this is a markdown view being opened for a .taskboard file
+			// const isMarkdownView = state.type === "markdown";
+			const isTaskBoardView = state.type === VIEW_TYPE_TASKBOARD;
+			const filePath = state.state?.file as string | undefined;
+			const isTaskboardFile = filePath && filePath.endsWith(".taskboard");
+
+			if (isTaskBoardView && isTaskboardFile) {
+				// Replace the view type with our custom TaskBoard view
+				const newState = {
+					...state,
+					type: VIEW_TYPE_TASKBOARD,
+					// Keep the file path in state so TaskBoardView can access it
+					state: {
+						...state.state,
+						file: filePath,
+					},
+				};
+				console.log(
+					`TaskBoard: Intercepted .taskboard file click: ${filePath}\nNew state:`,
+					newState,
+				);
+				return originalSetViewState.call(this, newState, eState);
+			}
+
+			// For all other view types, proceed normally
+			return originalSetViewState.call(this, state, eState);
+		};
 	}
 
 	registerEditorExtensions() {

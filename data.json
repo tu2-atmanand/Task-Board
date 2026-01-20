@@ -139,7 +139,7 @@
       "reminderPlugin": false,
       "quickAddPlugin": false
     },
-    "preDefinedNote": "Meta/Task_Board/New_Tasks.md",
+    "preDefinedNote": "TEmp TEst/All Tasks.md",
     "taskNoteIdentifierTag": "taskNote",
     "taskNoteDefaultLocation": "Meta/Task_Board/Task_Notes",
     "quickAddPluginDefaultChoice": "",
@@ -252,9 +252,9 @@
       "TaskBoard/Boards/Status Based Workflow.taskboard"
     ],
     "lastViewHistory": {
-      "viewedType": "map",
+      "viewedType": "kanban",
       "boardIndex": 2,
-      "settingTab": 0,
+      "settingTab": 3,
       "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
@@ -269,7 +269,7 @@
       "mapOrientation": "hor",
       "optimizedRender": false,
       "arrowDirection": "c2p",
-      "animatedEdges": true,
+      "animatedEdges": false,
       "scrollAction": "zoom",
       "showMinimap": true,
       "renderVisibleNodes": false,

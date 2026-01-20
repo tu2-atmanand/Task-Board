@@ -61,11 +61,24 @@ export class TaskBoardView extends ItemView {
 
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
-		// await this.loadBoards();
-		const allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
+		// Check if a specific .taskboard file was clicked from File Navigator
+		const state = this.leaf.getViewState();
+		console.log("TaskBoardView.tsx : state :", state);
+		const clickedFilePath = state?.state?.file as string | undefined;
+
+		let allBoardsData: Board[];
+
+		if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
+			// User clicked on a specific .taskboard file - load just that file
+			console.log(`TaskBoardView: Loading clicked file: ${clickedFilePath}`);
+			const specificBoardData = await this.plugin.taskBoardFileManager.loadBoardFromFile(clickedFilePath);
+			allBoardsData = specificBoardData ? [specificBoardData] : [];
+		} else {
+			// No specific file clicked - load all boards as usual
+			allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
+		}
+
 		this.renderBoard(allBoardsData);
-
-
 	}
 
 	async highlighgtScanvaultIcon() {
