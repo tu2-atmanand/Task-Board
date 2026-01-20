@@ -359,22 +359,35 @@ export default class TaskBoard extends Plugin {
 			const filePath = state.state?.file as string | undefined;
 			const isTaskboardFile = filePath && filePath.endsWith(".taskboard");
 
+			console.log(
+				`Checking: isMarkdownView=${isTaskBoardView}, filePath=${filePath}, isTaskboardFile=${isTaskboardFile}`,
+			);
+
 			if (isTaskBoardView && isTaskboardFile) {
 				// Replace the view type with our custom TaskBoard view
 				const newState = {
 					...state,
 					type: VIEW_TYPE_TASKBOARD,
-					// Keep the file path in state so TaskBoardView can access it
-					state: {
-						...state.state,
-						file: filePath,
-					},
 				};
 				console.log(
-					`TaskBoard: Intercepted .taskboard file click: ${filePath}\nNew state:`,
-					newState,
+					`TaskBoard: Intercepted .taskboard file click: ${filePath}`,
 				);
-				return originalSetViewState.call(this, newState, eState);
+
+				// Store the file path directly on the leaf instance for immediate access
+				(this as any).taskboardFilePath = filePath;
+				console.log(`TaskBoard: Stored file path on leaf: ${filePath}`);
+
+				// Call the original setViewState with the new state
+				const result = originalSetViewState.call(
+					this,
+					newState,
+					eState,
+				);
+
+				// Also set ephemeral state for safety
+				this.setEphemeralState({ taskboardFilePath: filePath });
+
+				return result;
 			}
 
 			// For all other view types, proceed normally

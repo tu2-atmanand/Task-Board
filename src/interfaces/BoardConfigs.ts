@@ -128,7 +128,7 @@ export interface swimlaneConfigs {
 }
 
 export type Board = {
-	id: string;
+	// id: string;
 	name: string;
 	description?: string;
 	index: number;
@@ -228,7 +228,7 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 				index: 6,
 			},
 		],
-		id: generateRandomTempTaskId(),
+		// id: generateRandomTempTaskId(),
 		name: "Time Based Workflow",
 		index: 0,
 		showColumnTags: false,
@@ -295,7 +295,7 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 				name: "Completed",
 			},
 		],
-		id: generateRandomTempTaskId(),
+		// id: generateRandomTempTaskId(),
 		name: "Tag Based Workflow",
 		index: 1,
 		showColumnTags: false,
@@ -372,7 +372,7 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 				index: 7,
 			},
 		],
-		id: generateRandomTempTaskId(),
+		// id: generateRandomTempTaskId(),
 		name: "Status Based Workflow",
 		index: 2,
 		showColumnTags: false,
