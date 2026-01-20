@@ -3,7 +3,7 @@
 import React, { useMemo, memo } from 'react';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItem';
-import Column from './Column';
+// import Column from './Column';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
@@ -32,7 +32,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	tasksPerColumn,
 	lazyLoadingEnabled,
 }) => {
-	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn;
 
 	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
 	const {
@@ -453,7 +453,7 @@ const MemoizedSwimlanColumn = memo<{
 	activeBoardData: Board;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
-	Component: typeof Column | typeof LazyColumn;
+	Component: typeof LazyColumn;
 	hideColumnHeader?: boolean;
 	swimlaneData?: { property: string, value: string };
 	headerOnly?: boolean;
