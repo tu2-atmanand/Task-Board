@@ -61,26 +61,23 @@ export class TaskBoardView extends ItemView {
 
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
+		// All boards data should be cumpulsorily loaded.
+		let allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
+
 		// Check if a specific .taskboard file was clicked from File Navigator
 		// First check the leaf instance directly (set by monkey patch)
 		const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
 
 		console.log("TaskBoardView.tsx : clickedFilePath from leaf:", clickedFilePath);
 
-		let allBoardsData: Board[];
-
+		let clickedFileData: Board | null;
 		if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
 			// User clicked on a specific .taskboard file - load just that file
-			console.log(`TaskBoardView: Loading clicked file: ${clickedFilePath}`);
-			const specificBoardData = await this.plugin.taskBoardFileManager.loadBoardFromFile(clickedFilePath);
-			allBoardsData = specificBoardData ? [specificBoardData] : [];
+			clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
+			this.renderBoard(allBoardsData, clickedFileData);
 		} else {
-			// No specific file clicked - load all boards as usual
-			console.log("TaskBoardView: No specific file, loading all boards");
-			allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
+			this.renderBoard(allBoardsData);
 		}
-
-		this.renderBoard(allBoardsData);
 	}
 
 	async highlighgtScanvaultIcon() {
@@ -108,13 +105,14 @@ export class TaskBoardView extends ItemView {
 	// 	}
 	// }
 
-	private renderBoard(allBoardsData: Board[]) {
+	private renderBoard(allBoardsData: Board[], clickedFileData?: Board | null) {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
 				<TaskBoardViewContent
 					plugin={this.plugin}
 					allBoards={allBoardsData}
+					clickedFileBoard={clickedFileData}
 				/>,
 			</StrictMode>,
 		);

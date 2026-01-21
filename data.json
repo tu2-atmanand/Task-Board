@@ -246,11 +246,6 @@
     "uniqueIdCounter": 586,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
-    "boardFilesLocation": [
-      "TaskBoard/Boards/Time Based Workflow.taskboard",
-      "TaskBoard/Boards/Tag Based Workflow.taskboard",
-      "TaskBoard/Boards/Status Based Workflow.taskboard"
-    ],
     "lastViewHistory": {
       "viewedType": "kanban",
       "boardIndex": 2,
@@ -275,6 +270,20 @@
       "renderVisibleNodes": false,
       "edgeType": "default"
     },
-    "searchQuery": ""
+    "searchQuery": "",
+    "taskBoardFilesRegistry": [
+      {
+        "boardId": "3103563481",
+        "filePath": "TaskBoard/Boards/Time Based Workflow.taskboard"
+      },
+      {
+        "boardId": "2957159294",
+        "filePath": "TaskBoard/Boards/Tag Based Workflow.taskboard"
+      },
+      {
+        "boardId": "4271106430",
+        "filePath": "TaskBoard/Boards/Status Based Workflow.taskboard"
+      }
+    ]
   }
 }

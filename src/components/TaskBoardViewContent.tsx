@@ -22,7 +22,7 @@ import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[] }> = ({ plugin, allBoards }) => {
+const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], clickedFileBoard?: Board | null }> = ({ plugin, allBoards, clickedFileBoard }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
 	const [currentBoardData, setCurrentBoardData] = useState<Board>();
@@ -88,10 +88,18 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[] }> 
 		const fetchData = async () => {
 			console.log("TASK BOARD : Does this run while switching boards...");
 			try {
-				const data = await plugin.taskBoardFileManager.loadBoard(activeBoardIndex);
-				if (!data) throw "Board data not found.";
+				if (clickedFileBoard) {
+					setCurrentBoardData(clickedFileBoard);
 
-				setCurrentBoardData(data);
+					// Get index of the new board from the registry based on the board id.
+					const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(clickedFileBoard.id);;
+					setActiveBoardIndex(indexOfNewBoard ?? plugin.settings.data.taskBoardFilesRegistry?.length);
+				} else {
+					const data = await plugin.taskBoardFileManager.loadBoardUsingIndex(activeBoardIndex);
+					if (!data) throw "Board data not found.";
+
+					setCurrentBoardData(data);
+				}
 
 				const allTasks = await loadTasksAndMerge(plugin, true);
 				if (allTasks) {

@@ -139,6 +139,10 @@ export default class TaskBoard extends Plugin {
 		await this.vaultScanner.initializeTasksCache();
 
 		await this.taskBoardFileManager.loadAllBoards();
+		console.log(
+			"TASK BOARD : Loaded following boards : ",
+			this.taskBoardFileManager.getAllBoards(),
+		);
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -783,9 +787,11 @@ export default class TaskBoard extends Plugin {
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
-		new Notice(
-			`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
-		);
+		if (processed > 0) {
+			new Notice(
+				`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
+			);
+		}
 	}
 
 	/**
@@ -860,9 +866,11 @@ export default class TaskBoard extends Plugin {
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
-		new Notice(
-			`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
-		);
+		if (processed > 0) {
+			new Notice(
+				`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
+			);
+		}
 	}
 
 	/**
@@ -934,9 +942,11 @@ export default class TaskBoard extends Plugin {
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
-		new Notice(
-			`✓ Task Board : Finished processing ${totalFiles} created file(s)`,
-		);
+		if (processed > 0) {
+			new Notice(
+				`✓ Task Board : Finished processing ${totalFiles} created file(s)`,
+			);
+		}
 	}
 
 	/**

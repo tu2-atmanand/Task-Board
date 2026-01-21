@@ -67,6 +67,11 @@ export interface frontmatterFormatting {
 	taskItemKey: string;
 }
 
+export interface taskBoardFilesRegistryItem {
+	boardId: string;
+	filePath: string;
+}
+
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
@@ -122,7 +127,7 @@ export interface globalSettingsData {
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
 	safeGuardFeature: boolean;
-	boardFilesLocation: string[];
+	taskBoardFilesRegistry: taskBoardFilesRegistryItem[];
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
@@ -425,10 +430,19 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 		experimentalFeatures: false,
 		safeGuardFeature: true,
-		boardFilesLocation: [
-			`TaskBoard/Boards/${DEFAULT_BOARDS[0].name}.taskboard`,
-			`TaskBoard/Boards/${DEFAULT_BOARDS[1].name}.taskboard`,
-			`TaskBoard/Boards/${DEFAULT_BOARDS[2].name}.taskboard`,
+		taskBoardFilesRegistry: [
+			{
+				boardId: DEFAULT_BOARDS[0].id,
+				filePath: `TaskBoard/Boards/${DEFAULT_BOARDS[0].name}.taskboard`,
+			},
+			{
+				boardId: DEFAULT_BOARDS[1].id,
+				filePath: `TaskBoard/Boards/${DEFAULT_BOARDS[1].name}.taskboard`,
+			},
+			{
+				boardId: DEFAULT_BOARDS[2].id,
+				filePath: `TaskBoard/Boards/${DEFAULT_BOARDS[2].name}.taskboard`,
+			},
 		],
 		lastViewHistory: {
 			viewedType: "kanban",

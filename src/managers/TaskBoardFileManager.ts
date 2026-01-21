@@ -7,6 +7,7 @@
 import { App, TFile, Notice, normalizePath } from "obsidian";
 import { Board } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
+import { taskBoardFilesRegistryItem } from "src/interfaces/GlobalSettings";
 
 export default class TaskBoardFileManager {
 	private app: App;
@@ -22,7 +23,7 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Load board configuration from a .taskboard file
+	 * Load board configuration from a .taskboard file from disk.
 	 * @param filePath - The path to the .taskboard file
 	 * @returns The board configuration object, or null if file doesn't exist or cannot be parsed
 	 */
@@ -64,78 +65,31 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Loads all the boards data as per the file paths stored in the global settings.
-	 * @returns All boards data as an array or an empty array if failed to load the boards.
-	 */
-	async loadAllBoards(): Promise<Board[] | []> {
-		try {
-			const boardFilesLocations =
-				this.plugin.settings.data.boardFilesLocation || [];
-			let allBoardsData: Board[] | [] = [];
-
-			boardFilesLocations.forEach(async (boardFilePath: string) => {
-				if (!boardFilePath || boardFilePath.trim() === "") {
-					console.error(
-						`No board file path configured for index: ${this.currentBoardIndex}`,
-					);
-					return [];
-				}
-
-				// Load board from file
-				const boardData = await this.loadBoardFromFile(boardFilePath);
-
-				if (boardData) {
-					// Cache the board data in memory
-					allBoardsData[boardData.index] = boardData;
-					console.log(
-						`Loaded and cached board "${boardData.name}" (index: ${boardData.index}) from: ${boardFilePath}`,
-					);
-
-					return boardData;
-				} else {
-					new Notice(
-						`Task Board : Error loading all boards data. Following board not found : ${boardFilePath}`,
-					);
-				}
-
-				return [];
-			});
-
-			this.allBoardsData = allBoardsData;
-			return allBoardsData;
-		} catch (error) {
-			console.error(
-				`Error loading board at index ${this.currentBoardIndex}:`,
-				error,
-			);
-			return [];
-		}
-	}
-
-	/**
-	 * Loads the specific/current board data from the memory cache (allBoardsData)
+	 * Loads the specific/current board data from the memory cache (allBoardsData),
+	 * Based on the boardIndex passed
 	 * @param boardIndex - The index of the board to load
 	 * @returns The board configuration object, or null if file cannot be loaded
 	 */
-	async loadBoard(boardIndex?: number): Promise<Board | null> {
+	async loadBoardUsingIndex(boardIndex: number): Promise<Board | null> {
 		try {
-			const currentBoardINdex = boardIndex ?? this.currentBoardIndex;
+			const boardIndexToUse = boardIndex ?? this.currentBoardIndex;
+			console.log("All boards data :", this.allBoardsData);
 
 			// Validate board index
 			if (
-				currentBoardINdex < 0 ||
-				currentBoardINdex > this.allBoardsData.length - 1
+				boardIndexToUse < 0 ||
+				boardIndexToUse > this.allBoardsData.length - 1
 			) {
 				console.error(
-					`Invalid board index: ${currentBoardINdex}. Available boards: ${this.plugin.settings.data.boardFilesLocation.length}`,
+					`Invalid board index: ${boardIndexToUse}. Available boards: ${this.plugin.settings.data.taskBoardFilesRegistry?.length}`,
 				);
 				return null;
 			}
 
-			const boardData = this.allBoardsData[currentBoardINdex];
+			const boardData = this.allBoardsData[boardIndexToUse];
 			if (boardData) {
 				// Cache the board data in memory
-				this.currentBoardIndex = currentBoardINdex;
+				this.currentBoardIndex = boardIndexToUse;
 			}
 
 			return boardData;
@@ -145,6 +99,127 @@ export default class TaskBoardFileManager {
 				error,
 			);
 			return null;
+		}
+	}
+
+	/**
+	 * First tries to see if the board is already cached in memory,
+	 * If not, loads the board from the .taskboard file at the given path,
+	 * and caches it in memory and updates the currentBoardIndex
+	 * @param filePath - The path to the .taskboard file
+	 * @returns The board configuration object, or null if file cannot be loaded
+	 */
+	async loadBoardUsingPath(filePath: string): Promise<Board | null> {
+		try {
+			if (!filePath || filePath.trim() === "") {
+				console.error(`No board file path provided to load the board`);
+				return null;
+			}
+
+			// Check if board is already cached in memory based on id
+			const taskBoardFilesRegistry =
+				this.plugin.settings.data.taskBoardFilesRegistry || [];
+			const registryItem = taskBoardFilesRegistry.find(
+				(item) => item.filePath === filePath,
+			);
+			if (registryItem) {
+				const cachedBoard = this.allBoardsData.find((board) => {
+					return board.id === registryItem.boardId;
+				});
+
+				if (cachedBoard) {
+					this.currentBoardIndex =
+						this.getBoardIndexFromRegistry(cachedBoard.id) ??
+						this.allBoardsData.length;
+					console.log(
+						`Board "${cachedBoard.name}" (index: ${this.currentBoardIndex}) loaded from cache for file: ${filePath}`,
+					);
+					return cachedBoard;
+				}
+			}
+
+			// Load board from file (disk) since not found in cache
+			const boardData = await this.loadBoardFromFile(filePath);
+
+			if (boardData) {
+				const newIndex = this.allBoardsData.length;
+				// Cache the board data in memory
+				this.allBoardsData[newIndex] = boardData;
+				console.log(
+					`Loaded and cached board "${boardData.name}" (index: ${newIndex}) from: ${filePath}`,
+				);
+				this.currentBoardIndex = newIndex;
+
+				this.addNewBoardToRegistry(boardData.id, filePath);
+
+				return boardData;
+			} else {
+				new Notice(
+					`Task Board : Error loading board data from file : ${filePath}`,
+				);
+			}
+
+			return null;
+		} catch (error) {
+			console.error(`Error loading board from file ${filePath}:`, error);
+			return null;
+		}
+	}
+
+	/**
+	 * Loads all the boards data from disk,
+	 * as per the file paths stored in the global settings.
+	 * @returns All boards data as an array or an empty array if failed to load the boards.
+	 */
+	async loadAllBoards(): Promise<Board[] | []> {
+		console.log("loadAllBoards : Starting to load all boards...");
+		try {
+			const taskBoardFilesRegistry =
+				this.plugin.settings.data.taskBoardFilesRegistry || [];
+			let allBoardsData: Board[] | [] = [];
+
+			taskBoardFilesRegistry.forEach(
+				async (taskBoardFileEntry: taskBoardFilesRegistryItem) => {
+					if (
+						!taskBoardFileEntry.filePath ||
+						taskBoardFileEntry.filePath.trim() === ""
+					) {
+						console.error(
+							`No board file path configured for index: ${this.currentBoardIndex}`,
+						);
+						return [];
+					}
+
+					// Load board from file
+					const boardData = await this.loadBoardFromFile(
+						taskBoardFileEntry.filePath,
+					);
+
+					if (boardData) {
+						const boardIndex =
+							this.getBoardIndexFromRegistry(boardData.id) ??
+							this.allBoardsData.length;
+						// Cache the board data in memory
+						allBoardsData[boardIndex] = boardData;
+						console.log(
+							`Loaded and cached board "${boardData.name}" (index: ${boardIndex}) from: ${taskBoardFileEntry.filePath}`,
+						);
+					} else {
+						new Notice(
+							`Task Board : Error loading all boards data. Following board not found : ${taskBoardFileEntry.filePath}`,
+						);
+					}
+				},
+			);
+
+			this.allBoardsData = allBoardsData;
+			return allBoardsData;
+		} catch (error) {
+			console.error(
+				`Error loading board at index ${this.currentBoardIndex}:`,
+				error,
+			);
+			return [];
 		}
 	}
 
@@ -205,8 +280,8 @@ export default class TaskBoardFileManager {
 		boardIndex?: number,
 	): Promise<boolean> {
 		try {
-			const boardFilesLocation =
-				this.plugin.settings.data.boardFilesLocation || [];
+			const taskBoardFilesRegistry =
+				this.plugin.settings.data.taskBoardFilesRegistry || [];
 
 			let boardIndexToUse = boardIndex;
 			if (!boardIndexToUse) {
@@ -225,16 +300,19 @@ export default class TaskBoardFileManager {
 			// Validate board index
 			if (
 				boardIndexToUse < 0 ||
-				boardIndexToUse >= boardFilesLocation.length
+				boardIndexToUse >= taskBoardFilesRegistry.length
 			) {
 				console.error(
-					`Invalid board index: ${boardIndexToUse}. Available boards: ${boardFilesLocation.length}`,
+					`Invalid board index: ${boardIndexToUse}. Available boards: ${taskBoardFilesRegistry.length}`,
 				);
 				return false;
 			}
 
-			const boardFilePath = boardFilesLocation[boardIndexToUse];
-			if (!boardFilePath || boardFilePath.trim() === "") {
+			const taskBoardFileEntry = taskBoardFilesRegistry[boardIndexToUse];
+			if (
+				!taskBoardFileEntry.filePath ||
+				taskBoardFileEntry.filePath.trim() === ""
+			) {
 				console.error(
 					`No board file path configured for index: ${boardIndexToUse}`,
 				);
@@ -243,7 +321,7 @@ export default class TaskBoardFileManager {
 
 			// Save board to file
 			const success = await this.saveBoardToFile(
-				boardFilePath,
+				taskBoardFileEntry.filePath,
 				updatedBoardData,
 			);
 
@@ -251,7 +329,7 @@ export default class TaskBoardFileManager {
 				this.allBoardsData[boardIndexToUse] = updatedBoardData;
 
 				console.log(
-					`Saved board "${updatedBoardData.name}" (index: ${boardIndexToUse}) to: ${boardFilePath}`,
+					`Saved board "${updatedBoardData.name}" (index: ${boardIndexToUse}) to: ${taskBoardFileEntry.filePath}`,
 				);
 			}
 
@@ -262,6 +340,33 @@ export default class TaskBoardFileManager {
 				error,
 			);
 			return false;
+		}
+	}
+
+	/**
+	 * Adds a new .taskboard file path to the registry in settings
+	 * if it does not already exist
+	 * @param filePath - The path to the .taskboard file
+	 */
+	async addNewBoardToRegistry(
+		boardId: string,
+		filePath: string,
+	): Promise<void> {
+		const taskBoardFilesRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry || [];
+		if (
+			!taskBoardFilesRegistry.find((item) => item.filePath === filePath)
+		) {
+			taskBoardFilesRegistry.push({
+				filePath: filePath,
+				boardId: boardId,
+			});
+			this.plugin.settings.data.taskBoardFilesRegistry =
+				taskBoardFilesRegistry;
+			await this.plugin.saveSettings();
+			console.log(`Added new board file to registry: ${filePath}`);
+		} else {
+			console.log(`Board file already exists in registry: ${filePath}`);
 		}
 	}
 
@@ -372,16 +477,18 @@ export default class TaskBoardFileManager {
 	 * @returns Array of missing file paths
 	 */
 	async validateBoardFiles(): Promise<string[]> {
-		const boardFilesLocation =
-			this.plugin.settings.data.boardFilesLocation || [];
+		const taskBoardFilesRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry || [];
 		const missingFiles: string[] = [];
 
-		for (const filePath of boardFilesLocation) {
-			const exists = await this.boardFileExists(filePath);
+		for (const taskBoardFileEntry of taskBoardFilesRegistry) {
+			const exists = await this.boardFileExists(
+				taskBoardFileEntry.filePath,
+			);
 			if (!exists) {
-				missingFiles.push(filePath);
+				missingFiles.push(taskBoardFileEntry.filePath);
 				console.warn(
-					`Expected board file not found: ${filePath}. It may have been moved or deleted.`,
+					`Expected board file not found: ${taskBoardFileEntry.filePath}. It may have been moved or deleted.`,
 				);
 			}
 		}
@@ -398,27 +505,29 @@ export default class TaskBoardFileManager {
 	async createMissingDefaultBoardFiles(
 		defaultBoards: Board[],
 	): Promise<number> {
-		const boardFilesLocation =
-			this.plugin.settings.data.boardFilesLocation || [];
+		const taskBoardFilesRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry || [];
 		let createdCount = 0;
 
-		for (let i = 0; i < boardFilesLocation.length; i++) {
-			const filePath = boardFilesLocation[i];
-			const exists = await this.boardFileExists(filePath);
+		for (let i = 0; i < taskBoardFilesRegistry.length; i++) {
+			const taskBoardFileEntry = taskBoardFilesRegistry[i];
+			const exists = await this.boardFileExists(
+				taskBoardFileEntry.filePath,
+			);
 
 			if (!exists && i < defaultBoards.length) {
 				const created = await this.createNewBoardFile(
-					filePath,
+					taskBoardFileEntry.filePath,
 					defaultBoards[i],
 				);
 				if (created) {
 					createdCount++;
 					console.log(
-						`Created default board file: ${filePath}`,
+						`Created default board file: ${taskBoardFileEntry.filePath}`,
 						defaultBoards[i].name,
 					);
 					new Notice(
-						`Created default board file: ${filePath} : ${defaultBoards[i].name}`,
+						`Created default board file: ${taskBoardFileEntry.filePath} : ${defaultBoards[i].name}`,
 					);
 				}
 			}
@@ -427,13 +536,16 @@ export default class TaskBoardFileManager {
 		return createdCount;
 	}
 
+	/**
+	 * Returns all the boards data cached in memory
+	 * @returns Array of all board configurations
+	 */
 	async getAllBoards(): Promise<Board[]> {
 		return this.allBoardsData;
 	}
 
 	/**
-	 * Get the currently cached board data
-	 * Returns the board that was last loaded with loadBoard()
+	 * Returns the board data that was last active/used by user.
 	 * @returns The cached board data, or null if no board has been loaded
 	 */
 	async getCurrentBoardData(): Promise<Board | null> {
@@ -441,11 +553,45 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Get the index of the currently cached board
+	 * Get the index of the last used board as per the saved files registry
 	 * @returns The index of the currently loaded board, or null if no board has been loaded
 	 */
 	getCurrentBoardIndex(): number | null {
 		return this.currentBoardIndex;
+	}
+
+	/**
+	 * Get the index of a board from the registry based on its boardId
+	 * @param boardId - The ID of the board
+	 * @returns The index of the board in the registry, or null if not found
+	 */
+	getBoardIndexFromRegistry(boardId: string): number | null {
+		const taskBoardFilesRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry || [];
+		const registryItem = taskBoardFilesRegistry.find(
+			(item) => item.boardId === boardId,
+		);
+		if (registryItem) {
+			return taskBoardFilesRegistry.indexOf(registryItem);
+		}
+		return null;
+	}
+
+	/**
+	 * Get the file path of a board from the registry based on its boardId
+	 * @param boardId - The ID of the board
+	 * @returns The file path of the board, or null if not found
+	 */
+	getBoardFilepathFromRegistry(boardId: string): string | null {
+		const taskBoardFilesRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry || [];
+		const registryItem = taskBoardFilesRegistry.find(
+			(item) => item.boardId === boardId,
+		);
+		if (registryItem) {
+			return registryItem.filePath;
+		}
+		return null;
 	}
 
 	/**

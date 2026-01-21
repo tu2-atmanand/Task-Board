@@ -21,6 +21,7 @@ import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/int
 import { columnDataProp, AddColumnModal } from "./AddColumnModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -209,8 +210,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	const handleAddNewBoard = async (oldBoards: Board[]) => {
 		const newBoard: Board = {
+			id: generateRandomTempTaskId(),
 			name: t("new-board"),
-			index: localBoards.length,
 			columns: [],
 			hideEmptyColumns: false,
 			showColumnTags: true,
@@ -270,24 +271,26 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			app,
 			mssg,
 			onConfirm: () => {
-				if (selectedBoardIndex !== -1) {
-					const updatedBoards = [...localBoards];
-					updatedBoards.splice(selectedBoardIndex, 1);
-					// Update indexes of boards below the deleted one
-					for (let i = selectedBoardIndex; i < updatedBoards.length; i++) {
-						updatedBoards[i].index = i;
-					}
-					setLocalBoards(updatedBoards);
-					setIsEdited(true);
-					if (updatedBoards.length === 0) {
-						handleAddNewBoard(updatedBoards);
-						setSelectedBoardIndex(0);
-					} else if (selectedBoardIndex !== 0) {
-						setSelectedBoardIndex(selectedBoardIndex - 1);
-					}
-				} else {
-					new Notice(t("no-board-selected-to-delete"));
-				}
+				new Notice('NOT IMPLEMENTED');
+
+				// if (selectedBoardIndex !== -1) {
+				// 	const updatedBoards = [...localBoards];
+				// 	updatedBoards.splice(selectedBoardIndex, 1);
+				// 	// Update indexes of boards below the deleted one
+				// 	for (let i = selectedBoardIndex; i < updatedBoards.length; i++) {
+				// 		updatedBoards[i].index = i;
+				// 	}
+				// 	setLocalBoards(updatedBoards);
+				// 	setIsEdited(true);
+				// 	if (updatedBoards.length === 0) {
+				// 		handleAddNewBoard(updatedBoards);
+				// 		setSelectedBoardIndex(0);
+				// 	} else if (selectedBoardIndex !== 0) {
+				// 		setSelectedBoardIndex(selectedBoardIndex - 1);
+				// 	}
+				// } else {
+				// 	new Notice(t("no-board-selected-to-delete"));
+				// }
 			},
 			onCancel: () => {
 				// console.log("Board Deletion Operation Cancelled.");
