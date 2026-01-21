@@ -36,7 +36,7 @@ export async function fetchTasksPluginCustomStatuses(
 		);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
-			plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin =
+			plugin.settings.data.compatiblePlugins.tasksPlugin =
 				true;
 
 			// Define the path to the tasks plugin data.json file
@@ -67,10 +67,10 @@ export async function fetchTasksPluginCustomStatuses(
 			// 	"Fetched custom statuses from tasks plugin:",
 			// 	statuses,
 			// 	"\nTask Board old statuses:",
-			// 	plugin.settings.data.globalSettings.customStatuses,
+			// 	plugin.settings.data.customStatuses,
 			// 	"\nCondition :",
 			// 	JSON.stringify(
-			// 		plugin.settings.data.globalSettings
+			// 		plugin.settings.data
 			// 			.customStatuses
 			// 	) !== JSON.stringify(statuses)
 			// );
@@ -78,10 +78,10 @@ export async function fetchTasksPluginCustomStatuses(
 			// Store it in the plugin settings if there is a difference
 			if (
 				JSON.stringify(
-					plugin.settings.data.globalSettings.customStatuses
+					plugin.settings.data.customStatuses
 				) !== JSON.stringify(statuses)
 			) {
-				plugin.settings.data.globalSettings.customStatuses = statuses;
+				plugin.settings.data.customStatuses = statuses;
 				await plugin.saveSettings(plugin.settings);
 			}
 		}

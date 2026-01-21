@@ -3,16 +3,12 @@
 import { Board } from "../../interfaces/BoardConfigs";
 import React, { memo } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-
-import { App } from "obsidian";
-import Column from "./Column";
 import LazyColumn from "./LazyColumn";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
 interface KanbanBoardProps {
-	app: App;
 	plugin: TaskBoard;
 	board: Board;
 	allTasks: taskJsonMerged | undefined;
@@ -23,8 +19,9 @@ interface KanbanBoardProps {
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, tasksPerColumn, loading, freshInstall }) => {
 	// Check if lazy loading is enabled
-	const lazyLoadingEnabled = plugin.settings.data.globalSettings.kanbanView?.lazyLoadingEnabled ?? false;
-	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+	const lazyLoadingEnabled = plugin.settings.data.kanbanView?.lazyLoadingEnabled ?? false;
+	// const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn;
 
 	return (
 		<div className="kanbanBoard">
@@ -86,7 +83,7 @@ const MemoizedColumn = memo<{
 	activeBoardData: Board;
 	columnData: any;
 	tasksForThisColumn: taskItem[];
-	Component: typeof Column | typeof LazyColumn;
+	Component: typeof LazyColumn;
 }>(({ Component, ...props }) => {
 	return <Component {...props} />;
 }, (prevProps, nextProps) => {
@@ -249,7 +246,7 @@ export default memo(KanbanBoard);
 
 // 	// Memoized refreshBoardButton to avoid re-creating the function on every render
 // 	const refreshBoardButton = useCallback(async () => {
-// 		if (plugin.settings.data.globalSettings.realTimeScanner) {
+// 		if (plugin.settings.data.realTimeScanner) {
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		} else {
 // 			if (

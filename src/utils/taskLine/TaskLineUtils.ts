@@ -475,7 +475,7 @@ export const deleteTaskFromFile = async (
 /**
  * Archives a task by moving it to a specified archived tasks file or marking it as archived in the same file.
  *
- * This function first checks the value of `plugin.settings.data.globalSettings.archivedTasksFilePath`.
+ * This function first checks the value of `plugin.settings.data.archivedTasksFilePath`.
  * If this setting contains the path of the file, it removes the task from its original file and adds it
  * to the top of the specified archived file with a timestamp. If the setting does not contain a file path,
  * it marks the task as archived in the original file by surrounding the task content with '%%'.
@@ -491,7 +491,7 @@ export const archiveTask = async (
 	task: taskItem
 ): Promise<void> => {
 	const archivedFilePath =
-		plugin.settings.data.globalSettings.archivedTasksFilePath;
+		plugin.settings.data.archivedTasksFilePath;
 	// Prepare the task content to be archived
 	const oldTaskContent = await getFormattedTaskContent(task);
 	if (oldTaskContent === "")
@@ -766,7 +766,7 @@ export const replaceOldTaskWithNewTask = async (
 			// Replace the old task block with the updated content
 			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else {
-			if (plugin.settings.data.globalSettings.safeGuardFeature) {
+			if (plugin.settings.data.safeGuardFeature) {
 				// Ask user to choose between old and new content
 				openDiffContentCompareModal(
 					plugin,

@@ -29,6 +29,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 10;
+	private TRACK_MAX_ID = 90; // This is not being used in the code, its manually tracked to refer it here and update it when I will be adding new IDs.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern

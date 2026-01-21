@@ -17,7 +17,7 @@ interface ResizableNodeSelectedProps {
 }
 
 const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id, data, selected, width, height }) => {
-	const mapViewSettings = data.label?.props?.plugin.settings.data.globalSettings.mapView;
+	const mapViewSettings = data.label?.props?.plugin.settings.data.mapView;
 	const orientationHorizontal = mapViewSettings.mapOrientation === mapViewNodeMapOrientation.horizontal;
 	// console.log('Rendering ResizableNodeSelected for node:', id, { data, selected, width, height });
 
@@ -36,7 +36,7 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 					try {
 						const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
 						sizeData[id] = {
-							width: params.width ?? data.label.props.plugin.settings.data.globalSettings.columnWidth ?? 300
+							width: params.width ?? data.label.props.plugin.settings.data.columnWidth ?? 300
 							// height: params.height ?? 30 
 						};
 						localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));

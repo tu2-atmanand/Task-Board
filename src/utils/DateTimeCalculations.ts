@@ -66,7 +66,7 @@ export const getUniversalDateFromTask = (
 ): string => {
 	// Method 1 - Comparing
 	const universalDateChoice =
-		plugin.settings.data.globalSettings.universalDate;
+		plugin.settings.data.universalDate;
 
 	if (universalDateChoice === UniversalDateOptions.dueDate) {
 		return task.due;
@@ -77,9 +77,9 @@ export const getUniversalDateFromTask = (
 	}
 	return "";
 
-	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.globalSettings.universalDate
+	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.universalDate
 	// const universalDateChoice =
-	// 	plugin.settings.data.globalSettings.universalDate;
+	// 	plugin.settings.data.universalDate;
 	// if (
 	// 	!universalDateChoice ||
 	// 	!task[universalDateChoice] ||
@@ -99,7 +99,7 @@ export const getUniversalDateFromTask = (
  */
 export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
 	const universalDateChoice =
-		plugin.settings.data.globalSettings.universalDate;
+		plugin.settings.data.universalDate;
 	if (universalDateChoice === UniversalDateOptions.dueDate) {
 		return "📅";
 	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {

@@ -2,7 +2,6 @@
 
 import { TFile } from "obsidian";
 import type TaskBoard from "main";
-import { bugReporter } from "src/services/OpenModals";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**

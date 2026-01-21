@@ -94,13 +94,13 @@ export function generateRandomTempTaskId(): string {
  * @returns A string representing the unique ID for the task
  */
 export function generateTaskId(plugin: TaskBoard): string {
-	plugin.settings.data.globalSettings.uniqueIdCounter =
-		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
+	plugin.settings.data.uniqueIdCounter =
+		plugin.settings.data.uniqueIdCounter + 1 || 0;
 
 	// Save the updated uniqueIdCounter back to settings
 	plugin.saveSettings();
 	// Return the current counter value and then increment it for the next ID
-	return String(plugin.settings.data.globalSettings.uniqueIdCounter);
+	return String(plugin.settings.data.uniqueIdCounter);
 }
 
 /**
@@ -117,7 +117,7 @@ export const applyIdToTaskItem = async (
 ): Promise<string | undefined> => {
 	if (
 		isTaskNotePresentInTags(
-			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+			plugin.settings.data.taskNoteIdentifierTag,
 			task.tags
 		)
 	) {

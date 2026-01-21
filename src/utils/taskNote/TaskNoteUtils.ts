@@ -14,7 +14,6 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
-import { bugReporter } from "src/services/OpenModals";
 import { defaultTaskStatuses } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
@@ -75,7 +74,7 @@ export function extractTaskNoteProperties(
 	}
 
 	const frontmatterFormatting: frontmatterFormatting[] =
-		settings.data.globalSettings.frontmatterFormatting;
+		settings.data.frontmatterFormatting;
 
 	return {
 		id:
@@ -229,7 +228,7 @@ export function getStatusSymbolFromStatusName(
 	// return " ";
 
 	const tasksPluginStatusConfigs =
-		settings.data.globalSettings.customStatuses;
+		settings.data.customStatuses;
 	let statusSymbol = "";
 	tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 		if (customStatus.name === statusName) {
@@ -458,7 +457,7 @@ export async function archiveTaskNote(
 
 		// Get the archive folder path from settings
 		const archiveFolderPath =
-			plugin.settings.data.globalSettings.archivedTBNotesFolderPath;
+			plugin.settings.data.archivedTBNotesFolderPath;
 
 		if (!archiveFolderPath || archiveFolderPath.trim() === "") {
 			new Notice("Archive folder path is not configured in settings");

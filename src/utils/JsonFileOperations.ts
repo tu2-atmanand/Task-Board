@@ -17,7 +17,7 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 export const loadGlobalSettings = async (plugin: TaskBoard) => {
 	try {
 		await plugin.loadSettings();
-		const globalSettings = plugin.settings.data.globalSettings || {};
+		const globalSettings = plugin.settings.data || {};
 		return globalSettings;
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
@@ -30,50 +30,63 @@ export const loadGlobalSettings = async (plugin: TaskBoard) => {
 	}
 };
 
-// Function to load boards data from the JSON file
-export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
-	try {
-		// Fetch settings via Obsidian's loadData method
-		await plugin.loadSettings();
+/**
+ * Loads all boards configurations from the data.json file.
+ * @param plugin - Plugin instance.
+ * @returns - Returns the board configurations.
+ * 
+ * @deprecated v2.0.0 - The individual board data will stored in their respective files. All laoding and saving of board configurations will be handled by the TaskBOardFileManager.
+ */
+// export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
+// 	try {
+// 		// Fetch settings via Obsidian's loadData method
+// 		await plugin.loadSettings();
 
-		const boardConfigs = plugin.settings.data.boardConfigs || [];
+// 		const boardConfigs = plugin.settings.data.boardConfigs || [];
 
-		return boardConfigs;
-	} catch (error) {
-		bugReporterManagerInsatance.showNotice(
-			69,
-			"Failed to load board configurations from data.json",
-			String(error),
-			"JsonFileOperations.ts/loadBoardsData"
-		);
-		throw error;
-	}
-};
+// 		return boardConfigs;
+// 	} catch (error) {
+// 		bugReporterManagerInsatance.showNotice(
+// 			69,
+// 			"Failed to load board configurations from data.json",
+// 			String(error),
+// 			"JsonFileOperations.ts/loadBoardsData"
+// 		);
+// 		throw error;
+// 	}
+// };
 
-// Function to save boards data to the JSON file
-export const saveBoardsData = async (
-	plugin: TaskBoard,
-	updatedBoards: Board[]
-) => {
-	try {
-		// Fetch current settings
-		await plugin.loadSettings();
+/**
+ * Saves the updated boards configurations from the data.json file.
+ * @param plugin - Plugin instance.
+ * @param updatedBoards - Updated boards configurations list.
+ * @returns - Returns the board configurations.
+ * 
+ * @deprecated v2.0.0 - The individual board data will stored in their respective files. All laoding and saving of board configurations will be handled by the TaskBOardFileManager.
+ */
+// export const saveBoardsData = async (
+// 	plugin: TaskBoard,
+// 	updatedBoards: Board[]
+// ) => {
+// 	try {
+// 		// Fetch current settings
+// 		await plugin.loadSettings();
 
-		// Update the boardConfigs in settings
-		plugin.settings.data.boardConfigs = updatedBoards;
+// 		// Update the boardConfigs in settings
+// 		plugin.settings.data.boardConfigs = updatedBoards;
 
-		// Save updated settings
-		await plugin.saveSettings();
-	} catch (error) {
-		bugReporterManagerInsatance.showNotice(
-			70,
-			"Failed to save board configurations to data.json",
-			String(error),
-			"JsonFileOperations.ts/saveBoardsData"
-		);
-		throw error;
-	}
-};
+// 		// Save updated settings
+// 		await plugin.saveSettings();
+// 	} catch (error) {
+// 		bugReporterManagerInsatance.showNotice(
+// 			70,
+// 			"Failed to save board configurations to data.json",
+// 			String(error),
+// 			"JsonFileOperations.ts/saveBoardsData"
+// 		);
+// 		throw error;
+// 	}
+// };
 
 // ------------  Operations with tasks.json ----------------
 
@@ -105,8 +118,8 @@ export const loadJsonCacheDataFromDisk = async (
 ): Promise<jsonCacheData> => {
 	try {
 		let path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		if (plugin.settings.data.globalSettings.tasksCacheFilePath !== "") {
-			path = plugin.settings.data.globalSettings.tasksCacheFilePath;
+		if (plugin.settings.data.tasksCacheFilePath !== "") {
+			path = plugin.settings.data.tasksCacheFilePath;
 		}
 		const data: string = await plugin.app.vault.adapter.read(path);
 		const cacheData: jsonCacheData = JSON.parse(data);
@@ -196,8 +209,8 @@ export const writeJsonCacheDataToDisk = async (
 ): Promise<boolean> => {
 	try {
 		let path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		if (plugin.settings.data.globalSettings.tasksCacheFilePath !== "") {
-			path = plugin.settings.data.globalSettings.tasksCacheFilePath;
+		if (plugin.settings.data.tasksCacheFilePath !== "") {
+			path = plugin.settings.data.tasksCacheFilePath;
 		}
 
 		// const cleanedTasksData = tasksData; //await dataCleanup(tasksData);
@@ -257,7 +270,7 @@ export const moveTasksCacheFileToNewPath = (
 			.rename(oldPath, newPath)
 			// .then(() => {
 			// 	// Update the tasksCacheFilePath in globalSettings
-			// 	plugin.settings.data.globalSettings.tasksCacheFilePath =
+			// 	plugin.settings.data.tasksCacheFilePath =
 			// 		newPath;
 			// 	// Save the updated settings
 			// 	return plugin.saveSettings();

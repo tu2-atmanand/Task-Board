@@ -310,7 +310,7 @@ export async function verifySubtasksAndChildtasksAreComplete(
 	plugin: TaskBoard,
 	task: taskItem
 ): Promise<boolean> {
-	if (!plugin.settings.data.globalSettings.boundTaskCompletionToChildTasks)
+	if (!plugin.settings.data.boundTaskCompletionToChildTasks)
 		return true;
 
 	let flag = true;

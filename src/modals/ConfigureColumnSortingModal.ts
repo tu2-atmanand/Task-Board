@@ -140,7 +140,7 @@ export class ConfigureColumnSortingModal extends Modal {
 						)
 						.addDropdown((dropdown) => {
 							if (
-								this.plugin.settings.data.globalSettings
+								this.plugin.settings.data
 									.experimentalFeatures
 							) {
 								dropdown.addOption(

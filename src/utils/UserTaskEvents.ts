@@ -45,7 +45,7 @@ export const handleEditTask = (
 	settingOption: string
 ) => {
 	const taskNoteIdentifierTag =
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+		plugin.settings.data.taskNoteIdentifierTag;
 	const isThisATaskNote = isTaskNotePresentInTags(
 		taskNoteIdentifierTag,
 		task.tags
@@ -211,7 +211,7 @@ export const updateTaskItemStatus = (
 	eventEmitter.emit("UPDATE_TASK", eventData);
 
 	const isThisTaskNote = isTaskNotePresentInTags(
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		plugin.settings.data.taskNoteIdentifierTag,
 		oldTask.tags
 	);
 	if (isThisTaskNote) {
@@ -227,11 +227,11 @@ export const updateTaskItemStatus = (
 		});
 	} else {
 		const newStatusType =
-			plugin.settings.data.globalSettings.customStatuses.find(
+			plugin.settings.data.customStatuses.find(
 				(status) => status.symbol === newStatus
 			)?.type ?? statusTypeNames.TODO;
 		newTask.title = sanitizeStatus(
-			plugin.settings.data.globalSettings,
+			plugin.settings.data,
 			newTask.title,
 			newStatus,
 			newStatusType
@@ -270,7 +270,7 @@ export const updateTaskItemPriority = (
 	eventEmitter.emit("UPDATE_TASK", eventData);
 
 	const isThisTaskNote = isTaskNotePresentInTags(
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		plugin.settings.data.taskNoteIdentifierTag,
 		oldTask.tags
 	);
 
@@ -285,7 +285,7 @@ export const updateTaskItemPriority = (
 		});
 	} else {
 		newTask.title = sanitizePriority(
-			plugin.settings.data.globalSettings,
+			plugin.settings.data,
 			newTask.title,
 			newPriority
 		);
@@ -335,7 +335,7 @@ export const updateTaskItemDate = (
 	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
 
 	const isThisTaskNote = isTaskNotePresentInTags(
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		plugin.settings.data.taskNoteIdentifierTag,
 		oldTask.tags
 	);
 
@@ -352,21 +352,21 @@ export const updateTaskItemDate = (
 		switch (dateType) {
 			case UniversalDateOptions.startDate:
 				newTask.title = sanitizeStartDate(
-					plugin.settings.data.globalSettings,
+					plugin.settings.data,
 					newTask.title,
 					newDate
 				);
 				break;
 			case UniversalDateOptions.scheduledDate:
 				newTask.title = sanitizeScheduledDate(
-					plugin.settings.data.globalSettings,
+					plugin.settings.data,
 					newTask.title,
 					newDate
 				);
 				break;
 			case UniversalDateOptions.dueDate:
 				newTask.title = sanitizeDueDate(
-					plugin.settings.data.globalSettings,
+					plugin.settings.data,
 					newTask.title,
 					newDate
 				);
@@ -407,7 +407,7 @@ export const updateTaskItemReminder = (
 	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
 
 	const isThisTaskNote = isTaskNotePresentInTags(
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		plugin.settings.data.taskNoteIdentifierTag,
 		oldTask.tags
 	);
 
@@ -452,7 +452,7 @@ export const updateTaskItemTags = (
 	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
 
 	const isThisTaskNote = isTaskNotePresentInTags(
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		plugin.settings.data.taskNoteIdentifierTag,
 		oldTask.tags
 	);
 

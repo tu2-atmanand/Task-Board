@@ -24,7 +24,7 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 
 	isQuickAddPluginIntegrationEnabled() {
 		return (
-			this.settings.data.globalSettings.compatiblePlugins
+			this.settings.data.compatiblePlugins
 				.quickAddPlugin && this.isQuickAddPluginEnabled()
 		);
 	}
@@ -39,6 +39,6 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 export function isReminderPluginInstalled(plugin: TaskBoard) {
 	const reminderPlugin = new CommunityPlugins(plugin);
 
-	plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin =
+	plugin.settings.data.compatiblePlugins.reminderPlugin =
 		reminderPlugin.isReminderPluginEnabled();
 }

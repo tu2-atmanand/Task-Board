@@ -23,36 +23,3 @@
 
 ## Recent Bug Reports
 
-Timestamp : 2026-01-15T16:47:07.456Z
-ID : 4
-Message : Error showing filter popover
-Context : Column.tsx/column-menu/configure-conlum-filters
-
-#### Bug Content
-```log
-Dont show popover.
-```
-
--------------
-
-Timestamp : 2026-01-15T16:47:11.710Z
-ID : 27
-Message : Error in Sortable onSort for child tasks
-Context : AddOrEditTaskRC.tsx/childTasksListRef useEffect
-
-#### Bug Content
-```log
-Testing the new bug reporter.
-```
-
--------------
-
-Timestamp : 2026-01-15T16:47:59.447Z
-ID : 4
-Message : Error showing filter popover
-Context : Column.tsx/column-menu/configure-conlum-filters
-
-#### Bug Content
-```log
-Dont show popover.
-```

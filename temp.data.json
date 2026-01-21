@@ -1,0 +1,1193 @@
+{
+  "version": "1.8.7",
+  "data": {
+    "boardConfigs": [
+      {
+        "name": "Path filtered",
+        "index": 0,
+        "columns": [
+          {
+            "id": 3061361157,
+            "index": 1,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "TaskNotes",
+            "filePaths": "TaskNotes/",
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "ur7dguyt"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "367",
+              "372",
+              "398696308",
+              "373",
+              "370",
+              "3077781059",
+              "4184100420",
+              "3052793295",
+              "1506909345",
+              274,
+              "4031700447",
+              "362"
+            ]
+          },
+          {
+            "id": 1312742179,
+            "index": 2,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "Indented Bug",
+            "filePaths": "Testing Indented Task Bug.md",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "id": 2025781698,
+            "index": 3,
+            "colType": "pathFiltered",
+            "active": true,
+            "collapsed": false,
+            "name": "QMD",
+            "filePaths": "A QMD file.qmd"
+          },
+          {
+            "id": 1623496994,
+            "index": 4,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20
+          }
+        ],
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        },
+        "taskCount": {
+          "pending": 65,
+          "completed": 19
+        }
+      },
+      {
+        "columns": [
+          {
+            "id": 1799377278,
+            "index": 1,
+            "colType": "undated",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlog",
+            "datedBasedColumn": {
+              "from": 0,
+              "to": 0,
+              "dateType": "scheduledDate"
+            },
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "id": 3492,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Over Due",
+            "index": 2,
+            "datedBasedColumn": {
+              "dateType": "scheduledDate",
+              "from": -300,
+              "to": -1
+            },
+            "sortCriteria": [
+              {
+                "criteria": "scheduledDate",
+                "order": "asc",
+                "priority": 1
+              },
+              {
+                "criteria": "time",
+                "order": "asc",
+                "priority": 2
+              }
+            ],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "id": 3494,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Today",
+            "index": 3,
+            "datedBasedColumn": {
+              "dateType": "scheduledDate",
+              "from": 0,
+              "to": 0
+            },
+            "sortCriteria": [
+              {
+                "criteria": "time",
+                "order": "asc",
+                "priority": 1
+              }
+            ],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": true
+          },
+          {
+            "id": 3493,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Tomorrow",
+            "index": 4,
+            "datedBasedColumn": {
+              "dateType": "scheduledDate",
+              "from": 1,
+              "to": 1
+            }
+          },
+          {
+            "id": 3495,
+            "colType": "dated",
+            "active": true,
+            "collapsed": false,
+            "name": "Future",
+            "index": 5,
+            "datedBasedColumn": {
+              "dateType": "scheduledDate",
+              "from": 2,
+              "to": 300
+            }
+          },
+          {
+            "id": 3497,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "limit": 20,
+            "name": "Completed, updated",
+            "index": 6,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          }
+        ],
+        "filters": [
+          "#Test",
+          "#working",
+          "#new"
+        ],
+        "filterPolarity": "0",
+        "filterScope": "Both",
+        "name": "Time based workflow",
+        "index": 1,
+        "showColumnTags": true,
+        "showFilteredTags": false,
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": [
+            {
+              "id": "id-1763871967163-8a21jnuiq",
+              "groupCondition": "any",
+              "filters": [
+                {
+                  "id": "id-1763871967165-lct3l84v6",
+                  "property": "tags",
+                  "condition": "doesNotContain",
+                  "value": "#task"
+                },
+                {
+                  "id": "id-1763871980225-nbzhu6dnv",
+                  "property": "tags",
+                  "condition": "doesNotContain",
+                  "value": "#taskNote"
+                }
+              ]
+            }
+          ]
+        },
+        "description": "Project to manage all the tasks related to plugin release.",
+        "taskCount": {
+          "pending": 4,
+          "completed": 1
+        }
+      },
+      {
+        "columns": [
+          {
+            "id": 3187486162,
+            "index": 1,
+            "colType": "otherTags",
+            "active": true,
+            "collapsed": false,
+            "name": "Other tags",
+            "minimized": false
+          },
+          {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "index": 2,
+            "id": 226119,
+            "sortCriterias": [],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "sortCriteria": [
+              {
+                "criteria": "id",
+                "order": "desc",
+                "priority": 1,
+                "uid": "k6wjlc63"
+              }
+            ],
+            "minimized": false
+          },
+          {
+            "id": 2485661779,
+            "index": 3,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "#Task",
+            "coltag": "#Task",
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "asc",
+                "priority": 1,
+                "uid": "bmlpsogj"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              274,
+              "362"
+            ],
+            "minimized": false,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Can be implemented",
+            "index": 4,
+            "coltag": "#pending",
+            "id": 47626,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "285zohor"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "224",
+              "276",
+              "389",
+              "378",
+              "355",
+              "258",
+              "375"
+            ]
+          },
+          {
+            "id": 3130768414,
+            "index": 5,
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Progress",
+            "coltag": "wip"
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Ready to publish",
+            "index": 6,
+            "coltag": "done",
+            "id": 328227,
+            "minimized": false
+          },
+          {
+            "id": 1936828579,
+            "index": 7,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "*/seeding/*",
+            "coltag": "*/seeding/*",
+            "minimized": false
+          },
+          {
+            "id": 3193261849,
+            "index": 8,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false
+          }
+        ],
+        "filters": [
+          "#Test",
+          "#working",
+          "*/seeding/*"
+        ],
+        "filterPolarity": "0",
+        "filterScope": "Both",
+        "name": "Tag based board",
+        "index": 2,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "all",
+          "filterGroups": []
+        },
+        "filterConfig": {
+          "enableSavedFilters": true,
+          "savedConfigs": [
+            {
+              "id": "filter-config-1760103432145-fevybeh8j",
+              "name": "Destinatio",
+              "description": "Filtering all tasks from \"Destinatio\" folder",
+              "filterState": {
+                "rootCondition": "any",
+                "filterGroups": [
+                  {
+                    "id": "id-1760029960520-z2a1g0ka4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1760029960521-t33fwt542",
+                        "property": "filePath",
+                        "condition": "startsWith",
+                        "value": "Destinatio"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-10-10T13:37:12.145Z",
+              "updatedAt": "2025-10-10T13:37:12.145Z"
+            },
+            {
+              "id": "filter-config-1764176875594-8gv5ee69p",
+              "name": "This",
+              "description": "If \"This\" is present in the content.",
+              "filterState": {
+                "rootCondition": "any",
+                "filterGroups": [
+                  {
+                    "id": "id-1760365709344-buyyxwhhh",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1760365709345-8uyz54hm3",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "This"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-11-26T17:07:55.594Z",
+              "updatedAt": "2025-11-26T17:07:55.594Z"
+            },
+            {
+              "id": "filter-config-1764176933714-tm6ozdue7",
+              "name": "This and No",
+              "description": "Content contains this and no",
+              "filterState": {
+                "rootCondition": "any",
+                "filterGroups": [
+                  {
+                    "id": "id-1760029960520-z2a1g0ka4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1760029960521-t33fwt542",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "This"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "id-1764176913802-bwvk75kr4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1764176913803-1ugczxozs",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "No"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-11-26T17:08:53.714Z",
+              "updatedAt": "2025-11-26T17:08:53.714Z"
+            },
+            {
+              "id": "filter-config-1764177013691-5uj7krjmm",
+              "name": "This and No, both",
+              "description": "Both",
+              "filterState": {
+                "rootCondition": "all",
+                "filterGroups": [
+                  {
+                    "id": "id-1760029960520-z2a1g0ka4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1760029960521-t33fwt542",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "This"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "id-1764176913802-bwvk75kr4",
+                    "groupCondition": "all",
+                    "filters": [
+                      {
+                        "id": "id-1764176913803-1ugczxozs",
+                        "property": "content",
+                        "condition": "contains",
+                        "value": "No"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "createdAt": "2025-11-26T17:10:13.691Z",
+              "updatedAt": "2025-11-26T17:10:13.691Z"
+            }
+          ]
+        },
+        "taskCount": {
+          "pending": 63,
+          "completed": 14
+        },
+        "swimlanes": {
+          "enabled": true,
+          "hideEmptySwimlanes": false,
+          "property": "tags",
+          "maxHeight": "500px",
+          "sortCriteria": "custom",
+          "customSortOrder": [
+            {
+              "value": "first",
+              "index": 1
+            },
+            {
+              "value": "second",
+              "index": 2
+            },
+            {
+              "value": "third",
+              "index": 3
+            }
+          ],
+          "groupAllRest": true,
+          "verticalHeaderUI": true,
+          "minimized": []
+        }
+      },
+      {
+        "columns": [
+          {
+            "colType": "untagged",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "index": 1,
+            "id": 226119,
+            "sortCriterias": [],
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "desc",
+                "priority": 1,
+                "uid": "k6wjlc63"
+              }
+            ],
+            "minimized": false
+          },
+          {
+            "id": 2485661779,
+            "index": 2,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "#Task",
+            "coltag": "#Task",
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "asc",
+                "priority": 1,
+                "uid": "bmlpsogj"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "365",
+              274,
+              "362"
+            ],
+            "minimized": false,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            }
+          },
+          {
+            "id": 1936828579,
+            "index": 3,
+            "colType": "namedTag",
+            "active": false,
+            "collapsed": false,
+            "name": "*/seeding/*",
+            "coltag": "*/seeding/*"
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Can be implemented",
+            "index": 4,
+            "coltag": "#pending",
+            "id": 47626,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false,
+            "sortCriteria": [
+              {
+                "criteria": "manualOrder",
+                "order": "asc",
+                "priority": 1,
+                "uid": "pn3wvwal"
+              }
+            ],
+            "tasksIdManualOrder": [
+              "375",
+              "389",
+              "224",
+              "355",
+              "276",
+              "258",
+              "378"
+            ]
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Progress",
+            "index": 5,
+            "coltag": "working",
+            "id": 908753,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false,
+            "workLimit": 5
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "In Review",
+            "index": 6,
+            "coltag": "Test",
+            "id": 396902,
+            "minimized": false,
+            "workLimit": 3
+          },
+          {
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Ready to publish",
+            "index": 7,
+            "coltag": "done",
+            "id": 328227,
+            "minimized": false
+          },
+          {
+            "id": 3193261849,
+            "index": 8,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": []
+            },
+            "minimized": false
+          }
+        ],
+        "filters": [
+          "#Test",
+          "#working",
+          "*/seeding/*"
+        ],
+        "filterPolarity": "0",
+        "filterScope": "Both",
+        "name": "Tag based board (copy)",
+        "index": 3,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "hideEmptyColumns": false,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        },
+        "taskCount": {
+          "pending": 60,
+          "completed": 15
+        },
+        "swimlanes": {
+          "enabled": false,
+          "showEmptySwimlanes": true,
+          "property": "tags",
+          "maxHeight": "500px",
+          "sortCriteria": "custom",
+          "customSortOrder": [
+            {
+              "value": "first",
+              "index": 1
+            },
+            {
+              "value": "second",
+              "index": 2
+            },
+            {
+              "value": "third",
+              "index": 3
+            }
+          ],
+          "groupAllRest": true,
+          "verticalHeaderUI": false
+        }
+      },
+      {
+        "name": "Only column filters",
+        "index": 4,
+        "columns": [
+          {
+            "id": 2050194674,
+            "index": 1,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlogs",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140055334-efs743ce1",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1768140055335-r98019pcb",
+                      "property": "tags",
+                      "condition": "isEmpty"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": 850996788,
+            "index": 2,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "Important",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140070366-ymlrpxfd5",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1768140070367-26fzfh3fi",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#important"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": 3370807172,
+            "index": 3,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "WIP",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140095718-9u02uoxai",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1768140095719-sfcnddjpj",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#wip"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": 1957870296,
+            "index": 4,
+            "colType": "allPending",
+            "active": true,
+            "collapsed": false,
+            "name": "In Review",
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1768140118917-x50nyv0rm",
+                  "groupCondition": "any",
+                  "filters": [
+                    {
+                      "id": "id-1768140118918-q6snn1uk7",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#Test"
+                    },
+                    {
+                      "id": "id-1768140126093-wn5bwcpwz",
+                      "property": "tags",
+                      "condition": "contains",
+                      "value": "#working"
+                    }
+                  ]
+                }
+              ]
+            },
+            "workLimit": 3
+          },
+          {
+            "id": 4265650565,
+            "index": 5,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20
+          }
+        ],
+        "hideEmptyColumns": false,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": []
+        },
+        "swimlanes": {
+          "enabled": false,
+          "hideEmptySwimlanes": false,
+          "property": "tags",
+          "sortCriteria": "asc",
+          "minimized": [],
+          "maxHeight": "300px",
+          "verticalHeaderUI": false
+        },
+        "taskCount": {
+          "pending": 63,
+          "completed": 14
+        }
+      }
+    ],
+    "globalSettings": {
+      "lang": "zh-TW",
+      "scanFilters": {
+        "files": {
+          "polarity": 3,
+          "values": [
+            "Testing Indented Task Bug.md",
+            "/\\b2025-\\d{2}-\\d{2}\\b/"
+          ]
+        },
+        "folders": {
+          "polarity": 3,
+          "values": [
+            "Task Board/1.7.0",
+            "/Notes/",
+            "Bible"
+          ]
+        },
+        "tags": {
+          "polarity": 3,
+          "values": [
+            "#CS",
+            "#placeholder/author",
+            "*/seeding/*"
+          ]
+        },
+        "frontMatter": {
+          "polarity": 3,
+          "values": [
+            "[\"created\": 2025-02-27]",
+            "[\"tags\": #TEST]",
+            "[\"background\": yellow]"
+          ]
+        }
+      },
+      "firstDayOfWeek": "2",
+      "ignoreFileNameDates": false,
+      "taskCompletionFormat": "2",
+      "taskCompletionDateTimePattern": "YYYY-MM-DD/HH:mm",
+      "dailyNotesPluginComp": true,
+      "universalDateFormat": "YYYY-MM-DD",
+      "taskCompletionInLocalTime": true,
+      "taskCompletionShowUtcOffset": false,
+      "autoAddDue": true,
+      "scanVaultAtStartup": false,
+      "dayPlannerPlugin": false,
+      "realTimeScanner": true,
+      "columnWidth": "300px",
+      "showHeader": true,
+      "showFooter": true,
+      "showVerticalScroll": false,
+      "tagColors": [
+        {
+          "name": "Bug",
+          "color": "rgba(131, 10, 18, 0.84)",
+          "priority": 1
+        },
+        {
+          "name": "feat",
+          "color": "rgba(115, 15, 151, 0.9490196078431372)",
+          "priority": 3
+        },
+        {
+          "name": "Test",
+          "color": "rgba(142, 157, 24, 1)",
+          "priority": 4
+        },
+        {
+          "name": "working",
+          "color": "rgba(22, 85, 17, 1)",
+          "priority": 5
+        },
+        {
+          "name": "New",
+          "color": "rgba(16, 50, 117, 1)",
+          "priority": 6
+        },
+        {
+          "name": "pending",
+          "color": "rgba(64, 20, 144, 1)",
+          "priority": 7
+        },
+        {
+          "name": "done",
+          "color": "rgba(14, 117, 84, 1)",
+          "priority": 7
+        },
+        {
+          "name": "*/seeding/*",
+          "color": "rgba(15, 121, 110, 1)",
+          "priority": 8
+        },
+        {
+          "name": "first",
+          "color": "rgba(13, 103, 37, 1)",
+          "priority": 9
+        }
+      ],
+      "editButtonAction": "popUp",
+      "openOnStartup": false,
+      "customStatuses": [
+        {
+          "symbol": " ",
+          "name": "Incomplete",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "X",
+          "name": "Complete",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        },
+        {
+          "symbol": "/",
+          "name": "In Progress",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": true,
+          "type": "IN_PROGRESS"
+        },
+        {
+          "symbol": "-",
+          "name": "Cancelled",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": true,
+          "type": "CANCELLED"
+        },
+        {
+          "symbol": ">",
+          "name": "Deferred",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "!",
+          "name": "Important",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
+        },
+        {
+          "symbol": "x",
+          "name": "Finished",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": false,
+          "type": "DONE"
+        }
+      ],
+      "showTaskWithoutMetadata": false,
+      "tagColorsType": "text",
+      "compatiblePlugins": {
+        "dailyNotesPlugin": false,
+        "tasksPlugin": false,
+        "reminderPlugin": false,
+        "dayPlannerPlugin": true,
+        "quickAddPlugin": false
+      },
+      "preDefinedNote": "Task_Board_Temp_Tasks.md",
+      "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
+      "autoAddCreatedDate": true,
+      "autoAddUniversalDate": true,
+      "universalDate": "startDate",
+      "archivedTasksFilePath": "",
+      "showFileNameInCard": true,
+      "showFrontmatterTagsOnCards": true,
+      "tasksCacheFilePath": ".obsidian/plugins/task-board/tasks.json",
+      "notificationService": "obsiApp",
+      "frontmatterPropertyForReminder": "remind at",
+      "actions": [
+        {
+          "enabled": true,
+          "trigger": "Complete",
+          "type": "move",
+          "targetColumn": "6"
+        }
+      ],
+      "cardSectionsVisibility": "hideBoth",
+      "hiddenTaskProperties": [],
+      "taskPropertyFormat": "3",
+      "taskNoteDefaultLocation": "",
+      "autoAddUniqueID": true,
+      "uniqueIdCounter": 586,
+      "experimentalFeatures": true,
+      "searchQuery": "",
+      "lastViewHistory": {
+        "viewedType": "kanban",
+        "boardIndex": 4,
+        "taskId": "",
+        "settingTab": 1
+      },
+      "taskNoteIdentifierTag": "task",
+      "doubleClickCardToEdit": "noteInTab",
+      "boundTaskCompletionToChildTasks": true,
+      "defaultStartTime": "23:59",
+      "archivedTBNotesFolderPath": "",
+      "frontmatterFormatting": [
+        {
+          "index": 0,
+          "property": "ID",
+          "key": "id",
+          "taskItemKey": "id"
+        },
+        {
+          "index": 1,
+          "property": "Title",
+          "key": "title",
+          "taskItemKey": "title"
+        },
+        {
+          "index": 2,
+          "property": "Status",
+          "key": "status",
+          "taskItemKey": "status"
+        },
+        {
+          "index": 3,
+          "property": "Priority",
+          "key": "priority",
+          "taskItemKey": "priority"
+        },
+        {
+          "index": 4,
+          "property": "Tags",
+          "key": "tags",
+          "taskItemKey": "tags"
+        },
+        {
+          "index": 5,
+          "property": "Time",
+          "key": "time",
+          "taskItemKey": "time"
+        },
+        {
+          "index": 6,
+          "property": "Reminder",
+          "key": "reminder",
+          "taskItemKey": "reminder"
+        },
+        {
+          "index": 7,
+          "property": "Created date",
+          "key": "created-date",
+          "taskItemKey": "createdDate"
+        },
+        {
+          "index": 8,
+          "property": "Start date",
+          "key": "start-date",
+          "taskItemKey": "startDate"
+        },
+        {
+          "index": 9,
+          "property": "Scheduled date",
+          "key": "scheduled",
+          "taskItemKey": "scheduledDate"
+        },
+        {
+          "index": 10,
+          "property": "Due date",
+          "key": "due",
+          "taskItemKey": "due"
+        },
+        {
+          "index": 11,
+          "property": "Depends on",
+          "key": "depends-on",
+          "taskItemKey": "dependsOn"
+        },
+        {
+          "index": 12,
+          "property": "Cancelled date",
+          "key": "cancelled-date",
+          "taskItemKey": "cancelledDate"
+        },
+        {
+          "index": 13,
+          "key": "completed-date",
+          "taskItemKey": "completionDate"
+        }
+      ],
+      "mapView": {
+        "background": "transparent",
+        "mapOrientation": "hor",
+        "optimizedRender": false,
+        "arrowDirection": "c2p",
+        "animatedEdges": false,
+        "scrollAction": "pan",
+        "showMinimap": true,
+        "renderVisibleNodes": true,
+        "edgeType": "default"
+      },
+      "kanbanView": {
+        "lazyLoadingEnabled": true,
+        "initialTaskCount": 20,
+        "loadMoreCount": 10,
+        "scrollThresholdPercent": 80
+      },
+      "safeGuardFeature": true,
+      "visiblePropertiesList": [
+        "id",
+        "priority",
+        "tags",
+        "time",
+        "reminder",
+        "createdDate",
+        "startDate",
+        "scheduledDate",
+        "dueDate",
+        "completionDate",
+        "cancelledDate",
+        "dependsOn",
+        "filePath",
+        "status",
+        "checkbox"
+      ],
+      "taskCardStyle": "emoji",
+      "autoAddCompletedDate": true,
+      "autoAddCancelledDate": true,
+      "scanMode": "manual"
+    }
+  }
+}

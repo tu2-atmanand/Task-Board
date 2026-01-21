@@ -23,7 +23,7 @@ export class ScanFilterModal extends Modal {
 	) {
 		super(plugin.app);
 		this.selectedValues = new Set(
-			this.plugin.settings.data.globalSettings.scanFilters[
+			this.plugin.settings.data.scanFilters[
 				this.filterType
 			].values
 		);
