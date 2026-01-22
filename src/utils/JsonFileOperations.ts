@@ -10,6 +10,7 @@ import { Board } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { App } from "obsidian";
 
 // --------------- Operations with data.json ---------------
 
@@ -24,7 +25,7 @@ export const loadGlobalSettings = async (plugin: TaskBoard) => {
 			68,
 			"Failed to load global settings from data.json",
 			String(error),
-			"JsonFileOperations.ts/loadGlobalSettings"
+			"JsonFileOperations.ts/loadGlobalSettings",
 		);
 		return {};
 	}
@@ -44,7 +45,7 @@ export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
 			69,
 			"Failed to load board configurations from data.json",
 			String(error),
-			"JsonFileOperations.ts/loadBoardsData"
+			"JsonFileOperations.ts/loadBoardsData",
 		);
 		throw error;
 	}
@@ -53,7 +54,7 @@ export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
 // Function to save boards data to the JSON file
 export const saveBoardsData = async (
 	plugin: TaskBoard,
-	updatedBoards: Board[]
+	updatedBoards: Board[],
 ) => {
 	try {
 		// Fetch current settings
@@ -69,7 +70,7 @@ export const saveBoardsData = async (
 			70,
 			"Failed to save board configurations to data.json",
 			String(error),
-			"JsonFileOperations.ts/saveBoardsData"
+			"JsonFileOperations.ts/saveBoardsData",
 		);
 		throw error;
 	}
@@ -79,7 +80,7 @@ export const saveBoardsData = async (
 
 // load tasks from plugin.vaultScanner.tasksCache
 export const loadJsonCacheData = async (
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<jsonCacheData> => {
 	try {
 		return plugin.vaultScanner.tasksCache;
@@ -88,7 +89,7 @@ export const loadJsonCacheData = async (
 			71,
 			"Failed to load tasks from tasks.json",
 			String(error),
-			"JsonFileOperations.ts/loadJsonCacheData"
+			"JsonFileOperations.ts/loadJsonCacheData",
 		);
 		return {
 			VaultName: plugin.app.vault.getName(),
@@ -101,7 +102,7 @@ export const loadJsonCacheData = async (
 
 // load tasks from disk.
 export const loadJsonCacheDataFromDisk = async (
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<jsonCacheData> => {
 	try {
 		let path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
@@ -156,7 +157,7 @@ const writeFileWithRetry = async (
 	path: string,
 	content: string,
 	maxRetries: number = 3,
-	baseDelay: number = 1000
+	baseDelay: number = 1000,
 ): Promise<void> => {
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {
 		try {
@@ -182,7 +183,7 @@ const writeFileWithRetry = async (
 			// Wait with exponential backoff before retry
 			const delay = baseDelay * Math.pow(2, attempt - 1);
 			console.warn(
-				`Task Board: File write timeout (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`
+				`Task Board: File write timeout (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`,
 			);
 			await new Promise((resolve) => setTimeout(resolve, delay));
 		}
@@ -192,7 +193,7 @@ const writeFileWithRetry = async (
 // Function to write tasks data to disk
 export const writeJsonCacheDataToDisk = async (
 	plugin: TaskBoard,
-	tasksData: jsonCacheData
+	tasksData: jsonCacheData,
 ): Promise<boolean> => {
 	try {
 		let path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
@@ -205,7 +206,7 @@ export const writeJsonCacheDataToDisk = async (
 		await writeFileWithRetry(
 			plugin,
 			path,
-			JSON.stringify(tasksData, null, 4)
+			JSON.stringify(tasksData, null, 4),
 		);
 
 		return true;
@@ -225,7 +226,7 @@ export const writeJsonCacheDataToDisk = async (
 				72,
 				userMessage,
 				errorMessage,
-				"JsonFileOperations.ts/writeJsonCacheDataFromDisk"
+				"JsonFileOperations.ts/writeJsonCacheDataFromDisk",
 			);
 		}
 
@@ -235,11 +236,11 @@ export const writeJsonCacheDataToDisk = async (
 
 // Function to move the file from old path to new path
 export const moveTasksCacheFileToNewPath = (
-	plugin: TaskBoard,
+	app: App,
 	oldPath: string,
-	newPath: string
+	newPath: string,
 ) => {
-	return new Promise<boolean>((resolve, reject) => {
+	return new Promise<boolean>(async (resolve, reject) => {
 		if (
 			oldPath === newPath ||
 			(newPath !== "" && newPath.endsWith(".json") === false) ||
@@ -249,11 +250,26 @@ export const moveTasksCacheFileToNewPath = (
 			return true;
 		}
 
+		// Check if the directory exists, create if not
+		const parts = newPath.split("/");
+		if (parts.length > 1) {
+			const dirPath = parts.slice(0, -1).join("/").trim();
+			if (!(await app.vault.adapter.exists(dirPath))) {
+				await app.vault.createFolder(dirPath);
+			}
+		}
+
+		console.log(
+			"moveTasksCacheFileToNewPath...\nOld path :",
+			oldPath,
+			"\nNew path :",
+			newPath,
+		);
 		if (newPath === "")
-			newPath = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+			newPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
 		if (oldPath === "")
-			oldPath = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		plugin.app.vault.adapter
+			oldPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
+		app.vault.adapter
 			.rename(oldPath, newPath)
 			// .then(() => {
 			// 	// Update the tasksCacheFilePath in globalSettings
@@ -268,7 +284,7 @@ export const moveTasksCacheFileToNewPath = (
 					73,
 					"Failed to move tasks.json file to new path",
 					String(error),
-					"JsonFileOperations.ts/moveTasksCacheFileToNewPath"
+					"JsonFileOperations.ts/moveTasksCacheFileToNewPath",
 				);
 				reject(error);
 				return false;
@@ -279,7 +295,7 @@ export const moveTasksCacheFileToNewPath = (
 // Helper function to load tasks from tasks.json and merge them
 export const loadTasksAndMerge = async (
 	plugin: TaskBoard,
-	hardRefresh: boolean
+	hardRefresh: boolean,
 ): Promise<taskJsonMerged> => {
 	try {
 		let allTasks: jsonCacheData;
@@ -316,7 +332,7 @@ export const loadTasksAndMerge = async (
 
 		const mergeTasks = (tasks: typeof allTasks.Pending) =>
 			Object.entries(tasks || {}).flatMap(([filePath, tasks]) =>
-				tasks.map((task: taskItem) => ({ ...task, filePath }))
+				tasks.map((task: taskItem) => ({ ...task, filePath })),
 			);
 
 		const allTasksMerged: taskJsonMerged = {

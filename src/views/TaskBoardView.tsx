@@ -10,7 +10,7 @@ import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { bugReporter, openScanVaultModal } from "../services/OpenModals";
+import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";

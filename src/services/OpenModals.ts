@@ -156,7 +156,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 					// Check if the directory exists, create if not
 					const parts = newTask.filePath.split("/");
 					if (parts.length > 1) {
-						const dirPath = parts.slice(0, -1).join("/");
+						const dirPath = parts.slice(0, -1).join("/").trim();
 						if (!(await plugin.app.vault.adapter.exists(dirPath))) {
 							await plugin.app.vault.createFolder(dirPath);
 						}
