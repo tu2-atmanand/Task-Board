@@ -381,7 +381,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 				],
 				name: "Status Based Workflow",
-				index: 1,
+				index: 2,
 				showColumnTags: false,
 				showFilteredTags: true,
 				hideEmptyColumns: false,
