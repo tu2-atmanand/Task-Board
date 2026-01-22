@@ -861,7 +861,7 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 63,
+          "pending": 64,
           "completed": 14
         }
       }
@@ -1057,7 +1057,7 @@
         "viewedType": "kanban",
         "boardIndex": 4,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 4
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
