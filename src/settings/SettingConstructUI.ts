@@ -54,7 +54,7 @@ export class SettingsManager {
 	win: Window;
 	app: App;
 	plugin: TaskBoard;
-	globalSettings: globalSettingsData | null = null;
+	globalSettings: globalSettingsData;
 	allPickrs: Pickr[] = [];
 	reloadNoticeAlreadyShown: boolean = false;
 
@@ -62,6 +62,7 @@ export class SettingsManager {
 		this.app = plugin.app;
 		this.plugin = plugin;
 		this.win = window;
+		this.globalSettings = this.plugin.settings.data.globalSettings;
 	}
 
 	private getPropertyDisplayName(
@@ -269,9 +270,6 @@ export class SettingsManager {
 		// 	this.contentEl.empty(); // Empty the contentEl to remove all child elements
 		// }
 
-		// Reset global settings if necessary
-		this.globalSettings = null;
-
 		this.reloadNoticeAlreadyShown = false;
 
 		//Destroy all Pickr instances
@@ -451,6 +449,8 @@ export class SettingsManager {
 						this.globalSettings!.scanMode =
 							value as scanModeOptions;
 						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
 					}),
 			);
 
@@ -476,57 +476,129 @@ export class SettingsManager {
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddUniqueID).onChange(async (value) => {
-					this.globalSettings!.autoAddUniqueID = value;
+					this.globalSettings.autoAddUniqueID = value;
 					await this.saveSettings();
 
 					this.openReloadNoticeIfNeeded();
 				}),
 			);
 
-		new Setting(contentEl)
-			.setClass("taskBoard-settings-wide-input")
-			.setName(t("tasks-cache-file-path"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("tasks-cache-file-path-description") +
-						"<br/>" +
-						t("tasks-cache-file-path-description-2"),
-				),
-			)
-			.addDropdown((dropdown) => {
-				const defaultPath = `${this.plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-				const suggestionContent = [
-					defaultPath,
-					...getFolderSuggestions(this.app).map((item) =>
-						normalizePath(`${item}/task-board-cache.json`),
+		const tasksCachePathSettingsContainer = contentEl.createDiv({
+			cls: "task-board-single-setting-container",
+		});
+		const renderTasksCachePathSetting = () => {
+			tasksCachePathSettingsContainer.empty();
+
+			let newPath = this.globalSettings.tasksCacheFilePath;
+			new Setting(tasksCachePathSettingsContainer)
+				.setClass("taskBoard-settings-wide-input")
+				.setName(t("tasks-cache-file-path"))
+				.setDesc(
+					createFragmentWithHTML(
+						t("tasks-cache-file-path-description") +
+							"<br/>" +
+							t("tasks-cache-file-path-description-2"),
 					),
-				];
-				// Add 'Default' option label for the default path
-				dropdown.addOption(defaultPath, `Default - ${defaultPath}`);
+				)
+				.addText((text) => {
+					text.setValue(newPath).onChange((editedPath: string) => {
+						if (editedPath.endsWith(".json")) {
+							newPath = normalizePath(editedPath);
+						} else {
+							newPath = normalizePath(
+								editedPath + "/task-board-cache.json",
+							);
+						}
+					});
 
-				// Add options to dropdown
-				suggestionContent.forEach((path) => {
-					dropdown.addOption(path, path);
-				});
+					// const inputEl = text.inputEl;
+					// const suggestionContent = getFolderSuggestions(this.app);
+					// const onSelectCallback = async (selectedPath: string) => {
+					// 	let newPath = "";
+					// 	if (this.globalSettings) {
+					// 		if (selectedPath.endsWith(".json")) {
+					// 			this.globalSettings.tasksCacheFilePath =
+					// 				selectedPath;
+					// 			newPath = selectedPath;
+					// 		} else {
+					// 			newPath = normalizePath(
+					// 				selectedPath + "/task-board-cache.json",
+					// 			);
+					// 			this.globalSettings.tasksCacheFilePath =
+					// 				newPath;
+					// 		}
+					// 	}
+					// 	renderTasksCachePathSetting();
+					// 	await this.saveSettings();
+					// };
 
-				// Set current value
-				dropdown.setValue(tasksCacheFilePath);
+					// new MultiSuggest(
+					// 	inputEl,
+					// 	new Set(suggestionContent),
+					// 	onSelectCallback,
+					// 	this.app,
+					// );
+				})
+				.addButton((button) =>
+					button.setButtonText(t("transfer")).onClick(async () => {
+						const result = await moveTasksCacheFileToNewPath(
+							this.app,
+							tasksCacheFilePath,
+							newPath,
+						);
+						if (result) {
+							this.globalSettings.tasksCacheFilePath = newPath;
+							this.saveSettings();
 
-				dropdown.onChange(async (selectedPath) => {
-					const result = await moveTasksCacheFileToNewPath(
-						this.plugin,
-						tasksCacheFilePath,
-						selectedPath,
-					);
+							renderTasksCachePathSetting();
+							new Notice(
+								`Task Board cache file path changed to new location succussfully. New location : ${this.globalSettings.tasksCacheFilePath}`,
+							);
+						} else {
+							new Notice(
+								"Task Board : Failed to change the path. Check logs for more info.",
+							);
+							this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+							this.saveSettings();
 
-					if (this.globalSettings && result) {
-						this.globalSettings.tasksCacheFilePath = selectedPath;
-						await this.saveSettings();
+							renderTasksCachePathSetting();
+						}
+					}),
+				)
+				.addButton((button) =>
+					button.setButtonText(t("reset")).onClick(async () => {
+						newPath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 
-						this.openReloadNoticeIfNeeded();
-					}
-				});
-			});
+						const result = await moveTasksCacheFileToNewPath(
+							this.app,
+							tasksCacheFilePath,
+							newPath,
+						);
+
+						if (result) {
+							this.globalSettings.tasksCacheFilePath = newPath;
+							this.saveSettings();
+
+							renderTasksCachePathSetting();
+							new Notice(
+								`Task Board cache file path reset was succussfully.`,
+							);
+						} else {
+							new Notice(
+								"Task Board : Failed to change the path. Check logs for more info.",
+							);
+							this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+							this.saveSettings();
+
+							renderTasksCachePathSetting();
+						}
+
+						renderTasksCachePathSetting();
+					}),
+				);
+		};
+
+		renderTasksCachePathSetting();
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -1510,7 +1582,7 @@ export class SettingsManager {
 			// Use Obsidian's MarkdownUIRenderer to render markdown
 			// @ts-ignore
 			MarkdownUIRenderer.renderSubtaskText(
-				this.plugin.app,
+				this.app,
 				markdown,
 				markdownPreviewEl,
 				"",
@@ -1676,7 +1748,7 @@ export class SettingsManager {
 				});
 
 				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(this.plugin.app);
+				const suggestionContent = getFileSuggestions(this.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTasksFilePath =
@@ -1781,7 +1853,7 @@ export class SettingsManager {
 
 				const inputEl = text.inputEl;
 				inputEl.placeholder = "e.g., TaskBoard/TaskNotes";
-				const suggestionContent = getFolderSuggestions(this.plugin.app);
+				const suggestionContent = getFolderSuggestions(this.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTBNotesFolderPath =
