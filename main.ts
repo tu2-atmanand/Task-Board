@@ -661,8 +661,8 @@ export default class TaskBoard extends Plugin {
 	/**
 	 * Add a file to the rename queue and schedule processing
 	 * @private
-	 * @param {TAbstractFile} file - The file to add to the queue
-	 * @param {string} oldPath - The old path of the file
+	 * @param file - The file to add to the queue
+	 * @param oldPath - The old path of the file
 	 */
 	private queueFileForRename(file: TAbstractFile, oldPath: string) {
 		// Only queue TFile objects (not folders) that are allowed for scanning
@@ -716,11 +716,11 @@ export default class TaskBoard extends Plugin {
 						oldPath,
 						archivedPath,
 					);
-				}
-				processed++;
+					processed++;
 
-				// Update progress notice
-				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
+				}
 			} catch (error) {
 				console.error(
 					`Error processing renamed file ${file.path}:`,
@@ -742,9 +742,11 @@ export default class TaskBoard extends Plugin {
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
-		new Notice(
-			`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
-		);
+		if (processed > 0) {
+			new Notice(
+				`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
+			);
+		}
 	}
 
 	/**
@@ -796,11 +798,11 @@ export default class TaskBoard extends Plugin {
 					)
 				) {
 					this.realTimeScanner.onFileDeleted(file);
-				}
-				processed++;
+					processed++;
 
-				// Update progress notice
-				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
+				}
 			} catch (error) {
 				console.error(
 					`Error processing deleted file ${file.path}:`,
@@ -822,9 +824,11 @@ export default class TaskBoard extends Plugin {
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
-		new Notice(
-			`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
-		);
+		if (processed > 0) {
+			new Notice(
+				`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
+			);
+		}
 	}
 
 	/**
@@ -857,52 +861,55 @@ export default class TaskBoard extends Plugin {
 
 		const totalFiles = this.createQueue.length;
 
-		// Show progress notice
-		this.currentProgressNotice = new Notice(
-			`Task Board : Processing created files: 0/${totalFiles}`,
-			0,
-		);
-
 		this.plugin.vaultScanner.refreshTasksFromFiles(this.createQueue, false);
 
-		let processed = 0;
-		while (this.createQueue.length > 0) {
-			const file = this.createQueue.shift()!;
+		// Show progress notice only if the files are more than 10
+		if (totalFiles > 10) {
+			this.currentProgressNotice = new Notice(
+				`Task Board : Processing created files: 0/${totalFiles}`,
+				0,
+			);
+			let processed = 0;
+			while (this.createQueue.length > 0) {
+				const file = this.createQueue.shift()!;
 
-			try {
-				// if (
-				// 	fileTypeAllowedForScanning(
-				// 		this.plugin.settings.data.globalSettings,
-				// 		file
-				// 	)
-				// ) {
-				// 	await this.realTimeScanner.processAllUpdatedFiles(file);
-				// }
-				processed++;
+				try {
+					// if (
+					// 	fileTypeAllowedForScanning(
+					// 		this.plugin.settings.data.globalSettings,
+					// 		file
+					// 	)
+					// ) {
+					// 	await this.realTimeScanner.processAllUpdatedFiles(file);
+					// }
+					processed++;
 
-				// Update progress notice
-				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
-			} catch (error) {
-				console.error(
-					`Error processing created file ${file.path}:`,
-					error,
-				);
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
+				} catch (error) {
+					console.error(
+						`Error processing created file ${file.path}:`,
+						error,
+					);
+				}
+
+				// Add delay between processing each file to prevent blocking UI
+				if (this.createQueue.length > 0) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
 			}
 
-			// Add delay between processing each file to prevent blocking UI
-			if (this.createQueue.length > 0) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, this.PROCESSING_INTERVAL),
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			if (processed > 0) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFiles} created file(s)`,
 				);
 			}
 		}
-
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-		new Notice(
-			`✓ Task Board : Finished processing ${totalFiles} created file(s)`,
-		);
 	}
 
 	/**
@@ -1301,7 +1308,12 @@ export default class TaskBoard extends Plugin {
 			);
 			const deletedFilesList = [...deletedFiles];
 
-			const changed_files = [...modifiedCreatedRenamedFiles];
+			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
+				fileTypeAllowedForScanning(
+					this.plugin.settings.data.globalSettings,
+					file,
+				),
+			);
 			console.log(
 				"Task Board : Fetching complete.\nModified files :",
 				changed_files,
