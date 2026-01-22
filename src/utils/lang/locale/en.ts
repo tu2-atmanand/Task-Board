@@ -537,7 +537,9 @@ const en: Lang = {
 	"show-modified-files-message-on-startup-info": "If any of the vault files has been modified when Obsidian was inactive. These modified files will be auto-detected at the application start time, after a 10 second delay. This message will provide you to provide the statistics of which files has been modified. If you disable this setting, the modified files will be auto-scanned without needing your attention.",
 	"properties": "Properties",
 	"task-notes": "Task notes",
-	"inline-tasks": "Inline tasks"
+	"inline-tasks": "Inline tasks",
+	"transfer": "Transfer",
+	"reset": "Reset"
 };
 
 export default en;

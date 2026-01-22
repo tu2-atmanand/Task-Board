@@ -2376,7 +2376,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 
-/* /src/views/TaskBoardSettingConstructUI.ts */
+/*----------------------------------------------------
+	 /src/views/TaskBoardSettingConstructUI.ts 
+ ----------------------------------------------------*/
 
 /* .TaskBoardSettingTab {
 	max-width: fit-content;
@@ -2453,6 +2455,22 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskboard-compact-setting .setting-item-control {
 	min-width: auto;
+}
+
+.setting-item.taskBoard-settings-wide-input .setting-item-control {
+	min-width: 80%;
+
+	flex: 1 1 auto;
+	text-align: end;
+	display: flex !important;
+	justify-content: flex-end;
+	align-items: center;
+	gap: var(--size-4-2);
+	flex-wrap: wrap !important;
+}
+
+.setting-item.taskBoard-settings-wide-input .setting-item-control input[type='text'] {
+	min-width: -webkit-fill-available !important;
 }
 
 /* Hidden Properties in Live Editor and Reading Mode */
@@ -2867,7 +2885,9 @@ li:hover .taskboard-hidden-property {
 }
 
 
-/* /src/components/ScanVaultModal.tsx */
+/*------------------------------------------------------------
+		 /src/components/ScanVaultModal.tsx 
+------------------------------------------------------------*/
 
 .scanVaultModalHome {
 	min-width: 40vw;
