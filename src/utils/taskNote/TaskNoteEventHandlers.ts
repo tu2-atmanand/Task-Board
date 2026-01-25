@@ -23,14 +23,14 @@ import { statusTypeNames } from "src/interfaces/Enums";
  */
 export const handleTaskNoteStatusChange = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
 		const newStatus = checkboxStateSwitcher(plugin, task.status);
 		const globalSettings = plugin.settings.data.globalSettings;
 		const moment = _moment as unknown as typeof _moment.default;
 		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern
+			globalSettings?.taskCompletionDateTimePattern,
 		);
 
 		console.log("handleTaskNoteStatusChange..\nnewStatus = ", newStatus);
@@ -56,7 +56,7 @@ export const handleTaskNoteStatusChange = async (
 		}
 		const newStatusName = getStatusNameFromStatusSymbol(
 			newStatus.newSymbol,
-			plugin.settings.data.globalSettings
+			plugin.settings.data.globalSettings,
 		);
 
 		// Update frontmatter with new status
@@ -66,7 +66,7 @@ export const handleTaskNoteStatusChange = async (
 				// This is required to rescan the updated file and refresh the board.
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath,
-					task.legacyId
+					task.legacyId,
 				);
 			});
 		});
@@ -87,7 +87,7 @@ export const handleTaskNoteStatusChange = async (
 export const handleTaskNotePropertyUpdate = async (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ) => {
 	try {
 		// Update frontmatter with all updated properties
@@ -96,7 +96,7 @@ export const handleTaskNotePropertyUpdate = async (
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
 				plugin.realTimeScanner.processAllUpdatedFiles(
-					updatedTask.filePath
+					updatedTask.filePath,
 				);
 			});
 		});
@@ -115,7 +115,7 @@ export const handleTaskNotePropertyUpdate = async (
  */
 export const handleTaskNoteDelete = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
 		const file = plugin.app.vault.getFileByPath(task.filePath);
@@ -135,8 +135,8 @@ export const handleTaskNoteDelete = async (
 				(tag: string) =>
 					tag.includes(
 						plugin.settings.data.globalSettings
-							.taskNoteIdentifierTag
-					) === false
+							.taskNoteIdentifierTag,
+					) === false,
 			);
 
 			// If no other tags remain, we could remove the tags property entirely
@@ -160,7 +160,7 @@ export const handleTaskNoteDelete = async (
 export const handleTaskNoteBodyChange = async (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ) => {
 	try {
 		const file = plugin.app.vault.getFileByPath(updatedTask.filePath);
@@ -168,8 +168,9 @@ export const handleTaskNoteBodyChange = async (
 
 		const fileContent = await readDataOfVaultFile(
 			plugin,
-			updatedTask.filePath
+			updatedTask.filePath,
 		);
+		if (fileContent == null) return;
 
 		// Find the line representing the old task and the updated task
 		// Find all lines between oldTask.body and updatedTask.body that are different
@@ -200,21 +201,21 @@ export const handleTaskNoteBodyChange = async (
 		await writeDataToVaultFile(
 			plugin,
 			updatedTask.filePath,
-			updatedLines.join("\n")
+			updatedLines.join("\n"),
 		).then(() => {
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath,
-					oldTask.id
+					oldTask.id,
 				);
 			});
 		});
 	} catch (error) {
 		console.error(
 			"TaskItemEventHandlers.ts : Error in handleTaskNoteBodyChange",
-			error
+			error,
 		);
 	}
 };

@@ -6,7 +6,7 @@ import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSet
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component, Notice, Platform, Menu, TFile } from 'obsidian';
+import { Component, Notice, Platform, Menu, TFile, MenuItem } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
@@ -16,10 +16,10 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
-import { bugReporter } from 'src/services/OpenModals';
+import { bugReporter, openDateInputModal } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames } from 'src/interfaces/Enums';
-import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
+import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
@@ -156,7 +156,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				el.innerHTML = '';
 				if (task.title === "") return;
 
-				const cleanedTitle = cleanTaskTitleLegacy(task);
+				const cleanedTitle = isTaskNote ? task.title : cleanTaskTitleLegacy(task);
 
 				await MarkdownUIRenderer.renderTaskDisc(
 					plugin.app,
@@ -638,6 +638,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 	const handleMenuButtonClicked = (event: React.MouseEvent) => {
 		event.stopPropagation();
+
+		if (!globalSettings.experimentalFeatures) return;
+
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
@@ -645,20 +648,86 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("status"));
 			item.setIcon("info");
+			item.setTitle(t("status"));
 			const statusMenu = item.setSubmenu()
 
 			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
-					item.setTitle(status.text);
+					const itemDocFragment = MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} (**[${status.value}]**)`, item.titleEl, '', null);
+					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
 						updateTaskItemStatus(plugin, task, status.value);
 					})
 				});
 			})
+		});
+
+		// Priority submenu
+		taskItemMenu.addItem((item) => {
+			item.setIcon("flag");
+			item.setTitle(t("priority"));
+			const priMenu = item.setSubmenu();
+			const priorityOptions = getPriorityOptionsForDropdown();
+			priorityOptions.forEach((p) => {
+				priMenu.addItem((it) => {
+					it.setTitle(p.text);
+					it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
+				});
+			});
+		});
+
+		// Tags editor modal - TODO : It doesnt make sense to build another modal specifically changing the tags, when the AddOrEditTaskModal can itself do this.
+		// taskItemMenu.addItem((item) => {
+		// 	item.setTitle(t("tags"));
+		// 	item.setIcon("tag");
+		// 	item.onClick(() => {
+		// 		const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
+		// 			updateTaskItemTags(plugin, task, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
+		// 		});
+		// 		modal.open();
+		// 	});
+		// });
+
+		// Dates submenu
+
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar-plus")
+			it.setTitle(t("start-date"));
+			it.onClick(async () => {
+				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
+					updateTaskItemDate(plugin, task, 'startDate', newDate);
+				})
+			});
+		});
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar-clock")
+			it.setTitle(t("scheduled-date"));
+			it.onClick(async () => {
+				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
+					updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
+				})
+			});
+		});
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar")
+			it.setTitle(t("due-date"));
+			it.onClick(async () => {
+				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
+					updateTaskItemDate(plugin, task, 'due', newDate);
+				})
+			});
+		});
+
+		// Reminder item - open prompt for date/time
+		taskItemMenu.addItem((item) => {
+			item.setIcon("clock");
+			item.setTitle(t("reminder"));
+			item.onClick(async () => {
+				// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+			});
 		});
 
 		taskItemMenu.addSeparator();
@@ -668,90 +737,37 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
+			item.setIcon("copy");
 			item.setTitle(t("copy-task-title"));
-			item.setIcon("eye-off");
 			item.onClick(async () => {
+				try {
+					await navigator.clipboard.writeText(cleanTaskTitleLegacy(task));
+					new Notice(t("copy-task-title-successful"));
+				} catch (error) {
+					new Notice(t("copy-task-title-unsuccessful"));
+				}
 			});
+		});
 
-			// Priority submenu
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("priority"));
-				item.setIcon("flag");
-				const priMenu = item.setSubmenu();
-				const priorities = [
-					{ label: t("none"), value: 0 },
-					{ label: t("low"), value: 1 },
-					{ label: t("medium"), value: 2 },
-					{ label: t("high"), value: 3 },
-				];
-				priorities.forEach((p) => {
-					priMenu.addItem((it) => {
-						it.setTitle(p.label);
-						it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
-					});
-				});
-			});
-
-			// Dates submenu
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("dates"));
-				item.setIcon("calendar");
-				const dateMenu = item.setSubmenu();
-				dateMenu.addItem((it) => {
-					it.setTitle(t("start-date"));
-					it.onClick(async () => {
-						const newDate = await showTextInputModal(plugin.app, { title: t("set-start-date"), placeholder: 'YYYY-MM-DD', initialValue: task.startDate || '' });
-						if (newDate) updateTaskItemDate(plugin, task, 'startDate', newDate);
-					});
-				});
-				dateMenu.addItem((it) => {
-					it.setTitle(t("scheduled-date"));
-					it.onClick(async () => {
-						const newDate = await showTextInputModal(plugin.app, { title: t("set-scheduled-date"), placeholder: 'YYYY-MM-DD', initialValue: task.scheduledDate || '' });
-						if (newDate) updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
-					});
-				});
-				dateMenu.addItem((it) => {
-					it.setTitle(t("due-date"));
-					it.onClick(async () => {
-						const newDate = await showTextInputModal(plugin.app, { title: t("set-due-date"), placeholder: 'YYYY-MM-DD', initialValue: task.due || '' });
-						if (newDate) updateTaskItemDate(plugin, task, 'due', newDate);
-					});
-				});
-			});
-
-			// Reminder item - open prompt for date/time
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("reminder"));
-				item.setIcon("clock");
-				item.onClick(async () => {
-					const newReminder = await showTextInputModal(plugin.app, { title: t("set-reminder"), placeholder: 'YYYY-MM-DD HH:mm', initialValue: task.reminder || '' });
-					if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
-				});
-			});
-
-			// Tags editor modal
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("tags"));
-				item.setIcon("tag");
-				item.onClick(() => {
-					const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
-						updateTaskItemTags(plugin, task, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
-					});
-					modal.open();
-				});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("file-input");
+			item.setTitle(t("open-note"));
+			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.NoteInTab)
 			});
 		});
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("open-note"));
-			item.setIcon("eye-off");
+			item.setIcon("columns-2");
+			item.setTitle(t("open-note-to-right"));
 			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.NoteInSplit)
 			});
 		});
+
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("contextMenus.task.noteActions"));
 			item.setIcon("file-text");
+			item.setTitle(t("note-actions"));
 
 			const submenu = (item as any).setSubmenu();
 
@@ -767,16 +783,16 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				}
 
 				// Add common file actions (these will either supplement or replace the native menu)
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.rename"));
+				submenu.addItem((subItem: MenuItem) => {
 					subItem.setIcon("pencil");
+					subItem.setTitle(t("rename-note"));
 					subItem.onClick(async () => {
 						try {
 							// Modal-based rename
 							const currentName = file.basename;
 							const newName = await showTextInputModal(plugin.app, {
-								title: t("contextMenus.task.renameTitle"),
-								placeholder: t("contextMenus.task.renamePlaceholder"),
+								title: t("rename-note"),
+								placeholder: t("rename-note-placeholder"),
 								initialValue: currentName,
 							});
 
@@ -794,15 +810,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 								// Rename the file
 								await plugin.app.vault.rename(file, newPath);
-								new Notice(
-									t("contextMenus.task.notices.renameSuccess") + finalName,
-
-								);
-
-								// // Trigger update callback
-								// if (options.onUpdate) {
-								// 	options.onUpdate();
-								// }
+								new Notice("contextMenus.task.notices.renameSuccess");
 							}
 						} catch (error) {
 							console.error("Error renaming file:", error);
@@ -811,76 +819,78 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					});
 				});
 
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("delete-note"));
+				submenu.addItem((subItem: MenuItem) => {
 					subItem.setIcon("trash");
+					subItem.setTitle(t("delete-note"));
 					subItem.onClick(async () => {
 						// Show confirmation and delete
-						const confirmed = await showConfirmationModal(plugin.app, {
-							title: t("contextMenus.task.deleteTitle"),
-							message: t("contextMenus.task.deleteMessage") + file.name,
-							confirmText: t("contextMenus.task.deleteConfirm"),
-							cancelText: t("common.cancel"),
-							isDestructive: true,
-						});
-						if (confirmed) {
-							plugin.app.vault.trash(file, true);
-						}
+						// const confirmed = await showConfirmationModal(plugin.app, {
+						// 	title: t("contextMenus.task.deleteTitle"),
+						// 	message: t("contextMenus.task.deleteMessage") + file.name,
+						// 	confirmText: t("contextMenus.task.deleteConfirm"),
+						// 	cancelText: t("common.cancel"),
+						// 	isDestructive: true,
+						// });
+						// if (confirmed) {
+						// }
+
+						plugin.app.vault.trash(file, true);
+						// handleDeleteTask(plugin, task, true);
 					});
 				});
 
-				submenu.addSeparator();
+				// submenu.addSeparator();
 
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.copyPath"));
-					subItem.setIcon("copy");
-					subItem.onClick(async () => {
-						try {
-							await navigator.clipboard.writeText(file.path);
-							new Notice(t("contextMenus.task.notices.copyPathSuccess"));
-						} catch (error) {
-							new Notice(t("contextMenus.task.notices.copyFailure"));
-						}
-					});
-				});
+				// submenu.addItem((subItem: any) => {
+				// 	subItem.setTitle(t("contextMenus.task.copyPath"));
+				// 	subItem.setIcon("copy");
+				// 	subItem.onClick(async () => {
+				// 		try {
+				// 			await navigator.clipboard.writeText(file.path);
+				// 			new Notice(t("contextMenus.task.notices.copyPathSuccess"));
+				// 		} catch (error) {
+				// 			new Notice(t("contextMenus.task.notices.copyFailure"));
+				// 		}
+				// 	});
+				// });
 
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.copyUrl"));
-					subItem.setIcon("link");
-					subItem.onClick(async () => {
-						try {
-							const url = `obsidian://open?vault=${encodeURIComponent(plugin.app.vault.getName())}&file=${encodeURIComponent(file.path)}`;
-							await navigator.clipboard.writeText(url);
-							new Notice(t("contextMenus.task.notices.copyUrlSuccess"));
-						} catch (error) {
-							new Notice(t("contextMenus.task.notices.copyFailure"));
-						}
-					});
-				});
+				// submenu.addItem((subItem: any) => {
+				// 	subItem.setTitle(t("contextMenus.task.copyUrl"));
+				// 	subItem.setIcon("link");
+				// 	subItem.onClick(async () => {
+				// 		try {
+				// 			const url = `obsidian://open?vault=${encodeURIComponent(plugin.app.vault.getName())}&file=${encodeURIComponent(file.path)}`;
+				// 			await navigator.clipboard.writeText(url);
+				// 			new Notice(t("contextMenus.task.notices.copyUrlSuccess"));
+				// 		} catch (error) {
+				// 			new Notice(t("contextMenus.task.notices.copyFailure"));
+				// 		}
+				// 	});
+				// });
 
-				submenu.addSeparator();
+				// submenu.addSeparator();
 
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.showInExplorer"));
-					subItem.setIcon("folder-open");
-					subItem.onClick(() => {
-						// Reveal file in file explorer
-						plugin.app.workspace
-							.getLeaf()
-							.setViewState({
-								type: "file-explorer",
-								state: {},
-							})
-							.then(() => {
-								// Focus the file in the explorer
-								const fileExplorer =
-									plugin.app.workspace.getLeavesOfType("file-explorer")[0];
-								if (fileExplorer?.view && "revealInFolder" in fileExplorer.view) {
-									(fileExplorer.view as any).revealInFolder(file);
-								}
-							});
-					});
-				});
+				// submenu.addItem((subItem: any) => {
+				// 	subItem.setTitle(t("contextMenus.task.showInExplorer"));
+				// 	subItem.setIcon("folder-open");
+				// 	subItem.onClick(() => {
+				// 		// Reveal file in file explorer
+				// 		plugin.app.workspace
+				// 			.getLeaf()
+				// 			.setViewState({
+				// 				type: "file-explorer",
+				// 				state: {},
+				// 			})
+				// 			.then(() => {
+				// 				// Focus the file in the explorer
+				// 				const fileExplorer =
+				// 					plugin.app.workspace.getLeavesOfType("file-explorer")[0];
+				// 				if (fileExplorer?.view && "revealInFolder" in fileExplorer.view) {
+				// 					(fileExplorer.view as any).revealInFolder(file);
+				// 				}
+				// 			});
+				// 	});
+				// });
 			}
 		});
 

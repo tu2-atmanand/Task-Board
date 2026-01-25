@@ -912,6 +912,164 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
+	async findModifiedFilesOnAppAbsense() {
+		if (this.vaultScanner.tasksCache.Modified_at) {
+			const LAST_UPDATED_TIME = Date.parse(
+				this.vaultScanner.tasksCache.Modified_at,
+			);
+			console.log(
+				"Task Board : Fetching all modified files...\nLast modified time :",
+				LAST_UPDATED_TIME,
+			);
+			let filesScannedCount = 0;
+			const modifiedCreatedRenamedFiles = this.app.vault
+				.getFiles()
+				.filter((file) => {
+					filesScannedCount++;
+					return (
+						file.stat.mtime > LAST_UPDATED_TIME ||
+						file.stat.ctime > LAST_UPDATED_TIME
+					);
+				});
+
+			// Find deleted files by comparing cache with current vault files
+			const currentFilesPaths = new Set(
+				this.app.vault.getFiles().map((file) => file.path),
+			);
+			const cachedFilesPaths = Object.keys(
+				this.vaultScanner.tasksCache.Pending || {},
+			).concat(Object.keys(this.vaultScanner.tasksCache.Completed || {}));
+			const deletedFiles = new Set(
+				cachedFilesPaths.filter(
+					(filePath) => !currentFilesPaths.has(filePath),
+				),
+			);
+			const deletedFilesList = [...deletedFiles];
+
+			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
+				fileTypeAllowedForScanning(
+					this.plugin.settings.data.globalSettings,
+					file,
+				),
+			);
+			console.log(
+				"Task Board : Fetching complete.\nModified files :",
+				changed_files,
+				"\nDeleted files :",
+				deletedFilesList,
+				"\nFiles scanned :",
+				filesScannedCount,
+			);
+			const totalFilesLength =
+				changed_files.length + deletedFilesList.length;
+
+			if (totalFilesLength > 0) {
+				const modifiedFilesNotice = new Notice(
+					createFragment((f) => {
+						f.createDiv("bugReportNotice", (el) => {
+							el.createEl("p", {
+								text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
+							});
+							el.createEl("button", {
+								text: t("show-me"),
+								cls: "reportBugButton",
+								onclick: () => {
+									// el.hide();
+
+									// Open a modal and show all these file names with their modified date-time in a nice UI.
+									const modifiedFilesModal =
+										new ModifiedFilesModal(this.app, {
+											modifiedFiles: changed_files,
+											deletedFiles: deletedFilesList,
+										});
+									modifiedFilesModal.open();
+								},
+							});
+							el.createEl("button", {
+								text: t("scan-them"),
+								cls: "ignoreBugButton",
+								onclick: async () => {
+									modifiedFilesNotice.hide();
+
+									// Show progress notice
+									this.currentProgressNotice = new Notice(
+										`Task Board : Processing modified files: 0/${totalFilesLength}`,
+										0,
+									);
+
+									this.plugin.vaultScanner
+										.refreshTasksFromFiles(
+											changed_files,
+											false,
+										)
+										.then(async () => {
+											console.log(
+												"Task Board : Will now going to update the deleted files cache...",
+											);
+											if (deletedFilesList.length > 0) {
+												await this.plugin.vaultScanner.deleteCacheForFiles(
+													deletedFilesList,
+												);
+												console.log(
+													"Task Board : Completed deleting cache of deleted files...",
+												);
+											}
+										});
+
+									let modifiedFilesQueue = changed_files;
+
+									let processed = 0;
+									while (modifiedFilesQueue.length > 0) {
+										const file =
+											modifiedFilesQueue.shift()!;
+
+										try {
+											processed++;
+
+											// Update progress notice
+											this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+										} catch (error) {
+											console.error(
+												`Error processing created file ${file.path}:`,
+												error,
+											);
+										}
+
+										// Add delay between processing each file to prevent blocking UI
+										if (modifiedFilesQueue.length > 0) {
+											await new Promise((resolve) =>
+												setTimeout(
+													resolve,
+													this.PROCESSING_INTERVAL,
+												),
+											);
+										}
+									}
+
+									// Hide progress notice after completion
+									this.currentProgressNotice?.hide();
+									this.currentProgressNotice = null;
+									new Notice(
+										`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
+									);
+								},
+							});
+						});
+					}),
+					0,
+				);
+
+				modifiedFilesNotice.messageEl.onClickEvent((e) => {
+					if (e.target instanceof HTMLButtonElement) {
+						e.stopPropagation();
+						e.preventDefault();
+						e.stopImmediatePropagation();
+					}
+				});
+			}
+		}
+	}
+
 	/**
 	 * Registers all the events that TaskBoard needs to listen to
 	 */
@@ -1273,164 +1431,6 @@ export default class TaskBoard extends Plugin {
 	// 	this.settings = settings;
 	// 	// this.saveSettings();
 	// }
-
-	async findModifiedFilesOnAppAbsense() {
-		if (this.vaultScanner.tasksCache.Modified_at) {
-			const LAST_UPDATED_TIME = Date.parse(
-				this.vaultScanner.tasksCache.Modified_at,
-			);
-			console.log(
-				"Task Board : Fetching all modified files...\nLast modified time :",
-				LAST_UPDATED_TIME,
-			);
-			let filesScannedCount = 0;
-			const modifiedCreatedRenamedFiles = this.app.vault
-				.getFiles()
-				.filter((file) => {
-					filesScannedCount++;
-					return (
-						file.stat.mtime > LAST_UPDATED_TIME ||
-						file.stat.ctime > LAST_UPDATED_TIME
-					);
-				});
-
-			// Find deleted files by comparing cache with current vault files
-			const currentFilesPaths = new Set(
-				this.app.vault.getFiles().map((file) => file.path),
-			);
-			const cachedFilesPaths = Object.keys(
-				this.vaultScanner.tasksCache.Pending || {},
-			).concat(Object.keys(this.vaultScanner.tasksCache.Completed || {}));
-			const deletedFiles = new Set(
-				cachedFilesPaths.filter(
-					(filePath) => !currentFilesPaths.has(filePath),
-				),
-			);
-			const deletedFilesList = [...deletedFiles];
-
-			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
-				fileTypeAllowedForScanning(
-					this.plugin.settings.data.globalSettings,
-					file,
-				),
-			);
-			console.log(
-				"Task Board : Fetching complete.\nModified files :",
-				changed_files,
-				"\nDeleted files :",
-				deletedFilesList,
-				"\nFiles scanned :",
-				filesScannedCount,
-			);
-			const totalFilesLength =
-				changed_files.length + deletedFilesList.length;
-
-			if (totalFilesLength > 0) {
-				const modifiedFilesNotice = new Notice(
-					createFragment((f) => {
-						f.createDiv("bugReportNotice", (el) => {
-							el.createEl("p", {
-								text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
-							});
-							el.createEl("button", {
-								text: t("show-me"),
-								cls: "reportBugButton",
-								onclick: () => {
-									// el.hide();
-
-									// Open a modal and show all these file names with their modified date-time in a nice UI.
-									const modifiedFilesModal =
-										new ModifiedFilesModal(this.app, {
-											modifiedFiles: changed_files,
-											deletedFiles: deletedFilesList,
-										});
-									modifiedFilesModal.open();
-								},
-							});
-							el.createEl("button", {
-								text: t("scan-them"),
-								cls: "ignoreBugButton",
-								onclick: async () => {
-									modifiedFilesNotice.hide();
-
-									// Show progress notice
-									this.currentProgressNotice = new Notice(
-										`Task Board : Processing modified files: 0/${totalFilesLength}`,
-										0,
-									);
-
-									this.plugin.vaultScanner
-										.refreshTasksFromFiles(
-											changed_files,
-											false,
-										)
-										.then(async () => {
-											console.log(
-												"Task Board : Will now going to update the deleted files cache...",
-											);
-											if (deletedFilesList.length > 0) {
-												await this.plugin.vaultScanner.deleteCacheForFiles(
-													deletedFilesList,
-												);
-												console.log(
-													"Task Board : Completed deleting cache of deleted files...",
-												);
-											}
-										});
-
-									let modifiedFilesQueue = changed_files;
-
-									let processed = 0;
-									while (modifiedFilesQueue.length > 0) {
-										const file =
-											modifiedFilesQueue.shift()!;
-
-										try {
-											processed++;
-
-											// Update progress notice
-											this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
-										} catch (error) {
-											console.error(
-												`Error processing created file ${file.path}:`,
-												error,
-											);
-										}
-
-										// Add delay between processing each file to prevent blocking UI
-										if (modifiedFilesQueue.length > 0) {
-											await new Promise((resolve) =>
-												setTimeout(
-													resolve,
-													this.PROCESSING_INTERVAL,
-												),
-											);
-										}
-									}
-
-									// Hide progress notice after completion
-									this.currentProgressNotice?.hide();
-									this.currentProgressNotice = null;
-									new Notice(
-										`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
-									);
-								},
-							});
-						});
-					}),
-					0,
-				);
-
-				modifiedFilesNotice.messageEl.onClickEvent((e) => {
-					if (e.target instanceof HTMLButtonElement) {
-						e.stopPropagation();
-						e.preventDefault();
-						e.stopImmediatePropagation();
-					}
-				});
-			}
-		}
-	}
 
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed

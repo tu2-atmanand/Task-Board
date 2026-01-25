@@ -127,7 +127,7 @@ const en: Lang = {
 	"task-board": "Task Board",
 	"open-task-board": "Open task board",
 	"open-task-board-in-new-window": "Open task board in new window",
-	"update-tasks-from-this-file": "Update tasks from this file",
+	"update-tasks-from-this-file": "Scan tasks from this file",
 	"add-file-in-scan-filter": "Add file in scan filter",
 	"add-folder-in-scan-filter": "Add folder in scan filter",
 	"board-filters": "Board filters",
@@ -539,7 +539,27 @@ const en: Lang = {
 	"task-notes": "Task notes",
 	"inline-tasks": "Inline tasks",
 	"transfer": "Transfer",
-	"reset": "Reset"
+	"reset": "Reset",
+	"copy-task-title": "Copy task title",
+	"open-note": "Open note",
+	"note-actions": "Note actions",
+	"dates": "Dates",
+	"today": "Today",
+	"tomorrow": "Tomorrow",
+	"in-2-days": "In 2 days",
+	"in-3-days": "In 3 days",
+	"in-1-week": "In 1 week",
+	"in-2-weeks": "In 2 weeks",
+	"in-1-month": "In 1 month",
+	"in-2-months": "In 2 months",
+	"in-6-months": "In 6 months",
+	"in-1-year": "In 1 year",
+	"clear-date": "Clear date",
+	"rename-note": "Rename note",
+	"delete-note": "Delete note",
+	"open-note-to-right": "Open note to right",
+	"copy-task-title-successful": "Successfully copied the task title.",
+	"copy-task-title-unsuccessful": "There was an error while copying the task title."
 };
 
 export default en;

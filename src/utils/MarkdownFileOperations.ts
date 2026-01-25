@@ -13,8 +13,8 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
  */
 export const readDataOfVaultFile = async (
 	plugin: TaskBoard,
-	filePath: string
-): Promise<string> => {
+	filePath: string,
+): Promise<string | null> => {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
@@ -27,18 +27,18 @@ export const readDataOfVaultFile = async (
 				75,
 				"File not found in vault.",
 				`File not found at path: ${filePath}`,
-				"MarkdownFileOperations.ts/readDataOfVaultFile"
+				"MarkdownFileOperations.ts/readDataOfVaultFile",
 			);
 			throw `File not found at path: ${filePath}`;
 		}
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			76,
-			"Error reading data from vault files.",
+			`Error reading data from vault file. Couldnt able to read the following file : ${filePath}`,
 			String(error),
-			"MarkdownFileOperations.ts/readDataOfVaultFile"
+			"MarkdownFileOperations.ts/readDataOfVaultFile",
 		);
-		throw error;
+		return null;
 	}
 };
 
@@ -52,7 +52,7 @@ export const readDataOfVaultFile = async (
 export const writeDataToVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string,
-	newContent: string
+	newContent: string,
 ): Promise<void> => {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
@@ -70,7 +70,7 @@ export const writeDataToVaultFile = async (
 			77,
 			"Error writing to file in vault.",
 			String(error),
-			"MarkdownFileOperations.ts/writeDataToVaultFile"
+			"MarkdownFileOperations.ts/writeDataToVaultFile",
 		);
 		// throw error;
 	}

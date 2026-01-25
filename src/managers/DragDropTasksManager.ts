@@ -404,7 +404,7 @@ class DragDropTasksManager {
 				UniversalDateOptions.dueDate;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin.app, plugin);
+			const datePicker = new DatePickerModal(plugin);
 			datePicker.onDateSelected = async (date: string | null) => {
 				if (date) {
 					// newTask[dateType] = date;
@@ -648,7 +648,7 @@ class DragDropTasksManager {
 				UniversalDateOptions.dueDate;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin.app, plugin);
+			const datePicker = new DatePickerModal(plugin);
 			datePicker.onDateSelected = async (date: string | null) => {
 				if (date) {
 					// newTask[dateType] = date;
