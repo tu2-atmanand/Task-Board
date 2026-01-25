@@ -7554,3 +7554,21 @@ Date picker modal styles
 	min-width: 20px;
 	font-size: 16px;
 }
+
+
+/* -----------------------------------------------------------
+	MENU ITEMS
+------------------------------------------------------------ */
+
+.menu-item-title .contains-task-list {
+	margin-block: 4px;
+	padding-inline-start: 24px;
+}
+
+.menu-item-title .contains-task-list>li>input {
+	vertical-align: middle;
+}
+
+.menu-item-title .contains-task-list>li>input[type=checkbox]:checked::after {
+	padding-block-start: 4px;
+}
