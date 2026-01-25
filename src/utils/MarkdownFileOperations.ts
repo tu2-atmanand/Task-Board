@@ -14,7 +14,7 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 export const readDataOfVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string,
-): Promise<string> => {
+): Promise<string | null> => {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
@@ -38,7 +38,7 @@ export const readDataOfVaultFile = async (
 			String(error),
 			"MarkdownFileOperations.ts/readDataOfVaultFile",
 		);
-		return "";
+		return null;
 	}
 };
 

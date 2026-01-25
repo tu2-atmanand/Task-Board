@@ -70,7 +70,10 @@ export class AddOrEditTaskModal extends Modal {
 		let noteContent: string = "";
 		if (this.isTaskNote) {
 			if (this.filePath) {
-				noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
+				const data = await readDataOfVaultFile(this.plugin, this.filePath);
+
+				if (data == null) this.onClose();
+				else noteContent = data;
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 

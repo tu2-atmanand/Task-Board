@@ -101,6 +101,8 @@ export default class VaultScanner {
 				this.plugin,
 				fileNameWithPath,
 			);
+			if (fileContent == null) return "false";
+
 			const lines = fileContent.split("\n");
 
 			const oldPendingFileCache =
