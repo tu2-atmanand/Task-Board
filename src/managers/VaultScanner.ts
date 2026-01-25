@@ -684,16 +684,15 @@ export function fileTypeAllowedForScanning(
 	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
 
 	const filePath = file.path.toLocaleLowerCase();
+	console.log("Filepath :", filePath);
 
 	if (
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
-		allowedFileExtensionsRegEx.test(file.path) === false ||
-		(
-			globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
+		!allowedFileExtensionsRegEx.test(file.path) ||
+		(globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
 			filePath.startsWith(
 				globalSettings.archivedTBNotesFolderPath.toLowerCase(),
-			)
-		) ||
+			)) ||
 		filePath === globalSettings.archivedTasksFilePath.toLowerCase()
 	) {
 		return false;

@@ -1261,7 +1261,8 @@ export const sanitizeDependsOn = (
 // For handleCheckboxChange
 
 /**
- * Function to clean the task title by removing metadata.
+ * Function to remove only the properties which user has configured 
+ * to be hidden using the hiddenTaskProperties setting.
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The task item to clean.
  * @returns The cleaned task title without metadata.
@@ -1289,10 +1290,10 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		)
 		.trim();
 
-	// If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
-	if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
-		return cleanTaskTitleLegacy(task);
-	}
+	// // If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
+	// if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+	// 	return cleanTaskTitleLegacy(task);
+	// }
 
 	// Hide only selected properties
 	hiddenProperties.forEach((property) => {
@@ -1440,6 +1441,9 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 			""
 		)
 		.trim();
+
+	// TODO : Support the legacy feature of adding all properties after the pipe symbol (|).
+	// If pipe symbol is present (` | `), then remove everything after the pipe symbol. 
 
 	// Remove tags
 	task.tags.forEach((tag) => {
