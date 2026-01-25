@@ -421,7 +421,7 @@ export async function deleteTaskNote(
 			return;
 		}
 
-		await plugin.app.vault.delete(file);
+		await plugin.app.vault.trash(file, true);
 		new Notice(`Task note deleted: ${file.name}`);
 	} catch (error) {
 		console.error("Error deleting task note:", error);
