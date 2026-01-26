@@ -49,3 +49,15 @@ Context : JsonFileOperations.ts/moveTasksCacheFileToNewPath
 ```log
 Error: ENOENT: no such file or directory, rename 'D:\Personal_Projects_Hub\IDE_Wise_Projects\Obsidian\TemplateToDevelopPlugin\Meta\Task_Board\task-board-cache.json' -> 'D:\Personal_Projects_Hub\IDE_Wise_Projects\Obsidian\TemplateToDevelopPlugin\Meta\Task_Board\Cache\task-board-cache.json'
 ```
+
+-------------
+
+Timestamp : 2026-01-26T06:52:46.386Z
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "390". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```

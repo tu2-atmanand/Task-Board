@@ -1050,12 +1050,12 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 587,
+      "uniqueIdCounter": 588,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 4,
+        "boardIndex": 2,
         "taskId": "",
         "settingTab": 7
       },
@@ -1182,7 +1182,8 @@
         "dependsOn",
         "filePath",
         "status",
-        "checkbox"
+        "checkbox",
+        "subTasks"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
