@@ -14,6 +14,7 @@ import {
 } from "../MarkdownFileOperations";
 import { moment as _moment } from "obsidian";
 import { statusTypeNames } from "src/interfaces/Enums";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Handle task note status change (checkbox change)
@@ -73,8 +74,12 @@ export const handleTaskNoteStatusChange = async (
 
 		new Notice(`Task note status updated to ${newStatusName}`);
 	} catch (error) {
-		console.error("Error updating task note status:", error);
-		new Notice("Error updating task note status: " + String(error));
+		bugReporterManagerInsatance.showNotice(
+			153,
+			"There was an error while updating the status.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNoteStatusChange",
+		);
 	}
 };
 
@@ -103,8 +108,12 @@ export const handleTaskNotePropertyUpdate = async (
 
 		new Notice("Task note properties updated");
 	} catch (error) {
-		console.error("Error updating task note properties:", error);
-		new Notice("Error updating task note properties: " + String(error));
+		bugReporterManagerInsatance.showNotice(
+			154,
+			"There was an error while updating the task note.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNotePropertyUpdate",
+		);
 	}
 };
 
@@ -113,7 +122,7 @@ export const handleTaskNotePropertyUpdate = async (
  * @param plugin - TaskBoard plugin instance
  * @param task - Task note to delete
  */
-export const handleTaskNoteDelete = async (
+export const handleTaskNote2NormalNote = async (
 	plugin: TaskBoard,
 	task: taskItem,
 ) => {
@@ -146,8 +155,12 @@ export const handleTaskNoteDelete = async (
 			new Notice("Task note converted back to regular note");
 		}
 	} catch (error) {
-		console.error("Error deleting task note:", error);
-		new Notice("Error deleting task note: " + String(error));
+		bugReporterManagerInsatance.showNotice(
+			155,
+			"There was an error while converting the note back to normal note.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNote2NormalNote",
+		);
 	}
 };
 
@@ -213,9 +226,11 @@ export const handleTaskNoteBodyChange = async (
 			});
 		});
 	} catch (error) {
-		console.error(
-			"TaskItemEventHandlers.ts : Error in handleTaskNoteBodyChange",
-			error,
+		bugReporterManagerInsatance.showNotice(
+			156,
+			"There was an error while updating the body of the task note. Below error will provide some more information.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNoteBodyChange",
 		);
 	}
 };

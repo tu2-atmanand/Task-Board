@@ -539,7 +539,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			dragDropTasksManagerInsatance.clearDesiredDropIndex();
 			// }
 		} catch (error) {
-			console.error('Error handling task drop:', error);
+			bugReporterManagerInsatance.addToLogs(
+				118,
+				String(error),
+				"Column.tsx/handleDrop",
+			);
 		}
 	}, [columnData, plugin]);
 
@@ -616,7 +620,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
 			}
 		} catch (error) {
-			console.error('Error computing insert index:', error);
+			bugReporterManagerInsatance.addToLogs(
+				119,
+				String(error),
+				"Column.tsx/handleTaskItemDragOVer",
+			);
 		}
 	}, [scheduleSetInsertIndex, columnData]);
 
@@ -690,7 +698,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			// const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
 			// e.dataTransfer!.dropEffect = allowed ? 'move' : 'none';
 		} catch (error) {
-			console.error('Error handling drag over:', error);
+			bugReporterManagerInsatance.addToLogs(
+				120,
+				String(error),
+				"Column.tsx/handleDragOver",
+			);
 		}
 	}, [columnData]);
 

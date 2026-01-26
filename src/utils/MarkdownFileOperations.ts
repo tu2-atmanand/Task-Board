@@ -61,14 +61,18 @@ export const writeDataToVaultFile = async (
 			// plugin.fileUpdatedUsingModal = file.path;
 		} else {
 			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
-			console.error(`File not found at path: ${filePath}`);
+			bugReporterManagerInsatance.addToLogs(
+				160,
+				`File not found at path.\nPath: ${filePath}`,
+				"MarkdownFileOperations.ts/writeDataToVaultFile",
+			);
 			throw `File not found at path: ${filePath}`;
 		}
 		return;
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			77,
-			"Error writing to file in vault.",
+			`Error writing to file in vault. Make sure the following file exists : ${filePath}`,
 			String(error),
 			"MarkdownFileOperations.ts/writeDataToVaultFile",
 		);

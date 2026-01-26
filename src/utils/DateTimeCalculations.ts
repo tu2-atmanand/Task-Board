@@ -3,25 +3,10 @@ import { UniversalDateOptions } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 
 /**
- * Returns local time in ISO-like format (YYYY-MM-DDTHH:MM) without milliseconds or timezone
- * @returns Current local time in ISO format string (YYYY-MM-DDTHH:MM)
- *
- * @todo - Update this function and the below one and their names. And take input as the format from the setting and return the value as per the format.
- */
-export const getLocalDateTimeString = (): string => {
-	const now = new Date();
-	const year = now.getFullYear();
-	const month = String(now.getMonth() + 1).padStart(2, "0");
-	const day = String(now.getDate()).padStart(2, "0");
-	const hours = String(now.getHours()).padStart(2, "0");
-	const minutes = String(now.getMinutes()).padStart(2, "0");
-
-	return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
-/**
  * Returns local time in ISO-like format (YYYY-MM-DDTHH:MM:SS) without milliseconds or timezone
  * @returns Current local time in ISO format string (YYYY-MM-DDTHH:MM:SS)
+ * 
+ * @todo - Update this function to take input as the format from the setting and return the value as per the format.
  */
 export const getCurrentLocalTimeString = (): string => {
 	const now = new Date();

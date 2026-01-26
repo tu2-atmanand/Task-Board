@@ -42,7 +42,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				plugin.settings.data.globalSettings,
 				task.title,
 				newStatus.newSymbol,
-				newStatus.newSymbolType
+				newStatus.newSymbolType,
 			);
 			const taskWithUpdatedStatus = {
 				...task,
@@ -54,12 +54,12 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				(newId) => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
 						task.filePath,
-						task.legacyId
+						task.legacyId,
 					);
 
 					// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 					// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
-				}
+				},
 			);
 
 			// if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
@@ -130,7 +130,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 				45,
 				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
-				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+				"TaskItemUtils.ts/useTasksPluginToUpdateInFile",
 			);
 
 			// useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
@@ -154,23 +154,18 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			.then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					task.filePath,
-					task.legacyId
+					task.legacyId,
 				);
 
 				// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 				// 	// Move from Pending to Completed
 				// 	moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
 			})
-			.catch((error) => {
-				// bugReporterManagerInsatance.showNotice(
-				// 	46,
-				// 	"Error updating recurring task in file",
-				// 	error as string,
-				// 	"TaskItemEventHandlers.ts/handleCheckboxChange"
-				// );
-				console.error(
-					"TaskItemEventHandlers.ts : Error updating recurring task in file",
-					error
+			.catch((err) => {
+				bugReporterManagerInsatance.addToLogs(
+					152,
+					String(err),
+					"TaskItemEventHandlers.ts/handleCheckboxChange",
 				);
 			});
 	}
@@ -186,7 +181,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 export const handleSubTasksChange = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ) => {
 	// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 	// updateTaskInJson(plugin, updatedTask);
@@ -194,7 +189,7 @@ export const handleSubTasksChange = (
 	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
 		plugin.realTimeScanner.processAllUpdatedFiles(
 			updatedTask.filePath,
-			oldTask.id
+			oldTask.id,
 		);
 	});
 };
@@ -208,7 +203,7 @@ export const handleSubTasksChange = (
 export const handleDeleteTask = (
 	plugin: TaskBoard,
 	task: taskItem,
-	isTaskNote: boolean
+	isTaskNote: boolean,
 ) => {
 	const mssg = t("confirm-task-delete-description");
 	const app = plugin.app;
@@ -221,7 +216,7 @@ export const handleDeleteTask = (
 			} else {
 				deleteTaskFromFile(plugin, task).then(() => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
-						task.filePath
+						task.filePath,
 					);
 				});
 

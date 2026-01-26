@@ -148,7 +148,7 @@ export class BugReporterModal extends Modal {
 			)
 			.join("\n");
 
-		const finalContentForHTMLDom = `<h4>Developer message</h4><br/>${message.replaceAll(
+		const finalContentForHTMLDom = `<h4>Message for user</h4><br/>${message.replaceAll(
 			"\n",
 			"<br/>"
 		)}<br/><br/><h5>Error Message</h5><i>${sanitizedErrorContent.replaceAll(
@@ -156,7 +156,7 @@ export class BugReporterModal extends Modal {
 			"<br/>"
 		)}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfoTextHTMLDom}<br/><h5>Any additional information and screenshots</h5>`;
 
-		const finalContentForMarkdown = `# Bug Report\n\n## Developer message\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n### Any additional information and screenshots`;
+		const finalContentForMarkdown = `# Bug Report\n\n## Message for user\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n### Any additional information and screenshots`;
 
 		return { finalContentForHTMLDom, finalContentForMarkdown };
 	}

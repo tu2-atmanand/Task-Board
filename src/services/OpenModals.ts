@@ -203,9 +203,10 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							});
 					}
 				} catch (error) {
-					console.error(
-						"Error creating or updating task note:",
-						error,
+					bugReporterManagerInsatance.addToLogs(
+						149,
+						String(error),
+						"OpenModals.ts/openAddNewTaskNoteModal/callback()",
 					);
 					new Notice(t("error-creating-task-note"), 5000);
 					return false;

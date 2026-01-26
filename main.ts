@@ -274,11 +274,19 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async saveSettings(newSetting?: PluginDataJson) {
-		if (newSetting) {
-			this.settings = newSetting;
-			await this.saveData(newSetting);
-		} else {
-			await this.saveData(this.settings);
+		try {
+			if (newSetting) {
+				this.settings = newSetting;
+				await this.saveData(newSetting);
+			} else {
+				await this.saveData(this.settings);
+			}
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				140,
+				String(err),
+				"main.ts/saveSettings",
+			);
 		}
 	}
 
@@ -722,9 +730,10 @@ export default class TaskBoard extends Plugin {
 					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
 				}
 			} catch (error) {
-				console.error(
-					`Error processing renamed file ${file.path}:`,
-					error,
+				bugReporterManagerInsatance.addToLogs(
+					162,
+					String(error),
+					"main.ts/processRenameQueue",
 				);
 			}
 
@@ -804,9 +813,10 @@ export default class TaskBoard extends Plugin {
 					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
 				}
 			} catch (error) {
-				console.error(
-					`Error processing deleted file ${file.path}:`,
-					error,
+				bugReporterManagerInsatance.addToLogs(
+					163,
+					String(error),
+					"main.ts/processDeleteQueue",
 				);
 			}
 
@@ -887,9 +897,10 @@ export default class TaskBoard extends Plugin {
 					// Update progress notice
 					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
 				} catch (error) {
-					console.error(
-						`Error processing created file ${file.path}:`,
-						error,
+					bugReporterManagerInsatance.addToLogs(
+						164,
+						String(error),
+						"main.ts/processCreateQueue",
 					);
 				}
 
@@ -1029,9 +1040,10 @@ export default class TaskBoard extends Plugin {
 											// Update progress notice
 											this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
 										} catch (error) {
-											console.error(
-												`Error processing created file ${file.path}:`,
-												error,
+											bugReporterManagerInsatance.addToLogs(
+												165,
+												String(error),
+												"main.ts/findModifiedFilesOnAppAbsense",
 											);
 										}
 

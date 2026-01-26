@@ -3,12 +3,12 @@
 import React, { useMemo, memo } from 'react';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItem';
-import Column from './Column';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
 import { ChevronDown, ChevronLast, ChevronLeft, ChevronRight } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -32,7 +32,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	tasksPerColumn,
 	lazyLoadingEnabled,
 }) => {
-	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 
 	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
 	const {
@@ -240,7 +240,11 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			await plugin.saveSettings();
 			eventEmitter.emit('REFRESH_BOARD');
 		} catch (err) {
-			console.error('Error toggling swimlane minimize:', err);
+			bugReporterManagerInsatance.addToLogs(
+				121,
+				String(err),
+				"KanbanSwimlanesContainer.tsx/handleSwimlaneMinimize",
+			);
 		}
 	}
 
@@ -453,7 +457,7 @@ const MemoizedSwimlanColumn = memo<{
 	activeBoardData: Board;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
-	Component: typeof Column | typeof LazyColumn;
+	Component: typeof LazyColumn;
 	hideColumnHeader?: boolean;
 	swimlaneData?: { property: string, value: string };
 	headerOnly?: boolean;

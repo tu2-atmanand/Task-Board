@@ -116,7 +116,7 @@ const MapView: React.FC<MapViewProps> = ({
 				}
 			}
 		} catch (error) {
-			console.warn('Failed to load node positions from localStorage:', error);
+			bugReporterManagerInsatance.addToLogs(92, String(error), 'MapView.tsx/loadPositions');
 			allBoardPositions = {};
 		}
 
@@ -127,7 +127,7 @@ const MapView: React.FC<MapViewProps> = ({
 			}
 			return {};
 		} catch (error) {
-			console.warn('Failed to get positions for board', activeBoardIndex, ':', error);
+			bugReporterManagerInsatance.addToLogs(93, String(error), 'MapView.tsx/loadPositions');
 			return {};
 		}
 	};
@@ -144,7 +144,7 @@ const MapView: React.FC<MapViewProps> = ({
 			}
 			return {};
 		} catch (error) {
-			console.warn('Failed to load node sizes from localStorage:', error);
+			bugReporterManagerInsatance.addToLogs(94, String(error), 'MapView.tsx/loadNodeSizes');
 			return {};
 		}
 	};
@@ -161,7 +161,7 @@ const MapView: React.FC<MapViewProps> = ({
 			}
 			return { [activeBoardIndex]: { x: 10, y: 10, zoom: 1.5 } };
 		} catch (error) {
-			console.warn('Failed to load viewport from localStorage:', error);
+			bugReporterManagerInsatance.addToLogs(95, String(error), 'MapView.tsx/loadViewport');
 			return { [activeBoardIndex]: { x: 10, y: 10, zoom: 1.5 } };
 		}
 	};
@@ -240,7 +240,8 @@ const MapView: React.FC<MapViewProps> = ({
 					return parsed;
 				}
 			} catch (e) {
-				console.warn('Error parsing columnWidth:', e);
+				bugReporterManagerInsatance.addToLogs(96, String(e), 'MapView.tsx/getDefaultWidth');
+
 			}
 			return 300; // Fallback default width
 		};
@@ -253,7 +254,7 @@ const MapView: React.FC<MapViewProps> = ({
 				if (task.legacyId) {
 					const id = task.legacyId;
 					if (usedIds.has(id)) {
-						console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
+						// console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
 						duplicateIds.add(id);
 						return; // Skip duplicate
 					}
@@ -301,7 +302,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 		if (duplicateIds.size > 0) {
 			const stringOfListOfDuplicateIds = Array.from(duplicateIds).join(',');
-			// bugReporterManagerInsatance.showNotice(17, `Following duplicate IDs has been found for tasks : "${stringOfListOfDuplicateIds}" detected in Map View. This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
+			bugReporterManagerInsatance.showNotice(17, `Following duplicate IDs has been found for tasks with IDs: "${stringOfListOfDuplicateIds}". This may cause unexpected behavior. Please consider changing the IDs of these tasks.`, "ERROR: Same id is present on two tasks", "MapView.tsx/initialNodes");
 			duplicateIds.clear();
 		}
 
@@ -456,7 +457,7 @@ const MapView: React.FC<MapViewProps> = ({
 				}
 			}
 		} catch (error) {
-			console.warn('Failed to load existing positions:', error);
+			bugReporterManagerInsatance.addToLogs(97, String(error), 'MapView.tsx/handleNodePositionChange');
 			allBoardPositions = {};
 		}
 
@@ -474,7 +475,7 @@ const MapView: React.FC<MapViewProps> = ({
 		try {
 			localStorage.setItem(NODE_POSITIONS_STORAGE_KEY, JSON.stringify(allBoardPositions));
 		} catch (error) {
-			console.warn('Failed to save node positions:', error);
+			bugReporterManagerInsatance.addToLogs(98, String(error), 'MapView.tsx/handleNodePositionChange');
 		}
 	};
 
@@ -645,7 +646,8 @@ const MapView: React.FC<MapViewProps> = ({
 				localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(parsed));
 				lastViewportSaveTime.current = now;
 			} catch (error) {
-				console.warn('Failed to save viewport:', error);
+				bugReporterManagerInsatance.addToLogs(99, String(error), 'MapView.tsx/debouncedSetViewportStorage');
+
 			}
 		}
 	}, 2000);

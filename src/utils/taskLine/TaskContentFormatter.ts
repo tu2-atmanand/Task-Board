@@ -24,6 +24,7 @@ import { taskItem } from "src/interfaces/TaskItem";
 import { cursorLocation } from "src/interfaces/TaskItem";
 import { generateTaskId } from "../TaskItemUtils";
 import { moment as _moment } from "obsidian";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -31,7 +32,7 @@ import { moment as _moment } from "obsidian";
  * @returns The formatted task content as a string.
  */
 export const getFormattedTaskContent = async (
-	task: taskItem
+	task: taskItem,
 ): Promise<string> => {
 	if (!task || !task.title) {
 		return "";
@@ -74,7 +75,7 @@ export const getFormattedTaskContent = async (
 export const addIdToTaskContent = async (
 	Plugin: TaskBoard,
 	formattedTaskContent: string,
-	forcefullyAddId?: boolean
+	forcefullyAddId?: boolean,
 ): Promise<{ formattedTaskContent: string; newId: string | undefined }> => {
 	const taskId = extractTaskId(formattedTaskContent);
 	let newId = undefined;
@@ -89,28 +90,28 @@ export const addIdToTaskContent = async (
 			case taskPropertyFormatOptions.default:
 				formattedTaskContent = formattedTaskContent.replace(
 					/^(.*?)(\n|$)/,
-					`$1 🆔 ${newId} $2`
+					`$1 🆔 ${newId} $2`,
 				);
 				break;
 
 			case taskPropertyFormatOptions.dataviewPlugin:
 				formattedTaskContent = formattedTaskContent.replace(
 					/^(.*?)(\n|$)/,
-					`$1 [id:: ${newId}] $2`
+					`$1 [id:: ${newId}] $2`,
 				);
 				break;
 
 			case taskPropertyFormatOptions.obsidianNative:
 				formattedTaskContent = formattedTaskContent.replace(
 					/^(.*?)(\n|$)/,
-					`$1 @id(${newId}) $2`
+					`$1 @id(${newId}) $2`,
 				);
 				break;
 
 			default:
 				formattedTaskContent = formattedTaskContent.replace(
 					/^(.*?)(\n|$)/,
-					`$1 🆔 ${newId} $2`
+					`$1 🆔 ${newId} $2`,
 				);
 				break;
 		}
@@ -167,7 +168,7 @@ export const getFormattedTaskContentSync = (task: taskItem): string => {
  */
 export const getSanitizedTaskContent = (
 	plugin: TaskBoard,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ): string => {
 	// if (updatedTask.title === "") {
 	// 	return "";
@@ -183,7 +184,7 @@ export const getSanitizedTaskContent = (
 	updatedTitle = sanitizePriority(
 		globalSettings,
 		updatedTitle,
-		updatedTask.priority
+		updatedTask.priority,
 	);
 
 	updatedTitle = sanitizeTime(globalSettings, updatedTitle, updatedTask.time);
@@ -191,49 +192,49 @@ export const getSanitizedTaskContent = (
 	updatedTitle = sanitizeCreatedDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.createdDate
+		updatedTask.createdDate,
 	);
 
 	updatedTitle = sanitizeStartDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.startDate
+		updatedTask.startDate,
 	);
 
 	updatedTitle = sanitizeScheduledDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.scheduledDate
+		updatedTask.scheduledDate,
 	);
 
 	updatedTitle = sanitizeDueDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.due
+		updatedTask.due,
 	);
 
 	updatedTitle = sanitizeTags(
 		updatedTitle,
 		updatedTask.tags,
-		updatedTask.tags || []
+		updatedTask.tags || [],
 	);
 
 	updatedTitle = sanitizeReminder(
 		globalSettings,
 		updatedTitle,
-		updatedTask?.reminder || ""
+		updatedTask?.reminder || "",
 	);
 
 	updatedTitle = sanitizeCompletionDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.completion || ""
+		updatedTask.completion || "",
 	);
 
 	updatedTitle = sanitizeCancelledDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.cancelledDate || ""
+		updatedTask.cancelledDate || "",
 	);
 
 	// Build the formatted string for the main task
@@ -270,13 +271,15 @@ export const sanitizeStatus = (
 	globalSettings: globalSettingsData,
 	oldTitle: string,
 	newStatusSymbol: string,
-	newStatusType: string
+	newStatusType: string,
 ): string => {
 	const oldStatusValuematch = oldTitle.match(/\[(.)\]/); // Extract the symbol inside [ ]
 	let newTitle = oldTitle;
 	if (!oldStatusValuematch || oldStatusValuematch.length < 2) {
-		console.warn(
-			"There was an issue while extracting the old status value from the old title. Old title value has been returned as it is."
+		bugReporterManagerInsatance.addToLogs(
+			106,
+			`Status symbol not found in the following oldTtitle : ${oldTitle}`,
+			"TaskContentFormatter.ts/sanitizeStatus",
 		);
 		return oldTitle;
 	}
@@ -286,22 +289,22 @@ export const sanitizeStatus = (
 	if (newStatusType === statusTypeNames.DONE) {
 		const moment = _moment as unknown as typeof _moment.default;
 		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern
+			globalSettings?.taskCompletionDateTimePattern,
 		);
 		newTitle = sanitizeCompletionDate(
 			globalSettings,
 			newTitle,
-			currentDateValue
+			currentDateValue,
 		);
 	} else if (newStatusType === statusTypeNames.CANCELLED) {
 		const moment = _moment as unknown as typeof _moment.default;
 		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern
+			globalSettings?.taskCompletionDateTimePattern,
 		);
 		newTitle = sanitizeCancelledDate(
 			globalSettings,
 			newTitle,
-			currentDateValue
+			currentDateValue,
 		);
 	} else {
 		newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
@@ -323,7 +326,7 @@ export const sanitizeCreatedDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	createdDate: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const createdDateRegex =
 		/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::\s*?\d{4}-\d{2}-\d{2}\]|@created\(\d{4}-\d{2}-\d{2}\)/;
@@ -391,7 +394,7 @@ export const sanitizeStartDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	startDate: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const startDateRegex =
 		/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::\s*?\d{4}-\d{2}-\d{2}\]|@start\(\d{4}-\d{2}-\d{2}\)/;
@@ -455,7 +458,7 @@ export const sanitizeScheduledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	scheduledDate: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const scheduledDateRegex =
 		/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::\s*?\d{4}-\d{2}-\d{2}\]|@scheduled\(\d{4}-\d{2}-\d{2}\)/;
@@ -525,7 +528,7 @@ export const sanitizeDueDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	dueDate: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const dueDateRegex =
 		/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
@@ -590,7 +593,7 @@ export const sanitizeCompletionDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	completionDate: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const completionDateRegex =
 		/\[completion::[^\]]+\]|\@completion\(.*?\)|✅\s*.*?(?=\s|$)/;
@@ -657,7 +660,7 @@ export const sanitizeCancelledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	cancelledDate: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const cancellationDateRegex =
 		/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[cancelled::\s*?\d{4}-\d{2}-\d{2}\]|@cancelled\(\d{4}-\d{2}-\d{2}\)/;
@@ -724,7 +727,7 @@ export const sanitizeTime = (
 	globalSettings: globalSettingsData,
 	title: string,
 	newTime: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const timeAtStartRegex = /]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
 	const timeFormatsRegex =
@@ -822,7 +825,7 @@ export const sanitizePriority = (
 	globalSettings: globalSettingsData,
 	title: string,
 	newPriority: number,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	// // Create a regex pattern to match any priority emoji
 	// const emojiPattern = new RegExp(
@@ -910,7 +913,7 @@ export const sanitizePriority = (
 	}
 
 	let match = title.match(
-		new RegExp(`\\[priority::\\s*${extractedPriorityMatch}\\s*\\]`)
+		new RegExp(`\\[priority::\\s*${extractedPriorityMatch}\\s*\\]`),
 	);
 	if (match) {
 		return newPriority > 0
@@ -919,7 +922,7 @@ export const sanitizePriority = (
 	}
 
 	match = title.match(
-		new RegExp(`@priority\\(\\s*${extractedPriorityMatch}\\s*\\)`)
+		new RegExp(`@priority\\(\\s*${extractedPriorityMatch}\\s*\\)`),
 	);
 	if (match) {
 		return newPriority > 0
@@ -933,7 +936,7 @@ export const sanitizePriority = (
 	} else {
 		return title.replace(
 			priorityEmojis[extractedPriorityMatch],
-			priorityEmojis[newPriority]
+			priorityEmojis[newPriority],
 		);
 	}
 };
@@ -950,7 +953,7 @@ export const sanitizeTags = (
 	title: string,
 	oldTagsList: string[],
 	newTagsList: string[],
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	console.log(
 		"sanitizeTags...\ntitle: ",
@@ -960,7 +963,7 @@ export const sanitizeTags = (
 		"\nnewTagsList: ",
 		newTagsList,
 		"\ncursorLocation: ",
-		cursorLocation
+		cursorLocation,
 	);
 	// Remove <mark> and <font> tags before processing
 	let updatedTitle = title;
@@ -969,7 +972,7 @@ export const sanitizeTags = (
 	// Regex to extract tags from title
 	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
 	const extractedTags = (tempTitle.match(tagsRegex) || []).map((t) =>
-		t.trim()
+		t.trim(),
 	);
 
 	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
@@ -1034,7 +1037,7 @@ export const sanitizeReminder = (
 	globalSettings: globalSettingsData,
 	title: string,
 	newReminder: string,
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const formatReminder = (reminder: string) => {
 		const date = new Date(reminder);
@@ -1111,7 +1114,7 @@ export const sanitizeDependsOn = (
 	globalSettings: globalSettingsData,
 	title: string,
 	dependesOnIds: string[],
-	cursorLocation?: cursorLocation
+	cursorLocation?: cursorLocation,
 ): string => {
 	const extractedDependsOnMatch = extractDependsOn(title);
 
@@ -1261,7 +1264,7 @@ export const sanitizeDependsOn = (
 // For handleCheckboxChange
 
 /**
- * Function to remove only the properties which user has configured 
+ * Function to remove only the properties which user has configured
  * to be hidden using the hiddenTaskProperties setting.
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The task item to clean.
@@ -1286,7 +1289,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	cleanedTitle = cleanedTitle
 		.replace(
 			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
-			""
+			"",
 		)
 		.trim();
 
@@ -1370,7 +1373,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				// Remove priority in various formats
 				if (task.priority > 0) {
 					let match = cleanedTitle.match(
-						/\[priority::\s*(\d{1,2})\]/
+						/\[priority::\s*(\d{1,2})\]/,
 					);
 					if (match) {
 						cleanedTitle = cleanedTitle.replace(match[0], "");
@@ -1389,7 +1392,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 							`(${Object.values(priorityEmojis)
 								.map((emoji) => `\\s*${emoji}\\s*`)
 								.join("|")})`,
-							"g"
+							"g",
 						);
 
 						// Replace the first valid priority emoji found
@@ -1399,7 +1402,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 								return match.trim() === priorityIcon
 									? " "
 									: match;
-							}
+							},
 						);
 					}
 				}
@@ -1438,12 +1441,12 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	cleanedTitle = cleanedTitle
 		.replace(
 			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
-			""
+			"",
 		)
 		.trim();
 
 	// TODO : Support the legacy feature of adding all properties after the pipe symbol (|).
-	// If pipe symbol is present (` | `), then remove everything after the pipe symbol. 
+	// If pipe symbol is present (` | `), then remove everything after the pipe symbol.
 
 	// Remove tags
 	task.tags.forEach((tag) => {
@@ -1458,7 +1461,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	if (task.legacyId) {
 		const combinedIdRegex = new RegExp(
 			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
-			"g" // add the 'g' flag if you want to match all occurrences
+			"g", // add the 'g' flag if you want to match all occurrences
 		);
 		const idMatch = cleanedTitle.match(combinedIdRegex);
 		if (idMatch) {
@@ -1538,7 +1541,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 				`(${Object.values(priorityEmojis)
 					.map((emoji) => `\\s*${emoji}\\s*`)
 					.join("|")})`,
-				"g"
+				"g",
 			);
 
 			// Replace the first valid priority emoji found
@@ -1552,7 +1555,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	if (task.dependsOn && task.dependsOn.length > 0) {
 		const combinedDependsOnRegex = new RegExp(
 			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dependsOnRegex.source})`,
-			"g" // add the 'g' flag if you want to match all occurrences
+			"g", // add the 'g' flag if you want to match all occurrences
 		);
 		const match = cleanedTitle.match(combinedDependsOnRegex);
 		if (match) {
@@ -1575,14 +1578,14 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 		.replace(
 			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
 				.recurrenceRegex,
-			""
+			"",
 		)
 		.trim();
 	cleanedTitle = cleanedTitle
 		.replace(
 			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
 				.onCompletionRegex,
-			""
+			"",
 		)
 		.trim();
 

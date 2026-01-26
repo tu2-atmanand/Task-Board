@@ -1,6 +1,7 @@
 import TaskBoard from "main";
 import { App } from "obsidian";
 import { AddOrEditTaskModal } from "./modals/AddOrEditTaskModal";
+import { bugReporterManagerInsatance } from "./managers/BugReporter";
 
 /**
  * TaskBoardApi provides external plugins with a public API to interact with Task Board functionality.
@@ -68,7 +69,7 @@ export class TaskBoardApi {
 					app,
 					plugin,
 					isTaskNote,
-					filePath
+					filePath,
 				);
 			},
 		};
@@ -94,7 +95,7 @@ export class TaskBoardApi {
 		app: App,
 		plugin: TaskBoard,
 		isTaskNote: boolean,
-		filePath?: string
+		filePath?: string,
 	): Promise<string> {
 		try {
 			const AddTaskModal = new AddOrEditTaskModal(
@@ -106,12 +107,16 @@ export class TaskBoardApi {
 				true,
 				false,
 				undefined,
-				filePath
+				filePath,
 			);
 			AddTaskModal.open();
 			return await AddTaskModal.waitForClose;
 		} catch (error) {
-			console.error("Error opening add new task modal:", error);
+			bugReporterManagerInsatance.addToLogs(
+				161,
+				String(error),
+				"taskBoardAPIs.ts/openAddNewTaskModal",
+			);
 			return String(error);
 		}
 	}

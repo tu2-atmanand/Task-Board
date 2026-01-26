@@ -168,7 +168,11 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 
 				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
 			} catch (err) {
-				console.error('Error rendering task title:', err);
+				bugReporterManagerInsatance.addToLogs(
+					122,
+					String(err),
+					"TaskItem.tsx/Main title rendering useEffect",
+				);
 			}
 		})();
 
@@ -248,7 +252,11 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 						break;
 					}
 				} catch (err) {
-					console.error('Error rendering subtask:', err);
+					bugReporterManagerInsatance.addToLogs(
+						123,
+						String(err),
+						"TaskItem.tsx/Sub-tasks rendering useEffect",
+					);
 				}
 			}
 		})();
@@ -458,7 +466,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		};
 
 		if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-			return updateRGBAOpacity(plugin, highestPriorityTag.color, 0.2);
+			return updateRGBAOpacity(highestPriorityTag.color, 0.2);
 		}
 
 		return highestPriorityTag?.color;
@@ -512,7 +520,11 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					handleCheckboxChange(plugin, task);
 				}
 			} catch (error) {
-				console.error("Error updating task:", error);
+				bugReporterManagerInsatance.addToLogs(
+					124,
+					String(error),
+					"TaskItem.tsx/handleMainCheckBoxClick",
+				);
 			}
 
 			// The component might be unmounted by the time this runs, but this is a safeguard.
@@ -626,7 +638,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				event.ctrlKey = false;
 			}
 		} catch (error) {
-			console.error("Error opening child task modal:", error);
 			bugReporterManagerInsatance.showNotice(6, "Error opening child task modal", String(error), "TaskItem.tsx/handleOpenChildTaskModal");
 		}
 	}
@@ -805,11 +816,15 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 
 								// Rename the file
 								await plugin.app.vault.rename(file, newPath);
-								new Notice("contextMenus.task.notices.renameSuccess");
+								new Notice("File renamed successfully.");
 							}
 						} catch (error) {
-							console.error("Error renaming file:", error);
-							new Notice(t("contextMenus.task.notices.renameFailure"));
+							new Notice("There was an error while renaming the file.");
+							bugReporterManagerInsatance.addToLogs(
+								125,
+								String(error),
+								"TaskItem.tsx/handleMenuButtonClicked/renaming",
+							);
 						}
 					});
 				});
@@ -818,95 +833,14 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					subItem.setIcon("trash");
 					subItem.setTitle(t("delete-note"));
 					subItem.onClick(async () => {
-						// Show confirmation and delete
-						// const confirmed = await showConfirmationModal(plugin.app, {
-						// 	title: t("contextMenus.task.deleteTitle"),
-						// 	message: t("contextMenus.task.deleteMessage") + file.name,
-						// 	confirmText: t("contextMenus.task.deleteConfirm"),
-						// 	cancelText: t("common.cancel"),
-						// 	isDestructive: true,
-						// });
-						// if (confirmed) {
-						// }
-
-						plugin.app.vault.trash(file, true);
+						plugin.app.vault.trash(file, true).then(() => {
+							new Notice("File deleted successfully. Moved to system trash.");
+						})
 						// handleDeleteTask(plugin, task, true);
 					});
 				});
-
-				// submenu.addSeparator();
-
-				// submenu.addItem((subItem: any) => {
-				// 	subItem.setTitle(t("contextMenus.task.copyPath"));
-				// 	subItem.setIcon("copy");
-				// 	subItem.onClick(async () => {
-				// 		try {
-				// 			await navigator.clipboard.writeText(file.path);
-				// 			new Notice(t("contextMenus.task.notices.copyPathSuccess"));
-				// 		} catch (error) {
-				// 			new Notice(t("contextMenus.task.notices.copyFailure"));
-				// 		}
-				// 	});
-				// });
-
-				// submenu.addItem((subItem: any) => {
-				// 	subItem.setTitle(t("contextMenus.task.copyUrl"));
-				// 	subItem.setIcon("link");
-				// 	subItem.onClick(async () => {
-				// 		try {
-				// 			const url = `obsidian://open?vault=${encodeURIComponent(plugin.app.vault.getName())}&file=${encodeURIComponent(file.path)}`;
-				// 			await navigator.clipboard.writeText(url);
-				// 			new Notice(t("contextMenus.task.notices.copyUrlSuccess"));
-				// 		} catch (error) {
-				// 			new Notice(t("contextMenus.task.notices.copyFailure"));
-				// 		}
-				// 	});
-				// });
-
-				// submenu.addSeparator();
-
-				// submenu.addItem((subItem: any) => {
-				// 	subItem.setTitle(t("contextMenus.task.showInExplorer"));
-				// 	subItem.setIcon("folder-open");
-				// 	subItem.onClick(() => {
-				// 		// Reveal file in file explorer
-				// 		plugin.app.workspace
-				// 			.getLeaf()
-				// 			.setViewState({
-				// 				type: "file-explorer",
-				// 				state: {},
-				// 			})
-				// 			.then(() => {
-				// 				// Focus the file in the explorer
-				// 				const fileExplorer =
-				// 					plugin.app.workspace.getLeavesOfType("file-explorer")[0];
-				// 				if (fileExplorer?.view && "revealInFolder" in fileExplorer.view) {
-				// 					(fileExplorer.view as any).revealInFolder(file);
-				// 				}
-				// 			});
-				// 	});
-				// });
 			}
 		});
-
-		// // Show minimize or maximize option based on current state
-		// if (columnData.minimized) {
-		// 	taskItemMenu.addItem((item) => {
-		// 		item.setTitle(t("maximize-column"));
-		// 		item.setIcon("panel-left-open");
-		// 		item.onClick(async () => {
-		// 			await handleMinimizeColumn();
-		// 		});
-		// 	});
-		// } else {
-		// 	taskItemMenu.addItem((item) => {
-		// 		item.setTitle(t("minimize-column"));
-		// 		item.setIcon("panel-left-close");
-		// 		item.onClick(async () => {
-		// 			await handleMinimizeColumn();
-		// 		});
-		// 	});
-		// }
 
 		// Use native event if available (React event has nativeEvent property)
 		taskItemMenu.showAtMouseEvent(
@@ -919,7 +853,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		console.log("TaskItem : handleDragStart...");
 		if (!columnData) {
 			e.preventDefault();
-			console.warn('handleDragStart: columnData is undefined');
+			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskItem.tsx/handleDragStart");
 			return;
 		}
 
@@ -960,13 +894,15 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			// 	e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
 			// 	e.dataTransfer.effectAllowed = 'move';
 			// } catch (ex) {/* ignore */ }
-
-			console.error(err);
+			bugReporterManagerInsatance.addToLogs(
+				126,
+				String(err),
+				"TaskItem.tsx/handleDragStart",
+			);
 		}
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-		console.log("TaskItem : handleDragEnd...");
 		setIsDragging(false);
 
 		// Remove dim effect from this dragged task and clear manager state
@@ -1001,8 +937,8 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 									const tagName = tag.replace('#', '');
 									const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
 									const tagColor = customTag?.color || `var(--tag-color)`;
-									const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-									const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
+									const backgroundColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+									const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 									// If columnIndex is defined, proceed to get the column
 									if (
@@ -1059,8 +995,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				</div>
 			);
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(7, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
-			console.warn("TaskItem.tsx/renderHeader : Error while rendering task header", error);
+			bugReporterManagerInsatance.addToLogs(7, error as string, "TaskItem.tsx/renderHeader");
 			return null;
 		}
 	};
@@ -1159,8 +1094,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			);
 
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(8, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
-			console.warn("TaskItem.tsx/renderSubTasks : Error while rendering sub-tasks", error);
+			bugReporterManagerInsatance.addToLogs(8, error as string, "TaskItem.tsx/renderSubTasks");
 			return null;
 		}
 	};
@@ -1237,8 +1171,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				</>
 			);
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(9, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
-			console.warn("TaskItem.tsx/renderFooter : Error while rendering task footer", error);
+			bugReporterManagerInsatance.addToLogs(9, error as string, "TaskItem.tsx/renderFooter");
 			return null;
 		}
 	};
@@ -1300,8 +1233,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				return null;
 			}
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(10, "Error while rendering child-tasks", error as string, "TaskItem.tsx/renderChildTasks");
-			console.warn("TaskItem.tsx/renderChildTasks : Error while rendering child-tasks", error);
+			bugReporterManagerInsatance.addToLogs(10, error as string, "TaskItem.tsx/renderChildTasks");
 			return null;
 		}
 	};

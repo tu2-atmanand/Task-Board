@@ -77,9 +77,10 @@ export default class VaultScanner {
 			// Load existing tasks from JSON cache
 			this.tasksCache = await loadJsonCacheDataFromDisk(this.plugin);
 		} catch (error) {
-			console.error(
-				"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
-				error,
+			bugReporterManagerInsatance.addToLogs(
+				145,
+				`No need to worry if this is appearing on the fresh install.\n${String(error)}`,
+				"RealTimeScanner.ts/initializeTasksCache",
 			);
 			this.tasksCache = {
 				VaultName: this.plugin?.app.vault.getName(),
@@ -526,13 +527,12 @@ export default class VaultScanner {
 				return "true";
 			}
 		} catch (error) {
-			console.error(
-				"Error occurred while extracting tasks from file:",
-				file.path,
-				"\nERROR :",
-				error,
+			bugReporterManagerInsatance.addToLogs(
+				146,
+				String(error),
+				"VaultScanner.ts/extractTasksFromFile",
 			);
-			return String(error);
+			return "false";
 		}
 	}
 
@@ -597,7 +597,6 @@ export default class VaultScanner {
 				error as string,
 				"VaultScanner.tsx/refreshTasksFromFiles",
 			);
-			console.error(error);
 			return false;
 		}
 	}
@@ -1204,7 +1203,11 @@ export async function compareFileCache(
 		// This approach is optimal for most use cases as task arrays are typically small to medium sized
 		return JSON.stringify(newCache) === JSON.stringify(oldCache);
 	} catch (error) {
-		console.error("Error comparing file caches:", error);
+		bugReporterManagerInsatance.addToLogs(
+			147,
+			String(error),
+			"VaultScanner.ts/compareFileCache",
+		);
 		// In case of error, assume they're different to trigger a refresh
 		return false;
 	}

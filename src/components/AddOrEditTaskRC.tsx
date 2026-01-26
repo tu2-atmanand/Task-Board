@@ -110,7 +110,11 @@ export const AddOrEditTaskRC: React.FC<{
 			text: `${customStatus.name} [${customStatus.symbol}]`,
 		}));
 	} else {
-		console.error("No custom statuses found.");
+		bugReporterManagerInsatance.addToLogs(
+			129,
+			`customStatuses are empty in the settings.`,
+			"AddOrEditTaskRC.tsx",
+		);
 	}
 
 	// ------------ Handle task property values changes ------------
@@ -1020,8 +1024,12 @@ export const AddOrEditTaskRC: React.FC<{
 					const validTasks = tasks.filter(Boolean) as taskItem[];
 					setChildTasks(validTasks);
 				})
-				.catch(err => {
-					console.error("Error fetching child tasks:", err);
+				.catch((err) => {
+					bugReporterManagerInsatance.addToLogs(
+						130,
+						String(err),
+						"AddOrEditTaskRC.tsx/fetching child-tasks useEffect",
+					);
 				});
 		}
 	}, []);
@@ -1419,8 +1427,8 @@ export const AddOrEditTaskRC: React.FC<{
 									const tagName = tag.replace('#', '');
 									const customTagData = plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
 									const tagColor = customTagData?.color;
-									const backgroundColor = tagColor ? updateRGBAOpacity(plugin, tagColor, 0.1) : `var(--tag-background)`;
-									const borderColor = tagColor ? updateRGBAOpacity(plugin, tagColor, 0.5) : `var(--tag-color-hover)`;
+									const backgroundColor = tagColor ? updateRGBAOpacity(tagColor, 0.1) : `var(--tag-background)`;
+									const borderColor = tagColor ? updateRGBAOpacity(tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
 											key={tag}

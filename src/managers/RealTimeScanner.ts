@@ -29,7 +29,11 @@ export class RealTimeScanner {
 			}
 			// this.startScanTimer();
 		} catch (error) {
-			console.error("Error loading file stack:", error);
+			bugReporterManagerInsatance.addToLogs(
+				144,
+				String(error),
+				"RealTimeScanner.ts/initializeStack",
+			);
 		}
 	}
 
@@ -37,14 +41,14 @@ export class RealTimeScanner {
 		try {
 			localStorage.setItem(
 				PENDING_SCAN_FILE_STACK,
-				JSON.stringify(this.taskBoardFileStack)
+				JSON.stringify(this.taskBoardFileStack),
 			);
 		} catch (error) {
 			bugReporterManagerInsatance.showNotice(
 				32,
 				"Error saving file stack to localStorage.",
 				String(error),
-				"RealTimeScanner.ts/saveStack"
+				"RealTimeScanner.ts/saveStack",
 			);
 		}
 	}
@@ -57,7 +61,7 @@ export class RealTimeScanner {
 	 */
 	async processAllUpdatedFiles(
 		currentFile?: TFile | string | undefined,
-		updatedTaskId?: string | undefined
+		updatedTaskId?: string | undefined,
 	) {
 		// If a current file is provided, ensure it's included in the processing
 		let newFile: TFile | null | undefined = null;
@@ -86,7 +90,7 @@ export class RealTimeScanner {
 			// Send all files for scanning and updating tasks
 			result = await this.vaultScanner.refreshTasksFromFiles(
 				files,
-				false
+				false,
 			);
 		}
 
@@ -117,11 +121,11 @@ export class RealTimeScanner {
 		if (
 			this.taskBoardFileStack.at(0) === undefined ||
 			!this.taskBoardFileStack.includes(
-				file instanceof TFile ? file.path : file
+				file instanceof TFile ? file.path : file,
 			)
 		) {
 			this.taskBoardFileStack.push(
-				file instanceof TFile ? file.path : file
+				file instanceof TFile ? file.path : file,
 			); // Add the file to the stack
 			this.saveStack(); // Save the updated stack
 		}
@@ -137,12 +141,11 @@ export class RealTimeScanner {
 	onFileRenamed(
 		file: TAbstractFile,
 		oldPath: string,
-		archivedTaskNotesPath: string
+		archivedTaskNotesPath: string,
 	) {
 		let foundFlag = false;
 		// Find the oldPath inside the plugin.vaultScanner.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
-		const { Pending, Completed } =
-			this.plugin.vaultScanner.tasksCache;
+		const { Pending, Completed } = this.plugin.vaultScanner.tasksCache;
 
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
@@ -167,7 +170,7 @@ export class RealTimeScanner {
 				} else if (file instanceof TFolder) {
 					// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
 					const keysToUpdate = Object.keys(cache).filter((key) =>
-						key.startsWith(oldPath + "/")
+						key.startsWith(oldPath + "/"),
 					);
 					keysToUpdate.forEach((oldKey) => {
 						const newKey =
@@ -241,8 +244,7 @@ export class RealTimeScanner {
 		}
 
 		// Also remove the file from the tasks cache
-		const { Pending, Completed } =
-			this.plugin.vaultScanner.tasksCache;
+		const { Pending, Completed } = this.plugin.vaultScanner.tasksCache;
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
 				if (file instanceof TFile && cache.hasOwnProperty(file.path)) {
@@ -251,7 +253,7 @@ export class RealTimeScanner {
 				} else if (file instanceof TFolder) {
 					// Actually this is not at all needed as I am only running this function when a file is deleted. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
 					const keysToDelete = Object.keys(cache).filter((key) =>
-						key.startsWith(file.path + "/")
+						key.startsWith(file.path + "/"),
 					);
 					keysToDelete.forEach((key) => {
 						delete cache[key];

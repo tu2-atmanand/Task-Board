@@ -9,6 +9,7 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { t } from 'src/utils/lang/helper';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { applyIdToTaskItem } from 'src/utils/TaskItemUtils';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
@@ -62,7 +63,11 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 				})
 			}
 		} catch (error) {
-			console.error('Error importing task:', error);
+			bugReporterManagerInsatance.addToLogs(
+				128,
+				String(error),
+				"TasksImporterPanel.tsx/handleImportTask",
+			);
 		}
 	};
 

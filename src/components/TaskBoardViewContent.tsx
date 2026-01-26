@@ -95,9 +95,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					setFreshInstall(false);
 				}
 			} catch (error) {
-				console.error(
-					"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
-					error
+				bugReporterManagerInsatance.addToLogs(
+					131,
+					`No need to worry about this bug, if its appearing on the fresh install.\n${String(error)}`,
+					"TaskBoardViewContent.tsx/loading boards and tasks useEffect",
 				);
 				setFreshInstall(true);
 			}

@@ -118,7 +118,11 @@ export const loadJsonCacheDataFromDisk = async (
 		// };
 		return cacheData;
 	} catch (error) {
-		console.error("Error reading tasks.json from disk:", error); // This error will be shown for a fresh install hence dont use the bugReporter here.
+		bugReporterManagerInsatance.addToLogs(
+			159,
+			`No need to worry if this is shown on a fresh install.\n${String(error)}`,
+			"TaskNoteUtils.ts/updateFrontmatterInMarkdownFile",
+		);
 		throw error;
 	}
 };

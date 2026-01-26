@@ -1,5 +1,6 @@
 import type TaskBoard from "main";
 import { sanitizeHTMLToDom } from "obsidian";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Convert a hex color string to an rgba() CSS string.
@@ -62,39 +63,24 @@ export function colorTo20PercentOpacity(color: string): string {
  * @param newOpacity - New opacity value between 0 and 1
  * @returns RGBA color string with updated opacity
  */
-export function updateRGBAOpacity(
-	plugin: TaskBoard,
-	rgba: string,
-	newOpacity: number
-): string {
+export function updateRGBAOpacity(rgba: string, newOpacity: number): string {
+	let newRGBA = rgba;
 	if (rgba.startsWith("#")) {
-		rgba = hexToRgba(rgba, newOpacity);
-
-		const regex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)$/;
-		const match = rgba.match(regex);
-
-		if (match) {
-			return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${newOpacity})`;
-		} else {
-			// bugReporterManagerInsatance.showNotice(
-			// 	84,
-			// 	"Invalid RGBA color string",
-			// 	`Invalid RGBA color string: ${rgba}`,
-			// 	"updateRGBAOpacity function"
-			// );
-			console.warn(`Invalid RGBA color string: ${rgba}`);
-			return rgba;
-		}
+		newRGBA = hexToRgba(rgba, newOpacity);
 	}
 
 	const regex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)$/;
-	const match = rgba.match(regex);
+	const match = newRGBA.match(regex);
 
 	if (match) {
 		return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${newOpacity})`;
 	} else {
-		console.warn(`Invalid RGBA color string: ${rgba}`);
-		return rgba;
+		bugReporterManagerInsatance.addToLogs(
+			110,
+			`rgba match : ${newRGBA}`,
+			"UIHelpers.ts/updateRGBAOpacity",
+		);
+		return newRGBA;
 	}
 }
 
