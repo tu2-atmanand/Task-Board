@@ -69,6 +69,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	const rafRef = useRef<number | null>(null);
 	const [localTasks, setLocalTasks] = useState(tasksForThisColumn);
 
+	// Navigation visibility state
+	const prevScrollTopRef = useRef<number>(0);
+	const isNavHiddenRef = useRef<boolean>(false);
+	const scrollPositionWhenHiddenRef = useRef<number>(0);
+	const SCROLL_UP_THRESHOLD = 10;
+
 	const scheduleSetInsertIndex = (pos: number | null) => {
 		if (insertIndexRef.current === pos) return;
 		if (rafRef.current) {
@@ -101,6 +107,38 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		setLocalTasks(tasksForThisColumn);
 	}, [tasksForThisColumn]);
 
+	const handleNavVisibility = () => {
+		const container = tasksContainerRef.current;
+		if (!container) return;
+
+		const currentScrollTop = container.scrollTop;
+		const isScrollingDown = currentScrollTop > prevScrollTopRef.current;
+		const scrollDifference = Math.abs(currentScrollTop - prevScrollTopRef.current);
+		console.log("LazyColumn.tsx...\ncurrentScrollTop:", currentScrollTop, "\nisScrollingDown :", isScrollingDown, "\nscrollDifference :", scrollDifference, "\nisNavHiddenRef :", isNavHiddenRef.current);
+
+		// Only update if there's a meaningful scroll (> 0)
+		if (scrollDifference === 0) return;
+
+		const htmlElement = document.documentElement;
+
+		if (isScrollingDown && !isNavHiddenRef.current) {
+			// User is scrolling down - hide navigation
+			htmlElement.classList.add('is-hidden-nav');
+			isNavHiddenRef.current = true;
+			scrollPositionWhenHiddenRef.current = currentScrollTop;
+		} else if (!isScrollingDown && isNavHiddenRef.current) {
+			// User is scrolling up - show navigation after scrolling up by threshold
+			const scrolledUpDistance = scrollPositionWhenHiddenRef.current - currentScrollTop;
+			if (scrolledUpDistance >= SCROLL_UP_THRESHOLD) {
+				htmlElement.classList.remove('is-hidden-nav');
+				isNavHiddenRef.current = false;
+			}
+		}
+
+		// Update previous scroll position for next iteration
+		prevScrollTopRef.current = currentScrollTop;
+	};
+
 	// Scroll event handler
 	const handleScroll = useCallback(() => {
 		const container = tasksContainerRef.current;
@@ -129,6 +167,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			if (throttleTimeout) return;
 			throttleTimeout = setTimeout(() => {
 				handleScroll();
+
+				handleNavVisibility();
 				throttleTimeout = null;
 			}, 100);
 		};
@@ -712,6 +752,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			if (rafRef.current) {
 				cancelAnimationFrame(rafRef.current);
 				rafRef.current = null;
+			}
+			// Clean up navigation visibility class when component unmounts
+			if (isNavHiddenRef.current) {
+				document.documentElement.classList.remove('is-hidden-nav');
+				isNavHiddenRef.current = false;
 			}
 		};
 	}, []);
