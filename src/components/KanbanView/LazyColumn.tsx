@@ -51,11 +51,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 
-	// Lazy loading settings from plugin
-	const lazySettings = plugin.settings.data.globalSettings.kanbanView;
-	const initialTaskCount = lazySettings.initialTaskCount || 20;
-	const loadMoreCount = lazySettings.loadMoreCount || 10;
-	const scrollThresholdPercent = lazySettings.scrollThresholdPercent || 80;
+	// Lazy loading configs
+	const initialTaskCount = 20;
+	const loadMoreCount = 10;
+	const scrollThresholdPercent = 80;
 
 	// State for managing visible tasks
 	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);

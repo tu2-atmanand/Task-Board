@@ -13,9 +13,7 @@ import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
 	board: Board;
-	allTasks: taskJsonMerged | undefined;
 	tasksPerColumn: taskItem[][];
-	lazyLoadingEnabled: boolean;
 }
 
 interface SwimlaneRow {
@@ -28,9 +26,7 @@ interface SwimlaneRow {
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	plugin,
 	board,
-	allTasks,
 	tasksPerColumn,
-	lazyLoadingEnabled,
 }) => {
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 

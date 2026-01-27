@@ -22,7 +22,6 @@ interface KanbanBoardProps {
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, tasksPerColumn, loading, freshInstall }) => {
 	// Check if lazy loading is enabled
-	const lazyLoadingEnabled = plugin.settings.data.globalSettings.kanbanView?.lazyLoadingEnabled ?? false;
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 
 	return (
@@ -55,9 +54,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, task
 					<KanbanSwimlanesContainer
 						plugin={plugin}
 						board={board}
-						allTasks={allTasks}
 						tasksPerColumn={tasksPerColumn}
-						lazyLoadingEnabled={lazyLoadingEnabled}
 					/>
 				) : (
 					board?.columns
