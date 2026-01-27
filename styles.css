@@ -4752,7 +4752,11 @@ svg.react-flow__connectionline {
 }
 
 .react-flow__panel.bottom {
-	bottom: 120px;
+	bottom: 0;
+}
+
+.is-mobile .react-flow__panel.bottom {
+	bottom: 60px;
 }
 
 .react-flow__panel.top.center,
