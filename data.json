@@ -29,7 +29,6 @@
               "372",
               "373",
               "370",
-              "1506909345",
               "362"
             ]
           },
@@ -1050,10 +1049,10 @@
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "kanban",
+        "viewedType": "map",
         "boardIndex": 0,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 2
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
