@@ -1450,7 +1450,9 @@ export class SettingsManager {
 								symbol: updatedStatus.symbol,
 								name: updatedStatus.name,
 								nextStatusSymbol:
-									updatedStatus.nextStatusSymbol,
+									updatedStatus.nextStatusSymbol === ""
+										? " "
+										: updatedStatus.nextStatusSymbol,
 								availableAsCommand:
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,

@@ -1,7 +1,10 @@
 import { Modal, Notice, Setting, TextComponent } from "obsidian";
 import type { Plugin } from "obsidian";
 import { statusTypeNames } from "src/interfaces/Enums";
-import { StatusConfiguration, StatusType } from "src/interfaces/StatusConfiguration";
+import {
+	StatusConfiguration,
+	StatusType,
+} from "src/interfaces/StatusConfiguration";
 import { t } from "src/utils/lang/helper";
 import type { CustomStatus } from "src/interfaces/GlobalSettings";
 
@@ -18,7 +21,7 @@ export class CustomStatusModal extends Modal {
 	constructor(
 		public plugin: Plugin,
 		statusType: CustomStatus | StatusConfiguration,
-		isCoreStatus: boolean
+		isCoreStatus: boolean,
 	) {
 		super(plugin.app);
 		const status = statusType as any;
@@ -27,7 +30,7 @@ export class CustomStatusModal extends Modal {
 		this.statusNextSymbol = status.nextStatusSymbol;
 		this.statusAvailableAsCommand = status.availableAsCommand;
 		// Ensure type is a valid StatusType enum value
-		if (typeof status.type === 'string') {
+		if (typeof status.type === "string") {
 			this.type = status.type as StatusType;
 		} else {
 			this.type = status.type;
@@ -45,7 +48,7 @@ export class CustomStatusModal extends Modal {
 			this.statusName,
 			this.statusNextSymbol,
 			this.statusAvailableAsCommand,
-			this.type
+			this.type,
 		);
 	}
 
@@ -59,12 +62,8 @@ export class CustomStatusModal extends Modal {
 
 		let statusSymbolText: TextComponent;
 		new Setting(settingDiv)
-			.setName(t("Task status symbol"))
-			.setDesc(
-				t(
-					"This is the character between the square braces in case of inline-tasks. Also, this is used to store in the case."
-				)
-			)
+			.setName(t("task-status-symbol"))
+			.setDesc(t("task-status-symbol-info"))
 			.addText((text) => {
 				statusSymbolText = text;
 				text.setValue(this.statusSymbol).onChange((v) => {
@@ -78,12 +77,8 @@ export class CustomStatusModal extends Modal {
 
 		let statusNameText: TextComponent;
 		new Setting(settingDiv)
-			.setName(t("Task status name"))
-			.setDesc(
-				t(
-					"Map a unique name to the above status symbol. This name will be used in the task-note frontmatter."
-				)
-			)
+			.setName(t("task-status-name"))
+			.setDesc(t("task-status-name-info"))
 			.addText((text) => {
 				statusNameText = text;
 				text.setValue(this.statusName).onChange((v) => {
@@ -93,12 +88,8 @@ export class CustomStatusModal extends Modal {
 			.then((_setting) => {});
 
 		new Setting(settingDiv)
-			.setName(t("Task status type"))
-			.setDesc(
-				t(
-					"Select what kind of status is this. If this status if of type DONE or CANCELLED, then the task will appear inside the 'completed' type column."
-				)
-			)
+			.setName(t("task-status-type"))
+			.setDesc(t("task-status-type-info"))
 			.addDropdown((dropdown) => {
 				const types = [
 					statusTypeNames.TODO,
@@ -118,13 +109,10 @@ export class CustomStatusModal extends Modal {
 
 		let statusNextSymbolText: TextComponent;
 		new Setting(settingDiv)
-			.setName(t("Cycle to the following status"))
-			.setDesc(
-				t(
-					"Once you click on the above status, cycle to this status. Also, dont forget to create a new entry for this status type."
-				)
-			)
+			.setName(t("cycle-to-following-status"))
+			.setDesc(t("cycle-to-following-status-info"))
 			.addText((text) => {
+				text.setPlaceholder("eg.: /");
 				statusNextSymbolText = text;
 				text.setValue(this.statusNextSymbol).onChange((v) => {
 					this.statusNextSymbol = v;
@@ -135,12 +123,10 @@ export class CustomStatusModal extends Modal {
 		const footerEl = contentEl.createDiv();
 		const footerButtons = new Setting(footerEl);
 		footerButtons.addButton((b) => {
-			b.setTooltip(t("save"))
-				.setIcon("checkmark")
-				.onClick(async () => {
-					this.saved = true;
-					this.close();
-				});
+			b.setTooltip(t("save")).onClick(async () => {
+				this.saved = true;
+				this.close();
+			});
 			return b;
 		});
 		footerButtons.addExtraButton((b) => {
