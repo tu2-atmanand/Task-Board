@@ -11,7 +11,6 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { bugReporter } from 'src/services/OpenModals';
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
@@ -71,7 +70,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	// Navigation visibility state
 	const prevScrollTopRef = useRef<number>(0);
-	const isNavHiddenRef = useRef<boolean>(false);
+	// const isNavHiddenRef = useRef<boolean>(false);
 	const scrollPositionWhenHiddenRef = useRef<number>(0);
 	const SCROLL_UP_THRESHOLD = 10;
 
@@ -114,24 +113,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		const currentScrollTop = container.scrollTop;
 		const isScrollingDown = currentScrollTop > prevScrollTopRef.current;
 		const scrollDifference = Math.abs(currentScrollTop - prevScrollTopRef.current);
-		console.log("LazyColumn.tsx...\ncurrentScrollTop:", currentScrollTop, "\nisScrollingDown :", isScrollingDown, "\nscrollDifference :", scrollDifference, "\nisNavHiddenRef :", isNavHiddenRef.current);
+		// console.log("LazyColumn.tsx...\ncurrentScrollTop:", currentScrollTop, "\nisScrollingDown :", isScrollingDown, "\nscrollDifference :", scrollDifference, "\nisNavHiddenRef :");
 
-		// Only update if there's a meaningful scroll (> 0)
-		if (scrollDifference === 0) return;
+		if (scrollDifference < 1) return;
 
 		const htmlElement = document.documentElement;
 
-		if (isScrollingDown && !isNavHiddenRef.current) {
+		if (isScrollingDown) {
 			// User is scrolling down - hide navigation
 			htmlElement.classList.add('is-hidden-nav');
-			isNavHiddenRef.current = true;
+			// isNavHiddenRef.current = true;
 			scrollPositionWhenHiddenRef.current = currentScrollTop;
-		} else if (!isScrollingDown && isNavHiddenRef.current) {
+		} else if (!isScrollingDown) {
 			// User is scrolling up - show navigation after scrolling up by threshold
 			const scrolledUpDistance = scrollPositionWhenHiddenRef.current - currentScrollTop;
 			if (scrolledUpDistance >= SCROLL_UP_THRESHOLD) {
 				htmlElement.classList.remove('is-hidden-nav');
-				isNavHiddenRef.current = false;
+				// isNavHiddenRef.current = false;
 			}
 		}
 
@@ -168,7 +166,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			throttleTimeout = setTimeout(() => {
 				handleScroll();
 
-				handleNavVisibility();
+				if (Platform.isMobile)
+					handleNavVisibility();
+
 				throttleTimeout = null;
 			}, 100);
 		};
@@ -754,10 +754,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				rafRef.current = null;
 			}
 			// Clean up navigation visibility class when component unmounts
-			if (isNavHiddenRef.current) {
-				document.documentElement.classList.remove('is-hidden-nav');
-				isNavHiddenRef.current = false;
-			}
+			// if (isNavHiddenRef.current) {
+			document.documentElement.classList.remove('is-hidden-nav');
+			// isNavHiddenRef.current = false;
+			// }
 		};
 	}, []);
 
