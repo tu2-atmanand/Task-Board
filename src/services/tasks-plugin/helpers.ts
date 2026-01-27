@@ -8,15 +8,40 @@ import {
 	addIdToTaskContent,
 	getFormattedTaskContent,
 } from "src/utils/taskLine/TaskContentFormatter";
-import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskItemUtils";
+import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskLineUtils";
 import { CustomStatus } from "src/interfaces/GlobalSettings";
 import { eventEmitter } from "../EventEmitter";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
+export async function isTasksPluginEnabled(plugin: TaskBoard) {
 	try {
 		const tasksPluginO = new TasksPluginApi(plugin);
+		return tasksPluginO.isTasksPluginEnabled();
+	} catch (err) {
+		bugReporterManagerInsatance.addToLogs(
+			148,
+			String(err),
+			"tasks-plugin/helpers.ts/isTasksPluginEnabled",
+		);
+		return false;
+	}
+}
+
+export async function fetchTasksPluginCustomStatuses(
+	plugin: TaskBoard,
+): Promise<boolean> {
+	try {
+		const tasksPluginO = new TasksPluginApi(plugin);
+		console.log(
+			"Tasks Plugin API:",
+			tasksPluginO,
+			"\nIs tasks plugin enabled?",
+			tasksPluginO.isTasksPluginEnabled(),
+		);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
+			plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin = true;
+
 			// Define the path to the tasks plugin data.json file
 			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
 
@@ -34,10 +59,10 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 
 			const statusMap = new Map();
 			coreStatuses.forEach((status: CustomStatus) =>
-				statusMap.set(status.symbol, status)
+				statusMap.set(status.symbol, status),
 			);
 			customStatuses.forEach((status: CustomStatus) =>
-				statusMap.set(status.symbol, status)
+				statusMap.set(status.symbol, status),
 			);
 			const statuses: CustomStatus[] = Array.from(statusMap.values());
 
@@ -45,37 +70,39 @@ export async function fetchTasksPluginCustomStatuses(plugin: TaskBoard) {
 			// 	"Fetched custom statuses from tasks plugin:",
 			// 	statuses,
 			// 	"\nTask Board old statuses:",
-			// 	plugin.settings.data.globalSettings.tasksPluginCustomStatuses,
+			// 	plugin.settings.data.globalSettings.customStatuses,
 			// 	"\nCondition :",
 			// 	JSON.stringify(
 			// 		plugin.settings.data.globalSettings
-			// 			.tasksPluginCustomStatuses
+			// 			.customStatuses
 			// 	) !== JSON.stringify(statuses)
 			// );
 
 			// Store it in the plugin settings if there is a difference
 			if (
 				JSON.stringify(
-					plugin.settings.data.globalSettings
-						.tasksPluginCustomStatuses
+					plugin.settings.data.globalSettings.customStatuses,
 				) !== JSON.stringify(statuses)
 			) {
-				plugin.settings.data.globalSettings.tasksPluginCustomStatuses =
-					statuses;
+				plugin.settings.data.globalSettings.customStatuses = statuses;
 				await plugin.saveSettings(plugin.settings);
 			}
 		}
 	} catch (error) {
-		console.warn(
-			"Error fetching custom statuses from tasks plugin:",
-			error
+		bugReporterManagerInsatance.addToLogs(
+			100,
+			String(error),
+			"tasks-plugin/helper.ts/fetchTasksPluginCustomStatuses",
 		);
+
+		return false;
 	}
+	return true;
 }
 
 export async function openTasksPluginEditModal(
 	plugin: TaskBoard,
-	oldTask: taskItem
+	oldTask: taskItem,
 ) {
 	try {
 		const tasksPlugin = new TasksPluginApi(plugin);
@@ -86,15 +113,15 @@ export async function openTasksPluginEditModal(
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const tasksPluginApiOutput = await tasksPlugin.editTaskLineModal(
-				completeOldTaskContent
+				completeOldTaskContent,
 			);
 
 			if (!tasksPluginApiOutput) {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					37,
 					"Tasks plugin API did not return any output.",
 					"Tasks plugin API did not return any output.",
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+					"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 				);
 				return;
 			}
@@ -116,7 +143,7 @@ export async function openTasksPluginEditModal(
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else if ((twoTaskTitles.length = 1)) {
 				const { formattedTaskContent, newId } =
@@ -131,7 +158,7 @@ export async function openTasksPluginEditModal(
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else if ((twoTaskTitles.length = 2)) {
 				newContent = `${twoTaskTitles[0]}${
@@ -148,19 +175,19 @@ export async function openTasksPluginEditModal(
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					38,
 					"Unexpected output from tasks plugin API. Since the task you are trying to update is a recurring task, Task Board cannot handle recurring tasks as of now and Tasks plugin didnt returned an expected output. Please report this issue so developers can enhance the integration.",
 					`Input to tasksPluginApi : ${completeOldTaskContent}\n Output of tasksPluginApi: ${tasksPluginApiOutput}`,
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+					"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 				);
 				return;
 			}
 
-			plugin.realTimeScanning.processAllUpdatedFiles(oldTask.filePath);
+			plugin.realTimeScanner.processAllUpdatedFiles(oldTask.filePath);
 			setTimeout(() => {
 				// This event emmitter will stop any loading animation of ongoing task-card.
 				eventEmitter.emit("UPDATE_TASK", {
@@ -180,19 +207,19 @@ export async function openTasksPluginEditModal(
 			//fallback to normal function
 			// await updateTaskInFile(plugin, updatedTask, oldTask);
 
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				39,
 				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
-				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+				"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 			);
 		}
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			40,
 			"Error while updating the recurring task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
-			"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+			"services/tasks-plugin/helpers.ts/openTasksPluginEditModal",
 		);
 		throw error;
 	}

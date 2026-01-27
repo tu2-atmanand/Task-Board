@@ -6,6 +6,7 @@ import {
 	RootFilterState,
 	SavedFilterConfig,
 } from "src/interfaces/BoardConfigs";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class FilterConfigModal extends Modal {
 	private plugin: TaskBoard;
@@ -22,7 +23,7 @@ export class FilterConfigModal extends Modal {
 		activeBoardIndex: number,
 		currentFilterState?: RootFilterState,
 		onSave?: (config: SavedFilterConfig) => void,
-		onLoad?: (config: SavedFilterConfig) => void
+		onLoad?: (config: SavedFilterConfig) => void,
 	) {
 		super(app);
 		this.plugin = plugin;
@@ -124,7 +125,7 @@ export class FilterConfigModal extends Modal {
 			.addDropdown((dropdown: DropdownComponent) => {
 				dropdown.addOption(
 					"",
-					t("select-a-saved-filter-configuration")
+					t("select-a-saved-filter-configuration"),
 				);
 
 				savedConfigs.forEach((config) => {
@@ -185,7 +186,7 @@ export class FilterConfigModal extends Modal {
 		if (!board.filterConfig) return;
 
 		const config = board.filterConfig.savedConfigs.find(
-			(c: SavedFilterConfig) => c.id === configId
+			(c: SavedFilterConfig) => c.id === configId,
 		);
 
 		if (!config) return;
@@ -198,14 +199,14 @@ export class FilterConfigModal extends Modal {
 
 		detailsContainer.createEl("p", {
 			text: `${t("created")}: ${new Date(
-				config.createdAt
+				config.createdAt,
 			).toLocaleString()}`,
 			cls: "filter-config-meta",
 		});
 
 		detailsContainer.createEl("p", {
 			text: `${t("updated")}: ${new Date(
-				config.updatedAt
+				config.updatedAt,
 			).toLocaleString()}`,
 			cls: "filter-config-meta",
 		});
@@ -219,7 +220,7 @@ export class FilterConfigModal extends Modal {
 		const groupCount = config.filterState.filterGroups.length;
 		const totalFilters = config.filterState.filterGroups.reduce(
 			(sum: number, group: FilterGroup) => sum + group.filters.length,
-			0
+			0,
 		);
 
 		filterSummary.createEl("p", {
@@ -274,7 +275,11 @@ export class FilterConfigModal extends Modal {
 
 			this.close();
 		} catch (error) {
-			console.error("Failed to save filter configuration:", error);
+			bugReporterManagerInsatance.addToLogs(
+				111,
+				String(error),
+				"FilterConfigModal.ts/saveConfiguration",
+			);
 			new Notice(t("failed-to-save-filter-configuration"));
 		}
 	}
@@ -290,7 +295,7 @@ export class FilterConfigModal extends Modal {
 		if (!board.filterConfig) return;
 
 		const config = board.filterConfig.savedConfigs.find(
-			(c: SavedFilterConfig) => c.id === configId
+			(c: SavedFilterConfig) => c.id === configId,
 		);
 
 		if (!config) {
@@ -305,7 +310,11 @@ export class FilterConfigModal extends Modal {
 
 			this.close();
 		} catch (error) {
-			console.error("Failed to load filter configuration:", error);
+			bugReporterManagerInsatance.addToLogs(
+				112,
+				String(error),
+				"FilterConfigModal.ts/loadConfiguration",
+			);
 			new Notice(t("failed-to-load-filter-configuration"));
 		}
 	}
@@ -321,7 +330,7 @@ export class FilterConfigModal extends Modal {
 		if (!board.filterConfig) return;
 
 		const config = board.filterConfig.savedConfigs.find(
-			(c: SavedFilterConfig) => c.id === configId
+			(c: SavedFilterConfig) => c.id === configId,
 		);
 
 		if (!config) {
@@ -371,7 +380,7 @@ export class FilterConfigModal extends Modal {
 
 			board.filterConfig.savedConfigs =
 				board.filterConfig.savedConfigs.filter(
-					(c: SavedFilterConfig) => c.id !== configId
+					(c: SavedFilterConfig) => c.id !== configId,
 				);
 
 			await this.plugin.saveSettings();
@@ -389,11 +398,15 @@ export class FilterConfigModal extends Modal {
 				this.activeBoardIndex,
 				undefined,
 				this.onSave,
-				this.onLoad
+				this.onLoad,
 			);
 			newModal.open();
 		} catch (error) {
-			console.error("Failed to delete filter configuration:", error);
+			bugReporterManagerInsatance.addToLogs(
+				113,
+				String(error),
+				"FilterConfigModal.ts/deleteConfiguration",
+			);
 			new Notice(t("failed-to-delete-filter-configuration"));
 		}
 	}

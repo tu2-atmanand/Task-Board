@@ -5,8 +5,8 @@ import React, { memo } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
-import Column from "./Column";
 import LazyColumn from "./LazyColumn";
+import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 
@@ -20,10 +20,9 @@ interface KanbanBoardProps {
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn, loading, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, tasksPerColumn, loading, freshInstall }) => {
 	// Check if lazy loading is enabled
-	const lazyLoadingEnabled = plugin.settings.data.globalSettings.kanbanView?.lazyLoadingEnabled ?? false;
-	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 
 	return (
 		<div className="kanbanBoard">
@@ -51,6 +50,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, tasksPerColumn
 					<div className="emptyBoardMessage">
 						Create columns on this board using the board config modal from top right corner button.
 					</div>
+				) : board?.swimlanes?.enabled ? (
+					<KanbanSwimlanesContainer
+						plugin={plugin}
+						board={board}
+						tasksPerColumn={tasksPerColumn}
+					/>
 				) : (
 					board?.columns
 						.filter((column) => column.active)
@@ -77,7 +82,7 @@ const MemoizedColumn = memo<{
 	activeBoardData: Board;
 	columnData: any;
 	tasksForThisColumn: taskItem[];
-	Component: typeof Column | typeof LazyColumn;
+	Component: typeof LazyColumn;
 }>(({ Component, ...props }) => {
 	return <Component {...props} />;
 }, (prevProps, nextProps) => {
@@ -140,7 +145,7 @@ export default memo(KanbanBoard);
 // 				}
 // 			} catch (error) {
 // 				setFreshInstall(true);
-// 				// bugReporter(plugin, "Error loading boards or tasks data", error as string, "KanbanBoard.tsx/useEffect");
+// 				// bugReporterManagerInsatance.showNotice(2, "Error loading boards or tasks data", error as string, "KanbanBoard.tsx/useEffect");
 // 			}
 // 		};
 
@@ -199,7 +204,7 @@ export default memo(KanbanBoard);
 // 			const allTasks = await loadTasksAndMerge(plugin);
 // 			setAllTasks(allTasks);
 // 		} catch (error) {
-// 			bugReporter(plugin, "Error loading tasks on column refresh", error as string, "KanbanBoard.tsx/debouncedRefreshColumn");
+// 			bugReporterManagerInsatance.showNotice(3, "Error loading tasks on column refresh", error as string, "KanbanBoard.tsx/debouncedRefreshColumn");
 // 		}
 // 	}, 300), [plugin]);
 
@@ -240,13 +245,13 @@ export default memo(KanbanBoard);
 
 // 	// Memoized refreshBoardButton to avoid re-creating the function on every render
 // 	const refreshBoardButton = useCallback(async () => {
-// 		if (plugin.settings.data.globalSettings.realTimeScanning) {
+// 		if (plugin.settings.data.globalSettings.realTimeScanner) {
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		} else {
 // 			if (
 // 				localStorage.getItem(PENDING_SCAN_FILE_STACK)?.at(0) !== undefined
 // 			) {
-// 				await plugin.realTimeScanning.processAllUpdatedFiles();
+// 				await plugin.realTimeScanner.processAllUpdatedFiles();
 // 			}
 // 			eventEmitter.emit("REFRESH_BOARD");
 // 		}

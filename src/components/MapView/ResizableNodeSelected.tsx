@@ -6,6 +6,7 @@ import type TaskBoard from 'main';
 import { mapViewNodeMapOrientation } from 'src/interfaces/Enums';
 import { CircleArrowDownIcon, CircleArrowRightIcon } from 'lucide-react';
 import { t } from 'src/utils/lang/helper';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 interface dataProps extends React.ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };
@@ -41,7 +42,11 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 						};
 						localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));
 					} catch (e) {
-						console.error('Failed to update node size in localStorage:', e);
+						bugReporterManagerInsatance.addToLogs(
+							127,
+							String(e),
+							"ResizableNodeSelected.tsx/return()",
+						);
 					}
 				}}
 			/>

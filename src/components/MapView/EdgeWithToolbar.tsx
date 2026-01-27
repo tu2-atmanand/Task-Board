@@ -11,7 +11,7 @@ import {
 import { Trash2, Palette, Sparkles } from 'lucide-react';
 import TaskBoard from 'main';
 import { taskItem } from 'src/interfaces/TaskItem';
-import { updateTaskInFile } from 'src/utils/taskLine/TaskItemUtils';
+import { updateTaskInFile } from 'src/utils/taskLine/TaskLineUtils';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 
 // interface EdgeWithToolbarProps extends EdgeProps {
@@ -82,7 +82,7 @@ export function EdgeWithToolbar(props: EdgeProps) {
 		// await updateTaskInFile(plugin, updatedTargetTask, targetTask);
 
 		// // Trigger real-time scanning to update the UI
-		// plugin.realTimeScanning.processAllUpdatedFiles(updatedTargetTask.filePath);
+		// plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
 
 		// // Delete the edge from the graph
 		// deleteElements({ edges: [edge] });

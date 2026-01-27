@@ -6,13 +6,13 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { generateTaskId } from "src/managers/VaultScanner";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getLocalDateTimeString } from "src/utils/TimeCalculations";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { taskItemEmpty } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
+import { generateTaskId } from "src/utils/TaskItemUtils";
 
 
 // Class component extending Modal for Obsidian
@@ -63,19 +63,22 @@ export class AddOrEditTaskModal extends Modal {
 
 		if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
-			this.task.legacyId = String(this.task.id);
+			this.task.legacyId = this.task.id;
 		}
 
 		// Some processing, if this is a Task-Note
 		let noteContent: string = "";
 		if (this.isTaskNote) {
 			if (this.filePath) {
-				noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
+				const data = await readDataOfVaultFile(this.plugin, this.filePath);
+
+				if (data == null) this.onClose();
+				else noteContent = data;
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'TaskNotes';
-				const noteName = this.task.title || getLocalDateTimeString();
+				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
+				const noteName = this.task.title || getCurrentLocalTimeString();
 				// Sanitize filename
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
@@ -116,7 +119,7 @@ export class AddOrEditTaskModal extends Modal {
 			mssg,
 			onDiscard: () => {
 				this.isEdited = false;
-				this.rejectPromise("Task was not submitted.")
+				this.resolvePromise("");
 				this.close();
 			},
 			onGoBack: () => {
@@ -137,7 +140,7 @@ export class AddOrEditTaskModal extends Modal {
 		} else {
 			this.modalEl.addClass(".slide-out");
 			sleep(300);
-			this.rejectPromise("Task was not submitted.")
+			this.resolvePromise("");
 			this.onClose();
 			super.close();
 		}

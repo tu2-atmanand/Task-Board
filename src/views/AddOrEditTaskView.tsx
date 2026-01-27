@@ -7,12 +7,12 @@ import type TaskBoard from "../../main";
 import { t } from "src/utils/lang/helper";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { generateTaskId } from "src/managers/VaultScanner";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getLocalDateTimeString } from "src/utils/TimeCalculations";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { taskItemEmpty } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
+import { generateTaskId } from "src/utils/TaskItemUtils";
 
 
 export class AddOrEditTaskView extends ItemView {
@@ -75,12 +75,15 @@ export class AddOrEditTaskView extends ItemView {
 		let noteContent: string = "";
 		if (this.isTaskNote) {
 			if (this.filePath) {
-				noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
+				const data = await readDataOfVaultFile(this.plugin, this.filePath);
+
+				if (data == null) this.onClose();
+				else noteContent = data;
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'TaskNotes';
-				const noteName = this.task.title || getLocalDateTimeString();
+				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
+				const noteName = this.task.title || getCurrentLocalTimeString();
 				// Sanitize filename
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
@@ -88,8 +91,9 @@ export class AddOrEditTaskView extends ItemView {
 
 			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
 
-			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
+			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.legacyId)) {
 				this.task.id = generateTaskId(this.plugin);
+				this.task.legacyId = this.task.id;
 			}
 		}
 

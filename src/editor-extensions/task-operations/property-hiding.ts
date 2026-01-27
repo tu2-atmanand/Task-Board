@@ -20,7 +20,7 @@ import {
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
 } from "src/regularExpressions/TasksPluginRegularExpr";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
-import { HideableTaskProperty } from "src/interfaces/Enums";
+import { taskPropertiesNames } from "src/interfaces/Enums";
 
 /**
  * Widget for showing placeholder text when properties are hidden
@@ -43,63 +43,63 @@ class HiddenPropertyWidget extends WidgetType {
  * Get regex patterns for different property types for different formats as per the user setting.
  */
 export function getTaskPropertyRegexPatterns(
-	property: HideableTaskProperty,
+	property: taskPropertiesNames,
 	tasksPropertyFormat: string
 ): RegExp {
 	if (tasksPropertyFormat === "1" || tasksPropertyFormat === "2") {
 		switch (property) {
-			case HideableTaskProperty.ID:
+			case taskPropertiesNames.ID:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.idRegex;
 
-			case HideableTaskProperty.Tags:
+			case taskPropertiesNames.Tags:
 				// return [/#[\w\-_\/]+/g];
 				return TaskRegularExpressions.hashTagsRegex;
 
-			case HideableTaskProperty.CreatedDate:
+			case taskPropertiesNames.CreatedDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.createdDateRegex;
 
-			case HideableTaskProperty.StartDate:
+			case taskPropertiesNames.StartDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.startDateRegex;
 
-			case HideableTaskProperty.ScheduledDate:
+			case taskPropertiesNames.ScheduledDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.scheduledDateRegex;
 
-			case HideableTaskProperty.DueDate:
+			case taskPropertiesNames.DueDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.dueDateRegex;
 
-			case HideableTaskProperty.CompletionDate:
+			case taskPropertiesNames.CompletionDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.doneDateRegex;
 
-			case HideableTaskProperty.CancelledDate:
+			case taskPropertiesNames.CancelledDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.cancelledDateRegex;
 
-			case HideableTaskProperty.Priority:
+			case taskPropertiesNames.Priority:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.priorityRegex;
 
-			case HideableTaskProperty.Time:
+			case taskPropertiesNames.Time:
 				return /⏰\s*\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/g;
 
-			case HideableTaskProperty.Recurring:
+			case taskPropertiesNames.Recurring:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.recurrenceRegex;
 
-			case HideableTaskProperty.OnCompletion:
+			case taskPropertiesNames.OnCompletion:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.onCompletionRegex;
 
-			case HideableTaskProperty.Dependencies:
+			case taskPropertiesNames.Dependencies:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.dependsOnRegex;
 
-			case HideableTaskProperty.Reminder:
+			case taskPropertiesNames.Reminder:
 				return /\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/g;
 
 			default:
@@ -107,59 +107,59 @@ export function getTaskPropertyRegexPatterns(
 		}
 	} else if (tasksPropertyFormat === "3") {
 		switch (property) {
-			case HideableTaskProperty.ID:
+			case taskPropertiesNames.ID:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.idRegex;
 
-			case HideableTaskProperty.Tags:
+			case taskPropertiesNames.Tags:
 				// return [/#[\w\-_\/]+/g];
 				return TaskRegularExpressions.hashTagsRegex;
 
-			case HideableTaskProperty.CreatedDate:
+			case taskPropertiesNames.CreatedDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.createdDateRegex;
 
-			case HideableTaskProperty.StartDate:
+			case taskPropertiesNames.StartDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.startDateRegex;
 
-			case HideableTaskProperty.ScheduledDate:
+			case taskPropertiesNames.ScheduledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.scheduledDateRegex;
 
-			case HideableTaskProperty.DueDate:
+			case taskPropertiesNames.DueDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dueDateRegex;
 
-			case HideableTaskProperty.CompletionDate:
+			case taskPropertiesNames.CompletionDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.doneDateRegex;
 
-			case HideableTaskProperty.CancelledDate:
+			case taskPropertiesNames.CancelledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.cancelledDateRegex;
 
-			case HideableTaskProperty.Priority:
+			case taskPropertiesNames.Priority:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.priorityRegex;
 
-			case HideableTaskProperty.Time:
+			case taskPropertiesNames.Time:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.timeRegex;
 
-			case HideableTaskProperty.Recurring:
+			case taskPropertiesNames.Recurring:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.recurrenceRegex;
 
-			case HideableTaskProperty.OnCompletion:
+			case taskPropertiesNames.OnCompletion:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.onCompletionRegex;
 
-			case HideableTaskProperty.Dependencies:
+			case taskPropertiesNames.Dependencies:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dependsOnRegex;
 
-			case HideableTaskProperty.Reminder:
+			case taskPropertiesNames.Reminder:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.reminderRegex;
 
@@ -168,59 +168,59 @@ export function getTaskPropertyRegexPatterns(
 		}
 	} else {
 		switch (property) {
-			case HideableTaskProperty.ID:
+			case taskPropertiesNames.ID:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.idRegex;
 
-			case HideableTaskProperty.Tags:
+			case taskPropertiesNames.Tags:
 				// return [/#[\w\-_\/]+/g];
 				return TaskRegularExpressions.hashTagsRegex;
 
-			case HideableTaskProperty.CreatedDate:
+			case taskPropertiesNames.CreatedDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.createdDateRegex;
 
-			case HideableTaskProperty.StartDate:
+			case taskPropertiesNames.StartDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.startDateRegex;
 
-			case HideableTaskProperty.ScheduledDate:
+			case taskPropertiesNames.ScheduledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.scheduledDateRegex;
 
-			case HideableTaskProperty.DueDate:
+			case taskPropertiesNames.DueDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dueDateRegex;
 
-			case HideableTaskProperty.CompletionDate:
+			case taskPropertiesNames.CompletionDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.doneDateRegex;
 
-			case HideableTaskProperty.CancelledDate:
+			case taskPropertiesNames.CancelledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.cancelledDateRegex;
 
-			case HideableTaskProperty.Priority:
+			case taskPropertiesNames.Priority:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.priorityRegex;
 
-			case HideableTaskProperty.Time:
+			case taskPropertiesNames.Time:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.timeRegex;
 
-			case HideableTaskProperty.Recurring:
+			case taskPropertiesNames.Recurring:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.recurrenceRegex;
 
-			case HideableTaskProperty.OnCompletion:
+			case taskPropertiesNames.OnCompletion:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.onCompletionRegex;
 
-			case HideableTaskProperty.Dependencies:
+			case taskPropertiesNames.Dependencies:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dependsOnRegex;
 
-			case HideableTaskProperty.Reminder:
+			case taskPropertiesNames.Reminder:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.reminderRegex;
 

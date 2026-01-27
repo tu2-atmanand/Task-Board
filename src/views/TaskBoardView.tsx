@@ -10,9 +10,10 @@ import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { bugReporter, openScanVaultModal } from "../services/OpenModals";
+import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
@@ -46,7 +47,7 @@ export class TaskBoardView extends ItemView {
 				const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
 
 				if (fileStack && fileStack.length > 0) {
-					await this.plugin.realTimeScanning.processAllUpdatedFiles();
+					await this.plugin.realTimeScanner.processAllUpdatedFiles();
 				}
 				eventEmitter.emit("REFRESH_BOARD");
 			}).addClass("taskboardRefreshBtn");
@@ -82,8 +83,8 @@ export class TaskBoardView extends ItemView {
 		try {
 			this.boards = await loadBoardsData(this.plugin);
 		} catch (err) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				89,
 				"Failed to load board configurations from data.json",
 				String(err),
 				"TaskBoardView.tsx/loadBoards"

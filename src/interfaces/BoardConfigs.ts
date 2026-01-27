@@ -16,6 +16,7 @@ export interface columnSortingCriteria {
 		| "recurrence"
 		| "filePath"
 		| "lineNumber"
+		| "manualOrder"
 		| "id"; // Fields to sort by
 	order: "asc" | "desc"; // Sort order
 	priority: number;
@@ -76,8 +77,10 @@ export type ColumnData = {
 	};
 	taskStatus?: string;
 	taskPriority?: number;
+	workLimit?: number;
 	limit?: number;
 	sortCriteria?: columnSortingCriteria[];
+	tasksIdManualOrder?: string[];
 	filters?: RootFilterState;
 	range?: {
 		// Keep it for few versions, this is required while settings migrations
@@ -105,6 +108,22 @@ export interface FilterConfigSettings {
 	savedConfigs: SavedFilterConfig[];
 }
 
+export interface swimlaneConfigs {
+	enabled: boolean;
+	hideEmptySwimlanes: boolean;
+	maxHeight: string;
+	property: string; // e.g., 'tags', 'priority'
+	customValue?: string; // This is only if user selects "custom" as the property. This is also only applicable in case of dataview format properties or for task-notes, where user can use their custom key-value from frontmatter.
+	sortCriteria: string; // e.g., 'asc', 'desc', 'custom'
+	customSortOrder?: {
+		value: string;
+		index: number;
+	}[]; // This is only if user selects "custom" as the sort criteria.
+	groupAllRest?: boolean; // This will be only visible for customSortOrder. It will help user to decide if they want to group all the rest of the task below the custom sort order.
+	verticalHeaderUI: boolean; // This is a temporary setting for user telemetry. Later will remove it based on user feedback.
+	minimized: string[]; // This will store the names of the minimized swimlanes.
+}
+
 export type Board = {
 	name: string;
 	description?: string;
@@ -119,6 +138,7 @@ export type Board = {
 		pending: number;
 		completed: number;
 	};
+	swimlanes: swimlaneConfigs;
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
 	filterPolarity?: string;
