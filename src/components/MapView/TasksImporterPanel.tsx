@@ -1,7 +1,7 @@
 // /src/components/MapView/TasksImporterPanel.tsx
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { X, ChevronDown } from 'lucide-react';
 import { taskItem } from 'src/interfaces/TaskItem';
 import TaskItem from '../KanbanView/TaskItem';
 import TaskBoard from 'main';
@@ -28,6 +28,16 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 }) => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [importedTaskIds, setImportedTaskIds] = useState<Set<string>>(new Set());
+	const tasksContentRef = useRef<HTMLDivElement>(null);
+
+	// Lazy loading configs
+	// Lazy loading configs
+	const initialTaskCount = 20;
+	const loadMoreCount = 10;
+	const scrollThresholdPercent = 80;
+
+	// State for managing visible tasks
+	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);
 
 	// Get all tasks without an ID (legacyId is empty)
 	const tasksWithoutId = useMemo(() => {
@@ -47,6 +57,12 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 			task.tags.some(tag => tag.toLowerCase().includes(query))
 		);
 	}, [tasksWithoutId, searchQuery]);
+
+	// Memoize visible tasks based on count
+	const visibleTasks = useMemo(() => {
+		if (!filteredTasks || filteredTasks.length < 1) return [];
+		return filteredTasks.slice(0, visibleTaskCount);
+	}, [filteredTasks, visibleTaskCount]);
 
 	const handleImportTask = async (task: taskItem) => {
 		try {
@@ -70,6 +86,50 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 			);
 		}
 	};
+
+	// Reset visible count when filtered tasks change (e.g., due to search)
+	useEffect(() => {
+		setVisibleTaskCount(initialTaskCount);
+	}, [filteredTasks, initialTaskCount]);
+
+	// Scroll event handler
+	const handleScroll = useCallback(() => {
+		const container = tasksContentRef.current;
+		if (!container) return;
+
+		const { scrollTop, scrollHeight, clientHeight } = container;
+		const scrollPercentage = ((scrollTop + clientHeight) / scrollHeight) * 100;
+
+		// Load more tasks when scroll threshold is reached and there are more tasks to load
+		if (scrollPercentage >= scrollThresholdPercent && visibleTaskCount < filteredTasks.length) {
+			setVisibleTaskCount((prevCount) => {
+				const newCount = Math.min(prevCount + loadMoreCount, filteredTasks.length);
+				return newCount;
+			});
+		}
+	}, [scrollThresholdPercent, visibleTaskCount, filteredTasks.length, loadMoreCount]);
+
+	// Attach scroll listener
+	useEffect(() => {
+		const container = tasksContentRef.current;
+		if (!container) return;
+
+		// Throttle scroll events for performance
+		let throttleTimeout: NodeJS.Timeout | null = null;
+		const throttledScroll = () => {
+			if (throttleTimeout) return;
+			throttleTimeout = setTimeout(() => {
+				handleScroll();
+				throttleTimeout = null;
+			}, 100);
+		};
+
+		container.addEventListener('scroll', throttledScroll);
+		return () => {
+			container.removeEventListener('scroll', throttledScroll);
+			if (throttleTimeout) clearTimeout(throttleTimeout);
+		};
+	}, [handleScroll]);
 
 	// Reset imported tasks when panel is closed
 	useEffect(() => {
@@ -133,7 +193,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 					)}
 				</div>
 
-				<div className="tasksImporterPanelContent">
+				<div className="tasksImporterPanelContent" ref={tasksContentRef}>
 					{filteredTasks.length === 0 ? (
 						<div className="tasksImporterPanelEmptyState">
 							<p>
@@ -143,23 +203,34 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 							</p>
 						</div>
 					) : (
-						<div className="tasksImporterPanelTaskList">
-							{filteredTasks.map((task, index) => (
-								<div
-									key={task.id}
-									className="tasksImporterPanelTaskItemWrapper"
-									onClick={() => handleImportTask(task)}
-								>
-									<TaskItem
+						<>
+							<div className="tasksImporterPanelTaskList">
+								{visibleTasks.map((task, index) => (
+									<div
 										key={task.id}
-										plugin={plugin}
-										task={task}
-										activeBoardSettings={activeBoardSettings}
-										dataAttributeIndex={0} // TODO : No need of this data in this case.
-									/>
-								</div>
-							))}
-						</div>
+										className="tasksImporterPanelTaskItemWrapper"
+										onClick={() => handleImportTask(task)}
+									>
+										<TaskItem
+											key={task.id}
+											plugin={plugin}
+											task={task}
+											activeBoardSettings={activeBoardSettings}
+											dataAttributeIndex={0} // TODO : No need of this data in this case.
+										/>
+									</div>
+								))}
+							</div>
+							{visibleTaskCount < filteredTasks.length && (
+								<button
+									className="tasksImporterPanelLoadMoreBtn"
+									onClick={() => setVisibleTaskCount(prev => Math.min(prev + loadMoreCount, filteredTasks.length))}
+								>
+									<ChevronDown size={18} />
+									{t('load-more')}
+								</button>
+							)}
+						</>
 					)}
 				</div>
 			</div>
