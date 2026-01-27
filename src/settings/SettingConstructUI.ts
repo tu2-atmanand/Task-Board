@@ -1,6 +1,13 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Notice, Setting, normalizePath, setIcon } from "obsidian";
+import {
+	App,
+	Notice,
+	Setting,
+	SettingGroup,
+	normalizePath,
+	setIcon,
+} from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
@@ -1225,21 +1232,23 @@ export class SettingsManager {
 		renderTagColors();
 
 		// Add "Add New Tag Color" button
-		new Setting(contentEl).addButton((btn) =>
-			btn
-				.setButtonText(t("add-tag-color"))
-				.setCta()
-				.onClick(async () => {
-					const newTag = {
-						name: "",
-						color: "rgba(255, 0, 0, 1)",
-						priority: this.globalSettings!.tagColors.length + 1,
-					};
-					this.globalSettings!.tagColors.push(newTag);
-					await this.saveSettings();
-					renderTagColors();
-				}),
-		);
+		new Setting(contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-tag-color"))
+					.setCta()
+					.onClick(async () => {
+						const newTag = {
+							name: "",
+							color: "rgba(255, 0, 0, 1)",
+							priority: this.globalSettings!.tagColors.length + 1,
+						};
+						this.globalSettings!.tagColors.push(newTag);
+						await this.saveSettings();
+						renderTagColors();
+					}),
+			)
+			.setClass("task-board-settingtab-add-tag-color-btn");
 
 		// new Setting(contentEl)
 		// 	.setName(t("live-editor-and-reading-mode"))
