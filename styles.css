@@ -138,8 +138,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskBoardViewSection-mobile {
-	height: 100%;
-	/* max-height: 93%; */
+	/* height: 100%; */
+	max-height: 92%;
 	/* margin-block-end: 20px; */
 	padding-block-end: 4.2rem;
 }
@@ -1997,7 +1997,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .boardConfigModalSidebarBtnArea-btn {
-	border-radius: var(--button-radius);
+	border-radius: 1rem;
 	border: var(--border-width) solid var(--table-header-border-color);
 	padding: 8px;
 	cursor: pointer;
@@ -2045,6 +2045,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-left: 1em;
 	/* overflow-y: auto; */
 	max-width: 50vw;
+	width: -webkit-fill-available;
 	max-height: calc(var(--dialog-max-height) - 6vh);
 }
 
@@ -2247,7 +2248,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 	.boardConfigModalMainContent {
 		max-width: 95vw;
-		width: 95vw;
+		width: -webkit-fill-available;
 		padding-left: 0 !important;
 		overflow-y: unset !important;
 	}
@@ -2716,6 +2717,11 @@ li:hover .taskboard-hidden-property {
 	transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.setting-item.tag-color-row-element {
+	border: none !important;
+	background-color: transparent !important;
+}
+
 .tag-color-row-element .setting-item-info {
 	display: none !important;
 }
@@ -2811,6 +2817,10 @@ li:hover .taskboard-hidden-property {
 
 .taskboard-setting-tag-color-row-element-color-picker {
 	cursor: pointer !important;
+}
+
+.task-board-settingtab-add-tag-color-btn {
+	background-color: transparent !important;
 }
 
 .global-setting-tab-live-preview {
@@ -4742,7 +4752,7 @@ svg.react-flow__connectionline {
 }
 
 .react-flow__panel.bottom {
-	bottom: 0;
+	bottom: 120px;
 }
 
 .react-flow__panel.top.center,
