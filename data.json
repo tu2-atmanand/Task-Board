@@ -23,17 +23,13 @@
               }
             ],
             "tasksIdManualOrder": [
+              "3670624679",
+              263,
               "367",
               "372",
-              "398696308",
               "373",
               "370",
-              "3077781059",
-              "4184100420",
-              "3052793295",
               "1506909345",
-              274,
-              "4031700447",
               "362"
             ]
           },
@@ -75,8 +71,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 65,
-          "completed": 19
+          "pending": 64,
+          "completed": 14
         }
       },
       {
@@ -229,8 +225,8 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 4,
-          "completed": 1
+          "pending": 64,
+          "completed": 14
         }
       },
       {
@@ -1055,9 +1051,9 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 0,
         "taskId": "",
-        "settingTab": 7
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
