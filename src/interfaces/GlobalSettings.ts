@@ -129,12 +129,6 @@ export interface globalSettingsData {
 		taskId?: string;
 	};
 	boundTaskCompletionToChildTasks: boolean;
-	kanbanView: {
-		lazyLoadingEnabled: boolean;
-		initialTaskCount: number;
-		loadMoreCount: number;
-		scrollThresholdPercent: number;
-	};
 	mapView: {
 		background: string;
 		mapOrientation: string;
@@ -675,12 +669,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				settingTab: 0,
 			},
 			boundTaskCompletionToChildTasks: false,
-			kanbanView: {
-				lazyLoadingEnabled: true,
-				initialTaskCount: 20,
-				loadMoreCount: 10,
-				scrollThresholdPercent: 80,
-			},
 			mapView: {
 				background: mapViewBackgrounVariantTypes.none,
 				mapOrientation: mapViewNodeMapOrientation.horizontal,
