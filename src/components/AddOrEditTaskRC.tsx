@@ -1205,7 +1205,7 @@ export const AddOrEditTaskRC: React.FC<{
 								</div> */}
 							</div>
 							<div className="EditTaskModalHomePreviewHeader">
-								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">{(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !isTaskNote && !activeNote) ? t("quickadd-plugin-choice") : t("file")}
+								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">
 									<input
 										type="text"
 										disabled={taskExists || isTaskNote || activeNote}
