@@ -182,25 +182,29 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								});
 							});
 					} else {
+						const newName = getCurrentLocalTimeString();
+						const parts = newTask.filePath.split("/");
+						const dirPath = parts.slice(0, -1).join("/").trim();
+						const newPath = normalizePath(
+							`${dirPath}/${newName}.md`,
+						);
 						new Notice(
 							t("file-note-already-exists") +
 								t(
-									"creating a new file with the following name :",
+									"creating a new file with the current timestamp as note name :",
 								) +
-								` Copy-${newTask.filePath}`,
+								` ${newName}.md`,
 							10000,
 						);
-						await plugin.app.vault
-							.create(`Copy-${newTask.filePath}`, noteContent)
-							.then(() => {
-								// This is required to rescan the updated file and refresh the board.
-								plugin.realTimeScanner.onFileModified(
-									`Copy-${newTask.filePath}`,
-								);
-								sleep(1000).then(() => {
-									plugin.realTimeScanner.processAllUpdatedFiles();
-								});
+						await plugin.app.vault.create(newPath, "").then(() => {
+							// This is required to rescan the updated file and refresh the board.
+							plugin.realTimeScanner.onFileModified(
+								`Copy-${newTask.filePath}`,
+							);
+							sleep(1000).then(() => {
+								plugin.realTimeScanner.processAllUpdatedFiles();
 							});
+						});
 					}
 				} catch (error) {
 					bugReporterManagerInsatance.addToLogs(
