@@ -23,13 +23,13 @@
               }
             ],
             "tasksIdManualOrder": [
-              "3670624679",
-              263,
+              "362",
               "367",
-              "372",
+              "3670624679",
               "373",
               "370",
-              "362"
+              263,
+              "372"
             ]
           },
           {
@@ -856,7 +856,7 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 64,
+          "pending": 65,
           "completed": 14
         }
       }
@@ -1021,7 +1021,7 @@
         "dayPlannerPlugin": true,
         "quickAddPlugin": false
       },
-      "preDefinedNote": "Task_Board_Temp_Tasks.md",
+      "preDefinedNote": "Meta/TaskBoard/All Tasks.md",
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
       "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
@@ -1045,14 +1045,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 588,
+      "uniqueIdCounter": 594,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "map",
-        "boardIndex": 0,
+        "viewedType": "kanban",
+        "boardIndex": 4,
         "taskId": "",
-        "settingTab": 2
+        "settingTab": 4
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",

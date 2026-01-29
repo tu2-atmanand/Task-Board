@@ -4,30 +4,6 @@
 
 ## Recent Bug Reports
 
-Timestamp : 2026-01-22T14:41:12.790Z
-ID : 73
-Message : Failed to move tasks.json file to new path
-Context : JsonFileOperations.ts/moveTasksCacheFileToNewPath
-
-#### Bug Content
-```log
-Error: Destination file already exists!
-```
-
--------------
-
-Timestamp : 2026-01-22T15:32:49.517Z
-ID : 73
-Message : Failed to move tasks.json file to new path
-Context : JsonFileOperations.ts/moveTasksCacheFileToNewPath
-
-#### Bug Content
-```log
-Error: ENOENT: no such file or directory, rename 'D:\Personal_Projects_Hub\IDE_Wise_Projects\Obsidian\TemplateToDevelopPlugin\Meta\task-board-cache.json' -> 'D:\Personal_Projects_Hub\IDE_Wise_Projects\Obsidian\TemplateToDevelopPlugin\Meta\Task_Board\task-board-cache.json'
-```
-
--------------
-
 Timestamp : 2026-01-22T15:39:09.095Z
 ID : 73
 Message : Failed to move tasks.json file to new path
@@ -240,4 +216,28 @@ Context : MapView.tsx/initialNodes
 #### Bug Content
 ```log
 ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-28T13:05:51
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "276,224". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-29T10:56:43
+ID : 103
+Message : 
+Context : MultiSuggest.ts/getQuickAddPluginChoices
+
+#### Bug Content
+```log
+Error: QuickAdd plugin object is undefined.
 ```
