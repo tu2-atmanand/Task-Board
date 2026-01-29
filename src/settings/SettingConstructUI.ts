@@ -634,7 +634,14 @@ export class SettingsManager {
 		// New setting for updating language file
 		new Setting(contentEl)
 			.setName(t("update-language-translations"))
-			.setDesc(t("update-language-translations-info"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("update-language-translations-info") +
+						" <a href='https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/'>" +
+						t("task-board-docs") +
+						".",
+				),
+			)
 			.addButton((button) =>
 				button.setButtonText("Update").onClick(async () => {
 					const result = await downloadAndApplyLanguageFile(
@@ -728,6 +735,13 @@ export class SettingsManager {
 						" : " +
 						"</b>" +
 						t("manual-sorting-feature-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						"Task card menu" +
+						" : " +
+						"</b>" +
+						"Easily change various properties of tasks and access quick actions through the menu. Specially useful on mobile as an alternative to drag and drop feature." +
 						"</li>" +
 						"</ul>",
 				),
@@ -2304,8 +2318,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("auto-add-created-date-to-tasks"))
-			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.setName(t("auto-add-created-date"))
+			.setDesc(t("auto-add-created-date-desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddCreatedDate).onChange(async (value) => {
 					this.globalSettings!.autoAddCreatedDate = value;
@@ -2315,8 +2329,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("auto-add-completed-date-to-tasks"))
-			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.setName(t("auto-add-completed-date"))
+			.setDesc(t("auto-add-completed-date-desc"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(autoAddCompletedDate)
@@ -2328,8 +2342,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("auto-add-cancelled-date-to-tasks"))
-			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.setName(t("auto-add-cancelled-date"))
+			.setDesc(t("auto-add-cancelled-date-desc"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(autoAddCancelledDate)

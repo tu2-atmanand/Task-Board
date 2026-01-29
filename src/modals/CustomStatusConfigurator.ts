@@ -36,7 +36,7 @@ export class CustomStatusModal extends Modal {
 			this.type = status.type;
 		}
 		this.isCoreStatus = isCoreStatus;
-		this.setTitle(t("Configure status entry"));
+		this.setTitle(t("configure-status-entry"));
 	}
 
 	/**
@@ -123,6 +123,7 @@ export class CustomStatusModal extends Modal {
 		const footerEl = contentEl.createDiv();
 		const footerButtons = new Setting(footerEl);
 		footerButtons.addButton((b) => {
+			b.setButtonText(t("save"));
 			b.setTooltip(t("save")).onClick(async () => {
 				this.saved = true;
 				this.close();
