@@ -1,6 +1,6 @@
 // src/services/OpenModals.ts
 
-import { App, Notice, TFile, WorkspaceLeaf } from "obsidian";
+import { App, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	addTaskInNote,
 	updateTaskInFile,
@@ -29,6 +29,7 @@ import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { DatePickerModal } from "src/modals/date_picker";
 import { updateTaskItemDate } from "src/utils/UserTaskEvents";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -136,7 +137,7 @@ export const openAddNewTaskModal = (
 		undefined,
 		activeTFile
 			? activeTFile.path
-			: plugin.settings.data.globalSettings.preDefinedNote,
+			: normalizePath(plugin.settings.data.globalSettings.preDefinedNote),
 	);
 	AddTaskModal.open();
 };
@@ -162,6 +163,9 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 						if (!(await plugin.app.vault.adapter.exists(dirPath))) {
 							await plugin.app.vault.createFolder(dirPath);
 						}
+
+						// Required for Obsidian to create the folder and index it.
+						sleep(200);
 					}
 
 					// Create or update the file

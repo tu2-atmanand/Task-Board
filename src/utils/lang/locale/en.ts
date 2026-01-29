@@ -220,7 +220,7 @@ const en: Lang = {
 	"auto-add-cancelled-date": "Auto add cancelled date",
 	"auto-add-cancelled-date-desc": "Enable this feature to automatically add current date-time value as the cancelled date property to the task when you will mark the task as cancelled through checkbox or through status change to status of type 'CANCELLED'",
 	"file-for-archived-tasks": "File for archived tasks",
-	"file-for-archived-tasks-description": "Select the note in which the archived tasks should be moved. Leave this setting empty to simply comment out the task in the parent file itself",
+	"file-for-archived-tasks-description": "Select the note in which the archived tasks should be moved. Leave this setting empty, if you want to simply comment out the task in the parent file itself when you will click on 'archive instead' button.",
 	"default-quickadd-choice": "Default quickadd plugin choice",
 	"default-quickadd-choice-description": "Select which of your choice from your quickadd plugin configuration should be used as the default choice in the 'add new task modal'. Please install the quickadd plugin first and create a choice in the quickadd plugin.",
 	"quickadd-plugin-not-enabled": "Quickadd plugin is not enabled. Please install the plugin and enable it.",
@@ -576,7 +576,8 @@ const en: Lang = {
 	"export-logs-info": "This plugin stores all the warnings and errors in a log file inside the plugin folder. You may click on the export button to export it wherever you want in a txt file so you can debug the issue on your own or submit it to the developer if they have asked you for the logs. Before submitting the log file, please ensure that no vault content has been captured inside the logs. Also it will be advisable to submit the logs on email instead of on GitHub.",
 	"configure-status-entry": "Configure status entry",
 	"edit": "Edit",
-	"no-custom-statuses-configured": "No custom statuses configured"
+	"no-custom-statuses-configured": "No custom statuses configured",
+	"task-note-title-placeholder": "Enter a simple title for the task..."
 };
 
 export default en;

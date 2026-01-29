@@ -534,7 +534,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 		const taskNoteItem: taskItem = {
 			...modifiedTask,
-			title: title,
+			title: title === "" ? taskNoteFilePath.split('/').pop() ?? "No title" : title,
 			body: formattedTaskContent ? formattedTaskContent.split('\n').filter(line => isTaskLine(line)) : [],
 			createdDate: newCreatedDate,
 			startDate: newStartDate,
@@ -1208,7 +1208,7 @@ export const AddOrEditTaskRC: React.FC<{
 								<div className="EditTaskModalHomePreviewHeaderFilenameLabel">
 									<input
 										type="text"
-										disabled={taskExists || isTaskNote || activeNote}
+										disabled={taskExists || activeNote}
 										ref={filePathRef}
 										className="EditTaskModalHomePreviewHeaderFilenameValue"
 										value={(communityPlugins.isQuickAddPluginIntegrationEnabled() && !taskExists && !activeNote) ? quickAddPluginChoice : newFilePath}

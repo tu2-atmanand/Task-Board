@@ -2,6 +2,7 @@
 
 import {
 	App,
+	normalizePath,
 	Notice,
 	Plugin,
 	PluginManifest,
@@ -698,8 +699,9 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		const archivedPath =
-			this.settings.data.globalSettings.archivedTBNotesFolderPath;
+		const archivedPath = normalizePath(
+			this.settings.data.globalSettings.archivedTBNotesFolderPath,
+		);
 		const totalFiles = this.renameQueue.length;
 
 		// Show progress notice

@@ -536,12 +536,12 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				reminderPlugin: false,
 				quickAddPlugin: false,
 			},
-			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
 			taskNoteIdentifierTag: "taskNote",
-			taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
-			quickAddPluginDefaultChoice: "",
+			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
 			archivedTasksFilePath: "",
+			taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
 			archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",
+			quickAddPluginDefaultChoice: "",
 			frontmatterFormatting: [
 				{
 					index: 0,

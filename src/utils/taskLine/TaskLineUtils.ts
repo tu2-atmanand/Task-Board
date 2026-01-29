@@ -10,7 +10,7 @@ import {
 	writeDataToVaultFile,
 } from "../MarkdownFileOperations";
 
-import { Notice } from "obsidian";
+import { normalizePath, Notice } from "obsidian";
 import TaskBoard from "main";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import {
@@ -52,21 +52,33 @@ export const addTaskInNote = async (
 	editorActive: boolean,
 	cursorPosition?: { line: number; ch: number } | undefined,
 ): Promise<string | undefined> => {
-	const filePath = allowedFileExtensionsRegEx.test(newTask.filePath)
+	const filePath = newTask.filePath.endsWith("md")
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
 
-	// Clean the task title to ensure it doesn't contain any special characters
-	if (!(await plugin.fileExists(filePath))) {
-		new Notice(
-			`New note created since it does not exists : "${filePath}"`,
-			5000,
-		);
-		// Create a new file if it doesn't exist
-		await plugin.app.vault.create(filePath, "");
-	}
-
 	try {
+		// Clean the task title to ensure it doesn't contain any special characters
+		if (!(await plugin.fileExists(filePath))) {
+			new Notice(
+				`New note created since it does not exists : "${filePath}"`,
+				5000,
+			);
+			const normalizedPath = normalizePath(filePath);
+			// Check if the directory exists, create if not
+			const parts = normalizedPath.split("/");
+			if (parts.length > 1) {
+				const dirPath = parts.slice(0, -1).join("/").trim();
+				if (!(await plugin.app.vault.adapter.exists(dirPath))) {
+					await plugin.app.vault.createFolder(dirPath);
+				}
+			}
+
+			// Create a new file if it doesn't exist
+			await plugin.app.vault.create(normalizedPath, "");
+
+			await sleep(200);
+		}
+
 		let completeTask = await getFormattedTaskContent(newTask);
 		const { formattedTaskContent, newId } = await addIdToTaskContent(
 			plugin,

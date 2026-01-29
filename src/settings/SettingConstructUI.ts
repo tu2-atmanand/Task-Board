@@ -1741,8 +1741,10 @@ export class SettingsManager {
 			.setDesc(t("default-note-for-new-tasks-description"))
 			.addText((text) => {
 				text.setValue(preDefinedNote).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.preDefinedNote = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.preDefinedNote = normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
@@ -1769,8 +1771,10 @@ export class SettingsManager {
 			.setDesc(t("file-for-archived-tasks-description"))
 			.addText((text) => {
 				text.setValue(archivedTasksFilePath).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.archivedTasksFilePath = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.archivedTasksFilePath = normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
@@ -1851,20 +1855,38 @@ export class SettingsManager {
 				inputEl.placeholder = "e.g., #taskNote";
 			});
 
+		const folderSuggestions = getFolderSuggestions(this.app);
+
 		// Setting for choosing the default location for task notes
 		new Setting(contentEl)
 			.setName(t("default-location-for-new-task-notes"))
 			.setDesc(t("default-location-for-new-task-notes-description"))
 			.addText((text) => {
 				text.setValue(taskNoteDefaultLocation).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.taskNoteDefaultLocation = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.taskNoteDefaultLocation =
+							normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
-				// For folders, we could use folder suggestions or just allow text input
-				// For now, let's keep it simple with text input
 				inputEl.placeholder = "e.g., Task Notes/";
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.taskNoteDefaultLocation =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(folderSuggestions),
+					onSelectCallback,
+					this.app,
+				);
 			});
 
 		// Setting for choosing the default file to archive tasks
@@ -1873,13 +1895,15 @@ export class SettingsManager {
 			.setDesc(t("folder-for-archived-task-notes-description"))
 			.addText((text) => {
 				text.setValue(archivedTBNotesFolderPath).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.archivedTBNotesFolderPath = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.archivedTBNotesFolderPath =
+							normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
 				inputEl.placeholder = "e.g., TaskBoard/TaskNotes";
-				const suggestionContent = getFolderSuggestions(this.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTBNotesFolderPath =
@@ -1891,7 +1915,7 @@ export class SettingsManager {
 
 				new MultiSuggest(
 					inputEl,
-					new Set(suggestionContent),
+					new Set(folderSuggestions),
 					onSelectCallback,
 					this.app,
 				);
