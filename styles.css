@@ -688,6 +688,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	mask-image: unset;
 	-webkit-mask-image: unset;
 	margin-block-start: 3px !important;
+	vertical-align: middle;
 }
 
 .taskItemCheckbox-checked {
@@ -1661,10 +1662,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .EditTaskModalHomePreviewBody ol {
 	padding-inline-start: 20px;
 	margin-block: 0 !important;
-}
-
-.taskItemCheckbox {
-	vertical-align: middle;
 }
 
 .EditTaskModalLiveEditor {
@@ -3368,6 +3365,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox.taskItemCheckbox-checked:is([data-tas
 	cursor: pointer;
 	mask-image: unset;
 	-webkit-mask-image: unset;
+	background-image: none !important;
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-task=X],
@@ -3528,6 +3526,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 	mask-image: unset;
 	-webkit-mask-image: unset;
 	border: none !important;
+	background-image: none !important;
 }
 
 /*--Checkbox Type Icons--*/
@@ -3841,6 +3840,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	[data-task="H"],
 	[data-task="<"]) {
 	border: 0 !important;
+	background-image: none !important;
 	/* This will remove the border of the checkbox so only the icon is visible*/
 }
 
@@ -6870,6 +6870,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	gap: 5px;
+	backdrop-filter: blur(5px);
 }
 
 .swimlanesHeaderRow .TaskBoardColumnsSection {
