@@ -23,26 +23,29 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 		if (!(key in settings)) {
 			// This is a cumpulsory migration which will be required in every new version update, since a new field should be added into the users settings.
 			settings[key] = defaults[key];
-		} else if (
-			!Array.isArray(settings[key]) &&
-			key === "tagColors" &&
-			typeof settings[key] === "object" &&
-			settings[key] !== null
-		) {
-			// This is a temporary migration applied since version 1.2.0. Can be removed, after around 6 months.
-			settings[key] = Object.entries(
-				settings[key] as Record<string, string>,
-			).map(
-				([name, color], idx) =>
-					({
-						name,
-						color,
-						priority: idx + 1,
-					}) as any,
-			);
-		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-			// This is a temporary solution to sync the boardConfigs. Will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
-			// This migration was applied since version 1.5.0.
+		}
+
+		// -----------------------------------
+		/**
+		 * @since v1.9.0
+		 * @type Temporary
+		 * @note Remove this on the next version release where this migration will run.
+		 *
+		 * This is migration is only applied to replace the older settings available in users configs with the new settings as per the new Settinsg section added in the global settings.
+		 */
+		else if (key === "customStatuses") {
+			settings[key] = DEFAULT_SETTINGS.data.globalSettings.customStatuses;
+		}
+
+		// -------------------------------------
+		/**
+		 * @since v1.5.0
+		 * @type Temporary
+		 * @note Remove this in 6 months.
+		 *
+		 * This is a temporary solution to sync the boardConfigs. This is required to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically we need to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
+		 */
+		else if (key === "boardConfigs" && Array.isArray(settings[key])) {
 			settings[key].forEach((boardConfig: Board) => {
 				boardConfig.columns.forEach((column: ColumnData) => {
 					if (!column.id) {
