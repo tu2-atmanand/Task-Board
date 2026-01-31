@@ -32,6 +32,7 @@ import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
 import {
 	newReleaseVersion,
+	OBSIDIAN_CLOSED_TIME_KEY,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
@@ -51,6 +52,7 @@ import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -926,13 +928,20 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async findModifiedFilesOnAppAbsense() {
-		if (this.vaultScanner.tasksCache.Modified_at) {
-			const LAST_UPDATED_TIME = Date.parse(
-				this.vaultScanner.tasksCache.Modified_at,
-			);
+		let OBSIDIAN_CLOSED_TIME = this.app.loadLocalStorage(
+			OBSIDIAN_CLOSED_TIME_KEY,
+		);
+		console.log("DATA loaded from localStorage :", OBSIDIAN_CLOSED_TIME);
+
+		if (!OBSIDIAN_CLOSED_TIME)
+			OBSIDIAN_CLOSED_TIME = this.vaultScanner.tasksCache.Modified_at;
+		console.log("DATA loaded from cache :", OBSIDIAN_CLOSED_TIME);
+
+		if (OBSIDIAN_CLOSED_TIME) {
+			OBSIDIAN_CLOSED_TIME = Date.parse(OBSIDIAN_CLOSED_TIME);
 			console.log(
 				"Task Board : Fetching all modified files...\nLast modified time :",
-				LAST_UPDATED_TIME,
+				OBSIDIAN_CLOSED_TIME,
 			);
 			let filesScannedCount = 0;
 			const modifiedCreatedRenamedFiles = this.app.vault
@@ -940,8 +949,8 @@ export default class TaskBoard extends Plugin {
 				.filter((file) => {
 					filesScannedCount++;
 					return (
-						file.stat.mtime > LAST_UPDATED_TIME ||
-						file.stat.ctime > LAST_UPDATED_TIME
+						file.stat.mtime > OBSIDIAN_CLOSED_TIME ||
+						file.stat.ctime > OBSIDIAN_CLOSED_TIME
 					);
 				});
 
@@ -1162,6 +1171,16 @@ export default class TaskBoard extends Plugin {
 				console.log("Focusing in the window...");
 			});
 		}
+
+		this.registerEvent(
+			this.app.workspace.on("quit", () => {
+				const currentTime = getCurrentLocalTimeString();
+				this.app.saveLocalStorage(
+					OBSIDIAN_CLOSED_TIME_KEY,
+					currentTime,
+				);
+			}),
+		);
 
 		// const closeButton = document.querySelector<HTMLElement>(
 		// 	".titlebar-button.mod-close"
