@@ -1013,7 +1013,7 @@
         }
       ],
       "showTaskWithoutMetadata": false,
-      "tagColorsType": "text",
+      "tagColorsType": "tagBg",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": false,
@@ -1052,7 +1052,7 @@
         "viewedType": "kanban",
         "boardIndex": 4,
         "taskId": "",
-        "settingTab": 4
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInTab",
