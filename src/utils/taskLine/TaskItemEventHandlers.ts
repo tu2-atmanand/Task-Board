@@ -34,97 +34,114 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	const tasksPlugin = new TasksPluginApi(plugin);
 
 	console.log("handleCheckboxChange...\nTask =", task);
-	if (!tasksPlugin.isTasksPluginEnabled()) {
-		if (!isTaskRecurring(task.title)) {
-			// Check if the task is completed
-			const newStatus = checkboxStateSwitcher(plugin, task.status);
-			const newTitle = sanitizeStatus(
-				plugin.settings.data.globalSettings,
-				task.title,
-				newStatus.newSymbol,
-				newStatus.newSymbolType,
-			);
-			const taskWithUpdatedStatus = {
-				...task,
-				title: newTitle,
-				status: newStatus.newSymbol,
-			};
+	if (!isTaskRecurring(task.title)) {
+		// Check if the task is completed
+		const newStatus = checkboxStateSwitcher(plugin, task.status);
+		const newTitle = sanitizeStatus(
+			plugin.settings.data.globalSettings,
+			task.title,
+			newStatus.newSymbol,
+			newStatus.newSymbolType,
+		);
+		const taskWithUpdatedStatus = {
+			...task,
+			title: newTitle,
+			status: newStatus.newSymbol,
+		};
 
-			updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
-				(newId) => {
+		updateTaskInFile(plugin, taskWithUpdatedStatus, task).then((newId) => {
+			plugin.realTimeScanner.processAllUpdatedFiles(
+				task.filePath,
+				task.legacyId,
+			);
+
+			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+			// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+		});
+
+		// if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
+		// 	const newStatusType =
+		// 		plugin.settings.data.globalSettings.customStatuses.find(
+		// 			(status) => status.symbol === newStatus
+		// 		)?.type ?? statusTypeNames.TODO;
+		// 	let newTitle = sanitizeStatus(task.title, newStatus.newSymbol);
+
+		// 	const taskWithUpdatedStatus = {
+		// 		...task,
+		// 		title: newTitle,
+		// 		completion: "",
+		// 		status: newStatus.newSymbol,
+		// 	};
+
+		// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+		// 		(newId) => {
+		// 			plugin.realTimeScanner.processAllUpdatedFiles(
+		// 				task.filePath,
+		// 				task.legacyId
+		// 			);
+
+		// 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+		// 			// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+		// 		}
+		// 	);
+		// } else {
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	const moment = _moment as unknown as typeof _moment.default;
+		// 	const currentDateValue = moment().format(
+		// 		globalSettings?.taskCompletionDateTimePattern
+		// 	);
+		// 	let newTitle = "";
+		// 	if (newStatus.type === statusTypeNames.DONE) {
+		// 		newTitle = sanitizeCompletionDate(
+		// 			globalSettings,
+		// 			task.title,
+		// 			currentDateValue
+		// 		);
+		// 	} else if (newStatus.type === statusTypeNames.CANCELLED) {
+		// 		newTitle = sanitizeCancelledDate(
+		// 			globalSettings,
+		// 			task.title,
+		// 			currentDateValue
+		// 		);
+		// 	}
+
+		// 	const taskWithUpdatedStatus = {
+		// 		...task,
+		// 		title: newTitle,
+		// 		status: newStatus.newSymbol,
+		// 	};
+
+		// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+		// 		(newId) => {
+		// 			plugin.realTimeScanner.processAllUpdatedFiles(
+		// 				taskWithUpdatedStatus.filePath
+		// 			);
+
+		// 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+		// 			// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+		// 		}
+		// 	);
+		// }
+	} else {
+		if (tasksPlugin.isTasksPluginEnabled()) {
+			useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
+				.then(() => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
 						task.filePath,
 						task.legacyId,
 					);
 
-					// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
-					// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
-				},
-			);
-
-			// if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
-			// 	const newStatusType =
-			// 		plugin.settings.data.globalSettings.customStatuses.find(
-			// 			(status) => status.symbol === newStatus
-			// 		)?.type ?? statusTypeNames.TODO;
-			// 	let newTitle = sanitizeStatus(task.title, newStatus.newSymbol);
-
-			// 	const taskWithUpdatedStatus = {
-			// 		...task,
-			// 		title: newTitle,
-			// 		completion: "",
-			// 		status: newStatus.newSymbol,
-			// 	};
-
-			// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
-			// 		(newId) => {
-			// 			plugin.realTimeScanner.processAllUpdatedFiles(
-			// 				task.filePath,
-			// 				task.legacyId
-			// 			);
-
-			// 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
-			// 			// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
-			// 		}
-			// 	);
-			// } else {
-			// 	const globalSettings = plugin.settings.data.globalSettings;
-			// 	const moment = _moment as unknown as typeof _moment.default;
-			// 	const currentDateValue = moment().format(
-			// 		globalSettings?.taskCompletionDateTimePattern
-			// 	);
-			// 	let newTitle = "";
-			// 	if (newStatus.type === statusTypeNames.DONE) {
-			// 		newTitle = sanitizeCompletionDate(
-			// 			globalSettings,
-			// 			task.title,
-			// 			currentDateValue
-			// 		);
-			// 	} else if (newStatus.type === statusTypeNames.CANCELLED) {
-			// 		newTitle = sanitizeCancelledDate(
-			// 			globalSettings,
-			// 			task.title,
-			// 			currentDateValue
-			// 		);
-			// 	}
-
-			// 	const taskWithUpdatedStatus = {
-			// 		...task,
-			// 		title: newTitle,
-			// 		status: newStatus.newSymbol,
-			// 	};
-
-			// 	updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
-			// 		(newId) => {
-			// 			plugin.realTimeScanner.processAllUpdatedFiles(
-			// 				taskWithUpdatedStatus.filePath
-			// 			);
-
-			// 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
-			// 			// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
-			// 		}
-			// 	);
-			// }
+					// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
+					// 	// Move from Pending to Completed
+					// 	moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
+				})
+				.catch((err) => {
+					bugReporterManagerInsatance.addToLogs(
+						152,
+						String(err),
+						"TaskItemEventHandlers.ts/handleCheckboxChange",
+					);
+				});
 		} else {
 			bugReporterManagerInsatance.showNotice(
 				45,
@@ -146,30 +163,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			// 		);
 			// 	});
 		}
-
-		// // Move from Pending to Completed
-		// moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
-	} else {
-		useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
-			.then(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					task.filePath,
-					task.legacyId,
-				);
-
-				// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
-				// 	// Move from Pending to Completed
-				// 	moveFromPendingToCompleted(plugin, taskWithUpdatedStatus);
-			})
-			.catch((err) => {
-				bugReporterManagerInsatance.addToLogs(
-					152,
-					String(err),
-					"TaskItemEventHandlers.ts/handleCheckboxChange",
-				);
-			});
 	}
-	// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from the moveFromPendingToCompleted functions, because if i add that here, then all the things are getting executed parallely instead of sequential.
 };
 
 /**
