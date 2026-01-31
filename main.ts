@@ -44,7 +44,6 @@ import {
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
 import {
-	fetchTasksPluginCustomStatuses,
 	isTasksPluginEnabled,
 } from "src/services/tasks-plugin/helpers";
 import { scanModeOptions, taskPropertiesNames } from "src/interfaces/Enums";

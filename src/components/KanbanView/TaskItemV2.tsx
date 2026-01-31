@@ -969,7 +969,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 											key={tagKey}
 											className="taskItemTag"
 											style={{
-												color: isTagBg ? 'white' : tagColor,
+												color: isTagBg && tagColor ? 'white' : tagColor,
 												// border: `1px solid ${borderColor}`,
 												backgroundColor: isTagBg ? tagColor : dimmedTagColor
 											}}
