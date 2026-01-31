@@ -637,6 +637,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: row;
 	min-width: 100%;
+	align-items: flex-start;
 }
 
 .taskItemBodyContent {
@@ -687,7 +688,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	cursor: pointer;
 	mask-image: unset;
 	-webkit-mask-image: unset;
-	margin-block-start: 3px !important;
 	vertical-align: middle;
 }
 
@@ -831,7 +831,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemMainBodyDescriptionSectionVisible {
 	margin-top: 5px;
-	margin-inline: -5px;
+	margin-inline: -8px;
 }
 
 .taskItemMainBodyDescriptionSectionToggler {
@@ -1103,15 +1103,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .prioirtyCircle.p2 {
-	background-color: var(--status-in-progress-color);
+	background-color: var(--color-blue);
 }
 
 .prioirtyCircle.p3 {
-	background-color: var(--status-in-progress-color);
+	background-color: var(--color-blue);
 }
 
 .prioirtyCircle.p4 {
-	background-color: var(--status-in-progress-color);
+	background-color: var(--color-blue);
 }
 
 .prioirtyCircle.p5 {
@@ -1237,7 +1237,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	max-width: calc(var(--task-board-column-width) - 4rem);
+	max-width: calc(var(--task-board-column-width) - 5rem);
 }
 
 /*-----------------------------------------------------------
