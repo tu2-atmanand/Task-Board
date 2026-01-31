@@ -477,7 +477,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			editButtonAction: EditButtonMode.Modal,
 			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
-			tagColorsType: TagColorType.Background,
+			tagColorsType: TagColorType.TagText,
 			customStatuses: [
 				{
 					symbol: defaultTaskStatuses.todo,

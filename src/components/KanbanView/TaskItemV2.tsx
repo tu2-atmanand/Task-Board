@@ -18,7 +18,7 @@ import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/util
 import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
 import { bugReporter, openDateInputModal } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
-import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames } from 'src/interfaces/Enums';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -424,57 +424,58 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
-		if (plugin.settings.data.globalSettings.tagColorsType === "text") {
-			return undefined;
-		}
+		if (globalSettings.tagColorsType === TagColorType.CardBg) {
 
-		const tagColors = plugin.settings.data.globalSettings.tagColors;
+			const tagColors = plugin.settings.data.globalSettings.tagColors;
 
-		if (!Array.isArray(tagColors) || tagColors.length === 0) {
-			return undefined;
-		}
-
-		// Prepare a map for faster lookup
-		const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
-
-		let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
-
-		for (const rawTag of tags) {
-			const tagName = rawTag.replace('#', '');
-			let tagData = tagColorMap.get(tagName);
-
-			if (!tagData) {
-				tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
-					const result = matchTagsWithWildcards(tagNameKey, tagName || '');
-					// Return the first match found
-					if (result) tagData = tagColor;
-				});
+			if (!Array.isArray(tagColors) || tagColors.length === 0) {
+				return undefined;
 			}
 
-			if (tagData) {
-				if (
-					!highestPriorityTag ||
-					(tagData.priority) < (highestPriorityTag.priority)
-				) {
-					highestPriorityTag = tagData;
+			// Prepare a map for faster lookup
+			const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
+
+			let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
+
+			for (const rawTag of tags) {
+				const tagName = rawTag.replace('#', '');
+				let tagData = tagColorMap.get(tagName);
+
+				if (!tagData) {
+					tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+						const result = matchTagsWithWildcards(tagNameKey, tagName || '');
+						// Return the first match found
+						if (result) tagData = tagColor;
+					});
+				}
+
+				if (tagData) {
+					if (
+						!highestPriorityTag ||
+						(tagData.priority) < (highestPriorityTag.priority)
+					) {
+						highestPriorityTag = tagData;
+					}
 				}
 			}
-		}
 
-		const getOpacityValue = (color: string): number => {
-			const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
-			if (rgbaMatch) {
-				const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
-				return opacity;
+			const getOpacityValue = (color: string): number => {
+				const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+				if (rgbaMatch) {
+					const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+					return opacity;
+				}
+				return 1;
+			};
+
+			if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+				return updateRGBAOpacity(highestPriorityTag.color, 0.2);
 			}
-			return 1;
-		};
 
-		if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-			return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+			return highestPriorityTag?.color;
 		}
 
-		return highestPriorityTag?.color;
+		return undefined;
 	}
 
 	// ========================================
@@ -942,11 +943,14 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 							<div className="taskItemTags">
 								{/* Render line tags (editable) */}
 								{task.tags.map((tag: string) => {
+									const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
+
 									const tagName = tag.replace('#', '');
-									const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
+									const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+
 									const tagColor = customTag?.color || `var(--tag-color)`;
-									const backgroundColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-									const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
+									const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+									// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 									// If columnIndex is defined, proceed to get the column
 									if (
@@ -965,9 +969,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 											key={tagKey}
 											className="taskItemTag"
 											style={{
-												color: tagColor,
+												color: isTagBg ? 'white' : tagColor,
 												// border: `1px solid ${borderColor}`,
-												backgroundColor: backgroundColor
+												backgroundColor: isTagBg ? tagColor : dimmedTagColor
 											}}
 										>
 											{tag}

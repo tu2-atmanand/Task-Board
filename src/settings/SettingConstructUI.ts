@@ -1009,8 +1009,9 @@ export class SettingsManager {
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[TagColorType.Text]: t("text-of-the-tag"),
-						[TagColorType.Background]: t("background-of-the-card"),
+						[TagColorType.TagText]: t("text-of-the-tag"),
+						[TagColorType.TagBg]: t("tag-background"),
+						[TagColorType.CardBg]: t("background-of-the-card"),
 					})
 					.setValue(tagColorsType)
 					.onChange(async (value) => {
@@ -1086,18 +1087,18 @@ export class SettingsManager {
 							.buttonEl.setCssStyles({
 								cursor: "grab",
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								maxWidth: "max-content !important",
@@ -1114,18 +1115,18 @@ export class SettingsManager {
 							})
 							.inputEl.setCssStyles({
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								minWidth: "23vw !important",
@@ -1208,18 +1209,18 @@ export class SettingsManager {
 							})
 							.inputEl.setCssStyles({
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								minWidth: "23vw !important",

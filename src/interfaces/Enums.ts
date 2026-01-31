@@ -23,8 +23,9 @@ export enum UniversalDateOptions {
 }
 
 export enum TagColorType {
-	Text = "text",
-	Background = "background",
+	TagText = "text",
+	TagBg= "tagBg",
+	CardBg = "background",
 }
 
 export enum NotificationService {
