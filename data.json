@@ -964,17 +964,24 @@
       "customStatuses": [
         {
           "symbol": " ",
-          "name": "Incomplete",
+          "name": "Todo",
           "nextStatusSymbol": "x",
           "availableAsCommand": false,
           "type": "TODO"
         },
         {
-          "symbol": "X",
-          "name": "Complete",
-          "nextStatusSymbol": " ",
+          "symbol": "<",
+          "name": "Ready to start",
+          "nextStatusSymbol": "x",
           "availableAsCommand": false,
-          "type": "DONE"
+          "type": "TODO"
+        },
+        {
+          "symbol": "?",
+          "name": "In Review",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": false,
+          "type": "TODO"
         },
         {
           "symbol": "/",
@@ -984,32 +991,25 @@
           "type": "IN_PROGRESS"
         },
         {
-          "symbol": "-",
-          "name": "Cancelled",
+          "symbol": "x",
+          "name": "Done",
           "nextStatusSymbol": " ",
           "availableAsCommand": true,
-          "type": "CANCELLED"
-        },
-        {
-          "symbol": ">",
-          "name": "Deferred",
-          "nextStatusSymbol": "x",
-          "availableAsCommand": false,
-          "type": "TODO"
-        },
-        {
-          "symbol": "!",
-          "name": "Important",
-          "nextStatusSymbol": "x",
-          "availableAsCommand": false,
-          "type": "TODO"
-        },
-        {
-          "symbol": "x",
-          "name": "Finished",
-          "nextStatusSymbol": " ",
-          "availableAsCommand": false,
           "type": "DONE"
+        },
+        {
+          "symbol": "X",
+          "name": "Completed",
+          "nextStatusSymbol": " ",
+          "availableAsCommand": true,
+          "type": "DONE"
+        },
+        {
+          "symbol": "-",
+          "name": "Cancelled",
+          "nextStatusSymbol": "x",
+          "availableAsCommand": true,
+          "type": "CANCELLED"
         }
       ],
       "showTaskWithoutMetadata": false,
@@ -1045,7 +1045,7 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 594,
+      "uniqueIdCounter": 593,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
@@ -1183,7 +1183,8 @@
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
       "autoAddCancelledDate": true,
-      "scanMode": "manual"
+      "scanMode": "manual",
+      "showModifiedFilesNotice": true
     }
   }
 }
