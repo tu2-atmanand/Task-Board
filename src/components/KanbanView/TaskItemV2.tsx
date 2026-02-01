@@ -853,7 +853,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log("TaskItem : handleDragStart...");
 		if (!columnData) {
 			e.preventDefault();
 			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskItem.tsx/handleDragStart");
@@ -872,7 +871,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			e.dataTransfer?.setDragImage(el, 0, 0);
 			requestAnimationFrame(() => {
 				clone.classList.add("task-item-dragging");
-				console.log("TaskItem : handleDragStart... done : ", el);
 			});
 
 			// Also set a drag image from the whole task element so the preview is the full card
@@ -1023,7 +1021,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
 
 			const showSubTaskSummaryBar = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized);
-			console.log("Show subtasks :", showSubtasks, "\nShow subtasks summary :", showSubTaskSummaryBar);
 
 			return (
 				<>

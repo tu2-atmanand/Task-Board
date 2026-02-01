@@ -1141,7 +1141,6 @@ export const AddOrEditTaskRC: React.FC<{
 			easing: "cubic-bezier(1, 0, 0, 1)",
 			onSort: (evt) => {
 				try {
-					console.log("Lets go...");
 					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
 					// Reorder the dependsOn array based on the drag and drop

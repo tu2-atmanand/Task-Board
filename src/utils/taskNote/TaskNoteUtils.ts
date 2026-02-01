@@ -353,12 +353,6 @@ export async function updateFrontmatterInMarkdownFile(
 				task,
 				forceId,
 			);
-			console.log(
-				"updateFrontmatterInMarkdownFile...\nUpdated frontmatter",
-				updated,
-				"\nold frontmatter",
-				existing,
-			);
 			for (const key of Object.keys(updated)) {
 				existing[key] = updated[key];
 			}

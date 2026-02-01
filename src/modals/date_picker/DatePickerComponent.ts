@@ -57,7 +57,6 @@ export class DatePickerComponent extends Component {
 	}
 
 	setSelectedDate(date: string | null): void {
-		console.log("DatePickerComponent : Sumbitting following date :", date);
 		this.state.selectedDate = date;
 		this.updateSelectedDateDisplay();
 		// Only pass the date string, let the caller handle formatting
@@ -276,7 +275,6 @@ export class DatePickerComponent extends Component {
 	}
 
 	private navigateMonth(direction: number): void {
-		console.log(`Navigating month: ${direction}`);
 		this.currentViewDate.add(direction, "month");
 		this.render();
 	}

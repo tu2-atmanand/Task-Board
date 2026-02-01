@@ -42,7 +42,11 @@ export function extractFrontmatterFromFile(
 	// 	const frontmatter = yaml.load(yamlContent);
 	// 	return frontmatter;
 	// } catch (error) {
-	// 	console.warn("Failed to parse frontmatter:", error);
+	// bugReporterManagerInsatance.addToLogs(
+	// 	175,
+	// 	`Failed to parse frontmatter: ${String(error)}`,
+	// 	"FrontmatterOperations.ts/extractFrontmatterFromFile",
+	// );
 	// 	return null;
 	// }
 
@@ -59,7 +63,11 @@ export function extractFrontmatterFromFile(
 
 		return frontmatterAsObject;
 	} catch (error) {
-		// console.warn("Failed to parse frontmatter:", error);
+		// bugReporterManagerInsatance.addToLogs(
+		// 	176,
+		// 	`Failed to parse frontmatter: ${String(error)}`,
+		// 	"FrontmatterOperations.ts/extractFrontmatterFromFile",
+		// );
 		return undefined;
 	}
 }

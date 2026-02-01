@@ -31,6 +31,7 @@ import {
 	priorityDropDownOption,
 } from "src/interfaces/Mapping";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;
@@ -94,7 +95,7 @@ export class TaskFilterComponent extends Component {
 			// } else {
 			// 	if (savedState) {
 			// 		// If it exists but failed validation
-			// 		console.warn(
+			// 		bugreporterInstance.addToLogs(
 			// 			"Task Filter: Invalid data in local storage. Resetting to default state."
 			// 		);
 			// 	}
@@ -473,8 +474,10 @@ export class TaskFilterComponent extends Component {
 	): void {
 		// Ensure the container is initialized
 		if (!this.filterGroupsContainerEl) {
-			console.warn(
-				"TaskFilterComponent: filterGroupsContainerEl not initialized yet",
+			bugReporterManagerInsatance.addToLogs(
+				168,
+				"filterGroupsContainerEl not initialized yet",
+				"ViewTaskFilter.ts/addFilterGroup",
 			);
 			return;
 		}
@@ -788,7 +791,6 @@ export class TaskFilterComponent extends Component {
 		// let dropdownInput: DropdownComponent | null = null;
 		// filterItemEl.removeChild(dropdownInputContainer);
 		if (valueSelect) {
-			console.log("Removing dropdown input");
 			// dropdownInput.disabled = true;
 			// dropdownInput.type = "text";
 			// dropdownInput = null;
@@ -1440,7 +1442,11 @@ export class TaskFilterComponent extends Component {
 				this.groupsSortable = undefined;
 			}
 		} catch (error) {
-			console.warn("Error destroying groups sortable:", error);
+			bugReporterManagerInsatance.addToLogs(
+				169,
+				`Error destroying groups sortable: ${String(error)}`,
+				"ViewTaskFilter.ts/loadFilterState",
+			);
 			this.groupsSortable = undefined;
 		}
 
@@ -1456,9 +1462,10 @@ export class TaskFilterComponent extends Component {
 						(listEl as any).sortableInstance = undefined;
 					}
 				} catch (error) {
-					console.warn(
-						"Error destroying filter list sortable:",
-						error,
+					bugReporterManagerInsatance.addToLogs(
+						170,
+						`Error destroying filter list sortable: ${String(error)}`,
+						"ViewTaskFilter.ts/loadFilterState",
 					);
 					(listEl as any).sortableInstance = undefined;
 				}

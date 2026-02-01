@@ -31,12 +31,6 @@ export async function fetchTasksPluginCustomStatuses(
 ): Promise<boolean> {
 	try {
 		const tasksPluginO = new TasksPluginApi(plugin);
-		console.log(
-			"Tasks Plugin API:",
-			tasksPluginO,
-			"\nIs tasks plugin enabled?",
-			tasksPluginO.isTasksPluginEnabled(),
-		);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
 			plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin = true;

@@ -30,7 +30,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 20;
-	private readonly MAX_USED_ID = 165; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
+	private readonly MAX_USED_ID = 167; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -370,7 +370,6 @@ ${entry.bugContent}
 			await this.ensureLogFileExists();
 
 			const data = await vault.adapter.read(this.LOG_FILE_PATH);
-			console.log("data\n", data);
 			const exportFileName = "task-board-logs.txt";
 			// const fileContent = JSON.stringify(data, null, 2);
 

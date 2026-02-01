@@ -208,13 +208,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	const refreshBoardButton = useCallback(() => {
-		plugin.realTimeScanner.processAllUpdatedFiles().then(() => console.log("Finished processing all updated files."));
-		plugin.processCreateQueue().then(() => console.log("Finished processing create queue."));
-		plugin.processDeleteQueue().then(() => console.log("Finished processing delete queue."));
-		plugin.processRenameQueue().then(() => console.log("Finished processing rename queue."));
+		plugin.realTimeScanner.processAllUpdatedFiles(); //.then(() => console.log("Finished processing all updated files."));
+		plugin.processCreateQueue(); //.then(() => console.log("Finished processing create queue."));
+		plugin.processDeleteQueue(); //.then(() => console.log("Finished processing delete queue."));
+		plugin.processRenameQueue(); //.then(() => console.log("Finished processing rename queue."));
 
 		setTimeout(() => {
-			console.log("Now will emit REFRESH_BOARD event...");
 			eventEmitter.emit("REFRESH_BOARD");
 		}, 100)
 	}, []);
@@ -431,13 +430,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	function togglePropertyNameInSettings(propertyName: string) {
 		let visibleProperties = plugin.settings.data.globalSettings.visiblePropertiesList || [];
 
-		console.log("Current properties list :", visibleProperties, "\nRemove following property :", propertyName, "\nWill remove from the following index :", visibleProperties.indexOf(propertyName));
 		if (visibleProperties.includes(propertyName)) {
 			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
 			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
 
 		} else {
-			console.log("Property Name:", propertyName);
 			let index = -1;
 			switch (propertyName) {
 				case taskPropertiesNames.SubTasks:

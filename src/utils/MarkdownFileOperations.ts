@@ -21,7 +21,6 @@ export const readDataOfVaultFile = async (
 			return fileData; // Return the raw content of the file
 		} else {
 			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
-			// console.error(`File not found at path: ${filePath}`);
 			bugReporterManagerInsatance.showNotice(
 				75,
 				"File not found in vault.",
@@ -90,10 +89,8 @@ export const writeDataToVaultFile = async (
 // 			await plugin.app.vault.process(file, () => newContent);
 // 		} else {
 // 			new Notice(`File not found at path: ${filePath}`);
-// 			console.error(`File not found at path: ${filePath}`);
 // 		}
 // 	} catch (error) {
-// 		console.error("Error writing to file in vault:", error);
 // 		throw error;
 // 	}
 // };

@@ -350,12 +350,7 @@ export const columnSegregator = (
 			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
 			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
 				newTasksIdManualOrder;
-			console.log(
-				"columnSegregator...\nNew manual order :",
-				newTasksIdManualOrder,
-				"\nOld manual order :",
-				columnData.tasksIdManualOrder
-			);
+
 			if (onBoardDataChange && didTasksIdManualOrderChange) {
 				onBoardDataChange(currentBoardData);
 			}

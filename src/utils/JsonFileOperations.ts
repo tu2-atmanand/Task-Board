@@ -185,8 +185,10 @@ const writeFileWithRetry = async (
 
 			// Wait with exponential backoff before retry
 			const delay = baseDelay * Math.pow(2, attempt - 1);
-			console.warn(
-				`Task Board: File write timeout (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`,
+			bugReporterManagerInsatance.addToLogs(
+				177,
+				`File write timeout due to following error: ${String(error)}....retrying again...`,
+				"TaskItemEventHandlers.ts/writeFileWithRetry",
 			);
 			await new Promise((resolve) => setTimeout(resolve, delay));
 		}
@@ -262,12 +264,6 @@ export const moveTasksCacheFileToNewPath = (
 			}
 		}
 
-		console.log(
-			"moveTasksCacheFileToNewPath...\nOld path :",
-			oldPath,
-			"\nNew path :",
-			newPath,
-		);
 		if (newPath === "")
 			newPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
 		if (oldPath === "")
@@ -345,14 +341,11 @@ export const loadTasksAndMerge = async (
 
 		return allTasksMerged;
 	} catch (error) {
-		// console.error("Failed to load tasks from tasks.json:", error);
-		// bugReporterManagerInsatance.showNotice(
-		// 	74,
-		// 	"Failed to load tasks from tasks.json file. If this is your fresh install kindly run the scan vault using the top right corner button and open the board again. If the issue persists, please report it to the developer using steps mentioned below.",
-		// 	String(error),
-		// 	"JsonFileOperations.ts/loadTasksAndMerge"
-		// );
-		console.log("Is this running..");
+		bugReporterManagerInsatance.addToLogs(
+			74,
+			String(error),
+			"JsonFileOperations.ts/loadTasksAndMerge",
+		);
 		throw error;
 	}
 };
@@ -363,7 +356,6 @@ export const loadTasksAndMerge = async (
 // 			return allTasksMerged; // Ensure it returns the merged tasks
 // 		})
 // 		.catch((error) => {
-// 			console.error("Error while loading tasks:", error);
 // 			// Return an empty taskJsonMerged object to avoid 'undefined'
 // 			return { Pending: [], Completed: [] };
 // 		});

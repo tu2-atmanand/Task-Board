@@ -34,7 +34,6 @@ export const handleTaskNoteStatusChange = async (
 			globalSettings?.taskCompletionDateTimePattern,
 		);
 
-		console.log("handleTaskNoteStatusChange..\nnewStatus = ", newStatus);
 		const updatedTask = {
 			...task,
 			status: newStatus.newSymbol,

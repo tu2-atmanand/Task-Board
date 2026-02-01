@@ -91,7 +91,6 @@ class DragDropTasksManager {
 	 * Store current drag payload (called from dragstart)
 	 */
 	setCurrentDragData(data: currentDragDataPayload) {
-		console.log("setCurrentDragData", data);
 		this.currentDragData = data;
 	}
 
@@ -177,7 +176,6 @@ class DragDropTasksManager {
 					oldTask.tags,
 					newTask.tags,
 				);
-				console.log("Sanitized title after tag update:", newTask.title);
 				updateTaskInFile(plugin, newTask, oldTask).then(() => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
 						oldTask.filePath,
@@ -246,7 +244,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		// -----------------------------------------------
@@ -275,11 +272,6 @@ class DragDropTasksManager {
 		// 	oldTask.tags,
 		// 	newTask.tags
 		// );
-
-		console.log(
-			"handleTaskMove_namedTag_to_namedTag...\nnewTask=",
-			newTask,
-		);
 
 		// -----------------------------------------------
 		// STEP 4 - Finally update the task in the note, so that its automatically scanned again. Which will trigger screen refresh.
@@ -364,7 +356,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		if (
@@ -469,7 +460,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		// Extract the priority value from the source column
@@ -524,7 +514,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		// Extract the status value from the source column
@@ -605,7 +594,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		if (sourceColumn.colType === colTypeNames.completed) {
@@ -709,10 +697,8 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
-		console.log("Should hit this one...");
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
 		}
@@ -777,7 +763,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		if (sourceColumn.colType === colTypeNames.completed) {
@@ -834,7 +819,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		if (sourceColumn.colType === colTypeNames.completed) {
@@ -885,7 +869,6 @@ class DragDropTasksManager {
 				targetColumnSwimlaneData,
 				plugin.settings.data.globalSettings,
 			);
-			console.log("newTask after swimlane change:", newTask);
 		}
 
 		const newStatus =
@@ -910,14 +893,6 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		desiredIndex: number | null,
 	): void => {
-		console.log(
-			"handleTasksOrderChange called...\ncurrentDragData=",
-			currentDragData,
-			"\ntargetColumnData=",
-			targetColumnData,
-			"\ndesiredIndex=",
-			desiredIndex,
-		);
 		if (
 			!(
 				targetColumnData?.sortCriteria &&
@@ -1106,8 +1081,6 @@ class DragDropTasksManager {
 		if (!this.plugin) return;
 		if (!cardEl || !cardEl.parentElement) return;
 
-		console.log("cardEl", cardEl, "\nparentEl", cardEl.parentElement);
-
 		// Create indicator if not already created
 		if (!this.dropIndicator) {
 			this.dropIndicator = document.createElement("div");
@@ -1219,7 +1192,11 @@ class DragDropTasksManager {
 		// 	);
 		// } catch (err) {
 		// 	// some browsers may throw on setData for complex types
-		// 	console.warn("Could not set JSON dataTransfer payload", err);
+		// 				bugReporterManagerInsatance.addToLogs(
+		// 					180,
+		// 					`Could not set JSON dataTransfer payload: ${String(err)}`,
+		// 					"DragDropTasksManager.ts",
+		// 				);
 		// 	try {
 		// 		e.dataTransfer.setData("text/plain", currentDragData.task.id);
 		// 	} catch {}
@@ -1330,10 +1307,6 @@ class DragDropTasksManager {
 			e.dataTransfer!.dropEffect = "move";
 			return true;
 		} else {
-			console.log(
-				"Task drop not allowed from column:",
-				sourceColumnData.name,
-			);
 			// Apply CSS styling for not allowed drop
 			targetColumnContainer.classList.add("drag-over-not-allowed");
 			targetColumnContainer.classList.remove("drag-over-allowed");
@@ -1394,7 +1367,6 @@ class DragDropTasksManager {
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
 	): void {
-		console.log("DragDropTasksManager : handleDrop called...");
 		e.preventDefault();
 
 		// All checks before proceeding with the calculations...
@@ -1439,12 +1411,12 @@ class DragDropTasksManager {
 
 		// Perform required operations to update task properties
 		// This is where the actual task update logic will be implemented
-		console.log("Task drop allowed. Updating task properties...");
-		console.log("Source column:", sourceColumnData);
-		console.log("Target column:", targetColumnData);
-		console.log("Current drag data:", this.currentDragData);
-		console.log("Current drag index:", this.desiredDropIndex);
-		console.log("targetSwimilaneData", targetColumnSwimlaneData);
+		// console.log("Task drop allowed. Updating task properties...");
+		// console.log("Source column:", sourceColumnData);
+		// console.log("Target column:", targetColumnData);
+		// console.log("Current drag data:", this.currentDragData);
+		// console.log("Current drag index:", this.desiredDropIndex);
+		// console.log("targetSwimilaneData", targetColumnSwimlaneData);
 
 		// Determine the operation based on source and target column types
 

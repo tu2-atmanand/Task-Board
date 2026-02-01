@@ -60,7 +60,6 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 // Main translation function
 export function t(key: string): string {
 	// if (!isI18nInitialized) { // INFO : Cannot use this method, since I dont have access to plugin instance to access the isI18nInitialized variable.
-	// 	console.warn("i18n not initialized, falling back to English");
 	// 	return en?.[key] || `Missing translation for "${key}"`;
 	// }
 
@@ -75,10 +74,6 @@ export function t(key: string): string {
 		// 	transString === null ||
 		// 	transString === undefined
 		// ) {
-		// 	console.warn(
-		// 		`Translation for "${key}" returned invalid value:`,
-		// 		transString
-		// 	);
 		// 	return en?.[key] || `Missing translation for "${key}"`;
 		// }
 

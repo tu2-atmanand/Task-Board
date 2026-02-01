@@ -42,13 +42,13 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 export const handleEditTask = (
 	plugin: TaskBoard,
 	task: taskItem,
-	settingOption: string
+	settingOption: string,
 ) => {
 	const taskNoteIdentifierTag =
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isThisATaskNote = isTaskNotePresentInTags(
 		taskNoteIdentifierTag,
-		task.tags
+		task.tags,
 	);
 	switch (settingOption) {
 		case EditButtonMode.Modal:
@@ -66,7 +66,7 @@ export const handleEditTask = (
 				true,
 				task,
 				task.filePath,
-				"window"
+				"window",
 			);
 			break;
 		case EditButtonMode.TasksPluginModal:
@@ -93,7 +93,7 @@ export const handleEditTask = (
 				85,
 				"This should never happen, looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
 				"NA",
-				"TaskItemEventHandlers.ts/handleEditTask"
+				"TaskItemEventHandlers.ts/handleEditTask",
 			);
 			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
 			break;
@@ -112,7 +112,7 @@ export const handleEditTask = (
 export const openFileAndHighlightTask = async (
 	plugin: TaskBoard,
 	task: taskItem,
-	mode: string
+	mode: string,
 ) => {
 	const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
 	let leaf: WorkspaceLeaf | null = null;
@@ -137,7 +137,7 @@ export const openFileAndHighlightTask = async (
 				86,
 				"This is a low priority error and it should never happen. Looks like you have not set the setting for Edit button mode or double click action correctly. Or the setting has been corrupted. Please try to change the setting first. If issue still persists, report it to the developer.",
 				"NA",
-				"TaskItemEventHandlers.ts/handleEditTask"
+				"TaskItemEventHandlers.ts/handleEditTask",
 			);
 			// markdownButtonHoverPreviewEvent(app, event, task.filePath);
 			break;
@@ -154,7 +154,7 @@ export const openFileAndHighlightTask = async (
 			`Trying to open the following file: ${task.filePath}.\nLeaf type: ${
 				leaf ? leaf.constructor.name : "undefined"
 			}`,
-			"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
+			"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked",
 		);
 	}
 
@@ -199,7 +199,7 @@ export const openFileAndHighlightTask = async (
 export const updateTaskItemStatus = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	newStatus: string
+	newStatus: string,
 ) => {
 	let newTask = { ...oldTask };
 	newTask.status = newStatus;
@@ -212,7 +212,7 @@ export const updateTaskItemStatus = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-		oldTask.tags
+		oldTask.tags,
 	);
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
@@ -221,25 +221,25 @@ export const updateTaskItemStatus = (
 				// This is required to rescan the updated file and refresh the board.
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
-					oldTask.id
+					oldTask.id,
 				);
 			});
 		});
 	} else {
 		const newStatusType =
 			plugin.settings.data.globalSettings.customStatuses.find(
-				(status) => status.symbol === newStatus
+				(status) => status.symbol === newStatus,
 			)?.type ?? statusTypeNames.TODO;
 		newTask.title = sanitizeStatus(
 			plugin.settings.data.globalSettings,
 			newTask.title,
 			newStatus,
-			newStatusType
+			newStatusType,
 		);
 		updateTaskInFile(plugin, newTask, oldTask).then((newId) => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
-				oldTask.id
+				oldTask.id,
 			);
 		});
 	}
@@ -258,7 +258,7 @@ export const updateTaskItemStatus = (
 export const updateTaskItemPriority = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	newPriority: number
+	newPriority: number,
 ) => {
 	let newTask = { ...oldTask } as taskItem;
 	newTask.priority = newPriority;
@@ -271,7 +271,7 @@ export const updateTaskItemPriority = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-		oldTask.tags
+		oldTask.tags,
 	);
 
 	if (isThisTaskNote) {
@@ -279,7 +279,7 @@ export const updateTaskItemPriority = (
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
-					oldTask.id
+					oldTask.id,
 				);
 			});
 		});
@@ -287,12 +287,12 @@ export const updateTaskItemPriority = (
 		newTask.title = sanitizePriority(
 			plugin.settings.data.globalSettings,
 			newTask.title,
-			newPriority
+			newPriority,
 		);
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
-				oldTask.id
+				oldTask.id,
 			);
 		});
 	}
@@ -313,7 +313,7 @@ export const updateTaskItemDate = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
 	dateType: "startDate" | "scheduledDate" | "due",
-	newDate: string
+	newDate: string,
 ): void => {
 	let newTask = { ...oldTask } as taskItem;
 	switch (dateType) {
@@ -327,8 +327,10 @@ export const updateTaskItemDate = (
 			newTask.due = newDate;
 			break;
 		default:
-			console.log(
-				"error while updating the date value. Date type unknown."
+			bugReporterManagerInsatance.addToLogs(
+				166,
+				"error while updating the date value. Date type unknown.",
+				`dateType = ${dateType}`,
 			);
 	}
 
@@ -336,7 +338,7 @@ export const updateTaskItemDate = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-		oldTask.tags
+		oldTask.tags,
 	);
 
 	if (isThisTaskNote) {
@@ -344,7 +346,7 @@ export const updateTaskItemDate = (
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
-					oldTask.id
+					oldTask.id,
 				);
 			});
 		});
@@ -354,33 +356,35 @@ export const updateTaskItemDate = (
 				newTask.title = sanitizeStartDate(
 					plugin.settings.data.globalSettings,
 					newTask.title,
-					newDate
+					newDate,
 				);
 				break;
 			case UniversalDateOptions.scheduledDate:
 				newTask.title = sanitizeScheduledDate(
 					plugin.settings.data.globalSettings,
 					newTask.title,
-					newDate
+					newDate,
 				);
 				break;
 			case UniversalDateOptions.dueDate:
 				newTask.title = sanitizeDueDate(
 					plugin.settings.data.globalSettings,
 					newTask.title,
-					newDate
+					newDate,
 				);
 				break;
 			default:
-				console.log(
-					"error while updating the date value. Date type unknown."
+				bugReporterManagerInsatance.addToLogs(
+					167,
+					"error while updating the date value. Date type unknown.",
+					`dateType = ${dateType}`,
 				);
 		}
 
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
-				oldTask.id
+				oldTask.id,
 			);
 		});
 	}
@@ -399,7 +403,7 @@ export const updateTaskItemDate = (
 export const updateTaskItemReminder = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	newReminder: string
+	newReminder: string,
 ) => {
 	const newTask = { ...oldTask } as taskItem;
 	newTask.reminder = newReminder;
@@ -408,7 +412,7 @@ export const updateTaskItemReminder = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-		oldTask.tags
+		oldTask.tags,
 	);
 
 	if (isThisTaskNote) {
@@ -416,7 +420,7 @@ export const updateTaskItemReminder = (
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
-					oldTask.id
+					oldTask.id,
 				);
 			});
 		});
@@ -424,7 +428,7 @@ export const updateTaskItemReminder = (
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
-				oldTask.id
+				oldTask.id,
 			);
 		});
 	}
@@ -444,7 +448,7 @@ export const updateTaskItemTags = (
 	plugin: TaskBoard,
 	oldTask: taskItem,
 	newTask: taskItem,
-	newTags: string[]
+	newTags: string[],
 ) => {
 	// let newTask = { ...oldTask };
 	newTask.tags = newTags;
@@ -453,7 +457,7 @@ export const updateTaskItemTags = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-		oldTask.tags
+		oldTask.tags,
 	);
 
 	if (isThisTaskNote) {
@@ -461,7 +465,7 @@ export const updateTaskItemTags = (
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					oldTask.filePath,
-					oldTask.id
+					oldTask.id,
 				);
 			});
 		});
@@ -470,7 +474,7 @@ export const updateTaskItemTags = (
 		updateTaskInFile(plugin, newTask, oldTask).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				oldTask.filePath,
-				oldTask.id
+				oldTask.id,
 			);
 		});
 	}
@@ -490,12 +494,12 @@ export const updateTaskItemProperty = async (
 	globalSettings: globalSettingsData,
 	property: string,
 	oldValue: string | number | string[],
-	newValue: string | number | string[]
+	newValue: string | number | string[],
 ): Promise<taskItem> => {
 	const updatedTask: taskItem = { ...task };
 	const isThisTaskNote = isTaskNotePresentInTags(
 		globalSettings.taskNoteIdentifierTag,
-		task.tags
+		task.tags,
 	);
 
 	switch (property) {
@@ -505,7 +509,7 @@ export const updateTaskItemProperty = async (
 				updatedTask.title = sanitizeTags(
 					task.title,
 					oldValue as string[],
-					newValue as string[]
+					newValue as string[],
 				);
 			}
 			break;
@@ -518,7 +522,7 @@ export const updateTaskItemProperty = async (
 				updatedTask.title = sanitizePriority(
 					globalSettings,
 					task.title,
-					newValue as number
+					newValue as number,
 				);
 			}
 			break;

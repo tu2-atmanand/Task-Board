@@ -253,7 +253,6 @@ const MapView: React.FC<MapViewProps> = ({
 				if (task.legacyId) {
 					const id = task.legacyId;
 					if (usedIds.has(id)) {
-						// console.warn('Duplicate node id detected:', id, "\nTitle : ", task.title);
 						duplicateIds.add(id);
 						return; // Skip duplicate
 					}
@@ -346,7 +345,11 @@ const MapView: React.FC<MapViewProps> = ({
 	// 			try {
 	// 				localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(updatedSizes));
 	// 			} catch (error) {
-	// 				console.warn('Failed to save node sizes:', error);
+	// 				bugReporterManagerInsatance.addToLogs(
+	// 					179,
+	// 					`Failed to save node sizes: ${String(error)}`,
+	// 					"MapView.tsx/updateSingleNodeSizeOnDiskDebounced",
+	// 				);
 	// 			}
 	// 		}
 	// 	},

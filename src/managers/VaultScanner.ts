@@ -681,8 +681,6 @@ export function fileTypeAllowedForScanning(
 	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
 
 	const filePath = file.path.toLocaleLowerCase();
-	console.log("Filepath :", filePath);
-
 	if (
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
 		!allowedFileExtensionsRegEx.test(file.path) ||
@@ -1009,7 +1007,6 @@ export function extractPriority(text: string): number {
 		.map((match) => match.trim()) // Trim spaces
 		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
 
-	console.log("What is the priority emoji : ", validMatches);
 	// Find the first match in the priorityEmojis mapping
 	for (const emoji of validMatches) {
 		const priorityMatch = Object.entries(priorityEmojis).find(
@@ -1103,7 +1100,6 @@ export function extractDependsOn(text: string): RegExpMatchArray | null {
 			.dependsOnRegex,
 	);
 	if (match && match[1]) {
-		console.log("What is the match : ", match);
 		return match;
 	}
 

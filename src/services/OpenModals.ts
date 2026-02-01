@@ -150,7 +150,11 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 			noteContent: string | undefined,
 		) => {
 			if (!noteContent) {
-				// console.warn("This code should not run...");
+				bugReporterManagerInsatance.addToLogs(
+					178,
+					`This code will only run if the content passed is empty : ${noteContent}`,
+					"OpenModals.ts/openAddNewTaskNoteModal",
+				);
 			} else {
 				// If noteContent is provided, it means user wants to save this task as a TaskNote.
 				// Create the note content with frontmatter

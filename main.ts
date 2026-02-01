@@ -136,7 +136,6 @@ export default class TaskBoard extends Plugin {
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
-			console.log("Task Board : Running onLayoutReady...");
 			this.compatiblePluginsAvailabilityCheck();
 
 			//Creates a Icon on Ribbon Bar (after i18n is initialized)
@@ -167,10 +166,7 @@ export default class TaskBoard extends Plugin {
 			this.registerReadingModePostProcessor();
 
 			setTimeout(() => this.findModifiedFilesOnAppAbsense(), 10000);
-
-			console.log("Task Board : onLayoutReady FINISHED.");
 		});
-		console.log("Task Board : onload funcion FINISHED.");
 	}
 
 	onunload() {
@@ -358,15 +354,12 @@ export default class TaskBoard extends Plugin {
 		const tasksPlugin = new TasksPluginApi(this);
 		if (!tasksPlugin.isTasksPluginEnabled()) {
 			this.registerMarkdownPostProcessor((element, context) => {
-				// console.log("Element : ", element, "\nContent :", context);
 				// Only process if we have properties to hide
-
 				// Find all list items that could be tasks
 				const listItems = element.querySelectorAll("li");
 
 				listItems.forEach((listItem) => {
 					// const textContent = listItem.textContent || "";
-					// console.log("Text Content :", textContent);
 					// Check if this is a task (starts with checkbox syntax)
 					if (listItem.querySelector(".contains-task-list")) {
 						this.hidePropertiesInElement(
@@ -928,18 +921,12 @@ export default class TaskBoard extends Plugin {
 		let OBSIDIAN_CLOSED_TIME = this.app.loadLocalStorage(
 			OBSIDIAN_CLOSED_TIME_KEY,
 		);
-		console.log("DATA loaded from localStorage :", OBSIDIAN_CLOSED_TIME);
 
 		if (!OBSIDIAN_CLOSED_TIME)
 			OBSIDIAN_CLOSED_TIME = this.vaultScanner.tasksCache.Modified_at;
-		console.log("DATA loaded from cache :", OBSIDIAN_CLOSED_TIME);
 
 		if (OBSIDIAN_CLOSED_TIME) {
 			OBSIDIAN_CLOSED_TIME = Date.parse(OBSIDIAN_CLOSED_TIME);
-			console.log(
-				"Task Board : Fetching all modified files...\nLast modified time :",
-				OBSIDIAN_CLOSED_TIME,
-			);
 			let filesScannedCount = 0;
 			const modifiedCreatedRenamedFiles = this.app.vault
 				.getFiles()
@@ -970,14 +957,6 @@ export default class TaskBoard extends Plugin {
 					this.plugin.settings.data.globalSettings,
 					file,
 				),
-			);
-			console.log(
-				"Task Board : Fetching complete.\nModified files :",
-				changed_files,
-				"\nDeleted files :",
-				deletedFilesList,
-				"\nFiles scanned :",
-				filesScannedCount,
 			);
 			const totalFilesLength =
 				changed_files.length + deletedFilesList.length;
@@ -1022,15 +1001,9 @@ export default class TaskBoard extends Plugin {
 											false,
 										)
 										.then(async () => {
-											console.log(
-												"Task Board : Will now going to update the deleted files cache...",
-											);
 											if (deletedFilesList.length > 0) {
 												await this.plugin.vaultScanner.deleteCacheForFiles(
 													deletedFilesList,
-												);
-												console.log(
-													"Task Board : Completed deleting cache of deleted files...",
 												);
 											}
 										});
@@ -1096,7 +1069,6 @@ export default class TaskBoard extends Plugin {
 	registerEvents() {
 		this.registerEvent(
 			this.app.vault.on("modify", async (file: TAbstractFile) => {
-				console.log("Modify event is fired...");
 				if (
 					fileTypeAllowedForScanning(
 						this.plugin.settings.data.globalSettings,
@@ -1123,21 +1095,18 @@ export default class TaskBoard extends Plugin {
 		);
 		this.registerEvent(
 			this.app.vault.on("rename", (file, oldPath) => {
-				console.log("Rename event is fired...");
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForRename(file, oldPath);
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
-				console.log("Delete event is fired...");
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForDeletion(file);
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
-				console.log("Create event is fired...");
 				if (file instanceof TFile) {
 					// Queue the file for processing instead of processing immediately
 					this.queueFileForCreation(file);
@@ -1154,18 +1123,15 @@ export default class TaskBoard extends Plugin {
 				this.app.workspace.on(
 					"active-leaf-change",
 					(leaf: WorkspaceLeaf | null) => {
-						console.log("On Active Leaf Change...\nLeaf =", leaf);
 						this.onFileModifiedAndLostFocus();
 					},
 				),
 			);
 			this.registerDomEvent(window, "blur", () => {
 				this.onFileModifiedAndLostFocus();
-				console.log("Focusing out of the window...");
 			});
 			this.registerDomEvent(window, "focus", () => {
 				this.onFileModifiedAndLostFocus();
-				console.log("Focusing in the window...");
 			});
 		}
 

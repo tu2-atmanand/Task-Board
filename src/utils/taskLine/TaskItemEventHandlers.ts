@@ -27,7 +27,6 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
 	const tasksPlugin = new TasksPluginApi(plugin);
 
-	console.log("handleCheckboxChange...\nTask =", task);
 	if (!isTaskRecurring(task.title)) {
 		// Check if the task is completed
 		const newStatus = checkboxStateSwitcher(plugin, task.status);
@@ -139,23 +138,10 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 		} else {
 			bugReporterManagerInsatance.showNotice(
 				45,
-				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
+				"Task Board do not support recurring tasks yet. Tasks plugin is required to work with recurring inline-tasks. No changes has been made.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
 				"TaskItemUtils.ts/useTasksPluginToUpdateInFile",
 			);
-
-			// useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
-			// 	.then(() => {
-			// 		plugin.realTimeScanner.processAllUpdatedFiles(
-			// 			task.filePath
-			// 		);
-			// 	})
-			// 	.catch((error) => {
-			// 		console.error(
-			// 			"TaskItemEventHandlers.ts : Error updating recurring task in file",
-			// 			error
-			// 		);
-			// 	});
 		}
 	}
 };

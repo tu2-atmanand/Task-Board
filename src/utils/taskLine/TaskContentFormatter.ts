@@ -954,16 +954,6 @@ export const sanitizeTags = (
 	newTagsList: string[],
 	cursorLocation?: cursorLocation,
 ): string => {
-	console.log(
-		"sanitizeTags...\ntitle: ",
-		title,
-		"\noldTagsList: ",
-		oldTagsList,
-		"\nnewTagsList: ",
-		newTagsList,
-		"\ncursorLocation: ",
-		cursorLocation,
-	);
 	// Remove <mark> and <font> tags before processing
 	let updatedTitle = title;
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
