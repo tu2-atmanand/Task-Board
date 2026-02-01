@@ -24,7 +24,6 @@ import {
 import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
-import { bugReporter } from "src/services/OpenModals";
 import { DatePickerModal } from "src/modals/date_picker";
 import { bugReporterManagerInsatance } from "./BugReporter";
 

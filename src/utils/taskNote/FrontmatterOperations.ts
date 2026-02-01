@@ -10,7 +10,6 @@ import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 import { generateTaskId } from "../TaskItemUtils";
 import { statusTypeNames } from "src/interfaces/Enums";
 import { moment as _moment } from "obsidian";
-import { getCurrentLocalTimeString } from "../DateTimeCalculations";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**

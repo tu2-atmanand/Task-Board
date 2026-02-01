@@ -8,7 +8,6 @@ import {
 
 import { Board } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
-import { bugReporter } from "src/services/OpenModals";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { App } from "obsidian";
 

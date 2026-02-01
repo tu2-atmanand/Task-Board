@@ -1,5 +1,5 @@
-import { App, Modal } from "obsidian";
-import { DatePickerComponent, DatePickerState } from "./DatePickerComponent";
+import { Modal } from "obsidian";
+import { DatePickerComponent } from "./DatePickerComponent";
 import TaskBoard from "main";
 
 export class DatePickerModal extends Modal {

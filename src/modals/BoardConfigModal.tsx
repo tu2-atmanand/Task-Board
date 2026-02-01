@@ -13,7 +13,6 @@ import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { Board, swimlaneConfigs } from "src/interfaces/BoardConfigs";

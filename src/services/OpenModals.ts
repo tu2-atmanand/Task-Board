@@ -28,7 +28,6 @@ import { ScanVaultModal } from "src/modals/ScanVaultModal";
 import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { DatePickerModal } from "src/modals/date_picker";
-import { updateTaskItemDate } from "src/utils/UserTaskEvents";
 import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 
 // Function to open the BoardConfigModal

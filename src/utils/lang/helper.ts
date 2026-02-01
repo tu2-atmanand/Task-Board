@@ -5,7 +5,6 @@ import i18next from "i18next";
 import en from "./locale/en";
 import TaskBoard from "main";
 import { langCodes } from "src/interfaces/GlobalSettings";
-import { bugReporter } from "src/services/OpenModals";
 import {
 	NODE_POSITIONS_STORAGE_KEY,
 	NODE_SIZE_STORAGE_KEY,

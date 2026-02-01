@@ -4,7 +4,6 @@ import {
 	App,
 	Notice,
 	Setting,
-	SettingGroup,
 	normalizePath,
 	setIcon,
 } from "obsidian";
@@ -20,7 +19,7 @@ import {
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
+import { openScanFiltersModal } from "src/services/OpenModals";
 import { CustomStatusModal } from "src/modals/CustomStatusConfigurator";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 import {
@@ -42,7 +41,6 @@ import {
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
-	defaultTaskStatuses,
 	statusTypeNames,
 	scanModeOptions,
 } from "src/interfaces/Enums";

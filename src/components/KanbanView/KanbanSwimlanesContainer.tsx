@@ -2,11 +2,11 @@
 
 import React, { useMemo, memo } from 'react';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
-import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItem';
+import { taskItem } from 'src/interfaces/TaskItem';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
-import { ChevronDown, ChevronLast, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 

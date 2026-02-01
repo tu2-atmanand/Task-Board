@@ -1,6 +1,6 @@
 import { t } from "i18next";
 import TaskBoard from "main";
-import { Notice, TFolder } from "obsidian";
+import { Notice, } from "obsidian";
 import { BugReporterModal } from "src/modals/BugReporterModal";
 import { fsPromises } from "src/services/FileSystem";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";

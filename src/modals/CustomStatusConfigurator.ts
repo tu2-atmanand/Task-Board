@@ -1,4 +1,4 @@
-import { Modal, Notice, Setting, TextComponent } from "obsidian";
+import { Modal, Setting, TextComponent } from "obsidian";
 import type { Plugin } from "obsidian";
 import { statusTypeNames } from "src/interfaces/Enums";
 import {

@@ -1,12 +1,4 @@
-import {
-	Component,
-	ExtraButtonComponent,
-	setIcon,
-	DropdownComponent,
-	ButtonComponent,
-	App,
-	setTooltip,
-} from "obsidian";
+import { Component, setIcon, App } from "obsidian";
 import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";

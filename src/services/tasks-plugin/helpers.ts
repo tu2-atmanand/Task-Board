@@ -1,7 +1,6 @@
 // /src/services/tasks-plugin/helpers.ts
 
 import { TasksPluginApi } from "./api";
-import { bugReporter } from "../OpenModals";
 import TaskBoard from "main";
 import { taskItem } from "src/interfaces/TaskItem";
 import {

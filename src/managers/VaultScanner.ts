@@ -11,7 +11,7 @@ import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
 } from "../utils/JsonFileOperations";
-import { jsonCacheData, noteItem, taskItem } from "src/interfaces/TaskItem";
+import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
 	extractTaskNoteProperties,
 	isTaskNotePresentInFrontmatter,
@@ -31,14 +31,10 @@ import {
 	extractFrontmatterTags,
 } from "../utils/taskNote/FrontmatterOperations";
 import { t } from "../utils/lang/helper";
-import {
-	allowedFileExtensionsRegEx,
-	notAllowedFileExtensionsRegEx,
-} from "src/regularExpressions/MiscelleneousRegExpr";
-import { bugReporter } from "src/services/OpenModals";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { getCurrentLocalTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
-import { scanModeOptions, UniversalDateOptions } from "src/interfaces/Enums";
+import { UniversalDateOptions } from "src/interfaces/Enums";
 import {
 	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,

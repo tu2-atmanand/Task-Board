@@ -1,6 +1,5 @@
 import TaskBoard from "main";
 import { taskItem } from "src/interfaces/TaskItem";
-import { bugReporter } from "src/services/OpenModals";
 import { updateTaskInFile } from "./taskLine/TaskLineUtils";
 import {
 	isTaskNotePresentInTags,

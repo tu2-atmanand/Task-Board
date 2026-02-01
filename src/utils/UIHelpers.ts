@@ -1,4 +1,3 @@
-import type TaskBoard from "main";
 import { sanitizeHTMLToDom } from "obsidian";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 

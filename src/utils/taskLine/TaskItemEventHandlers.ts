@@ -1,4 +1,4 @@
-import { checkboxStateSwitcher, isTaskCompleted } from "../CheckBoxUtils";
+import { checkboxStateSwitcher } from "../CheckBoxUtils";
 import {
 	archiveTask,
 	deleteTaskFromFile,
@@ -10,17 +10,11 @@ import TaskBoard from "main";
 import { moment as _moment } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
-import { bugReporter } from "src/services/OpenModals";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
 import { archiveTaskNote, deleteTaskNote } from "../taskNote/TaskNoteUtils";
-import { statusTypeNames } from "src/interfaces/Enums";
 import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
 import { eventEmitter } from "src/services/EventEmitter";
-import {
-	sanitizeCancelledDate,
-	sanitizeCompletionDate,
-	sanitizeStatus,
-} from "./TaskContentFormatter";
+import { sanitizeStatus } from "./TaskContentFormatter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**

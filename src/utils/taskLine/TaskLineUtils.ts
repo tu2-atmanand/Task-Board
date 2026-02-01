@@ -13,10 +13,7 @@ import {
 import { normalizePath, Notice } from "obsidian";
 import TaskBoard from "main";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import {
-	bugReporter,
-	openDiffContentCompareModal,
-} from "src/services/OpenModals";
+import { openDiffContentCompareModal } from "src/services/OpenModals";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { isTheContentDiffAreOnlySpaces_V2 } from "src/modals/DiffContentCompareModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";

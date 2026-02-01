@@ -15,7 +15,6 @@ import {
 	taskPropertyFormatOptions,
 	NotificationService,
 	taskPropertiesNames,
-	UniversalDateOptions,
 	statusTypeNames,
 } from "src/interfaces/Enums";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";

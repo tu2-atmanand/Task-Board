@@ -50,7 +50,6 @@ import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
-import { createFragmentWithHTML } from "src/utils/UIHelpers";
 
 export default class TaskBoard extends Plugin {
 	app: App;
