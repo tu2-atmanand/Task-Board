@@ -43,15 +43,14 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
-import {
-	isTasksPluginEnabled,
-} from "src/services/tasks-plugin/helpers";
+import { isTasksPluginEnabled } from "src/services/tasks-plugin/helpers";
 import { scanModeOptions, taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { createFragmentWithHTML } from "src/utils/UIHelpers";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -1472,6 +1471,32 @@ export default class TaskBoard extends Plugin {
 
 		if (previousVersion == "" || currentVersion !== previousVersion) {
 			// make the localStorage flag, 'manadatoryScan' to True
+
+			if (previousVersion !== "") {
+				const customMessage = new Notice("", 0);
+
+				const messageContainer = customMessage.containerEl;
+
+				const customMessageContainer = messageContainer.createDiv({
+					cls: "taskboardCustomMessageContainer",
+				});
+
+				customMessageContainer.createEl("h3", { text: "Task Board" });
+				customMessageContainer.createEl("p", {
+					text: "Note for existing users",
+					cls: "taskboardCustomMessageContainerBold",
+				});
+				customMessageContainer.createEl("span", {
+					text: "If you were using the custom statuses from Tasks plugin configs. Please import them in Task Board's setting, using a button in the new Custom Statuses setting section. Task Board will no longer import the custom statuses from Tasks plugin automatically.",
+				});
+				customMessageContainer.createEl("p", {
+					text: "Read the release notes for all the latest features : ",
+				});
+				customMessageContainer.createEl("a", {
+					text: "Task Board v1.9.0",
+					href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
+				});
+			}
 
 			if (previousVersion === "" || runMandatoryScan) {
 				localStorage.setItem("manadatoryScan", "true");

@@ -7587,3 +7587,16 @@ Date picker modal styles
 .menu-item-title .contains-task-list>li>input[type=checkbox]:checked::after {
 	padding-block-start: 4px;
 }
+
+
+/* ------------------------------------------------------
+	CUSTOM NOTICE CONTAINER
+*/
+
+.taskboardCustomMessageContainer h3 {
+	margin-top: 0 !important;
+}
+
+.taskboardCustomMessageContainerBold {
+	font-weight: 600;
+}
