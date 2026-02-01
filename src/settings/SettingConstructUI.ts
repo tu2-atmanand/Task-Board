@@ -1,6 +1,13 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Notice, Setting, normalizePath } from "obsidian";
+import {
+	App,
+	Notice,
+	Setting,
+	SettingGroup,
+	normalizePath,
+	setIcon,
+} from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
@@ -14,6 +21,7 @@ import {
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
 import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
+import { CustomStatusModal } from "src/modals/CustomStatusConfigurator";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 import {
 	exportConfigurations,
@@ -23,8 +31,7 @@ import {
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
 import {
-	HideableTaskProperty,
-	cardSectionsVisibilityOptions,
+	taskPropertiesNames,
 	TagColorType,
 	EditButtonMode,
 	NotificationService,
@@ -35,18 +42,26 @@ import {
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
+	defaultTaskStatuses,
+	statusTypeNames,
+	scanModeOptions,
 } from "src/interfaces/Enums";
 import {
 	frontmatterFormatting,
 	globalSettingsData,
+	taskCardStyleNames,
+	type CustomStatus,
 } from "src/interfaces/GlobalSettings";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
+import { StatusType } from "src/interfaces/StatusConfiguration";
+import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class SettingsManager {
 	win: Window;
 	app: App;
 	plugin: TaskBoard;
-	globalSettings: globalSettingsData | null = null;
+	globalSettings: globalSettingsData;
 	allPickrs: Pickr[] = [];
 	reloadNoticeAlreadyShown: boolean = false;
 
@@ -54,29 +69,50 @@ export class SettingsManager {
 		this.app = plugin.app;
 		this.plugin = plugin;
 		this.win = window;
+		this.globalSettings = this.plugin.settings.data.globalSettings;
 	}
 
-	private getPropertyDisplayName(property: HideableTaskProperty): string {
-		const displayNames: Record<HideableTaskProperty, string> = {
-			[HideableTaskProperty.ID]: "ID (🆔 fpyvkz)",
-			[HideableTaskProperty.Tags]: "Tags (#tag)",
-			[HideableTaskProperty.Priority]: "Priority (🔺)",
-			[HideableTaskProperty.CreatedDate]: "Created Date (➕ 2024-01-01)",
-			[HideableTaskProperty.StartDate]: "Start Date (🛫 2024-01-01)",
-			[HideableTaskProperty.ScheduledDate]:
+	private getPropertyDisplayName(
+		property: taskPropertiesNames,
+	): string | null {
+		type PartialDisplayNames = Pick<
+			Record<taskPropertiesNames, string>,
+			| taskPropertiesNames.ID
+			| taskPropertiesNames.Tags
+			| taskPropertiesNames.Priority
+			| taskPropertiesNames.Time
+			| taskPropertiesNames.Reminder
+			| taskPropertiesNames.CreatedDate
+			| taskPropertiesNames.StartDate
+			| taskPropertiesNames.ScheduledDate
+			| taskPropertiesNames.DueDate
+			| taskPropertiesNames.CompletionDate
+			| taskPropertiesNames.CancelledDate
+			| taskPropertiesNames.Dependencies
+			| taskPropertiesNames.OnCompletion
+			| taskPropertiesNames.Recurring
+		>;
+
+		const displayNames: PartialDisplayNames = {
+			[taskPropertiesNames.ID]: "ID (🆔 fpyvkz)",
+			[taskPropertiesNames.Tags]: "Tags (#tag)",
+			[taskPropertiesNames.Priority]: "Priority (🔺)",
+			[taskPropertiesNames.CreatedDate]: "Created Date (➕ 2024-01-01)",
+			[taskPropertiesNames.StartDate]: "Start Date (🛫 2024-01-01)",
+			[taskPropertiesNames.ScheduledDate]:
 				"Scheduled Date (⏳ 2024-01-01)",
-			[HideableTaskProperty.DueDate]: "Due Date (📅 2024-01-01)",
-			[HideableTaskProperty.CompletionDate]:
+			[taskPropertiesNames.DueDate]: "Due Date (📅 2024-01-01)",
+			[taskPropertiesNames.CompletionDate]:
 				"Completion Date (✅ 2024-01-01)",
-			[HideableTaskProperty.CancelledDate]:
+			[taskPropertiesNames.CancelledDate]:
 				"Cancelled Date (❌ 2024-01-01)",
-			[HideableTaskProperty.Time]: "Time (⏰ 09:00-10:00)",
-			[HideableTaskProperty.Reminder]: "Reminder ((@12:30))",
-			[HideableTaskProperty.Recurring]: "Recurring (🔁 every 2 weeks)",
-			[HideableTaskProperty.OnCompletion]: "On-completion (🏁 delete)",
-			[HideableTaskProperty.Dependencies]: "Dependens-on ⛔ fa4sm9",
+			[taskPropertiesNames.Time]: "Time (⏰ 09:00-10:00)",
+			[taskPropertiesNames.Reminder]: "Reminder (@(12:30))",
+			[taskPropertiesNames.Recurring]: "Recurring (🔁 every 2 weeks)",
+			[taskPropertiesNames.OnCompletion]: "On-completion (🏁 delete)",
+			[taskPropertiesNames.Dependencies]: "Dependens-on (⛔ fa4sm9)",
 		};
-		return displayNames[property] || property;
+		return displayNames[property as keyof typeof displayNames] || null;
 	}
 
 	private openReloadNoticeIfNeeded() {
@@ -96,11 +132,11 @@ export class SettingsManager {
 			const settingsData = this.plugin.settings.data.globalSettings;
 			this.globalSettings = settingsData;
 		} catch (err) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				42,
 				"Failed to load settings",
 				err as string,
-				"TaskBoardSettingConstructUI.ts/SettingsManager/loadSettings"
+				"TaskBoardSettingConstructUI.ts/SettingsManager/loadSettings",
 			);
 		}
 	}
@@ -113,11 +149,11 @@ export class SettingsManager {
 			this.plugin.settings.data.globalSettings = this.globalSettings;
 			this.plugin.saveSettings();
 		} catch (err) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				43,
 				"Failed to save settings",
 				err as string,
-				"TaskBoardSettingConstructUI.ts/SettingsManager/saveSettings"
+				"TaskBoardSettingConstructUI.ts/SettingsManager/saveSettings",
 			);
 		}
 	}
@@ -152,7 +188,15 @@ export class SettingsManager {
 				handler: () => this.renderAllUITabSettings(tabContent),
 			},
 			{
-				key: t("tbnote"),
+				key: t("properties"),
+				handler: () => this.renderPropertiesTabSettings(tabContent),
+			},
+			{
+				key: t("inline-tasks"),
+				handler: () => this.renderInlineTasksTabSettings(tabContent),
+			},
+			{
+				key: t("task-notes"),
 				handler: () => this.renderTBNoteTabSettings(tabContent),
 			},
 			{
@@ -183,8 +227,8 @@ export class SettingsManager {
 				Array.from(tabBar.children).forEach((child) =>
 					child.toggleClass(
 						"taskBoard-settings-tab-button-active",
-						child === tabButton
-					)
+						child === tabButton,
+					),
 				);
 
 				// Clear and render the appropriate content
@@ -217,7 +261,7 @@ export class SettingsManager {
 		contentEl
 			.createEl("p", {
 				text: t(
-					"please-read-the-documentation-to-make-an-efficient-use-of-this-plugin"
+					"please-read-the-documentation-to-make-an-efficient-use-of-this-plugin",
 				),
 				cls: "taskBoard-docs-section",
 			})
@@ -232,9 +276,6 @@ export class SettingsManager {
 		// if (this.contentEl) {
 		// 	this.contentEl.empty(); // Empty the contentEl to remove all child elements
 		// }
-
-		// Reset global settings if necessary
-		this.globalSettings = null;
 
 		this.reloadNoticeAlreadyShown = false;
 
@@ -260,11 +301,9 @@ export class SettingsManager {
 		const {
 			scanFilters,
 			openOnStartup,
-			realTimeScanning,
-			archivedTasksFilePath,
+			scanMode,
 			tasksCacheFilePath,
-			scanVaultAtStartup,
-			preDefinedNote,
+			showModifiedFilesNotice,
 			autoAddUniqueID,
 			experimentalFeatures,
 			safeGuardFeature,
@@ -279,8 +318,8 @@ export class SettingsManager {
 						"<b>" +
 						t("note") +
 						" :</b> " +
-						t("name-of-the-file-folder-tag-for-filter-info-2")
-				)
+						t("name-of-the-file-folder-tag-for-filter-info-2"),
+				),
 			);
 
 		["files", "folders", "frontMatter", "tags"].forEach((type) => {
@@ -364,7 +403,7 @@ export class SettingsManager {
 			});
 			polarityDropdown.addEventListener("change", (e) => {
 				const newPolarity = Number(
-					(e.target as HTMLSelectElement).value
+					(e.target as HTMLSelectElement).value,
 				);
 				this.plugin.settings.data.globalSettings.scanFilters[
 					filterType
@@ -375,13 +414,51 @@ export class SettingsManager {
 
 		// Setting to scan the modified file in realtime
 		new Setting(contentEl)
-			.setName(t("real-time-scanning"))
-			.setDesc(t("real-time-scanning-info"))
-			.addToggle((toggle) =>
-				toggle.setValue(realTimeScanning).onChange(async (value) => {
-					this.globalSettings!.realTimeScanning = value;
-					await this.saveSettings();
-				})
+			.setName(t("scanning-mode"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("scanning-mode-info") +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("balanced") +
+						"</b>" +
+						" : " +
+						t("balanced-scanning-mode-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("real-time") +
+						"</b>" +
+						" : " +
+						t("real-time-scanning-mode-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("manual") +
+						"</b>" +
+						" : " +
+						t("manual-scanning-mode-info") +
+						"</li>" +
+						"</ul>",
+				),
+			)
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[scanModeOptions.AUTOMATIC]: t("balanced"),
+						[scanModeOptions.REAL_TIME]: t("real-time"),
+						[scanModeOptions.MANUAL]: t("manual"),
+					})
+					.setValue(scanMode)
+					.onChange(async (value) => {
+						this.globalSettings!.scanMode =
+							value as scanModeOptions;
+						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
+					}),
 			);
 
 		// Setting to scan the modified file in realtime
@@ -393,129 +470,142 @@ export class SettingsManager {
 						"<br/>" +
 						"<ul>" +
 						"<li>" +
-						t("link-parent-child-tasks") +
-						"</li>" +
-						"<li>" +
-						t("pin-tasks-on-top-in-each-column-upcoming") +
+						t("map-view-feature") +
 						"</li>" +
 						"<li>" +
 						t("manual-sorting-inside-each-column-upcoming") +
 						"</li>" +
 						"<li>" +
-						t("map-view-upcoming") +
+						t("pin-tasks-on-top-in-each-column-upcoming") +
 						"</li>" +
-						"</ul>"
-				)
+						"</ul>",
+				),
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddUniqueID).onChange(async (value) => {
-					this.globalSettings!.autoAddUniqueID = value;
+					this.globalSettings.autoAddUniqueID = value;
 					await this.saveSettings();
 
 					this.openReloadNoticeIfNeeded();
-				})
+				}),
 			);
 
-		new Setting(contentEl)
-			.setName(t("default-note-for-adding-new-tasks"))
-			.setDesc(t("default-note-for-new-tasks-description"))
-			.addText((text) => {
-				text.setValue(preDefinedNote).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.preDefinedNote = value;
-				});
+		const tasksCachePathSettingsContainer = contentEl.createDiv({
+			cls: "task-board-single-setting-container",
+		});
+		const renderTasksCachePathSetting = () => {
+			tasksCachePathSettingsContainer.empty();
 
-				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(this.app);
-				const onSelectCallback = async (selectedPath: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.preDefinedNote = selectedPath;
-					}
-					text.setValue(selectedPath);
-					await this.saveSettings();
-				};
-
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
-			});
-
-		// Setting for choosing the default file to archive tasks
-		new Setting(contentEl)
-			.setName(t("file-for-archived-tasks"))
-			.setDesc(t("file-for-archived-tasks-description"))
-			.addText((text) => {
-				text.setValue(archivedTasksFilePath).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.archivedTasksFilePath = value;
-				});
-
-				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(this.plugin.app);
-				const onSelectCallback = async (selectedPath: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.archivedTasksFilePath =
-							selectedPath;
-					}
-					text.setValue(selectedPath);
-					await this.saveSettings();
-				};
-
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
-			});
-
-		new Setting(contentEl)
-			.setClass("taskBoard-settings-wide-input")
-			.setName(t("tasks-cache-file-path"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("tasks-cache-file-path-description") +
-						"<br/>" +
-						t("tasks-cache-file-path-description-2")
-				)
-			)
-			.addDropdown((dropdown) => {
-				const defaultPath = `${this.plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-				const suggestionContent = [
-					defaultPath,
-					...getFolderSuggestions(this.app).map((item) =>
-						normalizePath(`${item}/task-board-cache.json`)
+			let newPath = this.globalSettings.tasksCacheFilePath;
+			new Setting(tasksCachePathSettingsContainer)
+				.setClass("taskBoard-settings-wide-input")
+				.setName(t("tasks-cache-file-path"))
+				.setDesc(
+					createFragmentWithHTML(
+						t("tasks-cache-file-path-description") +
+							"<br/>" +
+							t("tasks-cache-file-path-description-2"),
 					),
-				];
-				// Add 'Default' option label for the default path
-				dropdown.addOption(defaultPath, `Default - ${defaultPath}`);
+				)
+				.addText((text) => {
+					text.setValue(newPath).onChange((editedPath: string) => {
+						if (editedPath.endsWith(".json")) {
+							newPath = normalizePath(editedPath);
+						} else {
+							newPath = normalizePath(
+								editedPath + "/task-board-cache.json",
+							);
+						}
+					});
 
-				// Add options to dropdown
-				suggestionContent.forEach((path) => {
-					dropdown.addOption(path, path);
-				});
+					// const inputEl = text.inputEl;
+					// const suggestionContent = getFolderSuggestions(this.app);
+					// const onSelectCallback = async (selectedPath: string) => {
+					// 	let newPath = "";
+					// 	if (this.globalSettings) {
+					// 		if (selectedPath.endsWith(".json")) {
+					// 			this.globalSettings.tasksCacheFilePath =
+					// 				selectedPath;
+					// 			newPath = selectedPath;
+					// 		} else {
+					// 			newPath = normalizePath(
+					// 				selectedPath + "/task-board-cache.json",
+					// 			);
+					// 			this.globalSettings.tasksCacheFilePath =
+					// 				newPath;
+					// 		}
+					// 	}
+					// 	renderTasksCachePathSetting();
+					// 	await this.saveSettings();
+					// };
 
-				// Set current value
-				dropdown.setValue(tasksCacheFilePath);
+					// new MultiSuggest(
+					// 	inputEl,
+					// 	new Set(suggestionContent),
+					// 	onSelectCallback,
+					// 	this.app,
+					// );
+				})
+				.addButton((button) =>
+					button.setButtonText(t("transfer")).onClick(async () => {
+						const result = await moveTasksCacheFileToNewPath(
+							this.app,
+							tasksCacheFilePath,
+							newPath,
+						);
+						if (result) {
+							this.globalSettings.tasksCacheFilePath = newPath;
+							this.saveSettings();
 
-				dropdown.onChange(async (selectedPath) => {
-					const result = await moveTasksCacheFileToNewPath(
-						this.plugin,
-						tasksCacheFilePath,
-						selectedPath
-					);
+							renderTasksCachePathSetting();
+							new Notice(
+								`Task Board cache file path changed to new location succussfully. New location : ${this.globalSettings.tasksCacheFilePath}`,
+							);
+						} else {
+							new Notice(
+								"Task Board : Failed to change the path. Check logs for more info.",
+							);
+							this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+							this.saveSettings();
 
-					if (this.globalSettings && result) {
-						this.globalSettings.tasksCacheFilePath = selectedPath;
-						await this.saveSettings();
+							renderTasksCachePathSetting();
+						}
+					}),
+				)
+				.addButton((button) =>
+					button.setButtonText(t("reset")).onClick(async () => {
+						newPath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 
-						this.openReloadNoticeIfNeeded();
-					}
-				});
-			});
+						const result = await moveTasksCacheFileToNewPath(
+							this.app,
+							tasksCacheFilePath,
+							newPath,
+						);
+
+						if (result) {
+							this.globalSettings.tasksCacheFilePath = newPath;
+							this.saveSettings();
+
+							renderTasksCachePathSetting();
+							new Notice(
+								`Task Board cache file path reset was succussfully.`,
+							);
+						} else {
+							new Notice(
+								"Task Board : Failed to change the path. Check logs for more info.",
+							);
+							this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+							this.saveSettings();
+
+							renderTasksCachePathSetting();
+						}
+
+						renderTasksCachePathSetting();
+					}),
+				);
+		};
+
+		renderTasksCachePathSetting();
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -525,42 +615,42 @@ export class SettingsManager {
 				toggle.setValue(openOnStartup).onChange(async (value) => {
 					this.globalSettings!.openOnStartup = value;
 					await this.saveSettings();
-				})
+				}),
 			);
 
 		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
 		new Setting(contentEl)
-			.setName(t("auto-scan-the-vault-on-obsidian-startup"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("auto-scan-the-vault-on-obsidian-startup-info") +
-						"<br/>" +
-						"<b>" +
-						t("note") +
-						" :</b> " +
-						t("auto-scan-the-vault-on-obsidian-startup-info-2")
-				)
-			)
+			.setName(t("show-modified-files-message-on-startup"))
+			.setDesc(t("show-modified-files-message-on-startup-info"))
 			.addToggle((toggle) =>
-				toggle.setValue(scanVaultAtStartup).onChange(async (value) => {
-					this.globalSettings!.scanVaultAtStartup = value;
-					await this.saveSettings();
-				})
+				toggle
+					.setValue(showModifiedFilesNotice)
+					.onChange(async (value) => {
+						this.globalSettings!.showModifiedFilesNotice = value;
+						await this.saveSettings();
+					}),
 			);
 
 		// New setting for updating language file
 		new Setting(contentEl)
 			.setName(t("update-language-translations"))
-			.setDesc(t("update-language-translations-info"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("update-language-translations-info") +
+						" <a href='https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/'>" +
+						t("task-board-docs") +
+						".",
+				),
+			)
 			.addButton((button) =>
 				button.setButtonText("Update").onClick(async () => {
 					const result = await downloadAndApplyLanguageFile(
-						this.plugin
+						this.plugin,
 					);
 					if (result) {
 						this.openReloadNoticeIfNeeded();
 					}
-				})
+				}),
 			);
 
 		new Setting(contentEl)
@@ -572,27 +662,37 @@ export class SettingsManager {
 					if (result) {
 						this.openReloadNoticeIfNeeded();
 					}
-				})
+				}),
 			)
 			.addButton((button) =>
 				button.setButtonText(t("export")).onClick(async () => {
 					await exportConfigurations(this.plugin);
-				})
+				}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("export-logs"))
+			.setDesc(t("export-logs-info"))
+			.addButton((button) =>
+				button.setButtonText(t("export")).onClick(async () => {
+					await bugReporterManagerInsatance.exportLogFile();
+				}),
 			);
 
 		new Setting(contentEl)
 			.setName("Safeguard feature")
 			.setDesc(
 				createFragmentWithHTML(
-					"This feature helps to ensure that this plugin wont temper the conte of other tasks. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+					"This feature helps to ensure that task board should only update the task content in the note. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+						"<br/>" +
 						"<br/>" +
 						"<b>" +
-						"NOTE :" +
+						"NOTE : " +
 						"</b>" +
-						"Disabling this feature will by-pass the security check which might lead to unwanted behavior. Example in case where there are multiple inline tasks one after the another. Only disable this feature if you feel this modal is poppin-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but ensure you take care of you data manually." +
+						"Disabling this feature will by-pass the security check which might lead to unwanted behavior like tempering the content of other inline-tasks right below the intended task. Only disable this feature if you feel this modal is popping-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but also ensure you are taking care of you data." +
 						"<br/>" +
-						"This is a temporary solution to the problem few users are facing right now. This will be the default behavior moving forward and you will not require to disable this feature moving forward."
-				)
+						"This setting was provided on the request of few users to tempararily disable safe-guard. In upcoming releasing, will remove this setting if everything is working as expected and safe-guard will be always doing the security checks.",
+				),
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(safeGuardFeature).onChange(async (value) => {
@@ -600,37 +700,62 @@ export class SettingsManager {
 					await this.saveSettings();
 
 					this.openReloadNoticeIfNeeded();
-				})
+				}),
 			);
 
-		// new Setting(contentEl)
-		// 	.setName(t("enable-experimental-features"))
-		// 	.setDesc(
-		// 		createFragmentWithHTML(
-		// 			t("enable-experimental-features-info-1") +
-		// 				"<br/>" +
-		// 				t("enable-experimental-features-info-2") +
-		// 				"<br/>" +
-		// 				"<ul>" +
-		// 				"<li>" +
-		// 				"<b>" +
-		// 				t("drag-and-drop") +
-		// 				"</b>" +
-		// 				t("drag-and-drop-feature-description") +
-		// 				"</li>" +
-		// 				"</ul>" +
-		// 		)
-		// 	)
-		// 	.addToggle((toggle) =>
-		// 		toggle
-		// 			.setValue(experimentalFeatures)
-		// 			.onChange(async (value) => {
-		// 				this.globalSettings!.experimentalFeatures = value;
-		// 				await this.saveSettings();
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						"<br/>" +
+						"<br/>" +
+						t("enable-experimental-features-info-2") +
+						"<br/>" +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("drag-and-drop") +
+						" : " +
+						"</b>" +
+						t("drag-and-drop-feature-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("kanban-swimlanes") +
+						" : " +
+						"</b>" +
+						t("kanban-swimlanes-feature-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						t("manual-sorting") +
+						" : " +
+						"</b>" +
+						t("manual-sorting-feature-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						"Task card menu" +
+						" : " +
+						"</b>" +
+						"Easily change various properties of tasks and access quick actions through the menu. Specially useful on mobile as an alternative to drag and drop feature." +
+						"</li>" +
+						"</ul>",
+				),
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(experimentalFeatures)
+					.onChange(async (value) => {
+						this.globalSettings!.experimentalFeatures = value;
+						await this.saveSettings();
 
-		// 				this.openReloadNoticeIfNeeded();
-		// 			})
-		// 	);
+						this.openReloadNoticeIfNeeded();
+					}),
+			);
 
 		// // Helper to add filter rows
 		// const addFilterRow = (
@@ -736,20 +861,20 @@ export class SettingsManager {
 			cls: "settingTabFooterDonationsSec",
 		});
 		donationSection.appendChild(
-			paypalButton("https://paypal.me/tu2atmanand")
+			paypalButton("https://paypal.me/tu2atmanand"),
 		);
 		donationSection.appendChild(
 			buyMeACoffeeButton(
 				"https://www.buymeacoffee.com/tu2_atmanand",
 				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
-					.documentElement
-			)
+					.documentElement,
+			),
 		);
 		donationSection.appendChild(
 			kofiButton(
 				"https://ko-fi.com/atmanandgauns",
-				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement
-			)
+				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement,
+			),
 		);
 
 		footerSection.appendChild(donationSection);
@@ -783,86 +908,31 @@ export class SettingsManager {
 		// 	});
 
 		const {
-			showHeader,
-			showFooter,
 			columnWidth,
 			showVerticalScroll,
 			tagColors,
 			tagColorsType,
 			showTaskWithoutMetadata,
-			showFileNameInCard,
-			cardSectionsVisibility,
-			showFrontmatterTagsOnCards,
-			hiddenTaskProperties,
+			taskCardStyle,
 		} = this.globalSettings!;
 
-		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
-			.setName(t("show-header-of-the-task-card"))
-			.setDesc(t("enable-this-to-see-the-header-in-the-task-card"))
-			.addToggle((toggle) =>
-				toggle.setValue(showHeader).onChange(async (value) => {
-					this.globalSettings!.showHeader = value;
-					await this.saveSettings();
-				})
-			);
-
-		// Setting to show/Hide the Footer of the task card
-		new Setting(contentEl)
-			.setName(t("show-footer-of-the-task-card"))
-			.setDesc(t("enable-this-to-see-the-footer-in-the-task-card"))
-			.addToggle((toggle) =>
-				toggle.setValue(showFooter).onChange(async (value) => {
-					this.globalSettings!.showFooter = value;
-					await this.saveSettings();
-				})
-			);
-
-		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
-		new Setting(contentEl)
-			.setName(t("show-note-frontmatter-tags-in-the-card-header"))
-			.setDesc(t("show-note-frontmatter-tags-in-the-card-header-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(showFrontmatterTagsOnCards)
-					.onChange(async (value) => {
-						this.globalSettings!.showFrontmatterTagsOnCards = value;
-						await this.saveSettings();
-					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("customize-card-sections"))
-			.setDesc(t("customize-card-sections-info"))
+			.setName(t("task-card-style"))
+			.setDesc(t("task-card-style-info"))
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[cardSectionsVisibilityOptions.showDescriptionOnly]: t(
-							"show-description-only"
-						),
-						[cardSectionsVisibilityOptions.showSubTasksOnly]:
-							t("show-subtasks-only"),
-						[cardSectionsVisibilityOptions.showBoth]:
-							t("show-both"),
-						[cardSectionsVisibilityOptions.hideBoth]:
-							t("hide-both"),
+						[taskCardStyleNames.EMOJI]: t("tasks-plugin-emoji"),
+						// [taskCardStyleNames.ICONS]: t("lucide-icons"),
+						[taskCardStyleNames.BASES]: t("bases-cards-style"),
+						// [taskCardStyleNames.DATAVIEW]: t("dataview-style"),
 					})
-					.setValue(cardSectionsVisibility)
+					.setValue(taskCardStyle)
 					.onChange(async (value) => {
-						this.globalSettings!.cardSectionsVisibility = value;
+						this.globalSettings!.taskCardStyle =
+							value as taskCardStyleNames;
 						await this.saveSettings();
-					})
-			);
-
-		// Setting to show/Hide the Footer of the task card
-		new Setting(contentEl)
-			.setName(t("show-note-name-in-task-header"))
-			.setDesc(t("show-note-name-in-task-header-description"))
-			.addToggle((toggle) =>
-				toggle.setValue(showFileNameInCard).onChange(async (value) => {
-					this.globalSettings!.showFileNameInCard = value;
-					await this.saveSettings();
-				})
+					}),
 			);
 
 		// Setting to show/Hide the Footer of the task card
@@ -875,7 +945,7 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.showTaskWithoutMetadata = value;
 						await this.saveSettings();
-					})
+					}),
 			);
 
 		// Setting to take the width of each Column in px.
@@ -889,7 +959,7 @@ export class SettingsManager {
 						this.globalSettings!.columnWidth = value;
 						await this.saveSettings();
 					})
-					.setPlaceholder("300px")
+					.setPlaceholder("300px"),
 			);
 
 		// Setting to show/Hide the Vertical ScrollBar of each Column
@@ -900,94 +970,36 @@ export class SettingsManager {
 				toggle.setValue(showVerticalScroll).onChange(async (value) => {
 					this.globalSettings!.showVerticalScroll = value;
 					await this.saveSettings();
-				})
+				}),
 			);
 
 		// Lazy loading settings for Kanban view
-		new Setting(contentEl)
-			.setName("Enable lazy loading for Kanban view")
-			.setDesc(
-				"When enabled, only a limited number of task cards are initially rendered per column. More tasks load automatically as you scroll within each column. This significantly improves performance for boards with thousands of tasks. This setting is just to provide a backward compatibility in case user faces any issue with rendering. If there are no issues faced with this approach, this setting will be removed in the future releases and this technique will be used a default behavior for rendering the columns."
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(
-						this.globalSettings!.kanbanView?.lazyLoadingEnabled ??
-							false
-					)
-					.onChange(async (value) => {
-						if (!this.globalSettings!.kanbanView) {
-							this.globalSettings!.kanbanView = {
-								lazyLoadingEnabled: false,
-								initialTaskCount: 20,
-								loadMoreCount: 10,
-								scrollThresholdPercent: 80,
-							};
-						}
-						this.globalSettings!.kanbanView.lazyLoadingEnabled =
-							value;
-						await this.saveSettings();
-					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("live-editor-and-reading-mode"))
-			.setHeading();
-
-		// Setting for hiding specific task properties in Live Editor and Reading mode
-		new Setting(contentEl)
-			.setName(t("hide-specific-properties-in-notes"))
-			.setDesc(t("hide-specific-properties-in-notes-description"))
-			.setClass("taskboard-hidden-properties-setting");
-
-		// Create a container for checkboxes
-		const checkboxContainer = contentEl.createDiv(
-			"taskboard-hidden-properties-container"
-		);
-
-		// Create checkboxes for each hideable property
-		Object.values(HideableTaskProperty).forEach((property) => {
-			const displayName = this.getPropertyDisplayName(property);
-
-			const checkboxSetting = new Setting(checkboxContainer)
-				.setName(displayName)
-				.setClass("taskboard-property-checkbox-setting")
-				.addToggle((toggle) => {
-					const isSelected = hiddenTaskProperties.includes(property);
-					toggle.setValue(isSelected).onChange(async (value) => {
-						if (value) {
-							// Add property if not already included
-							if (
-								!this.globalSettings!.hiddenTaskProperties.includes(
-									property
-								)
-							) {
-								this.globalSettings!.hiddenTaskProperties.push(
-									property
-								);
-							}
-						} else {
-							// Remove property
-							this.globalSettings!.hiddenTaskProperties =
-								this.globalSettings!.hiddenTaskProperties.filter(
-									(p) => p !== property
-								);
-						}
-						await this.saveSettings();
-
-						this.openReloadNoticeIfNeeded();
-					});
-				});
-
-			// Style the checkbox setting to be more compact
-			checkboxSetting.settingEl.addClass("taskboard-compact-setting");
-		});
-
-		// Tag Colors settings
-		// Setting to show/Hide the Header of the task card
+		// @deprecated - v1.9.0
 		// new Setting(contentEl)
-		// 	.setName(t("tag-colors"))
-		// 	.setDesc(t("tag-colors-info"));
+		// 	.setName("Enable lazy loading for Kanban view")
+		// 	.setDesc(
+		// 		"When enabled, only a limited number of task cards are initially rendered per column. More tasks load automatically as you scroll within each column. This significantly improves performance for boards with thousands of tasks. This setting is just to provide a backward compatibility in case user faces any issue with rendering. If there are no issues faced with this approach, this setting will be removed in the future releases and this technique will be used a default behavior for rendering the columns.",
+		// 	)
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(
+		// 				this.globalSettings!.kanbanView?.lazyLoadingEnabled ??
+		// 					false,
+		// 			)
+		// 			.onChange(async (value) => {
+		// 				if (!this.globalSettings!.kanbanView) {
+		// 					this.globalSettings!.kanbanView = {
+		// 						lazyLoadingEnabled: false,
+		// 						initialTaskCount: 20,
+		// 						loadMoreCount: 10,
+		// 						scrollThresholdPercent: 80,
+		// 					};
+		// 				}
+		// 				this.globalSettings!.kanbanView.lazyLoadingEnabled =
+		// 					value;
+		// 				await this.saveSettings();
+		// 			}),
+		// 	);
 
 		new Setting(contentEl).setName(t("tag-colors")).setHeading();
 
@@ -997,8 +1009,9 @@ export class SettingsManager {
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[TagColorType.Text]: t("text-of-the-tag"),
-						[TagColorType.Background]: t("background-of-the-card"),
+						[TagColorType.TagText]: t("text-of-the-tag"),
+						[TagColorType.TagBg]: t("tag-background"),
+						[TagColorType.CardBg]: t("background-of-the-card"),
 					})
 					.setValue(tagColorsType)
 					.onChange(async (value) => {
@@ -1006,7 +1019,7 @@ export class SettingsManager {
 							value as TagColorType;
 						await this.saveSettings();
 						renderTagColors();
-					})
+					}),
 			);
 
 		const tagColorsContainer = contentEl.createDiv({
@@ -1037,12 +1050,12 @@ export class SettingsManager {
 					})
 					.filter(
 						(
-							tag
+							tag,
 						): tag is {
 							name: string;
 							color: string;
 							priority: number;
-						} => tag !== null
+						} => tag !== null,
 					);
 
 				this.globalSettings!.tagColors = newOrder;
@@ -1054,7 +1067,7 @@ export class SettingsManager {
 			tagColorsContainer.empty(); // Clear existing rendered rows
 
 			this.globalSettings!.tagColors.sort(
-				(a, b) => a.priority - b.priority
+				(a, b) => a.priority - b.priority,
 			).forEach((tag, index) => {
 				const row = tagColorsContainer.createDiv({
 					cls: "tag-color-row",
@@ -1069,27 +1082,27 @@ export class SettingsManager {
 							.setTooltip("Hold and drag")
 							.setIcon("grip-horizontal")
 							.setClass(
-								"taskboard-setting-tag-color-row-element-drag-handle"
+								"taskboard-setting-tag-color-row-element-drag-handle",
 							)
 							.buttonEl.setCssStyles({
 								cursor: "grab",
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								maxWidth: "max-content !important",
-							})
+							}),
 					)
 					.addText((text) =>
 						text
@@ -1102,28 +1115,28 @@ export class SettingsManager {
 							})
 							.inputEl.setCssStyles({
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								minWidth: "23vw !important",
-							})
+							}),
 					)
 					.addButton((btn) => {
 						btn.setTooltip(t("pick-color-for-tag"))
 							.setIcon("palette")
 							.setClass(
-								"taskboard-setting-tag-color-row-element-color-picker"
+								"taskboard-setting-tag-color-row-element-color-picker",
 							)
 							.then(() => {
 								const colorMap =
@@ -1134,13 +1147,13 @@ export class SettingsManager {
 													.globalSettings.tagColors[
 													tagColor.priority - 1
 												]?.color || "#ff0000",
-										})
+										}),
 									);
 								const pickr = new Pickr({
 									el: btn.buttonEl,
 									theme: "nano",
 									swatches: colorMap.map(
-										(item) => item.color
+										(item) => item.color,
 									),
 									defaultRepresentation: "HEXA",
 									default: tag.color || "#ff0000",
@@ -1170,7 +1183,7 @@ export class SettingsManager {
 										const rgbaColor = `rgba(${color
 											.toRGBA()
 											.map((v: number, i: number) =>
-												i < 3 ? Math.round(v) : v
+												i < 3 ? Math.round(v) : v,
 											)
 											.join(", ")})`;
 										tag.color = rgbaColor;
@@ -1196,18 +1209,18 @@ export class SettingsManager {
 							})
 							.inputEl.setCssStyles({
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								minWidth: "23vw !important",
@@ -1218,14 +1231,14 @@ export class SettingsManager {
 							.setButtonText("Delete")
 							.setIcon("trash")
 							.setClass(
-								"taskboard-setting-tag-color-row-element-delete"
+								"taskboard-setting-tag-color-row-element-delete",
 							)
 							.setTooltip(t("delete-tag-color"))
 							.onClick(async () => {
 								this.globalSettings!.tagColors.splice(index, 1);
 								await this.saveSettings();
 								renderTagColors(); // Re-render after delete
-							})
+							}),
 					);
 			});
 		};
@@ -1234,722 +1247,337 @@ export class SettingsManager {
 		renderTagColors();
 
 		// Add "Add New Tag Color" button
-		new Setting(contentEl).addButton((btn) =>
-			btn
-				.setButtonText(t("add-tag-color"))
-				.setCta()
-				.onClick(async () => {
-					const newTag = {
-						name: "",
-						color: "rgba(255, 0, 0, 1)",
-						priority: this.globalSettings!.tagColors.length + 1,
-					};
-					this.globalSettings!.tagColors.push(newTag);
-					await this.saveSettings();
-					renderTagColors();
-				})
-		);
-	}
-
-	private renderTBNoteTabSettings(contentEl: HTMLElement) {
-		const {
-			taskNoteIdentifierTag,
-			taskNoteDefaultLocation,
-			archivedTBNotesFolderPath,
-			frontmatterFormatting,
-		} = this.globalSettings!;
-
 		new Setting(contentEl)
-			.setName(t("task-note-vs-tbnote"))
-			.setDesc(
-				createFragmentWithHTML(
-					"<ul>" +
-						"<li><b>" +
-						t("task-note") +
-						":</b> " +
-						t("task-note-description") +
-						"</li>" +
-						"<li><b>" +
-						t("tbnote") +
-						":</b> " +
-						t("tbnote-description") +
-						" <a href='https://github.com/tu2-atmanand/Task-Board/issues/33'>" +
-						t("tbnote-development-ticker") +
-						"</a></li>" +
-						"</ul>"
-				)
-			);
-
-		new Setting(contentEl)
-			.setName(t("task-note-identifier-tag"))
-			.setDesc(t("task-note-identifier-tag-description"))
-			.addText((text) => {
-				text.setValue(taskNoteIdentifierTag).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.taskNoteIdentifierTag =
-							value.startsWith("#")
-								? value.replace("#", "")
-								: value;
-				});
-
-				const inputEl = text.inputEl;
-				inputEl.placeholder = "e.g., #taskNote";
-			});
-
-		// Setting for choosing the default location for task notes
-		new Setting(contentEl)
-			.setName(t("default-location-for-new-task-notes"))
-			.setDesc(t("default-location-for-new-task-notes-description"))
-			.addText((text) => {
-				text.setValue(taskNoteDefaultLocation).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.taskNoteDefaultLocation = value;
-				});
-
-				const inputEl = text.inputEl;
-				// For folders, we could use folder suggestions or just allow text input
-				// For now, let's keep it simple with text input
-				inputEl.placeholder = "e.g., Task Notes/";
-			});
-
-		// Setting for choosing the default file to archive tasks
-		new Setting(contentEl)
-			.setName(t("folder-for-archived-task-notes"))
-			.setDesc(t("folder-for-archived-task-notes-description"))
-			.addText((text) => {
-				text.setValue(archivedTBNotesFolderPath).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.archivedTBNotesFolderPath = value;
-				});
-
-				const inputEl = text.inputEl;
-				inputEl.placeholder = "e.g., TaskBoard/TaskNotes";
-				const suggestionContent = getFolderSuggestions(this.plugin.app);
-				const onSelectCallback = async (selectedPath: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.archivedTBNotesFolderPath =
-							selectedPath;
-					}
-					text.setValue(selectedPath);
-					await this.saveSettings();
-				};
-
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
-			});
-
-		new Setting(contentEl)
-			.setName(t("frontmatter-formatting"))
-			.setDesc(t("frontmatter-formatting-description"));
-
-		const frontmatterFormattingContainer = contentEl.createDiv({
-			cls: "taskBoardSettingsFrontmatterFormattingContainer",
-		});
-
-		// Initialize Sortable.js
-		Sortable.create(frontmatterFormattingContainer, {
-			animation: 150,
-			handle: ".taskBoardSettingsFrontmatterFormattingContainerItemDragHandle",
-			ghostClass: "task-board-sortable-ghost",
-			chosenClass: "task-board-sortable-chosen",
-			dragClass: "task-board-sortable-drag",
-			dragoverBubble: true,
-			forceFallback: true,
-			fallbackClass: "task-board-sortable-fallback",
-			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: async () => {
-				const newOrder = Array.from(
-					frontmatterFormattingContainer.children
-				)
-					.map((child, index) => {
-						const propertyName = child.getAttribute(
-							"data-frontmatterItem-name"
-						);
-						const frontmatterItem = frontmatterFormatting?.find(
-							(c) => c.property === propertyName
-						);
-						if (frontmatterItem) {
-							frontmatterItem.index = index + 1;
-							return frontmatterItem;
-						}
-						return null;
-					})
-					.filter(
-						(
-							frontmatterItem
-						): frontmatterItem is frontmatterFormatting =>
-							frontmatterItem !== null
-					);
-
-				this.plugin.settings.data.globalSettings.frontmatterFormatting =
-					newOrder;
-			},
-		});
-
-		const renderFrontmatterFormattingItems = () => {
-			if (!frontmatterFormatting) return;
-
-			frontmatterFormattingContainer.empty(); // Clear existing rendered rows
-
-			frontmatterFormatting
-				.sort((a, b) => a.index - b.index)
-				.forEach((sortfrontmatterItem, index) => {
-					const row = frontmatterFormattingContainer.createDiv({
-						cls: "taskBoardSettingsFrontmatterFormattingContainerItemRow",
-						attr: {
-							"data-frontmatterItem-name":
-								sortfrontmatterItem.property,
-						},
-					});
-
-					new Setting(row)
-						.setClass(
-							"taskBoardSettingsFrontmatterFormattingContainerItem"
-						)
-						.addButton((drag) =>
-							drag
-								.setTooltip("Hold and drag")
-								.setIcon("grip-horizontal")
-								.setClass(
-									"taskBoardSettingsFrontmatterFormattingContainerItemDragHandle"
-								)
-						)
-						.addButton((button) => {
-							button.setButtonText(sortfrontmatterItem.property);
-						})
-						.addText((text) => {
-							text.setValue(sortfrontmatterItem.key)
-								.setPlaceholder(t("Enter property key"))
-								.onChange((value) => {
-									this.plugin.settings.data.globalSettings.frontmatterFormatting[
-										index
-									].key = value.trim();
-								});
-						});
-					// .addButton((del) =>
-					// 	del
-					// 		.setButtonText("delete")
-					// 		.setIcon("trash")
-					// 		.setClass(
-					// 			"taskBoardSettingsFrontmatterFormattingContainerItemDeleteCriterion"
-					// 		)
-					// 		.setTooltip(t("remove-sort-criterion"))
-					// 		.onClick(async () => {
-					// 			if (
-					// 				this.plugin.settings.data.globalSettings
-					// 					.frontmatterFormatting
-					// 			) {
-					// 				this.plugin.settings.data.globalSettings.frontmatterFormatting.splice(
-					// 					index,
-					// 					1
-					// 				);
-					// 				this.saveSettings();
-					// 				renderFrontmatterFormattingItems(); // Re-render after delete
-					// 			}
-					// 		})
-					// );
-				});
-		};
-
-		// Initial render
-		renderFrontmatterFormattingItems();
-
-		// const addNewSortingButton = frontmatterFormattingContainer.createEl(
-		// 	"button",
-		// 	{
-		// 		text: t("add-new-sorting-criterion"),
-		// 		cls: "configureColumnSortingModalHomeAddSortingBtn",
-		// 	}
-		// );
-		// addNewSortingButton.addEventListener("click", async () => {
-		// 	const newfrontmatterItem: frontmatterFormatting = {
-		// 		index:
-		// 			(this.plugin.settings.data.globalSettings
-		// 				.frontmatterFormatting?.length || 0) + 1,
-		// 		property: "",
-		// 		key: "",
-		// 	};
-		// 	if (
-		// 		!this.plugin.settings.data.globalSettings.frontmatterFormatting
-		// 	) {
-		// 		this.plugin.settings.data.globalSettings.frontmatterFormatting =
-		// 			[];
-		// 	}
-		// 	this.plugin.settings.data.globalSettings.frontmatterFormatting.push(
-		// 		newfrontmatterItem
-		// 	);
-		// 	renderFrontmatterFormattingItems();
-		// });
-	}
-
-	private renderMapViewTabSettings(contentEl: HTMLElement) {
-		const {
-			background,
-			mapOrientation,
-			optimizedRender,
-			arrowDirection,
-			animatedEdges,
-			scrollAction,
-			showMinimap,
-			renderVisibleNodes,
-			edgeType,
-		} = this.globalSettings?.mapView!;
-
-		new Setting(contentEl)
-			.setName(
-				createFragmentWithHTML("<b>" + t("dfp-methodology") + "</b>")
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-tag-color"))
+					.setCta()
+					.onClick(async () => {
+						const newTag = {
+							name: "",
+							color: "rgba(255, 0, 0, 1)",
+							priority: this.globalSettings!.tagColors.length + 1,
+						};
+						this.globalSettings!.tagColors.push(newTag);
+						await this.saveSettings();
+						renderTagColors();
+					}),
 			)
-			.setDesc(
-				createFragmentWithHTML(
-					t("dfp-methodology-description-1") +
-						"<br />" +
-						t("dfp-methodology-description-2") +
-						" <a href='https://github.com/tu2-atmanand/Task-Board/discussions/400'>" +
-						t("dfp-methodology") +
-						"." +
-						"</a>"
-				)
-			);
+			.setClass("task-board-settingtab-add-tag-color-btn");
 
-		new Setting(contentEl)
-			.setName(t("render-only-visible-nodes"))
-			.setDesc(
-				createFragmentWithHTML(
-					"<ul>" +
-						"<li>" +
-						t("render-only-visible-nodes-description-1") +
-						"</li>" +
-						"<li>" +
-						t("render-only-visible-nodes-description-2") +
-						"</li>" +
-						"</ul>"
-				)
-			)
-			.addToggle((toggle) =>
-				toggle.setValue(renderVisibleNodes).onChange(async (value) => {
-					this.globalSettings!.mapView.renderVisibleNodes = value;
-					await this.saveSettings();
-				})
-			);
+		// new Setting(contentEl)
+		// 	.setName(t("live-editor-and-reading-mode"))
+		// 	.setHeading();
 
-		new Setting(contentEl).setName(t("controls")).setHeading();
-
-		new Setting(contentEl)
-			.setName(t("mouse-wheel-behaviour"))
-			.setDesc(t("mouse-wheel-behaviour-description"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[mapViewScrollAction.zoom]: t("zoom"),
-						[mapViewScrollAction.pan]: t("pan"),
-					})
-					.setValue(scrollAction)
-					.onChange(async (value) => {
-						this.globalSettings!.mapView.scrollAction =
-							value as mapViewScrollAction;
-						await this.saveSettings();
-					})
-			);
-
-		new Setting(contentEl).setName(t("appearance")).setHeading();
-
-		new Setting(contentEl)
-			.setName(t("canvas-background"))
-			.setDesc(t("canvas-background-description"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[mapViewBackgrounVariantTypes.none]: t("default"),
-						[mapViewBackgrounVariantTypes.transparent]:
-							t("transparent"),
-						[mapViewBackgrounVariantTypes.dots]: t("dots"),
-						[mapViewBackgrounVariantTypes.lines]: t("lines"),
-						[mapViewBackgrounVariantTypes.cross]: t("cross"),
-					})
-					.setValue(background)
-					.onChange(async (value) => {
-						this.globalSettings!.mapView.background =
-							value as mapViewBackgrounVariantTypes;
-						await this.saveSettings();
-					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("map-orientation"))
-			.setDesc(t("map-orientation-description"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[mapViewNodeMapOrientation.horizontal]: t("horizontal"),
-						[mapViewNodeMapOrientation.vertical]: t("vertical"),
-					})
-					.setValue(mapOrientation)
-					.onChange(async (value) => {
-						this.globalSettings!.mapView.mapOrientation =
-							value as mapViewNodeMapOrientation;
-						await this.saveSettings();
-					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("link-arrow-direction"))
-			.setDesc(t("link-arrow-direction-description"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[mapViewArrowDirection.childToParent]:
-							t("child-to-parent"),
-						[mapViewArrowDirection.parentToChild]:
-							t("parent-to-child"),
-						[mapViewArrowDirection.bothWay]: t("both-way"),
-					})
-					.setValue(arrowDirection)
-					.onChange(async (value) => {
-						this.globalSettings!.mapView.arrowDirection =
-							value as mapViewArrowDirection;
-						await this.saveSettings();
-					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("link-style"))
-			.setDesc(t("link-style-description"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[mapViewEdgeType.straight]: t("straight"),
-						[mapViewEdgeType.step]: t("step"),
-						[mapViewEdgeType.smoothstep]: t("smooth-step"),
-						[mapViewEdgeType.bezier]: t("curved"),
-					})
-					.setValue(edgeType)
-					.onChange(async (value) => {
-						this.globalSettings!.mapView.edgeType =
-							value as mapViewEdgeType;
-						await this.saveSettings();
-					})
-			);
-
-		new Setting(contentEl)
-			.setName(t("animate-links"))
-			.setDesc(t("animate-links-description"))
-			.addToggle((toggle) =>
-				toggle.setValue(animatedEdges).onChange(async (value) => {
-					this.globalSettings!.mapView.animatedEdges = value;
-					await this.saveSettings();
-				})
-			);
-
-		new Setting(contentEl)
-			.setName(t("show-minimap"))
-			.setDesc(t("show-minimap-description"))
-			.addToggle((toggle) =>
-				toggle.setValue(showMinimap).onChange(async (value) => {
-					this.globalSettings!.mapView.showMinimap = value;
-					await this.saveSettings();
-				})
-			);
+		// TODO : In the future, will add more setting like gutters and all. FOr these features, more settings will be added here.
 	}
 
-	// Function to render "Automation" tab content
-	private renderAutomationTabSettings(contentEl: HTMLElement) {
+	// Function to render "All properties" tab content
+	private renderPropertiesTabSettings(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
-		// 	text: t("automation-section-description"),
+		// 	text: t("board-ui-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
 		// });
 
-		const {
-			autoAddUniversalDate,
-			autoAddCreatedDate,
-			compatiblePlugins,
-			dailyNotesPluginComp,
-			quickAddPluginDefaultChoice,
-			notificationService,
-			frontmatterPropertyForReminder,
-			boundTaskCompletionToChildTasks,
-		} = this.globalSettings!;
+		// // Setting for Plugin Language
+		// new Setting(contentEl)
+		// 	.setName(t("plugin-language"))
+		// 	.setDesc(t("plugin-language-info"))
+		// 	.addDropdown((dropdown) => {
+		// 		// Dynamically add options from langCodes
+		// 		Object.keys(langCodes).forEach((key) => {
+		// 			dropdown.addOption(key, langCodes[key]); // key as value, langCodes[key] as label
+		// 		});
 
+		// 		// Set the initial value (assuming lang is the current selected language)
+		// 		dropdown.setValue(lang as string);
+
+		// 		// On dropdown value change, update the global settings
+		// 		dropdown.onChange(async (value) => {
+		// 			this.globalSettings!.lang = value;
+		// 			await this.saveSettings();
+		// 		});
+		// 	});
+
+		const { hiddenTaskProperties } = this.globalSettings!;
+
+		// Setting for hiding specific task properties in Live Editor and Reading mode
 		new Setting(contentEl)
-			.setName(t("edit-button-mode"))
-			.setDesc(t("edit-button-mode-info"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[EditButtonMode.Modal]: t(
-							"use-edit-task-modal-feature"
-						),
-						[EditButtonMode.View]: t(
-							"use-edit-task-window-feature"
-						),
-						[EditButtonMode.TasksPluginModal]:
-							t("tasks-plugin-modal"),
-						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
-						[EditButtonMode.NoteInSplit]: t(
-							"open-note-in-right-split"
-						),
-						[EditButtonMode.NoteInWindow]: t(
-							"open-note-in-new-window"
-						),
-						[EditButtonMode.NoteInHover]: t(
-							"open-note-in-hover-preview"
-						),
-					})
-					.setValue(this.globalSettings!.editButtonAction)
-					.onChange(async (value) => {
-						this.globalSettings!.editButtonAction =
-							value as EditButtonMode;
-						await this.saveSettings();
-					})
-			);
+			.setName(t("hide-specific-properties-in-notes"))
+			.setDesc(t("hide-specific-properties-in-notes-description"))
+			.setClass("taskboard-hidden-properties-setting");
 
-		new Setting(contentEl)
-			.setName(t("double-click-card-action"))
-			.setDesc(t("double-click-card-action-info"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[EditButtonMode.None]: t("none"),
-						[EditButtonMode.Modal]: t(
-							"use-edit-task-window-feature"
-						),
-						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
-						[EditButtonMode.NoteInSplit]: t(
-							"open-note-in-right-split"
-						),
-						[EditButtonMode.NoteInWindow]: t(
-							"open-note-in-new-window"
-						),
-						[EditButtonMode.NoteInHover]: t(
-							"open-note-in-hover-preview"
-						),
-					})
-					.setValue(this.globalSettings!.doubleClickCardToEdit)
-					.onChange(async (value) => {
-						this.globalSettings!.doubleClickCardToEdit =
-							value as EditButtonMode;
-						await this.saveSettings();
-					})
-			);
+		// Create a container for checkboxes
+		const checkboxContainer = contentEl.createDiv(
+			"taskboard-hidden-properties-container",
+		);
 
-		new Setting(contentEl)
-			.setName(t("restrict-task-completion-to-child-tasks-and-sub-tasks"))
-			.setDesc(t("restrict-task-completion-to-child-tasks-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(boundTaskCompletionToChildTasks)
-					.onChange(async (value) => {
-						this.globalSettings!.boundTaskCompletionToChildTasks =
-							value;
-						await this.saveSettings();
-					})
-			);
+		// Create checkboxes for each hideable property
+		Object.values(taskPropertiesNames).forEach((property) => {
+			const displayName = this.getPropertyDisplayName(property);
 
-		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
-		new Setting(contentEl)
-			.setName(t("auto-add-universal-date-to-tasks"))
-			.setDesc(t("auto-add-universal-date-to-tasks-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(autoAddUniversalDate)
-					.onChange(async (value) => {
-						this.globalSettings!.autoAddUniversalDate = value;
-						await this.saveSettings();
-					})
-			);
-
-		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
-		new Setting(contentEl)
-			.setName(t("auto-add-created-date-to-tasks"))
-			.setDesc(t("auto-add-created-date-to-tasks-desc"))
-			.addToggle((toggle) =>
-				toggle.setValue(autoAddCreatedDate).onChange(async (value) => {
-					this.globalSettings!.autoAddCreatedDate = value;
-					await this.saveSettings();
-				})
-			);
-
-		// contentEl.createEl("h4", { text: t("compatible-plugins") });
-		new Setting(contentEl).setName(t("compatible-plugins")).setHeading();
-
-		// Setting for Auto Adding Due Date from the Daily Notes file name.
-		new Setting(contentEl)
-			.setName(t("daily-notes") + t("plugin-compatibility"))
-			.setDesc(t("daily-notes-plugin-compatibility"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(dailyNotesPluginComp)
-					.onChange(async (value) => {
-						this.globalSettings!.dailyNotesPluginComp = value;
-						await this.saveSettings();
-					})
-			);
-
-		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
-		new Setting(contentEl)
-			.setName("Day Planner " + t("plugin-compatibility"))
-			.setDesc(t("day-planner-plugin-compatibility"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(compatiblePlugins.dayPlannerPlugin)
-					.onChange(async (value) => {
-						this.globalSettings!.compatiblePlugins.dayPlannerPlugin =
-							value;
-						await this.saveSettings();
-					})
-			);
-
-		// Setting for choosing the default QuickAdd plugin run command
-		const communityPlugins = new CommunityPlugins(this.plugin);
-		if (!communityPlugins.isQuickAddPluginEnabled()) {
-			this.globalSettings!.compatiblePlugins.quickAddPlugin = false;
-			this.saveSettings();
-		}
-		new Setting(contentEl)
-			.setName("QuickAdd " + t("plugin-compatibility"))
-			.setDesc(t("quickadd-plugin-compatibility-description"))
-			.setTooltip(
-				t("Install and enable QuickAdd plugin to use this setting.")
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(
-						compatiblePlugins.quickAddPlugin &&
-							communityPlugins.isQuickAddPluginEnabled()
-					)
-					.onChange(async (value) => {
-						if (
-							this.globalSettings &&
-							!communityPlugins.isQuickAddPluginEnabled()
-						) {
-							new Notice(t("quickadd-plugin-not-enabled"));
-							this.globalSettings.compatiblePlugins.quickAddPlugin =
-								false;
-						} else if (this.globalSettings) {
-							this.globalSettings.compatiblePlugins.quickAddPlugin =
-								value;
+			if (displayName) {
+				const checkboxSetting = new Setting(checkboxContainer)
+					.setName(displayName)
+					.setClass("taskboard-property-checkbox-setting")
+					.addToggle((toggle) => {
+						const isSelected =
+							hiddenTaskProperties.includes(property);
+						toggle.setValue(isSelected).onChange(async (value) => {
+							if (value) {
+								// Add property if not already included
+								if (
+									!this.globalSettings!.hiddenTaskProperties.includes(
+										property,
+									)
+								) {
+									this.globalSettings!.hiddenTaskProperties.push(
+										property,
+									);
+								}
+							} else {
+								// Remove property
+								this.globalSettings!.hiddenTaskProperties =
+									this.globalSettings!.hiddenTaskProperties.filter(
+										(p) => p !== property,
+									);
+							}
+							await this.saveSettings();
 
 							this.openReloadNoticeIfNeeded();
-						}
+						});
+					});
 
-						await this.saveSettings();
-					})
-			)
-			.setDisabled(!communityPlugins.isQuickAddPluginEnabled());
+				// Style the checkbox setting to be more compact
+				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+			}
+		});
 
 		new Setting(contentEl)
-			.setName(t("default-quickadd-choice"))
-			.setDesc(t("default-quickadd-choice-description"))
-			.setTooltip(t("Enable the above setting to use this setting."))
-			.addText((text) => {
-				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.quickAddPluginDefaultChoice = value;
+			.setName(t("custom-statuses"))
+			.setDesc(t("custom-statuses-info"));
+
+		// Container for custom statuses list
+		const customStatusesContainer = contentEl.createDiv({
+			cls: "custom-statuses-container",
+		});
+
+		const renderCustomStatuses = () => {
+			customStatusesContainer.empty(); // Clear existing rendered rows
+
+			const customStatuses =
+				this.plugin.settings.data.globalSettings.customStatuses;
+
+			if (!customStatuses || customStatuses.length === 0) {
+				customStatusesContainer.createDiv({
+					cls: "custom-statuses-empty-message",
+					text: t("no-custom-statuses-configured"),
+				});
+				return;
+			}
+
+			customStatuses.forEach((status, index) => {
+				const row = customStatusesContainer.createDiv({
+					cls: "custom-status-row",
 				});
 
-				const inputEl = text.inputEl;
-				const suggestionContent = getQuickAddPluginChoices(
-					this.app,
-					communityPlugins.quickAddPlugin
-				);
-				const onSelectCallback = async (selectedChoiceName: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.quickAddPluginDefaultChoice =
-							selectedChoiceName;
-					}
-					text.setValue(selectedChoiceName);
-					await this.saveSettings();
+				const statusInfoContainer = row.createDiv({
+					cls: "custom-status-info-container",
+				});
+
+				// Status Name
+				const statusInfoName = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-name")}:`,
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-value",
+					text: status.name,
+				});
+
+				// Status Symbol
+				const statusInfoSymbol = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-symbol")}:`,
+				});
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-value",
+					text: `[${status.symbol}]`,
+				});
+
+				// Next Status Symbol
+				const statusInfoAction = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusInfoAction.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("status-action")}:`,
+				});
+				statusInfoAction.createDiv({
+					cls: "custom-status-field",
+					text: `When you will click on the checkbox [${status.symbol}] it will change to [${status.nextStatusSymbol}]`,
+				});
+
+				const rightSideContainer = row.createDiv({
+					cls: "custom-status-right-side",
+				});
+
+				// Status Type
+				rightSideContainer.createDiv({
+					cls: `custom-status-field-status-pill${
+						status.type === statusTypeNames.DONE ? " done" : ""
+					}${
+						status.type === statusTypeNames.CANCELLED
+							? " cancelled"
+							: ""
+					}`,
+					text: status.type,
+				});
+
+				// Buttons container
+				const buttonsContainer = rightSideContainer.createDiv({
+					cls: "custom-status-buttons",
+				});
+
+				// Edit button
+				const editButton = buttonsContainer.createEl("span", {
+					cls: "edit-btn",
+					text: t("edit"),
+					title: t("edit"),
+				});
+				setIcon(editButton, "pencil");
+				editButton.onclick = async () => {
+					const modal = new CustomStatusModal(
+						this.plugin,
+						status,
+						false,
+					);
+					modal.onClose = async () => {
+						if (modal.saved) {
+							const updatedStatus = modal.statusConfiguration();
+							const customStatus: CustomStatus = {
+								symbol: updatedStatus.symbol,
+								name: updatedStatus.name,
+								nextStatusSymbol:
+									updatedStatus.nextStatusSymbol === ""
+										? " "
+										: updatedStatus.nextStatusSymbol,
+								availableAsCommand:
+									updatedStatus.availableAsCommand,
+								type: updatedStatus.type,
+							};
+							this.plugin.settings.data.globalSettings!.customStatuses[
+								index
+							] = customStatus;
+							await this.saveSettings();
+							renderCustomStatuses();
+						}
+					};
+					modal.open();
 				};
 
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app
-				);
-			})
-			.setDisabled(
-				!this.globalSettings!.compatiblePlugins.quickAddPlugin
-			);
-
-		new Setting(contentEl)
-			.setName(t("push-notification-compatibility"))
-			.setDesc(t("push-notification-compatibility-description"))
-			.addDropdown((dropdown) => {
-				dropdown.addOption(NotificationService.None, t("none"));
-				dropdown.addOption(
-					NotificationService.ReminderPlugin,
-					"Reminder " + t("plugin")
-				);
-				// dropdown.addOption(
-				// 	NotificationService.NotifianApp,
-				// 	"Notifian " + t("app")
-				// );
-				dropdown.addOption(
-					NotificationService.ObsidApp,
-					"Obsi " + t("app")
-				);
-
-				dropdown.setValue(notificationService as string);
-				dropdown.onChange(async (value) => {
-					this.globalSettings!.notificationService = value;
-					await this.saveSettings();
+				// Delete button
+				const deleteButton = buttonsContainer.createEl("span", {
+					cls: "delete-btn",
+					text: t("delete"),
+					title: t("delete"),
 				});
+				setIcon(deleteButton, "trash");
+				deleteButton.onclick = async () => {
+					this.globalSettings!.customStatuses.splice(index, 1);
+					await this.saveSettings();
+					renderCustomStatuses();
+				};
 			});
+		};
 
+		// Initial render
+		renderCustomStatuses();
+
+		const isTasksPluginEnabled =
+			this.plugin.settings.data.globalSettings.compatiblePlugins
+				.tasksPlugin;
+		// Add "Add New Status" button
 		new Setting(contentEl)
-			.setName(t("frontmatter-property-for-reminder"))
-			.setDesc(t("frontmatter-property-for-reminder-description"))
-			.addText((text) => {
-				text.setValue(frontmatterPropertyForReminder)
-					.onChange((value) => {
-						if (this.globalSettings)
-							this.globalSettings.frontmatterPropertyForReminder =
-								value;
-						this.saveSettings();
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("import-from-tasks-plugin"))
+					.setClass("import-from-tasks-plugin-btn")
+					.setCta()
+					.onClick(async () => {
+						const flag = await fetchTasksPluginCustomStatuses(
+							this.plugin,
+						);
+						if (flag) {
+							renderCustomStatuses();
+						}
 					})
-					.setPlaceholder("eg.: reminder");
+					.setDisabled(!isTasksPluginEnabled),
+			)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-new-status"))
+					.setCta()
+					.onClick(async () => {
+						const newStatus: CustomStatus = {
+							symbol: "",
+							name: "",
+							nextStatusSymbol: "",
+							availableAsCommand: false,
+							type: StatusType.TODO,
+						};
+						const modal = new CustomStatusModal(
+							this.plugin,
+							newStatus,
+							false,
+						);
+						modal.onClose = async () => {
+							if (modal.saved) {
+								const statusConfig =
+									modal.statusConfiguration();
+								const customStatus: CustomStatus = {
+									symbol: statusConfig.symbol,
+									name: statusConfig.name,
+									nextStatusSymbol:
+										statusConfig.nextStatusSymbol,
+									availableAsCommand:
+										statusConfig.availableAsCommand,
+									type: statusConfig.type,
+								};
+								if (!this.globalSettings!.customStatuses) {
+									this.globalSettings!.customStatuses = [];
+								}
+								this.globalSettings!.customStatuses.push(
+									customStatus,
+								);
+								await this.saveSettings();
+								renderCustomStatuses();
+							}
+						};
 
-				// const inputEl = text.inputEl;
-				// const suggestionContent = getFrontmatterPropertyNames(
-				// 	this.plugin
-				// );
-				// const onSelectCallback = async (selectedPath: string) => {
-				// 	if (this.globalSettings) {
-				// 		this.globalSettings.quickAddPluginDefaultChoice =
-				// 			selectedPath;
-				// 	}
-				// 	text.setValue(selectedPath);
-				// 	await this.saveSettings();
-				// };
-
-				// new MultiSuggest(
-				// 	inputEl,
-				// 	new Set(suggestionContent),
-				// 	onSelectCallback,
-				// 	this.app
-				// );
-			});
+						modal.open();
+					}),
+			);
 	}
 
 	// Function to render "Task formats" tab content
-	private renderFormatsTabSettings(contentEl: HTMLElement) {
+	private renderInlineTasksTabSettings(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("format-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
 		// });
 
 		const {
-			universalDateFormat,
-			defaultStartTime,
 			taskPropertyFormat,
-			// taskCompletionDateTimePattern,
-			firstDayOfWeek,
-			taskCompletionInLocalTime,
-			taskCompletionShowUtcOffset,
+			preDefinedNote,
+			archivedTasksFilePath,
+			showFrontmatterTagsOnCards,
 		} = this.globalSettings!;
 
 		// Create the live preview element
@@ -1981,11 +1609,11 @@ export class SettingsManager {
 			// Use Obsidian's MarkdownUIRenderer to render markdown
 			// @ts-ignore
 			MarkdownUIRenderer.renderSubtaskText(
-				this.plugin.app,
+				this.app,
 				markdown,
 				markdownPreviewEl,
 				"",
-				this.plugin.view
+				this.plugin.view,
 			);
 		};
 		const updatePreview = () => {
@@ -2081,19 +1709,19 @@ export class SettingsManager {
 			.addDropdown((dropdown) => {
 				dropdown.addOption(
 					taskPropertyFormatOptions.default,
-					t("default")
+					t("default"),
 				);
 				dropdown.addOption(
 					taskPropertyFormatOptions.tasksPlugin,
-					"Tasks " + t("plugin")
+					"Tasks " + t("plugin"),
 				);
 				dropdown.addOption(
 					taskPropertyFormatOptions.dataviewPlugin,
-					"Dataview " + t("plugin")
+					"Dataview " + t("plugin"),
 				);
 				dropdown.addOption(
 					taskPropertyFormatOptions.obsidianNative,
-					"Obsidian " + t("native")
+					"Obsidian " + t("native"),
 				);
 
 				dropdown.setValue(taskPropertyFormat as string);
@@ -2105,6 +1733,793 @@ export class SettingsManager {
 					this.openReloadNoticeIfNeeded();
 				});
 			});
+
+		// Initialize the preview on page load
+		updatePreview();
+
+		new Setting(contentEl)
+			.setName(t("default-note-for-adding-new-tasks"))
+			.setDesc(t("default-note-for-new-tasks-description"))
+			.addText((text) => {
+				text.setValue(preDefinedNote).onChange((value) => {
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.preDefinedNote = normalized;
+					}
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFileSuggestions(this.app);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.preDefinedNote = selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app,
+				);
+			});
+
+		// Setting for choosing the default file to archive tasks
+		new Setting(contentEl)
+			.setName(t("file-for-archived-tasks"))
+			.setDesc(t("file-for-archived-tasks-description"))
+			.addText((text) => {
+				text.setValue(archivedTasksFilePath).onChange((value) => {
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.archivedTasksFilePath = normalized;
+					}
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getFileSuggestions(this.app);
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.archivedTasksFilePath =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app,
+				);
+			});
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("show-note-frontmatter-tags-in-the-card-header"))
+			.setDesc(t("show-note-frontmatter-tags-in-the-card-header-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(showFrontmatterTagsOnCards)
+					.onChange(async (value) => {
+						this.globalSettings!.showFrontmatterTagsOnCards = value;
+						await this.saveSettings();
+					}),
+			);
+	}
+
+	private renderTBNoteTabSettings(contentEl: HTMLElement) {
+		const {
+			taskNoteIdentifierTag,
+			taskNoteDefaultLocation,
+			archivedTBNotesFolderPath,
+			frontmatterFormatting,
+		} = this.globalSettings!;
+
+		new Setting(contentEl)
+			.setName(t("task-note-vs-tbnote"))
+			.setDesc(
+				createFragmentWithHTML(
+					"<ul>" +
+						"<li><b>" +
+						t("task-note") +
+						":</b> " +
+						t("task-note-description") +
+						"</li>" +
+						"<li><b>" +
+						t("tbnote") +
+						":</b> " +
+						t("tbnote-description") +
+						" <a href='https://github.com/tu2-atmanand/Task-Board/issues/33'>" +
+						t("tbnote-development-ticker") +
+						"</a></li>" +
+						"</ul>",
+				),
+			);
+
+		new Setting(contentEl)
+			.setName(t("task-note-identifier-tag"))
+			.setDesc(t("task-note-identifier-tag-description"))
+			.addText((text) => {
+				text.setValue(taskNoteIdentifierTag).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.taskNoteIdentifierTag =
+							value.startsWith("#")
+								? value.replace("#", "")
+								: value;
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., #taskNote";
+			});
+
+		const folderSuggestions = getFolderSuggestions(this.app);
+
+		// Setting for choosing the default location for task notes
+		new Setting(contentEl)
+			.setName(t("default-location-for-new-task-notes"))
+			.setDesc(t("default-location-for-new-task-notes-description"))
+			.addText((text) => {
+				text.setValue(taskNoteDefaultLocation).onChange((value) => {
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.taskNoteDefaultLocation =
+							normalized;
+					}
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., Task Notes/";
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.taskNoteDefaultLocation =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(folderSuggestions),
+					onSelectCallback,
+					this.app,
+				);
+			});
+
+		// Setting for choosing the default file to archive tasks
+		new Setting(contentEl)
+			.setName(t("folder-for-archived-task-notes"))
+			.setDesc(t("folder-for-archived-task-notes-description"))
+			.addText((text) => {
+				text.setValue(archivedTBNotesFolderPath).onChange((value) => {
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.archivedTBNotesFolderPath =
+							normalized;
+					}
+				});
+
+				const inputEl = text.inputEl;
+				inputEl.placeholder = "e.g., TaskBoard/TaskNotes";
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.archivedTBNotesFolderPath =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(folderSuggestions),
+					onSelectCallback,
+					this.app,
+				);
+			});
+
+		new Setting(contentEl)
+			.setName(t("frontmatter-formatting"))
+			.setDesc(t("frontmatter-formatting-description"));
+
+		const frontmatterFormattingContainer = contentEl.createDiv({
+			cls: "taskBoardSettingsFrontmatterFormattingContainer",
+		});
+
+		// Initialize Sortable.js
+		Sortable.create(frontmatterFormattingContainer, {
+			animation: 150,
+			handle: ".taskBoardSettingsFrontmatterFormattingContainerItemDragHandle",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: async () => {
+				const newOrder = Array.from(
+					frontmatterFormattingContainer.children,
+				)
+					.map((child, index) => {
+						const propertyName = child.getAttribute(
+							"data-frontmatterItem-name",
+						);
+						const frontmatterItem = frontmatterFormatting?.find(
+							(c) => c.property === propertyName,
+						);
+						if (frontmatterItem) {
+							frontmatterItem.index = index + 1;
+							return frontmatterItem;
+						}
+						return null;
+					})
+					.filter(
+						(
+							frontmatterItem,
+						): frontmatterItem is frontmatterFormatting =>
+							frontmatterItem !== null,
+					);
+
+				this.plugin.settings.data.globalSettings.frontmatterFormatting =
+					newOrder;
+			},
+		});
+
+		const renderFrontmatterFormattingItems = () => {
+			if (!frontmatterFormatting) return;
+
+			frontmatterFormattingContainer.empty(); // Clear existing rendered rows
+
+			frontmatterFormatting
+				.sort((a, b) => a.index - b.index)
+				.forEach((sortfrontmatterItem, index) => {
+					const row = frontmatterFormattingContainer.createDiv({
+						cls: "taskBoardSettingsFrontmatterFormattingContainerItemRow",
+						attr: {
+							"data-frontmatterItem-name":
+								sortfrontmatterItem.property,
+						},
+					});
+
+					new Setting(row)
+						.setClass(
+							"taskBoardSettingsFrontmatterFormattingContainerItem",
+						)
+						.addButton((drag) =>
+							drag
+								.setTooltip("Hold and drag")
+								.setIcon("grip-horizontal")
+								.setClass(
+									"taskBoardSettingsFrontmatterFormattingContainerItemDragHandle",
+								),
+						)
+						.addButton((button) => {
+							button.setButtonText(sortfrontmatterItem.property);
+						})
+						.addText((text) => {
+							text.setValue(sortfrontmatterItem.key)
+								.setPlaceholder(t("Enter property key"))
+								.onChange((value) => {
+									this.plugin.settings.data.globalSettings.frontmatterFormatting[
+										index
+									].key = value.trim();
+								});
+						});
+					// .addButton((del) =>
+					// 	del
+					// 		.setButtonText("delete")
+					// 		.setIcon("trash")
+					// 		.setClass(
+					// 			"taskBoardSettingsFrontmatterFormattingContainerItemDeleteCriterion"
+					// 		)
+					// 		.setTooltip(t("remove-sort-criterion"))
+					// 		.onClick(async () => {
+					// 			if (
+					// 				this.plugin.settings.data.globalSettings
+					// 					.frontmatterFormatting
+					// 			) {
+					// 				this.plugin.settings.data.globalSettings.frontmatterFormatting.splice(
+					// 					index,
+					// 					1
+					// 				);
+					// 				this.saveSettings();
+					// 				renderFrontmatterFormattingItems(); // Re-render after delete
+					// 			}
+					// 		})
+					// );
+				});
+		};
+
+		// Initial render
+		renderFrontmatterFormattingItems();
+
+		// const addNewSortingButton = frontmatterFormattingContainer.createEl(
+		// 	"button",
+		// 	{
+		// 		text: t("add-new-sorting-criterion"),
+		// 		cls: "configureColumnSortingModalHomeAddSortingBtn",
+		// 	}
+		// );
+		// addNewSortingButton.addEventListener("click", async () => {
+		// 	const newfrontmatterItem: frontmatterFormatting = {
+		// 		index:
+		// 			(this.plugin.settings.data.globalSettings
+		// 				.frontmatterFormatting?.length || 0) + 1,
+		// 		property: "",
+		// 		key: "",
+		// 	};
+		// 	if (
+		// 		!this.plugin.settings.data.globalSettings.frontmatterFormatting
+		// 	) {
+		// 		this.plugin.settings.data.globalSettings.frontmatterFormatting =
+		// 			[];
+		// 	}
+		// 	this.plugin.settings.data.globalSettings.frontmatterFormatting.push(
+		// 		newfrontmatterItem
+		// 	);
+		// 	renderFrontmatterFormattingItems();
+		// });
+	}
+
+	private renderMapViewTabSettings(contentEl: HTMLElement) {
+		const {
+			background,
+			mapOrientation,
+			arrowDirection,
+			animatedEdges,
+			scrollAction,
+			showMinimap,
+			renderVisibleNodes,
+			edgeType,
+		} = this.globalSettings?.mapView!;
+
+		new Setting(contentEl)
+			.setName(
+				createFragmentWithHTML("<b>" + t("dfp-methodology") + "</b>"),
+			)
+			.setDesc(
+				createFragmentWithHTML(
+					t("dfp-methodology-description-1") +
+						"<br />" +
+						t("dfp-methodology-description-2") +
+						" <a href='https://github.com/tu2-atmanand/Task-Board/discussions/400'>" +
+						t("dfp-methodology") +
+						"." +
+						"</a>",
+				),
+			);
+
+		new Setting(contentEl)
+			.setName(t("render-only-visible-nodes"))
+			.setDesc(
+				createFragmentWithHTML(
+					"<ul>" +
+						"<li>" +
+						t("render-only-visible-nodes-description-1") +
+						"</li>" +
+						"<li>" +
+						t("render-only-visible-nodes-description-2") +
+						"</li>" +
+						"</ul>",
+				),
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(renderVisibleNodes).onChange(async (value) => {
+					this.globalSettings!.mapView.renderVisibleNodes = value;
+					await this.saveSettings();
+				}),
+			);
+
+		new Setting(contentEl).setName(t("controls")).setHeading();
+
+		new Setting(contentEl)
+			.setName(t("mouse-wheel-behaviour"))
+			.setDesc(t("mouse-wheel-behaviour-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewScrollAction.zoom]: t("zoom"),
+						[mapViewScrollAction.pan]: t("pan"),
+					})
+					.setValue(scrollAction)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.scrollAction =
+							value as mapViewScrollAction;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl).setName(t("appearance")).setHeading();
+
+		new Setting(contentEl)
+			.setName(t("canvas-background"))
+			.setDesc(t("canvas-background-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewBackgrounVariantTypes.none]: t("default"),
+						[mapViewBackgrounVariantTypes.transparent]:
+							t("transparent"),
+						[mapViewBackgrounVariantTypes.dots]: t("dots"),
+						[mapViewBackgrounVariantTypes.lines]: t("lines"),
+						[mapViewBackgrounVariantTypes.cross]: t("cross"),
+					})
+					.setValue(background)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.background =
+							value as mapViewBackgrounVariantTypes;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("map-orientation"))
+			.setDesc(t("map-orientation-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewNodeMapOrientation.horizontal]: t("horizontal"),
+						[mapViewNodeMapOrientation.vertical]: t("vertical"),
+					})
+					.setValue(mapOrientation)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.mapOrientation =
+							value as mapViewNodeMapOrientation;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("link-arrow-direction"))
+			.setDesc(t("link-arrow-direction-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewArrowDirection.childToParent]:
+							t("child-to-parent"),
+						[mapViewArrowDirection.parentToChild]:
+							t("parent-to-child"),
+						[mapViewArrowDirection.bothWay]: t("both-way"),
+					})
+					.setValue(arrowDirection)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.arrowDirection =
+							value as mapViewArrowDirection;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("link-style"))
+			.setDesc(t("link-style-description"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[mapViewEdgeType.straight]: t("straight"),
+						[mapViewEdgeType.step]: t("step"),
+						[mapViewEdgeType.smoothstep]: t("smooth-step"),
+						[mapViewEdgeType.bezier]: t("curved"),
+					})
+					.setValue(edgeType)
+					.onChange(async (value) => {
+						this.globalSettings!.mapView.edgeType =
+							value as mapViewEdgeType;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("animate-links"))
+			.setDesc(t("animate-links-description"))
+			.addToggle((toggle) =>
+				toggle.setValue(animatedEdges).onChange(async (value) => {
+					this.globalSettings!.mapView.animatedEdges = value;
+					await this.saveSettings();
+				}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("show-minimap"))
+			.setDesc(t("show-minimap-description"))
+			.addToggle((toggle) =>
+				toggle.setValue(showMinimap).onChange(async (value) => {
+					this.globalSettings!.mapView.showMinimap = value;
+					await this.saveSettings();
+				}),
+			);
+	}
+
+	// Function to render "Automation" tab content
+	private renderAutomationTabSettings(contentEl: HTMLElement) {
+		// contentEl.createEl("p", {
+		// 	text: t("automation-section-description"),
+		// 	cls: "taskBoard-tab-section-desc",
+		// });
+
+		const {
+			autoAddUniversalDate,
+			autoAddCreatedDate,
+			compatiblePlugins,
+			dailyNotesPluginComp,
+			quickAddPluginDefaultChoice,
+			notificationService,
+			boundTaskCompletionToChildTasks,
+			autoAddCancelledDate,
+			autoAddCompletedDate,
+		} = this.globalSettings!;
+
+		new Setting(contentEl)
+			.setName(t("edit-button-mode"))
+			.setDesc(t("edit-button-mode-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.Modal]: t(
+							"use-edit-task-modal-feature",
+						),
+						[EditButtonMode.View]: t(
+							"use-edit-task-window-feature",
+						),
+						[EditButtonMode.TasksPluginModal]:
+							t("tasks-plugin-modal"),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split",
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window",
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview",
+						),
+					})
+					.setValue(this.globalSettings!.editButtonAction)
+					.onChange(async (value) => {
+						this.globalSettings!.editButtonAction =
+							value as EditButtonMode;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("double-click-card-action"))
+			.setDesc(t("double-click-card-action-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.None]: t("none"),
+						[EditButtonMode.Modal]: t(
+							"use-edit-task-window-feature",
+						),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split",
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window",
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview",
+						),
+					})
+					.setValue(this.globalSettings!.doubleClickCardToEdit)
+					.onChange(async (value) => {
+						this.globalSettings!.doubleClickCardToEdit =
+							value as EditButtonMode;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("restrict-task-completion-to-child-tasks-and-sub-tasks"))
+			.setDesc(t("restrict-task-completion-to-child-tasks-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(boundTaskCompletionToChildTasks)
+					.onChange(async (value) => {
+						this.globalSettings!.boundTaskCompletionToChildTasks =
+							value;
+						await this.saveSettings();
+					}),
+			);
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-universal-date-to-tasks"))
+			.setDesc(t("auto-add-universal-date-to-tasks-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(autoAddUniversalDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddUniversalDate = value;
+						await this.saveSettings();
+					}),
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-created-date"))
+			.setDesc(t("auto-add-created-date-desc"))
+			.addToggle((toggle) =>
+				toggle.setValue(autoAddCreatedDate).onChange(async (value) => {
+					this.globalSettings!.autoAddCreatedDate = value;
+					await this.saveSettings();
+				}),
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-completed-date"))
+			.setDesc(t("auto-add-completed-date-desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(autoAddCompletedDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddCompletedDate = value;
+						await this.saveSettings();
+					}),
+			);
+
+		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName(t("auto-add-cancelled-date"))
+			.setDesc(t("auto-add-cancelled-date-desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(autoAddCancelledDate)
+					.onChange(async (value) => {
+						this.globalSettings!.autoAddCancelledDate = value;
+						await this.saveSettings();
+					}),
+			);
+
+		// contentEl.createEl("h4", { text: t("compatible-plugins") });
+		new Setting(contentEl).setName(t("compatible-plugins")).setHeading();
+
+		// Setting for Auto Adding Due Date from the Daily Notes file name.
+		new Setting(contentEl)
+			.setName(t("daily-notes") + t("plugin-compatibility"))
+			.setDesc(t("daily-notes-plugin-compatibility"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(dailyNotesPluginComp)
+					.onChange(async (value) => {
+						this.globalSettings!.dailyNotesPluginComp = value;
+						await this.saveSettings();
+					}),
+			);
+
+		// Setting for Auto Adding Due Date while creating new Tasks through AddTaskModal
+		new Setting(contentEl)
+			.setName("Day Planner " + t("plugin-compatibility"))
+			.setDesc(t("day-planner-plugin-compatibility"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(compatiblePlugins.dayPlannerPlugin)
+					.onChange(async (value) => {
+						this.globalSettings!.compatiblePlugins.dayPlannerPlugin =
+							value;
+						await this.saveSettings();
+					}),
+			);
+
+		// Setting for choosing the default QuickAdd plugin run command
+		const communityPlugins = new CommunityPlugins(this.plugin);
+		if (!communityPlugins.isQuickAddPluginEnabled()) {
+			this.globalSettings!.compatiblePlugins.quickAddPlugin = false;
+			this.saveSettings();
+		}
+		new Setting(contentEl)
+			.setName("QuickAdd " + t("plugin-compatibility"))
+			.setDesc(t("quickadd-plugin-compatibility-description"))
+			.setTooltip(
+				t("Install and enable QuickAdd plugin to use this setting."),
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(
+						compatiblePlugins.quickAddPlugin &&
+							communityPlugins.isQuickAddPluginEnabled(),
+					)
+					.onChange(async (value) => {
+						if (
+							this.globalSettings &&
+							!communityPlugins.isQuickAddPluginEnabled()
+						) {
+							new Notice(t("quickadd-plugin-not-enabled"));
+							this.globalSettings.compatiblePlugins.quickAddPlugin = false;
+						} else if (this.globalSettings) {
+							this.globalSettings.compatiblePlugins.quickAddPlugin =
+								value;
+
+							this.openReloadNoticeIfNeeded();
+						}
+
+						await this.saveSettings();
+					}),
+			)
+			.setDisabled(!communityPlugins.isQuickAddPluginEnabled());
+
+		new Setting(contentEl)
+			.setName(t("default-quickadd-choice"))
+			.setDesc(t("default-quickadd-choice-description"))
+			.setTooltip(t("Enable the above setting to use this setting."))
+			.addText((text) => {
+				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {
+					if (this.globalSettings)
+						this.globalSettings.quickAddPluginDefaultChoice = value;
+				});
+
+				const inputEl = text.inputEl;
+				const suggestionContent = getQuickAddPluginChoices(
+					this.app,
+					communityPlugins.quickAddPlugin,
+				);
+				const onSelectCallback = async (selectedChoiceName: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.quickAddPluginDefaultChoice =
+							selectedChoiceName;
+					}
+					text.setValue(selectedChoiceName);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(suggestionContent),
+					onSelectCallback,
+					this.app,
+				);
+			})
+			.setDisabled(
+				!this.globalSettings!.compatiblePlugins.quickAddPlugin,
+			);
+
+		new Setting(contentEl)
+			.setName(t("push-notification-compatibility"))
+			.setDesc(t("push-notification-compatibility-description"))
+			.addDropdown((dropdown) => {
+				dropdown.addOption(NotificationService.None, t("none"));
+				dropdown.addOption(
+					NotificationService.ReminderPlugin,
+					"Reminder " + t("plugin"),
+				);
+				// dropdown.addOption(
+				// 	NotificationService.NotifianApp,
+				// 	"Notifian " + t("app")
+				// );
+				dropdown.addOption(
+					NotificationService.ObsidApp,
+					"Obsi " + t("app"),
+				);
+
+				dropdown.setValue(notificationService as string);
+				dropdown.onChange(async (value) => {
+					this.globalSettings!.notificationService = value;
+					await this.saveSettings();
+				});
+			});
+	}
+
+	// Function to render "Task formats" tab content
+	private renderFormatsTabSettings(contentEl: HTMLElement) {
+		// contentEl.createEl("p", {
+		// 	text: t("format-section-description"),
+		// 	cls: "taskBoard-tab-section-desc",
+		// });
+
+		const {
+			universalDateFormat,
+			defaultStartTime,
+			firstDayOfWeek,
+			taskCompletionInLocalTime,
+			taskCompletionShowUtcOffset,
+		} = this.globalSettings!;
 
 		new Setting(contentEl)
 			.setName(t("universal-date"))
@@ -2122,8 +2537,7 @@ export class SettingsManager {
 						this.globalSettings!.universalDate =
 							value as UniversalDateOptions;
 						await this.saveSettings();
-						updatePreview(); // Update the preview when the universal date changes
-					})
+					}),
 			);
 
 		// Text input for the universalDateFormat
@@ -2136,9 +2550,8 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.universalDateFormat = value;
 						await this.saveSettings();
-						updatePreview(); // Update the preview when the text pattern changes
 					})
-					.setPlaceholder("YYYY-MM-DD")
+					.setPlaceholder("YYYY-MM-DD"),
 			);
 
 		// Text input for the default startime
@@ -2152,7 +2565,7 @@ export class SettingsManager {
 						this.globalSettings!.defaultStartTime = value;
 						await this.saveSettings();
 					})
-					.setPlaceholder("eg.: 00:00 or 23:59")
+					.setPlaceholder("eg.: 00:00 or 23:59"),
 			);
 
 		// Text input for the taskCompletionDateTimePattern
@@ -2170,9 +2583,6 @@ export class SettingsManager {
 		// 			})
 		// 			.setPlaceholder("YYYY-MM-DD/HH:mm")
 		// 	);
-
-		// Initialize the preview on page load
-		updatePreview();
 
 		// Setting for firstDayOfWeek
 		new Setting(contentEl)
@@ -2210,7 +2620,7 @@ export class SettingsManager {
 					.onChange(async (value) => {
 						this.globalSettings!.taskCompletionInLocalTime = value;
 						await this.saveSettings();
-					})
+					}),
 			);
 
 		// Setting for taskCompletionShowUtcOffset
@@ -2224,7 +2634,7 @@ export class SettingsManager {
 						this.globalSettings!.taskCompletionShowUtcOffset =
 							value;
 						await this.saveSettings();
-					})
+					}),
 			);
 	}
 }
@@ -2248,7 +2658,7 @@ const paypalButton = (link: string): HTMLElement => {
 				fill: "#253B80",
 				d: "M46.211 6.749h-6.839a.95.95 0 0 0-.939.802l-2.766 17.537a.57.57 0 0 0 .564.658h3.265a.95.95 0 0 0 .939-.803l.746-4.73a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.972-1.142-2.696-1.746-4.985-1.746zM47 13.154c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583a.57.57 0 0 1 .563-.481h.473c1.235 0 2.4 0 3.002.704.359.42.469 1.044.332 1.906zM66.654 13.075h-3.275a.57.57 0 0 0-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .562.66h2.95a.95.95 0 0 0 .939-.803l1.77-11.209a.568.568 0 0 0-.561-.658zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.499.589.697 1.411.554 2.317zM84.096 13.075h-3.291a.954.954 0 0 0-.787.417l-4.539 6.686-1.924-6.425a.953.953 0 0 0-.912-.678h-3.234a.57.57 0 0 0-.541.754l3.625 10.638-3.408 4.811a.57.57 0 0 0 .465.9h3.287a.949.949 0 0 0 .781-.408l10.946-15.8a.57.57 0 0 0-.468-.895z",
 			},
-		})
+		}),
 	);
 	svg.appendChild(
 		createSvg("path", {
@@ -2256,7 +2666,7 @@ const paypalButton = (link: string): HTMLElement => {
 				fill: "#179BD7",
 				d: "M94.992 6.749h-6.84a.95.95 0 0 0-.938.802l-2.766 17.537a.569.569 0 0 0 .562.658h3.51a.665.665 0 0 0 .656-.562l.785-4.971a.95.95 0 0 1 .938-.803h2.164c4.506 0 7.105-2.18 7.785-6.5.307-1.89.012-3.375-.873-4.415-.971-1.142-2.694-1.746-4.983-1.746zm.789 6.405c-.373 2.454-2.248 2.454-4.062 2.454h-1.031l.725-4.583a.568.568 0 0 1 .562-.481h.473c1.234 0 2.4 0 3.002.704.359.42.468 1.044.331 1.906zM115.434 13.075h-3.273a.567.567 0 0 0-.562.481l-.145.916-.23-.332c-.709-1.029-2.289-1.373-3.867-1.373-3.619 0-6.709 2.741-7.311 6.586-.312 1.918.131 3.752 1.219 5.031 1 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .564.66h2.949a.95.95 0 0 0 .938-.803l1.771-11.209a.571.571 0 0 0-.565-.658zm-4.565 6.374c-.314 1.871-1.801 3.127-3.695 3.127-.949 0-1.711-.305-2.199-.883-.484-.574-.666-1.391-.514-2.301.297-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.501.589.699 1.411.554 2.317zM119.295 7.23l-2.807 17.858a.569.569 0 0 0 .562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536a.57.57 0 0 0-.562-.659h-3.16a.571.571 0 0 0-.562.482z",
 			},
-		})
+		}),
 	);
 	svg.appendChild(
 		createSvg("path", {
@@ -2264,7 +2674,7 @@ const paypalButton = (link: string): HTMLElement => {
 				fill: "#253B80",
 				d: "M7.266 29.154l.523-3.322-1.165-.027H1.061L4.927 1.292a.316.316 0 0 1 .314-.268h9.38c3.114 0 5.263.648 6.385 1.927.526.6.861 1.227 1.023 1.917.17.724.173 1.589.007 2.644l-.012.077v.676l.526.298a3.69 3.69 0 0 1 1.065.812c.45.513.741 1.165.864 1.938.127.795.085 1.741-.123 2.812-.24 1.232-.628 2.305-1.152 3.183a6.547 6.547 0 0 1-1.825 2c-.696.494-1.523.869-2.458 1.109-.906.236-1.939.355-3.072.355h-.73c-.522 0-1.029.188-1.427.525a2.21 2.21 0 0 0-.744 1.328l-.055.299-.924 5.855-.042.215c-.011.068-.03.102-.058.125a.155.155 0 0 1-.096.035H7.266z",
 			},
-		})
+		}),
 	);
 	svg.appendChild(
 		createSvg("path", {
@@ -2272,7 +2682,7 @@ const paypalButton = (link: string): HTMLElement => {
 				fill: "#179BD7",
 				d: "M23.048 7.667c-.028.179-.06.362-.096.55-1.237 6.351-5.469 8.545-10.874 8.545H9.326c-.661 0-1.218.48-1.321 1.132L6.596 26.83l-.399 2.533a.704.704 0 0 0 .695.814h4.881c.578 0 1.069-.42 1.16-.99l.048-.248.919-5.832.059-.32c.09-.572.582-.992 1.16-.992h.73c4.729 0 8.431-1.92 9.513-7.476.452-2.321.218-4.259-.978-5.622a4.667 4.667 0 0 0-1.336-1.03z",
 			},
-		})
+		}),
 	);
 	svg.appendChild(
 		createSvg("path", {
@@ -2280,7 +2690,7 @@ const paypalButton = (link: string): HTMLElement => {
 				fill: "#222D65",
 				d: "M21.754 7.151a9.757 9.757 0 0 0-1.203-.267 15.284 15.284 0 0 0-2.426-.177h-7.352a1.172 1.172 0 0 0-1.159.992L8.05 17.605l-.045.289a1.336 1.336 0 0 1 1.321-1.132h2.752c5.405 0 9.637-2.195 10.874-8.545.037-.188.068-.371.096-.55a6.594 6.594 0 0 0-1.017-.429 9.045 9.045 0 0 0-.277-.087z",
 			},
-		})
+		}),
 	);
 	svg.appendChild(
 		createSvg("path", {
@@ -2288,7 +2698,7 @@ const paypalButton = (link: string): HTMLElement => {
 				fill: "#253B80",
 				d: "M9.614 7.699a1.169 1.169 0 0 1 1.159-.991h7.352c.871 0 1.684.057 2.426.177a9.757 9.757 0 0 1 1.481.353c.365.121.704.264 1.017.429.368-2.347-.003-3.945-1.272-5.392C20.378.682 17.853 0 14.622 0h-9.38c-.66 0-1.223.48-1.325 1.133L.01 25.898a.806.806 0 0 0 .795.932h5.791l1.454-9.225 1.564-9.906z",
 			},
-		})
+		}),
 	);
 
 	a.appendChild(svg);

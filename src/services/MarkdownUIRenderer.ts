@@ -1,13 +1,14 @@
 // /src/services/MarkdownUIRenderer.ts
 
 import { App, Component, MarkdownRenderer } from "obsidian";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export type TextRenderer = (
 	app: App,
 	text: string,
 	element: HTMLSpanElement,
 	path: string,
-	obsidianComponent: Component | null // null is allowed here only for tests
+	obsidianComponent: Component | null, // null is allowed here only for tests
 ) => Promise<void>;
 
 /**
@@ -24,7 +25,7 @@ export type TextRenderer = (
  */
 export function createAndAppendElement<K extends keyof HTMLElementTagNameMap>(
 	tagName: K,
-	parentElement: HTMLElement
+	parentElement: HTMLElement,
 ): HTMLElementTagNameMap[K] {
 	// Maintenance note:
 	//  We don't use the Obsidian convenience function li.createEl() here, because we don't have it available
@@ -49,7 +50,7 @@ export class MarkdownUIRenderer {
 		text: string,
 		element: HTMLSpanElement,
 		path: string,
-		obsidianComponent: Component | null
+		obsidianComponent: Component | null,
 	) {
 		if (!obsidianComponent) {
 			return;
@@ -59,7 +60,7 @@ export class MarkdownUIRenderer {
 			text,
 			element,
 			path,
-			obsidianComponent
+			obsidianComponent,
 		);
 	}
 
@@ -93,7 +94,7 @@ export class MarkdownUIRenderer {
 		taskDescText: string,
 		element: HTMLDivElement,
 		path: string,
-		obsidianComponent: Component | null
+		obsidianComponent: Component | null,
 	) {
 		if (!obsidianComponent) {
 			return;
@@ -104,7 +105,7 @@ export class MarkdownUIRenderer {
 			taskDescText,
 			element,
 			path,
-			obsidianComponent
+			obsidianComponent,
 		);
 	}
 
@@ -113,7 +114,7 @@ export class MarkdownUIRenderer {
 		subtaskText: string,
 		el: HTMLElement,
 		path: string,
-		taskItemComponent: Component | null
+		taskItemComponent: Component | null,
 	) {
 		try {
 			// console.log("renderSubtaskText : Received following text : ", subtaskText);
@@ -127,13 +128,14 @@ export class MarkdownUIRenderer {
 				subtaskText,
 				el,
 				path,
-				componentEl
+				componentEl,
 			);
 		} catch (error) {
-			console.warn("Error rendering subtask text:", error, {
-				subtaskText,
-				path,
-			});
+			bugReporterManagerInsatance.addToLogs(
+				102,
+				String(error),
+				"MarkdownUIRenderer.ts/MarkdownUIRenderer.renderSubtaskText",
+			);
 		}
 	}
 }

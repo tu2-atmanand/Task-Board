@@ -6,12 +6,12 @@ import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import vaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScanner";
+import VaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScanner";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
 import { newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { getCurrentLocalTimeString } from "src/utils/TimeCalculations";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
 
@@ -43,7 +43,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	plugin.saveSettings();
 }
 
-const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanner: vaultScanner }> = ({ app, plugin, vaultScanner }) => {
+const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanner: VaultScanner }> = ({ app, plugin, vaultScanner }) => {
 
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
@@ -54,7 +54,6 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		Modified_at: getCurrentLocalTimeString(),
 		Pending: {},
 		Completed: {},
-		Notes: [],
 	});
 
 	const runScan = async () => {
@@ -68,12 +67,13 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
-		const scanFilters = plugin.settings.data.globalSettings.scanFilters;
+		const globalSettings = plugin.settings.data.globalSettings;
+		const scanFilters = globalSettings.scanFilters;
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 
-			if (fileTypeAllowedForScanning(plugin, file)) {
+			if (fileTypeAllowedForScanning(globalSettings, file)) {
 				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 					await vaultScanner.extractTasksFromFile(file, scanFilters);
@@ -223,7 +223,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 }
 
 export class ScanVaultModal extends Modal {
-	vaultScanner: vaultScanner;
+	vaultScanner: VaultScanner;
 	plugin: TaskBoard;
 
 	constructor(app: App, plugin: TaskBoard) {

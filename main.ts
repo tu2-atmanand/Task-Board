@@ -2,6 +2,7 @@
 
 import {
 	App,
+	normalizePath,
 	Notice,
 	Plugin,
 	PluginManifest,
@@ -23,13 +24,15 @@ import {
 
 import { TaskBoardView } from "./src/views/TaskBoardView";
 import { RealTimeScanner } from "src/managers/RealTimeScanner";
-import vaultScanner, {
+import VaultScanner, {
 	fileTypeAllowedForScanning,
 } from "src/managers/VaultScanner";
 import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
+import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
 import {
 	newReleaseVersion,
+	OBSIDIAN_CLOSED_TIME_KEY,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
@@ -40,19 +43,25 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
-import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
-import { HideableTaskProperty } from "src/interfaces/Enums";
+import {
+	isTasksPluginEnabled,
+} from "src/services/tasks-plugin/helpers";
+import { scanModeOptions, taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
+import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
+import { eventEmitter } from "src/services/EventEmitter";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
-	vaultScanner: vaultScanner;
-	realTimeScanning: RealTimeScanner;
-	taskBoardFileStack: string[] = [];
-	editorModified: boolean;
+	vaultScanner: VaultScanner;
+	realTimeScanner: RealTimeScanner;
+	// taskBoardFileStack: string[] = [];
+	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
 	// fileUpdatedUsingModal: string;
 	IstasksJsonDataChanged: boolean;
@@ -60,17 +69,41 @@ export default class TaskBoard extends Plugin {
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
+	// Public getter/setter for editorModified that emits events
+	get editorModified(): boolean {
+		return this._editorModified;
+	}
+
+	set editorModified(value: boolean) {
+		if (this._editorModified !== value) {
+			this._editorModified = value;
+			// Emit event whenever the value changes so React components can update
+			eventEmitter.emit("EDITOR_MODIFIED_CHANGED", value);
+		}
+	}
+
+	// Queue management for bulk file operations
+	private renameQueue: Array<{ file: TAbstractFile; oldPath: string }> = [];
+	private deleteQueue: TAbstractFile[] = [];
+	private createQueue: TFile[] = [];
+	private renameProcessingTimer: NodeJS.Timeout | null = null;
+	private deleteProcessingTimer: NodeJS.Timeout | null = null;
+	private createProcessingTimer: NodeJS.Timeout | null = null;
+	private currentProgressNotice: Notice | null = null;
+	private readonly QUEUE_DELAY = 1000; // Delay in ms before starting to process queue
+	private readonly PROCESSING_INTERVAL = 100; // Delay between processing each file
+
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
 		this.plugin = this;
 		this.app = this.plugin.app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.vaultScanner = new vaultScanner(this.app, this.plugin);
-		this.realTimeScanning = new RealTimeScanner(
+		this.vaultScanner = new VaultScanner(this.app, this.plugin);
+		this.realTimeScanner = new RealTimeScanner(
 			this.app,
 			this.plugin,
-			this.vaultScanner
+			this.vaultScanner,
 		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
@@ -88,6 +121,10 @@ export default class TaskBoard extends Plugin {
 	async onload() {
 		console.log("Task Board : Loading...");
 
+		// NOTE : I feel, if these singleton instances needs the latest version of 'this', then they might show some unexpected behavior as I am not updating the 'this' inside those singleton instances latest during the plugin life-cycle.
+		dragDropTasksManagerInsatance.setPlugin(this);
+		bugReporterManagerInsatance.setPlugin(this);
+
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
 		this.runOnPluginUpdate();
@@ -99,10 +136,11 @@ export default class TaskBoard extends Plugin {
 
 		await this.vaultScanner.initializeTasksCache();
 
-		await this.compatiblePluginsAvailabilityCheck();
-
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
+			console.log("Task Board : Running onLayoutReady...");
+			this.compatiblePluginsAvailabilityCheck();
+
 			//Creates a Icon on Ribbon Bar (after i18n is initialized)
 			this.getRibbonIcon();
 
@@ -115,23 +153,26 @@ export default class TaskBoard extends Plugin {
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
 
-			// Run scanVaultForTasks if scanVaultAtStartup is true
-			this.scanVaultAtStartup();
-
 			// Register the Kanban view
 			this.registerTaskBoardView();
 
-			// Register editor extensions
-			this.registerEditorExtensions();
-
+			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
 
 			// Register status bar element
 			this.registerTaskBoardStatusBar();
 
+			// Register editor extensions
+			this.registerEditorExtensions();
+
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
+
+			setTimeout(() => this.findModifiedFilesOnAppAbsense(), 10000);
+
+			console.log("Task Board : onLayoutReady FINISHED.");
 		});
+		console.log("Task Board : onload funcion FINISHED.");
 	}
 
 	onunload() {
@@ -154,7 +195,7 @@ export default class TaskBoard extends Plugin {
 		// Separate leaves into MainWindow and SeparateWindow categories
 		const mainWindowLeaf = leaves.find((leaf) => isFromMainWindow(leaf));
 		const separateWindowLeaf = leaves.find(
-			(leaf) => !isFromMainWindow(leaf)
+			(leaf) => !isFromMainWindow(leaf),
 		);
 
 		if (leafLayout === "icon") {
@@ -209,7 +250,7 @@ export default class TaskBoard extends Plugin {
 				// 	active: true,
 				// 	reveal: true,
 				// });
-			}
+			},
 		);
 	}
 	get leafIsActive(): boolean {
@@ -228,18 +269,26 @@ export default class TaskBoard extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			await this.loadData()
+			await this.loadData(),
 		);
 		// this.migrateSettings(DEFAULT_SETTINGS, this.settings);
 		this.saveSettings();
 	}
 
 	async saveSettings(newSetting?: PluginDataJson) {
-		if (newSetting) {
-			this.settings = newSetting;
-			await this.saveData(newSetting);
-		} else {
-			await this.saveData(this.settings);
+		try {
+			if (newSetting) {
+				this.settings = newSetting;
+				await this.saveData(newSetting);
+			} else {
+				await this.saveData(this.settings);
+			}
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				140,
+				String(err),
+				"main.ts/saveSettings",
+			);
 		}
 	}
 
@@ -261,14 +310,8 @@ export default class TaskBoard extends Plugin {
 
 	createLocalStorageAndScanModifiedFiles() {
 		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
-		this.realTimeScanning.initializeStack();
-		this.realTimeScanning.processAllUpdatedFiles();
-	}
-
-	scanVaultAtStartup() {
-		if (this.settings.data.globalSettings.scanVaultAtStartup) {
-			this.vaultScanner.scanVaultForTasks();
-		}
+		this.realTimeScanner.initializeStack();
+		this.realTimeScanner.processAllUpdatedFiles();
 	}
 
 	registerTaskBoardView() {
@@ -330,7 +373,7 @@ export default class TaskBoard extends Plugin {
 					if (listItem.querySelector(".contains-task-list")) {
 						this.hidePropertiesInElement(
 							listItem,
-							hiddenProperties
+							hiddenProperties,
 						);
 					}
 				});
@@ -341,7 +384,7 @@ export default class TaskBoard extends Plugin {
 			// Dynamically inject CSS to hide spans with the specified class names
 			const styleId = "task-board-hide-task-properties-style";
 			let styleEl = document.getElementById(
-				styleId
+				styleId,
 			) as HTMLStyleElement | null;
 			if (!styleEl) {
 				styleEl = document.createElement("style");
@@ -355,7 +398,7 @@ export default class TaskBoard extends Plugin {
 			// 	"@keyframes task-board-fade-out { from { display: inline !important; opacity: 1; transform: scaleX(1); } to { display: none !important; opacity: 0; transform: scaleX(0.8); } }";
 			hiddenProperties.forEach((property) => {
 				switch (property) {
-					case HideableTaskProperty.ID:
+					case taskPropertiesNames.ID:
 						css += ".task-id{ display: none !important; }";
 						css +=
 							"span:hover .task-id { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -364,7 +407,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-id { animation: task-board-fade-out 0.5s ease-in-out 0.5s; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Tags:
+					case taskPropertiesNames.Tags:
 						css +=
 							".task-description>span>a.tag { display: none !important; }";
 						css +=
@@ -373,7 +416,7 @@ export default class TaskBoard extends Plugin {
 					// css +=
 					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 					// css += fadeOutCSS;
-					case HideableTaskProperty.CreatedDate:
+					case taskPropertiesNames.CreatedDate:
 						css += ".task-created { display: none !important; }";
 						css +=
 							"span:hover .task-created { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -382,7 +425,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.StartDate:
+					case taskPropertiesNames.StartDate:
 						css += ".task-start { display: none !important; }";
 						css +=
 							"span:hover .task-start { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -391,7 +434,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.ScheduledDate:
+					case taskPropertiesNames.ScheduledDate:
 						css += ".task-scheduled { display: none !important; }";
 						css +=
 							"span:hover .task-scheduled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -400,7 +443,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.DueDate:
+					case taskPropertiesNames.DueDate:
 						css += ".task-due { display: none !important; }";
 						css +=
 							"span:hover .task-due { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -409,7 +452,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.CompletionDate:
+					case taskPropertiesNames.CompletionDate:
 						css += ".task-completion { display: none !important; }";
 						css +=
 							"span:hover .task-completion { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -418,7 +461,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.CancelledDate:
+					case taskPropertiesNames.CancelledDate:
 						css += ".task-cancelled { display: none !important; }";
 						css +=
 							"span:hover .task-cancelled { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -427,7 +470,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Priority:
+					case taskPropertiesNames.Priority:
 						css += ".task-priority { display: none !important; }";
 						css +=
 							"span:hover .task-priority { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -436,7 +479,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Time:
+					case taskPropertiesNames.Time:
 						css += ".task-time { display: none !important; }";
 						css +=
 							"span:hover .task-time { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -445,7 +488,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Dependencies:
+					case taskPropertiesNames.Dependencies:
 						css += ".task-dependsOn { display: none !important; }";
 						css +=
 							"span:hover .task-dependsOn { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -454,7 +497,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.OnCompletion:
+					case taskPropertiesNames.OnCompletion:
 						css +=
 							".task-onCompletion{ display: none !important; }";
 						css +=
@@ -464,7 +507,7 @@ export default class TaskBoard extends Plugin {
 						// 	"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 						// css += fadeOutCSS;
 						break;
-					case HideableTaskProperty.Recurring:
+					case taskPropertiesNames.Recurring:
 						css += ".task-recurring{ display: none !important; }";
 						css +=
 							"span:hover .task-recurring { display: inline !important; animation: task-board-fade-in 0.5s ease-in-out; }";
@@ -483,13 +526,13 @@ export default class TaskBoard extends Plugin {
 
 	private hidePropertiesInElement(
 		element: HTMLElement,
-		hiddenProperties: HideableTaskProperty[]
+		hiddenProperties: taskPropertiesNames[],
 	) {
 		// Process text nodes to find and hide specific patterns
 		const walker = document.createTreeWalker(
 			element,
 			NodeFilter.SHOW_TEXT,
-			null
+			null,
 		);
 
 		const textNodes: Text[] = [];
@@ -505,7 +548,7 @@ export default class TaskBoard extends Plugin {
 			hiddenProperties.forEach((property) => {
 				const pattern = getTaskPropertyRegexPatterns(
 					property,
-					this.settings.data.globalSettings?.taskPropertyFormat
+					this.settings.data.globalSettings?.taskPropertyFormat,
 				);
 				if (pattern.test(content)) {
 					content = content.replace(pattern, (match) => {
@@ -524,7 +567,7 @@ export default class TaskBoard extends Plugin {
 				while (tempDiv.firstChild) {
 					textNode.parentNode?.insertBefore(
 						tempDiv.firstChild,
-						textNode
+						textNode,
 					);
 				}
 				textNode.remove();
@@ -572,7 +615,7 @@ export default class TaskBoard extends Plugin {
 						this.app,
 						this.plugin,
 						activeFile,
-						activeEditor?.getCursor()
+						activeEditor?.getCursor(),
 					);
 					activeEditor = undefined;
 					return true;
@@ -621,61 +664,521 @@ export default class TaskBoard extends Plugin {
 		// });
 	}
 
-	registerEvents() {
-		this.registerEvent(
-			this.app.vault.on("modify", (file: TAbstractFile) => {
-				if (fileTypeAllowedForScanning(this.plugin, file)) {
-					if (file instanceof TFile) {
-						// 	this.taskBoardFileStack.push(file.path);
-						this.realTimeScanning.onFileModified(file);
-						this.editorModified = true;
-					}
-				}
-			})
-		);
-		// Listen for editor-blur event and trigger scanning if the editor was modified
-		this.registerEvent(
-			this.app.workspace.on(
-				"active-leaf-change",
-				(leaf: WorkspaceLeaf | null) => {
-					this.onFileModifiedAndLostFocus();
-				}
-			)
-		);
-		this.registerDomEvent(window, "blur", () => {
-			this.onFileModifiedAndLostFocus();
-		});
+	// ========================================================
+	// Queue Management for Bulk File Operations - Rename, Delete, Create
+	// ========================================================
 
-		this.registerEvent(
-			this.app.vault.on("rename", (file, oldPath) => {
-				if (file instanceof TFile) {
-					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
-					this.realTimeScanning.onFileRenamed(
+	/**
+	 * Add a file to the rename queue and schedule processing
+	 * @private
+	 * @param file - The file to add to the queue
+	 * @param oldPath - The old path of the file
+	 */
+	private queueFileForRename(file: TAbstractFile, oldPath: string) {
+		// Only queue TFile objects (not folders) that are allowed for scanning
+		if (file instanceof TFile) {
+			this.renameQueue.push({ file, oldPath });
+
+			// Clear existing timer and set a new one
+			if (this.renameProcessingTimer) {
+				clearTimeout(this.renameProcessingTimer);
+			}
+
+			this.renameProcessingTimer = setTimeout(() => {
+				this.processRenameQueue();
+			}, this.QUEUE_DELAY);
+		}
+	}
+
+	/**
+	 * Process all files in the rename queue one by one
+	 */
+	async processRenameQueue() {
+		if (this.renameQueue.length === 0) {
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			return;
+		}
+
+		const archivedPath = normalizePath(
+			this.settings.data.globalSettings.archivedTBNotesFolderPath,
+		);
+		const totalFiles = this.renameQueue.length;
+
+		// Show progress notice
+		this.currentProgressNotice = new Notice(
+			`Processing renamed files: 0/${totalFiles}`,
+			0,
+		);
+
+		let processed = 0;
+		while (this.renameQueue.length > 0) {
+			const { file, oldPath } = this.renameQueue.shift()!;
+
+			try {
+				if (
+					fileTypeAllowedForScanning(
+						this.plugin.settings.data.globalSettings,
+						file,
+					)
+				) {
+					this.realTimeScanner.onFileRenamed(
 						file,
 						oldPath,
-						this.plugin.settings.data.globalSettings
-							.archivedTBNotesFolderPath
+						archivedPath,
+					);
+					processed++;
+
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
+				}
+			} catch (error) {
+				bugReporterManagerInsatance.addToLogs(
+					162,
+					String(error),
+					"main.ts/processRenameQueue",
+				);
+			}
+
+			// Add delay between processing each file to prevent blocking UI
+			if (this.renameQueue.length > 0) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, this.PROCESSING_INTERVAL),
+				);
+			}
+		}
+
+		this.plugin.vaultScanner.saveTasksToJsonCache();
+		eventEmitter.emit("REFRESH_BOARD");
+
+		// Hide progress notice after completion
+		this.currentProgressNotice?.hide();
+		this.currentProgressNotice = null;
+		if (processed > 0) {
+			new Notice(
+				`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
+			);
+		}
+	}
+
+	/**
+	 * Add a file to the delete queue and schedule processing
+	 */
+	private queueFileForDeletion(file: TAbstractFile) {
+		// Only queue TFile objects (not folders) that are allowed for scanning
+		if (file instanceof TFile) {
+			this.deleteQueue.push(file);
+
+			// Clear existing timer and set a new one
+			if (this.deleteProcessingTimer) {
+				clearTimeout(this.deleteProcessingTimer);
+			}
+
+			this.deleteProcessingTimer = setTimeout(() => {
+				this.processDeleteQueue();
+			}, this.QUEUE_DELAY);
+		}
+	}
+
+	/**
+	 * Process all files in the delete queue one by one
+	 */
+	async processDeleteQueue() {
+		if (this.deleteQueue.length === 0) {
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			return;
+		}
+
+		const totalFiles = this.deleteQueue.length;
+
+		// Show progress notice
+		this.currentProgressNotice = new Notice(
+			`Processing deleted files: 0/${totalFiles}`,
+			0,
+		);
+
+		let processed = 0;
+		while (this.deleteQueue.length > 0) {
+			const file = this.deleteQueue.shift()!;
+
+			try {
+				if (
+					fileTypeAllowedForScanning(
+						this.plugin.settings.data.globalSettings,
+						file,
+					)
+				) {
+					this.realTimeScanner.onFileDeleted(file);
+					processed++;
+
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
+				}
+			} catch (error) {
+				bugReporterManagerInsatance.addToLogs(
+					163,
+					String(error),
+					"main.ts/processDeleteQueue",
+				);
+			}
+
+			// Add delay between processing each file to prevent blocking UI
+			if (this.deleteQueue.length > 0) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, this.PROCESSING_INTERVAL),
+				);
+			}
+		}
+
+		this.plugin.vaultScanner.saveTasksToJsonCache();
+		eventEmitter.emit("REFRESH_COLUMN");
+
+		// Hide progress notice after completion
+		this.currentProgressNotice?.hide();
+		this.currentProgressNotice = null;
+		if (processed > 0) {
+			new Notice(
+				`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
+			);
+		}
+	}
+
+	/**
+	 * Add a file to the create queue and schedule processing
+	 */
+	private queueFileForCreation(file: TFile) {
+		// Only queue files that are allowed for scanning
+
+		this.createQueue.push(file);
+
+		// Clear existing timer and set a new one
+		if (this.createProcessingTimer) {
+			clearTimeout(this.createProcessingTimer);
+		}
+
+		this.createProcessingTimer = setTimeout(() => {
+			this.processCreateQueue();
+		}, this.QUEUE_DELAY);
+	}
+
+	/**
+	 * Process all files in the create queue one by one
+	 */
+	async processCreateQueue() {
+		if (this.createQueue.length === 0) {
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			return;
+		}
+
+		const totalFiles = this.createQueue.length;
+
+		this.plugin.vaultScanner.refreshTasksFromFiles(this.createQueue, false);
+
+		// Show progress notice only if the files are more than 10
+		if (totalFiles > 10) {
+			this.currentProgressNotice = new Notice(
+				`Task Board : Processing created files: 0/${totalFiles}`,
+				0,
+			);
+			let processed = 0;
+			while (this.createQueue.length > 0) {
+				const file = this.createQueue.shift()!;
+
+				try {
+					// if (
+					// 	fileTypeAllowedForScanning(
+					// 		this.plugin.settings.data.globalSettings,
+					// 		file
+					// 	)
+					// ) {
+					// 	await this.realTimeScanner.processAllUpdatedFiles(file);
+					// }
+					processed++;
+
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
+				} catch (error) {
+					bugReporterManagerInsatance.addToLogs(
+						164,
+						String(error),
+						"main.ts/processCreateQueue",
 					);
 				}
-			})
+
+				// Add delay between processing each file to prevent blocking UI
+				if (this.createQueue.length > 0) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
+			}
+
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			if (processed > 0) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFiles} created file(s)`,
+				);
+			}
+		}
+	}
+
+	async findModifiedFilesOnAppAbsense() {
+		let OBSIDIAN_CLOSED_TIME = this.app.loadLocalStorage(
+			OBSIDIAN_CLOSED_TIME_KEY,
+		);
+		console.log("DATA loaded from localStorage :", OBSIDIAN_CLOSED_TIME);
+
+		if (!OBSIDIAN_CLOSED_TIME)
+			OBSIDIAN_CLOSED_TIME = this.vaultScanner.tasksCache.Modified_at;
+		console.log("DATA loaded from cache :", OBSIDIAN_CLOSED_TIME);
+
+		if (OBSIDIAN_CLOSED_TIME) {
+			OBSIDIAN_CLOSED_TIME = Date.parse(OBSIDIAN_CLOSED_TIME);
+			console.log(
+				"Task Board : Fetching all modified files...\nLast modified time :",
+				OBSIDIAN_CLOSED_TIME,
+			);
+			let filesScannedCount = 0;
+			const modifiedCreatedRenamedFiles = this.app.vault
+				.getFiles()
+				.filter((file) => {
+					filesScannedCount++;
+					return (
+						file.stat.mtime > OBSIDIAN_CLOSED_TIME ||
+						file.stat.ctime > OBSIDIAN_CLOSED_TIME
+					);
+				});
+
+			// Find deleted files by comparing cache with current vault files
+			const currentFilesPaths = new Set(
+				this.app.vault.getFiles().map((file) => file.path),
+			);
+			const cachedFilesPaths = Object.keys(
+				this.vaultScanner.tasksCache.Pending || {},
+			).concat(Object.keys(this.vaultScanner.tasksCache.Completed || {}));
+			const deletedFiles = new Set(
+				cachedFilesPaths.filter(
+					(filePath) => !currentFilesPaths.has(filePath),
+				),
+			);
+			const deletedFilesList = [...deletedFiles];
+
+			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
+				fileTypeAllowedForScanning(
+					this.plugin.settings.data.globalSettings,
+					file,
+				),
+			);
+			console.log(
+				"Task Board : Fetching complete.\nModified files :",
+				changed_files,
+				"\nDeleted files :",
+				deletedFilesList,
+				"\nFiles scanned :",
+				filesScannedCount,
+			);
+			const totalFilesLength =
+				changed_files.length + deletedFilesList.length;
+
+			if (totalFilesLength > 0) {
+				const modifiedFilesNotice = new Notice(
+					createFragment((f) => {
+						f.createDiv("bugReportNotice", (el) => {
+							el.createEl("p", {
+								text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
+							});
+							el.createEl("button", {
+								text: t("show-me"),
+								cls: "reportBugButton",
+								onclick: () => {
+									// el.hide();
+
+									// Open a modal and show all these file names with their modified date-time in a nice UI.
+									const modifiedFilesModal =
+										new ModifiedFilesModal(this.app, {
+											modifiedFiles: changed_files,
+											deletedFiles: deletedFilesList,
+										});
+									modifiedFilesModal.open();
+								},
+							});
+							el.createEl("button", {
+								text: t("scan-them"),
+								cls: "ignoreBugButton",
+								onclick: async () => {
+									modifiedFilesNotice.hide();
+
+									// Show progress notice
+									this.currentProgressNotice = new Notice(
+										`Task Board : Processing modified files: 0/${totalFilesLength}`,
+										0,
+									);
+
+									this.plugin.vaultScanner
+										.refreshTasksFromFiles(
+											changed_files,
+											false,
+										)
+										.then(async () => {
+											console.log(
+												"Task Board : Will now going to update the deleted files cache...",
+											);
+											if (deletedFilesList.length > 0) {
+												await this.plugin.vaultScanner.deleteCacheForFiles(
+													deletedFilesList,
+												);
+												console.log(
+													"Task Board : Completed deleting cache of deleted files...",
+												);
+											}
+										});
+
+									let modifiedFilesQueue = changed_files;
+
+									let processed = 0;
+									while (modifiedFilesQueue.length > 0) {
+										const file =
+											modifiedFilesQueue.shift()!;
+
+										try {
+											processed++;
+
+											// Update progress notice
+											this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+										} catch (error) {
+											bugReporterManagerInsatance.addToLogs(
+												165,
+												String(error),
+												"main.ts/findModifiedFilesOnAppAbsense",
+											);
+										}
+
+										// Add delay between processing each file to prevent blocking UI
+										if (modifiedFilesQueue.length > 0) {
+											await new Promise((resolve) =>
+												setTimeout(
+													resolve,
+													this.PROCESSING_INTERVAL,
+												),
+											);
+										}
+									}
+
+									// Hide progress notice after completion
+									this.currentProgressNotice?.hide();
+									this.currentProgressNotice = null;
+									new Notice(
+										`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
+									);
+								},
+							});
+						});
+					}),
+					0,
+				);
+
+				modifiedFilesNotice.messageEl.onClickEvent((e) => {
+					if (e.target instanceof HTMLButtonElement) {
+						e.stopPropagation();
+						e.preventDefault();
+						e.stopImmediatePropagation();
+					}
+				});
+			}
+		}
+	}
+
+	/**
+	 * Registers all the events that TaskBoard needs to listen to
+	 */
+	registerEvents() {
+		this.registerEvent(
+			this.app.vault.on("modify", async (file: TAbstractFile) => {
+				console.log("Modify event is fired...");
+				if (
+					fileTypeAllowedForScanning(
+						this.plugin.settings.data.globalSettings,
+						file,
+					)
+				) {
+					if (file instanceof TFile) {
+						if (
+							this.plugin.settings.data.globalSettings
+								.scanMode === scanModeOptions.REAL_TIME
+						) {
+							this.vaultScanner.refreshTasksFromFiles(
+								[file],
+								false,
+							);
+						} else {
+							// 	this.taskBoardFileStack.push(file.path);
+							this.editorModified = true;
+							this.realTimeScanner.onFileModified(file);
+						}
+					}
+				}
+			}),
+		);
+		this.registerEvent(
+			this.app.vault.on("rename", (file, oldPath) => {
+				console.log("Rename event is fired...");
+				// Queue the file for processing instead of processing immediately
+				this.queueFileForRename(file, oldPath);
+			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
-				if (file instanceof TFile) {
-					// Instead of scanning the file, it will be good idea to update the file path in the tasks.json directly.
-					this.realTimeScanning.onFileDeleted(file);
-				}
-			})
+				console.log("Delete event is fired...");
+				// Queue the file for processing instead of processing immediately
+				this.queueFileForDeletion(file);
+			}),
 		);
-
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
+				console.log("Create event is fired...");
 				if (file instanceof TFile) {
-					setTimeout(() => {
-						this.realTimeScanning.processAllUpdatedFiles(file);
-					}, 400);
+					// Queue the file for processing instead of processing immediately
+					this.queueFileForCreation(file);
 				}
-			})
+			}),
+		);
+
+		if (
+			this.plugin.settings.data.globalSettings.scanMode !==
+			scanModeOptions.MANUAL
+		) {
+			// Listen for editor-blur event and trigger scanning if the editor was modified
+			this.registerEvent(
+				this.app.workspace.on(
+					"active-leaf-change",
+					(leaf: WorkspaceLeaf | null) => {
+						console.log("On Active Leaf Change...\nLeaf =", leaf);
+						this.onFileModifiedAndLostFocus();
+					},
+				),
+			);
+			this.registerDomEvent(window, "blur", () => {
+				this.onFileModifiedAndLostFocus();
+				console.log("Focusing out of the window...");
+			});
+			this.registerDomEvent(window, "focus", () => {
+				this.onFileModifiedAndLostFocus();
+				console.log("Focusing in the window...");
+			});
+		}
+
+		this.registerEvent(
+			this.app.workspace.on("quit", () => {
+				const currentTime = getCurrentLocalTimeString();
+				this.app.saveLocalStorage(
+					OBSIDIAN_CLOSED_TIME_KEY,
+					currentTime,
+				);
+			}),
 		);
 
 		// const closeButton = document.querySelector<HTMLElement>(
@@ -714,10 +1217,18 @@ export default class TaskBoard extends Plugin {
 							.setIcon(TaskBoardIcon)
 							.setSection("action")
 							.onClick(() => {
-								this.vaultScanner.refreshTasksFromFiles(
-									[file],
-									true
-								);
+								if (
+									fileTypeAllowedForScanning(
+										this.plugin.settings.data
+											.globalSettings,
+										file,
+									)
+								) {
+									this.vaultScanner.refreshTasksFromFiles(
+										[file],
+										true,
+									);
+								}
 							});
 					});
 					if (
@@ -730,7 +1241,7 @@ export default class TaskBoard extends Plugin {
 								.setSection("action")
 								.onClick(() => {
 									this.settings.data.globalSettings.scanFilters.files.values.push(
-										file.path
+										file.path,
 									);
 									this.saveSettings();
 								});
@@ -746,7 +1257,7 @@ export default class TaskBoard extends Plugin {
 								.setSection("action")
 								.onClick(() => {
 									this.settings.data.globalSettings.scanFilters.files.values.push(
-										file.path
+										file.path,
 									);
 									this.saveSettings();
 								});
@@ -774,7 +1285,7 @@ export default class TaskBoard extends Plugin {
 								.setSection("action")
 								.onClick(() => {
 									this.settings.data.globalSettings.scanFilters.folders.values.push(
-										file.path
+										file.path,
 									);
 									this.saveSettings();
 								});
@@ -790,7 +1301,7 @@ export default class TaskBoard extends Plugin {
 								.setSection("action")
 								.onClick(() => {
 									this.settings.data.globalSettings.scanFilters.folders.values.push(
-										file.path
+										file.path,
 									);
 									this.saveSettings();
 								});
@@ -830,7 +1341,7 @@ export default class TaskBoard extends Plugin {
 				// 				});
 				// 		});
 				// }
-			})
+			}),
 		);
 
 		// this.registerEvent(
@@ -856,21 +1367,24 @@ export default class TaskBoard extends Plugin {
 	async onFileModifiedAndLostFocus() {
 		if (this.editorModified) {
 			// if (this.currentModifiedFile.path !== this.fileUpdatedUsingModal) {
-			// 	await this.realTimeScanning.onFileModified(
+			// 	await this.realTimeScanner.onFileModified(
 			// 		this.currentModifiedFile,
-			// 		this.settings.data.globalSettings.realTimeScanning
+			// 		this.settings.data.globalSettings.realTimeScanner
 			// 	);
 			// } else {
 			// 	this.fileUpdatedUsingModal = "";
 			// }
 
-			await this.realTimeScanning.processAllUpdatedFiles();
+			await this.realTimeScanner.processAllUpdatedFiles();
 		}
 	}
 
 	async compatiblePluginsAvailabilityCheck() {
 		// Check if the Tasks plugin is installed and fetch the custom statuses
-		await fetchTasksPluginCustomStatuses(this.plugin);
+		// await fetchTasksPluginCustomStatuses(this.plugin);
+		const tasksPlug = await isTasksPluginEnabled(this.plugin);
+		this.plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin =
+			tasksPlug;
 
 		// Check if the Reminder plugin is installed
 		isReminderPluginInstalled(this.plugin);

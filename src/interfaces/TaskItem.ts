@@ -23,6 +23,7 @@ export interface taskItem {
 	due: string;
 	filePath: string;
 	taskLocation: taskLocation;
+	// onCompletion?: number;
 	dependsOn?: string[]; // Array of task IDs that this task depends on
 	reminder?: string; // A date-time value.
 	completion?: string;
@@ -58,7 +59,7 @@ export interface jsonCacheData {
 	Completed: {
 		[filePath: string]: taskItem[]; // Maps file paths to arrays of completed tasks
 	};
-	Notes: noteItem[];
+	// Notes: noteItem[]; // @deprecated v1.9.0
 }
 
 export interface tasksJsonData {

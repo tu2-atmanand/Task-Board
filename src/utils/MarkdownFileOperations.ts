@@ -3,6 +3,7 @@
 import { TFile } from "obsidian";
 import type TaskBoard from "main";
 import { bugReporter } from "src/services/OpenModals";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Read data from a file in the vault
@@ -12,8 +13,8 @@ import { bugReporter } from "src/services/OpenModals";
  */
 export const readDataOfVaultFile = async (
 	plugin: TaskBoard,
-	filePath: string
-): Promise<string> => {
+	filePath: string,
+): Promise<string | null> => {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file && file instanceof TFile) {
@@ -22,22 +23,22 @@ export const readDataOfVaultFile = async (
 		} else {
 			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
 			// console.error(`File not found at path: ${filePath}`);
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				75,
 				"File not found in vault.",
 				`File not found at path: ${filePath}`,
-				"MarkdownFileOperations.ts/readDataOfVaultFile"
+				"MarkdownFileOperations.ts/readDataOfVaultFile",
 			);
 			throw `File not found at path: ${filePath}`;
 		}
 	} catch (error) {
-		bugReporter(
-			plugin,
-			"Error reading data from vault files.",
+		bugReporterManagerInsatance.showNotice(
+			76,
+			`Error reading data from vault file. Couldnt able to read the following file : ${filePath}`,
 			String(error),
-			"MarkdownFileOperations.ts/readDataOfVaultFile"
+			"MarkdownFileOperations.ts/readDataOfVaultFile",
 		);
-		throw error;
+		return null;
 	}
 };
 
@@ -51,7 +52,7 @@ export const readDataOfVaultFile = async (
 export const writeDataToVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string,
-	newContent: string
+	newContent: string,
 ): Promise<void> => {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
@@ -60,16 +61,20 @@ export const writeDataToVaultFile = async (
 			// plugin.fileUpdatedUsingModal = file.path;
 		} else {
 			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
-			console.error(`File not found at path: ${filePath}`);
+			bugReporterManagerInsatance.addToLogs(
+				160,
+				`File not found at path.\nPath: ${filePath}`,
+				"MarkdownFileOperations.ts/writeDataToVaultFile",
+			);
 			throw `File not found at path: ${filePath}`;
 		}
 		return;
 	} catch (error) {
-		bugReporter(
-			plugin,
-			"Error writing to file in vault.",
+		bugReporterManagerInsatance.showNotice(
+			77,
+			`Error writing to file in vault. Make sure the following file exists : ${filePath}`,
 			String(error),
-			"MarkdownFileOperations.ts/writeDataToVaultFile"
+			"MarkdownFileOperations.ts/writeDataToVaultFile",
 		);
 		// throw error;
 	}
