@@ -1,0 +1,243 @@
+# Task Board Logs
+
+## System Information
+
+## Recent Bug Reports
+
+Timestamp : 2026-01-22T15:39:09.095Z
+ID : 73
+Message : Failed to move tasks.json file to new path
+Context : JsonFileOperations.ts/moveTasksCacheFileToNewPath
+
+#### Bug Content
+```log
+Error: ENOENT: no such file or directory, rename 'D:\Personal_Projects_Hub\IDE_Wise_Projects\Obsidian\TemplateToDevelopPlugin\Meta\Task_Board\task-board-cache.json' -> 'D:\Personal_Projects_Hub\IDE_Wise_Projects\Obsidian\TemplateToDevelopPlugin\Meta\Task_Board\Cache\task-board-cache.json'
+```
+
+-------------
+
+Timestamp : 2026-01-26T06:52:46.386Z
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "390". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T10:48:04
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "490". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T11:12:10
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "490". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T13:31:39
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:36:39
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:37:55
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:39:23
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:40:34
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:41:44
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:47:48
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:48:11
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:48:29
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:49:11
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:49:24
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:49:37
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:49:50
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-27T14:51:52
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "268". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-28T13:05:51
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "276,224". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-01-29T10:56:43
+ID : 103
+Message : 
+Context : MultiSuggest.ts/getQuickAddPluginChoices
+
+#### Bug Content
+```log
+Error: QuickAdd plugin object is undefined.
+```

@@ -1,26 +1,27 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
-import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
+import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform, Menu, addIcon } from "obsidian";
+import { App, debounce, Platform, Menu } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
-import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
+import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
 import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
-import { viewTypeNames } from "src/interfaces/Enums";
+import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -43,6 +44,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [isMobileView, setIsMobileView] = useState(false);
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
+	const [editorModified, setEditorModified] = useState(plugin.editorModified);
 
 	// plugin.registerEvent(
 	// 	plugin.app.workspace.on("resize", () => {
@@ -93,9 +95,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					setFreshInstall(false);
 				}
 			} catch (error) {
-				console.error(
-					"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
-					error
+				bugReporterManagerInsatance.addToLogs(
+					131,
+					`No need to worry about this bug, if its appearing on the fresh install.\n${String(error)}`,
+					"TaskBoardViewContent.tsx/loading boards and tasks useEffect",
 				);
 				setFreshInstall(true);
 			}
@@ -135,7 +138,19 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				return currentBoard.columns
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks)
+						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks, (updatedBoardData: Board) => {
+							// I think this below code is not required as we simply want to update the data on the disk.
+							// setBoards((prevBoards) => {
+							// 	const updatedBoards = [...prevBoards];
+							// 	updatedBoards[activeBoardIndex] = updatedBoardData;
+							// 	return updatedBoards;
+							// });
+
+							plugin.settings.data.boardConfigs[activeBoardIndex] = updatedBoardData;
+							// Technically, at later point in time, when user will make any changes, the latest data will be updated on the disk, so we need not have to update it everytime during this column seggregation.
+							// const newSettings = plugin.settings;
+							// plugin.saveSettings(newSettings);
+						})
 					);
 			}
 
@@ -155,7 +170,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				const allTasks = await loadTasksAndMerge(plugin, false);
 				setAllTasks(allTasks);
 			} catch (error) {
-				bugReporter(plugin, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
+				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
 			}
 		}, 500),
 		[plugin]
@@ -182,15 +197,25 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
 	}, []);
 
-	const refreshBoardButton = useCallback(async () => {
-		const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
-		const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
+	// Listen to editor modified state changes
+	useEffect(() => {
+		const handleEditorModifiedChange = (modified: boolean) => {
+			setEditorModified(modified);
+		};
 
-		if (fileStack && fileStack.length > 0) {
-			await plugin.realTimeScanning.processAllUpdatedFiles().then((result) => {
-				eventEmitter.emit("REFRESH_BOARD");
-			})
-		}
+		eventEmitter.on("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+		return () => eventEmitter.off("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+	}, []);
+
+	const refreshBoardButton = useCallback(() => {
+		plugin.realTimeScanner.processAllUpdatedFiles(); //.then(() => console.log("Finished processing all updated files."));
+		plugin.processCreateQueue(); //.then(() => console.log("Finished processing create queue."));
+		plugin.processDeleteQueue(); //.then(() => console.log("Finished processing delete queue."));
+		plugin.processRenameQueue(); //.then(() => console.log("Finished processing rename queue."));
+
+		setTimeout(() => {
+			eventEmitter.emit("REFRESH_BOARD");
+		}, 100)
 	}, []);
 
 	function handleOpenAddNewTaskModal() {
@@ -351,10 +376,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				}
 
 				// Get button position
-				const buttonRect = event.currentTarget.getBoundingClientRect();
+				const buttonRect = event.currentTarget?.getBoundingClientRect();
 				const position = {
-					x: buttonRect.left,
-					y: buttonRect.bottom
+					x: buttonRect?.left ?? 100,
+					y: buttonRect?.bottom ?? 100
 				};
 
 				// Create and show popover
@@ -398,8 +423,247 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				filterPopoverRef.current = popover;
 			}
 		} catch (error) {
-			bugReporter(plugin, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+			bugReporterManagerInsatance.showNotice(29, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
 		}
+	}
+
+	function togglePropertyNameInSettings(propertyName: string) {
+		let visibleProperties = plugin.settings.data.globalSettings.visiblePropertiesList || [];
+
+		if (visibleProperties.includes(propertyName)) {
+			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
+			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+
+		} else {
+			let index = -1;
+			switch (propertyName) {
+				case taskPropertiesNames.SubTasks:
+					index = visibleProperties.indexOf(taskPropertiesNames.SubTasksMinimized);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+				case taskPropertiesNames.SubTasksMinimized:
+					index = visibleProperties.indexOf(taskPropertiesNames.SubTasks);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+				case taskPropertiesNames.Description:
+					index = visibleProperties.indexOf(taskPropertiesNames.DescriptionMinimized);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+				case taskPropertiesNames.DescriptionMinimized:
+					index = visibleProperties.indexOf(taskPropertiesNames.Description);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+			}
+			visibleProperties.push(propertyName);
+
+			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+		}
+
+		plugin.saveSettings();
+		eventEmitter.emit("REFRESH_BOARD");
+	}
+
+	function handlePropertiesBtnClick(event: React.MouseEvent<HTMLButtonElement>) {
+		const propertyMenu = new Menu();
+
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("show-hide-properties"));
+			item.setIsLabel(true);
+		});
+		propertyMenu.addSeparator();
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("id"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.ID);
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("checkbox"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.Checkbox);
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("status"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.Status);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("priority"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.Priority);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("tags"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.Tags);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("time"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.Time);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("reminder"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.Reminder);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Reminder))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("created-date"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.CreatedDate);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("start-date"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.StartDate);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.StartDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("scheduled-date"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.ScheduledDate);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("due-date"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.DueDate);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DueDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("completed-date"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.CompletionDate);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("cancelled-date"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.CancelledDate);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("dependencies"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.Dependencies);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("file-name"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.FilePath);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
+		});
+
+		propertyMenu.addSeparator();
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("sub-tasks"));
+			const subTasksMenu = item.setSubmenu()
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("visible"))
+				item.onClick(async () => {
+					togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
+
+				})
+				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
+			});
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("minimized"))
+				item.onClick(async () => {
+					togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
+
+				})
+				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+			});
+
+			// subTasksMenu.addItem((item) => {
+			// 	item.setTitle(t("hidden"))
+			// 	item.onClick(async () => {
+			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
+			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
+
+			// 	})
+			// 	item.setChecked(!plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+			// });
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("description"));
+			const subTasksMenu = item.setSubmenu()
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("visible"))
+				item.onClick(async () => {
+					togglePropertyNameInSettings(taskPropertiesNames.Description);
+					plugin.saveSettings();
+
+				})
+				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description));
+			});
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("minimized"))
+				item.onClick(async () => {
+					togglePropertyNameInSettings(taskPropertiesNames.DescriptionMinimized);
+					plugin.saveSettings();
+
+				})
+				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+			});
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		propertyMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
 	}
 
 	function handleBoardSelection(index: number) {
@@ -439,7 +703,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}, 300); // Match animation duration
 	}
 
-	function openHeaderMoreOptionsMenu(event: MouseEvent | React.MouseEvent) {
+	function openHeaderMoreOptionsMenu(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
 		const sortMenu = new Menu();
 
 		sortMenu.addItem((item) => {
@@ -454,12 +718,17 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			});
 		});
 		sortMenu.addItem((item) => {
+			item.setTitle(t("show-hide-properties"));
+			item.setIcon("list");
+			item.onClick(async () => {
+				handlePropertiesBtnClick(event);
+			});
+		});
+		sortMenu.addItem((item) => {
 			item.setTitle(t("open-board-filters-modal"));
 			item.setIcon(funnelIcon);
-			item.onClick(async (event) => {
-				if (event instanceof MouseEvent) {
-					handleFilterButtonClick(event as unknown as React.MouseEvent<HTMLButtonElement, MouseEvent>);
-				}
+			item.onClick(async () => {
+				handleFilterButtonClick(event);
 			});
 		});
 		sortMenu.addItem((item) => {
@@ -604,6 +873,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 					<button
 						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+						aria-label={t("show-hide-properties")}
+						onClick={handlePropertiesBtnClick}
+					>
+						<List size={18} />
+					</button>
+
+					<button
+						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("apply-advanced-board-filters")}
 						onClick={handleFilterButtonClick}
 					>
@@ -637,9 +914,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<option value={viewTypeNames.map}>{t("map")}</option>
 					</select>
 
-					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
+					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
 					</button>
+
 					{(isMobileView || Platform.isMobile) && (
 						<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
 							<EllipsisVertical size={20} />

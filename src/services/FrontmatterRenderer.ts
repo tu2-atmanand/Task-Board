@@ -1,9 +1,13 @@
 // /src/services/FrontmatterRenderer.ts
 
 /**
+ * @module FrontmatterRenderer
  * Utility class for rendering frontmatter properties using Obsidian's PropertyWidget API
+ * The below code has been referenced from the following sources :
  * @see https://github.com/Fevol/obsidian-typings/blob/release/obsidian-public/1.9.14/src/obsidian/internals/PropertyWidget.d.ts
  * @see https://github.com/unxok/obsidian-better-properties/blob/main/src/classes/PropertyComponent/index.ts
+ *
+ * In the current version, this FrontmatterRenderer is using a simple custom styling method to render the properties.
  */
 
 import type TaskBoard from "main";
@@ -47,12 +51,12 @@ export class FrontmatterRenderer {
 
 	public extractContentWithoutFrontmatter(
 		content: string,
-		frontmatterContent: string
+		frontmatterContent: string,
 	): string {
 		if (!frontmatterContent) return content;
 
 		const contentWithoutFrontmatter = content.substring(
-			frontmatterContent.length
+			frontmatterContent.length,
 		);
 		return contentWithoutFrontmatter;
 	}
@@ -81,7 +85,11 @@ export class FrontmatterRenderer {
 	// 		const frontmatter = parseYaml(yamlContent);
 	// 		return frontmatter as Record<string, any>;
 	// 	} catch (error) {
-	// 		console.warn("Failed to parse frontmatter:", error);
+	// bugReporterManagerInsatance.addToLogs(
+	// 	172,
+	// 	`Failed to parse frontmatter: ${String(error)}`,
+	// 	"FrontmatterRenderer.ts/extractFrontmatterObject",
+	// );
 	// 		return null;
 	// 	}
 	// }
@@ -96,7 +104,7 @@ export class FrontmatterRenderer {
 	public renderCollapsibleFrontmatter(
 		containerEl: HTMLElement,
 		content: string,
-		file?: TFile
+		file?: TFile,
 	): {
 		frontmatterContainer: HTMLElement | null;
 		contentWithoutFrontmatter: string;
@@ -123,7 +131,7 @@ export class FrontmatterRenderer {
 		// Get the content after frontmatter
 		const contentWithoutFrontmatter = this.extractContentWithoutFrontmatter(
 			content,
-			frontmatterContent
+			frontmatterContent,
 		);
 
 		// Create the frontmatter section container
@@ -150,7 +158,7 @@ export class FrontmatterRenderer {
 
 		// Add property count
 		const propertyCount = Object.keys(frontmatter).filter(
-			(key) => key !== "position"
+			(key) => key !== "position",
 		).length;
 		header.createSpan({
 			cls: "taskboard-frontmatter-property-count",
@@ -184,7 +192,7 @@ export class FrontmatterRenderer {
 
 			frontmatterSection.toggleClass(
 				"is-collapsed",
-				this.isFrontmatterContainerCollapsed
+				this.isFrontmatterContainerCollapsed,
 			);
 		});
 
@@ -203,7 +211,7 @@ export class FrontmatterRenderer {
 	private renderProperties(
 		containerEl: HTMLElement,
 		frontmatter: Record<string, any>,
-		file?: TFile
+		file?: TFile,
 	): void {
 		this.renderPropertiesSimple(containerEl, frontmatter);
 		return;
@@ -301,10 +309,11 @@ export class FrontmatterRenderer {
 					this.renderPropertyValueSimple(valueEl, value);
 				}
 			} catch (error) {
-				console.warn(
-					`FALLBACK : Failed to render property ${key} with PropertyWidget:`,
-					error
-				);
+				bugReporterManagerInsatance.addToLogs(
+				174,
+				`FALLBACK : Failed to render property ${key} with PropertyWidget: ${String(error)}`,
+				"FrontmatterRenderer.ts/renderProperties",
+			);
 				// Fallback to simple rendering
 				this.renderPropertyValueSimple(valueEl, value);
 			}
@@ -319,10 +328,10 @@ export class FrontmatterRenderer {
 	 */
 	private renderPropertiesSimple(
 		containerEl: HTMLElement,
-		frontmatter: Record<string, any>
+		frontmatter: Record<string, any>,
 	): void {
 		const propertiesToRender = Object.entries(frontmatter).filter(
-			([key]) => key !== "position"
+			([key]) => key !== "position",
 		);
 
 		for (const [key, value] of propertiesToRender) {
@@ -332,7 +341,7 @@ export class FrontmatterRenderer {
 
 			propertyRow.addEventListener("click", () => {
 				new Notice(
-					"This frontmatter section is read-only. A fully-functional frontmatter editor is under development."
+					"This frontmatter section is read-only. A fully-functional frontmatter editor is under development.",
 				);
 			});
 
@@ -356,7 +365,7 @@ export class FrontmatterRenderer {
 	 */
 	private renderPropertyValueSimple(
 		containerEl: HTMLElement,
-		value: any
+		value: any,
 	): void {
 		if (Array.isArray(value)) {
 			const list = containerEl.createEl("ul", {

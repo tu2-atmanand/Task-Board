@@ -1,7 +1,7 @@
 // /src/modal/BugReporter.ts
 
 import type TaskBoard from "main";
-import { Modal, Notice, PluginManifest } from "obsidian";
+import { Modal, Notice } from "obsidian";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
 import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
@@ -148,7 +148,7 @@ export class BugReporterModal extends Modal {
 			)
 			.join("\n");
 
-		const finalContentForHTMLDom = `<h4>Developer message</h4><br/>${message.replaceAll(
+		const finalContentForHTMLDom = `<h4>Message for user</h4><br/>${message.replaceAll(
 			"\n",
 			"<br/>"
 		)}<br/><br/><h5>Error Message</h5><i>${sanitizedErrorContent.replaceAll(
@@ -156,33 +156,33 @@ export class BugReporterModal extends Modal {
 			"<br/>"
 		)}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfoTextHTMLDom}<br/><h5>Any additional information and screenshots</h5>`;
 
-		const finalContentForMarkdown = `# Bug Report\n\n## Developer message\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n### Any additional information and screenshots`;
+		const finalContentForMarkdown = `# Bug Report\n\n## Message for user\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n### Any additional information and screenshots`;
 
 		return { finalContentForHTMLDom, finalContentForMarkdown };
 	}
 
-	getSystemInfo() {
-		// Get system information like OS, Obsidian version, etc.
-		const obsidianVersion =
-			this.plugin.app.title.split(" ").pop() || "Unknown Version";
-		const appVersion = navigator.appVersion || "Unknown App Version";
-		const enabledPlugins = this.plugin.app.plugins.enabledPlugins;
-		const manifests = Object.values(
-			this.plugin.app.plugins.manifests
-		) as PluginManifest[];
-		const enabledPluginsWithVersionMap = manifests
-			.filter((plugin) => enabledPlugins.has(plugin.id))
-			.map((plugin) => ({
-				id: plugin.id,
-				version: plugin.version,
-			}));
+	// getSystemInfo() {
+	// 	// Get system information like OS, Obsidian version, etc.
+	// 	const obsidianVersion =
+	// 		this.plugin.app.title.split(" ").pop() || "Unknown Version";
+	// 	const appVersion = navigator.appVersion || "Unknown App Version";
+	// 	const enabledPlugins = this.plugin.app.plugins.enabledPlugins;
+	// 	const manifests = Object.values(
+	// 		this.plugin.app.plugins.manifests
+	// 	) as PluginManifest[];
+	// 	const enabledPluginsWithVersionMap = manifests
+	// 		.filter((plugin) => enabledPlugins.has(plugin.id))
+	// 		.map((plugin) => ({
+	// 			id: plugin.id,
+	// 			version: plugin.version,
+	// 		}));
 
-		const stringifyEnabledPlugins = enabledPluginsWithVersionMap
-			.map((plugin) => `${plugin.id} = ${plugin.version}`)
-			.join("    <br/>");
+	// 	const stringifyEnabledPlugins = enabledPluginsWithVersionMap
+	// 		.map((plugin) => `${plugin.id} = ${plugin.version}`)
+	// 		.join("    <br/>");
 
-		return `<b>App version</b>: ${appVersion}<br/><br/><b>Obsidian Version</b>: ${obsidianVersion}<br/><br/><b>Enabled Plugins</b>:<br/>${stringifyEnabledPlugins}`;
-	}
+	// 	return `<b>App version</b>: ${appVersion}<br/><br/><b>Obsidian Version</b>: ${obsidianVersion}<br/><br/><b>Enabled Plugins</b>:<br/>${stringifyEnabledPlugins}`;
+	// }
 
 	handleCopyBtnEvent(bugReportContent: string) {
 		// Copy the bug report content to clipboard

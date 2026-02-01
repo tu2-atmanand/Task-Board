@@ -1,6 +1,5 @@
 // /src/utils/ColumnSortingAlgorithm.ts
 
-import type TaskBoard from "main";
 import { columnSortingCriteria } from "src/interfaces/BoardConfigs";
 import { taskItem } from "src/interfaces/TaskItem";
 

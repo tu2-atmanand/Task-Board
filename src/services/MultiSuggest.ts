@@ -2,9 +2,9 @@
 
 import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
-import { taskStatuses } from "src/interfaces/Enums";
 import { CustomStatus } from "src/interfaces/GlobalSettings";
 import { taskItem } from "src/interfaces/TaskItem";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
@@ -14,7 +14,7 @@ export class MultiSuggest extends AbstractInputSuggest<string> {
 		private inputEl: HTMLInputElement,
 		content: Set<string>,
 		private onSelectCb: (value: string) => void,
-		app: App
+		app: App,
 	) {
 		super(app, inputEl);
 		this.content = content;
@@ -23,7 +23,7 @@ export class MultiSuggest extends AbstractInputSuggest<string> {
 	getSuggestions(inputStr: string): string[] {
 		const lowerCaseInputStr = inputStr.toLocaleLowerCase();
 		return [...this.content].filter((content) =>
-			content.toLocaleLowerCase().includes(lowerCaseInputStr)
+			content.toLocaleLowerCase().includes(lowerCaseInputStr),
 		);
 	}
 
@@ -66,7 +66,8 @@ export function getFileSuggestions(app: App): string[] {
 	const files = app.vault
 		.getAllLoadedFiles()
 		.filter(
-			(f) => f instanceof TFile && allowedFileExtensionsRegEx.test(f.path)
+			(f) =>
+				f instanceof TFile && allowedFileExtensionsRegEx.test(f.path),
 		)
 		.map((f) => f.path);
 
@@ -86,7 +87,7 @@ export function getTagSuggestions(app: App): string[] {
 
 export function getQuickAddPluginChoices(
 	app: App,
-	quickAddPluginObj: any
+	quickAddPluginObj: any,
 ): string[] {
 	try {
 		if (!quickAddPluginObj) {
@@ -101,7 +102,11 @@ export function getQuickAddPluginChoices(
 			.filter((key) => choices[key].type === "Capture")
 			.map((key) => choices[key].name);
 	} catch (error) {
-		console.warn("Error fetching QuickAdd plugin choices:", error);
+		bugReporterManagerInsatance.addToLogs(
+			103,
+			String(error),
+			"MultiSuggest.ts/getQuickAddPluginChoices",
+		);
 		return [];
 	}
 }
