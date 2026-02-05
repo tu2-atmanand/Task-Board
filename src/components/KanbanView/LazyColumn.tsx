@@ -47,6 +47,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	hideColumnHeader = false,
 	headerOnly = false,
 }) => {
+	// console.log("Column Data :", columnData);
 	if (!headerOnly && activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
@@ -283,11 +284,16 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							if (columnIndex !== -1) {
 								// Update the column configuration
 								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
+								const newSettings = plugin.settings;
 
 								// Save the settings
-								plugin.saveSettings();
+								plugin.saveSettings(newSettings).then(() => {
+									setTimeout(() => {
+										console.log("Refreshing now..");
+										eventEmitter.emit('REFRESH_BOARD');
+									}, 200)
+								})
 
-								eventEmitter.emit('REFRESH_BOARD');
 							}
 						}
 					},

@@ -301,7 +301,7 @@ export const columnSegregator = (
 	 * 		SORTING
 	 * -------------------------------------------------------------
 	 */
-	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
+	if (columnData?.sortCriteria && columnData.sortCriteria.length > 0) {
 		// TODO : This code can be moved inside the ColumnSortingAlgorithm function.
 		// If manualOrder is one of the sorting criteria, apply manual ordering using columnData.tasksIdManualOrder
 		const hasManualOrder = columnData.sortCriteria.some(

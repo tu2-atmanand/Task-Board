@@ -7,6 +7,7 @@ import { ColumnData, columnSortingCriteria } from "src/interfaces/BoardConfigs";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class ConfigureColumnSortingModal extends Modal {
 	plugin: TaskBoard;
@@ -19,20 +20,23 @@ export class ConfigureColumnSortingModal extends Modal {
 		plugin: TaskBoard,
 		columnConfiguration: ColumnData,
 		onSave: (updatedColumnConfiguration: ColumnData) => void,
-		onCancel: () => void
+		onCancel: () => void,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.isEdited = false;
-		// Deep-copy columnConfiguration to avoid mutating caller's object (avoid stale/unsaved changes)
-		try {
-			this.columnConfiguration = JSON.parse(
-				JSON.stringify(columnConfiguration)
-			);
-		} catch (e) {
-			// Fallback to shallow copy if stringify fails
-			this.columnConfiguration = { ...columnConfiguration };
-		}
+		// // Deep-copy columnConfiguration to avoid mutating caller's object (avoid stale/unsaved changes)
+		// try {
+		// 	this.columnConfiguration = JSON.parse(
+		// 		JSON.stringify(columnConfiguration),
+		// 	);
+		// } catch (e) {
+		// 	// Fallback to shallow copy if stringify fails
+		// 	this.columnConfiguration = { ...columnConfiguration };
+		// }
+
+		this.columnConfiguration = columnConfiguration;
+
 		this.onSave = onSave;
 		this.onCancel = onCancel;
 
@@ -54,12 +58,12 @@ export class ConfigureColumnSortingModal extends Modal {
 		const { contentEl } = this;
 
 		this.setTitle(
-			t("sorting-criterias-for") + " " + this.columnConfiguration.name
+			t("sorting-criterias-for") + " " + this.columnConfiguration.name,
 		);
 
 		this.modalEl.setAttribute(
 			"data-type",
-			"task-board-column-sorting-configure"
+			"task-board-column-sorting-configure",
 		);
 
 		const homeComponent = contentEl.createEl("span", {
@@ -92,7 +96,7 @@ export class ConfigureColumnSortingModal extends Modal {
 			onSort: async () => {
 				// Use stable uid attributes on DOM rows to determine new order
 				const uidsInDom = Array.from(sortingCriteriaList.children).map(
-					(child) => child.getAttribute("data-uid")
+					(child) => child.getAttribute("data-uid"),
 				);
 				const existing = this.columnConfiguration.sortCriteria || [];
 				const newOrder: ColumnData["sortCriteria"] = [];
@@ -129,15 +133,15 @@ export class ConfigureColumnSortingModal extends Modal {
 
 					new Setting(row)
 						.setClass(
-							"configureColumnSortingModalHomeSortingCriteriaListItem"
+							"configureColumnSortingModalHomeSortingCriteriaListItem",
 						)
 						.addButton((drag) =>
 							drag
 								.setTooltip("Hold and drag")
 								.setIcon("grip-horizontal")
 								.setClass(
-									"configureColumnSortingModalHomeSortingCriteriaListItemDragHandle"
-								)
+									"configureColumnSortingModalHomeSortingCriteriaListItemDragHandle",
+								),
 						)
 						.addDropdown((dropdown) => {
 							if (
@@ -146,7 +150,7 @@ export class ConfigureColumnSortingModal extends Modal {
 							) {
 								dropdown.addOption(
 									"manualOrder",
-									t("manual-order")
+									t("manual-order"),
 								);
 							}
 
@@ -171,18 +175,39 @@ export class ConfigureColumnSortingModal extends Modal {
 									this.isEdited = true;
 									if (this.columnConfiguration.sortCriteria) {
 										if (value === "manualOrder") {
-											renderSortingCriterias(); // Re-render if manualOrder is selected
 											// Remove all the other sort criteria
 											this.columnConfiguration.sortCriteria =
 												[];
+
+											const newCriteria: columnSortingCriteria =
+												{
+													criteria: "manualOrder",
+													order: "asc",
+													priority: 1,
+													uid: generateRandomTempTaskId(),
+												};
 											// Add manualOrder sort criteria
-											this.columnConfiguration.sortCriteria[0].criteria =
-												value as columnSortingCriteria["criteria"];
+											this.columnConfiguration.sortCriteria.push(
+												newCriteria,
+											);
+
+											renderSortingCriterias(); // Re-render if manualOrder is selected
 										} else {
-											this.columnConfiguration.sortCriteria[
-												index
-											].criteria =
-												value as columnSortingCriteria["criteria"];
+											const foundCriteria =
+												this.columnConfiguration
+													.sortCriteria[index];
+
+											if (foundCriteria) {
+												foundCriteria.criteria =
+													value as columnSortingCriteria["criteria"];
+											} else {
+												bugReporterManagerInsatance.showNotice(
+													179,
+													"There was an issue finding the exact sorting criterion using the index.",
+													`Sorting criteria : ${JSON.stringify(this.columnConfiguration.sortCriteria)}\nIndex : ${index}`,
+													"ConfigureColumnSortingModal.ts/renderSortingCritierias/onChange",
+												);
+											}
 										}
 									}
 								});
@@ -208,7 +233,7 @@ export class ConfigureColumnSortingModal extends Modal {
 								// Add tooltips explaining what asc/desc means for each field type if possible
 								if (sortCriteria.criteria === "priority") {
 									dropdown.selectEl.title = t(
-										"column-sorting-criteria-priority-tooltip-numeric-properties"
+										"column-sorting-criteria-priority-tooltip-numeric-properties",
 									);
 								} else if (
 									[
@@ -218,15 +243,15 @@ export class ConfigureColumnSortingModal extends Modal {
 									].includes(sortCriteria.criteria)
 								) {
 									dropdown.selectEl.title = t(
-										"column-sorting-criteria-priority-tooltip-date-properties"
+										"column-sorting-criteria-priority-tooltip-date-properties",
 									);
 								} else if (sortCriteria.criteria === "status") {
 									dropdown.selectEl.title = t(
-										"column-sorting-criteria-priority-tooltip-status-properties"
+										"column-sorting-criteria-priority-tooltip-status-properties",
 									);
 								} else {
 									dropdown.selectEl.title = t(
-										"column-sorting-criteria-priority-tooltip-content-properties"
+										"column-sorting-criteria-priority-tooltip-content-properties",
 									);
 								}
 							} else {
@@ -238,30 +263,42 @@ export class ConfigureColumnSortingModal extends Modal {
 								.setButtonText("delete")
 								.setIcon("trash")
 								.setClass(
-									"configureColumnSortingModalHomeSortingCriteriaListItemDeleteCriterion"
+									"configureColumnSortingModalHomeSortingCriteriaListItemDeleteCriterion",
 								)
 								.setTooltip(t("remove-sort-criterion"))
 								.onClick(async () => {
 									this.isEdited = true;
-									if (this.columnConfiguration.sortCriteria) {
+									if (
+										this.columnConfiguration.sortCriteria &&
+										this.columnConfiguration.sortCriteria
+											.length > index
+									) {
+										console.log(
+											"Old sorting criterias :",
+											this.columnConfiguration,
+										);
 										this.columnConfiguration.sortCriteria.splice(
 											index,
-											1
+											1,
+										);
+										console.log(
+											"New sorting criterias :",
+											this.columnConfiguration,
 										);
 										renderSortingCriterias(); // Re-render after delete
 									}
-								})
+								}),
 						);
 				});
 
 			if (
 				this.columnConfiguration.sortCriteria.some(
-					(c) => c.criteria === "manualOrder"
+					(c) => c.criteria === "manualOrder",
 				)
 			) {
 				new Setting(sortingCriteriaList)
 					.setClass(
-						"configureColumnSortingModalHomeSortingCriteriaListItemNotice"
+						"configureColumnSortingModalHomeSortingCriteriaListItemNotice",
 					)
 					.setName(t("note"))
 					.setDesc(t("manual-order-notice"));
@@ -278,19 +315,19 @@ export class ConfigureColumnSortingModal extends Modal {
 		addNewSortingButton.addEventListener("click", async () => {
 			if (
 				this.columnConfiguration.sortCriteria?.some(
-					(c) => c.criteria === "manualOrder"
+					(c) => c.criteria === "manualOrder",
 				)
 			) {
 				new Notice(
-					t("cannot-add-more-sorting-criteria-with-manual-order")
+					t("cannot-add-more-sorting-criteria-with-manual-order"),
 				);
 			} else {
 				this.isEdited = true;
-				const newCriteria: any = {
+				const newCriteria: columnSortingCriteria = {
 					criteria: "content",
 					order: "asc",
 					priority:
-						(this.columnConfiguration.sortCriteria?.length || 0) +
+						(this.columnConfiguration.sortCriteria?.length ?? 0) +
 						1,
 					uid: generateRandomTempTaskId(),
 				};
@@ -304,7 +341,7 @@ export class ConfigureColumnSortingModal extends Modal {
 
 		// Button container at bottom
 		const buttonContainer = homeComponent.createDiv(
-			"configureColumnSortingModalHomeButtonContainer"
+			"configureColumnSortingModalHomeButtonContainer",
 		);
 
 		const saveButton = buttonContainer.createEl("button", {
@@ -312,6 +349,10 @@ export class ConfigureColumnSortingModal extends Modal {
 			cls: "configureColumnSortingModalHomeButtonContainerSaveBtn",
 		});
 		saveButton.addEventListener("click", () => {
+			console.log(
+				"On Save button clicked. Passing following column configs :",
+				this.columnConfiguration,
+			);
 			this.onSave(this.columnConfiguration);
 			this.isEdited = false;
 			this.close();
@@ -321,7 +362,7 @@ export class ConfigureColumnSortingModal extends Modal {
 			text: t("cancel"),
 		});
 		cancelButton.classList.add(
-			"configureColumnSortingModalHomeButtonContainerCancelBtn"
+			"configureColumnSortingModalHomeButtonContainerCancelBtn",
 		);
 		cancelButton.addEventListener("click", () => {
 			this.onCancel();

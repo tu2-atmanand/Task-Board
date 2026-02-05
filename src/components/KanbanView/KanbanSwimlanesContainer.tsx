@@ -42,14 +42,21 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		minimized
 	} = board.swimlanes;
 
+	const activeColumns = board.columns
+		.filter((col) => col.active);
+	// .map((col) => ({
+	// 	// create a shallow copy so we don't mutate original board state
+	// 	...col,
+	// 	sortCriteria: col.sortCriteria || [],
+	// 	tasksIdManualOrder: Array.isArray(col.tasksIdManualOrder) ? col.tasksIdManualOrder : [],
+	// }));
+
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
 		if (!board.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
 		}
 
-
 		// Get all active columns
-		const activeColumns = board.columns.filter((col) => col.active);
 		if (activeColumns.length === 0) return [];
 
 		// Extract unique values for the swimlane property from tasksPerColumn
@@ -219,8 +226,6 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// 		(event instanceof MouseEvent ? event : event.nativeEvent)
 	// 	);
 	// }
-
-	const activeColumns = board.columns.filter((col) => col.active);
 
 	async function handleSwimlaneMinimize(rowIndex: number) {
 		try {

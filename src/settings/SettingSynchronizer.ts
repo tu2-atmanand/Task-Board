@@ -10,6 +10,7 @@ import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
 import { colTypeNames } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomNumber } from "src/utils/TaskItemUtils";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
@@ -46,7 +47,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 		 * This is a temporary solution to sync the boardConfigs. This is required to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically we need to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
 		 */
 		else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-			settings[key].forEach((boardConfig: Board) => {
+			settings[key].forEach((boardConfig: Board, index: number) => {
 				boardConfig.columns.forEach((column: ColumnData) => {
 					// Older IDs were smaller number. Will change them to 10 digit numbers.
 					column.id = generateRandomNumber();
@@ -67,8 +68,11 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 					}
 				});
 
+				// FIX : This is a fix becauase of my silly mistake, in the third board I hardcoded the index as 1 instead of 2.
+				boardConfig.index = index;
+
 				// Migration applied since version 1.4.0
-				if (!boardConfig.hideEmptyColumns) {
+				if (!boardConfig?.hideEmptyColumns) {
 					boardConfig.hideEmptyColumns = false;
 				}
 
@@ -101,7 +105,15 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 					}
 				}
 			});
-		} else if (
+		}
+
+		// -------------------------------------
+		/**
+		 * @type Reqruired
+		 *
+		 * This is a cumpulsory case, which will recursively iterate all the object type settings.
+		 */
+		else if (
 			typeof defaults[key] === "object" &&
 			defaults[key] !== null &&
 			!Array.isArray(defaults[key])
