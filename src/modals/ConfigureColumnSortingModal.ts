@@ -6,6 +6,7 @@ import Sortable from "sortablejs";
 import { ColumnData, columnSortingCriteria } from "src/interfaces/BoardConfigs";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 export class ConfigureColumnSortingModal extends Modal {
 	plugin: TaskBoard;
@@ -40,12 +41,12 @@ export class ConfigureColumnSortingModal extends Modal {
 			this.columnConfiguration.sortCriteria = [];
 		} else {
 			this.columnConfiguration.sortCriteria =
-				this.columnConfiguration.sortCriteria.map((c) => ({
-					...c,
-					uid:
-						(c as any).uid ||
-						Math.random().toString(36).slice(2, 10),
-				}));
+				this.columnConfiguration.sortCriteria.map(
+					(criteria: columnSortingCriteria) => ({
+						...criteria,
+						uid: criteria.uid || generateRandomTempTaskId(),
+					}),
+				);
 		}
 	}
 
@@ -291,7 +292,7 @@ export class ConfigureColumnSortingModal extends Modal {
 					priority:
 						(this.columnConfiguration.sortCriteria?.length || 0) +
 						1,
-					uid: Math.random().toString(36).slice(2, 10),
+					uid: generateRandomTempTaskId(),
 				};
 				if (!this.columnConfiguration.sortCriteria) {
 					this.columnConfiguration.sortCriteria = [];

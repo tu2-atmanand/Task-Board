@@ -48,9 +48,9 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 		else if (key === "boardConfigs" && Array.isArray(settings[key])) {
 			settings[key].forEach((boardConfig: Board) => {
 				boardConfig.columns.forEach((column: ColumnData) => {
-					if (!column.id) {
-						column.id = Math.floor(Math.random() * 1000000);
-					}
+					// Older IDs were smaller number. Will change them to 10 digit numbers.
+					column.id = generateRandomNumber();
+
 					if (
 						column.colType === colTypeNames.dated ||
 						(column.colType === colTypeNames.undated &&

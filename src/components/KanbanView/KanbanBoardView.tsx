@@ -1,6 +1,6 @@
 // src/components/KanbanBoard.tsx
 
-import { Board } from "../../interfaces/BoardConfigs";
+import { Board, ColumnData } from "../../interfaces/BoardConfigs";
 import React, { memo } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
@@ -80,7 +80,7 @@ const MemoizedColumn = memo<{
 	plugin: TaskBoard;
 	columnIndex: number;
 	activeBoardData: Board;
-	columnData: any;
+	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
 	Component: typeof LazyColumn;
 }>(({ Component, ...props }) => {

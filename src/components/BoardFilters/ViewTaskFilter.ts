@@ -32,6 +32,7 @@ import {
 } from "src/interfaces/Mapping";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;
@@ -1556,5 +1557,5 @@ export class TaskFilterComponent extends Component {
 }
 
 export function generateIdForFilters(): string {
-	return `id-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+	return `id-${Date.now()}-${generateRandomTempTaskId()}`;
 }

@@ -27,7 +27,7 @@ export const getAllTaskTags = (task: taskItem): string[] => {
  */
 export const getTaskFromId = async (
 	plugin: TaskBoard,
-	id: string | number
+	id: string | number,
 ): Promise<taskItem | null> => {
 	try {
 		let foundTask: taskItem | undefined | null;
@@ -37,7 +37,7 @@ export const getTaskFromId = async (
 		for (const tasks of Object.values(pendingTasksObj)) {
 			if (id) {
 				foundTask = tasks.find(
-					(task) => task.legacyId === id || task.id === id
+					(task) => task.legacyId === id || task.id === id,
 				);
 			}
 			if (foundTask) return foundTask;
@@ -49,7 +49,7 @@ export const getTaskFromId = async (
 		for (const tasks of Object.values(completedTasksObj)) {
 			if (id) {
 				foundTask = tasks.find(
-					(task) => task.legacyId === id || task.id === id
+					(task) => task.legacyId === id || task.id === id,
 				);
 			}
 			if (foundTask) return foundTask;
@@ -61,7 +61,7 @@ export const getTaskFromId = async (
 			82,
 			"Error retrieving task from tasksCache using ID",
 			String(error),
-			"TaskItemUtils.ts/getTaskFromId"
+			"TaskItemUtils.ts/getTaskFromId",
 		);
 		return null;
 	}
@@ -76,12 +76,26 @@ export const getTaskFromId = async (
 
 /**
  * Generates a random unique ID using the Web Crypto API.
+ * 
+ * For example : '1851955511'.
  * @return {string} a random unique ID for a task
  */
 export function generateRandomTempTaskId(): string {
 	const array = new Uint32Array(1);
 	crypto.getRandomValues(array);
 	return String(array[0]);
+}
+
+/**
+ * Generates a random unique ID using the Web Crypto API.
+ * 
+ * For example : 1851955511.
+ * @return a random unique 10 digit number
+ */
+export function generateRandomNumber(): number {
+	const array = new Uint32Array(1);
+	crypto.getRandomValues(array);
+	return array[0];
 }
 
 /**
@@ -112,12 +126,12 @@ export function generateTaskId(plugin: TaskBoard): string {
  */
 export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ): Promise<string | undefined> => {
 	if (
 		isTaskNotePresentInTags(
 			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-			task.tags
+			task.tags,
 		)
 	) {
 		let newId;

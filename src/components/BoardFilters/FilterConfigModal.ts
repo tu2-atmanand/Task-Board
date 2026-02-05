@@ -7,6 +7,7 @@ import {
 	SavedFilterConfig,
 } from "src/interfaces/BoardConfigs";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 export class FilterConfigModal extends Modal {
 	private plugin: TaskBoard;
@@ -247,9 +248,7 @@ export class FilterConfigModal extends Modal {
 
 		const now = new Date().toISOString();
 		const config: SavedFilterConfig = {
-			id: `filter-config-${Date.now()}-${Math.random()
-				.toString(36)
-				.substr(2, 9)}`,
+			id: `filter-config-${Date.now()}-${generateRandomTempTaskId()}`,
 			name: name.trim(),
 			description: description.trim() || undefined,
 			filterState: JSON.parse(JSON.stringify(this.currentFilterState)),

@@ -156,7 +156,9 @@ export class AddColumnModal extends Modal {
 				this.colType === colTypeNames.undated
 			) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0], // Generate a random ID
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					datedBasedColumn: {
@@ -167,42 +169,54 @@ export class AddColumnModal extends Modal {
 				}); // Add range data
 			} else if (this.colType === colTypeNames.namedTag) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					coltag: "",
 				});
 			} else if (this.colType === colTypeNames.taskStatus) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					taskStatus: "",
 				});
 			} else if (this.colType === colTypeNames.taskPriority) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					taskPriority: 1,
 				});
 			} else if (this.colType === "completed") {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					limit: 20,
 				}); // Add limit
 			} else if (this.colType === colTypeNames.pathFiltered) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					filePaths: "",
 				}); // Add path filter
 			} else {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 				});
