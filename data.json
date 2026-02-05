@@ -1,5 +1,5 @@
 {
-  "version": "1.8.7",
+  "version": "1.9.0",
   "data": {
     "boardConfigs": [
       {
@@ -505,7 +505,7 @@
           ]
         },
         "taskCount": {
-          "pending": 64,
+          "pending": 65,
           "completed": 14
         },
         "swimlanes": {
@@ -692,7 +692,7 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 64,
+          "pending": 65,
           "completed": 14
         },
         "swimlanes": {
@@ -770,7 +770,15 @@
                   ]
                 }
               ]
-            }
+            },
+            "sortCriteria": [
+              {
+                "criteria": "content",
+                "order": "asc",
+                "priority": 1,
+                "uid": "8izcxk47"
+              }
+            ]
           },
           {
             "id": 3370807172,
