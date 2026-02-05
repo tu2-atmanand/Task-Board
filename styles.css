@@ -1845,17 +1845,16 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	}
 
 	.EditTaskModalHomeToggleBtn {
-		background-color: var(--accent-color, blue);
-		color: white;
 		border: none;
-		padding: 8px 12px;
-		border-radius: 4px;
+		border-radius: 7px;
 		cursor: pointer;
 		display: block;
 	}
 
-	.EditTaskModalHomeToggleBtn:hover {
-		background-color: darkblue;
+	.EditTaskModalHomeToggleBtn svg {
+		display: flex;
+		align-content: center;
+		vertical-align: middle;
 	}
 }
 
@@ -2268,7 +2267,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 		left: 1em;
 		width: 4.2em !important;
 		height: 2.5em !important;
-		color: white;
 		border: none;
 		padding: 9px 20px !important;
 		border-radius: 4px;
@@ -2317,7 +2315,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 		/* right: 1px; */
 		/* left: 1px; */
 		align-self: center;
-		background-color: var(--color-green) !important;
+		border: 2px solid var(--color-green) !important;
 		cursor: pointer;
 		width: 90%;
 	}
@@ -5942,7 +5940,7 @@ svg.react-flow__connectionline {
 .boardSidebarCardTitle {
 	font-weight: 500;
 	font-size: 1rem !important;
-	color: var(--background-modifier-border-focus) !important;
+	color: var(--text-faint) !important;
 	font-size: var(--font-size-default);
 }
 
@@ -5959,7 +5957,7 @@ svg.react-flow__connectionline {
 	width: 100%;
 	font-size: 0.9rem;
 	padding-block-start: 0.7rem;
-	color: var(--background-modifier-border-focus) !important;
+	color: var(--text-faint) !important;
 }
 
 .boardSidebarCard--active .boardSidebarCardDescription {
