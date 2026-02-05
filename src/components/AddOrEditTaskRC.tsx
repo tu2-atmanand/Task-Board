@@ -1318,7 +1318,7 @@ export const AddOrEditTaskRC: React.FC<{
 						<div className="EditTaskModalHomeFooterBtnSec">
 							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
 							<button className="EditTaskModalHomeToggleBtn" onClick={toggleRightSec} aria-label="Toggle Details">
-								<PanelRightOpenIcon size={20} alignmentBaseline="middle" />
+								<PanelRightOpenIcon size={25} alignmentBaseline="middle" />
 							</button>
 						</div>
 					</div>
