@@ -15,9 +15,9 @@ import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
-import { Board, swimlaneConfigs } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
-import { columnDataProp, AddColumnModal } from "./AddColumnModal";
+import { AddColumnModal } from "./AddColumnModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
@@ -173,7 +173,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		swimlaneModal.open();
 	};
 
-	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
+	const handleAddColumn = (boardIndex: number, columnData: ColumnData) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
 			id: columnData.id,
@@ -201,7 +201,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const modal = new AddColumnModal(plugin.app, {
 			app: plugin.app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
-			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
+			onSubmit: (columnData: ColumnData) => handleAddColumn(selectedBoardIndex, columnData),
 		});
 		modal.open();
 	};

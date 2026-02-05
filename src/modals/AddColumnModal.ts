@@ -1,43 +1,20 @@
 // /src/modal/AddColumnModal.ts
 
 import { App, Modal } from "obsidian";
+import { ColumnData } from "src/interfaces/BoardConfigs";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { columnTypeAndNameMapping } from "src/interfaces/Mapping";
-
 import { t } from "src/utils/lang/helper";
-
-export type columnDataProp = {
-	id: number;
-	colType: string;
-	name: string;
-	active?: boolean;
-	datedBasedColumn?: { dateType: string; from: number; to: number };
-	coltag?: string;
-	taskStatus?: string;
-	taskPriority?: number;
-	limit?: number;
-	filePaths?: string;
-};
+import { generateRandomNumber } from "src/utils/TaskItemUtils";
 
 interface AddColumnModalProps {
 	app: App;
 	onCancel: () => void;
-	onSubmit: (columnData: columnDataProp) => void;
+	onSubmit: (columnData: ColumnData) => void;
 }
 
 export class AddColumnModal extends Modal {
-	private onSubmit: (columnData: {
-		id: number;
-		colType: string;
-		name: string;
-		active?: boolean;
-		datedBasedColumn?: { dateType: string; from: number; to: number };
-		coltag?: string;
-		taskStatus?: string;
-		taskPriority?: number;
-		limit?: number;
-		filePaths?: string;
-	}) => void;
+	private onSubmit: (columnData: ColumnData) => void;
 	private onCancel: () => void;
 	private colType: string;
 	private name: string;
