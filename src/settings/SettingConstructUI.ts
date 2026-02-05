@@ -320,7 +320,7 @@ export class SettingsManager {
 				),
 			);
 
-		["files", "folders", "frontMatter", "tags"].forEach((type) => {
+		["files", "folders", "frontmatter", "tags"].forEach((type) => {
 			const filterType = type as keyof typeof scanFilters;
 			const filter = scanFilters[filterType];
 

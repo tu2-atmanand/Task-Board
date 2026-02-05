@@ -1354,80 +1354,6 @@ export default class TaskBoard extends Plugin {
 		isReminderPluginInstalled(this.plugin);
 	}
 
-	// private migrateSettings(defaults: any, settings: any) {
-	// 	for (const key in defaults) {
-	// 		if (!(key in settings)) {
-	// 			settings[key] = defaults[key];
-	// 		} else if (
-	// 			// This is a temporary fix for the tagColors
-	// 			!Array.isArray(settings[key]) &&
-	// 			key === "tagColors" &&
-	// 			typeof settings[key] === "object" &&
-	// 			settings[key] !== null
-	// 		) {
-	// 			settings[key] = Object.entries(
-	// 				settings[key] as Record<string, string>
-	// 			).map(
-	// 				([name, color], idx) =>
-	// 					({
-	// 						name,
-	// 						color,
-	// 						priority: idx + 1,
-	// 					} as any)
-	// 			);
-	// 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-	// 			// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.globalSettings.defaultDateType.
-	// 			settings[key].forEach((boardConfig: Board) => {
-	// 				boardConfig.columns.forEach((column: ColumnData) => {
-	// 					if (!column.id) {
-	// 						column.id = Math.floor(Math.random() * 1000000);
-	// 					}
-	// 					if (
-	// 						column.colType === colType.dated ||
-	// 						(column.colType === colType.undated &&
-	// 							!column.datedBasedColumn)
-	// 					) {
-	// 						column.datedBasedColumn = {
-	// 							dateType:
-	// 								this.settings.data.globalSettings
-	// 									.universalDate,
-	// 							from: column.datedBasedColumn?.from || 0,
-	// 							to: column.datedBasedColumn?.to || 0,
-	// 						};
-	// 						delete column.range;
-	// 					}
-	// 				});
-
-	// 				if (!boardConfig.hideEmptyColumns) {
-	// 					boardConfig.hideEmptyColumns = false;
-	// 				}
-	// 			});
-	// 		} else if (
-	// 			typeof defaults[key] === "object" &&
-	// 			defaults[key] !== null &&
-	// 			!Array.isArray(defaults[key])
-	// 		) {
-	// 			// Recursively sync nested objects
-	// 			// console.log(
-	// 			// 	"Syncing settings for key:",
-	// 			// 	key,
-	// 			// 	"Defaults:",
-	// 			// 	defaults[key],
-	// 			// 	"Settings:",
-	// 			// 	settings[key]
-	// 			// );
-	// 			this.migrateSettings(defaults[key], settings[key]);
-	// 		} else if (key === "tasksCacheFilePath" && settings[key] === "") {
-	// 			settings[
-	// 				key
-	// 			] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
-	// 		}
-	// 	}
-
-	// 	this.settings = settings;
-	// 	// this.saveSettings();
-	// }
-
 	private runOnPluginUpdate() {
 		// Check if the plugin version has changed
 		const currentVersion = newReleaseVersion; // Change this whenever you will going to release a new version.
@@ -1465,10 +1391,13 @@ export default class TaskBoard extends Plugin {
 
 			if (previousVersion === "" || runMandatoryScan) {
 				localStorage.setItem("manadatoryScan", "true");
-				const smallMessage =
-					"Even being a minor release, this new version of Task Board requires a re-scan of your vault. Kindly re-scan using the top-right button in the task board tab.";
-				new Notice(smallMessage, 0);
 			}
+
+			// if (runMandatoryScan) {
+			// const smallMessage =
+			// 	"Even being a minor release, this new version of Task Board requires a re-scan of your vault. Kindly re-scan using the top-right button in the task board tab.";
+			// new Notice(smallMessage, 0);
+			// }
 
 			this.settings.version = currentVersion;
 
