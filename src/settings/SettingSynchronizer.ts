@@ -34,7 +34,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 		 *
 		 * This is migration is only applied to replace the older settings available in users configs with the new settings as per the new Settinsg section added in the global settings.
 		 */
-		else if (key === "customStatuses") {
+		if (key === "customStatuses") {
 			settings[key] = DEFAULT_SETTINGS.data.globalSettings.customStatuses;
 		}
 
@@ -59,7 +59,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 		 *
 		 * This is a temporary solution to sync the boardConfigs. This is required to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically we need to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
 		 */
-		else if (key === "boardConfigs" && Array.isArray(settings[key])) {
+		if (key === "boardConfigs" && Array.isArray(settings[key])) {
 			settings[key].forEach((boardConfig: Board, index: number) => {
 				boardConfig.columns.forEach((column: ColumnData) => {
 					// Older IDs were smaller number. Will change them to 10 digit numbers.
@@ -126,7 +126,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 		 *
 		 * This is a cumpulsory case, which will recursively iterate all the object type settings.
 		 */
-		else if (
+		if (
 			typeof defaults[key] === "object" &&
 			defaults[key] !== null &&
 			!Array.isArray(defaults[key])
