@@ -962,103 +962,118 @@ export default class TaskBoard extends Plugin {
 				changed_files.length + deletedFilesList.length;
 
 			if (totalFilesLength > 0) {
-				const modifiedFilesNotice = new Notice(
-					createFragment((f) => {
-						f.createDiv("bugReportNotice", (el) => {
-							el.createEl("p", {
-								text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
-							});
-							el.createEl("button", {
-								text: t("show-me"),
-								cls: "reportBugButton",
-								onclick: () => {
-									// el.hide();
+				const scanAllModifiedFiles = () => {
+					this.plugin.vaultScanner
+						.refreshTasksFromFiles(changed_files, false)
+						.then(async () => {
+							if (deletedFilesList.length > 0) {
+								await this.plugin.vaultScanner.deleteCacheForFiles(
+									deletedFilesList,
+								);
+							}
+						});
+				};
 
-									// Open a modal and show all these file names with their modified date-time in a nice UI.
-									const modifiedFilesModal =
-										new ModifiedFilesModal(this.app, {
-											modifiedFiles: changed_files,
-											deletedFiles: deletedFilesList,
-										});
-									modifiedFilesModal.open();
-								},
-							});
-							el.createEl("button", {
-								text: t("scan-them"),
-								cls: "ignoreBugButton",
-								onclick: async () => {
-									modifiedFilesNotice.hide();
+				if (this.settings.data.globalSettings.showModifiedFilesNotice) {
+					const modifiedFilesNotice = new Notice(
+						createFragment((f) => {
+							f.createDiv("bugReportNotice", (el) => {
+								el.createEl("p", {
+									text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
+								});
+								el.createEl("button", {
+									text: t("show-me"),
+									cls: "reportBugButton",
+									onclick: () => {
+										// el.hide();
 
-									// Show progress notice
-									this.currentProgressNotice = new Notice(
-										`Task Board : Processing modified files: 0/${totalFilesLength}`,
-										0,
-									);
-
-									this.plugin.vaultScanner
-										.refreshTasksFromFiles(
-											changed_files,
-											false,
-										)
-										.then(async () => {
-											if (deletedFilesList.length > 0) {
-												await this.plugin.vaultScanner.deleteCacheForFiles(
-													deletedFilesList,
-												);
-											}
-										});
-
-									let modifiedFilesQueue = changed_files;
-
-									let processed = 0;
-									while (modifiedFilesQueue.length > 0) {
-										const file =
-											modifiedFilesQueue.shift()!;
-
+										// Open a modal and show all these file names with their modified date-time in a nice UI.
+										const modifiedFilesModal =
+											new ModifiedFilesModal(this.app, {
+												modifiedFiles: changed_files,
+												deletedFiles: deletedFilesList,
+											});
+										modifiedFilesModal.open();
+									},
+								});
+								el.createEl("button", {
+									text: t("scan-them"),
+									cls: "ignoreBugButton",
+									onclick: async () => {
 										try {
-											processed++;
+											modifiedFilesNotice.hide();
 
-											// Update progress notice
-											this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+											// Show progress notice
+											this.currentProgressNotice =
+												new Notice(
+													`Task Board : Processing modified files: 0/${totalFilesLength}`,
+													0,
+												);
+
+											scanAllModifiedFiles();
+
+											let modifiedFilesQueueLength =
+												changed_files?.length ?? 0;
+
+											let processed = 0;
+											while (
+												modifiedFilesQueueLength > 0
+											) {
+												modifiedFilesQueueLength =
+													modifiedFilesQueueLength -
+													1;
+
+												processed++;
+
+												// Update progress notice
+												this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+
+												// Add delay between processing each file to prevent blocking UI
+												if (
+													modifiedFilesQueueLength > 0
+												) {
+													await new Promise(
+														(resolve) =>
+															setTimeout(
+																resolve,
+																this
+																	.PROCESSING_INTERVAL,
+															),
+													);
+												}
+											}
+
+											// Hide progress notice after completion
+											this.currentProgressNotice?.hide();
+											this.currentProgressNotice = null;
+											new Notice(
+												`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
+											);
 										} catch (error) {
+											this.currentProgressNotice?.hide();
 											bugReporterManagerInsatance.addToLogs(
 												165,
 												String(error),
 												"main.ts/findModifiedFilesOnAppAbsense",
 											);
 										}
-
-										// Add delay between processing each file to prevent blocking UI
-										if (modifiedFilesQueue.length > 0) {
-											await new Promise((resolve) =>
-												setTimeout(
-													resolve,
-													this.PROCESSING_INTERVAL,
-												),
-											);
-										}
-									}
-
-									// Hide progress notice after completion
-									this.currentProgressNotice?.hide();
-									this.currentProgressNotice = null;
-									new Notice(
-										`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
-									);
-								},
+									},
+								});
 							});
-						});
-					}),
-					0,
-				);
+						}),
+						0,
+					);
 
-				modifiedFilesNotice.messageEl.onClickEvent((e) => {
-					if (e.target instanceof HTMLButtonElement) {
-						e.stopPropagation();
-						e.preventDefault();
-						e.stopImmediatePropagation();
-					}
-				});
+					modifiedFilesNotice.messageEl.onClickEvent((e) => {
+						if (e.target instanceof HTMLButtonElement) {
+							e.stopPropagation();
+							e.preventDefault();
+							e.stopImmediatePropagation();
+						}
+					});
+				} else {
+					scanAllModifiedFiles();
+				}
 			}
 		}
 	}
@@ -1069,6 +1084,7 @@ export default class TaskBoard extends Plugin {
 	registerEvents() {
 		this.registerEvent(
 			this.app.vault.on("modify", async (file: TAbstractFile) => {
+				console.log("File modifed : ", file.path);
 				if (
 					fileTypeAllowedForScanning(
 						this.plugin.settings.data.globalSettings,
@@ -1131,7 +1147,7 @@ export default class TaskBoard extends Plugin {
 				this.onFileModifiedAndLostFocus();
 			});
 			this.registerDomEvent(window, "focus", () => {
-				this.onFileModifiedAndLostFocus();
+				setTimeout(() => this.onFileModifiedAndLostFocus(), 200);
 			});
 		}
 
