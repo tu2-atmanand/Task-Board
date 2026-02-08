@@ -38,6 +38,19 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			settings[key] = DEFAULT_SETTINGS.data.globalSettings.customStatuses;
 		}
 
+		// -----------------------------------
+		/**
+		 * @since v1.9.2
+		 * @type Temporary
+		 * @note Remove this on the next version release where this migration will run.
+		 *
+		 * Because of the name change, we had to do this migration.
+		 */
+		if (key === "frontmatter") {
+			settings[key] = settings["frontMatter"];
+			delete settings["frontMatter"];
+		}
+
 		// -------------------------------------
 		/**
 		 * @since v1.5.0

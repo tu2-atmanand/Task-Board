@@ -29,7 +29,7 @@ export interface scanFilters {
 		polarity: number;
 		values: string[];
 	};
-	frontMatter: {
+	frontmatter: {
 		polarity: number;
 		values: string[];
 	};
@@ -411,7 +411,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					polarity: 3,
 					values: [],
 				},
-				frontMatter: {
+				frontmatter: {
 					polarity: 3,
 					values: [],
 				},

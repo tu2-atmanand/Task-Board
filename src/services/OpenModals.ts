@@ -29,6 +29,7 @@ import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { DatePickerModal } from "src/modals/date_picker";
 import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { scanFilters } from "src/interfaces/GlobalSettings";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -525,7 +526,7 @@ export const openTaskBoardActionsModal = (
 
 export const openScanFiltersModal = (
 	plugin: TaskBoard,
-	filterType: "files" | "frontMatter" | "folders" | "tags",
+	filterType: keyof scanFilters,
 	onSave: (scanFilters: string[]) => void,
 ) => {
 	new ScanFilterModal(plugin, filterType, async (newValues) => {
