@@ -113,6 +113,12 @@ export class SettingsManager {
 		return displayNames[property as keyof typeof displayNames] || null;
 	}
 
+	/**
+	 * Shows an Obsidian Notice to reload the application.
+	 * It tracks if such a notice has already been shown.
+	 * If already shown, will not show again.
+	 * @returns void
+	 */
 	private openReloadNoticeIfNeeded() {
 		if (!this.reloadNoticeAlreadyShown) {
 			sleep(100).then(() => {
@@ -2415,68 +2421,68 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName("QuickAdd " + t("plugin-compatibility"))
 			.setDesc(t("quickadd-plugin-compatibility-description"))
-			.setTooltip(
-				t("Install and enable QuickAdd plugin to use this setting."),
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(
-						compatiblePlugins.quickAddPlugin &&
-							communityPlugins.isQuickAddPluginEnabled(),
-					)
-					.onChange(async (value) => {
-						if (
-							this.globalSettings &&
-							!communityPlugins.isQuickAddPluginEnabled()
-						) {
-							new Notice(t("quickadd-plugin-not-enabled"));
-							this.globalSettings.compatiblePlugins.quickAddPlugin = false;
-						} else if (this.globalSettings) {
-							this.globalSettings.compatiblePlugins.quickAddPlugin =
-								value;
+			.addToggle((toggle) => {
+				toggle.onChange(async (value) => {
+					if (
+						this.globalSettings &&
+						!communityPlugins.isQuickAddPluginEnabled()
+					) {
+						new Notice(t("quickadd-plugin-not-enabled"));
+						this.globalSettings.compatiblePlugins.quickAddPlugin = false;
+					} else if (this.globalSettings) {
+						this.globalSettings.compatiblePlugins.quickAddPlugin =
+							value;
 
-							this.openReloadNoticeIfNeeded();
-						}
+						this.openReloadNoticeIfNeeded();
+					}
 
-						await this.saveSettings();
-					}),
-			)
+					await this.saveSettings();
+				});
+				// toggle.onClick();
+			})
 			.setDisabled(!communityPlugins.isQuickAddPluginEnabled());
 
-		new Setting(contentEl)
-			.setName(t("default-quickadd-choice"))
-			.setDesc(t("default-quickadd-choice-description"))
-			.setTooltip(t("Enable the above setting to use this setting."))
-			.addText((text) => {
-				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.quickAddPluginDefaultChoice = value;
-				});
+		if (communityPlugins.isQuickAddPluginEnabled()) {
+			new Setting(contentEl)
+				.setName(t("default-quickadd-choice"))
+				.setDesc(t("default-quickadd-choice-description"))
+				.setTooltip(t("Enable the above setting to use this setting."))
+				.addText((text) => {
+					text.setValue(quickAddPluginDefaultChoice).onChange(
+						(value) => {
+							if (this.globalSettings)
+								this.globalSettings.quickAddPluginDefaultChoice =
+									value;
+						},
+					);
 
-				const inputEl = text.inputEl;
-				const suggestionContent = getQuickAddPluginChoices(
-					this.app,
-					communityPlugins.quickAddPlugin,
-				);
-				const onSelectCallback = async (selectedChoiceName: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.quickAddPluginDefaultChoice =
-							selectedChoiceName;
-					}
-					text.setValue(selectedChoiceName);
-					await this.saveSettings();
-				};
+					const inputEl = text.inputEl;
+					const suggestionContent = getQuickAddPluginChoices(
+						this.app,
+						communityPlugins.quickAddPlugin,
+					);
+					const onSelectCallback = async (
+						selectedChoiceName: string,
+					) => {
+						if (this.globalSettings) {
+							this.globalSettings.quickAddPluginDefaultChoice =
+								selectedChoiceName;
+						}
+						text.setValue(selectedChoiceName);
+						await this.saveSettings();
+					};
 
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app,
+					new MultiSuggest(
+						inputEl,
+						new Set(suggestionContent),
+						onSelectCallback,
+						this.app,
+					);
+				})
+				.setDisabled(
+					!this.globalSettings!.compatiblePlugins.quickAddPlugin,
 				);
-			})
-			.setDisabled(
-				!this.globalSettings!.compatiblePlugins.quickAddPlugin,
-			);
+		}
 
 		new Setting(contentEl)
 			.setName(t("push-notification-compatibility"))
