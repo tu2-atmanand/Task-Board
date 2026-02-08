@@ -1,5 +1,5 @@
 {
-  "version": "1.9.0",
+  "version": "1.9.1",
   "data": {
     "boardConfigs": [
       {
@@ -7,7 +7,7 @@
         "index": 0,
         "columns": [
           {
-            "id": 3061361157,
+            "id": 2330614280,
             "index": 1,
             "colType": "pathFiltered",
             "active": true,
@@ -33,7 +33,7 @@
             ]
           },
           {
-            "id": 1312742179,
+            "id": 885377673,
             "index": 2,
             "colType": "pathFiltered",
             "active": true,
@@ -46,7 +46,7 @@
             }
           },
           {
-            "id": 2025781698,
+            "id": 52784179,
             "index": 3,
             "colType": "pathFiltered",
             "active": true,
@@ -55,7 +55,7 @@
             "filePaths": "A QMD file.qmd"
           },
           {
-            "id": 1623496994,
+            "id": 256123682,
             "index": 4,
             "colType": "completed",
             "active": true,
@@ -77,7 +77,7 @@
       {
         "columns": [
           {
-            "id": 1799377278,
+            "id": 524870256,
             "index": 1,
             "colType": "undated",
             "active": true,
@@ -94,7 +94,7 @@
             }
           },
           {
-            "id": 3492,
+            "id": 3166878915,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -123,7 +123,7 @@
             }
           },
           {
-            "id": 3494,
+            "id": 3843923032,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -145,10 +145,10 @@
               "rootCondition": "any",
               "filterGroups": []
             },
-            "minimized": true
+            "minimized": false
           },
           {
-            "id": 3493,
+            "id": 2774776615,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -161,7 +161,7 @@
             }
           },
           {
-            "id": 3495,
+            "id": 1965953982,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -174,7 +174,7 @@
             }
           },
           {
-            "id": 3497,
+            "id": 2482682517,
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -224,14 +224,14 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 64,
+          "pending": 65,
           "completed": 14
         }
       },
       {
         "columns": [
           {
-            "id": 3187486162,
+            "id": 1118419526,
             "index": 1,
             "colType": "otherTags",
             "active": true,
@@ -245,7 +245,7 @@
             "collapsed": false,
             "name": "Backlogs",
             "index": 2,
-            "id": 226119,
+            "id": 2952909289,
             "sortCriterias": [],
             "filters": {
               "rootCondition": "any",
@@ -262,7 +262,7 @@
             "minimized": false
           },
           {
-            "id": 2485661779,
+            "id": 1843592777,
             "index": 3,
             "colType": "namedTag",
             "active": false,
@@ -295,7 +295,7 @@
             "name": "Can be implemented",
             "index": 4,
             "coltag": "#pending",
-            "id": 47626,
+            "id": 1557502453,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -310,17 +310,12 @@
               }
             ],
             "tasksIdManualOrder": [
-              "378",
-              "276",
               "224",
-              "258",
-              "355",
-              "375",
-              "389"
+              "381"
             ]
           },
           {
-            "id": 3130768414,
+            "id": 1969182514,
             "index": 5,
             "colType": "namedTag",
             "active": true,
@@ -335,11 +330,11 @@
             "name": "Ready to publish",
             "index": 6,
             "coltag": "done",
-            "id": 328227,
+            "id": 2777875276,
             "minimized": false
           },
           {
-            "id": 1936828579,
+            "id": 1946148819,
             "index": 7,
             "colType": "namedTag",
             "active": false,
@@ -349,7 +344,7 @@
             "minimized": false
           },
           {
-            "id": 3193261849,
+            "id": 2774562667,
             "index": 8,
             "colType": "completed",
             "active": true,
@@ -377,7 +372,20 @@
         "hideEmptyColumns": false,
         "boardFilter": {
           "rootCondition": "all",
-          "filterGroups": []
+          "filterGroups": [
+            {
+              "id": "id-1770531241625-90470449",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1770531241627-474416378",
+                  "property": "status",
+                  "condition": "is",
+                  "value": "/"
+                }
+              ]
+            }
+          ]
         },
         "filterConfig": {
           "enableSavedFilters": true,
@@ -505,8 +513,8 @@
           ]
         },
         "taskCount": {
-          "pending": 65,
-          "completed": 14
+          "pending": 5,
+          "completed": 0
         },
         "swimlanes": {
           "enabled": true,
@@ -541,7 +549,7 @@
             "collapsed": false,
             "name": "Backlogs",
             "index": 1,
-            "id": 226119,
+            "id": 601779359,
             "sortCriterias": [],
             "filters": {
               "rootCondition": "any",
@@ -558,7 +566,7 @@
             "minimized": false
           },
           {
-            "id": 2485661779,
+            "id": 3393111391,
             "index": 2,
             "colType": "namedTag",
             "active": false,
@@ -585,7 +593,7 @@
             }
           },
           {
-            "id": 1936828579,
+            "id": 2819855131,
             "index": 3,
             "colType": "namedTag",
             "active": false,
@@ -595,12 +603,12 @@
           },
           {
             "colType": "namedTag",
-            "active": true,
+            "active": false,
             "collapsed": false,
             "name": "Can be implemented",
             "index": 4,
             "coltag": "#pending",
-            "id": 47626,
+            "id": 9311975,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -631,7 +639,7 @@
             "name": "In Progress",
             "index": 5,
             "coltag": "working",
-            "id": 908753,
+            "id": 46608313,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -646,7 +654,7 @@
             "name": "In Review",
             "index": 6,
             "coltag": "Test",
-            "id": 396902,
+            "id": 1294172419,
             "minimized": false,
             "workLimit": 3
           },
@@ -657,11 +665,11 @@
             "name": "Ready to publish",
             "index": 7,
             "coltag": "done",
-            "id": 328227,
+            "id": 2582703279,
             "minimized": false
           },
           {
-            "id": 3193261849,
+            "id": 3845106054,
             "index": 8,
             "colType": "completed",
             "active": true,
@@ -724,7 +732,7 @@
         "index": 4,
         "columns": [
           {
-            "id": 2050194674,
+            "id": 3778690204,
             "index": 1,
             "colType": "allPending",
             "active": true,
@@ -748,7 +756,7 @@
             }
           },
           {
-            "id": 850996788,
+            "id": 3502262967,
             "index": 2,
             "colType": "allPending",
             "active": true,
@@ -781,7 +789,7 @@
             ]
           },
           {
-            "id": 3370807172,
+            "id": 3435868142,
             "index": 3,
             "colType": "allPending",
             "active": true,
@@ -806,7 +814,7 @@
             }
           },
           {
-            "id": 1957870296,
+            "id": 1049959260,
             "index": 4,
             "colType": "allPending",
             "active": true,
@@ -838,7 +846,7 @@
             "workLimit": 3
           },
           {
-            "id": 4265650565,
+            "id": 3800077403,
             "index": 5,
             "colType": "completed",
             "active": true,
@@ -896,6 +904,14 @@
           ]
         },
         "frontMatter": {
+          "polarity": 3,
+          "values": [
+            "[\"created\": 2025-02-27]",
+            "[\"tags\": #TEST]",
+            "[\"background\": yellow]"
+          ]
+        },
+        "frontmatter": {
           "polarity": 3,
           "values": [
             "[\"created\": 2025-02-27]",
@@ -1058,12 +1074,12 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 4,
+        "boardIndex": 2,
         "taskId": "",
-        "settingTab": 1
+        "settingTab": 6
       },
       "taskNoteIdentifierTag": "task",
-      "doubleClickCardToEdit": "noteInTab",
+      "doubleClickCardToEdit": "noteInSplit",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
       "archivedTBNotesFolderPath": "",
@@ -1186,13 +1202,14 @@
         "filePath",
         "status",
         "checkbox",
-        "subTasks"
+        "subTasks",
+        "description"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
       "autoAddCancelledDate": true,
-      "scanMode": "manual",
-      "showModifiedFilesNotice": true
+      "scanMode": "automatic",
+      "showModifiedFilesNotice": false
     }
   }
 }
