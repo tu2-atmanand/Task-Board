@@ -254,44 +254,45 @@ const MapView: React.FC<MapViewProps> = ({
 					const id = task.legacyId;
 					if (usedIds.has(id)) {
 						duplicateIds.add(id);
-						return; // Skip duplicate
+						// return; // Skip duplicate
+					} else {
+						usedIds.add(id);
+						const savedPos = positions[id] || {};
+						const savedSize = nodeSizes[id] || {};
+
+						// Ensure width is always a valid number
+						let nodeWidth = defaultWidth;
+						if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
+							nodeWidth = savedSize.width;
+						}
+
+						// Ensure positions are always valid finite numbers
+						const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
+						const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
+
+						// Safety check: if computed offsets are somehow NaN, use fallback
+						const safeX = Number.isFinite(nodeX) ? nodeX : (colIdx * 350);
+						const safeY = Number.isFinite(nodeY) ? nodeY : (rowIdx * 170);
+
+						newNodes.push({
+							id,
+							type: 'ResizableNodeSelected',
+							data: {
+								label: <TaskItem
+									dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
+									plugin={plugin}
+									task={task}
+									activeBoardSettings={activeBoardSettings}
+								/>
+							},
+							position: {
+								x: safeX,
+								y: safeY
+							},
+							width: nodeWidth,
+						});
+						yOffset += rowSpacing;
 					}
-					usedIds.add(id);
-					const savedPos = positions[id] || {};
-					const savedSize = nodeSizes[id] || {};
-
-					// Ensure width is always a valid number
-					let nodeWidth = defaultWidth;
-					if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
-						nodeWidth = savedSize.width;
-					}
-
-					// Ensure positions are always valid finite numbers
-					const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
-					const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
-
-					// Safety check: if computed offsets are somehow NaN, use fallback
-					const safeX = Number.isFinite(nodeX) ? nodeX : (colIdx * 350);
-					const safeY = Number.isFinite(nodeY) ? nodeY : (rowIdx * 170);
-
-					newNodes.push({
-						id,
-						type: 'ResizableNodeSelected',
-						data: {
-							label: <TaskItem
-								dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
-								plugin={plugin}
-								task={task}
-								activeBoardSettings={activeBoardSettings}
-							/>
-						},
-						position: {
-							x: safeX,
-							y: safeY
-						},
-						width: nodeWidth,
-					});
-					yOffset += rowSpacing;
 				}
 
 			});
