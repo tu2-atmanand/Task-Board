@@ -268,9 +268,30 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskboardActionshBtn:hover,
 .RefreshBtn:hover,
 .taskBoardViewHeaderOptionsBtn:hover,
-.taskboardActionshBtn:hover {
+.taskboardActionshBtn:hover,
+.taskBoardViewDropdown:hover {
 	/* border: var(--border-width) solid olive; */
 	box-shadow: 0px 0px 1px 1px var(--color-accent);
+}
+
+.taskBoardViewDropdown {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+		justify-content: center;
+	gap: 4px;
+	border-radius: 5px;
+	padding-inline: 4px;
+	min-height: 100%;
+	box-shadow: 0px 0px 1px 1px var(--text-faint);
+	background: var(--background-modifier-border);
+	min-width: 80px;
+}
+
+.taskBoardViewDropdownIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .taskBoardViewHeaderHideElements {
