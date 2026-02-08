@@ -1,7 +1,7 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
@@ -774,6 +774,37 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		);
 	}
 
+	function handleViewChangeDropdownClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+		const viewMenu = new Menu();
+
+		viewMenu.addItem((item) => {
+			item.setTitle(t("kanban"));
+			item.setIcon("square-kanban");
+			item.onClick(async () => {
+				const newViewType = viewTypeNames.kanban;
+				setViewType(newViewType);
+				plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
+				plugin.saveSettings();
+			});
+		});
+
+		viewMenu.addItem((item) => {
+			item.setTitle(t("map"));
+			item.setIcon("network");
+			item.onClick(async () => {
+				const newViewType = viewTypeNames.map;
+				setViewType(newViewType);
+				plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
+				plugin.saveSettings();
+			});
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		viewMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
 	// useEffect(() => {
 	// 	const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
 	// 	if (taskBoardLeaf) {
@@ -794,6 +825,17 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			return () => document.removeEventListener('keydown', handleKeyDown);
 		}
 	}, [showBoardSidebar]);
+
+	const viewTypeIconComponent = () => {
+		switch (viewType) {
+			case viewTypeNames.kanban:
+				return <SquareKanban size={20} />;
+			case viewTypeNames.map:
+				return <Network size={18} />;
+			default:
+				return <BrickWall size={18} />;
+		}
+	}
 
 	return (
 		<div className="taskBoardView">
@@ -903,16 +945,17 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<Bot size={20} />
 					</button> */}
 
-					<select
+					<div
 						className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						value={viewType}
-						onChange={(e) => { handleViewTypeChange(e); }}
+						onClick={(e) => {
+							handleViewChangeDropdownClick(e)
+						}}
 					>
-						<option value={viewTypeNames.kanban}>{t("kanban")}</option>
-						{/* <option value="list">List</option>
-							<option value="table">Table</option> */}
-						<option value={viewTypeNames.map}>{t("map")}</option>
-					</select>
+						<div className="taskBoardViewDropdownIcon">
+							{viewTypeIconComponent()}
+						</div>
+						<div className="taskBoardViewDropdownName">{t(viewType)}</div>
+					</div>
 
 					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
