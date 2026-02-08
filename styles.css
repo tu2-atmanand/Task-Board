@@ -278,7 +278,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-		justify-content: center;
+	justify-content: center;
 	gap: 4px;
 	border-radius: 5px;
 	padding-inline: 4px;
@@ -550,10 +550,73 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 /* Drag and Drop Styling */
 
+/* Element being dragged: dim / scale */
+.task-item-dragging,
+.taskItem.task-item-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
 /* Dragged task item dimming effect */
+.task-item-dragging-dimmed {
+	opacity: 0.45 !important;
+	filter: blur(0.0px);
+}
+
 .taskItem.task-item-dragging-dimmed {
 	opacity: 0.45;
 	transition: opacity 0.2s ease-in-out;
+}
+
+/* Drop indicator (card) - rectangular indicator positioned absolutely inside cards container */
+.taskboard-drop-indicator {
+	position: absolute;
+	background-color: var(--interactive-accent);
+	border-radius: 4px;
+	pointer-events: none;
+	z-index: 10000;
+	transition: top 0.08s ease, left 0.08s ease, width 0.08s ease;
+	display: none;
+}
+
+.taskboard-drop-indicator.is-visible {
+	display: block;
+}
+
+/* Card drop indicator horizontal */
+.taskboard-drop-indicator {
+	height: 6px;
+	box-shadow: 0 0 8px var(--interactive-accent);
+}
+
+/* Board and cards containers should be positioning contexts */
+.TaskBoardColumnsSection {
+	position: relative;
+}
+
+/* Smooth transitions for columns/cards */
+.TaskBoardColumnsSection {
+	transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.taskItem {
+	transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+/* Highlight effect when dropped */
+@keyframes kanban-drop-highlight {
+	0% {
+		box-shadow: 0 0 0 3px var(--interactive-accent);
+	}
+
+	100% {
+		box-shadow: none;
+	}
+}
+
+.taskboard-just-dropped {
+	animation: kanban-drop-highlight 0.45s ease-out;
 }
 
 /* Target column allowed drop styling */
@@ -624,12 +687,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: var(--border-width) solid var(--background-modifier-border-focus);
 	box-shadow: 0px 4px 10px 0 rgba(0, 0, 0, 0.3);
 	transition: box-shadow 0.3s ease-in-out;
-}
-
-.taskItem .taskItem-dragging {
-	opacity: 0.5;
-	transform: scale(0.98);
-	box-shadow: var(--shadow-l);
 }
 
 .colorIndicator {
@@ -7165,71 +7222,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	background-color: var(--background-secondary);
 	border-radius: 6px;
 	margin: 20px;
-}
-
-/* Element being dragged: dim / scale */
-.task-item-dragging,
-.taskItemContainer.task-item-dragging,
-.taskItem.task-item-dragging {
-	opacity: 0.5;
-	transform: scale(0.98);
-	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-}
-
-/* Drop indicator (card) - rectangular indicator positioned absolutely inside cards container */
-.taskboard-drop-indicator {
-	position: absolute;
-	background-color: var(--interactive-accent);
-	border-radius: 4px;
-	pointer-events: none;
-	z-index: 10000;
-	transition: top 0.08s ease, left 0.08s ease, width 0.08s ease;
-	display: none;
-}
-
-.taskboard-drop-indicator.is-visible {
-	display: block;
-}
-
-/* Card drop indicator horizontal */
-.taskboard-drop-indicator {
-	height: 6px;
-	box-shadow: 0 0 8px var(--interactive-accent);
-}
-
-/* Board and cards containers should be positioning contexts */
-.TaskBoardColumnsSection {
-	position: relative;
-}
-
-/* Smooth transitions for columns/cards */
-.TaskBoardColumnsSection {
-	transition: transform 0.18s ease, opacity 0.18s ease;
-}
-
-.taskItem {
-	transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-}
-
-/* Highlight effect when dropped */
-@keyframes kanban-drop-highlight {
-	0% {
-		box-shadow: 0 0 0 3px var(--interactive-accent);
-	}
-
-	100% {
-		box-shadow: none;
-	}
-}
-
-.taskboard-just-dropped {
-	animation: kanban-drop-highlight 0.45s ease-out;
-}
-
-/* Dimming helper used by manager */
-.task-item-dragging-dimmed {
-	opacity: 0.45 !important;
-	filter: blur(0.0px);
 }
 
 /* Swimlane minimize/expand animations */

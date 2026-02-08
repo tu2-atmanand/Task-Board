@@ -778,7 +778,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		const viewMenu = new Menu();
 
 		viewMenu.addItem((item) => {
-			item.setTitle(t("kanban"));
+			item.setTitle(t("kanban-view"));
 			item.setIcon("square-kanban");
 			item.onClick(async () => {
 				const newViewType = viewTypeNames.kanban;
@@ -789,7 +789,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		});
 
 		viewMenu.addItem((item) => {
-			item.setTitle(t("map"));
+			item.setTitle(t("map-view"));
 			item.setIcon("network");
 			item.onClick(async () => {
 				const newViewType = viewTypeNames.map;

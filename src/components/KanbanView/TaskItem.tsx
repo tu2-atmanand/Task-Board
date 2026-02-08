@@ -52,7 +52,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
 	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
 
-	const [isDragging, setIsDragging] = useState(false);
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -856,7 +855,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			return;
 		}
 
-		setIsDragging(true);
 		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
@@ -864,11 +862,11 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Add dragging class after a small delay to not affect the drag image
-			const clone = el.cloneNode(true) as HTMLDivElement;
-			e.dataTransfer?.setDragImage(el, 0, 0);
-			requestAnimationFrame(() => {
-				clone.classList.add("task-item-dragging");
-			});
+			// const clone = el.cloneNode(true) as HTMLDivElement;
+			// requestAnimationFrame(() => {
+			// 	e.dataTransfer?.setDragImage(clone, 0, 0);
+			// });
+			// clone.classList.add("task-item-dragging");
 
 			// Also set a drag image from the whole task element so the preview is the full card
 			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
@@ -901,7 +899,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-		setIsDragging(false);
 
 		// Remove dim effect from this dragged task and clear manager state
 		if (taskItemRef.current) {
@@ -1252,11 +1249,14 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		<div className='taskItemContainer'>
 			<div
 				ref={taskItemRef}
-				className={`taskItem ${isThistaskCompleted ? 'completed' : ''} ${isDragging ? 'taskItem-dragging' : ''}`}
+				className={`taskItem ${isThistaskCompleted ? 'completed' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
+				draggable={true}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
@@ -1277,9 +1277,9 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 										{columnData?.colType !== colTypeNames.allPending && (
 											<div className="taskItemDragBtn"
 												// aria-label={t("drag-task-card")}
-												draggable={true}
-												onDragStart={handleDragStart}
-												onDragEnd={handleDragEnd}
+												// draggable={true}
+												// onDragStart={handleDragStart}
+												// onDragEnd={handleDragEnd}
 											>
 												<Grip size={18} enableBackground={0} opacity={0.4} />
 											</div>

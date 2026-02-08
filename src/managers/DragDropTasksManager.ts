@@ -1059,7 +1059,13 @@ class DragDropTasksManager {
 	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
 	 */
 	dimDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
-		draggedTaskItem.classList.add("task-item-dragging-dimmed");
+		// draggedTaskItem.classList.add("task-item-dragging-dimmed");
+
+		// Add dragging class after a small delay to not affect the drag image
+		requestAnimationFrame(() => {
+			// e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
+			draggedTaskItem.classList.add("task-item-dragging");
+		});
 	}
 
 	/**
@@ -1069,6 +1075,7 @@ class DragDropTasksManager {
 	 */
 	removeDimFromDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
 		draggedTaskItem.classList.remove("task-item-dragging-dimmed");
+		draggedTaskItem.classList.remove("task-item-dragging");
 	}
 
 	/**
@@ -1076,6 +1083,8 @@ class DragDropTasksManager {
 	 *
 	 * @param {HTMLElement} cardEl - The card element
 	 * @param {boolean} isAbove - True if the indicator should be shown above the card, false otherwise
+	 *
+	 * @deprecated - This approach has been deprecated. Will show the indicator directly inside the column component.
 	 */
 	showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
 		if (!this.plugin) return;
@@ -1134,6 +1143,8 @@ class DragDropTasksManager {
 				"drag-over-not-allowed",
 			);
 		});
+
+		// Remove the dim styling from the dragged components
 
 		// Removes the drop indicator, if the target column had manualOrder sorting and if the dropIndicator was visible.
 		if (this.dropIndicator && this.dropIndicator.parentElement) {
@@ -1201,12 +1212,6 @@ class DragDropTasksManager {
 		// 		e.dataTransfer.setData("text/plain", currentDragData.task.id);
 		// 	} catch {}
 		// }
-
-		// Add dragging class after a small delay to not affect the drag image
-		requestAnimationFrame(() => {
-			e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
-			draggedTaskItem.classList.add("task-item-dragging");
-		});
 
 		// Visual dim / dragging class
 		this.dimDraggedTaskItem(draggedTaskItem);
