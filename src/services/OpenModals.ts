@@ -151,9 +151,10 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 			noteContent: string | undefined,
 		) => {
 			if (!noteContent) {
-				bugReporterManagerInsatance.addToLogs(
+				bugReporterManagerInsatance.showNotice(
 					178,
-					`This code will only run if the content passed is empty : ${noteContent}`,
+					"There was an issue with generating the content for the note. Hence, not proceeding with creating the note for the task you entered.",
+					`Generated content for note : ${noteContent}`,
 					"OpenModals.ts/openAddNewTaskNoteModal",
 				);
 			} else {

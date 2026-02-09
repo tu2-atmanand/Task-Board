@@ -86,11 +86,12 @@ export class AddOrEditTaskView extends ItemView {
 				noteContent = "---\ntitle: \n---\n";
 
 				const defaultLocation = normalizePath(this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.globalSettings.taskNoteDefaultLocation);
-				const noteName = this.task.title || getCurrentLocalTimeString();
+				this.task.title = "";
+				
 				// Sanitize filename
+				const noteName = this.task.title || getCurrentLocalTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
-				this.task.title = "";
 			}
 		} else {
 			if (!this.taskExists)
