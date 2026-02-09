@@ -1186,6 +1186,7 @@ export const AddOrEditTaskRC: React.FC<{
 									value={title}
 									onChange={e => handleTaskTitleChange(e.target.value)}
 									placeholder={t("task-note-title-placeholder")}
+									autoFocus={taskExists ? false : true}
 								/>
 							)}
 
