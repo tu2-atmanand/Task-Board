@@ -364,6 +364,7 @@ export const openEditTaskNoteModal = (
  */
 export const bugReporter = (
 	plugin: TaskBoard,
+	id: number,
 	message: string,
 	bugContent: string,
 	context: string,
@@ -411,6 +412,7 @@ export const bugReporter = (
 					onclick: () => {
 						const bugReportModal = new BugReporterModal(
 							plugin,
+							id,
 							message,
 							bugContent,
 							context,

@@ -8,11 +8,14 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
  * Read data from a file in the vault
  * @param plugin - TaskBoard plugin instance
  * @param filePath - Path of the file to read from
+ * @param showBugNotice - Whether to show a notice to user if there was an error while reading
+ * the file. If false, will anyway log the error in log file.
  * @returns Promise<string> - Raw content of the file
  */
 export const readDataOfVaultFile = async (
 	plugin: TaskBoard,
 	filePath: string,
+	showBugNotice: boolean,
 ): Promise<string | null> => {
 	try {
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
@@ -21,21 +24,29 @@ export const readDataOfVaultFile = async (
 			return fileData; // Return the raw content of the file
 		} else {
 			// new Notice(`${t("file-not-found-at-path")} ${filePath}`);
-			bugReporterManagerInsatance.showNotice(
-				75,
-				"File not found in vault.",
-				`File not found at path: ${filePath}`,
-				"MarkdownFileOperations.ts/readDataOfVaultFile",
-			);
-			throw `File not found at path: ${filePath}`;
+			// bugReporterManagerInsatance.showNotice(
+			// 	75,
+			// 	"File not found in vault.",
+			// 	`File not found at path: ${filePath}`,
+			// 	"MarkdownFileOperations.ts/readDataOfVaultFile",
+			// );
+			throw `File not found at path: ${filePath}, file object : ${JSON.stringify(file)}`;
 		}
 	} catch (error) {
-		bugReporterManagerInsatance.showNotice(
-			76,
-			`Error reading data from vault file. Couldnt able to read the following file : ${filePath}`,
-			String(error),
-			"MarkdownFileOperations.ts/readDataOfVaultFile",
-		);
+		if (showBugNotice) {
+			bugReporterManagerInsatance.showNotice(
+				76,
+				`Error reading data from vault file. Couldnt able to read the following file : ${filePath}`,
+				String(error),
+				"MarkdownFileOperations.ts/readDataOfVaultFile",
+			);
+		} else {
+			bugReporterManagerInsatance.addToLogs(
+				76,
+				`Error reading data from vault file. Couldnt able to read the following file : ${filePath}\nERROR :${JSON.stringify(error)}`,
+				"MarkdownFileOperations.ts/readDataOfVaultFile",
+			);
+		}
 		return null;
 	}
 };

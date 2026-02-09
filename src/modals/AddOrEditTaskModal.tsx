@@ -71,7 +71,7 @@ export class AddOrEditTaskModal extends Modal {
 		let noteContent: string = "";
 		if (this.isTaskNote) {
 			if (this.taskExists) {
-				const data = await readDataOfVaultFile(this.plugin, this.filePath);
+				const data = await readDataOfVaultFile(this.plugin, this.filePath, true);
 
 				if (data == null) this.onClose();
 				else noteContent = data;
@@ -82,7 +82,7 @@ export class AddOrEditTaskModal extends Modal {
 
 				const defaultLocation = normalizePath(this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.globalSettings.taskNoteDefaultLocation);
 				this.task.title = "";
-				
+
 				// Sanitize filename
 				const noteName = this.task.title || getCurrentLocalTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');

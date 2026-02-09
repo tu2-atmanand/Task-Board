@@ -97,6 +97,7 @@ export default class VaultScanner {
 			const fileContent = await readDataOfVaultFile(
 				this.plugin,
 				fileNameWithPath,
+				false
 			);
 			if (fileContent == null) return "false";
 
