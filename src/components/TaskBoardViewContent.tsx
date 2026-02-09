@@ -599,6 +599,14 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			})
 			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
 		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("file-name-in-header"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.FilePathInHeader);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
+		});
 
 		propertyMenu.addSeparator();
 
@@ -762,7 +770,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("map-view"));
-			item.setIcon("waypoints");
+			item.setIcon("network");
 			item.onClick(async () => {
 				eventEmitter.emit("SWITCH_VIEW", 'map');
 			});

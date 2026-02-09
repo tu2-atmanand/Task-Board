@@ -309,6 +309,7 @@ ${entry.bugContent}
 						onclick: () => {
 							const bugReportModal = new BugReporterModal(
 								this.plugin!,
+								id,
 								message,
 								bugContent,
 								context,

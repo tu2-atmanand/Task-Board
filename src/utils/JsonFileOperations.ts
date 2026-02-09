@@ -233,6 +233,12 @@ export const writeJsonCacheDataToDisk = async (
 				errorMessage,
 				"JsonFileOperations.ts/writeJsonCacheDataFromDisk",
 			);
+		} else {
+			bugReporterManagerInsatance.addToLogs(
+				72,
+				errorMessage,
+				"JsonFileOperations.ts/writeJsonCacheDataFromDisk",
+			);
 		}
 
 		return false;

@@ -86,7 +86,7 @@ export const addTaskInNote = async (
 			throw "getSanitizedTaskContent returned empty string";
 
 		// Read the file content
-		const fileContent = await readDataOfVaultFile(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath, true);
 		if (fileContent == null) return;
 
 		let newContent = fileContent;
@@ -565,6 +565,7 @@ export const archiveTask = async (
 			const archivedFileContent = await readDataOfVaultFile(
 				plugin,
 				archivedFilePath,
+				true
 			);
 
 			// Add the task to the top of the archived file content
@@ -672,7 +673,7 @@ export const replaceOldTaskWithNewTask = async (
 
 	try {
 		// Step 1: Read the file content
-		const fileContent = await readDataOfVaultFile(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath, true);
 		if (fileContent == null) return false;
 
 		const lines = fileContent.split("\n");

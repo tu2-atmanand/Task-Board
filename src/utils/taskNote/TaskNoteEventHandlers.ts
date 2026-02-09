@@ -181,6 +181,7 @@ export const handleTaskNoteBodyChange = async (
 		const fileContent = await readDataOfVaultFile(
 			plugin,
 			updatedTask.filePath,
+			true
 		);
 		if (fileContent == null) return;
 

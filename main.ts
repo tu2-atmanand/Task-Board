@@ -724,6 +724,8 @@ export default class TaskBoard extends Plugin {
 					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
 				}
 			} catch (error) {
+				this.currentProgressNotice?.hide();
+				// this.currentProgressNotice = null;
 				bugReporterManagerInsatance.addToLogs(
 					162,
 					String(error),
@@ -739,12 +741,13 @@ export default class TaskBoard extends Plugin {
 			}
 		}
 
-		this.plugin.vaultScanner.saveTasksToJsonCache();
-		eventEmitter.emit("REFRESH_BOARD");
-
 		// Hide progress notice after completion
 		this.currentProgressNotice?.hide();
 		this.currentProgressNotice = null;
+
+		this.plugin.vaultScanner.saveTasksToJsonCache();
+		eventEmitter.emit("REFRESH_BOARD");
+
 		if (processed > 0) {
 			new Notice(
 				`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
@@ -807,6 +810,8 @@ export default class TaskBoard extends Plugin {
 					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
 				}
 			} catch (error) {
+				this.currentProgressNotice?.hide();
+				// this.currentProgressNotice = null;
 				bugReporterManagerInsatance.addToLogs(
 					163,
 					String(error),
@@ -821,13 +826,13 @@ export default class TaskBoard extends Plugin {
 				);
 			}
 		}
+		// Hide progress notice after completion
+		this.currentProgressNotice?.hide();
+		this.currentProgressNotice = null;
 
 		this.plugin.vaultScanner.saveTasksToJsonCache();
 		eventEmitter.emit("REFRESH_COLUMN");
 
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
 		if (processed > 0) {
 			new Notice(
 				`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
@@ -891,6 +896,8 @@ export default class TaskBoard extends Plugin {
 					// Update progress notice
 					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
 				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
 					bugReporterManagerInsatance.addToLogs(
 						164,
 						String(error),
@@ -917,6 +924,11 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
+	/**
+	 * Runs on plugin load/Obsidian startup time and find all the files which where
+	 * modified (edited/renamed/deleted) between the time when Obsidian was last closed
+	 * till now.
+	 */
 	async findModifiedFilesOnAppAbsense() {
 		let OBSIDIAN_CLOSED_TIME = this.app.loadLocalStorage(
 			OBSIDIAN_CLOSED_TIME_KEY,

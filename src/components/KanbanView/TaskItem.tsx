@@ -24,7 +24,7 @@ import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/
 import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate} from 'src/utils/UserTaskEvents';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { openDateInputModal } from 'src/services/OpenModals';
@@ -918,78 +918,86 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		try {
 			return (
 				<div className="taskItemHeader">
-					<div className="taskItemHeaderLeft">
-						{/* Render priority */}
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
-							<div className="taskItemPrio">{priorityEmojis[task.priority as number]}</div>
-						)}
-
-						{/* Render tags individually */}
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
-							<div className="taskItemTags">
-								{/* Render line tags (editable) */}
-								{task.tags.map((tag: string) => {
-									const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
-
-									const tagName = tag.replace('#', '');
-									const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
-
-									const tagColor = customTag?.color;
-									const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-									// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
-
-									// If columnIndex is defined, proceed to get the column
-									if (
-										(!activeBoardSettings?.showColumnTags) &&
-										columnData &&
-										columnData?.colType === colTypeNames.namedTag &&
-										tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
-									) {
-										return null;
-									}
-
-									const tagKey = `${task.id}-${tag}`;
-									// Render the remaining tags
-									return (
-										<div
-											key={tagKey}
-											className="taskItemTag"
-											style={{
-												color: isTagBg && tagColor ? 'white' : tagColor,
-												// border: `1px solid ${borderColor}`,
-												backgroundColor: isTagBg ? tagColor : dimmedTagColor
-											}}
-										>
-											{tag}
-										</div>
-									);
-								})}
-
-								{/* Render frontmatter tags (read-only) */}
-								{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
-									const tagKey = `${task.id}-fm-${tag}`;
-									// Render frontmatter tags with different styling
-									return (
-										<div
-											key={tagKey}
-											className="taskItemTagFrontmatter"
-											title="Tag from note frontmatter (read-only)"
-										>
-											{tag}
-										</div>
-									);
-								})}
-							</div>
+					<div className='taskItemHeaderTop'>
+						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
+							<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
 						)}
 					</div>
 
-					<div className='taskItemHeaderRight'>
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
-							<div className='taskItemPropertyID'>
-								<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
-							</div>
-						)}
+					<div className='taskItemHeaderBottom'>
+						<div className="taskItemHeaderLeft">
+							{/* Render priority */}
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
+								<div className="taskItemPrio">{priorityEmojis[task.priority as number]}</div>
+							)}
+
+							{/* Render tags individually */}
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
+								<div className="taskItemTags">
+									{/* Render line tags (editable) */}
+									{task.tags.map((tag: string) => {
+										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
+
+										const tagName = tag.replace('#', '');
+										const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+
+										const tagColor = customTag?.color;
+										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
+
+										// If columnIndex is defined, proceed to get the column
+										if (
+											(!activeBoardSettings?.showColumnTags) &&
+											columnData &&
+											columnData?.colType === colTypeNames.namedTag &&
+											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+										) {
+											return null;
+										}
+
+										const tagKey = `${task.id}-${tag}`;
+										// Render the remaining tags
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTag"
+												style={{
+													color: isTagBg && tagColor ? 'white' : tagColor,
+													// border: `1px solid ${borderColor}`,
+													backgroundColor: isTagBg ? tagColor : dimmedTagColor
+												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+
+									{/* Render frontmatter tags (read-only) */}
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+										const tagKey = `${task.id}-fm-${tag}`;
+										// Render frontmatter tags with different styling
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTagFrontmatter"
+												title="Tag from note frontmatter (read-only)"
+											>
+												{tag}
+											</div>
+										);
+									})}
+								</div>
+							)}
+						</div>
+						<div className='taskItemHeaderRight'>
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
+								<div className='taskItemPropertyID'>
+									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
+								</div>
+							)}
+						</div>
 					</div>
+
 				</div>
 			);
 		} catch (error) {
@@ -1276,10 +1284,10 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 										{/* Drag Handle */}
 										{columnData?.colType !== colTypeNames.allPending && (
 											<div className="taskItemDragBtn"
-												// aria-label={t("drag-task-card")}
-												// draggable={true}
-												// onDragStart={handleDragStart}
-												// onDragEnd={handleDragEnd}
+											// aria-label={t("drag-task-card")}
+											// draggable={true}
+											// onDragStart={handleDragStart}
+											// onDragEnd={handleDragEnd}
 											>
 												<Grip size={18} enableBackground={0} opacity={0.4} />
 											</div>

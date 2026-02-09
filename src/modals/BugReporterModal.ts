@@ -8,18 +8,21 @@ import { t } from "src/utils/lang/helper";
 
 export class BugReporterModal extends Modal {
 	private plugin: TaskBoard;
+	private bugID: number;
 	private bugContent: string;
 	private context: string;
 	private message: string;
 
 	constructor(
 		plugin: TaskBoard,
+		id: number,
 		message: string,
 		bug: string,
-		context: string
+		context: string,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
+		this.bugID = id;
 		this.message = message;
 		this.bugContent = bug;
 		this.context = context;
@@ -31,7 +34,7 @@ export class BugReporterModal extends Modal {
 
 		this.modalEl.setAttribute(
 			"modal-type",
-			"task-board-bug-reporter-modal"
+			"task-board-bug-reporter-modal",
 		);
 
 		const modalContent = contentEl.createDiv({
@@ -48,11 +51,11 @@ export class BugReporterModal extends Modal {
 		const sanitizedBugReportContent = await this.sanitizeBugReportContent(
 			this.message,
 			this.bugContent,
-			this.context
+			this.context,
 		);
 		bugReportContent.createEl("p", {
 			text: createFragmentWithHTML(
-				sanitizedBugReportContent.finalContentForHTMLDom
+				sanitizedBugReportContent.finalContentForHTMLDom,
 			),
 		});
 
@@ -67,7 +70,7 @@ export class BugReporterModal extends Modal {
 
 		messageForUser.createEl("p", {
 			text: createFragmentWithHTML(
-				"<li>Kindly copy the report using button below.</li><li>Under the <b>ERROR</b> section, please find if there is any personal information captured. If yes, please replace the content with some dummy data, so the developers can understand the format of your content for easier debugging.</li><br/><li>Either mail it to <a href='mailto:sanketgauns8@gmail.com'>sanketgauns8@gmail.com</a></li><li style='align-item: 'center';''>OR</li><li>Click on the following link and login with your GitHub account :  <a href='https://github.com/tu2-atmanand/Task-Board/issues/new'>New GitHub Issue</a></li><li>Paste the report and add any additional information or screenshots.</li><li>Click on <b>create</b> to submit the issue.</b><br/><li>Thank you for your contribution.</li>"
+				"<li>Kindly copy the report using button below.</li><li>Under the <b>ERROR</b> section, please find if there is any personal information captured. If yes, please replace the content with some dummy data, so the developers can understand the format of your content for easier debugging.</li><br/><li>Either mail it to <a href='mailto:sanketgauns8@gmail.com'>sanketgauns8@gmail.com</a></li><li style='align-item: 'center';''>OR</li><li>Click on the following link and login with your GitHub account :  <a href='https://github.com/tu2-atmanand/Task-Board/issues/new'>New GitHub Issue</a></li><li>Paste the report and add any additional information or screenshots.</li><li>Click on <b>create</b> to submit the issue.</b><br/><li>Thank you for your contribution.</li>",
 			),
 		});
 
@@ -84,7 +87,7 @@ export class BugReporterModal extends Modal {
 
 		closeButton.addEventListener("click", () => {
 			this.handleCopyBtnEvent(
-				sanitizedBugReportContent.finalContentForMarkdown
+				sanitizedBugReportContent.finalContentForMarkdown,
 			);
 		});
 
@@ -119,7 +122,7 @@ export class BugReporterModal extends Modal {
 	async sanitizeBugReportContent(
 		message: String,
 		bugContent: String,
-		context: String
+		context: String,
 	) {
 		// Sanitize the bug report content to prevent XSS attacks
 		let sanitizedErrorContent = bugContent;
@@ -135,7 +138,7 @@ export class BugReporterModal extends Modal {
 				([key, value]) =>
 					`${key}: ${
 						Array.isArray(value) ? value.join("<br/>") : value
-					}`
+					}`,
 			)
 			.join("<br/>");
 
@@ -144,19 +147,19 @@ export class BugReporterModal extends Modal {
 				([key, value]) =>
 					`${key}: ${
 						Array.isArray(value) ? value.join("\n\t") : value
-					}`
+					}`,
 			)
 			.join("\n");
 
-		const finalContentForHTMLDom = `<h4>Message for user</h4><br/>${message.replaceAll(
+		const finalContentForHTMLDom = `BUG ID : ${this.bugID}<br/><br/><h4>Message for user</h4><br/>${message.replaceAll(
 			"\n",
-			"<br/>"
+			"<br/>",
 		)}<br/><br/><h5>Error Message</h5><i>${sanitizedErrorContent.replaceAll(
 			"\n",
-			"<br/>"
+			"<br/>",
 		)}</i><br/><br/><b>Context</b> : ${context}<br/><br/><h5>System Information</h5>${systemInfoTextHTMLDom}<br/><h5>Any additional information and screenshots</h5>`;
 
-		const finalContentForMarkdown = `# Bug Report\n\n## Message for user\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n### Any additional information and screenshots`;
+		const finalContentForMarkdown = `# Bug Report\n\nBUG ID : ${this.bugID}\n\n## Message for user\n\n${message}\n\n## Error Message\n\n${sanitizedErrorContent}\n\n## Context\n${context}\n\n## System Information\n\n${systemInfoTextMarkdown}\n\n## Any additional information and screenshots`;
 
 		return { finalContentForHTMLDom, finalContentForMarkdown };
 	}

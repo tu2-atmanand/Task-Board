@@ -64,6 +64,7 @@ export enum taskPropertiesNames {
 	Checkbox = "checkbox",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",
+	FilePathInHeader="filePathInHeader"
 }
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {

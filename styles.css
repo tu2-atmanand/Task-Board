@@ -909,7 +909,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemMainBodyDescriptionSectionVisible {
 	margin-top: 5px;
-	margin-inline: -8px;
+	margin-inline: -5px;
 }
 
 .taskItemMainBodyDescriptionSectionToggler {
@@ -1128,9 +1128,32 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemHeader {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
+	gap: 0.5rem;
+}
+
+.taskItemHeaderTop {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 100%;
+	background: var(--background-modifier-border);
+	border-radius: 1rem;
+}
+
+.taskitemHeaderTopFilename {
+	color: var(--tab-text-color-active);
+	font-size: 0.85rem;
+	;
+}
+
+.taskItemHeaderBottom {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-width: 100%;
 }
 
 .taskItemHeaderLeft {

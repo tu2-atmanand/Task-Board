@@ -50,6 +50,9 @@ export const AddOrEditTaskRC: React.FC<{
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
 }> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
+	const globalSettings = plugin.settings.data.globalSettings;
+
+	// All useState
 	const [title, setTitle] = useState(
 		task.title
 			? task.title
@@ -73,7 +76,7 @@ export const AddOrEditTaskRC: React.FC<{
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>(isTaskNote ? noteContent : getFormattedTaskContentSync(task));
 	const frontmatterContentRef = useRef<string>('');
 	const [newFilePath, setNewFilePath] = useState<string>(filePath);
-	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(plugin.settings.data.globalSettings.quickAddPluginDefaultChoice || '');
+	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(globalSettings.quickAddPluginDefaultChoice || '');
 
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
 	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(true);
@@ -104,8 +107,8 @@ export const AddOrEditTaskRC: React.FC<{
 	let filteredStatusesDropdown: filterOptions[] = [];
 
 	// Fetch all the custom statuses and add them to the dropdown
-	if (plugin.settings.data.globalSettings.customStatuses?.length > 0) {
-		filteredStatusesDropdown = plugin.settings.data.globalSettings.customStatuses.map((customStatus) => ({
+	if (globalSettings.customStatuses?.length > 0) {
+		filteredStatusesDropdown = globalSettings.customStatuses.map((customStatus) => ({
 			value: customStatus.symbol,
 			text: `${customStatus.name} [${customStatus.symbol}]`,
 		}));
@@ -463,35 +466,44 @@ export const AddOrEditTaskRC: React.FC<{
 	};
 
 	const handleSaveAsTaskLine = () => {
-		let newDue = due;
+		let newDueDate = due;
 		let newStartDate = startDate;
 		let newScheduledDate = scheduledDate;
+		let newTitle = title;
 
-		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists) {
-			const universalDateType = plugin.settings.data.globalSettings.universalDate;
+		if (globalSettings.autoAddUniversalDate && !taskExists) {
+			const universalDateType = globalSettings.universalDate;
 			if (universalDateType === UniversalDateOptions.dueDate && !due) {
-				newDue = new Date().toISOString().split('T')[0];
+				newDueDate = new Date().toISOString().split('T')[0];
+				newTitle = sanitizeDueDate(globalSettings, newTitle, newDueDate);
 			} else if (universalDateType === UniversalDateOptions.startDate && !startDate) {
 				newStartDate = new Date().toISOString().split('T')[0];
+				newTitle = sanitizeStartDate(globalSettings, newTitle, newStartDate);
 			} else if (universalDateType === UniversalDateOptions.scheduledDate && !scheduledDate) {
 				newScheduledDate = new Date().toISOString().split('T')[0];
+				newTitle = sanitizeScheduledDate(globalSettings, newTitle, newScheduledDate);
 			}
 		}
 
 		let newCreatedDate = createdDate;
-		if (plugin.settings.data.globalSettings.autoAddCreatedDate && !taskExists) {
+		if (globalSettings.autoAddCreatedDate && !taskExists) {
 			newCreatedDate = new Date().toISOString().split('T')[0];
+			newTitle = sanitizeCreatedDate(globalSettings, newTitle, newCreatedDate);
 		}
+
+		let editedFilePath = allowedFileExtensionsRegEx.test(newFilePath) ? newFilePath : `${newFilePath}.md`;
+		editedFilePath = normalizePath(editedFilePath);
+
 		const updatedTask = {
 			...task,
-			title,
+			title: newTitle,
 			body: [
 				...bodyContent.split('\n'),
 			],
 			createdDate: newCreatedDate,
 			startDate: newStartDate,
 			scheduledDate: newScheduledDate,
-			due: newDue,
+			due: newDueDate,
 			tags,
 			time: newTime,
 			priority,
@@ -511,9 +523,10 @@ export const AddOrEditTaskRC: React.FC<{
 		let newDue = due;
 		let newStartDate = startDate;
 		let newScheduledDate = scheduledDate;
+		console.log("Conditions :", globalSettings.autoAddUniversalDate, "\nTask Exisits :", taskExists);
 
-		if (plugin.settings.data.globalSettings.autoAddUniversalDate && !taskExists) {
-			const universalDateType = plugin.settings.data.globalSettings.universalDate;
+		if (globalSettings.autoAddUniversalDate && !taskExists) {
+			const universalDateType = globalSettings.universalDate;
 			if (universalDateType === UniversalDateOptions.dueDate && !due) {
 				newDue = new Date().toISOString().split('T')[0];
 			} else if (universalDateType === UniversalDateOptions.startDate && !startDate) {
@@ -524,7 +537,7 @@ export const AddOrEditTaskRC: React.FC<{
 		}
 
 		let newCreatedDate = createdDate;
-		if (plugin.settings.data.globalSettings.autoAddCreatedDate && !taskExists) {
+		if (globalSettings.autoAddCreatedDate && !taskExists) {
 			newCreatedDate = new Date().toISOString().split('T')[0];
 		}
 
@@ -551,8 +564,10 @@ export const AddOrEditTaskRC: React.FC<{
 			dependsOn: dependsOn,
 		};
 
+		const newFormattedNoteContent = formatTaskNoteContent(plugin, taskNoteItem, formattedTaskContent);
+
 		// Call onSave with the task note item
-		onSave(taskNoteItem, quickAddPluginChoice, formattedTaskContent ? formattedTaskContent : undefined);
+		onSave(taskNoteItem, quickAddPluginChoice, newFormattedNoteContent.newContent ? newFormattedNoteContent.newContent : undefined);
 	};
 
 	let modifiedTask: taskItem = {
@@ -611,14 +626,14 @@ export const AddOrEditTaskRC: React.FC<{
 	}, [plugin.app]);
 
 	const handleOpenTaskInMapView = () => {
-		// if (!plugin.settings.data.globalSettings.experimentalFeatures) {
+		// if (!globalSettings.experimentalFeatures) {
 		// 	new Notice(t("enable-experimental-features-message"));
 		// 	return;
 		// }
 
 		applyIdToTaskItem(plugin, task).then((newId) => {
-			plugin.settings.data.globalSettings.lastViewHistory.viewedType = 'map';
-			plugin.settings.data.globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(plugin.settings.data.globalSettings.uniqueIdCounter));
+			globalSettings.lastViewHistory.viewedType = 'map';
+			globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
 
 			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
 
@@ -641,7 +656,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 	const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 	useEffect(() => {
-		if (!Platform.isMobile) {
+		if (!Platform.isMobile && !isTaskNote) {
 			markdownEditor?.editor?.focus();
 		}
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -976,7 +991,7 @@ export const AddOrEditTaskRC: React.FC<{
 					if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
 						if (newId === undefined && !selectedTask?.legacyId) {
 							bugReporterManagerInsatance.showNotice(24, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "AddOrEditTaskModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
-							return [...prev, String(plugin.settings.data.globalSettings.uniqueIdCounter)];
+							return [...prev, String(globalSettings.uniqueIdCounter)];
 						} else if (newId === undefined) {
 							return [...prev, selectedTask.legacyId];
 						} else if (newId) {
@@ -994,7 +1009,7 @@ export const AddOrEditTaskRC: React.FC<{
 						setTitle(newTitle);
 					}
 
-					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : (newId ? String(newId) : String(plugin.settings.data.globalSettings.uniqueIdCounter));
+					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : (newId ? String(newId) : String(globalSettings.uniqueIdCounter));
 					setChildTasks(prevChildTasks => {
 						// Avoid adding duplicates
 						if (!prevChildTasks.find(t => t.id === selectedTask.id)) {
@@ -1069,7 +1084,7 @@ export const AddOrEditTaskRC: React.FC<{
 		// // Clear existing children in the leaf
 		// await leaf.open(new AddOrEditTaskModal(plugin, childTask, onSave, onClose, true, activeNote));
 
-		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		const settingOption = globalSettings.editButtonAction;
 		switch (settingOption) {
 			case EditButtonMode.NoteInSplit:
 			case EditButtonMode.NoteInTab:
@@ -1085,7 +1100,7 @@ export const AddOrEditTaskRC: React.FC<{
 			case EditButtonMode.View:
 			case EditButtonMode.TasksPluginModal:
 			default:
-				const isTaskNotePresent = isTaskNotePresentInTags(plugin.settings.data.globalSettings.taskNoteIdentifierTag, childTask.tags);
+				const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);
 				openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
 				break;
 		}
@@ -1186,6 +1201,7 @@ export const AddOrEditTaskRC: React.FC<{
 									value={title}
 									onChange={e => handleTaskTitleChange(e.target.value)}
 									placeholder={t("task-note-title-placeholder")}
+									autoFocus={taskExists ? false : true}
 								/>
 							)}
 
@@ -1352,7 +1368,7 @@ export const AddOrEditTaskRC: React.FC<{
 						</div>
 
 						{/* Task Created Date */}
-						{!plugin.settings.data.globalSettings.autoAddCreatedDate &&
+						{!globalSettings.autoAddCreatedDate &&
 							<div className="EditTaskModalHomeField">
 								<label className="EditTaskModalHomeFieldTitle">{t("created-date")}</label>
 								<input className="EditTaskModalHomeDueInput" type="date" value={createdDate} onChange={(e) => handleCreatedDateChange(e.target.value)} />
@@ -1378,7 +1394,7 @@ export const AddOrEditTaskRC: React.FC<{
 						</div>
 
 						{/* Task reminder date-time selector */}
-						{plugin.settings.data.globalSettings.notificationService !== NotificationService.None && (
+						{globalSettings.notificationService !== NotificationService.None && (
 							<div className="EditTaskModalHomeField">
 								<label className="EditTaskModalHomeFieldTitle">{t("reminder-label")}</label>
 								<input
@@ -1424,7 +1440,7 @@ export const AddOrEditTaskRC: React.FC<{
 							<div className="EditTaskModalHome-taskItemTags">
 								{tags.map((tag: string) => {
 									const tagName = tag.replace('#', '');
-									const customTagData = plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+									const customTagData = globalSettings.tagColors.find(t => t.name === tagName);
 									const tagColor = customTagData?.color;
 									const backgroundColor = tagColor ? updateRGBAOpacity(tagColor, 0.1) : `var(--tag-background)`;
 									const borderColor = tagColor ? updateRGBAOpacity(tagColor, 0.5) : `var(--tag-color-hover)`;

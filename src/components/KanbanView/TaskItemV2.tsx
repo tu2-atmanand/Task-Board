@@ -55,7 +55,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
 	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
 
-	const [isDragging, setIsDragging] = useState(false);
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -859,7 +858,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			return;
 		}
 
-		setIsDragging(true);
 		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
@@ -867,11 +865,11 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Add dragging class after a small delay to not affect the drag image
-			const clone = el.cloneNode(true) as HTMLDivElement;
-			e.dataTransfer?.setDragImage(el, 0, 0);
-			requestAnimationFrame(() => {
-				clone.classList.add("task-item-dragging");
-			});
+			// const clone = el.cloneNode(true) as HTMLDivElement;
+			// e.dataTransfer?.setDragImage(el, 0, 0);
+			// requestAnimationFrame(() => {
+			// 	clone.classList.add("task-item-dragging");
+			// });
 
 			// Also set a drag image from the whole task element so the preview is the full card
 			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
@@ -904,8 +902,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-		setIsDragging(false);
-
 		// Remove dim effect from this dragged task and clear manager state
 		if (taskItemRef.current) {
 			dragDropTasksManagerInsatance.removeDimFromDraggedTaskItem(taskItemRef.current);
@@ -924,80 +920,87 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		try {
 			return (
 				<div className="taskItemHeader">
-					<div className="taskItemHeaderLeft">
-						{/* Render priority */}
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
-							<div className="taskItemPriority">
-								<div className={`prioirtyCircle p${task.priority}`}>{task.priority}
-								</div>
-							</div>
-						)}
-
-						{/* Render tags individually */}
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
-							<div className="taskItemTags">
-								{/* Render line tags (editable) */}
-								{task.tags.map((tag: string) => {
-									const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
-
-									const tagName = tag.replace('#', '');
-									const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
-
-									const tagColor = customTag?.color || `var(--tag-color)`;
-									const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-									// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
-
-									// If columnIndex is defined, proceed to get the column
-									if (
-										(!activeBoardSettings?.showColumnTags) &&
-										columnData &&
-										columnData?.colType === colTypeNames.namedTag &&
-										tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
-									) {
-										return null;
-									}
-
-									const tagKey = `${task.id}-${tag}`;
-									// Render the remaining tags
-									return (
-										<div
-											key={tagKey}
-											className="taskItemTag"
-											style={{
-												color: isTagBg && tagColor ? 'white' : tagColor,
-												// border: `1px solid ${borderColor}`,
-												backgroundColor: isTagBg ? tagColor : dimmedTagColor
-											}}
-										>
-											{tag}
-										</div>
-									);
-								})}
-
-								{/* Render frontmatter tags (read-only) */}
-								{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
-									const tagKey = `${task.id}-fm-${tag}`;
-									// Render frontmatter tags with different styling
-									return (
-										<div
-											key={tagKey}
-											className="taskItemTagFrontmatter"
-											title="Tag from note frontmatter (read-only)"
-										>
-											{tag}
-										</div>
-									);
-								})}
-							</div>
+					<div className='taskItemHeaderTop'>
+						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
+							<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
 						)}
 					</div>
 
-					<div className='taskItemHeaderRight'>
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
-							<div className='taskItemPropertyID'>
-								<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
-							</div>
-						)}
+					<div className='taskItemHeaderBottom'>
+						<div className="taskItemHeaderLeft">
+							{/* Render priority */}
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
+								<div className="taskItemPriority">
+									<div className={`prioirtyCircle p${task.priority}`}>{task.priority}
+									</div>
+								</div>
+							)}
+
+							{/* Render tags individually */}
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
+								<div className="taskItemTags">
+									{/* Render line tags (editable) */}
+									{task.tags.map((tag: string) => {
+										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
+
+										const tagName = tag.replace('#', '');
+										const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+
+										const tagColor = customTag?.color || `var(--tag-color)`;
+										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
+
+										// If columnIndex is defined, proceed to get the column
+										if (
+											(!activeBoardSettings?.showColumnTags) &&
+											columnData &&
+											columnData?.colType === colTypeNames.namedTag &&
+											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+										) {
+											return null;
+										}
+
+										const tagKey = `${task.id}-${tag}`;
+										// Render the remaining tags
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTag"
+												style={{
+													color: isTagBg && tagColor ? 'white' : tagColor,
+													// border: `1px solid ${borderColor}`,
+													backgroundColor: isTagBg ? tagColor : dimmedTagColor
+												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+
+									{/* Render frontmatter tags (read-only) */}
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+										const tagKey = `${task.id}-fm-${tag}`;
+										// Render frontmatter tags with different styling
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTagFrontmatter"
+												title="Tag from note frontmatter (read-only)"
+											>
+												{tag}
+											</div>
+										);
+									})}
+								</div>
+							)}
+						</div>
+						<div className='taskItemHeaderRight'>
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
+								<div className='taskItemPropertyID'>
+									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 			);
@@ -1263,11 +1266,14 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		<div className='taskItemContainer'>
 			<div
 				ref={taskItemRef}
-				className={`taskItem ${isThistaskCompleted ? 'completed' : ''} ${isDragging ? 'taskItem-dragging' : ''}`}
+				className={`taskItem ${isThistaskCompleted ? 'completed' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
+				draggable={true}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
@@ -1287,10 +1293,10 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 										{/* Drag Handle */}
 										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
 											<div className="taskItemDragBtn"
-												// aria-label={t("drag-task-card")}
-												draggable={true}
-												onDragStart={handleDragStart}
-												onDragEnd={handleDragEnd}
+											// aria-label={t("drag-task-card")}
+											// draggable={true}
+											// onDragStart={handleDragStart}
+											// onDragEnd={handleDragEnd}
 											>
 												<Grip size={18} enableBackground={0} opacity={0.4} />
 											</div>
