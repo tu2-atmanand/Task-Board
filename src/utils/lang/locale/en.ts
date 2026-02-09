@@ -578,7 +578,8 @@ const en: Lang = {
 	"configure-status-entry": "Configure status entry",
 	"edit": "Edit",
 	"no-custom-statuses-configured": "No custom statuses configured",
-	"task-note-title-placeholder": "Enter a simple title for the task..."
+	"task-note-title-placeholder": "Enter a simple title for the task...",
+	"file-name-in-header": "Filename (in header)"
 };
 
 export default en;
