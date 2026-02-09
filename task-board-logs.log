@@ -39,3 +39,28 @@ Context : MapView.tsx/initialNodes
 ```log
 ERROR: Same id is present on two tasks
 ```
+
+-------------
+
+Timestamp : 2026-02-09T11:26:36
+ID : 76
+Message : Error reading data from vault file. Couldnt able to read the following file : TaskBoard/New Note 1.md
+Context : MarkdownFileOperations.ts/readDataOfVaultFile
+
+#### Bug Content
+```log
+File not found at path: TaskBoard/New Note 1.md
+```
+
+-------------
+
+Timestamp : 2026-02-09T11:27:26
+ID : 76
+Message : 
+Context : MarkdownFileOperations.ts/readDataOfVaultFile
+
+#### Bug Content
+```log
+Error reading data from vault file. Couldnt able to read the following file : TaskBoard/New Note 1.md
+ERROR :"File not found at path: TaskBoard/New Note 1.md, file object : null"
+```

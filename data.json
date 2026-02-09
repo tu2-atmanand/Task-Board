@@ -224,7 +224,7 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 65,
+          "pending": 71,
           "completed": 14
         }
       },
@@ -700,7 +700,7 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 65,
+          "pending": 73,
           "completed": 14
         },
         "swimlanes": {
@@ -872,7 +872,7 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 65,
+          "pending": 72,
           "completed": 14
         }
       }
@@ -954,17 +954,17 @@
         },
         {
           "name": "working",
-          "color": "rgba(22, 85, 17, 1)",
+          "color": "rgba(22, 185, 9, 1)",
           "priority": 5
         },
         {
           "name": "New",
-          "color": "rgba(16, 50, 117, 1)",
+          "color": "rgba(29, 90, 212, 1)",
           "priority": 6
         },
         {
           "name": "pending",
-          "color": "rgba(64, 20, 144, 1)",
+          "color": "rgba(116, 59, 220, 1)",
           "priority": 7
         },
         {
@@ -1069,14 +1069,14 @@
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 593,
+      "uniqueIdCounter": 605,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 2,
+        "boardIndex": 3,
         "taskId": "",
-        "settingTab": 6
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInSplit",
@@ -1199,11 +1199,11 @@
         "completionDate",
         "cancelledDate",
         "dependsOn",
-        "filePath",
         "status",
         "checkbox",
         "subTasks",
-        "description"
+        "description",
+        "filePathInHeader"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
