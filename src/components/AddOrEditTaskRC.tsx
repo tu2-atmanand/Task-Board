@@ -523,7 +523,6 @@ export const AddOrEditTaskRC: React.FC<{
 		let newDue = due;
 		let newStartDate = startDate;
 		let newScheduledDate = scheduledDate;
-		console.log("Conditions :", globalSettings.autoAddUniversalDate, "\nTask Exisits :", taskExists);
 
 		if (globalSettings.autoAddUniversalDate && !taskExists) {
 			const universalDateType = globalSettings.universalDate;

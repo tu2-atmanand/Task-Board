@@ -289,7 +289,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 								// Save the settings
 								plugin.saveSettings(newSettings).then(() => {
 									setTimeout(() => {
-										console.log("Refreshing now..");
 										eventEmitter.emit('REFRESH_BOARD');
 									}, 200)
 								})

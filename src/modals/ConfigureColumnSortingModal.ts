@@ -273,17 +273,9 @@ export class ConfigureColumnSortingModal extends Modal {
 										this.columnConfiguration.sortCriteria
 											.length > index
 									) {
-										console.log(
-											"Old sorting criterias :",
-											this.columnConfiguration,
-										);
 										this.columnConfiguration.sortCriteria.splice(
 											index,
 											1,
-										);
-										console.log(
-											"New sorting criterias :",
-											this.columnConfiguration,
 										);
 										renderSortingCriterias(); // Re-render after delete
 									}
@@ -349,10 +341,6 @@ export class ConfigureColumnSortingModal extends Modal {
 			cls: "configureColumnSortingModalHomeButtonContainerSaveBtn",
 		});
 		saveButton.addEventListener("click", () => {
-			console.log(
-				"On Save button clicked. Passing following column configs :",
-				this.columnConfiguration,
-			);
 			this.onSave(this.columnConfiguration);
 			this.isEdited = false;
 			this.close();

@@ -1096,7 +1096,6 @@ export default class TaskBoard extends Plugin {
 	registerEvents() {
 		this.registerEvent(
 			this.app.vault.on("modify", async (file: TAbstractFile) => {
-				console.log("File modifed : ", file.path);
 				if (
 					fileTypeAllowedForScanning(
 						this.plugin.settings.data.globalSettings,
