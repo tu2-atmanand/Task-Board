@@ -18,7 +18,7 @@
 
 <p align="center">An <a href="https://obsidian.md/">Obsidian</a> plugin to view and manage all your tasks, throughout the vault on a centralized board using various kinds of views. Use boards to manage small to large projects.</p>
 
-![Task Board Thumbnail](./assets/MainThumbnail-3.jpg)
+![Task Board Thumbnail](./assets/MainThumbnail-4.png)
 
 > YouTube playlist : [Task Board - Obsidian plugin](https://youtube.com/playlist?list=PLqEPxsDi1dtepfcaUO9r1BTGZN6IuhvvH&si=yohu1rczpRVq68D6)
 
