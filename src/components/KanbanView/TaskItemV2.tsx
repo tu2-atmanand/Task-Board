@@ -920,11 +920,11 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		try {
 			return (
 				<div className="taskItemHeader">
-					<div className='taskItemHeaderTop'>
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
-							<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
-						)}
-					</div>
+					{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
+						<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>
+							<div className='taskitemHeaderTopFilenameValue'>{task.filePath.split('/').pop()}</div>
+						</div>
+					)}
 
 					<div className='taskItemHeaderBottom'>
 						<div className="taskItemHeaderLeft">
@@ -1177,7 +1177,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
-										<div className='taskItemFooterPropertyContainerValue'>{task.filePath}</div>
+											<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
 									</div>
 								)}
 							</div>
