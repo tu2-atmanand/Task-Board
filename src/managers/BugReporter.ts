@@ -1,6 +1,7 @@
 import { t } from "i18next";
 import TaskBoard from "main";
 import { Notice, } from "obsidian";
+import { newReleaseVersion } from "src/interfaces/Constants";
 import { BugReporterModal } from "src/modals/BugReporterModal";
 import { fsPromises } from "src/services/FileSystem";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
@@ -14,6 +15,7 @@ interface BugReportEntry {
 	id: number;
 	message: string;
 	context: string;
+	version: string | null;
 	bugContent: string;
 }
 
@@ -183,6 +185,10 @@ class BugReporterManager {
 				entry.context = contextMatch[1].trim();
 			}
 
+			// Extract version (for backward compatibility, set to null if not found)
+			const versionMatch = entryText.match(/Version\s*:\s*(.+?)(?=\n|$)/);
+			entry.version = versionMatch ? versionMatch[1].trim() : "Older than 1.9.3";
+
 			// Extract bug content from code block
 			const bugContentMatch = entryText.match(/```log\n([\s\S]*?)\n```/);
 			if (bugContentMatch) {
@@ -215,6 +221,7 @@ class BugReporterManager {
 ID : ${entry.id}
 Message : ${entry.message}
 Context : ${entry.context}
+Version : ${newReleaseVersion}
 
 #### Bug Content
 \`\`\`log
@@ -240,12 +247,13 @@ ${entry.bugContent}
 			// Parse existing bug reports
 			let bugReports = await this.parseBugReportEntries();
 
-			// Create new bug report entry
+			// Create new bug report entry with current version
 			const newEntry: BugReportEntry = {
 				timestamp: getCurrentLocalTimeString(),
 				id,
 				message,
 				context,
+				version: newReleaseVersion,
 				bugContent,
 			};
 
@@ -260,16 +268,12 @@ ${entry.bugContent}
 				.map((entry) => this.formatBugReportEntry(entry))
 				.join("\n\n-------------\n\n");
 
-			// Read current file to extract system info
-			const currentContent = await vault.adapter.read(this.LOG_FILE_PATH);
-			const systemInfoMatch = currentContent.match(
-				/(## System Information\n\n[\s\S]*?)(?=## Recent Bug Reports)/,
-			);
-			const systemInfoSection = systemInfoMatch
-				? systemInfoMatch[1].trim()
-				: "## System Information\n\n";
+			// Regenerate system information fresh from current environment
+			const systemInfo = await getObsidianDebugInfo(this.plugin!.app);
+			const systemInfoText = this.formatSystemInfo(systemInfo);
+			const systemInfoSection = `## System Information\n\n${systemInfoText}`;
 
-			// Rebuild the file content
+			// Rebuild the file content with fresh system info
 			const newContent = `# Task Board Logs\n\n${systemInfoSection}\n\n## Recent Bug Reports\n\n${recentBugsText}\n`;
 
 			await vault.adapter.write(this.LOG_FILE_PATH, newContent);
