@@ -1,5 +1,5 @@
 {
-  "version": "1.9.2",
+  "version": "1.9.3",
   "data": {
     "boardConfigs": [
       {
@@ -7,7 +7,7 @@
         "index": 0,
         "columns": [
           {
-            "id": 3243690973,
+            "id": 1408884119,
             "index": 1,
             "colType": "pathFiltered",
             "active": true,
@@ -33,7 +33,7 @@
             ]
           },
           {
-            "id": 3559756193,
+            "id": 1722381674,
             "index": 2,
             "colType": "pathFiltered",
             "active": true,
@@ -46,7 +46,7 @@
             }
           },
           {
-            "id": 1691761196,
+            "id": 1109053911,
             "index": 3,
             "colType": "pathFiltered",
             "active": true,
@@ -55,7 +55,7 @@
             "filePaths": "Daily_Notes"
           },
           {
-            "id": 1669693439,
+            "id": 1901864489,
             "index": 4,
             "colType": "pathFiltered",
             "active": true,
@@ -64,7 +64,7 @@
             "filePaths": "A QMD file.qmd"
           },
           {
-            "id": 1334738102,
+            "id": 2585022570,
             "index": 5,
             "colType": "completed",
             "active": true,
@@ -86,7 +86,7 @@
       {
         "columns": [
           {
-            "id": 2140105268,
+            "id": 991907373,
             "index": 1,
             "colType": "undated",
             "active": true,
@@ -103,7 +103,7 @@
             }
           },
           {
-            "id": 2229865717,
+            "id": 2468669902,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -132,7 +132,7 @@
             }
           },
           {
-            "id": 3727786625,
+            "id": 2593357655,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -157,7 +157,7 @@
             "minimized": false
           },
           {
-            "id": 2375042002,
+            "id": 2258141454,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -170,7 +170,7 @@
             }
           },
           {
-            "id": 2308148228,
+            "id": 2026681830,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -183,7 +183,7 @@
             }
           },
           {
-            "id": 2640245509,
+            "id": 1284358259,
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -240,7 +240,7 @@
       {
         "columns": [
           {
-            "id": 2014800349,
+            "id": 36672606,
             "index": 1,
             "colType": "otherTags",
             "active": true,
@@ -254,7 +254,7 @@
             "collapsed": false,
             "name": "Backlogs",
             "index": 2,
-            "id": 3733109737,
+            "id": 3581841277,
             "sortCriterias": [],
             "filters": {
               "rootCondition": "any",
@@ -271,7 +271,7 @@
             "minimized": false
           },
           {
-            "id": 3519181985,
+            "id": 246080170,
             "index": 3,
             "colType": "namedTag",
             "active": false,
@@ -304,7 +304,7 @@
             "name": "Can be implemented",
             "index": 4,
             "coltag": "#pending",
-            "id": 3325705180,
+            "id": 3342437579,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -324,7 +324,7 @@
             ]
           },
           {
-            "id": 2870642988,
+            "id": 4140492745,
             "index": 5,
             "colType": "namedTag",
             "active": true,
@@ -339,11 +339,11 @@
             "name": "Ready to publish",
             "index": 6,
             "coltag": "done",
-            "id": 1763479160,
+            "id": 3982458329,
             "minimized": false
           },
           {
-            "id": 265364702,
+            "id": 2790395058,
             "index": 7,
             "colType": "namedTag",
             "active": false,
@@ -353,7 +353,7 @@
             "minimized": false
           },
           {
-            "id": 1257338214,
+            "id": 3230188917,
             "index": 8,
             "colType": "completed",
             "active": true,
@@ -558,7 +558,7 @@
             "collapsed": false,
             "name": "Backlogs",
             "index": 1,
-            "id": 3237472741,
+            "id": 1810558858,
             "sortCriterias": [],
             "filters": {
               "rootCondition": "any",
@@ -575,7 +575,7 @@
             "minimized": false
           },
           {
-            "id": 4095756427,
+            "id": 2496891904,
             "index": 2,
             "colType": "namedTag",
             "active": false,
@@ -602,7 +602,7 @@
             }
           },
           {
-            "id": 3423203657,
+            "id": 1010105125,
             "index": 3,
             "colType": "namedTag",
             "active": false,
@@ -617,7 +617,7 @@
             "name": "Can be implemented",
             "index": 4,
             "coltag": "#pending",
-            "id": 2441828888,
+            "id": 3434559113,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -648,7 +648,7 @@
             "name": "In Progress",
             "index": 5,
             "coltag": "working",
-            "id": 764127648,
+            "id": 764270348,
             "filters": {
               "rootCondition": "any",
               "filterGroups": []
@@ -663,7 +663,7 @@
             "name": "In Review",
             "index": 6,
             "coltag": "Test",
-            "id": 1362618452,
+            "id": 3623051402,
             "minimized": false,
             "workLimit": 3
           },
@@ -674,11 +674,11 @@
             "name": "Ready to publish",
             "index": 7,
             "coltag": "done",
-            "id": 293064055,
+            "id": 2994856818,
             "minimized": false
           },
           {
-            "id": 222677294,
+            "id": 2329464087,
             "index": 8,
             "colType": "completed",
             "active": true,
@@ -741,7 +741,7 @@
         "index": 4,
         "columns": [
           {
-            "id": 4261653332,
+            "id": 3452645410,
             "index": 1,
             "colType": "allPending",
             "active": true,
@@ -765,7 +765,7 @@
             }
           },
           {
-            "id": 3998490215,
+            "id": 3457280449,
             "index": 2,
             "colType": "allPending",
             "active": true,
@@ -798,7 +798,7 @@
             ]
           },
           {
-            "id": 1920714230,
+            "id": 1799911929,
             "index": 3,
             "colType": "allPending",
             "active": true,
@@ -823,7 +823,7 @@
             }
           },
           {
-            "id": 159970160,
+            "id": 500957103,
             "index": 4,
             "colType": "allPending",
             "active": true,
@@ -855,7 +855,7 @@
             "workLimit": 3
           },
           {
-            "id": 4007509393,
+            "id": 1098559804,
             "index": 5,
             "colType": "completed",
             "active": true,
