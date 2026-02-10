@@ -798,117 +798,121 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	const taskItemComponent = plugin.settings.data.globalSettings.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
 
-	return (
-		<div
-			className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
-			data-column-id={columnData.id}
-			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
-			data-column-type={columnData.colType}
-			data-column-tag-name={tagData?.name}
-			data-column-tag-color={tagData?.color}
-		>
-			{columnData.minimized && !hideColumnHeader ? (
-				// Minimized view
-				<div className="taskBoardColumnMinimized">
-					<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-						{allTasks?.length ?? 0}
-					</div>
-					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
-						await handleMinimizeColumn();
-						eventEmitter.emit('REFRESH_BOARD');
-					}}>{columnData.name}</div>
-				</div>
-			) : (
-				// Normal view
-				<>
-					{!hideColumnHeader && (
-						<div className="taskBoardColumnSecHeader">
-							<div className="taskBoardColumnSecHeaderTitleSec">
-								<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
-								{columnData?.workLimit && tasksForThisColumn.length > columnData.workLimit && (
-									<div className='taskBoardColumnSecHeaderTitleSecWorkLimitAlert' aria-label={t("work-limit-alert")} onClick={handleAlertButtonClick}>
-										<AlertOctagon size={20} />
-									</div>
-								)}
-							</div>
-							<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-								{allTasks?.length ?? 0}
-							</div>
+	try {
+		return (
+			<div
+				className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
+				data-column-id={columnData.id}
+				style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
+				data-column-type={columnData.colType}
+				data-column-tag-name={tagData?.name}
+				data-column-tag-color={tagData?.color}
+			>
+				{columnData.minimized && !hideColumnHeader ? (
+					// Minimized view
+					<div className="taskBoardColumnMinimized">
+						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+							{allTasks?.length ?? 0}
 						</div>
-					)}
-					<div
-						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
-						ref={tasksContainerRef}
-						onDragOver={(e) => { handleDragOver(e); }}
-						onDragLeave={handleDragLeave}
-						onDrop={handleDrop}
-						onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
-					>
-						{columnData.minimized ? <></> : (
-							<>
-								{visibleTasks && visibleTasks.length > 0 ? (
-									<>
-										{(() => {
-											const elements: React.ReactNode[] = [];
-											for (let i = 0; i < visibleTasks.length; i++) {
-												// If insertIndex points to this position, render placeholder
-												if (insertIndex === i) {
+						<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
+							await handleMinimizeColumn();
+							eventEmitter.emit('REFRESH_BOARD');
+						}}>{columnData.name}</div>
+					</div>
+				) : (
+					// Normal view
+					<>
+						{!hideColumnHeader && (
+							<div className="taskBoardColumnSecHeader">
+								<div className="taskBoardColumnSecHeaderTitleSec">
+									<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+									{columnData?.workLimit && tasksForThisColumn.length > columnData.workLimit && (
+										<div className='taskBoardColumnSecHeaderTitleSecWorkLimitAlert' aria-label={t("work-limit-alert")} onClick={handleAlertButtonClick}>
+											<AlertOctagon size={20} />
+										</div>
+									)}
+								</div>
+								<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+									{allTasks?.length ?? 0}
+								</div>
+							</div>
+						)}
+						<div
+							className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
+							ref={tasksContainerRef}
+							onDragOver={(e) => { handleDragOver(e); }}
+							onDragLeave={handleDragLeave}
+							onDrop={handleDrop}
+							onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
+						>
+							{columnData.minimized ? <></> : (
+								<>
+									{visibleTasks && visibleTasks.length > 0 ? (
+										<>
+											{(() => {
+												const elements: React.ReactNode[] = [];
+												for (let i = 0; i < visibleTasks.length; i++) {
+													// If insertIndex points to this position, render placeholder
+													if (insertIndex === i) {
+														elements.push(
+															<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+														);
+													}
+													const task = visibleTasks[i];
 													elements.push(
-														<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+														<div
+															key={task.id}
+															className="taskItemFadeIn"
+															data-taskitem-index={i}
+															data-taskitem-id={task.id}
+															onDragOver={(e) => { handleTaskItemDragOver(e); }
+															}
+															onDrop={e => handleTaskDrop(e, i)}
+														>
+															<MemoizedTaskItem
+																Component={taskItemComponent}
+																key={task.id}
+																dataAttributeIndex={i}
+																plugin={plugin}
+																task={task}
+																activeBoardSettings={activeBoardData}
+																columnIndex={columnIndex}
+																swimlaneData={swimlaneData}
+															/>
+														</div>
 													);
 												}
-												const task = visibleTasks[i];
-												elements.push(
-													<div
-														key={task.id}
-														className="taskItemFadeIn"
-														data-taskitem-index={i}
-														data-taskitem-id={task.id}
-														onDragOver={(e) => { handleTaskItemDragOver(e); }
-														}
-														onDrop={e => handleTaskDrop(e, i)}
-													>
-														<MemoizedTaskItem
-															Component={taskItemComponent}
-															key={task.id}
-															dataAttributeIndex={i}
-															plugin={plugin}
-															task={task}
-															activeBoardSettings={activeBoardData}
-															columnIndex={columnIndex}
-															swimlaneData={swimlaneData}
-														/>
-													</div>
-												);
-											}
-											// If insertIndex points to end (after last item)
-											if (insertIndex === localTasks.length) {
-												elements.push(
-													<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-												);
-											}
-											return elements;
-										})()}
-										{allTasks && visibleTaskCount < allTasks.length && (
-											<div className="lazyLoadIndicator">
-												<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
-											</div>
-										)}
-									</>
-								) : (
-									<div onDragOver={(e) => { e.preventDefault(); }}>
-										<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
-									</div>
-								)}
-							</>
-						)
-						}
-					</div>
-				</>
-			)
-			}
-		</div >
-	);
+												// If insertIndex points to end (after last item)
+												if (localTasks && insertIndex === localTasks.length) {
+													elements.push(
+														<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+													);
+												}
+												return elements;
+											})()}
+											{allTasks && visibleTaskCount < allTasks.length && (
+												<div className="lazyLoadIndicator">
+													<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
+												</div>
+											)}
+										</>
+									) : (
+										<div onDragOver={(e) => { e.preventDefault(); }}>
+											<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
+										</div>
+									)}
+								</>
+							)
+							}
+						</div>
+					</>
+				)
+				}
+			</div >
+		);
+	} catch (error) {
+		bugReporterManagerInsatance.showNotice(180, "There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer", JSON.stringify(error), "LazyColumn.tsx/return");
+	}
 };
 
 const MemoizedTaskItem = memo<{

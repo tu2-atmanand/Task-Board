@@ -918,11 +918,11 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		try {
 			return (
 				<div className="taskItemHeader">
-					<div className='taskItemHeaderTop'>
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
-							<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
-						)}
-					</div>
+					{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
+						<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>
+							<div className='taskitemHeaderTopFilenameValue'>{task.filePath.split('/').pop()}</div>
+						</div>
+					)}
 
 					<div className='taskItemHeaderBottom'>
 						<div className="taskItemHeaderLeft">

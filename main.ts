@@ -88,7 +88,7 @@ export default class TaskBoard extends Plugin {
 	private deleteProcessingTimer: NodeJS.Timeout | null = null;
 	private createProcessingTimer: NodeJS.Timeout | null = null;
 	private currentProgressNotice: Notice | null = null;
-	private readonly QUEUE_DELAY = 1000; // Delay in ms before starting to process queue
+	private readonly QUEUE_DELAY = 2000; // Delay in ms before starting to process queue
 	private readonly PROCESSING_INTERVAL = 100; // Delay between processing each file
 
 	constructor(app: App, menifest: PluginManifest) {
@@ -694,25 +694,29 @@ export default class TaskBoard extends Plugin {
 		const archivedPath = normalizePath(
 			this.settings.data.globalSettings.archivedTBNotesFolderPath,
 		);
-		const totalFiles = this.renameQueue.length;
-
-		// Show progress notice
-		this.currentProgressNotice = new Notice(
-			`Processing renamed files: 0/${totalFiles}`,
-			0,
+		let allowedFiles = this.renameQueue.filter((fileData) =>
+			fileTypeAllowedForScanning(
+				this.settings.data.globalSettings,
+				fileData.file,
+			),
 		);
+		const totalFilesLength = allowedFiles.length;
 
-		let processed = 0;
-		while (this.renameQueue.length > 0) {
-			const { file, oldPath } = this.renameQueue.shift()!;
+		// Empty the global queue
+		this.renameQueue = [];
 
-			try {
-				if (
-					fileTypeAllowedForScanning(
-						this.plugin.settings.data.globalSettings,
-						file,
-					)
-				) {
+		if (totalFilesLength > 0) {
+			// Show progress notice
+			this.currentProgressNotice = new Notice(
+				`Processing renamed files: 0/${totalFilesLength}`,
+				0,
+			);
+
+			let processed = 0;
+			while (allowedFiles.length > 0) {
+				const { file, oldPath } = allowedFiles.shift()!;
+
+				try {
 					this.realTimeScanner.onFileRenamed(
 						file,
 						oldPath,
@@ -721,38 +725,41 @@ export default class TaskBoard extends Plugin {
 					processed++;
 
 					// Update progress notice
-					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFilesLength}`;
+				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
+					bugReporterManagerInsatance.addToLogs(
+						162,
+						String(error),
+						"main.ts/processRenameQueue",
+					);
 				}
-			} catch (error) {
-				this.currentProgressNotice?.hide();
-				// this.currentProgressNotice = null;
-				bugReporterManagerInsatance.addToLogs(
-					162,
-					String(error),
-					"main.ts/processRenameQueue",
-				);
+
+				// Add delay between processing each file to prevent blocking UI
+				if (allowedFiles.length > 0) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
 			}
 
-			// Add delay between processing each file to prevent blocking UI
-			if (this.renameQueue.length > 0) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, this.PROCESSING_INTERVAL),
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+
+			this.plugin.vaultScanner.saveTasksToJsonCache();
+			eventEmitter.emit("REFRESH_BOARD");
+
+			if (processed > 0) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFilesLength} renamed file(s)`,
 				);
 			}
 		}
 
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-
-		this.plugin.vaultScanner.saveTasksToJsonCache();
-		eventEmitter.emit("REFRESH_BOARD");
-
-		if (processed > 0) {
-			new Notice(
-				`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
-			);
-		}
+		if (this.renameProcessingTimer)
+			clearTimeout(this.renameProcessingTimer);
 	}
 
 	/**
@@ -764,13 +771,14 @@ export default class TaskBoard extends Plugin {
 			this.deleteQueue.push(file);
 
 			// Clear existing timer and set a new one
-			if (this.deleteProcessingTimer) {
-				clearTimeout(this.deleteProcessingTimer);
+			if (!this.deleteProcessingTimer) {
+				this.deleteProcessingTimer = setTimeout(() => {
+					this.processDeleteQueue();
+				}, this.QUEUE_DELAY);
+			} else {
+				// NOTE : I think there is no need to remove the Timout created, in 2 seconds, all the Obsidians triggers should finish, for the Task Board's processing to start.
+				// clearTimeout(this.deleteProcessingTimer);
 			}
-
-			this.deleteProcessingTimer = setTimeout(() => {
-				this.processDeleteQueue();
-			}, this.QUEUE_DELAY);
 		}
 	}
 
@@ -784,59 +792,57 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		const totalFiles = this.deleteQueue.length;
-
-		// Show progress notice
-		this.currentProgressNotice = new Notice(
-			`Processing deleted files: 0/${totalFiles}`,
-			0,
+		let allowedFiles = this.deleteQueue.filter((file: TAbstractFile) =>
+			fileTypeAllowedForScanning(this.settings.data.globalSettings, file),
 		);
+		const totalFilesLength = allowedFiles.length;
 
-		let processed = 0;
-		while (this.deleteQueue.length > 0) {
-			const file = this.deleteQueue.shift()!;
+		if (allowedFiles.length > 0) {
+			// Show progress notice
+			this.currentProgressNotice = new Notice(
+				`Processing deleted files: 0/${totalFilesLength}`,
+				0,
+			);
 
-			try {
-				if (
-					fileTypeAllowedForScanning(
-						this.plugin.settings.data.globalSettings,
-						file,
-					)
-				) {
+			let processed = 0;
+			while (allowedFiles.length > 0) {
+				const file = allowedFiles.shift()!;
+
+				try {
 					this.realTimeScanner.onFileDeleted(file);
 					processed++;
 
 					// Update progress notice
-					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFilesLength}`;
+				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
+					bugReporterManagerInsatance.addToLogs(
+						163,
+						String(error),
+						"main.ts/processDeleteQueue",
+					);
 				}
-			} catch (error) {
-				this.currentProgressNotice?.hide();
-				// this.currentProgressNotice = null;
-				bugReporterManagerInsatance.addToLogs(
-					163,
-					String(error),
-					"main.ts/processDeleteQueue",
+
+				// Add delay between processing each file to prevent blocking UI
+				if (allowedFiles.length > 0) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
+			}
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+
+			this.plugin.vaultScanner.saveTasksToJsonCache();
+			eventEmitter.emit("REFRESH_COLUMN");
+
+			if (processed > 0) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFilesLength} deleted file(s)`,
 				);
 			}
-
-			// Add delay between processing each file to prevent blocking UI
-			if (this.deleteQueue.length > 0) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, this.PROCESSING_INTERVAL),
-				);
-			}
-		}
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-
-		this.plugin.vaultScanner.saveTasksToJsonCache();
-		eventEmitter.emit("REFRESH_COLUMN");
-
-		if (processed > 0) {
-			new Notice(
-				`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
-			);
 		}
 	}
 
@@ -849,13 +855,14 @@ export default class TaskBoard extends Plugin {
 		this.createQueue.push(file);
 
 		// Clear existing timer and set a new one
-		if (this.createProcessingTimer) {
-			clearTimeout(this.createProcessingTimer);
+		if (!this.createProcessingTimer) {
+			this.createProcessingTimer = setTimeout(() => {
+				this.processCreateQueue();
+			}, this.QUEUE_DELAY);
+		} else {
+			// NOTE : I think there is no need to remove the Timout created, in 2 seconds, all the Obsidians triggers should finish, for the Task Board's processing to start.
+			// clearTimeout(this.createProcessingTimer);
 		}
-
-		this.createProcessingTimer = setTimeout(() => {
-			this.processCreateQueue();
-		}, this.QUEUE_DELAY);
 	}
 
 	/**
@@ -868,19 +875,22 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		const totalFiles = this.createQueue.length;
+		let allowedFiles = this.createQueue.filter((file: TFile) =>
+			fileTypeAllowedForScanning(this.settings.data.globalSettings, file),
+		);
+		const totalFilesLength = allowedFiles.length;
 
-		this.plugin.vaultScanner.refreshTasksFromFiles(this.createQueue, false);
+		this.plugin.vaultScanner.refreshTasksFromFiles(allowedFiles, false);
 
 		// Show progress notice only if the files are more than 10
-		if (totalFiles > 10) {
+		if (totalFilesLength > 10) {
 			this.currentProgressNotice = new Notice(
-				`Task Board : Processing created files: 0/${totalFiles}`,
+				`Task Board : Processing created files: 0/${totalFilesLength}`,
 				0,
 			);
 			let processed = 0;
-			while (this.createQueue.length > 0) {
-				const file = this.createQueue.shift()!;
+			while (allowedFiles.length > 0) {
+				const file = allowedFiles.shift()!;
 
 				try {
 					// if (
@@ -894,7 +904,7 @@ export default class TaskBoard extends Plugin {
 					processed++;
 
 					// Update progress notice
-					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
 				} catch (error) {
 					this.currentProgressNotice?.hide();
 					// this.currentProgressNotice = null;
@@ -906,7 +916,7 @@ export default class TaskBoard extends Plugin {
 				}
 
 				// Add delay between processing each file to prevent blocking UI
-				if (this.createQueue.length > 0) {
+				if (allowedFiles.length > 0) {
 					await new Promise((resolve) =>
 						setTimeout(resolve, this.PROCESSING_INTERVAL),
 					);
@@ -918,7 +928,7 @@ export default class TaskBoard extends Plugin {
 			this.currentProgressNotice = null;
 			if (processed > 0) {
 				new Notice(
-					`✓ Task Board : Finished processing ${totalFiles} created file(s)`,
+					`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
 				);
 			}
 		}
