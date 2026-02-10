@@ -13,54 +13,32 @@
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
-  - Task Board v1.9.1
+  - Task Board v1.9.2
   - BRAT v1.4.0
 
 ## Recent Bug Reports
 
-Timestamp : 2026-02-08T21:56:26
-ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "276,224". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
+Timestamp : 2026-02-10T15:04:23
+ID : 180
+Message : There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer
+Context : LazyColumn.tsx/return
+Version : 1.9.2
+Version : 1.9.2
 
 #### Bug Content
 ```log
-ERROR: Same id is present on two tasks
+"THis is a test."
 ```
 
 -------------
 
-Timestamp : 2026-02-09T00:02:46
-ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "224". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
+Timestamp : 2026-02-10T15:05:23
+ID : 180
+Message : There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer
+Context : LazyColumn.tsx/return
+Version : 1.9.2
 
 #### Bug Content
 ```log
-ERROR: Same id is present on two tasks
-```
-
--------------
-
-Timestamp : 2026-02-09T11:26:36
-ID : 76
-Message : Error reading data from vault file. Couldnt able to read the following file : TaskBoard/New Note 1.md
-Context : MarkdownFileOperations.ts/readDataOfVaultFile
-
-#### Bug Content
-```log
-File not found at path: TaskBoard/New Note 1.md
-```
-
--------------
-
-Timestamp : 2026-02-09T11:27:26
-ID : 76
-Message : 
-Context : MarkdownFileOperations.ts/readDataOfVaultFile
-
-#### Bug Content
-```log
-Error reading data from vault file. Couldnt able to read the following file : TaskBoard/New Note 1.md
-ERROR :"File not found at path: TaskBoard/New Note 1.md, file object : null"
+"THis is a test."
 ```
