@@ -1,6 +1,13 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, Notice, TAbstractFile, TFile, moment as _moment } from "obsidian";
+import {
+	App,
+	Notice,
+	TAbstractFile,
+	TFile,
+	TFolder,
+	moment as _moment,
+} from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -97,7 +104,7 @@ export default class VaultScanner {
 			const fileContent = await readDataOfVaultFile(
 				this.plugin,
 				fileNameWithPath,
-				false
+				false,
 			);
 			if (fileContent == null) return "false";
 
@@ -683,6 +690,7 @@ export function fileTypeAllowedForScanning(
 
 	const filePath = file.path.toLocaleLowerCase();
 	if (
+		file instanceof TFolder ||
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
 		!allowedFileExtensionsRegEx.test(file.path) ||
 		(globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
