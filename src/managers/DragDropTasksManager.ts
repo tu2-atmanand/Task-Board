@@ -261,7 +261,7 @@ class DragDropTasksManager {
 		// Add the target column tag if it doesn't exist
 		const targetTag = targetColumn.coltag.replace("#", "");
 		// Make sure we don't have duplicates
-		newTags.push(targetTag);
+		newTags.push(targetTag.startsWith("#") ? targetTag : `#${targetTag}`);
 		newTags = Array.from(new Set(newTags));
 
 		// newTask.tags = newTags;
@@ -1372,6 +1372,7 @@ class DragDropTasksManager {
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
 	): void {
+		console.log("handleDropEvent...");
 		e.preventDefault();
 
 		// All checks before proceeding with the calculations...

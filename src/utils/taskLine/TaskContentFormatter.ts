@@ -965,7 +965,16 @@ export const sanitizeTags = (
 	);
 
 	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
-	const newTagSet = new Set(newTagsList.map((t) => t.trim()));
+	// TODO : Soon, will update the tags management mechanism to store the tags without the `#`
+	// in the tasks cache. And here will directly apply the '#' to the newTagSet
+	// and reduce the below computations.
+	const newTagSet = new Set(
+		newTagsList.map((t) => {
+			let sTag = t.trim();
+			sTag = sTag.startsWith("#") ? sTag : `#${sTag}`;
+			return sTag;
+		}),
+	);
 	const extractedTagsSet = new Set(extractedTags.map((t) => t.trim()));
 
 	// --------------------------------------------------
