@@ -6,7 +6,7 @@ import { CSSProperties } from 'react';
 import TaskItem, { swimlaneDataProp } from './TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
-import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, RootFilterState, getActiveColumnKey } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
 import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
@@ -230,14 +230,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		const boardIndex = activeBoardData.index;
 
 		if (boardIndex !== -1) {
-			// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
-			// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-			// 	(col: ColumnData) => col.id === columnData.id
-			// );
-			const columnIndex = columnData.index - 1;
+			const board = plugin.settings.data.boardConfigs[boardIndex];
+			const columnKey = getActiveColumnKey(board);
+			const columnIndex = board.columns[columnKey].findIndex(
+				(col: ColumnData) => col.name === columnData.name
+			);
 
 			if (columnIndex !== -1) {
-				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
+				board.columns[columnKey][columnIndex].minimized = !board.columns[columnKey][columnIndex].minimized;
 				await plugin.saveSettings();
 				eventEmitter.emit('REFRESH_BOARD');
 			}
@@ -277,22 +277,16 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						);
 
 						if (boardIndex !== -1) {
-							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-								(col: ColumnData) => col.id === columnData.id
+							const board = plugin.settings.data.boardConfigs[boardIndex];
+							const columnKey = getActiveColumnKey(board);
+							const columnIndex = board.columns[columnKey].findIndex(
+								(col: ColumnData) => col.name === columnData.name
 							);
 
 							if (columnIndex !== -1) {
-								// Update the column configuration
-								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
-								const newSettings = plugin.settings;
-
-								// Save the settings
-								plugin.saveSettings(newSettings).then(() => {
-									setTimeout(() => {
-										eventEmitter.emit('REFRESH_BOARD');
-									}, 200)
-								})
-
+								board.columns[columnKey][columnIndex] = updatedColumnConfiguration;
+								plugin.saveSettings();
+								eventEmitter.emit('REFRESH_BOARD');
 							}
 						}
 					},
@@ -308,15 +302,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			item.setIcon("list-filter");
 			item.onClick(async () => {
 				try {
-					// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-					// 	(board: Board) => board.name === activeBoardData.name
-					// );
 					const boardIndex = activeBoardData.index;
-					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
-					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-					// 	(col: ColumnData) => col.id === columnData.id
-					// );
-					const columnIndex = columnData.index - 1;
+					const board = plugin.settings.data.boardConfigs[boardIndex];
+					const columnKey = getActiveColumnKey(board);
+					const columnIndex = board.columns[columnKey].findIndex(
+						(col: ColumnData) => col.name === columnData.name
+					);
 
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
@@ -328,10 +319,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						filterModal.filterCloseCallback = async (filterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
-									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
-
-									// Save the settings
+									board.columns[columnKey][columnIndex].filters = filterState;
 									await plugin.saveSettings();
 
 									// Refresh the board view
@@ -365,10 +353,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						popover.onClose = async (filterState?: RootFilterState) => {
 							if (filterState && boardIndex !== -1) {
 								if (columnIndex !== -1) {
-									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
-
-									// Save the settings
+									board.columns[columnKey][columnIndex].filters = filterState;
 									await plugin.saveSettings();
 
 									// Refresh the board view
@@ -401,17 +386,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				const boardIndex = activeBoardData.index;
 
 				if (boardIndex !== -1) {
-					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
-					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-					// 	(col: ColumnData) => col.id === columnData.id
-					// );
-					const columnIndex = columnData.index - 1;
+					const board = plugin.settings.data.boardConfigs[boardIndex];
+					const columnKey = getActiveColumnKey(board);
+					const columnIndex = board.columns[columnKey].findIndex(
+						(col: ColumnData) => col.name === columnData.name
+					);
 
 					if (columnIndex !== -1) {
-						// Set the active property to false
-						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
-
-						// Save the settings
+						board.columns[columnKey][columnIndex].active = false;
 						await plugin.saveSettings();
 
 						// Refresh the board view

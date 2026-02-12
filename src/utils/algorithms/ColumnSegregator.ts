@@ -2,7 +2,7 @@
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 import { moment as _moment } from "obsidian";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, getActiveColumns, getActiveColumnKey } from "src/interfaces/BoardConfigs";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
@@ -31,6 +31,13 @@ export const columnSegregator = (
 	if (activeBoardIndex < 0 || !allTasks) return [];
 
 	const boardConfigs = settings.data.boardConfigs;
+
+	// 1. Get the current board based on activeBoardIndex index
+	const currentBoard = boardConfigs.find(
+		(board: Board) => board.index === activeBoardIndex
+	);
+	// 2. Collect all coltags from columns where colType is 'namedTag'
+	const activeColumns = currentBoard ? getActiveColumns(currentBoard) : [];
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
@@ -220,32 +227,20 @@ export const columnSegregator = (
 			}
 			break;
 		case colTypeNames.otherTags:
-			// 1. Get the current board based on activeBoardIndex index
-			const currentBoard = boardConfigs.find(
-				(board: Board) => board.index === activeBoardIndex
-			);
-
-			// 2. Collect all coltags from columns where colType is 'namedTag'
 			const namedTags =
-				currentBoard?.columns
-					.filter(
-						(col: ColumnData) =>
-							col.colType === colTypeNames.namedTag && col.coltag
-					)
-					.map((col: ColumnData) =>
-						col.coltag?.toLowerCase().replace(`#`, "")
-					)
-					.filter(
-						(tag): tag is string =>
-							typeof tag === "string" && tag.length > 0
-					) || [];
+				activeColumns
+					.filter((col: ColumnData) => col.colType === colTypeNames.namedTag && col.coltag)
+					.map((col: ColumnData) => col.coltag?.toLowerCase().replace(`#`, "")).filter(
+					(tag): tag is string =>
+						typeof tag === "string" && tag.length > 0
+				) || [];
 
-			// 3. Now filter tasks
+			// Now filter tasks
 			tasksToDisplay = pendingTasks.filter((task) => {
 				const allTaskTags = getAllTaskTags(task);
 				if (allTaskTags.length === 0) return false;
 
-				// Check if none of the task's tags are in the namedTags list
+			// Check if none of the task's tags are in the namedTags list
 				return allTaskTags.every((tag: string) => {
 					// return !namedTags.includes(tag.replace("#", "").toLowerCase());
 					const result = matchTagsWithWildcards(namedTags, tag);
@@ -254,7 +249,8 @@ export const columnSegregator = (
 			});
 			break;
 		case colTypeNames.completed:
-			const tasksLimit = columnData?.limit;
+			const completedColumnIndex = activeColumns.findIndex((column: ColumnData) => column.colType === colTypeNames.completed);
+			const tasksLimit = activeColumns[completedColumnIndex]?.limit;
 
 			// This sorting will be done through the columnData.sortCriteria for this column if its configured
 			// const sortedCompletedTasks = completedTasks.sort((a, b): number => {
@@ -348,8 +344,11 @@ export const columnSegregator = (
 
 			// Update the newTasksIdManualOrder inside board data.
 			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
-			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
-				newTasksIdManualOrder;
+			const columnKey = getActiveColumnKey(currentBoardData);
+			const colIdx = currentBoardData.columns[columnKey].findIndex((col: ColumnData) => col.id === columnData.id);
+			if (colIdx !== -1) {
+				currentBoardData.columns[columnKey][colIdx].tasksIdManualOrder = newTasksIdManualOrder;
+			}
 
 			if (onBoardDataChange && didTasksIdManualOrderChange) {
 				onBoardDataChange(currentBoardData);

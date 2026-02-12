@@ -24,7 +24,7 @@ export enum UniversalDateOptions {
 
 export enum TagColorType {
 	TagText = "text",
-	TagBg= "tagBg",
+	TagBg = "tagBg",
 	CardBg = "background",
 }
 
@@ -64,7 +64,7 @@ export enum taskPropertiesNames {
 	Checkbox = "checkbox",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",
-	FilePathInHeader="filePathInHeader"
+	FilePathInHeader = "filePathInHeader"
 }
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
@@ -193,6 +193,12 @@ export enum mapViewEdgeType {
 	step = "step",
 	smoothstep = "smoothstep",
 	bezier = "default",
+}
+
+export enum KanbanBoardType {
+	statusBoard = "Status Based Board",
+	timeBoard = "Time Based Board",
+	tagBoard = "Tag Based Board",
 }
 
 export enum taskCardStyleNames {

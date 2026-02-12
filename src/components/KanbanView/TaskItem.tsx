@@ -12,7 +12,7 @@ import { cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
-import { Board } from 'src/interfaces/BoardConfigs';
+import { Board, getActiveColumns } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
@@ -49,7 +49,9 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
-	const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
+	
+	const activeColumns = activeBoardSettings ? getActiveColumns(activeBoardSettings) : [];
+	const columnData = columnIndex !== undefined ? activeColumns[columnIndex - 1] : undefined;	
 	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
@@ -946,6 +948,8 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
+										// const activeColumns = activeBoardSettings ? getActiveColumns(activeBoardSettings) : [];
+										// const columnData = columnIndex !== undefined ? activeColumns[columnIndex - 1] : undefined;
 										if (
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&

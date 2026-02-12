@@ -1,7 +1,7 @@
 // src/components/KanbanView/KanbanSwimlanesContainer.tsx
 
 import React, { useMemo, memo } from 'react';
-import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, getActiveColumns } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
@@ -42,8 +42,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		minimized
 	} = board.swimlanes;
 
-	const activeColumns = board.columns
-		.filter((col) => col.active);
+	const activeColumns = getActiveColumns(board)
+		.filter((col: ColumnData) => col.active);
 	// .map((col) => ({
 	// 	// create a shallow copy so we don't mutate original board state
 	// 	...col,

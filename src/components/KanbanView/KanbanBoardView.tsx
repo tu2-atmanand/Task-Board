@@ -1,6 +1,6 @@
 // src/components/KanbanBoard.tsx
 
-import { Board, ColumnData } from "../../interfaces/BoardConfigs";
+import { Board, ColumnData, getActiveColumns } from "../../interfaces/BoardConfigs";
 import React, { memo } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
@@ -23,6 +23,7 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, tasksPerColumn, loading, freshInstall }) => {
 	// Check if lazy loading is enabled
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	const activeColumns = board ? getActiveColumns(board) : [];
 
 	return (
 		<div className="kanbanBoard">
@@ -46,7 +47,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, task
 							</>
 						)}
 					</div>
-				) : board?.columns?.length === 0 ? (
+				) : activeColumns.length === 0 ? (
 					<div className="emptyBoardMessage">
 						Create columns on this board using the board config modal from top right corner button.
 					</div>
@@ -57,7 +58,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, task
 						tasksPerColumn={tasksPerColumn}
 					/>
 				) : (
-					board?.columns
+					activeColumns
 						.filter((column) => column.active)
 						.map((column, index) => (
 							<MemoizedColumn

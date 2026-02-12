@@ -1,6 +1,6 @@
 import TaskBoard from "main";
 import { Notice } from "obsidian";
-import { ColumnData } from "src/interfaces/BoardConfigs";
+import { ColumnData, getActiveColumnKey } from "src/interfaces/BoardConfigs";
 import {
 	colTypeNames,
 	statusTypeNames,
@@ -929,9 +929,12 @@ class DragDropTasksManager {
 		}
 
 		let newSettings = plugin.settings;
-		newSettings.data.boardConfigs[
-			currentDragData.currentBoardIndex
-		].columns[targetColumnData.index - 1] = targetColumnData;
+		const board = newSettings.data.boardConfigs[currentDragData.currentBoardIndex];
+		const columnKey = getActiveColumnKey(board);
+		const colIdx = board.columns[columnKey].findIndex((col: ColumnData) => col.id === targetColumnData.id);
+		if (colIdx !== -1) {
+			board.columns[columnKey][colIdx] = targetColumnData;
+		}
 
 		// Persist settings and refresh the board
 		plugin.saveSettings(newSettings);

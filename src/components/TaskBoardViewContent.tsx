@@ -1,12 +1,12 @@
 // src/components/TaskBoardViewContent.tsx
 
-import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
+import { Board, ColumnData, RootFilterState, getActiveColumns } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform, Menu } from "obsidian";
+import { App, debounce, Platform, Menu, Notice, addIcon } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
@@ -19,13 +19,14 @@ import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
 import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
-import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
+import { taskPropertiesNames, viewTypeNames, KanbanBoardType } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
 	const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
+	const [activeBoardType, setActiveBoardType] = useState(KanbanBoardType.statusBoard);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
 	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
@@ -129,13 +130,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 			if (searchQuery.trim() !== "") {
 				const searchQueryFilteredTasks = handleSearchSubmit(filteredAllTasks);
-				return currentBoard.columns
+				return getActiveColumns(currentBoard)
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
 						columnSegregator(plugin.settings, activeBoardIndex, column, searchQueryFilteredTasks)
-					);
+				);						
 			} else {
-				return currentBoard.columns
+				return getActiveColumns(currentBoard)
 					.filter((column) => column.active)
 					.map((column: ColumnData) =>
 						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks, (updatedBoardData: Board) => {
@@ -156,7 +157,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 		}
 		return [];
-	}, [allTasks, activeBoardIndex]);
+	}, [allTasks, activeBoardIndex, activeBoardType]);
 
 	useEffect(() => {
 		if (allTasksArrangedPerColumn.length > 0) {
@@ -684,8 +685,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			setTimeout(() => {
 				eventEmitter.emit("REFRESH_BOARD");
 				plugin.saveSettings();
-			}, 100);
-
+			}, 100);			
+		} else if (viewType === viewTypeNames.kanban) {
+			// toggle kanban board type
+			const updatedBoards = [...boards];
+			const boardTypes = Object.values(KanbanBoardType);
+			const currentIndex = boardTypes.indexOf(updatedBoards[activeBoardIndex].boardType);
+			const nextIndex = (currentIndex + 1) % boardTypes.length;
+			const nextBoardType = boardTypes[nextIndex];
+			updatedBoards[activeBoardIndex].boardType = nextBoardType;
+			setBoards(updatedBoards);
+			setActiveBoardType(nextBoardType);
+			new Notice(`${t("changed-kanban-board-type")}: ${nextBoardType.valueOf()}`);
 		}
 		closeBoardSidebar(); // Close sidebar after selection
 	}
