@@ -7,6 +7,7 @@ import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { RootFilterState } from "src/interfaces/BoardConfigs";
 import { TaskFilterComponent } from "./ViewTaskFilter";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class ViewTaskFilterPopover
 	extends Component
@@ -31,7 +32,7 @@ export class ViewTaskFilterPopover
 		private leafId?: string | undefined,
 		activeBoardIndex?: number,
 		columnOrBoardName?: string,
-		initialFilterState?: RootFilterState
+		initialFilterState?: RootFilterState,
 	) {
 		super();
 		this.plugin = plugin;
@@ -86,11 +87,11 @@ export class ViewTaskFilterPopover
 		// Create metadata editor, use compact mode
 		this.taskFilterComponent = new TaskFilterComponent(
 			taskFilterContainer,
+			this.plugin,
 			this.app,
 			this.leafId,
-			this.plugin,
 			this.activeBoardIndex,
-			this.initialFilterState
+			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();
@@ -151,7 +152,7 @@ export class ViewTaskFilterPopover
 							},
 						},
 					],
-				}
+				},
 			);
 		}
 
@@ -221,7 +222,11 @@ export class ViewTaskFilterPopover
 			try {
 				filterState = this.taskFilterComponent.getFilterState();
 			} catch (error) {
-				console.error("Failed to get filter state before close", error);
+				bugReporterManagerInsatance.addToLogs(
+					116,
+					String(error),
+					"ViewTaskFilterPopover.ts/close",
+				);
 			}
 		}
 
@@ -245,7 +250,11 @@ export class ViewTaskFilterPopover
 			try {
 				this.onClose(filterState);
 			} catch (error) {
-				console.error("Error in onClose callback", error);
+				bugReporterManagerInsatance.addToLogs(
+					117,
+					String(error),
+					"ViewTaskFilterPopover.ts/close",
+				);
 			}
 		}
 	}

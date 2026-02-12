@@ -2,12 +2,12 @@
 
 import { taskItem } from "src/interfaces/TaskItem";
 import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter";
-import { getAllTaskTags } from "../taskLine/TaskItemUtils";
 import {
 	RootFilterState,
 	FilterGroup,
 	Filter,
 } from "src/interfaces/BoardConfigs";
+import { getAllTaskTags } from "../TaskItemUtils";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -97,7 +97,6 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 
 	// Evaluate based on condition
 	switch (condition) {
-		case "isSet":
 		case "isNotEmpty":
 			if (Array.isArray(taskValue && taskValue.length > 0)) return true;
 			else if (taskValue && taskValue !== "") return true;
@@ -111,7 +110,6 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 		// 	taskValue?.length > 0
 		// );
 		case "isEmpty":
-		case "isNotSet":
 			return (
 				taskValue === "" ||
 				taskValue === null ||
@@ -133,6 +131,7 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			if (Array.isArray(taskValue)) {
 				return taskValue.some((item) =>
 					String(item)
+						.replace("#", "")
 						.toLowerCase()
 						.includes(String(value).replace("#", "").toLowerCase())
 				);
@@ -147,8 +146,9 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 			if (Array.isArray(taskValue)) {
 				return !taskValue.some((item) =>
 					String(item)
+						.replace("#", "")
 						.toLowerCase()
-						.includes(String(value).toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase())
 				);
 			}
 			return true;
@@ -241,7 +241,7 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "cancelledDate":
 			return task?.cancelledDate || "";
 		case "priority":
-			return String(task.priority) || "";
+			return task.priority || 0;
 		case "status":
 			return task.status || "";
 		case "tags":

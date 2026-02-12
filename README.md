@@ -18,7 +18,7 @@
 
 <p align="center">An <a href="https://obsidian.md/">Obsidian</a> plugin to view and manage all your tasks, throughout the vault on a centralized board using various kinds of views. Use boards to manage small to large projects.</p>
 
-![Task Board Thumbnail](./assets/MainThumbnail-3.jpg)
+![Task Board Thumbnail](./assets/MainThumbnail-4.png)
 
 > YouTube playlist : [Task Board - Obsidian plugin](https://youtube.com/playlist?list=PLqEPxsDi1dtepfcaUO9r1BTGZN6IuhvvH&si=yohu1rczpRVq68D6)
 
@@ -51,7 +51,7 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 **Step 3 :** Click on the **Scan vault modal** button from the top-right corner in the Task Board view header. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters](https://tu2-atmanand.github.io/task-board-docs/docs/Features/Filters_for_Scanning/) to exclude certain files from scanning.
 
-**Step 4 :** There are already three predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToCreateNewBoard/) from the [Board configure modal](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToUseBoardSettings/). 
+**Step 4 :** There are already three predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToCreateNewBoard/) from the [Board configure modal](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToUseBoardSettings/).
 
 Enjoy !
 
@@ -124,11 +124,11 @@ This advanced and dynamic filters will help you to use boards as separate projec
 
 You can contribute to this project by :
 
-**1. Requesting a new feature, suggesting an improvement or reporting a Bug :** [How to create a new request](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToCreateRequest.html).
+**1. Requesting a new feature, suggesting an improvement or reporting a Bug :** [How to create a new request](https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/HowToCreateRequest).
 
-**2. Improving the translated languages or add a new language :** [How to Contribute for Language Translation](https://tu2-atmanand.github.io/task-board-docs/Advanced/Contribution_For_Languages.html).
+**2. Improving the translated languages or add a new language :** [How to Contribute for Language Translation](https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages).
 
-**3. Contribute to the Development of the plugin Code :** : [How to join the plugin development](https://tu2-atmanand.github.io/task-board-docs/Advanced/HowToJoinDevelopment.html).
+**3. Contribute to the Development of the plugin Code :** : [How to join the plugin development](https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/HowToJoinDevelopment).
 
 
 ## Motivation for the Project

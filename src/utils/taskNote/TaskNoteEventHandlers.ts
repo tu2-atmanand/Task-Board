@@ -12,6 +12,9 @@ import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
 } from "../MarkdownFileOperations";
+import { moment as _moment } from "obsidian";
+import { statusTypeNames } from "src/interfaces/Enums";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Handle task note status change (checkbox change)
@@ -21,17 +24,39 @@ import {
  */
 export const handleTaskNoteStatusChange = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
-		const newStatusSymbol = checkboxStateSwitcher(plugin, task.status);
+		const newStatus = checkboxStateSwitcher(plugin, task.status);
+		const globalSettings = plugin.settings.data.globalSettings;
+		const moment = _moment as unknown as typeof _moment.default;
+		const currentDateValue = moment().format(
+			globalSettings?.taskCompletionDateTimePattern,
+		);
+
 		const updatedTask = {
 			...task,
-			status: newStatusSymbol,
+			status: newStatus.newSymbol,
 		};
+		if (
+			globalSettings.autoAddCompletedDate &&
+			newStatus.newSymbolType === statusTypeNames.DONE
+		) {
+			updatedTask.completion = currentDateValue;
+			updatedTask.cancelledDate = "";
+		} else if (
+			globalSettings.autoAddCancelledDate &&
+			newStatus.newSymbolType === statusTypeNames.CANCELLED
+		) {
+			updatedTask.cancelledDate = currentDateValue;
+			updatedTask.completion = "";
+		} else {
+			updatedTask.completion = "";
+			updatedTask.cancelledDate = "";
+		}
 		const newStatusName = getStatusNameFromStatusSymbol(
-			newStatusSymbol,
-			plugin.settings
+			newStatus.newSymbol,
+			plugin.settings.data.globalSettings,
 		);
 
 		// Update frontmatter with new status
@@ -39,17 +64,21 @@ export const handleTaskNoteStatusChange = async (
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath,
-					task.legacyId
+					task.legacyId,
 				);
 			});
 		});
 
 		new Notice(`Task note status updated to ${newStatusName}`);
 	} catch (error) {
-		console.error("Error updating task note status:", error);
-		new Notice("Error updating task note status: " + String(error));
+		bugReporterManagerInsatance.showNotice(
+			153,
+			"There was an error while updating the status.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNoteStatusChange",
+		);
 	}
 };
 
@@ -62,7 +91,7 @@ export const handleTaskNoteStatusChange = async (
 export const handleTaskNotePropertyUpdate = async (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ) => {
 	try {
 		// Update frontmatter with all updated properties
@@ -70,16 +99,20 @@ export const handleTaskNotePropertyUpdate = async (
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanning.processAllUpdatedFiles(
-					updatedTask.filePath
+				plugin.realTimeScanner.processAllUpdatedFiles(
+					updatedTask.filePath,
 				);
 			});
 		});
 
 		new Notice("Task note properties updated");
 	} catch (error) {
-		console.error("Error updating task note properties:", error);
-		new Notice("Error updating task note properties: " + String(error));
+		bugReporterManagerInsatance.showNotice(
+			154,
+			"There was an error while updating the task note.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNotePropertyUpdate",
+		);
 	}
 };
 
@@ -88,9 +121,9 @@ export const handleTaskNotePropertyUpdate = async (
  * @param plugin - TaskBoard plugin instance
  * @param task - Task note to delete
  */
-export const handleTaskNoteDelete = async (
+export const handleTaskNote2NormalNote = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
 		const file = plugin.app.vault.getFileByPath(task.filePath);
@@ -110,8 +143,8 @@ export const handleTaskNoteDelete = async (
 				(tag: string) =>
 					tag.includes(
 						plugin.settings.data.globalSettings
-							.taskNoteIdentifierTag
-					) === false
+							.taskNoteIdentifierTag,
+					) === false,
 			);
 
 			// If no other tags remain, we could remove the tags property entirely
@@ -121,15 +154,25 @@ export const handleTaskNoteDelete = async (
 			new Notice("Task note converted back to regular note");
 		}
 	} catch (error) {
-		console.error("Error deleting task note:", error);
-		new Notice("Error deleting task note: " + String(error));
+		bugReporterManagerInsatance.showNotice(
+			155,
+			"There was an error while converting the note back to normal note.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNote2NormalNote",
+		);
 	}
 };
 
+/**
+ * Handle task note body change (old task body -> new task body)
+ * @param plugin - Taskboard plugin instance
+ * @param oldTask - Task note to update
+ * @param updatedTask - Task note with updated body
+ */
 export const handleTaskNoteBodyChange = async (
 	plugin: TaskBoard,
 	oldTask: taskItem,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ) => {
 	try {
 		const file = plugin.app.vault.getFileByPath(updatedTask.filePath);
@@ -137,8 +180,10 @@ export const handleTaskNoteBodyChange = async (
 
 		const fileContent = await readDataOfVaultFile(
 			plugin,
-			updatedTask.filePath
+			updatedTask.filePath,
+			true
 		);
+		if (fileContent == null) return;
 
 		// Find the line representing the old task and the updated task
 		// Find all lines between oldTask.body and updatedTask.body that are different
@@ -169,21 +214,23 @@ export const handleTaskNoteBodyChange = async (
 		await writeDataToVaultFile(
 			plugin,
 			updatedTask.filePath,
-			updatedLines.join("\n")
+			updatedLines.join("\n"),
 		).then(() => {
 			// This is required to rescan the updated file and refresh the board.
 			sleep(1000).then(() => {
 				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanning.processAllUpdatedFiles(
+				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath,
-					oldTask.id
+					oldTask.id,
 				);
 			});
 		});
 	} catch (error) {
-		console.error(
-			"TaskItemEventHandlers.ts : Error in handleTaskNoteBodyChange",
-			error
+		bugReporterManagerInsatance.showNotice(
+			156,
+			"There was an error while updating the body of the task note. Below error will provide some more information.",
+			String(error),
+			"TaskNoteEventHandlers.ts/handleTaskNoteBodyChange",
 		);
 	}
 };

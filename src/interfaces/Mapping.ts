@@ -1,6 +1,7 @@
 import { t } from "src/utils/lang/helper";
-import { taskStatuses } from "./Enums";
+import { defaultTaskStatuses } from "./Enums";
 import { taskItem } from "./TaskItem";
+import { CustomStatus } from "./GlobalSettings";
 
 export const priorityEmojis: { [key: number]: string } = {
 	0: "0",
@@ -11,64 +12,85 @@ export const priorityEmojis: { [key: number]: string } = {
 	5: "⏬", // Lowest
 };
 
+export interface statusDropDownOption {
+	value: string;
+	name: string;
+	text: string;
+}
+
+export interface priorityDropDownOption {
+	value: number;
+	text: string;
+}
+
 // Helper function to get priority emoji
 export const getPriorityEmoji = (priority: number): string => {
 	return priorityEmojis[priority] || "";
 };
 
 // Priority Options - function to ensure translations are loaded
-export const getPriorityOptions = () => [
-	{ value: 0, text: t("none") },
-	{ value: 1, text: t("highest") + " : 🔺" },
-	{ value: 2, text: t("high") + " : ⏫" },
-	{ value: 3, text: t("medium") + " : 🔼" },
-	{ value: 4, text: t("low") + " : 🔽" },
-	{ value: 5, text: t("lowest") + " : ⏬" },
+export const getPriorityOptionsForDropdown = (): priorityDropDownOption[] => [
+	{ value: 0, text: "0 - " + t("none") },
+	{ value: 1, text: "1 - " + t("highest") + " : 🔺" },
+	{ value: 2, text: "2 - " + t("high") + " : ⏫" },
+	{ value: 3, text: "3 - " + t("medium") + " : 🔼" },
+	{ value: 4, text: "4 - " + t("low") + " : 🔽" },
+	{ value: 5, text: "5 - " + t("lowest") + " : ⏬" },
 ];
 
 // Legacy export for backward compatibility
-export const priorityOptions = getPriorityOptions();
+export const priorityOptions = getPriorityOptionsForDropdown();
 
-// TODO : From the following values I am only going to display the ones that are selected by user in the tasks plugin settings.
+export const getCustomStatusOptionsForDropdown = (
+	statusConfigs: CustomStatus[],
+): statusDropDownOption[] => {
+	return statusConfigs.map(({ symbol, name }) => ({
+		value: symbol,
+		name: name,
+		text: `${name} : [${symbol}]`,
+	}));
+};
+
+// NOTE : Dont use the below array for dropdowns directly. Use it from the settings configured by the user.
 export const taskStatusesDropdown = [
-	{ value: taskStatuses.unchecked, text: "Unchecked [ ]" },
-	{ value: taskStatuses.regular, text: "Regular [x]" },
-	{ value: taskStatuses.checked, text: "Checked [X]" },
-	{ value: taskStatuses.dropped, text: "Dropped [-]" },
-	{ value: taskStatuses.forward, text: "Forward [>]" },
-	{ value: taskStatuses.migrated, text: "Migrated [<]" },
-	{ value: taskStatuses.date, text: "Date [D]" },
-	{ value: taskStatuses.question, text: "Question [?]" },
-	{ value: taskStatuses.halfDone, text: "In progress [/]" },
-	{ value: taskStatuses.add, text: "Add [+]" },
-	{ value: taskStatuses.research, text: "Research [R]" },
-	{ value: taskStatuses.important, text: "Important [!]" },
-	{ value: taskStatuses.idea, text: "Idea [i]" },
-	{ value: taskStatuses.brainstorm, text: "Brainstorm [B]" },
-	{ value: taskStatuses.pro, text: "Pro [P]" },
-	{ value: taskStatuses.con, text: "Con [C]" },
-	{ value: taskStatuses.quote, text: "Quote [Q]" },
-	{ value: taskStatuses.note, text: "Note [N]" },
-	{ value: taskStatuses.bookmark, text: "Bookmark [b]" },
-	{ value: taskStatuses.information, text: "Information [I]" },
-	{ value: taskStatuses.paraphrase, text: "Paraphrase [p]" },
-	{ value: taskStatuses.location, text: "Location [L]" },
-	{ value: taskStatuses.example, text: "Example [E]" },
-	{ value: taskStatuses.answer, text: "Answer [A]" },
-	{ value: taskStatuses.reward, text: "Reward [r]" },
-	{ value: taskStatuses.choice, text: "Choice [c]" },
-	{ value: taskStatuses.doing, text: "Doing [d]" },
-	{ value: taskStatuses.time, text: "Time [T]" },
-	{ value: taskStatuses.character, text: "Character [@]" },
-	{ value: taskStatuses.talk, text: "Talk [t]" },
-	{ value: taskStatuses.outline, text: "Outline [o]" },
-	{ value: taskStatuses.conflict, text: "Conflict [~]" },
-	{ value: taskStatuses.world, text: "World [W]" },
-	{ value: taskStatuses.find, text: "Find [f]" },
-	{ value: taskStatuses.foreshadow, text: "Foreshadow [F]" },
-	{ value: taskStatuses.favorite, text: "Favorite [H]" },
-	{ value: taskStatuses.symbolism, text: "Symbolism [&]" },
-	{ value: taskStatuses.secret, text: "Secret [s]" },
+	{ value: defaultTaskStatuses.unchecked, text: "Unchecked [ ]" },
+	{ value: defaultTaskStatuses.regular, text: "Regular [x]" },
+	{ value: defaultTaskStatuses.checked, text: "Checked [X]" },
+	{ value: defaultTaskStatuses.dropped, text: "Dropped [-]" },
+	{ value: defaultTaskStatuses.forward, text: "Forward [>]" },
+	{ value: defaultTaskStatuses.migrated, text: "Migrated [<]" },
+	{ value: defaultTaskStatuses.date, text: "Date [D]" },
+	{ value: defaultTaskStatuses.question, text: "Question [?]" },
+	{ value: defaultTaskStatuses.halfDone, text: "In progress [/]" },
+	{ value: defaultTaskStatuses.add, text: "Add [+]" },
+	{ value: defaultTaskStatuses.research, text: "Research [R]" },
+	{ value: defaultTaskStatuses.important, text: "Important [!]" },
+	{ value: defaultTaskStatuses.idea, text: "Idea [i]" },
+	{ value: defaultTaskStatuses.brainstorm, text: "Brainstorm [B]" },
+	{ value: defaultTaskStatuses.pro, text: "Pro [P]" },
+	{ value: defaultTaskStatuses.con, text: "Con [C]" },
+	{ value: defaultTaskStatuses.quote, text: "Quote [Q]" },
+	{ value: defaultTaskStatuses.note, text: "Note [N]" },
+	{ value: defaultTaskStatuses.bookmark, text: "Bookmark [b]" },
+	{ value: defaultTaskStatuses.information, text: "Information [I]" },
+	{ value: defaultTaskStatuses.paraphrase, text: "Paraphrase [p]" },
+	{ value: defaultTaskStatuses.location, text: "Location [L]" },
+	{ value: defaultTaskStatuses.example, text: "Example [E]" },
+	{ value: defaultTaskStatuses.answer, text: "Answer [A]" },
+	{ value: defaultTaskStatuses.reward, text: "Reward [r]" },
+	{ value: defaultTaskStatuses.choice, text: "Choice [c]" },
+	{ value: defaultTaskStatuses.doing, text: "Doing [d]" },
+	{ value: defaultTaskStatuses.time, text: "Time [T]" },
+	{ value: defaultTaskStatuses.character, text: "Character [@]" },
+	{ value: defaultTaskStatuses.talk, text: "Talk [t]" },
+	{ value: defaultTaskStatuses.outline, text: "Outline [o]" },
+	{ value: defaultTaskStatuses.conflict, text: "Conflict [~]" },
+	{ value: defaultTaskStatuses.world, text: "World [W]" },
+	{ value: defaultTaskStatuses.find, text: "Find [f]" },
+	{ value: defaultTaskStatuses.foreshadow, text: "Foreshadow [F]" },
+	{ value: defaultTaskStatuses.favorite, text: "Favorite [H]" },
+	{ value: defaultTaskStatuses.symbolism, text: "Symbolism [&]" },
+	{ value: defaultTaskStatuses.secret, text: "Secret [s]" },
 ];
 
 export const taskItemEmpty: taskItem = {
@@ -94,7 +116,7 @@ export const taskItemEmpty: taskItem = {
 		endLine: 0,
 		endCharIndex: 0,
 	},
-	status: taskStatuses.unchecked,
+	status: defaultTaskStatuses.unchecked,
 };
 
 export const taskItemKeyToNameMapping: { [key: string]: string } = {
@@ -129,4 +151,5 @@ export const columnTypeAndNameMapping: { [key: string]: string } = {
 	taskPriority: "Priority",
 	pathFiltered: "Path filtered",
 	completed: "Completed",
+	allPending: "All pending tasks",
 };

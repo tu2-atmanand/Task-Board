@@ -8,17 +8,18 @@ import React, { useEffect, useRef, useState } from "react";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
-import { RxDragHandleDots2 } from "react-icons/rx";
+import { RxDragHandleDots2, RxDragHandleHorizontal } from "react-icons/rx";
 import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { colType, KanbanBoardType, UniversalDateOptions, universalDateOptionsNames } from "src/interfaces/Enums";
-import { Board, ColumnData, getActiveColumns, getActiveColumnKey } from "src/interfaces/BoardConfigs";
-import { columnTypeAndNameMapping, getPriorityOptions } from "src/interfaces/Mapping";
-import { columnDataProp, AddColumnModal } from "./AddColumnModal";
+import { colTypeNames, UniversalDateOptions, KanbanBoardType } from "src/interfaces/Enums";
+import { Board, ColumnData, swimlaneConfigs, getActiveColumns, getActiveColumnKey } from "src/interfaces/BoardConfigs";
+import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
+import { AddColumnModal } from "./AddColumnModal";
+import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -43,7 +44,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		try {
 			return boards ? JSON.parse(JSON.stringify(boards)) : [];
 		} catch (e) {
-			bugReporter(plugin, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
+			bugReporterManagerInsatance.showNotice(34, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
 			return [];
 		}
 	});
@@ -140,7 +141,39 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsAddColumnModalOpen(false);
 	};
 
-	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
+	const handleSwimlanesConfigureBtnClick = () => {
+		if (selectedBoardIndex === -1) {
+			new Notice(t("no-board-selected"));
+			return;
+		}
+
+		const board = localBoards[selectedBoardIndex];
+		const currentSwimlaneConfig = board.swimlanes || {
+			enabled: false,
+			hideEmptySwimlanes: false,
+			property: 'tags',
+			customValue: '',
+			sortCriteria: 'asc',
+			customSortOrder: [],
+			minimized: false,
+			maxHeight: '300px',
+		};
+
+		const swimlaneModal = new SwimlanesConfigModal(
+			plugin.app,
+			currentSwimlaneConfig,
+			(updatedConfig: swimlaneConfigs) => {
+				const updatedBoards = [...localBoards];
+				updatedBoards[selectedBoardIndex].swimlanes = updatedConfig;
+				setLocalBoards(updatedBoards);
+				setIsEdited(true);
+			}
+		);
+
+		swimlaneModal.open();
+	};
+
+	const handleAddColumn = (boardIndex: number, columnData: ColumnData) => {
 		const updatedBoards = [...localBoards];
 		const columnKey = getActiveColumnKey(updatedBoards[boardIndex]);
 		updatedBoards[boardIndex].columns[columnKey].push({
@@ -169,7 +202,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const modal = new AddColumnModal(plugin.app, {
 			app: plugin.app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
-			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
+			onSubmit: (columnData: ColumnData) => handleAddColumn(selectedBoardIndex, columnData),
 		});
 		modal.open();
 	};
@@ -190,6 +223,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			boardFilter: {
 				rootCondition: "any",
 				filterGroups: [],
+			},
+			swimlanes: {
+				enabled: false,
+				hideEmptySwimlanes: false,
+				property: 'tags',
+				sortCriteria: 'asc',
+				minimized: [],
+				maxHeight: '300px',
+				verticalHeaderUI: false
 			},
 		};
 		setLocalBoards([...oldBoards, newBoard]);
@@ -212,6 +254,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			boardFilter: {
 				rootCondition: "any",
 				filterGroups: [],
+			},
+			swimlanes: boardToDuplicate.swimlanes || {
+				enabled: false,
+				hideEmptySwimlanes: false,
+				property: 'tags',
+				sortCriteria: 'asc',
 			},
 		};
 		const updatedBoards = [...localBoards, duplicatedBoard];
@@ -292,14 +340,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			const fileInputElement = filePathInputRefs.current[column.id];
 			if (!fileInputElement) return;
 
-			if (filePathInputRefs.current[column.id] !== null && column.colType === colType.pathFiltered) {
+			if (filePathInputRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
 				const suggestionContent = getFileSuggestions(plugin.app);
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
 					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
-			} else if (filePathInputRefs.current[column.id] !== null && column.colType === colType.namedTag) {
+			} else if (filePathInputRefs.current[column.id] !== null && column.colType === colTypeNames.namedTag) {
 				const suggestionContent = getTagSuggestions(plugin.app);
 				const onSelectCallback = (selectedTag: string) => {
 					handleColumnChange(selectedBoardIndex, index, "coltag", selectedTag);
@@ -387,7 +435,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					setIsEdited(true);
 				} else {
 					const colKey = getActiveColumnKey(localBoards[boardIndex]);
-					bugReporter(plugin, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[colKey][columnIndex]?.name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
+					bugReporterManagerInsatance.showNotice(35, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[colKey][columnIndex]?.name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
 				}
 			},
 			onCancel: () => {
@@ -436,7 +484,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
 					// }
 				} catch (error) {
-					bugReporter(plugin, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
+					bugReporterManagerInsatance.showNotice(36, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
 				}
 			},
 		});
@@ -506,6 +554,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
+					{plugin.settings.data.globalSettings.experimentalFeatures && (
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+								<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
+								<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
+							</div>
+							<button
+								className="boardConfigModalMainContentConfigureSwimlanesBtn"
+								onClick={handleSwimlanesConfigureBtnClick}
+							>{t("configure")}</button>
+						</div>
+					)}
+
 					<hr className="boardConfigModalHr-100" />
 
 					<h3>{t("columns")}</h3>
@@ -538,8 +599,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							className="boardConfigModalMainContent-Active-BodyColumnsList"
 						>
 							{getActiveColumns(board).map((column: ColumnData, columnIndex: number) => (
-								<div key={column.id} className="boardConfigModalColumnRow">
-									<RxDragHandleDots2 className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
+								<div key={column.id} className={`boardConfigModalColumnRow${column.active ? "" : " Hidden"}`}>
+									<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 									{column.active ? (
 										<EyeIcon
 											onClick={() => toggleActiveState(boardIndex, columnIndex)}
@@ -566,61 +627,129 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											}
 											className="boardConfigModalColumnRowContentColName"
 										/>
-										{column.colType === colType.namedTag && (
+										{column.colType === colTypeNames.allPending && (
 											<input
-												type="text"
-												ref={(el) => {
-													filePathInputRefs.current[column.id] = el;
-												}}
-												placeholder={t("enter-tag")}
-												value={column.coltag || ""}
+												type="number"
+												placeholder={t("work-limit")}
+												aria-label={t("work-limit-info")}
+												value={column.workLimit ?? 0}
 												onChange={(e) =>
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
-														"coltag",
-														e.target.value
+														"workLimit",
+														Number(e.target.value)
 													)
 												}
 												className="boardConfigModalColumnRowContentColName"
 											/>
 										)}
-										{column.colType === colType.taskStatus && (
-											<input
-												type="text"
-												placeholder={t("enter-status-placeholder")}
-												value={column.taskStatus || ""}
-												onChange={(e) =>
-													handleColumnChange(
-														boardIndex,
-														columnIndex,
-														colType.taskStatus,
-														e.target.value
-													)
-												}
-												className="boardConfigModalColumnRowContentColName"
-											/>
+										{column.colType === colTypeNames.namedTag && (
+											<>
+												<input
+													type="text"
+													ref={(el) => {
+														filePathInputRefs.current[column.id] = el;
+													}}
+													placeholder={t("enter-tag")}
+													value={column.coltag || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"coltag",
+															e.target.value
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
 										)}
-										{column.colType === colType.taskPriority && (
-											<select
-												aria-label="Select priority"
-												value={column.taskPriority || getPriorityOptions()[0].value}
-												onChange={(e) =>
-													handleColumnChange(
-														boardIndex,
-														columnIndex,
-														colType.taskPriority,
-														e.target.value
-													)
-												}
-												className="boardConfigModalColumnRowContentColDatedVal"
-											>
-												{getPriorityOptions().map((option) => (
-													<option key={option.value} value={option.value}>{option.text}</option>
-												))}
-											</select>
+										{column.colType === colTypeNames.taskStatus && (
+											<>
+												<input
+													type="text"
+													placeholder={t("enter-status-placeholder")}
+													value={column.taskStatus || ""}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															colTypeNames.taskStatus,
+															e.target.value
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
 										)}
-										{column.colType === "completed" && (
+										{column.colType === colTypeNames.taskPriority && (
+											<>
+												<select
+													aria-label="Select priority"
+													value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															colTypeNames.taskPriority,
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentPriorityDropdown"
+												>
+													{getPriorityOptionsForDropdown().map((option) => (
+														<option key={option.value} value={option.value}>{option.text}</option>
+													))}
+												</select>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
+											</>
+										)}
+										{column.colType === colTypeNames.completed && (
 											<input
 												type="number"
 												placeholder={t("max-items")}
@@ -636,7 +765,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												className="boardConfigModalColumnRowContentColDatedVal"
 											/>
 										)}
-										{column.colType === colType.pathFiltered && (
+										{column.colType === colTypeNames.pathFiltered && (
 											<input
 												type="text"
 												ref={(el) => {
@@ -655,12 +784,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												placeholder={t("enter-path-pattern")}
 											/>
 										)}
-										{column.colType === colType.dated && (
+										{column.colType === colTypeNames.dated && (
 											<>
 												<input
 													type="number"
 													placeholder={t("from")}
-													value={column.datedBasedColumn?.from || ""}
+													value={column.datedBasedColumn?.from || 0}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -677,7 +806,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("to")}
-													value={column.datedBasedColumn?.to || ""}
+													value={column.datedBasedColumn?.to || 0}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -707,13 +836,28 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+													<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+													<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
 												</select>
+												<input
+													type="number"
+													placeholder={t("work-limit")}
+													aria-label={t("work-limit-info")}
+													value={column.workLimit || 0}
+													onChange={(e) =>
+														handleColumnChange(
+															boardIndex,
+															columnIndex,
+															"workLimit",
+															Number(e.target.value)
+														)
+													}
+													className="boardConfigModalColumnRowContentColName"
+												/>
 											</>
 										)}
-										{column.colType === colType.undated && (
+										{column.colType === colTypeNames.undated && (
 											<>
 												<select
 													aria-label="Select date type"
@@ -732,9 +876,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												>
-													<option value={UniversalDateOptions.dueDate}>{universalDateOptionsNames.dueDate}</option>
-													<option value={UniversalDateOptions.startDate}>{universalDateOptionsNames.startDate}</option>
-													<option value={UniversalDateOptions.scheduledDate}>{universalDateOptionsNames.scheduledDate}</option>
+													<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+													<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+													<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
 												</select>
 											</>
 										)}
@@ -816,14 +960,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							))}
 						</div>
 					</div>
-					<div className="boardConfigModalSidebarBtnArea">
+					<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
 						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
-
 						<hr className="boardConfigModalHr-100" />
-
-						{selectedBoardIndex !== -1 && (
-							<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
-						)}
+						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 				</div>
 				<div className="boardConfigModalMainContent">
@@ -833,9 +973,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					}
 				</div>
 			</div>
-			{selectedBoardIndex !== -1 && (
-				<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
-			)}
+
+			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
 		</>
 	);
 };

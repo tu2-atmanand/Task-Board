@@ -24,7 +24,7 @@ export interface DefaultDataviewSymbols {
  */
 export const DATAVIEW_PLUGIN_DEFAULT_SYMBOLS: DefaultDataviewSymbols = {
 	TaskFormatRegularExpr: {
-		priorityRegex: /\[priority::\s*\d+\]/,
+		priorityRegex: /\[priority::\s*(\d+)\]/,
 		startDateRegex: /\[start::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/,
 		createdDateRegex:
 			/\[created::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/,
@@ -34,12 +34,12 @@ export const DATAVIEW_PLUGIN_DEFAULT_SYMBOLS: DefaultDataviewSymbols = {
 		doneDateRegex: /\[completion::\s*(.*?)\]/,
 		cancelledDateRegex:
 			/\[cancelled::\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\]/,
-		recurrenceRegex: /\[recurring::.*?\]/,
-		onCompletionRegex: /\[onCompletion::.*?\]/,
-		dependsOnRegex: /\[dependsOn::\s*([^\]]+)\]/,
-		idRegex: /\[id::\s*(\d+)\s*\]/,
-		timeRegex: /\[time::.*?\]/,
-		reminderRegex: /\[reminder::.*?\]/,
+		recurrenceRegex: /\[recurring::\s*(.*?)\]/,
+		onCompletionRegex: /\[onCompletion::\s*(.*?)\]/,
+		dependsOnRegex: /\[dependsOn::\s*(.*?)\]/,
+		idRegex: /\[id::\s*(.*?)\]/,
+		timeRegex: /\[time::\s*(.*?)\]/,
+		reminderRegex: /\[reminder::\s*(.*?)\]/,
 	},
 	TaskFormatRegularExprGlobal: {
 		priorityRegex: /\[priority::\s*\d+\]/g,

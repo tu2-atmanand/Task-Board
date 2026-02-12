@@ -8,7 +8,8 @@ import {
 
 import { Board } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
-import { bugReporter } from "src/services/OpenModals";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { App } from "obsidian";
 
 // --------------- Operations with data.json ---------------
 
@@ -19,11 +20,11 @@ export const loadGlobalSettings = async (plugin: TaskBoard) => {
 		const globalSettings = plugin.settings.data.globalSettings || {};
 		return globalSettings;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			68,
 			"Failed to load global settings from data.json",
 			String(error),
-			"JsonFileOperations.ts/loadGlobalSettings"
+			"JsonFileOperations.ts/loadGlobalSettings",
 		);
 		return {};
 	}
@@ -39,11 +40,11 @@ export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
 
 		return boardConfigs;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			69,
 			"Failed to load board configurations from data.json",
 			String(error),
-			"JsonFileOperations.ts/loadBoardsData"
+			"JsonFileOperations.ts/loadBoardsData",
 		);
 		throw error;
 	}
@@ -52,7 +53,7 @@ export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
 // Function to save boards data to the JSON file
 export const saveBoardsData = async (
 	plugin: TaskBoard,
-	updatedBoards: Board[]
+	updatedBoards: Board[],
 ) => {
 	try {
 		// Fetch current settings
@@ -64,11 +65,11 @@ export const saveBoardsData = async (
 		// Save updated settings
 		await plugin.saveSettings();
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			70,
 			"Failed to save board configurations to data.json",
 			String(error),
-			"JsonFileOperations.ts/saveBoardsData"
+			"JsonFileOperations.ts/saveBoardsData",
 		);
 		throw error;
 	}
@@ -78,30 +79,29 @@ export const saveBoardsData = async (
 
 // load tasks from plugin.vaultScanner.tasksCache
 export const loadJsonCacheData = async (
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<jsonCacheData> => {
 	try {
 		return plugin.vaultScanner.tasksCache;
 	} catch (error) {
-		bugReporter(
-			plugin,
+		bugReporterManagerInsatance.showNotice(
+			71,
 			"Failed to load tasks from tasks.json",
 			String(error),
-			"JsonFileOperations.ts/loadJsonCacheData"
+			"JsonFileOperations.ts/loadJsonCacheData",
 		);
 		return {
 			VaultName: plugin.app.vault.getName(),
 			Modified_at: "INVALID",
 			Pending: {},
 			Completed: {},
-			Notes: [],
 		};
 	}
 };
 
 // load tasks from disk.
 export const loadJsonCacheDataFromDisk = async (
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<jsonCacheData> => {
 	try {
 		let path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
@@ -117,7 +117,11 @@ export const loadJsonCacheDataFromDisk = async (
 		// };
 		return cacheData;
 	} catch (error) {
-		console.error("Error reading tasks.json from disk:", error); // This error will be shown for a fresh install hence dont use the bugReporter here.
+		bugReporterManagerInsatance.addToLogs(
+			159,
+			`No need to worry if this is shown on a fresh install.\n${String(error)}`,
+			"TaskNoteUtils.ts/updateFrontmatterInMarkdownFile",
+		);
 		throw error;
 	}
 };
@@ -156,7 +160,7 @@ const writeFileWithRetry = async (
 	path: string,
 	content: string,
 	maxRetries: number = 3,
-	baseDelay: number = 1000
+	baseDelay: number = 1000,
 ): Promise<void> => {
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {
 		try {
@@ -181,8 +185,10 @@ const writeFileWithRetry = async (
 
 			// Wait with exponential backoff before retry
 			const delay = baseDelay * Math.pow(2, attempt - 1);
-			console.warn(
-				`Task Board: File write timeout (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`
+			bugReporterManagerInsatance.addToLogs(
+				177,
+				`File write timeout due to following error: ${String(error)}....retrying again...`,
+				"TaskItemEventHandlers.ts/writeFileWithRetry",
 			);
 			await new Promise((resolve) => setTimeout(resolve, delay));
 		}
@@ -192,7 +198,7 @@ const writeFileWithRetry = async (
 // Function to write tasks data to disk
 export const writeJsonCacheDataToDisk = async (
 	plugin: TaskBoard,
-	tasksData: jsonCacheData
+	tasksData: jsonCacheData,
 ): Promise<boolean> => {
 	try {
 		let path = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
@@ -205,7 +211,7 @@ export const writeJsonCacheDataToDisk = async (
 		await writeFileWithRetry(
 			plugin,
 			path,
-			JSON.stringify(tasksData, null, 4)
+			JSON.stringify(tasksData, null, 4),
 		);
 
 		return true;
@@ -221,11 +227,17 @@ export const writeJsonCacheDataToDisk = async (
 			: "Failed to write tasks to tasks.json file. Or failed to create the a new file. Maybe write permission is not granted.";
 
 		if (!isTimeoutError) {
-			bugReporter(
-				plugin,
+			bugReporterManagerInsatance.showNotice(
+				72,
 				userMessage,
 				errorMessage,
-				"JsonFileOperations.ts/writeJsonCacheDataFromDisk"
+				"JsonFileOperations.ts/writeJsonCacheDataFromDisk",
+			);
+		} else {
+			bugReporterManagerInsatance.addToLogs(
+				72,
+				errorMessage,
+				"JsonFileOperations.ts/writeJsonCacheDataFromDisk",
 			);
 		}
 
@@ -235,11 +247,11 @@ export const writeJsonCacheDataToDisk = async (
 
 // Function to move the file from old path to new path
 export const moveTasksCacheFileToNewPath = (
-	plugin: TaskBoard,
+	app: App,
 	oldPath: string,
-	newPath: string
+	newPath: string,
 ) => {
-	return new Promise<boolean>((resolve, reject) => {
+	return new Promise<boolean>(async (resolve, reject) => {
 		if (
 			oldPath === newPath ||
 			(newPath !== "" && newPath.endsWith(".json") === false) ||
@@ -249,11 +261,20 @@ export const moveTasksCacheFileToNewPath = (
 			return true;
 		}
 
+		// Check if the directory exists, create if not
+		const parts = newPath.split("/");
+		if (parts.length > 1) {
+			const dirPath = parts.slice(0, -1).join("/").trim();
+			if (!(await app.vault.adapter.exists(dirPath))) {
+				await app.vault.createFolder(dirPath);
+			}
+		}
+
 		if (newPath === "")
-			newPath = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
+			newPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
 		if (oldPath === "")
-			oldPath = `${plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-		plugin.app.vault.adapter
+			oldPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
+		app.vault.adapter
 			.rename(oldPath, newPath)
 			// .then(() => {
 			// 	// Update the tasksCacheFilePath in globalSettings
@@ -264,11 +285,11 @@ export const moveTasksCacheFileToNewPath = (
 			// })
 			.then(() => resolve(true))
 			.catch((error) => {
-				bugReporter(
-					plugin,
+				bugReporterManagerInsatance.showNotice(
+					73,
 					"Failed to move tasks.json file to new path",
 					String(error),
-					"JsonFileOperations.ts/moveTasksCacheFileToNewPath"
+					"JsonFileOperations.ts/moveTasksCacheFileToNewPath",
 				);
 				reject(error);
 				return false;
@@ -279,7 +300,7 @@ export const moveTasksCacheFileToNewPath = (
 // Helper function to load tasks from tasks.json and merge them
 export const loadTasksAndMerge = async (
 	plugin: TaskBoard,
-	hardRefresh: boolean
+	hardRefresh: boolean,
 ): Promise<taskJsonMerged> => {
 	try {
 		let allTasks: jsonCacheData;
@@ -316,7 +337,7 @@ export const loadTasksAndMerge = async (
 
 		const mergeTasks = (tasks: typeof allTasks.Pending) =>
 			Object.entries(tasks || {}).flatMap(([filePath, tasks]) =>
-				tasks.map((task: taskItem) => ({ ...task, filePath }))
+				tasks.map((task: taskItem) => ({ ...task, filePath })),
 			);
 
 		const allTasksMerged: taskJsonMerged = {
@@ -326,13 +347,11 @@ export const loadTasksAndMerge = async (
 
 		return allTasksMerged;
 	} catch (error) {
-		// console.error("Failed to load tasks from tasks.json:", error);
-		// bugReporter(
-		// 	plugin,
-		// 	"Failed to load tasks from tasks.json file. If this is your fresh install kindly run the scan vault using the top right corner button and open the board again. If the issue persists, please report it to the developer using steps mentioned below.",
-		// 	String(error),
-		// 	"JsonFileOperations.ts/loadTasksAndMerge"
-		// );
+		bugReporterManagerInsatance.addToLogs(
+			74,
+			String(error),
+			"JsonFileOperations.ts/loadTasksAndMerge",
+		);
 		throw error;
 	}
 };
@@ -343,7 +362,6 @@ export const loadTasksAndMerge = async (
 // 			return allTasksMerged; // Ensure it returns the merged tasks
 // 		})
 // 		.catch((error) => {
-// 			console.error("Error while loading tasks:", error);
 // 			// Return an empty taskJsonMerged object to avoid 'undefined'
 // 			return { Pending: [], Completed: [] };
 // 		});

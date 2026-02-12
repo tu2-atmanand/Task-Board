@@ -3,13 +3,10 @@ import { BoardConfigs } from "./BoardConfigs";
 import {
 	EditButtonMode,
 	TagColorType,
-	HideableTaskProperty,
+	taskPropertiesNames,
 	taskPropertyFormatOptions,
 	UniversalDateOptions,
 	NotificationService,
-	cardSectionsVisibilityOptions,
-	colType,
-	taskStatuses,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	mapViewBackgrounVariantTypes,
 	mapViewNodeMapOrientation,
@@ -17,6 +14,10 @@ import {
 	mapViewArrowDirection,
 	mapViewEdgeType,
 	KanbanBoardType,
+	colTypeNames,
+	defaultTaskStatuses,
+	taskCardStyleNames,
+	scanModeOptions,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 
@@ -29,7 +30,7 @@ export interface scanFilters {
 		polarity: number;
 		values: string[];
 	};
-	frontMatter: {
+	frontmatter: {
 		polarity: number;
 		values: string[];
 	};
@@ -80,25 +81,25 @@ export interface globalSettingsData {
 	defaultStartTime: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
-	autoAddCreatedDate: boolean;
 	autoAddUniversalDate: boolean;
-	scanVaultAtStartup: boolean;
-	realTimeScanning: boolean;
+	autoAddCreatedDate: boolean;
+	autoAddCompletedDate: boolean;
+	autoAddCancelledDate: boolean;
+	// scanVaultAtStartup: boolean; // @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
+	showModifiedFilesNotice: boolean;
+	scanMode: string;
 	columnWidth: string;
-	showHeader: boolean;
-	showFooter: boolean;
+	visiblePropertiesList: string[];
+	taskCardStyle: string;
 	showVerticalScroll: boolean;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
 	universalDate: string;
 	customStatuses: CustomStatus[];
-	tasksPluginCustomStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
-	preDefinedNote: string;
 	taskNoteIdentifierTag: string;
-	taskNoteDefaultLocation: string;
 	quickAddPluginDefaultChoice: string;
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
@@ -107,21 +108,21 @@ export interface globalSettingsData {
 		reminderPlugin: boolean;
 		quickAddPlugin: boolean;
 	};
+	preDefinedNote: string;
 	archivedTasksFilePath: string;
+	taskNoteDefaultLocation: string;
 	archivedTBNotesFolderPath: string;
 	frontmatterFormatting: frontmatterFormatting[];
-	showFileNameInCard: boolean;
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
 	notificationService: string;
-	frontmatterPropertyForReminder: string;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
-	cardSectionsVisibility: string;
-	hiddenTaskProperties: HideableTaskProperty[];
+	hiddenTaskProperties: taskPropertiesNames[];
 	autoAddUniqueID: boolean;
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
+	safeGuardFeature: boolean;
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
@@ -129,12 +130,6 @@ export interface globalSettingsData {
 		taskId?: string;
 	};
 	boundTaskCompletionToChildTasks: boolean;
-	kanbanView: {
-		lazyLoadingEnabled: boolean;
-		initialTaskCount: number;
-		loadMoreCount: number;
-		scrollThresholdPercent: number;
-	};
 	mapView: {
 		background: string;
 		mapOrientation: string;
@@ -157,53 +152,57 @@ export interface PluginDataJson {
 	};
 }
 
+/**
+ * @note There are hardcoded ids present in this data
+ * If you are changing the below configs, make sure the ids of
+ * two different objects are different.
+ */
 export const DEFAULT_SETTINGS: PluginDataJson = {
 	version: "", // Keep this empty only. Change the version number in the runOnPluginUpdate function inside main.ts file whenever you will going to release a new version.
 	data: {
 		boardConfigs: [
 			{
-				boardType: KanbanBoardType.statusBoard,
 				columns: {
 					status: [
 						{
-							id: 7,
-							colType: colType.taskStatus,
-							taskStatus: taskStatuses.unchecked,
+							id: 1851955522,
+							colType: colTypeNames.taskStatus,
+							taskStatus: defaultTaskStatuses.unchecked,
 							active: true,
 							collapsed: false,
 							name: "Backlogs",
 							index: 1,
 						},
 						{
-							id: 8,
-							colType: colType.taskStatus,
-							taskStatus: taskStatuses.scheduled,
+							id: 1851955523,
+							colType: colTypeNames.taskStatus,
+							taskStatus: defaultTaskStatuses.scheduled,
 							active: true,
 							collapsed: false,
 							name: "Ready to start",
 							index: 2,
 						},
 						{
-							id: 9,
-							colType: colType.taskStatus,
-							taskStatus: taskStatuses.inprogress,
+							id: 1851955524,
+							colType: colTypeNames.taskStatus,
+							taskStatus: defaultTaskStatuses.inprogress,
 							active: true,
 							collapsed: false,
 							name: "In Progress",
 							index: 3,
 						},
 						{
-							id: 11,
-							colType: colType.taskStatus,
-							taskStatus: taskStatuses.question,
+							id: 1851955525,
+							colType: colTypeNames.taskStatus,
+							taskStatus: defaultTaskStatuses.question,
 							active: true,
 							collapsed: false,
 							name: "In Review",
 							index: 5,
 						},
 						{
-							id: 12,
-							colType: colType.completed,
+							id: 1851955526,
+							colType: colTypeNames.completed,
 							active: true,
 							collapsed: false,
 							index: 6,
@@ -211,9 +210,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							name: "Completed",
 						},
 						{
-							id: 13,
-							colType: colType.taskStatus,
-							taskStatus: taskStatuses.dropped,
+							id: 1851955527,
+							colType: colTypeNames.taskStatus,
+							taskStatus: defaultTaskStatuses.dropped,
 							active: true,
 							collapsed: false,
 							name: "Cancelled",
@@ -222,8 +221,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					],
 					time: [
 						{
-							id: 1,
-							colType: colType.undated,
+							id: 1851955511,
+							colType: colTypeNames.undated,
 							active: true,
 							collapsed: false,
 							name: "Undated Tasks",
@@ -235,8 +234,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							},
 						},
 						{
-							id: 2,
-							colType: colType.dated,
+							id: 1851955512,
+							colType: colTypeNames.dated,
 							active: true,
 							collapsed: false,
 							name: "Over Due",
@@ -248,8 +247,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							},
 						},
 						{
-							id: 3,
-							colType: colType.dated,
+							id: 1851955513,
+							colType: colTypeNames.dated,
 							active: true,
 							collapsed: false,
 							name: "Today",
@@ -261,8 +260,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							},
 						},
 						{
-							id: 4,
-							colType: colType.dated,
+							id: 1851955514,
+							colType: colTypeNames.dated,
 							active: true,
 							collapsed: false,
 							name: "Tomorrow",
@@ -274,8 +273,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							},
 						},
 						{
-							id: 5,
-							colType: colType.dated,
+							id: 1851955515,
+							colType: colTypeNames.dated,
 							active: true,
 							collapsed: false,
 							name: "Future",
@@ -287,8 +286,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							},
 						},
 						{
-							id: 6,
-							colType: colType.completed,
+							id: 1851955516,
+							colType: colTypeNames.completed,
 							active: true,
 							collapsed: false,
 							limit: 20,
@@ -298,16 +297,16 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					],
 					tag: [
 						{
-							id: 7,
-							colType: colType.untagged,
+							id: 1851955517,
+							colType: colTypeNames.untagged,
 							active: true,
 							collapsed: false,
 							name: "Backlogs",
 							index: 1,
 						},
 						{
-							id: 8,
-							colType: colType.namedTag,
+							id: 1851955518,
+							colType: colTypeNames.namedTag,
 							active: true,
 							collapsed: false,
 							name: "Important",
@@ -315,8 +314,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							coltag: "important",
 						},
 						{
-							id: 9,
-							colType: colType.namedTag,
+							id: 1851955519,
+							colType: colTypeNames.namedTag,
 							active: true,
 							collapsed: false,
 							name: "WIP",
@@ -324,8 +323,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							coltag: "wip",
 						},
 						{
-							id: 11,
-							colType: colType.namedTag,
+							id: 1851955520,
+							colType: colTypeNames.namedTag,
 							active: true,
 							collapsed: false,
 							name: "In Review",
@@ -333,8 +332,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 							coltag: "review",
 						},
 						{
-							id: 12,
-							colType: colType.completed,
+							id: 1851955521,
+							colType: colTypeNames.completed,
 							active: true,
 							collapsed: false,
 							index: 6,
@@ -344,6 +343,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					]
 				},
 				name: "Default Board",
+				boardType: KanbanBoardType.statusBoard,
 				index: 0,
 				showColumnTags: false,
 				showFilteredTags: true,
@@ -352,7 +352,16 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					rootCondition: "any",
 					filterGroups: [],
 				},
-			},
+				swimlanes: {
+					enabled: false,
+					hideEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: [],
+					maxHeight: "300px",
+					verticalHeaderUI: false,
+				},
+			}
 		],
 		globalSettings: {
 			lang: "en",
@@ -366,7 +375,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					polarity: 3,
 					values: [],
 				},
-				frontMatter: {
+				frontmatter: {
 					polarity: 3,
 					values: [],
 				},
@@ -386,13 +395,34 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			defaultStartTime: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
-			autoAddCreatedDate: false,
 			autoAddUniversalDate: true,
-			scanVaultAtStartup: false,
-			realTimeScanning: true,
+			autoAddCreatedDate: false,
+			autoAddCompletedDate: false,
+			autoAddCancelledDate: false,
+			showModifiedFilesNotice: true,
+			scanMode: scanModeOptions.AUTOMATIC,
 			columnWidth: "300px",
-			showHeader: true,
-			showFooter: true,
+			visiblePropertiesList: [
+				taskPropertiesNames.Checkbox,
+				taskPropertiesNames.ID,
+				taskPropertiesNames.Title,
+				taskPropertiesNames.SubTasksMinimized,
+				taskPropertiesNames.DescriptionMinimized,
+				taskPropertiesNames.Status,
+				taskPropertiesNames.Tags,
+				taskPropertiesNames.Time,
+				taskPropertiesNames.Reminder,
+				taskPropertiesNames.Priority,
+				taskPropertiesNames.CreatedDate,
+				taskPropertiesNames.StartDate,
+				taskPropertiesNames.ScheduledDate,
+				taskPropertiesNames.DueDate,
+				taskPropertiesNames.CompletionDate,
+				taskPropertiesNames.CancelledDate,
+				taskPropertiesNames.Dependencies,
+				taskPropertiesNames.FilePath,
+			],
+			taskCardStyle: taskCardStyleNames.EMOJI,
 			showVerticalScroll: true,
 			tagColors: [
 				{
@@ -419,50 +449,56 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			editButtonAction: EditButtonMode.Modal,
 			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
-			tasksPluginCustomStatuses: [],
-			tagColorsType: TagColorType.Background,
+			tagColorsType: TagColorType.TagText,
 			customStatuses: [
 				{
-					symbol: taskStatuses.todo,
+					symbol: defaultTaskStatuses.todo,
 					name: "Todo",
-					nextStatusSymbol: taskStatuses.done,
+					nextStatusSymbol: defaultTaskStatuses.done,
 					availableAsCommand: false,
 					type: "TODO",
 				},
 				{
-					symbol: taskStatuses.scheduled,
+					symbol: defaultTaskStatuses.scheduled,
 					name: "Ready to start",
-					nextStatusSymbol: taskStatuses.done,
+					nextStatusSymbol: defaultTaskStatuses.done,
 					availableAsCommand: false,
 					type: "TODO",
 				},
 				{
-					symbol: taskStatuses.question,
+					symbol: defaultTaskStatuses.question,
 					name: "In Review",
-					nextStatusSymbol: taskStatuses.done,
+					nextStatusSymbol: defaultTaskStatuses.done,
 					availableAsCommand: false,
 					type: "TODO",
 				},
 				{
-					symbol: taskStatuses.inprogress,
+					symbol: defaultTaskStatuses.inprogress,
 					name: "In Progress",
-					nextStatusSymbol: taskStatuses.done,
+					nextStatusSymbol: defaultTaskStatuses.done,
 					availableAsCommand: true,
 					type: "IN_PROGRESS",
 				},
 				{
-					symbol: taskStatuses.dropped,
-					name: "Cancelled",
-					nextStatusSymbol: taskStatuses.done,
-					availableAsCommand: true,
-					type: "CANCELLED",
-				},
-				{
-					symbol: taskStatuses.done,
+					symbol: defaultTaskStatuses.done,
 					name: "Done",
-					nextStatusSymbol: taskStatuses.todo,
+					nextStatusSymbol: defaultTaskStatuses.todo,
 					availableAsCommand: true,
 					type: "DONE",
+				},
+				{
+					symbol: defaultTaskStatuses.checked,
+					name: "Completed",
+					nextStatusSymbol: defaultTaskStatuses.todo,
+					availableAsCommand: true,
+					type: "DONE",
+				},
+				{
+					symbol: defaultTaskStatuses.dropped,
+					name: "Cancelled",
+					nextStatusSymbol: defaultTaskStatuses.done,
+					availableAsCommand: true,
+					type: "CANCELLED",
 				},
 			],
 			compatiblePlugins: {
@@ -472,12 +508,12 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				reminderPlugin: false,
 				quickAddPlugin: false,
 			},
-			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
 			taskNoteIdentifierTag: "taskNote",
-			taskNoteDefaultLocation: "Meta/Task_Board/New_Task_Notes",
-			quickAddPluginDefaultChoice: "",
+			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
 			archivedTasksFilePath: "",
+			taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
 			archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",
+			quickAddPluginDefaultChoice: "",
 			frontmatterFormatting: [
 				{
 					index: 0,
@@ -553,7 +589,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				},
 				{
 					index: 12,
-					property: taskItemKeyToNameMapping["cancelledDate"],
+					property: taskItemKeyToNameMapping["completion"],
 					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
 					taskItemKey: "cancelledDate",
 				},
@@ -576,18 +612,16 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.taskLocation,
 				// 	taskItemKey: "taskLocation",
 				// },
-				{
-					index: 14,
-					property: taskItemKeyToNameMapping["dateModified"],
-					key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
-					taskItemKey: "",
-				},
+				// {
+				// 	index: 14,
+				// 	property: taskItemKeyToNameMapping["dateModified"],
+				// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
+				// 	taskItemKey: "",
+				// },
 			],
-			showFileNameInCard: false,
 			showFrontmatterTagsOnCards: false,
 			tasksCacheFilePath: "",
 			notificationService: NotificationService.None,
-			frontmatterPropertyForReminder: "reminder",
 			actions: [
 				{
 					enabled: true,
@@ -596,24 +630,17 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					targetColumn: "Completed",
 				},
 			],
-			cardSectionsVisibility:
-				cardSectionsVisibilityOptions.showSubTasksOnly,
 			hiddenTaskProperties: [],
 			autoAddUniqueID: false,
 			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 			experimentalFeatures: false,
+			safeGuardFeature: true,
 			lastViewHistory: {
 				viewedType: "kanban",
 				boardIndex: 0,
 				settingTab: 0,
 			},
 			boundTaskCompletionToChildTasks: false,
-			kanbanView: {
-				lazyLoadingEnabled: true,
-				initialTaskCount: 20,
-				loadMoreCount: 10,
-				scrollThresholdPercent: 80,
-			},
 			mapView: {
 				background: mapViewBackgrounVariantTypes.none,
 				mapOrientation: mapViewNodeMapOrientation.horizontal,
@@ -655,3 +682,4 @@ export const langCodes: { [key: string]: string } = {
 	zh: "简体中文",
 	"zh-TW": "繁體中文",
 };
+export { taskCardStyleNames };

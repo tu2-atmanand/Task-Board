@@ -2,19 +2,19 @@
 
 import { App, TAbstractFile, TFile, TFolder } from "obsidian";
 
-import type vaultScanner from "src/managers/VaultScanner";
+import type VaultScanner from "src/managers/VaultScanner";
 import type TaskBoard from "main";
-import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
 import { PENDING_SCAN_FILE_STACK } from "src/interfaces/Constants";
+import { bugReporterManagerInsatance } from "./BugReporter";
 
 export class RealTimeScanner {
 	app: App;
 	plugin: TaskBoard;
 	taskBoardFileStack: string[] = [];
-	vaultScanner: vaultScanner;
+	vaultScanner: VaultScanner;
 
-	constructor(app: App, plugin: TaskBoard, vaultScanner: vaultScanner) {
+	constructor(app: App, plugin: TaskBoard, vaultScanner: VaultScanner) {
 		this.app = app;
 		this.plugin = plugin;
 		this.vaultScanner = vaultScanner;
@@ -28,7 +28,11 @@ export class RealTimeScanner {
 			}
 			// this.startScanTimer();
 		} catch (error) {
-			console.error("Error loading file stack:", error);
+			bugReporterManagerInsatance.addToLogs(
+				144,
+				String(error),
+				"RealTimeScanner.ts/initializeStack",
+			);
 		}
 	}
 
@@ -36,21 +40,27 @@ export class RealTimeScanner {
 		try {
 			localStorage.setItem(
 				PENDING_SCAN_FILE_STACK,
-				JSON.stringify(this.taskBoardFileStack)
+				JSON.stringify(this.taskBoardFileStack),
 			);
 		} catch (error) {
-			bugReporter(
-				this.plugin,
+			bugReporterManagerInsatance.showNotice(
+				32,
 				"Error saving file stack to localStorage.",
 				String(error),
-				"RealTimeScanner.ts/saveStack"
+				"RealTimeScanner.ts/saveStack",
 			);
 		}
 	}
 
+	/**
+	 * Process all updated files and update tasks if necessary.
+	 * @param currentFile The file that was modified, or undefined if no file was modified.
+	 * @param updatedTaskId The ID of the task that was updated, or undefined if no task was updated.
+	 * @returns A Promise that resolves to a boolean indicating if the process was successful.
+	 */
 	async processAllUpdatedFiles(
 		currentFile?: TFile | string | undefined,
-		updatedTaskId?: string | undefined
+		updatedTaskId?: string | undefined,
 	) {
 		// If a current file is provided, ensure it's included in the processing
 		let newFile: TFile | null | undefined = null;
@@ -79,7 +89,7 @@ export class RealTimeScanner {
 			// Send all files for scanning and updating tasks
 			result = await this.vaultScanner.refreshTasksFromFiles(
 				files,
-				false
+				false,
 			);
 		}
 
@@ -88,10 +98,10 @@ export class RealTimeScanner {
 			this.taskBoardFileStack = [];
 			// Save updated stack (which should now be empty)
 			this.saveStack();
-		}
 
-		// Reset the editorModified flag after the scan.
-		this.plugin.editorModified = false;
+			// Reset the editorModified flag after the scan.
+			this.plugin.editorModified = false;
+		}
 
 		setTimeout(() => {
 			// This event emmitter will stop any loading animation of ongoing task-card.
@@ -110,25 +120,31 @@ export class RealTimeScanner {
 		if (
 			this.taskBoardFileStack.at(0) === undefined ||
 			!this.taskBoardFileStack.includes(
-				file instanceof TFile ? file.path : file
+				file instanceof TFile ? file.path : file,
 			)
 		) {
 			this.taskBoardFileStack.push(
-				file instanceof TFile ? file.path : file
+				file instanceof TFile ? file.path : file,
 			); // Add the file to the stack
 			this.saveStack(); // Save the updated stack
 		}
 	}
 
+	/**
+	 * Finds the oldPath inside the plugin.vaultScanner.tasksCache and replaces it with the new file path.
+	 * This function does not update the taskBoardFileStack.
+	 * @param file - The file that was renamed (TAbstractFile)
+	 * @param oldPath - The old path of the file (string)
+	 * @param archivedTaskNotesPath - The path of the archived task notes folder (string)
+	 */
 	onFileRenamed(
 		file: TAbstractFile,
 		oldPath: string,
-		archivedTaskNotesPath: string
+		archivedTaskNotesPath: string,
 	) {
 		let foundFlag = false;
 		// Find the oldPath inside the plugin.vaultScanner.tasksCache and replace it with the new file path. Please dont update it inside taskBoardFileStack.
-		const { Pending, Completed, Notes } =
-			this.plugin.vaultScanner.tasksCache;
+		const { Pending, Completed } = this.plugin.vaultScanner.tasksCache;
 
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
@@ -153,7 +169,7 @@ export class RealTimeScanner {
 				} else if (file instanceof TFolder) {
 					// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
 					const keysToUpdate = Object.keys(cache).filter((key) =>
-						key.startsWith(oldPath + "/")
+						key.startsWith(oldPath + "/"),
 					);
 					keysToUpdate.forEach((oldKey) => {
 						const newKey =
@@ -175,24 +191,25 @@ export class RealTimeScanner {
 			}
 		});
 
-		if (file instanceof TFile) {
-			// Update the file path in the Notes cache
-			Notes.forEach((note) => {
-				if (note.filePath === oldPath) {
-					note.filePath = file.path; // Update the file path in the note
-					foundFlag = true;
-				}
-			});
-		} else if (file instanceof TFolder) {
-			// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
-			Notes.forEach((note) => {
-				if (note.filePath.startsWith(oldPath + "/")) {
-					note.filePath =
-						file.path + note.filePath.substring(oldPath.length);
-					foundFlag = true;
-				}
-			});
-		}
+		// @deprecated v1.9.0
+		// if (file instanceof TFile) {
+		// 	// Update the file path in the Notes cache
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath === oldPath) {
+		// 			note.filePath = file.path; // Update the file path in the note
+		// 			foundFlag = true;
+		// 		}
+		// 	});
+		// } else if (file instanceof TFolder) {
+		// 	// Actually this is not at all needed as I am only running this function when a file is renamed. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath.startsWith(oldPath + "/")) {
+		// 			note.filePath =
+		// 				file.path + note.filePath.substring(oldPath.length);
+		// 			foundFlag = true;
+		// 		}
+		// 	});
+		// }
 
 		// Also remove the old path from the stack if it exists
 		const index = this.taskBoardFileStack.indexOf(oldPath);
@@ -208,12 +225,14 @@ export class RealTimeScanner {
 		if (foundFlag) {
 			this.plugin.vaultScanner.tasksCache.Pending = Pending;
 			this.plugin.vaultScanner.tasksCache.Completed = Completed;
-			this.plugin.vaultScanner.tasksCache.Notes = Notes;
-			this.plugin.vaultScanner.saveTasksToJsonCache();
-			eventEmitter.emit("REFRESH_COLUMN");
+			// this.plugin.vaultScanner.tasksCache.Notes = Notes;
 		}
 	}
 
+	/**
+	 * This function is called when a file is deleted. It removes the file from the taskBoardFileStack and the tasks cache.
+	 * @param file - The file that was deleted (TAbstractFile)
+	 */
 	onFileDeleted(file: TAbstractFile) {
 		let foundFlag = false;
 		// Remove the file from the stack if it exists
@@ -224,8 +243,7 @@ export class RealTimeScanner {
 		}
 
 		// Also remove the file from the tasks cache
-		const { Pending, Completed, Notes } =
-			this.plugin.vaultScanner.tasksCache;
+		const { Pending, Completed } = this.plugin.vaultScanner.tasksCache;
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
 				if (file instanceof TFile && cache.hasOwnProperty(file.path)) {
@@ -234,7 +252,7 @@ export class RealTimeScanner {
 				} else if (file instanceof TFolder) {
 					// Actually this is not at all needed as I am only running this function when a file is deleted. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
 					const keysToDelete = Object.keys(cache).filter((key) =>
-						key.startsWith(file.path + "/")
+						key.startsWith(file.path + "/"),
 					);
 					keysToDelete.forEach((key) => {
 						delete cache[key];
@@ -244,38 +262,37 @@ export class RealTimeScanner {
 			}
 		});
 
-		if (file instanceof TFile) {
-			// Update the file path in the Notes cache
-			Notes.forEach((note) => {
-				if (note.filePath === file.path) {
-					// remove this object from Notes
-					const noteIndex = Notes.indexOf(note);
-					if (noteIndex !== -1) {
-						Notes.splice(noteIndex, 1);
-						foundFlag = true;
-					}
-				}
-			});
-		} else if (file instanceof TFolder) {
-			// Actually this is not at all needed as I am only running this function when a file is deleted. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
-			Notes.forEach((note) => {
-				if (note.filePath.startsWith(file.path + "/")) {
-					// remove this object from Notes
-					const noteIndex = Notes.indexOf(note);
-					if (noteIndex !== -1) {
-						Notes.splice(noteIndex, 1);
-						foundFlag = true;
-					}
-				}
-			});
-		}
+		// @deprecated v1.9.0
+		// if (file instanceof TFile) {
+		// 	// Update the file path in the Notes cache
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath === file.path) {
+		// 			// remove this object from Notes
+		// 			const noteIndex = Notes.indexOf(note);
+		// 			if (noteIndex !== -1) {
+		// 				Notes.splice(noteIndex, 1);
+		// 				foundFlag = true;
+		// 			}
+		// 		}
+		// 	});
+		// } else if (file instanceof TFolder) {
+		// 	// Actually this is not at all needed as I am only running this function when a file is deleted. Also it was required because, it will anyways going to run of TFile, and if I run it for TFolder as well, it will run two files for the same file. If in case of child folders, it will too many times for the same file unnecessarily.
+		// 	Notes.forEach((note) => {
+		// 		if (note.filePath.startsWith(file.path + "/")) {
+		// 			// remove this object from Notes
+		// 			const noteIndex = Notes.indexOf(note);
+		// 			if (noteIndex !== -1) {
+		// 				Notes.splice(noteIndex, 1);
+		// 				foundFlag = true;
+		// 			}
+		// 		}
+		// 	});
+		// }
 
 		if (foundFlag) {
 			this.plugin.vaultScanner.tasksCache.Pending = Pending;
 			this.plugin.vaultScanner.tasksCache.Completed = Completed;
-			this.plugin.vaultScanner.tasksCache.Notes = Notes;
-			this.plugin.vaultScanner.saveTasksToJsonCache();
-			eventEmitter.emit("REFRESH_COLUMN");
+			// this.plugin.vaultScanner.tasksCache.Notes = Notes;
 		}
 	}
 }

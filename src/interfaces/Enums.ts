@@ -22,15 +22,10 @@ export enum UniversalDateOptions {
 	dueDate = "due",
 }
 
-export enum universalDateOptionsNames {
-	startDate = "Start Date",
-	scheduledDate = "Scheduled Date",
-	dueDate = "Due Date",
-}
-
 export enum TagColorType {
-	Text = "text",
-	Background = "background",
+	TagText = "text",
+	TagBg = "tagBg",
+	CardBg = "background",
 }
 
 export enum NotificationService {
@@ -40,28 +35,36 @@ export enum NotificationService {
 	ObsidApp = "obsiApp",
 }
 
-export enum cardSectionsVisibilityOptions {
-	showSubTasksOnly = "showSubTasksOnly",
-	showDescriptionOnly = "showDescriptionOnly",
-	showBoth = "showBoth",
-	hideBoth = "hideBoth",
-}
-
-export enum HideableTaskProperty {
+export enum taskPropertiesNames {
+	// These are the main properties stored inside the cache with the exact key name.
 	ID = "id",
+	Title = "title",
+	Body = "body",
+	SubTasks = "subTasks",
+	Description = "description",
+	Status = "status",
+	Priority = "priority",
 	Tags = "tags",
+	Time = "time",
+	Reminder = "reminder",
 	CreatedDate = "createdDate",
 	StartDate = "startDate",
 	ScheduledDate = "scheduledDate",
 	DueDate = "dueDate",
 	CompletionDate = "completionDate",
 	CancelledDate = "cancelledDate",
-	OnCompletion = "on-completion",
-	Priority = "priority",
+	Dependencies = "dependsOn",
+	FilePath = "filePath",
+
+	// These two properties are not stored inside the cache yet.
+	OnCompletion = "onCompletion",
 	Recurring = "recurring",
-	Time = "time",
-	Dependencies = "dependencies",
-	Reminder = "reminder",
+
+	// These are specially added for the UI hide/show properties setting.
+	Checkbox = "checkbox",
+	SubTasksMinimized = "subTasksMinimized",
+	DescriptionMinimized = "descriptionMinimized",
+	FilePathInHeader = "filePathInHeader"
 }
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
@@ -90,7 +93,7 @@ export enum viewTypeNames {
 	map = "map",
 }
 
-export enum taskStatuses {
+export enum defaultTaskStatuses {
 	unchecked = " ",
 	incomplete = " ",
 	pending = " ",
@@ -138,7 +141,17 @@ export enum taskStatuses {
 	secret = "s",
 }
 
-export enum colType {
+export enum statusTypeNames {
+	TODO = "TODO",
+	DONE = "DONE",
+	IN_PROGRESS = "IN_PROGRESS",
+	ON_HOLD = "ON_HOLD",
+	CANCELLED = "CANCELLED",
+	NON_TASK = "NON_TASK",
+	EMPTY = "EMPTY",
+}
+
+export enum colTypeNames {
 	undated = "undated",
 	dated = "dated",
 	namedTag = "namedTag",
@@ -148,6 +161,7 @@ export enum colType {
 	taskPriority = "taskPriority",
 	pathFiltered = "pathFiltered",
 	completed = "completed",
+	allPending = "allPending",
 }
 
 export enum mapViewBackgrounVariantTypes {
@@ -185,4 +199,24 @@ export enum KanbanBoardType {
 	statusBoard = "Status Based Board",
 	timeBoard = "Time Based Board",
 	tagBoard = "Tag Based Board",
+}
+
+export enum taskCardStyleNames {
+	EMOJI = "emoji",
+	ICONS = "icons",
+	BASES = "bases",
+	DATAVIEW = "custom",
+}
+
+export enum onCompletionOptions {
+	NONE = 0,
+	keep = 1,
+	delete = 2,
+	archive = 3,
+}
+
+export enum scanModeOptions {
+	REAL_TIME = "realtime",
+	AUTOMATIC = "automatic",
+	MANUAL = "manual",
 }

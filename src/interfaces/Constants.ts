@@ -1,4 +1,4 @@
-export const newReleaseVersion = "1.8.5";
+export const newReleaseVersion = "1.9.4";
 // Plugin view type identifiers
 export const VIEW_TYPE_TASKBOARD = "task-board-view";
 export const VIEW_TYPE_ADD_OR_EDIT_TASK = "add-or-edit-task-view";
@@ -10,6 +10,7 @@ export const PENDING_SCAN_FILE_STACK = "taskBoard_file_stack";
 export const NODE_POSITIONS_STORAGE_KEY = "taskboard_map_node_positions"; // now stores board-wise
 export const NODE_SIZE_STORAGE_KEY = "taskboard_map_node_sizes";
 export const VIEWPORT_STORAGE_KEY = "taskboard_map_viewport";
+export const OBSIDIAN_CLOSED_TIME_KEY = "OBSIDIAN_CLOSED_TIME";
 
 // Default file names and paths
 export const DEFAULT_TASKS_CACHE_FILE = "task-board-data.json";

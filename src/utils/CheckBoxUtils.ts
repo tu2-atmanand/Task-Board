@@ -1,7 +1,8 @@
 import type TaskBoard from "main";
-import { taskStatuses } from "src/interfaces/Enums";
+import { Notice } from "obsidian";
+import { statusTypeNames } from "src/interfaces/Enums";
 import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
-import { taskItem } from "src/interfaces/TaskItem";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**
@@ -12,31 +13,46 @@ import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegula
  */
 export function checkboxStateSwitcher(
 	plugin: TaskBoard,
-	symbol: string
-): string {
-	const { tasksPluginCustomStatuses, customStatuses } =
-		plugin.settings.data.globalSettings;
+	symbol: string,
+): { newSymbol: string; newSymbolType: string } {
+	const { customStatuses } = plugin.settings.data.globalSettings;
 
-	// Check if tasksPluginCustomStatuses is available and has entries
-	if (tasksPluginCustomStatuses?.length > 0) {
-		const foundStatus = tasksPluginCustomStatuses.find(
-			(status: { symbol: string }) => status.symbol === symbol
+	// Check if customStatuses is available and has entries
+	if (customStatuses?.length > 0) {
+		const oldStatus = customStatuses.find(
+			(status) => status.symbol === symbol,
 		);
-		if (foundStatus) return foundStatus.nextStatusSymbol;
-	} else if (customStatuses?.length > 0) {
-		const foundStatus = customStatuses.find(
-			(status: { symbol: string }) => status.symbol === symbol
-		);
-		if (foundStatus) return foundStatus.nextStatusSymbol;
+		if (oldStatus) {
+			const nextStatus = customStatuses.find(
+				(status) => status.symbol === oldStatus?.nextStatusSymbol,
+			);
+			if (nextStatus) {
+				return {
+					newSymbol: oldStatus.nextStatusSymbol,
+					newSymbolType: nextStatus?.type,
+				};
+			}
+		}
 	}
 
+	new Notice(
+		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior.",
+	);
 	// Default fallback behavior
-	return symbol === "x" || symbol === "X" ? " " : "x";
+	return symbol === "x" || symbol === "X"
+		? {
+				newSymbol: " ",
+				newSymbolType: statusTypeNames.TODO,
+			}
+		: {
+				newSymbol: "x",
+				newSymbolType: statusTypeNames.DONE,
+			};
 }
 
 /**
  * Determines if a task is completed based on its title or symbol.
- * @param titleOrSymbol - The title or symbol (task.status) of the task.
+ * @param titleOrSymbol - The title if its a inline-task, or the symbol (task.status) if its a task-note.
  * @param isTaskNote - A boolean indicating whether the task is a task note.
  * @param settings - The plugin settings.
  * @returns True if the symbol represents a completed state, otherwise false.
@@ -44,7 +60,7 @@ export function checkboxStateSwitcher(
 export function isTaskCompleted(
 	titleOrSymbol: string,
 	isTaskNote: boolean,
-	settings: PluginDataJson
+	settings: PluginDataJson,
 ): boolean {
 	// console.log(
 	// 	"isTaskCompleted...\ntitleOrSymbol :",
@@ -57,22 +73,28 @@ export function isTaskCompleted(
 		// // console.log("CheckBoxUtils.ts : isCompleted : match :", match);
 		// if (!match || match.length < 2) return false;
 
-		const symbol = extractCheckboxSymbol(titleOrSymbol);
+		let symbol = " ";
+		if (titleOrSymbol.trim().length === 1) {
+			symbol = titleOrSymbol;
+		} else {
+			symbol = extractCheckboxSymbol(titleOrSymbol);
+		}
 		// return (
-		// 	symbol === taskStatuses.regular ||
-		// 	symbol === taskStatuses.checked ||
-		// 	symbol === taskStatuses.done ||
-		// 	symbol === taskStatuses.dropped
+		// 	symbol === defaultTaskStatuses.regular ||
+		// 	symbol === defaultTaskStatuses.checked ||
+		// 	symbol === defaultTaskStatuses.done ||
+		// 	symbol === defaultTaskStatuses.dropped
 		// );
 
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+			settings.data.globalSettings.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
 			if (
 				customStatus.symbol === symbol &&
-				customStatus.type === "DONE"
+				(customStatus.type === "DONE" ||
+					customStatus.type === "CANCELLED")
 			) {
 				flag = true;
 				return true;
@@ -81,12 +103,13 @@ export function isTaskCompleted(
 		return flag;
 	} else {
 		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.tasksPluginCustomStatuses;
+			settings.data.globalSettings.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (
 				customStatus.symbol === titleOrSymbol &&
-				customStatus.type === "DONE"
+				(customStatus.type === "DONE" ||
+					customStatus.type === "CANCELLED")
 			) {
 				flag = true;
 				return true;
@@ -148,9 +171,11 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 				return parsed?.useTab ? `\t` : " ".repeat(tabSize);
 			});
 			return `\t`; // Default indentation while async read happens
-		} catch {
-			console.warn(
-				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				108,
+				String(err),
+				"CheckBoxUtils.ts/getObsidianIndentationSetting",
 			);
 			return `\t`;
 		}
@@ -163,7 +188,7 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
  * @returns A promise that resolves to the indentation string.
  */
 export async function getObsidianIndentationSettingAsync(
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<string> {
 	try {
 		if (plugin.app.vault.config) {
@@ -181,9 +206,11 @@ export async function getObsidianIndentationSettingAsync(
 				typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
 			const useTab = !!parsed?.useTab;
 			return useTab ? `\t` : " ".repeat(tabSize);
-		} catch {
-			console.warn(
-				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				109,
+				String(err),
+				"CheckBoxUtils.ts/getObsidianIndentationSettingAsync",
 			);
 			return `\t`;
 		}
