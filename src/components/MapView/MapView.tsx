@@ -16,7 +16,7 @@ import {
 	ControlButton,
 } from '@xyflow/react';
 // import '@xyflow/react/dist/style.css';
-import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
+import { taskItem, UpdateTaskEventData, taskJsonMerged } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
 import ResizableNodeSelected from './ResizableNodeSelected';
 import TaskItem from '../KanbanView/TaskItem';
@@ -37,9 +37,7 @@ import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 type MapViewProps = {
 	plugin: TaskBoard;
 	activeBoardIndex: number;
-	allTasksArranged: taskItem[][];
-	// loading: boolean;
-	// freshInstall: boolean;
+	filteredTasks: taskJsonMerged;
 	focusOnTaskId?: string;
 };
 
@@ -66,11 +64,14 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, activeBoardIndex, allTasksArranged, focusOnTaskId
+	plugin, activeBoardIndex, filteredTasks, focusOnTaskId
 }) => {
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+	
+	// Flatten the filtered tasks from taskJsonMerged to a single array for MapView
+	const allTasksFlattened = filteredTasks ? [...filteredTasks.Pending, ...filteredTasks.Completed] : [];
 
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
@@ -216,9 +217,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
 		// Don't calculate nodes until storage data is loaded
-		if (!storageLoaded) {
-			return [];
-		}
+		if (!storageLoaded) { return []; }
 
 		const newNodes: Node[] = [];
 		const usedIds = new Set<string>();
@@ -246,57 +245,59 @@ const MapView: React.FC<MapViewProps> = ({
 		};
 		const defaultWidth = getDefaultWidth();
 
+		// Grid layout: arrange tasks in columns with wrapping
 		let xOffset = 0;
-		allTasksArranged.forEach((columnTasks, colIdx) => {
-			let yOffset = 0;
-			columnTasks.forEach((task, rowIdx) => {
-				if (task.legacyId) {
-					const id = task.legacyId;
-					if (usedIds.has(id)) {
-						duplicateIds.add(id);
-						// return; // Skip duplicate
-					} else {
-						usedIds.add(id);
-						const savedPos = positions[id] || {};
-						const savedSize = nodeSizes[id] || {};
+		let yOffset = 0;
+		const tasksPerRow = 1; // One column of tasks for wrapping
+		let columnCount = 0;
 
-						// Ensure width is always a valid number
-						let nodeWidth = defaultWidth;
-						if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
-							nodeWidth = savedSize.width;
-						}
+		allTasksFlattened.forEach((task, idx) => {
+			if (task.legacyId) {
+				const id = task.legacyId;
+				if (usedIds.has(id)) {
+					duplicateIds.add(id);
+					// return; // Skip duplicate
+				} else {
+					usedIds.add(id);
+					const savedPos = positions[id] || {};
+					const savedSize = nodeSizes[id] || {};
 
-						// Ensure positions are always valid finite numbers
-						const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
-						const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
-
-						// Safety check: if computed offsets are somehow NaN, use fallback
-						const safeX = Number.isFinite(nodeX) ? nodeX : (colIdx * 350);
-						const safeY = Number.isFinite(nodeY) ? nodeY : (rowIdx * 170);
-
-						newNodes.push({
-							id,
-							type: 'ResizableNodeSelected',
-							data: {
-								label: <TaskItem
-									dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
-									plugin={plugin}
-									task={task}
-									activeBoardSettings={activeBoardSettings}
-								/>
-							},
-							position: {
-								x: safeX,
-								y: safeY
-							},
-							width: nodeWidth,
-						});
-						yOffset += rowSpacing;
+					// Ensure width is always a valid number
+					let nodeWidth = defaultWidth;
+					if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
+						nodeWidth = savedSize.width;
 					}
-				}
 
-			});
-			xOffset += columnSpacing;
+					// Ensure positions are always valid finite numbers
+					const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
+					const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
+
+					// Safety check: if computed offsets are somehow NaN, use fallback
+					const safeX = Number.isFinite(nodeX) ? nodeX : (columnCount * columnSpacing);
+					const safeY = Number.isFinite(nodeY) ? nodeY : (idx % tasksPerRow * rowSpacing);
+
+					newNodes.push({
+						id,
+						type: 'ResizableNodeSelected',
+						data: {
+							label: <TaskItem
+								dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
+								plugin={plugin}
+								task={task}
+								activeBoardSettings={activeBoardSettings}
+							/>
+						},
+						position: {
+							x: safeX,
+							y: safeY
+						},
+						width: nodeWidth,
+					});
+
+					// Move to next row after each task (since tasksPerRow = 1)
+					yOffset += rowSpacing;
+				}
+			}
 		});
 
 		if (duplicateIds.size > 0) {
@@ -306,7 +307,7 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 
 		return newNodes;
-	}, [allTasksArranged, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey]);
+	}, [allTasksFlattened, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey]);
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -379,7 +380,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// Calculate edges from dependsOn property
 	// TODO : Might be efficient to make use of the addEdge api of reactflow.
 	function getEdgesFromTasks(): Edge[] {
-		const tasks: taskItem[] = allTasksArranged.flat();
+		const tasks: taskItem[] = allTasksFlattened;
 		const edges: Edge[] = [];
 		const idToTask = new Map<string, taskItem>();
 		tasks.forEach(task => {
@@ -447,7 +448,7 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksArranged]);
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksFlattened]);
 
 	const handleNodePositionChange = () => {
 		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
@@ -515,12 +516,12 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Handle edge creation (connecting nodes)
 	const onConnect = useMemo<((params: Connection) => void)>(() => {
-		const flattenedTasks = allTasksArranged.flat();
+		const flattenedTasks = allTasksFlattened;
 		return (params: Connection) => {
 			connectParentToChild(params.source, params.target, flattenedTasks);
 			// You may want to update the dependsOn property of the source task and trigger a re-render
 		};
-	}, [allTasksArranged]);
+	}, [allTasksFlattened]);
 
 	// Function for connecting parent to child
 	function connectParentToChild(sourceNodeId: string, targetNodeId: string, allTasks: taskItem[]) {
@@ -791,7 +792,7 @@ const MapView: React.FC<MapViewProps> = ({
 			item.onClick(async () => {
 				// Edge id format: `${targetId}->${sourceId}`
 				const [targetId, sourceId] = edge.id.split('->');
-				const allTasks = allTasksArranged.flat();
+				const allTasks = allTasksFlattened;
 				const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
 				if (!targetTask) {
 					bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
@@ -803,7 +804,7 @@ const MapView: React.FC<MapViewProps> = ({
 					return;
 				}
 
-				const updatedDependsOn = targetTask.dependsOn.filter(dep => dep !== sourceId);
+				const updatedDependsOn = targetTask.dependsOn.filter((dep: string) => dep !== sourceId);
 				const updatedTargetTask = {
 					...targetTask,
 					dependsOn: updatedDependsOn
@@ -880,7 +881,7 @@ const MapView: React.FC<MapViewProps> = ({
 	}
 
 
-	if (allTasksArranged.flat().length === 0) {
+	if (allTasksFlattened.length === 0) {
 		return (
 			<div className='taskBoardMapViewWrapper'>
 				<div className="taskBoardMapView">
@@ -906,7 +907,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 					<TasksImporterPanel
 						plugin={plugin}
-						allTasksArranged={allTasksArranged}
+						allTasksArranged={[allTasksFlattened]}
 						activeBoardSettings={activeBoardSettings}
 						isVisible={isImporterPanelVisible}
 						onClose={() => setIsImporterPanelVisible(false)}
@@ -1048,7 +1049,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 						<TasksImporterPanel
 							plugin={plugin}
-							allTasksArranged={allTasksArranged}
+							allTasksArranged={[allTasksFlattened]}
 							activeBoardSettings={activeBoardSettings}
 							isVisible={isImporterPanelVisible}
 							onClose={() => setIsImporterPanelVisible(false)}
