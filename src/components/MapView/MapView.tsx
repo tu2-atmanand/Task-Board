@@ -69,11 +69,11 @@ const MapView: React.FC<MapViewProps> = ({
 	plugin.settings.data.globalSettings.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.globalSettings.mapView;
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
-	
+
 	// Flatten the filtered tasks from taskJsonMerged to a single array for MapView
 	// IMPORTANT: Memoize to prevent infinite loop - prevents recreating array on every render
-	const allTasksFlattened = useMemo(() => 
-		filteredTasks ? [...filteredTasks.Pending, ...filteredTasks.Completed] : [],
+	const allTasksFlattened = useMemo(() =>
+		filteredTasks ? [...filteredTasks.Completed, ...filteredTasks.Pending] : [],
 		[filteredTasks]
 	);
 
@@ -226,8 +226,9 @@ const MapView: React.FC<MapViewProps> = ({
 		const newNodes: Node[] = [];
 		const usedIds = new Set<string>();
 		const duplicateIds = new Set<string>();
-		const columnSpacing = 350;
-		const rowSpacing = 170;
+		const columnSpacing = 350; // base gap between columns
+		const rowSpacing = 200;
+		const tasksPerColumn = 20; // wrap after 20 tasks per column
 
 		// Get default width with proper validation
 		const getDefaultWidth = () => {
@@ -243,64 +244,71 @@ const MapView: React.FC<MapViewProps> = ({
 				}
 			} catch (e) {
 				bugReporterManagerInsatance.addToLogs(96, String(e), 'MapView.tsx/getDefaultWidth');
-
+				return 300; // Fallback default width
 			}
 			return 300; // Fallback default width
 		};
 		const defaultWidth = getDefaultWidth();
 
-		// Grid layout: arrange tasks in columns with wrapping
-		let xOffset = 0;
-		let yOffset = 0;
-		const tasksPerRow = 5; // One column of tasks for wrapping
-		let columnCount = 0;
+		// Counter for tasks that do NOT have saved positions so we can place them in a grid
+		let autoIndex = 0;
+		let maxColumnCount = 0;
 
-		allTasksFlattened.forEach((task, idx) => {
+		allTasksFlattened.forEach((task) => {
 			if (task.legacyId) {
 				const id = task.legacyId;
 				if (usedIds.has(id)) {
 					duplicateIds.add(id);
-					// return; // Skip duplicate
-				} else {
-					usedIds.add(id);
-					const savedPos = positions[id] || {};
-					const savedSize = nodeSizes[id] || {};
-
-					// Ensure width is always a valid number
-					let nodeWidth = defaultWidth;
-					if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
-						nodeWidth = savedSize.width;
-					}
-
-					// Ensure positions are always valid finite numbers
-					const nodeX = Number.isFinite(savedPos.x) ? savedPos.x : xOffset;
-					const nodeY = Number.isFinite(savedPos.y) ? savedPos.y : yOffset;
-
-					// Safety check: if computed offsets are somehow NaN, use fallback
-					const safeX = Number.isFinite(nodeX) ? nodeX : (columnCount * columnSpacing);
-					const safeY = Number.isFinite(nodeY) ? nodeY : (idx % tasksPerRow * rowSpacing);
-
-					newNodes.push({
-						id,
-						type: 'ResizableNodeSelected',
-						data: {
-							label: <TaskItem
-								dataAttributeIndex={0} // TODO : Will think of better approach in the future, if this creates an issue.
-								plugin={plugin}
-								task={task}
-								activeBoardSettings={activeBoardSettings}
-							/>
-						},
-						position: {
-							x: safeX,
-							y: safeY
-						},
-						width: nodeWidth,
-					});
-
-					// Move to next row after each task (since tasksPerRow = 1)
-					yOffset += rowSpacing;
+					return;
 				}
+				usedIds.add(id);
+
+				const savedPos = positions[id];
+				const savedSize = nodeSizes[id] || {};
+
+				// Ensure width is always a valid number
+				let nodeWidth = defaultWidth;
+				if (savedSize.width && Number.isFinite(savedSize.width) && savedSize.width > 0) {
+					nodeWidth = savedSize.width;
+				}
+
+				// Determine position: use saved position if present and valid, else compute grid position
+				let posX: number;
+				let posY: number;
+				const hasSavedPos = savedPos && Number.isFinite(savedPos.x) && Number.isFinite(savedPos.y);
+				if (hasSavedPos) {
+					posX = savedPos.x;
+					posY = savedPos.y;
+				} else {
+					const columnIndex = Math.floor(autoIndex / tasksPerColumn);
+					const rowIndex = autoIndex % tasksPerColumn;
+					// Space columns by node width + columnSpacing so variable widths are respected
+					posX = columnIndex * (defaultWidth + columnSpacing);
+					posY = rowIndex * rowSpacing;
+					autoIndex += 1;
+					maxColumnCount = Math.max(maxColumnCount, columnIndex + 1);
+				}
+
+				const safeX = Number.isFinite(posX) ? posX : 0;
+				const safeY = Number.isFinite(posY) ? posY : 0;
+
+				newNodes.push({
+					id,
+					type: 'ResizableNodeSelected',
+					data: {
+						label: <TaskItem
+							dataAttributeIndex={0}
+							plugin={plugin}
+							task={task}
+							activeBoardSettings={activeBoardSettings}
+						/>
+					},
+					position: {
+						x: safeX,
+						y: safeY,
+					},
+					width: nodeWidth,
+				});
 			}
 		});
 
