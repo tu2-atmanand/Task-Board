@@ -1,4 +1,4 @@
-export const newReleaseVersion = "1.9.4";
+export const newReleaseVersion = "1.9.5";
 // Plugin view type identifiers
 export const VIEW_TYPE_TASKBOARD = "task-board-view";
 export const VIEW_TYPE_ADD_OR_EDIT_TASK = "add-or-edit-task-view";
