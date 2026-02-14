@@ -579,7 +579,11 @@ const en: Lang = {
 	"edit": "Edit",
 	"no-custom-statuses-configured": "No custom statuses configured",
 	"task-note-title-placeholder": "Enter a simple title for the task...",
-	"file-name-in-header": "Filename (in header)"
+	"file-name-in-header": "Filename (in header)",
+	"parent-folder": "Parent folder",
+	"full-path": "Full path",
+	"folder": "Folder",
+	"path": "Path"
 };
 
 export default en;

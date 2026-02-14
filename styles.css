@@ -457,16 +457,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-height: 80vh;
 }
 
-.tasksContainer-SH {
+.tasksContainer.SH {
 	padding-inline: 7px;
 	padding-block: 12px;
-	flex: 1;
-	overflow-y: auto;
 	gap: 12px;
-	display: flex;
-	flex-direction: column;
 	/* height: auto; */
-	max-height: 80vh;
 
 	/* Firefox */
 	scrollbar-width: none;

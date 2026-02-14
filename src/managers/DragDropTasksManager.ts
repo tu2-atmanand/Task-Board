@@ -45,7 +45,7 @@ class DragDropTasksManager {
 	// Hold the current drag payload so dragover handlers can access it reliably
 	private currentDragData: currentDragDataPayload | null = null;
 	private desiredDropIndex: number | null = null;
-	private dropIndicator: HTMLElement | null = null;
+	// private dropIndicator: HTMLElement | null = null; // deprecated
 	private plugin: TaskBoard | null = null;
 
 	private constructor() {
@@ -261,7 +261,7 @@ class DragDropTasksManager {
 		// Add the target column tag if it doesn't exist
 		const targetTag = targetColumn.coltag.replace("#", "");
 		// Make sure we don't have duplicates
-		newTags.push(targetTag);
+		newTags.push(targetTag.startsWith("#") ? targetTag : `#${targetTag}`);
 		newTags = Array.from(new Set(newTags));
 
 		// newTask.tags = newTags;
@@ -1084,58 +1084,58 @@ class DragDropTasksManager {
 	 * @param {HTMLElement} cardEl - The card element
 	 * @param {boolean} isAbove - True if the indicator should be shown above the card, false otherwise
 	 *
-	 * @deprecated - This approach has been deprecated. Will show the indicator directly inside the column component.
 	 */
-	showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
-		if (!this.plugin) return;
-		if (!cardEl || !cardEl.parentElement) return;
+	// * @deprecated - This approach has been deprecated. Will show the indicator directly inside the column component.
+	// showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
+	// 	if (!this.plugin) return;
+	// 	if (!cardEl || !cardEl.parentElement) return;
 
-		// Create indicator if not already created
-		if (!this.dropIndicator) {
-			this.dropIndicator = document.createElement("div");
-			this.dropIndicator.className =
-				"taskboard-drop-indicator is-visible";
-			this.dropIndicator.style.position = "absolute";
-			this.dropIndicator.style.pointerEvents = "none";
-			this.dropIndicator.style.zIndex = "9999";
-			this.dropIndicator.style.background =
-				"var(--interactive-accent, #5b8cff)";
-			this.dropIndicator.style.borderRadius = "4px";
-			// default height; adjusted below
-			this.dropIndicator.style.height = "4px";
-		}
+	// 	// Create indicator if not already created
+	// 	if (!this.dropIndicator) {
+	// 		this.dropIndicator = document.createElement("div");
+	// 		this.dropIndicator.className =
+	// 			"taskboard-drop-indicator is-visible";
+	// 		this.dropIndicator.style.position = "absolute";
+	// 		this.dropIndicator.style.pointerEvents = "none";
+	// 		this.dropIndicator.style.zIndex = "9999";
+	// 		this.dropIndicator.style.background =
+	// 			"var(--interactive-accent, #5b8cff)";
+	// 		this.dropIndicator.style.borderRadius = "4px";
+	// 		// default height; adjusted below
+	// 		this.dropIndicator.style.height = "4px";
+	// 	}
 
-		const rect = cardEl.getBoundingClientRect();
-		const parentRect = cardEl.parentElement.getBoundingClientRect();
-		const topPos = isAbove
-			? `${rect.top - parentRect.top - 6}px`
-			: `${rect.bottom - parentRect.top + 2}px`;
+	// 	const rect = cardEl.getBoundingClientRect();
+	// 	const parentRect = cardEl.parentElement.getBoundingClientRect();
+	// 	const topPos = isAbove
+	// 		? `${rect.top - parentRect.top - 6}px`
+	// 		: `${rect.bottom - parentRect.top + 2}px`;
 
-		// A proof of concept to show a box instead of a simple line and to move the adjacent cards up or down.
-		// cardEl.style.marginBottom = "0px";
-		// cardEl.style.marginTop = "0px";
-		// if (isAbove) {
-		// 	cardEl.style.marginTop = "40px";
-		// } else {
-		// 	cardEl.style.marginBottom = "40px";
-		// }
+	// 	// A proof of concept to show a box instead of a simple line and to move the adjacent cards up or down.
+	// 	// cardEl.style.marginBottom = "0px";
+	// 	// cardEl.style.marginTop = "0px";
+	// 	// if (isAbove) {
+	// 	// 	cardEl.style.marginTop = "40px";
+	// 	// } else {
+	// 	// 	cardEl.style.marginBottom = "40px";
+	// 	// }
 
-		this.dropIndicator.style.width = `${rect.width}px`;
-		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
-		this.dropIndicator.style.top = topPos;
+	// 	this.dropIndicator.style.width = `${rect.width}px`;
+	// 	this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
+	// 	this.dropIndicator.style.top = topPos;
 
-		cardEl.parentElement.appendChild(this.dropIndicator);
-	}
+	// 	cardEl.parentElement.appendChild(this.dropIndicator);
+	// }
 
 	/**
-	 * Clears all drag-related styling from all task items and columns
+	 * Clears all drag-related styling from all columns
 	 *
 	 */
 	clearAllDragStyling(): void {
 		// For column we can do this kind of heavy DOM traversing,
 		// since there will be less columns, so querySelecting them all is not so big issue.
 		const allColumnContainers = Array.from(
-			document.querySelectorAll(".TaskBoardColumnsSection"),
+			document.querySelectorAll(".tasksContainer"),
 		) as HTMLDivElement[];
 		allColumnContainers.forEach((container) => {
 			container.classList.remove(
@@ -1146,10 +1146,11 @@ class DragDropTasksManager {
 
 		// Remove the dim styling from the dragged components
 
+		// @deprecated - This approach is no longer used.
 		// Removes the drop indicator, if the target column had manualOrder sorting and if the dropIndicator was visible.
-		if (this.dropIndicator && this.dropIndicator.parentElement) {
-			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
-		}
+		// if (this.dropIndicator && this.dropIndicator.parentElement) {
+		// 	this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		// }
 
 		// TODO : This feels like overkill, because I am only dimming the single .taskItem which I will be dragging. Optimize this later.
 		// Also clear dimming from all task items
@@ -1277,6 +1278,8 @@ class DragDropTasksManager {
 	 * @param {DragEvent} e - The drag event object
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
+	 *
+	 * @returns - true if drop is allowed in the hovered column, else false.
 	 */
 	public handleColumnDragOverEvent(
 		e: DragEvent,
@@ -1329,10 +1332,10 @@ class DragDropTasksManager {
 	public handleDragLeaveEvent(columnContainerEl: HTMLDivElement): void {
 		this.clearDesiredDropIndex();
 		// remove indicator if present
-		if (this.dropIndicator && this.dropIndicator.parentElement) {
-			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
-		}
-		this.dropIndicator = null;
+		// if (this.dropIndicator && this.dropIndicator.parentElement) {
+		// 	this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		// }
+		// this.dropIndicator = null;
 
 		columnContainerEl.classList.remove(
 			"drag-over-allowed",
@@ -1372,6 +1375,7 @@ class DragDropTasksManager {
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
 	): void {
+		console.log("handleDropEvent...");
 		e.preventDefault();
 
 		// All checks before proceeding with the calculations...
@@ -1400,6 +1404,7 @@ class DragDropTasksManager {
 			"drag-over-allowed",
 			"drag-over-not-allowed",
 		);
+		this.clearAllDragStyling();
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(

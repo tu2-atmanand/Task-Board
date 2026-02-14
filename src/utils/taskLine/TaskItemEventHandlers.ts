@@ -26,12 +26,16 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	// const task = tasks.filter(t => t.id !== task.id);
 	// setTasks(updatedTasks); // This two lines were not required at all since, anyways the `writeDataToVaultFile` is running and sending and refresh emit signal.
 	const tasksPlugin = new TasksPluginApi(plugin);
+	const globalSettings = plugin.settings.data.globalSettings;
 
 	if (!isTaskRecurring(task.title)) {
 		// Check if the task is completed
-		const newStatus = checkboxStateSwitcher(plugin, task.status);
+		const newStatus = checkboxStateSwitcher(
+			globalSettings.customStatuses,
+			task.status,
+		);
 		const newTitle = sanitizeStatus(
-			plugin.settings.data.globalSettings,
+			globalSettings,
 			task.title,
 			newStatus.newSymbol,
 			newStatus.newSymbolType,

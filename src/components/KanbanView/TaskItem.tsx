@@ -560,7 +560,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				// Toggle the checkbox status only for the specific line
 
 				const symbol = extractCheckboxSymbol(line);
-				const nextStatus = checkboxStateSwitcher(plugin, symbol);
+				const nextStatus = checkboxStateSwitcher(globalSettings.customStatuses, symbol);
 
 				return line.replace(`[${symbol}]`, `[${nextStatus.newSymbol}]`);
 			}
@@ -1169,6 +1169,16 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
 									<div className="taskItemFooterPropertyContainerEmoji">
 										📄 <div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder) && task.filePath && (
+									<div className="taskItemFooterPropertyContainerEmoji">
+										📁 <div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/')[task.filePath.split('/').length - 2] ? task.filePath.split('/')[task.filePath.split('/').length - 2] : "Vault root"}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FullPath) && task.filePath && (
+									<div className="taskItemFooterPropertyContainerEmoji">
+										📁 <div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').slice(0, -1).join("/") ? task.filePath.split('/').slice(0, -1).join("/") : "Vault root"}</div>
 									</div>
 								)}
 							</div>

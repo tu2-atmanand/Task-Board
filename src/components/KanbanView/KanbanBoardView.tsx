@@ -1,7 +1,7 @@
 // src/components/KanbanBoard.tsx
 
 import { Board, ColumnData } from "../../interfaces/BoardConfigs";
-import React, { memo } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
@@ -9,20 +9,41 @@ import LazyColumn from "./LazyColumn";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { columnSegregator } from "src/utils/algorithms/ColumnSegregator";
 
 interface KanbanBoardProps {
 	app: App;
 	plugin: TaskBoard;
 	board: Board;
-	allTasks: taskJsonMerged | undefined;
-	tasksPerColumn: taskItem[][];
-	loading: boolean;
+	filteredAndSearchedTasks: taskJsonMerged;
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, tasksPerColumn, loading, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSearchedTasks, freshInstall }) => {
+	const [loading, setLoading] = useState(true);
+
 	// Check if lazy loading is enabled
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+
+	// Second memo: Segregate filtered tasks by column (for Kanban view only)
+	const allTasksArrangedPerColumn = useMemo(() => {
+		if (board && filteredAndSearchedTasks) {
+			return board.columns
+				.filter((column) => column.active)
+				.map((column: ColumnData) =>
+					columnSegregator(plugin.settings, board.index, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
+						plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
+					})
+				);
+		}
+		return [];
+	}, [filteredAndSearchedTasks, board]);
+
+	useEffect(() => {
+		if (allTasksArrangedPerColumn.flat().length > 0) {
+			setLoading(false);
+		}
+	}, [allTasksArrangedPerColumn]);
 
 	return (
 		<div className="kanbanBoard">
@@ -54,7 +75,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, task
 					<KanbanSwimlanesContainer
 						plugin={plugin}
 						board={board}
-						tasksPerColumn={tasksPerColumn}
+						tasksPerColumn={allTasksArrangedPerColumn}
 					/>
 				) : (
 					board?.columns
@@ -66,7 +87,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, allTasks, task
 								columnIndex={column.index}
 								activeBoardData={board}
 								columnData={column}
-								tasksForThisColumn={tasksPerColumn[index]}
+								tasksForThisColumn={allTasksArrangedPerColumn[index]}
 								Component={ColumnComponent}
 							/>
 						))
