@@ -27,3 +27,6 @@ locales/
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+
+# Logs files
+task-board-logs.log
