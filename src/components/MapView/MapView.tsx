@@ -71,7 +71,11 @@ const MapView: React.FC<MapViewProps> = ({
 	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
 	
 	// Flatten the filtered tasks from taskJsonMerged to a single array for MapView
-	const allTasksFlattened = filteredTasks ? [...filteredTasks.Pending, ...filteredTasks.Completed] : [];
+	// IMPORTANT: Memoize to prevent infinite loop - prevents recreating array on every render
+	const allTasksFlattened = useMemo(() => 
+		filteredTasks ? [...filteredTasks.Pending, ...filteredTasks.Completed] : [],
+		[filteredTasks]
+	);
 
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
@@ -361,7 +365,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// Reset nodes when initialNodes changes
 	useEffect(() => {
 		setNodes(initialNodes);
-	}, [initialNodes, setNodes]);
+	}, [initialNodes]);
 
 	// When the active board or viewport data changes, apply the stored viewport to the ReactFlow instance.
 	useEffect(() => {
