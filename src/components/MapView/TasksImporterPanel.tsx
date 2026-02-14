@@ -70,11 +70,14 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 			if (newId !== undefined) {
 				// Add to imported set
 				setImportedTaskIds(prev => new Set(prev).add(task.id));
+				// Close the panel to show the newly imported task
+				onClose();
 				// Trigger re-scan to update the map view, adding delay for task-note
 				sleep(500).then(async () => {
 					await plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 
-					// Emit event to refresh the board
+					// Emit event to refresh the board and notify about the newly imported task
+					eventEmitter.emit('TASK_IMPORTED_TO_MAP', newId);
 					eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with REFRESH_COLUMN only.
 				})
 			}
