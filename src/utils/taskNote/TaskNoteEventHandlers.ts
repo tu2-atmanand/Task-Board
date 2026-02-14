@@ -27,8 +27,11 @@ export const handleTaskNoteStatusChange = async (
 	task: taskItem,
 ) => {
 	try {
-		const newStatus = checkboxStateSwitcher(plugin, task.status);
 		const globalSettings = plugin.settings.data.globalSettings;
+		const newStatus = checkboxStateSwitcher(
+			globalSettings.customStatuses,
+			task.status,
+		);
 		const moment = _moment as unknown as typeof _moment.default;
 		const currentDateValue = moment().format(
 			globalSettings?.taskCompletionDateTimePattern,
@@ -181,7 +184,7 @@ export const handleTaskNoteBodyChange = async (
 		const fileContent = await readDataOfVaultFile(
 			plugin,
 			updatedTask.filePath,
-			true
+			true,
 		);
 		if (fileContent == null) return;
 

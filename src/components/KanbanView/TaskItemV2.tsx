@@ -563,7 +563,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				// Toggle the checkbox status only for the specific line
 
 				const symbol = extractCheckboxSymbol(line);
-				const nextStatus = checkboxStateSwitcher(plugin, symbol);
+				const nextStatus = checkboxStateSwitcher(globalSettings.customStatuses, symbol);
 
 				return line.replace(`[${symbol}]`, `[${nextStatus.newSymbol}]`);
 			}
@@ -1177,7 +1177,19 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
-											<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("folder")}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/')[task.filePath.split('/').length - 2] ? task.filePath.split('/')[task.filePath.split('/').length - 2] : "Vault root"}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FullPath) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("path")}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').slice(0, -1).join("/") ? task.filePath.split('/').slice(0, -1).join("/") : "Vault root"}</div>
 									</div>
 								)}
 							</div>

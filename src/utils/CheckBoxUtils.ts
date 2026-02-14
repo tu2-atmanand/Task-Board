@@ -7,16 +7,14 @@ import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegula
 
 /**
  * Switches the checkbox state based on the current symbol.
- * @param plugin - The plugin instance.
+ * @param customStatuses - The customStatuses configurations from setting.
  * @param symbol - The current checkbox symbol.
- * @returns The next checkbox state symbol.
+ * @returns The next checkbox state.
  */
 export function checkboxStateSwitcher(
-	plugin: TaskBoard,
+	customStatuses: CustomStatus[],
 	symbol: string,
 ): { newSymbol: string; newSymbolType: string } {
-	const { customStatuses } = plugin.settings.data.globalSettings;
-
 	// Check if customStatuses is available and has entries
 	if (customStatuses?.length > 0) {
 		const oldStatus = customStatuses.find(

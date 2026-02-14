@@ -1398,43 +1398,44 @@ export default class TaskBoard extends Plugin {
 		const previousVersion = this.settings.version;
 
 		if (previousVersion == "" || currentVersion !== previousVersion) {
-			// make the localStorage flag, 'manadatoryScan' to True
+			// A short custom message to show in Obsidian's Notice on plugin update.
+			// if (previousVersion !== "") {
+			// 	const customMessage = new Notice("", 0);
 
-			if (previousVersion !== "") {
-				const customMessage = new Notice("", 0);
+			// 	const messageContainer = customMessage.containerEl;
 
-				const messageContainer = customMessage.containerEl;
+			// 	const customMessageContainer = messageContainer.createDiv({
+			// 		cls: "taskboardCustomMessageContainer",
+			// 	});
 
-				const customMessageContainer = messageContainer.createDiv({
-					cls: "taskboardCustomMessageContainer",
-				});
+			// 	customMessageContainer.createEl("h3", { text: "Task Board" });
+			// 	customMessageContainer.createEl("p", {
+			// 		text: "Note for existing users",
+			// 		cls: "taskboardCustomMessageContainerBold",
+			// 	});
+			// 	customMessageContainer.createEl("span", {
+			// 		text: "If you were using the custom statuses from Tasks plugin configs. Please import them in Task Board's setting, using a button in the new Custom Statuses setting section. Task Board will no longer import the custom statuses from Tasks plugin automatically.",
+			// 	});
+			// 	customMessageContainer.createEl("p", {
+			// 		text: "Read the release notes for all the latest features : ",
+			// 	});
+			// 	customMessageContainer.createEl("a", {
+			// 		text: "Task Board v1.9.4",
+			// 		href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
+			// 	});
+			// }
 
-				customMessageContainer.createEl("h3", { text: "Task Board" });
-				customMessageContainer.createEl("p", {
-					text: "Note for existing users",
-					cls: "taskboardCustomMessageContainerBold",
-				});
-				customMessageContainer.createEl("span", {
-					text: "If you were using the custom statuses from Tasks plugin configs. Please import them in Task Board's setting, using a button in the new Custom Statuses setting section. Task Board will no longer import the custom statuses from Tasks plugin automatically.",
-				});
-				customMessageContainer.createEl("p", {
-					text: "Read the release notes for all the latest features : ",
-				});
-				customMessageContainer.createEl("a", {
-					text: "Task Board v1.9.4",
-					href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
-				});
-			}
-
-			if (previousVersion === "" || runMandatoryScan) {
-				localStorage.setItem("manadatoryScan", "true");
-			}
-
-			// if (runMandatoryScan) {
+			// Show a message to existing users to re-scan the vault on minor version updates
+			// if (runMandatoryScan && previousVersion === "") {
 			// const smallMessage =
 			// 	"Even being a minor release, this new version of Task Board requires a re-scan of your vault. Kindly re-scan using the top-right button in the task board tab.";
 			// new Notice(smallMessage, 0);
 			// }
+
+			// make the localStorage flag, 'manadatoryScan' to True
+			if (previousVersion === "" || runMandatoryScan) {
+				localStorage.setItem("manadatoryScan", "true");
+			}
 
 			this.settings.version = currentVersion;
 

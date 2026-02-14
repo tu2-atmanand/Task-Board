@@ -223,13 +223,19 @@ export function createFrontmatterFromTask(
 			plugin.settings.data.globalSettings,
 		) || "pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
-		plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-		...(task?.tags?.filter(
-			(tag) =>
-				tag.includes(
-					plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-				) === false,
-		) ?? []),
+		plugin.settings.data.globalSettings.taskNoteIdentifierTag.replace(
+			"#",
+			"",
+		),
+		...(task?.tags
+			?.filter(
+				(tag) =>
+					tag.includes(
+						plugin.settings.data.globalSettings
+							.taskNoteIdentifierTag,
+					) === false,
+			)
+			.map((tag: string) => tag.replace("#", "")) ?? []),
 	];
 
 	if (task.id && plugin.settings.data.globalSettings.autoAddUniqueID)

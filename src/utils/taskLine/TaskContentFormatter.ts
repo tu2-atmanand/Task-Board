@@ -286,25 +286,29 @@ export const sanitizeStatus = (
 	newTitle = oldTitle.replace(oldStatusValuematch[0], `[${newStatusSymbol}]`);
 
 	if (newStatusType === statusTypeNames.DONE) {
-		const moment = _moment as unknown as typeof _moment.default;
-		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern,
-		);
-		newTitle = sanitizeCompletionDate(
-			globalSettings,
-			newTitle,
-			currentDateValue,
-		);
+		if (globalSettings.autoAddCompletedDate) {
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern,
+			);
+			newTitle = sanitizeCompletionDate(
+				globalSettings,
+				newTitle,
+				currentDateValue,
+			);
+		}
 	} else if (newStatusType === statusTypeNames.CANCELLED) {
-		const moment = _moment as unknown as typeof _moment.default;
-		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern,
-		);
-		newTitle = sanitizeCancelledDate(
-			globalSettings,
-			newTitle,
-			currentDateValue,
-		);
+		if (globalSettings.autoAddCancelledDate) {
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern,
+			);
+			newTitle = sanitizeCancelledDate(
+				globalSettings,
+				newTitle,
+				currentDateValue,
+			);
+		}
 	} else {
 		newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
 		newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
@@ -335,7 +339,7 @@ export const sanitizeCreatedDate = (
 	if (!createdDate) {
 		if (extractedCreatedDateMatch) {
 			// If created date is empty, remove any existing due date
-			return title.replace(extractedCreatedDateMatch[0], "").trim();
+			return title.replace(extractedCreatedDateMatch[0], "").trimEnd();
 		}
 		return title;
 	}
@@ -361,7 +365,7 @@ export const sanitizeCreatedDate = (
 		if (cursorLocation?.lineNumber === 1) {
 			// Insert createdDateWithFormat at the specified charIndex with spaces
 			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
+				title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 			const spaceAfter =
 				" " + title.slice(cursorLocation.charIndex).trim();
 			return `${spaceBefore}${createdDateWithFormat}${spaceAfter}`;
@@ -403,7 +407,7 @@ export const sanitizeStartDate = (
 	if (!startDate) {
 		if (extractedStartDateMatch) {
 			// If created date is empty, remove any existing due date
-			return title.replace(extractedStartDateMatch[0], "").trim();
+			return title.replace(extractedStartDateMatch[0], "").trimEnd();
 		}
 		return title;
 	}
@@ -425,7 +429,7 @@ export const sanitizeStartDate = (
 		if (cursorLocation?.lineNumber === 1) {
 			// Insert startDateWithFormat at the specified charIndex with spaces
 			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
+				title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 			const spaceAfter =
 				" " + title.slice(cursorLocation.charIndex).trim();
 			return `${spaceBefore}${startDateWithFormat}${spaceAfter}`;
@@ -467,7 +471,7 @@ export const sanitizeScheduledDate = (
 	if (!scheduledDate) {
 		if (extractedScheduledDateMatch) {
 			// If scheduled date is empty, remove any existing due date
-			return title.replace(extractedScheduledDateMatch[0], "").trim();
+			return title.replace(extractedScheduledDateMatch[0], "").trimEnd();
 		}
 		return title;
 	}
@@ -495,7 +499,7 @@ export const sanitizeScheduledDate = (
 		if (cursorLocation?.lineNumber === 1) {
 			// Insert scheduledDateWithFormat at the specified charIndex with spaces
 			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
+				title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 			const spaceAfter =
 				" " + title.slice(cursorLocation.charIndex).trim();
 			return `${spaceBefore}${scheduledDateWithFormat}${spaceAfter}`;
@@ -538,7 +542,7 @@ export const sanitizeDueDate = (
 	if (!dueDate) {
 		if (extractedDueDateMatch) {
 			// If due date is empty, remove any existing due date
-			return title.replace(extractedDueDateMatch[0], "").trim();
+			return title.replace(extractedDueDateMatch[0], "").trimEnd();
 		}
 		return title;
 	}
@@ -560,7 +564,7 @@ export const sanitizeDueDate = (
 		if (cursorLocation?.lineNumber === 1) {
 			// Insert createdDateWithFormat at the specified charIndex with spaces
 			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
+				title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 			const spaceAfter =
 				" " + title.slice(cursorLocation.charIndex).trim();
 			return `${spaceBefore}${dueDateWithFormat}${spaceAfter}`;
@@ -601,7 +605,7 @@ export const sanitizeCompletionDate = (
 	if (!completionDate) {
 		// If completion date is empty, remove any existing completion date
 		if (extractedCompletionDateMatch) {
-			return title.replace(extractedCompletionDateMatch[0], "").trim();
+			return title.replace(extractedCompletionDateMatch[0], "").trimEnd();
 		}
 		return title;
 	}
@@ -627,7 +631,7 @@ export const sanitizeCompletionDate = (
 		if (cursorLocation?.lineNumber === 1) {
 			// Insert completedWitFormat at the specified charIndex with spaces
 			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
+				title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 			const spaceAfter =
 				" " + title.slice(cursorLocation.charIndex).trim();
 			return `${spaceBefore}${completedWitFormat}${spaceAfter}`;
@@ -668,7 +672,9 @@ export const sanitizeCancelledDate = (
 	if (!cancelledDate) {
 		// If cancellation date is empty, remove any existing cancellation date
 		if (extractedCancellationDateMatch) {
-			return title.replace(extractedCancellationDateMatch[0], "").trim();
+			return title
+				.replace(extractedCancellationDateMatch[0], "")
+				.trimEnd();
 		}
 		return title;
 	}
@@ -694,7 +700,7 @@ export const sanitizeCancelledDate = (
 		if (cursorLocation?.lineNumber === 1) {
 			// Insert cancelledWithFormat at the specified charIndex with spaces
 			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
+				title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 			const spaceAfter =
 				" " + title.slice(cursorLocation.charIndex).trim();
 			return `${spaceBefore}${cancelledWithFormat}${spaceAfter}`;
@@ -747,11 +753,11 @@ export const sanitizeTime = (
 	// If newtime is empty, that means, either time was not present from initially, or it has been removed now in the modal.
 	if (newTime === "") {
 		if (timeAtStartMatch) {
-			return title.replace(timeAtStartMatch[1], "").trim();
+			return title.replace(timeAtStartMatch[1], "").trimEnd();
 		}
 
 		if (timeFormatMatch) {
-			return title.replace(timeFormatMatch[0], "").trim();
+			return title.replace(timeFormatMatch[0], "").trimEnd();
 		}
 
 		return title;
@@ -766,13 +772,14 @@ export const sanitizeTime = (
 
 		if (timeFormatMatch) {
 			// If time is present in any format, remove it and add this new time at the start
-			title = title.replace(timeFormatsRegex, "").trim();
+			title = title.replace(timeFormatsRegex, "").trimEnd();
 		}
 
 		// If no time is present, add it at the start
-		const beforePosition = title.slice(0, 5).trim();
-		const afterPosition = title.slice(5).trim();
-		return `${beforePosition} ${newTime} ${afterPosition}`;
+		// const beforePosition = title.slice(0, 5).trimEnd();
+		// const afterPosition = title.slice(5).trim();
+		const newTitle = title.replace("]", `] ${newTime}`);
+		return newTitle;
 	} else {
 		let newTimeWithFormat: string = "";
 		if (globalSettings.taskPropertyFormat === "1") {
@@ -800,7 +807,9 @@ export const sanitizeTime = (
 				"*" +
 				title.slice(cursorLocation.charIndex);
 			// Insert newTimeWithFormat at the specified charIndex with spaces
-			const spaceBefore = title.slice(0, cursorLocation.charIndex).trim();
+			const spaceBefore = title
+				.slice(0, cursorLocation.charIndex)
+				.trimEnd();
 			const spaceAfter = title.slice(cursorLocation.charIndex).trim();
 
 			return `${spaceBefore} ${newTimeWithFormat} ${spaceAfter}`;
@@ -811,7 +820,6 @@ export const sanitizeTime = (
 	}
 };
 
-// TODO : This is the only thing remaining, I might have to avoid sanitizing this, as it might create duplicates. Just adding it as the property of the task which will be only visible in the task board.
 /**
  * Function to sanitize the priority inside the task title.
  * @param globalSettings - The global settings data.
@@ -819,6 +827,8 @@ export const sanitizeTime = (
  * @param newPriority - The new priority to be sanitized and added to the title.
  * @param cursorLocation - (Optional) The cursor location to insert the priority at a specific position.
  * @returns The sanitized priority string to be used in the task title.
+ *
+ * @todo This is the only thing remaining, I might have to avoid sanitizing this, as it might create duplicates. Just adding it as the property of the task which will be only visible in the task board.
  */
 export const sanitizePriority = (
 	globalSettings: globalSettingsData,
@@ -900,7 +910,7 @@ export const sanitizePriority = (
 			if (cursorLocation?.lineNumber === 1) {
 				// Insert priorityWithFormat at the specified charIndex with spaces
 				const spaceBefore =
-					title.slice(0, cursorLocation.charIndex).trim() + " ";
+					title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 				const spaceAfter =
 					" " + title.slice(cursorLocation.charIndex).trim();
 				return `${spaceBefore}${priorityWithFormat}${spaceAfter}`;
@@ -965,7 +975,16 @@ export const sanitizeTags = (
 	);
 
 	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
-	const newTagSet = new Set(newTagsList.map((t) => t.trim()));
+	// TODO : Soon, will update the tags management mechanism to store the tags without the `#`
+	// in the tasks cache. And here will directly apply the '#' to the newTagSet
+	// and reduce the below computations.
+	const newTagSet = new Set(
+		newTagsList.map((t) => {
+			let sTag = t.trim();
+			sTag = sTag.startsWith("#") ? sTag : `#${sTag}`;
+			return sTag;
+		}),
+	);
 	const extractedTagsSet = new Set(extractedTags.map((t) => t.trim()));
 
 	// --------------------------------------------------
@@ -973,7 +992,7 @@ export const sanitizeTags = (
 	// --------------------------------------------------
 	for (const tag of extractedTags) {
 		if (!newTagSet.has(tag)) {
-			updatedTitle = updatedTitle.replace(tag, "").trim();
+			updatedTitle = updatedTitle.replace(tag, "").trimEnd();
 		}
 	}
 
@@ -995,7 +1014,7 @@ export const sanitizeTags = (
 			// Insert at cursor position (preserves your original behavior)
 			const before = updatedTitle
 				.slice(0, cursorLocation.charIndex)
-				.trim();
+				.trimEnd();
 			const after = updatedTitle.slice(cursorLocation.charIndex).trim();
 
 			updatedTitle = [before, ...tagsToAdd, after]
@@ -1011,7 +1030,8 @@ export const sanitizeTags = (
 		}
 	}
 
-	return updatedTitle.replace(/\s+/g, " ").trim();
+	// Sanitize the title by reducing two or more spaces into one space.
+	return updatedTitle.replace(/ {2,}/g, " ").trimEnd();
 };
 
 /**
@@ -1067,7 +1087,7 @@ export const sanitizeReminder = (
 			: /\(\@\d{4}-\d{2}-\d{2} \d{2}:\d{2}\)/;
 
 	if (!newReminder) {
-		return title.replace(reminderRegex, "").trim();
+		return title.replace(reminderRegex, "").trimEnd();
 	}
 
 	const formattedReminder = formatReminder(newReminder);
@@ -1083,7 +1103,7 @@ export const sanitizeReminder = (
 	if (cursorLocation?.lineNumber === 1) {
 		// Insert formattedReminder at the specified charIndex with spaces
 		const spaceBefore =
-			title.slice(0, cursorLocation.charIndex).trim() + " ";
+			title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 		const spaceAfter = " " + title.slice(cursorLocation.charIndex).trim();
 		return `${spaceBefore}${formattedReminder}${spaceAfter}`;
 	}
@@ -1110,7 +1130,7 @@ export const sanitizeDependsOn = (
 	if (!dependesOnIds || dependesOnIds.length === 0) {
 		if (extractedDependsOnMatch) {
 			// If dependsOnIds is empty, remove any existing dependsOn
-			return title.replace(extractedDependsOnMatch[0], "").trim();
+			return title.replace(extractedDependsOnMatch[0], "").trimEnd();
 		}
 		return title;
 	} else {
@@ -1142,7 +1162,7 @@ export const sanitizeDependsOn = (
 		if (cursorLocation?.lineNumber === 1) {
 			// Insert newDependsOn at the specified charIndex with spaces
 			const spaceBefore =
-				title.slice(0, cursorLocation.charIndex).trim() + " ";
+				title.slice(0, cursorLocation.charIndex).trimEnd() + " ";
 			const spaceAfter =
 				" " + title.slice(cursorLocation.charIndex).trim();
 			return `${spaceBefore}${dependsOnFormat}${spaceAfter}`;
