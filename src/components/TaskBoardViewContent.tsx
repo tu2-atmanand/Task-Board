@@ -138,26 +138,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		return { Pending: [], Completed: [] };
 	}, [allTasks, activeBoardIndex, searchQuery]);
 
-	// Second memo: Segregate filtered tasks by column (for Kanban view only)
-	const allTasksArrangedPerColumn = useMemo(() => {
-		if (boards[activeBoardIndex] && filteredAndSearchedTasks) {
-			const currentBoard = boards[activeBoardIndex];
-			return currentBoard.columns
-				.filter((column) => column.active)
-				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, activeBoardIndex, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
-						plugin.settings.data.boardConfigs[activeBoardIndex] = updatedBoardData;
-					})
-				);
-		}
-		return [];
-	}, [filteredAndSearchedTasks, activeBoardIndex, boards]);
-
 	useEffect(() => {
-		if (allTasksArrangedPerColumn.length > 0 || filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
+		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
 			setLoading(false);
 		}
-	}, [allTasksArrangedPerColumn, filteredAndSearchedTasks]);
+	}, [filteredAndSearchedTasks]);
 
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
@@ -280,13 +265,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}
 
 		return searchFilteredTasks;
-	}
-
-	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
-		const newViewType = e.target.value;
-		setViewType(newViewType);
-		plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
-		plugin.saveSettings();
 	}
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -1020,9 +998,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							app={app}
 							plugin={plugin}
 							board={boards[activeBoardIndex]}
-							allTasks={allTasks}
-							tasksPerColumn={allTasksArrangedPerColumn}
-							loading={loading}
+							filteredAndSearchedTasks={filteredAndSearchedTasks}
 							freshInstall={freshInstall}
 						/>
 					) : viewType === viewTypeNames.map ? (

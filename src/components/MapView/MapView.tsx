@@ -252,7 +252,7 @@ const MapView: React.FC<MapViewProps> = ({
 		// Grid layout: arrange tasks in columns with wrapping
 		let xOffset = 0;
 		let yOffset = 0;
-		const tasksPerRow = 1; // One column of tasks for wrapping
+		const tasksPerRow = 5; // One column of tasks for wrapping
 		let columnCount = 0;
 
 		allTasksFlattened.forEach((task, idx) => {

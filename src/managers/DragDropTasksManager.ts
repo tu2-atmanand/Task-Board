@@ -1137,7 +1137,6 @@ class DragDropTasksManager {
 		const allColumnContainers = Array.from(
 			document.querySelectorAll(".tasksContainer"),
 		) as HTMLDivElement[];
-		console.log("All tasksContainers : ", allColumnContainers);
 		allColumnContainers.forEach((container) => {
 			container.classList.remove(
 				"drag-over-allowed",
