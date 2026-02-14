@@ -563,7 +563,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				// Toggle the checkbox status only for the specific line
 
 				const symbol = extractCheckboxSymbol(line);
-				const nextStatus = checkboxStateSwitcher(plugin, symbol);
+				const nextStatus = checkboxStateSwitcher(globalSettings.customStatuses, symbol);
 
 				return line.replace(`[${symbol}]`, `[${nextStatus.newSymbol}]`);
 			}
@@ -1177,7 +1177,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
-											<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
 									</div>
 								)}
 							</div>

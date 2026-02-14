@@ -286,25 +286,29 @@ export const sanitizeStatus = (
 	newTitle = oldTitle.replace(oldStatusValuematch[0], `[${newStatusSymbol}]`);
 
 	if (newStatusType === statusTypeNames.DONE) {
-		const moment = _moment as unknown as typeof _moment.default;
-		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern,
-		);
-		newTitle = sanitizeCompletionDate(
-			globalSettings,
-			newTitle,
-			currentDateValue,
-		);
+		if (globalSettings.autoAddCompletedDate) {
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern,
+			);
+			newTitle = sanitizeCompletionDate(
+				globalSettings,
+				newTitle,
+				currentDateValue,
+			);
+		}
 	} else if (newStatusType === statusTypeNames.CANCELLED) {
-		const moment = _moment as unknown as typeof _moment.default;
-		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern,
-		);
-		newTitle = sanitizeCancelledDate(
-			globalSettings,
-			newTitle,
-			currentDateValue,
-		);
+		if (globalSettings.autoAddCancelledDate) {
+			const moment = _moment as unknown as typeof _moment.default;
+			const currentDateValue = moment().format(
+				globalSettings?.taskCompletionDateTimePattern,
+			);
+			newTitle = sanitizeCancelledDate(
+				globalSettings,
+				newTitle,
+				currentDateValue,
+			);
+		}
 	} else {
 		newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
 		newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
@@ -668,7 +672,9 @@ export const sanitizeCancelledDate = (
 	if (!cancelledDate) {
 		// If cancellation date is empty, remove any existing cancellation date
 		if (extractedCancellationDateMatch) {
-			return title.replace(extractedCancellationDateMatch[0], "").trimEnd();
+			return title
+				.replace(extractedCancellationDateMatch[0], "")
+				.trimEnd();
 		}
 		return title;
 	}
@@ -801,7 +807,9 @@ export const sanitizeTime = (
 				"*" +
 				title.slice(cursorLocation.charIndex);
 			// Insert newTimeWithFormat at the specified charIndex with spaces
-			const spaceBefore = title.slice(0, cursorLocation.charIndex).trimEnd();
+			const spaceBefore = title
+				.slice(0, cursorLocation.charIndex)
+				.trimEnd();
 			const spaceAfter = title.slice(cursorLocation.charIndex).trim();
 
 			return `${spaceBefore} ${newTimeWithFormat} ${spaceAfter}`;
@@ -812,7 +820,6 @@ export const sanitizeTime = (
 	}
 };
 
-// TODO : This is the only thing remaining, I might have to avoid sanitizing this, as it might create duplicates. Just adding it as the property of the task which will be only visible in the task board.
 /**
  * Function to sanitize the priority inside the task title.
  * @param globalSettings - The global settings data.
@@ -820,6 +827,8 @@ export const sanitizeTime = (
  * @param newPriority - The new priority to be sanitized and added to the title.
  * @param cursorLocation - (Optional) The cursor location to insert the priority at a specific position.
  * @returns The sanitized priority string to be used in the task title.
+ *
+ * @todo This is the only thing remaining, I might have to avoid sanitizing this, as it might create duplicates. Just adding it as the property of the task which will be only visible in the task board.
  */
 export const sanitizePriority = (
 	globalSettings: globalSettingsData,
