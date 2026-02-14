@@ -28,7 +28,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
-	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
 	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || viewTypeNames.kanban);
 
 	const [refreshCount, setRefreshCount] = useState(0);
@@ -107,62 +106,43 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		fetchData();
 	}, [refreshCount]);
 
-	const allTasksArrangedPerColumn = useMemo(() => {
-		// console.log("Calculating allTasksArrangedPerColumn...");
-		setFilteredTasksPerColumn([]);
+	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
+	const filteredAndSearchedTasks = useMemo(() => {
 		if (allTasks && boards[activeBoardIndex]) {
-			// Apply board filters to pending tasks
 			const currentBoard = boards[activeBoardIndex];
 			const boardFilter = currentBoard.boardFilter;
 
-			// Create a copy of allTasks with filtered pending tasks
-			const filteredAllTasks = {
+			// Apply board filters to tasks
+			const boardFilteredTasks = {
 				...allTasks,
 				Pending: boardFilterer(allTasks.Pending, boardFilter),
 				Completed: boardFilterer(allTasks.Completed, boardFilter),
 			};
+
+			// Update task count in settings
 			plugin.settings.data.boardConfigs[activeBoardIndex].taskCount = {
-				pending: filteredAllTasks.Pending.length,
-				completed: filteredAllTasks.Completed.length,
+				pending: boardFilteredTasks.Pending.length,
+				completed: boardFilteredTasks.Completed.length,
 			};
-			setFilteredTasks(filteredAllTasks);
 
+			setFilteredTasks(boardFilteredTasks);
+
+			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
-				const searchQueryFilteredTasks = handleSearchSubmit(filteredAllTasks);
-				return currentBoard.columns
-					.filter((column) => column.active)
-					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, searchQueryFilteredTasks)
-					);
-			} else {
-				return currentBoard.columns
-					.filter((column) => column.active)
-					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks, (updatedBoardData: Board) => {
-							// I think this below code is not required as we simply want to update the data on the disk.
-							// setBoards((prevBoards) => {
-							// 	const updatedBoards = [...prevBoards];
-							// 	updatedBoards[activeBoardIndex] = updatedBoardData;
-							// 	return updatedBoards;
-							// });
-
-							plugin.settings.data.boardConfigs[activeBoardIndex] = updatedBoardData;
-							// Technically, at later point in time, when user will make any changes, the latest data will be updated on the disk, so we need not have to update it everytime during this column seggregation.
-							// const newSettings = plugin.settings;
-							// plugin.saveSettings(newSettings);
-						})
-					);
+				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+				return searchFiltered || boardFilteredTasks;
 			}
 
+			return boardFilteredTasks;
 		}
-		return [];
-	}, [allTasks, activeBoardIndex]);
+		return { Pending: [], Completed: [] };
+	}, [allTasks, activeBoardIndex, searchQuery]);
 
 	useEffect(() => {
-		if (allTasksArrangedPerColumn.length > 0) {
+		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
 			setLoading(false);
 		}
-	}, [allTasksArrangedPerColumn]);
+	}, [filteredAndSearchedTasks]);
 
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
@@ -230,7 +210,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		if (showSearchInput) {
 			setSearchQuery("");
 			// el.currentTarget.focus();
-			setFilteredTasksPerColumn([]);
 			plugin.settings.data.globalSettings.searchQuery = "";
 
 			eventEmitter.emit("REFRESH_COLUMN");
@@ -251,11 +230,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | null {
 		if (!searchQuery.trim()) {
-			setFilteredTasksPerColumn([]);
 			return null;
 		}
-
-		// plugin.settings.data.globalSettings.searchQuery = searchQuery;
 
 		const lowerQuery = searchQuery.toLowerCase();
 		let searchFilteredTasks: taskJsonMerged | null = null;
@@ -281,33 +257,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					}
 				})
 			};
-		}
-		else {
-			const filtered = allTasksArrangedPerColumn.map((column) => {
-				const filteredTasks = column
-					.filter((task) => {
-						if (lowerQuery.startsWith("file:")) {
-							return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
-						} else {
-							const titleMatch = task.title.toLowerCase().includes(lowerQuery);
-							const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
-							return titleMatch || bodyMatch;
-						}
-					});
-				// TODO : This highliting option also cannot work as it destroys the other functionalities of the taskItem.
-				// .map((task) => {
-				// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
-				// 	const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
-
-				// 	return {
-				// 		...task,
-				// 		title: highlightedTitle,
-				// 		body: highlightedBody.split("\n"),
-				// 	};
-				// });
-				return filteredTasks;
-			});
-			setFilteredTasksPerColumn(filtered);
 
 			setTimeout(() => {
 				plugin.settings.data.globalSettings.searchQuery = lowerQuery;
@@ -315,15 +264,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			}, 100);
 		}
 
-
 		return searchFilteredTasks;
-	}
-
-	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
-		const newViewType = e.target.value;
-		setViewType(newViewType);
-		plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
-		plugin.saveSettings();
 	}
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -693,7 +634,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	function handleBoardSelection(index: number) {
 		if (index !== activeBoardIndex) {
 			setSearchQuery("");
-			setFilteredTasksPerColumn([]);
 			plugin.settings.data.globalSettings.searchQuery = "";
 			plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index;
 			setActiveBoardIndex(index);
@@ -1058,9 +998,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							app={app}
 							plugin={plugin}
 							board={boards[activeBoardIndex]}
-							allTasks={allTasks}
-							tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
-							loading={loading}
+							filteredAndSearchedTasks={filteredAndSearchedTasks}
 							freshInstall={freshInstall}
 						/>
 					) : viewType === viewTypeNames.map ? (
@@ -1087,7 +1025,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							<MapView
 								plugin={plugin}
 								activeBoardIndex={activeBoardIndex}
-								allTasksArranged={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
+								filteredTasks={filteredAndSearchedTasks}
 								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
 							/>
 						)
@@ -1096,7 +1034,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							{/* Placeholder for other view types */}
 							{viewType === "list" && "List view coming soon."}
 							{viewType === "table" && "Table view coming soon."}
-							{viewType === "calender" && "Calender view coming soon."}
+							{viewType === "inbox" && "Inbox view coming soon."}
 							{viewType === "gantt" && "Gantt chart view coming soon."}
 						</div>
 					)
