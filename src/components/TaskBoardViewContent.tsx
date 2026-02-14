@@ -607,6 +607,22 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			})
 			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
 		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("parent-folder"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.ParentFolder);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("full-path"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.FullPath);
+
+			})
+			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
+		});
 
 		propertyMenu.addSeparator();
 
