@@ -9,36 +9,26 @@
 - **Base color scheme**: dark
 - **Community theme**: none
 - **Snippets enabled**: 2
-- **Plugins installed**: 51
+- **Plugins installed**: 53
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
-  - Task Board v1.9.2
   - BRAT v1.4.0
+  - Tasks v7.22.0
+  - Hover Editor v0.11.28
+  - Colored Text v1.3.0
+  - Copy document as HTML v0.8.1
+  - Task Board v1.9.4
 
 ## Recent Bug Reports
 
-Timestamp : 2026-02-10T15:04:23
-ID : 180
-Message : There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer
-Context : LazyColumn.tsx/return
-Version : 1.9.2
-Version : 1.9.2
+Timestamp : 2026-02-14T11:34:11
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 1.9.4
 
 #### Bug Content
 ```log
-"THis is a test."
-```
-
--------------
-
-Timestamp : 2026-02-10T15:05:23
-ID : 180
-Message : There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer
-Context : LazyColumn.tsx/return
-Version : 1.9.2
-
-#### Bug Content
-```log
-"THis is a test."
+No current drag data available for drop operation.currentDragData=null
 ```
