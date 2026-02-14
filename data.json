@@ -79,8 +79,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 73,
-          "completed": 14
+          "pending": 5076,
+          "completed": 13
         }
       },
       {
@@ -233,8 +233,8 @@
         },
         "description": "Project to manage all the tasks related to plugin release.",
         "taskCount": {
-          "pending": 71,
-          "completed": 14
+          "pending": 5074,
+          "completed": 13
         }
       },
       {
@@ -508,8 +508,8 @@
           ]
         },
         "taskCount": {
-          "pending": 76,
-          "completed": 14
+          "pending": 5076,
+          "completed": 13
         },
         "swimlanes": {
           "enabled": true,
@@ -643,11 +643,20 @@
             "workLimit": 5
           },
           {
+            "id": 2431760009,
+            "index": 6,
+            "colType": "namedTag",
+            "active": true,
+            "collapsed": false,
+            "name": "Test",
+            "coltag": "Test"
+          },
+          {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
             "name": "In Review",
-            "index": 6,
+            "index": 7,
             "coltag": "Test",
             "id": 2563369761,
             "minimized": false,
@@ -658,14 +667,14 @@
             "active": true,
             "collapsed": false,
             "name": "Ready to publish",
-            "index": 7,
+            "index": 8,
             "coltag": "done",
             "id": 3018278517,
             "minimized": false
           },
           {
             "id": 378328547,
-            "index": 8,
+            "index": 9,
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -695,8 +704,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 76,
-          "completed": 14
+          "pending": 5076,
+          "completed": 13
         },
         "swimlanes": {
           "enabled": false,
@@ -867,8 +876,8 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 73,
-          "completed": 14
+          "pending": 5076,
+          "completed": 13
         }
       },
       {
@@ -948,8 +957,8 @@
         },
         "description": "This board is for testing drag and drop feature for status based workflow.",
         "taskCount": {
-          "pending": 73,
-          "completed": 14
+          "pending": 5076,
+          "completed": 13
         }
       }
     ],
@@ -1155,8 +1164,8 @@
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "kanban",
-        "boardIndex": 3,
+        "viewedType": "map",
+        "boardIndex": 4,
         "taskId": "",
         "settingTab": 1
       },
