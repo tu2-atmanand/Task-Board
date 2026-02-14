@@ -20,6 +20,7 @@ import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/int
 import { AddColumnModal } from "./AddColumnModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -256,6 +257,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				sortCriteria: 'asc',
 			},
 		};
+
+		// Regenerate IDs for all columns to ensure uniqueness
+		if (duplicatedBoard.columns && duplicatedBoard.columns.length > 0) {
+			duplicatedBoard.columns = duplicatedBoard.columns.map((column) => ({
+				...column,
+				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
+			}));
+		}
+
 		const updatedBoards = [...localBoards, duplicatedBoard];
 		setLocalBoards(updatedBoards);
 		setSelectedBoardIndex(updatedBoards.length - 1);
