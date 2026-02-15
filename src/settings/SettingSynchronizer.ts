@@ -39,8 +39,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			 * This is migration is only applied to replace the older settings available in users configs with the new settings as per the new Settinsg section added in the global settings.
 			 */
 			if (key === "customStatuses") {
-				settings[key] =
-					DEFAULT_SETTINGS.data.globalSettings.customStatuses;
+				settings[key] = DEFAULT_SETTINGS.data.customStatuses;
 			}
 
 			// -----------------------------------
@@ -65,67 +64,72 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			 * This is a temporary solution to sync the boardConfigs. This is required to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically we need to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
 			 */
 			if (key === "boardConfigs" && Array.isArray(settings[key])) {
-				settings[key].forEach((boardConfig: Board, index: number) => {
-					boardConfig.columns.forEach((column: ColumnData) => {
-						// Older IDs were smaller number. Will change them to 10 digit numbers.
-						column.id = generateRandomNumber();
+				new Notice(
+					"Need to create migrations for exporting all boards as files...",
+					0,
+				);
 
-						if (
-							column.colType === colTypeNames.dated ||
-							(column.colType === colTypeNames.undated &&
-								!column.datedBasedColumn)
-						) {
-							column.datedBasedColumn = {
-								dateType:
-									column.datedBasedColumn?.dateType ??
-									defaults.universalDate,
-								from: column.datedBasedColumn?.from || 0,
-								to: column.datedBasedColumn?.to || 0,
-							};
-							delete column.range;
-						}
-					});
+				// settings[key].forEach((boardConfig: Board, index: number) => {
+				// 	boardConfig.columns.forEach((column: ColumnData) => {
+				// 		// Older IDs were smaller number. Will change them to 10 digit numbers.
+				// 		column.id = generateRandomNumber();
 
-					// FIX : This is a fix becauase of my silly mistake, in the third board I hardcoded the index as 1 instead of 2.
-					boardConfig.index = index;
+				// 		if (
+				// 			column.colType === colTypeNames.dated ||
+				// 			(column.colType === colTypeNames.undated &&
+				// 				!column.datedBasedColumn)
+				// 		) {
+				// 			column.datedBasedColumn = {
+				// 				dateType:
+				// 					column.datedBasedColumn?.dateType ??
+				// 					defaults.universalDate,
+				// 				from: column.datedBasedColumn?.from || 0,
+				// 				to: column.datedBasedColumn?.to || 0,
+				// 			};
+				// 			delete column.range;
+				// 		}
+				// 	});
 
-					// Migration applied since version 1.4.0
-					if (!boardConfig?.hideEmptyColumns) {
-						boardConfig.hideEmptyColumns = false;
-					}
+				// 	// FIX : This is a fix becauase of my silly mistake, in the third board I hardcoded the index as 1 instead of 2.
+				// 	boardConfig.index = index;
 
-					// Migration applied since version 1.8.0
-					if (
-						boardConfig?.filters &&
-						boardConfig.filters.length > 0
-					) {
-						if (
-							boardConfig?.filterPolarity &&
-							boardConfig.filterPolarity === "1"
-						) {
-							boardConfig.boardFilter = {
-								rootCondition: "any",
-								filterGroups: [
-									{
-										id: generateIdForFilters(),
-										groupCondition: "any",
-										filters: boardConfig.filters.map(
-											(f: string) => ({
-												id: generateIdForFilters(),
-												property: "tags",
-												condition: "contains",
-												value: f,
-											}),
-										),
-									},
-								],
-							};
+				// 	// Migration applied since version 1.4.0
+				// 	if (!boardConfig?.hideEmptyColumns) {
+				// 		boardConfig.hideEmptyColumns = false;
+				// 	}
 
-							delete boardConfig?.filters;
-							delete boardConfig?.filterPolarity;
-						}
-					}
-				});
+				// 	// Migration applied since version 1.8.0
+				// 	if (
+				// 		boardConfig?.filters &&
+				// 		boardConfig.filters.length > 0
+				// 	) {
+				// 		if (
+				// 			boardConfig?.filterPolarity &&
+				// 			boardConfig.filterPolarity === "1"
+				// 		) {
+				// 			boardConfig.boardFilter = {
+				// 				rootCondition: "any",
+				// 				filterGroups: [
+				// 					{
+				// 						id: generateIdForFilters(),
+				// 						groupCondition: "any",
+				// 						filters: boardConfig.filters.map(
+				// 							(f: string) => ({
+				// 								id: generateIdForFilters(),
+				// 								property: "tags",
+				// 								condition: "contains",
+				// 								value: f,
+				// 							}),
+				// 						),
+				// 					},
+				// 				],
+				// 			};
+
+				// 			delete boardConfig?.filters;
+				// 			delete boardConfig?.filterPolarity;
+				// 		}
+				// 	}
+				// });
 			}
 
 			// -------------------------------------

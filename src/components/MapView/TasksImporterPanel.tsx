@@ -15,6 +15,7 @@ interface TasksImporterPanelProps {
 	plugin: TaskBoard;
 	allTasksArranged: taskItem[][];
 	activeBoardSettings: Board;
+	activeBoardIndex: number;
 	isVisible: boolean;
 	onClose: () => void;
 }
@@ -23,6 +24,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 	plugin,
 	allTasksArranged,
 	activeBoardSettings,
+	activeBoardIndex,
 	isVisible,
 	onClose
 }) => {
@@ -216,6 +218,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 											plugin={plugin}
 											task={task}
 											activeBoardSettings={activeBoardSettings}
+											activeBoardIndex={activeBoardIndex}
 											dataAttributeIndex={0} // TODO : No need of this data in this case.
 										/>
 									</div>

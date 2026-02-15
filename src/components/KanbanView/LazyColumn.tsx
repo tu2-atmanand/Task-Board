@@ -27,11 +27,12 @@ type CustomCSSProperties = CSSProperties & {
 
 export interface LazyColumnProps {
 	plugin: TaskBoard;
-	columnIndex: number;
 	activeBoardData: Board;
-	collapsed?: boolean;
+	activeBoardIndex: number;
 	columnData: ColumnData;
+	// columnIndex: number;
 	tasksForThisColumn: taskItem[];
+	// collapsed?: boolean;
 	swimlaneData?: swimlaneDataProp;
 	hideColumnHeader?: boolean;
 	headerOnly?: boolean;
@@ -39,9 +40,9 @@ export interface LazyColumnProps {
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
 	plugin,
-	columnIndex,
 	activeBoardData,
 	columnData,
+	activeBoardIndex,
 	tasksForThisColumn,
 	swimlaneData,
 	hideColumnHeader = false,
@@ -883,7 +884,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																plugin={plugin}
 																task={task}
 																activeBoardSettings={activeBoardData}
-																columnIndex={columnIndex}
+																activeBoardIndex={activeBoardIndex}
+																columnIndex={columnData.index}
 																swimlaneData={swimlaneData}
 															/>
 														</div>
@@ -928,6 +930,7 @@ const MemoizedTaskItem = memo<{
 	plugin: TaskBoard;
 	task: taskItem;
 	activeBoardSettings: Board;
+	activeBoardIndex: number;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
 }>(({ Component, ...props }) => {
@@ -937,6 +940,7 @@ const MemoizedTaskItem = memo<{
 		prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
 		prevProps.task === nextProps.task &&
 		prevProps.activeBoardSettings === nextProps.activeBoardSettings &&
+		prevProps.activeBoardIndex === nextProps.activeBoardIndex &&
 		prevProps.columnIndex === nextProps.columnIndex &&
 		prevProps.swimlaneData === nextProps.swimlaneData
 	);

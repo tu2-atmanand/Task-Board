@@ -34,16 +34,11 @@ import { scanFilters } from "src/interfaces/GlobalSettings";
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
 	plugin: TaskBoard,
-	allBoardData: Board[],
+	boards: Board[],
 	activeBoardIndex: number,
 	onSave: (updatedBoards: Board[], boardIndex: number) => void,
 ) => {
-	new BoardConfigureModal(
-		plugin,
-		allBoardData,
-		activeBoardIndex,
-		onSave,
-	).open();
+	new BoardConfigureModal(plugin, boards, activeBoardIndex, onSave).open();
 };
 
 // Function to open the BoardConfigModal
@@ -56,7 +51,6 @@ export const openAddNewTaskInCurrentFileModal = (
 	plugin: TaskBoard,
 	activeFile: TFile,
 	cursorPosition?: { line: number; ch: number } | undefined,
-	cursorPosition?: { line: number; ch: number } | undefined,
 ) => {
 	const AddTaskModal = new AddOrEditTaskModal(
 		plugin,
@@ -65,9 +59,7 @@ export const openAddNewTaskInCurrentFileModal = (
 				(newId) => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
 						newTask.filePath,
-						newTask.filePath,
 					);
-				},
 				},
 			);
 
@@ -89,7 +81,6 @@ export const openAddNewTaskInCurrentFileModal = (
 		false,
 		undefined,
 		activeFile.path,
-		activeFile.path,
 	);
 	AddTaskModal.open();
 	return true;
@@ -97,7 +88,6 @@ export const openAddNewTaskInCurrentFileModal = (
 
 export const openAddNewTaskModal = (
 	plugin: TaskBoard,
-	activeFile?: TFile,
 	activeFile?: TFile,
 ) => {
 	const preDefinedNoteFile = plugin.app.vault.getAbstractFileByPath(
@@ -120,12 +110,10 @@ export const openAddNewTaskModal = (
 					{
 						value: completeTask + "\n",
 					},
-					},
 				);
 			} else {
 				await addTaskInNote(plugin, newTask, false).then((newId) => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
-						newTask.filePath,
 						newTask.filePath,
 					);
 				});
@@ -148,7 +136,7 @@ export const openAddNewTaskModal = (
 		undefined,
 		activeTFile
 			? activeTFile.path
-			: normalizePath(plugin.settings.data.globalSettings.preDefinedNote),
+			: normalizePath(plugin.settings.data.preDefinedNote),
 	);
 	AddTaskModal.open();
 };
@@ -159,7 +147,6 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 		async (
 			newTask: taskItem,
 			quickAddPluginChoice: string,
-			noteContent: string | undefined,
 			noteContent: string | undefined,
 		) => {
 			if (!noteContent) {
@@ -188,7 +175,6 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 					// Create or update the file
 					const existingFile = plugin.app.vault.getFileByPath(
 						newTask.filePath,
-						newTask.filePath,
 					);
 					if (!existingFile) {
 						await plugin.app.vault
@@ -196,7 +182,6 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							.then(() => {
 								// This is required to rescan the updated file and refresh the board.
 								plugin.realTimeScanner.onFileModified(
-									newTask.filePath,
 									newTask.filePath,
 								);
 								sleep(1000).then(() => {
@@ -532,11 +517,11 @@ export const openDiffContentCompareModal = (
 
 export const openTaskBoardActionsModal = (
 	plugin: TaskBoard,
-	activeBoardIndex: number,
+	activeBoardData: Board,
 ) => {
 	const actionModal = new TaskBoardActionsModal(
 		plugin,
-		plugin.settings.data.boardConfigs[activeBoardIndex].columns,
+		activeBoardData.columns,
 	);
 	actionModal.open();
 };

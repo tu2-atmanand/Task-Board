@@ -67,7 +67,7 @@ export class SettingsManager {
 		this.app = plugin.app;
 		this.plugin = plugin;
 		this.win = window;
-		this.globalSettings = this.plugin.settings.data.globalSettings;
+		this.globalSettings = this.plugin.settings.data;
 	}
 
 	private getPropertyDisplayName(

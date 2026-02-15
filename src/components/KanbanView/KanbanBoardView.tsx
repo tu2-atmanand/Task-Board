@@ -13,12 +13,13 @@ import { columnSegregator } from "src/utils/algorithms/ColumnSegregator";
 
 interface KanbanBoardProps {
 	plugin: TaskBoard;
-	board: Board;
+	currentBoardData: Board;
+	currentBoardIndex: number;
 	filteredAndSearchedTasks: taskJsonMerged;
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSearchedTasks, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentBoardIndex, filteredAndSearchedTasks, freshInstall }) => {
 	const [loading, setLoading] = useState(true);
 
 	// Check if lazy loading is enabled
@@ -26,11 +27,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 
 	// Second memo: Segregate filtered tasks by column (for Kanban view only)
 	const allTasksArrangedPerColumn = useMemo(() => {
-		if (board && filteredAndSearchedTasks) {
-			return board.columns
+		if (currentBoardData && filteredAndSearchedTasks) {
+			return currentBoardData.columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, board, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
+					columnSegregator(plugin.settings, currentBoardData, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
 						// plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
 
 						// TODO Add a debounce here, as this callback will be called at high rate.
@@ -39,7 +40,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 				);
 		}
 		return [];
-	}, [filteredAndSearchedTasks, board]);
+	}, [filteredAndSearchedTasks, currentBoardData]);
 
 	useEffect(() => {
 		if (allTasksArrangedPerColumn.flat().length > 0) {
@@ -69,26 +70,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 							</>
 						)}
 					</div>
-				) : board?.columns?.length === 0 ? (
+				) : currentBoardData?.columns?.length === 0 ? (
 					<div className="emptyBoardMessage">
 						Create columns on this board using the board config modal from top right corner button.
 					</div>
-				) : board?.swimlanes?.enabled ? (
+				) : currentBoardData?.swimlanes?.enabled ? (
 					<KanbanSwimlanesContainer
 						plugin={plugin}
-						board={board}
+						currentBoardData={currentBoardData}
+						currentBoardIndex={currentBoardIndex}
 						tasksPerColumn={allTasksArrangedPerColumn}
 					/>
 				) : (
-					board?.columns
+					currentBoardData?.columns
 						.filter((column) => column.active)
 						.map((column, index) => (
 							<MemoizedColumn
 								key={index}
 								plugin={plugin}
-								columnIndex={column.index}
-								activeBoardData={board}
+								activeBoardData={currentBoardData}
 								columnData={column}
+								activeBoardIndex={currentBoardIndex}
 								tasksForThisColumn={allTasksArrangedPerColumn[index]}
 								Component={ColumnComponent}
 							/>
@@ -101,17 +103,18 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 
 const MemoizedColumn = memo<{
 	plugin: TaskBoard;
-	columnIndex: number;
 	activeBoardData: Board;
 	columnData: ColumnData;
+	activeBoardIndex: number;
 	tasksForThisColumn: taskItem[];
 	Component: typeof LazyColumn;
 }>(({ Component, ...props }) => {
 	return <Component {...props} />;
 }, (prevProps, nextProps) => {
 	return (
-		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
+		prevProps.activeBoardData === nextProps.activeBoardData &&
 		prevProps.columnData === nextProps.columnData &&
+		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
 		prevProps.Component === nextProps.Component
 	);
 });

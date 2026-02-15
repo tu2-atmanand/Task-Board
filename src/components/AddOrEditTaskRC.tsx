@@ -50,7 +50,7 @@ export const AddOrEditTaskRC: React.FC<{
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
 }> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
-	const globalSettings = plugin.settings.data.globalSettings;
+	const globalSettings = plugin.settings.data;
 
 	// All useState
 	const [title, setTitle] = useState(

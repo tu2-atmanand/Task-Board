@@ -31,7 +31,7 @@ export interface currentDragDataPayload {
 	task: taskItem;
 	taskIndex: string;
 	sourceColumnData: ColumnData;
-	// currentBoardIndex: number;
+	currentBoardIndex: number;
 	swimlaneData: swimlaneDataProp | null | undefined;
 }
 

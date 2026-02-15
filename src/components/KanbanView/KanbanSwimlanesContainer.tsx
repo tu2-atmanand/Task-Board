@@ -12,7 +12,8 @@ import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
-	board: Board;
+	currentBoardData: Board;
+	currentBoardIndex: number;
 	tasksPerColumn: taskItem[][];
 }
 
@@ -25,7 +26,8 @@ interface SwimlaneRow {
 
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	plugin,
-	board,
+	currentBoardData,
+	currentBoardIndex,
 	tasksPerColumn,
 }) => {
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
@@ -40,9 +42,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		maxHeight: maxSwimlaneHeight,
 		verticalHeaderUI,
 		minimized
-	} = board.swimlanes;
+	} = currentBoardData.swimlanes;
 
-	const activeColumns = board.columns
+	const activeColumns = currentBoardData.columns
 		.filter((col) => col.active);
 	// .map((col) => ({
 	// 	// create a shallow copy so we don't mutate original board state
@@ -52,7 +54,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// }));
 
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
-		if (!board.swimlanes?.enabled || !tasksPerColumn) {
+		if (!currentBoardData.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
 		}
 
@@ -177,14 +179,14 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		});
 
 		// Filter out empty swimlanes if hideEmptySwimlanes is false
-		if (board.swimlanes.hideEmptySwimlanes) {
+		if (currentBoardData.swimlanes.hideEmptySwimlanes) {
 			return swimlaneRows.filter((row) =>
 				row.tasks.some((columnTasks) => columnTasks.length > 0)
 			);
 		}
 
 		return swimlaneRows;
-	}, [board, tasksPerColumn, plugin]);
+	}, [currentBoardData, tasksPerColumn, plugin]);
 
 	if (swimlanes.length === 0) {
 		return (
@@ -231,16 +233,16 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		try {
 			const swimlaneName = swimlanes[rowIndex]?.swimlaneName;
 			if (!swimlaneName) return;
-			const boardIndex = board.index; // plugin.settings.data.boardConfigs.findIndex((b) => b.index === board.index);
-			if (boardIndex === -1) return;
-			const swimCfg = board.swimlanes || { minimized: [] };
+			// const boardIndex = currentBoardData.index; // plugin.settings.data.boardConfigs.findIndex((b) => b.index === currentBoardData.index);
+			// if (boardIndex === -1) return;
+			const swimCfg = currentBoardData.swimlanes || { minimized: [] };
 			const arr = Array.isArray(swimCfg.minimized) ? [...swimCfg.minimized] : [];
 			const idx = arr.indexOf(swimlaneName);
 			if (idx === -1) arr.push(swimlaneName); else arr.splice(idx, 1);
-			board.swimlanes.minimized = arr;
+			currentBoardData.swimlanes.minimized = arr;
 
 
-			await plugin.taskBoardFileManager.saveBoard(board, boardIndex);
+			await plugin.taskBoardFileManager.saveBoard(currentBoardData);
 			eventEmitter.emit('REFRESH_BOARD');
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(
@@ -264,9 +266,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 							<MemoizedSwimlanColumn
 								key={`header-${column.id}`}
 								plugin={plugin}
-								columnIndex={column.index}
-								activeBoardData={board}
+								activeBoardData={currentBoardData}
 								columnData={column}
+								activeBoardIndex={currentBoardIndex}
 								tasksForThisColumn={tasksPerColumn?.[colIndex] || []}
 								Component={ColumnComponent}
 								headerOnly={true}
@@ -297,7 +299,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
 									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
 										const swimlaneData = {
-											property: board.swimlanes.property,
+											property: currentBoardData.swimlanes.property,
 											value: swimlane.swimlaneValue,
 										};
 
@@ -305,9 +307,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 											<MemoizedSwimlanColumn
 												key={`${swimlane.swimlaneValue}-${column.id}`}
 												plugin={plugin}
-												columnIndex={column.index}
-												activeBoardData={board}
+												activeBoardData={currentBoardData}
 												columnData={column}
+												activeBoardIndex={currentBoardIndex}
 												tasksForThisColumn={swimlane.tasks[colIndex] || []}
 												Component={ColumnComponent}
 												swimlaneData={swimlaneData}
@@ -338,7 +340,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
 									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
 										const swimlaneData = {
-											property: board.swimlanes.property,
+											property: currentBoardData.swimlanes.property,
 											value: swimlane.swimlaneValue,
 										};
 
@@ -346,9 +348,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 											<MemoizedSwimlanColumn
 												key={`${swimlane.swimlaneValue}-${column.id}`}
 												plugin={plugin}
-												columnIndex={column.index}
-												activeBoardData={board}
+												activeBoardData={currentBoardData}
 												columnData={column}
+												activeBoardIndex={currentBoardIndex}
 												tasksForThisColumn={swimlane.tasks[colIndex] || []}
 												Component={ColumnComponent}
 												hideColumnHeader={true}
@@ -456,20 +458,21 @@ function getPropertyValues(
  */
 const MemoizedSwimlanColumn = memo<{
 	plugin: TaskBoard;
-	columnIndex: number;
 	activeBoardData: Board;
 	columnData: ColumnData;
+	activeBoardIndex: number;
 	tasksForThisColumn: taskItem[];
 	Component: typeof LazyColumn;
-	hideColumnHeader?: boolean;
 	swimlaneData?: { property: string, value: string };
+	hideColumnHeader?: boolean;
 	headerOnly?: boolean;
 }>(({ Component, ...props }) => {
 	return <Component {...props} />;
 }, (prevProps, nextProps) => {
 	return (
-		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
+		prevProps.activeBoardData === nextProps.activeBoardData &&
 		prevProps.columnData === nextProps.columnData &&
+		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
 		prevProps.Component === nextProps.Component &&
 		prevProps.hideColumnHeader === nextProps.hideColumnHeader
 	);

@@ -80,7 +80,7 @@ export class AddOrEditTaskModal extends Modal {
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = normalizePath(this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.globalSettings.taskNoteDefaultLocation);
+				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
 				this.task.title = "";
 
 				// Sanitize filename

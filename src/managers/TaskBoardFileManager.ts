@@ -247,7 +247,10 @@ export default class TaskBoardFileManager {
 
 			if (!fileExists) {
 				// Create new file with binary data
-				await this.app.vault.createBinary(filePath, arrayBuffer);
+				await this.app.vault.createBinary(
+					filePath,
+					arrayBuffer as ArrayBuffer,
+				);
 				console.log(`Created new TaskBoard file: ${filePath}`);
 			} else {
 				// Update existing file with binary data
@@ -256,7 +259,10 @@ export default class TaskBoardFileManager {
 					console.error(`Cannot find file to update: ${filePath}`);
 					return false;
 				}
-				await this.app.vault.modifyBinary(file, arrayBuffer);
+				await this.app.vault.modifyBinary(
+					file,
+					arrayBuffer as ArrayBuffer,
+				);
 				console.log(`Updated TaskBoard file: ${filePath}`);
 			}
 

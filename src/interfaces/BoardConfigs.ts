@@ -133,11 +133,14 @@ export type viewPortType = {
 	zoom: number;
 };
 
-export type nodeDataType = {
-	id: string;
+export type nodePositionWidth = {
 	x: number;
 	y: number;
 	width: number;
+};
+
+export type nodeDataType = {
+	[taskID: string]: nodePositionWidth;
 };
 
 export type Board = {
@@ -157,7 +160,7 @@ export type Board = {
 	swimlanes: swimlaneConfigs;
 	mapView: {
 		viewPortData: viewPortType;
-		nodePositions: nodeDataType[];
+		nodesData: nodeDataType;
 	};
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
@@ -268,7 +271,7 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 				y: 0,
 				zoom: 0.5,
 			},
-			nodePositions: [],
+			nodesData: {},
 		},
 	},
 	{
@@ -342,7 +345,7 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 				y: 0,
 				zoom: 0.5,
 			},
-			nodePositions: [],
+			nodesData: {},
 		},
 	},
 	{
@@ -426,7 +429,7 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 				y: 0,
 				zoom: 0.5,
 			},
-			nodePositions: [],
+			nodesData: {},
 		},
 	},
 ];

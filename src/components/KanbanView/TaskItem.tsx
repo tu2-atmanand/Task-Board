@@ -29,22 +29,14 @@ import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/manag
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { openDateInputModal } from 'src/services/OpenModals';
 import { showTextInputModal } from 'src/modals/TextInputModal';
+import { TaskCardProps } from './TaskItemV2';
 
 export interface swimlaneDataProp {
 	property: string;
 	value: string;
 }
 
-export interface TaskCardComponentProps {
-	dataAttributeIndex: number;
-	plugin: TaskBoard;
-	task: taskItem;
-	activeBoardSettings: Board;
-	columnIndex?: number;
-	swimlaneData?: swimlaneDataProp;
-}
-
-const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, columnIndex, swimlaneData }) => {
+const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, activeBoardIndex, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
@@ -862,7 +854,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				task,
 				taskIndex: String(dataAttributeIndex),
 				sourceColumnData: columnData,
-				// currentBoardIndex: activeBoardSettings.index,
+				currentBoardIndex: activeBoardIndex,
 				swimlaneData: swimlaneData
 			};
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);

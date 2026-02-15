@@ -216,7 +216,8 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 	}
 
 	function handleOpenTaskBoardActionsModal() {
-		openTaskBoardActionsModal(plugin, activeBoardIndex);
+		if (currentBoardData)
+			openTaskBoardActionsModal(plugin, currentBoardData);
 	}
 
 	function handleSearchButtonClick() {
@@ -1048,7 +1049,8 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 					viewType === viewTypeNames.kanban ? (
 						<KanbanBoard
 							plugin={plugin}
-							board={currentBoardData}
+							currentBoardData={currentBoardData}
+							currentBoardIndex={activeBoardIndex}
 							filteredAndSearchedTasks={filteredAndSearchedTasks}
 							freshInstall={freshInstall}
 						/>
@@ -1076,6 +1078,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 							<MapView
 								plugin={plugin}
 								activeBoardData={currentBoardData}
+								activeBoardIndex={activeBoardIndex}
 								filteredTasks={filteredAndSearchedTasks}
 								focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
 							/>

@@ -228,6 +228,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				maxHeight: '300px',
 				verticalHeaderUI: false
 			},
+			mapView: {
+				viewPortData: {
+					x: 0,
+					y: 0,
+					zoom: 0.5,
+				},
+				nodesData: {},
+			},
 		};
 		setLocalBoards([...oldBoards, newBoard]);
 		setSelectedBoardIndex(localBoards.length);

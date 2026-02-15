@@ -13,6 +13,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { taskItemEmpty } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
 import { generateTaskId } from "src/utils/TaskItemUtils";
+import { DEFAULT_SETTINGS } from "src/interfaces/GlobalSettings";
 
 
 export class AddOrEditTaskView extends ItemView {
@@ -84,7 +85,7 @@ export class AddOrEditTaskView extends ItemView {
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = normalizePath(this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.globalSettings.taskNoteDefaultLocation);
+				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
 				this.task.title = "";
 
 				// Sanitize filename

@@ -26,28 +26,26 @@ import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
-
-// Helper modal functions may be provided elsewhere; declare them for TypeScript
-declare function showTextInputModal(app: any, options: { title?: string; placeholder?: string; initialValue?: string }): Promise<string | null>;
-declare function showConfirmationModal(app: any, options: any): Promise<boolean>;
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
+import { showTextInputModal } from 'src/modals/TextInputModal';
 
 export interface swimlaneDataProp {
 	property: string;
 	value: string;
 }
 
-export interface TaskProps {
+export interface TaskCardProps {
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
 	activeBoardSettings: Board;
+	activeBoardIndex: number;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
 }
 
-const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, columnIndex, swimlaneData }) => {
+const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, activeBoardIndex, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
@@ -422,7 +420,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
 		if (globalSettings.tagColorsType === TagColorType.CardBg) {
 
-			const tagColors = plugin.settings.data.globalSettings.tagColors;
+			const tagColors = plugin.settings.data.tagColors;
 
 			if (!Array.isArray(tagColors) || tagColors.length === 0) {
 				return undefined;
@@ -861,7 +859,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
-			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index, swimlaneData: swimlaneData };
+			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentBoardIndex: activeBoardIndex, swimlaneData: swimlaneData };
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Add dragging class after a small delay to not affect the drag image
@@ -944,7 +942,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 
 										const tagName = tag.replace('#', '');
-										const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+										const customTag = plugin.settings.data.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.tagColors.find(t => t.name === tagName);
 
 										const tagColor = customTag?.color || `var(--tag-color)`;
 										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
