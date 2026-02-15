@@ -1,3 +1,6 @@
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { colTypeNames, defaultTaskStatuses } from "./Enums";
+
 export interface columnSortingCriteria {
 	criteria:
 		| "status"
@@ -125,9 +128,9 @@ export interface swimlaneConfigs {
 }
 
 export type Board = {
+	id: string;
 	name: string;
 	description?: string;
-	index: number;
 	columns: ColumnData[];
 	hideEmptyColumns: boolean;
 	showColumnTags: boolean;
@@ -145,3 +148,244 @@ export type Board = {
 };
 
 export type BoardConfigs = Board[];
+
+export const DEFAULT_BOARDS: BoardConfigs = [
+	{
+		columns: [
+			{
+				id: 1,
+				colType: colTypeNames.undated,
+				active: true,
+				collapsed: false,
+				name: "Undated Tasks",
+				index: 1,
+				datedBasedColumn: {
+					dateType: "due",
+					from: 0,
+					to: 0,
+				},
+			},
+			{
+				id: 2,
+				colType: colTypeNames.dated,
+				active: true,
+				collapsed: false,
+				name: "Over Due",
+				index: 2,
+				datedBasedColumn: {
+					dateType: "due",
+					from: -300,
+					to: -1,
+				},
+			},
+			{
+				id: 3,
+				colType: colTypeNames.dated,
+				active: true,
+				collapsed: false,
+				name: "Today",
+				index: 3,
+				datedBasedColumn: {
+					dateType: "due",
+					from: 0,
+					to: 0,
+				},
+			},
+			{
+				id: 4,
+				colType: colTypeNames.dated,
+				active: true,
+				collapsed: false,
+				name: "Tomorrow",
+				index: 4,
+				datedBasedColumn: {
+					dateType: "due",
+					from: 1,
+					to: 1,
+				},
+			},
+			{
+				id: 5,
+				colType: colTypeNames.dated,
+				active: true,
+				collapsed: false,
+				name: "Future",
+				index: 5,
+				datedBasedColumn: {
+					dateType: "due",
+					from: 2,
+					to: 300,
+				},
+			},
+			{
+				id: 6,
+				colType: colTypeNames.completed,
+				active: true,
+				collapsed: false,
+				limit: 20,
+				name: "Completed",
+				index: 6,
+			},
+		],
+		id: "3103563481",
+		name: "Time Based Workflow",
+		showColumnTags: false,
+		showFilteredTags: true,
+		hideEmptyColumns: false,
+		boardFilter: {
+			rootCondition: "any",
+			filterGroups: [],
+		},
+		swimlanes: {
+			enabled: false,
+			hideEmptySwimlanes: false,
+			property: "tags",
+			sortCriteria: "asc",
+			minimized: [],
+			maxHeight: "300px",
+			verticalHeaderUI: false,
+		},
+	},
+	{
+		columns: [
+			{
+				id: 7,
+				colType: colTypeNames.untagged,
+				active: true,
+				collapsed: false,
+				name: "Backlogs",
+				index: 1,
+			},
+			{
+				id: 8,
+				colType: colTypeNames.namedTag,
+				active: true,
+				collapsed: false,
+				name: "Important",
+				index: 2,
+				coltag: "important",
+			},
+			{
+				id: 9,
+				colType: colTypeNames.namedTag,
+				active: true,
+				collapsed: false,
+				name: "WIP",
+				index: 3,
+				coltag: "wip",
+			},
+			{
+				id: 11,
+				colType: colTypeNames.namedTag,
+				active: true,
+				collapsed: false,
+				name: "In Review",
+				index: 5,
+				coltag: "review",
+			},
+			{
+				id: 12,
+				colType: colTypeNames.completed,
+				active: true,
+				collapsed: false,
+				index: 6,
+				limit: 20,
+				name: "Completed",
+			},
+		],
+		id: "2957159294",
+		name: "Tag Based Workflow",
+		showColumnTags: false,
+		showFilteredTags: true,
+		hideEmptyColumns: false,
+		boardFilter: {
+			rootCondition: "any",
+			filterGroups: [],
+		},
+		swimlanes: {
+			enabled: false,
+			hideEmptySwimlanes: false,
+			property: "tags",
+			sortCriteria: "asc",
+			minimized: [],
+			maxHeight: "300px",
+			verticalHeaderUI: false,
+		},
+	},
+	{
+		columns: [
+			{
+				id: 7,
+				colType: colTypeNames.taskStatus,
+				taskStatus: defaultTaskStatuses.unchecked,
+				active: true,
+				collapsed: false,
+				name: "Backlogs",
+				index: 1,
+			},
+			{
+				id: 8,
+				colType: colTypeNames.taskStatus,
+				taskStatus: defaultTaskStatuses.scheduled,
+				active: true,
+				collapsed: false,
+				name: "Ready to start",
+				index: 2,
+			},
+			{
+				id: 9,
+				colType: colTypeNames.taskStatus,
+				taskStatus: defaultTaskStatuses.inprogress,
+				active: true,
+				collapsed: false,
+				name: "In Progress",
+				index: 3,
+			},
+			{
+				id: 11,
+				colType: colTypeNames.taskStatus,
+				taskStatus: defaultTaskStatuses.question,
+				active: true,
+				collapsed: false,
+				name: "In Review",
+				index: 5,
+			},
+			{
+				id: 12,
+				colType: colTypeNames.completed,
+				active: true,
+				collapsed: false,
+				index: 6,
+				limit: 20,
+				name: "Completed",
+			},
+			{
+				id: 13,
+				colType: colTypeNames.taskStatus,
+				taskStatus: defaultTaskStatuses.dropped,
+				active: true,
+				collapsed: false,
+				name: "Cancelled",
+				index: 7,
+			},
+		],
+		id: "4271106430",
+		name: "Status Based Workflow",
+		showColumnTags: false,
+		showFilteredTags: true,
+		hideEmptyColumns: false,
+		boardFilter: {
+			rootCondition: "any",
+			filterGroups: [],
+		},
+		swimlanes: {
+			enabled: false,
+			hideEmptySwimlanes: false,
+			property: "tags",
+			sortCriteria: "asc",
+			minimized: [],
+			maxHeight: "300px",
+			verticalHeaderUI: false,
+		},
+	},
+];

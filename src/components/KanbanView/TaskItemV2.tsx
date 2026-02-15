@@ -6,7 +6,7 @@ import { checkboxStateSwitcher, extractCheckboxSymbol, getObsidianIndentationSet
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from 'src/utils/taskLine/TaskItemEventHandlers';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from 'src/services/MarkdownHoverPreview';
 
-import { Component, Notice, Platform, Menu, TFile } from 'obsidian';
+import { Component, Notice, Platform, Menu, TFile, MenuItem } from 'obsidian';
 import { MarkdownUIRenderer } from 'src/services/MarkdownUIRenderer';
 import { cleanTaskTitleLegacy } from 'src/utils/taskLine/TaskContentFormatter';
 import { updateRGBAOpacity } from 'src/utils/UIHelpers';
@@ -15,20 +15,17 @@ import TaskBoard from 'main';
 import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
-import { allowedFileExtensionsRegEx } from 'src/regularExpressions/MiscelleneousRegExpr';
-import { bugReporter } from 'src/services/OpenModals';
+import { openDateInputModal } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
-import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames } from 'src/interfaces/Enums';
-import { getCustomStatusOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType } from 'src/interfaces/Enums';
+import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { RxDragHandleDots2 } from 'react-icons/rx';
-import { getUniversalDateEmoji, getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
+import { getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder, updateTaskItemTags } from 'src/utils/UserTaskEvents';
-import EditTagsModal from 'src/modals/EditTagsModal';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
 
 // Helper modal functions may be provided elsewhere; declare them for TypeScript
 declare function showTextInputModal(app: any, options: { title?: string; placeholder?: string; initialValue?: string }): Promise<string | null>;
@@ -51,25 +48,24 @@ export interface TaskProps {
 }
 
 const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, columnIndex, swimlaneData }) => {
-	const globalSettings = plugin.settings.data.globalSettings;
-	const taskNoteIdentifierTag = plugin.settings.data.globalSettings.taskNoteIdentifierTag;
+	const globalSettings = plugin.settings.data;
+	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
 	const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
 	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
 
-	const [isDragging, setIsDragging] = useState(false);
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
+	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
 	useEffect(() => {
-		if (plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks)) {
+		if (plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks)) {
 			setShowSubtasks(true);
 		} else {
 			setShowSubtasks(false);
 		}
-	}, [plugin.settings.data.globalSettings]);
+	}, [plugin.settings.data]);
 
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, plugin));
 	useEffect(() => {
@@ -116,7 +112,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	// 		if (titleElement && task.title !== "") {
 	// 			let cleanedTitle = cleanTaskTitleLegacy(task);
 	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
-	// 			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+	// 			// const searchQuery = plugin.settings.data.searchQuery || '';
 	// 			// if (searchQuery) {
 	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	// 			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
@@ -156,7 +152,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				el.innerHTML = '';
 				if (task.title === "") return;
 
-				const cleanedTitle = cleanTaskTitleLegacy(task);
+				const cleanedTitle = isTaskNote ? task.title : cleanTaskTitleLegacy(task);
 
 				await MarkdownUIRenderer.renderTaskDisc(
 					plugin.app,
@@ -173,14 +169,18 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
 			} catch (err) {
-				console.error('Error rendering task title:', err);
+				bugReporterManagerInsatance.addToLogs(
+					122,
+					String(err),
+					"TaskItemV2.tsx/Main title rendering useEffect",
+				);
 			}
 		})();
 
 		// return () => {
 		// 	cancelled = true;
 		// };
-	}, [task.id, task.title, task.filePath, plugin.settings.data.globalSettings.searchQuery]);
+	}, [task.id, task.title, task.filePath, plugin.settings.data.searchQuery]);
 
 	// useEffect(() => {
 	// 	const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
@@ -196,7 +196,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	// 			element.empty(); // Clear previous content
 
 	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
-	// 			// const searchQuery = plugin.settings.data.globalSettings.searchQuery || '';
+	// 			// const searchQuery = plugin.settings.data.searchQuery || '';
 	// 			// if (searchQuery) {
 	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	// 			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
@@ -253,7 +253,11 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 						break;
 					}
 				} catch (err) {
-					console.error('Error rendering subtask:', err);
+					bugReporterManagerInsatance.addToLogs(
+						123,
+						String(err),
+						"TaskItemV2.tsx/Sub-tasks rendering useEffect",
+					);
 				}
 			}
 		})();
@@ -416,57 +420,58 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
-		if (plugin.settings.data.globalSettings.tagColorsType === "text") {
-			return undefined;
-		}
+		if (globalSettings.tagColorsType === TagColorType.CardBg) {
 
-		const tagColors = plugin.settings.data.globalSettings.tagColors;
+			const tagColors = plugin.settings.data.globalSettings.tagColors;
 
-		if (!Array.isArray(tagColors) || tagColors.length === 0) {
-			return undefined;
-		}
-
-		// Prepare a map for faster lookup
-		const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
-
-		let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
-
-		for (const rawTag of tags) {
-			const tagName = rawTag.replace('#', '');
-			let tagData = tagColorMap.get(tagName);
-
-			if (!tagData) {
-				tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
-					const result = matchTagsWithWildcards(tagNameKey, tagName || '');
-					// Return the first match found
-					if (result) tagData = tagColor;
-				});
+			if (!Array.isArray(tagColors) || tagColors.length === 0) {
+				return undefined;
 			}
 
-			if (tagData) {
-				if (
-					!highestPriorityTag ||
-					(tagData.priority) < (highestPriorityTag.priority)
-				) {
-					highestPriorityTag = tagData;
+			// Prepare a map for faster lookup
+			const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
+
+			let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
+
+			for (const rawTag of tags) {
+				const tagName = rawTag.replace('#', '');
+				let tagData = tagColorMap.get(tagName);
+
+				if (!tagData) {
+					tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+						const result = matchTagsWithWildcards(tagNameKey, tagName || '');
+						// Return the first match found
+						if (result) tagData = tagColor;
+					});
+				}
+
+				if (tagData) {
+					if (
+						!highestPriorityTag ||
+						(tagData.priority) < (highestPriorityTag.priority)
+					) {
+						highestPriorityTag = tagData;
+					}
 				}
 			}
-		}
 
-		const getOpacityValue = (color: string): number => {
-			const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
-			if (rgbaMatch) {
-				const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
-				return opacity;
+			const getOpacityValue = (color: string): number => {
+				const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+				if (rgbaMatch) {
+					const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+					return opacity;
+				}
+				return 1;
+			};
+
+			if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+				return updateRGBAOpacity(highestPriorityTag.color, 0.2);
 			}
-			return 1;
-		};
 
-		if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-			return updateRGBAOpacity(plugin, highestPriorityTag.color, 0.2);
+			return highestPriorityTag?.color;
 		}
 
-		return highestPriorityTag?.color;
+		return undefined;
 	}
 
 	// ========================================
@@ -517,7 +522,11 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					handleCheckboxChange(plugin, task);
 				}
 			} catch (error) {
-				console.error("Error updating task:", error);
+				bugReporterManagerInsatance.addToLogs(
+					124,
+					String(error),
+					"TaskItemV2.tsx/handleMainCheckBoxClick",
+				);
 			}
 
 			// The component might be unmounted by the time this runs, but this is a safeguard.
@@ -554,7 +563,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				// Toggle the checkbox status only for the specific line
 
 				const symbol = extractCheckboxSymbol(line);
-				const nextStatus = checkboxStateSwitcher(plugin, symbol);
+				const nextStatus = checkboxStateSwitcher(globalSettings.customStatuses, symbol);
 
 				return line.replace(`[${symbol}]`, `[${nextStatus.newSymbol}]`);
 			}
@@ -590,7 +599,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	};
 
 	const onEditButtonClicked = (event: React.MouseEvent) => {
-		const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+		const settingOption = plugin.settings.data.editButtonAction;
 		if (settingOption !== EditButtonMode.NoteInHover) {
 			handleEditTask(plugin, task, settingOption);
 		} else {
@@ -601,7 +610,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	}
 
 	const handleDoubleClickOnCard = (event: React.MouseEvent) => {
-		const settingOption = plugin.settings.data.globalSettings.doubleClickCardToEdit;
+		const settingOption = plugin.settings.data.doubleClickCardToEdit;
 		if (settingOption === EditButtonMode.None) return;
 
 		if (settingOption !== EditButtonMode.NoteInHover) {
@@ -622,7 +631,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				return;
 			}
 
-			const settingOption = plugin.settings.data.globalSettings.editButtonAction;
+			const settingOption = plugin.settings.data.editButtonAction;
 			if (settingOption !== EditButtonMode.NoteInHover) {
 				handleEditTask(plugin, childTask, settingOption);
 			} else {
@@ -631,13 +640,15 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				event.ctrlKey = false;
 			}
 		} catch (error) {
-			console.error("Error opening child task modal:", error);
 			bugReporterManagerInsatance.showNotice(12, "Error opening child task modal", String(error), "TaskItem.tsx/handleOpenChildTaskModal");
 		}
 	}
 
 	const handleMenuButtonClicked = (event: React.MouseEvent) => {
 		event.stopPropagation();
+
+		if (!globalSettings.experimentalFeatures) return;
+
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
@@ -645,20 +656,86 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("status"));
 			item.setIcon("info");
+			item.setTitle(t("status"));
 			const statusMenu = item.setSubmenu()
 
-			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.customStatuses);
+			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
-					item.setTitle(status.text);
+					const itemDocFragment = MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} (**[${status.value}]**)`, item.titleEl, '', null);
+					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
 						updateTaskItemStatus(plugin, task, status.value);
 					})
 				});
 			})
+		});
+
+		// Priority submenu
+		taskItemMenu.addItem((item) => {
+			item.setIcon("flag");
+			item.setTitle(t("priority"));
+			const priMenu = item.setSubmenu();
+			const priorityOptions = getPriorityOptionsForDropdown();
+			priorityOptions.forEach((p) => {
+				priMenu.addItem((it) => {
+					it.setTitle(p.text);
+					it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
+				});
+			});
+		});
+
+		// Tags editor modal - TODO : It doesnt make sense to build another modal specifically changing the tags, when the AddOrEditTaskModal can itself do this.
+		// taskItemMenu.addItem((item) => {
+		// 	item.setTitle(t("tags"));
+		// 	item.setIcon("tag");
+		// 	item.onClick(() => {
+		// 		const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
+		// 			updateTaskItemTags(plugin, task, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
+		// 		});
+		// 		modal.open();
+		// 	});
+		// });
+
+		// Dates submenu
+
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar-plus")
+			it.setTitle(t("start-date"));
+			it.onClick(async () => {
+				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
+					updateTaskItemDate(plugin, task, 'startDate', newDate);
+				})
+			});
+		});
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar-clock")
+			it.setTitle(t("scheduled-date"));
+			it.onClick(async () => {
+				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
+					updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
+				})
+			});
+		});
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar")
+			it.setTitle(t("due-date"));
+			it.onClick(async () => {
+				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
+					updateTaskItemDate(plugin, task, 'due', newDate);
+				})
+			});
+		});
+
+		// Reminder item - open prompt for date/time
+		taskItemMenu.addItem((item) => {
+			item.setIcon("clock");
+			item.setTitle(t("reminder"));
+			item.onClick(async () => {
+				// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+			});
 		});
 
 		taskItemMenu.addSeparator();
@@ -668,90 +745,37 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
+			item.setIcon("copy");
 			item.setTitle(t("copy-task-title"));
-			item.setIcon("eye-off");
 			item.onClick(async () => {
+				try {
+					await navigator.clipboard.writeText(cleanTaskTitleLegacy(task));
+					new Notice(t("copy-task-title-successful"));
+				} catch (error) {
+					new Notice(t("copy-task-title-unsuccessful"));
+				}
 			});
+		});
 
-			// Priority submenu
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("priority"));
-				item.setIcon("flag");
-				const priMenu = item.setSubmenu();
-				const priorities = [
-					{ label: t("none"), value: 0 },
-					{ label: t("low"), value: 1 },
-					{ label: t("medium"), value: 2 },
-					{ label: t("high"), value: 3 },
-				];
-				priorities.forEach((p) => {
-					priMenu.addItem((it) => {
-						it.setTitle(p.label);
-						it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
-					});
-				});
-			});
-
-			// Dates submenu
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("dates"));
-				item.setIcon("calendar");
-				const dateMenu = item.setSubmenu();
-				dateMenu.addItem((it) => {
-					it.setTitle(t("start-date"));
-					it.onClick(async () => {
-						const newDate = await showTextInputModal(plugin.app, { title: t("set-start-date"), placeholder: 'YYYY-MM-DD', initialValue: task.startDate || '' });
-						if (newDate) updateTaskItemDate(plugin, task, 'startDate', newDate);
-					});
-				});
-				dateMenu.addItem((it) => {
-					it.setTitle(t("scheduled-date"));
-					it.onClick(async () => {
-						const newDate = await showTextInputModal(plugin.app, { title: t("set-scheduled-date"), placeholder: 'YYYY-MM-DD', initialValue: task.scheduledDate || '' });
-						if (newDate) updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
-					});
-				});
-				dateMenu.addItem((it) => {
-					it.setTitle(t("due-date"));
-					it.onClick(async () => {
-						const newDate = await showTextInputModal(plugin.app, { title: t("set-due-date"), placeholder: 'YYYY-MM-DD', initialValue: task.due || '' });
-						if (newDate) updateTaskItemDate(plugin, task, 'due', newDate);
-					});
-				});
-			});
-
-			// Reminder item - open prompt for date/time
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("reminder"));
-				item.setIcon("clock");
-				item.onClick(async () => {
-					const newReminder = await showTextInputModal(plugin.app, { title: t("set-reminder"), placeholder: 'YYYY-MM-DD HH:mm', initialValue: task.reminder || '' });
-					if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
-				});
-			});
-
-			// Tags editor modal
-			taskItemMenu.addItem((item) => {
-				item.setTitle(t("tags"));
-				item.setIcon("tag");
-				item.onClick(() => {
-					const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
-						updateTaskItemTags(plugin, task, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
-					});
-					modal.open();
-				});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("file-input");
+			item.setTitle(t("open-note"));
+			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.NoteInTab)
 			});
 		});
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("open-note"));
-			item.setIcon("eye-off");
+			item.setIcon("columns-2");
+			item.setTitle(t("open-note-to-right"));
 			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.NoteInSplit)
 			});
 		});
+
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("contextMenus.task.noteActions"));
 			item.setIcon("file-text");
+			item.setTitle(t("note-actions"));
 
 			const submenu = (item as any).setSubmenu();
 
@@ -767,16 +791,16 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				}
 
 				// Add common file actions (these will either supplement or replace the native menu)
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.rename"));
+				submenu.addItem((subItem: MenuItem) => {
 					subItem.setIcon("pencil");
+					subItem.setTitle(t("rename-note"));
 					subItem.onClick(async () => {
 						try {
 							// Modal-based rename
 							const currentName = file.basename;
 							const newName = await showTextInputModal(plugin.app, {
-								title: t("contextMenus.task.renameTitle"),
-								placeholder: t("contextMenus.task.renamePlaceholder"),
+								title: t("rename-note"),
+								placeholder: t("rename-note-placeholder"),
 								initialValue: currentName,
 							});
 
@@ -794,114 +818,31 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 								// Rename the file
 								await plugin.app.vault.rename(file, newPath);
-								new Notice(
-									t("contextMenus.task.notices.renameSuccess") + finalName,
-
-								);
-
-								// // Trigger update callback
-								// if (options.onUpdate) {
-								// 	options.onUpdate();
-								// }
+								new Notice("File renamed successfully.");
 							}
 						} catch (error) {
-							console.error("Error renaming file:", error);
-							new Notice(t("contextMenus.task.notices.renameFailure"));
+							new Notice("There was an error while renaming the file.");
+							bugReporterManagerInsatance.addToLogs(
+								125,
+								String(error),
+								"TaskItem.tsx/handleMenuButtonClicked/renaming",
+							);
 						}
 					});
 				});
 
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("delete-note"));
+				submenu.addItem((subItem: MenuItem) => {
 					subItem.setIcon("trash");
+					subItem.setTitle(t("delete-note"));
 					subItem.onClick(async () => {
-						// Show confirmation and delete
-						const confirmed = await showConfirmationModal(plugin.app, {
-							title: t("contextMenus.task.deleteTitle"),
-							message: t("contextMenus.task.deleteMessage") + file.name,
-							confirmText: t("contextMenus.task.deleteConfirm"),
-							cancelText: t("common.cancel"),
-							isDestructive: true,
-						});
-						if (confirmed) {
-							plugin.app.vault.trash(file, true);
-						}
-					});
-				});
-
-				submenu.addSeparator();
-
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.copyPath"));
-					subItem.setIcon("copy");
-					subItem.onClick(async () => {
-						try {
-							await navigator.clipboard.writeText(file.path);
-							new Notice(t("contextMenus.task.notices.copyPathSuccess"));
-						} catch (error) {
-							new Notice(t("contextMenus.task.notices.copyFailure"));
-						}
-					});
-				});
-
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.copyUrl"));
-					subItem.setIcon("link");
-					subItem.onClick(async () => {
-						try {
-							const url = `obsidian://open?vault=${encodeURIComponent(plugin.app.vault.getName())}&file=${encodeURIComponent(file.path)}`;
-							await navigator.clipboard.writeText(url);
-							new Notice(t("contextMenus.task.notices.copyUrlSuccess"));
-						} catch (error) {
-							new Notice(t("contextMenus.task.notices.copyFailure"));
-						}
-					});
-				});
-
-				submenu.addSeparator();
-
-				submenu.addItem((subItem: any) => {
-					subItem.setTitle(t("contextMenus.task.showInExplorer"));
-					subItem.setIcon("folder-open");
-					subItem.onClick(() => {
-						// Reveal file in file explorer
-						plugin.app.workspace
-							.getLeaf()
-							.setViewState({
-								type: "file-explorer",
-								state: {},
-							})
-							.then(() => {
-								// Focus the file in the explorer
-								const fileExplorer =
-									plugin.app.workspace.getLeavesOfType("file-explorer")[0];
-								if (fileExplorer?.view && "revealInFolder" in fileExplorer.view) {
-									(fileExplorer.view as any).revealInFolder(file);
-								}
-							});
+						plugin.app.vault.trash(file, true).then(() => {
+							new Notice("File deleted successfully. Moved to system trash.");
+						})
+						// handleDeleteTask(plugin, task, true);
 					});
 				});
 			}
 		});
-
-		// // Show minimize or maximize option based on current state
-		// if (columnData.minimized) {
-		// 	taskItemMenu.addItem((item) => {
-		// 		item.setTitle(t("maximize-column"));
-		// 		item.setIcon("panel-left-open");
-		// 		item.onClick(async () => {
-		// 			await handleMinimizeColumn();
-		// 		});
-		// 	});
-		// } else {
-		// 	taskItemMenu.addItem((item) => {
-		// 		item.setTitle(t("minimize-column"));
-		// 		item.setIcon("panel-left-close");
-		// 		item.onClick(async () => {
-		// 			await handleMinimizeColumn();
-		// 		});
-		// 	});
-		// }
 
 		// Use native event if available (React event has nativeEvent property)
 		taskItemMenu.showAtMouseEvent(
@@ -911,14 +852,12 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		console.log("TaskItem : handleDragStart...");
 		if (!columnData) {
 			e.preventDefault();
-			console.warn('handleDragStart: columnData is undefined');
+			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskItem.tsx/handleDragStart");
 			return;
 		}
 
-		setIsDragging(true);
 		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
@@ -926,12 +865,11 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Add dragging class after a small delay to not affect the drag image
-			const clone = el.cloneNode(true) as HTMLDivElement;
-			e.dataTransfer?.setDragImage(el, 0, 0);
-			requestAnimationFrame(() => {
-				clone.classList.add("task-item-dragging");
-				console.log("TaskItem : handleDragStart... done : ", el);
-			});
+			// const clone = el.cloneNode(true) as HTMLDivElement;
+			// e.dataTransfer?.setDragImage(el, 0, 0);
+			// requestAnimationFrame(() => {
+			// 	clone.classList.add("task-item-dragging");
+			// });
 
 			// Also set a drag image from the whole task element so the preview is the full card
 			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
@@ -955,15 +893,15 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			// 	e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
 			// 	e.dataTransfer.effectAllowed = 'move';
 			// } catch (ex) {/* ignore */ }
-
-			console.error(err);
+			bugReporterManagerInsatance.addToLogs(
+				126,
+				String(err),
+				"TaskItem.tsx/handleDragStart",
+			);
 		}
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-		console.log("TaskItem : handleDragEnd...");
-		setIsDragging(false);
-
 		// Remove dim effect from this dragged task and clear manager state
 		if (taskItemRef.current) {
 			dragDropTasksManagerInsatance.removeDimFromDraggedTaskItem(taskItemRef.current);
@@ -982,85 +920,92 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		try {
 			return (
 				<div className="taskItemHeader">
-					<div className="taskItemHeaderLeft">
-						{/* Render priority */}
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
-							<div className="taskItemPriority">
-								<div className={`prioirtyCircle p${task.priority}`}>{task.priority}
+					{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
+						<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>
+							<div className='taskitemHeaderTopFilenameValue'>{task.filePath.split('/').pop()}</div>
+						</div>
+					)}
+
+					<div className='taskItemHeaderBottom'>
+						<div className="taskItemHeaderLeft">
+							{/* Render priority */}
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
+								<div className="taskItemPriority">
+									<div className={`prioirtyCircle p${task.priority}`}>{task.priority}
+									</div>
 								</div>
-							</div>
-						)}
+							)}
 
-						{/* Render tags individually */}
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
-							<div className="taskItemTags">
-								{/* Render line tags (editable) */}
-								{task.tags.map((tag: string) => {
-									const tagName = tag.replace('#', '');
-									const customTag = plugin.settings.data.globalSettings.tagColorsType === "text" ? plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName) : undefined;
-									const tagColor = customTag?.color || null;
-									// const backgroundColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
-									// const borderColor = customTag ? updateRGBAOpacity(plugin, customTag.color, 0.5) : `var(--tag-color-hover)`;
+							{/* Render tags individually */}
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
+								<div className="taskItemTags">
+									{/* Render line tags (editable) */}
+									{task.tags.map((tag: string) => {
+										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 
-									// If columnIndex is defined, proceed to get the column
-									if (
-										(!activeBoardSettings?.showColumnTags) &&
-										columnData &&
-										columnData?.colType === colTypeNames.namedTag &&
-										tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
-									) {
-										return null;
-									}
+										const tagName = tag.replace('#', '');
+										const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
 
-									const tagKey = `${task.id}-${tag}`;
-									// Render the remaining tags
-									return (
-										<div
-											key={tagKey}
-											className="taskItemTag"
-											style={{
-												color: `${tagColor ? 'white' : ''}`,
-												backgroundColor: `${tagColor ? tagColor : ''}`,
-												opacity: `${tagColor ? '0.8' : ''}`
-												// border: `1px solid ${borderColor}`,
-												// backgroundColor: backgroundColor
-											}}
-										>
-											{tag}
-										</div>
-									);
-								})}
+										const tagColor = customTag?.color || `var(--tag-color)`;
+										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
-								{/* Render frontmatter tags (read-only) */}
-								{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
-									const tagKey = `${task.id}-fm-${tag}`;
-									// Render frontmatter tags with different styling
-									return (
-										<div
-											key={tagKey}
-											className="taskItemTagFrontmatter"
-											title="Tag from note frontmatter (read-only)"
-										>
-											{tag}
-										</div>
-									);
-								})}
-							</div>
-						)}
-					</div>
+										// If columnIndex is defined, proceed to get the column
+										if (
+											(!activeBoardSettings?.showColumnTags) &&
+											columnData &&
+											columnData?.colType === colTypeNames.namedTag &&
+											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+										) {
+											return null;
+										}
 
-					<div className='taskItemHeaderRight'>
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
-							<div className='taskItemPropertyID'>
-								<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
-							</div>
-						)}
+										const tagKey = `${task.id}-${tag}`;
+										// Render the remaining tags
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTag"
+												style={{
+													color: isTagBg && tagColor ? 'white' : tagColor,
+													// border: `1px solid ${borderColor}`,
+													backgroundColor: isTagBg ? tagColor : dimmedTagColor
+												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+
+									{/* Render frontmatter tags (read-only) */}
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+										const tagKey = `${task.id}-fm-${tag}`;
+										// Render frontmatter tags with different styling
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTagFrontmatter"
+												title="Tag from note frontmatter (read-only)"
+											>
+												{tag}
+											</div>
+										);
+									})}
+								</div>
+							)}
+						</div>
+						<div className='taskItemHeaderRight'>
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
+								<div className='taskItemPropertyID'>
+									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 			);
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(13, "Error while rendering task header", error as string, "TaskItem.tsx/renderHeader");
-			console.warn("TaskItem.tsx/renderHeader : Error while rendering task header", error);
+			bugReporterManagerInsatance.addToLogs(13, error as string, "TaskItemV2.tsx/renderHeader");
 			return null;
 		}
 	};
@@ -1079,7 +1024,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
 
 			const showSubTaskSummaryBar = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized);
-			console.log("Show subtasks :", showSubtasks, "\nShow subtasks summary :", showSubTaskSummaryBar);
 
 			return (
 				<>
@@ -1160,8 +1104,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			);
 
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(14, "Error while rendering sub-tasks", error as string, "TaskItem.tsx/renderSubTasks");
-			console.warn("TaskItem.tsx/renderSubTasks : Error while rendering sub-tasks", error);
+			bugReporterManagerInsatance.addToLogs(14, error as string, "TaskItemV2.tsx/renderSubTasks");
 			return null;
 		}
 	};
@@ -1234,7 +1177,19 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
-										<div className='taskItemFooterPropertyContainerValue'>{task.filePath}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("folder")}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/')[task.filePath.split('/').length - 2] ? task.filePath.split('/')[task.filePath.split('/').length - 2] : "Vault root"}</div>
+									</div>
+								)}
+								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FullPath) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("path")}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').slice(0, -1).join("/") ? task.filePath.split('/').slice(0, -1).join("/") : "Vault root"}</div>
 									</div>
 								)}
 							</div>
@@ -1243,8 +1198,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				</>
 			);
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(15, "Error while rendering task footer", error as string, "TaskItem.tsx/renderFooter");
-			console.warn("TaskItem.tsx/renderFooter : Error while rendering task footer", error);
+			bugReporterManagerInsatance.addToLogs(15, error as string, "TaskItemV2.tsx/renderFooter");
 			return null;
 		}
 	};
@@ -1272,7 +1226,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	const renderChildTasks = () => {
 		try {
 			// Render only if the last viewed history is Kanban and there are child tasks
-			if (plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
+			if (plugin.settings.data.lastViewHistory.viewedType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
 				return (
 					<div className="taskItemChildTasksSection">
 						{/* Placeholder for future child tasks rendering */}
@@ -1306,17 +1260,16 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				return null;
 			}
 		} catch (error) {
-			// bugReporterManagerInsatance.showNotice(16, "Error while rendering child-tasks", error as string, "TaskItem.tsx/renderChildTasks");
-			console.warn("TaskItem.tsx/renderChildTasks : Error while rendering child-tasks", error);
+			bugReporterManagerInsatance.addToLogs(16, error as string, "TaskItemV2.tsx/renderChildTasks");
 			return null;
 		}
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.priority, task.tags, activeBoardSettings]);
-	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.body, showSubtasks]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.visiblePropertiesList, task.priority, task.tags, activeBoardSettings]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.visiblePropertiesList, task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
-	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
+	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
 
 	// ========================================
 	// RETURN STATEMENT (UPDATED)
@@ -1325,11 +1278,14 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		<div className='taskItemContainer'>
 			<div
 				ref={taskItemRef}
-				className={`taskItem ${isThistaskCompleted ? 'completed' : ''} ${isDragging ? 'taskItem-dragging' : ''}`}
+				className={`taskItem ${isThistaskCompleted ? 'completed' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
+				draggable={true}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
 			>
 				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
 				<div className="taskItemMainContent">
@@ -1337,7 +1293,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					{memoizedRenderHeader}
 
 					{/* Drag Handle and Task Menu button */}
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
+					{plugin.settings.data.experimentalFeatures && (
 						<>
 							{
 								Platform.isPhone ? (
@@ -1347,12 +1303,12 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								) : (
 									<>
 										{/* Drag Handle */}
-										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.lastViewHistory.viewedType === viewTypeNames.kanban && (
 											<div className="taskItemDragBtn"
-												// aria-label={t("drag-task-card")}
-												draggable={true}
-												onDragStart={handleDragStart}
-												onDragEnd={handleDragEnd}
+											// aria-label={t("drag-task-card")}
+											// draggable={true}
+											// onDragStart={handleDragStart}
+											// onDragEnd={handleDragEnd}
 											>
 												<Grip size={18} enableBackground={0} opacity={0.4} />
 											</div>

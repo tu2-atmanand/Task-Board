@@ -2,20 +2,18 @@
 
 import React, { useMemo, memo } from 'react';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
-import { taskItem, taskJsonMerged } from 'src/interfaces/TaskItem';
-import Column from './Column';
+import { taskItem } from 'src/interfaces/TaskItem';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
-import { ChevronDown, ChevronLast, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
 	board: Board;
-	allTasks: taskJsonMerged | undefined;
 	tasksPerColumn: taskItem[][];
-	lazyLoadingEnabled: boolean;
 }
 
 interface SwimlaneRow {
@@ -28,11 +26,9 @@ interface SwimlaneRow {
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	plugin,
 	board,
-	allTasks,
 	tasksPerColumn,
-	lazyLoadingEnabled,
 }) => {
-	const ColumnComponent = lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 
 	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
 	const {
@@ -46,14 +42,21 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		minimized
 	} = board.swimlanes;
 
+	const activeColumns = board.columns
+		.filter((col) => col.active);
+	// .map((col) => ({
+	// 	// create a shallow copy so we don't mutate original board state
+	// 	...col,
+	// 	sortCriteria: col.sortCriteria || [],
+	// 	tasksIdManualOrder: Array.isArray(col.tasksIdManualOrder) ? col.tasksIdManualOrder : [],
+	// }));
+
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
 		if (!board.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
 		}
 
-
 		// Get all active columns
-		const activeColumns = board.columns.filter((col) => col.active);
 		if (activeColumns.length === 0) return [];
 
 		// Extract unique values for the swimlane property from tasksPerColumn
@@ -224,23 +227,27 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// 	);
 	// }
 
-	const activeColumns = board.columns.filter((col) => col.active);
-
 	async function handleSwimlaneMinimize(rowIndex: number) {
 		try {
 			const swimlaneName = swimlanes[rowIndex]?.swimlaneName;
 			if (!swimlaneName) return;
 			const boardIndex = board.index; // plugin.settings.data.boardConfigs.findIndex((b) => b.index === board.index);
 			if (boardIndex === -1) return;
-			const swimCfg = plugin.settings.data.boardConfigs[boardIndex].swimlanes || { minimized: [] };
+			const swimCfg = board.swimlanes || { minimized: [] };
 			const arr = Array.isArray(swimCfg.minimized) ? [...swimCfg.minimized] : [];
 			const idx = arr.indexOf(swimlaneName);
 			if (idx === -1) arr.push(swimlaneName); else arr.splice(idx, 1);
-			plugin.settings.data.boardConfigs[boardIndex].swimlanes.minimized = arr;
-			await plugin.saveSettings();
+			board.swimlanes.minimized = arr;
+
+
+			await plugin.taskBoardFileManager.saveBoard(board, boardIndex);
 			eventEmitter.emit('REFRESH_BOARD');
 		} catch (err) {
-			console.error('Error toggling swimlane minimize:', err);
+			bugReporterManagerInsatance.addToLogs(
+				121,
+				String(err),
+				"KanbanSwimlanesContainer.tsx/handleSwimlaneMinimize",
+			);
 		}
 	}
 
@@ -453,7 +460,7 @@ const MemoizedSwimlanColumn = memo<{
 	activeBoardData: Board;
 	columnData: ColumnData;
 	tasksForThisColumn: taskItem[];
-	Component: typeof Column | typeof LazyColumn;
+	Component: typeof LazyColumn;
 	hideColumnHeader?: boolean;
 	swimlaneData?: { property: string, value: string };
 	headerOnly?: boolean;

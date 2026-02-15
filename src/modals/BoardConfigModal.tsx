@@ -13,21 +13,21 @@ import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
-import { Board, swimlaneConfigs } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
-import { columnDataProp, AddColumnModal } from "./AddColumnModal";
+import { AddColumnModal } from "./AddColumnModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
 	settingManager: SettingsManager;
 	boards: Board[];
 	activeBoardIndex: number;
-	onSave: (updatedBoards: Board[]) => void;
+	onSave: (updatedBoards: Board[], boardIndex: number) => void;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
 }
@@ -174,7 +174,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		swimlaneModal.open();
 	};
 
-	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
+	const handleAddColumn = (boardIndex: number, columnData: ColumnData) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
 			id: columnData.id,
@@ -202,15 +202,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const modal = new AddColumnModal(plugin.app, {
 			app: plugin.app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
-			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
+			onSubmit: (columnData: ColumnData) => handleAddColumn(selectedBoardIndex, columnData),
 		});
 		modal.open();
 	};
 
 	const handleAddNewBoard = async (oldBoards: Board[]) => {
 		const newBoard: Board = {
+			id: generateRandomTempTaskId(),
 			name: t("new-board"),
-			index: localBoards.length,
 			columns: [],
 			hideEmptyColumns: false,
 			showColumnTags: true,
@@ -257,6 +257,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				sortCriteria: 'asc',
 			},
 		};
+
+		// Regenerate IDs for all columns to ensure uniqueness
+		if (duplicatedBoard.columns && duplicatedBoard.columns.length > 0) {
+			duplicatedBoard.columns = duplicatedBoard.columns.map((column) => ({
+				...column,
+				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
+			}));
+		}
+
 		const updatedBoards = [...localBoards, duplicatedBoard];
 		setLocalBoards(updatedBoards);
 		setSelectedBoardIndex(updatedBoards.length - 1);
@@ -270,24 +279,26 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			app,
 			mssg,
 			onConfirm: () => {
-				if (selectedBoardIndex !== -1) {
-					const updatedBoards = [...localBoards];
-					updatedBoards.splice(selectedBoardIndex, 1);
-					// Update indexes of boards below the deleted one
-					for (let i = selectedBoardIndex; i < updatedBoards.length; i++) {
-						updatedBoards[i].index = i;
-					}
-					setLocalBoards(updatedBoards);
-					setIsEdited(true);
-					if (updatedBoards.length === 0) {
-						handleAddNewBoard(updatedBoards);
-						setSelectedBoardIndex(0);
-					} else if (selectedBoardIndex !== 0) {
-						setSelectedBoardIndex(selectedBoardIndex - 1);
-					}
-				} else {
-					new Notice(t("no-board-selected-to-delete"));
-				}
+				new Notice('NOT IMPLEMENTED');
+
+				// if (selectedBoardIndex !== -1) {
+				// 	const updatedBoards = [...localBoards];
+				// 	updatedBoards.splice(selectedBoardIndex, 1);
+				// 	// Update indexes of boards below the deleted one
+				// 	for (let i = selectedBoardIndex; i < updatedBoards.length; i++) {
+				// 		updatedBoards[i].index = i;
+				// 	}
+				// 	setLocalBoards(updatedBoards);
+				// 	setIsEdited(true);
+				// 	if (updatedBoards.length === 0) {
+				// 		handleAddNewBoard(updatedBoards);
+				// 		setSelectedBoardIndex(0);
+				// 	} else if (selectedBoardIndex !== 0) {
+				// 		setSelectedBoardIndex(selectedBoardIndex - 1);
+				// 	}
+				// } else {
+				// 	new Notice(t("no-board-selected-to-delete"));
+				// }
 			},
 			onCancel: () => {
 				// console.log("Board Deletion Operation Cancelled.");
@@ -306,7 +317,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Function to save changes
 	const handleSave = () => {
-		onSave(localBoards);
+		onSave(localBoards, selectedBoardIndex);
 		// onClose();
 	};
 
@@ -541,7 +552,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
+					{plugin.settings.data.experimentalFeatures && (
 						<div className="boardConfigModalMainContent-Active-Body-InputItems">
 							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 								<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
@@ -786,7 +797,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												/>
 												<select
 													aria-label="Select date type"
-													value={column.datedBasedColumn?.dateType || plugin.settings.data.globalSettings.universalDate || UniversalDateOptions.dueDate}
+													value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -825,7 +836,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<>
 												<select
 													aria-label="Select date type"
-													value={column.datedBasedColumn?.dateType || plugin.settings.data.globalSettings.universalDate || UniversalDateOptions.dueDate}
+													value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
 													onChange={(e) =>
 														handleColumnChange(
 															boardIndex,
@@ -926,12 +937,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
 						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
-
 						<hr className="boardConfigModalHr-100" />
-
-						{selectedBoardIndex !== -1 && (
-							<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
-						)}
+						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 				</div>
 				<div className="boardConfigModalMainContent">
@@ -941,9 +948,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					}
 				</div>
 			</div>
-			{selectedBoardIndex !== -1 && (
-				<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
-			)}
+
+			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
 		</>
 	);
 };
@@ -955,14 +961,14 @@ export class BoardConfigureModal extends Modal {
 	boards: Board[];
 	activeBoardIndex: number;
 	isEdited: boolean;
-	onSave: (updatedBoards: Board[]) => void;
+	onSave: (updatedBoards: Board[], boardIndex: number) => void;
 	plugin: TaskBoard;
 
 	constructor(
 		plugin: TaskBoard,
 		boards: Board[],
 		activeBoardIndex: number,
-		onSave: (updatedBoards: Board[]) => void
+		onSave: (updatedBoards: Board[], boardIndex: number) => void
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
@@ -984,9 +990,9 @@ export class BoardConfigureModal extends Modal {
 				settingManager={this.settingsManager}
 				boards={this.boards}
 				activeBoardIndex={this.activeBoardIndex}
-				onSave={(updatedBoards: Board[]) => {
+				onSave={(updatedBoards: Board[], boardIndex: number) => {
 					this.isEdited = false;
-					this.onSave(updatedBoards);
+					this.onSave(updatedBoards, boardIndex);
 					this.close();
 				}}
 				onClose={() => this.close()}
@@ -1012,12 +1018,12 @@ export class BoardConfigureModal extends Modal {
 		closeConfirmModal.open();
 	}
 
-	handleSave() {
-		// Trigger save functionality if required before closing
-		this.onSave(this.boards);
-		this.isEdited = false;
-		this.close();
-	}
+	// handleSave() {
+	// 	// Trigger save functionality if required before closing
+	// 	this.onSave(this.boards);
+	// 	this.isEdited = false;
+	// 	this.close();
+	// }
 
 	onClose() {
 		// Clean up React rendering

@@ -14,7 +14,6 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
-import { bugReporter } from "src/services/OpenModals";
 import { defaultTaskStatuses } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
@@ -25,7 +24,7 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
  */
 export function isTaskNotePresentInFrontmatter(
 	taskNoteIdentifierTag: string,
-	frontmatter: Partial<customFrontmatterCache> | undefined
+	frontmatter: Partial<customFrontmatterCache> | undefined,
 ): boolean {
 	if (!frontmatter || !frontmatter.tags) {
 		return false;
@@ -50,12 +49,12 @@ export function isTaskNotePresentInFrontmatter(
  */
 export function isTaskNotePresentInTags(
 	taskNoteIdentifierTag: string,
-	tags: string[]
+	tags: string[],
 ): boolean {
 	return tags
 		? tags.some((tag) =>
-				tag.toLowerCase().includes(taskNoteIdentifierTag.toLowerCase())
-		  )
+				tag.toLowerCase().includes(taskNoteIdentifierTag.toLowerCase()),
+			)
 		: false;
 }
 
@@ -68,14 +67,14 @@ export function isTaskNotePresentInTags(
 export function extractTaskNoteProperties(
 	frontmatter: Partial<customFrontmatterCache> | undefined,
 	filePath: string,
-	settings: PluginDataJson
+	settings: PluginDataJson,
 ): Partial<taskItem> {
 	if (!frontmatter) {
 		return {};
 	}
 
 	const frontmatterFormatting: frontmatterFormatting[] =
-		settings.data.globalSettings.frontmatterFormatting;
+		settings.data.frontmatterFormatting;
 
 	return {
 		id:
@@ -86,20 +85,20 @@ export function extractTaskNoteProperties(
 				getCustomFrontmatterKey("title", frontmatterFormatting)
 			] || "",
 		tags: Array.isArray(
-			frontmatter[getCustomFrontmatterKey("tags", frontmatterFormatting)]
+			frontmatter[getCustomFrontmatterKey("tags", frontmatterFormatting)],
 		)
 			? frontmatter[
 					getCustomFrontmatterKey("tags", frontmatterFormatting)
-			  ]
+				]
 			: typeof frontmatter[
-					getCustomFrontmatterKey("tags", frontmatterFormatting)
-			  ] === "string"
-			? frontmatter[
-					getCustomFrontmatterKey("tags", frontmatterFormatting)
-			  ]
-					.split(",")
-					.map((tag: string) => tag.trim())
-			: [],
+						getCustomFrontmatterKey("tags", frontmatterFormatting)
+				  ] === "string"
+				? frontmatter[
+						getCustomFrontmatterKey("tags", frontmatterFormatting)
+					]
+						.split(",")
+						.map((tag: string) => tag.trim())
+				: [],
 		time:
 			frontmatter[
 				getCustomFrontmatterKey("time", frontmatterFormatting)
@@ -131,13 +130,13 @@ export function extractTaskNoteProperties(
 		priority: mapPriorityNameFromFrontmatter(
 			frontmatter[
 				getCustomFrontmatterKey("priority", frontmatterFormatting)
-			]
+			],
 		),
 		status: getStatusSymbolFromStatusName(
 			frontmatter[
 				getCustomFrontmatterKey("status", frontmatterFormatting)
 			],
-			settings
+			settings,
 		),
 		dependsOn:
 			frontmatter[
@@ -197,11 +196,11 @@ export function getPriorityNameForTaskNote(priority: number): string {
 
 export function getCustomFrontmatterKey(
 	taskItemKey: string,
-	frontmatterFormatting: frontmatterFormatting[]
+	frontmatterFormatting: frontmatterFormatting[],
 ): string {
 	// Find the custom mapping for this task item key
 	const customMapping = frontmatterFormatting.find(
-		(mapping) => mapping.taskItemKey === taskItemKey
+		(mapping) => mapping.taskItemKey === taskItemKey,
 	);
 
 	// Return custom frontmatter key if found, otherwise return the original key
@@ -216,7 +215,7 @@ export function getCustomFrontmatterKey(
  */
 export function getStatusSymbolFromStatusName(
 	statusName: string | undefined,
-	settings: PluginDataJson
+	settings: PluginDataJson,
 ): string {
 	if (!statusName) return " ";
 
@@ -229,7 +228,7 @@ export function getStatusSymbolFromStatusName(
 	// return " ";
 
 	const tasksPluginStatusConfigs =
-		settings.data.globalSettings.customStatuses;
+		settings.data.customStatuses;
 	let statusSymbol = "";
 	tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 		if (customStatus.name === statusName) {
@@ -248,7 +247,7 @@ export function getStatusSymbolFromStatusName(
  */
 export function getStatusNameFromStatusSymbol(
 	statusSymbol: string | undefined,
-	globalSettings: globalSettingsData
+	globalSettings: globalSettingsData,
 ): string {
 	if (!statusSymbol) return "pending";
 
@@ -286,7 +285,7 @@ export function getStatusNameFromStatusSymbol(
 export function formatTaskNoteContent(
 	plugin: TaskBoard,
 	updatedTask: taskItem,
-	oldNoteContent: string
+	oldNoteContent: string,
 ): {
 	newContent: string;
 	newFrontmatter: string;
@@ -295,14 +294,14 @@ export function formatTaskNoteContent(
 	try {
 		const existingFrontmatter = extractFrontmatterFromContent(
 			plugin,
-			oldNoteContent
+			oldNoteContent,
 		);
 
 		// Update frontmatter properties based on updatedTask
 		const updatedFrontmatter = updateFrontmatterProperties(
 			plugin,
 			existingFrontmatter,
-			updatedTask
+			updatedTask,
 		);
 		const newFrontmatter = createYamlFromObject(updatedFrontmatter);
 
@@ -315,7 +314,11 @@ export function formatTaskNoteContent(
 		}`; // I hope the content returned from the stringifyYaml API will always have a newline at the end.
 		return { newContent, newFrontmatter, contentWithoutFrontmatter };
 	} catch (error) {
-		console.error("Error updating task note frontmatter:", error);
+		bugReporterManagerInsatance.addToLogs(
+			157,
+			String(error),
+			"TaskNoteUtils.ts/formatTaskNoteContent",
+		);
 		return {
 			newContent: "",
 			newFrontmatter: "",
@@ -334,7 +337,7 @@ export function formatTaskNoteContent(
 export async function updateFrontmatterInMarkdownFile(
 	plugin: TaskBoard,
 	task: taskItem,
-	forceId?: boolean
+	forceId?: boolean,
 ): Promise<void> {
 	try {
 		const file = plugin.app.vault.getFileByPath(task.filePath);
@@ -348,13 +351,7 @@ export async function updateFrontmatterInMarkdownFile(
 				plugin,
 				existing,
 				task,
-				forceId
-			);
-			console.log(
-				"updateFrontmatterInMarkdownFile...\nUpdated frontmatter",
-				updated,
-				"\nold frontmatter",
-				existing
+				forceId,
 			);
 			for (const key of Object.keys(updated)) {
 				existing[key] = updated[key];
@@ -395,7 +392,11 @@ export async function updateFrontmatterInMarkdownFile(
 
 		// await writeDataToVaultFile(plugin, task.filePath, newContent);
 	} catch (error) {
-		console.error("Error updating task note frontmatter:", error);
+		bugReporterManagerInsatance.addToLogs(
+			158,
+			String(error),
+			"TaskNoteUtils.ts/updateFrontmatterInMarkdownFile",
+		);
 		throw error;
 	}
 }
@@ -407,7 +408,7 @@ export async function updateFrontmatterInMarkdownFile(
  */
 export async function deleteTaskNote(
 	plugin: TaskBoard,
-	filePath: string
+	filePath: string,
 ): Promise<void> {
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
@@ -416,20 +417,19 @@ export async function deleteTaskNote(
 				64,
 				"There was an issue while deleting the task note.",
 				`File not found at path: ${filePath}`,
-				"deleteTaskNote"
+				"deleteTaskNote",
 			);
 			return;
 		}
 
-		await plugin.app.vault.delete(file);
+		await plugin.app.vault.trash(file, true);
 		new Notice(`Task note deleted: ${file.name}`);
 	} catch (error) {
-		console.error("Error deleting task note:", error);
 		bugReporterManagerInsatance.showNotice(
 			65,
 			"There was an issue while deleting the task note.",
 			String(error),
-			"deleteTaskNote"
+			"deleteTaskNote",
 		);
 		throw error;
 	}
@@ -442,7 +442,7 @@ export async function deleteTaskNote(
  */
 export async function archiveTaskNote(
 	plugin: TaskBoard,
-	filePath: string
+	filePath: string,
 ): Promise<void> {
 	try {
 		const file = plugin.app.vault.getFileByPath(filePath);
@@ -451,14 +451,14 @@ export async function archiveTaskNote(
 				66,
 				"There was an issue while archiving the task note.",
 				`File not found at path: ${filePath}`,
-				"archiveTaskNote"
+				"archiveTaskNote",
 			);
 			return;
 		}
 
 		// Get the archive folder path from settings
 		const archiveFolderPath =
-			plugin.settings.data.globalSettings.archivedTBNotesFolderPath;
+			plugin.settings.data.archivedTBNotesFolderPath;
 
 		if (!archiveFolderPath || archiveFolderPath.trim() === "") {
 			new Notice("Archive folder path is not configured in settings");
@@ -475,7 +475,7 @@ export async function archiveTaskNote(
 
 		// Construct the new file path
 		const newFilePath = normalizePath(
-			`${normalizedArchivePath}/${file.name}`
+			`${normalizedArchivePath}/${file.name}`,
 		);
 
 		// Check if a file with the same name already exists in the archive folder
@@ -485,11 +485,11 @@ export async function archiveTaskNote(
 			const nameWithoutExt = file.basename;
 			const ext = file.extension;
 			const uniqueFilePath = normalizePath(
-				`${normalizedArchivePath}/${nameWithoutExt}-${timestamp}.${ext}`
+				`${normalizedArchivePath}/${nameWithoutExt}-${timestamp}.${ext}`,
 			);
 			await plugin.app.vault.rename(file, uniqueFilePath);
 			new Notice(
-				`Task note archived as: ${nameWithoutExt}-${timestamp}.${ext}`
+				`Task note archived as: ${nameWithoutExt}-${timestamp}.${ext}`,
 			);
 		} else {
 			await plugin.app.vault.rename(file, newFilePath);
@@ -502,12 +502,11 @@ export async function archiveTaskNote(
 		if (plugin.vaultScanner.tasksCache.Completed[filePath])
 			delete plugin.vaultScanner.tasksCache.Completed[filePath];
 	} catch (error) {
-		console.error("Error archiving task note:", error);
 		bugReporterManagerInsatance.showNotice(
 			67,
 			"There was an issue while archiving the task note.",
 			String(error),
-			"archiveTaskNote"
+			"archiveTaskNote",
 		);
 		// throw error;
 	}

@@ -1,5 +1,6 @@
 /**
  * This BoardFilters component has been inspired from Bases filter and Task Genius plugin filters. All credits for this component go to the developer of Task Genius plugin.
+ * 
  * Changes made to the original code:
  * 	 - Added type safetly at various places.
  *   - This component can be used for both board as well as column.

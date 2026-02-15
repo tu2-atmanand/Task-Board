@@ -23,14 +23,12 @@ import { getAllTaskTags } from "../TaskItemUtils";
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
-	activeBoardIndex: number,
+	activeBoardData: Board,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged | null,
-	onBoardDataChange?: (boardData: Board) => void
+	onBoardDataChange?: (boardData: Board) => void,
 ): taskItem[] => {
-	if (activeBoardIndex < 0 || !allTasks) return [];
-
-	const boardConfigs = settings.data.boardConfigs;
+	if (!allTasks) return [];
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
@@ -143,7 +141,7 @@ export const columnSegregator = (
 				const moment = _moment as unknown as typeof _moment.default;
 				const diffDays = moment(taskUniversalDate).diff(
 					moment(today),
-					"days"
+					"days",
 				);
 
 				// console.log(
@@ -165,7 +163,7 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.untagged:
 			tasksToDisplay = pendingTasks.filter(
-				(task) => getAllTaskTags(task).length === 0
+				(task) => getAllTaskTags(task).length === 0,
 			);
 			break;
 		case colTypeNames.namedTag:
@@ -178,10 +176,10 @@ export const columnSegregator = (
 
 					const result = matchTagsWithWildcards(
 						columnData?.coltag || "",
-						tag
+						tag,
 					);
 					return result !== null;
-				})
+				}),
 			);
 			break;
 		case colTypeNames.pathFiltered:
@@ -208,7 +206,7 @@ export const columnSegregator = (
 									// Check if the task's file path contains the pattern
 									return lowerCasePath.includes(pattern);
 								}
-							}
+							},
 						);
 						return matchedPattern;
 					});
@@ -221,23 +219,21 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.otherTags:
 			// 1. Get the current board based on activeBoardIndex index
-			const currentBoard = boardConfigs.find(
-				(board: Board) => board.index === activeBoardIndex
-			);
+			const currentBoard = activeBoardData;
 
 			// 2. Collect all coltags from columns where colType is 'namedTag'
 			const namedTags =
 				currentBoard?.columns
 					.filter(
 						(col: ColumnData) =>
-							col.colType === colTypeNames.namedTag && col.coltag
+							col.colType === colTypeNames.namedTag && col.coltag,
 					)
 					.map((col: ColumnData) =>
-						col.coltag?.toLowerCase().replace(`#`, "")
+						col.coltag?.toLowerCase().replace(`#`, ""),
 					)
 					.filter(
 						(tag): tag is string =>
-							typeof tag === "string" && tag.length > 0
+							typeof tag === "string" && tag.length > 0,
 					) || [];
 
 			// 3. Now filter tasks
@@ -270,13 +266,13 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.taskPriority:
 			tasksToDisplay = pendingTasks.filter(
-				(task) => task.priority === columnData.taskPriority
+				(task) => task.priority === columnData.taskPriority,
 			);
 			break;
 		case colTypeNames.taskStatus:
 			const allTasks = [...pendingTasks, ...completedTasks];
 			tasksToDisplay = allTasks.filter(
-				(task) => task.status === columnData.taskStatus
+				(task) => task.status === columnData.taskStatus,
 			);
 			break;
 		case colTypeNames.allPending:
@@ -301,11 +297,11 @@ export const columnSegregator = (
 	 * 		SORTING
 	 * -------------------------------------------------------------
 	 */
-	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
+	if (columnData?.sortCriteria && columnData.sortCriteria.length > 0) {
 		// TODO : This code can be moved inside the ColumnSortingAlgorithm function.
 		// If manualOrder is one of the sorting criteria, apply manual ordering using columnData.tasksIdManualOrder
 		const hasManualOrder = columnData.sortCriteria.some(
-			(c) => c.criteria === "manualOrder"
+			(c) => c.criteria === "manualOrder",
 		);
 		if (hasManualOrder) {
 			// Ensure tasksIdManualOrder exists
@@ -316,7 +312,7 @@ export const columnSegregator = (
 			// Add any new tasks (not present in manual order) to the TOP of the manual order array
 			const currentIds = tasksToDisplay.map((t) => t.id);
 			const missingIds = currentIds.filter(
-				(id) => !columnData.tasksIdManualOrder!.includes(id)
+				(id) => !columnData.tasksIdManualOrder!.includes(id),
 			);
 			if (missingIds.length > 0) {
 				// Prepend missing ids so newest appear on top
@@ -327,7 +323,7 @@ export const columnSegregator = (
 			}
 
 			let newTasksIdManualOrder = columnData.tasksIdManualOrder;
-			let currentBoardData = settings.data.boardConfigs[activeBoardIndex];
+			let currentBoardData = activeBoardData;
 
 			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
@@ -340,7 +336,7 @@ export const columnSegregator = (
 				} else {
 					newTasksIdManualOrder.splice(
 						newTasksIdManualOrder.indexOf(id),
-						1
+						1,
 					);
 					didTasksIdManualOrderChange = true;
 				}
@@ -350,12 +346,7 @@ export const columnSegregator = (
 			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
 			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
 				newTasksIdManualOrder;
-			console.log(
-				"columnSegregator...\nNew manual order :",
-				newTasksIdManualOrder,
-				"\nOld manual order :",
-				columnData.tasksIdManualOrder
-			);
+
 			if (onBoardDataChange && didTasksIdManualOrderChange) {
 				onBoardDataChange(currentBoardData);
 			}
@@ -364,9 +355,9 @@ export const columnSegregator = (
 		} else {
 			// Default algorithm for other criteria
 			tasksToDisplay = columnSortingAlgorithm(
-				settings.data.globalSettings.defaultStartTime,
+				settings.data.defaultStartTime,
 				tasksToDisplay,
-				columnData.sortCriteria
+				columnData.sortCriteria,
 			);
 		}
 	}

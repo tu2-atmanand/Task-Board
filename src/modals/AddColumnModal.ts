@@ -1,43 +1,20 @@
 // /src/modal/AddColumnModal.ts
 
 import { App, Modal } from "obsidian";
+import { ColumnData } from "src/interfaces/BoardConfigs";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { columnTypeAndNameMapping } from "src/interfaces/Mapping";
-
 import { t } from "src/utils/lang/helper";
-
-export type columnDataProp = {
-	id: number;
-	colType: string;
-	name: string;
-	active?: boolean;
-	datedBasedColumn?: { dateType: string; from: number; to: number };
-	coltag?: string;
-	taskStatus?: string;
-	taskPriority?: number;
-	limit?: number;
-	filePaths?: string;
-};
+import { generateRandomNumber } from "src/utils/TaskItemUtils";
 
 interface AddColumnModalProps {
 	app: App;
 	onCancel: () => void;
-	onSubmit: (columnData: columnDataProp) => void;
+	onSubmit: (columnData: ColumnData) => void;
 }
 
 export class AddColumnModal extends Modal {
-	private onSubmit: (columnData: {
-		id: number;
-		colType: string;
-		name: string;
-		active?: boolean;
-		datedBasedColumn?: { dateType: string; from: number; to: number };
-		coltag?: string;
-		taskStatus?: string;
-		taskPriority?: number;
-		limit?: number;
-		filePaths?: string;
-	}) => void;
+	private onSubmit: (columnData: ColumnData) => void;
 	private onCancel: () => void;
 	private colType: string;
 	private name: string;
@@ -156,7 +133,9 @@ export class AddColumnModal extends Modal {
 				this.colType === colTypeNames.undated
 			) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0], // Generate a random ID
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					datedBasedColumn: {
@@ -167,42 +146,54 @@ export class AddColumnModal extends Modal {
 				}); // Add range data
 			} else if (this.colType === colTypeNames.namedTag) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					coltag: "",
 				});
 			} else if (this.colType === colTypeNames.taskStatus) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					taskStatus: "",
 				});
 			} else if (this.colType === colTypeNames.taskPriority) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					taskPriority: 1,
 				});
 			} else if (this.colType === "completed") {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					limit: 20,
 				}); // Add limit
 			} else if (this.colType === colTypeNames.pathFiltered) {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 					filePaths: "",
 				}); // Add path filter
 			} else {
 				this.onSubmit({
-					id: crypto.getRandomValues(new Uint32Array(1))[0],
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
 					colType: this.colType,
 					name: this.name,
 				});

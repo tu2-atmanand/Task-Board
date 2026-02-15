@@ -9,22 +9,20 @@ import { Board } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { loadBoardsData } from "src/utils/JsonFileOperations";
-import { bugReporter, openScanVaultModal } from "../services/OpenModals";
+import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
-	boards: Board[];
+	// boards: Board[];
 	root: Root | null = null;
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
 		this.app = plugin.app;
 		this.plugin = plugin;
-		this.boards = [];
+		// this.boards = [];
 		this.icon = TaskBoardIcon;
 	}
 
@@ -63,8 +61,23 @@ export class TaskBoardView extends ItemView {
 
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
-		await this.loadBoards();
-		this.renderBoard();
+		// All boards data should be cumpulsorily loaded.
+		let allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
+
+		// Check if a specific .taskboard file was clicked from File Navigator
+		// First check the leaf instance directly (set by monkey patch)
+		const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
+
+		console.log("TaskBoardView.tsx : clickedFilePath from leaf:", clickedFilePath);
+
+		let clickedFileData: Board | null;
+		if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
+			// User clicked on a specific .taskboard file - load just that file
+			clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
+			this.renderBoard(allBoardsData, clickedFileData);
+		} else {
+			this.renderBoard(allBoardsData);
+		}
 	}
 
 	async highlighgtScanvaultIcon() {
@@ -79,27 +92,27 @@ export class TaskBoardView extends ItemView {
 		}
 	}
 
-	private async loadBoards() {
-		try {
-			this.boards = await loadBoardsData(this.plugin);
-		} catch (err) {
-			bugReporterManagerInsatance.showNotice(
-				89,
-				"Failed to load board configurations from data.json",
-				String(err),
-				"TaskBoardView.tsx/loadBoards"
-			);
-		}
-	}
+	// private async loadBoards() {
+	// 	try {
+	// 		this.boards = await loadBoardsData(this.plugin);
+	// 	} catch (err) {
+	// 		bugReporterManagerInsatance.showNotice(
+	// 			89,
+	// 			"Failed to load board configurations from data.json",
+	// 			String(err),
+	// 			"TaskBoardView.tsx/loadBoards"
+	// 		);
+	// 	}
+	// }
 
-	private renderBoard() {
+	private renderBoard(allBoardsData: Board[], clickedFileData?: Board | null) {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
 				<TaskBoardViewContent
-					app={this.app}
 					plugin={this.plugin}
-					boardConfigs={this.boards}
+					allBoards={allBoardsData}
+					clickedFileBoard={clickedFileData}
 				/>,
 			</StrictMode>,
 		);

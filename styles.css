@@ -138,8 +138,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskBoardViewSection-mobile {
-	height: 100%;
-	/* max-height: 93%; */
+	/* height: 100%; */
+	max-height: 92%;
 	/* margin-block-end: 20px; */
 	padding-block-end: 4.2rem;
 }
@@ -268,9 +268,30 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskboardActionshBtn:hover,
 .RefreshBtn:hover,
 .taskBoardViewHeaderOptionsBtn:hover,
-.taskboardActionshBtn:hover {
+.taskboardActionshBtn:hover,
+.taskBoardViewDropdown:hover {
 	/* border: var(--border-width) solid olive; */
 	box-shadow: 0px 0px 1px 1px var(--color-accent);
+}
+
+.taskBoardViewDropdown {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	border-radius: 5px;
+	padding-inline: 4px;
+	min-height: 100%;
+	box-shadow: 0px 0px 1px 1px var(--text-faint);
+	background: var(--background-modifier-border);
+	min-width: 80px;
+}
+
+.taskBoardViewDropdownIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .taskBoardViewHeaderHideElements {
@@ -436,16 +457,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-height: 80vh;
 }
 
-.tasksContainer-SH {
+.tasksContainer.SH {
 	padding-inline: 7px;
 	padding-block: 12px;
-	flex: 1;
-	overflow-y: auto;
 	gap: 12px;
-	display: flex;
-	flex-direction: column;
 	/* height: auto; */
-	max-height: 80vh;
 
 	/* Firefox */
 	scrollbar-width: none;
@@ -529,10 +545,73 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 /* Drag and Drop Styling */
 
+/* Element being dragged: dim / scale */
+.task-item-dragging,
+.taskItem.task-item-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
 /* Dragged task item dimming effect */
+.task-item-dragging-dimmed {
+	opacity: 0.45 !important;
+	filter: blur(0.0px);
+}
+
 .taskItem.task-item-dragging-dimmed {
 	opacity: 0.45;
 	transition: opacity 0.2s ease-in-out;
+}
+
+/* Drop indicator (card) - rectangular indicator positioned absolutely inside cards container */
+.taskboard-drop-indicator {
+	position: absolute;
+	background-color: var(--interactive-accent);
+	border-radius: 4px;
+	pointer-events: none;
+	z-index: 10000;
+	transition: top 0.08s ease, left 0.08s ease, width 0.08s ease;
+	display: none;
+}
+
+.taskboard-drop-indicator.is-visible {
+	display: block;
+}
+
+/* Card drop indicator horizontal */
+.taskboard-drop-indicator {
+	height: 6px;
+	box-shadow: 0 0 8px var(--interactive-accent);
+}
+
+/* Board and cards containers should be positioning contexts */
+.TaskBoardColumnsSection {
+	position: relative;
+}
+
+/* Smooth transitions for columns/cards */
+.TaskBoardColumnsSection {
+	transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.taskItem {
+	transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+/* Highlight effect when dropped */
+@keyframes kanban-drop-highlight {
+	0% {
+		box-shadow: 0 0 0 3px var(--interactive-accent);
+	}
+
+	100% {
+		box-shadow: none;
+	}
+}
+
+.taskboard-just-dropped {
+	animation: kanban-drop-highlight 0.45s ease-out;
 }
 
 /* Target column allowed drop styling */
@@ -605,12 +684,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	transition: box-shadow 0.3s ease-in-out;
 }
 
-.taskItem .taskItem-dragging {
-	opacity: 0.5;
-	transform: scale(0.98);
-	box-shadow: var(--shadow-l);
-}
-
 .colorIndicator {
 	width: 0.3em;
 	/* height: 100%; */
@@ -637,6 +710,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: row;
 	min-width: 100%;
+	align-items: flex-start;
 }
 
 .taskItemBodyContent {
@@ -687,7 +761,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	cursor: pointer;
 	mask-image: unset;
 	-webkit-mask-image: unset;
-	margin-block-start: 3px !important;
+	vertical-align: middle;
 }
 
 .taskItemCheckbox-checked {
@@ -1049,9 +1123,39 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemHeader {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
+	gap: 0.5rem;
+}
+
+.taskItemHeaderTop {}
+
+.taskitemHeaderTopFilename {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 1rem;
+	background: var(--background-modifier-hover);
+	padding-block: 2px;
+	padding-inline: 10px;
+	min-width: 100%;
+	max-width: 100%;
+}
+
+.taskitemHeaderTopFilenameValue {
+	color: var(--tab-text-color-active);
+	font-size: 0.8rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.taskItemHeaderBottom {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	min-width: 100%;
 }
 
 .taskItemHeaderLeft {
@@ -1102,15 +1206,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .prioirtyCircle.p2 {
-	background-color: var(--status-in-progress-color);
+	background-color: var(--color-blue);
 }
 
 .prioirtyCircle.p3 {
-	background-color: var(--status-in-progress-color);
+	background-color: var(--color-blue);
 }
 
 .prioirtyCircle.p4 {
-	background-color: var(--status-in-progress-color);
+	background-color: var(--color-blue);
 }
 
 .prioirtyCircle.p5 {
@@ -1225,6 +1329,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 1em;
 	align-items: center;
 	font-size: var(--font-ui-smaller);
+	max-width: 100%;
 }
 
 .taskItemFooterPropertyContainerLabel {
@@ -1236,7 +1341,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	max-width: calc(var(--task-board-column-width) - 4rem);
+	max-width: calc(var(--task-board-column-width) - 5rem);
 }
 
 /*-----------------------------------------------------------
@@ -1663,10 +1768,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	margin-block: 0 !important;
 }
 
-.taskItemCheckbox {
-	vertical-align: middle;
-}
-
 .EditTaskModalLiveEditor {
 	min-height: 20vh;
 	/* max-height: 40vh; */
@@ -1848,17 +1949,16 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	}
 
 	.EditTaskModalHomeToggleBtn {
-		background-color: var(--accent-color, blue);
-		color: white;
 		border: none;
-		padding: 8px 12px;
-		border-radius: 4px;
+		border-radius: 7px;
 		cursor: pointer;
 		display: block;
 	}
 
-	.EditTaskModalHomeToggleBtn:hover {
-		background-color: darkblue;
+	.EditTaskModalHomeToggleBtn svg {
+		display: flex;
+		align-content: center;
+		vertical-align: middle;
 	}
 }
 
@@ -1997,7 +2097,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .boardConfigModalSidebarBtnArea-btn {
-	border-radius: var(--button-radius);
+	border-radius: 1rem;
 	border: var(--border-width) solid var(--table-header-border-color);
 	padding: 8px;
 	cursor: pointer;
@@ -2045,6 +2145,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-left: 1em;
 	/* overflow-y: auto; */
 	max-width: 50vw;
+	width: -webkit-fill-available;
 	max-height: calc(var(--dialog-max-height) - 6vh);
 }
 
@@ -2247,7 +2348,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 	.boardConfigModalMainContent {
 		max-width: 95vw;
-		width: 95vw;
+		width: -webkit-fill-available;
 		padding-left: 0 !important;
 		overflow-y: unset !important;
 	}
@@ -2270,7 +2371,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 		left: 1em;
 		width: 4.2em !important;
 		height: 2.5em !important;
-		color: white;
 		border: none;
 		padding: 9px 20px !important;
 		border-radius: 4px;
@@ -2319,7 +2419,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 		/* right: 1px; */
 		/* left: 1px; */
 		align-self: center;
-		background-color: var(--color-green) !important;
+		border: 2px solid var(--color-green) !important;
 		cursor: pointer;
 		width: 90%;
 	}
@@ -2376,7 +2476,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 
-/* /src/views/TaskBoardSettingConstructUI.ts */
+/*----------------------------------------------------
+	 /src/views/TaskBoardSettingConstructUI.ts 
+ ----------------------------------------------------*/
 
 /* .TaskBoardSettingTab {
 	max-width: fit-content;
@@ -2453,6 +2555,22 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskboard-compact-setting .setting-item-control {
 	min-width: auto;
+}
+
+.setting-item.taskBoard-settings-wide-input .setting-item-control {
+	min-width: 80%;
+
+	flex: 1 1 auto;
+	text-align: end;
+	display: flex !important;
+	justify-content: flex-end;
+	align-items: center;
+	gap: var(--size-4-2);
+	flex-wrap: wrap !important;
+}
+
+.setting-item.taskBoard-settings-wide-input .setting-item-control input[type='text'] {
+	min-width: -webkit-fill-available !important;
 }
 
 /* Hidden Properties in Live Editor and Reading Mode */
@@ -2698,6 +2816,11 @@ li:hover .taskboard-hidden-property {
 	transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.setting-item.tag-color-row-element {
+	border: none !important;
+	background-color: transparent !important;
+}
+
 .tag-color-row-element .setting-item-info {
 	display: none !important;
 }
@@ -2795,6 +2918,10 @@ li:hover .taskboard-hidden-property {
 	cursor: pointer !important;
 }
 
+.task-board-settingtab-add-tag-color-btn {
+	background-color: transparent !important;
+}
+
 .global-setting-tab-live-preview {
 	padding: 5px;
 	padding-block: 1em;
@@ -2867,7 +2994,9 @@ li:hover .taskboard-hidden-property {
 }
 
 
-/* /src/components/ScanVaultModal.tsx */
+/*------------------------------------------------------------
+		 /src/components/ScanVaultModal.tsx 
+------------------------------------------------------------*/
 
 .scanVaultModalHome {
 	min-width: 40vw;
@@ -3338,6 +3467,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox.taskItemCheckbox-checked:is([data-tas
 	cursor: pointer;
 	mask-image: unset;
 	-webkit-mask-image: unset;
+	background-image: none !important;
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-task=X],
@@ -3498,6 +3628,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 	mask-image: unset;
 	-webkit-mask-image: unset;
 	border: none !important;
+	background-image: none !important;
 }
 
 /*--Checkbox Type Icons--*/
@@ -3811,6 +3942,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	[data-task="H"],
 	[data-task="<"]) {
 	border: 0 !important;
+	background-image: none !important;
 	/* This will remove the border of the checkbox so only the icon is visible*/
 }
 
@@ -4723,6 +4855,10 @@ svg.react-flow__connectionline {
 
 .react-flow__panel.bottom {
 	bottom: 0;
+}
+
+.is-mobile .react-flow__panel.bottom {
+	bottom: 60px;
 }
 
 .react-flow__panel.top.center,
@@ -5908,7 +6044,7 @@ svg.react-flow__connectionline {
 .boardSidebarCardTitle {
 	font-weight: 500;
 	font-size: 1rem !important;
-	color: var(--background-modifier-border-focus) !important;
+	color: var(--text-faint) !important;
 	font-size: var(--font-size-default);
 }
 
@@ -5925,7 +6061,7 @@ svg.react-flow__connectionline {
 	width: 100%;
 	font-size: 0.9rem;
 	padding-block-start: 0.7rem;
-	color: var(--background-modifier-border-focus) !important;
+	color: var(--text-faint) !important;
 }
 
 .boardSidebarCard--active .boardSidebarCardDescription {
@@ -6836,6 +6972,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	gap: 5px;
+	backdrop-filter: blur(5px);
 }
 
 .swimlanesHeaderRow .TaskBoardColumnsSection {
@@ -7111,71 +7248,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	background-color: var(--background-secondary);
 	border-radius: 6px;
 	margin: 20px;
-}
-
-/* Element being dragged: dim / scale */
-.task-item-dragging,
-.taskItemContainer.task-item-dragging,
-.taskItem.task-item-dragging {
-	opacity: 0.5;
-	transform: scale(0.98);
-	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-}
-
-/* Drop indicator (card) - rectangular indicator positioned absolutely inside cards container */
-.taskboard-drop-indicator {
-	position: absolute;
-	background-color: var(--interactive-accent);
-	border-radius: 4px;
-	pointer-events: none;
-	z-index: 10000;
-	transition: top 0.08s ease, left 0.08s ease, width 0.08s ease;
-	display: none;
-}
-
-.taskboard-drop-indicator.is-visible {
-	display: block;
-}
-
-/* Card drop indicator horizontal */
-.taskboard-drop-indicator {
-	height: 6px;
-	box-shadow: 0 0 8px var(--interactive-accent);
-}
-
-/* Board and cards containers should be positioning contexts */
-.TaskBoardColumnsSection {
-	position: relative;
-}
-
-/* Smooth transitions for columns/cards */
-.TaskBoardColumnsSection {
-	transition: transform 0.18s ease, opacity 0.18s ease;
-}
-
-.taskItem {
-	transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-}
-
-/* Highlight effect when dropped */
-@keyframes kanban-drop-highlight {
-	0% {
-		box-shadow: 0 0 0 3px var(--interactive-accent);
-	}
-
-	100% {
-		box-shadow: none;
-	}
-}
-
-.taskboard-just-dropped {
-	animation: kanban-drop-highlight 0.45s ease-out;
-}
-
-/* Dimming helper used by manager */
-.task-item-dragging-dimmed {
-	opacity: 0.45 !important;
-	filter: blur(0.0px);
 }
 
 /* Swimlane minimize/expand animations */
@@ -7533,4 +7605,35 @@ Date picker modal styles
 .deletedFileIndicator {
 	min-width: 20px;
 	font-size: 16px;
+}
+
+
+/* -----------------------------------------------------------
+	MENU ITEMS
+------------------------------------------------------------ */
+
+.menu-item-title .contains-task-list {
+	margin-block: 4px;
+	padding-inline-start: 24px;
+}
+
+.menu-item-title .contains-task-list>li>input {
+	vertical-align: middle;
+}
+
+.menu-item-title .contains-task-list>li>input[type=checkbox]:checked::after {
+	padding-block-start: 4px;
+}
+
+
+/* ------------------------------------------------------
+	CUSTOM NOTICE CONTAINER
+*/
+
+.taskboardCustomMessageContainer h3 {
+	margin-top: 0 !important;
+}
+
+.taskboardCustomMessageContainerBold {
+	font-weight: 600;
 }

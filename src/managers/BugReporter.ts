@@ -1,9 +1,11 @@
 import { t } from "i18next";
 import TaskBoard from "main";
-import { Notice, TFolder } from "obsidian";
+import { Notice, } from "obsidian";
+import { newReleaseVersion } from "src/interfaces/Constants";
 import { BugReporterModal } from "src/modals/BugReporterModal";
 import { fsPromises } from "src/services/FileSystem";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 
 /**
  * Interface for bug report entries
@@ -13,6 +15,7 @@ interface BugReportEntry {
 	id: number;
 	message: string;
 	context: string;
+	version: string | null;
 	bugContent: string;
 }
 
@@ -28,7 +31,8 @@ class BugReporterManager {
 	private plugin: TaskBoard | null = null;
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
-	private readonly MAX_RECENT_LOGS = 10;
+	private readonly MAX_RECENT_LOGS = 20;
+	private readonly MAX_USED_ID = 181; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -59,13 +63,6 @@ class BugReporterManager {
 	}
 
 	/**
-	 * Get current timestamp in ISO format
-	 */
-	private getCurrentTimestamp(): string {
-		return new Date().toISOString();
-	}
-
-	/**
 	 * Ensure the log file exists with proper structure
 	 */
 	private async ensureLogFileExists(): Promise<void> {
@@ -80,13 +77,13 @@ class BugReporterManager {
 				if (!existingContent) {
 					// Create new log file with system info
 					const systemInfo = await getObsidianDebugInfo(
-						this.plugin!.app
+						this.plugin!.app,
 					);
 					const systemInfoText = this.formatSystemInfo(systemInfo);
 					const initialContent = `# Task Board Logs\n\n## System Information\n\n${systemInfoText}\n\n## Recent Bug Reports\n\n`;
 					await vault.adapter.write(
 						this.LOG_FILE_PATH,
-						initialContent
+						initialContent,
 					);
 				}
 			}
@@ -123,13 +120,13 @@ class BugReporterManager {
 
 			// Find the "Recent Bug Reports" section
 			const recentBugsSectionStart = content.indexOf(
-				"## Recent Bug Reports"
+				"## Recent Bug Reports",
 			);
 			if (recentBugsSectionStart === -1) return [];
 
 			// Extract content after "## Recent Bug Reports"
 			const contentAfterHeader = content.substring(
-				recentBugsSectionStart + "## Recent Bug Reports".length
+				recentBugsSectionStart + "## Recent Bug Reports".length,
 			);
 
 			// Split by the separator line
@@ -163,7 +160,7 @@ class BugReporterManager {
 
 			// Extract each field with more flexible matching
 			const timestampMatch = entryText.match(
-				/Timestamp\s*:\s*(.+?)(?=\n|$)/
+				/Timestamp\s*:\s*(.+?)(?=\n|$)/,
 			);
 			if (timestampMatch) {
 				entry.timestamp = timestampMatch[1].trim();
@@ -175,18 +172,22 @@ class BugReporterManager {
 			}
 
 			const messageMatch = entryText.match(
-				/Message\s*:\s*(.+?)(?=\nContext|$)/
+				/Message\s*:\s*(.+?)(?=\nContext|$)/,
 			);
 			if (messageMatch) {
 				entry.message = messageMatch[1].trim();
 			}
 
 			const contextMatch = entryText.match(
-				/Context\s*:\s*([\s\S]*?)(?=\n#### Bug Content|\n\n|$)/
+				/Context\s*:\s*([\s\S]*?)(?=\n#### Bug Content|\n\n|$)/,
 			);
 			if (contextMatch) {
 				entry.context = contextMatch[1].trim();
 			}
+
+			// Extract version (for backward compatibility, set to null if not found)
+			const versionMatch = entryText.match(/Version\s*:\s*(.+?)(?=\n|$)/);
+			entry.version = versionMatch ? versionMatch[1].trim() : "Older than 1.9.3";
 
 			// Extract bug content from code block
 			const bugContentMatch = entryText.match(/```log\n([\s\S]*?)\n```/);
@@ -220,6 +221,7 @@ class BugReporterManager {
 ID : ${entry.id}
 Message : ${entry.message}
 Context : ${entry.context}
+Version : ${newReleaseVersion}
 
 #### Bug Content
 \`\`\`log
@@ -234,7 +236,7 @@ ${entry.bugContent}
 		id: number,
 		message: string,
 		bugContent: string,
-		context: string
+		context: string,
 	): Promise<void> {
 		try {
 			const vault = this.plugin?.app.vault;
@@ -245,12 +247,13 @@ ${entry.bugContent}
 			// Parse existing bug reports
 			let bugReports = await this.parseBugReportEntries();
 
-			// Create new bug report entry
+			// Create new bug report entry with current version
 			const newEntry: BugReportEntry = {
-				timestamp: this.getCurrentTimestamp(),
+				timestamp: getCurrentLocalTimeString(),
 				id,
 				message,
 				context,
+				version: newReleaseVersion,
 				bugContent,
 			};
 
@@ -265,16 +268,12 @@ ${entry.bugContent}
 				.map((entry) => this.formatBugReportEntry(entry))
 				.join("\n\n-------------\n\n");
 
-			// Read current file to extract system info
-			const currentContent = await vault.adapter.read(this.LOG_FILE_PATH);
-			const systemInfoMatch = currentContent.match(
-				/(## System Information\n\n[\s\S]*?)(?=## Recent Bug Reports)/
-			);
-			const systemInfoSection = systemInfoMatch
-				? systemInfoMatch[1].trim()
-				: "## System Information\n\n";
+			// Regenerate system information fresh from current environment
+			const systemInfo = await getObsidianDebugInfo(this.plugin!.app);
+			const systemInfoText = this.formatSystemInfo(systemInfo);
+			const systemInfoSection = `## System Information\n\n${systemInfoText}`;
 
-			// Rebuild the file content
+			// Rebuild the file content with fresh system info
 			const newContent = `# Task Board Logs\n\n${systemInfoSection}\n\n## Recent Bug Reports\n\n${recentBugsText}\n`;
 
 			await vault.adapter.write(this.LOG_FILE_PATH, newContent);
@@ -290,7 +289,7 @@ ${entry.bugContent}
 		id: number,
 		message: string,
 		bugContent: string,
-		context: string
+		context: string,
 	) => {
 		// STEP 1 - Check if this type of bug, based on the id, is already visible to the user or not
 		if (this.alreadyShownBugsIDs.includes(id)) {
@@ -314,9 +313,10 @@ ${entry.bugContent}
 						onclick: () => {
 							const bugReportModal = new BugReporterModal(
 								this.plugin!,
+								id,
 								message,
 								bugContent,
-								context
+								context,
 							);
 							bugReportModal.open();
 							el.hide();
@@ -331,7 +331,7 @@ ${entry.bugContent}
 					});
 				});
 			}),
-			0
+			0,
 		);
 
 		bugReportNotice.messageEl.onClickEvent((e) => {
@@ -346,6 +346,27 @@ ${entry.bugContent}
 		this.appendBugReport(id, message, bugContent, context);
 	};
 
+	/**
+	 * Appends a new bug report at the end of the log file.
+	 */
+	addToLogs = (
+		id: number,
+		bugContent: string,
+		context: string,
+	) => {
+		// STEP 1 - Check if this type of bug, based on the id, is already visible to the user or not
+		if (this.alreadyShownBugsIDs.includes(id)) {
+			// Bug already shown, don't show again
+			return;
+		}
+
+		// STEP 2 - Store the ID to prevent showing the same error again
+		this.alreadyShownBugsIDs.push(id);
+
+		// STEP 3 - Append the bug report to the task-board-logs.md file
+		this.appendBugReport(id, "", bugContent, context);
+	};
+
 	async exportLogFile(): Promise<void> {
 		try {
 			const vault = this.plugin?.app.vault;
@@ -354,7 +375,6 @@ ${entry.bugContent}
 			await this.ensureLogFileExists();
 
 			const data = await vault.adapter.read(this.LOG_FILE_PATH);
-			console.log("data\n", data);
 			const exportFileName = "task-board-logs.txt";
 			// const fileContent = JSON.stringify(data, null, 2);
 
@@ -379,15 +399,15 @@ ${entry.bugContent}
 					folderPath.endsWith("/") || folderPath.endsWith("\\")
 						? folderPath + exportFileName
 						: folderPath +
-						  (folderPath.includes("/") ? "/" : "\\") +
-						  exportFileName;
+							(folderPath.includes("/") ? "/" : "\\") +
+							exportFileName;
 				await fsPromises.writeFile(exportPath, data, "utf8");
 				new Notice(`Log file exported to ${exportPath}`);
 			} else {
 				// Web: use file save dialog
 				let a = document.createElement("a");
 				a.href = URL.createObjectURL(
-					new Blob([data], { type: "application/json" })
+					new Blob([data], { type: "application/json" }),
 				);
 				a.download = exportFileName;
 				document.body.appendChild(a);
@@ -397,7 +417,7 @@ ${entry.bugContent}
 					URL.revokeObjectURL(a.href);
 				}, 1000);
 				new Notice(
-					"Log file exported. Check the folder where you downloaded the file."
+					"Log file exported. Check the folder where you downloaded the file.",
 				);
 			}
 		} catch (err) {

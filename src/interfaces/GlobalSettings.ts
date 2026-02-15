@@ -1,5 +1,4 @@
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
-import { BoardConfigs } from "./BoardConfigs";
 import {
 	EditButtonMode,
 	TagColorType,
@@ -19,6 +18,7 @@ import {
 	scanModeOptions,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
+import { DEFAULT_BOARDS } from "./BoardConfigs";
 
 export interface scanFilters {
 	files: {
@@ -29,7 +29,7 @@ export interface scanFilters {
 		polarity: number;
 		values: string[];
 	};
-	frontMatter: {
+	frontmatter: {
 		polarity: number;
 		values: string[];
 	};
@@ -65,6 +65,11 @@ export interface frontmatterFormatting {
 	property: string;
 	key: string;
 	taskItemKey: string;
+}
+
+export interface taskBoardFilesRegistryItem {
+	boardId: string;
+	filePath: string;
 }
 
 export interface globalSettingsData {
@@ -122,6 +127,7 @@ export interface globalSettingsData {
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
 	safeGuardFeature: boolean;
+	taskBoardFilesRegistry: taskBoardFilesRegistryItem[];
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
@@ -129,12 +135,6 @@ export interface globalSettingsData {
 		taskId?: string;
 	};
 	boundTaskCompletionToChildTasks: boolean;
-	kanbanView: {
-		lazyLoadingEnabled: boolean;
-		initialTaskCount: number;
-		loadMoreCount: number;
-		scrollThresholdPercent: number;
-	};
 	mapView: {
 		background: string;
 		mapOrientation: string;
@@ -151,12 +151,14 @@ export interface globalSettingsData {
 // Define the interface for GlobalSettings based on your JSON structure
 export interface PluginDataJson {
 	version: string;
-	data: {
-		boardConfigs: BoardConfigs;
-		globalSettings: globalSettingsData;
-	};
+	data: globalSettingsData;
 }
 
+/**
+ * @note There are hardcoded ids present in this data
+ * If you are changing the below configs, make sure the ids of
+ * two different objects are different.
+ */
 export const DEFAULT_SETTINGS: PluginDataJson = {
 	version: "", // Keep this empty only. Change the version number in the runOnPluginUpdate function inside main.ts file whenever you will going to release a new version.
 	data: {
@@ -164,7 +166,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				columns: [
 					{
-						id: 1,
+						id: 1851955511,
 						colType: colTypeNames.undated,
 						active: true,
 						collapsed: false,
@@ -177,7 +179,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
-						id: 2,
+						id: 1851955512,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -190,7 +192,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
-						id: 3,
+						id: 1851955513,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -203,7 +205,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
-						id: 4,
+						id: 1851955514,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -216,7 +218,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
-						id: 5,
+						id: 1851955515,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -229,7 +231,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						},
 					},
 					{
-						id: 6,
+						id: 1851955516,
 						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
@@ -260,7 +262,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				columns: [
 					{
-						id: 7,
+						id: 1851955517,
 						colType: colTypeNames.untagged,
 						active: true,
 						collapsed: false,
@@ -268,7 +270,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 1,
 					},
 					{
-						id: 8,
+						id: 1851955518,
 						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
@@ -277,7 +279,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "important",
 					},
 					{
-						id: 9,
+						id: 1851955519,
 						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
@@ -286,7 +288,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "wip",
 					},
 					{
-						id: 11,
+						id: 1851955520,
 						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
@@ -295,7 +297,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						coltag: "review",
 					},
 					{
-						id: 12,
+						id: 1851955521,
 						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
@@ -326,7 +328,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				columns: [
 					{
-						id: 7,
+						id: 1851955522,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.unchecked,
 						active: true,
@@ -335,7 +337,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 1,
 					},
 					{
-						id: 8,
+						id: 1851955523,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.scheduled,
 						active: true,
@@ -344,7 +346,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 2,
 					},
 					{
-						id: 9,
+						id: 1851955524,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.inprogress,
 						active: true,
@@ -353,7 +355,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 3,
 					},
 					{
-						id: 11,
+						id: 1851955525,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.question,
 						active: true,
@@ -362,7 +364,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						index: 5,
 					},
 					{
-						id: 12,
+						id: 1851955526,
 						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
@@ -371,7 +373,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 						name: "Completed",
 					},
 					{
-						id: 13,
+						id: 1851955527,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.dropped,
 						active: true,
@@ -381,7 +383,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					},
 				],
 				name: "Status Based Workflow",
-				index: 1,
+				index: 2,
 				showColumnTags: false,
 				showFilteredTags: true,
 				hideEmptyColumns: false,
@@ -412,7 +414,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					polarity: 3,
 					values: [],
 				},
-				frontMatter: {
+				frontmatter: {
 					polarity: 3,
 					values: [],
 				},
@@ -440,12 +442,15 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			scanMode: scanModeOptions.AUTOMATIC,
 			columnWidth: "300px",
 			visiblePropertiesList: [
+				taskPropertiesNames.Checkbox,
 				taskPropertiesNames.ID,
 				taskPropertiesNames.Title,
-				taskPropertiesNames.SubTasks,
-				taskPropertiesNames.Description,
+				taskPropertiesNames.SubTasksMinimized,
+				taskPropertiesNames.DescriptionMinimized,
 				taskPropertiesNames.Status,
 				taskPropertiesNames.Tags,
+				taskPropertiesNames.Time,
+				taskPropertiesNames.Reminder,
 				taskPropertiesNames.Priority,
 				taskPropertiesNames.CreatedDate,
 				taskPropertiesNames.StartDate,
@@ -453,7 +458,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				taskPropertiesNames.DueDate,
 				taskPropertiesNames.CompletionDate,
 				taskPropertiesNames.CancelledDate,
-				taskPropertiesNames.Reminder,
+				taskPropertiesNames.Dependencies,
 				taskPropertiesNames.FilePath,
 			],
 			taskCardStyle: taskCardStyleNames.EMOJI,
@@ -483,7 +488,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			editButtonAction: EditButtonMode.Modal,
 			doubleClickCardToEdit: EditButtonMode.None,
 			universalDate: UniversalDateOptions.dueDate,
-			tagColorsType: TagColorType.Background,
+			tagColorsType: TagColorType.TagText,
 			customStatuses: [
 				{
 					symbol: defaultTaskStatuses.todo,
@@ -542,12 +547,12 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				reminderPlugin: false,
 				quickAddPlugin: false,
 			},
-			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
 			taskNoteIdentifierTag: "taskNote",
-			taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
-			quickAddPluginDefaultChoice: "",
+			preDefinedNote: "Meta/Task_Board/New_Tasks.md",
 			archivedTasksFilePath: "",
+			taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
 			archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",
+			quickAddPluginDefaultChoice: "",
 			frontmatterFormatting: [
 				{
 					index: 0,
@@ -675,12 +680,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				settingTab: 0,
 			},
 			boundTaskCompletionToChildTasks: false,
-			kanbanView: {
-				lazyLoadingEnabled: true,
-				initialTaskCount: 20,
-				loadMoreCount: 10,
-				scrollThresholdPercent: 80,
-			},
 			mapView: {
 				background: mapViewBackgrounVariantTypes.none,
 				mapOrientation: mapViewNodeMapOrientation.horizontal,
