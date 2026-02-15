@@ -127,6 +127,19 @@ export interface swimlaneConfigs {
 	minimized: string[]; // This will store the names of the minimized swimlanes.
 }
 
+export type viewPortType = {
+	x: number;
+	y: number;
+	zoom: number;
+};
+
+export type nodeDataType = {
+	id: string;
+	x: number;
+	y: number;
+	width: number;
+};
+
 export type Board = {
 	id: string;
 	name: string;
@@ -142,6 +155,10 @@ export type Board = {
 		completed: number;
 	};
 	swimlanes: swimlaneConfigs;
+	mapView: {
+		viewPortData: viewPortType;
+		nodePositions: nodeDataType[];
+	};
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
 	filterPolarity?: string;
@@ -245,6 +262,14 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 			maxHeight: "300px",
 			verticalHeaderUI: false,
 		},
+		mapView: {
+			viewPortData: {
+				x: 0,
+				y: 0,
+				zoom: 0.5,
+			},
+			nodePositions: [],
+		},
 	},
 	{
 		columns: [
@@ -310,6 +335,14 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 			minimized: [],
 			maxHeight: "300px",
 			verticalHeaderUI: false,
+		},
+		mapView: {
+			viewPortData: {
+				x: 0,
+				y: 0,
+				zoom: 0.5,
+			},
+			nodePositions: [],
 		},
 	},
 	{
@@ -386,6 +419,14 @@ export const DEFAULT_BOARDS: BoardConfigs = [
 			minimized: [],
 			maxHeight: "300px",
 			verticalHeaderUI: false,
+		},
+		mapView: {
+			viewPortData: {
+				x: 0,
+				y: 0,
+				zoom: 0.5,
+			},
+			nodePositions: [],
 		},
 	},
 ];

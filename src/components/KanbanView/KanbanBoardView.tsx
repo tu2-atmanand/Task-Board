@@ -30,8 +30,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 			return board.columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, board.index, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
-						plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
+					columnSegregator(plugin.settings, board, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
+						// plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
+
+						// TODO Add a debounce here, as this callback will be called at high rate.
+						plugin.taskBoardFileManager.saveBoard(updatedBoardData);
 					})
 				);
 		}

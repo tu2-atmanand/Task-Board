@@ -858,7 +858,13 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
-			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index, swimlaneData: swimlaneData };
+			const payload: currentDragDataPayload = {
+				task,
+				taskIndex: String(dataAttributeIndex),
+				sourceColumnData: columnData,
+				// currentBoardIndex: activeBoardSettings.index,
+				swimlaneData: swimlaneData
+			};
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
 
 			// Add dragging class after a small delay to not affect the drag image

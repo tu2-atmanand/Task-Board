@@ -33,30 +33,14 @@ import { TasksImporterPanel } from './TasksImporterPanel';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
 import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { Board } from 'src/interfaces/BoardConfigs';
+import { Board, nodeDataType, viewPortType } from 'src/interfaces/BoardConfigs';
 
 type MapViewProps = {
 	plugin: TaskBoard;
-	activeBoardIndex: number;
+	activeBoardData: Board;
 	filteredTasks: taskJsonMerged;
 	focusOnTaskId?: string;
 };
-
-export type viewPort = {
-	x: number;
-	y: number;
-	zoom: number;
-}
-
-export type nodeSize = {
-	width: number;
-	// height: number;
-}
-
-export type nodePosition = {
-	x: number;
-	y: number;
-}
 
 const nodeTypes = {
 	// CustomNodeResizer,
@@ -65,7 +49,7 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, activeBoardIndex, filteredTasks, focusOnTaskId
+	plugin, activeBoardData, filteredTasks, focusOnTaskId
 }) => {
 	plugin.settings.data.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.mapView;
@@ -96,9 +80,9 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Loading state for localStorage data
 	const [storageLoaded, setStorageLoaded] = useState(false);
-	const [positions, setPositions] = useState<Record<string, nodePosition>>({});
-	const [nodeSizes, setNodeSizes] = useState<Record<string, nodeSize>>({});
-	const [viewport, setViewport] = useState<Record<number, viewPort>>({});
+	const [positions, setPositions] = useState<Record<string, nodePositionType>>({});
+	const [nodeSizeTypes, setnodeSizeTypes] = useState<Record<string, nodeSizeType>>({});
+	const [viewport, setViewport] = useState<Record<number, viewPortType>>({});
 
 	// Track when board changes to force node recalculation
 	const [boardChangeKey, setBoardChangeKey] = useState(0);
@@ -109,9 +93,19 @@ const MapView: React.FC<MapViewProps> = ({
 	// ReactFlow instance ref so we can programmatically set viewport when switching boards
 	const reactFlowInstanceRef = useRef<any | null>(null);
 
+
+	useEffect(() => {
+		const saveMapDataListener = () => {
+			plugin.taskBoardFileManager.saveBoard(activeBoardData);
+		};
+
+		eventEmitter.on("SAVE_MAP", saveMapDataListener);
+		return () => eventEmitter.off("SAVE_MAP", saveMapDataListener);
+	}, []);
+
 	// Load positions from localStorage, board-wise
 	const loadPositions = () => {
-		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
+		let allBoardPositions: Record<string, Record<string, nodePositionType>> = {};
 		try {
 			const stored = localStorage.getItem(NODE_POSITIONS_STORAGE_KEY);
 			if (stored) {
@@ -139,30 +133,30 @@ const MapView: React.FC<MapViewProps> = ({
 	};
 
 	// Load node sizes from localStorage
-	const loadNodeSizes = () => {
+	const loadnodeSizeTypes = () => {
 		try {
 			const stored = localStorage.getItem(NODE_SIZE_STORAGE_KEY);
 			if (stored) {
 				const parsed = JSON.parse(stored);
 				if (typeof parsed === 'object' && parsed !== null) {
-					return parsed as Record<string, nodeSize>;
+					return parsed as Record<string, nodeSizeType>;
 				}
 			}
 			return {};
 		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(94, String(error), 'MapView.tsx/loadNodeSizes');
+			bugReporterManagerInsatance.addToLogs(94, String(error), 'MapView.tsx/loadnodeSizeTypes');
 			return {};
 		}
 	};
 
 	// Viewport state (board-wise)
-	const loadViewport = (): Record<string, viewPort> => {
+	const loadViewport = (): Record<string, viewPortType> => {
 		try {
 			const stored = localStorage.getItem(VIEWPORT_STORAGE_KEY);
 			if (stored) {
 				const parsed = JSON.parse(stored);
 				if (typeof parsed === 'object' && parsed !== null) {
-					return parsed as Record<string, viewPort>;
+					return parsed as Record<string, viewPortType>;
 				}
 			}
 			return { [activeBoardIndex]: { x: 10, y: 10, zoom: 1.5 } };
@@ -178,7 +172,7 @@ const MapView: React.FC<MapViewProps> = ({
 		setStorageLoaded(false);
 		// Load and sanitize positions
 		const pos = loadPositions();
-		const sanitizedPositions: Record<string, nodePosition> = {};
+		const sanitizedPositions: Record<string, nodePositionType> = {};
 		Object.keys(pos).forEach(id => {
 			sanitizedPositions[id] = {
 				x: Number.isFinite(pos[id]?.x) ? pos[id].x : 0,
@@ -188,19 +182,19 @@ const MapView: React.FC<MapViewProps> = ({
 		setPositions(sanitizedPositions);
 
 		// Load and sanitize node sizes
-		const sizes = loadNodeSizes();
-		const sanitizedSizes: Record<string, nodeSize> = {};
+		const sizes = loadnodeSizeTypes();
+		const sanitizedSizes: Record<string, nodeSizeType> = {};
 		Object.keys(sizes).forEach(id => {
 			sanitizedSizes[id] = {
 				width: Number.isFinite(sizes[id]?.width) && sizes[id].width > 0 ? sizes[id].width : 300
 			};
 		});
-		setNodeSizes(sanitizedSizes);
+		setnodeSizeTypes(sanitizedSizes);
 
 		// Load and sanitize viewport (board-wise)
 		const vpMap = loadViewport();
 		const rawForBoard = vpMap[activeBoardIndex] || { x: 10, y: 10, zoom: 1.5 };
-		const sanitizedForBoard: viewPort = {
+		const sanitizedForBoard: viewPortType = {
 			x: Number.isFinite(rawForBoard.x) ? rawForBoard.x : 10,
 			y: Number.isFinite(rawForBoard.y) ? rawForBoard.y : 10,
 			zoom: Number.isFinite(rawForBoard.zoom) ? rawForBoard.zoom : 1.5
@@ -266,7 +260,7 @@ const MapView: React.FC<MapViewProps> = ({
 				usedIds.add(id);
 
 				const savedPos = positions[id];
-				const savedSize = nodeSizes[id] || {};
+				const savedSize = nodeSizeTypes[id] || {};
 
 				// Ensure width is always a valid number
 				let nodeWidth = defaultWidth;
@@ -327,21 +321,21 @@ const MapView: React.FC<MapViewProps> = ({
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
 	// TODO : Its not a good idea to use debounce and allow stale data. I am already storing the data in localStorage on resize end in ResizableNodeSelected component. And there its much better as I can capture the final size directly based on the callback.
-	// Custom handler that intercepts dimension changes and updates nodeSizes state
+	// Custom handler that intercepts dimension changes and updates nodeSizeTypes state
 	// const handleNodesChange = (changes: NodeChange[]) => {
 	// 	// First, apply the changes to ReactFlow's state
 	// 	onNodesChange(changes);
 
-	// 	updateSingleNodeSizeOnDiskDebounced(changes);
+	// 	updateSinglenodeSizeTypeOnDiskDebounced(changes);
 
 	// };
 
-	// const updateSingleNodeSizeOnDiskDebounced = debounce(
+	// const updateSinglenodeSizeTypeOnDiskDebounced = debounce(
 	// 	async (changes: NodeChange[]): Promise<void> => {
 	// 		if (changes.length !== 1 || changes[0].type !== "dimensions") return;
 
-	// 		// Update nodeSizes state and localStorage
-	// 		const updatedSizes = { ...nodeSizes };
+	// 		// Update nodeSizeTypes state and localStorage
+	// 		const updatedSizes = { ...nodeSizeTypes };
 	// 		let hasChanges = false;
 
 
@@ -357,14 +351,14 @@ const MapView: React.FC<MapViewProps> = ({
 	// 		}
 
 	// 		if (hasChanges) {
-	// 			// setNodeSizes(updatedSizes);
+	// 			// setnodeSizeTypes(updatedSizes);
 	// 			try {
 	// 				localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(updatedSizes));
 	// 			} catch (error) {
 	// 				bugReporterManagerInsatance.addToLogs(
 	// 					179,
 	// 					`Failed to save node sizes: ${String(error)}`,
-	// 					"MapView.tsx/updateSingleNodeSizeOnDiskDebounced",
+	// 					"MapView.tsx/updateSinglenodeSizeTypeOnDiskDebounced",
 	// 				);
 	// 			}
 	// 		}
@@ -464,8 +458,8 @@ const MapView: React.FC<MapViewProps> = ({
 	}
 	const edges = useMemo(() => getEdgesFromTasks(), [allTasksFlattened]);
 
-	const handleNodePositionChange = () => {
-		let allBoardPositions: Record<string, Record<string, nodePosition>> = {};
+	const handlenodePositionTypeChange = () => {
+		let allBoardPositions: Record<string, Record<string, nodePositionType>> = {};
 		try {
 			const stored = localStorage.getItem(NODE_POSITIONS_STORAGE_KEY);
 			if (stored) {
@@ -475,7 +469,7 @@ const MapView: React.FC<MapViewProps> = ({
 				}
 			}
 		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(97, String(error), 'MapView.tsx/handleNodePositionChange');
+			bugReporterManagerInsatance.addToLogs(97, String(error), 'MapView.tsx/handlenodePositionTypeChange');
 			allBoardPositions = {};
 		}
 
@@ -485,7 +479,7 @@ const MapView: React.FC<MapViewProps> = ({
 			const y = Number.isFinite(n.position?.y) ? n.position.y : 0;
 			acc[n.id] = { x, y };
 			return acc;
-		}, {} as Record<string, nodePosition>);
+		}, {} as Record<string, nodePositionType>);
 
 		setPositions(posMap);
 		allBoardPositions[String(activeBoardIndex)] = posMap;
@@ -493,12 +487,12 @@ const MapView: React.FC<MapViewProps> = ({
 		try {
 			localStorage.setItem(NODE_POSITIONS_STORAGE_KEY, JSON.stringify(allBoardPositions));
 		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(98, String(error), 'MapView.tsx/handleNodePositionChange');
+			bugReporterManagerInsatance.addToLogs(98, String(error), 'MapView.tsx/handlenodePositionTypeChange');
 		}
 	};
 
 	// Persist updated positions and sizes
-	// const prevNodeSizesRef = useRef<Record<string, { width: number; height: number }>>({});
+	// const prevnodeSizeTypesRef = useRef<Record<string, { width: number; height: number }>>({});
 
 	// Only save sizes if they have changed
 	// useEffect(() => {
@@ -508,7 +502,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	}, {} as Record<string, { width: number; height: number }>);
 
 	// 	// Compare with previous sizes
-	// 	const prevSizes = prevNodeSizesRef.current;
+	// 	const prevSizes = prevnodeSizeTypesRef.current;
 	// 	let changed = false;
 	// 	for (const id in sizeMap) {
 	// 		if (
@@ -522,9 +516,9 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	}
 
 	// 	if (changed) {
-	// 		setNodeSizes(sizeMap);
+	// 		setnodeSizeTypes(sizeMap);
 	// 		localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeMap));
-	// 		prevNodeSizesRef.current = sizeMap;
+	// 		prevnodeSizeTypesRef.current = sizeMap;
 	// 	}
 	// }, [nodes]);
 
@@ -633,17 +627,17 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	}) as T;
 	// }
 
-	// const throttledSetViewportStorage = throttle((vp: viewPort) => {
+	// const throttledSetViewportStorage = throttle((vp: viewPortType) => {
 	// 	console.log('Saving viewport:', vp);
 	// 	localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(vp));
 	// }, 20000);
 
 	const lastViewportSaveTime = useRef(0);
-	const debouncedSetViewportStorage = debounce((vp: viewPort) => {
+	const debouncedSetViewportStorage = debounce((vp: viewPortType) => {
 		const now = Date.now();
 		if (now - lastViewportSaveTime.current > 2000) {
 			// Validate viewport values before saving
-			const safeViewport: viewPort = {
+			const safeViewport: viewPortType = {
 				x: Number.isFinite(vp.x) ? vp.x : 10,
 				y: Number.isFinite(vp.y) ? vp.y : 10,
 				zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1.5
@@ -651,7 +645,7 @@ const MapView: React.FC<MapViewProps> = ({
 			try {
 				// Load existing map, update only current board entry
 				const stored = localStorage.getItem(VIEWPORT_STORAGE_KEY);
-				let parsed: Record<string, viewPort> = {};
+				let parsed: Record<string, viewPortType> = {};
 				if (stored) {
 					try {
 						const p = JSON.parse(stored);
@@ -979,7 +973,7 @@ const MapView: React.FC<MapViewProps> = ({
 							onEdgeClick={handleEdgeClick}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={() => {
-								handleNodePositionChange();
+								handlenodePositionTypeChange();
 							}}
 
 							// viewport controls
@@ -1019,7 +1013,7 @@ const MapView: React.FC<MapViewProps> = ({
 								if (focusOnTaskId) {
 									const node = nodes.find(n => n.id === focusOnTaskId);
 									if (node && Number.isFinite(node.position.x) && Number.isFinite(node.position.y)) {
-										const newVp: viewPort = {
+										const newVp: viewPortType = {
 											x: - (node.position.x - 200),
 											y: - (node.position.y),
 											zoom: 1
@@ -1038,7 +1032,7 @@ const MapView: React.FC<MapViewProps> = ({
 								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom) && currentVpForBoard.zoom > 0) {
 									instance.setViewport(currentVpForBoard);
 								} else {
-									const defaultVp: viewPort = { x: 10, y: 10, zoom: 1.5 };
+									const defaultVp: viewPortType = { x: 10, y: 10, zoom: 1.5 };
 									instance.setViewport(defaultVp);
 									setViewport(prev => ({ ...prev, [activeBoardIndex]: defaultVp }));
 								}
