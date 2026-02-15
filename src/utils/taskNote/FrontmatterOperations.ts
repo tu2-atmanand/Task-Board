@@ -10,7 +10,7 @@ import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 import { generateTaskId } from "../TaskItemUtils";
 import { statusTypeNames } from "src/interfaces/Enums";
 import { moment as _moment } from "obsidian";
-import { getCurrentLocalTimeString } from "../DateTimeCalculations";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Extract frontmatter from file content
@@ -20,7 +20,7 @@ import { getCurrentLocalTimeString } from "../DateTimeCalculations";
  */
 export function extractFrontmatterFromFile(
 	plugin: TaskBoard,
-	file: TFile
+	file: TFile,
 ): customFrontmatterCache | undefined {
 	// Method 1 - Find the frontmatter using delimiters
 	// // Check if the file starts with frontmatter delimiter
@@ -42,7 +42,11 @@ export function extractFrontmatterFromFile(
 	// 	const frontmatter = yaml.load(yamlContent);
 	// 	return frontmatter;
 	// } catch (error) {
-	// 	console.warn("Failed to parse frontmatter:", error);
+	// bugReporterManagerInsatance.addToLogs(
+	// 	175,
+	// 	`Failed to parse frontmatter: ${String(error)}`,
+	// 	"FrontmatterOperations.ts/extractFrontmatterFromFile",
+	// );
 	// 	return null;
 	// }
 
@@ -59,7 +63,11 @@ export function extractFrontmatterFromFile(
 
 		return frontmatterAsObject;
 	} catch (error) {
-		// console.warn("Failed to parse frontmatter:", error);
+		// bugReporterManagerInsatance.addToLogs(
+		// 	176,
+		// 	`Failed to parse frontmatter: ${String(error)}`,
+		// 	"FrontmatterOperations.ts/extractFrontmatterFromFile",
+		// );
 		return undefined;
 	}
 }
@@ -72,7 +80,7 @@ export function extractFrontmatterFromFile(
  */
 export function extractFrontmatterFromContent(
 	plugin: TaskBoard,
-	fileContent: string
+	fileContent: string,
 ): customFrontmatterCache | undefined {
 	// Method 1 - Find the frontmatter using delimiters
 	// Check if the content starts with frontmatter delimiter
@@ -94,9 +102,10 @@ export function extractFrontmatterFromContent(
 		const frontmatter = parseYaml(yamlContent) as customFrontmatterCache;
 		return frontmatter;
 	} catch (error) {
-		console.warn(
-			"FrontmatterOperations.ts/extractFrontmatterFromContent : Failed to parse frontmatter:",
-			error
+		bugReporterManagerInsatance.addToLogs(
+			107,
+			String(error),
+			"TaskContentFormatter.ts/sanitizeStatus",
 		);
 		return undefined;
 	}
@@ -108,7 +117,7 @@ export function extractFrontmatterFromContent(
  * @returns string[] - Array of tags
  */
 export function extractFrontmatterTags(
-	frontmatter: Partial<customFrontmatterCache> | undefined
+	frontmatter: Partial<customFrontmatterCache> | undefined,
 ): string[] {
 	if (!frontmatter) {
 		return [];
@@ -150,18 +159,18 @@ export function extractFrontmatterTags(
 function orderFrontmatterProperties(
 	frontmatterObj: Partial<customFrontmatterCache>,
 	frontmatterFormatting: frontmatterFormatting[],
-	existingFrontmatter?: customFrontmatterCache
+	existingFrontmatter?: customFrontmatterCache,
 ): Partial<customFrontmatterCache> {
 	const orderedFrontmatter: Partial<customFrontmatterCache> = {};
 
 	// Create a set of all custom frontmatter keys for quick lookup
 	const customKeys = new Set(
-		frontmatterFormatting.map((format) => format.key)
+		frontmatterFormatting.map((format) => format.key),
 	);
 
 	// Sort frontmatter formatting by index and add properties in order
 	const sortedFormatting = [...frontmatterFormatting].sort(
-		(a, b) => a.index - b.index
+		(a, b) => a.index - b.index,
 	);
 
 	for (const format of sortedFormatting) {
@@ -202,7 +211,7 @@ function orderFrontmatterProperties(
 export function createFrontmatterFromTask(
 	plugin: TaskBoard,
 	task: taskItem,
-	frontmatterFormatting: frontmatterFormatting[]
+	frontmatterFormatting: frontmatterFormatting[],
 ): string {
 	const frontmatterObj: Partial<customFrontmatterCache> = {};
 
@@ -214,13 +223,19 @@ export function createFrontmatterFromTask(
 			plugin.settings.data
 		) || "pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
-		plugin.settings.data.taskNoteIdentifierTag,
-		...(task?.tags?.filter(
-			(tag) =>
-				tag.includes(
-					plugin.settings.data.taskNoteIdentifierTag
-				) === false
-		) ?? []),
+		plugin.settings.data.taskNoteIdentifierTag.replace(
+			"#",
+			"",
+		),
+		...(task?.tags
+			?.filter(
+				(tag) =>
+					tag.includes(
+						plugin.settings.data
+							.taskNoteIdentifierTag,
+					) === false,
+			)
+			.map((tag: string) => tag.replace("#", "")) ?? []),
 	];
 
 	if (task.id && plugin.settings.data.autoAddUniqueID)
@@ -270,7 +285,7 @@ export function createFrontmatterFromTask(
 	// Order the frontmatter properties based on index values
 	const orderedFrontmatter = orderFrontmatterProperties(
 		frontmatterObj,
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 
 	return createYamlFromObject(orderedFrontmatter);
@@ -288,7 +303,7 @@ export function updateFrontmatterProperties(
 	plugin: TaskBoard,
 	existingFrontmatter: customFrontmatterCache | undefined,
 	task: taskItem,
-	forceId?: boolean
+	forceId?: boolean,
 ): Partial<customFrontmatterCache> {
 	const frontmatterFormatting: frontmatterFormatting[] =
 		plugin.settings.data.frontmatterFormatting;
@@ -357,13 +372,13 @@ export function updateFrontmatterProperties(
 
 	const hasIdentifierTag = finalTags.some(
 		(tag) =>
-			tag.replace("#", "").toLowerCase() === identifierTag.toLowerCase()
+			tag.replace("#", "").toLowerCase() === identifierTag.toLowerCase(),
 	);
 	finalTags = hasIdentifierTag ? finalTags : [...finalTags, identifierTag];
 
 	// Remove duplicates and empty entries
 	tempUpdates[tagsKey] = Array.from(
-		new Set(finalTags.map((t) => String(t).trim()).filter(Boolean))
+		new Set(finalTags.map((t) => String(t).trim()).filter(Boolean)),
 	);
 
 	// Update or add unique ID
@@ -402,7 +417,7 @@ export function updateFrontmatterProperties(
 	// Update date properties
 	const createdDateKey = getCustomFrontmatterKey(
 		"createdDate",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (task.createdDate) {
 		tempUpdates[createdDateKey] = task.createdDate;
@@ -413,7 +428,7 @@ export function updateFrontmatterProperties(
 
 	const startDateKey = getCustomFrontmatterKey(
 		"startDate",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (task.startDate) {
 		tempUpdates[startDateKey] = task.startDate;
@@ -424,7 +439,7 @@ export function updateFrontmatterProperties(
 
 	const scheduledDateKey = getCustomFrontmatterKey(
 		"scheduledDate",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (task.scheduledDate) {
 		tempUpdates[scheduledDateKey] = task.scheduledDate;
@@ -449,7 +464,7 @@ export function updateFrontmatterProperties(
 
 	const cancelledDateKey = getCustomFrontmatterKey(
 		"cancelledDate",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (statusType === statusTypeNames.CANCELLED) {
 		if (task.cancelledDate) {
@@ -458,7 +473,7 @@ export function updateFrontmatterProperties(
 			const globalSettings = plugin.settings.data;
 			const moment = _moment as unknown as typeof _moment.default;
 			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern
+				globalSettings?.taskCompletionDateTimePattern,
 			);
 
 			tempUpdates[cancelledDateKey] = currentDateValue;
@@ -470,7 +485,7 @@ export function updateFrontmatterProperties(
 
 	const completionKey = getCustomFrontmatterKey(
 		"completion",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (statusType === statusTypeNames.DONE) {
 		if (task.cancelledDate) {
@@ -479,7 +494,7 @@ export function updateFrontmatterProperties(
 			const globalSettings = plugin.settings.data;
 			const moment = _moment as unknown as typeof _moment.default;
 			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern
+				globalSettings?.taskCompletionDateTimePattern,
 			);
 
 			tempUpdates[completionKey] = currentDateValue;
@@ -491,7 +506,7 @@ export function updateFrontmatterProperties(
 
 	const priorityKey = getCustomFrontmatterKey(
 		"priority",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (task.priority && task.priority > 0) {
 		tempUpdates[priorityKey] =
@@ -503,7 +518,7 @@ export function updateFrontmatterProperties(
 
 	const reminderKey = getCustomFrontmatterKey(
 		"reminder",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (task?.reminder) {
 		tempUpdates[reminderKey] = task.reminder;
@@ -514,7 +529,7 @@ export function updateFrontmatterProperties(
 
 	const dependsOnKey = getCustomFrontmatterKey(
 		"dependsOn",
-		frontmatterFormatting
+		frontmatterFormatting,
 	);
 	if (task?.dependsOn && task.dependsOn.length > 0) {
 		tempUpdates[dependsOnKey] = task.dependsOn;
@@ -527,7 +542,7 @@ export function updateFrontmatterProperties(
 	const orderedFrontmatter = orderFrontmatterProperties(
 		tempUpdates,
 		frontmatterFormatting,
-		oldFrontmatter
+		oldFrontmatter,
 	);
 
 	return orderedFrontmatter;
@@ -539,7 +554,7 @@ export function updateFrontmatterProperties(
  * @returns string - YAML string
  */
 export function createYamlFromObject(
-	obj: Partial<customFrontmatterCache>
+	obj: Partial<customFrontmatterCache>,
 ): string {
 	// METHOD 1 - Using Obsidian's API
 	const YAMLstringUsingAPI = stringifyYaml(obj);

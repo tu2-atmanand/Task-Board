@@ -10,7 +10,6 @@
 import TaskBoard from "main";
 import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import { eventEmitter } from "src/services/EventEmitter";
-import { bugReporter } from "src/services/OpenModals";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,

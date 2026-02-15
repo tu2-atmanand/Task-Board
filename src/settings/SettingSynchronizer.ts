@@ -9,6 +9,9 @@ import { t } from "src/utils/lang/helper";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
 import { colTypeNames } from "src/interfaces/Enums";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomNumber } from "src/utils/TaskItemUtils";
+import { newReleaseVersion } from "src/interfaces/Constants";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
@@ -18,94 +21,138 @@ import { colTypeNames } from "src/interfaces/Enums";
  * @returns The migrated settings object
  */
 export function migrateSettings(defaults: any, settings: any): PluginDataJson {
-	for (const key in defaults) {
-		if (!(key in settings)) {
-			// This is a cumpulsory migration which will be required in every new version update, since a new field should be added into the users settings.
-			settings[key] = defaults[key];
-		} else if (
-			!Array.isArray(settings[key]) &&
-			key === "tagColors" &&
-			typeof settings[key] === "object" &&
-			settings[key] !== null
-		) {
-			// This is a temporary migration applied since version 1.2.0. Can be removed, after around 6 months.
-			settings[key] = Object.entries(
-				settings[key] as Record<string, string>
-			).map(
-				([name, color], idx) =>
-					({
-						name,
-						color,
-						priority: idx + 1,
-					} as any)
-			);
-		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-			// This is a temporary solution to sync the boardConfigs. Will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.universalDate
-			// This migration was applied since version 1.5.0.
-			settings[key].forEach((boardConfig: Board) => {
-				boardConfig.columns.forEach((column: ColumnData) => {
-					if (!column.id) {
-						column.id = Math.floor(Math.random() * 1000000);
+	try {
+		if (settings == undefined) return defaults;
+
+		for (const key in defaults) {
+			if (!(key in settings)) {
+				// This is a cumpulsory migration which will be required in every new version update, since a new field should be added into the users settings.
+				settings[key] = defaults[key];
+			}
+
+			// -----------------------------------
+			/**
+			 * @since v1.9.0
+			 * @type Temporary
+			 * @note Remove this on the next version release where this migration will run.
+			 *
+			 * This is migration is only applied to replace the older settings available in users configs with the new settings as per the new Settinsg section added in the global settings.
+			 */
+			if (key === "customStatuses") {
+				settings[key] =
+					DEFAULT_SETTINGS.data.globalSettings.customStatuses;
+			}
+
+			// -----------------------------------
+			/**
+			 * @since v1.9.2
+			 * @type Temporary
+			 * @note Remove this on the next version release where this migration will run.
+			 *
+			 * Because of the name change, we had to do this migration.
+			 */
+			if (key === "frontmatter" && settings["frontMatter"]) {
+				settings[key] = settings["frontMatter"];
+				delete settings["frontMatter"];
+			}
+
+			// -------------------------------------
+			/**
+			 * @since v1.5.0
+			 * @type Temporary
+			 * @note Remove this in 6 months.
+			 *
+			 * This is a temporary solution to sync the boardConfigs. This is required to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically we need to copy `range.rangedata.from` value to `datedBasedColumn.from` and similarly for `range.rangedatato`. And for `datedBasedColumn.dateType`, put the value this.settings.data.globalSettings.universalDate
+			 */
+			if (key === "boardConfigs" && Array.isArray(settings[key])) {
+				settings[key].forEach((boardConfig: Board, index: number) => {
+					boardConfig.columns.forEach((column: ColumnData) => {
+						// Older IDs were smaller number. Will change them to 10 digit numbers.
+						column.id = generateRandomNumber();
+
+						if (
+							column.colType === colTypeNames.dated ||
+							(column.colType === colTypeNames.undated &&
+								!column.datedBasedColumn)
+						) {
+							column.datedBasedColumn = {
+								dateType:
+									column.datedBasedColumn?.dateType ??
+									defaults.universalDate,
+								from: column.datedBasedColumn?.from || 0,
+								to: column.datedBasedColumn?.to || 0,
+							};
+							delete column.range;
+						}
+					});
+
+					// FIX : This is a fix becauase of my silly mistake, in the third board I hardcoded the index as 1 instead of 2.
+					boardConfig.index = index;
+
+					// Migration applied since version 1.4.0
+					if (!boardConfig?.hideEmptyColumns) {
+						boardConfig.hideEmptyColumns = false;
 					}
+
+					// Migration applied since version 1.8.0
 					if (
-						column.colType === colTypeNames.dated ||
-						(column.colType === colTypeNames.undated &&
-							!column.datedBasedColumn)
+						boardConfig?.filters &&
+						boardConfig.filters.length > 0
 					) {
-						column.datedBasedColumn = {
-							dateType:
-								column.datedBasedColumn?.dateType ??
-								defaults.universalDate,
-							from: column.datedBasedColumn?.from || 0,
-							to: column.datedBasedColumn?.to || 0,
-						};
-						delete column.range;
+						if (
+							boardConfig?.filterPolarity &&
+							boardConfig.filterPolarity === "1"
+						) {
+							boardConfig.boardFilter = {
+								rootCondition: "any",
+								filterGroups: [
+									{
+										id: generateIdForFilters(),
+										groupCondition: "any",
+										filters: boardConfig.filters.map(
+											(f: string) => ({
+												id: generateIdForFilters(),
+												property: "tags",
+												condition: "contains",
+												value: f,
+											}),
+										),
+									},
+								],
+							};
+
+							delete boardConfig?.filters;
+							delete boardConfig?.filterPolarity;
+						}
 					}
 				});
+			}
 
-				// Migration applied since version 1.4.0
-				if (!boardConfig.hideEmptyColumns) {
-					boardConfig.hideEmptyColumns = false;
-				}
-
-				// Migration applied since version 1.8.0
-				if (boardConfig?.filters && boardConfig.filters.length > 0) {
-					if (
-						boardConfig?.filterPolarity &&
-						boardConfig.filterPolarity === "1"
-					) {
-						boardConfig.boardFilter = {
-							rootCondition: "any",
-							filterGroups: [
-								{
-									id: generateIdForFilters(),
-									groupCondition: "any",
-									filters: boardConfig.filters.map(
-										(f: string) => ({
-											id: generateIdForFilters(),
-											property: "tags",
-											condition: "contains",
-											value: f,
-										})
-									),
-								},
-							],
-						};
-
-						delete boardConfig?.filters;
-						delete boardConfig?.filterPolarity;
-					}
-				}
-			});
-		} else if (
-			typeof defaults[key] === "object" &&
-			defaults[key] !== null &&
-			!Array.isArray(defaults[key])
-		) {
-			migrateSettings(defaults[key], settings[key]);
+			// -------------------------------------
+			/**
+			 * @type Reqruired
+			 *
+			 * This is a cumpulsory case, which will recursively iterate all the object type settings.
+			 */
+			if (
+				typeof defaults[key] === "object" &&
+				defaults[key] !== null &&
+				!Array.isArray(defaults[key])
+			) {
+				migrateSettings(defaults[key], settings[key]);
+			}
 		}
+		return settings;
+	} catch (error) {
+		bugReporterManagerInsatance.showNotice(
+			181,
+			`There was an issue while applying the migrations to the configurations for this new version ${newReleaseVersion}.\nIt will be recommended to bring this issue to the developers notice to get some suggestion on this.`,
+			JSON.stringify(error),
+			"SettingSynchronizer.ts",
+		);
+		if (settings != undefined) return settings;
+		else return defaults;
 	}
-	return settings;
 }
 
 /**
@@ -138,15 +185,15 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 				folderPath.endsWith("/") || folderPath.endsWith("\\")
 					? folderPath + exportFileName
 					: folderPath +
-					  (folderPath.includes("/") ? "/" : "\\") +
-					  exportFileName;
+						(folderPath.includes("/") ? "/" : "\\") +
+						exportFileName;
 			await fsPromises.writeFile(exportPath, fileContent, "utf8");
 			new Notice(`Settings exported to ${exportPath}`);
 		} else {
 			// Web: use file save dialog
 			let a = document.createElement("a");
 			a.href = URL.createObjectURL(
-				new Blob([fileContent], { type: "application/json" })
+				new Blob([fileContent], { type: "application/json" }),
 			);
 			a.download = exportFileName;
 			document.body.appendChild(a);
@@ -156,12 +203,16 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 				URL.revokeObjectURL(a.href);
 			}, 1000);
 			new Notice(
-				"Settings exported. Check the folder where you downloaded the file."
+				"Settings exported. Check the folder where you downloaded the file.",
 			);
 		}
 	} catch (err) {
 		new Notice("Failed to export settings.");
-		console.error(err);
+		bugReporterManagerInsatance.addToLogs(
+			150,
+			String(err),
+			"SettingSynchronizer.ts/exportConfigurations",
+		);
 	}
 }
 
@@ -170,7 +221,7 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
  * Preserves new fields in both files.
  */
 export async function importConfigurations(
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<boolean> {
 	try {
 		let importedContent: string | undefined = undefined;
@@ -244,9 +295,10 @@ export async function importConfigurations(
 		return true;
 	} catch (err) {
 		new Notice("Failed to import settings.");
-		console.error(
-			"SettingSynchronizer.ts/importConfigurations : Following error occured while importing settings : ",
-			err
+		bugReporterManagerInsatance.addToLogs(
+			151,
+			String(err),
+			"SettingSynchronizer.ts/importConfigurations",
 		);
 		return false;
 	}
@@ -257,7 +309,7 @@ export async function importConfigurations(
  * @param plugin - TaskBoard plugin instance
  */
 export async function showReloadObsidianNotice(
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<void> {
 	const reloadObsidianNotice = new Notice(
 		createFragment((f) => {
@@ -282,7 +334,7 @@ export async function showReloadObsidianNotice(
 				});
 			});
 		}),
-		0
+		0,
 	);
 
 	reloadObsidianNotice.messageEl.onClickEvent((e) => {

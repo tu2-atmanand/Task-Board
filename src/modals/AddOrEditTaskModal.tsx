@@ -7,12 +7,13 @@ import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { taskItemEmpty } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
 import { generateTaskId } from "src/utils/TaskItemUtils";
+import { DEFAULT_SETTINGS } from "src/interfaces/GlobalSettings";
 
 
 // Class component extending Modal for Obsidian
@@ -69,19 +70,24 @@ export class AddOrEditTaskModal extends Modal {
 		// Some processing, if this is a Task-Note
 		let noteContent: string = "";
 		if (this.isTaskNote) {
-			if (this.filePath) {
-				noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
+			if (this.taskExists) {
+				const data = await readDataOfVaultFile(this.plugin, this.filePath, true);
+
+				if (data == null) this.onClose();
+				else noteContent = data;
+
+				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = this.plugin.settings.data.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
-				const noteName = this.task.title || getLocalDateTimeString();
+				const defaultLocation = normalizePath(this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.globalSettings.taskNoteDefaultLocation);
+				this.task.title = "";
+
 				// Sanitize filename
+				const noteName = this.task.title || getCurrentLocalTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
-
-			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
 		} else {
 			if (!this.taskExists)
 				this.task.title = "- [ ] ";

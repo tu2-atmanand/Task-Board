@@ -1,4 +1,4 @@
-import { Modal, Setting } from 'obsidian';
+import { Modal } from 'obsidian';
 import TaskBoard from 'main';
 
 export default class EditTagsModal extends Modal {

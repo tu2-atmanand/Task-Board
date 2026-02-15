@@ -13,12 +13,11 @@ import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { bugReporter } from "src/services/OpenModals";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
-import { Board, swimlaneConfigs } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
-import { columnDataProp, AddColumnModal } from "./AddColumnModal";
+import { AddColumnModal } from "./AddColumnModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
@@ -175,7 +174,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		swimlaneModal.open();
 	};
 
-	const handleAddColumn = (boardIndex: number, columnData: columnDataProp) => {
+	const handleAddColumn = (boardIndex: number, columnData: ColumnData) => {
 		const updatedBoards = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
 			id: columnData.id,
@@ -203,7 +202,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const modal = new AddColumnModal(plugin.app, {
 			app: plugin.app,
 			onCancel: handleCloseAddColumnModal, // Previously onClose
-			onSubmit: (columnData: columnDataProp) => handleAddColumn(selectedBoardIndex, columnData),
+			onSubmit: (columnData: ColumnData) => handleAddColumn(selectedBoardIndex, columnData),
 		});
 		modal.open();
 	};
@@ -258,6 +257,15 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				sortCriteria: 'asc',
 			},
 		};
+
+		// Regenerate IDs for all columns to ensure uniqueness
+		if (duplicatedBoard.columns && duplicatedBoard.columns.length > 0) {
+			duplicatedBoard.columns = duplicatedBoard.columns.map((column) => ({
+				...column,
+				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
+			}));
+		}
+
 		const updatedBoards = [...localBoards, duplicatedBoard];
 		setLocalBoards(updatedBoards);
 		setSelectedBoardIndex(updatedBoards.length - 1);
@@ -929,12 +937,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					</div>
 					<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
 						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
-
 						<hr className="boardConfigModalHr-100" />
-
-						{selectedBoardIndex !== -1 && (
-							<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
-						)}
+						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
 					</div>
 				</div>
 				<div className="boardConfigModalMainContent">
@@ -944,9 +948,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					}
 				</div>
 			</div>
-			{selectedBoardIndex !== -1 && (
-				<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
-			)}
+
+			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
 		</>
 	);
 };

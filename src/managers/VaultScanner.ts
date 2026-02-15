@@ -1,6 +1,13 @@
 // /src/utils/ScanningVaults.ts
 
-import { App, Notice, TAbstractFile, TFile, moment as _moment } from "obsidian";
+import {
+	App,
+	Notice,
+	TAbstractFile,
+	TFile,
+	TFolder,
+	moment as _moment,
+} from "obsidian";
 import {
 	extractCheckboxSymbol,
 	getObsidianIndentationSetting,
@@ -11,7 +18,7 @@ import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
 } from "../utils/JsonFileOperations";
-import { jsonCacheData, noteItem, taskItem } from "src/interfaces/TaskItem";
+import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import {
 	extractTaskNoteProperties,
 	isTaskNotePresentInFrontmatter,
@@ -31,14 +38,10 @@ import {
 	extractFrontmatterTags,
 } from "../utils/taskNote/FrontmatterOperations";
 import { t } from "../utils/lang/helper";
-import {
-	allowedFileExtensionsRegEx,
-	notAllowedFileExtensionsRegEx,
-} from "src/regularExpressions/MiscelleneousRegExpr";
-import { bugReporter } from "src/services/OpenModals";
+import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { getCurrentLocalTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
-import { scanModeOptions, UniversalDateOptions } from "src/interfaces/Enums";
+import { UniversalDateOptions } from "src/interfaces/Enums";
 import {
 	scanFilterForFilesNFoldersNFrontmatter,
 	scanFilterForTags,
@@ -77,9 +80,10 @@ export default class VaultScanner {
 			// Load existing tasks from JSON cache
 			this.tasksCache = await loadJsonCacheDataFromDisk(this.plugin);
 		} catch (error) {
-			console.error(
-				"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
-				error,
+			bugReporterManagerInsatance.addToLogs(
+				145,
+				`No need to worry if this is appearing on the fresh install.\n${String(error)}`,
+				"RealTimeScanner.ts/initializeTasksCache",
 			);
 			this.tasksCache = {
 				VaultName: this.plugin?.app.vault.getName(),
@@ -100,7 +104,10 @@ export default class VaultScanner {
 			const fileContent = await readDataOfVaultFile(
 				this.plugin,
 				fileNameWithPath,
+				false,
 			);
+			if (fileContent == null) return "false";
+
 			const lines = fileContent.split("\n");
 
 			const oldPendingFileCache =
@@ -524,13 +531,12 @@ export default class VaultScanner {
 				return "true";
 			}
 		} catch (error) {
-			console.error(
-				"Error occurred while extracting tasks from file:",
-				file.path,
-				"\nERROR :",
-				error,
+			bugReporterManagerInsatance.addToLogs(
+				146,
+				String(error),
+				"VaultScanner.ts/extractTasksFromFile",
 			);
-			return String(error);
+			return "false";
 		}
 	}
 
@@ -595,7 +601,6 @@ export default class VaultScanner {
 				error as string,
 				"VaultScanner.tsx/refreshTasksFromFiles",
 			);
-			console.error(error);
 			return false;
 		}
 	}
@@ -712,11 +717,13 @@ export function fileTypeAllowedForScanning(
 	if (!globalSettings.archivedTBNotesFolderPath.trim()) return true;
 
 	if (
+		file instanceof TFolder ||
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
-		allowedFileExtensionsRegEx.test(file.path) === false ||
-		filePath.startsWith(
-			globalSettings.archivedTBNotesFolderPath.toLowerCase(),
-		) ||
+		!allowedFileExtensionsRegEx.test(file.path) ||
+		(globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
+			filePath.startsWith(
+				globalSettings.archivedTBNotesFolderPath.toLowerCase(),
+			)) ||
 		filePath === globalSettings.archivedTasksFilePath.toLowerCase()
 	) {
 		return false;
@@ -1036,7 +1043,6 @@ export function extractPriority(text: string): number {
 		.map((match) => match.trim()) // Trim spaces
 		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
 
-	console.log("What is the priority emoji : ", validMatches);
 	// Find the first match in the priorityEmojis mapping
 	for (const emoji of validMatches) {
 		const priorityMatch = Object.entries(priorityEmojis).find(
@@ -1130,7 +1136,6 @@ export function extractDependsOn(text: string): RegExpMatchArray | null {
 			.dependsOnRegex,
 	);
 	if (match && match[1]) {
-		console.log("What is the match : ", match);
 		return match;
 	}
 
@@ -1226,7 +1231,11 @@ export async function compareFileCache(
 		// This approach is optimal for most use cases as task arrays are typically small to medium sized
 		return JSON.stringify(newCache) === JSON.stringify(oldCache);
 	} catch (error) {
-		console.error("Error comparing file caches:", error);
+		bugReporterManagerInsatance.addToLogs(
+			147,
+			String(error),
+			"VaultScanner.ts/compareFileCache",
+		);
 		// In case of error, assume they're different to trigger a refresh
 		return false;
 	}

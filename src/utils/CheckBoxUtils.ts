@@ -2,28 +2,27 @@ import type TaskBoard from "main";
 import { Notice } from "obsidian";
 import { statusTypeNames } from "src/interfaces/Enums";
 import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 
 /**
  * Switches the checkbox state based on the current symbol.
- * @param plugin - The plugin instance.
+ * @param customStatuses - The customStatuses configurations from setting.
  * @param symbol - The current checkbox symbol.
- * @returns The next checkbox state symbol.
+ * @returns The next checkbox state.
  */
 export function checkboxStateSwitcher(
-	plugin: TaskBoard,
-	symbol: string
+	customStatuses: CustomStatus[],
+	symbol: string,
 ): { newSymbol: string; newSymbolType: string } {
-	const { customStatuses } = plugin.settings.data;
-
 	// Check if customStatuses is available and has entries
 	if (customStatuses?.length > 0) {
 		const oldStatus = customStatuses.find(
-			(status) => status.symbol === symbol
+			(status) => status.symbol === symbol,
 		);
 		if (oldStatus) {
 			const nextStatus = customStatuses.find(
-				(status) => status.symbol === oldStatus?.nextStatusSymbol
+				(status) => status.symbol === oldStatus?.nextStatusSymbol,
 			);
 			if (nextStatus) {
 				return {
@@ -35,18 +34,18 @@ export function checkboxStateSwitcher(
 	}
 
 	new Notice(
-		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
+		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior.",
 	);
 	// Default fallback behavior
 	return symbol === "x" || symbol === "X"
 		? {
 				newSymbol: " ",
 				newSymbolType: statusTypeNames.TODO,
-		  }
+			}
 		: {
 				newSymbol: "x",
 				newSymbolType: statusTypeNames.DONE,
-		  };
+			};
 }
 
 /**
@@ -59,7 +58,7 @@ export function checkboxStateSwitcher(
 export function isTaskCompleted(
 	titleOrSymbol: string,
 	isTaskNote: boolean,
-	settings: PluginDataJson
+	settings: PluginDataJson,
 ): boolean {
 	// console.log(
 	// 	"isTaskCompleted...\ntitleOrSymbol :",
@@ -170,9 +169,11 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 				return parsed?.useTab ? `\t` : " ".repeat(tabSize);
 			});
 			return `\t`; // Default indentation while async read happens
-		} catch {
-			console.warn(
-				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				108,
+				String(err),
+				"CheckBoxUtils.ts/getObsidianIndentationSetting",
 			);
 			return `\t`;
 		}
@@ -185,7 +186,7 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
  * @returns A promise that resolves to the indentation string.
  */
 export async function getObsidianIndentationSettingAsync(
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<string> {
 	try {
 		if (plugin.app.vault.config) {
@@ -203,9 +204,11 @@ export async function getObsidianIndentationSettingAsync(
 				typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
 			const useTab = !!parsed?.useTab;
 			return useTab ? `\t` : " ".repeat(tabSize);
-		} catch {
-			console.warn(
-				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				109,
+				String(err),
+				"CheckBoxUtils.ts/getObsidianIndentationSettingAsync",
 			);
 			return `\t`;
 		}

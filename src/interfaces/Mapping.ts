@@ -14,6 +14,7 @@ export const priorityEmojis: { [key: number]: string } = {
 
 export interface statusDropDownOption {
 	value: string;
+	name: string;
 	text: string;
 }
 
@@ -41,10 +42,11 @@ export const getPriorityOptionsForDropdown = (): priorityDropDownOption[] => [
 export const priorityOptions = getPriorityOptionsForDropdown();
 
 export const getCustomStatusOptionsForDropdown = (
-	statusConfigs: CustomStatus[]
+	statusConfigs: CustomStatus[],
 ): statusDropDownOption[] => {
 	return statusConfigs.map(({ symbol, name }) => ({
 		value: symbol,
+		name: name,
 		text: `${name} : [${symbol}]`,
 	}));
 };
@@ -149,5 +151,5 @@ export const columnTypeAndNameMapping: { [key: string]: string } = {
 	taskPriority: "Priority",
 	pathFiltered: "Path filtered",
 	completed: "Completed",
-	allPending: "All pending tasks"
+	allPending: "All pending tasks",
 };

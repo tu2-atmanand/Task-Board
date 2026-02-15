@@ -6,6 +6,8 @@ import {
 	RootFilterState,
 	SavedFilterConfig,
 } from "src/interfaces/BoardConfigs";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 export class FilterConfigModal extends Modal {
 	private plugin: TaskBoard;
@@ -246,9 +248,7 @@ export class FilterConfigModal extends Modal {
 
 		const now = new Date().toISOString();
 		const config: SavedFilterConfig = {
-			id: `filter-config-${Date.now()}-${Math.random()
-				.toString(36)
-				.substr(2, 9)}`,
+			id: `filter-config-${Date.now()}-${generateRandomTempTaskId()}`,
 			name: name.trim(),
 			description: description.trim() || undefined,
 			filterState: JSON.parse(JSON.stringify(this.currentFilterState)),
@@ -274,7 +274,11 @@ export class FilterConfigModal extends Modal {
 
 			this.close();
 		} catch (error) {
-			console.error("Failed to save filter configuration:", error);
+			bugReporterManagerInsatance.addToLogs(
+				111,
+				String(error),
+				"FilterConfigModal.ts/saveConfiguration",
+			);
 			new Notice(t("failed-to-save-filter-configuration"));
 		}
 	}
@@ -305,7 +309,11 @@ export class FilterConfigModal extends Modal {
 
 			this.close();
 		} catch (error) {
-			console.error("Failed to load filter configuration:", error);
+			bugReporterManagerInsatance.addToLogs(
+				112,
+				String(error),
+				"FilterConfigModal.ts/loadConfiguration",
+			);
 			new Notice(t("failed-to-load-filter-configuration"));
 		}
 	}
@@ -392,7 +400,11 @@ export class FilterConfigModal extends Modal {
 			);
 			newModal.open();
 		} catch (error) {
-			console.error("Failed to delete filter configuration:", error);
+			bugReporterManagerInsatance.addToLogs(
+				113,
+				String(error),
+				"FilterConfigModal.ts/deleteConfiguration",
+			);
 			new Notice(t("failed-to-delete-filter-configuration"));
 		}
 	}

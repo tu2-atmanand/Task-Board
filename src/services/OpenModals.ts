@@ -1,6 +1,6 @@
 // src/services/OpenModals.ts
 
-import { App, Notice, TFile, WorkspaceLeaf } from "obsidian";
+import { App, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	addTaskInNote,
 	updateTaskInFile,
@@ -27,6 +27,9 @@ import { ScanFilterModal } from "src/modals/ScanFilterModal";
 import { ScanVaultModal } from "src/modals/ScanVaultModal";
 import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { DatePickerModal } from "src/modals/date_picker";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { scanFilters } from "src/interfaces/GlobalSettings";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -53,6 +56,7 @@ export const openAddNewTaskInCurrentFileModal = (
 	plugin: TaskBoard,
 	activeFile: TFile,
 	cursorPosition?: { line: number; ch: number } | undefined,
+	cursorPosition?: { line: number; ch: number } | undefined,
 ) => {
 	const AddTaskModal = new AddOrEditTaskModal(
 		plugin,
@@ -61,7 +65,9 @@ export const openAddNewTaskInCurrentFileModal = (
 				(newId) => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
 						newTask.filePath,
+						newTask.filePath,
 					);
+				},
 				},
 			);
 
@@ -83,6 +89,7 @@ export const openAddNewTaskInCurrentFileModal = (
 		false,
 		undefined,
 		activeFile.path,
+		activeFile.path,
 	);
 	AddTaskModal.open();
 	return true;
@@ -90,6 +97,7 @@ export const openAddNewTaskInCurrentFileModal = (
 
 export const openAddNewTaskModal = (
 	plugin: TaskBoard,
+	activeFile?: TFile,
 	activeFile?: TFile,
 ) => {
 	const preDefinedNoteFile = plugin.app.vault.getAbstractFileByPath(
@@ -112,10 +120,12 @@ export const openAddNewTaskModal = (
 					{
 						value: completeTask + "\n",
 					},
+					},
 				);
 			} else {
 				await addTaskInNote(plugin, newTask, false).then((newId) => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
+						newTask.filePath,
 						newTask.filePath,
 					);
 				});
@@ -136,7 +146,9 @@ export const openAddNewTaskModal = (
 		false,
 		false,
 		undefined,
-		activeTFile ? activeTFile.path : plugin.settings.data.preDefinedNote,
+		activeTFile
+			? activeTFile.path
+			: normalizePath(plugin.settings.data.globalSettings.preDefinedNote),
 	);
 	AddTaskModal.open();
 };
@@ -148,9 +160,15 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 			newTask: taskItem,
 			quickAddPluginChoice: string,
 			noteContent: string | undefined,
+			noteContent: string | undefined,
 		) => {
 			if (!noteContent) {
-				// console.warn("This code should not run...");
+				bugReporterManagerInsatance.showNotice(
+					178,
+					"There was an issue with generating the content for the note. Hence, not proceeding with creating the note for the task you entered.",
+					`Generated content for note : ${noteContent}`,
+					"OpenModals.ts/openAddNewTaskNoteModal",
+				);
 			} else {
 				// If noteContent is provided, it means user wants to save this task as a TaskNote.
 				// Create the note content with frontmatter
@@ -158,14 +176,18 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 					// Check if the directory exists, create if not
 					const parts = newTask.filePath.split("/");
 					if (parts.length > 1) {
-						const dirPath = parts.slice(0, -1).join("/");
+						const dirPath = parts.slice(0, -1).join("/").trim();
 						if (!(await plugin.app.vault.adapter.exists(dirPath))) {
 							await plugin.app.vault.createFolder(dirPath);
 						}
+
+						// Required for Obsidian to create the folder and index it.
+						sleep(200);
 					}
 
 					// Create or update the file
 					const existingFile = plugin.app.vault.getFileByPath(
+						newTask.filePath,
 						newTask.filePath,
 					);
 					if (!existingFile) {
@@ -175,6 +197,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								// This is required to rescan the updated file and refresh the board.
 								plugin.realTimeScanner.onFileModified(
 									newTask.filePath,
+									newTask.filePath,
 								);
 								sleep(1000).then(() => {
 									// TODO : Is 1 seconds really required ?
@@ -182,30 +205,35 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								});
 							});
 					} else {
+						const newName = getCurrentLocalTimeString();
+						const parts = newTask.filePath.split("/");
+						const dirPath = parts.slice(0, -1).join("/").trim();
+						const newPath = normalizePath(
+							`${dirPath}/${newName}.md`,
+						);
 						new Notice(
 							t("file-note-already-exists") +
 								t(
-									"creating a new file with the following name :",
+									"creating a new file with the current timestamp as note name :",
 								) +
-								` Copy-${newTask.filePath}`,
+								` ${newName}.md`,
 							10000,
 						);
-						await plugin.app.vault
-							.create(`Copy-${newTask.filePath}`, noteContent)
-							.then(() => {
-								// This is required to rescan the updated file and refresh the board.
-								plugin.realTimeScanner.onFileModified(
-									`Copy-${newTask.filePath}`,
-								);
-								sleep(1000).then(() => {
-									plugin.realTimeScanner.processAllUpdatedFiles();
-								});
+						await plugin.app.vault.create(newPath, "").then(() => {
+							// This is required to rescan the updated file and refresh the board.
+							plugin.realTimeScanner.onFileModified(
+								`Copy-${newTask.filePath}`,
+							);
+							sleep(1000).then(() => {
+								plugin.realTimeScanner.processAllUpdatedFiles();
 							});
+						});
 					}
 				} catch (error) {
-					console.error(
-						"Error creating or updating task note:",
-						error,
+					bugReporterManagerInsatance.addToLogs(
+						149,
+						String(error),
+						"OpenModals.ts/openAddNewTaskNoteModal/callback()",
 					);
 					new Notice(t("error-creating-task-note"), 5000);
 					return false;
@@ -350,6 +378,7 @@ export const openEditTaskNoteModal = (
  */
 export const bugReporter = (
 	plugin: TaskBoard,
+	id: number,
 	message: string,
 	bugContent: string,
 	context: string,
@@ -397,6 +426,7 @@ export const bugReporter = (
 					onclick: () => {
 						const bugReportModal = new BugReporterModal(
 							plugin,
+							id,
 							message,
 							bugContent,
 							context,
@@ -504,16 +534,16 @@ export const openTaskBoardActionsModal = (
 	plugin: TaskBoard,
 	activeBoardIndex: number,
 ) => {
-	// const actionModal = new TaskBoardActionsModal(
-	// 	plugin,
-	// 	plugin.taskBoardFileManager.getCurrentBoardData()?.columns,
-	// );
-	// actionModal.open();
+	const actionModal = new TaskBoardActionsModal(
+		plugin,
+		plugin.settings.data.boardConfigs[activeBoardIndex].columns,
+	);
+	actionModal.open();
 };
 
 export const openScanFiltersModal = (
 	plugin: TaskBoard,
-	filterType: "files" | "frontMatter" | "folders" | "tags",
+	filterType: keyof scanFilters,
 	onSave: (scanFilters: string[]) => void,
 ) => {
 	new ScanFilterModal(plugin, filterType, async (newValues) => {
@@ -777,4 +807,20 @@ export const openEditTaskView = async (
 		}
 		return leaf;
 	}
+};
+
+export const openDateInputModal = async (
+	plugin: TaskBoard,
+	dateName: string,
+	initialValue: string,
+	onSelect: (newDate: string) => void,
+) => {
+	const datePicker = new DatePickerModal(plugin, dateName, initialValue);
+	datePicker.onDateSelected = async (date: string) => {
+		// newTask[dateType] = date;
+		// updateTaskItemDate(plugin, newTask, dateType, date);
+		onSelect(date);
+	};
+
+	datePicker.open();
 };

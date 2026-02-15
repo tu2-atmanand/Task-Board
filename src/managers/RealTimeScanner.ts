@@ -4,7 +4,6 @@ import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
 
 import type VaultScanner from "src/managers/VaultScanner";
 import type TaskBoard from "main";
-import { bugReporter } from "src/services/OpenModals";
 import { eventEmitter } from "src/services/EventEmitter";
 import { PENDING_SCAN_FILE_STACK } from "src/interfaces/Constants";
 import { bugReporterManagerInsatance } from "./BugReporter";
@@ -29,7 +28,11 @@ export class RealTimeScanner {
 			}
 			// this.startScanTimer();
 		} catch (error) {
-			console.error("Error loading file stack:", error);
+			bugReporterManagerInsatance.addToLogs(
+				144,
+				String(error),
+				"RealTimeScanner.ts/initializeStack",
+			);
 		}
 	}
 

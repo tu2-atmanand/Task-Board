@@ -297,7 +297,7 @@ export const columnSegregator = (
 	 * 		SORTING
 	 * -------------------------------------------------------------
 	 */
-	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
+	if (columnData?.sortCriteria && columnData.sortCriteria.length > 0) {
 		// TODO : This code can be moved inside the ColumnSortingAlgorithm function.
 		// If manualOrder is one of the sorting criteria, apply manual ordering using columnData.tasksIdManualOrder
 		const hasManualOrder = columnData.sortCriteria.some(
@@ -346,12 +346,7 @@ export const columnSegregator = (
 			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
 			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
 				newTasksIdManualOrder;
-			console.log(
-				"columnSegregator...\nNew manual order :",
-				newTasksIdManualOrder,
-				"\nOld manual order :",
-				columnData.tasksIdManualOrder,
-			);
+
 			if (onBoardDataChange && didTasksIdManualOrderChange) {
 				onBoardDataChange(currentBoardData);
 			}

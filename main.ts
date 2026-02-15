@@ -3,6 +3,7 @@
 import { around } from "monkey-around";
 import {
 	App,
+	normalizePath,
 	Notice,
 	Plugin,
 	PluginManifest,
@@ -33,6 +34,7 @@ import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
 import {
 	newReleaseVersion,
+	OBSIDIAN_CLOSED_TIME_KEY,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
@@ -43,15 +45,13 @@ import {
 	getTaskPropertyRegexPatterns,
 	taskPropertyHidingExtension,
 } from "src/editor-extensions/task-operations/property-hiding";
-import {
-	fetchTasksPluginCustomStatuses,
-	isTasksPluginEnabled,
-} from "src/services/tasks-plugin/helpers";
+import { isTasksPluginEnabled } from "src/services/tasks-plugin/helpers";
 import { scanModeOptions, taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -91,7 +91,7 @@ export default class TaskBoard extends Plugin {
 	private deleteProcessingTimer: NodeJS.Timeout | null = null;
 	private createProcessingTimer: NodeJS.Timeout | null = null;
 	private currentProgressNotice: Notice | null = null;
-	private readonly QUEUE_DELAY = 1000; // Delay in ms before starting to process queue
+	private readonly QUEUE_DELAY = 2000; // Delay in ms before starting to process queue
 	private readonly PROCESSING_INTERVAL = 100; // Delay between processing each file
 
 	constructor(app: App, menifest: PluginManifest) {
@@ -146,7 +146,6 @@ export default class TaskBoard extends Plugin {
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
-			console.log("Task Board : Running onLayoutReady...");
 			this.compatiblePluginsAvailabilityCheck();
 
 			//Creates a Icon on Ribbon Bar (after i18n is initialized)
@@ -177,10 +176,7 @@ export default class TaskBoard extends Plugin {
 			this.registerReadingModePostProcessor();
 
 			setTimeout(() => this.findModifiedFilesOnAppAbsense(), 10000);
-
-			console.log("Task Board : onLayoutReady FINISHED.");
 		});
-		console.log("Task Board : onload funcion FINISHED.");
 	}
 
 	onunload() {
@@ -284,11 +280,19 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async saveSettings(newSetting?: PluginDataJson) {
-		if (newSetting) {
-			this.settings = newSetting;
-			await this.saveData(newSetting);
-		} else {
-			await this.saveData(this.settings);
+		try {
+			if (newSetting) {
+				this.settings = newSetting;
+				await this.saveData(newSetting);
+			} else {
+				await this.saveData(this.settings);
+			}
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				140,
+				String(err),
+				"main.ts/saveSettings",
+			);
 		}
 	}
 
@@ -399,15 +403,12 @@ export default class TaskBoard extends Plugin {
 		const tasksPlugin = new TasksPluginApi(this);
 		if (!tasksPlugin.isTasksPluginEnabled()) {
 			this.registerMarkdownPostProcessor((element, context) => {
-				// console.log("Element : ", element, "\nContent :", context);
 				// Only process if we have properties to hide
-
 				// Find all list items that could be tasks
 				const listItems = element.querySelectorAll("li");
 
 				listItems.forEach((listItem) => {
 					// const textContent = listItem.textContent || "";
-					// console.log("Text Content :", textContent);
 					// Check if this is a task (starts with checkbox syntax)
 					if (listItem.querySelector(".contains-task-list")) {
 						this.hidePropertiesInElement(
@@ -710,8 +711,8 @@ export default class TaskBoard extends Plugin {
 	/**
 	 * Add a file to the rename queue and schedule processing
 	 * @private
-	 * @param {TAbstractFile} file - The file to add to the queue
-	 * @param {string} oldPath - The old path of the file
+	 * @param file - The file to add to the queue
+	 * @param oldPath - The old path of the file
 	 */
 	private queueFileForRename(file: TAbstractFile, oldPath: string) {
 		// Only queue TFile objects (not folders) that are allowed for scanning
@@ -739,59 +740,75 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		const archivedPath = this.settings.data.archivedTBNotesFolderPath;
-		const totalFiles = this.renameQueue.length;
-
-		// Show progress notice
-		this.currentProgressNotice = new Notice(
-			`Processing renamed files: 0/${totalFiles}`,
-			0,
+		const archivedPath = normalizePath(
+			this.settings.data.archivedTBNotesFolderPath,
 		);
+		let allowedFiles = this.renameQueue.filter((fileData) =>
+			fileTypeAllowedForScanning(
+				this.settings.data,
+				fileData.file,
+			),
+		);
+		const totalFilesLength = allowedFiles.length;
 
-		let processed = 0;
-		while (this.renameQueue.length > 0) {
-			const { file, oldPath } = this.renameQueue.shift()!;
+		// Empty the global queue
+		this.renameQueue = [];
 
-			try {
-				if (
-					fileTypeAllowedForScanning(this.plugin.settings.data, file)
-				) {
+		if (totalFilesLength > 0) {
+			// Show progress notice
+			this.currentProgressNotice = new Notice(
+				`Processing renamed files: 0/${totalFilesLength}`,
+				0,
+			);
+
+			let processed = 0;
+			while (allowedFiles.length > 0) {
+				const { file, oldPath } = allowedFiles.shift()!;
+
+				try {
 					this.realTimeScanner.onFileRenamed(
 						file,
 						oldPath,
 						archivedPath,
 					);
+					processed++;
+
+					// Update progress notice
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFilesLength}`;
+				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
+					bugReporterManagerInsatance.addToLogs(
+						162,
+						String(error),
+						"main.ts/processRenameQueue",
+					);
 				}
-				processed++;
 
-				// Update progress notice
-				this.currentProgressNotice.messageEl.textContent = `Task Board : Processing renamed files: ${processed}/${totalFiles}`;
-			} catch (error) {
-				console.error(
-					`Error processing renamed file ${file.path}:`,
-					error,
-				);
+				// Add delay between processing each file to prevent blocking UI
+				if (allowedFiles.length > 0) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
 			}
 
-			// Add delay between processing each file to prevent blocking UI
-			if (this.renameQueue.length > 0) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, this.PROCESSING_INTERVAL),
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+
+			this.plugin.vaultScanner.saveTasksToJsonCache();
+			eventEmitter.emit("REFRESH_BOARD");
+
+			if (processed > 0) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFilesLength} renamed file(s)`,
 				);
 			}
 		}
 
-		this.plugin.vaultScanner.saveTasksToJsonCache();
-		eventEmitter.emit("REFRESH_BOARD");
-
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-		if (processed > 0) {
-			new Notice(
-				`✓ Task Board : Finished processing ${totalFiles} renamed file(s)`,
-			);
-		}
+		if (this.renameProcessingTimer)
+			clearTimeout(this.renameProcessingTimer);
 	}
 
 	/**
@@ -803,13 +820,14 @@ export default class TaskBoard extends Plugin {
 			this.deleteQueue.push(file);
 
 			// Clear existing timer and set a new one
-			if (this.deleteProcessingTimer) {
-				clearTimeout(this.deleteProcessingTimer);
+			if (!this.deleteProcessingTimer) {
+				this.deleteProcessingTimer = setTimeout(() => {
+					this.processDeleteQueue();
+				}, this.QUEUE_DELAY);
+			} else {
+				// NOTE : I think there is no need to remove the Timout created, in 2 seconds, all the Obsidians triggers should finish, for the Task Board's processing to start.
+				// clearTimeout(this.deleteProcessingTimer);
 			}
-
-			this.deleteProcessingTimer = setTimeout(() => {
-				this.processDeleteQueue();
-			}, this.QUEUE_DELAY);
 		}
 	}
 
@@ -823,53 +841,57 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		const totalFiles = this.deleteQueue.length;
+		let allowedFiles = this.deleteQueue.filter((file: TAbstractFile) =>
+			fileTypeAllowedForScanning(this.settings.data, file),
+		);
+		const totalFilesLength = allowedFiles.length;
 
-		let processed = 0;
-		while (this.deleteQueue.length > 0) {
-			const file = this.deleteQueue.shift()!;
+		if (allowedFiles.length > 0) {
+			// Show progress notice
+			this.currentProgressNotice = new Notice(
+				`Processing deleted files: 0/${totalFilesLength}`,
+				0,
+			);
 
-			try {
-				if (
-					fileTypeAllowedForScanning(this.plugin.settings.data, file)
-				) {
-					// Show progress notice
-					this.currentProgressNotice = new Notice(
-						`Processing deleted files: 0/${totalFiles}`,
-						0,
-					);
+			let processed = 0;
+			while (allowedFiles.length > 0) {
+				const file = allowedFiles.shift()!;
 
+				try {
 					this.realTimeScanner.onFileDeleted(file);
+					processed++;
 
 					// Update progress notice
-					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFiles}`;
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFilesLength}`;
+				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
+					bugReporterManagerInsatance.addToLogs(
+						163,
+						String(error),
+						"main.ts/processDeleteQueue",
+					);
 				}
-				processed++;
-			} catch (error) {
-				console.error(
-					`Error processing deleted file ${file.path}:`,
-					error,
+
+				// Add delay between processing each file to prevent blocking UI
+				if (allowedFiles.length > 0) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
+			}
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+
+			this.plugin.vaultScanner.saveTasksToJsonCache();
+			eventEmitter.emit("REFRESH_COLUMN");
+
+			if (processed > 0) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFilesLength} deleted file(s)`,
 				);
 			}
-
-			// Add delay between processing each file to prevent blocking UI
-			if (this.deleteQueue.length > 0) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, this.PROCESSING_INTERVAL),
-				);
-			}
-		}
-
-		this.plugin.vaultScanner.saveTasksToJsonCache();
-		eventEmitter.emit("REFRESH_COLUMN");
-
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-		if (processed > 0) {
-			new Notice(
-				`✓ Task Board : Finished processing ${totalFiles} deleted file(s)`,
-			);
 		}
 	}
 
@@ -882,13 +904,14 @@ export default class TaskBoard extends Plugin {
 		this.createQueue.push(file);
 
 		// Clear existing timer and set a new one
-		if (this.createProcessingTimer) {
-			clearTimeout(this.createProcessingTimer);
+		if (!this.createProcessingTimer) {
+			this.createProcessingTimer = setTimeout(() => {
+				this.processCreateQueue();
+			}, this.QUEUE_DELAY);
+		} else {
+			// NOTE : I think there is no need to remove the Timout created, in 2 seconds, all the Obsidians triggers should finish, for the Task Board's processing to start.
+			// clearTimeout(this.createProcessingTimer);
 		}
-
-		this.createProcessingTimer = setTimeout(() => {
-			this.processCreateQueue();
-		}, this.QUEUE_DELAY);
 	}
 
 	/**
@@ -901,51 +924,228 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		const totalFiles = this.createQueue.length;
+		let allowedFiles = this.createQueue.filter((file: TFile) =>
+			fileTypeAllowedForScanning(this.settings.data, file),
+		);
+		const totalFilesLength = allowedFiles.length;
 
-		this.plugin.vaultScanner.refreshTasksFromFiles(this.createQueue, false);
+		this.plugin.vaultScanner.refreshTasksFromFiles(allowedFiles, false);
 
-		let processed = 0;
-		while (this.createQueue.length > 0) {
-			const file = this.createQueue.shift()!;
+		// Show progress notice only if the files are more than 10
+		if (totalFilesLength > 10) {
+			this.currentProgressNotice = new Notice(
+				`Task Board : Processing created files: 0/${totalFilesLength}`,
+				0,
+			);
+			let processed = 0;
+			while (allowedFiles.length > 0) {
+				const file = allowedFiles.shift()!;
 
-			try {
-				if (
-					fileTypeAllowedForScanning(this.plugin.settings.data, file)
-				) {
-					// Show progress notice
-					this.currentProgressNotice = new Notice(
-						`Task Board : Processing created files: 0/${totalFiles}`,
-						0,
-					);
+				try {
+					// if (
+					// 	fileTypeAllowedForScanning(
+					// 		this.plugin.settings.data.globalSettings,
+					// 		file
+					// 	)
+					// ) {
 					// 	await this.realTimeScanner.processAllUpdatedFiles(file);
+					// }
+					processed++;
 
 					// Update progress notice
-					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFiles}`;
+					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
+					bugReporterManagerInsatance.addToLogs(
+						164,
+						String(error),
+						"main.ts/processCreateQueue",
+					);
 				}
-				processed++;
-			} catch (error) {
-				console.error(
-					`Error processing created file ${file.path}:`,
-					error,
-				);
+
+				// Add delay between processing each file to prevent blocking UI
+				if (allowedFiles.length > 0) {
+					await new Promise((resolve) =>
+						setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
 			}
 
-			// Add delay between processing each file to prevent blocking UI
-			if (this.createQueue.length > 0) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, this.PROCESSING_INTERVAL),
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			if (processed > 0) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
 				);
 			}
 		}
+	}
 
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-		if (processed > 0) {
-			new Notice(
-				`✓ Task Board : Finished processing ${totalFiles} created file(s)`,
+	/**
+	 * Runs on plugin load/Obsidian startup time and find all the files which where
+	 * modified (edited/renamed/deleted) between the time when Obsidian was last closed
+	 * till now.
+	 */
+	async findModifiedFilesOnAppAbsense() {
+		let OBSIDIAN_CLOSED_TIME = this.app.loadLocalStorage(
+			OBSIDIAN_CLOSED_TIME_KEY,
+		);
+
+		if (!OBSIDIAN_CLOSED_TIME)
+			OBSIDIAN_CLOSED_TIME = this.vaultScanner.tasksCache.Modified_at;
+
+		if (OBSIDIAN_CLOSED_TIME) {
+			OBSIDIAN_CLOSED_TIME = Date.parse(OBSIDIAN_CLOSED_TIME);
+			let filesScannedCount = 0;
+			const modifiedCreatedRenamedFiles = this.app.vault
+				.getFiles()
+				.filter((file) => {
+					filesScannedCount++;
+					return (
+						file.stat.mtime > OBSIDIAN_CLOSED_TIME ||
+						file.stat.ctime > OBSIDIAN_CLOSED_TIME
+					);
+				});
+
+			// Find deleted files by comparing cache with current vault files
+			const currentFilesPaths = new Set(
+				this.app.vault.getFiles().map((file) => file.path),
 			);
+			const cachedFilesPaths = Object.keys(
+				this.vaultScanner.tasksCache.Pending || {},
+			).concat(Object.keys(this.vaultScanner.tasksCache.Completed || {}));
+			const deletedFiles = new Set(
+				cachedFilesPaths.filter(
+					(filePath) => !currentFilesPaths.has(filePath),
+				),
+			);
+			const deletedFilesList = [...deletedFiles];
+
+			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
+				fileTypeAllowedForScanning(
+					this.plugin.settings.data,
+					file,
+				),
+			);
+			const totalFilesLength =
+				changed_files.length + deletedFilesList.length;
+
+			if (totalFilesLength > 0) {
+				const scanAllModifiedFiles = () => {
+					this.plugin.vaultScanner
+						.refreshTasksFromFiles(changed_files, false)
+						.then(async () => {
+							if (deletedFilesList.length > 0) {
+								await this.plugin.vaultScanner.deleteCacheForFiles(
+									deletedFilesList,
+								);
+							}
+						});
+				};
+
+				if (this.settings.data.showModifiedFilesNotice) {
+					const modifiedFilesNotice = new Notice(
+						createFragment((f) => {
+							f.createDiv("bugReportNotice", (el) => {
+								el.createEl("p", {
+									text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
+								});
+								el.createEl("button", {
+									text: t("show-me"),
+									cls: "reportBugButton",
+									onclick: () => {
+										// el.hide();
+
+										// Open a modal and show all these file names with their modified date-time in a nice UI.
+										const modifiedFilesModal =
+											new ModifiedFilesModal(this.app, {
+												modifiedFiles: changed_files,
+												deletedFiles: deletedFilesList,
+											});
+										modifiedFilesModal.open();
+									},
+								});
+								el.createEl("button", {
+									text: t("scan-them"),
+									cls: "ignoreBugButton",
+									onclick: async () => {
+										try {
+											modifiedFilesNotice.hide();
+
+											// Show progress notice
+											this.currentProgressNotice =
+												new Notice(
+													`Task Board : Processing modified files: 0/${totalFilesLength}`,
+													0,
+												);
+
+											scanAllModifiedFiles();
+
+											let modifiedFilesQueueLength =
+												changed_files?.length ?? 0;
+
+											let processed = 0;
+											while (
+												modifiedFilesQueueLength > 0
+											) {
+												modifiedFilesQueueLength =
+													modifiedFilesQueueLength -
+													1;
+
+												processed++;
+
+												// Update progress notice
+												this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+
+												// Add delay between processing each file to prevent blocking UI
+												if (
+													modifiedFilesQueueLength > 0
+												) {
+													await new Promise(
+														(resolve) =>
+															setTimeout(
+																resolve,
+																this
+																	.PROCESSING_INTERVAL,
+															),
+													);
+												}
+											}
+
+											// Hide progress notice after completion
+											this.currentProgressNotice?.hide();
+											this.currentProgressNotice = null;
+											new Notice(
+												`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
+											);
+										} catch (error) {
+											this.currentProgressNotice?.hide();
+											bugReporterManagerInsatance.addToLogs(
+												165,
+												String(error),
+												"main.ts/findModifiedFilesOnAppAbsense",
+											);
+										}
+									},
+								});
+							});
+						}),
+						0,
+					);
+
+					modifiedFilesNotice.messageEl.onClickEvent((e) => {
+						if (e.target instanceof HTMLButtonElement) {
+							e.stopPropagation();
+							e.preventDefault();
+							e.stopImmediatePropagation();
+						}
+					});
+				} else {
+					scanAllModifiedFiles();
+				}
+			}
 		}
 	}
 
@@ -955,7 +1155,6 @@ export default class TaskBoard extends Plugin {
 	registerEvents() {
 		this.registerEvent(
 			this.app.vault.on("modify", async (file: TAbstractFile) => {
-				console.log("Modify event is fired...");
 				if (
 					fileTypeAllowedForScanning(this.plugin.settings.data, file)
 				) {
@@ -979,21 +1178,18 @@ export default class TaskBoard extends Plugin {
 		);
 		this.registerEvent(
 			this.app.vault.on("rename", (file, oldPath) => {
-				console.log("Rename event is fired...");
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForRename(file, oldPath);
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
-				console.log("Delete event is fired...");
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForDeletion(file);
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
-				console.log("Create event is fired...");
 				if (file instanceof TFile) {
 					// Queue the file for processing instead of processing immediately
 					this.queueFileForCreation(file);
@@ -1007,20 +1203,27 @@ export default class TaskBoard extends Plugin {
 				this.app.workspace.on(
 					"active-leaf-change",
 					(leaf: WorkspaceLeaf | null) => {
-						console.log("On Active Leaf Change...\nLeaf =", leaf);
 						this.onFileModifiedAndLostFocus();
 					},
 				),
 			);
 			this.registerDomEvent(window, "blur", () => {
 				this.onFileModifiedAndLostFocus();
-				console.log("Focusing out of the window...");
 			});
 			this.registerDomEvent(window, "focus", () => {
-				this.onFileModifiedAndLostFocus();
-				console.log("Focusing in the window...");
+				setTimeout(() => this.onFileModifiedAndLostFocus(), 200);
 			});
 		}
+
+		this.registerEvent(
+			this.app.workspace.on("quit", () => {
+				const currentTime = getCurrentLocalTimeString();
+				this.app.saveLocalStorage(
+					OBSIDIAN_CLOSED_TIME_KEY,
+					currentTime,
+				);
+			}),
+		);
 
 		// const closeButton = document.querySelector<HTMLElement>(
 		// 	".titlebar-button.mod-close"
@@ -1217,235 +1420,6 @@ export default class TaskBoard extends Plugin {
 		isReminderPluginInstalled(this.plugin);
 	}
 
-	// private migrateSettings(defaults: any, settings: any) {
-	// 	for (const key in defaults) {
-	// 		if (!(key in settings)) {
-	// 			settings[key] = defaults[key];
-	// 		} else if (
-	// 			// This is a temporary fix for the tagColors
-	// 			!Array.isArray(settings[key]) &&
-	// 			key === "tagColors" &&
-	// 			typeof settings[key] === "object" &&
-	// 			settings[key] !== null
-	// 		) {
-	// 			settings[key] = Object.entries(
-	// 				settings[key] as Record<string, string>
-	// 			).map(
-	// 				([name, color], idx) =>
-	// 					({
-	// 						name,
-	// 						color,
-	// 						priority: idx + 1,
-	// 					} as any)
-	// 			);
-	// 		} else if (key === "boardConfigs" && Array.isArray(settings[key])) {
-	// 			// This is a temporary solution to sync the boardConfigs. I will need to replace the range object with the new 'datedBasedColumn', which will have three values 'dateType', 'from' and 'to'. So, basically I want to copy range.rangedata.from value to datedBasedColumn.from and similarly for to. And for datedBasedColumn.dateType, put the value this.settings.data.defaultDateType.
-	// 			settings[key].forEach((boardConfig: Board) => {
-	// 				boardConfig.columns.forEach((column: ColumnData) => {
-	// 					if (!column.id) {
-	// 						column.id = Math.floor(Math.random() * 1000000);
-	// 					}
-	// 					if (
-	// 						column.colType === colType.dated ||
-	// 						(column.colType === colType.undated &&
-	// 							!column.datedBasedColumn)
-	// 					) {
-	// 						column.datedBasedColumn = {
-	// 							dateType:
-	// 								this.settings.data
-	// 									.universalDate,
-	// 							from: column.datedBasedColumn?.from || 0,
-	// 							to: column.datedBasedColumn?.to || 0,
-	// 						};
-	// 						delete column.range;
-	// 					}
-	// 				});
-
-	// 				if (!boardConfig.hideEmptyColumns) {
-	// 					boardConfig.hideEmptyColumns = false;
-	// 				}
-	// 			});
-	// 		} else if (
-	// 			typeof defaults[key] === "object" &&
-	// 			defaults[key] !== null &&
-	// 			!Array.isArray(defaults[key])
-	// 		) {
-	// 			// Recursively sync nested objects
-	// 			// console.log(
-	// 			// 	"Syncing settings for key:",
-	// 			// 	key,
-	// 			// 	"Defaults:",
-	// 			// 	defaults[key],
-	// 			// 	"Settings:",
-	// 			// 	settings[key]
-	// 			// );
-	// 			this.migrateSettings(defaults[key], settings[key]);
-	// 		} else if (key === "tasksCacheFilePath" && settings[key] === "") {
-	// 			settings[
-	// 				key
-	// 			] = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
-	// 		}
-	// 	}
-
-	// 	this.settings = settings;
-	// 	// this.saveSettings();
-	// }
-
-	async findModifiedFilesOnAppAbsense() {
-		if (this.vaultScanner.tasksCache.Modified_at) {
-			const LAST_UPDATED_TIME = Date.parse(
-				this.vaultScanner.tasksCache.Modified_at,
-			);
-			console.log(
-				"Task Board : Fetching all modified files...\nLast modified time :",
-				LAST_UPDATED_TIME,
-			);
-			let filesScannedCount = 0;
-			const modifiedCreatedRenamedFiles = this.app.vault
-				.getFiles()
-				.filter((file) => {
-					filesScannedCount++;
-					return (
-						file.stat.mtime > LAST_UPDATED_TIME ||
-						file.stat.ctime > LAST_UPDATED_TIME
-					);
-				});
-
-			// Find deleted files by comparing cache with current vault files
-			const currentFilesPaths = new Set(
-				this.app.vault.getFiles().map((file) => file.path),
-			);
-			const cachedFilesPaths = Object.keys(
-				this.vaultScanner.tasksCache.Pending || {},
-			).concat(Object.keys(this.vaultScanner.tasksCache.Completed || {}));
-			const deletedFiles = new Set(
-				cachedFilesPaths.filter(
-					(filePath) => !currentFilesPaths.has(filePath),
-				),
-			);
-			const deletedFilesList = [...deletedFiles];
-
-			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
-				fileTypeAllowedForScanning(this.plugin.settings.data, file),
-			);
-			console.log(
-				"Task Board : Fetching complete.\nModified files :",
-				changed_files,
-				"\nDeleted files :",
-				deletedFilesList,
-				"\nFiles scanned :",
-				filesScannedCount,
-			);
-			const totalFilesLength =
-				changed_files.length + deletedFilesList.length;
-
-			if (totalFilesLength > 0) {
-				const modifiedFilesNotice = new Notice(
-					createFragment((f) => {
-						f.createDiv("bugReportNotice", (el) => {
-							el.createEl("p", {
-								text: `Task Board : ${totalFilesLength} files has been modified when Obsidian was inactive.`,
-							});
-							el.createEl("button", {
-								text: t("show-me"),
-								cls: "reportBugButton",
-								onclick: () => {
-									// el.hide();
-
-									// Open a modal and show all these file names with their modified date-time in a nice UI.
-									const modifiedFilesModal =
-										new ModifiedFilesModal(this.app, {
-											modifiedFiles: changed_files,
-											deletedFiles: deletedFilesList,
-										});
-									modifiedFilesModal.open();
-								},
-							});
-							el.createEl("button", {
-								text: t("scan-them"),
-								cls: "ignoreBugButton",
-								onclick: async () => {
-									modifiedFilesNotice.hide();
-
-									// Show progress notice
-									this.currentProgressNotice = new Notice(
-										`Task Board : Processing modified files: 0/${totalFilesLength}`,
-										0,
-									);
-
-									this.plugin.vaultScanner
-										.refreshTasksFromFiles(
-											changed_files,
-											false,
-										)
-										.then(async () => {
-											console.log(
-												"Task Board : Will now going to update the deleted files cache...",
-											);
-											if (deletedFilesList.length > 0) {
-												await this.plugin.vaultScanner.deleteCacheForFiles(
-													deletedFilesList,
-												);
-												console.log(
-													"Task Board : Completed deleting cache of deleted files...",
-												);
-											}
-										});
-
-									let modifiedFilesQueue = changed_files;
-
-									let processed = 0;
-									while (modifiedFilesQueue.length > 0) {
-										const file =
-											modifiedFilesQueue.shift()!;
-
-										try {
-											processed++;
-
-											// Update progress notice
-											this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
-										} catch (error) {
-											console.error(
-												`Error processing created file ${file.path}:`,
-												error,
-											);
-										}
-
-										// Add delay between processing each file to prevent blocking UI
-										if (modifiedFilesQueue.length > 0) {
-											await new Promise((resolve) =>
-												setTimeout(
-													resolve,
-													this.PROCESSING_INTERVAL,
-												),
-											);
-										}
-									}
-
-									// Hide progress notice after completion
-									this.currentProgressNotice?.hide();
-									this.currentProgressNotice = null;
-									new Notice(
-										`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
-									);
-								},
-							});
-						});
-					}),
-					0,
-				);
-
-				modifiedFilesNotice.messageEl.onClickEvent((e) => {
-					if (e.target instanceof HTMLButtonElement) {
-						e.stopPropagation();
-						e.preventDefault();
-						e.stopImmediatePropagation();
-					}
-				});
-			}
-		}
-	}
-
 	private async runOnPluginUpdate() {
 		// Check if the plugin version has changed
 		const currentVersion = newReleaseVersion; // Change this whenever you will going to release a new version.
@@ -1453,13 +1427,43 @@ export default class TaskBoard extends Plugin {
 		const previousVersion = this.settings.version;
 
 		if (previousVersion == "" || currentVersion !== previousVersion) {
-			// make the localStorage flag, 'manadatoryScan' to True
+			// A short custom message to show in Obsidian's Notice on plugin update.
+			// if (previousVersion !== "") {
+			// 	const customMessage = new Notice("", 0);
 
+			// 	const messageContainer = customMessage.containerEl;
+
+			// 	const customMessageContainer = messageContainer.createDiv({
+			// 		cls: "taskboardCustomMessageContainer",
+			// 	});
+
+			// 	customMessageContainer.createEl("h3", { text: "Task Board" });
+			// 	customMessageContainer.createEl("p", {
+			// 		text: "Note for existing users",
+			// 		cls: "taskboardCustomMessageContainerBold",
+			// 	});
+			// 	customMessageContainer.createEl("span", {
+			// 		text: "If you were using the custom statuses from Tasks plugin configs. Please import them in Task Board's setting, using a button in the new Custom Statuses setting section. Task Board will no longer import the custom statuses from Tasks plugin automatically.",
+			// 	});
+			// 	customMessageContainer.createEl("p", {
+			// 		text: "Read the release notes for all the latest features : ",
+			// 	});
+			// 	customMessageContainer.createEl("a", {
+			// 		text: "Task Board v1.9.4",
+			// 		href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
+			// 	});
+			// }
+
+			// Show a message to existing users to re-scan the vault on minor version updates
+			// if (runMandatoryScan && previousVersion === "") {
+			// const smallMessage =
+			// 	"Even being a minor release, this new version of Task Board requires a re-scan of your vault. Kindly re-scan using the top-right button in the task board tab.";
+			// new Notice(smallMessage, 0);
+			// }
+
+			// make the localStorage flag, 'manadatoryScan' to True
 			if (previousVersion === "" || runMandatoryScan) {
 				localStorage.setItem("manadatoryScan", "true");
-				const smallMessage =
-					"Even being a minor release, this new version of Task Board requires a re-scan of your vault. Kindly re-scan using the top-right button in the task board tab.";
-				new Notice(smallMessage, 0);
 			}
 
 			this.settings.version = currentVersion;

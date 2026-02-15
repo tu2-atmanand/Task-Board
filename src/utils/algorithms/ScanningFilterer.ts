@@ -55,7 +55,7 @@ export function checkFrontMatterFilters(
 		return; // No front matter found
 	}
 	const frontMatterInFilters = Object.keys(frontmatter).some((key) => {
-		const filterString = scanFilters.frontMatter.values.find(
+		const filterString = scanFilters.frontmatter.values.find(
 			(filter: string) => filter.includes(`"${key}":`)
 		);
 		if (filterString) {
@@ -72,9 +72,9 @@ export function checkFrontMatterFilters(
 		}
 		return false;
 	});
-	if (frontMatterInFilters && scanFilters.frontMatter.polarity === 1) {
+	if (frontMatterInFilters && scanFilters.frontmatter.polarity === 1) {
 		return true;
-	} else if (frontMatterInFilters && scanFilters.frontMatter.polarity === 2) {
+	} else if (frontMatterInFilters && scanFilters.frontmatter.polarity === 2) {
 		return false;
 	}
 }
@@ -124,25 +124,25 @@ export function checkFolderFilters(
 		if (
 			scanFilters.files.polarity === 1 &&
 			scanFilters.folders.polarity === 1 &&
-			scanFilters.frontMatter.polarity === 1
+			scanFilters.frontmatter.polarity === 1
 		) {
 			return false;
 		} else if (
 			scanFilters.files.polarity === 2 &&
 			scanFilters.folders.polarity === 2 &&
-			scanFilters.frontMatter.polarity === 2
+			scanFilters.frontmatter.polarity === 2
 		) {
 			return true;
 		} else if (
 			scanFilters.files.polarity === 1 ||
 			scanFilters.folders.polarity === 1 ||
-			scanFilters.frontMatter.polarity === 1
+			scanFilters.frontmatter.polarity === 1
 		) {
 			return true;
 		} else if (
 			scanFilters.files.polarity === 2 ||
 			scanFilters.folders.polarity === 2 ||
-			scanFilters.frontMatter.polarity === 2
+			scanFilters.frontmatter.polarity === 2
 		) {
 			return true;
 		}
@@ -169,7 +169,7 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 
 	if (
 		scanFilters.files.polarity === 3 &&
-		scanFilters.frontMatter.polarity === 3 &&
+		scanFilters.frontmatter.polarity === 3 &&
 		scanFilters.folders.polarity === 3
 	) {
 		return true;
@@ -192,8 +192,8 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 	}
 
 	if (
-		scanFilters.frontMatter.polarity !== 3 &&
-		scanFilters.frontMatter.values.length > 0
+		scanFilters.frontmatter.polarity !== 3 &&
+		scanFilters.frontmatter.values.length > 0
 	) {
 		const result = checkFrontMatterFilters(plugin, file, scanFilters);
 		if (result !== undefined) {

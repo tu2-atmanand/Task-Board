@@ -47,15 +47,15 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	hideColumnHeader = false,
 	headerOnly = false,
 }) => {
+	// console.log("Column Data :", columnData);
 	if (!headerOnly && activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 
-	// Lazy loading settings from plugin
-	const lazySettings = plugin.settings.data.kanbanView;
-	const initialTaskCount = lazySettings.initialTaskCount || 20;
-	const loadMoreCount = lazySettings.loadMoreCount || 10;
-	const scrollThresholdPercent = lazySettings.scrollThresholdPercent || 80;
+	// Lazy loading configs
+	const initialTaskCount = 20;
+	const loadMoreCount = 10;
+	const scrollThresholdPercent = 80;
 
 	// State for managing visible tasks
 	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);
@@ -67,6 +67,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	const insertIndexRef = useRef<number | null>(null);
 	const rafRef = useRef<number | null>(null);
 	const [localTasks, setLocalTasks] = useState(tasksForThisColumn);
+
+	// Navigation visibility state
+	const prevScrollTopRef = useRef<number>(0);
+	// const isNavHiddenRef = useRef<boolean>(false);
+	const scrollPositionWhenHiddenRef = useRef<number>(0);
+	const SCROLL_UP_THRESHOLD = 10;
 
 	const scheduleSetInsertIndex = (pos: number | null) => {
 		if (insertIndexRef.current === pos) return;
@@ -100,6 +106,37 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		setLocalTasks(tasksForThisColumn);
 	}, [tasksForThisColumn]);
 
+	const handleNavVisibility = () => {
+		const container = tasksContainerRef.current;
+		if (!container) return;
+
+		const currentScrollTop = container.scrollTop;
+		const isScrollingDown = currentScrollTop > prevScrollTopRef.current;
+		const scrollDifference = Math.abs(currentScrollTop - prevScrollTopRef.current);
+		// console.log("LazyColumn.tsx...\ncurrentScrollTop:", currentScrollTop, "\nisScrollingDown :", isScrollingDown, "\nscrollDifference :", scrollDifference, "\nisNavHiddenRef :");
+
+		if (scrollDifference < 1) return;
+
+		const htmlElement = document.documentElement;
+
+		if (isScrollingDown) {
+			// User is scrolling down - hide navigation
+			htmlElement.classList.add('is-hidden-nav');
+			// isNavHiddenRef.current = true;
+			scrollPositionWhenHiddenRef.current = currentScrollTop;
+		} else if (!isScrollingDown) {
+			// User is scrolling up - show navigation after scrolling up by threshold
+			const scrolledUpDistance = scrollPositionWhenHiddenRef.current - currentScrollTop;
+			if (scrolledUpDistance >= SCROLL_UP_THRESHOLD) {
+				htmlElement.classList.remove('is-hidden-nav');
+				// isNavHiddenRef.current = false;
+			}
+		}
+
+		// Update previous scroll position for next iteration
+		prevScrollTopRef.current = currentScrollTop;
+	};
+
 	// Scroll event handler
 	const handleScroll = useCallback(() => {
 		const container = tasksContainerRef.current;
@@ -128,6 +165,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			if (throttleTimeout) return;
 			throttleTimeout = setTimeout(() => {
 				handleScroll();
+
+				if (Platform.isMobile)
+					handleNavVisibility();
+
 				throttleTimeout = null;
 			}, 100);
 		};
@@ -245,7 +286,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 								newBoardData.columns[columnIndex] = updatedColumnConfiguration;
 								plugin.taskBoardFileManager.saveBoard(newBoardData);
 
-								eventEmitter.emit('REFRESH_BOARD');
 							}
 						}
 					},
@@ -407,7 +447,202 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// -------------------------------------------------
 
 	/**
-	 * Handles the drop event of a task in this column.
+	 * This function will be only run when user will drag the taskItem on another taskItem.
+	 * Computes insertion index based on mouse Y relative to task items inside the container.
+	 */
+	const handleTaskItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		setIsDragOver(true);
+		try {
+			// Only compute insertion index for columns that use "manualOrder" as the sorting criteria.
+			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			if (!hasManualOrder) {
+				// Clear any visual placeholder and desired index
+				if (insertIndexRef.current !== null) {
+					scheduleSetInsertIndex(null);
+				}
+				dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				return;
+			} else {
+				// APPROACH 1 - COMPUTE INSERTION INDEX BASED ON MOUSE Y POSITION BY COMPARING WITH TASK ITEM BOUNDING RECTANGLES
+				// Else will proceed with finding the insertion index
+				// const container = e.currentTarget.parentElement as HTMLDivElement;
+				// const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
+				// let pos = children.length; // default to end
+				// const clientY = e.clientY;
+				// for (let i = 0; i < children.length; i++) {
+				// 	const child = children[i];
+				// 	const rect = child.getBoundingClientRect();
+				// 	const midpoint = rect.top + rect.height / 2;
+				// 	if (clientY < midpoint) {
+				// 		pos = i;
+				// 		break;
+				// 	}
+				// }
+
+				// APPROACH 2 - DIRECTLY FETCH THE INDEX FROM THE DATA ATTRIBUTE OF THE HOVERED ELEMENT
+				let pos = 0 // Default to top of the column
+				const hoveredElement = e.currentTarget;
+				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
+				const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
+				const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+				// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
+				if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
+					const clientY = e.clientY;
+					const rect = hoveredElement.getBoundingClientRect();
+					const midpoint = rect.top + rect.height / 2;
+					if (clientY < midpoint) {
+						pos = parseInt(draggedOverItemIndex, 10);
+					} else {
+						pos = parseInt(draggedOverItemIndex, 10) + 1;
+					}
+
+					// Throttle updates via RAF
+					scheduleSetInsertIndex(pos);
+					// Store desired drop index in manager
+					dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+				} else {
+					// Clear any visual placeholder and desired index
+					if (insertIndexRef.current !== null) {
+						scheduleSetInsertIndex(null);
+					}
+					dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				}
+
+
+				// // Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
+				// dragDropTasksManagerInsatance.handleDragOver(
+				// 	e.nativeEvent,
+				// 	columnData,
+				// 	container
+				// );
+
+				const targetColumnContainer = tasksContainerRef.current as HTMLDivElement;
+				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				119,
+				String(error),
+				"Column.tsx/handleTaskItemDragOVer",
+			);
+		}
+	}, [scheduleSetInsertIndex, columnData]);
+
+	/**
+	 * This function will only run when userwill drag the taskItem on a emtpy tasksContainer.
+	 * If dragged over another taskItem within this tasksContainer, then handleTaskItemDragOver function will run.
+	 */
+	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		setIsDragOver(true);
+		try {
+			// // Try to read payload from the DataTransfer first
+			// let taskDataStr = '';
+			// try {
+			// 	taskDataStr = e.dataTransfer.getData('application/json');
+			// } catch (err) {
+			// 	// ignore - some environments restrict access
+			// }
+
+			// let payload: any = null;
+			// if (taskDataStr) {
+			// 	try { payload = JSON.parse(taskDataStr); } catch { }
+			// }
+
+			// // Fallback to manager-stored payload if dataTransfer is empty
+			// if (!payload) {
+			// 	payload = dragDropTasksManagerInsatance.getCurrentDragData();
+			// }
+
+			// if (!payload) return;
+
+			// const { task, sourceColumnData } = payload;
+			// if (!task || !sourceColumnData) return;
+
+			// Get the target column container
+			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+
+			// // Try id-based lookup first
+			// let sourceColumnContainer: HTMLDivElement | null = null;
+			// if (sourceColumnData?.id) {
+			// 	try {
+			// 		const escapedId = CSS.escape(String(sourceColumnData.id));
+			// 		sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
+			// 	} catch (err) {
+			// 		// ignore and fall back to tag-based lookup
+			// 	}
+			// }
+			// if (!sourceColumnContainer) {
+			// 	const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+			// 	sourceColumnContainer = allColumnContainers.find(container => {
+			// 		const containerTag = container.getAttribute('data-column-tag-name');
+			// 		return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+			// 	}) || targetColumnContainer;
+			// }
+
+			// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
+			dragDropTasksManagerInsatance.handleColumnDragOverEvent(
+				e.nativeEvent,
+				columnData,
+				targetColumnContainer
+			);
+
+			// Below code is not required, since, I will call the dragDropTasksManagerInsatance.handleCardDragOverEvent from handleTaskItemDragOver.
+			// // If hovering over an actual card element, show card drop indicator
+			// try {
+			// 	const hovered = (e.target as HTMLElement).closest('.taskItem') as HTMLElement | null;
+			// 	if (hovered) {
+			// 		dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, hovered);
+			// 	}
+			// } catch (err) {
+			// 	// ignore
+			// }
+
+			// // Ensure cursor reflects allowed/not-allowed (best-effort fallback)
+			// const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
+			// e.dataTransfer!.dropEffect = allowed ? 'move' : 'none';
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				120,
+				String(error),
+				"Column.tsx/handleDragOver",
+			);
+		}
+	}, [columnData]);
+
+	/**
+	 * Handles the dragleave event to remove the visual effect
+	 */
+	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// Avoid flicker: if the drag event indicates the pointer is still within the container bounds,
+		// ignore this dragleave (this happens when moving between child elements).
+		try {
+			const container = e.currentTarget as HTMLElement;
+			const x = e.clientX;
+			const y = e.clientY;
+			if (typeof x === 'number' && typeof y === 'number') {
+				const rect = container.getBoundingClientRect();
+				if (x >= rect.left + 10 && x <= rect.right - 10 && y >= rect.top && y <= rect.bottom) {
+					// still inside container — ignore to prevent CSS flicker
+					return;
+				}
+			}
+		} catch (err) {
+			console.log("While drag leave : ", err);
+			// ignore and continue cleanup
+		}
+
+		setIsDragOver(false);
+		setInsertIndex(null);
+		// Let manager clean up the column highlight
+		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget as HTMLDivElement);
+		dragDropTasksManagerInsatance.clearDesiredDropIndex();
+	}, []);
+
+
+	/**
+	 * Handles the drop event of a task when its dropped over another task.
 	 * Moves the task from its original position (dragIndex) to the new position (dropIndex).
 	 * Updates the localTasks state and the columnData.tasksIdManualOrder if the column uses manualOrder.
 	 * Clears the raf timer to prevent any pending raf calls.
@@ -539,160 +774,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			dragDropTasksManagerInsatance.clearDesiredDropIndex();
 			// }
 		} catch (error) {
-			console.error('Error handling task drop:', error);
+			bugReporterManagerInsatance.addToLogs(
+				118,
+				String(error),
+				"Column.tsx/handleDrop",
+			);
 		}
 	}, [columnData, plugin]);
 
-	// This function will be only run when user will drag the taskItem on another taskItem.
-	// Compute insertion index based on mouse Y relative to task items inside the container.
-	const handleTaskItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		e.preventDefault();
-		setIsDragOver(true);
-		try {
-			// Only compute insertion index for columns that use "manualOrder" as the sorting criteria.
-			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-			if (!hasManualOrder) {
-				// Clear any visual placeholder and desired index
-				if (insertIndexRef.current !== null) {
-					scheduleSetInsertIndex(null);
-				}
-				dragDropTasksManagerInsatance.clearDesiredDropIndex();
-				return;
-			} else {
-				// APPROACH 1 - COMPUTE INSERTION INDEX BASED ON MOUSE Y POSITION BY COMPARING WITH TASK ITEM BOUNDING RECTANGLES
-				// Else will proceed with finding the insertion index
-				// const container = e.currentTarget.parentElement as HTMLDivElement;
-				// const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
-				// let pos = children.length; // default to end
-				// const clientY = e.clientY;
-				// for (let i = 0; i < children.length; i++) {
-				// 	const child = children[i];
-				// 	const rect = child.getBoundingClientRect();
-				// 	const midpoint = rect.top + rect.height / 2;
-				// 	if (clientY < midpoint) {
-				// 		pos = i;
-				// 		break;
-				// 	}
-				// }
-
-				// APPROACH 2 - DIRECTLY FETCH THE INDEX FROM THE DATA ATTRIBUTE OF THE HOVERED ELEMENT
-				let pos = 0 // Default to top of the column
-				const hoveredElement = e.currentTarget;
-				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
-				const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
-				const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
-				// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
-				if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
-					const clientY = e.clientY;
-					const rect = hoveredElement.getBoundingClientRect();
-					const midpoint = rect.top + rect.height / 2;
-					if (clientY < midpoint) {
-						pos = parseInt(draggedOverItemIndex, 10);
-					} else {
-						pos = parseInt(draggedOverItemIndex, 10) + 1;
-					}
-
-					// Throttle updates via RAF
-					scheduleSetInsertIndex(pos);
-					// Store desired drop index in manager
-					dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
-				} else {
-					// Clear any visual placeholder and desired index
-					if (insertIndexRef.current !== null) {
-						scheduleSetInsertIndex(null);
-					}
-					dragDropTasksManagerInsatance.clearDesiredDropIndex();
-				}
-
-
-				// // Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
-				// dragDropTasksManagerInsatance.handleDragOver(
-				// 	e.nativeEvent,
-				// 	columnData,
-				// 	container
-				// );
-
-				const targetColumnContainer = tasksContainerRef.current as HTMLDivElement;
-				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
-			}
-		} catch (error) {
-			console.error('Error computing insert index:', error);
-		}
-	}, [scheduleSetInsertIndex, columnData]);
-
-	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		e.preventDefault();
-		setIsDragOver(true);
-		try {
-			// // Try to read payload from the DataTransfer first
-			// let taskDataStr = '';
-			// try {
-			// 	taskDataStr = e.dataTransfer.getData('application/json');
-			// } catch (err) {
-			// 	// ignore - some environments restrict access
-			// }
-
-			// let payload: any = null;
-			// if (taskDataStr) {
-			// 	try { payload = JSON.parse(taskDataStr); } catch { }
-			// }
-
-			// // Fallback to manager-stored payload if dataTransfer is empty
-			// if (!payload) {
-			// 	payload = dragDropTasksManagerInsatance.getCurrentDragData();
-			// }
-
-			// if (!payload) return;
-
-			// const { task, sourceColumnData } = payload;
-			// if (!task || !sourceColumnData) return;
-
-			// Get the target column container
-			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
-
-			// // Try id-based lookup first
-			// let sourceColumnContainer: HTMLDivElement | null = null;
-			// if (sourceColumnData?.id) {
-			// 	try {
-			// 		const escapedId = CSS.escape(String(sourceColumnData.id));
-			// 		sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
-			// 	} catch (err) {
-			// 		// ignore and fall back to tag-based lookup
-			// 	}
-			// }
-			// if (!sourceColumnContainer) {
-			// 	const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
-			// 	sourceColumnContainer = allColumnContainers.find(container => {
-			// 		const containerTag = container.getAttribute('data-column-tag-name');
-			// 		return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
-			// 	}) || targetColumnContainer;
-			// }
-
-			// Use the DragDropTasksManager to handle the drag over (this sets classes and dropEffect)
-			dragDropTasksManagerInsatance.handleColumnDragOverEvent(
-				e.nativeEvent,
-				columnData,
-				targetColumnContainer
-			);
-
-			// Below code is not required, since, I will call the dragDropTasksManagerInsatance.handleCardDragOverEvent from handleTaskItemDragOver.
-			// // If hovering over an actual card element, show card drop indicator
-			// try {
-			// 	const hovered = (e.target as HTMLElement).closest('.taskItem') as HTMLElement | null;
-			// 	if (hovered) {
-			// 		dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, hovered);
-			// 	}
-			// } catch (err) {
-			// 	// ignore
-			// }
-
-			// // Ensure cursor reflects allowed/not-allowed (best-effort fallback)
-			// const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
-			// e.dataTransfer!.dropEffect = allowed ? 'move' : 'none';
-		} catch (error) {
-			console.error('Error handling drag over:', error);
-		}
-	}, [columnData]);
 
 	// Cleanup any pending RAF on unmount
 	useEffect(() => {
@@ -701,35 +790,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				cancelAnimationFrame(rafRef.current);
 				rafRef.current = null;
 			}
+			// Clean up navigation visibility class when component unmounts
+			// if (isNavHiddenRef.current) {
+			document.documentElement.classList.remove('is-hidden-nav');
+			// isNavHiddenRef.current = false;
+			// }
 		};
 	}, []);
-
-	// Handle the dragleave event to remove the visual effect
-	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		// Avoid flicker: if the drag event indicates the pointer is still within the container bounds,
-		// ignore this dragleave (this happens when moving between child elements).
-		try {
-			const container = e.currentTarget as HTMLElement;
-			const x = e.clientX;
-			const y = e.clientY;
-			if (typeof x === 'number' && typeof y === 'number') {
-				const rect = container.getBoundingClientRect();
-				if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-					// still inside container — ignore to prevent CSS flicker
-					return;
-				}
-			}
-		} catch (err) {
-			// ignore and continue cleanup
-		}
-
-		setIsDragOver(false);
-		setInsertIndex(null);
-		dragDropTasksManagerInsatance.clearDesiredDropIndex();
-		// Let manager clean up the dropindicator and column highlight
-		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget as HTMLDivElement);
-	}, []);
-
 
 	// -------------------------------------------------
 	// Render
@@ -737,117 +804,121 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	const taskItemComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
 
-	return (
-		<div
-			className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
-			data-column-id={columnData.id}
-			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
-			data-column-type={columnData.colType}
-			data-column-tag-name={tagData?.name}
-			data-column-tag-color={tagData?.color}
-		>
-			{columnData.minimized && !hideColumnHeader ? (
-				// Minimized view
-				<div className="taskBoardColumnMinimized">
-					<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-						{allTasks?.length ?? 0}
-					</div>
-					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
-						await handleMinimizeColumn();
-						eventEmitter.emit('REFRESH_BOARD');
-					}}>{columnData.name}</div>
-				</div>
-			) : (
-				// Normal view
-				<>
-					{!hideColumnHeader && (
-						<div className="taskBoardColumnSecHeader">
-							<div className="taskBoardColumnSecHeaderTitleSec">
-								<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
-								{columnData?.workLimit && tasksForThisColumn.length > columnData.workLimit && (
-									<div className='taskBoardColumnSecHeaderTitleSecWorkLimitAlert' aria-label={t("work-limit-alert")} onClick={handleAlertButtonClick}>
-										<AlertOctagon size={20} />
-									</div>
-								)}
-							</div>
-							<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-								{allTasks?.length ?? 0}
-							</div>
+	try {
+		return (
+			<div
+				className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
+				data-column-id={columnData.id}
+				style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
+				data-column-type={columnData.colType}
+				data-column-tag-name={tagData?.name}
+				data-column-tag-color={tagData?.color}
+			>
+				{columnData.minimized && !hideColumnHeader ? (
+					// Minimized view
+					<div className="taskBoardColumnMinimized">
+						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+							{allTasks?.length ?? 0}
 						</div>
-					)}
-					<div
-						className={`tasksContainer${plugin.settings.data.showVerticalScroll ? '' : '-SH'}`}
-						ref={tasksContainerRef}
-						onDragOver={(e) => { handleDragOver(e); }}
-						onDragLeave={handleDragLeave}
-						onDrop={handleDrop}
-						onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
-					>
-						{columnData.minimized ? <></> : (
-							<>
-								{visibleTasks && visibleTasks.length > 0 ? (
-									<>
-										{(() => {
-											const elements: React.ReactNode[] = [];
-											for (let i = 0; i < visibleTasks.length; i++) {
-												// If insertIndex points to this position, render placeholder
-												if (insertIndex === i) {
+						<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
+							await handleMinimizeColumn();
+							eventEmitter.emit('REFRESH_BOARD');
+						}}>{columnData.name}</div>
+					</div>
+				) : (
+					// Normal view
+					<>
+						{!hideColumnHeader && (
+							<div className="taskBoardColumnSecHeader">
+								<div className="taskBoardColumnSecHeaderTitleSec">
+									<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+									{columnData?.workLimit && tasksForThisColumn.length > columnData.workLimit && (
+										<div className='taskBoardColumnSecHeaderTitleSecWorkLimitAlert' aria-label={t("work-limit-alert")} onClick={handleAlertButtonClick}>
+											<AlertOctagon size={20} />
+										</div>
+									)}
+								</div>
+								<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+									{allTasks?.length ?? 0}
+								</div>
+							</div>
+						)}
+						<div
+							className={`tasksContainer${plugin.settings.data.showVerticalScroll ? '' : ' SH'}`}
+							ref={tasksContainerRef}
+							onDragOver={(e) => { handleDragOver(e); }}
+							onDragLeave={handleDragLeave}
+							onDrop={handleDrop}
+							onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
+						>
+							{columnData.minimized ? <></> : (
+								<>
+									{visibleTasks && visibleTasks.length > 0 ? (
+										<>
+											{(() => {
+												const elements: React.ReactNode[] = [];
+												for (let i = 0; i < visibleTasks.length; i++) {
+													// If insertIndex points to this position, render placeholder
+													if (insertIndex === i) {
+														elements.push(
+															<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+														);
+													}
+													const task = visibleTasks[i];
 													elements.push(
-														<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+														<div
+															key={task.id}
+															className="taskItemFadeIn"
+															data-taskitem-index={i}
+															data-taskitem-id={task.id}
+															onDragOver={(e) => { handleTaskItemDragOver(e); }
+															}
+															onDrop={e => handleTaskDrop(e, i)}
+														>
+															<MemoizedTaskItem
+																Component={taskItemComponent}
+																key={task.id}
+																dataAttributeIndex={i}
+																plugin={plugin}
+																task={task}
+																activeBoardSettings={activeBoardData}
+																columnIndex={columnIndex}
+																swimlaneData={swimlaneData}
+															/>
+														</div>
 													);
 												}
-												const task = visibleTasks[i];
-												elements.push(
-													<div
-														key={task.id}
-														className="taskItemFadeIn"
-														data-taskitem-index={i}
-														data-taskitem-id={task.id}
-														onDragOver={(e) => { handleTaskItemDragOver(e); }
-														}
-														onDrop={e => handleTaskDrop(e, i)}
-													>
-														<MemoizedTaskItem
-															Component={taskItemComponent}
-															key={task.id}
-															dataAttributeIndex={i}
-															plugin={plugin}
-															task={task}
-															activeBoardSettings={activeBoardData}
-															columnIndex={columnIndex}
-															swimlaneData={swimlaneData}
-														/>
-													</div>
-												);
-											}
-											// If insertIndex points to end (after last item)
-											if (insertIndex === localTasks?.length) {
-												elements.push(
-													<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-												);
-											}
-											return elements;
-										})()}
-										{allTasks && visibleTaskCount < allTasks.length && (
-											<div className="lazyLoadIndicator">
-												<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
-											</div>
-										)}
-									</>
-								) : (
-									<div onDragOver={(e) => { e.preventDefault(); }}>
-										<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
-									</div>
-								)}
-							</>
-						)
-						}
-					</div>
-				</>
-			)
-			}
-		</div >
-	);
+												// If insertIndex points to end (after last item)
+												if (localTasks && insertIndex === localTasks.length) {
+													elements.push(
+														<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+													);
+												}
+												return elements;
+											})()}
+											{allTasks && visibleTaskCount < allTasks.length && (
+												<div className="lazyLoadIndicator">
+													<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
+												</div>
+											)}
+										</>
+									) : (
+										<div onDragOver={(e) => { e.preventDefault(); }}>
+											<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
+										</div>
+									)}
+								</>
+							)
+							}
+						</div>
+					</>
+				)
+				}
+			</div >
+		);
+	} catch (error) {
+		bugReporterManagerInsatance.showNotice(180, "There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer", JSON.stringify(error), "LazyColumn.tsx/return");
+	}
 };
 
 const MemoizedTaskItem = memo<{

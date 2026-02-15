@@ -10,19 +10,16 @@ import {
 	writeDataToVaultFile,
 } from "../MarkdownFileOperations";
 
-import { Notice } from "obsidian";
+import { normalizePath, Notice } from "obsidian";
 import TaskBoard from "main";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import {
-	bugReporter,
-	openDiffContentCompareModal,
-} from "src/services/OpenModals";
+import { openDiffContentCompareModal } from "src/services/OpenModals";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { isTheContentDiffAreOnlySpaces_V2 } from "src/modals/DiffContentCompareModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
- * This function will simpy check if the task title contains the recurring tag: 
+ * This function will simpy check if the task title contains the recurring tag:
  * If the task title contains the recurring tag, it will return true.
  * If the task title does not contain the recurring tag, it will return false.
  * @param taskTitle - The title of the task to check.
@@ -50,34 +47,48 @@ export const addTaskInNote = async (
 	plugin: TaskBoard,
 	newTask: taskItem,
 	editorActive: boolean,
-	cursorPosition?: { line: number; ch: number } | undefined
+	cursorPosition?: { line: number; ch: number } | undefined,
 ): Promise<string | undefined> => {
-	const filePath = allowedFileExtensionsRegEx.test(newTask.filePath)
+	const filePath = newTask.filePath.endsWith("md")
 		? newTask.filePath
 		: `${newTask.filePath}.md`;
 
-	// Clean the task title to ensure it doesn't contain any special characters
-	if (!(await plugin.fileExists(filePath))) {
-		new Notice(
-			`New note created since it does not exists : "${filePath}"`,
-			5000
-		);
-		// Create a new file if it doesn't exist
-		await plugin.app.vault.create(filePath, "");
-	}
-
 	try {
+		// Clean the task title to ensure it doesn't contain any special characters
+		if (!(await plugin.fileExists(filePath))) {
+			new Notice(
+				`New note created since it does not exists : "${filePath}"`,
+				5000,
+			);
+			const normalizedPath = normalizePath(filePath);
+			// Check if the directory exists, create if not
+			const parts = normalizedPath.split("/");
+			if (parts.length > 1) {
+				const dirPath = parts.slice(0, -1).join("/").trim();
+				if (!(await plugin.app.vault.adapter.exists(dirPath))) {
+					await plugin.app.vault.createFolder(dirPath);
+				}
+			}
+
+			// Create a new file if it doesn't exist
+			await plugin.app.vault.create(normalizedPath, "");
+
+			await sleep(200);
+		}
+
 		let completeTask = await getFormattedTaskContent(newTask);
 		const { formattedTaskContent, newId } = await addIdToTaskContent(
 			plugin,
-			completeTask
+			completeTask,
 		);
 		completeTask = formattedTaskContent;
 		if (completeTask === "")
 			throw "getSanitizedTaskContent returned empty string";
 
 		// Read the file content
-		const fileContent = await readDataOfVaultFile(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath, true);
+		if (fileContent == null) return;
+
 		let newContent = fileContent;
 
 		if (editorActive) {
@@ -106,7 +117,7 @@ export const addTaskInNote = async (
 			47,
 			"Error while adding the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
-			"TaskItemUtils.ts/addTaskInNote"
+			"TaskItemUtils.ts/addTaskInNote",
 		);
 	}
 };
@@ -125,7 +136,7 @@ export const updateTaskInFile = async (
 	plugin: TaskBoard,
 	updatedTask: taskItem,
 	oldTask: taskItem,
-	forceAddId?: boolean
+	forceAddId?: boolean,
 ): Promise<string | undefined> => {
 	try {
 		const oldTaskContent = await getFormattedTaskContent(oldTask);
@@ -134,14 +145,14 @@ export const updateTaskInFile = async (
 				48,
 				"getSanitizedTaskContent returned empty string for old task",
 				"getSanitizedTaskContent returned empty string",
-				"TaskItemUtils.ts/updateTaskInFile"
+				"TaskItemUtils.ts/updateTaskInFile",
 			);
 
 		let updatedTaskContent = await getFormattedTaskContent(updatedTask);
 		const { formattedTaskContent, newId } = await addIdToTaskContent(
 			plugin,
 			updatedTaskContent,
-			forceAddId
+			forceAddId,
 		);
 		updatedTaskContent = formattedTaskContent;
 		if (updatedTaskContent === "")
@@ -149,14 +160,14 @@ export const updateTaskInFile = async (
 				49,
 				"getSanitizedTaskContent returned empty string for old task",
 				"getSanitizedTaskContent returned empty string",
-				"TaskItemUtils.ts/updateTaskInFile"
+				"TaskItemUtils.ts/updateTaskInFile",
 			);
 
 		const result = await replaceOldTaskWithNewTask(
 			plugin,
 			oldTask,
 			oldTaskContent,
-			updatedTaskContent
+			updatedTaskContent,
 		);
 
 		if (result) {
@@ -221,7 +232,7 @@ export const updateTaskInFile = async (
 			51,
 			"Error while updating the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
-			"TaskItemUtils.ts/updateTaskInFile"
+			"TaskItemUtils.ts/updateTaskInFile",
 		);
 		return undefined;
 	}
@@ -238,7 +249,7 @@ export const updateTaskInFile = async (
 export const useTasksPluginToUpdateInFile = async (
 	plugin: TaskBoard,
 	tasksPlugin: TasksPluginApi,
-	oldTask: taskItem
+	oldTask: taskItem,
 ): Promise<void> => {
 	try {
 		// Prepare the updated task block
@@ -249,13 +260,13 @@ export const useTasksPluginToUpdateInFile = async (
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const { formattedTaskContent, newId } = await addIdToTaskContent(
 				plugin,
-				oldTask.title
+				oldTask.title,
 			);
 			const oldTaskTitleWithId = formattedTaskContent;
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
 					oldTaskTitleWithId,
-					oldTask.filePath
+					oldTask.filePath,
 				);
 
 			// if (!tasksPluginApiOutput) {
@@ -285,7 +296,7 @@ export const useTasksPluginToUpdateInFile = async (
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else if ((twoTaskTitles.length = 1)) {
 				const { formattedTaskContent, newId } =
@@ -300,7 +311,7 @@ export const useTasksPluginToUpdateInFile = async (
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else if ((twoTaskTitles.length = 2)) {
 				// if (twoTaskTitles[1].trim().startsWith("- [x]")) {
@@ -318,7 +329,7 @@ export const useTasksPluginToUpdateInFile = async (
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 				// } else if (twoTaskTitles[0].trim().startsWith("- [x]")) {
 				// 	newContent = `${twoTaskTitles[0]}${
@@ -343,7 +354,7 @@ export const useTasksPluginToUpdateInFile = async (
 					53,
 					"Unexpected output from tasks plugin API. Since the task you are trying to update is a recurring task, Task Board cannot handle recurring tasks as of now and Tasks plugin didnt returned an expected output. Please report this issue so developers can enhance the integration.",
 					`tasksPluginApiOutput: ${tasksPluginApiOutput}`,
-					"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+					"TaskItemUtils.ts/useTasksPluginToUpdateInFile",
 				);
 				return;
 			}
@@ -369,7 +380,7 @@ export const useTasksPluginToUpdateInFile = async (
 				54,
 				"Tasks plugin is must for handling recurring tasks. Since the task you are trying to update is a recurring task and Task Board cannot handle recurring tasks as of now. Hence the plugin has not updated your content.",
 				`Tasks plugin installed and enabled: ${tasksPlugin.isTasksPluginEnabled()}`,
-				"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+				"TaskItemUtils.ts/useTasksPluginToUpdateInFile",
 			);
 		}
 	} catch (error) {
@@ -377,7 +388,7 @@ export const useTasksPluginToUpdateInFile = async (
 			55,
 			"Error while updating the recurring task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
-			"TaskItemUtils.ts/useTasksPluginToUpdateInFile"
+			"TaskItemUtils.ts/useTasksPluginToUpdateInFile",
 		);
 		throw error;
 	}
@@ -392,7 +403,7 @@ export const useTasksPluginToUpdateInFile = async (
  */
 export const deleteTaskFromFile = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ): Promise<boolean> => {
 	try {
 		const oldTaskContent = await getFormattedTaskContent(task);
@@ -401,14 +412,14 @@ export const deleteTaskFromFile = async (
 				56,
 				"getSanitizedTaskContent returned empty string for old task",
 				"getSanitizedTaskContent returned empty string",
-				"TaskItemUtils.ts/updateTaskInFile"
+				"TaskItemUtils.ts/updateTaskInFile",
 			);
 
 		await replaceOldTaskWithNewTask(
 			plugin,
 			task,
 			oldTaskContent,
-			"" // Empty string indicates deletion
+			"", // Empty string indicates deletion
 		);
 
 		// // Step 1: Read the file content
@@ -466,7 +477,7 @@ export const deleteTaskFromFile = async (
 			57,
 			"Error deleting task from file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
-			"TaskItemUtils.ts/deleteTaskFromFile"
+			"TaskItemUtils.ts/deleteTaskFromFile",
 		);
 		return false;
 	}
@@ -488,7 +499,7 @@ export const deleteTaskFromFile = async (
  */
 export const archiveTask = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ): Promise<void> => {
 	const archivedFilePath =
 		plugin.settings.data.archivedTasksFilePath;
@@ -503,7 +514,7 @@ export const archiveTask = async (
 			if (!(await plugin.fileExists(archivedFilePath))) {
 				new Notice(
 					`New Archived file created since it did not exist at path: "${archivedFilePath}"`,
-					0
+					0,
 				);
 				// Ensure all folders in the path exist before creating the file
 				const lastSlash = archivedFilePath.lastIndexOf("/");
@@ -522,7 +533,7 @@ export const archiveTask = async (
 							// createFolder will create the single folder at currentPath
 							try {
 								await plugin.app.vault.createFolder(
-									currentPath
+									currentPath,
 								);
 							} catch (error) {
 								if (String(error).contains("already exists"))
@@ -540,7 +551,7 @@ export const archiveTask = async (
 									58,
 									`A file exists where a folder is expected: ${currentPath}`,
 									`Unexpected file at folder path: ${currentPath}`,
-									"TaskItemUtils.ts/archiveTask"
+									"TaskItemUtils.ts/archiveTask",
 								);
 							}
 						}
@@ -553,7 +564,8 @@ export const archiveTask = async (
 			// Read the content of the file where archived tasks will be stored
 			const archivedFileContent = await readDataOfVaultFile(
 				plugin,
-				archivedFilePath
+				archivedFilePath,
+				true
 			);
 
 			// Add the task to the top of the archived file content
@@ -563,7 +575,7 @@ export const archiveTask = async (
 			await writeDataToVaultFile(
 				plugin,
 				archivedFilePath,
-				newArchivedContent
+				newArchivedContent,
 			);
 
 			// Now delete the task from its original file
@@ -578,7 +590,7 @@ export const archiveTask = async (
 				59,
 				"Error archiving task",
 				error as string,
-				"TaskItemUtils.ts/archiveTask"
+				"TaskItemUtils.ts/archiveTask",
 			);
 		}
 	} else if (archivedFilePath === "") {
@@ -588,7 +600,7 @@ export const archiveTask = async (
 				plugin,
 				task,
 				oldTaskContent,
-				`%%${oldTaskContent}%%`
+				`%%${oldTaskContent}%%`,
 			).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 			});
@@ -615,7 +627,7 @@ export const archiveTask = async (
 				60,
 				"Error archiving task in the same file. Either the task is not present in the file or the plugin is not able to find the correct match, because the task must have been edited in such a way that the title is not present in the file.",
 				error as string,
-				"TaskItemUtils.ts/archiveTask"
+				"TaskItemUtils.ts/archiveTask",
 			);
 		}
 	} else {
@@ -623,7 +635,7 @@ export const archiveTask = async (
 			61,
 			"Error archiving task. The below error message might help you to find the issue.",
 			"Archived file path is not set in the plugin settings.",
-			"TaskItemUtils.ts/archiveTask"
+			"TaskItemUtils.ts/archiveTask",
 		);
 	}
 };
@@ -644,7 +656,7 @@ export const replaceOldTaskWithNewTask = async (
 	plugin: TaskBoard,
 	oldTask: taskItem,
 	oldTaskContent: string,
-	newTaskContent: string
+	newTaskContent: string,
 ): Promise<boolean> => {
 	const filePath = allowedFileExtensionsRegEx.test(oldTask.filePath)
 		? oldTask.filePath
@@ -661,7 +673,9 @@ export const replaceOldTaskWithNewTask = async (
 
 	try {
 		// Step 1: Read the file content
-		const fileContent = await readDataOfVaultFile(plugin, filePath);
+		const fileContent = await readDataOfVaultFile(plugin, filePath, true);
+		if (fileContent == null) return false;
+
 		const lines = fileContent.split("\n");
 
 		const { startLine, startCharIndex, endLine, endCharIndex } =
@@ -686,13 +700,13 @@ export const replaceOldTaskWithNewTask = async (
 				62,
 				`Task board couldnt able to find the task which you are trying to edit inside the file ${oldTask.filePath} at the line number : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.\n\nThis was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.`,
 				`\n\nOldTask location :${JSON.stringify(
-					oldTask.taskLocation
+					oldTask.taskLocation,
 				)}\n\nOldTask content inside task-board-cache :${
 					oldTask.title
 				}\n\nAt present the content inside file at line number ${
 					oldTask.taskLocation.startLine
 				} is: ${startLineText}`,
-				"TaskItemUtils.ts/replaceOldTaskWithNewTask"
+				"TaskItemUtils.ts/replaceOldTaskWithNewTask",
 			);
 			return false;
 		}
@@ -705,7 +719,7 @@ export const replaceOldTaskWithNewTask = async (
 		taskLines[0] = taskLines[0].slice(startCharIndex);
 		taskLines[taskLines.length - 1] = taskLines[taskLines.length - 1].slice(
 			0,
-			endCharIndex
+			endCharIndex,
 		);
 
 		const oldTaskContentFromFile = taskLines.join("\n");
@@ -713,7 +727,7 @@ export const replaceOldTaskWithNewTask = async (
 		const joinFinalNoteContent = (
 			before: string,
 			newTaskContent: string,
-			after: string
+			after: string,
 		) => {
 			if (newTaskContent.trim() === "") {
 				return `${before}${
@@ -727,8 +741,8 @@ export const replaceOldTaskWithNewTask = async (
 						? after
 						: `\n${after}`
 					: newTaskContent.endsWith("\n")
-					? ""
-					: `\n`
+						? ""
+						: `\n`
 			}`;
 		};
 
@@ -743,13 +757,13 @@ export const replaceOldTaskWithNewTask = async (
 			const newContent = joinFinalNoteContent(
 				before,
 				newTaskContent,
-				after
+				after,
 			);
 			await writeDataToVaultFile(plugin, filePath, newContent);
 		} else if (
 			isTheContentDiffAreOnlySpaces_V2(
 				oldTaskContent,
-				oldTaskContentFromFile
+				oldTaskContentFromFile,
 			)
 		) {
 			// If the content is only spaces, we can safely replace it
@@ -761,7 +775,7 @@ export const replaceOldTaskWithNewTask = async (
 			const newContent = joinFinalNoteContent(
 				before,
 				newTaskContent,
-				after
+				after,
 			);
 			// Replace the old task block with the updated content
 			await writeDataToVaultFile(plugin, filePath, newContent);
@@ -783,17 +797,17 @@ export const replaceOldTaskWithNewTask = async (
 							const newContent = joinFinalNoteContent(
 								before,
 								newTaskContent,
-								after
+								after,
 							);
 							// Replace the old task block with the updated content
 							await writeDataToVaultFile(
 								plugin,
 								filePath,
-								newContent
+								newContent,
 							);
 						}
 						// If user chooses "new", do nothing
-					}
+					},
 				);
 			} else {
 				// If safeguard feature has been disabled by the user. We will by-pass this check and instead of asking the user will directly go-ahead and replace the old content with the new content user has edited.
@@ -805,7 +819,7 @@ export const replaceOldTaskWithNewTask = async (
 				const newContent = joinFinalNoteContent(
 					before,
 					newTaskContent,
-					after
+					after,
 				);
 				// Replace the old task block with the updated content
 				await writeDataToVaultFile(plugin, filePath, newContent);
@@ -818,7 +832,7 @@ export const replaceOldTaskWithNewTask = async (
 			63,
 			"Error while updating the task in the file. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
 			String(error),
-			"TaskItemUtils.ts/replaceOldTaskWithNewTask"
+			"TaskItemUtils.ts/replaceOldTaskWithNewTask",
 		);
 		return false;
 	}
