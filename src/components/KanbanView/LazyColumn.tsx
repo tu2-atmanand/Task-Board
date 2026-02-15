@@ -227,23 +227,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 		// 	(board: Board) => board.name === activeBoardData.name
 		// );
-		const boardIndex = activeBoardData.index;
 
-		if (boardIndex !== -1) {
-			// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
-			// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-			// 	(col: ColumnData) => col.id === columnData.id
-			// );
-			const columnIndex = columnData.index - 1;
+		// const boardIndex = activeBoardData.index;
+		// if (boardIndex !== -1) {
+		// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
+		// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+		// 	(col: ColumnData) => col.id === columnData.id
+		// );
+		const columnIndex = columnData.index - 1;
 
-			if (columnIndex !== -1) {
-				let newBoardData = activeBoardData;
-				newBoardData.columns[columnIndex].minimized = !newBoardData.columns[columnIndex].minimized;
-				plugin.taskBoardFileManager.saveBoard(newBoardData);
+		if (columnIndex !== -1) {
+			let newBoardData = activeBoardData;
+			newBoardData.columns[columnIndex].minimized = !newBoardData.columns[columnIndex].minimized;
+			plugin.taskBoardFileManager.saveBoard(newBoardData);
 
-				eventEmitter.emit('REFRESH_BOARD');
-			}
+			eventEmitter.emit('REFRESH_BOARD');
 		}
+		// }
 	}
 
 	async function handleAlertButtonClick() {
@@ -275,19 +275,19 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					(updatedColumnConfiguration: ColumnData) => {
 						// Update the column configuration in the board data
 
-						if (activeBoardData.index !== -1) {
-							const columnIndex = activeBoardData.columns.findIndex(
-								(col: ColumnData) => col.id === columnData.id
-							);
+						// if (activeBoardData.index !== -1) {
+						const columnIndex = activeBoardData.columns.findIndex(
+							(col: ColumnData) => col.id === columnData.id
+						);
 
-							if (columnIndex !== -1) {
-								// Update the column configuration
-								let newBoardData = activeBoardData;
-								newBoardData.columns[columnIndex] = updatedColumnConfiguration;
-								plugin.taskBoardFileManager.saveBoard(newBoardData);
+						if (columnIndex !== -1) {
+							// Update the column configuration
+							let newBoardData = activeBoardData;
+							newBoardData.columns[columnIndex] = updatedColumnConfiguration;
+							plugin.taskBoardFileManager.saveBoard(newBoardData);
 
-							}
 						}
+						// }
 					},
 					() => {
 						// onCancel callback - nothing to do
@@ -304,13 +304,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 					// 	(board: Board) => board.name === activeBoardData.name
 					// );
-					const boardIndex = activeBoardData.index;
+					// const boardIndex = activeBoardData.index;
 					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
 					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
 					// 	(col: ColumnData) => col.id === columnData.id
 					// );
-					const columnIndex = columnData.index - 1;
 
+					const boardIndex = plugin.taskBoardFileManager.getBoardIndexFromRegistry(activeBoardData.id) ?? undefined;
+					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new ViewTaskFilterModal(
@@ -319,7 +320,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 						// Set the close callback - mainly used for handling cancel actions
 						filterModal.filterCloseCallback = async (filterState) => {
-							if (filterState && boardIndex !== -1) {
+							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
@@ -356,7 +357,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 						// Set up close callback to save filter state
 						popover.onClose = async (filterState?: RootFilterState) => {
-							if (filterState && boardIndex !== -1) {
+							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
@@ -391,29 +392,29 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 				// 	(board: Board) => board.name === activeBoardData.name
 				// );
-				const boardIndex = activeBoardData.index;
+				// const boardIndex = activeBoardData.index;
 
-				if (boardIndex !== -1) {
-					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
-					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-					// 	(col: ColumnData) => col.id === columnData.id
-					// );
-					const columnIndex = columnData.index - 1;
+				// if (boardIndex !== -1) {
+				// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
+				// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+				// 	(col: ColumnData) => col.id === columnData.id
+				// );
+				const columnIndex = columnData.index - 1;
 
-					if (columnIndex !== -1) {
-						// Set the active property to false
-						let newBoardData = activeBoardData;
-						newBoardData.columns[columnIndex].active = false;
+				if (columnIndex !== -1) {
+					// Set the active property to false
+					let newBoardData = activeBoardData;
+					newBoardData.columns[columnIndex].active = false;
 
-						plugin.taskBoardFileManager.saveBoard(newBoardData);
+					plugin.taskBoardFileManager.saveBoard(newBoardData);
 
-						// Save the settings
-						await plugin.saveSettings();
+					// Save the settings
+					// await plugin.saveSettings();
 
-						// Refresh the board view
-						eventEmitter.emit('REFRESH_BOARD');
-					}
+					// Refresh the board view
+					eventEmitter.emit('REFRESH_BOARD');
 				}
+				// }
 			});
 		});
 

@@ -120,8 +120,8 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
-		if (allTasks && boards[activeBoardIndex]) {
-			const currentBoard = boards[activeBoardIndex];
+		if (allTasks && allBoardsData[activeBoardIndex]) {
+			const currentBoard = allBoardsData[activeBoardIndex];
 			const boardFilter = currentBoard.boardFilter;
 
 			// Apply board filters to tasks
@@ -131,8 +131,9 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				Completed: boardFilterer(allTasks.Completed, boardFilter),
 			};
 
+			let newBoardData = currentBoard;
 			// Update task count in settings
-			plugin.settings.data.boardConfigs[activeBoardIndex].taskCount = {
+			newBoardData.taskCount = {
 				pending: boardFilteredTasks.Pending.length,
 				completed: boardFilteredTasks.Completed.length,
 			};
@@ -582,7 +583,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				togglePropertyNameInSettings(taskPropertiesNames.FilePathInHeader);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("parent-folder"));
@@ -590,7 +591,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				togglePropertyNameInSettings(taskPropertiesNames.ParentFolder);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("full-path"));
@@ -598,7 +599,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				togglePropertyNameInSettings(taskPropertiesNames.FullPath);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
 		});
 
 		propertyMenu.addSeparator();
@@ -1047,7 +1048,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 					viewType === viewTypeNames.kanban ? (
 						<KanbanBoard
 							plugin={plugin}
-							board={boards[activeBoardIndex]}
+							board={currentBoardData}
 							filteredAndSearchedTasks={filteredAndSearchedTasks}
 							freshInstall={freshInstall}
 						/>
@@ -1074,7 +1075,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 						) : (
 							<MapView
 								plugin={plugin}
-								activeBoardIndex={activeBoardIndex}
+								activeBoardData={currentBoardData}
 								filteredTasks={filteredAndSearchedTasks}
 								focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
 							/>

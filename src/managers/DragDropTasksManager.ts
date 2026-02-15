@@ -31,7 +31,7 @@ export interface currentDragDataPayload {
 	task: taskItem;
 	taskIndex: string;
 	sourceColumnData: ColumnData;
-	currentBoardIndex: number;
+	// currentBoardIndex: number;
 	swimlaneData: swimlaneDataProp | null | undefined;
 }
 
@@ -149,7 +149,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 			eventEmitter.emit("UPDATE_TASK", {
 				taskID: oldTask.id,
@@ -157,7 +157,7 @@ class DragDropTasksManager {
 			});
 
 			const isThisTaskNote = isTaskNotePresentInTags(
-				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+				plugin.settings.data.taskNoteIdentifierTag,
 				oldTask.tags,
 			);
 
@@ -242,7 +242,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -354,7 +354,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -458,7 +458,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -512,7 +512,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -536,7 +536,7 @@ class DragDropTasksManager {
 		};
 		if (
 			!isTaskNotePresentInTags(
-				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+				plugin.settings.data.taskNoteIdentifierTag,
 				task.tags,
 			)
 		) {
@@ -592,7 +592,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -695,7 +695,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -761,7 +761,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -817,7 +817,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
@@ -867,12 +867,12 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 			);
 		}
 
 		const newStatus =
-			plugin.settings.data.globalSettings.customStatuses.find(
+			plugin.settings.data.customStatuses.find(
 				(status) => status.type === statusTypeNames.DONE,
 			);
 
@@ -892,7 +892,7 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		targetColumnData: ColumnData,
 		desiredIndex: number | null,
-	): void => {
+	): Promise<void> => {
 		if (
 			!(
 				targetColumnData?.sortCriteria &&
@@ -939,7 +939,7 @@ class DragDropTasksManager {
 		newBoardData!.columns[targetColumnData.index - 1] = targetColumnData;
 
 		// Persist settings and refresh the board
-		plugin.saveSettings(newSettings);
+		// plugin.saveSettings(newSettings);
 	};
 
 	/**
