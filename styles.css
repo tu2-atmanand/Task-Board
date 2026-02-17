@@ -244,7 +244,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .ConfigureBtn,
 .taskboardActionshBtn,
 .taskBoardViewHeaderOptionsBtn,
-.RefreshBtn {
+.RefreshBtn,
+.taskBoardMapViewSaveIcon {
 	background-color: transparent !important;
 	background: none;
 	padding: 7px;
@@ -275,7 +276,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskBoardMapViewSaveIcon {
-	color: var(--text-faint);
+	color: var(--text-faint) !important;
 }
 
 .taskBoardViewDropdown {

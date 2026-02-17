@@ -132,7 +132,7 @@ export default class TaskBoardFileManager {
 						this.getBoardIndexFromRegistry(cachedBoard.id) ??
 						this.allBoardsData.length;
 					console.log(
-						`Board "${cachedBoard.name}" (index: ${this.currentBoardIndex}) loaded from cache for file: ${filePath}`,
+						`Board "${cachedBoard.name}" (index: ${this.currentBoardIndex}) already exists in cache.\n Reading from cache for file: ${filePath}`,
 					);
 					return cachedBoard;
 				}
@@ -176,7 +176,7 @@ export default class TaskBoardFileManager {
 		try {
 			const taskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry || [];
-			let allBoardsData: Board[] | [] = [];
+			let loadedBoardsData: Board[] | [] = [];
 
 			taskBoardFilesRegistry.forEach(
 				async (taskBoardFileEntry: taskBoardFilesRegistryItem) => {
@@ -200,20 +200,23 @@ export default class TaskBoardFileManager {
 							this.getBoardIndexFromRegistry(boardData.id) ??
 							this.allBoardsData.length;
 						// Cache the board data in memory
-						allBoardsData[boardIndex] = boardData;
+						loadedBoardsData[boardIndex] = boardData;
 						console.log(
 							`Loaded and cached board "${boardData.name}" (index: ${boardIndex}) from: ${taskBoardFileEntry.filePath}`,
 						);
 					} else {
-						new Notice(
-							`Task Board : Error loading all boards data. Following board not found : ${taskBoardFileEntry.filePath}`,
+						// new Notice(
+						// 	`Task Board : Error loading all boards data. Following board not found : ${taskBoardFileEntry.filePath}`,
+						// );
+						this.plugin.settings.data.taskBoardFilesRegistry.remove(
+							taskBoardFileEntry,
 						);
 					}
 				},
 			);
 
-			this.allBoardsData = allBoardsData;
-			return allBoardsData;
+			this.allBoardsData = loadedBoardsData;
+			return loadedBoardsData;
 		} catch (error) {
 			console.error(
 				`Error loading board at index ${this.currentBoardIndex}:`,

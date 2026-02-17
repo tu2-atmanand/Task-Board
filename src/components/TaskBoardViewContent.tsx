@@ -981,7 +981,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 					</div>
 
 					{viewType === viewTypeNames.map && (
-						<div
+						<button
 							className="taskBoardMapViewSaveIcon"
 							style={{ color: `${mapViewDataUpdated ? 'red' : ""}` }}
 							onClick={(e) => {
@@ -993,7 +993,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 							}}
 						>
 							<Save size={18} />
-						</div>
+						</button>
 					)}
 
 					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
