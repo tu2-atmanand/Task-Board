@@ -1549,7 +1549,7 @@
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
-      "boardIndex": 0,
+      "boardIndex": 2,
       "settingTab": 0,
       "taskId": ""
     },
@@ -1577,7 +1577,20 @@
       {
         "boardId": "4271106430",
         "filePath": "Meta/Task_Board/Boards/Status Based Workflow.taskboard"
+      },
+      {
+        "filePath": "TaskBoard/Boards/Time Based Workflow.taskboard",
+        "boardId": "4271106430"
+      },
+      {
+        "filePath": "TaskBoard/Boards/Tag Based Workflow.taskboard",
+        "boardId": "2957159294"
+      },
+      {
+        "filePath": "TaskBoard/Boards/Status Based Workflow.taskboard",
+        "boardId": "3103563481"
       }
-    ]
+    ],
+    "searchQuery": ""
   }
 }

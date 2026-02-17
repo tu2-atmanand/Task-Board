@@ -744,10 +744,7 @@ export default class TaskBoard extends Plugin {
 			this.settings.data.archivedTBNotesFolderPath,
 		);
 		let allowedFiles = this.renameQueue.filter((fileData) =>
-			fileTypeAllowedForScanning(
-				this.settings.data,
-				fileData.file,
-			),
+			fileTypeAllowedForScanning(this.settings.data, fileData.file),
 		);
 		const totalFilesLength = allowedFiles.length;
 
@@ -1024,10 +1021,7 @@ export default class TaskBoard extends Plugin {
 			const deletedFilesList = [...deletedFiles];
 
 			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
-				fileTypeAllowedForScanning(
-					this.plugin.settings.data,
-					file,
-				),
+				fileTypeAllowedForScanning(this.plugin.settings.data, file),
 			);
 			const totalFilesLength =
 				changed_files.length + deletedFilesList.length;
@@ -1204,14 +1198,19 @@ export default class TaskBoard extends Plugin {
 					"active-leaf-change",
 					(leaf: WorkspaceLeaf | null) => {
 						this.onFileModifiedAndLostFocus();
+						eventEmitter.emit("SAVE_MAP");
 					},
 				),
 			);
 			this.registerDomEvent(window, "blur", () => {
 				this.onFileModifiedAndLostFocus();
+				eventEmitter.emit("SAVE_MAP");
 			});
 			this.registerDomEvent(window, "focus", () => {
-				setTimeout(() => this.onFileModifiedAndLostFocus(), 200);
+				setTimeout(() => {
+					this.onFileModifiedAndLostFocus();
+					eventEmitter.emit("SAVE_MAP");
+				}, 200);
 			});
 		}
 

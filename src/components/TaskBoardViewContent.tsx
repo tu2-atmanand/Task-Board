@@ -1,7 +1,7 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban, Save } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
@@ -38,6 +38,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
 
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
+	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
 
 	const [showAllElements, setShowAllElements] = useState(true);
 	const [leafWidth, setLeafWidth] = useState<number>(1000);
@@ -178,6 +179,18 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 		const refreshBoardListener = () => setRefreshCount((prev) => prev + 1);
 		eventEmitter.on("REFRESH_BOARD", refreshBoardListener);
 		return () => eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
+	}, []);
+
+	useEffect(() => {
+		const handleMapDataUpdated = (eventData: { status: boolean }) => {
+			if (eventData.status)
+				setMapViewDataUpdated(true);
+			else
+				setMapViewDataUpdated(false);
+		};
+
+		eventEmitter.on("MAP_UPDATED", handleMapDataUpdated);
+		return () => eventEmitter.off("MAP_UPDATED", handleMapDataUpdated);
 	}, []);
 
 	useEffect(() => {
@@ -959,15 +972,29 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 
 					<div
 						className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						onClick={(e) => {
-							handleViewChangeDropdownClick(e)
-						}}
+						onClick={(e) => handleViewChangeDropdownClick(e)}
 					>
 						<div className="taskBoardViewDropdownIcon">
 							{viewTypeIconComponent()}
 						</div>
 						<div className="taskBoardViewDropdownName">{t(viewType)}</div>
 					</div>
+
+					{viewType === viewTypeNames.map && (
+						<div
+							className="taskBoardMapViewSaveIcon"
+							style={{ color: `${mapViewDataUpdated ? 'red' : ""}` }}
+							onClick={(e) => {
+								if (mapViewDataUpdated) {
+									console.log("Emitting SAVE_MAP event...");
+									eventEmitter.emit("SAVE_MAP");
+									setMapViewDataUpdated(false);
+								}
+							}}
+						>
+							<Save size={18} />
+						</div>
+					)}
 
 					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
@@ -982,66 +1009,67 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 			</div>
 
 			{/* Mobile board sidebar overlay */}
-			{!showAllElements && showBoardSidebar && (
-				<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
-					<div
-						className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
-						onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
-					>
-						<div className="boardSidebarHeader">
-							<h3>{t("your-boards")}</h3>
-						</div>
-						<div className="boardSidebarContent">
-							<div className="boardSidebarContentBtnContainer">
-								{allBoardsData && allBoardsData.map((board, index) => (
-									<div
-										key={index}
-										className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
-										onClick={() => handleBoardSelection(index)}
-									>
-										<div className="boardSidebarCardTitle" >
-											{board.name}
-										</div>
-										<div className="boardSidebarCardDescription" >
-											{board?.description}
-										</div>
-										<div className="taskCountContainerProgress" >
-											<div className={"taskCountContainerProgressBar"}>
-												<div
-													className="taskCountContainerProgressBarIndicator"
-													style={{
-														width: `${((board?.taskCount ? board.taskCount.completed : 0) / (board?.taskCount ? board?.taskCount.pending + board.taskCount.completed : 1)) * 100}%`,
-													}}
-												/>
-											</div>
-											<span className="taskCountContainerProgressCount">
-												{(board?.taskCount ? board.taskCount.completed : 0)} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
-											</span>
-										</div>
-									</div>
-								))}
+			{
+				!showAllElements && showBoardSidebar && (
+					<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
+						<div
+							className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
+							onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
+						>
+							<div className="boardSidebarHeader">
+								<h3>{t("your-boards")}</h3>
 							</div>
-							<div className="boardSidebarFooter">
-								<button
-									className="boardConfigureBtn"
-									onClick={() =>
-										openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
-											// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-											if (activeBoardIndex === boardIndex) {
-												setCurrentBoardData(updatedBoards[boardIndex]);
+							<div className="boardSidebarContent">
+								<div className="boardSidebarContentBtnContainer">
+									{allBoardsData && allBoardsData.map((board, index) => (
+										<div
+											key={index}
+											className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
+											onClick={() => handleBoardSelection(index)}
+										>
+											<div className="boardSidebarCardTitle" >
+												{board.name}
+											</div>
+											<div className="boardSidebarCardDescription" >
+												{board?.description}
+											</div>
+											<div className="taskCountContainerProgress" >
+												<div className={"taskCountContainerProgressBar"}>
+													<div
+														className="taskCountContainerProgressBarIndicator"
+														style={{
+															width: `${((board?.taskCount ? board.taskCount.completed : 0) / (board?.taskCount ? board?.taskCount.pending + board.taskCount.completed : 1)) * 100}%`,
+														}}
+													/>
+												</div>
+												<span className="taskCountContainerProgressCount">
+													{(board?.taskCount ? board.taskCount.completed : 0)} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
+												</span>
+											</div>
+										</div>
+									))}
+								</div>
+								<div className="boardSidebarFooter">
+									<button
+										className="boardConfigureBtn"
+										onClick={() =>
+											openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
+												// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+												if (activeBoardIndex === boardIndex) {
+													setCurrentBoardData(updatedBoards[boardIndex]);
+												}
+												plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
 											}
-											plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+											)
 										}
-										)
-									}
-								>
-									{t("configure-boards")}
-								</button>
+									>
+										{t("configure-boards")}
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			)
+				)
 			}
 
 			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>

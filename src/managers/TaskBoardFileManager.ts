@@ -39,12 +39,12 @@ export default class TaskBoardFileManager {
 			// Read the file
 			const file = await this.app.vault.adapter.readBinary(filePath);
 			const decodedData = new TextDecoder().decode(file);
-			console.log(
-				"Loaded file :",
-				file,
-				"\nDecoded data :\n",
-				decodedData,
-			);
+			// console.log(
+			// 	"Loaded file :",
+			// 	file,
+			// 	"\nDecoded data :\n",
+			// 	decodedData,
+			// );
 
 			if (!decodedData) {
 				console.warn(`TaskBoard file is empty: ${filePath}`);
@@ -53,10 +53,10 @@ export default class TaskBoardFileManager {
 
 			// Parse JSON content
 			const boardData: Board = JSON.parse(decodedData);
-			console.log(
-				`Successfully loaded board from: ${filePath}`,
-				boardData,
-			);
+			// console.log(
+			// 	`Successfully loaded board from: ${filePath}`,
+			// 	boardData,
+			// );
 			return boardData;
 		} catch (error) {
 			console.error(`Error loading board from file ${filePath}:`, error);
@@ -73,7 +73,7 @@ export default class TaskBoardFileManager {
 	async loadBoardUsingIndex(boardIndex: number): Promise<Board | null> {
 		try {
 			const boardIndexToUse = boardIndex ?? this.currentBoardIndex;
-			console.log("All boards data :", this.allBoardsData);
+			// console.log("All boards data :", this.allBoardsData);
 
 			// Validate board index
 			if (
