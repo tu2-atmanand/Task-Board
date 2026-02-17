@@ -982,8 +982,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 
 					{viewType === viewTypeNames.map && (
 						<button
-							className="taskBoardMapViewSaveIcon"
-							style={{ color: `${mapViewDataUpdated ? 'red' : ""}` }}
+							className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
 							onClick={(e) => {
 								if (mapViewDataUpdated) {
 									console.log("Emitting SAVE_MAP event...");

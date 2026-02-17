@@ -279,6 +279,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--text-faint) !important;
 }
 
+.taskBoardMapViewSaveIcon.red {
+	color: red !important;
+}
+
 .taskBoardViewDropdown {
 	display: flex;
 	flex-direction: row;
