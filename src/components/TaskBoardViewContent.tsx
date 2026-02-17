@@ -797,6 +797,10 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 	function handleViewChangeDropdownClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
 		const viewMenu = new Menu();
 
+		setTimeout(() => {
+			eventEmitter.emit("SAVE_MAP");
+		}, 200)
+
 		viewMenu.addItem((item) => {
 			item.setTitle(t("kanban-view"));
 			item.setIcon("square-kanban");
